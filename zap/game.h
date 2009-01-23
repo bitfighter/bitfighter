@@ -32,7 +32,7 @@
 #include "gridDB.h"
 #include "timer.h"
 #include "gameLoader.h"
-#include "point.h"   
+#include "point.h"
 
 #include <string>
 
@@ -277,8 +277,8 @@ extern void endGame();
 
 // already bumbed master, release.  cs also ok
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
-#define CS_PROTOCOL_VERSION 14     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 260          // Version of the game according to SVN, will be unique every release (must be int)
+#define CS_PROTOCOL_VERSION 15     // Change this when releasing an incompatible cs protocol (must be int)
+#define BUILD_VERSION 277          // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "Bitfighter 010" //"Bitfighter Release Candidate 010"   // Change this with every release -- for display purposes only, string
 
 };
