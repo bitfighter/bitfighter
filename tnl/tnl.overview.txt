@@ -1,0 +1,539 @@
+/*
+ Some style notes:
+     - subsections are named after the section they're in, with an underscore seperator; see the Intro section, which
+       contains Intro_TandT. This keeps the section namespace relatively clean.
+*/
+namespace TNL {
+/*!
+
+@mainpage Torque Network Library Reference
+
+The Torque Network Library is a networking API designed to allow developers to easily add world-class multiuser simulation capabilities to their products.  The TNL has proven successful in some of the most demanding multiplayer internet games and has gone through years of steady, evolutionary improvement.
+
+@section scope Scope of This Documentation
+
+@ref gettingstarted gives new users the information they need to download TNL source files, set up projects on supported compilers, and build and run the library and example programs.
+
+@ref history gives a brief history of the Torque Network Library from its origins as the network technology behind Sierra/Dynamix's Starsiege: TRIBES to its current status as a standalone network programming solution.
+
+@ref introprogramming introduces the developer to some of the basic concepts of network programming, including fundamental limitations of data networks, standard protocols, application network topologies, security and the hurdles the TNL will help them overcome in providing a consistent simulation on an unreliable communications medium.
+
+@ref fundamentals describes the general strategies used in the TNL to overcome the inherent limitations of today's networks.
+
+@ref archoverview gives an overview of the major classes in the TNL, from the basic Socket layer to the advanced state replication facilities provided by the GhostConnection and NetObject layer.
+
+The TNL namespace contains all of the major classes and structures in the Torque Network Library.
+
+@ref simpletutorial walks the developer through the creation of a simple, networked "Hello World!" program.
+
+TNLTest is a more complete TNL example program, utilizing the GhostConnection's object replication facilities.
+
+The MasterServerInterface class describes the simple master matchmaking server that comes included with TNL, and the client connection API for communicating with it.
+
+Finally, the ZAP project puts it all together in a 2D overhead team-based client/server space arcade action game, featuring a LAN/internet server browser, object interpolation and extrapolation, a client-side prediction model, and a more complete demonstration of the advanced features of the Torque Network Library.
+
+We presume the reader is familiar with C++ programming and concepts.
+
+@section acknowledgements Acknowledgments
+John Quigley - For his incredible patience as the Linux build master.
+
+Ben Garney - For his mad documentation skills and for usefully doing other projects that would have distracted Mark - and sound effects.
+
+Tom St. Denis - For his excellent <a href="http://libtomcrypt.org/">libtomcrypt</a> cryptographic library that is included in the TNL.
+
+The GLUT developers - For a cross-platform, easy-to-use OpenGL initialization, input and windowing API.
+
+The OpenAL team - For a good, cross-platform audio API.
+
+Ari Juels and John Brainard - For their work on Client Puzzles.
+
+Tuomas Aura, Pekka Nikander, and Jussipekka Leiwo of the Helsinki University of Technology - For their work on DoS resistant Authentication with Client Puzzles.
+
+*/
+/*! @page gettingstarted Getting Started
+
+@section downloading Downloading the Torque Network Library
+
+Please see <a href="http://www.opentnl.org/download.php">the download page</a> for information on how to get the source.
+
+@section building Compiling the Torque Network Library
+
+Once you have a copy of the source code, you may compile it by following the instructions in the Readme.html in the root of the source code.
+
+@section troubleshooting Troubleshooting and Questions
+
+For general information, <a href="http://www.opentnl.org/faq.php">please see our FAQ</a>.
+
+For bugs or other issues, you can get help from our <a href="http://lists.sourceforge.net/lists/listinfo/opentnl-general">mailing list</a>. Please check the archives first, as others may have had similar issues; if not, feel free to ask questions.
+
+*/
+/*! @page history History of the Torque Network Library
+
+Near the end of 1997, a team of developers at Dynamix were hard at work on a new, network only game that would push the requirements of internet gaming technology to a new level.  Starsiege: TRIBES allowed up to 32 players to compete in seamless indoor and outdoor areas with futuristic weapons, jet packs and vehicles.
+
+Unlike other games at the time that were limited to tight indoor environments, the TRIBES environment posed a more difficult set of networking problems.  Because of their open nature, clients in the game could often see most of the other players, along with a large number of projecticles and simulated vehicles, turrets and other objects.  Also, given the state of most internet connections at the time, it was decided that TRIBES must run well even over a 28.8 kbps modem, imposing a meager 2 Kbytes per second of bandwidth limitation on each client.
+
+With these requirements in mind, Mark Frohnmayer, Rick Overman and Tim Gift designed a network architecture that would maximize the information value of every bit transmitted over the network, and created a new "Notify" protocol that harnessed the unreliable nature of the network transport medium to eliminate unnecessary retransmission of information.
+
+The Tribes Network Architecture was further refined during the development of Tribes 2 to server more players (up to 100 in a single gaming area served by a 1GHz Pentium III) and save even more packet data space, introducing the concept of a network string table and only periodic control object state updating during client-side prediction.
+
+When the Tribes 2 engine became GarageGames' Torque Game Engine, additional iterative improvements were made, including checksums on client state data and a new network interface class to encapsulate the connection startup and prevent connection depletion Denial-of-Service attacks.
+
+The final step in the history of the Torque Network Library was to refactor its constituent parts into a standalone network technology that didn't require any other components from the Torque Game Engine.  As a part of this process, significant library structural improvements were made; every class and class member were documented, and strong encryption support was added.  Other new features include a simple and powerful Remote Procedure Call (RPC) mechanism, client puzzles for protecting servers from server CPU depletion Denial-of-Service attacks, and 3rd-party negotiated direct connections to connect clients behind firewalls and NAT (Network Address Translation) routers, making TNL a robust, full-featured, secure networking solution for a wide variety of applications.
+
+*/
+/*! @page introprogramming Introduction to Network Programming Concepts
+
+Computer networking technology allows computers that share the network to send messages to one another.  Computer networks vary greatly in complexity, from two machines connected together with a link cable, to the globe-spanning internet connecting millions of machines together over fiber-optics, satellite links, phone lines and other mediums.
+
+@section fundlimits Fundamental Limitations of Computer Networks
+
+Computer networks of any size share some common limitations to varying degrees that must be accounted for in network simulations, with the internet being the most limited in all three regards.  These three fundamental problems in network simulation are:
+
+<b>Limited Bandwidth</b> - There is a limit to the rate at which hosts on the network can send data to one another.  If a computer is connected to the network with a 56 kbps modem, this might be 5 Kbytes per second, while computers on a local area network might be able to communicate at 128 megabytes per second.  For service providers, additional bandwidth capacity can be costly, so even if there is no physical bandwidth limitation, bandwidth conservation is important for many projects.
+
+<b>Packet Loss</b> - Computer networks are inherently unreliable.  Information transmitted over a network may become corrupted in transit, or may be dropped at a router where traffic has become congested.  Even when (especially when) using a guaranteed message delivery protocol such as TCP, the unreliable nature of the underlying network still must be taken into account for network applications.
+
+<b>Latency</b> - Messages sent from one host to another on the network take time to arrive at the destination.  The time can be influenced by many factors, including the medium over which the messages travel, how many intermediate hosts must route the message, an the level of traffic congestion at each of those network nodes.  Latency becomes particularly problematic in network simulations that attempt to present a real-time interface to the client, when the latency of the connection may be perceptible in time.
+
+See @ref fundamentals for information on how TNL deals with the fundamental limitations of computer networks.
+
+@section stdprotos Standard Network Protocols
+
+When computers communicate over networks, they send and receive data using specific network protocols.  These protocols ensure that the computers are using the same specifications to address, forward and process data on the network.  The internet, certainly the most widely used computer network today, uses a stack of three primary protocols that facilitate communication over the network.  They are:
+
+<b>IP - Internet Protocol</b>: The Internet Protocol is the basic building block for internet communications.  IP is a routing protocol, which means that it is used to route information packets from a source host to a destination host, specified by an IP address.  IP packets are not guaranteed to arrive at the destination specified by the sender, and those packets that do arrive are not guaranteed to arrive in the order they were sent.  IP packet payloads may also be corrupted when they are delivered.  IP is not useful as an application protocol - it is used mainly as a foundation for the higher level TCP and UDP protocols.
+
+<b>UDP - User Datagram Protocol</b>: The User Datagram Protocol supplies a thin layer on top of IP that performs error detection and application level routing on a single host.  UDP packets are addressed using both an IP address to specify the physical host, and a port number, to specify which process on the machine the packet should be delivered to.  UDP packets also contain a checksum, so that corrupted packets can be discarded.  UDP packets that are corrupted or dropped by an intermediate host are not retransmitted by the sender, because the sender is never notified whether a given packet was delivered or not.
+
+<b>TCP/IP - Transmission Control Protocol</b>: TCP was designed to make internet programming easier by building a reliable, connection-based protocol on top of the unreliable IP.  TCP does this by sending acknowledgements when data packets arrive, and resending data that was dropped.  TCP is a stream protocol, so the network connection can be treated like any other file stream in the system.  TCP is not suitable for simulation data, because any dropped packets will stall the data pipeline until the dropped data can be retransmitted.
+
+@section prottnl Network Protocols and TNL
+
+Some network systems use both TCP and UDP - TCP for messages that must arrive, but are not time sensitive, and UDP for time-sensitive simulation updates.
+
+@ref fundamentals contains a discussion of why this is not optimal for bandwidth conservation, and an explanation of the protocol solution implemented in TNL.
+
+@section sockets Berkeley (BSD) Sockets - the standard network API
+
+The BSD Sockets API describes a set of C language interface routines for communicating using the TCP protocol suite, including IP and UDP.  The sockets API allows processes to open communcation "sockets" that can then be assigned to a particular integer port number on the host.
+
+Sockets created to use the TCP stream protocol can either be set to "listen()" for connections from remote hosts, or can be set to "connect()" to a remote host that is currently listening for incoming connections.  Once a connection is established between two stream sockets, either side can send and receive guaranteed data to the other.
+
+Sockets can also be created in datagram mode, in which case they will use the underlying UDP protocol for transmission of datagram packets.  Since the datagram socket mode is connectionless, the destination IP address and port must be specified with each data packet sent.
+
+The socket API contains other utility routines for performing operations such as host name resolution and socket options configuration.  The Microsoft Windows platform supplies a Windows socket API called Winsock that implements the BSD socket API.
+
+@see Socket, the TNL class that implements a wrapper on the BSD Sockets API.
+
+@section topologies Application Network Topologies
+
+Networked applications can be designed to communicate with each other using different topological organization strategies.  Some common communcations organization paradigms are discussed below.
+
+<b>Peer-to-Peer</b>: In a peer-to-peer network application, the client processes involved in the network communicate directly with one another.  Though there may be one or more hosts with authoritative control over the network of peers, peer-to-peer applications largely distribute the responsibility for the simulation or application amongst the peers.
+
+<b>Client-Server</b>: In the client-server model, one host on the network, the server, acts as a central communications hub for all the other hosts (the clients).  Typically the server is authoritative, and is responsible for routing communication between the several clients.
+
+<b>Client-Tiered Server Cluster</b>: In network applications where more clients want to subscribe to a service than can be accomodated by one server, the server's role will be handled by a cluster of servers peered together.  The servers in the network communicate using the peer-to-peer model, and communicate with the clients using the client-server model.  The servers may also communicate with an authoritative "super-server" to handle logins or resolve conflicts.
+
+TNL imposes no specific network topology on applications using it.
+
+@section security Security and Encryption
+
+When a message is sent between two hosts on a network, that message may pass through any number of intermediate wires, hosts and routers or even sent wirelessly to a satellite or a WiFi base station.  This opens up the potential that some third party who has access to any one of the intermediate communication forwarding points may eavesdrop on and/or change the contents of the message.  Often networked applications send sensitive user data, like credit card numbers, bank account information or private correspondence.  These applications rely on encryption algorithms to protect messages sent over an unsecure network.
+
+@subsection symmetric Symmetric Encryption
+
+Symmetric Encryption algorithms operate under the assumption that the two parties sending messages to each other share a common, secret key.  This key is used to encode the data in such a way that only users with the secret key can decode it.  In the ideal case, the ciphertext (encoded version of the message) looks like a random string of bits to any eavesdropper.
+
+There are many Symmetric Encryption algorithms of varying levels of security, but all of them when used alone have several drawbacks.  First, both parties to the communication must have a copy of the shared secret key.  If a client is attempting to communicate with a service it has never contacted before, and doesn't share a key with, it won't be able to communicate securely with it.  Also, although an intermediate eavesdropper cannot read the data sent between the hosts, it can alter the messages, potentially causing one or more of the systems to fail.
+@see SymmetricCipher, the TNL class that implements Symmetric Encryption.
+
+@subsection mesgauth Message Authentication
+
+In order to detect when a message has been altered by a third party, a secure messaging system will send a message authentication code (MAC) along with the data.  The MAC is generated using a cryptographically secure hashing function, such as MD5 or SHA.  Secure hash algorithms take an array of bytes and compute a cryptographically secure message digest of some fixed number of bytes - 16 in the case of MD5, 32 for SHA-256 and so on.
+
+When a message is sent using a symmetric cipher, the hash or some portion of it is encrypted and sent along as well.  Any changes in the message will cause the hash algorithm to compute a different hash than that which is encrypted and included with the message, notifying the receiving party that the message has been tampered with.
+
+@subsection pubkey Public Key Cryptography and Key Exchange
+
+Public Key Cryptography algorithms were invented to solve the symmetric key distribution problem.  In public key algorithms, each participant in the communication has a key pair composed of a public key and a private key.  The theory of public keys suggests that a message encrypted with the public key can only be decrypted with the private key and vice-versa.
+
+Key exchange algorithms (Diffie-Helman, ECDH) have certain properties such that two users, A and B can share their public keys with each other in plain text, and then, using each other's public key and their own private keys they can generate the same shared secret key.  Eavesdroppers can see the public keys, but, because the private keys are never transmitted, cannot know the shared secret.  Because public key algorithms are computationally much more expensive than symmetric cryptography, network applications generally use public key cryptography to share a secret key that is then used as a symmetric cipher key.
+@see AsymmetricKey, the TNL class that implements Asymmetric Keys and secret generation and
+@see NetInterface, the TNL class that implements the secure key exchange protocol.
+
+@subsection digsigca Digital Signatures/Certificate Authorization
+
+Public key algorithms still have one vulnerability, known as the Man-in-the-Middle attack.  Basically, an eavesdropper in the communication between A and B can intercept the public keys in transit and substitute its own public key, thereby establishing a secure connection with A and B - decrypting incoming data and reencrypting it with its shared key to the opposite party.
+
+To combat this attack, the concept of certificates was introduced.  In this model, the public key of one or both of the participants in the communication is digitally signed with the private key of some known, trusted Certificate Authority (CA).  Then, using the Certificate Authority's public key, the parties to the communication can validate the public key of the opposite parties.
+@see Certificate, the TNL class that implements digitally signed certificates.
+
+@subsection sectnl Security and the TNL
+
+The TNL uses the publicly available libtomcrypt (http://libtomcrypt.org) as its encryption foundation.  The TNL features key exchange, secret session keys, message authentication and certificate verification.
+
+@subsection morinfo More Information on Cryptography
+
+The preceding sections were only a very high level overview of some cryptographic algorithm theories.  For more information, see the USENET cryptography FAQ at http://www.faqs.org/faqs/cryptography-faq/
+
+@section challenges Additional Challenges Facing Network Programmers
+
+@subsection malicioususers Malicious Attackers and Denial of Service
+
+A problem facing developers of internet applications and web sites are Denial-of-Service attacks.  Malicious users employing custom tools often attempt to shut down publicly available internet servers.  There are a variety of well-known categories of DoS attacks.
+
+<b>Traffic flooding</b>: This attack sends a barrage of data to the public address of the server, in an attempt to overwhelm that server's connection to the internet.  This attack often employs many machines, hijacked by the attacker and acting in concert.  These attacks are often the most difficult to mount since they require a large number of available machines with high-speed internet access in order to attack a remote host effectively.
+
+<b>Connection depletion</b>: The connection depletion attack works by exploting a weakness of some connection based communications protocols.  Connection depletion attacks work by initiating a constant flow of spurious connection attempts.  When a legitimate user attempts to connect to the server, all available pending connection slots are already taken up by the spoofed connection attempts, thereby denying service to valid clients.
+@see NetInterface for a description of the connection handshaking protocol.
+
+<b>Server CPU depletion</b>: If the server performs public key cryptography as part of the connection sequence, a malicious client could be constructed to initiate bogus connection attempts in an effort to initiate many CPU intesive cryptographic operations on the server.
+
+The TNL uses a two-phase connection protocol to protect against connection depletion attacks, and implements a client-puzzle algorithm to prevent CPU depletion attacks.  Also, TNL is built so that bogus packets are discarded as quickly as possible, preventing flooding attacks from impacting the server CPU.
+@see ClientPuzzleManager, the class that implements cryptographically strong client puzzles for the NetInterface class.
+
+@subsection firewall Firewalls and Network Address Translation (NAT) routers
+
+Firewalls are software or hardware devices designed to protect local networks from malicious external attackers.  Most firewalls filter all incoming, unsolicited network traffic.  NAT routers exist to allow potentially many machines to share a single IP address, but for practical purposes they share similar characteristics with firewalls, by often filtering out unsolicited network traffic.
+
+In client/server applications, firewalls and NATs aren't generally a problem.  When a client behind a firewall or NAT makes a request to the server, the response is allowed to pass through the firewall or NAT because the network traffic was solicited first by the client.
+
+In peer-to-peer applications, NATs and firewalls pose a greater challenge.  if both peers are behind different firewalls, then getting them to communicate to each other requires that they both initiate the connection in order for the other's data to be able to flow through the firewall or NAT.  This can be facilitated by a third party server or client that both are able to communicate with directly.
+
+The TNL provides functionality for arranging a direct connection between two firewalled hosts via a third party master server.
+@see MasterServerInterface for a description of the TNL Master Server and the connection RPC interface.
+*/
+
+/*! @page fundamentals Torque Network Library Design Fundamentals
+
+The Torque Network Library was designed to overcome, as much as possible, the three fundamental limitations of network programming - high packet latency, limited bandwidth and packet loss.  The following strategies were identified for each of the limitations:
+
+@section bandwidthcons Bandwidth conservation
+
+Bandwidth conservation in multiuser simulations is of premium importance, not only for clients that may be connected over very low bandwidth transports, but also for servers whose operators have to pay for bandwidth usage.  Realizing this, the following techniques are used to conserve bandwidth as much as possible: 
+
+<b>Send static data once, or not at all</b>: Often in a networked application, a server will transmit some amount of static data to a client.  This data may be initialization parameters for a 3D world, a client's name, or some object state that is immutable for objects of a given type.  TNL provides direct facilities for caching string data (client names, mission descriptions, etc), sending a given string only once and an integer representation thereafter.  The Torque Game Engine also shows how simulations can cache common object instance data in DataBlock objects, which are transmitted only when a client connects.
+
+<b>Compress data to the minimum space necessary</b>: When conserving bandwidth, every bit counts.  TNL uses a utility class call BitStream to write standard data types into a packet compressed to the minimum number of bits necessary for that data.  Boolean values are written as a single bit, integer writes can specify the bit field width, and floating point values can be specified as 0 to 1 compressed to a specified bit count.  The BitStream also implements Huffman compression of string data and compression of 3D positions and surface normals.
+
+<b>Only send information that is relevant to the client</b>: In a client/server simulation, the server often has information that is not relevant at all to some or all of the clients.  For example, in a 3D world, if an object is outside the visible distance of a given client, there is no reason to consume valuable packet space describing that object to the client.  The TNL allows the application level code to easily specify which objects are relevant, or "in scope" for each client.
+@see NetObject
+
+<b>Prioritize object updates</b>: Because bandwidth is limited and there is generally a much greater amount of data a server could send to a given client than it has capacity for, the TNL implements a very fine-grained prioritization scheme for updating objects.  User code can determine the policy by which objects are judged to be more or less "important" to each client in the simulation, and objects with more importance are updated with a greater frequency.
+@see NetObject, @see GhostConnection
+
+<b>Only update the parts of an object that have changed</b>: Often in a networked simulation, not all object state is updated at the same time - for exampe, a player in a 3D action game may have state that includes the player's current position, velocity, health and ammunition.  If the player moves, only the position and velocity states will change, so sending the full state, including the health and ammunition values would waste space unnecessarily.  The TNL allows objects individual objects to have state that are updated independently of one another.
+@see NetObject
+
+@section packetloss Coping with Packet Loss
+
+In any networked simulation, packet loss will be a consideration - whether because of network congestion, hardware failure or software defects, some packets will inevitably be lost.  One solution to the packet loss problem is to use a guaranteed messaging protocol like TCP/IP.  Unfortunately, TCP has some behavioral characteristics that make it a poor choice for real-time networked simulations.  
+
+TCP guarantees that all data sent over the network will arrive, and will arrive in order.  This means that if a data packet sent using TCP is dropped in transit, the sending host must retransmit that data before any additional data, that may have already arrived at the remote host, can be processed.  In practice this can mean a complete stall of ANY communications for several seconds.  Also, TCP may be retransmitting data that is not important from the point of view of the simulation - holding up data that is.
+
+The other possible protocol choice would be to use UDP for time critical, but unguaranteed data, and use TCP only for data that will not hold up the real-time aspects of the simulation.  This solution ends up being non-optimal for several reasons.  First, maintaining two communications channels increases the complexity of the networking component.  If an object is sent to a client using the guaranteed channel, unguaranteed messages sent to that object at a later time may arrive for processing before the original guaranteed send.  Also, because the unguaranteed channel may lose information, the server will have to send more redundant data, with greater frequency.
+
+To solve these problems, TNL implements a new network protocol that fits somewhere between UDP and TCP in its feature set.  This protocol, dubbed the "Notify" protocol, does not attempt to hide the underlying unreliability of the network as TCP does, but at the same time it provides more information to the application than straight UDP.  The notify protocol is a connection-oriented unreliable communication protocol with packet delivery notification.  When a datagram packet is sent from one process, that process will eventually be notified as to whether that datagram was received or not.  Each data packet is sent with a packet header that includes acknowledgement information about packets the sending process has received from the remote process.  This negates the need for seperate acknowledgement packets, thereby conserving additional bandwidth.
+@see NetConnection
+
+The notify protocol foundation allows the TNL to provide a rich set of data transmission policies.  Rather than simply grouping data as either guaranteed or unguaranteed, the TNL allows at least five different categorizations of data:
+
+<b>Guaranteed Ordered data</b>: Guaranteed Ordered data are data that would be sent using a guaranteed delivery protocol like TCP.  Messages indicating clients joining a simulation, text messages between clients, and many other types of information would fall into this category.  In TNL, Guaranteed Ordered data are sent using Event objects and RPC method calls.  When the notify protocol determines that a packet containing guaranteed ordered data was lost, it requeues the data to be sent in a future packet.
+@see NetEvent
+
+<b>Guaranteed data</b>: TNL processes Guaranteed data is in a way similar to Guaranteed Ordered data, with the only difference being that a client can process Guaranteed data as soon as it arrives, rather than waiting for any ordered data to arrive that was dropped.
+@see NetEvent
+
+<b>Unguaranteed data</b>: Unguaranteed data is sent, and if the packet it is sent in arrives, is processed.  If a packet containing unguaranteed data events is dropped, that data is not resent.  The unguaranteed data sending policy could be used for information like real-time voice communication, where a retransmitted voice fragment would be useless.
+@see NetEvent
+
+<b>Current State data</b>: For many objects in a simulation, the client isn't concerned with "intervening" states of an object on the server, but only its current state.  For example, in a 3D action game, if an enemy player moves from point A to B to C, another client in the simulation is only interested in the final position, C of the object.  With the notify protocol, TNL is able to resend object state from a dropped packet only if that state was not updated in a subsequent packet.
+@see NetObject
+
+<b>Quickest Delivery data</b>: Some information sent in a simulation is of such importance that it must be delivered as quickly as possible.  In this situation, data can be sent with every packet until the remote host acknowledges any of the packets known to contain the data.  Client movement information is an example of data that might be transmitted using this policy.
+
+By implementing various data delivery policies, the TNL is able to optimize packet space utilization in high packet loss environments.
+
+@section latency Strategies for Dealing With Latency
+
+Latency is a function of the time-based limitations of physical data networks.  The time it takes information to travel from one host to another is dependent on many factors, and can definitely affect the user's perceptions of what is happening in the simulation.
+
+For example, in a client-server 3D simulation, suppose the round-trip time between one client and server is 250 milliseconds.  If the client is observing an object that is moving.  If the server is sending position updates of the object to the client, those positions will be "out of date" by 125 milliseconds by the time they arrive on the client.  Also, suppose that the server is sending packets to the client at a rate of 10 packets per second.  When the next update for the object arrives at the client, it may have moved a large distance relative to the perceptions of the client.
+
+Also, if the server is considered to be authoritative over the client's own position in the world, the client would have to wait at least a quarter of a second before its inputs were validated and reflected in its view of the world.  This gives the appearance of very perceptible input "lag" on the client.
+
+In the worst case, the client would always see an out of date version of the server's world, as objects moved they would "pop" from one position to another, and each keypress wouldn't be reflected until a quarter of a second later.  For most real-time simulations, this behavior is not optimal.
+
+Because TNL is predominantly a data transport and connection management API, it doesn't provide facilities for solving these problems directly.  TNL provides a simple mechanism for computing the average round-trip time of a connection from which the following solutions to connection latency issues can be implemented:
+
+<b>Interpolation</b>: Interpolation is used to smoothly move an object from where the client thinks it is to where the server declares it to be over some short period of time.  Parameters like position and rotation can be interpolated using linear or cubic interpolation to present a consistent, no "pop" view of the world to the client.  The downside of interpolation when used alone is that it actually exacerbates the time difference between the client and the server, because the client is spending even more time than the one-way message time to move the object from its current position to the known server position.
+
+<b>Extrapolation</b>: To solve the problem of out-of-date state information, extrapolation can be employed.  Extrapolation is a best guess of the current state of an object, given a known past state.  For example, suppose a player object has a last known position and velocity.  Rather than placing the player at the server's stated position, the player object can be placed at the position extrapolated forward by velocity times the time difference.
+
+In the Torque Game Engine, player objects controlled by other clients are simulated using both interpolation and extrapolation.  When a player update is received from the server, the client extrapolates that position forward using the player's velocity and the sum of the time it will use to interpolate and the one-way message time from the server - essentially, the player interpolates to an extrapolated position.  Once it has reached the extrapolated end point, the player will continue to extrapolate new positions until another update of the obect is received from the server.
+
+By using interpolation and extrapolation, the client view can be made to reasonably, smoothly approximate the world of the server, but neither approach is sufficient for real-time objects that are directly controlled by player input.  To solve this third, more difficult problem, client-side prediction is employed.
+
+<b>Client-side prediction</b> is similar to extrapolation, in that the client is attempting to guess the server state of an object the server has authority over.  In the case of simple extrapolation, however, the client doesn't have the benefit of the actual input data.  Client-side prediction uses the inputs of the user to make a better guess about where the client-controlled object will be.  Basically, the client performs the exact same object simulation as the server will eventually perform on that client's input data.  As long as the client-controlled object is not acted upon by forces on the server that don't exist on the client or vice versa, the client and server state information for the object should perfectly agree.  When they don't agree, interpolation can be employed to smoothly move the client object to the known server position and client-side prediction can be continued.
+
+*/
+
+/*! @page archoverview Torque Network Library Architectural Overview
+
+The Torque Network Library is built in layers, each adding more functionality to the layer below it.
+
+@section platf The Platform Layer
+
+At the lowest level, TNL provides a platform independent interface to operating system functions.  The platform layer includes functions for querying system time, sleeping the current process and displaying alerts.  The platform layer includes wrappers for all of the C standard library functions used in the TNL.
+
+The platform layer also contains the Socket and Address classes, which provide a cross-platform, simplified interface to datagram sockets and network addresses.
+
+@section netb The NetBase Layer
+
+The NetBase layer is the foundation upon which most of the classes in TNL are based.  At the root of the class hierarchy is the Object base class.  Every subclass of Object is associated with an instance of NetClassRep through a set of macros, allowing for instances of that class to be constructed by a class name string or by an automatically assigned class id.
+
+This id-based instantiation allows objects subclassed from NetEvent and NetObject to be serialized into data packets, transmitted, constructed on a remote host and deserialized.
+
+Object also has two helper template classes, SafePtr, which provides safe object pointers that become NULL when the referenced object is deleted, and a reference pointer class, RefPtr, that automatically deletes a referenced object when all the references to it are destructed.
+
+@section bitstr The BitStream and PacketStream classes
+
+The BitStream class presents a stream interface on top of a buffer of bytes.  BitStream provides standard read and write functions for the various TNL basic data types, including integers, characters and floating point values.  BitStream also allows fields to be written as bit-fields of specific size.  An integer that is always between 3 and 9 inclusive can be written using only 3 bits using the writeRangedU32 method, for example.
+
+BitStream huffman encodes string data for additional space savings, and provides methods for compressing 3D points and normals, as routines for writing arbitrary buffers of bits.
+
+The PacketStream subclass of BitStream is simply a thin interface that statically allocates space up to the maximum size of a UDP packet.  A routine can declare a stack allocated PacketStream instance, write data into it and send it to a remote address with just a few lines of code.
+
+@section netconint The NetInterface and NetConnection Layer
+
+The NetInterface class wraps a platform Socket instance and manages the set of NetConnection instances that are communicating through that socket.  NetInterface is manages the two-phase connection initiation process, dispatch of protocol packets to NetConnection objects, and provides a generic interface for subclasses to define and process their own unconnected datagram packets.
+
+The NetConnection class implements the connected Notify Protocol layered on UDP.  NetConnection manages packet send rates, writes and decodes packet headers, and notifies subclasses when previously sent packets are known to be either received or dropped.
+
+NetInterface instances can be set to use a public/private key pair for creating secure connections.  In order to prevent attackers from depleting server CPU resources, the NetItnerface issues a cryptographically difficult "client puzzle" to each host attempting to connect to the server.  Client puzzles have the property that they can be made arbitrarily difficult for the client to solve, but whose solutions can be checked by the server in a trivial amount of time.  This way, when a server is under attack from many connection attempts, it can increase the difficulty of the puzzle it issues to connecting clients.
+
+@section neteventconn The Event Layer - EventConnection, NetEvent and Remote Procedure Calls
+
+The EventConnection class subclasses NetConnection to provide several different types of data transmission policies.  EventConnection uses the NetEvent class to encapsulate event data to be sent to remote hosts.  Subclasses of NetEvent are responsible for serializing and deserializing themselves into BitStreams, as well as processing event data in the proper sequence.
+
+NetEvent subclasses can use one of three data guarantee policies.  They can be declared as GuaranteedOrdered, for ordered, reliable message delivery; Guaranteed, for reliable but possibly out of order delivery, or Unguaranteed, for ordered but not guaranteed messaging.  The EventConnection class uses the notify protocol to requeue dropped events for retransmission, and orders the invocations of the events' process methods if ordered processing is requested.
+
+Because declaring an individual NetEvent subclass for each type of message and payload to be sent over the network, with its corresponding pack, unpack and process routines, can be somewhat tedious, TNL provides a Remote Procedure Call (RPC) framework.  Using some macro magic, argument list parsing and a little assembly language, methods in EventConnection subclasses can be declared as RPC methods.  When called from C++, the methods construct an event containing the argument data passed to the function and send it to the remote host.  When the event is unpacked and processed, the body of the RPC method implementation is executed.
+
+See Also @ref rpcdesc for a more complete description of RPC in the Torque Network Library.
+
+@section ghostingconn Ghosting - GhostConnection and NetObject
+
+The GhostConnection class subclasses EventConnection in order to provide the most-recent and partial object state data update policies.  Instances of the NetObject class and its subclasses can be replicated over a connection from one host to another.  The GhostConnection class manages the relationship between the original object, and its "ghost" on the client side of the connection.
+
+In order to best utilize the available bandwidth, the GhostConnection attempts to determine which objects are "interesting" to each client - and among those objects, which ones are most important.  If an object is interesting to a client it is said to be "in scope" - for example, a visible enemy to a player in a first person shooter would be in scope.
+
+Each GhostConnection object maintains a NetObject instance called the scope object - responsible for determining which objects are in scope for that client. Before the GhostConnection writes ghost update information into each packet, it calls the scope object's performScopeQuery method which must determine which objects are "in scope" for that client.
+
+Each scoped object that needs to be updated is then prioritized based on the return value from the NetObject::getUpdatePriority() function, which by default returns a constant value.  This function can be overridden by NetObject subclasses to take into account such factors as the object's distance from the camera, its velocity perpendicular to the view vector, its orientation relative to the view direction and more.
+
+Rather than always sending the full state of the object each time it is updated across the network, the TNL supports only sending portions of the object's state that have changed. To facilitate this, each NetObject can specify up to 32 independent states that can be modified individually.  For example, a player object might have a movement state, detailing its position and velocity, a damage state, detailing its damage level and hit locations, and an animation state, signifying what animation, if any, the player is performing.
+
+A NetObject can notify the network system when one of its states has changed, allowing the GhostConnections that are ghosting that object to replicate the changed state to the clients for which that object is in scope.
+
+@section encrypttnl Encryption and TNL
+
+The TNL has hooks in various places to use encryption when requested.  To enable encrypted connections, the NetInterface must be assigned an instance of AsymmetricKey as a public/private key pair using NetInterface::setPrivateKey.  The NetInterface::setRequiresKeyExchange method may then be called to instruct the NetInterface that all incoming connection requests must include a key exchange.
+
+Asymmetric keys can be constructed with varying levels of security.  The TNL uses Elliptic Curve public key crytpography, with key sizes ranging from 20 to 32 bytes.  AsymmetricKey instances can be constructed either with a new, random key of a specified size, or can be created from an existing ByteBuffer.
+
+Once a secure connection handshake is completed, TNL uses the AES symmetric cipher to encode connected packets.  The BitStream::hashAndEncrypt and BitStream::decryptAndCheckHash methods use an instance of SymmetricCipher to encrypt and decrypt packets using a shared session key.
+
+In order to have properly secure communications, the cryptographically strong pseudo-random number generator (PRNG) in TNL must be initialized with good (high entropy) random data.
+
+@section usefulclasses Useful Classes
+
+TNL uses a number of utility classes throughout.  Some of these include:
+
+Vector - The Vector template class is a lightweight version of the STL Vector container.
+
+DataChunker - The DataChunker class performs small, very low overhead memory allocation out of a pool.  Individual allocations cannot be freed, however the entire pool can be freed at once.
+
+ClassChunker - The ClassChunker template class uses the DataChunker to manage allocation and deallocation of instances of the specific class.  ClassChunker maintains a free list for quick allocation and deallocation.
+
+StringTableEntry - StringTableEntry wraps a ref-counted element in the StringTable, with simple conversion operations to C strings.  StringTableEntry instances can be sent in the parameter lists of RPC methods or using the EventConnection::packStringTableEntry method.
+
+ByteBuffer - The ByteBuffer class wraps a buffer of arbitray binary data.  ByteBuffer serves as a base class for BitStream, as well as the cryptographic primitives.
+
+@section debugerror Debugging and Error Handling
+
+Correcting bugs in a networked simulation can sometimes be an incredibly difficult task.  TNL provides some handy features to make debugging somewhat less challenging:
+
+<b>Asserts</b> - The TNLAssert and TNLAssertV macros specify a condition that, if false, will cause the application to display an error dialog and halt in the debugger where the assert was hit.  Asserts are very useful for sanity-checking arguments to functions, and making sure network data is being properly read from and written to packets.
+
+<b>Logging</b> - TNL has a set of simple but effective facilities for logging status information.  The TNLLogMessage and TNLLogMessageV macros allow the user to specify logging tokens with particular log messages.  Logging of messages associated with a given token can be enabled or disabled using the TNLLogEnable macro.  Also, the TNLLogBlock macro can be used to log multiple logprintf statements in a single test.  Rather than log to a file or other destination, TNL applications must declare at least one instance of a sublclass of TNLLogConsumer.  Every TNLLogConsumer instance receives all the logging messages that are currently enabled.
+
+<b>Debugging object writes into packets</b> - One of the most common errors programmers experience when using TNL is failing to properly match the NetEvent::pack and NetEvent::unpack or NetObject::packUpdate and NetObject::unpackUpdate routines.  By default, if TNL_DEBUG is defined, the EventConnection and GhostConnection classes will write extra size information into the packet before each object's data are written.  The ConnectionParameters::mDebugObjectSizes flag can be modified directly to further control this behavior.
+*/
+
+/*! @page simpletutorial Simple Torque Network Library Tutorial: Hello World
+
+This simple tutorial walks the user through the creation of a very simple networked example program using the RPC functionality of the EventConnection class.  This command-line program can be run in either client or server modes.  As a client it will attempt to connect to a server at the specified address and send it a message every second.  When the server receives a message from a client, it will respond back with a "Hello, World!" message.
+
+See Also @ref rpcdesc for a more complete description of RPC in the Torque Network Library.
+
+First, create a new source file, "simpleNet.cpp", containing the following lines to start:
+
+@code
+#include "tnl.h"
+#include "tnlEventConnection.h"
+#include "tnlNetInterface.h"
+#include "tnlRPC.h"
+#include <stdio.h>
+
+bool gQuit = false; // a flag used when the client wants to quit.
+
+using namespace TNL; // make sure we can simply use the TNL classes.
+@endcode
+
+If the compiler complains of missing include files, be sure the "tnl" directory is in the include path.
+
+Next, create a custom subclass of EventConnection for the example program to communicate across, and declare the client-to-server and server-to-client RPC methods:
+
+@code
+class SimpleEventConnection : public EventConnection
+{
+    typedef EventConnection Parent;
+
+public:
+    // Let the network system know this is a valid network connection.
+    TNL_DECLARE_NETCONNECTION(SimpleEventConnection);
+
+    // declare the client to server message
+    TNL_DECLARE_RPC(rpcMessageClientToServer, (const char *theMessageString));
+
+    // declare the server to client message
+    TNL_DECLARE_RPC(rpcMessageServerToClient, (const char *theMessageString));
+};
+@endcode
+
+The first macro invoked, TNL_DECLARE_NETCONNECTION declares members necessary to make this class work as a connection in TNL.  The RPC methods are then declared using the TNL_DECLARE_RPC macro.  The first parameter to the macro is the name of the RPC method, which can be invoked like any other member function on the object.  The second argument is a parenthesized argument list to the RPC.  Although these functions are both declared to take only a single string, RPC method parameter lists can contain all the basic TNL types, as well as StringTableEntry, ByteBuffer and Vector objects.  
+
+Next, define the implementation of the SimpleEventConnection class:
+
+@code
+TNL_IMPLEMENT_NETCONNECTION(SimpleEventConnection, NetClassGroupGame, true);
+
+TNL_IMPLEMENT_RPC(SimpleEventConnection, rpcMessageClientToServer, (const char *messageString), 
+NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0)
+{
+    // display the message the client sent
+    printf("Got message from client: %s\n", messageString);
+    // send a hello world back to the client.
+    rpcMessageServerToClient("Hello, World!");
+}
+
+TNL_IMPLEMENT_RPC(SimpleEventConnection, rpcMessageServerToClient, (const char *messageString), 
+NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0)
+{
+    // display the message the server sent
+    printf("Got a message from server: %s\n", messageString);
+
+    // once the client has heard back from the server, it should quit.
+    gQuit = true;
+}
+@endcode
+
+The TNL_IMPLEMENT_NETCONNECTION macro specifies two properties.  The first, NetClassGroupGame declares that this connection traffics only in NetEvent, NetObject and RPC instances that have the NetClassGroupGame mask bit set in their implementations.  The second property, as declared by the boolean true specifies that remote hosts can request a connection of type SimpleEventConnection from this process.
+
+The TNL_IMPLEMENT_RPC macro behaves like a standard function signature declaration, but with some important additions.  The first three arguments, class name, method name and arguments are fairly self-explanatory.  The fourth argument is the connection type mask, which specifies which types of connections the specified RPC can travel over.  Since RPC's (unlike NetEvent and NetObject subclasses) are declared for only a single connection class, this mask should always be the mask associated with the connection type declared in TNL_IMPLEMENT_NETCONNECTION.
+
+The fifth argument to the macro specifies the guarantee type of the RPC, which can be one of RPCGuaranteedOrdered, RPCGuaranteed or RPCUnguaranteed.  The sixth parameter is the direction the RPC is allowed to travel, which when specified can make an application more secure from attacks that modify packets in transit.  The last argument is a version number, which can be specified so that older clients can still connect to servers offering newer RPCs.
+
+The function body of the RPC similar to any other function body with one important difference.  When an RPC method is invoked, the function body code is executed on the remote side of the connection.  So if the client calls the method rpcMessageClientToServer("Hello?"), the code for the body will execute on the server.
+
+Now that the connection class is defined, all that is left to do is create the main() function that will start up the instance as either a client or a server.
+
+@code
+int main(int argc, const char **argv)
+{
+    if(argc != 3)
+    {
+        printf("usage: simpletnltest <-server|-client> <connectAddress>");
+        return 1;
+    }
+    bool isClient = !strcmp(argv[1], "-client");
+
+    // convert the command-line address into TNL address form
+    Address cmdAddress(argv[2]);
+
+    RefPtr<NetInterface> theNetInterface;
+    if(isClient)
+    {
+        Address bindAddress(IPProtocol, Address::Any, 0);
+
+        // create a new NetInterface bound to any interface, any port (0)
+        theNetInterface = new NetInterface(bindAddress);
+        
+        // create a new SimpleEventConnection and tell it to connect to the
+        // server at cmdAddress.
+        SimpleEventConnection *newConnection = new SimpleEventConnection;
+        newConnection->connect(theNetInterface, cmdAddress);
+
+        // post an RPC, to be executed when the connection is established
+        newConnection->rpcMessageClientToServer("Hello??");
+    }
+    else
+    {
+        // create a server net interface, bound to the cmdAddress
+        theNetInterface = new NetInterface(cmdAddress);
+
+        // notify the NetInterface that it can allow connections
+        theNetInterface->setAllowsConnections(true);
+    }
+
+    // now just loop, processing incoming packets and sending outgoing packets
+    // until the global quit flag is set.
+    while(!gQuit)
+    {
+         theNetInterface->checkIncomingPackets();
+         theNetInterface->processConnections();
+         Platform::sleep(1);
+    }
+    return 0;
+}
+@endcode
+
+Once the code is written, use your compiler to build simpletnltest, making sure to link in the tnl library, along with whatever network libraries your platform requires (wsock32.lib on Windows, for example).
+
+Also, make sure Run-Time Type Checking is turned ON for your compiler or the program will not function correctly (option /GR in MSVC, for example).
+
+To test the program, open up two console shells, and in the first, type:
+
+@code
+simpletnltest -server 127.0.0.1:28000
+@endcode
+                
+This will create an instance of simpletnltest running as a server and bound to port 28000 on the local host machine.  In the second window, run another instance as a client, set to connect to the server like this:
+
+@code
+simpletnltest -client 127.0.0.1:28000
+@endcode
+
+Once the client runs, the server display should read:
+
+@code
+Got a message from client: Hello?
+@endcode
+
+and the client window should read:
+
+@code
+Got a message from server: Hello, World!
+@endcode
+
+The server will continue to accept new connections from clients until it is terminated manually.
+
+For an example program that uses more of TNL's advanced features, including RPCs with bit compressed arguments, a custom NetInterface subclass, and the NetObject replication system, look at the TNLTest project and documentation.
+
+
+*/
+
+};

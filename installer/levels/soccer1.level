@@ -1,0 +1,65 @@
+SoccerGameType 10 8
+LevelName "Hat Trick"
+LevelCredits Original Zap! Level
+
+GridSize 280
+
+Team Blue 0 0 1
+Team Red 1 0 0
+
+BarrierMaker 50 0 1 5 1 5.5 0 6.5 0 7 1 12 1 12 4 9 6 9 10 12 12 12 15 7 15 6.5 16 5.5 16 5 15 0 15 0 12 3 10 3 6 0 4 0 1
+
+BarrierMaker 50 6 6 7 7 5 7 6 6
+
+BarrierMaker 50 5 3 5 3.5 4 3.5 5 3
+BarrierMaker 50 4 4 5 4 5 5 5.5 5
+BarrierMaker 50 8 3 7 3 7 5
+BarrierMaker 50 4 2.5 4.5 2.5 4.5 2 5 2
+BarrierMaker 50 6 5 5.5 3 6.5 3 6 5
+BarrierMaker 50 3.5 4.5 3.5 6 4 6
+BarrierMaker 50 4.5 6 4.5 4.5 4 4.5
+BarrierMaker 50 3.5 2 4 2
+BarrierMaker 50 1.5 2 3 2 3 3.5 1.5 2
+BarrierMaker 50 1 2 2.5 4 1 3 1 2
+BarrierMaker 50 7 2 7.5 2 7 2.5 7 2
+BarrierMaker 50 7.5 4 8 4 8 5 7.5 5 7.5 4
+BarrierMaker 50 8 6 11 4 11 2 8 6
+BarrierMaker 50 8 2.5 9 2.5 9 3 8.5 3.5
+
+BarrierMaker 50 6 10 7 9 5 9 6 10
+
+BarrierMaker 50 5 13 5 12.5 4 12.5 5 13
+BarrierMaker 50 4 12 5 12 5 11 5.5 11
+BarrierMaker 50 8 13 7 13 7 11
+BarrierMaker 50 4 13.5 4.5 13.5 4.5 14 5 14
+BarrierMaker 50 6 11 5.5 13 6.5 13 6 11
+BarrierMaker 50 3.5 11.5 3.5 10 4 10
+BarrierMaker 50 4.5 10 4.5 11.5 4 11.5
+BarrierMaker 50 3.5 14 4 14
+BarrierMaker 50 1.5 14 3 14 3 12.5 1.5 14
+BarrierMaker 50 1 14 2.5 12 1 13 1 14
+BarrierMaker 50 7 14 7.5 14 7 13.5 7 14
+BarrierMaker 50 7.5 12 8 12 8 11 7.5 11 7.5 12
+BarrierMaker 50 8 10 11 12 11 14 8 10
+BarrierMaker 50 8 13.5 9 13.5 9 13 8.5 12.5
+
+Spawn 0 4 9 
+Spawn 0 4 8.5 
+Spawn 0 5 8.5 
+Spawn 0 6 8.5 
+Spawn 0 7 8.5 
+Spawn 0 8 8.5 
+Spawn 0 8 9
+
+Spawn 1 4 7 
+Spawn 1 4 7.5 
+Spawn 1 5 7.5 
+Spawn 1 6 7.5 
+Spawn 1 7 7.5 
+Spawn 1 8 7.5 
+Spawn 1 8 7
+
+SoccerBallItem 6 8
+
+GoalZone 1 5.2 1 5.6 0.2 6.4 0.2 6.8 1
+GoalZone 0 5.2 15 6.8 15 6.4 15.8 5.6 15.8

@@ -1,0 +1,559 @@
+CTFGameType 10 10
+LevelName Geo-War
+LevelDescription 
+LevelCredits Designed by Qui
+GridSize 260
+MinPlayers 0
+MaxPlayers 0
+Team Blue 0 0 1
+Team Red 1 0 0
+LoadoutZone 0 4 2.9 4 2.7 3.1 2.5 3.1 2.7 
+BarrierMaker 15 4.3134 -2.95 4.4866 -2.85 
+BarrierMaker 70 5.6 4.4 -5 4.4 -5 -4.4 5.6 -4.4 5.6 4.4 
+BarrierMaker 50 3.8 -4.1 3.8 -4.3 
+BarrierMaker 105 5.3 3.6 5.3 2.9 
+BarrierMaker 15 4.3 -2.9 4.5 -2.9 
+BarrierMaker 205 -5 -4 5.5 -4 
+BarrierMaker 260 -5.6 3.8 5.6 3.8 
+BarrierMaker 365 3.6 -2.6268 3.8 -2.97321 
+BarrierMaker 365 3.7 -2.6 3.7 -3 
+BarrierMaker 365 3.52679 -2.7 3.8732 -2.9 
+BarrierMaker 365 3.5 -2.8 3.9 -2.8 
+BarrierMaker 365 3.52679 -2.9 3.8732 -2.7 
+BarrierMaker 365 3.6 -2.97321 3.8 -2.6268 
+BarrierMaker 365 3.1 -3.62679 3.3 -3.97321 
+BarrierMaker 365 3.2 -3.6 3.2 -4 
+BarrierMaker 365 3.02679 -3.7 3.3732 -3.9 
+BarrierMaker 365 3 -3.8 3.4 -3.8 
+BarrierMaker 365 3.02679 -3.9 3.3732 -3.7 
+BarrierMaker 365 3.1 -3.97321 3.3 -3.62679 
+BarrierMaker 365 5 -3.62679 5.2 -3.97321 
+BarrierMaker 365 5.1 -3.6 5.1 -4 
+BarrierMaker 365 4.9268 -3.7 5.2732 -3.9 
+BarrierMaker 365 4.9 -3.8 5.3 -3.8 
+BarrierMaker 365 4.9268 -3.9 5.2732 -3.7 
+BarrierMaker 365 5 -3.97321 5.2 -3.62679 
+BarrierMaker 365 2.4 3.77321 2.6 3.4268 
+BarrierMaker 365 2.5 3.8 2.5 3.4 
+BarrierMaker 365 2.32679 3.7 2.6732 3.5 
+BarrierMaker 365 2.3 3.6 2.7 3.6 
+BarrierMaker 365 2.32679 3.5 2.6732 3.7 
+BarrierMaker 365 2.4 3.4268 2.6 3.77321 
+BarrierMaker 365 3.3 3.77321 3.5 3.4268 
+BarrierMaker 365 3.4 3.8 3.4 3.4 
+BarrierMaker 365 3.22679 3.7 3.5732 3.5 
+BarrierMaker 365 3.2 3.6 3.6 3.6 
+BarrierMaker 365 3.22679 3.5 3.5732 3.7 
+BarrierMaker 365 3.3 3.4268 3.5 3.77321 
+BarrierMaker 365 4.6 3.87321 4.8 3.52679 
+BarrierMaker 365 4.7 3.9 4.7 3.5 
+BarrierMaker 365 4.5268 3.8 4.8732 3.6 
+BarrierMaker 365 4.5 3.7 4.9 3.7 
+BarrierMaker 365 4.5268 3.6 4.8732 3.8 
+BarrierMaker 365 4.6 3.52679 4.8 3.87321 
+BarrierMaker 190 0.6 -0.6 0.6 -0.8 
+BarrierMaker 190 0.55 -0.6134 0.65 -0.7866 
+BarrierMaker 190 0.5134 -0.65 0.6866 -0.75 
+BarrierMaker 190 0.5 -0.7 0.7 -0.7 
+BarrierMaker 190 0.5134 -0.75 0.6866 -0.65 
+BarrierMaker 190 0.55 -0.7866 0.65 -0.6134 
+BarrierMaker 190 2.6 -3.6 2.6 -3.8 
+BarrierMaker 190 2.55 -3.6134 2.65 -3.7866 
+BarrierMaker 190 2.5134 -3.65 2.6866 -3.75 
+BarrierMaker 190 2.5 -3.7 2.7 -3.7 
+BarrierMaker 190 2.5134 -3.75 2.6866 -3.65 
+BarrierMaker 190 2.55 -3.7866 2.65 -3.6134 
+BarrierMaker 190 5.1 2.9 5.1 2.7 
+BarrierMaker 190 5.05 2.8866 5.15 2.7134 
+BarrierMaker 190 5.0134 2.85 5.1866 2.75 
+BarrierMaker 190 5 2.8 5.2 2.8 
+BarrierMaker 190 5.0134 2.75 5.1866 2.85 
+BarrierMaker 190 5.05 2.7134 5.15 2.8866 
+BarrierMaker 190 5.2 0.5 5.2 0.3 
+BarrierMaker 190 5.15 0.4866 5.25 0.3134 
+BarrierMaker 190 5.1134 0.45 5.2866 0.35 
+BarrierMaker 190 5.1 0.4 5.3 0.4 
+BarrierMaker 190 5.1134 0.35 5.2866 0.45 
+BarrierMaker 190 5.15 0.3134 5.25 0.4866 
+BarrierMaker 190 4.3 2.3 4.3 2.1 
+BarrierMaker 190 4.25 2.2866 4.35 2.1134 
+BarrierMaker 190 4.2134 2.25 4.3866 2.15 
+BarrierMaker 190 4.2 2.2 4.4 2.2 
+BarrierMaker 190 4.2134 2.15 4.3866 2.25 
+BarrierMaker 190 4.25 2.1134 4.35 2.2866 
+BarrierMaker 190 2.6 2.8 2.6 2.6 
+BarrierMaker 190 2.55 2.7866 2.65 2.6134 
+BarrierMaker 190 2.5134 2.75 2.6866 2.65 
+BarrierMaker 190 2.5 2.7 2.7 2.7 
+BarrierMaker 190 2.5134 2.65 2.6866 2.75 
+BarrierMaker 190 2.55 2.6134 2.65 2.7866 
+BarrierMaker 30 2.4 -2.12679 2.6 -2.47321 
+BarrierMaker 30 2.5 -2.1 2.5 -2.5 
+BarrierMaker 30 2.32679 -2.2 2.6732 -2.4 
+BarrierMaker 30 2.3 -2.3 2.7 -2.3 
+BarrierMaker 30 2.32679 -2.4 2.6732 -2.2 
+BarrierMaker 30 2.4 -2.47321 2.6 -2.12679 
+BarrierMaker 30 5.1 2.4732 5.3 2.12679 
+BarrierMaker 30 5.2 2.5 5.2 2.1 
+BarrierMaker 30 5.0268 2.4 5.3732 2.2 
+BarrierMaker 30 5 2.3 5.4 2.3 
+BarrierMaker 30 5.0268 2.2 5.3732 2.4 
+BarrierMaker 30 5.1 2.12679 5.3 2.4732 
+BarrierMaker 30 2.8 2.4732 3 2.12679 
+BarrierMaker 30 2.9 2.5 2.9 2.1 
+BarrierMaker 30 2.72679 2.4 3.0732 2.2 
+BarrierMaker 30 2.7 2.3 3.1 2.3 
+BarrierMaker 30 2.72679 2.2 3.0732 2.4 
+BarrierMaker 30 2.8 2.12679 3 2.4732 
+BarrierMaker 30 0.4 1.4732 0.6 1.12679 
+BarrierMaker 30 0.5 1.5 0.5 1.1 
+BarrierMaker 30 0.32679 1.4 0.6732 1.2 
+BarrierMaker 30 0.3 1.3 0.7 1.3 
+BarrierMaker 30 0.32679 1.2 0.6732 1.4 
+BarrierMaker 30 0.4 1.12679 0.6 1.4732 
+BarrierMaker 30 1 -1.7268 1.2 -2.07321 
+BarrierMaker 30 1.1 -1.7 1.1 -2.1 
+BarrierMaker 30 0.92679 -1.8 1.2732 -2 
+BarrierMaker 30 0.9 -1.9 1.3 -1.9 
+BarrierMaker 30 0.92679 -2 1.2732 -1.8 
+BarrierMaker 30 1 -2.07321 1.2 -1.7268 
+BarrierMaker 30 2 -0.6268 2.2 -0.97321 
+BarrierMaker 30 2.1 -0.6 2.1 -1 
+BarrierMaker 30 1.92679 -0.7 2.2732 -0.9 
+BarrierMaker 30 1.9 -0.8 2.3 -0.8 
+BarrierMaker 30 1.92679 -0.9 2.2732 -0.7 
+BarrierMaker 30 2 -0.97321 2.2 -0.6268 
+BarrierMaker 15 5.1 1.8 5.1 1.6 
+BarrierMaker 15 5.05 1.7866 5.15 1.6134 
+BarrierMaker 15 5.0134 1.75 5.1866 1.65 
+BarrierMaker 15 5 1.7 5.2 1.7 
+BarrierMaker 15 5.0134 1.65 5.1866 1.75 
+BarrierMaker 15 5.05 1.6134 5.15 1.7866 
+BarrierMaker 15 3.3 0.7 3.3 0.5 
+BarrierMaker 15 3.25 0.6866 3.35 0.5134 
+BarrierMaker 15 3.2134 0.65 3.3866 0.55 
+BarrierMaker 15 3.2 0.6 3.4 0.6 
+BarrierMaker 15 3.2134 0.55 3.3866 0.65 
+BarrierMaker 15 3.25 0.5134 3.35 0.6866 
+BarrierMaker 15 3.3 3 3.3 2.8 
+BarrierMaker 15 3.25 2.9866 3.35 2.8134 
+BarrierMaker 15 3.2134 2.95 3.3866 2.85 
+BarrierMaker 15 3.2 2.9 3.4 2.9 
+BarrierMaker 15 3.2134 2.85 3.3866 2.95 
+BarrierMaker 15 3.25 2.8134 3.35 2.9866 
+BarrierMaker 15 4.3 1.9 4.3 1.7 
+BarrierMaker 15 4.25 1.8866 4.35 1.7134 
+BarrierMaker 15 4.2134 1.85 4.3866 1.75 
+BarrierMaker 15 4.2 1.8 4.4 1.8 
+BarrierMaker 15 4.2134 1.75 4.3866 1.85 
+BarrierMaker 15 4.25 1.7134 4.35 1.8866 
+BarrierMaker 255 0.5 3.7 0.5 2.3 
+BarrierMaker 255 -0.2 3 -0.2 2 
+BarrierMaker 275 -2.8 4.4 -2.8 3.3 
+BarrierMaker 255 -3.6 4.1 -3.6 3 
+BarrierMaker 255 -4.1 3.5 -4.1 2.5 
+BarrierMaker 255 -3.5 -3 -3.5 -4 
+BarrierMaker 550 -2.6 -3 -2.6 -4 
+BarrierMaker 255 0.2 -2.2 0.2 -3.2 
+BarrierMaker 350 0.7 -2.4 0.7 -3.4 
+BarrierMaker 255 -4 -2.1 -4 -3.1 
+BarrierMaker 155 -3.5 2.6 -3.5 2 
+BarrierMaker 155 -3.5 -1.8 -3.5 -2.4 
+BarrierMaker 155 -0.0999999 -1.7 -0.1 -3.5 
+BarrierMaker 155 0 -0.2 0 -0.8 
+BarrierMaker 155 0.1 2.2 0.0999999 1.4 
+BarrierMaker 105 -3.9 2.2 -3.9 1.8 
+BarrierMaker 105 -2.8 -2.4 -2.8 -2.8 
+BarrierMaker 105 -0.3 -0.6 -0.3 -1 
+BarrierMaker 50 -3.2 2.1 -3.2 1.9 
+BarrierMaker 50 0 0.8 0 0.5 
+BarrierMaker 50 -0.589584 -0.5 -0.589584 -0.7 
+BarrierMaker 50 -3.8 -1.6 -3.8 -1.815 
+BarrierMaker 50 -2.6 -1.9 -2.6 -2.1 
+BarrierMaker 50 -0.2 0.2 -0.2 -1.04308e-007 
+BarrierMaker 190 4.1 -4 4.1 -4.2 
+BarrierMaker 190 4.05 -4.0134 4.15 -4.1866 
+BarrierMaker 190 4.0134 -4.05 4.1866 -4.15 
+BarrierMaker 190 4 -4.1 4.2 -4.1 
+BarrierMaker 190 4.0134 -4.15 4.1866 -4.05 
+BarrierMaker 190 4.05 -4.1866 4.15 -4.0134 
+BarrierMaker 30 4.4 -2.0268 4.6 -2.37321 
+BarrierMaker 30 4.5 -2 4.5 -2.4 
+BarrierMaker 30 4.3268 -2.1 4.6732 -2.3 
+BarrierMaker 30 4.3 -2.2 4.7 -2.2 
+BarrierMaker 30 4.3268 -2.3 4.6732 -2.1 
+BarrierMaker 30 4.4 -2.37321 4.6 -2.0268 
+BarrierMaker 15 5.2 0.1 5.2 -0.1 
+BarrierMaker 15 5.15 0.0866 5.25 -0.0865999 
+BarrierMaker 15 5.1134 0.05 5.2866 -0.0499999 
+BarrierMaker 15 5.1 3.72529e-008 5.3 3.72529e-008 
+BarrierMaker 15 5.1134 -0.0499999 5.2866 0.05 
+BarrierMaker 15 5.15 -0.0865999 5.25 0.0866 
+BarrierMaker 15 4.3 -1.5 4.3 -1.7 
+BarrierMaker 15 4.25 -1.5134 4.35 -1.6866 
+BarrierMaker 15 4.2134 -1.55 4.3866 -1.65 
+BarrierMaker 15 4.2 -1.6 4.4 -1.6 
+BarrierMaker 15 4.2134 -1.65 4.3866 -1.55 
+BarrierMaker 15 4.25 -1.6866 4.35 -1.5134 
+BarrierMaker 190 4.5 2.9 4.5 2.7 
+BarrierMaker 190 4.45 2.8866 4.55 2.7134 
+BarrierMaker 190 4.4134 2.85 4.5866 2.75 
+BarrierMaker 190 4.4 2.8 4.6 2.8 
+BarrierMaker 190 4.4134 2.75 4.5866 2.85 
+BarrierMaker 190 4.45 2.7134 4.55 2.8866 
+BarrierMaker 15 4 2.6 4 2.4 
+BarrierMaker 15 3.95 2.5866 4.05 2.4134 
+BarrierMaker 15 3.9134 2.55 4.0866 2.45 
+BarrierMaker 15 3.9 2.5 4.1 2.5 
+BarrierMaker 15 3.9134 2.45 4.0866 2.55 
+BarrierMaker 15 3.95 2.4134 4.05 2.5866 
+BarrierMaker 30 1.3 2.47321 1.5 2.1268 
+BarrierMaker 30 1.4 2.5 1.4 2.1 
+BarrierMaker 30 1.2268 2.4 1.5732 2.2 
+BarrierMaker 30 1.2 2.3 1.6 2.3 
+BarrierMaker 30 1.2268 2.2 1.5732 2.4 
+BarrierMaker 30 1.3 2.1268 1.5 2.47321 
+BarrierMaker 15 2.8 2.1 2.8 1.9 
+BarrierMaker 15 2.75 2.0866 2.85 1.9134 
+BarrierMaker 15 2.7134 2.05 2.8866 1.95 
+BarrierMaker 15 2.7 2 2.9 2 
+BarrierMaker 15 2.7134 1.95 2.8866 2.05 
+BarrierMaker 15 2.75 1.9134 2.85 2.0866 
+BarrierMaker 290 -4.5 4.1 -4.5 2.7 
+BarrierMaker 205 -4.6 -2.3 -4.6 -3.1 
+BarrierMaker 105 -4.7 1 -4.7 0.6 
+BarrierMaker 50 -4.6 2.5175 -4.6 2.3 
+BarrierMaker 50 -4.5 1.1 -4.5 0.9 
+BarrierMaker 50 -4.5 -1.9 -4.5 -2.12 
+BarrierMaker 50 0.4 -0.3 0.4 -0.5 
+BarrierMaker 30 2.8 -2.82679 3 -3.17321 
+BarrierMaker 30 2.9 -2.8 2.9 -3.2 
+BarrierMaker 30 2.7268 -2.9 3.0732 -3.1 
+BarrierMaker 30 2.7 -3 3.1 -3 
+BarrierMaker 30 2.7268 -3.1 3.0732 -2.9 
+BarrierMaker 30 2.8 -3.17321 3 -2.82679 
+BarrierMaker 205 -5.6 5 6.2 5 6.2 -5 -5.6 -5 -5.6 5 
+BarrierMaker 15 4.3134 -2.85 4.4866 -2.95 
+LoadoutZone 1 -2.3 2.9 -2.3 2.7 -3.5 2.7 -3.5 2.9 
+LoadoutZone 1 2.7 4.6 2.7 4.5 1.2 4.5 1.2 4.6 
+LoadoutZone 0 -5.1 2.7 -5.2 2.7 -5.2 4.5 -5.1 4.5 
+LoadoutZone 0 1.2 4.6 1.2 4.5 -0.4 4.5 -0.4 4.6 
+LoadoutZone 1 -0.4 4.6 -0.4 4.5 -2 4.5 -2 4.6 
+LoadoutZone 0 -2 4.6 -2 4.5 -3.6 4.5 -3.6 4.6 
+LoadoutZone 1 -3.6 4.6 -3.6 4.5 -5.2 4.5 -5.2 4.6 
+LoadoutZone 1 2.7 -4.5 2.7 -4.6 1.2 -4.6 1.2 -4.5 
+LoadoutZone 0 1.2 -4.5 1.2 -4.6 -0.4 -4.6 -0.4 -4.5 
+LoadoutZone 1 -0.4 -4.5 -0.4 -4.6 -2 -4.6 -2 -4.5 
+LoadoutZone 0 -2 -4.5 -2 -4.6 -3.6 -4.6 -3.6 -4.5 
+LoadoutZone 1 -3.6 -4.5 -3.6 -4.6 -5.2 -4.6 -5.2 -4.5 
+LoadoutZone 1 -5.1 0.9 -5.2 0.9 -5.2 2.7 -5.1 2.7 
+LoadoutZone 0 -5.1 -0.9 -5.2 -0.9 -5.2 0.9 -5.1 0.9 
+LoadoutZone 1 -5.1 -2.7 -5.2 -2.7 -5.2 -0.9 -5.1 -0.9 
+LoadoutZone 1 5.8 -2.7 5.7 -2.7 5.7 -0.9 5.8 -0.9 
+LoadoutZone 0 5.8 -4.5 5.7 -4.5 5.7 -2.7 5.8 -2.7 
+LoadoutZone 0 -5.1 -4.5 -5.2 -4.5 -5.2 -2.7 -5.1 -2.7 
+LoadoutZone 0 5.8 2.7 5.7 2.7 5.7 4.5 5.8 4.5 
+BarrierMaker 15 4.35 -2.8134 4.45 -2.9866 
+BarrierMaker 15 4.4 -2.8 4.4 -3 
+BarrierMaker 30 4.7 -3.37321 4.9 -3.0268 
+BarrierMaker 30 4.6268 -3.3 4.9732 -3.1 
+BarrierMaker 30 4.6 -3.2 5 -3.2 
+BarrierMaker 30 4.6268 -3.1 4.9732 -3.3 
+BarrierMaker 30 4.8 -3 4.8 -3.4 
+BarrierMaker 30 4.7 -3.0268 4.9 -3.37321 
+BarrierMaker 365 2.3 -3.77321 2.5 -3.4268 
+BarrierMaker 365 2.22679 -3.7 2.5732 -3.5 
+BarrierMaker 365 2.2 -3.6 2.6 -3.6 
+BarrierMaker 365 2.22679 -3.5 2.5732 -3.7 
+BarrierMaker 365 2.4 -3.4 2.4 -3.8 
+BarrierMaker 365 2.3 -3.4268 2.5 -3.77321 
+BarrierMaker 15 1.35 0.7134 1.45 0.8866 
+BarrierMaker 190 4.1 -1.9 4.1 -2.1 
+BarrierMaker 190 4.05 -1.9134 4.15 -2.0866 
+BarrierMaker 190 4.0134 -1.95 4.1866 -2.05 
+BarrierMaker 190 4 -2 4.2 -2 
+BarrierMaker 190 4.0134 -2.05 4.1866 -1.95 
+BarrierMaker 190 4.05 -2.0866 4.15 -1.9134 
+LoadoutZone 1 5.8 -4.5 5.8 -4.6 4.3 -4.6 4.3 -4.5 
+LoadoutZone 0 4.3 -4.5 4.3 -4.6 2.7 -4.6 2.7 -4.5 
+LoadoutZone 1 5.8 0.9 5.7 0.9 5.7 2.7 5.8 2.7 
+LoadoutZone 0 5.8 -0.9 5.7 -0.9 5.7 0.9 5.8 0.9 
+LoadoutZone 1 5.8 4.6 5.8 4.5 4.3 4.5 4.3 4.6 
+LoadoutZone 0 4.3 4.6 4.3 4.5 2.7 4.5 2.7 4.6 
+BarrierMaker 365 1.6 -3.62679 1.8 -3.97321 
+BarrierMaker 365 1.7 -3.6 1.7 -4 
+BarrierMaker 365 1.52679 -3.7 1.8732 -3.9 
+BarrierMaker 365 1.5 -3.8 1.9 -3.8 
+BarrierMaker 365 1.52679 -3.9 1.8732 -3.7 
+BarrierMaker 365 1.6 -3.97321 1.8 -3.62679 
+BarrierMaker 15 1.7 -2 1.7 -2.2 
+BarrierMaker 15 1.65 -2.0134 1.75 -2.1866 
+BarrierMaker 15 1.6134 -2.05 1.7866 -2.15 
+BarrierMaker 15 1.6 -2.1 1.8 -2.1 
+BarrierMaker 15 1.6134 -2.15 1.7866 -2.05 
+BarrierMaker 15 1.65 -2.1866 1.75 -2.0134 
+BarrierMaker 190 0.9 -2.2 0.9 -2.4 
+BarrierMaker 190 0.85 -2.2134 0.95 -2.3866 
+BarrierMaker 190 0.8134 -2.25 0.9866 -2.35 
+BarrierMaker 190 0.8 -2.3 1 -2.3 
+BarrierMaker 190 0.8134 -2.35 0.9866 -2.25 
+BarrierMaker 190 0.85 -2.3866 0.95 -2.2134 
+BarrierMaker 190 1.4 -3.2 1.4 -3.4 
+BarrierMaker 190 1.35 -3.2134 1.45 -3.3866 
+BarrierMaker 190 1.3134 -3.25 1.4866 -3.35 
+BarrierMaker 190 1.3 -3.3 1.5 -3.3 
+BarrierMaker 190 1.3134 -3.35 1.4866 -3.25 
+BarrierMaker 190 1.35 -3.3866 1.45 -3.2134 
+BarrierMaker 190 0.4 -0.2 0.4 -0.4 
+BarrierMaker 190 0.35 -0.2134 0.45 -0.3866 
+BarrierMaker 190 0.3134 -0.25 0.4866 -0.35 
+BarrierMaker 190 0.3 -0.3 0.5 -0.3 
+BarrierMaker 190 0.3134 -0.35 0.4866 -0.25 
+BarrierMaker 190 0.35 -0.3866 0.45 -0.2134 
+BarrierMaker 190 1.3 -2.6 1.3 -2.8 
+BarrierMaker 190 1.25 -2.6134 1.35 -2.7866 
+BarrierMaker 190 1.2134 -2.65 1.3866 -2.75 
+BarrierMaker 190 1.2 -2.7 1.4 -2.7 
+BarrierMaker 190 1.2134 -2.75 1.3866 -2.65 
+BarrierMaker 190 1.25 -2.7866 1.35 -2.6134 
+BarrierMaker 190 4.4 -3.2 4.4 -3.4 
+BarrierMaker 190 4.35 -3.2134 4.45 -3.3866 
+BarrierMaker 190 4.3134 -3.25 4.4866 -3.35 
+BarrierMaker 190 4.3 -3.3 4.5 -3.3 
+BarrierMaker 190 4.3134 -3.35 4.4866 -3.25 
+BarrierMaker 190 4.35 -3.3866 4.45 -3.2134 
+BarrierMaker 30 4.2 -3.6268 4.4 -3.97321 
+BarrierMaker 30 4.3 -3.6 4.3 -4 
+BarrierMaker 30 4.1268 -3.7 4.4732 -3.9 
+BarrierMaker 30 4.1 -3.8 4.5 -3.8 
+BarrierMaker 30 4.1268 -3.9 4.4732 -3.7 
+BarrierMaker 30 4.2 -3.97321 4.4 -3.6268 
+BarrierMaker 365 2.1 -0.0268 2.3 -0.37321 
+BarrierMaker 365 2.2 -9.68575e-008 2.2 -0.4 
+BarrierMaker 365 2.02679 -0.1 2.3732 -0.3 
+BarrierMaker 365 2 -0.2 2.4 -0.2 
+BarrierMaker 365 2.02679 -0.3 2.3732 -0.1 
+BarrierMaker 365 2.1 -0.37321 2.3 -0.0268 
+BarrierMaker 190 2.7 -0.6 2.7 -0.8 
+BarrierMaker 190 2.65 -0.6134 2.75 -0.7866 
+BarrierMaker 190 2.6134 -0.65 2.7866 -0.75 
+BarrierMaker 190 2.6 -0.7 2.8 -0.7 
+BarrierMaker 190 2.6134 -0.75 2.7866 -0.65 
+BarrierMaker 190 2.65 -0.7866 2.75 -0.6134 
+BarrierMaker 15 2 -2.9 2 -3.1 
+BarrierMaker 15 1.95 -2.9134 2.05 -3.0866 
+BarrierMaker 15 1.9134 -2.95 2.0866 -3.05 
+BarrierMaker 15 1.9 -3 2.1 -3 
+BarrierMaker 15 1.9134 -3.05 2.0866 -2.95 
+BarrierMaker 15 1.95 -3.0866 2.05 -2.9134 
+BarrierMaker 15 2.7 -2 2.7 -2.2 
+BarrierMaker 15 2.65 -2.0134 2.75 -2.1866 
+BarrierMaker 15 2.6134 -2.05 2.7866 -2.15 
+BarrierMaker 15 2.6 -2.1 2.8 -2.1 
+BarrierMaker 15 2.6134 -2.15 2.7866 -2.05 
+BarrierMaker 15 2.65 -2.1866 2.75 -2.0134 
+BarrierMaker 365 1.4 3.77321 1.6 3.4268 
+BarrierMaker 365 1.5 3.8 1.5 3.4 
+BarrierMaker 365 1.32679 3.7 1.6732 3.5 
+BarrierMaker 365 1.3 3.6 1.7 3.6 
+BarrierMaker 365 1.32679 3.5 1.6732 3.7 
+BarrierMaker 365 0.8 3.3 1.6 3.77321 
+BarrierMaker 190 1.1 2.8 1.1 2.6 
+BarrierMaker 190 1.05 2.7866 1.15 2.6134 
+BarrierMaker 190 1.0134 2.75 1.1866 2.65 
+BarrierMaker 190 1 2.7 1.2 2.7 
+BarrierMaker 190 1.0134 2.65 1.1866 2.75 
+BarrierMaker 190 1.05 2.6134 1.15 2.7866 
+BarrierMaker 15 1.5 3 1.5 2.8 
+BarrierMaker 15 1.45 2.9866 1.55 2.8134 
+BarrierMaker 15 1.4134 2.95 1.5866 2.85 
+BarrierMaker 15 1.4 2.9 1.6 2.9 
+BarrierMaker 15 1.4134 2.85 1.5866 2.95 
+BarrierMaker 15 1.45 2.8134 1.55 2.9866 
+BarrierMaker 15 2.2 2.7 2.2 2.5 
+BarrierMaker 15 2.15 2.6866 2.25 2.5134 
+BarrierMaker 15 2.1134 2.65 2.2866 2.55 
+BarrierMaker 15 2.1 2.6 2.3 2.6 
+BarrierMaker 15 2.1134 2.55 2.2866 2.65 
+BarrierMaker 15 2.15 2.5134 2.25 2.6866 
+BarrierMaker 30 1 -0.62679 1.2 -0.9732 
+BarrierMaker 30 1.1 -0.6 1.1 -1 
+BarrierMaker 30 0.9268 -0.7 1.2732 -0.9 
+BarrierMaker 30 0.9 -0.8 1.3 -0.8 
+BarrierMaker 30 0.9268 -0.9 1.2732 -0.7 
+BarrierMaker 30 1 -0.9732 1.2 -0.62679 
+BarrierMaker 190 5.2 -3 5.2 -3.2 
+BarrierMaker 190 5.15 -3.0134 5.25 -3.1866 
+BarrierMaker 190 5.1134 -3.05 5.2866 -3.15 
+BarrierMaker 190 5.1 -3.1 5.3 -3.1 
+BarrierMaker 190 5.1134 -3.15 5.2866 -3.05 
+BarrierMaker 190 5.15 -3.1866 5.25 -3.0134 
+BarrierMaker 190 1.7 1.6 1.7 1.4 
+BarrierMaker 190 1.65 1.5866 1.75 1.4134 
+BarrierMaker 190 1.6134 1.55 1.7866 1.45 
+BarrierMaker 190 1.6 1.5 1.8 1.5 
+BarrierMaker 190 1.6134 1.45 1.7866 1.55 
+BarrierMaker 190 1.65 1.4134 1.75 1.5866 
+BarrierMaker 190 4.5 -0.7 4.5 -0.9 
+BarrierMaker 190 4.45 -0.7134 4.55 -0.8866 
+BarrierMaker 190 4.4134 -0.75 4.5866 -0.85 
+BarrierMaker 190 4.4 -0.8 4.6 -0.8 
+BarrierMaker 190 4.4134 -0.85 4.5866 -0.75 
+BarrierMaker 190 4.45 -0.8866 4.55 -0.7134 
+BarrierMaker 30 2.1 1.2732 2.3 0.92679 
+BarrierMaker 30 2.2 1.3 2.2 0.9 
+BarrierMaker 30 2.02679 1.2 2.3732 1 
+BarrierMaker 30 2 1.1 2.4 1.1 
+BarrierMaker 30 2.02679 1 2.3732 1.2 
+BarrierMaker 30 2.1 0.92679 2.3 1.2732 
+BarrierMaker 15 4.1 -0.5 4.1 -0.7 
+BarrierMaker 15 4.05 -0.5134 4.15 -0.6866 
+BarrierMaker 15 4.0134 -0.55 4.1866 -0.65 
+BarrierMaker 15 4 -0.6 4.2 -0.6 
+BarrierMaker 15 4.0134 -0.65 4.1866 -0.55 
+BarrierMaker 15 4.05 -0.6866 4.15 -0.5134 
+BarrierMaker 15 3.3 -0.8 3.3 -1 
+BarrierMaker 15 3.25 -0.8134 3.35 -0.9866 
+BarrierMaker 15 3.2134 -0.85 3.3866 -0.95 
+BarrierMaker 15 3.2 -0.9 3.4 -0.9 
+BarrierMaker 15 3.2134 -0.95 3.3866 -0.85 
+BarrierMaker 15 3.25 -0.9866 3.35 -0.8134 
+BarrierMaker 15 5.2 -2 5.2 -2.2 
+BarrierMaker 15 5.15 -2.0134 5.25 -2.1866 
+BarrierMaker 15 5.1134 -2.05 5.2866 -2.15 
+BarrierMaker 15 5.1 -2.1 5.3 -2.1 
+BarrierMaker 15 5.1134 -2.15 5.2866 -2.05 
+BarrierMaker 15 5.15 -2.1866 5.25 -2.0134 
+BarrierMaker 15 1.3134 0.75 1.4866 0.85 
+BarrierMaker 15 1.3 0.8 1.5 0.8 
+BarrierMaker 255 -1.7 4.4 -1.7 2.3 
+BarrierMaker 255 -0.9 3.5 -0.9 2.5 
+BarrierMaker 105 -1.9 3.2 -2.7 3.2 
+BarrierMaker 105 -1.3 2.325 -1.3 1.9 
+BarrierMaker 255 -1.7 0 -1.7 -1 
+BarrierMaker 255 -1.7 -2.5 -1.7 -3.8 
+BarrierMaker 255 -0.9 -2.2 -0.9 -4.2 
+BarrierMaker 105 -0.4 -2.2 -0.4 -4 
+BarrierMaker 155 -1.6 1.5 -1.6 0.9 
+BarrierMaker 155 -2.3 -0.7 -2.3 -1.3 
+BarrierMaker 155 -4.6 -0.1 -4.6 -0.7 
+BarrierMaker 155 -2.9 1 -2.9 0.4 
+BarrierMaker 105 -3.2 -0.2 -3.2 -0.6 
+BarrierMaker 105 -0.9 0.8 -0.9 0.4 
+BarrierMaker 105 -0.8 -1.4 -0.8 -1.8 
+BarrierMaker 105 -1.4 -1.9 -1.4 -2.3 
+BarrierMaker 50 -1.2 -0.9 -1.2 -1.1 
+BarrierMaker 50 -1.9 0.2 -1.9 -0.1 
+BarrierMaker 50 -1.3 1.4 -1.3 1.2 
+BarrierMaker 50 -3.6 0.4 -3.6 0.2 
+BarrierMaker 50 -4.3 -4.76837e-007 -4.3 -0.2 
+BarrierMaker 50 -4.6 -0.900001 -4.6 -1.1 
+BarrierMaker 50 -3.4 -0.800001 -3.4 -1 
+BarrierMaker 50 -1.6 -1.3 -1.6 -1.5 
+BarrierMaker 260 -5.1 -3.7 5.6 -3.7 
+BarrierMaker 105 -3.7 -3.2 -5 -3.2 
+BarrierMaker 15 1.3134 0.85 1.4866 0.75 
+BarrierMaker 105 0.6 0.2 0.6 -0.2 
+BarrierMaker 155 -0.2 3.6 -0.2 2.5 
+BarrierMaker 15 1.35 0.8866 1.45 0.7134 
+BarrierMaker 50 0.7 -1 0.7 -1.2 
+BarrierMaker 50 -4.4 1.7 -4.4 1.5 
+BarrierMaker 155 0.0999999 1.3 0.0999999 0.7 
+BarrierMaker 50 -0.289583 1 -0.289583 0.8 
+BarrierMaker 105 -2.5 2.1 -2.5 1.7 
+BarrierMaker 155 -2.3 2.6 -2.3 2 
+BarrierMaker 30 3.9 0.3732 4.1 0.0267901 
+BarrierMaker 30 4 0.4 4 2.98023e-008 
+BarrierMaker 30 3.82679 0.3 4.1732 0.1 
+BarrierMaker 30 3.8 0.2 4.2 0.2 
+BarrierMaker 30 3.82679 0.1 4.1732 0.3 
+BarrierMaker 30 3.9 0.0267901 4.1 0.3732 
+BarrierMaker 15 3.6 1.4 3.6 1.2 
+BarrierMaker 15 3.55 1.3866 3.65 1.2134 
+BarrierMaker 15 3.5134 1.35 3.6866 1.25 
+BarrierMaker 15 3.5 1.3 3.7 1.3 
+BarrierMaker 15 3.5134 1.25 3.6866 1.35 
+BarrierMaker 15 3.55 1.2134 3.65 1.3866 
+BarrierMaker 5 0.3 0.7 0.5 0.7 
+BarrierMaker 15 0.4 0.8 0.4 0.6 
+BarrierMaker 15 0.35 0.7866 0.45 0.6134 
+BarrierMaker 15 0.3134 0.75 0.4866 0.65 
+BarrierMaker 15 0.3 0.7 0.5 0.7 
+BarrierMaker 15 0.3134 0.65 0.4866 0.75 
+BarrierMaker 15 0.35 0.6134 0.45 0.7866 
+BarrierMaker 50 -2.6 1.1 -2.6 0.9 
+BarrierMaker 15 1.3 1.5 1.3 1.3 
+BarrierMaker 15 1.25 1.4866 1.35 1.3134 
+BarrierMaker 15 1.2134 1.45 1.3866 1.35 
+BarrierMaker 15 1.2 1.4 1.4 1.4 
+BarrierMaker 15 1.2134 1.35 1.3866 1.45 
+BarrierMaker 15 1.25 1.3134 1.35 1.4866 
+BarrierMaker 15 5.5 2.9 5.5 2.7 
+BarrierMaker 15 5.45 2.8866 5.55 2.7134 
+BarrierMaker 15 5.4134 2.85 5.5866 2.75 
+BarrierMaker 15 5.4 2.8 5.6 2.8 
+BarrierMaker 15 5.4134 2.75 5.5866 2.85 
+BarrierMaker 15 5.45 2.7134 5.55 2.8866 
+BarrierMaker 105 -3.5 -2.8 -3.5 -3.2 
+BarrierMaker 30 -0.1 0.3732 0.1 0.0267901 
+BarrierMaker 30 -5.96046e-008 0.4 -5.96046e-008 0 
+BarrierMaker 30 -0.17321 0.3 0.1732 0.0999999 
+BarrierMaker 30 -0.2 0.2 0.2 0.2 
+BarrierMaker 30 -0.17321 0.0999999 0.1732 0.3 
+BarrierMaker 30 -0.1 0.0267901 0.1 0.3732 
+BarrierMaker 190 0.4 2.3 0.4 2.1 
+BarrierMaker 190 0.35 2.2866 0.45 2.1134 
+BarrierMaker 190 0.3134 2.25 0.4866 2.15 
+BarrierMaker 190 0.3 2.2 0.5 2.2 
+BarrierMaker 190 0.3134 2.15 0.4866 2.25 
+BarrierMaker 190 0.35 2.1134 0.45 2.2866 
+BarrierMaker 50 -0.2 1.8 -0.2 1.6 
+BarrierMaker 15 1.4 0.9 1.4 0.7 
+BarrierMaker 30 0.7 0.4732 0.9 0.12679 
+BarrierMaker 30 0.8 0.5 0.8 0.0999999 
+BarrierMaker 30 0.62679 0.4 0.9732 0.2 
+BarrierMaker 30 0.6 0.3 1 0.3 
+BarrierMaker 30 0.62679 0.2 0.9732 0.4 
+BarrierMaker 30 0.7 0.12679 0.9 0.4732 
+BarrierMaker 15 2.5 -1.4 2.5 -1.6 
+BarrierMaker 15 2.45 -1.4134 2.55 -1.5866 
+BarrierMaker 15 2.4134 -1.45 2.5866 -1.55 
+BarrierMaker 15 2.4 -1.5 2.6 -1.5 
+BarrierMaker 15 2.4134 -1.55 2.5866 -1.45 
+BarrierMaker 15 2.45 -1.5866 2.55 -1.4134 
+BarrierMaker 190 3.2 1.1 3.2 0.9 
+BarrierMaker 190 3.15 1.0866 3.25 0.9134 
+BarrierMaker 190 3.1134 1.05 3.2866 0.95 
+BarrierMaker 190 3.1 1 3.3 1 
+BarrierMaker 190 3.1134 0.95 3.2866 1.05 
+BarrierMaker 190 3.15 0.9134 3.25 1.0866 
+BarrierMaker 15 3.5 -1.6 3.5 -1.8 
+BarrierMaker 15 3.45 -1.6134 3.55 -1.7866 
+BarrierMaker 15 3.4134 -1.65 3.5866 -1.75 
+BarrierMaker 15 3.4 -1.7 3.6 -1.7 
+BarrierMaker 15 3.4134 -1.75 3.5866 -1.65 
+BarrierMaker 15 3.45 -1.7866 3.55 -1.6134 
+BarrierMaker 15 4.35 -2.9866 4.45 -2.8134 
+RepairItem 0.4 -2 
+Turret -1 -2 -2.5 
+Turret -1 3 -2.4 
+ForceFieldProjector -1 1.1 -1.1 
+Turret -1 -4.4 0.7 
+Turret -1 -3.9 1.7 
+Turret -1 4.8 0.6 
+Turret -1 4.5 1.8 
+ForceFieldProjector -1 -0.2 -1.7 
+Spawn 0 3.6 2.2 
+Spawn 0 5.2 1.2 
+Spawn 0 4.8 1.9 
+Spawn 0 4.7 -2.7 
+Spawn 1 -4.7 1.4 
+Spawn 1 -3.5 1.7 
+Spawn 1 -3 -2.1 
+Spawn 1 -4.6 -1.4 
+Spawn 1 -4.3 2.2 
+Spawn 1 -2.9 3.1 
+FlagItem 0 4.8 1.2 
+Spawn 0 5.1 -1.4 
+FlagItem 1 -4 1.1 
+RepairItem 0.4 0.4 

@@ -1,0 +1,495 @@
+http://www.cegui.org.uk/wiki/index.php/Using_CEGUI_with_GLUT 
+
+
+
+// Call every loop to update modifier state
+mod = glutGetModifiers();
+if (mod & GLUT_ACTIVE_CTRL)
+	keystate[KEY_CTRL] = state;
+	
+if (mod & GLUT_ACTIVE_ALT)
+	keystate[KEY_ALT] = state;
+
+if (mod & GLUT_ACTIVE_SHIFT)
+	keystate[KEY_SHIFT] = state;
+
+
+
+
+#define GLUT_LEFT_BUTTON		0
+#define GLUT_MIDDLE_BUTTON		1
+#define GLUT_RIGHT_BUTTON		2
+
+// Mouse buttons
+TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, mouse,
+   (S32 button, S32 state, S32 x, S32 y), (button, state, x, y))
+{
+   static int mouseState[2] = { 0, };
+   if(!UserInterface::current)
+      return;
+
+   if(gIsCrazyBot)
+      return;
+
+   if(button == GLUT_LEFT_BUTTON)
+   {
+      if(state == 1 && !mouseState[0])
+      {
+         UserInterface::current->onMouseUp(x, y);
+         mouseState[0] = 0;
+      }
+      else
+      {
+         mouseState[0] = state;
+         UserInterface::current->onMouseDown(x, y);
+      }
+   }
+   else if(button == GLUT_RIGHT_BUTTON)
+   {
+      if(state == 1 && !mouseState[1])
+      {
+         UserInterface::current->onRightMouseUp(x, y);
+         mouseState[1] = 0;
+      }
+      else
+      {
+         mouseState[1] = state;
+         UserInterface::current->onRightMouseDown(x, y);
+      }
+   }
+}
+
+
+
+
+
+
+// Special keys -- trapped by glutSpecialFunc
+
+switch(speckey) 
+{
+
+case GLUT_KEY_PAGE_UP :		// Page Up 		
+	keystate[KEY_PAGEUP] = state;
+	break;
+case GLUT_KEY_PAGE_DOWN:	// Page Down 		
+	keystate[KEY_PAGEDOWN] = state;
+	break;
+case GLUT_KEY_END :			// End 			
+	keystate[KEY_END] = state;
+	break;
+case GLUT_KEY_HOME :		// Home 			
+	keystate[KEY_HOME] = state;
+	break;
+case GLUT_KEY_LEFT:			// Cursor (Left) 	
+	keystate[KEY_LEFT] = state;
+	break;
+case GLUT_KEY_UP:			// Cursor (Up) 	
+	keystate[KEY_UP] = state;
+	break;
+case GLUT_KEY_RIGHT:		// Cursor (Right) 	
+	keystate[KEY_RIGHT] = state;
+	break;
+case GLUT_KEY_DOWN:			// Cursor (Down) 	
+	keystate[KEY_DOWN] = state;
+	break;
+case GLUT_KEY_INSERT:		// Insert 			
+	keystate[KEY_INSERT] = state;
+	break;
+
+case GLUT_KEY_F1:
+	keystate[KEY_F1] = state;
+	break;
+case GLUT_KEY_F2:
+	keystate[KEY_F2] = state;
+	break;
+case GLUT_KEY_F3:
+	keystate[KEY_F3] = state;
+	break;
+case GLUT_KEY_F4:
+	keystate[KEY_F4] = state;
+	break;
+case GLUT_KEY_F5:
+	keystate[KEY_F5] = state;
+	break;
+case GLUT_KEY_F6:
+	keystate[KEY_F6] = state;
+	break;
+case GLUT_KEY_F7:
+	keystate[KEY_F7] = state;
+	break;
+case GLUT_KEY_F8:
+	keystate[KEY_F8] = state;
+	break;
+case GLUT_KEY_F9:
+	keystate[KEY_F9] = state;
+	break;
+case GLUT_KEY_F10:
+	keystate[KEY_F10] = state;
+	break;
+case GLUT_KEY_F11:
+	keystate[KEY_F11] = state;
+	break;
+case GLUT_KEY_F12:
+	keystate[KEY_F12] = state;
+	break;
+
+}
+
+
+// Regular keys, trapped by glutKeyboardFunc
+
+switch(ucase(key)) 
+{
+	case 8:		// Backspace
+		keystate[KEY_BACKSPACE] = state;
+		break;
+	case 127:	// Del?
+		keystate[KEY_DELETE] = state;
+		break;
+	case 9:		// Tab
+		keystate[KEY_TAB] = state;
+		break;
+	case 13:	// Enter
+		keystate[KEY_ENTER] = state;
+		break;
+	case 27:	// Esc
+		keystate[KEY_ESCAPE] = state;
+		break;
+	case 32:	// Space
+		keystate[KEY_SPACE ] = state;
+		break;
+
+	// Numbers (shifted and unshifted)
+	case 48:		// 0
+		keystate[KEY_0] = state;
+		break;
+	case 41:		// )
+		keystate[KEY_0] = state;
+		break;
+	case 49:		// 1
+		keystate[KEY_1] = state;
+		break;
+	case 33:		// !
+		keystate[KEY_1] = state;
+		break;
+	case 50:		// 2
+		keystate[KEY_2] = state;
+		break;
+	case 64:		// @
+		keystate[KEY_2] = state;
+		break;
+	case 51:		// 3
+		keystate[KEY_3] = state;
+		break;
+	case 35:		// #
+		keystate[KEY_3] = state;
+		break;
+	case 52:		// 4
+		keystate[KEY_4] = state;
+		break;
+	case 36:		// $
+		keystate[KEY_4] = state;
+		break;
+	case 53:		// 5
+		keystate[KEY_5] = state;
+		break;
+	case 37:		// %
+		keystate[KEY_5] = state;
+		break;
+	case 54:		// 6
+		keystate[KEY_6] = state;
+		break;
+	case 94:		// ^
+		keystate[KEY_6] = state;
+		break;
+	case 55:		// 7
+		keystate[KEY_7] = state;
+		break;
+	case 38:		// &
+		keystate[KEY_7] = state;
+		break;
+	case 56:		// 8
+		keystate[KEY_8] = state;
+		break;
+	case 42:		// *
+		keystate[KEY_8] = state;
+		break;
+	case 57:		// 9
+		keystate[KEY_9] = state;
+		break;
+	case 40:		// (
+		keystate[KEY_9] = state;
+		break;
+
+	// Letters 
+	case 65:
+		keystate[KEY_A] = state;
+		break;
+	case 66:
+		keystate[KEY_B] = state;
+		break;
+	case 67:
+		keystate[KEY_C] = state;
+		break;
+	case 68:
+		keystate[KEY_D] = state;
+		break;
+	case 69:
+		keystate[KEY_E] = state;
+		break;
+	case 70:
+		keystate[KEY_F] = state;
+		break;
+	case 71:
+		keystate[KEY_G] = state;
+		break;
+	case 72:
+		keystate[KEY_H] = state;
+		break;
+	case 73:
+		keystate[KEY_I] = state;
+		break;
+	case 74:
+		keystate[KEY_J] = state;
+		break;
+	case 75:
+		keystate[KEY_K] = state;
+		break;
+	case 76:
+		keystate[KEY_L] = state;
+		break;
+	case 77:
+		keystate[KEY_M] = state;
+		break;
+	case 78:
+		keystate[KEY_N] = state;
+		break;
+	case 79:
+		keystate[KEY_O] = state;
+		break;
+	case 80:
+		keystate[KEY_P] = state;
+		break;
+	case 81:
+		keystate[KEY_Q] = state;
+		break;
+	case 82:
+		keystate[KEY_R] = state;
+		break;
+	case 83:
+		keystate[KEY_S] = state;
+		break;
+	case 84:
+		keystate[KEY_T] = state;
+		break;
+	case 85:
+		keystate[KEY_U] = state;
+		break;
+	case 86:
+		keystate[KEY_V] = state;
+		break;
+	case 87:
+		keystate[KEY_W] = state;
+		break;
+	case 88:
+		keystate[KEY_X] = state;
+		break;
+	case 89:
+		keystate[KEY_Y] = state;
+		break;
+	case 90:
+		keystate[KEY_Z] = state;
+		break;
+
+	// Other
+	case 126:	// ~
+		keystate[KEY_TILDE] = state;
+		break;
+	case 96 :	// `
+		keystate[KEY_TILDE] = state;
+		break;
+	case 45:	// -
+		keystate[KEY_MINUS] = state;
+		break;
+	case 95:	// _
+		keystate[KEY_MINUS] = state;
+		break;
+	case 61:	// =
+		keystate[KEY_EQUALS] = state;
+		break;
+	case 43:	// +
+		keystate[KEY_EQUALS] = state;
+		break;
+	case 91:	// [
+		keystate[KEY_OPENBRACKET] = state;
+		break;
+	case 123:	// {
+		keystate[KEY_OPENBRACKET] = state;
+		break;
+	case 93:	// ]
+		keystate[KEY_CLOSEBRACKET] = state;
+		break;	
+	case 125:	// }
+		keystate[KEY_CLOSEBRACKET] = state;
+		break;
+	case 92:	// \
+		keystate[KEY_BACKSLASH] = state;
+		break;
+	case 124:	// |
+		keystate[KEY_BACKSLASH] = state;
+		break;
+	case 59:	// ;
+		keystate[KEY_SEMICOLON] = state;
+		break;
+	case 58:	// :
+		keystate[KEY_SEMICOLON] = state;
+		break;
+	case 39:	// '
+		keystate[KEY_QUOTE] = state;
+		break;
+	case 34:	// "
+		keystate[KEY_QUOTE] = state;
+		break;
+	case 44:	// ,
+		keystate[KEY_COMMA] = state;
+		break;
+	case 60:	// <
+		keystate[KEY_COMMA] = state;
+		break;
+	case 46:	// .
+		keystate[KEY_PERIOD] = state;
+		break;
+	case 62:	// >
+		keystate[KEY_PERIOD] = state;
+		break;
+	case 47:	// /
+		keystate[KEY_SLASH] = state;
+		break;
+	case 63:	// ?
+		keystate[KEY_SLASH] = state;
+		break;
+}
+
+
+// Unknown how to handle...
+Sys key (Left) KEY_LSYS 
+Sys key (Right) KEY_RSYS 
+Numpad 0 KEY_NUM0 
+Numpad 1 KEY_NUM1 
+Numpad 2 KEY_NUM2 
+Numpad 3 KEY_NUM3 
+Numpad 4 KEY_NUM4 
+Numpad 5 KEY_NUM5 
+Numpad 6 KEY_NUM6 
+Numpad 7 KEY_NUM7 
+Numpad 8 KEY_NUM8 
+Numpad 9 KEY_NUM9 
+Numpad * KEY_NUMMULTIPLY 
+Numpad + KEY_NUMADD 
+Numpad - KEY_NUMSUBTRACT 
+Numpad . KEY_NUMDECIMAL 
+Numpad / KEY_NUMDIVIDE 
+
+Select 			KEY_SELECT 
+Print 			KEY_PRINT 
+Execute 		KEY_EXECUTE 
+Screen 			KEY_SCREEN 
+Help 			KEY_HELP 
+Pause 			KEY_PAUSE 
+Clear 			KEY_CLEAR 
+
+Num Lock KEY_NUMLOCK 
+Scroll Lock KEY_SCROLLLOCK 
+
+
+// Modifiers
+Shift (Left) KEY_LSHIFT 
+Shift (Right) KEY_RSHIFT 
+Control (Left) KEY_LCONTROL 
+Control (Right) KEY_RCONTROL 
+Alt key (Left) KEY_LALT 
+Alt key (Right) KEY_RALT 
+
+
+
+
+Shift modifier 		MODIFIER_SHIFT 
+Control modifier 	MODIFIER_CONTROL 
+Option modifier 	MODIFIER_OPTION 
+System modifier 	MODIFIER_SYSTEM 
+Command modifier 	MODIFIER_COMMAND 
+
+
+
+
+// Mouse
+
+Left mouse button MOUSE_LEFT 
+Right mouse button MOUSE_RIGHT 
+Middle mouse button MOUSE_MIDDLE 
+
+
+// Controller
+void onControllerButtonDown(U32 buttonIndex)
+buttonIndex 0-7
+CONTROLLER_BUTTON_0
+CONTROLLER_BUTTON_1
+CONTROLLER_BUTTON_2
+CONTROLLER_BUTTON_3
+CONTROLLER_BUTTON_4
+CONTROLLER_BUTTON_5
+CONTROLLER_BUTTON_6
+CONTROLLER_BUTTON_7
+
+
+
+
+
+   MaxJoystickAxes = 12,
+   MaxJoystickButtons = 14,
+   ControllerButton1 = 1 << 0,
+   ControllerButton2 = 1 << 1,
+   ControllerButton3 = 1 << 2,
+   ControllerButton4 = 1 << 3,
+   ControllerButton5 = 1 << 4,
+   ControllerButton6 = 1 << 5,
+   ControllerButtonLeftTrigger = 1 << 6,
+   ControllerButtonRightTrigger = 1 << 7,
+   ControllerGameButtonCount = 8,
+   ControllerButtonStart = 1 << 8,
+   ControllerButtonBack = 1 << 9,
+   ControllerButtonDPadUp = 1 << 10,
+   ControllerButtonDPadDown = 1 << 11,
+   ControllerButtonDPadLeft = 1 << 12,
+   ControllerButtonDPadRight = 1 << 13,
+
+
+
+#define MAX_KEYS 256
+static bool keystate[MAX_KEYS];	
+
+void glutKeyboardUpCallback( unsigned char key, int x, int y )
+{
+	keystate[key] = false;
+}
+
+void glutKeyboardCallback( unsigned char key, int x, int y )
+{
+	keystate[key] = true;
+}
+
+
+
+
+
+    void glutDisplayCallback( void )
+    {
+      Sleep(100);
+
+      for ( int i=0; i <= 255; i++ ) 
+      {
+        if ( keystate[i] == true ) 
+          printf( "ASCII key %i is pressed.\n", i );
+      }
+    }

@@ -1,0 +1,115 @@
+<html>
+<head>
+<title>Torque Network Library Readme</title>
+<style>
+h1,h2,h3,h4 {
+	border-bottom-style: solid;
+	border-bottom-width: 1px;
+	text-align: center;
+}
+h5,h6 {
+	text-align: center;
+}
+.header { text-align: left; }
+</style>
+</head>
+<body marginwidth=40px>
+<h1>Torque Network Library</h1>
+<h2>Readme</h2>
+<h5>(c) GarageGames 2004</h5>
+
+<h2 class="header">Introduction</h2>
+
+<p>Developing computational simulations is a complex, interdisciplinary undertaking. To take a simulation of any sort and run it in a distributed environment introduces a whole new world of problems to overcome. The Torque Network Library provides a robust framework for message  passing and efficient state replication, built on a UDP-based protocol.</p>
+
+<h2 class="header">Features</h2>
+
+<ul>
+<li>Portable
+	<ul>
+	<li>Platforms
+		<ul>
+		<li>Mac OSX
+		<li>Linux
+		<li>Win32
+		</ul>
+	<li>Compilers
+		<ul>
+		<li>Xcode
+		<li>GCC
+		<li>Visual C++ 6/7
+		</ul>
+	</ul>
+<li>Powerful RPC Support
+	<ul>
+	<li>Lightweight and efficient - not intended to be a replacement for CORBA.
+	<li>Extremely easy to use - two simple macro definitions and you're done.
+	<li>No complex wrapper classes to work with - write and call your functions as you normally would, and TNL will take care of the rest.
+	</ul>
+<li>Robust UDP-based notification protocol
+	<ul>
+	<li>Supports fixed or adaptive rate data transfer.
+	<li>Arbitrary sized packet window.
+	<li>Robust connection handshaking.
+	<li>Handles packet loss/out of order delivery.
+	</ul>
+<li>Networked Objects
+	<ul>
+	<li>Instantiation of objects by name or ID.
+	<li>IDs are assigned to NetGroups, so that only objects relevant to a connection can be references.
+	</ul>
+<li>Event Support
+	<ul>
+	<li>Unguaranteed, guaranteed unordered, or guaranteed ordered event delivery.
+	<li>Notification to the event when it has been received or dropped by a client.
+	</ul>
+<li>Ghost Support
+	<ul>
+	<li>Most-recent state information is transmitted to clienst.
+	<li>Scoping of objects to only those clients for which they are relevant - this helps prevent cheating or data sniffing and makes dramatically more effective use of available bandwidth.
+	<li>Prioritization of state updates by arbitrary criteria, such as relative velocity, team, ownership, etc.
+	</ul>
+<li>Extensible Protocol Architecture
+	<ul>
+	<li>Easy to extend the protocol, for instance, to transmit player move information with every packet, or add voice support.
+	<li>See Torque for examples of additional capabilities that could be added to the protocol.
+	</ul>
+</ul>
+
+<h2 class="header">Compiling TNL</h2>
+
+<h3 class="header">OSX/Xcode</h3>
+
+<p>Under the <code>osx</code> subdirectory there is an XCode project. It is set up to build TNL and the TNLTest app.</p>
+
+<h3 class="header">Linux/GCC</h3>
+
+<p>From the top level directory, type</p>
+
+<code>make</code>
+
+<p>If you have OpenGL and wxWindows installed, and OpenGL support enabled in wxWindows, you can build the wxgui test client/server program with</p>
+
+<code>cd test && make wxgui</code>
+
+<p>The wxgui is not built by default.
+
+<h3 class="header">Windows/VC6/VC7</h3>
+
+<p>There are VC6 and VC7 project workspaces in the root directory of the checkout. Individual project files are in their respective directories.</p>
+
+<h2 class="header">Documentation and Online Resources</h2>
+
+<p>The TNL comes with extensive Doxygen documentation. You can access this documentation online at <a href="">Some URL</a>, or generate it by downloading Doxygen from <a href="http://www.doxygen.org/">www.doxygen.org</a> and executing the following command line (assuming you installed Doxygen in the standard place) from the root of your TNL checkout...</p>
+
+<ul>
+<li>Under Windows:<br>
+	<code>"c:\Program Files\doxygen\bin\doxygen.exe" docs\doxygen.html.cfg</code>
+<li>Under Linux or OSX:<br>
+	<code>doxygen docs/doxygen.html.cfg</code>
+</ul>
+
+<p>This will produce a set of Doxygen docs in the docs\html subdirectory of your TNL checkout. Please note that these docs may ONLY be distributed to other TNL licensees.</p>
+
+</body>
+</html>

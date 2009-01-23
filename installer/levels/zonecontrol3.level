@@ -1,0 +1,125 @@
+ZoneControlGameType 10 32
+Team Blue 0 0 1
+Team Red 1 0 0
+LevelName Gridiron
+LevelCredits Original Zap! Level
+GridSize 300
+GoalZone -1 -4.4 -0.9 -3.6 -0.9 -3.6 -0.0999999 -4.4 -0.0999999
+GoalZone -1 3.6 8.6 4.4 8.6 4.4 9.4 3.6 9.4
+GoalZone -1 9.1 -0.4 9.9 -0.4 9.9 0.4 9.1 0.4
+GoalZone -1 -1.9 -3.9 -1.1 -3.9 -1.1 -3.1 -1.9 -3.1
+LoadoutZone 0 12.9 -4.9 14.1 -4.9 13.9 -4.5 13.1 -4.5
+FlagItem -1 3.5 2.5
+Spawn 0 13.3 -5.1
+Spawn 0 12.9 -5.3
+Spawn 0 13.5 -5.5
+Spawn 0 14.1 -5.3
+Spawn 0 13.7 -5.1
+Spawn 0 14.6 -5.5
+Spawn 0 14.1 -5.8
+Spawn 0 13.5 -5.8
+Spawn 0 12.9 -5.8
+Spawn 0 12.4 -5.5
+BarrierMaker 50 13 -4 13.2 -4 13.3 -3.8 13.7 -3.8 13.8 -4 14 -4 14.5 -5 15 -5 15 -6 12 -6 12 -5 12.5 -5 13 -4
+Teleporter 13.5 -4.2 3.5 1.7
+LoadoutZone 1 -7.9 8.9 -9.1 8.9 -8.9 8.5 -8.1 8.5
+Spawn 1 -8.3 9.1
+Spawn 1 -7.9 9.3
+Spawn 1 -8.5 9.5
+Spawn 1 -9.1 9.3
+Spawn 1 -8.7 9.1
+Spawn 1 -9.6 9.5
+Spawn 1 -9.1 9.8
+Spawn 1 -8.5 9.8
+Spawn 1 -7.9 9.8
+Spawn 1 -7.4 9.5
+BarrierMaker 50 -8 8 -8.2 8 -8.3 7.8 -8.7 7.8 -8.8 8 -9 8 -9.5 9 -10 9 -10 10 -7 10 -7 9 -7.5 9 -8 8
+Teleporter -8.5 8.2 3.5 3.3
+LoadoutZone 1 2.5 2.1 2.7 2 2.7 3 2.5 2.9
+BarrierMaker 50 2.7 1.8 2.3 2 2.3 3 2.7 3.2
+LoadoutZone 0 4.5 2.1 4.3 2 4.3 3 4.5 2.9
+BarrierMaker 50 4.3 1.8 4.7 2 4.7 3 4.3 3.2
+BarrierMaker 50 -5.5 3.5 -5.5 -1.5 -2 -5 2.5 -5 3.5 -6 7.5 -6 11 -2.5 11 1 10 2 10 7 7 10 3 10 1 8 -1 8 -3 10 -4 10 -6 8 -6 4 -5.5 3.5
+GoalZone -1 7.6 6.6 8.4 6.6 8.4 7.4 7.6 7.4
+GoalZone -1 7.6 -3.9 8.4 -3.9 8.4 -3.1 7.6 -3.1
+GoalZone -1 -4.4 3.6 -3.6 3.6 -3.6 4.4 -4.4 4.4
+GoalZone -1 -3.9 8.2 -3.1 8.2 -3.1 9 -3.9 9
+BarrierMaker 50 7.4 8.2 6.4 7.2 6.1 7.2 6 7.3 6 7.6 5.7 7.9 5.7 8.5 6.2 9 6.5 9 7 8.5 7.4 8.5 7.4 8.2
+BarrierMaker 50 9 6 4.4 6
+BarrierMaker 50 5.3 6.6 4.6 7.3
+BarrierMaker 50 3.4 7.7 2.1 6.4
+BarrierMaker 50 3.4 6.5 4 6.8
+BarrierMaker 50 2.6 5.8 3.8 5.2
+BarrierMaker 50 4.1 4.2 5.5 5
+BarrierMaker 50 5.2 3.6 4.8 4.6
+BarrierMaker 50 7.1 3.7 6.1 2.7
+BarrierMaker 50 6.3 4.8 7.9 4.3
+BarrierMaker 50 8.1 5.4 9.3 4
+BarrierMaker 50 8.2 3.3 6.7 2.3 7.1 1.4 9.2 1.8 9.1 2.8 8.2 3.3
+BarrierMaker 50 8.2 0.6 10.7 1.3
+BarrierMaker 50 8.2 -0.8 11 -1.3
+BarrierMaker 50 9.3 -2.7 8.6 -1.6 8.7 -1.5 10.1 -1.9 10.2 -2.2 9.4 -2.8 9.3 -2.7
+BarrierMaker 50 2.2 7.8 1.9 8.1
+BarrierMaker 50 1.3 6.9 1.6 7.3 1.8 7.3 1.8 7 1.3 6.1 1 6.1 1 6.9 1.3 6.9
+BarrierMaker 50 0 6.7 0 8
+BarrierMaker 50 0.5 6.4 -0.5 5.4
+BarrierMaker 50 0.8 5 0 5.9
+BarrierMaker 50 2.1 4.6 1.2 5.4
+BarrierMaker 50 2.3 5.2 1.9 4.8
+BarrierMaker 50 2.6 4 3.2 4.8
+BarrierMaker 50 6 -2.5 4 -3.5 1.5 -3.5 0 -2.5 -1 -1 -1 -0.5 -0.5 0 0 0 0.5 -0.5 0.5 -1.5 1 -2 2 -2.5 4 -2.5 5.5 -1.5 5.5 -0.5 6 0 7 -0.5 7 -1 6 -2.5
+BarrierMaker 50 -3.3 -2.8 -3.8 -3.2
+BarrierMaker 50 -2.8 -2.5 -2.3 -2.1 -2.7 -1.4
+BarrierMaker 50 -1.6 -1.6 -0.8 -1.3
+BarrierMaker 50 -3.9 -2.3 -3.2 -1.7
+BarrierMaker 50 -3.1 -0.5 -2 -0.5 -2 -1
+BarrierMaker 50 -1.4 0 -2.4 0.6 -2.8 0.1
+BarrierMaker 50 -2.4 7.5 -2.4 8.3 -2.3 8.3 -1.6 7.6 -1.6 7.5 -2.4 7.5
+BarrierMaker 50 -4.4 7.5 -4.4 8.3 -4.5 8.3 -5.2 7.6 -5.2 7.5 -4.4 7.5
+BarrierMaker 50 -4.4 6.8 -4.4 6 -4.5 6 -5.2 6.7 -5.2 6.8 -4.4 6.8
+BarrierMaker 50 -2.4 6.8 -2.4 6 -2.3 6 -1.6 6.7 -1.6 6.8 -2.4 6.8
+BarrierMaker 50 -3.8 5.9 -3.8 8 -3.2 8 -3.2 5.9 -3.8 5.9
+BarrierMaker 50 -5 5.4 -6 6.4
+BarrierMaker 50 -4.3 5.3 -3.3 5.1 -2.8 5.1
+BarrierMaker 50 -2 5.3 -1 6.2 -0.7 7.2
+BarrierMaker 50 -5.1 4.1 -5.1 4.8 -4.5 4.8
+BarrierMaker 50 -2.9 3.8 -2.9 3.1 -3.5 3.1
+BarrierMaker 50 -1.2 1.5 -2.3 3 -2 4.3 -1.1 4.6 -0.1 4.5 0.7 4 1.6 3.9 1.8 3.5 1.1 2.6 1 1.7 1.9 0.8 1.8 0.4 1.2 0.4 -1.2 1.5
+BarrierMaker 50 7.6 -4.5 7 -3.8 7 -3 7.7 -2.2
+BarrierMaker 50 6.7 -4.5 5.9 -5
+BarrierMaker 50 6 -4.5 5.7 -4
+BarrierMaker 50 5.4 -4.2 4.6 -4.4
+BarrierMaker 50 4.1 -4.5 3.5 -3.9
+BarrierMaker 50 3.2 -4.3 2.3 -4.3 0.9 -4.1 -0.2 -3.9 -1 -4.2 -1.8 -4.2
+BarrierMaker 50 -4.9 2.8 -3.7 2 -3.2 2.4 -2.7 2.3 -2.2 1.5
+Turret -1 -3.2 -0.5
+Turret -1 -0.4 -2.1
+ForceFieldProjector -1 2.3 -4.2
+ForceFieldProjector -1 2.4 -4.4
+Turret -1 4.9 -4.2
+Turret -1 8.1 -0.8
+Turret -1 8.1 0.6
+Teleporter 1.5 -2 -3.5 5.5
+Teleporter 4.5 -1.5 9.5 5
+Teleporter 3 -2 2.5 8.5
+Turret -1 -3.5 9.8
+ForceFieldProjector -1 -5.2 4.5
+BarrierMaker 95 7.2 8.3 7.2 8.2 6.4 7.4 6.2 7.4 6.2 7.7 5.9 8 5.9 8.4 6.3 8.8 6.4 8.8 6.9 8.3 7.2 8.3
+BarrierMaker 200 6.4 8.4 6.2 8.2 6.5 7.9 6.7 8.1 6.4 8.4
+BarrierMaker 90 1.7 7.3 1.2 6.3 1.1 6.3 1.1 6.7 1.3 6.7 1.3 6.6
+BarrierMaker 85 -2.3 8.2 -2.3 7.6 -1.7 7.6 -2.2 7.8 -2 8
+BarrierMaker 85 -2.3 6.1 -2.3 6.7 -1.7 6.7 -2.2 6.5 -2 6.3
+BarrierMaker 85 -4.5 6.1 -4.5 6.7 -5.1 6.7 -4.6 6.5 -4.8 6.3
+BarrierMaker 85 -4.5 8.2 -4.5 7.6 -5.1 7.6 -4.6 7.8 -4.8 8
+BarrierMaker 80 -3.4 7.8 -3.6 7.8 -3.6 6.1 -3.4 6.1 -3.4 7.8
+BarrierMaker 235 7.3 1.8 8.8 2.1 8.7 2.6 8.2 2.8 7.2 2.1 7.3 1.8
+BarrierMaker 95 8.7 -1.6 9.5 -2.6 10 -2.2 9.9 -2 8.9 -1.8
+BarrierMaker 125 9.3 -1.9 9.7 -2.3
+BarrierMaker 295 6.5 -0.5 6.5 -0.8 6.4 -1.1 5.8 -2 4 -3 1.7 -3 0.4 -2.2 -0.5 -0.8
+BarrierMaker 195 0.2 -1.4 0.2 -0.6 -0.1 -0.4 -0.4 -0.4 -0.7 -0.7 -0.7 -1.1
+BarrierMaker 175 5.8 -1.5 5.8 -0.7 6.1 -0.4 6.8 -0.8
+BarrierMaker 235 1.2 3.4 1.2 3.5 0.5 3.6 -0.3 4.1 -1.1 4.2 -1.7 4 -1.9 3 -0.9 1.8 0.9 1 1 1.1 0.6 1.7 0.7 2.8 1.2 3.4
+BarrierMaker 90 1.4 3.2 1.7 3.7
+BarrierMaker 90 1.3 1.1 1.7 0.7 1.7 0.6 1.6 0.5 1 0.7
+BarrierMaker 50 1.2 0.9 1.5 0.6
+BarrierMaker 510 -1.6 3.4 0.6 2.3

@@ -1,0 +1,886 @@
+//-----------------------------------------------------------------------------------
+//
+// bitFighter - A multiplayer vector graphics space game
+// Based on Zap demo released for Torque Network Library by GarageGames.com
+//
+// Derivative work copyright (C) 2008 Chris Eykamp
+// Original work copyright (C) 2004 GarageGames.com, Inc.
+// Other code copyright as noted
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful (and fun!),
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//------------------------------------------------------------------------------------
+
+#include "input.h"
+#include "IniFile.h"
+#include "config.h"
+#include "quickChat.h"
+
+#pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+
+#ifndef min
+#define min(a,b) ((a) <= (b) ? (a) : (b))
+#define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
+
+
+namespace Zap
+{
+
+extern CIniFile gINI;
+extern CmdLineSettings gCmdLineSettings;
+extern IniSettings gIniSettings;
+extern string lcase(string strToConvert);
+
+// Sorts alphanumerically
+extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
+
+// Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
+void loadKeyBindings()
+{                                // Whew!  This is quite the dense block of code!!
+   keySELWEAP1[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "SelWeapon1", keyCodeToString(KEY_1)).c_str());
+   keySELWEAP2[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "SelWeapon2", keyCodeToString(KEY_2)).c_str());
+   keySELWEAP3[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "SelWeapon3", keyCodeToString(KEY_3)).c_str());
+   keyADVWEAP[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "SelNextWeapon", keyCodeToString(KEY_E)).c_str());
+   keyCMDRMAP[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShowCmdrMap", keyCodeToString(KEY_C)).c_str());
+   keyTEAMCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "TeamChat", keyCodeToString(KEY_T)).c_str());
+   keyGLOBCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "GlobalChat", keyCodeToString(KEY_G)).c_str());
+   keyQUICKCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "QuickChat", keyCodeToString(KEY_V)).c_str());
+   keyLOADOUT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShowLoadoutMenu", keyCodeToString(KEY_Q)).c_str());
+   keyMOD1[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule1", keyCodeToString(KEY_SPACE)).c_str());
+   keyMOD2[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(MOUSE_RIGHT)).c_str());
+   keyFIRE[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "Fire", keyCodeToString(MOUSE_LEFT)).c_str());
+   keyTOGVOICE[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "VoiceChat", keyCodeToString(KEY_R)).c_str());
+   keyUP[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipUp", keyCodeToString(KEY_W)).c_str());
+   keyDOWN[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipDown", keyCodeToString(KEY_S)).c_str());
+   keyLEFT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipLeft", keyCodeToString(KEY_A)).c_str());
+   keyRIGHT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipRight", keyCodeToString(KEY_D)).c_str());
+   keySCRBRD[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShowScoreboard", keyCodeToString(KEY_TAB)).c_str());
+
+   keySELWEAP1[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "SelWeapon1", keyCodeToString(KEY_1)).c_str());
+   keySELWEAP2[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "SelWeapon2", keyCodeToString(KEY_2)).c_str());
+   keySELWEAP3[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "SelWeapon3", keyCodeToString(KEY_3)).c_str());
+   keyADVWEAP[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "SelNextWeapon", keyCodeToString(BUTTON_1)).c_str());
+   keyCMDRMAP[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShowCmdrMap", keyCodeToString(BUTTON_2)).c_str());
+   keyTEAMCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "TeamChat", keyCodeToString(KEY_T)).c_str());
+   keyGLOBCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "GlobalChat", keyCodeToString(KEY_G)).c_str());
+   keyQUICKCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "QuickChat", keyCodeToString(BUTTON_3)).c_str());
+   keyLOADOUT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShowLoadoutMenu", keyCodeToString(BUTTON_4)).c_str());
+   keyMOD1[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule1", keyCodeToString(BUTTON_7)).c_str());
+   keyMOD2[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(BUTTON_8)).c_str());
+   keyFIRE[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "Fire", keyCodeToString(MOUSE_LEFT)).c_str());
+   keyTOGVOICE[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "VoiceChat", keyCodeToString(BUTTON_6)).c_str());
+   keyUP[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipUp", keyCodeToString(KEY_UP)).c_str());
+   keyDOWN[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipDown", keyCodeToString(KEY_DOWN)).c_str());
+   keyLEFT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipLeft", keyCodeToString(KEY_LEFT)).c_str());
+   keyRIGHT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipRight", keyCodeToString(KEY_RIGHT)).c_str());
+   keySCRBRD[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShowScoreboard", keyCodeToString(BUTTON_5)).c_str());
+
+   // The following key bindings are not user-defineable at the moment, mostly because we want consistency
+   // throughout the game, and that would require some real constraints on what keys users could choose.
+   //keyHELP = KEY_F1;
+   //keyMISSION = KEY_F2;
+   //keyOUTGAMECHAT = KEY_F5;
+   //keyFPS = KEY_F6;
+   //keyDIAG = KEY_F7;
+   // These were moved to main.cpp to get them defined before the menus
+}
+
+void saveKeyBindings()
+{
+   gINI.SetValue("KeyboardKeyBindings", "SelWeapon1", keyCodeToString(keySELWEAP1[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "SelWeapon2", keyCodeToString(keySELWEAP2[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "SelWeapon3", keyCodeToString(keySELWEAP3[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "SelNextWeapon", keyCodeToString(keyADVWEAP[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShowCmdrMap", keyCodeToString(keyCMDRMAP[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "TeamChat", keyCodeToString(keyTEAMCHAT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "GlobalChat", keyCodeToString(keyGLOBCHAT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "QuickChat", keyCodeToString(keyQUICKCHAT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ActivateModule1", keyCodeToString(keyMOD1[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(keyMOD2[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "Fire", keyCodeToString(keyFIRE[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "VoiceChat", keyCodeToString(keyTOGVOICE[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShipUp", keyCodeToString(keyUP[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShipDown", keyCodeToString(keyDOWN[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShipLeft", keyCodeToString(keyLEFT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShipRight", keyCodeToString(keyRIGHT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "ShowScoreboard", keyCodeToString(keySCRBRD[Keyboard]), true);
+
+   gINI.SetValue("JoystickKeyBindings", "SelWeapon1", keyCodeToString(keySELWEAP1[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "SelWeapon2", keyCodeToString(keySELWEAP2[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "SelWeapon3", keyCodeToString(keySELWEAP3[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "SelNextWeapon", keyCodeToString(keyADVWEAP[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShowCmdrMap", keyCodeToString(keyCMDRMAP[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "TeamChat", keyCodeToString(keyTEAMCHAT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "GlobalChat", keyCodeToString(keyGLOBCHAT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "QuickChat", keyCodeToString(keyQUICKCHAT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ActivateModule1", keyCodeToString(keyMOD1[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(keyMOD2[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "Fire", keyCodeToString(keyFIRE[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "VoiceChat", keyCodeToString(keyTOGVOICE[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShipUp", keyCodeToString(keyUP[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShipDown", keyCodeToString(keyDOWN[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShipLeft", keyCodeToString(keyLEFT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShipRight", keyCodeToString(keyRIGHT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "ShowScoreboard", keyCodeToString(keySCRBRD[Joystick]), true);
+}
+
+void saveDefaultQuickChatMessages()
+{
+   // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
+   S32 keys = gINI.GetNumKeys();
+
+   for(S32 i = 0; i < keys; i++)
+   {
+      string keyName = gINI.GetKeyName(i);
+      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)
+         return;
+   }
+
+   gINI.AddKeyName("QuickChatMessages");
+   if (gINI.NumKeyComments("QuickChatMessages") == 0)
+   {
+      gINI.KeyComment("QuickChatMessages", "----------------");
+      gINI.KeyComment("QuickChatMessages", " The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the way the messages are");
+      gINI.KeyComment("QuickChatMessages", " displayed in the QuickChat menu, so make sure you are familiar with that before you start modifying these items.");
+      gINI.KeyComment("QuickChatMessages", " Messages are grouped, and each group has a Caption (short name shown on screen), a Key (the shortcut key used to select");
+      gINI.KeyComment("QuickChatMessages", " the group), and a Button (a shortcut button used when in joystick mode).  If the Button is \"Undefined key\", then that");
+      gINI.KeyComment("QuickChatMessages", " item will not be shown in joystick mode.  Groups can be defined in any order, but will be displayed sorted by [section]");
+      gINI.KeyComment("QuickChatMessages", " name.  Groups are designated by the [QuickChatMessagesGroupXXX] sections, where XXX is a unique suffix, usually a number.");
+      gINI.KeyComment("QuickChatMessages", "");
+      gINI.KeyComment("QuickChatMessages", " Each group can have one or more messages, as specified by the [QuickChatMessagesGroupXXX_MessageYYY] sections, where XXX");
+      gINI.KeyComment("QuickChatMessages", " is the unique group suffix, and YYY is a unique message suffix.  Again, messages can be defined in any order, and will");
+      gINI.KeyComment("QuickChatMessages", " appear sorted by their [section] name.  Key, Button, and Caption serve the same purposes as in the group definitions.");
+      gINI.KeyComment("QuickChatMessages", " Message is the actual message text that is sent, and MessageType should be either \"Team\" or \"Global\", depending on which");
+      gINI.KeyComment("QuickChatMessages", " users the message should be sent to.  You can mix Team and Global messages in the same section, but it may be less");
+      gINI.KeyComment("QuickChatMessages", " confusing not to do so.");
+      gINI.KeyComment("QuickChatMessages", "");
+      gINI.KeyComment("QuickChatMessages", " Note that no quotes are required around Messages or Captions, and if included, they will be sent as part");
+      gINI.KeyComment("QuickChatMessages", " of the message.  Also, if you bullocks things up too badly, simply delete all QuickChatMessage sections,");
+      gINI.KeyComment("QuickChatMessages", " and they will be regenerated the next time you run the game (though your modifications will be lost).");
+      gINI.KeyComment("QuickChatMessages", "----------------");
+   }
+
+   gINI.SetValue("QuickChatMessagesGroup1", "Key", keyCodeToString(KEY_G), true);
+   gINI.SetValue("QuickChatMessagesGroup1", "Button", keyCodeToString(BUTTON_6), true);
+   gINI.SetValue("QuickChatMessagesGroup1", "Caption", "Global", true);
+   gINI.SetValue("QuickChatMessagesGroup1", "MessageType", "Global", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message1", "Key", keyCodeToString(KEY_A), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message1", "Button", keyCodeToString(BUTTON_1), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message1", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message1", "Caption", "No Problem", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message1", "Message", "No Problemo.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message2", "Key", keyCodeToString(KEY_T), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message2", "Button", keyCodeToString(BUTTON_2), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message2", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message2", "Caption", "Thanks", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message2", "Message", "Thanks.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message3", "Key", keyCodeToString(KEY_X), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message3", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message3", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message3", "Caption", "You idiot!", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message3", "Message", "You idiot!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message4", "Key", keyCodeToString(KEY_E), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message4", "Button", keyCodeToString(BUTTON_3), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message4", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message4", "Caption", "Duh", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message4", "Message", "Duh.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message5", "Key", keyCodeToString(KEY_C), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message5", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message5", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message5", "Caption", "Crap", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message5", "Message", "Ah Crap!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message6", "Key", keyCodeToString(KEY_D), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message6", "Button", keyCodeToString(BUTTON_4), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message6", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message6", "Caption", "Damnit", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message6", "Message", "Dammit!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message7", "Key", keyCodeToString(KEY_S), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message7", "Button", keyCodeToString(BUTTON_5), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message7", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message7", "Caption", "Shazbot", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message7", "Message", "Shazbot!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup1_Message8", "Key", keyCodeToString(KEY_Z), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message8", "Button", keyCodeToString(BUTTON_6), true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message8", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message8", "Caption", "Doh", true);
+      gINI.SetValue("QuickChatMessagesGroup1_Message8", "Message", "Doh!", true);
+
+   gINI.SetValue("QuickChatMessagesGroup2", "Key", keyCodeToString(KEY_D), true);
+   gINI.SetValue("QuickChatMessagesGroup2", "Button", keyCodeToString(BUTTON_5), true);
+   gINI.SetValue("QuickChatMessagesGroup2", "MessageType", "Team", true);
+   gINI.SetValue("QuickChatMessagesGroup2", "Caption", "Defense", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message1", "Key", keyCodeToString(KEY_G), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message1", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message1", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message1", "Caption", "Defend Our Base", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message1", "Message", "Defend our base.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message2", "Key", keyCodeToString(KEY_D), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message2", "Button", keyCodeToString(BUTTON_1), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message2", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message2", "Caption", "Defending Base", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message2", "Message", "Defending our base.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message3", "Key", keyCodeToString(KEY_Q), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message3", "Button", keyCodeToString(BUTTON_2), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message3", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message3", "Caption", "Is Base Clear?", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message3", "Message", "Is our base clear?", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message4", "Key", keyCodeToString(KEY_C), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message4", "Button", keyCodeToString(BUTTON_3), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message4", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message4", "Caption", "Base Clear", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message4", "Message", "Base is secured.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message5", "Key", keyCodeToString(KEY_T), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message5", "Button", keyCodeToString(BUTTON_4), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message5", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message5", "Caption", "Base Taken", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message5", "Message", "Base is taken.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message6", "Key", keyCodeToString(KEY_N), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message6", "Button", keyCodeToString(BUTTON_5), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message6", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message6", "Caption", "Need More Defense", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message6", "Message", "We need more defense.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message7", "Key", keyCodeToString(KEY_E), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message7", "Button", keyCodeToString(BUTTON_6), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message7", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message7", "Caption", "Enemy Attacking Base", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message7", "Message", "The enemy is attacking our base.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup2_Message8", "Key", keyCodeToString(KEY_A), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message8", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message8", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message8", "Caption", "Attacked", true);
+      gINI.SetValue("QuickChatMessagesGroup2_Message8", "Message", "We are being attacked.", true);
+
+   gINI.SetValue("QuickChatMessagesGroup3", "Key", keyCodeToString(KEY_F), true);
+   gINI.SetValue("QuickChatMessagesGroup3", "Button", keyCodeToString(BUTTON_4), true);
+   gINI.SetValue("QuickChatMessagesGroup3", "MessageType", "Team", true);
+   gINI.SetValue("QuickChatMessagesGroup3", "Caption", "Flag", true);
+
+      gINI.SetValue("QuickChatMessagesGroup3_Message1", "Key", keyCodeToString(KEY_F), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message1", "Button", keyCodeToString(BUTTON_1), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message1", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message1", "Caption", "Get enemy flag", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message1", "Message", "Get the enemy flag.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup3_Message2", "Key", keyCodeToString(KEY_R), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message2", "Button", keyCodeToString(BUTTON_2), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message2", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message2", "Caption", "Return our flag", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message2", "Message", "Return our flag to base.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup3_Message3", "Key", keyCodeToString(KEY_S), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message3", "Button", keyCodeToString(BUTTON_3), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message3", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message3", "Caption", "Flag secure", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message3", "Message", "Our flag is secure.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup3_Message4", "Key", keyCodeToString(KEY_H), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message4", "Button", keyCodeToString(BUTTON_4), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message4", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message4", "Caption", "Have enemy flag", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message4", "Message", "I have the enemy flag.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup3_Message5", "Key", keyCodeToString(KEY_E), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message5", "Button", keyCodeToString(BUTTON_5), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message5", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message5", "Caption", "Enemy has flag", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message5", "Message", "The enemy has our flag!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup3_Message6", "Key", keyCodeToString(KEY_G), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message6", "Button", keyCodeToString(BUTTON_6), true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message6", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message6", "Caption", "Flag gone", true);
+      gINI.SetValue("QuickChatMessagesGroup3_Message6", "Message", "Our flag is not in the base!", true);
+
+   gINI.SetValue("QuickChatMessagesGroup4", "Key", keyCodeToString(KEY_S), true);
+   gINI.SetValue("QuickChatMessagesGroup4", "Button", keyCodeToString(KEY_UNKNOWN), true);
+   gINI.SetValue("QuickChatMessagesGroup4", "MessageType", "Team", true);
+   gINI.SetValue("QuickChatMessagesGroup4", "Caption", "Incoming Enemies - Direction", true);
+
+      gINI.SetValue("QuickChatMessagesGroup4_Message1", "Key", keyCodeToString(KEY_S), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message1", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message1", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message1", "Caption", "Incoming South", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message1", "Message", "*** INCOMING SOUTH ***", true);
+
+      gINI.SetValue("QuickChatMessagesGroup4_Message2", "Key", keyCodeToString(KEY_E), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message2", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message2", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message2", "Caption", "Incoming East", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message2", "Message", "*** INCOMING EAST  ***", true);
+
+      gINI.SetValue("QuickChatMessagesGroup4_Message3", "Key", keyCodeToString(KEY_W), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message3", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message3", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message3", "Caption", "Incoming West", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message3", "Message", "*** INCOMING WEST  ***", true);
+
+      gINI.SetValue("QuickChatMessagesGroup4_Message4", "Key", keyCodeToString(KEY_N), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message4", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message4", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message4", "Caption", "Incoming North", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message4", "Message", "*** INCOMING NORTH ***", true);
+
+      gINI.SetValue("QuickChatMessagesGroup4_Message5", "Key", keyCodeToString(KEY_V), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message5", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message5", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message5", "Caption", "Incoming Enemies", true);
+      gINI.SetValue("QuickChatMessagesGroup4_Message5", "Message", "Incoming enemies!", true);
+
+   gINI.SetValue("QuickChatMessagesGroup5", "Key", keyCodeToString(KEY_V), true);
+   gINI.SetValue("QuickChatMessagesGroup5", "Button", keyCodeToString(BUTTON_3), true);
+   gINI.SetValue("QuickChatMessagesGroup5", "MessageType", "Team", true);
+   gINI.SetValue("QuickChatMessagesGroup5", "Caption", "Quick", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message1", "Key", keyCodeToString(KEY_J), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message1", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message1", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message1", "Caption", "Capture the objective", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message1", "Message", "Capture the objective.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message2", "Key", keyCodeToString(KEY_O), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message2", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message2", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message2", "Caption", "Go on the offensive", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message2", "Message", "Go on the offensive.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message3", "Key", keyCodeToString(KEY_A), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message3", "Button", keyCodeToString(BUTTON_1), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message3", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message3", "Caption", "Attack!", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message3", "Message", "Attack!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message4", "Key", keyCodeToString(KEY_W), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message4", "Button", keyCodeToString(BUTTON_2), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message4", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message4", "Caption", "Wait for signal", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message4", "Message", "Wait for my signal to attack.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message5", "Key", keyCodeToString(KEY_V), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message5", "Button", keyCodeToString(BUTTON_3), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message5", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message5", "Caption", "Help!", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message5", "Message", "Help!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message6", "Key", keyCodeToString(KEY_E), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message6", "Button", keyCodeToString(BUTTON_4), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message6", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message6", "Caption", "Regroup", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message6", "Message", "Regroup.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message7", "Key", keyCodeToString(KEY_G), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message7", "Button", keyCodeToString(BUTTON_5), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message7", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message7", "Caption", "Going offense", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message7", "Message", "Going offense.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup5_Message8", "Key", keyCodeToString(KEY_Z), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message8", "Button", keyCodeToString(BUTTON_6), true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message8", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message8", "Caption", "Move out", true);
+      gINI.SetValue("QuickChatMessagesGroup5_Message8", "Message", "Move out.", true);
+
+   gINI.SetValue("QuickChatMessagesGroup6", "Key", keyCodeToString(KEY_R), true);
+   gINI.SetValue("QuickChatMessagesGroup6", "Button", keyCodeToString(BUTTON_2), true);
+   gINI.SetValue("QuickChatMessagesGroup6", "MessageType", "Team", true);
+   gINI.SetValue("QuickChatMessagesGroup6", "Caption", "Reponses", true);
+
+      gINI.SetValue("QuickChatMessagesGroup6_Message1", "Key", keyCodeToString(KEY_A), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message1", "Button", keyCodeToString(BUTTON_1), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message1", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message1", "Caption", "Acknowledge", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message1", "Message", "Acknowledged.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup6_Message2", "Key", keyCodeToString(KEY_N), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message2", "Button", keyCodeToString(BUTTON_2), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message2", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message2", "Caption", "No", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message2", "Message", "No.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup6_Message3", "Key", keyCodeToString(KEY_Y), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message3", "Button", keyCodeToString(BUTTON_3), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message3", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message3", "Caption", "Yes", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message3", "Message", "Yes.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup6_Message4", "Key", keyCodeToString(KEY_S), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message4", "Button", keyCodeToString(BUTTON_4), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message4", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message4", "Caption", "Sorry", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message4", "Message", "Sorry.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup6_Message5", "Key", keyCodeToString(KEY_T), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message5", "Button", keyCodeToString(BUTTON_5), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message5", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message5", "Caption", "Thanks", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message5", "Message", "Thanks.", true);
+
+      gINI.SetValue("QuickChatMessagesGroup6_Message6", "Key", keyCodeToString(KEY_D), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message6", "Button", keyCodeToString(BUTTON_6), true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message6", "MessageType", "Team", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message6", "Caption", "Don't know", true);
+      gINI.SetValue("QuickChatMessagesGroup6_Message6", "Message", "I don't know.", true);
+
+   gINI.SetValue("QuickChatMessagesGroup7", "Key", keyCodeToString(KEY_T), true);
+   gINI.SetValue("QuickChatMessagesGroup7", "Button", keyCodeToString(BUTTON_1), true);
+   gINI.SetValue("QuickChatMessagesGroup7", "MessageType", "Global", true);
+   gINI.SetValue("QuickChatMessagesGroup7", "Caption", "Taunts", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message1", "Key", keyCodeToString(KEY_R), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message1", "Button", keyCodeToString(KEY_UNKNOWN), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message1", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message1", "Caption", "Rawr", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message1", "Message", "RAWR!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message2", "Key", keyCodeToString(KEY_C), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message2", "Button", keyCodeToString(BUTTON_1), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message2", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message2", "Caption", "Come get some!", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message2", "Message", "Come get some!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message3", "Key", keyCodeToString(KEY_D), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message3", "Button", keyCodeToString(BUTTON_2), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message3", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message3", "Caption", "Dance!", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message3", "Message", "Dance!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message4", "Key", keyCodeToString(KEY_X), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message4", "Button", keyCodeToString(BUTTON_3), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message4", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message4", "Caption", "Missed me!", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message4", "Message", "Missed me!", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message5", "Key", keyCodeToString(KEY_W), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message5", "Button", keyCodeToString(BUTTON_4), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message5", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message5", "Caption", "I've had worse...", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message5", "Message", "I've had worse...", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message6", "Key", keyCodeToString(KEY_Q), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message6", "Button", keyCodeToString(BUTTON_5), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message6", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message6", "Caption", "How'd THAT feel?", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message6", "Message", "How'd THAT feel?", true);
+
+      gINI.SetValue("QuickChatMessagesGroup7_Message7", "Key", keyCodeToString(KEY_E), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message7", "Button", keyCodeToString(BUTTON_6), true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message7", "MessageType", "Global", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message7", "Caption", "Yoohoo!", true);
+      gINI.SetValue("QuickChatMessagesGroup7_Message7", "Message", "Yoohoo!", true);
+}
+
+
+// Convert a string value to our sfxSets enum
+inline sfxSets stringToSFXSet(string sfxSet)
+{
+   if(lcase(sfxSet) == "classic")
+      return sfxClassicSet;
+   else
+      return sfxModernSet;
+}
+
+// Option default values are stored here, in the 3rd prarm of the GetValue call
+// This is only called once, during initial initialization
+void loadSettingsFromINI()
+{
+   gINI.ReadFile();        // Read the INI file  (journaling of read lines happens within)
+
+   // Remeber that stricmp returns 0 if the strings match!
+   gIniSettings.starsInDistance = (lcase(gINI.GetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
+   gIniSettings.sfxVolLevel = (float) gINI.GetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10)) / 10.0f;
+   gIniSettings.musicVolLevel = (float) gINI.GetValueI("Sounds", "MusicVolume", (S32) (gIniSettings.musicVolLevel * 10)) / 10.0f;
+   gIniSettings.voiceChatVolLevel = (float) gINI.GetValueI("Sounds", "VoiceChatVolume", (S32) (gIniSettings.voiceChatVolLevel * 10)) / 10.0f;
+
+   string sfxSet = gINI.GetValue("Sounds", "SFXSet", "Modern");
+   gIniSettings.sfxSet = stringToSFXSet(sfxSet);
+
+   // Bounds checking
+   if (gIniSettings.sfxVolLevel > 1.0)
+      gIniSettings.sfxVolLevel = 1.0;
+   else if (gIniSettings.sfxVolLevel < 0)
+      gIniSettings.sfxVolLevel = 0;
+
+   if (gIniSettings.musicVolLevel > 1.0)
+      gIniSettings.musicVolLevel = 1.0;
+   else if (gIniSettings.musicVolLevel < 0)
+      gIniSettings.musicVolLevel = 0;
+
+   if (gIniSettings.voiceChatVolLevel > 1.0)
+      gIniSettings.voiceChatVolLevel = 1.0;
+   else if (gIniSettings.voiceChatVolLevel < 0)
+      gIniSettings.voiceChatVolLevel = 0;
+
+   if (gIniSettings.alertsVolLevel > 1.0)
+      gIniSettings.alertsVolLevel = 1.0;
+   else if (gIniSettings.alertsVolLevel < 0)
+      gIniSettings.alertsVolLevel = 0;
+
+   gIniSettings.fullscreen = (lcase(gINI.GetValue("Settings", "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"))) == "fullscreen");
+   gIniSettings.controlsRelative = (lcase(gINI.GetValue("Settings", "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
+   gIniSettings.echoVoice = (lcase(gINI.GetValue("Settings", "VoiceEcho",(gIniSettings.echoVoice ? "Yes" : "No"))) == "yes");
+   gIniSettings.showWeaponIndicators = (lcase(gINI.GetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"))) == "yes");
+   gIniSettings.verboseHelpMessages = (lcase(gINI.GetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"))) == "yes");
+   gIniSettings.showKeyboardKeys = (lcase(gINI.GetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"))) == "yes");
+   gIniSettings.joystickType = stringToJoystickType(gINI.GetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType)));
+   gIniSettings.winXPos = max(gINI.GetValueI("Settings", "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
+   gIniSettings.winYPos = max(gINI.GetValueI("Settings", "WindowYPos", gIniSettings.winYPos), 0);
+   gIniSettings.winSizeFact = (F32) gINI.GetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact);
+   gIniSettings.masterAddress = gINI.GetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress);
+   gIniSettings.name = gINI.GetValue("Settings", "Nickname", gIniSettings.name);
+   gIniSettings.defaultName = gINI.GetValue("Settings", "DefaultName", gIniSettings.defaultName);
+
+   gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.hostname = gINI.GetValue("Host", "ServerName", gIniSettings.hostname);
+   gIniSettings.hostaddr = gINI.GetValue("Host", "ServerAddress", gIniSettings.hostaddr);
+   gIniSettings.hostdescr = gINI.GetValue("Host", "ServerDescription", gIniSettings.hostdescr);
+
+   gIniSettings.password = gINI.GetValue("Host", "Password", gIniSettings.password);
+   gIniSettings.adminPassword = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
+   gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
+   gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
+
+   gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
+
+   gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);  
+
+
+   // Load the ReservedNames section...
+   if(gINI.FindKey("ReservedNames") != gINI.noID)
+   {
+      S32 numNames = gINI.NumValues("ReservedNames");
+
+      for(S32 i = 0; i < numNames; i++)
+      {
+         string candidate = gINI.ValueName("ReservedNames", i);
+         
+         if(lcase(candidate.substr(0,4)) == "name")
+         {
+            string name = gINI.GetValue("ReservedNames", candidate, "");
+            string pw = gINI.GetValue("ReservedNames", "Password"+candidate.substr(4, string::npos), "");
+
+            if(name != "" && pw != "")
+            {
+               gIniSettings.reservedNames.push_back(name);
+               gIniSettings.reservedPWs.push_back(pw);
+            }
+         }
+      }
+   }
+
+   loadKeyBindings();
+
+   // Read levels, if there are any...
+   if(gINI.FindKey("Levels") != gINI.noID)
+   {
+      S32 numLevels = gINI.NumValues("Levels");
+      Vector<string> levelValNames;
+
+      for(S32 i = 0; i < numLevels; i++)
+         levelValNames.push_back(gINI.ValueName("Levels", i));
+
+      levelValNames.sort(alphaSort);     // Will this really sort??  Apparently it will.
+
+      string level;
+      for(S32 i = 0; i < numLevels; i++)
+      {
+         level = gINI.GetValue("Levels", levelValNames[i], "");
+         if (level != "")
+            gIniSettings.levelList.push_back(StringTableEntry(level.c_str()));
+      }
+   }
+
+   // Run save now so that if there are no QuickChat messages, we will get a good default set.
+   saveDefaultQuickChatMessages();
+   /*  INI file looks a little like this:
+   [QuickChatMessagesGroup1]
+   Key=F
+   Button=1
+   Caption=Flag
+
+   [QuickChatMessagesGroup1_Message1]
+   Key=G
+   Button=Button 1
+   Caption=Flag Gone!
+   Message=Our flag is not in the base!
+   MessageType=Team     -or-     MessageType=Global
+   */
+
+   // Add initial node
+   QuickChatNode emptynode;
+   emptynode.depth = 0;    // This is a beginning or ending node
+   emptynode.keyCode = KEY_UNKNOWN;
+   emptynode.buttonCode = KEY_UNKNOWN;
+   emptynode.teamOnly = false;
+   emptynode.caption = "";
+   emptynode.msg = "";
+   gQuickChatTree.push_back(emptynode);
+
+   // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
+   S32 keys = gINI.GetNumKeys();
+   Vector<string> groups;
+   for(S32 i = 0; i < keys; i++)
+   {
+      string keyName = gINI.GetKeyName(i);
+      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)   // Found message group
+         groups.push_back(keyName);
+   }
+
+   groups.sort(alphaSort);
+
+   // Now find all the individual message definitions for each key -- match "QuickChatMessagesGroup123_Message456"
+   // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
+   // reenigneer those, let's just iterate backwards and leave the render functions alone.
+
+   for(S32 i = groups.size()-1; i >= 0; i--)
+   {
+      Vector<string> messages;
+      for(S32 j = 0; j < keys; j++)
+      {
+         string keyName = gINI.GetKeyName(j);
+         if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
+            messages.push_back(keyName);
+      }
+
+      messages.sort(alphaSort);
+
+      QuickChatNode node;
+      node.depth = 1;      // This is a group node
+      node.keyCode = stringToKeyCode(gINI.GetValue(groups[i], "Key", "A").c_str());
+      node.buttonCode = stringToKeyCode(gINI.GetValue(groups[i], "Button", "Button 1").c_str());
+      node.teamOnly = lcase(gINI.GetValue(groups[i], "MessageType", "Team")) == "team";
+      node.caption = gINI.GetValue(groups[i], "Caption", "Caption");
+      node.msg = "";
+      gQuickChatTree.push_back(node);
+
+      for(S32 j = messages.size()-1; j >= 0; j--)
+      {
+         node.depth = 2;   // This is a message node
+         node.keyCode = stringToKeyCode(gINI.GetValue(messages[j], "Key", "A").c_str());
+         node.buttonCode = stringToKeyCode(gINI.GetValue(messages[j], "Button", "Button 1").c_str());
+         node.teamOnly = lcase(gINI.GetValue(messages[j], "MessageType", "Team")) == "team";          // lcase for case insensitivity
+         node.caption = gINI.GetValue(messages[j], "Caption", "Caption");
+         node.msg = gINI.GetValue(messages[j], "Message", "Message");
+         gQuickChatTree.push_back(node);
+      }
+   }
+
+   // Add final node.  Last verse, same as the first.
+   gQuickChatTree.push_back(emptynode);
+
+   saveSettingsToINI();      // Save to fill in any missing settings
+}
+
+extern Vector<StringTableEntry> gLevelList;
+
+void saveSettingsToINI()
+{
+   if(!gINI.NumHeaderComments())
+   {
+      gINI.HeaderComment("Bitfighter configuration file");
+      gINI.HeaderComment("=============================");
+      gINI.HeaderComment("This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      gINI.HeaderComment("If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      gINI.HeaderComment("First, some basic terminology:");
+      gINI.HeaderComment("[section]");
+      gINI.HeaderComment("key=value");
+      gINI.HeaderComment("");
+   }
+
+   gINI.AddKeyName("Effects");
+   if (gINI.NumKeyComments("Effects") == 0)
+   {
+      gINI.KeyComment("Effects", "----------------");
+      gINI.KeyComment("Effects", " Various visual effects");
+      gINI.KeyComment("Effects", " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
+      gINI.KeyComment("Effects", "----------------");
+   }
+
+   gINI.SetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"), true);
+
+   gINI.AddKeyName("Sounds");
+   if (gINI.NumKeyComments("Sounds") == 0)
+   {
+      gINI.KeyComment("Sounds", "----------------");
+      gINI.KeyComment("Sounds", " Sound settings");
+      gINI.KeyComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
+      gINI.KeyComment("Sounds", "----------------");
+   }
+
+   gINI.SetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10), true);
+   gINI.SetValueI("Sounds", "MusicVolume",   (S32) (gIniSettings.musicVolLevel * 10), true);
+   gINI.SetValueI("Sounds", "VoiceChatVolume",   (S32) (gIniSettings.voiceChatVolLevel * 10), true);
+
+   gINI.SetValue("Sounds", "SFXSet", gIniSettings.sfxSet == sfxClassicSet ? "Classic" : "Modern", true);
+
+   gINI.AddKeyName("Settings");
+   if (gINI.NumKeyComments("Settings") == 0)
+   {
+      gINI.KeyComment("Settings", "----------------");
+      gINI.KeyComment("Settings", " Settings entries contain a number of different options");
+      gINI.KeyComment("Settings", " WindowMode - Fullscreen or Window");
+      gINI.KeyComment("Settings", " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
+      gINI.KeyComment("Settings", " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+      gINI.KeyComment("Settings", " VoiceEcho - Play echo when recording a voice message? Yes/No");
+      gINI.KeyComment("Settings", " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
+      gINI.KeyComment("Settings", " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
+      gINI.KeyComment("Settings", " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
+      gINI.KeyComment("Settings", " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
+      gINI.KeyComment("Settings", " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
+      gINI.KeyComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
+      gINI.KeyComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
+      gINI.KeyComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
+      gINI.KeyComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
+      gINI.KeyComment("Settings", "----------------");
+   }
+   gINI.SetValue("Settings",  "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"), true);
+   gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
+   gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
+   gINI.SetValue("Settings",  "VoiceEcho", (gIniSettings.echoVoice ? "Yes" : "No"), true);
+   gINI.SetValue("Settings",  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"), true);
+   // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
+
+   gINI.SetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"), true);
+   gINI.SetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"), true);
+   gINI.SetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"), true);
+   gINI.SetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType), true);
+   gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress, true);
+   gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName, true);
+   gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
+
+   gINI.AddKeyName("Host");
+   if (gINI.NumKeyComments("Host") == 0)
+   {
+      gINI.KeyComment("Host", "----------------");
+      gINI.KeyComment("Host", " The Host section contains entries that configure the game when you are hosting");
+      gINI.KeyComment("Host", " ServerName - The name others will see when they are browsing for servers (max 20 chars)");
+      gINI.KeyComment("Host", " ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
+      gINI.KeyComment("Host", " ServerDescription - A one line description of your server.  Please include nickname and physical location!");
+      gINI.KeyComment("Host", " Password - You can require players to use a password to play on your server.  Leave blank to disable.");
+      gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.  Leave blank to disable.");
+      gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to disable.");
+      gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
+      gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
+//      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
+      gINI.KeyComment("Host", "----------------");
+   }
+   gINI.SetValue("Host", "ServerName", gIniSettings.hostname, true);
+   gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr, true);
+   gINI.SetValue("Host", "ServerDescription", gIniSettings.hostdescr, true);
+   gINI.SetValue("Host", "Password", gIniSettings.password, true);
+   gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword, true);
+   gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword, true);
+   gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers, true);
+//   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay, true);
+   gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
+
+
+   gINI.AddKeyName("Diagnostics");
+   if (gINI.NumKeyComments("Diagnostics") == 0)
+   {
+      gINI.KeyComment("Diagnostics", "----------------");
+      gINI.KeyComment("Diagnostics", " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
+      gINI.KeyComment("Diagnostics", " You probably can't use any of these settings to enhance your gameplay experience!");
+      gINI.KeyComment("Diagnostics", " DumpKeys - Enable this to dump raw input to the screen");
+      gINI.KeyComment("Diagnostics", "----------------");
+   }
+   gINI.SetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"), true);
+
+
+   // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
+   // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
+   if(gINI.FindKey("Levels") == gINI.noID)    // Key doesn't exist... let's write one
+   {
+      gINI.AddKeyName("Levels");      // Create the key, then provide some comments for documentation purposes
+      if (gINI.NumKeyComments("Levels") == 0)
+      {
+         gINI.KeyComment("Levels", "----------------");
+         gINI.KeyComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
+         gINI.KeyComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
+         gINI.KeyComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
+         gINI.KeyComment("Levels", "----------------");
+      }
+
+      char levelName[256];
+      for(S32 i = 0; i < gLevelList.size(); i++)
+      {
+         dSprintf(levelName, 255, "Level%d", i);
+         gINI.SetValue("Levels", string(levelName), gLevelList[i].getString(), true);
+      }
+   }
+
+
+   gINI.AddKeyName("ReservedNames");
+   if (gINI.NumKeyComments("ReservedNames") == 0)
+   {
+      gINI.KeyComment("ReservedNames", "----------------");
+      gINI.KeyComment("ReservedNames", " Reserved names can be used to require a user with a specific name to enter a password to use that name.");
+      gINI.KeyComment("ReservedNames", " This is a temporary solution, and will likely be replaced in future versions of the game.  Note too that");
+      gINI.KeyComment("ReservedNames", " names can be reserved only on the server where they are defined.");
+      gINI.KeyComment("ReservedNames", " Usage: Name1=JoJo");
+      gINI.KeyComment("ReservedNames", "        Password1=MyPass");
+      gINI.KeyComment("ReservedNames", " Name/Password pairs can use any (reasonable) alpha-numeric suffix, but they must match, and any unmatched");
+      gINI.KeyComment("ReservedNames", " entries will be discarded.");
+      gINI.KeyComment("ReservedNames", "----------------");
+   }
+   // By default, this section is empty
+
+
+
+   gINI.AddKeyName("Testing");
+   if (gINI.NumKeyComments("Testing") == 0)
+   {
+      gINI.KeyComment("Testing", "----------------");
+      gINI.KeyComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
+      gINI.KeyComment("Testing", " short lived, and will likely be removed in the next version of Bitfighter");
+      gINI.KeyComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
+      gINI.KeyComment("Testing", "----------------");
+   }
+   gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
+
+   saveKeyBindings();
+   //saveDefaultQuickChatMessages();  <-- no need to save now... we ran save while initializing, and nothing would have changed
+
+   gINI.WriteFile();
+}
+
+
+
+};
+

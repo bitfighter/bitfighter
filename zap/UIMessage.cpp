@@ -1,0 +1,177 @@
+//-----------------------------------------------------------------------------------
+//
+// bitFighter - A multiplayer vector graphics space game
+// Based on Zap demo released for Torque Network Library by GarageGames.com
+//
+// Derivative work copyright (C) 2008 Chris Eykamp
+// Original work copyright (C) 2004 GarageGames.com, Inc.
+// Other code copyright as noted
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful (and fun!),
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+//------------------------------------------------------------------------------------
+
+// Renders a simple message box, and waits for the user to hit a key
+// None of this is currently used...  Why did I write it???
+
+#include "UIMessage.h"
+#include "UIMenus.h"
+#include "glutInclude.h"
+#include <stdio.h>
+
+namespace Zap
+{
+
+extern Color gErrorMessageTextColor;
+
+// Instantiate our MessageUI object
+MessageUserInterface gMsgUserInterface;
+
+void MessageUserInterface::onActivate()
+{
+   if(mFadeTime)
+      mFadeTimer.reset(mFadeTime);
+}
+
+void MessageUserInterface::reset()
+{
+   mTitle = "Message";     // Default title
+   mWidth = gScreenWidth - 200;
+   mHeight = gScreenHeight - 200;
+   mFadeTime = 0;          // 0 --> "Hit any key to continue"
+   mMessageColor = Color(1, 1, 1);
+   mVertOffset = 0;
+   mBox = true;
+
+   for(S32 i = 0; i < mNumLines; i++)
+      mMessage[i] = "";
+}
+
+// First line is 1
+void MessageUserInterface::setMessage(U32 id, char *message)
+{
+   if (id < 1 || id > mNumLines)       // Protect devs from themselves...
+   {
+      TNL::logprintf("Invalid line number in setMessage: %d", id);
+      return;
+   }
+
+   mMessage[id-1] = message;
+}
+
+void MessageUserInterface::setTitle(char *message)
+{
+   mTitle = message;
+}
+
+void MessageUserInterface::setSize(U32 width, U32 height)
+{
+   mWidth = width;
+   mHeight = height;
+}
+
+void MessageUserInterface::setFadeTime(U32 time)
+{
+   mFadeTime = time;
+}
+
+void MessageUserInterface::setStyle(U32 style)
+{
+   mFadeTime = 3500;
+   mBox = false;
+   mMessageColor = gErrorMessageTextColor;
+   mVertOffset = 0;
+   mTitle = "";
+
+}
+
+void MessageUserInterface::quit()
+{
+   if(prevUIs.size())
+      UserInterface::reactivatePrevUI();
+   else
+      gMainMenuUserInterface.activate();
+}
+
+void MessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+{
+   if(!mFadeTime)  // If message isn't the fading sort, then...
+      quit();      // ...quit the interface when any key is pressed...  any key at all.
+}
+
+
+void MessageUserInterface::idle(U32 timeDelta)
+{
+   if(mFadeTime && mFadeTimer.update(timeDelta))
+      quit();
+}
+
+
+void MessageUserInterface::render()
+{
+   U32 hInset = (gScreenHeight - mHeight) / 2;
+   U32 wInset = (gScreenWidth - mWidth) / 2;
+
+   // Fade effect
+   F32 fadeFactor;
+   if(mFadeTimer.getCurrent() < 1000)      // getCurrent returns time remaining
+      fadeFactor = (F32) mFadeTimer.getCurrent() / 1000.0;
+   else
+      fadeFactor = 1;
+
+
+   if(prevUIs.size())                     // If there is an underlying menu...
+      prevUIs.last()->render();           // ...render it
+
+   glEnable(GL_BLEND);
+
+
+   if(mBox)
+   {
+      glColor4f(.3, 0, 0, fadeFactor * 0.95);    // Draw a box
+      glBegin(GL_POLYGON);
+      glVertex2f(wInset + mVertOffset, hInset);
+      glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
+      glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
+      glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
+      glEnd();
+
+      glColor4f(1, 1, 1, fadeFactor); // Add a border
+      glBegin(GL_LINE_LOOP);
+      glVertex2f(wInset + mVertOffset, hInset);
+      glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
+      glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
+      glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
+      glEnd();
+   }
+
+   // Draw title, message, and footer
+   glColor4f(mMessageColor.r, mMessageColor.g, mMessageColor.b, fadeFactor);
+
+   if (mTitle != "")
+      drawCenteredString(vertMargin + hInset + mVertOffset, 30, mTitle);
+
+   for(S32 i = 0; i < mNumLines; i++)
+      drawCenteredString(vertMargin + 40 + hInset + i * 24 + mVertOffset, 18, mMessage[i]);
+
+   if (!mFadeTime)
+      drawCenteredString(canvasHeight - vertMargin - hInset - 18 + mVertOffset, 18, "Hit any key to continue");
+
+   glDisable(GL_BLEND);
+
+}
+
+};
+

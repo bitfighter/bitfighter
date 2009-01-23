@@ -1,0 +1,33 @@
+zap -levels test.txt -server -window
+
+<GameType> <Game-Dependent Params>	# Must be first?
+ZoneControlGameType, CTFGameType, 0.33, SoccerGameType (2), RetrieveGameType (2), RabbitGameType (4), HuntersGameType (4)
+
+LevelName <name>					# Quoted string
+LevelDescription <description>		# Quoted string (used for hints or whatever, can be omitted)
+Team <name> <R> <G> <B>				# R,G,B range from 0 to 1, use multiple lines to specify multiple teams
+
+FlagItem <team> <x> <y>				# Processed by flagItem.cpp, owner team is numeric index (-1 for neutral), x,y are starting coords
+
+GridSize <size>						# Size of game grid cell (in pix?)  [size -> mGridSize]  (defaults to 256)
+
+Spawn <team> <x> <y>				# Owner team is numeric index, x,y are coords
+BarrierMaker <width> <x1> <y1> ...	# Requires 2 or more vertices
+
+Teleporter <from x> <from y> <to x> <to y>   # ---> Make team-oriented
+
+ForceFieldProjector <team> <x> <y>	# Team can be -1 (engineeredObject), (mounted to nearest wall, perpendicular to that wall)
+
+
+LoadoutZone (int, 8 float)
+GoalZone (int, 8 float)
+Turret <team> <x> <y>
+SpeedZone
+RepairItem <x> <y>
+TestItem
+SoccerBallItem <x> <y>
+BotsPerTeam (int)
+HuntersNexusObject (2 float, 2 int)
+
+
+(most processing occurs in gameType.cpp)

@@ -1,0 +1,81 @@
+HuntersGameType 10 1 15 5000
+LevelCredits Original Zap! Level
+LevelName Colosseum
+GridSize 300
+Team Hunters 1 1 0
+HuntersNexusObject 17.3 14.8 17.7 14.8 17.7 15.2 17.3 15.2 
+Spawn 0 17.5 8 
+Spawn 0 18.5 22 
+Spawn 0 17.5 22 
+Spawn 0 16.5 22 
+BarrierMaker 50 17.2 15.7 17.3 15.6 17.7 15.6 17.8 15.7 
+BarrierMaker 50 16.8 14.7 16.9 14.8 16.9 15.2 16.8 15.3 
+BarrierMaker 50 17.2 14.3 17.3 14.4 17.7 14.4 17.8 14.3 
+BarrierMaker 50 18.2 14.7 18.1 14.8 18.1 15.2 18.2 15.3 
+BarrierMaker 50 19.3 8.7 19.3 9.5 
+Teleporter 17.8 9.8 17.8 18.4 
+Teleporter 17.2 20.2 17.2 11.6 
+BarrierMaker 50 17.5 10.1 17.5 9.6 17.6 9.5 18 9.5 18.1 9.6 18.1 10.6 18 10.7 16.4 10.7 
+BarrierMaker 50 15.1 10.7 15.6 10.7 15.7 10.6 15.7 10.2 15.8 10.1 16.9 10.1 
+BarrierMaker 50 15.1 11.3 15.6 11.3 15.7 11.4 15.7 12.4 15.6 12.5 15.1 12.5 
+BarrierMaker 50 16.3 12.5 16.3 11.4 16.4 11.3 17.4 11.3 17.5 11.4 17.5 11.8 17.4 11.9 16.9 11.9 
+BarrierMaker 50 18.1 11.3 18.1 11.8 18.2 11.9 18.6 11.9 18.7 12 18.7 12.5 
+BarrierMaker 50 18.7 11.3 19.2 11.3 19.3 11.4 19.3 12.4 19.4 12.5 19.9 12.5 
+BarrierMaker 50 19.9 11.3 19.9 10.8 19.8 10.7 18.7 10.7 
+BarrierMaker 50 19.3 10.1 18.8 10.1 18.7 10 18.7 8.8 18.6 8.7 18.1 8.7 
+BarrierMaker 50 16.9 8.7 16.9 9.4 16.8 9.5 15.8 9.5 15.7 9.4 15.7 8.7 
+BarrierMaker 50 15.7 21.3 15.7 20.5 
+BarrierMaker 50 17.5 19.9 17.5 20.4 17.4 20.5 17 20.5 16.9 20.4 16.9 19.4 17 19.3 18.6 19.3 
+BarrierMaker 50 19.9 19.3 19.4 19.3 19.3 19.4 19.3 19.8 19.2 19.9 18.1 19.9 
+BarrierMaker 50 19.9 18.7 19.4 18.7 19.3 18.6 19.3 17.6 19.4 17.5 19.9 17.5 
+BarrierMaker 50 18.7 17.5 18.7 18.6 18.6 18.7 17.6 18.7 17.5 18.6 17.5 18.2 17.6 18.1 18.1 18.1 
+BarrierMaker 50 16.9 18.7 16.9 18.2 16.8 18.1 16.4 18.1 16.3 18 16.3 17.5 
+BarrierMaker 50 16.3 18.7 15.8 18.7 15.7 18.6 15.7 17.6 15.6 17.5 15.1 17.5 
+BarrierMaker 50 15.1 18.7 15.1 19.2 15.2 19.3 16.3 19.3 
+BarrierMaker 50 15.7 19.9 16.2 19.9 16.3 20 16.3 21.2 16.4 21.3 16.9 21.3 
+BarrierMaker 50 18.1 21.3 18.1 20.6 18.2 20.5 19.2 20.5 19.3 20.6 19.3 21.3 
+ForceFieldProjector 0 17.8 15.6 
+ForceFieldProjector 0 17.2 14.4 
+ForceFieldProjector 0 17.2 15.6 
+ForceFieldProjector 0 17.8 14.4 
+BarrierMaker 50 19.9 18.1 20.4 18.1 20.5 18 20.5 12 20.4 11.9 19.9 11.9 
+BarrierMaker 50 15.1 18.1 14.6 18.1 14.5 18 14.5 11.9 14.6 11.8 15.1 11.8 
+BarrierMaker 50 12.5 7 22.5 7 24.5 9 24.5 21 22.5 23 12.5 23 10.5 21 10.5 9 12.5 7 
+Spawn 0 14 19.5 
+Spawn 0 21 19.5 
+Spawn 0 21 10.5 
+Spawn 0 14 10.5 
+BarrierMaker 50 12.5 10.5 12.5 10 13.5 9 14 9 
+BarrierMaker 50 13.5 12 13.5 14.5 
+BarrierMaker 50 13.5 15 13.5 16 
+BarrierMaker 50 13.5 16.5 13.5 18 
+BarrierMaker 50 12.5 19 12.5 15.5 
+BarrierMaker 50 12.5 15 12.5 14 
+BarrierMaker 50 12.5 13.5 12.5 11 
+BarrierMaker 50 11.5 10 11.5 12 
+BarrierMaker 50 11.5 12.5 11.5 16.5 
+BarrierMaker 50 11.5 17 11.5 20 
+BarrierMaker 50 22.5 10.5 22.5 10 21.5 9 21 9 
+BarrierMaker 50 22.5 19.5 22.5 20 21.5 21 21 21 
+BarrierMaker 50 12.5 19.5 12.5 20 13.5 21 14 21 
+BarrierMaker 50 21.5 18 21.5 15.5 
+BarrierMaker 50 21.5 15 21.5 14 
+BarrierMaker 50 21.5 13.5 21.5 12 
+BarrierMaker 50 22.5 11 22.5 14.5 
+BarrierMaker 50 22.5 15 22.5 16 
+BarrierMaker 50 22.5 16.5 22.5 19 
+BarrierMaker 50 23.5 20 23.5 18 
+BarrierMaker 50 23.5 17.5 23.5 13.5 
+BarrierMaker 50 23.5 13 23.5 10 
+BarrierMaker 50 13.5 22 15 22 
+BarrierMaker 50 21.5 22 20 22 
+BarrierMaker 50 21.5 8 20 8 
+BarrierMaker 50 13.5 8 15 8 
+Teleporter 24 15.5 18.7 21 
+Teleporter 11 15.5 16.3 9 
+Spawn 0 16.5 8 
+Spawn 0 18.5 8 
+RepairItem 23 8.5 
+RepairItem 12 8.5 
+RepairItem 23 21.5 
+RepairItem 12 21.5 

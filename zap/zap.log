@@ -1,0 +1,102 @@
+------ Zap Log File ------
+Winsock initialization succeeded.
+LogNetBase: Class Group: 0  Class Type: 0  count: 29
+LogNetBase: Barrier
+LogNetBase: CTFGameType
+LogNetBase: FlagItem
+LogNetBase: ForceField
+LogNetBase: ForceFieldProjector
+LogNetBase: GameType
+LogNetBase: GoalZone
+LogNetBase: GrenadeProjectile
+LogNetBase: HTFGameType
+LogNetBase: HeatSeeker
+LogNetBase: HuntersFlagItem
+LogNetBase: HuntersGameType
+LogNetBase: HuntersNexusObject
+LogNetBase: LoadoutZone
+LogNetBase: Mine
+LogNetBase: Projectile
+LogNetBase: RabbitGameType
+LogNetBase: RepairItem
+LogNetBase: ResourceItem
+LogNetBase: RetrieveGameType
+LogNetBase: Ship
+LogNetBase: SlipZone
+LogNetBase: SoccerBallItem
+LogNetBase: SoccerGameType
+LogNetBase: SpeedZone
+LogNetBase: Teleporter
+LogNetBase: TestItem
+LogNetBase: Turret
+LogNetBase: ZoneControlGameType
+LogNetBase: Class Group: 0  Class Type: 2  count: 43
+LogNetBase: RPCEV_GameType_c2sAdvanceWeapon
+LogNetBase: RPCEV_GameType_c2sChangeTeams
+LogNetBase: RPCEV_GameType_c2sRequestScoreboardUpdates
+LogNetBase: RPCEV_GameType_c2sSelectWeapon
+LogNetBase: RPCEV_GameType_c2sSendChat
+LogNetBase: RPCEV_GameType_c2sSendChatSTE
+LogNetBase: RPCEV_GameType_c2sSyncMessagesComplete
+LogNetBase: RPCEV_GameType_c2sVoiceChat
+LogNetBase: RPCEV_GameType_s2cAddBarriers
+LogNetBase: RPCEV_GameType_s2cAddClient
+LogNetBase: RPCEV_GameType_s2cAddTeam
+LogNetBase: RPCEV_GameType_s2cClientJoinedTeam
+LogNetBase: RPCEV_GameType_s2cDisplayChatMessage
+LogNetBase: RPCEV_GameType_s2cDisplayChatMessageSTE
+LogNetBase: RPCEV_GameType_s2cKillMessage
+LogNetBase: RPCEV_GameType_s2cRemoveClient
+LogNetBase: RPCEV_GameType_s2cScoreboardUpdate
+LogNetBase: RPCEV_GameType_s2cSetGameOver
+LogNetBase: RPCEV_GameType_s2cSetLevelInfo
+LogNetBase: RPCEV_GameType_s2cSetTeamScore
+LogNetBase: RPCEV_GameType_s2cSetTimeRemaining
+LogNetBase: RPCEV_GameType_s2cSyncMessagesComplete
+LogNetBase: RPCEV_GameType_s2cVoiceChat
+LogNetBase: RPCEV_HuntersGameType_s2cAddYardSaleWaypoint
+LogNetBase: RPCEV_HuntersGameType_s2cHuntersMessage
+LogNetBase: RPCEV_HuntersGameType_s2cSetNexusTimer
+LogNetBase: RPCEV_RabbitGameType_s2cRabbitMessage
+LogNetBase: RPCEV_SoccerGameType_s2cSoccerScoreMessage
+LogNetBase: RPCEV_ZoneControlGameType_s2cSetFlagTeam
+LogNetBase: RPC_GhostConnection_rpcEndGhosting
+LogNetBase: RPC_GhostConnection_rpcReadyForNormalGhosts
+LogNetBase: RPC_GhostConnection_rpcStartGhosting
+LogNetBase: RPC_GameConnection_c2sAdminPassword
+LogNetBase: RPC_GameConnection_c2sAdminPlayerAction
+LogNetBase: RPC_GameConnection_c2sReleaseCommanderMap
+LogNetBase: RPC_GameConnection_c2sRequestCommanderMap
+LogNetBase: RPC_GameConnection_c2sRequestLevelChange
+LogNetBase: RPC_GameConnection_c2sRequestLoadout
+LogNetBase: RPC_GameConnection_s2cAddLevel
+LogNetBase: RPC_GameConnection_s2cDisplayMessage
+LogNetBase: RPC_GameConnection_s2cDisplayMessageE
+LogNetBase: RPC_GameConnection_s2cDisplayMessageESI
+LogNetBase: RPC_GameConnection_s2cSetIsAdmin
+LogNetBase: Class Group: 2  Class Type: 2  count: 14
+LogNetBase: RPC_MasterServerInterface_c2mAcceptArrangedConnection
+LogNetBase: RPC_MasterServerInterface_c2mQueryGameTypes
+LogNetBase: RPC_MasterServerInterface_c2mQueryServers
+LogNetBase: RPC_MasterServerInterface_c2mRejectArrangedConnection
+LogNetBase: RPC_MasterServerInterface_c2mRequestArrangedConnection
+LogNetBase: RPC_MasterServerInterface_c2mSendChat
+LogNetBase: RPC_MasterServerInterface_c2mUpdateServerStatus
+LogNetBase: RPC_MasterServerInterface_m2cArrangedConnectionAccepted
+LogNetBase: RPC_MasterServerInterface_m2cArrangedConnectionRejected
+LogNetBase: RPC_MasterServerInterface_m2cClientRequestedArrangedConnection
+LogNetBase: RPC_MasterServerInterface_m2cQueryGameTypesResponse
+LogNetBase: RPC_MasterServerInterface_m2cQueryServersResponse
+LogNetBase: RPC_MasterServerInterface_m2cSendChat
+LogNetBase: RPC_MasterServerInterface_m2cSetMOTD
+Failure (2) loading sound file 'phaser.wav'
+LogNetInterface: Sending Connect Challenge Request to IP:67.18.11.81:25955
+Unable to connect to master
+LogNetInterface: Sending Connect Challenge Request to IP:67.18.11.81:25955
+LogNetInterface: Sending Connect Challenge Request to IP:67.18.11.81:25955
+LogNetInterface: Sending Connect Challenge Request to IP:67.18.11.81:25955
+LogNetInterface: Sending Connect Challenge Request to IP:67.18.11.81:25955
+Pinging broadcast servers...
+pinging server IP:Broadcast:28000...
+Net Class Bit Usage:
+Bye!

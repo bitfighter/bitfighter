@@ -1,0 +1,9 @@
+install VC++Express
+carefully follow instructions here:
+	
+install Direct X runtimes (Aug2007 version?)
+	http://msdn2.microsoft.com/en-us/xna/aa937788.aspx
+	
+Add C:\program files\MS SDK for Win Server 2003 R2\Include\mfc to include path
+
+Compile using MCF static library

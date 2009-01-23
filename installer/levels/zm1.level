@@ -1,0 +1,31 @@
+GameType 0.33
+GridSize 128
+LevelName Intermission
+LevelDescription "Hint: Use the bouncy balls for defensive relief!"
+LevelCredits Original Zap! Level
+
+Team Blue 0 0 1
+
+BarrierMaker 50 0 0 5 0 6 1 7 0 10 0 10 10 0 10 0 0
+BarrierMaker 50 8 4 8 4.5 
+BarrierMaker 50 8 5 8.5 6 7.5 6 8 5
+BarrierMaker 50 7 7 9 7 9 9 7 9 7 7
+BarrierMaker 50 5 8 6 7.5 6 8.5 5 8
+BarrierMaker 50 11 8 10 8.5 10 7.5 11 8
+BarrierMaker 50 8 11 7.5 10 8.5 10 8 11
+BarrierMaker 50 8 11.5 8 12
+
+Spawn 0 1 6
+Spawn 0 4.5 1.5
+Spawn 0 6.5 6.5
+Spawn 0 7 2
+Spawn 0 9 2
+Spawn 0 8 1
+
+TestItem 1 2
+TestItem 8 2
+TestItem 3 2
+TestItem 7 2
+TestItem 4 2
+TestItem 5 2
+TestItem 6 2

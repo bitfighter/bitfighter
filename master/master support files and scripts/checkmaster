@@ -1,0 +1,16 @@
+#!/usr/bin/perl 
+
+chdir '/home/eykamp/bitFighter/server/exe';
+open PROS, 'ps -p `cat /home/eykamp/bitFighter/server/exe/master_pid` |grep master|';
+
+if (<PROS>){
+	#print "Master server is running\n";
+	exit;
+}
+($sec,$min,$hour,$mday,$mon,$year,$wday, $yday,$isdst)=localtime(time);
+
+printf "Restarting master bitFighter server on domo %02d-%02d-%4d %02d:%02d:%02d\n",
+       $mday, $mon+1,$year+1900, $hour,$min,$sec;
+system 'echo Restarted `date` >> /home/eykamp/bitFighter/server/exe/restart.log';
+system 'sh /home/eykamp/bitFighter/server/exe/startmaster';
+

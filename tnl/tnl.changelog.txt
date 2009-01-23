@@ -1,0 +1,28 @@
+// Instructions for updating this file:
+//      - Locate the appropriate section for this version of TNL. This
+//       is changelog_VERSION, where VERSION is the next version of TNL. Dots
+//       should be replaced with _'s.
+//     - Add your change to the appropriate subsection. There are subsections
+//       for each module of the TNL. Add a subsection if necessary, the
+//       naming scheme is cl_VERSION_MODULE. (Modules might be: ghost, dnet,
+//       events, etc.)
+/*!
+
+@page changelog Torque Network Layer Upgrade Guide
+
+@section changelog_intro Introduction
+
+TNL is a living, changing body of code. Things become superceded, outdated, deprecated. As a developer, you are probably interested in keeping up to date with the latest features in TNL - which means you have to upgrade your code to work with changes to the layer.
+
+With such a large project as TNL, it is difficult to  make sure that you're fully up to synch with a changing target. This section of the documentation describes changes to the engine in each version, along with what you need to do to get your code up to date, so that everything works together smoothly.
+
+
+@note For a more comprehensive and fresher list of changes, see http://www.garagegames.com/docs/tnl/changelist/.
+
+@section changelog_1_0 Changes in TNL HEAD
+
+@subsection cl_1_0_core Changes to Core...
+
+    - Removed unused TagDictionary class (core/tagDictionary.*).
+
+*/

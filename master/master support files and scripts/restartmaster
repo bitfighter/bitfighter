@@ -1,0 +1,1 @@
+kill -9 `cat master_pid`; ./startmaster

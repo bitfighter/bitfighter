@@ -1,0 +1,521 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8D07F2BE0486CC7A007CD1D0 /* tnl_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 32BAE0B70371A74B00C91783 /* tnl_Prefix.pch */; settings = {ATTRIBUTES = (Public, ); }; };
+		8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C1666FE841158C02AAC07 /* InfoPlist.strings */; };
+		941E91FB0DDF076500621981 /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 941E91FA0DDF076500621981 /* libtomcrypt.framework */; };
+		941E92180DDF078300621981 /* assert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E91FE0DDF078300621981 /* assert.cpp */; };
+		941E92190DDF078300621981 /* asymmetricKey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E91FF0DDF078300621981 /* asymmetricKey.cpp */; };
+		941E921A0DDF078300621981 /* bitStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92000DDF078300621981 /* bitStream.cpp */; };
+		941E921B0DDF078300621981 /* byteBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92010DDF078300621981 /* byteBuffer.cpp */; };
+		941E921C0DDF078300621981 /* certificate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92020DDF078300621981 /* certificate.cpp */; };
+		941E921D0DDF078300621981 /* clientPuzzle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92030DDF078300621981 /* clientPuzzle.cpp */; };
+		941E921E0DDF078300621981 /* connectionStringTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92040DDF078300621981 /* connectionStringTable.cpp */; };
+		941E921F0DDF078300621981 /* dataChunker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92050DDF078300621981 /* dataChunker.cpp */; };
+		941E92200DDF078300621981 /* eventConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92060DDF078300621981 /* eventConnection.cpp */; };
+		941E92210DDF078300621981 /* ghostConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92070DDF078300621981 /* ghostConnection.cpp */; };
+		941E92220DDF078300621981 /* huffmanStringProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92080DDF078300621981 /* huffmanStringProcessor.cpp */; };
+		941E92230DDF078300621981 /* journal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92090DDF078300621981 /* journal.cpp */; };
+		941E92240DDF078300621981 /* log.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E920A0DDF078300621981 /* log.cpp */; };
+		941E92250DDF078300621981 /* netBase.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E920B0DDF078300621981 /* netBase.cpp */; };
+		941E92260DDF078300621981 /* netConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E920C0DDF078300621981 /* netConnection.cpp */; };
+		941E92270DDF078300621981 /* netInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E920D0DDF078300621981 /* netInterface.cpp */; };
+		941E92280DDF078300621981 /* netObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E920E0DDF078300621981 /* netObject.cpp */; };
+		941E92290DDF078300621981 /* netStringTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E920F0DDF078300621981 /* netStringTable.cpp */; };
+		941E922A0DDF078300621981 /* platform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92100DDF078300621981 /* platform.cpp */; };
+		941E922B0DDF078300621981 /* random.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92110DDF078300621981 /* random.cpp */; };
+		941E922C0DDF078300621981 /* rpc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92120DDF078300621981 /* rpc.cpp */; };
+		941E922D0DDF078300621981 /* symmetricCipher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92130DDF078300621981 /* symmetricCipher.cpp */; };
+		941E922E0DDF078300621981 /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92140DDF078300621981 /* thread.cpp */; };
+		941E922F0DDF078300621981 /* tnlMethodDispatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92150DDF078300621981 /* tnlMethodDispatch.cpp */; };
+		941E92300DDF078300621981 /* udp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92160DDF078300621981 /* udp.cpp */; };
+		941E92310DDF078300621981 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E92170DDF078300621981 /* vector.cpp */; };
+		941E92530DDF079F00621981 /* tnl.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92320DDF079F00621981 /* tnl.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92540DDF079F00621981 /* tnlAssert.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92330DDF079F00621981 /* tnlAssert.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92550DDF079F00621981 /* tnlAsymmetricKey.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92340DDF079F00621981 /* tnlAsymmetricKey.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92560DDF079F00621981 /* tnlBitSet.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92350DDF079F00621981 /* tnlBitSet.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92570DDF079F00621981 /* tnlBitStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92360DDF079F00621981 /* tnlBitStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92580DDF079F00621981 /* tnlByteBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92370DDF079F00621981 /* tnlByteBuffer.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92590DDF079F00621981 /* tnlCertificate.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92380DDF079F00621981 /* tnlCertificate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E925A0DDF079F00621981 /* tnlClientPuzzle.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92390DDF079F00621981 /* tnlClientPuzzle.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E925B0DDF079F00621981 /* tnlConnectionStringTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E923A0DDF079F00621981 /* tnlConnectionStringTable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E925C0DDF079F00621981 /* tnlDataChunker.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E923B0DDF079F00621981 /* tnlDataChunker.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E925D0DDF079F00621981 /* tnlEndian.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E923C0DDF079F00621981 /* tnlEndian.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E925E0DDF079F00621981 /* tnlEventConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E923D0DDF079F00621981 /* tnlEventConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E925F0DDF079F00621981 /* tnlGhostConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E923E0DDF079F00621981 /* tnlGhostConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92600DDF079F00621981 /* tnlHuffmanStringProcessor.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E923F0DDF079F00621981 /* tnlHuffmanStringProcessor.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92610DDF079F00621981 /* tnlJournal.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92400DDF079F00621981 /* tnlJournal.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92620DDF079F00621981 /* tnlLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92410DDF079F00621981 /* tnlLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92630DDF079F00621981 /* tnlMethodDispatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92420DDF079F00621981 /* tnlMethodDispatch.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92640DDF079F00621981 /* tnlNetBase.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92430DDF079F00621981 /* tnlNetBase.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92650DDF079F00621981 /* tnlNetConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92440DDF079F00621981 /* tnlNetConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92660DDF079F00621981 /* tnlNetEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92450DDF079F00621981 /* tnlNetEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92670DDF079F00621981 /* tnlNetInterface.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92460DDF079F00621981 /* tnlNetInterface.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92680DDF079F00621981 /* tnlNetObject.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92470DDF079F00621981 /* tnlNetObject.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92690DDF079F00621981 /* tnlNetStringTable.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92480DDF079F00621981 /* tnlNetStringTable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E926A0DDF079F00621981 /* tnlNonce.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92490DDF079F00621981 /* tnlNonce.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E926B0DDF079F00621981 /* tnlPlatform.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E924A0DDF079F00621981 /* tnlPlatform.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E926C0DDF079F00621981 /* tnlRandom.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E924B0DDF079F00621981 /* tnlRandom.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E926D0DDF079F00621981 /* tnlRPC.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E924C0DDF079F00621981 /* tnlRPC.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E926E0DDF079F00621981 /* tnlString.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E924D0DDF079F00621981 /* tnlString.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E926F0DDF079F00621981 /* tnlSymmetricCipher.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E924E0DDF079F00621981 /* tnlSymmetricCipher.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92700DDF079F00621981 /* tnlThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E924F0DDF079F00621981 /* tnlThread.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92710DDF079F00621981 /* tnlTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92500DDF079F00621981 /* tnlTypes.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92720DDF079F00621981 /* tnlUDP.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92510DDF079F00621981 /* tnlUDP.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		941E92730DDF079F00621981 /* tnlVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 941E92520DDF079F00621981 /* tnlVector.h */; settings = {ATTRIBUTES = (Public, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		32BAE0B70371A74B00C91783 /* tnl_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnl_Prefix.pch; sourceTree = "<group>"; };
+		8D07F2C70486CC7A007CD1D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8D07F2C80486CC7A007CD1D0 /* tnl.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = tnl.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		941E91FA0DDF076500621981 /* libtomcrypt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libtomcrypt.framework; path = ../libtomcrypt/build/Release/libtomcrypt.framework; sourceTree = SOURCE_ROOT; };
+		941E91FE0DDF078300621981 /* assert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = assert.cpp; sourceTree = "<group>"; };
+		941E91FF0DDF078300621981 /* asymmetricKey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = asymmetricKey.cpp; sourceTree = "<group>"; };
+		941E92000DDF078300621981 /* bitStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bitStream.cpp; sourceTree = "<group>"; };
+		941E92010DDF078300621981 /* byteBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = byteBuffer.cpp; sourceTree = "<group>"; };
+		941E92020DDF078300621981 /* certificate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = certificate.cpp; sourceTree = "<group>"; };
+		941E92030DDF078300621981 /* clientPuzzle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clientPuzzle.cpp; sourceTree = "<group>"; };
+		941E92040DDF078300621981 /* connectionStringTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = connectionStringTable.cpp; sourceTree = "<group>"; };
+		941E92050DDF078300621981 /* dataChunker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dataChunker.cpp; sourceTree = "<group>"; };
+		941E92060DDF078300621981 /* eventConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = eventConnection.cpp; sourceTree = "<group>"; };
+		941E92070DDF078300621981 /* ghostConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ghostConnection.cpp; sourceTree = "<group>"; };
+		941E92080DDF078300621981 /* huffmanStringProcessor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = huffmanStringProcessor.cpp; sourceTree = "<group>"; };
+		941E92090DDF078300621981 /* journal.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = journal.cpp; sourceTree = "<group>"; };
+		941E920A0DDF078300621981 /* log.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = log.cpp; sourceTree = "<group>"; };
+		941E920B0DDF078300621981 /* netBase.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = netBase.cpp; sourceTree = "<group>"; };
+		941E920C0DDF078300621981 /* netConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = netConnection.cpp; sourceTree = "<group>"; };
+		941E920D0DDF078300621981 /* netInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = netInterface.cpp; sourceTree = "<group>"; };
+		941E920E0DDF078300621981 /* netObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = netObject.cpp; sourceTree = "<group>"; };
+		941E920F0DDF078300621981 /* netStringTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = netStringTable.cpp; sourceTree = "<group>"; };
+		941E92100DDF078300621981 /* platform.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = platform.cpp; sourceTree = "<group>"; };
+		941E92110DDF078300621981 /* random.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = random.cpp; sourceTree = "<group>"; };
+		941E92120DDF078300621981 /* rpc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rpc.cpp; sourceTree = "<group>"; };
+		941E92130DDF078300621981 /* symmetricCipher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = symmetricCipher.cpp; sourceTree = "<group>"; };
+		941E92140DDF078300621981 /* thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = thread.cpp; sourceTree = "<group>"; };
+		941E92150DDF078300621981 /* tnlMethodDispatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tnlMethodDispatch.cpp; sourceTree = "<group>"; };
+		941E92160DDF078300621981 /* udp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = udp.cpp; sourceTree = "<group>"; };
+		941E92170DDF078300621981 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vector.cpp; sourceTree = "<group>"; };
+		941E92320DDF079F00621981 /* tnl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnl.h; sourceTree = "<group>"; };
+		941E92330DDF079F00621981 /* tnlAssert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlAssert.h; sourceTree = "<group>"; };
+		941E92340DDF079F00621981 /* tnlAsymmetricKey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlAsymmetricKey.h; sourceTree = "<group>"; };
+		941E92350DDF079F00621981 /* tnlBitSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlBitSet.h; sourceTree = "<group>"; };
+		941E92360DDF079F00621981 /* tnlBitStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlBitStream.h; sourceTree = "<group>"; };
+		941E92370DDF079F00621981 /* tnlByteBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlByteBuffer.h; sourceTree = "<group>"; };
+		941E92380DDF079F00621981 /* tnlCertificate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlCertificate.h; sourceTree = "<group>"; };
+		941E92390DDF079F00621981 /* tnlClientPuzzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlClientPuzzle.h; sourceTree = "<group>"; };
+		941E923A0DDF079F00621981 /* tnlConnectionStringTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlConnectionStringTable.h; sourceTree = "<group>"; };
+		941E923B0DDF079F00621981 /* tnlDataChunker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlDataChunker.h; sourceTree = "<group>"; };
+		941E923C0DDF079F00621981 /* tnlEndian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlEndian.h; sourceTree = "<group>"; };
+		941E923D0DDF079F00621981 /* tnlEventConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlEventConnection.h; sourceTree = "<group>"; };
+		941E923E0DDF079F00621981 /* tnlGhostConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlGhostConnection.h; sourceTree = "<group>"; };
+		941E923F0DDF079F00621981 /* tnlHuffmanStringProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlHuffmanStringProcessor.h; sourceTree = "<group>"; };
+		941E92400DDF079F00621981 /* tnlJournal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlJournal.h; sourceTree = "<group>"; };
+		941E92410DDF079F00621981 /* tnlLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlLog.h; sourceTree = "<group>"; };
+		941E92420DDF079F00621981 /* tnlMethodDispatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlMethodDispatch.h; sourceTree = "<group>"; };
+		941E92430DDF079F00621981 /* tnlNetBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNetBase.h; sourceTree = "<group>"; };
+		941E92440DDF079F00621981 /* tnlNetConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNetConnection.h; sourceTree = "<group>"; };
+		941E92450DDF079F00621981 /* tnlNetEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNetEvent.h; sourceTree = "<group>"; };
+		941E92460DDF079F00621981 /* tnlNetInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNetInterface.h; sourceTree = "<group>"; };
+		941E92470DDF079F00621981 /* tnlNetObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNetObject.h; sourceTree = "<group>"; };
+		941E92480DDF079F00621981 /* tnlNetStringTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNetStringTable.h; sourceTree = "<group>"; };
+		941E92490DDF079F00621981 /* tnlNonce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlNonce.h; sourceTree = "<group>"; };
+		941E924A0DDF079F00621981 /* tnlPlatform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlPlatform.h; sourceTree = "<group>"; };
+		941E924B0DDF079F00621981 /* tnlRandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlRandom.h; sourceTree = "<group>"; };
+		941E924C0DDF079F00621981 /* tnlRPC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlRPC.h; sourceTree = "<group>"; };
+		941E924D0DDF079F00621981 /* tnlString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlString.h; sourceTree = "<group>"; };
+		941E924E0DDF079F00621981 /* tnlSymmetricCipher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlSymmetricCipher.h; sourceTree = "<group>"; };
+		941E924F0DDF079F00621981 /* tnlThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlThread.h; sourceTree = "<group>"; };
+		941E92500DDF079F00621981 /* tnlTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlTypes.h; sourceTree = "<group>"; };
+		941E92510DDF079F00621981 /* tnlUDP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlUDP.h; sourceTree = "<group>"; };
+		941E92520DDF079F00621981 /* tnlVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tnlVector.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D07F2C30486CC7A007CD1D0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				941E91FB0DDF076500621981 /* libtomcrypt.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DDFF38A45A11DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D07F2C80486CC7A007CD1D0 /* tnl.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* tnl */ = {
+			isa = PBXGroup;
+			children = (
+				941E91390DDF074700621981 /* Headers */,
+				08FB77ACFE841707C02AAC07 /* Source */,
+				089C1665FE841158C02AAC07 /* Resources */,
+				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
+				034768DDFF38A45A11DB9C8B /* Products */,
+			);
+			name = tnl;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				941E91FA0DDF076500621981 /* libtomcrypt.framework */,
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		089C1665FE841158C02AAC07 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8D07F2C70486CC7A007CD1D0 /* Info.plist */,
+				089C1666FE841158C02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		08FB77ACFE841707C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				941E91FE0DDF078300621981 /* assert.cpp */,
+				941E91FF0DDF078300621981 /* asymmetricKey.cpp */,
+				941E92000DDF078300621981 /* bitStream.cpp */,
+				941E92010DDF078300621981 /* byteBuffer.cpp */,
+				941E92020DDF078300621981 /* certificate.cpp */,
+				941E92030DDF078300621981 /* clientPuzzle.cpp */,
+				941E92040DDF078300621981 /* connectionStringTable.cpp */,
+				941E92050DDF078300621981 /* dataChunker.cpp */,
+				941E92060DDF078300621981 /* eventConnection.cpp */,
+				941E92070DDF078300621981 /* ghostConnection.cpp */,
+				941E92080DDF078300621981 /* huffmanStringProcessor.cpp */,
+				941E92090DDF078300621981 /* journal.cpp */,
+				941E920A0DDF078300621981 /* log.cpp */,
+				941E920B0DDF078300621981 /* netBase.cpp */,
+				941E920C0DDF078300621981 /* netConnection.cpp */,
+				941E920D0DDF078300621981 /* netInterface.cpp */,
+				941E920E0DDF078300621981 /* netObject.cpp */,
+				941E920F0DDF078300621981 /* netStringTable.cpp */,
+				941E92100DDF078300621981 /* platform.cpp */,
+				941E92110DDF078300621981 /* random.cpp */,
+				941E92120DDF078300621981 /* rpc.cpp */,
+				941E92130DDF078300621981 /* symmetricCipher.cpp */,
+				941E92140DDF078300621981 /* thread.cpp */,
+				941E92150DDF078300621981 /* tnlMethodDispatch.cpp */,
+				941E92160DDF078300621981 /* udp.cpp */,
+				941E92170DDF078300621981 /* vector.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		941E91390DDF074700621981 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+				941E92320DDF079F00621981 /* tnl.h */,
+				941E92330DDF079F00621981 /* tnlAssert.h */,
+				941E92340DDF079F00621981 /* tnlAsymmetricKey.h */,
+				941E92350DDF079F00621981 /* tnlBitSet.h */,
+				941E92360DDF079F00621981 /* tnlBitStream.h */,
+				941E92370DDF079F00621981 /* tnlByteBuffer.h */,
+				941E92380DDF079F00621981 /* tnlCertificate.h */,
+				941E92390DDF079F00621981 /* tnlClientPuzzle.h */,
+				941E923A0DDF079F00621981 /* tnlConnectionStringTable.h */,
+				941E923B0DDF079F00621981 /* tnlDataChunker.h */,
+				941E923C0DDF079F00621981 /* tnlEndian.h */,
+				941E923D0DDF079F00621981 /* tnlEventConnection.h */,
+				941E923E0DDF079F00621981 /* tnlGhostConnection.h */,
+				941E923F0DDF079F00621981 /* tnlHuffmanStringProcessor.h */,
+				941E92400DDF079F00621981 /* tnlJournal.h */,
+				941E92410DDF079F00621981 /* tnlLog.h */,
+				941E92420DDF079F00621981 /* tnlMethodDispatch.h */,
+				941E92430DDF079F00621981 /* tnlNetBase.h */,
+				941E92440DDF079F00621981 /* tnlNetConnection.h */,
+				941E92450DDF079F00621981 /* tnlNetEvent.h */,
+				941E92460DDF079F00621981 /* tnlNetInterface.h */,
+				941E92470DDF079F00621981 /* tnlNetObject.h */,
+				941E92480DDF079F00621981 /* tnlNetStringTable.h */,
+				941E92490DDF079F00621981 /* tnlNonce.h */,
+				941E924A0DDF079F00621981 /* tnlPlatform.h */,
+				941E924B0DDF079F00621981 /* tnlRandom.h */,
+				941E924C0DDF079F00621981 /* tnlRPC.h */,
+				941E924D0DDF079F00621981 /* tnlString.h */,
+				941E924E0DDF079F00621981 /* tnlSymmetricCipher.h */,
+				941E924F0DDF079F00621981 /* tnlThread.h */,
+				941E92500DDF079F00621981 /* tnlTypes.h */,
+				941E92510DDF079F00621981 /* tnlUDP.h */,
+				941E92520DDF079F00621981 /* tnlVector.h */,
+				32BAE0B70371A74B00C91783 /* tnl_Prefix.pch */,
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		8D07F2BD0486CC7A007CD1D0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D07F2BE0486CC7A007CD1D0 /* tnl_Prefix.pch in Headers */,
+				941E92530DDF079F00621981 /* tnl.h in Headers */,
+				941E92540DDF079F00621981 /* tnlAssert.h in Headers */,
+				941E92550DDF079F00621981 /* tnlAsymmetricKey.h in Headers */,
+				941E92560DDF079F00621981 /* tnlBitSet.h in Headers */,
+				941E92570DDF079F00621981 /* tnlBitStream.h in Headers */,
+				941E92580DDF079F00621981 /* tnlByteBuffer.h in Headers */,
+				941E92590DDF079F00621981 /* tnlCertificate.h in Headers */,
+				941E925A0DDF079F00621981 /* tnlClientPuzzle.h in Headers */,
+				941E925B0DDF079F00621981 /* tnlConnectionStringTable.h in Headers */,
+				941E925C0DDF079F00621981 /* tnlDataChunker.h in Headers */,
+				941E925D0DDF079F00621981 /* tnlEndian.h in Headers */,
+				941E925E0DDF079F00621981 /* tnlEventConnection.h in Headers */,
+				941E925F0DDF079F00621981 /* tnlGhostConnection.h in Headers */,
+				941E92600DDF079F00621981 /* tnlHuffmanStringProcessor.h in Headers */,
+				941E92610DDF079F00621981 /* tnlJournal.h in Headers */,
+				941E92620DDF079F00621981 /* tnlLog.h in Headers */,
+				941E92630DDF079F00621981 /* tnlMethodDispatch.h in Headers */,
+				941E92640DDF079F00621981 /* tnlNetBase.h in Headers */,
+				941E92650DDF079F00621981 /* tnlNetConnection.h in Headers */,
+				941E92660DDF079F00621981 /* tnlNetEvent.h in Headers */,
+				941E92670DDF079F00621981 /* tnlNetInterface.h in Headers */,
+				941E92680DDF079F00621981 /* tnlNetObject.h in Headers */,
+				941E92690DDF079F00621981 /* tnlNetStringTable.h in Headers */,
+				941E926A0DDF079F00621981 /* tnlNonce.h in Headers */,
+				941E926B0DDF079F00621981 /* tnlPlatform.h in Headers */,
+				941E926C0DDF079F00621981 /* tnlRandom.h in Headers */,
+				941E926D0DDF079F00621981 /* tnlRPC.h in Headers */,
+				941E926E0DDF079F00621981 /* tnlString.h in Headers */,
+				941E926F0DDF079F00621981 /* tnlSymmetricCipher.h in Headers */,
+				941E92700DDF079F00621981 /* tnlThread.h in Headers */,
+				941E92710DDF079F00621981 /* tnlTypes.h in Headers */,
+				941E92720DDF079F00621981 /* tnlUDP.h in Headers */,
+				941E92730DDF079F00621981 /* tnlVector.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		8D07F2BC0486CC7A007CD1D0 /* tnl */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FADC24208B4156D00ABE55E /* Build configuration list for PBXNativeTarget "tnl" */;
+			buildPhases = (
+				8D07F2BD0486CC7A007CD1D0 /* Headers */,
+				8D07F2BF0486CC7A007CD1D0 /* Resources */,
+				8D07F2C10486CC7A007CD1D0 /* Sources */,
+				8D07F2C30486CC7A007CD1D0 /* Frameworks */,
+				8D07F2C50486CC7A007CD1D0 /* Rez */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = tnl;
+			productInstallPath = "$(HOME)/Library/Frameworks";
+			productName = tnl;
+			productReference = 8D07F2C80486CC7A007CD1D0 /* tnl.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "tnl" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			mainGroup = 0867D691FE84028FC02AAC07 /* tnl */;
+			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D07F2BC0486CC7A007CD1D0 /* tnl */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D07F2BF0486CC7A007CD1D0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D07F2C00486CC7A007CD1D0 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXRezBuildPhase section */
+		8D07F2C50486CC7A007CD1D0 /* Rez */ = {
+			isa = PBXRezBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXRezBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D07F2C10486CC7A007CD1D0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				941E92180DDF078300621981 /* assert.cpp in Sources */,
+				941E92190DDF078300621981 /* asymmetricKey.cpp in Sources */,
+				941E921A0DDF078300621981 /* bitStream.cpp in Sources */,
+				941E921B0DDF078300621981 /* byteBuffer.cpp in Sources */,
+				941E921C0DDF078300621981 /* certificate.cpp in Sources */,
+				941E921D0DDF078300621981 /* clientPuzzle.cpp in Sources */,
+				941E921E0DDF078300621981 /* connectionStringTable.cpp in Sources */,
+				941E921F0DDF078300621981 /* dataChunker.cpp in Sources */,
+				941E92200DDF078300621981 /* eventConnection.cpp in Sources */,
+				941E92210DDF078300621981 /* ghostConnection.cpp in Sources */,
+				941E92220DDF078300621981 /* huffmanStringProcessor.cpp in Sources */,
+				941E92230DDF078300621981 /* journal.cpp in Sources */,
+				941E92240DDF078300621981 /* log.cpp in Sources */,
+				941E92250DDF078300621981 /* netBase.cpp in Sources */,
+				941E92260DDF078300621981 /* netConnection.cpp in Sources */,
+				941E92270DDF078300621981 /* netInterface.cpp in Sources */,
+				941E92280DDF078300621981 /* netObject.cpp in Sources */,
+				941E92290DDF078300621981 /* netStringTable.cpp in Sources */,
+				941E922A0DDF078300621981 /* platform.cpp in Sources */,
+				941E922B0DDF078300621981 /* random.cpp in Sources */,
+				941E922C0DDF078300621981 /* rpc.cpp in Sources */,
+				941E922D0DDF078300621981 /* symmetricCipher.cpp in Sources */,
+				941E922E0DDF078300621981 /* thread.cpp in Sources */,
+				941E922F0DDF078300621981 /* tnlMethodDispatch.cpp in Sources */,
+				941E92300DDF078300621981 /* udp.cpp in Sources */,
+				941E92310DDF078300621981 /* vector.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		089C1666FE841158C02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C1667FE841158C02AAC07 /* English */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		4FADC24308B4156D00ABE55E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../libtomcrypt/build/Release\"";
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = tnl_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_NAME = tnl;
+				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		4FADC24408B4156D00ABE55E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../libtomcrypt/build/Release\"";
+				FRAMEWORK_VERSION = A;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = tnl_Prefix.pch;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				PRODUCT_NAME = tnl;
+				WRAPPER_EXTENSION = framework;
+			};
+			name = Release;
+		};
+		4FADC24708B4156D00ABE55E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Debug;
+		};
+		4FADC24808B4156D00ABE55E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4FADC24208B4156D00ABE55E /* Build configuration list for PBXNativeTarget "tnl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FADC24308B4156D00ABE55E /* Debug */,
+				4FADC24408B4156D00ABE55E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "tnl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FADC24708B4156D00ABE55E /* Debug */,
+				4FADC24808B4156D00ABE55E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}

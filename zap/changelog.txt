@@ -1,0 +1,10 @@
+Enhancements to quick chat, FPS display, loadout menu selection
+Fixed several crashes under rare situations
+New keyboard/joystick input system will make it easier to let players map keys
+Minor menu layout changes
+Quick weapon select keys (1,2,3)
+Added numerous comments throughout code
+Replaced some hard-wired numbers with constants for better maintainability and easier implementation of future enhancements
+Global out-of-game chat mode (F9)
+
+
