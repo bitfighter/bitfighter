@@ -37,9 +37,7 @@ class RetrieveGameType : public GameType
    typedef GameType Parent;
    Vector<GoalZone *> mZones;
    Vector<SafePtr<FlagItem> > mFlags;
-   enum {
-      CapScore = 2,
-   };
+
 public:
    void addFlag(FlagItem *theFlag)
    {
@@ -154,8 +152,6 @@ public:
       FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
       if(mountedFlag)
       {
-         setTeamScore(cl->teamId, mTeams[cl->teamId].score + 1);  // Event: ReturnFlagToZone
-
          static StringTableEntry capString("%e0 retrieved a flag!");
          static StringTableEntry oneFlagCapString("%e0 retrieved the flag!");
 
@@ -174,10 +170,13 @@ public:
                break;
 
          mFlags[flagIndex]->setZone(z);
-
-         // Score the flag for the client's team...
          mountedFlag->setActualPos(z->getExtent().getCenter());
-         cl->score += CapScore;     // Event: ReturnFlagToZone
+
+         // Score the flag...
+         // cl->score += 2;     // Event: ReturnFlagToZone
+         // setTeamScore(cl->teamId, mTeams[cl->teamId].score + 1);  // Event: ReturnFlagToZone
+		 setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ReturnFlagToZone, 0));
+		 cl->score += getEventScore(IndividualScore, ReturnFlagToZone, 0);
 
          // See if all the flags are owned by one team...
          for(S32 i = 0; i < mFlags.size(); i++)
@@ -290,7 +289,10 @@ public:
                return 0;
             case KillTeammate:
                return 0;
+		   case ReturnFlagToZone:
+               return 1;
             default:
+               logprintf("Unknown scoring event: %d", scoreEvent);
                return 0;
          }
       }
@@ -299,12 +301,15 @@ public:
          switch(scoreEvent)
          {
             case KillEnemy:
-               return 0;
+               return 1;
             case KillSelf:
-               return 0;
+               return -1;
             case KillTeammate:
                return 0;
+            case ReturnFlagToZone:
+               return 2;
             default:
+               logprintf("Unknown scoring event: %d", scoreEvent);
                return 0;
          }
       }
@@ -313,7 +318,7 @@ public:
 
    const char *getGameTypeString() { return "Retrieve"; }
    const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
-   bool isTeamGame() { return true; } 
+   bool isTeamGame() { return true; }
 
    TNL_DECLARE_CLASS(RetrieveGameType);
 };

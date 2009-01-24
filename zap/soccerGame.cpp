@@ -70,16 +70,11 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
             msg = "A goal was scored on a neutral goal!";
          else if(teamIndexAdjusted == -2)
             msg = "A goal was scored on a hostile goal!";
-         else 
+         else
             msg = "A goal was scored on an unknown goal!";
       }
       else
-      {
-         msg = string(clientName.getString()) + " scored an own-goal, giving a point to the other team";
-         if(mTeams.size() > 2)
-            msg += "s";
-         msg += "!";
-      }
+         msg = string(clientName.getString()) + " scored an own-goal, losing their team a point!";
    }
    // Print the message
    gGameUserInterface.displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
@@ -98,7 +93,7 @@ void SoccerGameType::setBall(SoccerBallItem *theBall)
 
 void SoccerGameType::scoreGoal(StringTableEntry playerName, S32 goalTeamIndex)
 {
-   ClientRef *cl = findClientRef(playerName);
+   ClientRef *cl = findClientRef(playerName);		// Need a better mechanism for this... time for shipIDs?
    S32 scoringTeam = -1;
    if(cl)
       scoringTeam = cl->teamId;
@@ -106,21 +101,32 @@ void SoccerGameType::scoreGoal(StringTableEntry playerName, S32 goalTeamIndex)
    if(scoringTeam == -1 || scoringTeam == goalTeamIndex)    // Own-goal
    {
       // Give all the other teams a point --> effectively the same as subtracting point from scorer
-      for(S32 i = 0; i < mTeams.size(); i++)
-      {
-         if(static_cast<U32>(i) != goalTeamIndex)           
-            setTeamScore(i, mTeams[i].score + 1);           // Event: ScoreGoalOwnTeam
-      }
+      // for(S32 i = 0; i < mTeams.size(); i++)
+      // {
+      //    if(static_cast<U32>(i) != goalTeamIndex)
+      //       setTeamScore(i, mTeams[i].score + 1);           // Event: ScoreGoalOwnTeam
+      // }
+	  cl->score += getEventScore(IndividualScore, ScoreGoalOwnTeam, 0);
+	  setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ScoreGoalOwnTeam, 0));
+
       s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));   // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
    }
-   else
+   else	   // Goal on someone else's goal
    {
-      S32 scoreMult = 1;
-      if(goalTeamIndex == -2)    // Hostile goal, yields negative score
-         scoreMult = -1;
+      if(goalTeamIndex == -2)
+      {
+         cl->score += getEventScore(IndividualScore, ScoreGoalHostileTeam, 0);
+	     setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ScoreGoalHostileTeam, 0));
+	  }
+      else
+      {
+		 cl->score += getEventScore(IndividualScore, ScoreGoalEnemyTeam, 0);
+	     setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ScoreGoalEnemyTeam, 0));
+      }
 
-      cl->score += scoreMult * GoalScore;                                     // Event: ScoreGoalHostileTeam, ScoreGoalEnemyTeam [player]
-      setTeamScore(scoringTeam, mTeams[scoringTeam].score + scoreMult * 1);   // Event: ScoreGoalHostileTeam, ScoreGoalEnemyTeam [team]
+      //cl->score += scoreMult * GoalScore;                                     // Event: ScoreGoalHostileTeam, ScoreGoalEnemyTeam [player]
+      //setTeamScore(scoringTeam, mTeams[scoringTeam].score + scoreMult * 1);   // Event: ScoreGoalHostileTeam, ScoreGoalEnemyTeam [team]
+
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
    }
 }
@@ -154,7 +160,14 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return 0;
          case KillTeammate:
             return 0;
+         case ScoreGoalEnemyTeam:
+            return 1;
+         case ScoreGoalOwnTeam:
+            return -1;
+         case ScoreGoalHostileTeam:
+            return -1;
          default:
+         	logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }
@@ -163,12 +176,19 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
       switch(scoreEvent)
       {
          case KillEnemy:
-            return 0;
+            return 1;
          case KillSelf:
-            return 0;
+            return -1;
          case KillTeammate:
             return 0;
+		 case ScoreGoalEnemyTeam:
+			return 5;
+		 case ScoreGoalOwnTeam:
+			return -5;
+		 case ScoreGoalHostileTeam:
+			return -5;
          default:
+			logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }

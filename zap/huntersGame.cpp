@@ -171,15 +171,13 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
          break;
    }
 
-   U32 score = 0;
-   for(U32 count = 1; count < theFlag->getFlagCount() + 1; count++)
-      score += (count * 10);
-
    ClientRef *cl = theShip->getControllingClient()->getClientRef();
-   cl->score += score;     // Score points for the player      // Event: ReturnFlagsToNexus
+   //cl->score += score;     // Score points for the player      // Event: ReturnFlagsToNexus
 
-   if(isTeamGame())        // Handle team scoring, if appropriate
-      setTeamScore(cl->teamId, mTeams[cl->teamId].score + score); // Event: ReturnFlagsToNexus
+   cl->score += getEventScore(IndividualScore, ReturnFlagsToNexus, theFlag->getFlagCount());
+
+   if(isTeamGame())        // Handle team scoring, if appropriate, includes check for winning score
+      setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore( TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount() ));
    else
       checkForWinningScore(cl->score);
 
@@ -255,8 +253,13 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
 }
 
 // What does a particular scoring event score?
-S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
+S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
 {
+
+   S32 score = 0;
+   for(S32 count = 1; count <= flags; count++)
+      score += (count * 10);
+
    if(scoreGroup == TeamScore)
    {
       switch(scoreEvent)
@@ -267,6 +270,8 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
             return 0;
          case KillTeammate:
             return 0;
+         case ReturnFlagsToNexus:
+         	return score;
          default:
             return 0;
       }
@@ -276,11 +281,13 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
       switch(scoreEvent)
       {
          case KillEnemy:
-            return 0;
+            return 10;
          case KillSelf:
-            return 0;
+            return -10;
          case KillTeammate:
             return 0;
+         case ReturnFlagsToNexus:
+            return score;
          default:
             return 0;
       }
@@ -297,7 +304,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
 
-   glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color  
+   glColor(mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);      // Display timer in appropriate color
 
    U32 timeLeft = mNexusReturnTimer.getCurrent();
    U32 minsRemaining = timeLeft / (60000);
@@ -305,7 +312,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65 - UserInterface::getStringWidth(20, NEXUS_STR),
       UserInterface::canvasHeight - UserInterface::vertMargin - 45, 20, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
-   
+
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, Color(1,1,1));
    renderObjectiveArrow(mNexus, mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);

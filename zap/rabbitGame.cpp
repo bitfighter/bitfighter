@@ -192,7 +192,7 @@ bool RabbitGameType::shipHasFlag(Ship *ship)
    return false;
 }
 
-void RabbitGameType::onClientScore(Ship *ship, S32 howMuch)
+void RabbitGameType::onClientScore(Ship *ship, ScoringEvent event)
 {
    GameConnection *controlConnection = ship->getControllingClient();
    ClientRef *cl = controlConnection->getClientRef();
@@ -200,7 +200,7 @@ void RabbitGameType::onClientScore(Ship *ship, S32 howMuch)
    if(!cl)
       return;
 
-   cl->score += howMuch;
+   cl->score += getEventScore(IndividualScore, event, 0);
    checkForWinningScore(cl->score);
 }
 
@@ -278,7 +278,7 @@ void RabbitGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
 
 void RabbitGameType::onFlagHeld(Ship *ship)
 {
-   onClientScore(ship, 1);    // Event: RabbitHoldsFlag
+   onClientScore(ship, RabbitHoldsFlag);    // Event: RabbitHoldsFlag
 }
 
 void RabbitGameType::addFlag(FlagItem *theFlag)
@@ -291,31 +291,23 @@ void RabbitGameType::addFlag(FlagItem *theFlag)
 void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 {
    s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->mPlayerName);
-   onClientScore(rabbitShip, RabbidRabbitBonus);      // Event: RabbitKills
+   onClientScore(rabbitShip, RabbitKills);      // Event: RabbitKills
 }
 
 void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
    s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->mPlayerName);
-   onClientScore(killerShip, RabbitKillBonus);        // Event: RabbitKilled
+   onClientScore(killerShip, RabbitKilled);        // Event: RabbitKilled
 }
 
 // What does a particular scoring event score?
 S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
+   // In general, there are no team scores in Rabbit games...
    if(scoreGroup == TeamScore)
    {
-      switch(scoreEvent)
-      {
-         case KillEnemy:
-            return 0;
-         case KillSelf:
-            return 0;
-         case KillTeammate:
-            return 0;
-         default:
-            return 0;
-      }
+	  logprintf("Unknown team scoring event: %d", scoreEvent);
+      return 0;
    }
    else  // scoreGroup == IndividualScore
    {
@@ -324,10 +316,17 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case KillEnemy:
             return 0;
          case KillSelf:
-            return 0;
+            return -5;
          case KillTeammate:
             return 0;
+         case RabbitKilled:
+         	return 5;
+         case RabbitKills:
+         	return 5;
+         case RabbitHoldsFlag:		// Pts per second
+         	return 1;
          default:
+            logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }

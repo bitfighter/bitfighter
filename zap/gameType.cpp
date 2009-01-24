@@ -215,7 +215,7 @@ void GameType::idle(GameObject::IdleCallPath path)
 // Sorts players by score
 S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 {
-   return a->getPointer()->score < b->getPointer()->score; 
+   return a->getPointer()->score < b->getPointer()->score;
 }
 
 
@@ -1092,18 +1092,18 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
       if(killerRef == clientRef)    // We killed ourselves -- should have gone easy with the bouncers!
       {
          killerRef->score += getEventScore(IndividualScore, KillSelf, 0);
-         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillSelf, 0));  
+         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillSelf, 0));
       }
       // Punish those who kill members of their own team.  Should do nothing with friendly fire disabled
       else if(isTeamGame() && killerRef->teamId == clientRef->teamId)   // Same team in a team game
       {
-         killerRef->score += getEventScore(IndividualScore, KillTeammate, 0);    
-         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillTeammate, 0));  
+         killerRef->score += getEventScore(IndividualScore, KillTeammate, 0);
+         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillTeammate, 0));
       }
       else                                                              // Different team, or not a team game
       {
          killerRef->score += getEventScore(IndividualScore, KillEnemy, 0);
-         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillEnemy, 0));  
+         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillEnemy, 0));
          if(!isTeamGame())
             checkForWinningScore(killerRef->score);
       }
@@ -1139,6 +1139,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillTeammate:
             return 0;
          default:
+            logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }
@@ -1153,6 +1154,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillTeammate:
             return 0;
          default:
+            logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }
@@ -1245,7 +1247,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
 
    if(!source->isAdmin())                // Admins only, please!
-      return;            
+      return;
 
    mGameTimer.reset(mGameTimer.getCurrent() + time);     // Increment "official time"
    s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients

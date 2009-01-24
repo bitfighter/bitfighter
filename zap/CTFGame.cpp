@@ -75,7 +75,11 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
 
          theFlag->sendHome();
-         cl->score += ReturnScore;     // Event: ReturnTeamFlag (holds enemy flag, touches own flag)
+
+         // cl->score += ReturnScore;     // Event: ReturnTeamFlag (holds enemy flag, touches own flag)
+	     cl->score += getEventScore(IndividualScore, ReturnTeamFlag, 0);
+	     setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ReturnTeamFlag, 0));
+
       }
       else
       {
@@ -86,7 +90,9 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
             FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
             if(mountedFlag)
             {
-               setTeamScore(cl->teamId, mTeams[cl->teamId].score + 1);     // Event: CaptureFlag
+               // setTeamScore(cl->teamId, mTeams[cl->teamId].score + 1);     // Event: CaptureFlag
+	           cl->score += getEventScore(IndividualScore, CaptureFlag, 0);
+	           setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, CaptureFlag, 0));
 
                static StringTableEntry capString("%e0 captured the %e1 flag!");
                Vector<StringTableEntry> e;
@@ -98,7 +104,14 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
                // Score the flag for the client's team...
                mountedFlag->dismount();
                mountedFlag->sendHome();
-               cl->score += CapScore;     // Event: CaptureFlag
+
+               //cl->score += CapScore;     // Event: CaptureFlag
+		   	   cl->score += getEventScore(IndividualScore, CaptureFlag, 0);
+			   setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, CaptureFlag, 0));
+
+
+
+
             }
          }
       }
@@ -184,7 +197,12 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 0;
          case KillTeammate:
             return 0;
-         default:
+		case ReturnTeamFlag:
+			return 1;
+		case CaptureFlag:
+			return 3;
+        default:
+        	logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }
@@ -193,12 +211,17 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
       switch(scoreEvent)
       {
          case KillEnemy:
-            return 0;
+            return 1;
          case KillSelf:
-            return 0;
+            return -1;
          case KillTeammate:
             return 0;
+		case ReturnTeamFlag:
+			return 1;
+		case CaptureFlag:
+			return 5;
          default:
+            logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }

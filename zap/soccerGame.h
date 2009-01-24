@@ -38,11 +38,6 @@ class SoccerBallItem;
 class SoccerGameType : public GameType
 {
    typedef GameType Parent;
-   enum Scores
-   {
-      KillScore    = 1,
-      GoalScore    = 5,
-   };
    Vector<GoalZone *> mGoals;
    SafePtr<SoccerBallItem> mBall;
 
@@ -63,7 +58,7 @@ public:
 
    const char *getGameTypeString() { return "Soccer"; }
    virtual const char *getInstructionString() { return "Push the ball into the opposing team's goal."; }
-   bool isTeamGame() { return true; } 
+   bool isTeamGame() { return true; }
 
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
    TNL_DECLARE_CLASS(SoccerGameType);

@@ -39,14 +39,7 @@ class CTFGameType : public GameType
 {
 private:
    typedef GameType Parent;
-   enum Scores
-   {
-      KillScore    = 1,
-      ReturnScore  = 1,
-      CapScore     = 5,
-      CapTeamScore = 2,
 
-   };
    Vector<SafePtr<FlagItem> > mFlags;
 
 public:
@@ -57,7 +50,7 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
    const char *getGameTypeString() { return "Capture the Flag"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
-   bool isTeamGame() { return true; } 
+   bool isTeamGame() { return true; }
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    TNL_DECLARE_CLASS(CTFGameType);
 };

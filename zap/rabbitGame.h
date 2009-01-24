@@ -57,12 +57,6 @@ public:
       RabbitMsgGameOverTie
    };
 
-   enum
-   {
-      RabbitKillBonus = 4,    //one for the kill and 4 more = 5 point bonus
-      RabbidRabbitBonus = 4
-   };
-
    RabbitGameType()
    {
       mTeamScoreLimit = 100;
@@ -93,10 +87,10 @@ public:
    void onFlaggerKill(Ship *rabbitShip);
    void onFlagReturned();
 
-   void onClientScore(Ship *ship, S32 howMuch);
+   void onClientScore(Ship *ship, ScoringEvent event);
    const char *getGameTypeString() { return "Rabbit"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
-   bool isTeamGame() { return false; } 
+   bool isTeamGame() { return false; }
    bool isSpawnWithLoadoutGame() { return true; }
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

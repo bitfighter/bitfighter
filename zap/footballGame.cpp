@@ -67,7 +67,7 @@ public:
    void shipTouchZone(Ship *s, GoalZone *z);
    const char *getGameTypeString() { return "Zone Control"; }
    const char *getInstructionString() { return "Capture each zone by carrying the flag into it!"; }
-   bool isTeamGame() { return true; } 
+   bool isTeamGame() { return true; }
 
    void renderInterfaceOverlay(bool scoreboardVisible);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
@@ -124,6 +124,7 @@ void ZoneControlGameType::addZone(GoalZone *z)
 // Ship enters a goal zone.  What happens?
 void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 {
+
    // Does the zone already belong to the ship's team?
    if(z->getTeam() == s->getTeam())
       return;
@@ -136,6 +137,10 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    if(i == s->mMountedItems.size())
       return;
 
+	ClientRef *cl = controlConnection->getClientRef();
+	if(!cl)
+      return;
+
    S32 oldTeam = z->getTeam();
    if(oldTeam >= 0)    // Zone is being captured from another team
    {
@@ -146,7 +151,10 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
-      setTeamScore(oldTeam, mTeams[oldTeam].score - 1);     // Event: UncaptureZone
+
+      // setTeamScore(oldTeam, mTeams[oldTeam].score - 1);     // Event: UncaptureZone
+	  cl->score += getEventScore(IndividualScore, UncaptureZone, 0);
+	  setTeamScore(z->teamId, mTeams[z->teamId].score + getEventScore(TeamScore, UncaptureZone, 0));
    }
    else                 // Zone is neutral
    {
@@ -157,7 +165,11 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    }
 
-   setTeamScore(s->getTeam(), mTeams[s->getTeam()].score + 1);    // Capturing team gets a point      // Event: CaptureZone
+   // setTeamScore(s->getTeam(), mTeams[s->getTeam()].score + 1);    // Capturing team gets a point      // Event: CaptureZone
+   cl->score += getEventScore(IndividualScore, CaptureZone, 0);
+   setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, CaptureZone, 0));
+
+
    z->setTeam(s->getTeam());                                      // and the zone is assigned to capturing team
 
    // Check to see if team now controls all zones
@@ -270,7 +282,12 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 0;
          case KillTeammate:
             return 0;
+         case CaptureZone:
+         	return 1;
+         case UncaptureZone:
+            return -1;
          default:
+            logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }
@@ -279,12 +296,17 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
       switch(scoreEvent)
       {
          case KillEnemy:
-            return 0;
+            return 1;
          case KillSelf:
-            return 0;
+            return -1;
          case KillTeammate:
             return 0;
+         case CaptureZone:
+         	return 1;
+		 case UncaptureZone:
+			return 0;
          default:
+            logprintf("Unknown scoring event: %d", scoreEvent);
             return 0;
       }
    }
