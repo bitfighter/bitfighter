@@ -133,7 +133,7 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
-   if(!isGhost() && (hitObject->getObjectTypeMask() & ShipType))     // Only ships collide
+   if(!isGhost() && (hitObject->getObjectTypeMask() & ShipType))     // Only ships collide, and only happens on server
    {
       Ship *s = dynamic_cast<Ship *>(hitObject);
 
@@ -151,7 +151,7 @@ bool SpeedZone::collide(GameObject *hitObject)
 
       Exclusion exclusion;
       exclusion.ship = s;
-      exclusion.time = gClientGame->getCurrentTime() + 500;
+      exclusion.time = gServerGame->getCurrentTime() + 500;
 
       mExclusions.push_back(exclusion);
    }
@@ -159,11 +159,12 @@ bool SpeedZone::collide(GameObject *hitObject)
    return false;
 }
 
+// Runs only on server!
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
    // Check for old exclusions that no longer apply
    for(S32 i = 0; i < mExclusions.size(); i++)
-      if(mExclusions[i].time < gClientGame->getCurrentTime())     // Exclusion has expired
+      if(mExclusions[i].time < gServerGame->getCurrentTime())     // Exclusion has expired
          mExclusions.erase(i);
 }
 

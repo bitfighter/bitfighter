@@ -49,6 +49,9 @@
 // Fixed mouse on menus in full screen mode
 // Tinkered with Geowar level -- bumped up gridsize, fixed a few quirks resulting in changes in rendering algorithm
 
+
+// Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options
+
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game

@@ -935,8 +935,6 @@ void EditorUserInterface::render()
       drawCenteredString(vertMargin, 14, "Non-wall objects hidden.  Hit Ctrl-A to restore display.");
    }
 
-
-
    //// TODO: del following block
    //glColor3f(1,0,0); // red for now
 
@@ -2887,7 +2885,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       // Write out our game parameters --> first one will be the gameType, along with all required parameters
       for(S32 i = 0; i < gGameParamUserInterface.gameParams.size(); i++)
       {
-         if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")
+         if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
          {
             fprintf(f, gGameParamUserInterface.gameParams[i].c_str());
             fprintf(f, "\n");

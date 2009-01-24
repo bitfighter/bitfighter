@@ -1221,7 +1221,7 @@ void LevelMenuSelectUserInterface::onActivate()
    
    char c[] = "A";
    for(S32 i = 0; i < gc->mLevelTypes.size(); i++)
-      if(strcmp(gc->mLevelNames[i].getString(), ""))                       // Skip levels with blank names
+      if(strcmp(gc->mLevelNames[i].getString(), ""))                       // Skip levels with blank names --> but all should have names now!
          if(!strcmp( gc->mLevelTypes[i].getString(), category.c_str() ) || !strcmp(category.c_str(), ALL_LEVELS) ) 
          {
             strncpy(c, gc->mLevelNames[i].getString(), 1);

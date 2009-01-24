@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../mslib/dsound.lib ../mslib/dxguid.lib ../mslib/dinput8.lib ../mslib/dinput.lib ../openal/OpenAL32.lib ../openal/alut.lib wsock32.lib ../glut/glut32.lib"
+				AdditionalDependencies="../win_include_do_not_distribute/dsound.lib ../win_include_do_not_distribute/dxguid.lib ../win_include_do_not_distribute/dinput8.lib ../openal/OpenAL32.lib ../openal/alut.lib wsock32.lib ../glut/glut32.lib"
 				OutputFile="..\exe\Bitfighter.exe"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="../libtomcrypt/release;../tnl;../lib"

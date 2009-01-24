@@ -39,7 +39,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory="$(TargetDir)"
-				CommandArguments="-jplay delme2"
+				CommandArguments=""
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

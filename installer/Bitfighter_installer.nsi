@@ -1,5 +1,5 @@
 # Script assumes that there is a /Dversion=curVersion
-!define curVersion "Release 010 preview"		###### <<<-----  TODO: Remove this.  For testing only!
+!define curVersion "Release 010 preview 2"		###### <<<-----  TODO: Remove this.  For testing only!
 ;--------------------------------
 ; Include Modern UI
 

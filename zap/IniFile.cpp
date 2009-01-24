@@ -31,6 +31,7 @@
 #include "../tnl/tnlJournal.h"    // For journaling support
 
 #include "zapjournal.h"
+#include "SweptEllipsoid.h"      // For string trimming functions
 
 
 // C Includes
@@ -63,22 +64,7 @@ CIniFile::CIniFile( string const iniPath)
   caseInsensitive = true;        // Case sensitivity creates confusion!
 }
 
-inline string trim_right(const string &source , const string& t = " ")
-{
-   string str = source;
-   return str.erase( str.find_last_not_of(t) + 1);
-}
 
-inline string trim_left(const string& source, const string& t = " ")
-{
-   string str = source;
-   return str.erase(0 , source.find_first_not_of(t) );
-}
-
-inline string trim(const string& source, const string& t = " ")
-{
-   return trim_left(trim_right(source, t), t);
-}
 
 
 extern Zap::ZapJournal gZapJournal;
@@ -142,7 +128,7 @@ void CIniFile::processLine(string line)
 
    //  line = _TCHAR(l.c_str());
    // To be compatible with Win32, check for existence of '\r'.
-   // Win32 files have the '\r' and Unix files don't at the end of a line.
+   // Win32 files have the '\r' at the end of a line, and Unix files don't.
    // Note that the '\r' will be written to INI files from
    // Unix so that the created INI file can be read under Win32
    // without change.

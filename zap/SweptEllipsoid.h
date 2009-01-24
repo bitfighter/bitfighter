@@ -49,6 +49,9 @@
 #ifndef _SWEPT_ELLIPSOID_H_
 #define _SWEPT_ELLIPSOID_H_
 
+#include "point.h"
+#include <string>
+
 using namespace TNL;
 
 namespace Zap {
@@ -69,6 +72,24 @@ bool segmentsColinear(Point p1, Point p2, Point p3, Point p4);
 bool segsOverlap(Point p1, Point p2, Point p3, Point p4, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(Point c, Point a, Point b);
 
+
+// Note that inlined functions seem to need to be defined in the header file, not just declared
+inline std::string trim_right(const std::string &source, const std::string &t = " ")
+{
+   std::string str = source;
+   return str.erase(str.find_last_not_of(t) + 1);
+}
+
+inline std::string trim_left(const std::string &source, const std::string &t = " ")
+{
+   std::string str = source;
+   return str.erase(0, source.find_first_not_of(t));
+}
+
+inline std::string trim(const std::string &source, const std::string &t = " ")
+{
+   return trim_left(trim_right(source, t), t);
+}
 
 
 /*****************************************************************/

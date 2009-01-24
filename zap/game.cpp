@@ -244,6 +244,7 @@ S32 ServerGame::getLevelNameCount()
    return mLevelNames.size();
 }
 
+
 extern CmdLineSettings gCmdLineSettings;
 
 // This gets called when you first host a game.
@@ -259,7 +260,13 @@ void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
       string levelName = getLevelFileName(mLevelList[i].getString());
       if(loadLevel(levelName))    // loadLevel returns true if the load was successful
       {
-         StringTableEntry name = getGameType()->mLevelName;
+         string lname = trim(getGameType()->mLevelName.getString());
+         StringTableEntry name;
+         if(lname == "")
+            name = mLevelList[i];      // Use filename if level name is blank
+         else
+            name = lname.c_str();
+
          StringTableEntry type(getGameType()->getGameTypeString());
 
          // Save some key level parameters
