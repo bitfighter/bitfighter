@@ -200,8 +200,7 @@ void RabbitGameType::onClientScore(Ship *ship, ScoringEvent event)
    if(!cl)
       return;
 
-   cl->score += getEventScore(IndividualScore, event, 0);
-   checkForWinningScore(cl->score);
+   updateScore(cl, event);
 }
 
 void RabbitGameType::idle(GameObject::IdleCallPath path)
@@ -298,6 +297,21 @@ void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
    s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->mPlayerName);
    onClientScore(killerShip, RabbitKilled);        // Event: RabbitKilled
+}
+
+
+Vector<U32> RabbitGameType::getScoringEventList()
+{
+   Vector<U32> events;
+
+   events.push_back( KillEnemy );
+   events.push_back( KillSelf );
+   events.push_back( KillTeammate );
+   events.push_back( RabbitKilled );
+   events.push_back( RabbitKills );
+   events.push_back( RabbitHoldsFlag );
+
+   return events;
 }
 
 // What does a particular scoring event score?

@@ -100,32 +100,15 @@ void SoccerGameType::scoreGoal(StringTableEntry playerName, S32 goalTeamIndex)
 
    if(scoringTeam == -1 || scoringTeam == goalTeamIndex)    // Own-goal
    {
-      // Give all the other teams a point --> effectively the same as subtracting point from scorer
-      // for(S32 i = 0; i < mTeams.size(); i++)
-      // {
-      //    if(static_cast<U32>(i) != goalTeamIndex)
-      //       setTeamScore(i, mTeams[i].score + 1);           // Event: ScoreGoalOwnTeam
-      // }
-	  cl->score += getEventScore(IndividualScore, ScoreGoalOwnTeam, 0);
-	  setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ScoreGoalOwnTeam, 0));
-
+      updateScore(cl, ScoreGoalOwnTeam);
       s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));   // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
    }
    else	   // Goal on someone else's goal
    {
       if(goalTeamIndex == -2)
-      {
-         cl->score += getEventScore(IndividualScore, ScoreGoalHostileTeam, 0);
-	     setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ScoreGoalHostileTeam, 0));
-	  }
+         updateScore(cl, ScoreGoalHostileTeam);
       else
-      {
-		 cl->score += getEventScore(IndividualScore, ScoreGoalEnemyTeam, 0);
-	     setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ScoreGoalEnemyTeam, 0));
-      }
-
-      //cl->score += scoreMult * GoalScore;                                     // Event: ScoreGoalHostileTeam, ScoreGoalEnemyTeam [player]
-      //setTeamScore(scoringTeam, mTeams[scoringTeam].score + scoreMult * 1);   // Event: ScoreGoalHostileTeam, ScoreGoalEnemyTeam [team]
+         updateScore(cl, ScoreGoalEnemyTeam);
 
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
    }
@@ -145,6 +128,20 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
    if(mBall.isValid())
       renderObjectiveArrow(mBall, getTeamColor(-1));
+}
+
+Vector<U32> SoccerGameType::getScoringEventList()
+{
+   Vector<U32> events;
+
+   events.push_back( KillEnemy );
+   events.push_back( KillSelf );
+   events.push_back( KillTeammate );
+   events.push_back( ScoreGoalEnemyTeam );
+   events.push_back( ScoreGoalOwnTeam );
+   events.push_back( ScoreGoalHostileTeam );
+
+   return events;
 }
 
 // What does a particular scoring event score?

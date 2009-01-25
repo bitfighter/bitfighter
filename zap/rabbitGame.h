@@ -92,6 +92,8 @@ public:
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    bool isTeamGame() { return false; }
    bool isSpawnWithLoadoutGame() { return true; }
+
+   Vector<U32> getScoringEventList();
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
 

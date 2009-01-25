@@ -51,7 +51,10 @@ public:
    const char *getGameTypeString() { return "Capture the Flag"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
    bool isTeamGame() { return true; }
+
+   Vector<U32> getScoringEventList();
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+
    TNL_DECLARE_CLASS(CTFGameType);
 };
 

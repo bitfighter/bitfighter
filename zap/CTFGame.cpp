@@ -76,10 +76,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          theFlag->sendHome();
 
-         // cl->score += ReturnScore;     // Event: ReturnTeamFlag (holds enemy flag, touches own flag)
-	     cl->score += getEventScore(IndividualScore, ReturnTeamFlag, 0);
-	     setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ReturnTeamFlag, 0));
-
+         updateScore(cl, ReturnTeamFlag);
       }
       else
       {
@@ -90,10 +87,6 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
             FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
             if(mountedFlag)
             {
-               // setTeamScore(cl->teamId, mTeams[cl->teamId].score + 1);     // Event: CaptureFlag
-	           cl->score += getEventScore(IndividualScore, CaptureFlag, 0);
-	           setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, CaptureFlag, 0));
-
                static StringTableEntry capString("%e0 captured the %e1 flag!");
                Vector<StringTableEntry> e;
                e.push_back(cl->name);
@@ -101,17 +94,10 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
                for(S32 i = 0; i < mClientList.size(); i++)
                   mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
 
-               // Score the flag for the client's team...
                mountedFlag->dismount();
                mountedFlag->sendHome();
 
-               //cl->score += CapScore;     // Event: CaptureFlag
-		   	   cl->score += getEventScore(IndividualScore, CaptureFlag, 0);
-			   setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, CaptureFlag, 0));
-
-
-
-
+               updateScore(cl, CaptureFlag);
             }
          }
       }
@@ -183,6 +169,18 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
 }
 
+Vector<U32> CTFGameType::getScoringEventList()
+{
+   Vector<U32> events;
+
+   events.push_back( KillEnemy );
+   events.push_back( KillSelf );
+   events.push_back( KillTeammate );
+   events.push_back( ReturnTeamFlag );
+   events.push_back( CaptureFlag );
+
+   return events;
+}
 
 // What does a particular scoring event score?
 S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)

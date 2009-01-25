@@ -77,6 +77,7 @@ public:
    bool isSpawnWithLoadoutGame() { return true; }
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
+   Vector<U32> getScoringEventList();
 
    enum {
       DefaultNexusReturnDelay = 60000,

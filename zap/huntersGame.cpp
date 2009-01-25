@@ -171,19 +171,15 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
          break;
    }
 
+   if(!theFlag)      // Just in case!
+      return;
+
    ClientRef *cl = theShip->getControllingClient()->getClientRef();
-   //cl->score += score;     // Score points for the player      // Event: ReturnFlagsToNexus
-
-   cl->score += getEventScore(IndividualScore, ReturnFlagsToNexus, theFlag->getFlagCount());
-
-   if(isTeamGame())        // Handle team scoring, if appropriate, includes check for winning score
-      setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore( TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount() ));
-   else
-      checkForWinningScore(cl->score);
+   updateScore(cl, ReturnFlagsToNexus, theFlag->getFlagCount());
 
    if(theFlag->getFlagCount() > 0)
    {
-      s2cHuntersMessage(HuntersMsgScore, theShip->mPlayerName.getString(), theFlag->getFlagCount(), score);
+      s2cHuntersMessage(HuntersMsgScore, theShip->mPlayerName.getString(), theFlag->getFlagCount(), theFlag->getFlagCount());
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
    }
    theFlag->changeFlagCount(0);
@@ -250,6 +246,18 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
    }
+}
+  
+Vector<U32> HuntersGameType::getScoringEventList()
+{
+   Vector<U32> events;
+
+   events.push_back( KillEnemy );
+   events.push_back( KillSelf );
+   events.push_back( KillTeammate );
+   events.push_back( ReturnFlagsToNexus );
+
+   return events;
 }
 
 // What does a particular scoring event score?

@@ -190,13 +190,9 @@ public:
                break;
 
          mFlags[flagIndex]->setZone(z);
-
          mountedFlag->setActualPos(z->getExtent().getCenter());
-         // cl->score += 2;     // Event: ReturnFlagToZone
 
-		 cl->score += getEventScore(IndividualScore, ReturnFlagToZone, 0);
-		 setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ReturnFlagToZone, 0));
-
+         updateScore(cl, ReturnFlagToZone);
       }
    }
 
@@ -207,22 +203,21 @@ public:
       if(path != GameObject::ServerIdleMainLoop)
          return;
 
- 	  if(!mScoreTimer.update(mCurrentMove.time))
- 		 return;
+      if(!mScoreTimer.update(mCurrentMove.time))
+         return;
 
-	  // Time to score!
-	  mScoreTimer.reset();
-	  for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
-	  {
-		 if(mFlags[flagIndex]->getZone() != NULL)
-		 {
-		    S32 team = mFlags[flagIndex]->getZone()->getTeam();
-		    // setTeamScore(team, mTeams[team].score + 1);           // Event: HoldFlagInZone
-		    setTeamScore(team, mTeams[team].score + getEventScore(TeamScore, HoldFlagInZone, 0));
-		    // No good way to award individual points for this event!!
-		 }
-	  }
+      // Time to score!
+      mScoreTimer.reset();
+      for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
+      {
+         if(mFlags[flagIndex]->getZone() != NULL)
+         {
+            S32 team = mFlags[flagIndex]->getZone()->getTeam();
+            updateScore(team, HoldFlagInZone);     // Team only --> No logical way to award individual points for this event!!
+         }
+      }
    }
+
 
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
    {
@@ -271,7 +266,7 @@ public:
                      break;
                }
                if(k == mFlags.size())
-                  renderObjectiveArrow(mZones[j], getTeamColor(u->getTeam()));
+                  renderObjectiveArrow( mZones[j], getTeamColor(u->getTeam()) );
             }
             uFlag = true;
             break;
@@ -303,6 +298,18 @@ public:
    const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
    bool isTeamGame() { return true; }
 
+   Vector<U32> getScoringEventList()
+   {
+      Vector<U32> events;
+
+      events.push_back( KillEnemy );
+      events.push_back( KillSelf );
+      events.push_back( KillTeammate );
+      events.push_back( ReturnFlagToZone );
+      events.push_back( HoldFlagInZone );
+
+      return events;
+   }
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
@@ -322,7 +329,7 @@ public:
             case HoldFlagInZone:		// Per ScoreTime ms
                return 1;
             default:
-               logprintf("Unknown scoring event: %d", scoreEvent);
+               //logprintf("Unknown scoring event: %d", scoreEvent);
                return 0;
          }
       }
@@ -336,12 +343,12 @@ public:
                return -1;
             case KillTeammate:
                return 0;
-		   case ReturnFlagToZone:
-			  return 2;
-		   // case HoldFlagInZone:		// There's not a good way to award these points
-		   //	  return 0;             // and unless we really want them, let's not bother
+		      case ReturnFlagToZone:
+			      return 2;
+		      // case HoldFlagInZone:		// There's not a good way to award these points
+		      //	  return 0;             // and unless we really want them, let's not bother
             default:
-               logprintf("Unknown scoring event: %d", scoreEvent);
+               //logprintf("Unknown scoring event: %d", scoreEvent);
                return 0;
          }
       }

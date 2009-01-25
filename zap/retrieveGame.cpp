@@ -92,21 +92,24 @@ public:
       StringTableEntry r = takeString;
       if(mFlags.size() == 1)
          r = oneFlagTakeString;
-      U32 teamIndex;
+      S32 team;
 
       if(theFlag->getZone() == NULL)      // Picked up flag just sitting around
-         teamIndex = cl->teamId;
+         team = cl->teamId;
       else                                // Grabbed flag from enemy zone
       {
          r = stealString;
-         teamIndex = theFlag->getZone()->getTeam();
-         setTeamScore(teamIndex, mTeams[teamIndex].score - 1);
+         team = theFlag->getZone()->getTeam();
+         updateScore(team, LostFlag);
       }
+
       Vector<StringTableEntry> e;
       e.push_back(cl->name);
-      e.push_back(mTeams[teamIndex].name);
+      e.push_back(mTeams[team].name);
+
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
+
       theFlag->mountToShip(theShip);
       theFlag->setZone(NULL);
    }
@@ -173,16 +176,14 @@ public:
          mountedFlag->setActualPos(z->getExtent().getCenter());
 
          // Score the flag...
-         // cl->score += 2;     // Event: ReturnFlagToZone
-         // setTeamScore(cl->teamId, mTeams[cl->teamId].score + 1);  // Event: ReturnFlagToZone
-		 setTeamScore(cl->teamId, mTeams[cl->teamId].score + getEventScore(TeamScore, ReturnFlagToZone, 0));
-		 cl->score += getEventScore(IndividualScore, ReturnFlagToZone, 0);
+         updateScore(cl, ReturnFlagToZone);
 
          // See if all the flags are owned by one team...
          for(S32 i = 0; i < mFlags.size(); i++)
             if(!mFlags[i]->getZone() || mFlags[i]->getZone()->getTeam() != cl->teamId)
                return;     // ...if not, we're done
 
+         // One team has all the flags
          if(mFlags.size() != 1)
          {
             static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
@@ -276,6 +277,19 @@ public:
       }
    }
 
+   Vector<U32> getScoringEventList()
+   {
+      Vector<U32> events;
+
+      events.push_back( KillEnemy );
+      events.push_back( KillSelf );
+      events.push_back( KillTeammate );
+      events.push_back( ReturnFlagToZone );
+      events.push_back( LostFlag );
+
+      return events;
+   }
+
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
    {
@@ -291,6 +305,8 @@ public:
                return 0;
 		   case ReturnFlagToZone:
                return 1;
+         case LostFlag:    // Not really an individual scoring event!
+               return -1;
             default:
                logprintf("Unknown scoring event: %d", scoreEvent);
                return 0;
@@ -308,6 +324,8 @@ public:
                return 0;
             case ReturnFlagToZone:
                return 2;
+            // case LostFlag:    // Not really an individual scoring event!
+            //    return 0;
             default:
                logprintf("Unknown scoring event: %d", scoreEvent);
                return 0;

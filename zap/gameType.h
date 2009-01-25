@@ -47,7 +47,11 @@ public:
    StringTableEntry name;  // Name of client - guaranteed to be unique of current clients
 
    S32 teamId;
-   S32 score;
+   
+   S32 score;              // Individual score for current game
+   S32 cumScore;           // Cumulative score over all games
+   S32 totalScore;         // Total points scored by all players, including this one
+
    bool isAdmin;
    bool isLevelChanger;
    Timer respawnTimer;
@@ -66,6 +70,8 @@ public:
    {
       ping = 0;
       score = 0;
+      cumScore = 0;
+      totalScore = 0;
       readyForRegularGhosts = false;
       wantsScoreboardUpdates = false;
       teamId = 0;
@@ -188,7 +194,8 @@ public:
       RabbitKilled,           // rabbit
       RabbitKills,            // rabbit
       ReturnFlagsToNexus,     // hunters game
-      ReturnFlagToZone,       // retrieve
+      ReturnFlagToZone,       // retrieve -> flag returned to zone
+      LostFlag,               // retrieve -> enemy took flag
       ReturnTeamFlag,  	      // ctf -> holds enemy flag, touches own flag
       ScoreGoalEnemyTeam,     // soccer
       ScoreGoalHostileTeam,   // soccer
@@ -200,9 +207,10 @@ public:
       TeamScore,
    };
 
+   virtual Vector<U32> getScoringEventList();
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-   //virtual const ScoringEvent *getScoringEvents();         // List of scoring events relevant to this game
-
+   static string GameType::getScoringEventDescr(ScoringEvent event);
+   
    static Vector<RangedU32<0, MaxPing> > mPingTimes; // Static vector used for constructing update RPCs
    static Vector<SignedInt<24> > mScores;
 
@@ -291,7 +299,10 @@ public:
 
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
-   void setTeamScore(U32 teamIndex, S32 newScore);
+   void updateScore(ClientRef *client, S32 team, ScoringEvent event, S32 data = 0);
+   void updateScore(ClientRef *client, ScoringEvent event, S32 data = 0);
+   void updateScore(S32 team, ScoringEvent event, S32 data = 0);
+
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, gMaxTeams> teamIndex, U32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));

@@ -124,7 +124,9 @@ Vector<GameType::ParameterDescription> GameType::describeArguments()
 
 
 void GameType::printRules()
-{
+{   
+   NetClassRep::initialize();
+
    printf("Bitfighter rules\n");
    printf("================\n");
    printf("Projectiles:\n");
@@ -138,7 +140,71 @@ void GameType::printRules()
       printf("\tCan Damage Shooter: %s\n", gWeapons[i].canDamageSelf ? "Yes" : "No");
       printf("\tCan Damage Teammate: %s\n", gWeapons[i].canDamageTeammate ? "Yes" : "No");
    }
+
+
+   for(S32 i = 0; ; i++)     // second arg intentionally blank!
+   {
+      if(gGameTypeNames[i] == NULL)
+         break;
+
+      TNL::Object *theObject = TNL::Object::create(gGameTypeNames[i]);  // Instantiate a gameType object
+      GameType *gameType = dynamic_cast<GameType*>(theObject);          // and cast it
+
+      Vector<U32> scoringEvents = gameType->getScoringEventList();
+      printf("Game type: %s\n", gGameTypeNames[i]);
+      printf("\nEvent: Team / Individual Score\n");
+      printf("===================================\n");
+      for(S32 j = 0; j < scoringEvents.size(); j++)
+         printf("%s: %d / %d\n", getScoringEventDescr((ScoringEvent) scoringEvents[j]).c_str(), gameType->getEventScore(GameType::TeamScore, (ScoringEvent) scoringEvents[j], 0), gameType->getEventScore(GameType::IndividualScore, (ScoringEvent) scoringEvents[j], 0));
+
+      printf("\n\n");
+   }
 }
+
+string GameType::getScoringEventDescr(ScoringEvent event)
+{
+   switch(event)
+   {
+      case KillEnemy:
+	      return("Kill enemy player");
+      case KillSelf:
+	      return("Kill self");
+      case KillTeammate:
+	      return("Kill teammate");
+      case CaptureFlag:
+	      return("CTF->Touch enemy flag to your flag");
+      case ReturnTeamFlag:
+	      return("CTF->Return own flag to goal");
+     case  CaptureZone:
+	      return("ZC->Capture zone");
+      case UncaptureZone:
+	      return("ZC->Lose captured zone to other team");
+      case HoldFlagInZone:
+	      return("HTF->Hold flag in zone for time");
+      case RabbitHoldsFlag:
+	      return("Rabbit->Hold flag, per second");
+      case RabbitKilled:
+	      return("Rabbit->Kill the rabbit");
+      case RabbitKills:
+	      return("Rabbit->Kill other player if you are rabbit");
+      case ReturnFlagsToNexus:
+	      return("Hunters->Return flags to Nexus");
+      case ReturnFlagToZone:
+	      return("Retrieve->Return flags to own zone");
+      case LostFlag:
+	      return("Retrieve->Lose captured flag to other team");
+      case ScoreGoalEnemyTeam:
+	      return("Soccer->Score a goal against other team");
+      case ScoreGoalHostileTeam:
+	      return("Soccer->Score a goal against Hostile team");
+      case ScoreGoalOwnTeam:
+	      return("Soccer->Score a goal against own team");
+      default:
+         return("Unknown event!");
+   }
+}
+
+
 
 const char *GameType::validateGameType(const char *gtype)
 {
@@ -344,7 +410,6 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].score);
          }
 
-
          Vector<RefPtr<ClientRef> > playerScores;
 
          // Now for player scores.  First build a list, then sort it, then display it.
@@ -354,7 +419,6 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          for(S32 j = 0; j < mClientList.size(); j++)
             if(mClientList[j]->teamId == i || !isTeamGame())
                playerScores.push_back(mClientList[j]);
-
 
          //qsort(playerScores, playerScores.size(), sizeof(ServerRef), compareFuncName);
          playerScores.sort(scoreSort);
@@ -1090,23 +1154,12 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
    if(killerRef)     // Known killer
    {
       if(killerRef == clientRef)    // We killed ourselves -- should have gone easy with the bouncers!
-      {
-         killerRef->score += getEventScore(IndividualScore, KillSelf, 0);
-         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillSelf, 0));
-      }
+         updateScore(killerRef, KillSelf);
       // Punish those who kill members of their own team.  Should do nothing with friendly fire disabled
       else if(isTeamGame() && killerRef->teamId == clientRef->teamId)   // Same team in a team game
-      {
-         killerRef->score += getEventScore(IndividualScore, KillTeammate, 0);
-         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillTeammate, 0));
-      }
+         updateScore(killerRef, KillTeammate);
       else                                                              // Different team, or not a team game
-      {
-         killerRef->score += getEventScore(IndividualScore, KillEnemy, 0);
-         setTeamScore(killerRef->teamId, mTeams[killerRef->teamId].score + getEventScore(TeamScore, KillEnemy, 0));
-         if(!isTeamGame())
-            checkForWinningScore(killerRef->score);
-      }
+         updateScore(killerRef, KillEnemy);
 
       s2cKillMessage(clientRef->name, killerRef->name);
    }
@@ -1117,12 +1170,67 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
 }
 
 
-//// Get a list of all relevant scoring events for this game type
-//const ScoringEvent *GameType::getScoringEvents()
-//{
-//   const ScoringEvent scoringEvents[] = { KillEnemy, KillSelf, KillTeammate };
-//   return scoringEvents;
-//}
+// Handle both individual scores and team scores
+void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent event, S32 data)
+{
+   S32 newScore = 0;
+
+   if(player != NULL)
+   {
+      // Individual scores
+      S32 points = getEventScore(IndividualScore, event, data);
+      player->score += points;
+      player->cumScore += points;
+      for(S32 i = 0; i < mClientList.size(); i++)
+         mClientList[i]->totalScore += points;
+
+      newScore = player->score;
+   }
+
+   if(isTeamGame())
+   {
+      // Just in case...  completely superflous, gratuitous check
+      if(team < 0) 
+         return;
+
+      newScore = mTeams[team].score + getEventScore(TeamScore, event, data);
+      mTeams[team].score = newScore;         
+      s2cSetTeamScore(team, newScore);       // Broadcast new team score
+   }
+
+   checkForWinningScore(newScore);           // Check if score is high enough to trigger end-of-game
+}
+
+// Different signature for more common usage
+void GameType::updateScore(ClientRef *client, ScoringEvent event, S32 data)
+{
+   updateScore(client, client->teamId, event, data);
+}
+
+// Signature for team-only scoring event
+void GameType::updateScore(S32 team, ScoringEvent event, S32 data)
+{
+   updateScore(NULL, team, event, data);
+}
+
+
+void GameType::checkForWinningScore(S32 newScore)
+{
+   if(newScore >= mTeamScoreLimit)        // End game if max score has been reached
+      gameOverManGameOver();
+}
+
+
+Vector<U32> GameType::getScoringEventList()
+{
+   Vector<U32> events;
+
+   events.push_back( KillEnemy );
+   events.push_back( KillSelf );
+   events.push_back( KillTeammate );
+
+   return events;
+}
 
 
 // What does a particular scoring event score?
@@ -1216,21 +1324,6 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
       menuOptions.push_back(MenuItem("CHANGE A PLAYER'S TEAM", 2000, KEY_C, KEY_UNKNOWN));
 }
 
-
-void GameType::setTeamScore(U32 teamIndex, S32 newScore)
-{
-   mTeams[teamIndex].score = newScore;    // Give team the new score
-   s2cSetTeamScore(teamIndex, newScore);  // Broadcast new score
-
-   checkForWinningScore(newScore);
-}
-
-
-void GameType::checkForWinningScore(S32 newScore)
-{
-   if(newScore >= mTeamScoreLimit)        // End game if max score has been reached
-      gameOverManGameOver();
-}
 
 // Broadcast info about the current level
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds), (levelName, levelDesc, teamScoreLimit, levelCreds))
@@ -1626,10 +1719,6 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, (Vector<RangedU32<0, GameType::M
       mClientList[i]->score = scores[i];
    }
 }
-
-
-
-
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer), (victim, killer))
 {
