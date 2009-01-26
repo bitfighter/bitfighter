@@ -829,12 +829,15 @@ S32 GhostConnection::getGhostIndex(NetObject *obj)
 
 //-----------------------------------------------------------------------------
 
-void GhostConnection::onEndGhosting()
-{
-}
-
 void GhostConnection::onStartGhosting()
 {
+   // Do nothing
 }
+
+void GhostConnection::onEndGhosting()
+{
+   // Do nothing
+}
+
 
 };

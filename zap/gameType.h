@@ -47,10 +47,8 @@ public:
    StringTableEntry name;  // Name of client - guaranteed to be unique of current clients
 
    S32 teamId;
-   
    S32 score;              // Individual score for current game
-   S32 cumScore;           // Cumulative score over all games
-   S32 totalScore;         // Total points scored by all players, including this one
+   F32 rating;             // Skill rating from -1 to 1
 
    bool isAdmin;
    bool isLevelChanger;
@@ -70,8 +68,7 @@ public:
    {
       ping = 0;
       score = 0;
-      cumScore = 0;
-      totalScore = 0;
+      rating = 0;
       readyForRegularGhosts = false;
       wantsScoreboardUpdates = false;
       teamId = 0;
@@ -95,7 +92,7 @@ public:
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
    virtual const char *getGameTypeString() { return "Zapmatch"; }                            // Will be overridden by other games
-   virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }    //    -- ditto --
+   virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }  //          -- ditto --
    virtual bool isTeamGame() { return mTeams.size() > 1; }                                // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool isSpawnWithLoadoutGame() { return false; }                                // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
@@ -105,6 +102,7 @@ public:
    {
       RespawnDelay = 1500,
       SwitchTeamsDelay = 60000,   // Time between team switches (ms) -->  60000 = 1 minute
+      naScore = -99999,           // Score representing a nonsesical event
    };
 
    struct BarrierRec
@@ -200,6 +198,7 @@ public:
       ScoreGoalEnemyTeam,     // soccer
       ScoreGoalHostileTeam,   // soccer
       ScoreGoalOwnTeam,       // soccer -> score on self
+      ScoringEventsCount
    };
 
    enum ScoringGroup {
@@ -207,12 +206,13 @@ public:
       TeamScore,
    };
 
-   virtual Vector<U32> getScoringEventList();
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    static string GameType::getScoringEventDescr(ScoringEvent event);
    
-   static Vector<RangedU32<0, MaxPing> > mPingTimes; // Static vector used for constructing update RPCs
-   static Vector<SignedInt<24> > mScores;
+   // Static vectors used for constructing update RPCs
+   static Vector<RangedU32<0, MaxPing> > mPingTimes;  
+   static Vector<SignedInt<24>> mScores;
+   static Vector<RangedU32<0,200>> mRatings;                      
 
    GameType();    // Constructor
    void countTeamPlayers();
@@ -306,7 +306,7 @@ public:
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, gMaxTeams> teamIndex, U32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200>> ratings));
    virtual void updateClientScoreboard(ClientRef *theClient);
 
    TNL_DECLARE_RPC(c2sAdvanceWeapon, ());

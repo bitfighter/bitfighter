@@ -72,7 +72,6 @@ public:
    void renderInterfaceOverlay(bool scoreboardVisible);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
 
-   Vector<U32> getScoringEventList();
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
    TNL_DECLARE_RPC(s2cSetFlagTeam, (S32 newFlagTeam));
@@ -264,20 +263,6 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-Vector<U32> ZoneControlGameType::getScoringEventList()
-{
-   Vector<U32> events;
-
-   events.push_back( KillEnemy );
-   events.push_back( KillSelf );
-   events.push_back( KillTeammate );
-   events.push_back( CaptureZone );
-   events.push_back( UncaptureZone );
-
-   return events;
-}
-
-
 // What does a particular scoring event score?
 S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
@@ -296,8 +281,7 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
          case UncaptureZone:
             return -1;
          default:
-            logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+            return naScore;
       }
    }
    else  // scoreGroup == IndividualScore
@@ -313,10 +297,9 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
          case CaptureZone:
          	return 1;
 		 case UncaptureZone:    // This pretty much has to stay at 0, as the player doing the "uncapturing" will
-			return 0;            // also be credited for a CaptureZone event
-         default:
-            logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+			   return 0;         // also be credited for a CaptureZone event
+       default:
+            return naScore;
       }
    }
 }

@@ -248,18 +248,6 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
    }
 }
   
-Vector<U32> HuntersGameType::getScoringEventList()
-{
-   Vector<U32> events;
-
-   events.push_back( KillEnemy );
-   events.push_back( KillSelf );
-   events.push_back( KillTeammate );
-   events.push_back( ReturnFlagsToNexus );
-
-   return events;
-}
-
 // What does a particular scoring event score?
 S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
 {
@@ -281,7 +269,7 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
          case ReturnFlagsToNexus:
          	return score;
          default:
-            return 0;
+            return naScore;
       }
    }
    else  // scoreGroup == IndividualScore
@@ -297,7 +285,7 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
          case ReturnFlagsToNexus:
             return score;
          default:
-            return 0;
+            return naScore;
       }
    }
 }

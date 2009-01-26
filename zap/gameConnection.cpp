@@ -62,6 +62,8 @@ GameConnection::GameConnection()
    mGotPermissionsReply = false;
    mWaitingForPermissionsReply = false;
    mSwitchTimer.reset(0);
+   mCumScore = 0;    // Total points scored my this connection
+   mTotalScore = 0;  // Total points scored by anyone while this connection is alive
 }
 
 GameConnection::~GameConnection()

@@ -93,9 +93,7 @@ public:
    bool isTeamGame() { return false; }
    bool isSpawnWithLoadoutGame() { return true; }
 
-   Vector<U32> getScoringEventList();
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-
 
    TNL_DECLARE_RPC(s2cRabbitMessage, (U32 msgIndex, StringTableEntry clientName));
    TNL_DECLARE_CLASS(RabbitGameType);

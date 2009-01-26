@@ -277,19 +277,6 @@ public:
       }
    }
 
-   Vector<U32> getScoringEventList()
-   {
-      Vector<U32> events;
-
-      events.push_back( KillEnemy );
-      events.push_back( KillSelf );
-      events.push_back( KillTeammate );
-      events.push_back( ReturnFlagToZone );
-      events.push_back( LostFlag );
-
-      return events;
-   }
-
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
    {
@@ -308,8 +295,7 @@ public:
          case LostFlag:    // Not really an individual scoring event!
                return -1;
             default:
-               logprintf("Unknown scoring event: %d", scoreEvent);
-               return 0;
+               return naScore;
          }
       }
       else  // scoreGroup == IndividualScore
@@ -327,8 +313,7 @@ public:
             // case LostFlag:    // Not really an individual scoring event!
             //    return 0;
             default:
-               logprintf("Unknown scoring event: %d", scoreEvent);
-               return 0;
+               return naScore;
          }
       }
    }

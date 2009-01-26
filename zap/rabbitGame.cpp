@@ -300,28 +300,13 @@ void RabbitGameType::onFlaggerDead(Ship *killerShip)
 }
 
 
-Vector<U32> RabbitGameType::getScoringEventList()
-{
-   Vector<U32> events;
-
-   events.push_back( KillEnemy );
-   events.push_back( KillSelf );
-   events.push_back( KillTeammate );
-   events.push_back( RabbitKilled );
-   events.push_back( RabbitKills );
-   events.push_back( RabbitHoldsFlag );
-
-   return events;
-}
-
 // What does a particular scoring event score?
 S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
    // In general, there are no team scores in Rabbit games...
    if(scoreGroup == TeamScore)
    {
-	  logprintf("Unknown team scoring event: %d", scoreEvent);
-      return 0;
+      return naScore;
    }
    else  // scoreGroup == IndividualScore
    {
@@ -340,8 +325,7 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case RabbitHoldsFlag:		// Pts per second
          	return 1;
          default:
-            logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+            return naScore;
       }
    }
 }

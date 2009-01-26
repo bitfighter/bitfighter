@@ -169,18 +169,6 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
 }
 
-Vector<U32> CTFGameType::getScoringEventList()
-{
-   Vector<U32> events;
-
-   events.push_back( KillEnemy );
-   events.push_back( KillSelf );
-   events.push_back( KillTeammate );
-   events.push_back( ReturnTeamFlag );
-   events.push_back( CaptureFlag );
-
-   return events;
-}
 
 // What does a particular scoring event score?
 S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
@@ -199,9 +187,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 			return 1;
 		case CaptureFlag:
 			return 3;
-        default:
-        	logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+      default:
+         return naScore;
       }
    }
    else  // scoreGroup == IndividualScore
@@ -218,9 +205,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
 			return 1;
 		case CaptureFlag:
 			return 5;
-         default:
-            logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+      default:
+         return naScore;
       }
    }
 }

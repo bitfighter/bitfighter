@@ -123,6 +123,13 @@ Vector<GameType::ParameterDescription> GameType::describeArguments()
 }
 
 
+string itos(S32 i) // convert int to string
+{
+   char outString[100];
+   sprintf(outString,"%d", i);
+   return outString;
+}
+
 void GameType::printRules()
 {   
    NetClassRep::initialize();
@@ -150,12 +157,23 @@ void GameType::printRules()
       TNL::Object *theObject = TNL::Object::create(gGameTypeNames[i]);  // Instantiate a gameType object
       GameType *gameType = dynamic_cast<GameType*>(theObject);          // and cast it
 
-      Vector<U32> scoringEvents = gameType->getScoringEventList();
       printf("Game type: %s\n", gGameTypeNames[i]);
-      printf("\nEvent: Team / Individual Score\n");
+      printf("Configure ship: %s", gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
+      printf("\nEvent: Individual Score / Team Score\n");
       printf("===================================\n");
-      for(S32 j = 0; j < scoringEvents.size(); j++)
-         printf("%s: %d / %d\n", getScoringEventDescr((ScoringEvent) scoringEvents[j]).c_str(), gameType->getEventScore(GameType::TeamScore, (ScoringEvent) scoringEvents[j], 0), gameType->getEventScore(GameType::IndividualScore, (ScoringEvent) scoringEvents[j], 0));
+      for(S32 j = 0; j < ScoringEventsCount; j++)
+      {
+         S32 teamScore = gameType->getEventScore(GameType::TeamScore, (ScoringEvent) j, 0);
+         S32 indScore = gameType->getEventScore(GameType::IndividualScore, (ScoringEvent) j, 0);
+
+         if(teamScore == naScore && indScore == naScore)    // Skip non-scoring events
+            continue;
+
+         string teamScoreStr = (teamScore == naScore) ? "N/A" : itos(teamScore);
+         string indScoreStr =  (indScore == naScore)  ? "N/A" : itos(indScore);
+
+         printf("%s: %s / %s\n", getScoringEventDescr((ScoringEvent) j).c_str(), indScoreStr.c_str(), teamScoreStr.c_str() );
+      }
 
       printf("\n\n");
    }
@@ -420,7 +438,6 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             if(mClientList[j]->teamId == i || !isTeamGame())
                playerScores.push_back(mClientList[j]);
 
-         //qsort(playerScores, playerScores.size(), sizeof(ServerRef), compareFuncName);
          playerScores.sort(scoreSort);
 
 
@@ -429,7 +446,11 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             UserInterface::drawString(xl + 40, curRowY, fontSize, playerScores[j]->name.getString());
 
             static char buff[255] = "";
-            dSprintf(buff, sizeof(buff), "%d", playerScores[j]->score);
+
+            if(isTeamGame())
+               dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->rating);
+            else
+               dSprintf(buff, sizeof(buff), "%d", playerScores[j]->score);
 
             UserInterface::drawString(xr - (120 + UserInterface::getStringWidth(fontSize, buff)), curRowY, fontSize, buff);
             UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
@@ -1180,9 +1201,11 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent event, S32 
       // Individual scores
       S32 points = getEventScore(IndividualScore, event, data);
       player->score += points;
-      player->cumScore += points;
+      player->clientConnection->mCumScore += points;
+
+      // Accumulate every client's total score counter
       for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->totalScore += points;
+         mClientList[i]->clientConnection->mTotalScore += abs(points);
 
       newScore = player->score;
    }
@@ -1221,18 +1244,6 @@ void GameType::checkForWinningScore(S32 newScore)
 }
 
 
-Vector<U32> GameType::getScoringEventList()
-{
-   Vector<U32> events;
-
-   events.push_back( KillEnemy );
-   events.push_back( KillSelf );
-   events.push_back( KillTeammate );
-
-   return events;
-}
-
-
 // What does a particular scoring event score?
 S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
@@ -1247,8 +1258,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillTeammate:
             return 0;
          default:
-            logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+            return naScore;
       }
    }
    else  // scoreGroup == IndividualScore
@@ -1262,8 +1272,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillTeammate:
             return 0;
          default:
-            logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+            return naScore;
       }
    }
 }
@@ -1513,7 +1522,6 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, (StringTableEntry name, RangedU3
          gp->setObjectTypeMask(mask &= ~CommandMapVisType);  // And no longer visible on commander's map
       }
    }
-
 }
 
 
@@ -1687,12 +1695,14 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
 
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
-Vector<SignedInt<24> > GameType::mScores;
+Vector<SignedInt<24>> GameType::mScores;
+Vector<RangedU32<0,200>> GameType::mRatings;
 
 void GameType::updateClientScoreboard(ClientRef *cl)
 {
    mPingTimes.clear();
    mScores.clear();
+   mRatings.clear();
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
@@ -1700,15 +1710,21 @@ void GameType::updateClientScoreboard(ClientRef *cl)
          mPingTimes.push_back(mClientList[i]->ping);
       else
          mPingTimes.push_back(MaxPing);
+
       mScores.push_back(mClientList[i]->score);
+
+      // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
+      mRatings.push_back((mClientList[i]->clientConnection->mTotalScore == 0) ? 100 : ((F32) mClientList[i]->clientConnection->mCumScore / (F32) mClientList[i]->clientConnection->mTotalScore * 100.0 + 100));
    }
 
    NetObject::setRPCDestConnection(cl->clientConnection);
-   s2cScoreboardUpdate(mPingTimes, mScores);
+   s2cScoreboardUpdate(mPingTimes, mScores, mRatings);
    NetObject::setRPCDestConnection(NULL);
 }
 
-GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores), (pingTimes, scores))
+GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, 
+                 (Vector<RangedU32<0, GameType::MaxPing>> pingTimes, Vector<SignedInt<24>> scores, Vector<RangedU32<0,200>> ratings), 
+                 (pingTimes, scores, ratings))
 {
    for(S32 i = 0; i < mClientList.size(); i++)
    {
@@ -1717,6 +1733,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, (Vector<RangedU32<0, GameType::M
 
       mClientList[i]->ping = pingTimes[i];
       mClientList[i]->score = scores[i];
+      mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0;
    }
 }
 

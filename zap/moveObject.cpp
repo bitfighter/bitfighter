@@ -352,7 +352,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    F32 v1f, v2f;
 
    F32 e = 0.9f;  // What is this?
-   v2f = ( e * (v1i - v2i) + v1i + v2i) / (2);
+   v2f = ( e * (v1i - v2i) + v1i + v2i) / 2;
    v1f = ( v1i + v2i - v2f);
 
    mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);

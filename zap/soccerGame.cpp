@@ -130,19 +130,6 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
       renderObjectiveArrow(mBall, getTeamColor(-1));
 }
 
-Vector<U32> SoccerGameType::getScoringEventList()
-{
-   Vector<U32> events;
-
-   events.push_back( KillEnemy );
-   events.push_back( KillSelf );
-   events.push_back( KillTeammate );
-   events.push_back( ScoreGoalEnemyTeam );
-   events.push_back( ScoreGoalOwnTeam );
-   events.push_back( ScoreGoalHostileTeam );
-
-   return events;
-}
 
 // What does a particular scoring event score?
 S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
@@ -164,8 +151,7 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case ScoreGoalHostileTeam:
             return -1;
          default:
-         	logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+            return naScore;
       }
    }
    else  // scoreGroup == IndividualScore
@@ -178,15 +164,14 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return -1;
          case KillTeammate:
             return 0;
-		 case ScoreGoalEnemyTeam:
-			return 5;
-		 case ScoreGoalOwnTeam:
-			return -5;
-		 case ScoreGoalHostileTeam:
-			return -5;
+		   case ScoreGoalEnemyTeam:
+			   return 5;
+		   case ScoreGoalOwnTeam:
+			   return -5;
+         case ScoreGoalHostileTeam:
+			   return -5;
          default:
-			logprintf("Unknown scoring event: %d", scoreEvent);
-            return 0;
+            return naScore;
       }
    }
 }

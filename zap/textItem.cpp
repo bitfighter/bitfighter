@@ -90,20 +90,6 @@ void TextItem::processArguments(S32 argc, const char **argv)
    computeExtent();
 }
 
-// Unit test for TextItem::processArguments()
-// Actually, this won't even work without some sort of assumption about getGame()->getGridSize().  This value must be
-// preset before running the test, and...  well we can do that here, I suppose.
-//void TextItem::testProcessArguments()
-//{
-//   getGame()->setGridSize(100);
-//   const char *sampleLine[] = { "1", "10", "12", "13", "15", "50", "This", "is", "a", "test", "item" };
-//   processArguments(11, *sampleLine);
-//
-//   if(mTeam == 1 && mSize = 50 && pos.x == 1000 && pos.y == 1200 && dir.x == 1300 && dir.y == 1500 && mText == "This is a test item")
-//      logprintf("TextItem test testProcessor passed");
-//   else
-//     logprintf("TextItem test testProcessor failed");
-//}
 
 void TextItem::onAddedToGame(Game *theGame)
 {

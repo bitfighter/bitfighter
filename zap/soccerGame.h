@@ -47,7 +47,6 @@ public:
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(bool scoreboardVisible);
 
-   Vector<U32> getScoringEventList();
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
    // Messages

@@ -298,19 +298,6 @@ public:
    const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
    bool isTeamGame() { return true; }
 
-   Vector<U32> getScoringEventList()
-   {
-      Vector<U32> events;
-
-      events.push_back( KillEnemy );
-      events.push_back( KillSelf );
-      events.push_back( KillTeammate );
-      events.push_back( ReturnFlagToZone );
-      events.push_back( HoldFlagInZone );
-
-      return events;
-   }
-
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
    {
@@ -329,8 +316,7 @@ public:
             case HoldFlagInZone:		// Per ScoreTime ms
                return 1;
             default:
-               //logprintf("Unknown scoring event: %d", scoreEvent);
-               return 0;
+               return naScore;
          }
       }
       else  // scoreGroup == IndividualScore
@@ -345,11 +331,10 @@ public:
                return 0;
 		      case ReturnFlagToZone:
 			      return 2;
-		      // case HoldFlagInZone:		// There's not a good way to award these points
-		      //	  return 0;             // and unless we really want them, let's not bother
+		      case HoldFlagInZone:		// There's not a good way to award these points
+		      	return naScore;      // and unless we really want them, let's not bother
             default:
-               //logprintf("Unknown scoring event: %d", scoreEvent);
-               return 0;
+               return naScore;
          }
       }
    }
