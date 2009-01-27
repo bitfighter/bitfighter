@@ -125,9 +125,10 @@ public:
       Vector<Point> spawnPoints;
       Vector<Point> flagSpawnPoints;   // List of places for team flags to spawn
 
-      U32 numPlayers;
+      U32 numPlayers;                  // Needs to be computed before use, not dynamically tracked
       S32 score;
-      Team() { numPlayers = 0; score = 0; }
+      F32 rating;
+      Team() { numPlayers = 0; score = 0; rating = 0; }     // Constructor
    };
    Vector<Team> mTeams;
    Vector<Point> mFlagSpawnPoints;     // List of non-team specific spawn points for flags
@@ -183,6 +184,8 @@ public:
       KillEnemy,              // all games
       KillSelf,               // all games
       KillTeammate,           // all games
+      KillEnemyTurret,        // all games
+      KillOwnTurret,          // all games
 
       CaptureFlag,
       CaptureZone,            // zone control -> gain zone
@@ -210,9 +213,9 @@ public:
    static string GameType::getScoringEventDescr(ScoringEvent event);
    
    // Static vectors used for constructing update RPCs
-   static Vector<RangedU32<0, MaxPing> > mPingTimes;  
+   static Vector<RangedU32<0, MaxPing>> mPingTimes;  
    static Vector<SignedInt<24>> mScores;
-   static Vector<RangedU32<0,200>> mRatings;                      
+   static Vector<RangedU32<0, 200>> mRatings;                      
 
    GameType();    // Constructor
    void countTeamPlayers();

@@ -290,7 +290,11 @@ public:
                return 0;
             case KillTeammate:
                return 0;
-		   case ReturnFlagToZone:
+            case KillEnemyTurret:
+               return 0;
+            case KillOwnTurret:
+               return 0;
+		      case ReturnFlagToZone:
                return 1;
          case LostFlag:    // Not really an individual scoring event!
                return -1;
@@ -308,6 +312,10 @@ public:
                return -1;
             case KillTeammate:
                return 0;
+            case KillEnemyTurret:
+               return 1;
+            case KillOwnTurret:
+               return -1;
             case ReturnFlagToZone:
                return 2;
             // case LostFlag:    // Not really an individual scoring event!

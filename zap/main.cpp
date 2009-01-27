@@ -54,6 +54,8 @@
 // Full scoring information available with -rules option
 // Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
 //     of points player makes divided by total scores all players make during that players time in the game
+// Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores
+// Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
 
 //-----------------------------------------------------------------------------------
 //

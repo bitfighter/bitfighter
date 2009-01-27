@@ -179,27 +179,47 @@ void EngineeredObject::damageObject(DamageInfo *di)
    F32 prevHealth = mHealth;
 
    if(di->damageAmount > 0)
-      mHealth -= di->damageAmount * .25f;
+      mHealth -= di->damageAmount * .25f; // ???
    else
       mHealth -= di->damageAmount;
 
    if(mHealth < 0)
       mHealth = 0;
+
+   // No additional damage, nothing more to do (i.e. was already at 0)
    if(prevHealth == mHealth)
       return;
 
    setMaskBits(HealthMask);
 
-   if(prevHealth >= disabledLevel && mHealth < disabledLevel)
+   // Check if turret just died
+   if(prevHealth >= disabledLevel && mHealth < disabledLevel)        // Turret just died
    {
+      // Revert team to neutral if this was a repaired turret
       if(mTeam != mOriginalTeam)
       {
          mTeam = mOriginalTeam;
          setMaskBits(TeamMask);
       }
       onDisabled();
+
+      // Handle scoring
+      if( isTurret() && di->damagingObject && di->damagingObject->getOwner() && di->damagingObject->getOwner()->getControlObject() )
+      {
+         Ship *s = dynamic_cast<Ship *>(di->damagingObject->getOwner()->getControlObject());
+         if(s)
+         {
+            GameType *gt = getGame()->getGameType();
+            ClientRef *cl = s->getControllingClient()->getClientRef();
+
+            if(gt->isTeamGame() && s->getTeam() == getTeam())
+               gt->updateScore(cl, GameType::KillOwnTurret);
+            else
+               gt->updateScore(cl, GameType::KillEnemyTurret);
+         }
+      }
    }
-   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)
+   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired
    {
       if(mTeam == -1)                                 // Neutral objects...
       {

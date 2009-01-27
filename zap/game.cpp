@@ -342,6 +342,14 @@ StringTableEntry ServerGame::getCurrentLevelType()
    return mLevelTypes[mCurrentLevelIndex];
 }
 
+
+static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
+{
+   return ( ((*a)->mTotalScore == 0) ? .5 : (*a)->mCumScore / (*a)->mTotalScore ) <  
+          ( ((*b)->mTotalScore == 0) ? .5 : (*b)->mCumScore / (*b)->mTotalScore );
+}
+
+
 extern void buildBotNavMeshZoneConnections();
 
 
@@ -378,12 +386,24 @@ void ServerGame::cycleLevel(S32 nextLevel)
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
       connectionList.push_back(walk);
 
-   // Now add the connections to the game type, in a random order
-   while(connectionList.size())
+   // Now add the connections to the game type, in a random order --> will create random teams
+   //while(connectionList.size())
+   //{
+   //   U32 index = TNL::Random::readI() % connectionList.size();
+   //   GameConnection *gc = connectionList[index];
+   //   connectionList.erase(index);     // Remove the connection from our list
+
+   //   if(mGameType.isValid())
+   //      mGameType->serverAddClient(gc);
+   //   gc->activateGhosting();
+   //}
+
+   // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
+   connectionList.sort(RatingSort);
+
+   for(S32 i = 0; i < connectionList.size(); i++)
    {
-      U32 index = TNL::Random::readI() % connectionList.size();
-      GameConnection *gc = connectionList[index];
-      connectionList.erase(index);     // Remove the connection from our list
+      GameConnection *gc = connectionList[i];
 
       if(mGameType.isValid())
          mGameType->serverAddClient(gc);

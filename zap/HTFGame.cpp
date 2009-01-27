@@ -311,6 +311,10 @@ public:
                return 0;
             case KillTeammate:
                return 0;
+            case KillEnemyTurret:
+               return 0;
+            case KillOwnTurret:
+               return 0;
             case ReturnFlagToZone:
                return 2;
             case HoldFlagInZone:		// Per ScoreTime ms
@@ -329,6 +333,10 @@ public:
                return -1;
             case KillTeammate:
                return 0;
+            case KillEnemyTurret:
+               return 1;
+            case KillOwnTurret:
+               return -1;
 		      case ReturnFlagToZone:
 			      return 2;
 		      case HoldFlagInZone:		// There's not a good way to award these points

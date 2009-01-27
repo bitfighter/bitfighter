@@ -144,6 +144,10 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return 0;
          case KillTeammate:
             return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
          case ScoreGoalEnemyTeam:
             return 1;
          case ScoreGoalOwnTeam:
@@ -164,6 +168,10 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return -1;
          case KillTeammate:
             return 0;
+         case KillEnemyTurret:
+            return 1;
+         case KillOwnTurret:
+            return -1;
 		   case ScoreGoalEnemyTeam:
 			   return 5;
 		   case ScoreGoalOwnTeam:

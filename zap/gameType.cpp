@@ -184,41 +184,45 @@ string GameType::getScoringEventDescr(ScoringEvent event)
    switch(event)
    {
       case KillEnemy:
-	      return("Kill enemy player");
+	      return "Kill enemy player";
       case KillSelf:
-	      return("Kill self");
+	      return "Kill self";
       case KillTeammate:
-	      return("Kill teammate");
+	      return "Kill teammate";
+      case KillEnemyTurret:
+         return "Kill enemy turret";
+      case KillOwnTurret:
+         return "Kill own turret";
       case CaptureFlag:
-	      return("CTF->Touch enemy flag to your flag");
+	      return "CTF->Touch enemy flag to your flag";
       case ReturnTeamFlag:
-	      return("CTF->Return own flag to goal");
+	      return "CTF->Return own flag to goal";
      case  CaptureZone:
-	      return("ZC->Capture zone");
+	      return "ZC->Capture zone";
       case UncaptureZone:
-	      return("ZC->Lose captured zone to other team");
+	      return "ZC->Lose captured zone to other team";
       case HoldFlagInZone:
-	      return("HTF->Hold flag in zone for time");
+	      return "HTF->Hold flag in zone for time";
       case RabbitHoldsFlag:
-	      return("Rabbit->Hold flag, per second");
+	      return "Rabbit->Hold flag, per second";
       case RabbitKilled:
-	      return("Rabbit->Kill the rabbit");
+	      return "Rabbit->Kill the rabbit";
       case RabbitKills:
-	      return("Rabbit->Kill other player if you are rabbit");
+	      return "Rabbit->Kill other player if you are rabbit";
       case ReturnFlagsToNexus:
-	      return("Hunters->Return flags to Nexus");
+	      return "Hunters->Return flags to Nexus";
       case ReturnFlagToZone:
-	      return("Retrieve->Return flags to own zone");
+	      return "Retrieve->Return flags to own zone";
       case LostFlag:
-	      return("Retrieve->Lose captured flag to other team");
+	      return "Retrieve->Lose captured flag to other team";
       case ScoreGoalEnemyTeam:
-	      return("Soccer->Score a goal against other team");
+	      return "Soccer->Score a goal against other team";
       case ScoreGoalHostileTeam:
-	      return("Soccer->Score a goal against Hostile team");
+	      return "Soccer->Score a goal against Hostile team";
       case ScoreGoalOwnTeam:
-	      return("Soccer->Score a goal against own team");
+	      return "Soccer->Score a goal against own team";
       default:
-         return("Unknown event!");
+         return "Unknown event!";
    }
 }
 
@@ -1085,16 +1089,27 @@ Color GameType::getShipColor(Ship *s)
 
 // Make sure that the mTeams[] structure has the proper player counts
 // Needs to be called manually before accessing the structure
+// Rating may only work on server... not tested on client
 void GameType::countTeamPlayers()
 {
    for(S32 i = 0; i < mTeams.size(); i ++)
+   {
       mTeams[i].numPlayers = 0;
+      mTeams[i].rating = 0;
+   }
 
    for(S32 i = 0; i < mClientList.size(); i++)
+   {
       mTeams[mClientList[i]->teamId].numPlayers++;
+
+      GameConnection *cc = mClientList[i]->clientConnection;
+      if(cc)
+         mTeams[mClientList[i]->teamId].rating += (cc->mTotalScore == 0) ? .5 : max((F32)cc->mCumScore / (F32)cc->mTotalScore, .1);
+   }
 }
 
 // Adds a new client to the game when a player joins, or when a level cycles
+// runs on the server
 void GameType::serverAddClient(GameConnection *theClient)
 {
    theClient->setScopeObject(this);
@@ -1105,17 +1120,33 @@ void GameType::serverAddClient(GameConnection *theClient)
    cref->clientConnection = theClient;
    countTeamPlayers();
 
-   U32 minPlayers = mTeams[0].numPlayers;
+   // Figure out which team has the fewest players...
+   //S32 minTeamIndex = 0;
+   //U32 minPlayers = mTeams[0].numPlayers;
+
+   //for(S32 i = 1; i < mTeams.i(); size++)
+   //{
+   //   if(mTeams[i].numPlayers < minPlayers)
+   //   {
+   //      minTeamIndex = i;
+   //      minPlayers = mTeams[i].numPlayers;
+   //   }
+   //}
+
+   // Figure out which team has lowest total ratings...
    S32 minTeamIndex = 0;
+   F32 minRating = mTeams[0].rating;
 
    for(S32 i = 1; i < mTeams.size(); i++)
    {
-      if(mTeams[i].numPlayers < minPlayers)
+      if(mTeams[i].rating < minRating)
       {
          minTeamIndex = i;
-         minPlayers = mTeams[i].numPlayers;
+         minRating = mTeams[i].rating;
       }
    }
+
+   // ...and add new player to that team
    cref->teamId = minTeamIndex;
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
@@ -1257,6 +1288,10 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
             return 0;
          case KillTeammate:
             return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
          default:
             return naScore;
       }
@@ -1271,6 +1306,10 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
             return -1;
          case KillTeammate:
             return 0;
+         case KillEnemyTurret:
+            return 1;
+         case KillOwnTurret:
+            return -1;
          default:
             return naScore;
       }

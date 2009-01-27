@@ -266,6 +266,10 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
             return 0;
          case KillTeammate:
             return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
          case ReturnFlagsToNexus:
          	return score;
          default:
@@ -281,6 +285,10 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
          case KillSelf:
             return -10;
          case KillTeammate:
+            return 0;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
             return 0;
          case ReturnFlagsToNexus:
             return score;

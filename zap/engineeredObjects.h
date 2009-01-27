@@ -63,9 +63,10 @@ public:
    void setResource(Item *resource);
    bool checkDeploymentPosition();
    void computeExtent();
-   virtual void onDestroyed() {}
-   virtual void onDisabled() {}
-   virtual void onEnabled() {}
+   virtual void onDestroyed() { } // do nothing 
+   virtual void onDisabled() { }  // do nothing
+   virtual void onEnabled() { }   // do nothing
+   virtual bool isTurret() { return false; }
    bool isEnabled();
 
    void processArguments(S32 argc, const char **argv);
@@ -154,6 +155,7 @@ public:
    void render();
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
+   bool isTurret() { return true; }
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

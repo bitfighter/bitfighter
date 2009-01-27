@@ -183,12 +183,16 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 0;
          case KillTeammate:
             return 0;
-		case ReturnTeamFlag:
-			return 1;
-		case CaptureFlag:
-			return 3;
-      default:
-         return naScore;
+         case KillEnemyTurret:
+            return 0;
+         case KillOwnTurret:
+            return 0;
+		   case ReturnTeamFlag:
+			   return 1;
+		   case CaptureFlag:
+			   return 3;
+         default:
+            return naScore;
       }
    }
    else  // scoreGroup == IndividualScore
@@ -201,12 +205,16 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return -1;
          case KillTeammate:
             return 0;
-		case ReturnTeamFlag:
-			return 1;
-		case CaptureFlag:
-			return 5;
-      default:
-         return naScore;
+         case KillEnemyTurret:
+            return 1;
+         case KillOwnTurret:
+            return -1;
+		   case ReturnTeamFlag:
+			   return 1;
+		   case CaptureFlag:
+			   return 5;
+         default:
+            return naScore;
       }
    }
 }
