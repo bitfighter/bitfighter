@@ -57,6 +57,7 @@ private:
       MessageStoreCount = 20,          // How many messages to store (only top MessageDisplayCount are normally displayed)
       MessageDisplayCount = 6,         // How many messages to display
       DisplayMessageTimeout = 3000,    // How long to display them (ms)
+      ChatWindowSlideoutTime = 100,      // Time for chat entry box to appear (ms)
    };
 
    enum MessageDisplayMode {
@@ -93,15 +94,11 @@ private:
    U32 mRecalcFPSTimer;       // Controls recalcing FPS running average
 
    enum {
+      WrongModeMsgDisplayTime = 2500,
       FPSAvgCount = 32,
    };
-   F32 mFPSAvg;
-
-
-   enum {
-      WrongModeMsgDisplayTime = 2500,
-   };
    Timer mWrongModeMsgDisplay;       // Help if user is trying to use keyboard in joystick mode
+   F32 mFPSAvg;
 
    U32 mIdleTimeDelta[FPSAvgCount];
    U32 mFrameIndex;
@@ -180,8 +177,9 @@ public:
       QuickChatMode,          // In quick-chat menu
       LoadoutMode,            // In loadout menu
    };
-   Mode mCurrentMode;         // Current game mode
-   void setPlayMode();        // Set mode to PlayMode
+   Mode mCurrentMode;              // Current game mode
+   Timer mChatModeSlideoutTimer;   // For animating slideout of chat box
+   void setPlayMode();             // Set mode to PlayMode
 
    void receivedControlUpdate(bool recvd) { mGotControlUpdate = recvd; }
 

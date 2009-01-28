@@ -49,12 +49,12 @@
 // Fixed mouse on menus in full screen mode
 // Tinkered with Geowar level -- bumped up gridsize, fixed a few quirks resulting in changes in rendering algorithm
 
-
+// For 011
 // Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options
 // Full scoring information available with -rules option
 // Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
 //     of points player makes divided by total scores all players make during that players time in the game
-// Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores
+// Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
 // Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
 
 //-----------------------------------------------------------------------------------

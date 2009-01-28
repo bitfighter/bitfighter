@@ -99,7 +99,8 @@ GameUserInterface::GameUserInterface()
    for (U32 i = 0; i < ShipModuleCount; i++)
       mModActivated[i] = false;
 
-   mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);   // Set the period of our message timeout timer
+   mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
+   mChatModeSlideoutTimer.setPeriod(ChatWindowSlideoutTime); // And out chat mode slideout timer
 }
 
 
@@ -205,6 +206,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mFrameIndex++;
 
    mWrongModeMsgDisplay.update(timeDelta);
+   mChatModeSlideoutTimer.update(timeDelta);
 }
 
 #ifdef TNL_OS_WIN32
@@ -477,10 +479,6 @@ void GameUserInterface::renderMessageDisplay()
          }
       }   
 
-
-
-
-
    // Render faint gray background box... probably better without this...
    //S32 ypos1 = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin);
    //S32 ypos2 = ypos1 + (FONTSIZE + fontGap) * MessageStoreCount;
@@ -502,64 +500,69 @@ void GameUserInterface::renderMessageDisplay()
    //      glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + ypos2);
    //   glEnd();
    //glDisable(GL_BLEND);
-
-
 }
 
 
 // Render chat msg that user is composing
 void GameUserInterface::renderCurrentChat()
 {
+   if(mCurrentMode != ChatMode && !mChatModeSlideoutTimer.getCurrent())
+      return;
+
    const S32 chatComposeYPos = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) + 
                                (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + fontGap);
-   if(mCurrentMode == ChatMode)
+   const char *promptStr;
+   if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
    {
-      const char *promptStr;
-      if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
-      {
-         glColor(gTeamChatColor);
-         promptStr = "(Team): ";
-      }
-      else                                // Global in-game chat (goes to all players in game)
-      {
-         glColor(gGlobalChatColor);
-         promptStr = "(Global): ";
-      }
-
-      // Protect against crashes while game is initializing
-      if(! (gClientGame && gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject()))
-         return;
-
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-      S32 promptSize = getStringWidthf(FONTSIZE, "%s", promptStr);
-      S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->mPlayerName.getString());
-      S32 nameWidth = max(nameSize, promptSize);
-      // Above block repeated below...
-
-
-      S32 width = canvasWidth - UserInterface::horizMargin - (nameWidth - promptSize) + 6;
-
-      // Render text entry box like thingy
-      glEnable(GL_BLEND);
-         glColor4f(1,1,1,.2);
-         glBegin(GL_POLYGON);
-            glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + chatComposeYPos - 3);
-            glVertex2f(width, UserInterface::vertMargin + chatComposeYPos - 3);
-            glVertex2f(width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-            glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-         glEnd();
-         glColor4f(1,1,1,.4);
-         glBegin(GL_LINE_LOOP);
-            glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + chatComposeYPos - 3);
-            glVertex2f(width, UserInterface::vertMargin + chatComposeYPos - 3);
-            glVertex2f(width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-            glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-         glEnd();
-      glDisable(GL_BLEND);
-
-      drawString(UserInterface::horizMargin + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
-      drawStringf(UserInterface::horizMargin + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, cursorBlink ? "_" : " ");
+      glColor(gTeamChatColor);
+      promptStr = "(Team): ";
    }
+   else                                // Global in-game chat (goes to all players in game)
+   {
+      glColor(gGlobalChatColor);
+      promptStr = "(Global): ";
+   }
+
+   // Protect against crashes while game is initializing
+   if(! (gClientGame && gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject()))
+      return;
+
+   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   S32 promptSize = getStringWidthf(FONTSIZE, "%s", promptStr);
+   S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->mPlayerName.getString());
+   S32 nameWidth = max(nameSize, promptSize);
+   // Above block repeated below...
+
+   S32 xpos = UserInterface::horizMargin;
+   S32 width = canvasWidth - 2 * UserInterface::horizMargin - (nameWidth - promptSize) + 6;
+
+   F32 fadefactor;
+   if(mCurrentMode == ChatMode)     // Sliding in
+      fadefactor = (1 - mChatModeSlideoutTimer.getFraction());
+   else                             // Sliding out
+      fadefactor = mChatModeSlideoutTimer.getFraction();
+
+   // Render text entry box like thingy
+   glEnable(GL_BLEND);
+      glColor4f(1,1,1,.2 * fadefactor);
+      glBegin(GL_POLYGON);
+         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
+         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
+         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
+         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
+      glEnd();
+      glColor4f(1,1,1,.4 * fadefactor);
+      glBegin(GL_LINE_LOOP);
+         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
+         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
+         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
+         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
+      glEnd();
+
+   glColor4f(1,1,1,fadefactor);
+   drawString(xpos + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
+   drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, cursorBlink ? "_" : " ");
+   glDisable(GL_BLEND);
 }
 
 #undef fontGap
@@ -765,11 +768,13 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             mCurrentChatType = TeamChat;
             mCurrentMode = ChatMode;
+            mChatModeSlideoutTimer.reset();
          }
          else if(keyCode == keyGLOBCHAT[inputMode])
          {
             mCurrentChatType = GlobalChat;
             mCurrentMode = ChatMode;
+            mChatModeSlideoutTimer.reset();
          }
          else if(keyCode == keyQUICKCHAT[inputMode])
             enterQuickChat();
@@ -952,6 +957,7 @@ void GameUserInterface::cancelChat()
    memset(mChatBuffer, 0, sizeof(mChatBuffer));
    mChatCursorPos = 0;
    mCurrentMode = PlayMode;
+   mChatModeSlideoutTimer.reset();
 }
 
 void GameUserInterface::issueChat()

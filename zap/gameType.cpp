@@ -133,10 +133,10 @@ string itos(S32 i) // convert int to string
 void GameType::printRules()
 {   
    NetClassRep::initialize();
-
+   printf("\n\n");
    printf("Bitfighter rules\n");
-   printf("================\n");
-   printf("Projectiles:\n");
+   printf("================\n\n");
+   printf("Projectiles:\n\n");
    for(S32 i = 0; i < WeaponCount; i++)
    {
       printf("Name: %s \n", gWeapons[i].name.getString());
@@ -148,7 +148,8 @@ void GameType::printRules()
       printf("\tCan Damage Teammate: %s\n", gWeapons[i].canDamageTeammate ? "Yes" : "No");
    }
 
-
+   printf("\n\n");
+   printf("Game Types:\n\n");
    for(S32 i = 0; ; i++)     // second arg intentionally blank!
    {
       if(gGameTypeNames[i] == NULL)
@@ -160,7 +161,7 @@ void GameType::printRules()
       printf("Game type: %s\n", gGameTypeNames[i]);
       printf("Configure ship: %s", gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
       printf("\nEvent: Individual Score / Team Score\n");
-      printf("===================================\n");
+      printf(  "====================================\n");
       for(S32 j = 0; j < ScoringEventsCount; j++)
       {
          S32 teamScore = gameType->getEventScore(GameType::TeamScore, (ScoringEvent) j, 0);
