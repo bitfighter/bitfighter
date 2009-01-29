@@ -112,10 +112,13 @@ private:
    S32 getYStart();     // Get vert pos of first menu item
    S32 getOffset(); 
    Timer mScrollTimer;
+
 protected:
    S32 currOffset;
    
 public:
+   MenuUserInterface();                // Constructor
+
    bool itemSelectedWithMouse;
    Vector<MenuItem> menuItems;
 
@@ -128,7 +131,6 @@ public:
    Color menuSubTitleColor;
    const char *menuFooter;
 
-   MenuUserInterface();                // Constructor
    void idle(U32 timeDelta); 
 
    // Track if certain menu options are active, for keyboard shortcut entry
@@ -137,7 +139,7 @@ public:
    S32 selectedIndex;
 
    void render();    // Draw the basic menu
-   virtual void renderExtras() { }     // For drawing something extra on a menu, not currently used...
+   virtual void renderExtras() { /* Do nothing */ }     // For drawing something extra on a menu, not currently used...
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onMouseMoved(S32 x, S32 y);
@@ -148,7 +150,7 @@ public:
 
    virtual void onEscape();
    virtual void processSelection(U32 index) = 0;
-   virtual void processShiftSelection(U32 index) { }
+   virtual void processShiftSelection(U32 index) { /* Do nothing */ }
 
    // Handle keyboard input while a menu is displayed
    virtual void processMenuSpecificKeys(KeyCode keyCode);
@@ -180,6 +182,8 @@ private:
    bool mNeedToUpgrade;       // True if client is out of date and needs to upgrade, false if we're on the latest version
    bool mShowedUpgradeAlert;  // So we don't show the upgrade message more than once
 
+   Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
+
 public:
    MainMenuUserInterface();                     // Constructor
    void processSelection(U32 index);
@@ -193,6 +197,8 @@ public:
    bool firstTime;                              // Is this the first time the menu is shown?
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
+
+   void clearLevelLoadDisplay();
 };
 
 extern MainMenuUserInterface gMainMenuUserInterface;

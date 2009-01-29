@@ -2933,7 +2933,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    return true;
 }
 
-extern void hostGame(bool dedicated, Address bindAddress);
+extern void initHostGame(Address bindAddress);
 extern Vector<StringTableEntry> gLevelList;
 extern CmdLineSettings gCmdLineSettings;
 
@@ -2984,7 +2984,7 @@ void EditorUserInterface::testLevel()
       gCmdLineSettings.levelFolder = "";     // Temporarily override levelFolder setting -- we want to write to levels folder regardless of the -levelfolder param
 
       gLevelList.push_front("editor.tmp");
-      hostGame(false, Address(IPProtocol, Address::Any, 28000));
+      initHostGame(Address(IPProtocol, Address::Any, 28000));
       gLevelList = tempList;                       // Restore level list
       gCmdLineSettings.levelFolder = levelFolder;  // Restore levelFolder setting
    }

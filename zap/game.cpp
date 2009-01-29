@@ -246,29 +246,43 @@ S32 ServerGame::getLevelNameCount()
 
 
 extern CmdLineSettings gCmdLineSettings;
-
+extern S32 gHostingModePhase;
+ 
 // This gets called when you first host a game.
 void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
 {
    mLevelList = levelList;
+}
 
+void ServerGame::resetLevelLoadIndex()
+{
+   mLevelLoadIndex = 0;
+}
+
+string ServerGame::getCurrentLevelLoadName()
+{
+   return mLevelNames.last().getString();
+}
+
+void ServerGame::loadNextLevel()
+{
    // Here we cycle through all the levels, reading them in, and grabbing their names for the level list
    // Seems kind of wasteful...  could we quit after we found the name? (probably not easily, and we get the benefit of learning early on which levels are b0rked)
    // How about storing them in memory for rapid recall? People sometimes load hundreds of levels, so it's probably not feasible.
-   for(S32 i = 0; i < mLevelList.size(); i++)
+   if(mLevelLoadIndex < mLevelList.size())
    {
-      string levelName = getLevelFileName(mLevelList[i].getString());
+      string levelName = getLevelFileName(mLevelList[mLevelLoadIndex].getString());
       if(loadLevel(levelName))    // loadLevel returns true if the load was successful
       {
          string lname = trim(getGameType()->mLevelName.getString());
          StringTableEntry name;
          if(lname == "")
-            name = mLevelList[i];      // Use filename if level name is blank
+            name = mLevelList[mLevelLoadIndex];      // Use filename if level name is blank
          else
             name = lname.c_str();
 
          StringTableEntry type(getGameType()->getGameTypeString());
-
+         
          // Save some key level parameters
          mLevelNames.push_back(name);
          mLevelTypes.push_back(type);
@@ -281,24 +295,23 @@ void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
          mScopeAlwaysList.clear();
 
          // If we're loading lots of levels, try not to kill the computer!
-         if(mLevelList.size() > 10)
-            Platform::sleep(1);
+         // Sleep now handled by idle loop
+         //if(mLevelList.size() > 10)
+         //   Platform::sleep(1);
 
          TNL::logprintf ("Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
       }
-      else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list
+      else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list.
       {
          logprintf("Could not load level %s.  Skipping...", levelName.c_str());
-         mLevelList.erase(i);
-         i--;
+         mLevelList.erase(mLevelLoadIndex);
+         mLevelLoadIndex--;
       }
+      mLevelLoadIndex++;
    }
 
-   if(!mLevelList.size())     // No levels were loaded, no sense in proceeding
-      return;
-
-   mCurrentLevelIndex = mLevelList.size() - 1;     // Go to last level...
-   cycleLevel();                                   // ...and cycle forward to the first
+   if(mLevelLoadIndex == mLevelList.size())
+      gHostingModePhase = 2;     // DoneLoadingLevels
 }
 
 

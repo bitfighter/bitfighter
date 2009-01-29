@@ -544,12 +544,64 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeyup, (U32 key), (key))
    }
 }
 
+S32 gHostingModePhase = 0;    // NotHosting
+
+// Host a game (and maybe even play a bit, too!)
+void initHostGame(Address bindAddress)
+{
+   gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str());
+
+	// Parse all levels, make sure they are in some sense valid, and record some critical parameters
+   if(gLevelList.size())
+   {
+      gServerGame->setLevelList(gLevelList);
+      gServerGame->resetLevelLoadIndex();
+      gMainMenuUserInterface.clearLevelLoadDisplay();
+  }
+
+  gHostingModePhase = 1;  // LoadingLevels      // Do this even if there are no levels, so hostGame error handling will be triggered
+}
+
+void hostGame()
+{
+   gHostingModePhase = 3;  // Hosting
+   s_logprintf("----------\nbitfighter server started %s", getTimeStamp().c_str());
+   
+   if(gServerGame->getLevelNameCount())   // Levels loaded --> start game!
+      gServerGame->cycleLevel(0);         // Start the first level
+
+   else        // No levels loaded... we'll crash if we try to start a game
+   {
+      if(gDedicatedServer)
+         logprintf("No levels were loaded.  Cannot host a game.");
+      else
+      {
+         gErrorMsgUserInterface.reset();
+         gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
+         gErrorMsgUserInterface.setMessage(1, "No levels were loaded.  Cannot host a game.");
+         gErrorMsgUserInterface.activate();
+      }
+      delete gServerGame;
+      gServerGame = NULL;
+      return;
+   }
+
+   if(!gDedicatedServer)                  // If this isn't a dedicated server...
+      joinGame(Address(), false, true);   // ...then we'll play, too!
+      //      (let the system assign ip and port, false -> not from master, true -> local connection)
+}
 
 
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
 {
+
+   if(gHostingModePhase == 1) // LoadingLevels
+      gServerGame->loadNextLevel();
+   else if(gHostingModePhase == 2)  // DoneLoadingLevels
+      hostGame();
+
    checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
    static S64 lastTimer = Platform::getHighPrecisionTimerValue();
    static F64 unusedFraction = 0;
@@ -622,10 +674,15 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
 {
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
-   if(gClientGame)
-      gClientGame->idle(integerTime);
-   if(gServerGame)
-      gServerGame->idle(integerTime);
+   
+   if(gHostingModePhase != 1)    // Don't idle games during level load
+   {
+      if(gClientGame)
+         gClientGame->idle(integerTime);
+      if(gServerGame)
+         gServerGame->idle(integerTime);
+   }
+
    if(gClientGame)
       glutPostRedisplay();
 }
@@ -760,40 +817,6 @@ void setDefaultLevelList()
    gLevelList.push_back(StringTableEntry("hunters1.level"));
    gLevelList.push_back(StringTableEntry("ctf4.level"));
    gLevelList.push_back(StringTableEntry("zm1.level"));
-}
-
-// Host a game (and maybe even play a bit, too!)
-void hostGame(bool dedicated, Address bindAddress)
-{
-   gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str());
-
-	// Parse all levels, make sure they are in some sense valid, and record some critical parameters
-   if (gLevelList.size())
-      gServerGame->setLevelList(gLevelList);
-
-   s_logprintf("----------\nbitfighter server started %s", getTimeStamp().c_str());
-
-   // No levels loaded... we'll crash if we try to start a game
-   if(!gServerGame->getLevelNameCount())
-   {
-      if(dedicated)
-         logprintf("No levels were loaded.  Cannot host a game.");
-      else
-      {
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
-         gErrorMsgUserInterface.setMessage(1, "No levels were loaded.  Cannot host a game.");
-         gErrorMsgUserInterface.activate();
-      }
-      delete gServerGame;
-      gServerGame = NULL;
-
-      return;
-   }
-
-   if(!dedicated)                         // If this isn't a dedicated server...
-      joinGame(Address(), false, true);   // ...then we'll play, too!
-      //      (let the system assign ip and port, false -> not from master, true -> local connection)
 }
 
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
@@ -1397,7 +1420,7 @@ void processStartupParams()
       gClientGame = new ClientGame(Address());   //   let the system figure out IP address and assign a port
 
    if(gCmdLineSettings.serverMode)
-      hostGame(gDedicatedServer, gBindAddress);  // Start hosting
+      initHostGame(gBindAddress);                // Start hosting
    else if(gCmdLineSettings.connectRemote)       //       or
       joinGame(gConnectAddress, false, false);   // Connect to a game server (i.e. bypass master matchmaking)
 

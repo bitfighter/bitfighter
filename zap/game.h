@@ -192,6 +192,7 @@ private:
    U32 mCurrentLevelIndex;
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
+   S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process
 
 public:
    U32 getPlayerCount() { return mPlayerCount; }
@@ -206,6 +207,9 @@ public:
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName);
 
    void setLevelList(Vector<StringTableEntry> levelList);
+   void resetLevelLoadIndex();
+   void loadNextLevel();
+   string ServerGame::getCurrentLevelLoadName();      // For updating the UI
    bool loadLevel(string fileName);
 
    void cycleLevel(S32 newLevelIndex = -1);
@@ -221,7 +225,6 @@ public:
    void gameEnded();
 
    S32 getLevelNameCount();
-
 };
 
 class Ship;
@@ -271,7 +274,7 @@ extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
 extern Address gMasterAddress;
 
-extern void hostGame(bool dedicated, Address bindAddress);
+extern void initHostGame(Address bindAddress);
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 

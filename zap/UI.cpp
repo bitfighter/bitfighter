@@ -34,6 +34,7 @@ using namespace TNL;
 #include "UIEditor.h"
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
+#include "game.h"
 
 #include "../tnl/tnlLog.h"
 
@@ -178,16 +179,17 @@ void UserInterface::reactivateMenu(UserInterface target)
       reactivatePrevUI();
 }
 
-void UserInterface::onActivate() { }
-void UserInterface::onReactivate() { }
+void UserInterface::onActivate()   { /* Do nothing */ }
+void UserInterface::onReactivate() { /* Do nothing */ }
 
 extern U32 gRawJoystickButtonInputs;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
+extern ServerGame *gServerGame;
 
 
-// Clean up and get ready to render
-void UserInterface::renderCurrent()
+// Clean up and get ready to render 
+void UserInterface::renderCurrent()    // static
 {
    glViewport(0, 0, windowWidth, windowHeight);
 
@@ -197,7 +199,7 @@ void UserInterface::renderCurrent()
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
-   // Now run the active UI renderer
+   // Run the active UI renderer
    if(current)
       current->render();
 
@@ -231,7 +233,6 @@ void UserInterface::renderCurrent()
          }
    }
    // End diagnostic key dump mode
-
 }
 
 extern const F32 radiansToDegreesConversion;
@@ -296,6 +297,7 @@ void UserInterface::drawString(S32 x, S32 y, U32 size, const char *string)
    drawAngleString(x, y, size, 0, string);
 }
 
+
 void UserInterface::drawString(F32 x, F32 y, U32 size, const char *string)
 {
    drawAngleString((S32) x, (S32) y, size, 0, string);
@@ -312,6 +314,7 @@ void UserInterface::drawStringf(S32 x, S32 y, U32 size, const char *format, ...)
    drawString(x, y, size, buffer);
 }
 
+
 void UserInterface::drawStringf(F32 x, F32 y, U32 size, const char *format, ...)
 {
    va_list args;
@@ -321,7 +324,6 @@ void UserInterface::drawStringf(F32 x, F32 y, U32 size, const char *format, ...)
    dVsprintf(buffer, sizeof(buffer), format, args);
    drawString((S32) x, (S32) y, size, buffer);
 }
-
 
 
 void UserInterface::drawCenteredString(S32 y, U32 size, const char *string)
@@ -414,8 +416,6 @@ void UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, c
    S32 width = offset + getStringWidth(size, buffer);
    S32 x = get2ColStartingPos(leftCol) - width / 2;         // x must be S32 in case it leaks off left side of screen
 
-
-
    glColor3f(1,1,1);
    drawString(x, y, size, left);
    glColor3f(0,1,1);
@@ -470,32 +470,32 @@ void UserInterface::playBoop()
 
 void UserInterface::render()
 {
-
+   // Do nothing
 }
 
 void UserInterface::idle(U32 timeDelta)
 {
-
+   // Do nothing
 }
 
 void UserInterface::onMouseMoved(S32 x, S32 y)
 {
-
+   // Do nothing
 }
 
 void UserInterface::onMouseDragged(S32 x, S32 y)
 {
-
+   // Do nothing
 }
 
 void UserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-
+   // Do nothing
 }
 
 void UserInterface::onKeyUp(KeyCode keyCode)
 {
-
+   // Do nothing
 }
 
 };

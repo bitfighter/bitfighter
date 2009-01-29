@@ -498,8 +498,33 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
 }
 
 
+extern S32 gHostingModePhase;
+
+
 void MainMenuUserInterface::render()
 {
+   // If we're in LoadingLevels mode, show the progress panel...
+   if(gHostingModePhase == 1 || gHostingModePhase == 2) // LoadingLevels
+   {
+      // There will be exactly one new entry every time we get here!
+      mLevelLoadDisplayNames.push_back(gServerGame->getCurrentLevelLoadName());
+
+      // Keep the list from growing too long:
+      if(mLevelLoadDisplayNames.size() > 15)
+         mLevelLoadDisplayNames.erase(0);
+
+      glEnable(GL_BLEND);
+      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
+      {
+         glColor4f(1,1,1, 1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0) );
+         drawStringf(100, canvasHeight - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 15, "Loaded level %s...", mLevelLoadDisplayNames[i].c_str());
+      }
+      glDisable(GL_BLEND);
+      return;
+   }
+
+   // else...
+
    Parent::render();
 
    if(motd[0])
@@ -549,6 +574,13 @@ void MainMenuUserInterface::idle(U32 timeDelta)
    }
 }
 
+
+void MainMenuUserInterface::clearLevelLoadDisplay()
+{
+   mLevelLoadDisplayNames.clear();
+}
+
+
 bool MainMenuUserInterface::getNeedToUpgrade()
 {
    return mNeedToUpgrade;
@@ -579,33 +611,28 @@ void MainMenuUserInterface::processSelection(U32 index)
    {
       case 0:
          gQueryServersUserInterface.activate();
-         firstTime = false;
          break;
       case 1:
-         hostGame(false, Address(IPProtocol, Address::Any, 28000));
-         firstTime = false;
+         initHostGame(Address(IPProtocol, Address::Any, 28000));
          break;
       case 2:
          gInstructionsUserInterface.activate();
-         firstTime = false;
          break;
       case 3:
          gOptionsMenuUserInterface.activate();
-         firstTime = false;
          break;
       case 4:
          gEditorUserInterface.setLevelFileName("");      // Reset this so we get the level entry screen
          gEditorUserInterface.activate();
-         firstTime = false;
          break;
       case 5:
          gCreditsUserInterface.activate();
-         firstTime = false;
          break;
       case 6:
          exitGame();
          break;
    }
+   firstTime = false;
 }
 
 
