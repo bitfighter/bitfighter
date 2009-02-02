@@ -10,3 +10,6 @@ dsound.h
 dinput8.lib
 dsound.lib
 dxguid.lib
+
+
+Note that there may be multiple copies of these files for different architectures.  Be sure to get the copy appropriate for your machine, most likely those in the x86 tree.
