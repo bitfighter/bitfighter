@@ -179,7 +179,7 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
 
    if(theFlag->getFlagCount() > 0)
    {
-      s2cHuntersMessage(HuntersMsgScore, theShip->mPlayerName.getString(), theFlag->getFlagCount(), theFlag->getFlagCount());
+      s2cHuntersMessage(HuntersMsgScore, theShip->mPlayerName.getString(), theFlag->getFlagCount(), getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
    }
    theFlag->changeFlagCount(0);
@@ -496,7 +496,7 @@ TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
 
 TNL_IMPLEMENT_NETOBJECT_RPC(HuntersNexusObject, s2cFlagsReturned, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
-   mNexusGlowTimer.reset(mNexusGlowTimerLength);
+   gClientGame->getGameType()->mZoneGlowTimer.reset();
 }
 
 // Constructor
@@ -504,7 +504,6 @@ HuntersNexusObject::HuntersNexusObject()
 {
    mObjectTypeMask |= NexusType | CommandMapVisType;
    mNetFlags.set(Ghostable);
-   //nexusBounds.set(Point(), Point());
 }
 
 extern S32 gMaxPolygonPoints;
@@ -564,14 +563,13 @@ void HuntersNexusObject::onAddedToGame(Game *theGame)
 void HuntersNexusObject::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
-   mNexusGlowTimer.update(deltaT);
 }
 
 
 void HuntersNexusObject::render()
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(getGame()->getGameType());
-   renderNexus(mPolyBounds, getExtent(), (theGameType && theGameType->mNexusIsOpen), mNexusGlowTimer.getFraction() );
+   renderNexus(mPolyBounds, getExtent(), (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
 }
 
 bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)

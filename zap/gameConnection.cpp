@@ -324,6 +324,21 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
                   Vector<StringTableEntry> e), (color, sfx, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
+   displayMessageE(color, sfx, formatString, e);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
+                  (StringTableEntry formatString, Vector<StringTableEntry> e), 
+                  (formatString, e),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+   displayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, formatString, e);
+   gClientGame->getGameType()->mZoneGlowTimer.reset();
+}
+
+void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e)
+{
    char outputBuffer[256];
    S32 pos = 0;
    const char *src = formatString.getString();
@@ -350,6 +365,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
    outputBuffer[pos] = 0;
    displayMessage(color, sfx, outputBuffer);
 }
+
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString),

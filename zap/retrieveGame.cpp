@@ -70,6 +70,11 @@ public:
          if(theShip->mMountedItems[i].isValid() && (theShip->mMountedItems[i]->getObjectTypeMask() & FlagType))
             return;
 
+      // Can only pick up flags on your team or neutral
+
+      if(theFlag->getTeam() != -1 && theShip->getTeam() != theFlag->getTeam())
+         return;
+
       S32 flagIndex;
 
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
@@ -180,8 +185,11 @@ public:
 
          // See if all the flags are owned by one team...
          for(S32 i = 0; i < mFlags.size(); i++)
-            if(!mFlags[i]->getZone() || mFlags[i]->getZone()->getTeam() != cl->teamId)
+         {
+            bool ourFlag = (mFlags[i]->getTeam() == cl->teamId) || (mFlags[i]->getTeam() == -1);    // Team flag || neutral flag
+            if(ourFlag && (!mFlags[i]->getZone() || mFlags[i]->getZone()->getTeam() != cl->teamId))
                return;     // ...if not, we're done
+         }
 
          // One team has all the flags
          if(mFlags.size() != 1)

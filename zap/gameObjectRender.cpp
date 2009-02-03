@@ -1174,8 +1174,7 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp)
    glEnd();
 }
 
-// Also used for rendering nexus object
-void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing)
+void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing, F32 glowFraction)
 {
    F32 alpha = 0.5;
    glColor(c * alpha);
@@ -1183,10 +1182,14 @@ void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing)
    for(S32 i = 0; i < bounds.size(); i++)
       glVertex(bounds[i]);
    glEnd();
-   if(isFlashing)
-      glColor(c);
-   else
-      glColor(c * 0.7);
+
+   Color h = (1,1,0);
+   glColor(c + h * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
+
+   if(!isFlashing)
+      c *= 0.7;
+
+   glColor(c);
 
    glBegin(GL_LINE_LOOP);
    for(S32 i = 0; i < bounds.size(); i++)

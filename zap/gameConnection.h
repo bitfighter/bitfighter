@@ -142,12 +142,16 @@ public:
                    Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
    TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString,
                    Vector<StringTableEntry> e));
+   TNL_DECLARE_RPC(s2cTouchdownScored, (StringTableEntry formatString, Vector<StringTableEntry> e));
+
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex));
 
    static GameConnection *getClientList();
    GameConnection *getNextClient();
+
+   void displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e);
 
    const Vector<U32> &getLoadout() { return mLoadout; }
    void writeConnectRequest(BitStream *stream);

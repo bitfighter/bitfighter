@@ -86,7 +86,9 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mCanSwitchTeams = true;    // Players can switch right away
    mLocalClient = NULL;       // Will be assigned by the server after a connection is made
    //mUsingFlagSpawnPoints = false;      // Need to have at least one flagSpawnPoint to activate random flag spawning
+   mZoneGlowTimer.setPeriod(mZoneGlowTime);
 }
+
 
 void GameType::processArguments(S32 argc, const char **argv)
 {
@@ -251,6 +253,7 @@ void GameType::idle(GameObject::IdleCallPath path)
    if(isGhost())     // i.e. we're a client
    {
       mGameTimer.update(deltaT);
+      mZoneGlowTimer.update(deltaT);
       return;
    }
 

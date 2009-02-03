@@ -126,12 +126,14 @@ bool FlagItem::collide(GameObject *hitObject)
    if(!(hitObject->getObjectTypeMask() & ShipType))
       return false;
 
-   if(isGhost() || (dynamic_cast<Ship *>(hitObject)->hasExploded))
+   // We've hit a ship
+   Ship *ship = dynamic_cast<Ship *>(hitObject);
+   if(isGhost() || (ship->hasExploded))
       return false;
 
    GameType *gt = getGame()->getGameType();
    if(gt)
-      gt->shipTouchFlag(dynamic_cast<Ship *>(hitObject), this);
+      gt->shipTouchFlag(ship, this);
    return false;
 }
 

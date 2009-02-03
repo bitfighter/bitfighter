@@ -138,12 +138,6 @@ private:
    Vector<Point> mPolyBounds;
    void computeExtent();
   
-   Timer mNexusGlowTimer;     // For tracking flag-return visual effect on Nexus
-
-   enum {
-      mNexusGlowTimerLength = 800,    // Time for visual effect, in ms
-   };
-
 public:
    HuntersNexusObject();
 

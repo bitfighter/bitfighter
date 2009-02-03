@@ -36,13 +36,13 @@ GoalZone::GoalZone()
 {
    mTeam = -1;
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = CommandMapVisType;
+   mObjectTypeMask = CommandMapVisType | GoalZoneType;
    mFlashCount = 0;
 }
 
 void GoalZone::render()
 {
-   renderGoalZone(mPolyBounds, getGame()->getGameType()->getTeamColor(getTeam()), isFlashing());
+   renderGoalZone(mPolyBounds, getGame()->getGameType()->getTeamColor(getTeam()), isFlashing(), getGame()->getGameType()->mZoneGlowTimer.getFraction());
 }
 
 S32 GoalZone::getRenderSortValue()

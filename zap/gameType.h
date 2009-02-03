@@ -338,6 +338,11 @@ public:
    TNL_DECLARE_RPC(s2cVoiceChat, (StringTableEntry client, ByteBufferPtr compressedVoice));
 
    TNL_DECLARE_CLASS(GameType);
+
+   enum {
+      mZoneGlowTime = 800,    // Time for visual effect, used by Nexus & GoalZone
+   };
+   Timer mZoneGlowTimer;
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \

@@ -104,6 +104,10 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    theFlag->mountToShip(theShip);
    mFlagTeam = theShip->getTeam();
    s2cSetFlagTeam(mFlagTeam);
+
+   GoalZone *theZone = dynamic_cast<GoalZone *>(theShip->isInZone(GoalZoneType));
+   if(theZone)
+      shipTouchZone(theShip, theZone);
 }
 
 void ZoneControlGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
@@ -161,7 +165,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       Vector<StringTableEntry> e;
       e.push_back(s->mPlayerName);
       for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+         mClientList[i]->clientConnection->s2cTouchdownScored(takeString, e);
    }
 
    updateScore(cl, CaptureZone);
@@ -178,7 +182,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    Vector<StringTableEntry> e;
    e.push_back(mTeams[s->getTeam()].name);
    for(S32 i = 0; i < mClientList.size(); i++)
-      mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, tdString, e);
+      mClientList[i]->clientConnection->s2cTouchdownScored(tdString, e);
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)

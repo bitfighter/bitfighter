@@ -48,6 +48,7 @@
 // Reinstated Colosseum level.  Hopefully will work better on OS X
 // Fixed mouse on menus in full screen mode
 // Tinkered with Geowar level -- bumped up gridsize, fixed a few quirks resulting in changes in rendering algorithm
+// Reassigned default key for loading loadout menu from Q to Z (Windows only, will be added to Mac build in release 011)
 
 // For 011
 // Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options
@@ -56,6 +57,12 @@
 //     of points player makes divided by total scores all players make during that players time in the game
 // Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
 // Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
+// When hosting a game from the UI, game load progress info displayed
+// Retrieve game -> can't pick up enemy flags, so more complex level designs are possible
+// Fixed scoring message on Hunters levels
+// ZoneControl -> When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter
+// Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
+// ZoneControl -> Better visual effects when zone captured, touchdown scored
 
 //-----------------------------------------------------------------------------------
 //

@@ -45,7 +45,8 @@ private:
    };
    S32 mFlashCount;
    Timer mFlashTimer;
-
+   
+   
 public:
    GoalZone();
    void render();

@@ -429,12 +429,12 @@ bool ServerGame::loadLevel(string filename)
 {
    mGridSize = DefaultGridSize;
 
-   char fileBuffer[256];
+   //char fileBuffer[256];
 #ifdef TNL_OS_XBOX
-   //dSprintf(fileBuffer, sizeof(fileBuffer), "d:\\media\\levels\\%s", filename);
+   //dSprintf(fileBuffer, sizeof(fileBuffer), "d:\\media\\levels\\%s", filename.c_str());
    filename = "d:\\media\\levels\\" + filename;
 #else
-   dSprintf(fileBuffer, sizeof(fileBuffer), "levels/%s", filename);
+   //dSprintf(fileBuffer, sizeof(fileBuffer), "levels/%s", filename.c_str());
    filename = "levels/" + filename;
 #endif
 

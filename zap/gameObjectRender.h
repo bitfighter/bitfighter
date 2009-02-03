@@ -58,7 +58,7 @@ extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 
 
 extern void renderLoadoutZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Rect extent);
-extern void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing);
+extern void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing, F32 glowFraction);
 extern void renderSlipZone(Vector<Point> &bounds, Rect extent);
 extern void renderNexus(Vector<Point> &bounds, Rect extent, bool open, F32 glowFraction);
 
