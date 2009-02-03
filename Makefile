@@ -19,7 +19,7 @@ default:
 	@$(MAKE) -C tnl
 	@$(MAKE) -C libtomcrypt
 	@$(MAKE) -C master
-	@$(MAKE) -C md5
+#	@$(MAKE) -C md5
 	@$(MAKE) -C zap	
 
 zap:
@@ -31,7 +31,7 @@ clean:
 	@$(MAKE) -C tnl clean
 	@$(MAKE) -C libtomcrypt clean
 	@$(MAKE) -C master clean
-	@$(MAKE) -C md5	
+#	@$(MAKE) -C md5	
 	@$(MAKE) -C zap	clean
 
 docs:
