@@ -272,6 +272,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
    }
 
    // Then render the ship:
+   // flameports...
    glColor4f(0.5,0.5,0.5, alpha);
    glBegin(GL_LINES);
    glVertex2f(-12.5, 0);
@@ -284,6 +285,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
    glVertex2f(12.5, 0);
    glEnd();
 
+   // colored insides
    glColor4f(c.r,c.g,c.b, alpha);
    glBegin(GL_LINE_LOOP);
    glVertex2f(-12, -13);
@@ -293,14 +295,18 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
 
    U32 lineCount = U32(14 * health);
    glBegin(GL_LINES);
+
+   // health bar
    for(U32 i = 0; i < lineCount; i++)
+
    {
       S32 yo = i * 2;
-      glVertex2f(-2, -11 + yo);
-      glVertex2f(2, -11 + yo);
+      glVertex2f(-2, -11 + yo);   // front of ship
+      glVertex2f(2, -11 + yo);    // back of ship
    }
    glEnd();
 
+   // Grey outside part
    glColor4f(0.7,0.7,0.7, alpha);
    glBegin(GL_LINE_LOOP);
    glVertex2f(-20, -15);
