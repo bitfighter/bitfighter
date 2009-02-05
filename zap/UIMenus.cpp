@@ -99,7 +99,7 @@ S32 MenuUserInterface::getOffset()
    if(count > gMaxMenuSize)     // Do some sort of scrolling
    {
       offset = currOffset;
- 
+
       // itemSelectedWithMouse basically lets users highlight the top and bottom items in a scrolling list,
       // which can't be done when using the keyboard
       if(selectedIndex - currOffset < (itemSelectedWithMouse ? 0 : 1))
@@ -157,7 +157,7 @@ void MenuUserInterface::render()
 
    S32 count = menuItems.size();
 
-   if(count > gMaxMenuSize)     // Do some sort of scrolling
+   if(count > gMaxMenuSize)     // Need some sort of scrolling
       count = gMaxMenuSize;
 
    S32 yStart = getYStart();
@@ -206,20 +206,20 @@ void MenuUserInterface::render()
          temp = temp + str;
       }
 
-      drawCenteredString(y, 25, temp.c_str()); 
+      drawCenteredString(y, 25, temp.c_str());
    }
 
    // Render an indicator that there are scrollable items above and/or below
    if(menuItems.size() > gMaxMenuSize)
    {
-      glColor3f(0, 0, 1);           
+      glColor3f(0, 0, 1);
 
       if(offset > 0)                                  // There are items above
          renderArrowAbove(yStart);
 
       if(offset < menuItems.size() - gMaxMenuSize)    // There are items below
          renderArrowBelow(yStart + MENU_ITEM_HEIGHT * gMaxMenuSize);
-   } 
+   }
 
    renderExtras();  // Draw something unique on a menu.  Not currently used anywhere...
 }
@@ -231,14 +231,15 @@ void MenuUserInterface::render()
 void MenuUserInterface::renderArrowAbove(S32 pos)
 {
    // First create a black poly to blot out what's behind
-   glColor3f(0, 0, 0);           
+   glColor3f(0, 0, 0);
    glBegin(GL_POLYGON);
       glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
       glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
       glVertex2f(canvasWidth / 2, pos - (ARROW_HEIGHT + ARROW_MARGIN ) - 7);
    glEnd();
 
-   glColor3f(0, 0, 1);           
+   // Then render the arrow itself
+   glColor3f(0, 0, 1);
    glBegin(GL_LINE_LOOP);
       glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
       glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
@@ -248,7 +249,7 @@ void MenuUserInterface::renderArrowAbove(S32 pos)
 
 void MenuUserInterface::renderArrowBelow(S32 pos)
 {
-   glColor3f(0, 0, 1);           
+   glColor3f(0, 0, 1);
    glBegin(GL_LINE_LOOP);
       glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
       glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
@@ -257,14 +258,14 @@ void MenuUserInterface::renderArrowBelow(S32 pos)
 }
 
 #undef ARROW_WIDTH
-#undef ARROW_HEIGHT 
+#undef ARROW_HEIGHT
 #undef ARROW_MARGIN
 
 
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   itemSelectedWithMouse = true; 
+   itemSelectedWithMouse = true;
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
    Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
@@ -310,7 +311,7 @@ void MenuUserInterface::processMouse()
    else if(selectedIndex >= menuItems.size())         // Scrolled off bottom of list
    {
       selectedIndex = menuItems.size() - 1;
-      currOffset = max(menuItems.size() - gMaxMenuSize, 0);   
+      currOffset = max(menuItems.size() - gMaxMenuSize, 0);
    }
 }
 
@@ -356,7 +357,7 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
    if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || keyCode == BUTTON_DPAD_RIGHT || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)
    {
       UserInterface::playBoop();
-      if(keyCode != MOUSE_LEFT) 
+      if(keyCode != MOUSE_LEFT)
          itemSelectedWithMouse = false;
       else // it was MOUSE_LEFT after all
       {
@@ -388,11 +389,11 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
       {
          if(menuItems.size() > gMaxMenuSize)       // No wrapping on long menus...
          {
-            selectedIndex = 0;               // (first item)
+            selectedIndex = 0;               // (select first item)
             return;                          // (leave before playBoop)
          }
          else                                      // ...but there is on shorter ones
-            selectedIndex = menuItems.size() - 1;  // (last item)
+            selectedIndex = menuItems.size() - 1;  // (select last item)
       }
       UserInterface::playBoop();
    }
@@ -1067,8 +1068,8 @@ void GameMenuUserInterface::buildMenu()
       {
          mAdminActiveOption = 8;
          menuItems.push_back(MenuItem("ENTER LEVEL CHANGE PASSWORD", mAdminActiveOption, KEY_L, KEY_P));
-      }      
-      
+      }
+
       if(gc->isAdmin())
       {
          mAdminActiveOption = 4;
@@ -1245,16 +1246,16 @@ void LevelMenuSelectUserInterface::onActivate()
       return;
 
    menuItems.clear();
-   
+
    char c[] = "A";
    for(S32 i = 0; i < gc->mLevelTypes.size(); i++)
       if(strcmp(gc->mLevelNames[i].getString(), ""))                       // Skip levels with blank names --> but all should have names now!
-         if(!strcmp( gc->mLevelTypes[i].getString(), category.c_str() ) || !strcmp(category.c_str(), ALL_LEVELS) ) 
+         if(!strcmp( gc->mLevelTypes[i].getString(), category.c_str() ) || !strcmp(category.c_str(), ALL_LEVELS) )
          {
             strncpy(c, gc->mLevelNames[i].getString(), 1);
             menuItems.push_back(MenuItem(gc->mLevelNames[i].getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
          }
-   
+
    menuItems.sort(menuItemValueSort);
    currOffset = 0;
 
