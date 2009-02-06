@@ -187,98 +187,6 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Levels"
-			>
-			<File
-				RelativePath="..\exe\levels\ctf1.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\ctf2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\ctf3.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\ctf4.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\football1.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\football2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\football3.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\football4.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\football5.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\hunters1.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\hunters2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\level2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\level8.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\level9.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\rabbit1.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\rabbit2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\retrieve1.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\retrieve2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\retrieve3.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\soccer1.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\soccer2.txt"
-				>
-			</File>
-			<File
-				RelativePath="..\exe\levels\zm1.txt"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="UI"
 			>
 			<File
@@ -694,19 +602,19 @@
 			Name="MD5"
 			>
 			<File
-				RelativePath="..\md5\md5.cpp"
+				RelativePath=".\md5.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\md5\md5.h"
+				RelativePath=".\md5.h"
 				>
 			</File>
 			<File
-				RelativePath="..\md5\md5wrapper.cpp"
+				RelativePath=".\md5wrapper.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\md5\md5wrapper.h"
+				RelativePath=".\md5wrapper.h"
 				>
 			</File>
 		</Filter>

@@ -24,7 +24,7 @@
   Or go to http://www.gnu.org/copyleft/lgpl.html
 */
 
-#if !defined( MACOSX ) && !defined (__APPLE__)
+#if !defined( MACOSX ) && !defined (__APPLE__)     // Can these ever be different???
 #include <malloc.h>
 #endif
 #include <stdlib.h>

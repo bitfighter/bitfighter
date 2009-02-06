@@ -49,7 +49,7 @@ namespace Zap
 //GCC can't link without this definition.  One of the calls to min in
 //UITeamDefMenu.cpp requires that this have actual storage (for some reason).
 // I don't even know what that means!! -CE
-#ifdef __APPLE__
+#ifdef TNL_OS_MAC_OSX
 const S32 GameType::gMaxTeams;
 #endif
 

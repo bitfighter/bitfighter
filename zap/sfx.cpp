@@ -471,7 +471,7 @@ void SFXObject::init()
 {
    ALint error;
 
-#ifdef __APPLE__
+#ifdef TNL_OS_MAC_OSX
    gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X
 #else
    gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows & Linux

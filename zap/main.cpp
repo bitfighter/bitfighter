@@ -28,28 +28,6 @@
 //-----------------------------------------------------------------------------------
 // Done:
 
-// Fixed problem with testing editor levels when the -leveldir parameter is used
-// Remapped screen shot key to Ctrl-Q so as to not interfere with save shortcut in editor
-// Fixed but wherein ships not propelled when destroying friendly spy bugs
-// Fixed crash with certain levels involving multiple pre-positioned spy bugs or mines
-// Mine/spybug explosions now kill phaser shots and other projectiles within blast radius
-// Improved rendering of teleport destinations
-// Fixed save message when saving from menu in editor
-// Fixed crash in editor when dragging existing item as first editing action
-// Fixed crash when changing teams while level is loading
-// Fixed UI problem with mouse and splash screen
-// Clicking on mouse when not pointed at menu item no longer activates highlighted menu item.
-// Concave loadout zones now rendered properly in game (though not yet in editor)
-// Fixed rabbit game -> ship colors now rendered properly
-// Modules no longer stuck on when restarting game after quitting while activated
-// Removed timeout on QuickChat menu --> now same as loadout menu
-// Fixed incorrect button labeling for Saitek 440 
-// Zapmatch is currently the only game that awards points for killing other players --> scoring for all games will be revisited on next release
-// Reinstated Colosseum level.  Hopefully will work better on OS X
-// Fixed mouse on menus in full screen mode
-// Tinkered with Geowar level -- bumped up gridsize, fixed a few quirks resulting in changes in rendering algorithm
-// Reassigned default key for loading loadout menu from Q to Z (Windows only, will be added to Mac build in release 011)
-
 // For 011
 // Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options
 // Full scoring information available with -rules option
@@ -93,9 +71,10 @@
 
 #include "IniFile.h"
 
-#ifdef __APPLE__
+#ifdef TNL_OS_MAC_OSX
 #include "Directory.h"
 #endif
+
 #include "../tnl/tnl.h"
 #include "../tnl/tnlRandom.h"
 #include "../tnl/tnlGhostConnection.h"
@@ -125,7 +104,7 @@ using namespace TNL;
 #include "input.h"
 #include "keyCode.h"
 #include "config.h"
-#include "../md5/md5wrapper.h"
+#include "md5wrapper.h"
 #include <sys/stat.h>   // For checking screenshot folder
 
 
@@ -922,11 +901,15 @@ void onExit()
 }
 
 
+#ifndef TNL_OS_MAC_OSX
 
-#ifndef __APPLE__
+#ifdef TNL_OS_WIN32
+#include "dirent.h"        // Need local copy for Windows builds
+#else
+#include <dirent.h>        // Need standard copy for Linux
+#endif
 
-#include "dirent.h"        // Pulls in standard version of this library in Linux, and seems to pull in the local copy in the dev folder under Windows.
-                           // It doesn't really make sense, but everyone wins!
+
 using namespace std;
 
 // Read files from folder
@@ -1533,7 +1516,7 @@ int main(int argc, char **argv)
 
       // On OS X, glutInit changes the working directory to the app
       // bundle's resource directory.  We don't want that. (RDW)
-#ifdef __APPLE__
+#ifdef TNL_OS_MAC_OSX
       moveToAppPath();
 #endif
       // InitSdlVideo();      // Get our main SDL rendering window all set up

@@ -27,7 +27,7 @@
  * details.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
  */
 
-#if !defined( MACOSX ) && !defined (__APPLE__)
+#if !defined( MACOSX ) && !defined (__APPLE__)     // Can these ever be different???
 #include <malloc.h>
 #endif
 #include <stdlib.h>

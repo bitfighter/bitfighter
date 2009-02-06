@@ -27,7 +27,7 @@
 #ifndef _MASTERINTERFACE_H_
 #define _MASTERINTERFACE_H_
 
-#ifdef __APPLE__
+#ifdef TNL_OS_MAC_OSX
 #include "tnl/tnlEventConnection.h"
 #include "tnl/tnlRPC.h"
 #else

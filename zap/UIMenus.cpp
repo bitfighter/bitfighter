@@ -316,11 +316,24 @@ void MenuUserInterface::processMouse()
 }
 
 
+extern S32 gHostingModePhase;
+
 // All key handling now under one roof!
 void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_UNKNOWN)
       return;
+
+   // Handle special case of keystrokes during hosting preparation phases
+   if(gHostingModePhase == 1 || gHostingModePhase == 2) // LoadingLevels
+   {
+      if(keyCode == KEY_ESCAPE)
+      {
+         gHostingModePhase = 0;
+         endGame();
+      }
+      return;
+   }
 
    gMainMenuUserInterface.firstTime = false;    // Stop animations if a key is pressed
    processMenuSpecificKeys(keyCode);            // This will, in turn, call the more generic keyboard handler if needed
