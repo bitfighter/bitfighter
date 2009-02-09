@@ -1923,13 +1923,15 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    Vector<WorldItem> items = mItems;
    bool deleted = false;
 
+   mSelectedSet.clear();         // Do this to avoid corrupting the heap... somehow...
+
    for(S32 i = 0; i < mItems.size(); ) // no i++
    {
       if(mItems[i].selected || (itemToLightUp == i && vertexToLightUp == -1))
       {
          mItems.erase(i);
          deleted = true;
-         if(itemToLightUp == i)     // Since indices change as items are deleted, this will keep incorrect items from being deleted
+         if(itemToLightUp == i)  // Since indices change as items are deleted, this will keep incorrect items from being deleted
             itemToLightUp = -1;
          else
             itemToLightUp--;
