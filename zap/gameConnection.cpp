@@ -36,7 +36,7 @@
 #include "UINameEntry.h"
 #include "UIErrorMessage.h"
 #include "UIQueryServers.h"
-#include "../md5/md5wrapper.h"
+#include "md5wrapper.h"
 
 
 namespace Zap
@@ -548,7 +548,10 @@ void GameConnection::onConnectionEstablished()
       setFixedRateParameters(50, 50, 2000, 2000);
 
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
-      TNL::s_logprintf("%s joined :: %s", mClientName.getString(), getTimeStamp().c_str());
+      if(isLocalConnection())
+         TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
+      else
+         TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), getNetAddressString(), getTimeStamp().c_str());
    }
 }
 

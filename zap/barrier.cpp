@@ -48,12 +48,20 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
    bool loop = vec[0] == vec[vec.size() - 1];      // Does our barrier form a closed loop?
 
    Vector<Point> edgeVector;
+   bool skipnext = false;
    for(S32 i = 0; i < vec.size() - 1; i++)
    {
+      if(skipnext)
+      {
+         skipnext = false;
+         continue;
+      }
+      if(i < vec.size() - 2 && (vec[i+1] - vec[i]).ATAN2() == (vec[i+2] - vec[i+1]).ATAN2())
+         skipnext = true;
       Point e = vec[i+1] - vec[i];
       e.normalize();
       edgeVector.push_back(e);
-   }
+   }  // Crashed here once -- corrupt stack error
 
 
    Point lastEdge = edgeVector[edgeVector.size() - 1];
@@ -136,7 +144,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
          pts.push_back(barrierEnds[i]);
          pts.push_back(barrierEnds[i+1]);
 
-         Barrier *b = new Barrier(pts, width, false);
+         Barrier *b = new Barrier(pts, width, false);    // false = not solid
          b->addToGame(theGame);
       }
    }

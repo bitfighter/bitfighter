@@ -41,6 +41,7 @@
 // ZoneControl -> When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter
 // Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
 // ZoneControl -> Better visual effects when zone captured, touchdown scored
+// Added client IP address to server log
 
 //-----------------------------------------------------------------------------------
 //

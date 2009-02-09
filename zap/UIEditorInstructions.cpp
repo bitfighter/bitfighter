@@ -204,13 +204,13 @@ void EditorInstructionsUserInterface::renderPage1()
    glColor(txtColor);
    drawString(col3, y, 18, "Team Editor");
    glColor(keyColor);
-   drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyDIAG));
+   drawStringf(col4, y, 18, "[%s]", keyCodeToString(KEY_F3));
 
    y+=26;
    glColor(txtColor);
    drawString(col1, y, 18, "Game Params Editor");
    glColor(keyColor);
-   drawStringf(col2, y, 18, "[%s]", keyCodeToString(keyDIAG));
+   drawStringf(col2, y, 18, "[%s]", keyCodeToString(KEY_F2));
    glColor(txtColor);
    drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);

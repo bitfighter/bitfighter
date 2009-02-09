@@ -32,7 +32,7 @@
 #include "gameConnection.h"
 #include "config.h"
 
-#include "../md5/md5wrapper.h"
+#include "md5wrapper.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap

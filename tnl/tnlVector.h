@@ -174,13 +174,19 @@ template<class T> inline Vector<T>::Vector(const Vector& p)
 template<class T> inline void  Vector<T>::destroy(U32 start, U32 end) // destroys from start to end-1
 {
    while(start < end)
-      destructInPlace(&mArray[start++]);
+   {
+      destructInPlace(&mArray[start]);
+      start++;
+   }
 }
 
 template<class T> inline void  Vector<T>::construct(U32 start, U32 end) // destroys from start to end-1
 {
    while(start < end)
-      constructInPlace(&mArray[start++]);
+   {
+      constructInPlace(&mArray[start]);
+      start++;
+   }
 }
 
 template<class T> inline void  Vector<T>::construct(U32 start, U32 end, const T* array) // destroys from start to end-1
