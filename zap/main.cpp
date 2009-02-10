@@ -42,12 +42,13 @@
 // Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
 // Added client IP address to server log
 // Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
-// Unneeded vertices now removed from walls to improve both appearance and performance
+// Uneeded vertices now removed from walls to improve both appearance and performance
 // Added screen saver supression (Windows only, sorry)
 // Username entry screen now remembers last name used
 // Enhanced flashing effect of zones in ZoneControl game
 // Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
 // Fixed minor rendering issue on servers menu
+// Color coded status messages on servers menu
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game

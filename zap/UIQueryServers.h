@@ -109,6 +109,7 @@ public:
       Nonce sendNonce;
       char serverName[MaxServerNameLen+1];
       char serverDescr[MaxServerDescrLen+1];
+      Color msgColor;
       Address serverAddress;
       U32 playerCount, maxPlayers;     // U32 because that's what we use on the master
    };

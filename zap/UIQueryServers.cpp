@@ -188,6 +188,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          s.isFromMaster = true;
          strcpy(s.serverName, "Internet Server");
          strcpy(s.serverDescr, "Internet Server -- attempting to connect");
+         s.msgColor = Color(1,1,1);   // white messages
          servers.push_back(s);
          mShouldSort = true;
       } 
@@ -221,6 +222,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.isFromMaster = false;
       strcpy(s.serverName, "LAN Server");
       strcpy(s.serverDescr, "LAN Server -- attempting to connect");
+      s.msgColor = Color(1,1,1);   // white messages
       servers.push_back(s);
       return;
    }
@@ -256,7 +258,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
 
          dSprintf(s.serverName, sizeof(s.serverName), "%s", serverName);
          dSprintf(s.serverDescr, sizeof(s.serverDescr), "%s", serverDescr);
-
+         s.msgColor = Color(1,1,0);   // yellow server details
          s.state = ServerRef::ReceivedQuery;
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was recieved, so we'll know when to send again
@@ -304,6 +306,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.pingTime = 999;
                strcpy(s.serverName, "PingTimedOut");
                strcpy(s.serverDescr, "Server not responding to pings");
+               s.msgColor = Color(1,0,0);   // red for errors
                s.playerCount = 0;
                s.maxPlayers = 0;
                s.state = ServerRef::ReceivedQuery;    // In effect, this will tell app not to send any more pings or queries to this server
@@ -345,6 +348,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                // Otherwise, we can deal with timeouts on remote servers
                strcpy(s.serverName, "QueryTimedOut");
                strcpy(s.serverDescr, "Server not responding to status query");
+               s.msgColor = Color(1,0,0);   // red for errors
                s.playerCount = s.maxPlayers = 0;
                s.state = ServerRef::ReceivedQuery;
                mShouldSort = true;
@@ -634,7 +638,7 @@ void QueryServersUserInterface::render()
          if(i == selectedIndex)
          {
             // Render description of selected server at bottom
-            glColor3f(1,1,0);    // yellow
+            glColor(s.msgColor);   
             drawString(horizMargin, canvasHeight - vertMargin - 62, 18, s.serverDescr);
          }
 
