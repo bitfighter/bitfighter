@@ -34,6 +34,7 @@
 #include "gameLoader.h"
 #include "point.h"
 
+#include <windows.h>   // For screensaver
 #include <string>
 
 ///
@@ -132,6 +133,7 @@ public:
 
       MasterServerConnectAttemptDelay = 60000,
    };
+
 
    Game(const Address &theBindAddress);
    virtual ~Game() {}
@@ -234,6 +236,7 @@ class ClientGame : public Game
 private:
    enum {
       NumStars = 256,      // 256 stars should be enough for anybody!   -- Bill Gates
+      CommanderMapZoomTime = 350,
    };
 
    Point mStars[NumStars];
@@ -242,10 +245,10 @@ private:
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
    bool mInCommanderMap;
 
-   enum {
-      CommanderMapZoomTime = 350,
-   };
    U32 mCommanderZoomDelta;
+
+   Timer mScreenSaverTimer;
+   void supressScreensaver();
 
 public:
    ClientGame(const Address &bindAddress);

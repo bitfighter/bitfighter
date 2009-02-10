@@ -48,16 +48,8 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
    bool loop = vec[0] == vec[vec.size() - 1];      // Does our barrier form a closed loop?
 
    Vector<Point> edgeVector;
-   bool skipnext = false;
    for(S32 i = 0; i < vec.size() - 1; i++)
    {
-      if(skipnext)
-      {
-         skipnext = false;
-         continue;
-      }
-      if(i < vec.size() - 2 && (vec[i+1] - vec[i]).ATAN2() == (vec[i+2] - vec[i+1]).ATAN2())
-         skipnext = true;
       Point e = vec[i+1] - vec[i];
       e.normalize();
       edgeVector.push_back(e);
@@ -111,14 +103,29 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
 
 void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid)
 {
+   Vector<Point> tmp;
    Vector<Point> vec;
 
    for(S32 i = 1; i < barrier.size(); i += 2)
    {
       float x = barrier[i-1];
       float y = barrier[i];
-      vec.push_back(Point(x,y));
+      tmp.push_back(Point(x,y));
    }
+
+   // Remove collinear points to make rendering nicer and datasets smaller
+
+   
+   for(S32 i = 0; i < tmp.size(); i++)
+   {
+      S32 j = i;
+      while(i > 0 && i < tmp.size() - 1 && (tmp[j] - tmp[j-1]).ATAN2() == (tmp[i+1] - tmp[i]).ATAN2())
+      {
+         i++;
+      }
+      vec.push_back(tmp[i]);
+   }
+
    if(vec.size() <= 1)
       return;
 

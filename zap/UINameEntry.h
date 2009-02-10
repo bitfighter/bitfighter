@@ -74,17 +74,12 @@ public:
 
 ////////////////
 
+
 class NameEntryUserInterface : public TextEntryUserInterface
 {
 public:
-   NameEntryUserInterface()      // Constructor
-   {
-      setMenuID(NameEntryUI);
-      title = "ENTER YOUR NICKNAME:";
-      instr1 = "You can skip this screen by adding a Nickname=blah line";
-      instr2 = "to the [Settings] section of Bitfighter.ini";
-      resetOnActivate = false;
-   }
+   NameEntryUserInterface();      // Constructor
+
    virtual void onAccept(const char *text);
    virtual void onEscape();
 };

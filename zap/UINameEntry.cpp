@@ -134,6 +134,8 @@ void TextEntryUserInterface::setText(const char *text)
    }
    else
       strcpy(buffer, text);
+
+   cursorPos = (U32) strlen(text);
 }
 
 // By default, all chars are valid.  Override to be more restrictive
@@ -157,13 +159,25 @@ void NameEntryUserInterface::onEscape()
 extern bool gReadyToConnectToMaster;
 extern IniSettings gIniSettings;
 
-void NameEntryUserInterface::onAccept(const char *text)
+NameEntryUserInterface::NameEntryUserInterface()      // Constructor
 {
-   if(!strcmp(text, ""))     // Non-blank entries required!
+   setMenuID(NameEntryUI);
+   title = "ENTER YOUR NICKNAME:";
+   instr1 = "You can skip this screen by adding a Nickname=YourNameHere line";
+   instr2 = "to the [Settings] section of Bitfighter.ini";
+   resetOnActivate = false;
+}
+
+
+void NameEntryUserInterface::onAccept(const char *name)
+{
+   if(!strcmp(name, ""))     // Non-blank entries required!
       setText(gIniSettings.defaultName.c_str());
 
    gMainMenuUserInterface.activate();
    gReadyToConnectToMaster = true;
+   gIniSettings.lastName = name;
+   saveSettingsToINI();             // Get that baby into the INI file
 
 }
 

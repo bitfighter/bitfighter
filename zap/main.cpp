@@ -42,6 +42,10 @@
 // Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
 // ZoneControl -> Better visual effects when zone captured, touchdown scored
 // Added client IP address to server log
+// Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
+// Unneeded vertices now removed from walls to improve both appearance and performance
+// Added screen saver supression (Windows only, sorry)
+// Username entry screen now remembers last name used
 
 //-----------------------------------------------------------------------------------
 //
@@ -1458,6 +1462,7 @@ int main(int argc, char **argv)
 
    gCmdLineSettings.init();      // Init cmd line settings struct
    gIniSettings.init();          // Init struct that holds INI settings
+      
    setDefaultLevelList();        // Levels we'll play, unless we're told otherwise
 
    Vector<TNL::StringPtr> theArgv;
@@ -1501,6 +1506,8 @@ int main(int argc, char **argv)
 
    loadSettingsFromINI();                    // Read INI
    processStartupParams();                   // And process command lines and INI settings in a unified way
+
+   gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
 
    SFXObject::init();
 

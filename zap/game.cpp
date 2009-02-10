@@ -564,6 +564,7 @@ void ServerGame::gameEnded()
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
 
+
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 {
@@ -576,6 +577,8 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
       mStars[i].x = TNL::Random::readF();      // Between 0 and 1
       mStars[i].y = TNL::Random::readF();
    }
+
+   mScreenSaverTimer.reset(59000);         // Fire screen saver supression every 59 seconds
 }
 
 bool ClientGame::hasValidControlObject()
@@ -689,8 +692,36 @@ void ClientGame::idle(U32 timeDelta)
    SFXObject::process();                        // Process sound effects (SFX)
 
    mNetInterface->processConnections();
+
+   if(mScreenSaverTimer.update(timeDelta))
+   {
+      supressScreensaver();
+      mScreenSaverTimer.reset();
+   }
 }
 
+
+// Fire keyboard event to suppress screen saver
+void ClientGame::supressScreensaver()
+{
+
+#ifdef TNL_OS_WIN32     // Windows only for now, sadly...
+   // Code from Tom Revell's Caffeine screen saver suppression product
+
+   // Build keypress
+   tagKEYBDINPUT keyup;
+   keyup.wVk = VK_MENU;     // Some key they GLUT doesn't recognize
+   keyup.wScan = NULL;
+   keyup.dwFlags = KEYEVENTF_KEYUP;
+   keyup.time = NULL;
+   keyup.dwExtraInfo = NULL;
+
+	tagINPUT array[1];
+	array[0].type = INPUT_KEYBOARD;
+	array[0].ki = keyup;
+	SendInput(1, array, sizeof(INPUT));
+#endif
+}
 
 void ClientGame::zoomCommanderMap()
 {
