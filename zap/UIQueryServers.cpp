@@ -583,7 +583,6 @@ void QueryServersUserInterface::render()
          mLastServer = mFirstServer + totalRows;
          if(mLastServer >= servers.size())
             mLastServer = servers.size() - 1;
-
          
          if(mFirstServer == 0)    // First sever should replace arrow
          {
@@ -605,31 +604,35 @@ void QueryServersUserInterface::render()
             mScrollingUpMode = true; 
       }
 
+
+      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
+
+      // Render box behind selected item
+      glColor3f(0,0,0.4);     // pale blue
+      glBegin(GL_POLYGON);
+         glVertex2f(0, y);
+         glVertex2f(799, y);
+         glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
+         glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
+      glEnd();
+
+      glColor3f(0,0,1);       // blue
+      glBegin(GL_LINE_LOOP);
+         glVertex2f(0, y);
+         glVertex2f(799, y);
+         glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
+         glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
+      glEnd();
+
+
       for(S32 i = mFirstServer; i <= mLastServer; i++)
       {
-         U32 y = ITEMS_TOP + (i - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
+         y = ITEMS_TOP + (i - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
          const U32 fontSize = 21;
          ServerRef &s = servers[i];
 
-         // Render box around selected item
          if(i == selectedIndex)
          {
-            glColor3f(0,0,0.4);     // pale blue
-            glBegin(GL_POLYGON);
-               glVertex2f(0, y);
-               glVertex2f(799, y);
-               glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
-               glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
-            glEnd();
-
-            glColor3f(0,0,1);       // blue
-            glBegin(GL_LINE_LOOP);
-               glVertex2f(0, y);
-               glVertex2f(799, y);
-               glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
-               glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
-            glEnd();
-
             // Render description of selected server at bottom
             glColor3f(1,1,0);    // yellow
             drawString(horizMargin, canvasHeight - vertMargin - 62, 18, s.serverDescr);
