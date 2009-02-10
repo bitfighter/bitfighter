@@ -117,7 +117,7 @@ public:
    {
       const char *name;
       S32 xStart;
-      ColumnInfo(const char *nm = NULL, U32 xs = 0) { name = nm; xStart = xs; }
+      ColumnInfo(const char *nm = NULL, U32 xs = 0) { name = nm; xStart = xs; }     // Constructor
    };
    struct HiddenServer
    {
@@ -142,7 +142,7 @@ public:
    void render();             // Draw the screen
 
    void addPingServers(const Vector<IPAddress> &ipList);    // Add many addresses
-   void addHiddenServer(Address addr, U32 time);      // Add server to list of servers we don't show the user
+   void addHiddenServer(Address addr, U32 time);            // Add server to list of servers we don't show the user
 
 
    void sort();               // Sort servers for pretty viewing

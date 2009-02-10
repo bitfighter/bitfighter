@@ -545,9 +545,7 @@ void QueryServersUserInterface::render()
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++)
-   {
       drawString(columns[i].xStart, COLUMNS_TOP - 20 + MENU_ITEM_HEIGHT, MENU_ITEM_HEIGHT, columns[i].name);
-   }
 
    bool drawScrollUpArrow = false;
    bool drawScrollDnArrow = false;
@@ -608,10 +606,11 @@ void QueryServersUserInterface::render()
             mScrollingUpMode = true; 
       }
 
+      S32 colwidth = columns[1].xStart - columns[0].xStart;
 
       U32 y = ITEMS_TOP + (selectedIndex - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
 
-      // Render box behind selected item
+      // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
       glColor3f(0,0,0.4);     // pale blue
       glBegin(GL_POLYGON);
          glVertex2f(0, y);
@@ -642,8 +641,22 @@ void QueryServersUserInterface::render()
             drawString(horizMargin, canvasHeight - vertMargin - 62, 18, s.serverDescr);
          }
 
+         
+         // Truncate server name to fit in the first column...
+         string sname = "";
+
+         // ...but first, see if the name will fit without truncation... if so, don't bother
+         if(getStringWidth(fontSize, s.serverName) < colwidth)
+            sname = s.serverName;
+         else
+            for(size_t j = 0; j < strlen(s.serverName); j++)
+               if(getStringWidth( fontSize, (sname + s.serverName[j]).c_str() ) < colwidth)
+                  sname += s.serverName[j];
+               else
+                  break;
+
          glColor3f(1,1,1);
-         drawString(columns[0].xStart, y, fontSize, s.serverName);
+         drawString(columns[0].xStart, y, fontSize, sname.c_str());
 
          // Render icons
          glColor3f(0,1,0);
