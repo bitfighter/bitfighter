@@ -71,6 +71,7 @@ public:
 
    void renderInterfaceOverlay(bool scoreboardVisible);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
+   void majorScoringEventOcurred();    // Gets run when a touchdown is scored
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
@@ -164,8 +165,9 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       static StringTableEntry takeString("%e0 captured an unclaimed zone!");
       Vector<StringTableEntry> e;
       e.push_back(s->mPlayerName);
+
       for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cTouchdownScored(takeString, e);
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    }
 
    updateScore(cl, CaptureZone);
@@ -266,6 +268,25 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
 }
 
+// A major scoring event has ocurred -- in this case, it's a touchdown
+void ZoneControlGameType::majorScoringEventOcurred()
+{
+   Vector<GameObject *> fillVector;
+
+   // Find all zones...
+   getGame()->getGridDatabase()->findObjects(GoalZoneType, fillVector, getGame()->computeWorldObjectExtents());
+
+   // ...and make sure they're not flashing...
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      GoalZone *gz = dynamic_cast<GoalZone *>(fillVector[i]);
+      if(gz)
+         gz->setFlashCount(0);
+   }
+
+   // ...then activate the glowing zone effect
+   gClientGame->getGameType()->mZoneGlowTimer.reset();
+}
 
 // What does a particular scoring event score?
 S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)

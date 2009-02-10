@@ -46,6 +46,8 @@
 // Unneeded vertices now removed from walls to improve both appearance and performance
 // Added screen saver supression (Windows only, sorry)
 // Username entry screen now remembers last name used
+// Enhanced flashing effect of zones in ZoneControl game
+// Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
 
 //-----------------------------------------------------------------------------------
 //

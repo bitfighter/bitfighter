@@ -1180,23 +1180,26 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp)
    glEnd();
 }
 
+// Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing, F32 glowFraction)
 {
    F32 alpha = 0.5;
-   glColor(c * alpha);
+
+   if(isFlashing)
+      alpha = 0.75;
+
+   Color h(1,1,0);      // Yellow highlight
+
+   glColor(h * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction));
+
+   // Fill
    glBegin(GL_POLYGON);
    for(S32 i = 0; i < bounds.size(); i++)
       glVertex(bounds[i]);
    glEnd();
 
-   Color h = (1,1,0);
-   glColor(c + h * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
-
-   if(!isFlashing)
-      c *= 0.7;
-
-   glColor(c);
-
+   // Outline
+   glColor(h * (glowFraction * glowFraction) + c * (1 - glowFraction * glowFraction));
    glBegin(GL_LINE_LOOP);
    for(S32 i = 0; i < bounds.size(); i++)
       glVertex(bounds[i]);

@@ -146,8 +146,8 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    if(stream->readFlag())
    {
-      stream->read(&mTeam);
-      if(!isInitialUpdate())
+      stream->read(&mTeam);                      // Zone was captured by team mTeam
+      if(!isInitialUpdate() && mTeam != -1)      // mTeam will be -1 on touchdown, and we don't want to flash then!
       {
          mFlashTimer.reset(FlashDelay);
          mFlashCount = FlashCount;

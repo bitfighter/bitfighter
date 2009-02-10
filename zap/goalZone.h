@@ -64,6 +64,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void idle(GameObject::IdleCallPath path);
+   void setFlashCount(S32 i) { mFlashCount = i; }
    TNL_DECLARE_CLASS(GoalZone);
 };
 

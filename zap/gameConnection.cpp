@@ -334,7 +334,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    displayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, formatString, e);
-   gClientGame->getGameType()->mZoneGlowTimer.reset();
+   gClientGame->getGameType()->majorScoringEventOcurred();
 }
 
 void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e)

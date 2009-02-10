@@ -343,6 +343,8 @@ public:
       mZoneGlowTime = 800,    // Time for visual effect, used by Nexus & GoalZone
    };
    Timer mZoneGlowTimer;
+
+   virtual void majorScoringEventOcurred() { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control game (football.cpp)
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \
