@@ -26,7 +26,7 @@
 #include "gameObject.h"
 #include "moveObject.h"    // For ActualState definition
 #include "gameType.h"
-
+#include "ship.h"
 
 #include "projectile.h"
 
@@ -59,11 +59,6 @@ void GameObject::setOwner(GameConnection *c)
 GameConnection *GameObject::getOwner()
 {
    return mOwner;
-}
-
-void GameObject::setControllingClient(GameConnection *c)
-{
-   mControllingClient = c;
 }
 
 void GameObject::deleteObject(U32 deleteTimeInterval)
@@ -211,10 +206,6 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
    }
 }
 
-GameConnection *GameObject::getControllingClient()
-{
-   return mControllingClient;
-}
 
 // Update object's extents in the database
 void GameObject::setExtent(Rect &extents)
@@ -261,6 +252,7 @@ void GameObject::removeFromDatabase()
    }
 }
 
+
 void GameObject::addToGame(Game *theGame)
 {
    TNLAssert(mGame == NULL, "Error, already in a game.");
@@ -273,7 +265,7 @@ void GameObject::addToGame(Game *theGame)
 
 void GameObject::onAddedToGame(Game *)
 {
-   // Do nothing
+   // Do nothing --> will be overridden
 }
 
 void GameObject::removeFromGame()

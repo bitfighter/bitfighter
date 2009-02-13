@@ -47,8 +47,12 @@
 // Username entry screen now remembers last name used
 // Enhanced flashing effect of zones in ZoneControl game
 // Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
+// Indicator added to player's name when they are in chat, global chat, or options menus
+
+// Server menu enhancements:
 // Fixed minor rendering issue on servers menu
 // Color coded status messages on servers menu
+// Trim server names too long to fit in column on servers menu
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game

@@ -59,6 +59,7 @@ GameConnection::GameConnection()
    mInCommanderMap = false;
    mIsAdmin = false;
    mIsLevelChanger = false;
+   mIsBusy = false;
    mGotPermissionsReply = false;
    mWaitingForPermissionsReply = false;
    mSwitchTimer.reset(0);
@@ -68,7 +69,7 @@ GameConnection::GameConnection()
 
 GameConnection::~GameConnection()
 {
-   // unlink ourselves if we're in the client list
+   // Unlink ourselves if we're in the client list
    mPrev->mNext = mNext;
    mNext->mPrev = mPrev;
 
@@ -408,6 +409,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex), (n
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          walk->s2cDisplayMessageE(ColorYellow, SFXNone, msg, e);
    }
+}
+
+
+// Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+{
+   setIsBusy(busy);
 }
 
 extern IniSettings gIniSettings;

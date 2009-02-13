@@ -46,7 +46,10 @@ const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
 {
+private:
    typedef MoveObject Parent;
+   bool isBusy;
+
 public:
    enum {
       MaxVelocity = 450,        // points per second
@@ -91,7 +94,6 @@ public:
       PowersMask = BIT(6),       // Which modules are active
       LoadoutMask = BIT(7),
    };
-
 
    Timer mFireTimer;
    Timer mWarpInTimer;

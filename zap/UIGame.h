@@ -136,7 +136,10 @@ private:
    void enterLoadout();
 
    bool mFiring;                          // Are we firing?
-   bool mModActivated[ShipModuleCount];   
+   bool mModActivated[ShipModuleCount];
+
+   void setBusyChatting(bool busy);     // Tell the server we are (or are not) busy chatting
+
 
 public:
 

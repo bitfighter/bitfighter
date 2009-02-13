@@ -185,6 +185,7 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
    theFlag->changeFlagCount(0);
 }
 
+// Runs on the server
 void HuntersGameType::onGhostAvailable(GhostConnection *theConnection)
 {
    Parent::onGhostAvailable(theConnection);
@@ -351,6 +352,7 @@ void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, Ga
    }
 }
 
+// Special spawn function for Hunters games (runs only on server)
 void HuntersGameType::spawnShip(GameConnection *theClient)
 {
    Parent::spawnShip(theClient);

@@ -71,7 +71,7 @@ const char *gModuleShortName[] = {
 GameUserInterface::GameUserInterface()
 {
    setMenuID(GameUI);
-   mCurrentMode = PlayMode;
+   setPlayMode();
    mInScoreboardMode = false;
 #if 0 //defined(TNL_OS_XBOX)
    mFPSVisible = true;
@@ -619,11 +619,21 @@ void GameUserInterface::enterLoadout()
 void GameUserInterface::setPlayMode()
 {
    mCurrentMode = PlayMode;
+   setBusyChatting(false);
    mUpDisabled = false;
    mDownDisabled = false;
    mLeftDisabled = false;
    mRightDisabled = false;
 }
+
+
+// Send a message to the server that we are (or are not) busy chatting
+void GameUserInterface::setBusyChatting(bool busy)
+{
+   if( gClientGame && gClientGame->getConnectionToServer() )
+      gClientGame->getConnectionToServer()->c2sSetIsBusy(busy);
+}
+
 
 // Select next weapon
 void GameUserInterface::advanceWeapon()
@@ -670,6 +680,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == keyOUTGAMECHAT)
    {
+      setBusyChatting(true);
       gChatInterface.activate();
       return;
    }
@@ -735,13 +746,16 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          UserInterface::playBoop();
 
-         if(!gClientGame->isConnectedToServer())
+         if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
          {
             endGame();
             gMainMenuUserInterface.activate();
          }
          else
+         {
+            setBusyChatting(true);
             gGameMenuUserInterface.activate();
+         }
       }
       else if(keyCode == keyCMDRMAP[inputMode])
          gClientGame->zoomCommanderMap();
@@ -769,12 +783,14 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mCurrentChatType = TeamChat;
             mCurrentMode = ChatMode;
             mChatModeSlideoutTimer.reset();
+            setBusyChatting(true);
          }
          else if(keyCode == keyGLOBCHAT[inputMode])
          {
             mCurrentChatType = GlobalChat;
             mCurrentMode = ChatMode;
             mChatModeSlideoutTimer.reset();
+            setBusyChatting(true);
          }
          else if(keyCode == keyQUICKCHAT[inputMode])
             enterQuickChat();
@@ -956,7 +972,7 @@ void GameUserInterface::cancelChat()
 {
    memset(mChatBuffer, 0, sizeof(mChatBuffer));
    mChatCursorPos = 0;
-   mCurrentMode = PlayMode;
+   setPlayMode();
    mChatModeSlideoutTimer.reset();
 }
 

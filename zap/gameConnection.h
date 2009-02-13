@@ -69,6 +69,7 @@ private:
    bool mIsLevelChanger;
    bool mWaitingForPermissionsReply;
    bool mGotPermissionsReply;
+   bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
    StringTableEntry mClientName;
    Vector<U32> mLoadout;
@@ -113,6 +114,9 @@ public:
    bool isAdmin() { return mIsAdmin; }
    void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
+   bool isBusy() { if(!this) return false; else return mIsBusy; }
+   void setIsBusy(bool busy) { mIsBusy = busy; }
+
    bool isLevelChanger() { return mIsLevelChanger; }
    void setIsLevelChanger(bool levelChanger) { mIsLevelChanger = levelChanger; }
 
@@ -147,6 +151,7 @@ public:
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex));
+   TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
 
    static GameConnection *getClientList();
    GameConnection *getNextClient();

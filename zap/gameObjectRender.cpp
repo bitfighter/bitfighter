@@ -174,41 +174,31 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
    if(alpha != 1.0)
       glEnable(GL_BLEND);
 
-   if(cloakActive)
-   {
-      // This block makes cloaked ship visible against loadout zones and other backgrounds
-      //glColor4f(0,0,0, 1 - alpha);
-      //glBegin(GL_POLYGON);
-      //glVertex2f(-20, -15);
-      //glVertex2f(0, 25);
-      //glVertex2f(20, -15);
-      //glEnd();
-   }
-
    // First render the thrusters
-
-   if(thrusts[0] > 0) // forward thrust:
+   if(thrusts[0] > 0) // forward thrust
    {
       glColor4f(1, 0, 0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(-8, -15);
-      glVertex2f(0, -15 - 20 * thrusts[0]);
-      glVertex2f(0, -15 - 20 * thrusts[0]);
-      glVertex2f(8, -15);
+         glVertex2f(-8, -15);
+         glVertex2f(0, -15 - 20 * thrusts[0]);
+         glVertex2f(0, -15 - 20 * thrusts[0]);
+         glVertex2f(8, -15);
       glEnd();
+      
       glColor4f(1, 0.5, 0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(-6, -15);
-      glVertex2f(0, -15 - 15 * thrusts[0]);
-      glVertex2f(0, -15 - 15 * thrusts[0]);
-      glVertex2f(6, -15);
+         glVertex2f(-6, -15);
+         glVertex2f(0, -15 - 15 * thrusts[0]);
+         glVertex2f(0, -15 - 15 * thrusts[0]);
+         glVertex2f(6, -15);
       glEnd();
+
       glColor4f(1, 1, 0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(-4, -15);
-      glVertex2f(0, -15 - 8 * thrusts[0]);
-      glVertex2f(0, -15 - 8 * thrusts[0]);
-      glVertex2f(4, -15);
+         glVertex2f(-4, -15);
+         glVertex2f(0, -15 - 8 * thrusts[0]);
+         glVertex2f(0, -15 - 8 * thrusts[0]);
+         glVertex2f(4, -15);
       glEnd();
    }
    if(thrusts[1] > 0) // back thrust
@@ -218,25 +208,26 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
       // from 7.5, 10 -> 12.5, 10 and from -7.5, 10 to -12.5, 10
       glColor4f(1, 0.5, 0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(7.5, 10);
-      glVertex2f(10, 10 + thrusts[1] * 15);
-      glVertex2f(12.5, 10);
-      glVertex2f(10, 10 + thrusts[1] * 15);
-      glVertex2f(-7.5, 10);
-      glVertex2f(-10, 10 + thrusts[1] * 15);
-      glVertex2f(-12.5, 10);
-      glVertex2f(-10, 10 + thrusts[1] * 15);
+         glVertex2f(7.5, 10);
+         glVertex2f(10, 10 + thrusts[1] * 15);
+         glVertex2f(12.5, 10);
+         glVertex2f(10, 10 + thrusts[1] * 15);
+         glVertex2f(-7.5, 10);
+         glVertex2f(-10, 10 + thrusts[1] * 15);
+         glVertex2f(-12.5, 10);
+         glVertex2f(-10, 10 + thrusts[1] * 15);
       glEnd();
+      
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(9, 10);
-      glVertex2f(10, 10 + thrusts[1] * 10);
-      glVertex2f(11, 10);
-      glVertex2f(10, 10 + thrusts[1] * 10);
-      glVertex2f(-9, 10);
-      glVertex2f(-10, 10 + thrusts[1] * 10);
-      glVertex2f(-11, 10);
-      glVertex2f(-10, 10 + thrusts[1] * 10);
+         glVertex2f(9, 10);
+         glVertex2f(10, 10 + thrusts[1] * 10);
+         glVertex2f(11, 10);
+         glVertex2f(10, 10 + thrusts[1] * 10);
+         glVertex2f(-9, 10);
+         glVertex2f(-10, 10 + thrusts[1] * 10);
+         glVertex2f(-11, 10);
+         glVertex2f(-10, 10 + thrusts[1] * 10);
       glEnd();
 
    }
@@ -250,24 +241,26 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
    {
       glColor4f(1, 0, 0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(xThrust, 10);
-      glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
-      glVertex2f(xThrust, 0);
-      glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
+         glVertex2f(xThrust, 10);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
+         glVertex2f(xThrust, 0);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
       glEnd();
+      
       glColor4f(1,0.5,0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(xThrust, 8);
-      glVertex2f(xThrust + thrusts[2] * xThrust, 5);
-      glVertex2f(xThrust, 2);
-      glVertex2f(xThrust + thrusts[2] * xThrust, 5);
+         glVertex2f(xThrust, 8);
+         glVertex2f(xThrust + thrusts[2] * xThrust, 5);
+         glVertex2f(xThrust, 2);
+         glVertex2f(xThrust + thrusts[2] * xThrust, 5);
       glEnd();
+      
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINES);
-      glVertex2f(xThrust, 6);
-      glVertex2f(xThrust + thrusts[2] * xThrust * 0.5, 5);
-      glVertex2f(xThrust, 4);
-      glVertex2f(xThrust + thrusts[2] * xThrust * 0.5, 5);
+         glVertex2f(xThrust, 6);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5, 5);
+         glVertex2f(xThrust, 4);
+         glVertex2f(xThrust + thrusts[2] * xThrust * 0.5, 5);
       glEnd();
    }
 
@@ -275,22 +268,22 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
    // flameports...
    glColor4f(0.5,0.5,0.5, alpha);
    glBegin(GL_LINES);
-   glVertex2f(-12.5, 0);
-   glVertex2f(-12.5, 10);
-   glVertex2f(-12.5, 10);
-   glVertex2f(-7.5, 10);
-   glVertex2f(7.5, 10);
-   glVertex2f(12.5, 10);
-   glVertex2f(12.5, 10);
-   glVertex2f(12.5, 0);
+      glVertex2f(-12.5, 0);
+      glVertex2f(-12.5, 10);
+      glVertex2f(-12.5, 10);
+      glVertex2f(-7.5, 10);
+      glVertex2f(7.5, 10);
+      glVertex2f(12.5, 10);
+      glVertex2f(12.5, 10);
+      glVertex2f(12.5, 0);
    glEnd();
 
    // colored insides
    glColor4f(c.r,c.g,c.b, alpha);
    glBegin(GL_LINE_LOOP);
-   glVertex2f(-12, -13);
-   glVertex2f(0, 22);
-   glVertex2f(12, -13);
+      glVertex2f(-12, -13);
+      glVertex2f(0, 22);
+      glVertex2f(12, -13);
    glEnd();
 
    U32 lineCount = U32(14 * health);
@@ -298,7 +291,6 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
 
    // health bar
    for(U32 i = 0; i < lineCount; i++)
-
    {
       S32 yo = i * 2;
       glVertex2f(-2, -11 + yo);   // front of ship
@@ -309,9 +301,9 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
    // Grey outside part
    glColor4f(0.7,0.7,0.7, alpha);
    glBegin(GL_LINE_LOOP);
-   glVertex2f(-20, -15);
-   glVertex2f(0, 25);
-   glVertex2f(20, -15);
+      glVertex2f(-20, -15);
+      glVertex2f(0, 25);
+      glVertex2f(20, -15);
    glEnd();
 
    // Render shield if appropriate
@@ -321,9 +313,8 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
 
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINE_LOOP);
-      for(F32 theta = 0; theta <= Float2Pi; theta += 0.3)
-         glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
-
+         for(F32 theta = 0; theta <= Float2Pi; theta += 0.3)
+            glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
       glEnd();
    }
 
@@ -338,8 +329,10 @@ void renderAimVector()
       glBegin(GL_LINES);
          glColor4f(0,1,0, 0);
          glVertex2f(0, 50);       // Gradient from here...
+
          glColor4f(0,1,0, 0.5);        // Reticle color
          glVertex2f(0, 150);      // ...to here
+
          glColor4f(0,1,0, 0.5);
          glVertex2f(0, 150);      // Solid from here on out
          glVertex2f(0, 1000);     // 1000 is pretty aribitrary!

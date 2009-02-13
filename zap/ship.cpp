@@ -54,6 +54,7 @@ static Vector<GameObject *> fillVector;
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
 // Constructor
+// Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
 Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p, CollisionRadius)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
@@ -74,13 +75,12 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
 
    mPlayerName = playerName;     // This will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
 
-   for(S32 i=0; i<TrailCount; i++)        // Don't draw any vehicle trails
+   for(S32 i=0; i<TrailCount; i++)         // Don't draw any vehicle trails
       mTrail[i].reset();
 
-   mEnergy = (S32)(EnergyMax * .80f); // Start off with 80% energy
+   mEnergy = (S32)(EnergyMax * .80f);      // Start off with 80% energy
    for(S32 i = 0; i < ModuleCount; i++)    // All modules disabled
       mModuleActive[i] = false;
-
 
    // Set initial module and weapon selections
    mModule[0] = ModuleBoost;
@@ -90,11 +90,12 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
    mWeapon[1] = WeaponMine;
    mWeapon[2] = WeaponBurst;
 
-
    mActiveWeaponIndx = 0;
 
    mCooldown = false;
+   isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 }
+
 
 void Ship::onGhostRemove()
 {
@@ -103,6 +104,7 @@ void Ship::onGhostRemove()
       mModuleActive[i] = false;
    updateModuleSounds();
 }
+
 
 void Ship::processArguments(S32 argc, const char **argv)
 {
@@ -119,7 +121,8 @@ void Ship::processArguments(S32 argc, const char **argv)
    }
 
    updateExtent();
-}
+} 
+
 
 void Ship::setActualPos(Point p)
 {
@@ -252,6 +255,7 @@ void Ship::processWeaponFire()
       }
    }
 }
+
 
 void Ship::controlMoveReplayComplete()
 {
@@ -658,9 +662,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
       stream->writeStringTableEntry(mPlayerName);
       stream->write(mass);
       stream->write(mTeam);
-
-      //stream->writeRangedU32(mTeam + 1, 0, getGame()->getTeamCount());
-
+    
       // now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
       {
@@ -690,10 +692,11 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    }
 
    stream->writeFlag(hasExploded);
-
-   bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
+   stream->writeFlag(getControllingClient()->isBusy()); 
 
    stream->writeFlag(updateMask & WarpPositionMask);
+
+   bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
    if(!shouldWritePosition)
    {
       stream->writeFlag(false);
@@ -735,9 +738,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       stream->readStringTableEntry(&mPlayerName);
       stream->read(&mass);
-
       stream->read(&mTeam);
-     // mTeam = stream->readRangedU32(0, gClientGame->getTeamCount()) - 1;
 
       // Read mounted items:
       while(stream->readFlag())
@@ -746,6 +747,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          Item *theItem = (Item *) connection->resolveGhost(index);
          theItem->mountToShip(this);
       }
+
    }  // initial update
 
 
@@ -761,8 +763,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mWeapon[i] = (WeaponType) stream->readEnum(WeaponCount);
    }
 
-
    bool explode = stream->readFlag();
+   isBusy = stream->readFlag();
+
    bool warp = stream->readFlag();
    if(warp)    // Ship just teleported/warped
    {
@@ -1172,7 +1175,6 @@ void Ship::render(S32 layerIndex)
    if(warpInScale < 0.8)
       rotAmount = (0.8 - warpInScale) * 540;
 
-
    GameConnection *conn = gClientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
 
@@ -1186,7 +1188,12 @@ void Ship::render(S32 layerIndex)
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
-      const char *string = mPlayerName.getString();
+      string str = mPlayerName.getString(); 
+                                                                                
+      // Modify name if owner is "busy"
+      if(isBusy)
+         str = "<<" + str + ">>";
+
       glEnable(GL_BLEND);
       F32 textAlpha = 0.5 * alpha;
       U32 textSize = 14;
@@ -1197,7 +1204,7 @@ void Ship::render(S32 layerIndex)
       glLineWidth(1);
 #endif
       glColor4f(1,1,1,textAlpha);
-      UserInterface::drawString((S32)(UserInterface::getStringWidth(textSize, string) * -0.5), 30, textSize, string );
+      UserInterface::drawString((UserInterface::getStringWidth(textSize, str.c_str()) * -0.5), 30, textSize, str.c_str() );
       glDisable(GL_BLEND);
       glLineWidth(gDefaultLineWidth);
    }
@@ -1213,15 +1220,14 @@ void Ship::render(S32 layerIndex)
       // scrambling thing here as well...
       glColor3f(0,0,0);
       glBegin(GL_POLYGON);
-      glVertex2f(-20, -15);
-      glVertex2f(0, 25);
-      glVertex2f(20, -15);
+         glVertex2f(-20, -15);
+         glVertex2f(0, 25);
+         glVertex2f(20, -15);
       glEnd();
 
       glPopMatrix();
       return;
    }
-
 
    // LayerIndex == 1
 
@@ -1266,7 +1272,7 @@ void Ship::render(S32 layerIndex)
 
    if(!localShip)
    {
-      // Sensor can see cloaked ships
+      // If local ship has sensor, it can see cloaked non-local ships
       Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
       if(ship && ship->isModuleActive(ModuleSensor) && alpha < 0.5)
          alpha = 0.5;
@@ -1277,13 +1283,12 @@ void Ship::render(S32 layerIndex)
          alpha = 0.25;
    }
 
-
    renderShip(color, alpha, thrusts, mHealth, mRadius, isModuleActive(ModuleCloak), isModuleActive(ModuleShield));
 
    if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
       renderAimVector();
 
-   // Now render some "addons"
+   // Now render some "addons"  --> should these be in renderShip?
    glColor3f(1,1,1);
    if(isModuleActive(ModuleSensor))
    {
@@ -1319,7 +1324,6 @@ void Ship::render(S32 layerIndex)
       }
       glLineWidth(gDefaultLineWidth);
    }
-
 }
 
 };

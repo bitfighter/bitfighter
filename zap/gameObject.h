@@ -135,10 +135,12 @@ public:
    GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
 
    bool isControlled() { return mControllingClient.isValid(); }
-   void setControllingClient(GameConnection *c);
+
    void setOwner(GameConnection *c);
 
-   GameConnection *getControllingClient();
+   SafePtr<GameConnection> getControllingClient() { return mControllingClient; }
+   void setControllingClient(GameConnection *c) { mControllingClient = c; }
+
    GameConnection *getOwner();
 
    U32 getObjectTypeMask() { return mObjectTypeMask; }

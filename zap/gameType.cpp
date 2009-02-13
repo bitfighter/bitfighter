@@ -257,7 +257,7 @@ void GameType::idle(GameObject::IdleCallPath path)
       return;
    }
 
-   // The following only gets run on the server
+   // From here on, only gets run on the server
    queryItemsOfInterest();
    if(mScoreboardUpdateTimer.update(deltaT))
    {
@@ -285,9 +285,10 @@ void GameType::idle(GameObject::IdleCallPath path)
       s2cSetTimeRemaining(mGameTimer.getCurrent());
    }
 
+   // Cycle through all clients...
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      if(mClientList[i]->respawnTimer.update(deltaT))
+      if(mClientList[i]->respawnTimer.update(deltaT))                            // Need to respawn?
          spawnShip(mClientList[i]->clientConnection);
 
       if(mClientList[i]->clientConnection->mSwitchTimer.getCurrent())            // Are we still counting down until the player can switch?
@@ -838,6 +839,7 @@ ClientRef *GameType::findClientRef(const StringTableEntry &name)
    return NULL;
 }
 
+// Only gets run on the server!
 void GameType::spawnShip(GameConnection *theClient)
 {
    ClientRef *cl = theClient->getClientRef();
@@ -846,7 +848,7 @@ void GameType::spawnShip(GameConnection *theClient)
    TNLAssert(mTeams[teamIndex].spawnPoints.size(), "No spawn points!");   // Basically, game bails here if there are no spawn points for a team.  Don't let this happen.
 
    Point spawnPoint;
-   S32 spawnIndex = TNL::Random::readI() % mTeams[teamIndex].spawnPoints.size();
+   S32 spawnIndex = TNL::Random::readI() % mTeams[teamIndex].spawnPoints.size();    // Pick random spawn point
    spawnPoint = mTeams[teamIndex].spawnPoints[spawnIndex];
    //                       Player's name, team, and spawning location
    Ship *newShip = new Ship(cl->name, teamIndex, spawnPoint);
@@ -1741,6 +1743,7 @@ Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vecto
 Vector<SignedInt<24>> GameType::mScores;
 Vector<RangedU32<0,200>> GameType::mRatings;
 
+
 void GameType::updateClientScoreboard(ClientRef *cl)
 {
    mPingTimes.clear();
@@ -1765,6 +1768,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
    NetObject::setRPCDestConnection(NULL);
 }
 
+
 GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, 
                  (Vector<RangedU32<0, GameType::MaxPing>> pingTimes, Vector<SignedInt<24>> scores, Vector<RangedU32<0,200>> ratings), 
                  (pingTimes, scores, ratings))
@@ -1780,6 +1784,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
    }
 }
 
+
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer), (victim, killer))
 {
    if(killer)
@@ -1792,6 +1797,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
    else
       gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 }
+
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr voiceBuffer), (echo, voiceBuffer),
    NetClassGroupGameMask, RPCUnguaranteed, RPCToGhostParent, 0)
@@ -1811,6 +1817,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
       }
    }
 }
+
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName, ByteBufferPtr voiceBuffer), (clientName, voiceBuffer),
    NetClassGroupGameMask, RPCUnguaranteed, RPCToGhost, 0)
