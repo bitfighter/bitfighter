@@ -213,7 +213,7 @@ void GameUserInterface::idle(U32 timeDelta)
 extern void checkMousePos(S32 maxdx, S32 maxdy);
 #endif
 
-// Draw main game screen
+// Draw main game screen (client only)
 void GameUserInterface::render()
 {
    glColor3f(0.0, 0.0, 0.0);

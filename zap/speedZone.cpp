@@ -81,7 +81,7 @@ void SpeedZone::render()
 // This object should be drawn below others
 S32 SpeedZone::getRenderSortValue()
 {
-   return -1;
+   return 0;
 }
 
 

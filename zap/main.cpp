@@ -48,6 +48,11 @@
 // Enhanced flashing effect of zones in ZoneControl game
 // Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
 // Indicator added to player's name when they are in chat, global chat, or options menus
+// Screenshots now saved in .BMP format
+
+
+// Bug fixes:
+// Speed zones now rendered on top of loadout zones
 
 // Server menu enhancements:
 // Fixed minor rendering issue on servers menu
@@ -116,7 +121,7 @@ using namespace TNL;
 #include "keyCode.h"
 #include "config.h"
 #include "md5wrapper.h"
-#include <sys/stat.h>   // For checking screenshot folder
+#include "screenShooter.h"
 
 
 #ifdef TNL_OS_MAC_OSX
@@ -200,92 +205,7 @@ void setMousePos(S32 x, S32 y)
 }
 
 
-class Screenshooter
-{
-private:
-   S32 mWidth;
-   S32 mHeight;
-
-public: 
-
-   S32 phase;
-
-   Screenshooter()    // Constructor
-   {
-      phase = 0;
-   }
-
-   // Save a TGA-format screenshot.  We do this in two phases because we get better screenshots if the window is exactly 800x600, 
-   // so we want to resize.  We need to wait one cycle after resizing to ensure the screen is repainted for us to capture.  This
-   // is unfortunate in that it creates a jarring experience for the user, but I think it is worth it.
-   void saveScreenshot()
-   { 
-      if(phase == 1)
-      {
-         mWidth = UserInterface::windowWidth;
-         mHeight = UserInterface::windowHeight;
-
-         glutReshapeWindow(gScreenWidth, gScreenHeight);    // Resize window to "standard" size
-         phase++;
-      }
-   
-      else if(phase == 2)
-      {
-         glPixelStorei(GL_PACK_ALIGNMENT,1);
-
-         S32 w = gScreenWidth;
-         S32 h = gScreenHeight;
-         S32 buffsize = w * h * 3;
-
-         GLubyte *pixels = new GLubyte [buffsize];
-         if (pixels == NULL) 
-            return;    
-          
-         const char *folder;
-         struct stat St;
-
-         if( stat( "./screenshots", &St ) == 0 )      // Put our screenshots in the screenshots folder
-            folder = "./screenshots";                 // it it exists... otherwise they go in the 
-         else                                         // executable folder (".")
-            folder = ".";
-
-         char filename[64];
-         FILE *filex;
-         S32 ctr = 0;
-
-         while(true)
-         {
-            sprintf(filename, "%s/screenshot_%d.tga", folder, ctr);
-            filex = fopen(filename,"rb");
-            if (filex == NULL) 
-               break;
-            else 
-               fclose(filex);
-
-            ctr++;
-         }   
-          
-         filex = fopen(filename, "wb");
-
-         glReadPixels(0, 0, w, h, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
-           
-         U8 TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
-         U8 header[6] = { w % 256, w/256, h % 256, h/256, 24, 0 };
-
-         fwrite(TGAheader, sizeof(U8), 12, filex);
-         fwrite(header, sizeof(U8), 6, filex);
-         fwrite(pixels, sizeof(GLubyte), buffsize, filex);
-         fclose(filex);
-
-         glutReshapeWindow(mWidth, mHeight);      // Restore window 
-
-         delete [] pixels;   
-
-         phase = 0;
-      }
-   }
-} gScreenshooter;
-
+Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;    // Our main journaling object
 
@@ -398,7 +318,7 @@ void GLUT_CB_keydown(unsigned char key, S32 x, S32 y)
    gZapJournal.keydown(key);
 }
 
-
+ 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
 {
    // First check for some "universal" keys.  If keydown isn't one of those, we'll pass the key onto the keyDown handler

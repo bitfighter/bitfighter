@@ -735,6 +735,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\screenShooter.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\screenShooter.h"
+			>
+		</File>
+		<File
 			RelativePath=".\SharedConstants.h"
 			>
 		</File>
