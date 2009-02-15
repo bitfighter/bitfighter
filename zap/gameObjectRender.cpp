@@ -1052,7 +1052,6 @@ void renderRepairItem(Point pos, bool forEditor)
 
 void renderSpeedZone(Point pos, Point dir, U32 time)
 {
-
    Vector<Point> points;
 
    Point parallel(dir - pos);
@@ -1061,7 +1060,6 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
    Point tip = pos + parallel * SpeedZone::height;
    Point perpendic(pos.y - tip.y, tip.x - pos.x);
    perpendic.normalize();   
-
 
    if(gIniSettings.szGraphicsMode == 4)      // Double chevron
    {
@@ -1097,7 +1095,6 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
       F32 chevronThickness = SpeedZone::height / 3;
       F32 chevronDepth = SpeedZone::halfWidth - inset;
 
-
       // Red chevron
       points.push_back(pos + parallel * chevronThickness);                                          
       points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * inset);                      //  2   3
@@ -1127,7 +1124,6 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
    }
    else     // 1, 2 = Default
    {
-   
       // Define points for basic chevron shape
       F32 chevronDepth = 10.0;
       F32 stripeThickness = 20;
@@ -1172,7 +1168,6 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
                   glVertex2f(points2[i].x, points2[i].y);
             glEnd();
             glDisable(GL_BLEND);
-
          }
       }
 
@@ -1183,7 +1178,6 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
             glVertex2f(points[i].x, points[i].y);
       glEnd();
    }
-
 }
 
 
@@ -1192,9 +1186,23 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
    Color c;
    GameType *gt = gClientGame->getGameType();
 
+   if(text == "Bitfighter")
+   {
+      F32 scaleFactor = size / 133.0f;
+      glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glRotatef(pos.angleTo(dir) * radiansToDegreesConversion, 0, 0, 1);
+      glScalef(scaleFactor, scaleFactor, 1);
+      glColor3f(0, 1, 0);
+      renderBitfighterLogo(73, 1, 0);
+      glPopMatrix();
+
+      return;
+   }
+
    // Don't render opposing team's text items
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(!ship && team != -1 || ship->getTeam() != team && team != -1)
+   if(!ship && team != -1 || ship && ship->getTeam() != team && team != -1)
       return;
 
    c = gt->getTeamColor(team);      // Handles case of team = -1 & -2 properly
