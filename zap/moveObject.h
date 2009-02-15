@@ -73,6 +73,7 @@ public:
    float getMass() { return mMass; }
    Point getRenderVel() { return mMoveState[RenderState].vel; }
    Point getActualVel() { return mMoveState[ActualState].vel; }
+   void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
 
    void move(F32 time, U32 stateIndex, bool displacing);
    bool collide(GameObject *otherObject);

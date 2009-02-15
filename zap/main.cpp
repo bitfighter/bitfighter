@@ -49,7 +49,7 @@
 // Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
 // Indicator added to player's name when they are in chat, global chat, or options menus
 // Screenshots now saved in .BMP format
-
+// Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
 
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones
@@ -58,6 +58,11 @@
 // Fixed minor rendering issue on servers menu
 // Color coded status messages on servers menu
 // Trim server names too long to fit in column on servers menu
+
+
+// Mac Test:
+// New screen saver code
+
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game

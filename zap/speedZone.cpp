@@ -78,7 +78,7 @@ void SpeedZone::render()
    renderSpeedZone(pos, dir, gClientGame->getCurrentTime());
 }
 
-// This object should be drawn below others
+// This object should be drawn above polygons
 S32 SpeedZone::getRenderSortValue()
 {
    return 0;
@@ -96,6 +96,8 @@ void SpeedZone::processArguments(S32 argc, const char **argv)
 
    dir.read(argv + 2);
    dir *= getGame()->getGridSize();
+
+   speed = dir.len();
 
    // Adjust the direction point so that it also represents the tip of the triangle
    Point offset(dir - pos);
@@ -143,8 +145,11 @@ bool SpeedZone::collide(GameObject *hitObject)
             return false;
 
       Point impulse = (dir - pos);
-      impulse.normalize(impulseSpeed);
-      s->mImpulseVector = impulse;
+      //impulse.normalize(speed); 
+      impulse.normalize(impulseSpeed); 
+      s->setActualVel(Point(0,0));
+      s->setActualPos(pos);
+      s->mImpulseVector = impulse * 1.5;
 
       // To ensure we don't give multiple impulses to the same ship, we'll exclude it from
       // further action for about 500ms.  That should do the trick.

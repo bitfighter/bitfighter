@@ -63,6 +63,7 @@ public:
 
    Point pos;
    Point dir;
+   F32 speed;     // Speed at which ship is propelled
    
    SpeedZone();   // Constructor
    static Vector<Point> generatePoints(Point pos, Point dir);
