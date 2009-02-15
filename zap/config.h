@@ -161,6 +161,7 @@ struct IniSettings      // With defaults specified
 
    // Testing values
    S32 burstGraphicsMode;           // Choose a burst graphic representation
+   S32 szGraphicsMode;              // Choose a speedzone graphic
 
    Vector<StringTableEntry> levelList;
  
@@ -209,6 +210,7 @@ struct IniSettings      // With defaults specified
       winSizeFact = 1.0;
 
       burstGraphicsMode = 1;
+      szGraphicsMode = 1;
    }
 };
 

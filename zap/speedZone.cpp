@@ -152,11 +152,11 @@ bool SpeedZone::collide(GameObject *hitObject)
       s->mImpulseVector = impulse * 1.5;
 
       // To ensure we don't give multiple impulses to the same ship, we'll exclude it from
-      // further action for about 500ms.  That should do the trick.
+      // further action for about 300ms.  That should do the trick.
 
       Exclusion exclusion;
       exclusion.ship = s;
-      exclusion.time = gServerGame->getCurrentTime() + 500;
+      exclusion.time = gServerGame->getCurrentTime() + 300;
 
       mExclusions.push_back(exclusion);
    }

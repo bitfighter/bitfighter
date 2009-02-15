@@ -871,7 +871,7 @@ void renderMine(Point pos, bool armed, bool visible)
 
 // lifeLeft is a number between 0 and 1.  Burst explodes when lifeLeft == 0.
 
-// burstGraphicsMode is between 1 and 4
+// burstGraphicsMode is between 1 and 5
 // 1 = flash & color change
 // 2 = flash only
 // 3 = color change only
@@ -1053,66 +1053,136 @@ void renderRepairItem(Point pos, bool forEditor)
 void renderSpeedZone(Point pos, Point dir, U32 time)
 {
 
-   // Define points for basic chevron shape
    Vector<Point> points;
+
    Point parallel(dir - pos);
    parallel.normalize();
+
    Point tip = pos + parallel * SpeedZone::height;
-
    Point perpendic(pos.y - tip.y, tip.x - pos.x);
-   perpendic.normalize();
-
-   F32 chevronDepth = 10.0;
-   F32 stripeThickness = 20;
-
-   points.push_back(pos + parallel * chevronDepth);                      //  2
-   points.push_back(pos + perpendic * SpeedZone::halfWidth);             //     1    3
-   points.push_back(tip);                                                //  4
-   points.push_back(pos - perpendic * SpeedZone::halfWidth);
+   perpendic.normalize();   
 
 
-   // Yellow fill
-      glColor3f(1, 1, 0);
-      glBegin(GL_POLYGON);
+   if(gIniSettings.szGraphicsMode == 4)      // Double chevron
+   {
+      const S32 inset = 3;
+
+      F32 chevronThickness = SpeedZone::height / 3;
+      F32 chevronDepth = SpeedZone::halfWidth - inset;
+      
+      for(S32 j = 0; j < 2; j++)
+      {
+         points.clear();
+         S32 offset = SpeedZone::halfWidth * 2 * j - (j * 4);
+
+         // Red chevron
+         points.push_back(pos + parallel * (chevronThickness + offset));                                          
+         points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (inset + offset));                                   //  2   3
+         points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (chevronThickness + inset + offset));                //    1    4
+         points.push_back(pos + parallel * (chevronDepth + chevronThickness + inset + offset));                                              //  6    5
+         points.push_back(pos - perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (chevronThickness + inset + offset));
+         points.push_back(pos - perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (inset + offset));
+
+         glColor3f(1, 0, 0);
+         glBegin(GL_LINE_LOOP);
+            for(S32 i = 0; i < points.size(); i++)
+               glVertex2f(points[i].x, points[i].y);
+         glEnd();
+      }
+   }
+   else if(gIniSettings.szGraphicsMode == 3)    // Chevron in box
+   {
+      const S32 inset = 3;
+
+      F32 chevronThickness = SpeedZone::height / 3;
+      F32 chevronDepth = SpeedZone::halfWidth - inset;
+
+
+      // Red chevron
+      points.push_back(pos + parallel * chevronThickness);                                          
+      points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * inset);                      //  2   3
+      points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (chevronThickness + inset)); //    1    4
+      points.push_back(pos + parallel * (chevronDepth + chevronThickness + inset));                               //  6    5
+      points.push_back(pos - perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (chevronThickness + inset));
+      points.push_back(pos - perpendic * (SpeedZone::halfWidth-2*inset) + parallel * inset);
+
+      glColor3f(1, 0, 0);
+      glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < points.size(); i++)
             glVertex2f(points[i].x, points[i].y);
       glEnd();
 
-   S32 maxi = 2;
-   S32 maxDist = 40;
-
-   for(S32 i = 0; i < maxi; i++)
-   {
-      // Create points for animated pointer
-      Vector<Point> points2;
-      //F32 beta = atan((F32) SpeedZone::halfWidth / (F32)SpeedZone::height);
-      //F32 h = 1/cos(beta);
-      F32 dist = (time / 30 + maxDist / maxi * i) % maxDist;
-      F32 ratio = (F32) SpeedZone::halfWidth / (F32) SpeedZone::height;
-
-      points2.push_back(tip - perpendic * 10  + parallel * (dist - 5));
-      points2.push_back(tip + parallel * (dist + chevronDepth - 5));
-      points2.push_back(tip + perpendic * 10  + parallel * (dist - 5));
-
-      F32 alpha = (maxDist - dist) / maxDist;
-
-   glEnable(GL_BLEND);
-
-      glColor4f(1, 0, 0, alpha);
-      glBegin(GL_LINE_STRIP);
-         for(S32 i = 0; i < points2.size(); i++)
-            glVertex2f(points2[i].x, points2[i].y);
+      // White box
+      points.clear();
+      points.push_back(pos + perpendic * SpeedZone::halfWidth);
+      points.push_back(pos + perpendic * SpeedZone::halfWidth + parallel * SpeedZone::halfWidth * 2);
+      points.push_back(pos - perpendic * SpeedZone::halfWidth + parallel * SpeedZone::halfWidth * 2);
+      points.push_back(pos - perpendic * SpeedZone::halfWidth);
+    
+      glColor3f(1, 1, 1);
+      glBegin(GL_LINE_LOOP);
+         for(S32 i = 0; i < points.size(); i++)
+            glVertex2f(points[i].x, points[i].y);
       glEnd();
-   glDisable(GL_BLEND);
+   }
+   else     // 1, 2 = Default
+   {
+   
+      // Define points for basic chevron shape
+      F32 chevronDepth = 10.0;
+      F32 stripeThickness = 20;
 
-}
+      points.push_back(pos + parallel * chevronDepth);                      //  2
+      points.push_back(pos + perpendic * SpeedZone::halfWidth);             //     1    3
+      points.push_back(tip);                                                //  4
+      points.push_back(pos - perpendic * SpeedZone::halfWidth);
 
-   // Opaque outline
-   glColor3f(1, 1, 1);
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < points.size(); i++)
-         glVertex2f(points[i].x, points[i].y);
-   glEnd();
+      if(gIniSettings.szGraphicsMode == 1)
+      {
+         // Yellow fill
+            glColor3f(1, 1, 0);
+            glBegin(GL_POLYGON);
+               for(S32 i = 0; i < points.size(); i++)
+                  glVertex2f(points[i].x, points[i].y);
+            glEnd();
+
+         S32 maxi = 2;
+         S32 maxDist = 40;
+
+         for(S32 i = 0; i < maxi; i++)
+         {
+            // Create points for animated pointer
+            Vector<Point> points2;
+            //F32 beta = atan((F32) SpeedZone::halfWidth / (F32)SpeedZone::height);
+            //F32 h = 1/cos(beta);
+            F32 dist = (time / 30 + maxDist / maxi * i) % maxDist;
+            F32 ratio = (F32) SpeedZone::halfWidth / (F32) SpeedZone::height;
+
+            points2.push_back(tip - perpendic * 10  + parallel * (dist - 5));
+            points2.push_back(tip + parallel * (dist + chevronDepth - 5));
+            points2.push_back(tip + perpendic * 10  + parallel * (dist - 5));
+
+            F32 alpha = (maxDist - dist) / maxDist;
+
+            glEnable(GL_BLEND);
+
+            glColor4f(1, 0, 0, alpha);
+            glBegin(GL_LINE_STRIP);
+               for(S32 i = 0; i < points2.size(); i++)
+                  glVertex2f(points2[i].x, points2[i].y);
+            glEnd();
+            glDisable(GL_BLEND);
+
+         }
+      }
+
+      // Opaque outline
+      glColor3f(1, 1, 1);
+      glBegin(GL_LINE_LOOP);
+         for(S32 i = 0; i < points.size(); i++)
+            glVertex2f(points[i].x, points[i].y);
+      glEnd();
+   }
 
 }
 

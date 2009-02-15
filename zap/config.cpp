@@ -577,6 +577,7 @@ void loadSettingsFromINI()
    gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
 
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);  
+   gIniSettings.szGraphicsMode = max(gINI.GetValueI("Testing", "SZGraphics", gIniSettings.szGraphicsMode), 0);  
 
 
    // Load the ReservedNames section...
@@ -874,9 +875,11 @@ void saveSettingsToINI()
       gINI.KeyComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
       gINI.KeyComment("Testing", " short lived, and will likely be removed in the next version of Bitfighter");
       gINI.KeyComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
+      gINI.KeyComment("Testing", " SZGraphics - Select which graphic to use for speed zones (1-4 -- note that for 3 & 4, collisions will not be quite right)");
       gINI.KeyComment("Testing", "----------------");
    }
    gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
+   gINI.SetValueI("Testing", "SZGraphics",  (S32) (gIniSettings.szGraphicsMode), true);
 
    saveKeyBindings();
    //saveDefaultQuickChatMessages();  <-- no need to save now... we ran save while initializing, and nothing would have changed

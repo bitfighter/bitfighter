@@ -29,7 +29,7 @@
 // Done:
 
 // For 011
-// Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options
+// Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name
 // Full scoring information available with -rules option
 // Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
 //     of points player makes divided by total scores all players make during that players time in the game
@@ -39,20 +39,21 @@
 // Retrieve game -> can't pick up enemy flags, so more complex level designs are possible
 // Fixed scoring message on Hunters levels
 // ZoneControl -> When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter
+// Enhanced flashing effect of zones in ZoneControl game
 // Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
 // Added client IP address to server log
-// Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
 // Uneeded vertices now removed from walls to improve both appearance and performance
 // Added screen saver supression (Windows only, sorry)
 // Username entry screen now remembers last name used
-// Enhanced flashing effect of zones in ZoneControl game
 // Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
 // Indicator added to player's name when they are in chat, global chat, or options menus
 // Screenshots now saved in .BMP format
 // Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
+// 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
 
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones
+// Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
 
 // Server menu enhancements:
 // Fixed minor rendering issue on servers menu
