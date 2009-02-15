@@ -401,6 +401,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
       totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
+//\\//\\//\\//\\//\\//\\//
       for(S32 i = 0; i < teams; i++)
       {
          S32 yt = (UserInterface::canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);

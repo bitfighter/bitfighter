@@ -89,12 +89,7 @@ public:
 
    void renderItem(Point pos)
    {
-      glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-
-      glColor3f(1, 1, 0);
-      drawPolygon(Point(0,0), 7, 60, 0);
-      glPopMatrix();
+      renderTestItem(pos);
    }
 
    void damageObject(DamageInfo *theInfo)
@@ -122,22 +117,7 @@ public:
 
    void renderItem(Point pos)
    {
-      glPushMatrix();
-      glTranslatef(pos.x, pos.y, 0);
-
-      glColor3f(1,1,1);
-      glBegin(GL_LINE_LOOP);
-      glVertex2f(-8, 8);
-      glVertex2f(0, 20);
-      glVertex2f(8, 8);
-      glVertex2f(20, 0);
-      glVertex2f(8, -8);
-      glVertex2f(0, -20);
-      glVertex2f(-8, -8);
-      glVertex2f(-20, 0);
-      glEnd();
-
-      glPopMatrix();
+      renderResourceItem(pos);
    }
 
    bool collide(GameObject *hitObject)

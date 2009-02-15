@@ -31,6 +31,7 @@
 #include "UI.h"
 #include "projectile.h"
 #include "speedZone.h"
+#include "soccerGame.h"
 
 #include "config.h"     // Only for testing burst graphics below
 
@@ -1180,6 +1181,44 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
    }
 }
 
+
+void renderTestItem(Point pos)
+{
+   glPushMatrix();
+   glTranslatef(pos.x, pos.y, 0); 
+
+   glColor3f(1, 1, 0);
+   drawPolygon(Point(0,0), 7, 60, 0);
+   glPopMatrix();
+}
+
+
+void renderResourceItem(Point pos)
+{
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+
+      glColor3f(1,1,1);
+      glBegin(GL_LINE_LOOP);
+         glVertex2f(-8, 8);
+         glVertex2f(0, 20);
+         glVertex2f(8, 8);
+         glVertex2f(20, 0);
+         glVertex2f(8, -8);
+         glVertex2f(0, -20);
+         glVertex2f(-8, -8);
+         glVertex2f(-20, 0);
+         glEnd();
+
+   glPopMatrix();
+}
+
+
+void renderSoccerBall(Point pos)
+{
+   glColor3f(1, 1, 1);
+   drawCircle(pos, SoccerBallItem::radius);
+}
 
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 {

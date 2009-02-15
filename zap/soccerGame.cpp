@@ -187,7 +187,8 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
-SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, 30, 4)
+// Constructor
+SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radius, 4)
 {
    mObjectTypeMask |= CommandMapVisType | TurretTargetType;
    mNetFlags.set(Ghostable);
@@ -216,8 +217,7 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 
 void SoccerBallItem::renderItem(Point pos)
 {
-   glColor3f(1, 1, 1);
-   drawCircle(pos, mRadius);
+   renderSoccerBall(pos);
 }
 
 void SoccerBallItem::idle(GameObject::IdleCallPath path)

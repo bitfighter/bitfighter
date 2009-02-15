@@ -42,6 +42,7 @@ class SoccerGameType : public GameType
    SafePtr<SoccerBallItem> mBall;
 
 public:
+
    void scoreGoal(StringTableEntry playerName, S32 goalTeamIndex);
    void addZone(GoalZone *theZone);
    void setBall(SoccerBallItem *theBall);
@@ -67,12 +68,17 @@ public:
 
 class SoccerBallItem : public Item
 {
+private:
    typedef Item Parent;
    Point initialPos;
    Timer mSendHomeTimer;
    StringTableEntry lastPlayerTouch;
+
 public:
-   SoccerBallItem(Point pos = Point());
+   SoccerBallItem(Point pos = Point());   // Constructor
+
+   static const S32 radius = 30;          // Radius of soccer ball
+
    void renderItem(Point pos);
    void sendHome();
    void damageObject(DamageInfo *theInfo);

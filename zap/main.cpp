@@ -51,6 +51,10 @@
 // Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
 // 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
 
+// Editor:
+// Moved turrent/spybug ranges display onto Tab-down display
+// When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible
+
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones
 // Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!

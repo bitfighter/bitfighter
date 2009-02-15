@@ -159,6 +159,8 @@ private:
    Point mMousePos;
    Point mMouseDownPos;
 
+   void renderGenericItem(Point pos, Color c);
+
    bool mCreatingPoly;
    bool mDragSelecting;
    bool mShowingReferenceShip;

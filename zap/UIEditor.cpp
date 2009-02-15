@@ -184,6 +184,7 @@ struct GameItemRec
    bool hasText;        // Item has a text string attached to it
    geomType geom;
    char letter;         // How item is represented by editor
+   bool specialTabKeyRendering;  // true if item is rendered in a special way when tab is down
    const char *prettyNamePlural;
    const char *onScreenName;     // Brief, pretty looking label to label things on screen
    const char *helpText;         // Help string displayed when hovering over item on the dock
@@ -191,30 +192,30 @@ struct GameItemRec
 
 
 // Remember to keep these properly aligned with GameItems enum
-//   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText,   geom,        letter, prettyNamePlural   on-screen name   description
+//   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText,   geom,        letter, special, prettyNamePlural     on-screen name   description
 GameItemRec gGameItemRecs[] = {
-   { "Spawn",               false,    true,      false,       false, geomPoint,      'S', "Spawn points",           "Spawn",    "Location where ships start.  At least one per team is required. [G]" },
-   { "SpeedZone",           false,    false,     true,        false, geomSimpleLine,  0,  "Speed zones",            "Spd Zone", "Flings ships in direction of arrow. [P]" },
-   { "SoccerBallItem",      false,    false,     false,       false, geomPoint,      'B', "Soccer balls",           "Ball",     "Soccer ball, can only be used in Soccer games." },
-   { "FlagItem",            false,    true,      true,        false, geomPoint,       0,  "Flags",                  "Flag",     "Flag item, used by a variety of game types." },
-   { "FlagSpawn",           false,    true,      true,        false, geomPoint,       0,  "Flag spawn points",      "FlagSpawn","Location where flags spawn after capture." },
-   { "BarrierMaker",        true,     false,     false,       false, geomLine,        0,  "Barrier makers",         "Wall",     "Run of the mill wall item." },
-   { "Teleporter",          false,    false,     false,       false, geomSimpleLine,  0,  "Teleporters",            "Teleport", "Teleports ships from one place to another. [T]" },
-   { "RepairItem",          false,    false,     false,       false, geomPoint,       0,  "Repair items",           "Repair",   "Repairs damage to ships. [B]" },
-   { "TestItem",            false,    false,     false,       false, geomPoint,      'x', "Test items",             "Test",     "Bouncy object that floats around and gets in the way." },
-   { "Mine",                false,    false,     true,        false, geomPoint,      'M', "Mines",                  "Mine",     "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
-   { "SpyBug",              false,    true,      true,        false, geomPoint,      'S', "Spy bugs",               "Spy Bug",  "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
-   { "ResourceItem",        false,    false,     false,       false, geomPoint,      'r', "Resource items",         "Resource", "Small bouncy object that floats around and gets in the way." },
-   { "LoadoutZone",         false,    true,      true,        false, geomPoly,        0,  "Loadout zones",          "Loadout",  "Area to finalize ship modifications.  Each team should have at least one." },
-   { "HuntersNexusObject",  false,    false,     true,        false, geomPoly,        0,  "Nexus zones",            "Nexus",    "Area to bring flags in Hunter game.  Cannot be used in other games." },
-   { "SlipZone",            false,    false,     true,        false, geomPoly,       'z', "Slip zones",             "Slip Zone","Not yet implemented." },
-   { "Turret",              false,    true,      true,        false, geomPoint,      'T', "Turrets",                "Turret",   "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
-   { "ForceFieldProjector", false,    true,      true,        false, geomPoint,      '>', "Force field projectors", "ForceFld", "Creates a force field that lets only team members pass. [H]" },
-   { "GoalZone",            false,    true,      true,        false, geomPoly,        0,  "Goal zones",             "Goal",     "Target area used in a variety of games." },
-   { "TextItem",            false,    true,      true,        true,  geomSimpleLine,  0,  "Text Items",             "Text",     "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
-   { "BotNavMeshZone",      false,    false,     true,        false, geomPoly,        0,  "NavMesh Zones",          "NavMesh",  "Creates navigational mesh zone for robots." },
+   { "Spawn",               false,    true,      false,       false, geomPoint,      'S',    false,   "Spawn points",          "Spawn",    "Location where ships start.  At least one per team is required. [G]" },
+   { "SpeedZone",           false,    false,     true,        false, geomSimpleLine,  0,     false,   "Speed zones",           "Spd Zone", "Flings ships in direction of arrow. [P]" },
+   { "SoccerBallItem",      false,    false,     false,       false, geomPoint,      'B',    true,    "Soccer balls",          "Ball",     "Soccer ball, can only be used in Soccer games." },
+   { "FlagItem",            false,    true,      true,        false, geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag item, used by a variety of game types." },
+   { "FlagSpawn",           false,    true,      true,        false, geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","Location where flags spawn after capture." },
+   { "BarrierMaker",        true,     false,     false,       false, geomLine,        0,     false,  "Barrier makers",         "Wall",     "Run of the mill wall item." },
+   { "Teleporter",          false,    false,     false,       false, geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleports ships from one place to another. [T]" },
+   { "RepairItem",          false,    false,     false,       false, geomPoint,       0,     false,  "Repair items",           "Repair",   "Repairs damage to ships. [B]" },
+   { "TestItem",            false,    false,     false,       false, geomPoint,      'x',    true,   "Test items",             "Test",     "Bouncy object that floats around and gets in the way." },
+   { "Mine",                false,    false,     true,        false, geomPoint,      'M',    false,  "Mines",                  "Mine",     "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
+   { "SpyBug",              false,    true,      true,        false, geomPoint,      'S',    false,  "Spy bugs",               "Spy Bug",  "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
+   { "ResourceItem",        false,    false,     false,       false, geomPoint,      'r',    true,   "Resource items",         "Resource", "Small bouncy object that floats around and gets in the way." },
+   { "LoadoutZone",         false,    true,      true,        false, geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Area to finalize ship modifications.  Each team should have at least one." },
+   { "HuntersNexusObject",  false,    false,     true,        false, geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Area to bring flags in Hunter game.  Cannot be used in other games." },
+   { "SlipZone",            false,    false,     true,        false, geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Not yet implemented." },
+   { "Turret",              false,    true,      true,        false, geomPoint,      'T',    false,  "Turrets",                "Turret",   "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
+   { "ForceFieldProjector", false,    true,      true,        false, geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "Creates a force field that lets only team members pass. [H]" },
+   { "GoalZone",            false,    true,      true,        false, geomPoly,        0,     false,  "Goal zones",             "Goal",     "Target area used in a variety of games." },
+   { "TextItem",            false,    true,      true,        true,  geomSimpleLine,  0,     false,  "Text Items",             "Text",     "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
+   { "BotNavMeshZone",      false,    false,     true,        false, geomPoly,        0,     false,  "NavMesh Zones",          "NavMesh",  "Creates navigational mesh zone for robots." },
 
-   { NULL,                  false,    false,     false,       false, geomNone,        0,  "",                       "",         "" },
+   { NULL,                  false,    false,     false,       false, geomNone,        0,     false,  "",                       "",         "" },
 };
 
 
@@ -1302,8 +1303,6 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
    else if((showAllObjects || isDockItem))               // Draw remaining point objects
    {
-      char letter = gGameItemRecs[item.index].letter;    // Get letter to represent object
-
       c = getTeamColor(item.team);        // And a color (based on team affiliation)
 
       if(item.index == ItemFlag)          // Draw flag
@@ -1325,15 +1324,51 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             drawCircle(Point(-4,0), 26);
          glPopMatrix();
       }
-      else if(item.index == ItemBouncyBall)   // Draw bouncy ball object
+      else if(item.index == ItemBouncyBall)   // Draw testitem
       {
-         glColor(c);
-         drawPolygon(pos, 7, 8, 0);
+         if(mShowingReferenceShip && !isDockItem)
+         {
+            glPushMatrix();
+               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
+               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               renderTestItem(pos);
+            glPopMatrix(); 
+         }
+         else
+         {
+            glColor(c);
+            drawPolygon(pos, 7, 8, 0);
+         }
+      }
+
+      else if(item.index == ItemResource)   // Draw resourceItem
+      {
+         if(mShowingReferenceShip && !isDockItem)
+         {
+            glPushMatrix();
+               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
+               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               renderResourceItem(pos);
+            glPopMatrix(); 
+         }
+         else
+            renderGenericItem(pos, c);
       }
       else if(item.index == ItemSoccerBall)  // Soccer ball, obviously
       {
-         glColor(c);
-         drawCircle(pos, 9);
+         if(mShowingReferenceShip && !isDockItem)
+         {
+            glPushMatrix();
+               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
+               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               renderSoccerBall(pos);
+            glPopMatrix(); 
+         }
+         else
+         {
+            glColor(c);
+            drawCircle(pos, 9);
+         }
       }
       else if(item.index == ItemMine)  // And a mine
       {
@@ -1351,10 +1386,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          glColor(getTeamColor(item.team));
          drawCircle(pos, 5);
 
-         //drawStringf(pos.x, pos.y+30,15,"T:%d",item.team);
-
-        // And show how far it can see... unless, of course, it's on the dock
-         if(!isDockItem)
+        // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
+         if(!isDockItem && mShowingReferenceShip)
          {
             glEnable(GL_BLEND);     // Enable transparency
             glColor4f(getTeamColor(item.team).r, getTeamColor(item.team).g, getTeamColor(item.team).b, .25);
@@ -1376,19 +1409,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       }
       else                             // Draw anything else
       {
-         glColor(c);
-         glBegin(GL_POLYGON);          // Draw box upon which we'll put our letter
-            glVertex2f(pos.x - 8, pos.y - 8);
-            glVertex2f(pos.x + 8, pos.y - 8);
-            glVertex2f(pos.x + 8, pos.y + 8);
-            glVertex2f(pos.x - 8, pos.y + 8);
-         glEnd();
+         renderGenericItem(pos, c);
       }
 
-      // If we have a turret, render it's range
+      // If we have a turret, render it's range (if tab is depressed)
       if(item.index == ItemTurret)
       {
-         if(!isDockItem)
+         if(!isDockItem && mShowingReferenceShip)
          {
             glEnable(GL_BLEND);     // Enable transparency
             glColor4f(getTeamColor(item.team).r, getTeamColor(item.team).g, getTeamColor(item.team).b, .25);
@@ -1416,8 +1443,11 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             glVertex2f(pos.x - 10, pos.y + 10);
          glEnd();
       }
+
+      char letter = gGameItemRecs[item.index].letter;    // Get letter to represent object
+
       // Mark the item with a letter
-      if(letter)
+      if(letter && !(gGameItemRecs[item.index].specialTabKeyRendering && mShowingReferenceShip))
       {
          S32 vertOffset = 8;
          if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
@@ -1449,6 +1479,19 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       drawString(canvasWidth - dockWidth / 2 - horizMargin - getStringWidth(labelSize, gGameItemRecs[item.index].onScreenName)/2, maxy + 8, labelSize, gGameItemRecs[item.index].onScreenName);
    }
 }
+
+
+void EditorUserInterface::renderGenericItem(Point pos, Color c)
+{
+   glColor(c);
+   glBegin(GL_POLYGON);          // Draw box upon which we'll put our letter
+      glVertex2f(pos.x - 8, pos.y - 8);
+      glVertex2f(pos.x + 8, pos.y - 8);
+      glVertex2f(pos.x + 8, pos.y + 8);
+      glVertex2f(pos.x - 8, pos.y + 8);
+   glEnd();
+}
+
 
 void EditorUserInterface::clearSelection()
 {
