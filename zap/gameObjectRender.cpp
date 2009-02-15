@@ -341,6 +341,9 @@ void renderAimVector()
 
 }
 
+
+#define ABS(x) (((x) > 0) ? (x) : -(x))
+
 void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests)
 {
    enum {
@@ -411,29 +414,31 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
  
       for(S32 i = 0; i < dests.size(); i++)
       {
+         F32 ang = pos.angleTo(dests[i]);
+         F32 sina = sin(ang);
+         F32 cosa = cos(ang);
+         F32 asina = (sina * cosa < 0) ? ABS(sina) : -ABS(sina);
+         F32 acosa = ABS(cosa);
+
+         F32 dist = pos.distanceTo(dests[i]);
+
+         Point mid = Point(pos.x + .75 * cosa * dist, pos.y + .75 * sina * dist);
+
          glBegin(GL_POLYGON);
-            F32 ang = pos.angleTo(dests[i]);
-            F32 sina = sin(ang);
-            F32 cosa = cos(ang);
-
-            F32 dist = pos.distanceTo(dests[i]);
-
-            Point mid = Point(pos.x + .75 * cosa * dist, pos.y + .75 * sina * dist);
             glColor4f(1, 1, 1, .25 * gClientGame->getCommanderZoomFraction());
-            
-            glVertex2f(pos.x + sina * wid, pos.y + cosa * wid);
-            glVertex2f(mid.x + sina * wid, mid.y + cosa * wid);
-            glVertex2f(mid.x - sina * wid, mid.y - cosa * wid);
-            glVertex2f(pos.x - sina * wid, pos.y - cosa * wid);
+            glVertex2f(pos.x + asina * wid, pos.y + acosa * wid);
+            glVertex2f(mid.x + asina * wid, mid.y + acosa * wid);
+            glVertex2f(mid.x - asina * wid, mid.y - acosa * wid);
+            glVertex2f(pos.x - asina * wid, pos.y - acosa * wid);
          glEnd();
 
          glBegin(GL_POLYGON);
-            glVertex2f(mid.x + sina * wid, mid.y + cosa * wid);
+            glVertex2f(mid.x + asina * wid, mid.y + acosa * wid);
             glColor4f(1, 1, 1, 0);
-            glVertex2f(dests[i].x + sina * wid, dests[i].y + cosa * wid);
-            glVertex2f(dests[i].x - sina * wid, dests[i].y - cosa * wid);
+            glVertex2f(dests[i].x + asina * wid, dests[i].y + acosa * wid);
+            glVertex2f(dests[i].x - asina * wid, dests[i].y - acosa * wid);
             glColor4f(1, 1, 1, .25 * gClientGame->getCommanderZoomFraction());
-            glVertex2f(mid.x - sina * wid, mid.y - cosa * wid);
+            glVertex2f(mid.x - asina * wid, mid.y - acosa * wid);
          glEnd();
       }
 
