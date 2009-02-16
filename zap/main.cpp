@@ -30,11 +30,6 @@
 
 // For 011
 // Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name
-// Full scoring information available with -rules option
-// Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
-//     of points player makes divided by total scores all players make during that players time in the game
-// Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
-// Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
 // When hosting a game from the UI, game load progress info displayed
 // Retrieve game -> can't pick up enemy flags, so more complex level designs are possible
 // Fixed scoring message on Hunters levels
@@ -50,6 +45,14 @@
 // Screenshots now saved in .BMP format
 // Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
 // 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
+// Scores displayed in LR corner of main game screen now sorted from high to low
+
+// Scoring:
+// Full scoring information available with -rules option
+// Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
+//     of points player makes divided by total scores all players make during that players time in the game
+// Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
+// Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
 
 // Editor:
 // Moved turrent/spybug ranges display onto Tab-down display
@@ -58,6 +61,7 @@
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones
 // Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
+// Changing other player's team in 3+ team game with 3+ players no longer switches a random player
 
 // Server menu enhancements:
 // Fixed minor rendering issue on servers menu

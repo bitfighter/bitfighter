@@ -1129,7 +1129,7 @@ void GameMenuUserInterface::processSelection(U32 index)        // Handler for un
          gPlayerMenuUserInterface.action = PlayerMenuUserInterface::Kick;
          gPlayerMenuUserInterface.activate();
          break;
-      case 5:     // Add 3 mins to game
+      case 5:     // Add 2 mins to game
          if(gClientGame->getGameType())
             gClientGame->getGameType()->addTime(2 * 60 * 1000);
             reactivatePrevUI();     // And back to our regularly scheduled programming!
@@ -1350,6 +1350,14 @@ void PlayerMenuUserInterface::onEscape()
 
 void PlayerMenuUserInterface::processSelection(U32 index)        // Handler for unshifted menu shortcut key
 {
+   // Find selected player, and put that value into index
+   for(S32 i = 0; i < menuItems.size(); i++)
+      if(menuItems[i].mIndex == index)
+      {
+         index = i;
+         break;
+      }
+
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(action == ChangeTeam)
    {
@@ -1390,21 +1398,39 @@ void TeamMenuUserInterface::render()
    if (!gt)
       return;
 
-      gt->countTeamPlayers();    // Make sure numPlayers is correctly populated
+   gt->countTeamPlayers();    // Make sure numPlayers is correctly populated
 
-      char c[] = "A";      // Dummy shortcut key, will change below
-      for(S32 i = 0; i < gt->mTeams.size(); i++)
-      {
-         strncpy(c, gt->mTeams[i].name.getString(), 1);     // Grab first char of name for a shortcut key
+   char c[] = "A";      // Dummy shortcut key, will change below
+   for(S32 i = 0; i < gt->mTeams.size(); i++)
+   {
+      strncpy(c, gt->mTeams[i].name.getString(), 1);     // Grab first char of name for a shortcut key
 
-         Color col = gt->mTeams[i].color;
-         S32 players = gt->mTeams[i].numPlayers;
-         S32 score = gt->mTeams[i].score;
-         bool isCurrent = (i == gt->getTeam(nameToChange));
-         menuItems.push_back(MenuItem(gt->mTeams[i].name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, isCurrent, players, score));
-      }
+      Color col = gt->mTeams[i].color;
+      S32 players = gt->mTeams[i].numPlayers;
+      S32 score = gt->mTeams[i].score;
+      bool isCurrent = (i == gt->getTeam(nameToChange));
+      menuItems.push_back(MenuItem(gt->mTeams[i].name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, isCurrent, players, score));
+   }
 
-   dSprintf(menuTitle, sizeof(menuTitle), "CHOOSE TEAM TO SWITCH TO:");
+   string name = "";
+   if(gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject())
+   {
+      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      if(ship)
+         name = ship->mPlayerName.getString();
+   }
+
+   if(strcmp(name.c_str(), nameToChange))    // i.e. names differ, this isn't the local player
+   {
+      name = nameToChange;
+      name += " ";
+   }
+   else
+      name = "";
+
+   // Finally, set menu title
+   dSprintf(menuTitle, sizeof(menuTitle), "TEAM TO SWITCH %sTO:", name.c_str());       // No space btwn %s and TO!
+
    Parent::render();
 }
 

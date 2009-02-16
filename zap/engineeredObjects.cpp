@@ -125,7 +125,7 @@ void EngineeredObject::processArguments(S32 argc, const char **argv)
    p *= getGame()->getGridSize();
 
    // Find the mount point:
-   F32 minDist = 1000;
+   F32 minDist = F32_MAX;
    Point normal;
    Point anchor;
 
@@ -554,8 +554,7 @@ void ForceField::render()
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
-Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) :
-   EngineeredObject(team, anchorPoint, anchorNormal)
+Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
    mNetFlags.set(Ghostable);
 }

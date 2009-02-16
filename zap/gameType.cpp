@@ -312,6 +312,13 @@ S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 }
 
 
+// Sorts teams by score
+S32 QSORT_CALLBACK teamScoreSort(GameType::Team *a, GameType::Team *b)
+{
+   return a->score > b->score;
+}
+
+
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 
@@ -401,7 +408,6 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
       totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
-//\\//\\//\\//\\//\\//\\//
       for(S32 i = 0; i < teams; i++)
       {
          S32 yt = (UserInterface::canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);
@@ -472,12 +478,20 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
    {
       S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
 
+      // Build a list of teams, so we can sort by score
+      Vector<Team> teams;
+
       for(S32 i = 0; i < mTeams.size(); i++)
+         teams.push_back(mTeams[i]);
+
+      teams.sort(teamScoreSort);
+
+      for(S32 i = 0; i < teams.size(); i++)
       {
          Point pos(UserInterface::canvasWidth - UserInterface::horizMargin - 35, UserInterface::canvasHeight - UserInterface::vertMargin - lroff - i * 38);
-         renderFlag(pos + Point(-20, 18), getTeamColor(i));
+         renderFlag(pos + Point(-20, 18), teams[i].color);
          glColor3f(1,1,1);
-         UserInterface::drawStringf(pos.x, pos.y, 32, "%d", mTeams[i].score);
+         UserInterface::drawStringf(pos.x, pos.y, 32, "%d", teams[i].score);
       }
    }
    renderTimeLeft();
