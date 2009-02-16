@@ -42,7 +42,7 @@ ChatUserInterface::ChatUserInterface()
 {
    setMenuID(GlobalChatUI);
    menuTitle = "Global Chat";
-   menuSubTitle = "";
+
    //menuSubTitleColor = Color(1,1,1);
    menuFooter = "Type your message | ENTER to send | ESC exits";
 
@@ -143,7 +143,20 @@ void ChatUserInterface::render()
    // Draw title, subtitle, and footer
    glColor3f(1, 1, 1);
    drawCenteredString(vertMargin, 30, menuTitle);
-   drawCenteredString(vertMargin + 35, 18, menuSubTitle);
+
+   string subtitle = "Not currently connected to game server";
+   
+   if(gClientGame && gClientGame->getConnectionToServer())
+   {
+      string name = gClientGame->getConnectionToServer()->getServerName();
+      if(name == "")
+         subtitle = "";
+      else
+         subtitle = "Connected to game server \"" + gClientGame->getConnectionToServer()->getServerName() + "\"";
+   }
+
+   glColor3f(0, 1, 0);
+   drawCenteredString(vertMargin + 35, 18, subtitle.c_str());
 
    S32 vertFooterPos = canvasHeight - vertMargin - 20;
    drawCenteredString(vertFooterPos, 18, menuFooter);

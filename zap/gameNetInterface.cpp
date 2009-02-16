@@ -34,8 +34,7 @@ extern const char *gServerPassword;
 extern bool gDedicatedServer;
 
 // Constructor
-GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame)
-   : NetInterface(bindAddress)
+GameNetInterface::GameNetInterface(const Address &bindAddress, Game *theGame) : NetInterface(bindAddress)
 {
    mGame = theGame;
 };
@@ -49,6 +48,7 @@ void GameNetInterface::banHost(const Address &bannedAddress, U32 bannedMilliseco
    mBanList.push_back(h);
 }
 
+// Check if address is on the ban list
 bool GameNetInterface::isHostBanned(const Address &theAddress)
 {
    for(S32 i = 0; i < mBanList.size(); i++)
@@ -86,7 +86,6 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
    switch(packetType)
    {
       case Ping:
-         TNL::logprintf("Got ping packet from %s", remoteAddress.toString());
          if(mGame->isServer())
          {
             Nonce clientNonce;
@@ -108,7 +107,6 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          break;
       case PingResponse:
          {
-            TNL::logprintf("Got ping response from %s", remoteAddress.toString());     //TODO: Delete
             Nonce theNonce;
             U32 clientIdentityToken;
             theNonce.read(stream);
@@ -118,7 +116,6 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          break;
       case Query:
          {
-            TNL::logprintf("Got query from %s", remoteAddress.toString());             //TODO: Delete
             Nonce theNonce;
             U32 clientIdentityToken;
             theNonce.read(stream);
@@ -143,7 +140,6 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          break;
       case QueryResponse:
          {
-            TNL::logprintf("Got query response from %s", remoteAddress.toString());
             Nonce theNonce;
             char nameString[256];
             char descrString[256];

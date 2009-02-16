@@ -206,6 +206,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 //   gGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 //}
 
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (name),
+   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+   setServerName(name);
+}
+
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
@@ -418,6 +424,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGro
    setIsBusy(busy);
 }
 
+
 extern IniSettings gIniSettings;
 
 // Send password, client's name, and version info to game server
@@ -446,6 +453,8 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 }
 
 
+// On the server side of things, read the connection request, and return if everything looks legit.  If not, provide an error string 
+// to help diagnose the problem, or prompt further data from client (such as a password).
 bool GameConnection::readConnectRequest(BitStream *stream, const char **errorString)
 {
    if(!Parent::readConnectRequest(stream, errorString))
@@ -554,6 +563,8 @@ void GameConnection::onConnectionEstablished()
       setGhostTo(false);
       activateGhosting();
       setFixedRateParameters(50, 50, 2000, 2000);
+
+      s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
 
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       if(isLocalConnection())

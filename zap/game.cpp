@@ -226,8 +226,7 @@ extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName)
- : Game(theBindAddress)
+ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName) : Game(theBindAddress)
 {
    mPlayerCount = 0;
    mMaxPlayers = maxPlayers;

@@ -812,6 +812,7 @@ void NetInterface::sendConnectAccept(NetConnection *conn)
       SymmetricCipher theCipher(theParams.mSharedSecret);
       out.hashAndEncrypt(NetConnection::MessageSignatureBytes, encryptPos, &theCipher);
    }
+
    out.sendto(mSocket, conn->getNetAddress());
 }
 
@@ -821,9 +822,11 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
 
    nonce.read(stream);
    serverNonce.read(stream);
+
    U32 decryptPos = stream->getBytePosition();
    stream->setBytePosition(decryptPos);
 
+   // Make sure we're actually waiting for a connection.  If not, then there's something wrong, and we bail.
    NetConnection *conn = findPendingConnection(address);
    if(!conn || conn->getConnectionState() != NetConnection::AwaitingConnectResponse)
       return;
@@ -855,8 +858,8 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
       conn->setSymmetricCipher(new SymmetricCipher(theParams.mSymmetricKey, theParams.mInitVector));
    }
 
-   addConnection(conn); // first, add it as a regular connection
-   removePendingConnection(conn); // remove from the pending connection list
+   addConnection(conn);           // First, add it as a regular connection,
+   removePendingConnection(conn); // then remove it from the pending connection list
 
    conn->setConnectionState(NetConnection::Connected);
    conn->onConnectionEstablished(); // notify the connection that it has been established
@@ -866,8 +869,6 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
 //-----------------------------------------------------------------------------
 // NetInterface connection rejection and handling
 //-----------------------------------------------------------------------------
-
-// extern enum TerminationReason;  <--- minGW objects to this line
 
 void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &theAddress, NetConnection::TerminationReason reason, const char *reasonStr)
 {

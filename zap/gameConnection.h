@@ -72,6 +72,7 @@ private:
    bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
    StringTableEntry mClientName;
+   StringTableEntry mServerName;
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;
 
@@ -105,7 +106,11 @@ public:
 
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
 
-   void setClientName(const char *string) { mClientName = string; }
+   void setClientName(const char *name) { mClientName = name; }
+   void setServerName(StringTableEntry name) { mServerName = name; }
+
+   std::string getServerName() { return mServerName.getString(); }
+
    void setClientRef(ClientRef *theRef);
    ClientRef *getClientRef();
 
@@ -133,6 +138,9 @@ public:
 
    TNL_DECLARE_RPC(s2cSetIsAdmin, (bool granted));
    TNL_DECLARE_RPC(s2cSetIsLevelChanger, (bool granted));
+
+   TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
+
 
    TNL_DECLARE_RPC(c2sAdminPlayerAction, (StringTableEntry playerName, U32 actionIndex, S32 team));
 

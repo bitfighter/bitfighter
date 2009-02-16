@@ -46,6 +46,7 @@
 // Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
 // 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
 // Scores displayed in LR corner of main game screen now sorted from high to low
+// Name of current game server now displayed on global chat screen
 
 // Scoring:
 // Full scoring information available with -rules option
@@ -767,6 +768,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
       const char *name = gNameEntryUserInterface.getText()[0] ? gNameEntryUserInterface.getText() : gIniSettings.defaultName.c_str();
 
       theConnection->setClientName(name);
+
       theConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
 
       if(local)   // Local client
@@ -775,7 +777,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
          theConnection->setIsAdmin(true);          // Local connection is always admin
          theConnection->setIsLevelChanger(true);   // Local connection can always change levels
 
-         GameConnection *gc = (GameConnection *) theConnection->getRemoteConnectionObject();
+         GameConnection *gc = dynamic_cast<GameConnection *>(theConnection->getRemoteConnectionObject());
 
          if(gc)                              // gc might evaluate false if a bad password was supplied to a password-protected server
          {
@@ -784,6 +786,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
             gc->s2cSetIsAdmin(true);         // Set isAdmin on the client
             gc->s2cSetIsLevelChanger(true);  // Set isLevelChanger on the client
+            gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
          }
       }
       else        // Remote client

@@ -42,7 +42,6 @@ class ChatUserInterface : public UserInterface
 
 public:
    const char *menuTitle;
-   const char *menuSubTitle;
    Color menuSubTitleColor;
 
    const char *menuFooter;
