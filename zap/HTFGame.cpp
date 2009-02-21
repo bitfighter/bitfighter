@@ -316,7 +316,7 @@ public:
             case KillOwnTurret:
                return 0;
             case ReturnFlagToZone:
-               return 2;
+               return 0;
             case HoldFlagInZone:		// Per ScoreTime ms
                return 1;
             default:

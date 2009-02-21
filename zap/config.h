@@ -45,6 +45,8 @@ using namespace Zap;
 namespace Zap
 {
 
+extern string gLevelDir;
+
 struct CmdLineSettings
 {
    bool clientMode;        // Start with client active
@@ -67,7 +69,7 @@ struct CmdLineSettings
    string password;
    string adminPassword;
    string levelChangePassword;
-   string levelFolder;     // Subfolder under levels specified with -leveldir parameter
+   string levelDir;        // Subfolder under levels specified with -leveldir parameter
    S32 maxplayers;
 
    bool window;            // Window param supplied
@@ -100,7 +102,7 @@ struct CmdLineSettings
       levelChangePassword = "";
       hostname = "";
       hostdescr = "";
-      levelFolder = "";
+      levelDir = "";
       maxplayers = -1;
       window = false;
       fullscreen = false;
@@ -152,6 +154,7 @@ struct IniSettings      // With defaults specified
    string password;
    string adminPassword;
    string levelChangePassword;      // Password to allow access to level changing functionality on non-local server
+   string levelDir;                 // Folder where levels are stored, by default
    S32 maxplayers;                  // Max number of players that can play on local server
 
    // Game window location when in windowed mode
@@ -203,6 +206,7 @@ struct IniSettings      // With defaults specified
       password = "";                     // Passwords empty by default
       adminPassword = "";
       levelChangePassword = "";
+      levelDir = "";
 
       // Game window location when in windowed mode
       winXPos = 100;

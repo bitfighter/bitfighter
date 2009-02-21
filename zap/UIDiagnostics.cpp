@@ -90,6 +90,7 @@ extern ControllerTypeType gAutoDetectedJoystickType;
 extern U32 gSticksFound;
 extern Color gMasterServerBlue;
 extern void glColor(Color c, float alpha = 1);
+extern string gLevelDir;
 
 void DiagnosticUserInterface::render()
 {
@@ -213,7 +214,7 @@ void DiagnosticUserInterface::render()
 
    // Dump out names of loaded levels...
    glColor3f(1,1,1);
-   string allLevels = "Levels: ";
+   string allLevels = "Levels: [" + gLevelDir + "] ";
    for(S32 i = 0; i < gLevelList.size(); i++)
       allLevels += string(gLevelList[i].getString()) + "; ";
 

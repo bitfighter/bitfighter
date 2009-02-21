@@ -526,9 +526,9 @@ void Screenshooter::saveScreenshot()
          return;    
        
       const char *folder;
-      struct stat St;
+      struct stat st;
 
-      if( stat( "./screenshots", &St ) == 0 )      // Put our screenshots in the screenshots folder
+      if( stat( "./screenshots", &st ) == 0 )      // Put our screenshots in the screenshots folder
          folder = "./screenshots";                 // it it exists... otherwise they go in the 
       else                                         // executable folder (".")
          folder = ".";

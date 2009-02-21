@@ -34,9 +34,10 @@
 using TNL::Vector;
 using std::string;
 
+
 bool getLevels(string subdir, Vector<string> &files)
 {
-    subdir = "levels/" + subdir;
+    //subdir = "levels/" + subdir;
     
     //Since this isn't an actual Cocoa app, we need an AutoreleasePool for the
     //durations of these functions.

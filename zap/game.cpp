@@ -52,6 +52,7 @@
 #include "../tnl/tnlGhostConnection.h"
 #include "../tnl/tnlNetInterface.h"
 
+#include <sys/stat.h>
 using namespace TNL;
 
 namespace Zap
@@ -260,7 +261,10 @@ void ServerGame::resetLevelLoadIndex()
 
 string ServerGame::getCurrentLevelLoadName()
 {
-   return mLevelNames.last().getString();
+   if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
+      return "";
+   else
+      return mLevelNames.last().getString();
 }
 
 void ServerGame::loadNextLevel()
@@ -335,11 +339,12 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
 
 string ServerGame::getLevelFileName(string base)
 {
-   // Prepend level subfolder, if it's been defined
-   if(gCmdLineSettings.levelFolder != "")
-      base = gCmdLineSettings.levelFolder + "/" + base;
 
-   return base;
+#ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
+      return = "d:\\media\\levels\\" + base;
+#endif
+
+   return gLevelDir + "/" + base;
 }
 
 // Return name of level currently in play
@@ -428,17 +433,13 @@ bool ServerGame::loadLevel(string filename)
 {
    mGridSize = DefaultGridSize;
 
-   //char fileBuffer[256];
-#ifdef TNL_OS_XBOX
-   //dSprintf(fileBuffer, sizeof(fileBuffer), "d:\\media\\levels\\%s", filename.c_str());
-   filename = "d:\\media\\levels\\" + filename;
-#else
-   //dSprintf(fileBuffer, sizeof(fileBuffer), "levels/%s", filename.c_str());
-   filename = "levels/" + filename;
-#endif
-
    if(!initLevelFromFile(filename.c_str()))
-      return false;
+   {
+      // Try appending a ".level" to the filename, and see if that helps
+      filename += ".level";
+      if(!initLevelFromFile(filename.c_str()))
+         return false;
+   }
 
    if(!getGameType())
    {

@@ -570,9 +570,12 @@ void loadSettingsFromINI()
    gIniSettings.password = gINI.GetValue("Host", "Password", gIniSettings.password);
    gIniSettings.adminPassword = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
    gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
+   gIniSettings.levelDir = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
    gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
+
+
 
    gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
 
@@ -800,8 +803,10 @@ void saveSettingsToINI()
       gINI.KeyComment("Host", " Password - You can require players to use a password to play on your server.  Leave blank to disable.");
       gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.  Leave blank to disable.");
       gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to disable.");
+      gINI.KeyComment("Host", " LevelDir - Specify where level files are stored");
       gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
+      
 //      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
       gINI.KeyComment("Host", "----------------");
    }
@@ -811,10 +816,12 @@ void saveSettingsToINI()
    gINI.SetValue("Host", "Password", gIniSettings.password, true);
    gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword, true);
    gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword, true);
+   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir, true);      
    gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers, true);
 //   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay, true);
    gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
 
+   
 
    gINI.AddKeyName("Diagnostics");
    if (gINI.NumKeyComments("Diagnostics") == 0)
@@ -839,6 +846,10 @@ void saveSettingsToINI()
          gINI.KeyComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
          gINI.KeyComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
          gINI.KeyComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
+         gINI.KeyComment("Levels", " Example:");
+         gINI.KeyComment("Levels", " Level1=ctf.level");
+         gINI.KeyComment("Levels", " Level2=zonecontrol.level");
+         gINI.KeyComment("Levels", " ... etc ...");
          gINI.KeyComment("Levels", "----------------");
       }
 

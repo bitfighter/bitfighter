@@ -48,6 +48,17 @@
 // Scores displayed in LR corner of main game screen now sorted from high to low
 // Name of current game server now displayed on global chat screen
 
+// Specifiying levels
+// ".level" extension now optional when specifying levels with the -levels param
+// -leveldir can now specify any folder on disk, but can still be used to specify a specific subdir of the levels folder.  Be sure to use "s if path includes spaces!
+// example: -leveldir abc will load levels in abc subfolder under levels folder.  -leveldir c:\levels will load all levels in c:\levels
+// If no levels specified on cmd line or in INI file, all levels in levels folder will be loaded, much as if the -alllevels param was specified
+// Level folder can now be specified in the INI file, either as absolute or relative path.
+//========>>>>>> Test this a little more....
+//========>>>>>> Fix in apple code....
+//========>>>>>> DOCUMENT with examples
+
+//
 // Scoring:
 // Full scoring information available with -rules option
 // Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
@@ -72,6 +83,8 @@
 
 // Mac Test:
 // New screen capture code
+// Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
+// Ryan -- I changed getLevels() slightly... I tried to make the corresponding change in Directory.mm, by commenting out single line.  Hopefully the functionalities are still the same!
 
 //-----------------------------------------------------------------------------------
 //
@@ -199,6 +212,7 @@ Address gConnectAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
       // Above is equivalent to ("IP:Any:28000")
 
+string gLevelDir = "levels";              // Where our levels are stored
 Vector<StringTableEntry> gLevelList;      // Holds a list of the levels we'll play when we're hosting
 
 // Lower = more slippery!  Not used at the moment...
@@ -476,6 +490,46 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeyup, (U32 key), (key))
    }
 }
 
+
+// Exit the game, back to the OS
+void exitGame()
+{
+   #ifdef TNL_OS_XBOX
+      extern void xboxexit();
+      xboxexit();
+   #else
+      exit(0);
+   #endif
+}
+
+
+// If we can't load any levels, here's the plan...
+void abortHosting()
+{
+   if(gDedicatedServer)
+   {
+      logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
+      exitGame(); 
+   }
+   else
+   {
+      gErrorMsgUserInterface.reset();
+      gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
+      gErrorMsgUserInterface.setMessage(1, "No levels were loaded.  Cannot host a game.");
+      gErrorMsgUserInterface.setMessage(3, "Check the LevelDir parameter in your INI file,");
+      gErrorMsgUserInterface.setMessage(4, "or your command-line parameters to make sure");
+      gErrorMsgUserInterface.setMessage(5, "you have correctly specified a folder containing");
+      gErrorMsgUserInterface.setMessage(6, "valid level files.");
+      gErrorMsgUserInterface.setMessage(8, "Trying to load levels from folder:");
+      gErrorMsgUserInterface.setMessage(9, gLevelDir.c_str());
+      gErrorMsgUserInterface.activate();
+   }
+   delete gServerGame;
+   gServerGame = NULL;
+   return;
+}
+
+
 S32 gHostingModePhase = 0;    // NotHosting
 
 // Host a game (and maybe even play a bit, too!)
@@ -489,8 +543,12 @@ void initHostGame(Address bindAddress)
       gServerGame->setLevelList(gLevelList);
       gServerGame->resetLevelLoadIndex();
       gMainMenuUserInterface.clearLevelLoadDisplay();
-  }
-
+   }
+   else
+   {
+      abortHosting();
+      return;
+   }
   gHostingModePhase = 1;  // LoadingLevels      // Do this even if there are no levels, so hostGame error handling will be triggered
 }
 
@@ -504,17 +562,7 @@ void hostGame()
 
    else        // No levels loaded... we'll crash if we try to start a game
    {
-      if(gDedicatedServer)
-         logprintf("No levels were loaded.  Cannot host a game.");
-      else
-      {
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
-         gErrorMsgUserInterface.setMessage(1, "No levels were loaded.  Cannot host a game.");
-         gErrorMsgUserInterface.activate();
-      }
-      delete gServerGame;
-      gServerGame = NULL;
+      abortHosting();
       return;
    }
 
@@ -724,32 +772,32 @@ public:
 
 
 
-void setDefaultLevelList()
-{
-   // Some levels to load when we play.  These will not be used if there are any
-   // levels specified on the command line or in the INI file.  If they are used,
-   // they will be added to the INI file to make it more transparent what is happening.
-   gLevelList.push_back(StringTableEntry("zonecontrol1.level"));
-   gLevelList.push_back(StringTableEntry("retrieve2.level"));
-   gLevelList.push_back(StringTableEntry("zonecontrol2.level"));
-   gLevelList.push_back(StringTableEntry("rabbit2.level"));
-   gLevelList.push_back(StringTableEntry("retrieve1.level"));
-   gLevelList.push_back(StringTableEntry("zonecontrol3.level"));
-   gLevelList.push_back(StringTableEntry("retrieve3.level"));
-   gLevelList.push_back(StringTableEntry("ctf3.level"));
-   gLevelList.push_back(StringTableEntry("zonecontrol4.level"));
-   gLevelList.push_back(StringTableEntry("zonecontrol5.level"));
-   gLevelList.push_back(StringTableEntry("rabbit1.level"));
-   gLevelList.push_back(StringTableEntry("soccer1.level"));
-   gLevelList.push_back(StringTableEntry("geowar.level"));
-   gLevelList.push_back(StringTableEntry("ctf2.level"));
-   gLevelList.push_back(StringTableEntry("hunters2.level"));
-   gLevelList.push_back(StringTableEntry("soccer2.level"));
-   gLevelList.push_back(StringTableEntry("ctf1.level"));
-   gLevelList.push_back(StringTableEntry("hunters1.level"));
-   gLevelList.push_back(StringTableEntry("ctf4.level"));
-   gLevelList.push_back(StringTableEntry("zm1.level"));
-}
+//void setDefaultLevelList()    // <<-- not used at the moment
+//{
+//   // Some levels to load when we play.  These will not be used if there are any
+//   // levels specified on the command line or in the INI file.  If they are used,
+//   // they will be added to the INI file to make it more transparent what is happening.
+//   gLevelList.push_back(StringTableEntry("zonecontrol1.level"));
+//   gLevelList.push_back(StringTableEntry("retrieve2.level"));
+//   gLevelList.push_back(StringTableEntry("zonecontrol2.level"));
+//   gLevelList.push_back(StringTableEntry("rabbit2.level"));
+//   gLevelList.push_back(StringTableEntry("retrieve1.level"));
+//   gLevelList.push_back(StringTableEntry("zonecontrol3.level"));
+//   gLevelList.push_back(StringTableEntry("retrieve3.level"));
+//   gLevelList.push_back(StringTableEntry("ctf3.level"));
+//   gLevelList.push_back(StringTableEntry("zonecontrol4.level"));
+//   gLevelList.push_back(StringTableEntry("zonecontrol5.level"));
+//   gLevelList.push_back(StringTableEntry("rabbit1.level"));
+//   gLevelList.push_back(StringTableEntry("soccer1.level"));
+//   gLevelList.push_back(StringTableEntry("geowar.level"));
+//   gLevelList.push_back(StringTableEntry("ctf2.level"));
+//   gLevelList.push_back(StringTableEntry("hunters2.level"));
+//   gLevelList.push_back(StringTableEntry("soccer2.level"));
+//   gLevelList.push_back(StringTableEntry("ctf1.level"));
+//   gLevelList.push_back(StringTableEntry("hunters1.level"));
+//   gLevelList.push_back(StringTableEntry("ctf4.level"));
+//   gLevelList.push_back(StringTableEntry("zm1.level"));
+//}
 
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
@@ -812,19 +860,6 @@ void endGame()
 }
 
 
-
-// Exit the game, back to the OS
-void exitGame()
-{
-   #ifdef TNL_OS_XBOX
-      extern void xboxexit();
-      xboxexit();
-   #else
-      exit(0);
-   #endif
-}
-
-
 // Run when we're quitting the game
 void onExit()
 {
@@ -863,16 +898,16 @@ using namespace std;
 // Read files from folder
 // Based on http://www.linuxquestions.org/questions/programming-9/c-list-files-in-directory-379323/
 // Is this platform independent?  Works on Windows and now on Linux, but apparently not on a Mac
-
-bool getLevels(string subdir, Vector<string> &files)
+// OSX version in Directory.mm
+bool getLevels(string dir, Vector<string> &files)
 {
    DIR *dp;
    struct dirent *dirp;
 
-   string dir = "levels";
-   if (subdir != "")
-      dir += "\\" + subdir;         // OK, this isn't really cross platform, but this will likely need to be modded
-                                    // for Linux anyway, and the Mac stuff is handled elsewhere...
+   //string dir = "levels";
+   //if (subdir != "")
+   //   dir += "\\" + subdir;         // OK, this isn't really cross platform, but this will likely need to be modded
+   //                                 // for Linux anyway, and the Mac stuff is handled elsewhere...
    if((dp = opendir(dir.c_str())) == NULL)
       return false;
 
@@ -1022,25 +1057,12 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             exitGame();
          }
       }
-      // Specify to include all levels in levels folder
+      // Specify to include all levels in levels folder -- not really needed any more, but can be used as a shortcut to tell game to ignore levels in INI file...
       else if(!stricmp(argv[i], "-alllevels"))     // no additional args
       {
          i--;  // compentsate for +=2 in for loop with single param
-         gLevelList.clear();
+
          gCmdLineSettings.suppliedLevels = true;
-
-         Vector<string> levelfiles;
-
-         if(!getLevels("", levelfiles))    // True if error reading level...  print message... or just PANIC!!
-         {
-            logprintf("Could not read any levels from the levels folder.  Sorry.");
-            exitGame();
-         }
-
-         levelfiles.sort(alphaSort);   // Just to be sure...
-
-         for (S32 i = 0; i < levelfiles.size(); i++)
-            gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
       }
       // Read all levels in the specified subfolder
       else if(!stricmp(argv[i], "-leveldir"))      // additional arg required
@@ -1051,22 +1073,8 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             exitGame();
          }
 
-         gLevelList.clear();
          gCmdLineSettings.suppliedLevels = true;
-
-         Vector<string> levelfiles;
-
-         gCmdLineSettings.levelFolder = argv[i+1].getString();
-         if(!getLevels(gCmdLineSettings.levelFolder, levelfiles))    // True if error reading level...  print message... or just PANIC!!
-         {
-            logprintf("Could not read any levels from the levels subfolder \"%s\".  Sorry.", argv[i+1].getString());
-            exitGame();
-         }
-
-         levelfiles.sort(alphaSort);   // Just to be sure...
-
-         for (S32 i = 0; i < levelfiles.size(); i++)
-            gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
+         gCmdLineSettings.levelDir = argv[i+1].getString();
       }
 
       // Specify list of levels...  all remaining params will be taken as level names
@@ -1259,13 +1267,22 @@ void InitSdlVideo()
 }
 */
 
+
+// Basically checks if the folder base exists, and if not, makes it a subdir of levels
+// Typos on the user's part can lead to hilarity!
+string getLevelsFolder(string base)
+{
+   // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
+   struct stat st;
+   if(stat(base.c_str(), &st) != 0 )  
+      return gLevelDir + "/" + base;      // It doesn't
+   else
+      return base;                        // It does
+}
+
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams()
 {
-   // Replace level list with INI file, unless our level list was specified on the cmd line
-   if(gIniSettings.levelList.size() > 0 && !gCmdLineSettings.suppliedLevels)
-      gLevelList = gIniSettings.levelList;
-
    // These options can only be set on cmd line
    if(!gCmdLineSettings.server.empty())
       gBindAddress.set(gCmdLineSettings.server);
@@ -1304,6 +1321,18 @@ void processStartupParams()
    else if(gIniSettings.levelChangePassword != "")
       gLevelChangePassword = gIniSettings.levelChangePassword.c_str();
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
+
+   if(gIniSettings.levelDir != "")
+      gLevelDir = gIniSettings.levelDir;
+   else 
+      gIniSettings.levelDir = gLevelDir;     // So a good default will be written to the INI
+
+   // This way, the main level dir can be specified in the INI, but it can either be overridden here, 
+   // or a subfolder can be specified, depending on what's in the leveldir param
+   if(gCmdLineSettings.levelDir != "")
+      gLevelDir = getLevelsFolder(gCmdLineSettings.levelDir);
+   else 
+   // else leave gLevelDir at it's default setting, "levels"
 
    if(gCmdLineSettings.hostname != "")
       gHostName = gCmdLineSettings.hostname;
@@ -1376,6 +1405,34 @@ void processStartupParams()
    }
 }
 
+
+// Create the definititve list of levels for hosting a game
+void buildLevelList()
+{
+   // If no levels were specified on the cmd line, and the INI file has some specified, use those
+   if(!gCmdLineSettings.suppliedLevels && gIniSettings.levelList.size() > 0)
+   {
+      gLevelList = gIniSettings.levelList;
+      return;
+   }
+
+   // Otherwise, use the levels gleaned from the cmd line, or, if nothing specified on the cmd line, 
+   // use all the levels in leveldir (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
+   gLevelList.clear();
+   Vector<string> levelfiles;
+
+   if(!getLevels(gLevelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
+   {
+      logprintf("Could not read any levels from the levels folder \"%s\".", gLevelDir.c_str());
+   }
+
+   levelfiles.sort(alphaSort);   // Just to be sure...
+
+   for (S32 i = 0; i < levelfiles.size(); i++)
+      gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
+}
+
+
 };  // namespace Zap
 
 
@@ -1406,7 +1463,7 @@ int main(int argc, char **argv)
    gCmdLineSettings.init();      // Init cmd line settings struct
    gIniSettings.init();          // Init struct that holds INI settings
       
-   setDefaultLevelList();        // Levels we'll play, unless we're told otherwise
+   //setDefaultLevelList();        // Levels we'll play, unless we're told otherwise
 
    Vector<TNL::StringPtr> theArgv;
 
@@ -1449,6 +1506,7 @@ int main(int argc, char **argv)
 
    loadSettingsFromINI();                    // Read INI
    processStartupParams();                   // And process command lines and INI settings in a unified way
+   buildLevelList();
 
    gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
 

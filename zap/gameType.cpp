@@ -186,6 +186,7 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 {
    switch(event)
    {
+      // General scoring events:
       case KillEnemy:
 	      return "Kill enemy player";
       case KillSelf:
@@ -196,34 +197,50 @@ string GameType::getScoringEventDescr(ScoringEvent event)
          return "Kill enemy turret";
       case KillOwnTurret:
          return "Kill own turret";
+
+      // CTF specific:
       case CaptureFlag:
-	      return "CTF->Touch enemy flag to your flag";
+	      return "Touch enemy flag to your flag";   
       case ReturnTeamFlag:
-	      return "CTF->Return own flag to goal";
+	      return "Return own flag to goal";         
+
+      // ZC specific:
      case  CaptureZone:
-	      return "ZC->Capture zone";
+	      return "Capture zone";                       
       case UncaptureZone:
-	      return "ZC->Lose captured zone to other team";
+	      return "Lose captured zone to other team";   
+
+      // HTF specific:
       case HoldFlagInZone:
-	      return "HTF->Hold flag in zone for time";
+	      return "Hold flag in zone for time";         
+
+      // Rabbit specific:
       case RabbitHoldsFlag:
-	      return "Rabbit->Hold flag, per second";
+	      return "Hold flag, per second";              
       case RabbitKilled:
-	      return "Rabbit->Kill the rabbit";
+	      return "Kill the rabbit";                    
       case RabbitKills:
-	      return "Rabbit->Kill other player if you are rabbit";
+	      return "Kill other player if you are rabbit"; 
+
+      // Hunters specific:
       case ReturnFlagsToNexus:
-	      return "Hunters->Return flags to Nexus";
+	      return "Return flags to Nexus";
+
+      // Retrieve specific:
       case ReturnFlagToZone:
-	      return "Retrieve->Return flags to own zone";
+	      return "Return flags to own zone";     
       case LostFlag:
-	      return "Retrieve->Lose captured flag to other team";
+	      return "Lose captured flag to other team";  
+
+      // Soccer specific:
       case ScoreGoalEnemyTeam:
-	      return "Soccer->Score a goal against other team";
+	      return "Score a goal against other team";
       case ScoreGoalHostileTeam:
-	      return "Soccer->Score a goal against Hostile team";
+	      return "Score a goal against Hostile team";
       case ScoreGoalOwnTeam:
-	      return "Soccer->Score a goal against own team";
+	      return "Score a goal against own team";
+
+      // Other:
       default:
          return "Unknown event!";
    }

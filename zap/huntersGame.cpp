@@ -252,7 +252,6 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
 // What does a particular scoring event score?
 S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
 {
-
    S32 score = 0;
    for(S32 count = 1; count <= flags; count++)
       score += (count * 10);
@@ -282,9 +281,9 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
       switch(scoreEvent)
       {
          case KillEnemy:
-            return 10;
+            return 0;
          case KillSelf:
-            return -10;
+            return 0;
          case KillTeammate:
             return 0;
          case KillEnemyTurret:

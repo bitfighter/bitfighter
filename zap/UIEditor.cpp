@@ -640,7 +640,7 @@ void EditorUserInterface::onReactivate()
 //   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
    populateDock();            // If game type changed, we'll need to update the dock
 
-   remove("levels/editor.tmp");        // Delete temp file
+   remove("editor.tmp");      // Delete temp file
 }
 
 Point EditorUserInterface::snapToLevelGrid(Point p)
@@ -3025,13 +3025,13 @@ void EditorUserInterface::testLevel()
       Vector<StringTableEntry> tempList = gLevelList;
       gLevelList.clear();
 
-      string levelFolder = gCmdLineSettings.levelFolder;
-      gCmdLineSettings.levelFolder = "";     // Temporarily override levelFolder setting -- we want to write to levels folder regardless of the -levelfolder param
+      string levelDir = gLevelDir;
+      gLevelDir = "";                 // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param
 
       gLevelList.push_front("editor.tmp");
       initHostGame(Address(IPProtocol, Address::Any, 28000));
       gLevelList = tempList;                       // Restore level list
-      gCmdLineSettings.levelFolder = levelFolder;  // Restore levelFolder setting
+      gLevelDir = levelDir;                        // Restore gLevelDir 
    }
 
    mNeedToSave = nts;                  // Restore saved parameters

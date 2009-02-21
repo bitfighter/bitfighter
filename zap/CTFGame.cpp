@@ -188,9 +188,9 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
          case KillOwnTurret:
             return 0;
 		   case ReturnTeamFlag:
-			   return 1;
+			   return 0;
 		   case CaptureFlag:
-			   return 3;
+			   return 1;
          default:
             return naScore;
       }
