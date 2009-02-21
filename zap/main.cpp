@@ -54,9 +54,7 @@
 // example: -leveldir abc will load levels in abc subfolder under levels folder.  -leveldir c:\levels will load all levels in c:\levels
 // If no levels specified on cmd line or in INI file, all levels in levels folder will be loaded, much as if the -alllevels param was specified
 // Level folder can now be specified in the INI file, either as absolute or relative path.
-//========>>>>>> Test this a little more....
-//========>>>>>> Fix in apple code....
-//========>>>>>> DOCUMENT with examples
+
 
 //
 // Scoring:
@@ -575,8 +573,7 @@ void hostGame()
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
-{
-
+{     
    if(gHostingModePhase == 1) // LoadingLevels
       gServerGame->loadNextLevel();
    else if(gHostingModePhase == 2)  // DoneLoadingLevels

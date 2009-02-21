@@ -344,7 +344,7 @@ string ServerGame::getLevelFileName(string base)
       return = "d:\\media\\levels\\" + base;
 #endif
 
-   return gLevelDir + "/" + base;
+      return gLevelDir + (gLevelDir != "" ? "/" : "") + base;
 }
 
 // Return name of level currently in play

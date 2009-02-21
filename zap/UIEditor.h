@@ -30,6 +30,7 @@
 #include "gameLoader.h"
 #include "timer.h"
 #include "point.h"
+#include "tnlNetStringTable.h"
 #include <string>
 
 using namespace std;
@@ -192,6 +193,10 @@ private:
    WorldItem constructItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height);   // Construct a new object
 
    Color getTeamColor(S32 team);    // Return a color based on team index
+
+   string mgLevelDir;
+   Vector<StringTableEntry> mgLevelList;
+   bool mWasTesting;
 
 public:
    EditorUserInterface();           // Constructor

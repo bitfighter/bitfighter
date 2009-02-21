@@ -80,7 +80,7 @@ EditorUserInterface::EditorUserInterface()
 
    // Create some items for the dock...  One of each, please
    showAllObjects = true;
-
+   mWasTesting = false;
 
    //MeshBox::init();
 
@@ -633,12 +633,22 @@ void EditorUserInterface::onActivate()
    mEditingTextItem = -1;
 }
 
+extern Vector<StringTableEntry> gLevelList;
+
 void EditorUserInterface::onReactivate()
 {
    mDraggingObjects = false;
    mEditingTextItem = -1;     // Probably not necessary
 //   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
    populateDock();            // If game type changed, we'll need to update the dock
+
+   if(mWasTesting)
+   {
+      gLevelList = mgLevelList;                       // Restore level list
+      gLevelDir = mgLevelDir;                        // Restore gLevelDir 
+      mWasTesting = false;
+   }
+
 
    remove("editor.tmp");      // Delete temp file
 }
@@ -2979,7 +2989,6 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 }
 
 extern void initHostGame(Address bindAddress);
-extern Vector<StringTableEntry> gLevelList;
 extern CmdLineSettings gCmdLineSettings;
 
 void EditorUserInterface::testLevel()
@@ -3022,16 +3031,16 @@ void EditorUserInterface::testLevel()
    {
       mEditFileName = tmpFileName;     // Restore the level name
 
-      Vector<StringTableEntry> tempList = gLevelList;
+      mgLevelList = gLevelList;
       gLevelList.clear();
 
-      string levelDir = gLevelDir;
-      gLevelDir = "";                 // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param
+      mgLevelDir = gLevelDir;
+      gLevelDir = "levels";           // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param
 
+      mWasTesting = true;
+ 
       gLevelList.push_front("editor.tmp");
       initHostGame(Address(IPProtocol, Address::Any, 28000));
-      gLevelList = tempList;                       // Restore level list
-      gLevelDir = levelDir;                        // Restore gLevelDir 
    }
 
    mNeedToSave = nts;                  // Restore saved parameters
