@@ -2,10 +2,10 @@
 @echo off
 IF %2.==. GOTO MissingParams
 
-start bitfighter -name %1 -usestick 1 -winwidth 952 -winpos 4 28
-start bitfighter -name %2 -usestick 2 -winwidth 952 -winpos 964 28
+start bitfighter -name %1 -usestick 1 -window -winwidth 952 -winpos 4 28 %3 %4 %5 %6 %7 %8 %9
+start bitfighter -name %2 -usestick 2 -window -winwidth 952 -winpos 964 28 %3 %4 %5 %6 %7 %8 %9
 
-GOTO End1
+GOTO End
 
 :MissingParams
 
