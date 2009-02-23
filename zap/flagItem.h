@@ -45,6 +45,7 @@ public:
    void onMountDestroyed();
    bool collide(GameObject *hitObject);
    bool isAtHome();
+   Timer mTimer;
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

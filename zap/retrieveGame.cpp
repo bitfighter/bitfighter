@@ -116,6 +116,7 @@ public:
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
 
       theFlag->mountToShip(theShip);
+      updateScore(cl, RemoveFlagFromEnemyZone);
       theFlag->setZone(NULL);
    }
 
@@ -304,6 +305,8 @@ public:
                return 0;
 		      case ReturnFlagToZone:
                return 1;
+            case RemoveFlagFromEnemyZone:
+               return 0;
          case LostFlag:    // Not really an individual scoring event!
                return -1;
             default:
@@ -326,6 +329,8 @@ public:
                return -1;
             case ReturnFlagToZone:
                return 2;
+            case RemoveFlagFromEnemyZone:
+               return 1;
             // case LostFlag:    // Not really an individual scoring event!
             //    return 0;
             default:
@@ -338,6 +343,9 @@ public:
    const char *getGameTypeString() { return "Retrieve"; }
    const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
    bool isTeamGame() { return true; }
+   bool canBeTeamGame() { return true; }
+   bool canBeIndividualGame() { return false; }
+
 
    TNL_DECLARE_CLASS(RetrieveGameType);
 };

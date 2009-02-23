@@ -43,9 +43,8 @@ class HTFGameType : public GameType
    enum {
       ScoreTime = 5000,    // Time flag is in your zone to get points for your team
    };
-   Timer mScoreTimer;
 public:
-   HTFGameType() : mScoreTimer(ScoreTime) {}    // Constructor, such as it is
+   HTFGameType() { /* nothing here */ }    // Constructor, such as it is
 
    void addFlag(FlagItem *theFlag)
    {
@@ -119,6 +118,7 @@ public:
          GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
       theFlag->mountToShip(theShip);
       theFlag->setZone(NULL);
+      updateScore(cl, RemoveFlagFromEnemyZone);
    }
 
    void flagDropped(Ship *theShip, FlagItem *theFlag)
@@ -149,13 +149,12 @@ public:
       if(s->getTeam() != z->getTeam())
          return;
 
-      // see if this zone already has a flag in it...
+      // See if this zone already has a flag in it...
       for(S32 i = 0; i < mFlags.size(); i++)
          if(mFlags[i]->getZone() == z)
             return;
 
-      // ok, it's an empty zone on our team:
-      // see if this ship is carrying a flag
+      // Ok, it's an empty zone on our team... See if this ship is carrying a flag
       S32 i;
       for(i = 0; i < s->mMountedItems.size(); i++)
          if(s->mMountedItems[i].isValid() && (s->mMountedItems[i]->getObjectTypeMask() & FlagType))
@@ -163,7 +162,7 @@ public:
       if(i == s->mMountedItems.size())
          return;
 
-      // ok, the ship has a flag and it's on the ship...
+      // Ok, the ship has a flag and it's on the ship...
       Item *theItem = s->mMountedItems[i];
       FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
       if(mountedFlag)
@@ -189,8 +188,9 @@ public:
             if(mFlags[flagIndex] == mountedFlag)
                break;
 
-         mFlags[flagIndex]->setZone(z);
-         mountedFlag->setActualPos(z->getExtent().getCenter());
+         mFlags[flagIndex]->setZone(z);                           // Assign zone to the flag
+         mFlags[flagIndex]->mTimer.reset(ScoreTime);              // Start countdown until scorin' time!
+         mountedFlag->setActualPos(z->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
          updateScore(cl, ReturnFlagToZone);
       }
@@ -200,20 +200,17 @@ public:
    {
       Parent::idle(path);
 
-      if(path != GameObject::ServerIdleMainLoop)
+      if(path != GameObject::ServerIdleMainLoop)      
          return;
 
-      if(!mScoreTimer.update(mCurrentMove.time))
-         return;
-
-      // Time to score!
-      mScoreTimer.reset();
+      // Server only, from here on out
       for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
       {
-         if(mFlags[flagIndex]->getZone() != NULL)
+         if(mFlags[flagIndex]->getZone() != NULL && mFlags[flagIndex]->mTimer.update(mCurrentMove.time))     // Flag is in a zone && it's scorin' time!
          {
             S32 team = mFlags[flagIndex]->getZone()->getTeam();
             updateScore(team, HoldFlagInZone);     // Team only --> No logical way to award individual points for this event!!
+            mFlags[flagIndex]->mTimer.reset();     
          }
       }
    }
@@ -297,6 +294,8 @@ public:
    const char *getGameTypeString() { return "Hold the Flag"; }
    const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
    bool isTeamGame() { return true; }
+   bool canBeTeamGame() { return true; }
+   bool canBeIndividualGame() { return false; }
 
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
@@ -319,6 +318,8 @@ public:
                return 0;
             case HoldFlagInZone:		// Per ScoreTime ms
                return 1;
+            case RemoveFlagFromEnemyZone:
+               return 0;
             default:
                return naScore;
          }
@@ -341,6 +342,8 @@ public:
 			      return 2;
 		      case HoldFlagInZone:		// There's not a good way to award these points
 		      	return naScore;      // and unless we really want them, let's not bother
+            case RemoveFlagFromEnemyZone:
+               return 1;
             default:
                return naScore;
          }

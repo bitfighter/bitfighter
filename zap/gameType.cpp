@@ -56,7 +56,7 @@ const S32 GameType::gMaxTeams;
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
 const char *gGameTypeNames[] = {
-   "GameType",                // Generic game type --> Zapmatch
+   "GameType",                // Generic game type --> Bitmatch
    "CTFGameType",
    "HTFGameType",
    "HuntersGameType",
@@ -160,7 +160,19 @@ void GameType::printRules()
       TNL::Object *theObject = TNL::Object::create(gGameTypeNames[i]);  // Instantiate a gameType object
       GameType *gameType = dynamic_cast<GameType*>(theObject);          // and cast it
 
-      printf("Game type: %s\n", gGameTypeNames[i]);
+      string indTeam;
+
+      if(gameType->canBeIndividualGame() && gameType->canBeTeamGame())
+         indTeam = "Individual or Teams";
+      else if (gameType->canBeIndividualGame())
+         indTeam = "Individual only";
+      else if (gameType->canBeTeamGame())
+         indTeam = "Team only";
+      else
+         indTeam = "Configuration Error!";
+
+
+      printf("Game type: %s [%s]\n", gameType->getGameTypeString(), indTeam.c_str());
       printf("Configure ship: %s", gameType->isSpawnWithLoadoutGame() ? "By respawning (no need for loadout zones)" : "By entering loadout zone");
       printf("\nEvent: Individual Score / Team Score\n");
       printf(  "====================================\n");
@@ -212,7 +224,9 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 
       // HTF specific:
       case HoldFlagInZone:
-	      return "Hold flag in zone for time";         
+	      return "Hold flag in zone for time";   
+      case RemoveFlagFromEnemyZone:
+         return "Remove flag from enemy zone";
 
       // Rabbit specific:
       case RabbitHoldsFlag:
@@ -1341,13 +1355,13 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillEnemy:
             return 1;
          case KillSelf:
-            return -1;
+            return 0;
          case KillTeammate:
             return 0;
          case KillEnemyTurret:
-            return 1;
+            return 0;
          case KillOwnTurret:
-            return -1;
+            return 0;
          default:
             return naScore;
       }

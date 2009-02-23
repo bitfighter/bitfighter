@@ -47,6 +47,7 @@
 // 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
 // Scores displayed in LR corner of main game screen now sorted from high to low
 // Name of current game server now displayed on global chat screen
+// Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.
 
 // Specifiying levels
 // ".level" extension now optional when specifying levels with the -levels param
@@ -63,6 +64,7 @@
 //     of points player makes divided by total scores all players make during that players time in the game
 // Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
 // Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
+// Added scoring events when flag is removed from enemy zone in Retrieve and HTF games
 
 // Editor:
 // Moved turrent/spybug ranges display onto Tab-down display

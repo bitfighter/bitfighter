@@ -91,6 +91,9 @@ public:
    const char *getGameTypeString() { return "Rabbit"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    bool isTeamGame() { return false; }
+   bool canBeTeamGame() { return false; }
+   bool canBeIndividualGame() { return true; }
+
    bool isSpawnWithLoadoutGame() { return true; }
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);

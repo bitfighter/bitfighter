@@ -91,9 +91,12 @@ public:
    static const U32 gMaxTeamCount = gMaxTeams - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
-   virtual const char *getGameTypeString() { return "Zapmatch"; }                            // Will be overridden by other games
+   virtual const char *getGameTypeString() { return "Bitmatch"; }                            // Will be overridden by other games
    virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }  //          -- ditto --
    virtual bool isTeamGame() { return mTeams.size() > 1; }                                // Team game if we have teams.  Otherwise it's every man for himself.
+   virtual bool canBeTeamGame() { return true; }
+   virtual bool canBeIndividualGame() { return true; }
+
    virtual bool isSpawnWithLoadoutGame() { return false; }                                // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    static void printRules();     // Dump game-rule info
@@ -191,6 +194,7 @@ public:
       CaptureZone,            // zone control -> gain zone
       UncaptureZone,          // zone control -> lose zone
       HoldFlagInZone,         // htf
+      RemoveFlagFromEnemyZone,// htf
       RabbitHoldsFlag,        // rabbit, called every second
       RabbitKilled,           // rabbit
       RabbitKills,            // rabbit

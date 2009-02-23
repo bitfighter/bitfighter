@@ -74,6 +74,9 @@ public:
    const char *getGameTypeString() { return "Hunters"; }
    const char *getInstructionString() { return "Collect flags from opposing players and bring them to the Nexus!"; }
    bool isTeamGame() { return mTeams.size() > 1; }
+   bool canBeTeamGame() { return true; }
+   bool canBeIndividualGame() { return true; }
+
    bool isSpawnWithLoadoutGame() { return true; }
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
