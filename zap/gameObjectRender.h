@@ -40,6 +40,7 @@ extern void glVertex(Point p);
 extern void glColor(Color c, float alpha = 1);
 extern void drawCircle(Point pos, F32 radius);
 extern void drawFilledCircle(Point pos, F32 radius);
+extern void drawFilledSector(Point pos, F32 radius, F32 start, F32 end);
 
 extern void drawRoundedRect(Point pos, F32 width, F32 height, F32 radius);
 extern void drawArc(Point pos, F32 radius, F32 startAngle, F32 endAngle);
@@ -54,6 +55,7 @@ extern void renderAimVector();
 extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests);
 extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset);
 extern void renderFlag(Point pos, Color c);
+extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 
 

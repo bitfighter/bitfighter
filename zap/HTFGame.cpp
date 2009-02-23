@@ -114,10 +114,10 @@ public:
          e.push_back(aString);
 
       for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(
-         GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
       theFlag->mountToShip(theShip);
       theFlag->setZone(NULL);
+      theFlag->mTimer.clear();
       updateScore(cl, RemoveFlagFromEnemyZone);
    }
 

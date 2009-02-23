@@ -54,6 +54,7 @@ public:
 };
 
 extern void renderFlag(Point pos, Color c);
+extern void renderFlag(Point pos, Color c, F32 fraction);
 
 };
 

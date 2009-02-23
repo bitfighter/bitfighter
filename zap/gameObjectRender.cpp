@@ -162,13 +162,20 @@ void drawFilledEllipse(Point pos, F32 width, F32 height, F32 angle)
 
 void drawFilledCircle(Point pos, F32 radius)
 {
+   drawFilledSector(pos, radius, 0, Float2Pi);
+}
+
+
+void drawFilledSector(Point pos, F32 radius, F32 start, F32 end)
+{
    glBegin(GL_POLYGON);
 
-   for(F32 theta = 0; theta < Float2Pi; theta += 0.2)
+   for(F32 theta = start; theta < end; theta += 0.2)
       glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
 
    glEnd();
 }
+
 
 void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive)
 {
@@ -594,12 +601,29 @@ void drawFlag(Color c)
    glEnd();
 }
 
+
 void renderFlag(Point pos, Color c)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
    drawFlag(c);
+
+   glPopMatrix();
+}
+
+
+// Not used
+void renderFlag(Point pos, Color c, F32 timerFraction)
+{
+   glPushMatrix();
+   glTranslatef(pos.x, pos.y, 0);
+
+   drawFlag(c);
+
+   drawCircle(Point(1,1), 5);
+
+   drawFilledSector(Point(1,1), 5, 0, timerFraction * Float2Pi);
 
    glPopMatrix();
 }

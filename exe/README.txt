@@ -44,7 +44,7 @@ Rabbit - Solo game wherein there is one flag that all players are fighting
 to control.  Players accumulate points by holding the flag, zapping
 the flag carrier or zapping other players while holding the flag.
 
-Zapmatch - Solo game, often of short duration between levels.  Just
+Bitmatch - Solo game, often of short duration between levels.  Just
 zap as many other players as you can!
 
 Pay special attention to the triangular arrows that move in an ellipse around
