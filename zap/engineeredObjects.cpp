@@ -434,6 +434,12 @@ bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints)
    return true;
 }
 
+void ForceFieldProjector::onAddedToGame(Game *theGame)
+{
+   getGame()->mObjectsLoaded++;
+}
+
+
 void ForceFieldProjector::render()
 {
    renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getGameType()->getTeamColor(getTeam()), isEnabled());
@@ -574,6 +580,7 @@ void Turret::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
    mCurrentAngle = atan2(mAnchorNormal.y, mAnchorNormal.x);
+   getGame()->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
 }
 
 void Turret::render()

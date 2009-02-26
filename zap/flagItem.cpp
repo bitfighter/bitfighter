@@ -26,6 +26,7 @@
 #include "flagItem.h"
 #include "gameType.h"
 #include "ship.h"
+#include "UIMenus.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -40,9 +41,11 @@ FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
    mObjectTypeMask |= FlagType | CommandMapVisType;
 }
 
+
 void FlagItem::onAddedToGame(Game *theGame)
 {
    theGame->getGameType()->addFlag(this);
+   getGame()->mObjectsLoaded++;
 }
 
 

@@ -431,14 +431,19 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
 bool ServerGame::loadLevel(string filename)
 {
+   string origFilename = filename;
    mGridSize = DefaultGridSize;
 
+   mObjectsLoaded = 0;
    if(!initLevelFromFile(filename.c_str()))
    {
       // Try appending a ".level" to the filename, and see if that helps
       filename += ".level";
       if(!initLevelFromFile(filename.c_str()))
+      {
+         logprintf("Unable to open level file %s.  Skipping...", origFilename.c_str());
          return false;
+      }
    }
 
    if(!getGameType())

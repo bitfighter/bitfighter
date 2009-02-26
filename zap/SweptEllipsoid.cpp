@@ -593,8 +593,6 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
     }
   }
 
-
-
   delete V;
 
   return true;

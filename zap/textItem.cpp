@@ -103,6 +103,8 @@ void TextItem::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
       setScopeAlways();
+
+   getGame()->mObjectsLoaded++;
 }
 
 // Bounding box for quick collision-possibility elimination, and display scoping purposes

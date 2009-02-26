@@ -51,10 +51,10 @@ class BotNavMeshZone : public GameObject
 private:   
    typedef GameObject Parent;
 
+Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
+
 public:
    U16 mZoneID;
-   Vector<Point> mPolyBounds;
-   Vector<NeighboringZone> mNeighbors;        // List of other zones this zone touches
 
    // Constructor
    BotNavMeshZone();
@@ -83,7 +83,10 @@ public:
    // These methods will be empty later...
     U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
 
+
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   Vector<Point> mPolyBounds;
+   Vector<NeighboringZone> mNeighbors;        // List of other zones this zone touches
 
    TNL_DECLARE_CLASS(BotNavMeshZone);
 };

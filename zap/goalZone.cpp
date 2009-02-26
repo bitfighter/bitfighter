@@ -84,7 +84,10 @@ void GoalZone::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
       setScopeAlways();
+
    theGame->getGameType()->addZone(this);
+
+  theGame->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
 }
 
 void GoalZone::computeExtent()

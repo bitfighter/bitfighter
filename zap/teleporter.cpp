@@ -56,6 +56,7 @@ void Teleporter::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
       setScopeAlways();    // Always in scope!
+   getGame()->mObjectsLoaded++;
 }
 
 void Teleporter::processArguments(S32 argc, const char **argv)

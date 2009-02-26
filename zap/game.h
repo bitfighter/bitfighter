@@ -168,6 +168,8 @@ public:
 
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
+
+   S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };
 
 class ServerGame : public Game, public LevelLoader

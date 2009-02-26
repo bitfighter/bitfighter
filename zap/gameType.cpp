@@ -808,7 +808,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
       }
    }
-   // TODO: Integrate code above with code below!!  EASY!!
+   // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS"))
    {
       BarrierRec barrier;
@@ -1426,13 +1426,18 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
 
 
 // Broadcast info about the current level
-GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds), (levelName, levelDesc, teamScoreLimit, levelCreds))
+GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount), 
+                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount))
 {
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
    mTeamScoreLimit = teamScoreLimit;
-   mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);
+   mObjectsExpected = objectCount;
+
+   gClientGame->mObjectsLoaded = 0;                      // Reset item counter
+   gGameUserInterface.mShowProgressBar = true;           // Show progress bar
+   mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
 }
 
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
@@ -1639,9 +1644,9 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 /// the ghost is available and addressable via the getGhostIndex()
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
-   NetObject::setRPCDestConnection(theConnection);
+   NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mTeamScoreLimit, mLevelCredits);
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mTeamScoreLimit, mLevelCredits, gServerGame->mObjectsLoaded);
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
@@ -1668,7 +1673,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    s2cSetGameOver(mGameOver);
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
 
-   NetObject::setRPCDestConnection(NULL);
+   NetObject::setRPCDestConnection(NULL);    // Set RPCs to go to all players
 }
 
 GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
@@ -1676,6 +1681,9 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    // Now we know the game is ready to begin...
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);
+
+   gGameUserInterface.mShowProgressBar = false;
+   gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
 
 GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
@@ -1684,6 +1692,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
    ClientRef *cl = source->getClientRef();
    if(sequence != source->getGhostingSequence())
       return;
+
    cl->readyForRegularGhosts = true;
 }
 

@@ -974,6 +974,8 @@ void SpyBug::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
       setScopeAlways();
+
+   getGame()->mObjectsLoaded++;
 }
 
 void SpyBug::idle(IdleCallPath path)

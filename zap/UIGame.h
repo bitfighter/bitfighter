@@ -152,6 +152,7 @@ public:
 
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
+   void renderProgressBar();        // Render level-load progress bar
    void renderMessageDisplay();     // Render incoming chat msgs
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
@@ -187,6 +188,8 @@ public:
    void receivedControlUpdate(bool recvd) { mGotControlUpdate = recvd; }
 
    Move *getCurrentMove();
+   Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
+   bool mShowProgressBar;
 };
 
 extern GameUserInterface gGameUserInterface;

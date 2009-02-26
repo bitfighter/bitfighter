@@ -124,6 +124,8 @@ public:
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point()) :EngineeredObject(team, anchorPoint, anchorNormal) { mNetFlags.set(Ghostable); }
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
+   void onAddedToGame(Game *theGame);
+
    void render();
    void onEnabled();
    void onDisabled();

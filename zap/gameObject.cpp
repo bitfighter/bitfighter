@@ -263,9 +263,10 @@ void GameObject::addToGame(Game *theGame)
    onAddedToGame(theGame);
 }
 
+
 void GameObject::onAddedToGame(Game *)
 {
-   // Do nothing --> will be overridden
+   // Note --> will be overridden
 }
 
 void GameObject::removeFromGame()
@@ -329,9 +330,7 @@ Rect GameObject::getBounds(U32 stateIndex)
 }
 
 
-
 extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint);
-
 
 // Find if the specified point is in theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Point point)
@@ -351,10 +350,11 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 }
 
 
-
 void GameObject::render()
 {
+   // Do nothing
 }
+
 
 void GameObject::render(S32 layerIndex)
 {
@@ -362,21 +362,30 @@ void GameObject::render(S32 layerIndex)
       render();
 }
 
+
 void GameObject::idle(IdleCallPath path)
 {
+   // Do nothing
 }
+
 
 void GameObject::writeControlState(BitStream *)
 {
+   // Do nothing
 }
+
 
 void GameObject::readControlState(BitStream *)
 {
+   // Do nothing
 }
+
 
 void GameObject::controlMoveReplayComplete()
 {
+   // Do nothing
 }
+
 
 void GameObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 {
@@ -399,6 +408,7 @@ void GameObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
       stream->writeRangedU32(len, 0, max);
    }
 }
+
 
 void GameObject::readCompressedVelocity(Point &vel, U32 max, BitStream *stream)
 {

@@ -81,8 +81,6 @@ inline void addArg()
 
 int LevelLoader::parseArgs(const char *string)
 {
-   int numObjects = 0;
-
    argc = 0;
    argLen = 0;
    argString = string;
@@ -171,7 +169,7 @@ stateLineParseDone:
    argLen = 0;
    if(c)
       goto stateEatingWhitespace;
-   return numObjects;               // Never incremented, always returns 0
+   return 0;     
 }  // parseArgs
 
 
@@ -180,10 +178,7 @@ bool LevelLoader::initLevelFromFile(const char *file)
 {
    FILE *f = fopen(file, "r");
    if(!f)
-   {
-      logprintf("Unable to open level file %s!!", file);
       return false;
-   }
 
    char fileData[65536];      // Max level size = 64k -- that's pretty big!
 

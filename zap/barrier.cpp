@@ -28,6 +28,8 @@
 #include "gameNetInterface.h"
 #include "gameObjectRender.h"
 #include "SweptEllipsoid.h"      // For polygon triangulation
+#include "UIMenus.h"
+
 #include "../glut/glutInclude.h"
 #include <math.h>
 
@@ -115,14 +117,12 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
 
    // Remove collinear points to make rendering nicer and datasets smaller
 
-   
    for(S32 i = 0; i < tmp.size(); i++)
    {
       S32 j = i;
       while(i > 0 && i < tmp.size() - 1 && (tmp[j] - tmp[j-1]).ATAN2() == (tmp[i+1] - tmp[i]).ATAN2())
-      {
          i++;
-      }
+
       vec.push_back(tmp[i]);
    }
 
@@ -191,10 +191,12 @@ Barrier::Barrier(Vector<Point> points, F32 width, bool solid)
    getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
 }
 
+
 void Barrier::onAddedToGame(Game *theGame)
 {
-   // Do nothing
+  getGame()->mObjectsLoaded++;
 }
+
 
 bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 {

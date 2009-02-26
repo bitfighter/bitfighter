@@ -559,6 +559,7 @@ void HuntersNexusObject::onAddedToGame(Game *theGame)
       setScopeAlways();    // Always visible!
 
    ((HuntersGameType *) theGame->getGameType())->addNexus(this);
+   getGame()->mObjectsLoaded++;
 }
 
 void HuntersNexusObject::idle(GameObject::IdleCallPath path)

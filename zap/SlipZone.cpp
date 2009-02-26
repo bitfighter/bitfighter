@@ -85,6 +85,8 @@ public:
    {
       if(!isGhost())
          setScopeAlways();
+
+      getGame()->mObjectsLoaded++;
    }
 
    void computeExtent()

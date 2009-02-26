@@ -26,6 +26,7 @@
 #include "BotNavMeshZone.h"
 #include "SweptEllipsoid.h"
 #include "Robot.h"
+#include "UIMenus.h"
 
 namespace Zap
 {
@@ -33,6 +34,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 extern S32 gMaxPolygonPoints;
+
 
 Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
@@ -67,29 +69,37 @@ void BotNavMeshZone::render()     // For now... in future will be invisible!
 {
    glEnable(GL_BLEND);
       F32 alpha = 0.5;
-      glColor3f(.2, .2, 0);
+   glColor3f(.2, .2, 0);
+
+   // Render loadout zone trinagle geometry
+   for(S32 i = 0; i < mPolyFill.size(); i+=3)
+   {
       glBegin(GL_POLYGON);
+      for(S32 j = i; j < i + 3; j++)
+         glVertex2f(mPolyFill[j].x, mPolyFill[j].y);
+      glEnd();
+   }
+
+      glColor3f(.7, .7, 0);
+   glBegin(GL_LINE_LOOP);
       for(S32 i = 0; i < mPolyBounds.size(); i++)
          glVertex2f(mPolyBounds[i].x, mPolyBounds[i].y);
-      glEnd();
-      glColor3f(.7, .7, 0);
-      glBegin(GL_LINE_LOOP);
-         for(S32 i = 0; i < mPolyBounds.size(); i++)
-            glVertex2f(mPolyBounds[i].x, mPolyBounds[i].y);
-      glEnd();
+   glEnd();
 
-      Point extents = getExtent().getExtents();
-      Point center = getExtent().getCenter();
+   Rect extents = this->getExtent();
+   Point center = extents.getCenter();
 
-      glPushMatrix();
-      glTranslatef(center.x, center.y, 0);
-      if(extents.x < extents.y)
-         glRotatef(90, 0, 0, 1);
+   glPushMatrix();
+   glTranslatef(center.x, center.y, 0);
       glColor3f(1,1,0);
       char buf[24];
-      dSprintf(buf, 24, "ZONE %d/%d", mNeighbors.size(),mZoneID);
+      dSprintf(buf, 24, "ZONE %d/%d", mNeighbors.size(), mZoneID);
       renderCenteredString(Point(0,0), 25, buf);
-       glPopMatrix();
+   glPopMatrix();
+
+
+
+
       glColor3f(1,0,0);
       for(S32 i = 0; i < mNeighbors.size(); i++)
       {
@@ -133,10 +143,13 @@ void BotNavMeshZone::processArguments(S32 argc, const char **argv)
    computeExtent();  // Not needed?
 }
 
+
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
    if(!isGhost())     // For now, so we can see them on the client to help with debugging
       setScopeAlways();
+
+   // Don't need to increment our objectloaded counter, as this object resides only on the server
 }
 
 // Bounding box for quick collision-possibility elimination
@@ -193,7 +206,11 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       mPolyBounds.push_back(p);
    }
    if(size)
+   {
       computeExtent();
+      Triangulate::Process(mPolyBounds, mPolyFill);
+   }
+
 
    size = stream->readEnum(15);
    for(U32 i = 0; i < size; i++)

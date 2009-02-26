@@ -31,6 +31,7 @@
 // For 011
 // Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name
 // When hosting a game from the UI, game load progress info displayed
+// When loading a level from a local or remote server, progress bar is displayed
 // Retrieve game -> can't pick up enemy flags, so more complex level designs are possible
 // Fixed scoring message on Hunters levels
 // ZoneControl -> When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter
@@ -48,6 +49,7 @@
 // Scores displayed in LR corner of main game screen now sorted from high to low
 // Name of current game server now displayed on global chat screen
 // Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.
+// Team chat message entry box colored appropriately
 
 // Specifiying levels
 // ".level" extension now optional when specifying levels with the -levels param
@@ -81,11 +83,13 @@
 // Color coded status messages on servers menu
 // Trim server names too long to fit in column on servers menu
 
+// Robots!
 
 // Mac Test:
 // New screen capture code
 // Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
 // Ryan -- I changed getLevels() slightly... I tried to make the corresponding change in Directory.mm, by commenting out single line.  Hopefully the functionalities are still the same!
+// Robots
 
 //-----------------------------------------------------------------------------------
 //
@@ -527,6 +531,10 @@ void abortHosting()
    }
    delete gServerGame;
    gServerGame = NULL;
+
+   gMainMenuUserInterface.levelLoadDisplayDisplay = false;
+   gMainMenuUserInterface.levelLoadDisplayFadeTimer.clear();
+
    return;
 }
 
@@ -543,7 +551,7 @@ void initHostGame(Address bindAddress)
    {
       gServerGame->setLevelList(gLevelList);
       gServerGame->resetLevelLoadIndex();
-      gMainMenuUserInterface.clearLevelLoadDisplay();
+      gMainMenuUserInterface.levelLoadDisplayDisplay = true;
    }
    else
    {
@@ -567,6 +575,9 @@ void hostGame()
       return;
    }
 
+   gMainMenuUserInterface.levelLoadDisplayDisplay = false;
+   gMainMenuUserInterface.levelLoadDisplayFadeTimer.reset();
+
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
       joinGame(Address(), false, true);   // ...then we'll play, too!
       //      (let the system assign ip and port, false -> not from master, true -> local connection)
@@ -577,7 +588,7 @@ void hostGame()
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
 {     
-   if(gHostingModePhase == 1) // LoadingLevels
+   if(gHostingModePhase == 1)       // LoadingLevels
       gServerGame->loadNextLevel();
    else if(gHostingModePhase == 2)  // DoneLoadingLevels
       hostGame();
@@ -1418,6 +1429,12 @@ void buildLevelList()
 
    // Otherwise, use the levels gleaned from the cmd line, or, if nothing specified on the cmd line, 
    // use all the levels in leveldir (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
+   if(gCmdLineSettings.suppliedLevels)
+   {
+      if(gLevelList.size() > 0)     // If there's something here, they came from the cmd line
+      return;
+   }
+
    gLevelList.clear();
    Vector<string> levelfiles;
 

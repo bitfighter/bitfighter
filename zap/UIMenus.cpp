@@ -468,6 +468,8 @@ MainMenuUserInterface::MainMenuUserInterface()
    menuFooter = "join us @ www.bitfighter.org";
    mNeedToUpgrade = false;                         // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;                    // So we don't show the upgrade message more than once
+   levelLoadDisplayFadeTimer.setPeriod(1000);
+   gMainMenuUserInterface.levelLoadDisplayDisplay = true;
 
    //                                  Text              ID      Keys
    menuItems.push_back(MenuItem("JOIN LAN/INTERNET GAME", 0, KEY_J, KEY_UNKNOWN ));
@@ -489,6 +491,8 @@ void MainMenuUserInterface::onActivate()
    mColorTimer.reset(ColorTime);
    mColorTimer2.reset(ColorTime2);
    mTransDir = true;
+   mLevelLoadDisplayTotal = 0;
+   clearLevelLoadDisplay();
 
    if(firstTime)
       gSplashUserInterface.activate();          // Show splash screen the first time throug
@@ -514,26 +518,14 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
 
 extern S32 gHostingModePhase;
 
-
 void MainMenuUserInterface::render()
 {
    // If we're in LoadingLevels mode, show the progress panel...
+   renderProgressListItems();   
    if(gHostingModePhase == 1 || gHostingModePhase == 2) // LoadingLevels
    {
       // There will be exactly one new entry every time we get here!
-      mLevelLoadDisplayNames.push_back(gServerGame->getCurrentLevelLoadName());
-
-      // Keep the list from growing too long:
-      if(mLevelLoadDisplayNames.size() > 15)
-         mLevelLoadDisplayNames.erase(0);
-
-      glEnable(GL_BLEND);
-      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
-      {
-         glColor4f(1,1,1, 1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0) );
-         drawStringf(100, canvasHeight - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 15, "Loaded level %s...", mLevelLoadDisplayNames[i].c_str());
-      }
-      glDisable(GL_BLEND);
+      addProgressListItem("Loaded level " + gServerGame->getCurrentLevelLoadName() + "...");
       return;
    }
 
@@ -572,6 +564,51 @@ void MainMenuUserInterface::render()
    renderStaticBitfighterLogo();
 }
 
+
+// Add bit of text to progress item, and manage the list
+void MainMenuUserInterface::addProgressListItem(string item)
+{
+   char buff[100];
+   dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal);
+
+   if(mLevelLoadDisplayNames.size() && (item + "[" + buff + "]" == mLevelLoadDisplayNames.last() || item == mLevelLoadDisplayNames.last()) )
+   {
+      dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal + 1);
+      mLevelLoadDisplayNames[mLevelLoadDisplayNames.size() - 1] = item + "[" + buff + "]";
+   }
+   else
+      mLevelLoadDisplayNames.push_back(item);
+
+   mLevelLoadDisplayTotal++;
+
+   // Keep the list from growing too long:
+   if(mLevelLoadDisplayNames.size() > 15)
+      mLevelLoadDisplayNames.erase(0);
+}
+
+
+void MainMenuUserInterface::clearLevelLoadDisplay()
+{
+   mLevelLoadDisplayNames.clear();
+   mLevelLoadDisplayTotal = 0;
+}
+
+
+void MainMenuUserInterface::renderProgressListItems()
+{
+   if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
+   {
+      glEnable(GL_BLEND);
+      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
+      {
+         glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
+         drawStringf(100, canvasHeight - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 15, "%s", mLevelLoadDisplayNames[i].c_str());
+      }
+      glDisable(GL_BLEND);
+   }
+}
+
+
 void MainMenuUserInterface::idle(U32 timeDelta)
 {
    mFadeInTimer.update(timeDelta);
@@ -586,12 +623,6 @@ void MainMenuUserInterface::idle(U32 timeDelta)
       mColorTimer2.reset(ColorTime2);
       mTransDir2 = !mTransDir2;
    }
-}
-
-
-void MainMenuUserInterface::clearLevelLoadDisplay()
-{
-   mLevelLoadDisplayNames.clear();
 }
 
 

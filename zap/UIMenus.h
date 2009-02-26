@@ -183,6 +183,7 @@ private:
    bool mShowedUpgradeAlert;  // So we don't show the upgrade message more than once
 
    Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
+   S32 mLevelLoadDisplayTotal;
 
 public:
    MainMenuUserInterface();                     // Constructor
@@ -198,6 +199,10 @@ public:
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
 
+   void addProgressListItem(string item);
+   void renderProgressListItems();
+   Timer levelLoadDisplayFadeTimer;
+   bool levelLoadDisplayDisplay;
    void clearLevelLoadDisplay();
 };
 

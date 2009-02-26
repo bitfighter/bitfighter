@@ -207,6 +207,12 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mWrongModeMsgDisplay.update(timeDelta);
    mChatModeSlideoutTimer.update(timeDelta);
+
+   mProgressBarFadeTimer.update(timeDelta);
+
+   // Should we move this timer over to UIGame??
+   if(gMainMenuUserInterface.levelLoadDisplayFadeTimer.update(timeDelta))
+      gMainMenuUserInterface.clearLevelLoadDisplay();
 }
 
 #ifdef TNL_OS_WIN32
@@ -237,14 +243,17 @@ void GameUserInterface::render()
    renderCurrentChat();       // Render any chat msg user is composing
    renderLoadoutIndicators(); // Draw indicators for the various loadout items
 
-   mVoiceRecorder.render();
+   gMainMenuUserInterface.renderProgressListItems();  // This is the list of levels loaded while hosting
+
+   renderProgressBar();       // This is the status bar that shows progress of loading this level
+
+   mVoiceRecorder.render();   // This is the indicator that someone is sending a voice msg
 
    // Display running average FPS
    if(mFPSVisible)
    {
       glColor3f(1, 1, 1);
-      drawStringf(canvasWidth - horizMargin - 170, vertMargin, 30,
-            "%4.1f fps", mFPSAvg);
+      drawStringf(canvasWidth - horizMargin - 170, vertMargin, 30, "%4.1f fps", mFPSAvg);
    }
 
    // Render QuickChat / Loadout menus
@@ -279,6 +288,46 @@ void GameUserInterface::render()
       drawString(710, 10, 30, "CU");
 #endif
 }
+
+// Draws level-load progress bar across the bottom of the screen
+void GameUserInterface::renderProgressBar()
+{
+   GameType *gt = gClientGame->getGameType();
+   if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
+   {
+      glEnable(GL_BLEND);
+      glColor4f(0, 1, 0, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
+
+      // Outline
+      const S32 left = 200;
+      const S32 width = canvasWidth - 2 * left;
+      const S32 height = 10;
+
+      // For some reason, there are occasions where the status bar doesn't progress all the way over during the load process.
+      // The problem is that, for some reason, some objects do not add themselves to the loaded object counter, and this creates
+      // a disconcerting effect, as if the level did not fully load.  Rather than waste any more time on this problem, we'll just
+      // fill in the status bar while it's fading, to make it look like the level fully loaded.  Since the only thing that this
+      // whole mechanism is used for is to display something to the user, this should work fine.
+      F32 barWidth = mShowProgressBar ? ((F32) width * (F32) gClientGame->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
+
+      glBegin(GL_LINE_LOOP);
+         glVertex2f(left, canvasHeight - vertMargin);
+         glVertex2f(left + width, canvasHeight - vertMargin);
+         glVertex2f(left + width, canvasHeight - vertMargin - height);
+         glVertex2f(left, canvasHeight - vertMargin - height);
+      glEnd();
+
+      glBegin(GL_POLYGON);
+         glVertex2f(left, canvasHeight - vertMargin);
+         glVertex2f(left + barWidth, canvasHeight - vertMargin);
+         glVertex2f(left + barWidth, canvasHeight - vertMargin - height);
+         glVertex2f(left, canvasHeight - vertMargin - height);
+      glEnd();
+
+      glDisable(GL_BLEND);
+   }
+}
+
 
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
@@ -512,14 +561,24 @@ void GameUserInterface::renderCurrentChat()
    const S32 chatComposeYPos = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) + 
                                (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + fontGap);
    const char *promptStr;
+
+   F32 fadefactor;
+   if(mCurrentMode == ChatMode)     // Sliding in
+      fadefactor = (1 - mChatModeSlideoutTimer.getFraction());
+   else                             // Sliding out
+      fadefactor = mChatModeSlideoutTimer.getFraction();
+
+
+   Color baseColor;
+
    if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
    {
-      glColor(gTeamChatColor);
+      baseColor = gTeamChatColor;
       promptStr = "(Team): ";
    }
    else                                // Global in-game chat (goes to all players in game)
    {
-      glColor(gGlobalChatColor);
+      baseColor = gGlobalChatColor;
       promptStr = "(Global): ";
    }
 
@@ -536,22 +595,19 @@ void GameUserInterface::renderCurrentChat()
    S32 xpos = UserInterface::horizMargin;
    S32 width = canvasWidth - 2 * UserInterface::horizMargin - (nameWidth - promptSize) + 6;
 
-   F32 fadefactor;
-   if(mCurrentMode == ChatMode)     // Sliding in
-      fadefactor = (1 - mChatModeSlideoutTimer.getFraction());
-   else                             // Sliding out
-      fadefactor = mChatModeSlideoutTimer.getFraction();
+
 
    // Render text entry box like thingy
    glEnable(GL_BLEND);
-      glColor4f(1,1,1,.2 * fadefactor);
+      glColor4f(baseColor.r, baseColor.g, baseColor.b, .25 * fadefactor);
       glBegin(GL_POLYGON);
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
          glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
          glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
       glEnd();
-      glColor4f(1,1,1,.4 * fadefactor);
+
+      glColor4f(baseColor.r, baseColor.g, baseColor.b, .4 * fadefactor);
       glBegin(GL_LINE_LOOP);
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
          glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
@@ -559,7 +615,7 @@ void GameUserInterface::renderCurrentChat()
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
       glEnd();
 
-   glColor4f(1,1,1,fadefactor);
+   glColor4f(baseColor.r, baseColor.g, baseColor.b, fadefactor);
    drawString(xpos + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
    drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, cursorBlink ? "_" : " ");
    glDisable(GL_BLEND);

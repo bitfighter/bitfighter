@@ -139,6 +139,7 @@ public:
    StringTableEntry mLevelName;
    StringTableEntry mLevelDescription;
    StringTableEntry mLevelCredits;
+   S32 mObjectsExpected;      // Count of objects we expect to get with this level (for display purposes only)
    S32 minRecPlayers;         // Recommended min players for this level
    S32 maxRecPlayers;         // Recommended max players for this level
 
@@ -288,7 +289,7 @@ public:
    virtual void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
 
    void onGhostAvailable(GhostConnection *theConnection);
-   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds));
+   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin));

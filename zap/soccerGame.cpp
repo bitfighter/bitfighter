@@ -213,6 +213,7 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
    //   theGame->getGameType()->addItemOfInterest(this);
 
    ((SoccerGameType *) theGame->getGameType())->setBall(this);
+   getGame()->mObjectsLoaded++;
 }
 
 void SoccerBallItem::renderItem(Point pos)
