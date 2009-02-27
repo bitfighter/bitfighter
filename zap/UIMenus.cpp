@@ -568,15 +568,15 @@ void MainMenuUserInterface::render()
 // Add bit of text to progress item, and manage the list
 void MainMenuUserInterface::addProgressListItem(string item)
 {
-   char buff[100];
-   dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal);
+   //char buff[100];
+   //dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal);
 
-   if(mLevelLoadDisplayNames.size() && (item + "[" + buff + "]" == mLevelLoadDisplayNames.last() || item == mLevelLoadDisplayNames.last()) )
-   {
-      dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal + 1);
-      mLevelLoadDisplayNames[mLevelLoadDisplayNames.size() - 1] = item + "[" + buff + "]";
-   }
-   else
+   //if(mLevelLoadDisplayNames.size() && (item + "[" + buff + "]" == mLevelLoadDisplayNames.last() || item == mLevelLoadDisplayNames.last()) )
+   //{
+   //   dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal + 1);
+   //   mLevelLoadDisplayNames[mLevelLoadDisplayNames.size() - 1] = item + "[" + buff + "]";
+   //}
+   //else
       mLevelLoadDisplayNames.push_back(item);
 
    mLevelLoadDisplayTotal++;
@@ -1317,8 +1317,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)             // Ha
    GameConnection *gc = gClientGame->getConnectionToServer();
 
    // The selection index is the level to load.
-   TNL::logprintf("load level %s", gc->mLevelNames[index].getString());
-   gc->c2sRequestLevelChange(index);
+   gc->c2sRequestLevelChange(index, false);
    reactivateMenu(gGameUserInterface);    // Jump back to the game menu
 }
 

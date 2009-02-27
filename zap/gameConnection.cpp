@@ -108,7 +108,24 @@ ClientRef *GameConnection::getClientRef()
    return mClientRef;
 }
 
+
 extern md5wrapper md5;
+
+void GameConnection::submitAdminPassword(const char *password)
+{
+   c2sAdminPassword(md5.getSaltedHashFromString(password).c_str());
+   setGotPermissionsReply(false);           
+   setWaitingForPermissionsReply(true);     
+}
+
+
+void GameConnection::submitLevelChangePassword(const char *password)
+{
+   c2sLevelChangePassword(md5.getSaltedHashFromString(password).c_str());
+   setGotPermissionsReply(false);           
+   setWaitingForPermissionsReply(true); 
+}
+
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
@@ -213,6 +230,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 }
 
 
+extern Color gCmdChatColor;
+
+static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
+static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
@@ -221,21 +243,47 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
          setIsLevelChanger(true);
 
    setGotPermissionsReply(true);
+
+   // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
+   if(!waitingForPermissionsReply())
+      return;
+
    if(granted)
-      gGameMenuUserInterface.menuSubTitle = "You've been granted permission to manage players and change levels";    
+      // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+      if(UserInterface::current->getMenuID() == GameMenuUI)
+         gGameMenuUserInterface.menuSubTitle = adminPassSuccessMsg;    
+      else
+         gGameUserInterface.displayMessage(gCmdChatColor, adminPassSuccessMsg);
+
    else
-      gGameMenuUserInterface.menuSubTitle = "Incorrect password: Admin access denied";     
+      if(UserInterface::current->getMenuID() == GameMenuUI)
+         gGameMenuUserInterface.menuSubTitle = adminPassFailureMsg;     
+      else
+         gGameUserInterface.displayMessage(gCmdChatColor, adminPassFailureMsg);
 }
+
+
+static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
+static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    setIsLevelChanger(granted);
+
    setGotPermissionsReply(true);
-   if(granted)
-      gGameMenuUserInterface.menuSubTitle = "You've been granted permission to change levels";    
+   if(granted)      
+      // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+      if(UserInterface::current->getMenuID() == GameMenuUI)
+         gGameMenuUserInterface.menuSubTitle = levelPassSuccessMsg;    
+      else
+         gGameUserInterface.displayMessage(gCmdChatColor, levelPassSuccessMsg);
+
    else
-      gGameMenuUserInterface.menuSubTitle = "Incorrect password: Level changing permissions denied";     
+      if(UserInterface::current->getMenuID() == GameMenuUI)
+         gGameMenuUserInterface.menuSubTitle = levelPassFailureMsg;     
+      else
+         gGameUserInterface.displayMessage(gCmdChatColor, levelPassFailureMsg);
 }
 
 
@@ -402,10 +450,17 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTab
    mLevelTypes.push_back(type);
 }
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex), (newLevelIndex), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    if(mIsLevelChanger)
    {
+      if(isRelative)
+         newLevelIndex = (gServerGame->getCurrentLevelIndex() + newLevelIndex ) % gServerGame->getLevelCount();
+
+      while(newLevelIndex < 0)
+         newLevelIndex += gServerGame->getLevelCount();
+
       static StringTableEntry msg("%e0 changed the level to %e1.");
       Vector<StringTableEntry> e;
       e.push_back(getClientName());

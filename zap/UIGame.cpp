@@ -43,6 +43,8 @@
 #include "config.h"
 #include "loadoutSelect.h"
 
+#include "md5wrapper.h"    // For submission of passwords
+
 #include "../glut/glutInclude.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -52,8 +54,10 @@ namespace Zap
 {
 
 GameUserInterface gGameUserInterface;
+
 Color gGlobalChatColor(0.9, 0.9, 0.9);
 Color gTeamChatColor(0, 1, 0);
+Color gCmdChatColor(1, 0, 0);
 
 // Used to supply names for loutout indicators --> must correspond to enum ShipModule
 const char *gModuleShortName[] = {
@@ -100,7 +104,8 @@ GameUserInterface::GameUserInterface()
       mModActivated[i] = false;
 
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
-   mChatModeSlideoutTimer.setPeriod(ChatWindowSlideoutTime); // And out chat mode slideout timer
+
+   populateChatCmdList();
 }
 
 
@@ -136,7 +141,9 @@ void GameUserInterface::onReactivate()
    onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);
 }
 
-// A new chat message is here!  We don't actually display anything here, despite the name...
+
+// A new chat message is here!  We don't actually display anything here, despite the name...  
+// just add it to the list, will be displayed in render()
 void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
 {
    // Create a slot for our new message
@@ -164,6 +171,7 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
 
    mDisplayMessageTimer.reset();
 }
+
 
 void GameUserInterface::idle(U32 timeDelta)
 {
@@ -206,7 +214,6 @@ void GameUserInterface::idle(U32 timeDelta)
    mFrameIndex++;
 
    mWrongModeMsgDisplay.update(timeDelta);
-   mChatModeSlideoutTimer.update(timeDelta);
 
    mProgressBarFadeTimer.update(timeDelta);
 
@@ -555,23 +562,22 @@ void GameUserInterface::renderMessageDisplay()
 // Render chat msg that user is composing
 void GameUserInterface::renderCurrentChat()
 {
-   if(mCurrentMode != ChatMode && !mChatModeSlideoutTimer.getCurrent())
+   if(mCurrentMode != ChatMode)
       return;
 
    const S32 chatComposeYPos = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) + 
                                (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + fontGap);
    const char *promptStr;
 
-   F32 fadefactor;
-   if(mCurrentMode == ChatMode)     // Sliding in
-      fadefactor = (1 - mChatModeSlideoutTimer.getFraction());
-   else                             // Sliding out
-      fadefactor = mChatModeSlideoutTimer.getFraction();
-
 
    Color baseColor;
 
-   if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
+   if(mChatBuffer[0] == '/')      // Whatever the underlying chat mode, seems we're entering a command here
+   {
+      baseColor = gCmdChatColor;
+      promptStr = "(Command): ";
+   }
+   else if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
    {
       baseColor = gTeamChatColor;
       promptStr = "(Team): ";
@@ -596,10 +602,9 @@ void GameUserInterface::renderCurrentChat()
    S32 width = canvasWidth - 2 * UserInterface::horizMargin - (nameWidth - promptSize) + 6;
 
 
-
    // Render text entry box like thingy
    glEnable(GL_BLEND);
-      glColor4f(baseColor.r, baseColor.g, baseColor.b, .25 * fadefactor);
+      glColor4f(baseColor.r, baseColor.g, baseColor.b, .25);
       glBegin(GL_POLYGON);
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
          glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
@@ -607,7 +612,7 @@ void GameUserInterface::renderCurrentChat()
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
       glEnd();
 
-      glColor4f(baseColor.r, baseColor.g, baseColor.b, .4 * fadefactor);
+      glColor4f(baseColor.r, baseColor.g, baseColor.b, .4);
       glBegin(GL_LINE_LOOP);
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
          glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
@@ -615,7 +620,7 @@ void GameUserInterface::renderCurrentChat()
          glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
       glEnd();
 
-   glColor4f(baseColor.r, baseColor.g, baseColor.b, fadefactor);
+   glColor3f(baseColor.r, baseColor.g, baseColor.b);
    drawString(xpos + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
    drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, cursorBlink ? "_" : " ");
    glDisable(GL_BLEND);
@@ -662,7 +667,7 @@ void GameUserInterface::enterQuickChat()
    mCurrentMode = QuickChatMode;
 }
 
-// Ennter loadout mode
+// Enter loadout mode
 void GameUserInterface::enterLoadout()
 {
    bool fromController = (gIniSettings.inputMode == Joystick);
@@ -838,14 +843,12 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             mCurrentChatType = TeamChat;
             mCurrentMode = ChatMode;
-            mChatModeSlideoutTimer.reset();
             setBusyChatting(true);
          }
          else if(keyCode == keyGLOBCHAT[inputMode])
          {
             mCurrentChatType = GlobalChat;
             mCurrentMode = ChatMode;
-            mChatModeSlideoutTimer.reset();
             setBusyChatting(true);
          }
          else if(keyCode == keyQUICKCHAT[inputMode])
@@ -859,7 +862,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }     // End if in LoadoutMode or PlayMode
 
-   else if(mCurrentMode == ChatMode)
+   else if(mCurrentMode == ChatMode)   // Player is entering a chat message
    {
       if(keyCode == KEY_ENTER)
          issueChat();
@@ -874,6 +877,30 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
          cancelChat();
+      else if(keyCode == KEY_TAB)      // Auto complete any commands
+      {
+         if(mChatBuffer[0] == '/')     // It's a command!
+         {
+            S32 found = -1;
+
+            size_t len = strlen(mChatBuffer);    
+            for(S32 i = 0; i < mChatCmds.size(); i++)
+               if( mChatCmds[i].substr(0, len) == string(mChatBuffer) )
+               {
+                  if(found != -1)   // We've already found another command that matches this one, so that means it's not yet unique enough to autocomplete.
+                     return;
+                  found = i;
+               }
+
+            if(found == -1)      // Found no match
+               return;
+
+            U32 clen = (U32) mChatCmds[found].copy(mChatBuffer, mChatCmds[found].length(), 0);      // Complete command
+            mChatBuffer[clen] = ' ';        // append trailing space for ready entry of next param
+            mChatBuffer[clen + 1] = '\0';   // terminate the string
+            mChatCursorPos = clen + 1;
+         }
+      }
       else if(ascii)     // Append any other keys to the chat message
       {
          // Protect against crashes while game is initializing
@@ -1024,24 +1051,246 @@ Move *GameUserInterface::getCurrentMove()
    }
 }
 
+
+// User has finished entering a chat message and pressed <enter>
+void GameUserInterface::issueChat()
+{
+   if(mChatBuffer[0])
+   {
+      // Check if chat buffer holds a message or a command
+      if(mChatBuffer[0] != '/')     // It's a normal chat message
+      {
+         GameType *gt = gClientGame->getGameType();
+         if(gt)
+            gt->c2sSendChat(mCurrentChatType == GlobalChat, mChatBuffer);   // Broadcast message
+      }
+      else                          // It's a command
+      {
+         Vector<string> words = parseString(mChatBuffer);
+         processCommand(words);
+      }
+   }
+   cancelChat();
+}
+
+
+Vector<string> GameUserInterface::parseString(char buffer[])
+{
+   // Parse the string
+   string word = "";
+   Vector<string> words;
+   for(size_t i = 1; i < strlen(mChatBuffer); i++)   // Start at 1 to omit the leading /
+   {
+      if(mChatBuffer[i] != ' ')
+         word += words.size() == 0 ? tolower(mChatBuffer[i]) : mChatBuffer[i];      // Make first word all lower case for case insensitivity
+      else if(word != "")
+      {
+         words.push_back(word);
+         word = "";
+      }
+   }
+   if(word != "")
+      words.push_back(word);
+
+   return words;
+}
+
+
+extern md5wrapper md5;
+
+// Process a command entered at the chat prompt
+// Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
+void GameUserInterface::processCommand(Vector<string> words)
+{
+   if(words.size() == 0)            // Just in case
+      return;
+
+   GameConnection *gc = gClientGame->getConnectionToServer();
+   if(!gc)
+   {
+      displayMessage(gCmdChatColor, "!!! Not connected to server");
+      return;
+   }
+
+   if(words[0] == "add")            // Add time to the game
+   {
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to supply a time (in minutes)");
+         return;
+      }
+
+      U8 mins;    // Use U8 to limit number of mins that can be added, while nominally having no limit!
+      // Parse 2nd arg -- if first digit isn't a number, user probably screwed up.  
+      // atoi will return 0, but this probably isn't what the user wanted.
+      
+      bool err = false;
+      if(words[1][0] >= '0' && words[1][0] <= '9')
+         mins = atoi(words[1].c_str());
+      else
+         err = true;
+
+      if(err || mins == 0)
+      {
+         displayMessage(gCmdChatColor, "!!! Invalid value... game time not changed");
+         return;
+      }
+      
+      displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
+
+      if(gClientGame->getGameType())
+         gClientGame->getGameType()->addTime(mins * 60 * 1000);
+   }
+
+   else if(words[0] == "next")      // Go to next level
+   {
+      if(!gc->isLevelChanger())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
+         return;
+      }
+
+      //if(words.size() < 2 || words[1] == "")
+         gc->c2sRequestLevelChange(1, true);
+   }
+
+   else if(words[0] == "prev")      // Go to previous level
+   {
+      if(!gc->isLevelChanger())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
+         return;
+      }
+
+      //if(words.size() < 2 || words[1] == "")
+         gc->c2sRequestLevelChange(-1, true);
+   }
+
+   else if(words[0] == "kick")      // Kick a player
+   {
+      if(!gc->isAdmin())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to kick players");
+         return;
+      }
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to specify who to kick");
+         return;
+      }
+      // Did user provide a valid, known name?
+      if(!gClientGame->getGameType())
+         return;
+
+      ClientRef *clientRef = gClientGame->getGameType()->findClientRef(words[1].c_str());
+      if(!clientRef)
+      {
+         displayMessage(gCmdChatColor, "!!! Could not find player %s", words[1].c_str());
+         return;
+      }
+
+      gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
+   }
+
+   else if(words[0] == "admin")     // Request admin permissions
+   {
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         return;
+      }
+      if(gc->isAdmin())
+      {
+         displayMessage(gCmdChatColor, "!!! You are already an admin");
+         return;
+      }
+
+      gc->submitAdminPassword(words[1].c_str());
+   }
+
+   else if(words[0] == "levpass" || words[0] == "levelpass" || words[0] == "lvlpass")
+   {
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         return;
+      }
+      if(gc->isLevelChanger())
+      {
+         displayMessage(gCmdChatColor, "!!! You can already change levels");
+         return;
+      }
+
+      gc->submitLevelChangePassword(words[1].c_str());
+   }
+
+   else if(words[0] == "svol")      // SFX volume
+      setVolume(SfxVolumeType, words[1]);
+   else if(words[0] == "mvol")      // Music volume
+      setVolume(MusicVolumeType, words[1]);
+   else if(words[0] == "vvol")      // Voice chat volume
+      setVolume(VoiceVolumeType, words[1]);
+
+   else
+      displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
+}
+
+
+// For auto-completion purposes
+void GameUserInterface::populateChatCmdList()
+{
+   // Our list of commands that can be entered at the chat prompt
+   mChatCmds.push_back("/add");
+   mChatCmds.push_back("/admin");
+   mChatCmds.push_back("/kick");
+   mChatCmds.push_back("/levpass");
+   mChatCmds.push_back("/mvol");
+   mChatCmds.push_back("/next");
+   mChatCmds.push_back("/prev");
+   mChatCmds.push_back("/svol");
+   mChatCmds.push_back("/vvol");
+}
+
+// Set specified volume to the specefied level
+void GameUserInterface::setVolume(VolumeType volType, string volstr)
+{
+   S32 vol;
+
+   // Parse volstr -- if first digit isn't a number, user probably screwed up.  
+   // atoi will return 0, but this probably isn't what the user wanted.
+   if(volstr[0] >= '0' && volstr[0] <= '9')
+      vol = max(min(atoi(volstr.c_str()), 10), 0);
+   else
+   {
+      displayMessage(gCmdChatColor, "!!! Invalid value... volume not changed");
+      return;
+   }
+
+  switch(volType)
+  {
+   case SfxVolumeType:
+      gIniSettings.sfxVolLevel = (F32) vol / 10.0;
+      displayMessage(gCmdChatColor, "SFX volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      return;
+   case MusicVolumeType:
+      gIniSettings.musicVolLevel = (F32) vol / 10.0;
+      displayMessage(gCmdChatColor, "Music volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      return;
+   case VoiceVolumeType:
+      gIniSettings.voiceChatVolLevel = (F32) vol / 10.0;
+      displayMessage(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      return;
+  }
+}
+
+
 void GameUserInterface::cancelChat()
 {
    memset(mChatBuffer, 0, sizeof(mChatBuffer));
    mChatCursorPos = 0;
    setPlayMode();
-   mChatModeSlideoutTimer.reset();
 }
 
-void GameUserInterface::issueChat()
-{
-   if(mChatBuffer[0])
-   {
-      GameType *gt = gClientGame->getGameType();
-      if(gt)
-         gt->c2sSendChat(mCurrentChatType == GlobalChat, mChatBuffer);
-   }
-   cancelChat();
-}
 
 // Constructor
 GameUserInterface::VoiceRecorder::VoiceRecorder()

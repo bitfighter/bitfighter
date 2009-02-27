@@ -116,6 +116,9 @@ public:
 
    StringTableEntryRef getClientName() { return mClientName; }
  
+   void submitAdminPassword(const char *password);
+   void submitLevelChangePassword(const char *password);
+
    bool isAdmin() { return mIsAdmin; }
    void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
@@ -156,8 +159,10 @@ public:
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
-   TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex));
+   TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
+
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
+
 
    static GameConnection *getClientList();
    GameConnection *getNextClient();

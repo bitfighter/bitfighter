@@ -57,7 +57,6 @@ private:
       MessageStoreCount = 20,          // How many messages to store (only top MessageDisplayCount are normally displayed)
       MessageDisplayCount = 6,         // How many messages to display
       DisplayMessageTimeout = 3000,    // How long to display them (ms)
-      ChatWindowSlideoutTime = 100,      // Time for chat entry box to appear (ms)
    };
 
    enum MessageDisplayMode {
@@ -140,7 +139,13 @@ private:
 
    void setBusyChatting(bool busy);     // Tell the server we are (or are not) busy chatting
 
+   enum VolumeType {
+      SfxVolumeType,
+      MusicVolumeType,
+      VoiceVolumeType,
+   };
 
+   Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
 public:
 
    bool displayInputModeChangeAlert;
@@ -162,6 +167,12 @@ public:
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
 
+   Vector<string> parseString(char buffer[]);      // Break a chat msg into parsable bits
+   void processCommand(Vector<string> words);      // Process a cmd entered into the chat interface
+   void populateChatCmdList();                     // Add all our chat cmds to a list for autocompletion purposes
+
+   void setVolume(VolumeType volType, string vol);
+
    void onMouseMoved(S32 x, S32 y);
    void onMouseDragged(S32 x, S32 y);
    void onActivate();               // Gets run when interface is first activated
@@ -182,7 +193,6 @@ public:
       LoadoutMode,            // In loadout menu
    };
    Mode mCurrentMode;              // Current game mode
-   Timer mChatModeSlideoutTimer;   // For animating slideout of chat box
    void setPlayMode();             // Set mode to PlayMode
 
    void receivedControlUpdate(bool recvd) { mGotControlUpdate = recvd; }

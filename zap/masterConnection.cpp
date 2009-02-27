@@ -178,16 +178,17 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
    if(!mIsGameServer && requestId == mCurrentQueryId)
    {
       TNL::logprintf("Remote host rejected arranged connection...");       // Perhaps because the player was kicked/banned?
+      onConnectionTerminated(ReasonTimedOut,"LLL");
       endGame();
       gMainMenuUserInterface.activate();
-   }
+   } 
 }
 
 // Display the MOTD that is set by the master server
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr masterName, StringPtr motdString))
 {
    setMasterName(masterName.getString());
-   gMainMenuUserInterface.setMOTD(motdString);
+   gMainMenuUserInterface.setMOTD(motdString); 
 }
 
 // Alert user to the fact that their client is (or is not) out of date

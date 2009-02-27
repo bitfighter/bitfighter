@@ -275,9 +275,8 @@ void AdminPasswordEntryUserInterface::onAccept(const char *text)
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(gc)
    {
-      gc->c2sAdminPassword(md5.getSaltedHashFromString(text).c_str());
-      gc->setGotPermissionsReply(false);
-      gc->setWaitingForPermissionsReply(true);
+      gc->submitAdminPassword(text);
+
       reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
       gGameMenuUserInterface.menuSubTitle = "** checking password **";     // ...then set the message
    }
@@ -319,12 +318,8 @@ void LevelChangePasswordEntryUserInterface::onAccept(const char *text)
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(gc)
    {
-      gc->c2sLevelChangePassword(md5.getSaltedHashFromString(text).c_str());
+      gc->submitLevelChangePassword(text);
 
-      logprintf("PW: %s +++++ %s",text, md5.getSaltedHashFromString(text).c_str());
-
-      gc->setGotPermissionsReply(false);
-      gc->setWaitingForPermissionsReply(true);
       reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
       gGameMenuUserInterface.menuSubTitle = "** checking password **";     // ...then set the message
    }

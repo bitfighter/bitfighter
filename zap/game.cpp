@@ -370,6 +370,7 @@ static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 extern void buildBotNavMeshZoneConnections();
 
 
+// Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
    // Delete any objects on the delete list

@@ -980,18 +980,18 @@ enum {
 };
 
 Color ShipExplosionColors[NumShipExplosionColors] = {
-Color(1, 0, 0),
-Color(0.9, 0.5, 0),
-Color(1, 1, 1),
-Color(1, 1, 0),
-Color(1, 0, 0),
-Color(0.8, 1.0, 0),
-Color(1, 0.5, 0),
-Color(1, 1, 1),
-Color(1, 0, 0),
-Color(0.9, 0.5, 0),
-Color(1, 1, 1),
-Color(1, 1, 0),
+   Color(1, 0, 0),
+   Color(0.9, 0.5, 0),
+   Color(1, 1, 1),
+   Color(1, 1, 0),
+   Color(1, 0, 0),
+   Color(0.8, 1.0, 0),
+   Color(1, 0.5, 0),
+   Color(1, 1, 1),
+   Color(1, 0, 0),
+   Color(0.9, 0.5, 0),
+   Color(1, 1, 1),
+   Color(1, 1, 0),
 };
 
 void Ship::emitShipExplosion(Point pos)

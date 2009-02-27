@@ -196,7 +196,7 @@ private:
    U32 mCurrentLevelIndex;
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
-   S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process
+   S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
 public:
    U32 getPlayerCount() { return mPlayerCount; }
@@ -229,6 +229,9 @@ public:
    void gameEnded();
 
    S32 getLevelNameCount();
+   S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
+   S32 getLevelCount() { return mLevelList.size(); }
+
 };
 
 class Ship;

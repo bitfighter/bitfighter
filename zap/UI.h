@@ -103,7 +103,7 @@ public:
    static S32 windowWidth, windowHeight, canvasWidth, canvasHeight;
    static S32 vertMargin, horizMargin;
    static S32 chatMargin;
-   static bool cameFromEditor();          // Did we arrive at our current interface via the Editor?
+   static bool cameFromEditor();             // Did we arrive at our current interface via the Editor?
 
    static void renderCurrent();
    void updateCursorBlink(U32 timeDelta);
@@ -141,9 +141,6 @@ public:
 
    static void drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string);
    static void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
-
-   //static void drawAngleString(S32 x, S32 y, U32 size, F32 angle, const char *string);
-   //static void drawAngleStringf(S32 x, S32 y, U32 size, F32 angle, const char *format, ...);
 
    // Draw text centered on screen (normal and formatted versions)
    static void drawCenteredString(S32 y, U32 size, const char *str);
