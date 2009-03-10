@@ -295,6 +295,7 @@ void ServerGame::loadNextLevel()
          // We got what we need, so get rid of this level.  Delete any objects that may exist
          while(mGameObjects.size())    // Don't just to a .clear() because we want to make sure destructors run and memory gets cleared.
             delete mGameObjects[0];    // But would they anyway?  Apparently not...  using .clear() causes all kinds of hell.
+
          mScopeAlwaysList.clear();
 
          // If we're loading lots of levels, try not to kill the computer!
@@ -465,7 +466,7 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
       return;
 
    if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int
-   {                                      // specifiying how many pixels in a grid cell)
+   {                                      //    specifiying how many pixels in a grid cell)
       if(argc < 2)
       {
          TNL::logprintf("Improperly formed GridSize parameter -- using default");
@@ -473,7 +474,7 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
       }
       mGridSize = max(min((F32) atof(argv[1]), (F32) maxGridSize), (F32) minGridSize);
    }
-   else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))
+   else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
    {
       TNL::Object *theObject = TNL::Object::create(argv[0]);      // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject

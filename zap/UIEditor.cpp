@@ -346,9 +346,12 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       WorldItem i;
       i.index = static_cast<GameItems>(index);
       S32 arg = 1;
+
+      // Should the following be moved to the constructor?  Probably...
       i.team = -1;
       i.selected = false;
       i.width = 0;
+
       if(gGameItemRecs[index].hasWidth)
       {
          i.width = atof(argv[arg]);
@@ -417,6 +420,10 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
                i.vertSelected.push_back(false);
             }
          }
+
+         if(index == ItemRepair && argc == 4)
+            i.repopDelay = atoi(argv[3]);
+
       mItems.push_back(i);    // Save item
    }
 
@@ -2961,9 +2968,11 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          if(gGameItemRecs[mItems[i].index].hasTeam)
             fprintf(f, "%d ", mItems[i].team);
          for(S32 j = 0; j < p.verts.size(); j++)
-            fprintf(f, "%g %g%c", p.verts[j].x, p.verts[j].y, (j == p.verts.size() - 1) ? ' ' : ' ');
+            fprintf(f, "%g %g%s", p.verts[j].x, p.verts[j].y, (j == p.verts.size() - 1) ? "" : " ");
          if(gGameItemRecs[mItems[i].index].hasText)
             fprintf(f, "%d %s", mItems[i].textSize, mItems[i].text.c_str());
+         if(mItems[i].repopDelay != -1)
+            fprintf(f, " %d", mItems[i].repopDelay);
          fprintf(f, "\n");
       }
       fclose(f);

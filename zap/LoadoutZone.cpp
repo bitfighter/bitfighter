@@ -90,7 +90,7 @@ public:
    }
 
    // More precise boundary for precise collision detection
-   bool getCollisionPoly(Vector<Point> &polyPoints)
+   bool getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints)
    {
       for(S32 i = 0; i < mPolyBounds.size(); i++)
          polyPoints.push_back(mPolyBounds[i]);

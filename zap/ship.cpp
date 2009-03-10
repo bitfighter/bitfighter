@@ -166,6 +166,7 @@ void Ship::processMove(U32 stateIndex)
    move(time, stateIndex, false);
 }
 
+
 extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
 // Returns the zone in question if this ship is in a zone of type zoneType
@@ -191,13 +192,37 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 
       // Get points that define the zone boundaries
       polyPoints.clear();
-      zone->getCollisionPoly(polyPoints);
+      zone->getCollisionPoly(ActualState, polyPoints);
 
-      if ( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
+      if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
          return zone;
    }
    return NULL;
  }
+
+
+// Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.b.)
+bool Ship::isOnObject(GameObject *object)
+{
+
+   Point center;
+   float radius;
+   Vector<Point> polyPoints;
+
+
+   // Ships don't have collisionPolys, so this first check, while technically right, is utterly unneeded, and is hence commented out.
+   //if(getCollisionPoly(polyPoints))
+   //   return object->collisionPolyPointIntersect(polyPoints);
+   //
+   //else 
+          if(getCollisionCircle(MoveObject::ActualState, center, radius))
+      return object->collisionPolyPointIntersect(center, radius);
+   
+   else
+      return false;
+}
+
+
 
  // Returns vector for aiming a weapon based on direction ship is facing
 Point Ship::getAimVector()
@@ -205,10 +230,12 @@ Point Ship::getAimVector()
    return Point(cos(mMoveState[ActualState].angle), sin(mMoveState[ActualState].angle) );
 }
 
+
 void Ship::selectWeapon()
 {
    selectWeapon(mActiveWeaponIndx + 1);
 }
+
 
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;

@@ -32,6 +32,7 @@
 #include "projectile.h"
 #include "speedZone.h"
 #include "soccerGame.h"
+#include "gameItems.h"
 
 #include "config.h"     // Only for testing burst graphics below
 
@@ -1217,6 +1218,28 @@ void renderTestItem(Point pos)
 }
 
 
+void renderAsteroid(Point pos, S32 design, F32 scaleFact)
+{
+   glPushMatrix();
+   glTranslatef(pos.x, pos.y, 0); 
+
+   glColor3f(.7, .7, .7);
+      // Design 1
+      glBegin(GL_LINE_LOOP);
+         for(S32 i = 0; i < AsteroidPoints; i++)
+         {
+            const F32 ang = -FloatHalfPi;
+            F32 x = AsteroidCoords[design][i][0] * scaleFact;
+            F32 y = AsteroidCoords[design][i][1] * scaleFact;
+            glVertex2f( x * cos(ang) + y * sin(ang), x * sin(ang) + y * cos(ang) );
+         }
+      glEnd();
+   glPopMatrix();
+
+   //drawCircle(pos, 86 * scaleFact);
+}
+
+
 void renderResourceItem(Point pos)
 {
    glPushMatrix();
@@ -1232,7 +1255,7 @@ void renderResourceItem(Point pos)
          glVertex2f(0, -20);
          glVertex2f(-8, -8);
          glVertex2f(-20, 0);
-         glEnd();
+      glEnd();
 
    glPopMatrix();
 }

@@ -272,6 +272,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted), (granted
    setIsLevelChanger(granted);
 
    setGotPermissionsReply(true);
+
+   // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
+   if(!waitingForPermissionsReply())
+      return;
+
    if(granted)      
       // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
       if(UserInterface::current->getMenuID() == GameMenuUI)
@@ -617,7 +622,7 @@ void GameConnection::onConnectionEstablished()
       setGhostFrom(true);
       setGhostTo(false);
       activateGhosting();
-      setFixedRateParameters(50, 50, 2000, 2000);
+      setFixedRateParameters(50, 50, 2000, 2000);        // U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth
 
       s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
 

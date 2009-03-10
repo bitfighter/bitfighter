@@ -32,24 +32,30 @@
 // Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name
 // When hosting a game from the UI, game load progress info displayed
 // When loading a level from a local or remote server, progress bar is displayed
-// Retrieve game -> can't pick up enemy flags, so more complex level designs are possible
+// Retrieve game -> can't pick up enemy flags, so more complex level designs are possible.  Actually, maybe not true... maybe this is a lame feature.
 // Fixed scoring message on Hunters levels
 // ZoneControl -> When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter
-// Enhanced flashing effect of zones in ZoneControl game
 // Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
 // Added client IP address to server log
 // Uneeded vertices now removed from walls to improve both appearance and performance
 // Added screen saver supression (Windows only, sorry)
 // Username entry screen now remembers last name used
+// Enhanced flashing effect of zones in ZoneControl game
 // Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
 // Indicator added to player's name when they are in chat, global chat, or options menus
 // Screenshots now saved in .BMP format
-// Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
-// 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
 // Scores displayed in LR corner of main game screen now sorted from high to low
 // Name of current game server now displayed on global chat screen
 // Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.
 // Team chat message entry box colored appropriately
+
+
+// Items
+// Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.
+// 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
+// Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
+// If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)
+
 
 // Specifiying levels
 // ".level" extension now optional when specifying levels with the -levels param
@@ -76,6 +82,7 @@
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones
 // Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
+// Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code
 // Changing other player's team in 3+ team game with 3+ players no longer switches a random player
 
 // Server menu enhancements:

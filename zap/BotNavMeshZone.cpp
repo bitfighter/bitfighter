@@ -162,7 +162,7 @@ void BotNavMeshZone::computeExtent()
 }
 
 // More precise boundary for precise collision detection
-bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
+bool BotNavMeshZone::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);

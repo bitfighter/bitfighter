@@ -269,7 +269,7 @@ GameObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayS
       F32 radius;
       float ct;
 
-      if(fillVector[i]->getCollisionPoly(poly))
+      if(fillVector[i]->getCollisionPoly(stateIndex, poly))
       {
          Point normal;
          if(PolygonLineIntersect(&poly[0], poly.size(), rayStart, rayEnd, ct, normal))

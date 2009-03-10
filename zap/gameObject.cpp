@@ -255,7 +255,9 @@ void GameObject::removeFromDatabase()
 
 void GameObject::addToGame(Game *theGame)
 {
-   TNLAssert(mGame == NULL, "Error, already in a game.");
+   TNLAssert(mGame == NULL, "Error: Object already in a game in GameObject::addToGame.");
+   TNLAssert(theGame != NULL, "Error: theGame is NULL in GameObject::addToGame.");
+
    theGame->addToGameObjectList(this);
    mCreationTime = theGame->getCurrentTime();
    mGame = theGame;
@@ -279,7 +281,7 @@ void GameObject::removeFromGame()
    }
 }
 
-bool GameObject::getCollisionPoly(Vector<Point> &polyPoints)
+bool GameObject::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
    return false;
 }
@@ -315,17 +317,18 @@ Rect GameObject::getBounds(U32 stateIndex)
    float radius;
    Vector<Point> bounds;
 
-   if(getCollisionCircle(stateIndex, p, radius))
-   {
-      ret.max = p + Point(radius, radius);
-      ret.min = p - Point(radius, radius);
-   }
-   else if(getCollisionPoly(bounds))
+   if(getCollisionPoly(stateIndex, bounds))
    {
       ret.min = ret.max = bounds[0];
       for(S32 i = 1; i < bounds.size(); i++)
          ret.unionPoint(bounds[i]);
+   }   
+   else if(getCollisionCircle(stateIndex, p, radius))
+   {
+      ret.max = p + Point(radius, radius);
+      ret.min = p - Point(radius, radius);
    }
+
    return ret;
 }
 
@@ -336,18 +339,67 @@ extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Po
 bool GameObject::collisionPolyPointIntersect(Point point)
 {
    Point center;
-   //float radius;
+   F32 radius;
    Vector<Point> polyPoints;
 
    polyPoints.clear();
 
-   if (getCollisionPoly(polyPoints))
+   if(getCollisionPoly(MoveObject::ActualState, polyPoints))
       return PolygonContains(polyPoints.address(), polyPoints.size(), point);
-   //else if (getCollisionCircle(MoveObject::ActualState, center, radius))
-   //   return (center.distanceTo(point) <= radius);
+   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
+      return(center.distanceTo(point) <= radius);
    else
       return false;
 }
+
+
+extern bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2);
+extern bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, Point::member_type inRadiusSq, Point &outPoint);
+
+
+// Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
+bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
+{
+   Point center;
+   F32 radius;
+   Vector<Point> polyPoints;
+
+   polyPoints.clear();
+
+   if(getCollisionPoly(MoveObject::ActualState, polyPoints))
+      return PolygonsIntersect(polyPoints, points);
+
+   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
+   {
+      Point pt;
+      return PolygonCircleIntersect(&points[0], points.size(), center, radius * radius, pt);
+   }
+   else
+      return false;
+}
+
+
+// Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
+bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
+{
+   Point c;
+   float r;
+   Point pt;
+   Vector<Point> polyPoints;
+
+   polyPoints.clear();
+
+   if(getCollisionPoly(MoveObject::ActualState, polyPoints))
+      return PolygonCircleIntersect(&polyPoints[0], polyPoints.size(), center, radius * radius, pt);
+
+   else if(getCollisionCircle(MoveObject::ActualState, c, r))
+      return ( center.distSquared(c) < (radius + r) * (radius + r) );
+
+   else
+      return false;
+}
+
+
 
 
 void GameObject::render()

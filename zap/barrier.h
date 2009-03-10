@@ -71,7 +71,7 @@ public:
    S32 getRenderSortValue() { return -1; }
 
    /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
 
    /// collide always returns true for Barrier objects.
    bool collide(GameObject *otherObject) { return true; }

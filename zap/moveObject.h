@@ -67,6 +67,8 @@ public:
 
    void updateInterpolation();
    void updateExtent();
+   void setRadius(F32 radius) {   mRadius = radius;   }
+
 
    Point getRenderPos() { return mMoveState[RenderState].pos; }
    Point getActualPos() { return mMoveState[ActualState].pos; }
@@ -89,6 +91,7 @@ public:
       radius = mRadius;
       return true;
    }
+
    F32 getRadius() { return mRadius; }
 };
 

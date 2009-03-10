@@ -24,8 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "moveObject.h"
+#include "gameItems.h"
 #include "SweptEllipsoid.h"
 #include "sparkManager.h"
+#include "ship.h"
 #include "sfx.h"
 
 namespace Zap
@@ -44,7 +46,9 @@ MoveObject::MoveObject(Point pos, float radius, float mass)    // Constructor
    mInterpolating = false;
 }
 
+
 static const float MoveObjectCollisionElasticity = 1.7f;
+
 
 // Update object's extents in the database
 void MoveObject::updateExtent()
@@ -223,7 +227,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
       static Vector<Point> poly;
       poly.clear();
-      if(fillVector[i]->getCollisionPoly(poly))
+      if(fillVector[i]->getCollisionPoly(stateIndex, poly))
       {
          Point cp;
          if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,
@@ -336,8 +340,10 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
    }
 }
 
+
 // Note that shipHit isn't necessarily a ship -- it could be any MoveObject
 // Also stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
+// Seems to run on both client and server side...
 void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *shipHit)
 {
    Point collisionVector = shipHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
@@ -357,6 +363,33 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
    mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
    shipHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
+
+   if(!isGhost())    // i.e., we're on the server
+   {
+      // Check for asteroids hitting a ship
+      Ship *ship = dynamic_cast<Ship *>(shipHit);
+      Asteroid *asteroid = dynamic_cast<Asteroid *>(this);
+ 
+      if(!ship)
+      {
+         // Since asteroids and ships are both MoveObjects, we should also check to see if ship hit an asteroid
+         ship = dynamic_cast<Ship *>(this);
+         asteroid = dynamic_cast<Asteroid *>(shipHit);
+      }
+
+
+      if(ship && asteroid && 0)      // Collided!  Do some damage!  Bring it on!
+      {
+         DamageInfo theInfo;
+         theInfo.collisionPoint = mMoveState[ActualState].pos;
+         theInfo.damageAmount = .35f;
+         theInfo.damageType = DamageTypePoint;
+         theInfo.damagingObject = asteroid;
+         theInfo.impulseVector = mMoveState[ActualState].vel;
+
+         ship->damageObject(&theInfo);
+      }
+   }
 
    if(v1i > 0.25)
       SFXObject::play(SFXBounceObject, shipHit->mMoveState[stateIndex].pos, Point());

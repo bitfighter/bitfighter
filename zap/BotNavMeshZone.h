@@ -75,7 +75,7 @@ public:
    void computeExtent();
 
    // More precise boundary for precise collision detection
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
 
    // Only gets run on the server, never on client
    bool collide(GameObject *hitObject);

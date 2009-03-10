@@ -26,16 +26,19 @@
 #include "item.h"
 #include "ship.h"
 #include "goalZone.h"
+#include "gameType.h"     
 #include "../glut/glutInclude.h"
 
 namespace Zap
 {
 
+// Constructor
 Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
 {
    mIsMounted = false;
    mIsCollideable = collideable;
    mObjectTypeMask = MoveableType | ItemType | CommandMapVisType;
+   mInitial = false;
 }
 
 void Item::processArguments(S32 argc, const char **argv)
@@ -204,7 +207,9 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool interpolate = false;
    bool positionChanged = false;
 
-   if(stream->readFlag())
+   mInitial = stream->readFlag();
+
+   if(mInitial)     // InitialMask
    {
        // Do nothing
    }
@@ -260,6 +265,7 @@ bool Item::collide(GameObject *otherObject)
 PickupItem::PickupItem(Point p, float radius) : Item(p, false, radius, 1)
 {
    mIsVisible = true;
+   mIsMomentarilyVisible = false;
 }
 
 void PickupItem::idle(GameObject::IdleCallPath path)
@@ -270,8 +276,30 @@ void PickupItem::idle(GameObject::IdleCallPath path)
       {
          setMaskBits(PickupMask);
          mIsVisible = true;
+
+         // Check if there is a ship sitting on this item... it so, ship gets the repair!
+         GameType *gt = getGame()->getGameType();
+         if(gt)
+         {
+            for(S32 i = 0; i < gt->mClientList.size(); i++)
+            {
+               Ship *client_ship = dynamic_cast<Ship *>(gt->mClientList[i]->clientConnection->getControlObject());
+
+               if(!client_ship)
+                  continue;
+               if(client_ship->isOnObject(this)) {
+                  S32 i = 1;
+               }
+               if(client_ship->isOnObject(this))
+               {
+                  collide(client_ship);
+                  mIsMomentarilyVisible = true;
+               }
+            }
+         }
       }
    }
+
    updateExtent();
 }
 
@@ -279,7 +307,13 @@ U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
    stream->writeFlag(updateMask & InitialMask);
-   stream->writeFlag(mIsVisible);
+   stream->writeFlag(mIsVisible || mIsMomentarilyVisible);
+
+   if(mIsMomentarilyVisible)
+   {
+      mIsMomentarilyVisible = false;
+      setMaskBits(PickupMask);
+   }
 
    return retMask;
 }

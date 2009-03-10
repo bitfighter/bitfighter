@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="F:\tnl-1.5.0-source\exe\masterd.exe"
 				WorkingDirectory="F:\tnl-1.5.0-source\exe\"
-				CommandArguments=""
+				CommandArguments="-levels crashy2"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

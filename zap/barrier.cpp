@@ -186,9 +186,9 @@ Barrier::Barrier(Vector<Point> points, F32 width, bool solid)
    if(mSolid)
        Triangulate::Process(mPoints, mRenderFillGeometry);
    else
-       getCollisionPoly(mRenderFillGeometry);
+       getCollisionPoly(-1, mRenderFillGeometry);
 
-   getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
+   getCollisionPoly(-1, mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
 }
 
 
@@ -198,7 +198,7 @@ void Barrier::onAddedToGame(Game *theGame)
 }
 
 
-bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
+bool Barrier::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
    if(mPoints.size() == 2)    // It's a regular segment, so apply width
    {
@@ -333,7 +333,7 @@ void Barrier::render(S32 layerIndex)
          for(S32 i = 0; i < fillObjects.size(); i++)
          {
             mRenderOutlineGeometry.clear();
-            if(fillObjects[i] != this && fillObjects[i]->getCollisionPoly(mRenderOutlineGeometry))
+            if(fillObjects[i] != this && fillObjects[i]->getCollisionPoly(-1, mRenderOutlineGeometry))
                clipRenderLinesToPoly(mRenderOutlineGeometry);
          }
       }

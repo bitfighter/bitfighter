@@ -334,7 +334,6 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
             bstream->writeClassId(classId, NetClassTypeObject, getNetClassGroup());
             NetObject::mIsInitialUpdate = true;
          }
-
          // update the object
          retMask = walk->obj->packUpdate(this, updateMask, bstream);
 

@@ -63,6 +63,7 @@ enum GameObjectType
    RobotType          = BIT(19),
    TeleportType       = BIT(20),    
    GoalZoneType       = BIT(21),
+   AsteroidType       = BIT(22),
 
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map
@@ -156,7 +157,7 @@ public:
    /// method one time (when layerIndex == 0).
    virtual void render(S32 layerIndex);
 
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints);
+   virtual bool getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints);
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius);
    Rect getBounds(U32 stateIndex);
 
@@ -205,6 +206,8 @@ public:
    bool isCollisionEnabled() { return mDisableCollisionCount == 0; }
 
    bool collisionPolyPointIntersect(Point point);
+   bool collisionPolyPointIntersect(Vector<Point> points);
+   bool collisionPolyPointIntersect(Point center, F32 radius);
 
 
    virtual void processArguments(S32 argc, const char**argv);

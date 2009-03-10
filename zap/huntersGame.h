@@ -53,7 +53,6 @@ private:
    };
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
    SafePtr<HuntersNexusObject> mNexus;
-
    U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 88; }
 
 public:
@@ -151,7 +150,7 @@ public:
    void render();
    S32 getRenderSortValue() { return -1; }
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
    bool collide(GameObject *hitObject);
 
    U32 packUpdate(GhostConnection *connection, U32 mask, BitStream *stream);

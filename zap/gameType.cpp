@@ -30,6 +30,7 @@
 #include "UINameEntry.h"
 #include "gameNetInterface.h"
 #include "flagItem.h"
+#include "gameItems.h"     // For asteroid def.
 #include "engineeredObjects.h"
 #include "gameObjectRender.h"
 #include "config.h"
@@ -531,6 +532,9 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 void GameType::renderObjectiveArrow(GameObject *target, Color c, F32 alphaMod)
 {
+   if(!target)
+      return;
+
    GameConnection *gc = gClientGame->getConnectionToServer();
    GameObject *co = NULL;
    if(gc)
@@ -741,14 +745,27 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cCanSwitchTeams, (bool allowed), (allowe
 }
 
 
+// Need to bump the priority of the gameType up really high, to ensure it gets ghosted first, before any game-specific objects like nexuses and 
+// other things that need to get registered with the gameType.  This will fix (I hope) the random crash-at-level start issues that have
+// been annoying everyone so much.
+F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
+{
+   return F32_MAX;      // High priority!!
+}
+
+
+
 void GameType::onAddedToGame(Game *theGame)
 {
    theGame->setGameType(this);
 }
 
+
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
 extern S32 gMaxPlayers;
 
+
+// Returns true if we ceated an object here, false otherwise
 bool GameType::processLevelItem(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Team"))
@@ -1225,13 +1242,17 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
    if(!victimOwner)     // Perhaps the victim is dead?!?
       return true;
 
+   // Asteroids do damage
+   if( dynamic_cast<Asteroid *>(damager) )
+      return true;
+
    WeaponType weaponType;
 
-   if( Projectile *proj = dynamic_cast<Projectile*>(damager) )
+   if( Projectile *proj = dynamic_cast<Projectile *>(damager) )
       weaponType = proj->mWeaponType;
    else if( GrenadeProjectile *grenproj = dynamic_cast<GrenadeProjectile*>(damager) )
       weaponType = grenproj->mWeaponType;
-   else if( HeatSeeker *hs = dynamic_cast<HeatSeeker*>(damager) )
+   else if(HeatSeeker *hs = dynamic_cast<HeatSeeker*>(damager) )
       weaponType = hs->mWeaponType;
    else
       return false;

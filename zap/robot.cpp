@@ -792,7 +792,7 @@ void Robot::idle(GameObject::IdleCallPath path)
 {
 
    // Never ClientIdleControlReplay, ClientIdleControlMain, or ServerIdleControlFromClient
-   TNLAssert(path == ServerIdleMainLoop || path == ClientIdleMainRemote , "Unexpected idle call path in Robot::idle!");       // TODO: Delete this line (after robots working)
+   TNLAssert(path == ServerIdleMainLoop || path == ClientIdleMainRemote , "Unexpected idle call path in Robot::idle!");      
 
    // Don't process exploded ships
    if(hasExploded)

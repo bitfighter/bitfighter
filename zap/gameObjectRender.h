@@ -75,6 +75,7 @@ extern void renderRepairItem(Point pos, bool forEditor);
 void renderSpeedZone(Point pos, Point dir, U32 time);
 
 void renderTestItem(Point pos);
+void renderAsteroid(Point pos, S32 design, F32 radius);
 void renderResourceItem(Point pos);
 void renderSoccerBall(Point pos);
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);

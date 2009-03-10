@@ -191,7 +191,8 @@ public:
 
    virtual void processArguments(S32 argc, const char **argv);
 
-   GameObject *isInZone(GameObjectType zoneType);      // Return whether the ship is currently in a zone of the specified type
+   GameObject *isInZone(GameObjectType zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
+   bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on an item
 
    TNL_DECLARE_CLASS(Ship);
 };

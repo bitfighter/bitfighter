@@ -106,7 +106,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
    void render();
    S32 getRenderSortValue() { return -1; }
 
@@ -123,7 +123,7 @@ private:
 public:
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point()) :EngineeredObject(team, anchorPoint, anchorNormal) { mNetFlags.set(Ghostable); }
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
    void onAddedToGame(Game *theGame);
 
    void render();
@@ -153,7 +153,7 @@ public:
 
    Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));
 
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
    void render();
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);

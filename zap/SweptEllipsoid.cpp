@@ -138,11 +138,11 @@ bool pointInTriangle(Point p, Point a, Point b, Point c)
 
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
 // Function returns true when it does and the intersection point is in outPoint
-// Works only for convex hulls
+// Works only for convex hulls.. maybe no longer true... may work for all polys now
 bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, Point::member_type inRadiusSq, Point &outPoint)
 {
-   // Check if the center is inside the polygon
-   if (PolygonContains(inVertices, inNumVertices, inCenter))
+   // Check if the center is inside the polygon  ==> now works for all polys
+   if(PolygonContains2(inVertices, inNumVertices, inCenter))
    {
       outPoint = inCenter;
       return true;
@@ -198,8 +198,8 @@ bool segmentsColinear(Point p1, Point p2, Point p3, Point p4)
    float numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
    float numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
 
-   if (ABS(denom) < smallNumber && ABS(numerator) < smallNumber && ABS(numerator2) < smallNumber)
-    return true;  // Coincident
+   if(ABS(denom) < smallNumber && ABS(numerator) < smallNumber && ABS(numerator2) < smallNumber)
+    return true;    // Coincident
 
    return false;    // Not
 }
@@ -291,11 +291,9 @@ Subject 1.02: How do I find the distance from a point to a line?
 }
 
 
-
 // See if segment p1-p2 overlaps p3-p4
 // Coincident endpoints alone do not count!
 // Pass back the overpping extent in two points
-
 bool segsOverlap(Point p1, Point p2, Point p3, Point p4, Point &overlapStart, Point &overlapEnd)
 {
    Point pInt;
@@ -347,13 +345,13 @@ bool segsOverlap(Point p1, Point p2, Point p3, Point p4, Point &overlapStart, Po
 }
 
 
-
 void Swap(Point::member_type &f1, Point::member_type &f2)
 {
    Point::member_type temp = f1;
    f1 = f2;
    f2 = temp;
 }
+
 
 // Solve the equation inA * x^2 + inB * x + inC == 0 for the lowest x in [0, inUpperBound].
 // Returns true if there is such a solution and returns the solution in outX

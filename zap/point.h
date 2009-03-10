@@ -68,7 +68,10 @@ struct Point
    void normalize(float newLen) { member_type l = len(); if(l == 0) { x = newLen; y = 0; } else { l = newLen / l; x *= l; y *= l; } }
    member_type ATAN2() const { return atan2(y, x); }
    member_type distanceTo(const Point &pt) { return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) ); }
+   member_type distSquared(const Point &pt) { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
+
    member_type angleTo(const Point &pt) { return atan2(pt.y-y, pt.x-x); }
+
    void scaleFloorDiv(float scaleFactor, float divFactor)
    {
       x = (member_type) floor(x * scaleFactor + 0.5) * divFactor;

@@ -38,7 +38,6 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(HuntersGameType);
 
 
-
 TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mNexusReturnTimer.reset(nexusTime);
@@ -94,10 +93,12 @@ HuntersGameType::HuntersGameType() : GameType()
    mNexusCapTimer.reset(0);
 }
 
+
 void HuntersGameType::addNexus(HuntersNexusObject *nexus)
 {
    mNexus = nexus;
 }
+
 
 void HuntersGameType::processArguments(S32 argc, const char **argv)
 {
@@ -233,6 +234,10 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       for(S32 i = 0; i < mClientList.size(); i++)
       {
          Ship *client_ship = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
+         
+         if(!client_ship)
+            continue;
+
          HuntersNexusObject *nexus = dynamic_cast<HuntersNexusObject *>(client_ship->isInZone(NexusType));
          if(nexus)
             shipTouchNexus(client_ship, nexus);
@@ -558,7 +563,8 @@ void HuntersNexusObject::onAddedToGame(Game *theGame)
    if(!isGhost())
       setScopeAlways();    // Always visible!
 
-   ((HuntersGameType *) theGame->getGameType())->addNexus(this);
+
+   dynamic_cast<HuntersGameType *>( getGame()->getGameType() )->addNexus(this);
    getGame()->mObjectsLoaded++;
 }
 
@@ -574,7 +580,7 @@ void HuntersNexusObject::render()
    renderNexus(mPolyBounds, getExtent(), (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
 }
 
-bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)
+bool HuntersNexusObject::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);

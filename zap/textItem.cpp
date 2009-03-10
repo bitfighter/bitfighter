@@ -132,7 +132,7 @@ void TextItem::computeExtent()
    setExtent(extent);
 }
 
-bool TextItem::getCollisionPoly(Vector<Point> &polyPoints)
+bool TextItem::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
    return false;
 }

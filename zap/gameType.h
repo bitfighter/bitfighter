@@ -99,6 +99,8 @@ public:
 
    virtual bool isSpawnWithLoadoutGame() { return false; }                                // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
+   F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
+
    static void printRules();     // Dump game-rule info
 
    enum

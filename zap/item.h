@@ -44,7 +44,8 @@ protected:
       WarpPositionMask = BIT(2),
       MountMask = BIT(3),
       ZoneMask = BIT(4),
-      FirstFreeMask = BIT(5),
+      ItemChangedMask = BIT(5),
+      FirstFreeMask = BIT(6),
    };
 
    SafePtr<Ship> mMount;
@@ -52,6 +53,8 @@ protected:
 
    bool mIsMounted;
    bool mIsCollideable;
+   bool mInitial;       // True on initial unpack, false thereafter
+
 public:
    void idle(GameObject::IdleCallPath path);
 
@@ -86,6 +89,7 @@ class PickupItem : public Item
 private:
    typedef Item Parent;
    bool mIsVisible;
+   bool mIsMomentarilyVisible;      // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
    Timer mRepopTimer;
 
 protected:
