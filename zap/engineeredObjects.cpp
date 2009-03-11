@@ -110,12 +110,14 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mAnchorNormal= anchorNormal;
    mObjectTypeMask = EngineeredType | CommandMapVisType;
    mIsDestroyed = false;
+   mHealRate = 0;
 }
 
 void EngineeredObject::processArguments(S32 argc, const char **argv)
 {
-   if(argc != 3)
+   if(argc < 3)
       return;
+
    Point p;
    mTeam = atoi(argv[0]);
    mOriginalTeam = mTeam;
@@ -123,6 +125,13 @@ void EngineeredObject::processArguments(S32 argc, const char **argv)
       mHealth = 0;
    p.read(argv + 1);
    p *= getGame()->getGridSize();
+
+
+   if(argc >= 4)
+   {
+      mHealRate = atoi(argv[3]);
+      mHealTimer.setPeriod(mHealRate * 1000);
+   }
 
    // Find the mount point:
    F32 minDist = F32_MAX;
@@ -151,14 +160,17 @@ void EngineeredObject::processArguments(S32 argc, const char **argv)
    mAnchorPoint = anchor + normal;
    mAnchorNormal = normal;
    computeExtent();
+
    if(mHealth != 0)
       onEnabled();
 }
+
 
 void EngineeredObject::setOwner(Ship *owner)
 {
    mOwner = owner;
 }
+
 
 void EngineeredObject::setResource(Item *resource)
 {
@@ -167,12 +179,14 @@ void EngineeredObject::setResource(Item *resource)
    mResource->removeFromDatabase();
 }
 
+
 static const F32 disabledLevel = 0.25;
 
 bool EngineeredObject::isEnabled()
 {
    return mHealth >= disabledLevel;
 }
+
 
 void EngineeredObject::damageObject(DamageInfo *di)
 {
@@ -185,6 +199,8 @@ void EngineeredObject::damageObject(DamageInfo *di)
 
    if(mHealth < 0)
       mHealth = 0;
+
+   mHealTimer.reset();     // Restart healing timer...
 
    // No additional damage, nothing more to do (i.e. was already at 0)
    if(prevHealth == mHealth)
@@ -219,7 +235,7 @@ void EngineeredObject::damageObject(DamageInfo *di)
          }
       }
    }
-   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired
+   else if(prevHealth < disabledLevel && mHealth >= disabledLevel)   // Turret was just repaired or healed
    {
       if(mTeam == -1)                                 // Neutral objects...
       {
@@ -244,6 +260,7 @@ void EngineeredObject::damageObject(DamageInfo *di)
    }
 }
 
+
 void EngineeredObject::computeExtent()
 {
    Vector<Point> v;
@@ -253,6 +270,7 @@ void EngineeredObject::computeExtent()
       r.unionPoint(v[i]);
    setExtent(r);
 }
+
 
 void EngineeredObject::explode()
 {
@@ -292,6 +310,7 @@ void EngineeredObject::explode()
 
    disableCollision();
 }
+
 
 bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2)
 {
@@ -338,6 +357,7 @@ bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2)
    }
    return false;
 }
+
 
 bool EngineeredObject::checkDeploymentPosition()
 {
@@ -401,6 +421,27 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
    }
 }
 
+void EngineeredObject::healObject(S32 time)
+{
+   if(mHealRate == 0 || mTeam == -1)      // Neutral items don't heal!
+      return;
+
+   F32 prevHealth = mHealth;
+   if(mHealTimer.update(time))
+   {
+      mHealth += .1;
+      setMaskBits(HealthMask);
+
+      if(mHealth >= 1)
+         mHealth = 1;
+      else
+         mHealTimer.reset();
+
+      if(prevHealth < disabledLevel && mHealth >= disabledLevel)
+         onEnabled();
+   }
+}
+
 
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
@@ -409,6 +450,16 @@ void ForceFieldProjector::onDisabled()
    if(mField.isValid())
       mField->deleteObject(0);
 }
+
+
+void ForceFieldProjector::idle(GameObject::IdleCallPath path)
+{
+   if(path != ServerIdleMainLoop)
+      return;
+
+   healObject(mCurrentMove.time);
+}
+
 
 void ForceFieldProjector::onEnabled()
 {
@@ -485,21 +536,21 @@ bool ForceField::collide(GameObject *hitObject)
 
 void ForceField::idle(GameObject::IdleCallPath path)
 {
-   if(path == ServerIdleMainLoop)
+   if(path != ServerIdleMainLoop)
+      return;
+
+   if(mDownTimer.update(mCurrentMove.time))
    {
-      if(mDownTimer.update(mCurrentMove.time))
+      // do an LOS test to see if anything is in the field:
+      F32 t;
+      Point n;
+      if(!findObjectLOS(ShipType | ItemType, MoveObject::ActualState, mStart, mEnd, t, n))
       {
-         // do an LOS test to see if anything is in the field:
-         F32 t;
-         Point n;
-         if(!findObjectLOS(ShipType | ItemType, MoveObject::ActualState, mStart, mEnd, t, n))
-         {
-            mFieldUp = true;
-            setMaskBits(StatusMask);
-         }
-         else
-            mDownTimer.reset(10);
+         mFieldUp = true;
+         setMaskBits(StatusMask);
       }
+      else
+         mDownTimer.reset(10);
    }
 }
 
@@ -611,12 +662,19 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
       stream->read(&mCurrentAngle);
 }
 
+
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 // Choose target, aim, and, if possible, fire
 void Turret::idle(IdleCallPath path)
 {
-   if(path != ServerIdleMainLoop || !isEnabled())
+
+   if(path != ServerIdleMainLoop)
+      return;
+
+   healObject(mCurrentMove.time);
+
+   if(!isEnabled())
       return;
 
    mFireTimer.update(mCurrentMove.time);

@@ -50,6 +50,9 @@ protected:
    bool mIsDestroyed;
    S32 mOriginalTeam;
 
+   S32 mHealRate;       // Rate at which items will heal themselves, defaults to 0
+   Timer mHealTimer;    // Timer for tracking mHealRate
+
    enum MaskBits
    {
       InitialMask = BIT(0),
@@ -60,6 +63,8 @@ protected:
 
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
+   void processArguments(S32 argc, const char **argv);
+
    void setResource(Item *resource);
    bool checkDeploymentPosition();
    void computeExtent();
@@ -68,8 +73,6 @@ public:
    virtual void onEnabled() { }   // do nothing
    virtual bool isTurret() { return false; }
    bool isEnabled();
-
-   void processArguments(S32 argc, const char **argv);
 
    void explode();
    bool isDestroyed() { return mIsDestroyed; }
@@ -81,6 +84,7 @@ public:
    void damageObject(DamageInfo *damageInfo);
    bool collide(GameObject *hitObject) { return true; }
    F32 getHealth() { return mHealth; }
+   void healObject(S32 time);
 };
 
 class ForceField : public GameObject
@@ -125,6 +129,7 @@ public:
 
    bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
    void onAddedToGame(Game *theGame);
+   void idle(GameObject::IdleCallPath path);
 
    void render();
    void onEnabled();

@@ -52,9 +52,11 @@
 
 // Items
 // Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.
+// Turrets and Forcefields can now repair themselves, if you specify an additional argument on their definition line (secs / 10% repair... i.e. entering 1, item will fully repair in 10 seconds).  Again, cannot change value in editor, but will survive load/save cycle.
 // 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
 // Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
 // If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)
+// Asteroids... you figure it out!
 
 
 // Specifiying levels

@@ -407,7 +407,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
             i.vertSelected.push_back(false);
       }
       else        // Anything but a textItem or old-school NexusObject
-         for(;arg < argc; arg += 2) // (no first part of for)
+         for(;arg < argc; arg += 2) // (no first arg)
          {
             // Put a cap on the number of vertices in a polygon
             if(gGameItemRecs[index].geom == geomPoly && i.verts.size() >= gMaxPolygonPoints)
@@ -421,8 +421,12 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
             }
          }
 
-         if(index == ItemRepair && argc == 4)
+         // Repair, Turrets, Forcefields all have optional additional argument dealing with repair or repopulation
+         if( (index == ItemRepair) && argc == 4)
             i.repopDelay = atoi(argv[3]);
+
+         if( (index == ItemTurret || index == ItemForceField) && argc == 5)
+            i.repopDelay = atoi(argv[4]);
 
       mItems.push_back(i);    // Save item
    }

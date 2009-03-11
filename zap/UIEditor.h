@@ -112,7 +112,7 @@ public:
       Vector<bool> vertSelected;
       string text;         // For items that have an aux text field
       U32 textSize;        // For items that have an aux text field
-      S32 repopDelay;      // For repair items only, but could be extended...
+      S32 repopDelay;      // For repair items, also used for engineered objects heal rate
 
       WorldItem()    // Constructor
       {
