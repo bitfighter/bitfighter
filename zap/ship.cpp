@@ -761,7 +761,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(isInitialUpdate())
    {
       wasInitialUpdate = true;
-      playSpawnEffect = stream->readFlag();
+      playSpawnEffect = stream->readFlag();          // Makes ship all spinny
 
       stream->readStringTableEntry(&mPlayerName);
       stream->read(&mass);
