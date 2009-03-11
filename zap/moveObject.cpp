@@ -378,11 +378,11 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       }
 
 
-      if(ship && asteroid && 0)      // Collided!  Do some damage!  Bring it on!
+      if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
       {
          DamageInfo theInfo;
          theInfo.collisionPoint = mMoveState[ActualState].pos;
-         theInfo.damageAmount = .35f;
+         theInfo.damageAmount = 1.0f;     // Kill ship
          theInfo.damageType = DamageTypePoint;
          theInfo.damagingObject = asteroid;
          theInfo.impulseVector = mMoveState[ActualState].vel;

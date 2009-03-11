@@ -1228,10 +1228,9 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact)
       glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < AsteroidPoints; i++)
          {
-            const F32 ang = -FloatHalfPi;
             F32 x = AsteroidCoords[design][i][0] * scaleFact;
             F32 y = AsteroidCoords[design][i][1] * scaleFact;
-            glVertex2f( x * cos(ang) + y * sin(ang), x * sin(ang) + y * cos(ang) );
+            glVertex2f(x, y);
          }
       glEnd();
    glPopMatrix();

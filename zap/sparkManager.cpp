@@ -245,14 +245,20 @@ void emitExplosion(Point pos, F32 size, Color *colorArray, U32 numColors)
    }
 }
 
+
 void emitBurst(Point pos, Point scale, Color color1, Color color2)
+{
+   emitBurst(pos, scale, color1, color2, 250);
+}
+
+void emitBurst(Point pos, Point scale, Color color1, Color color2, U32 count)
 {
    F32 size = 1;
 
-   for(U32 i = 0; i < (250.0 * size); i++)
+   for(U32 i = 0; i < ((F32) count * size); i++)
    {
 
-      F32 th = TNL::Random::readF() * 2 * 3.14;
+      F32 th = TNL::Random::readF() * 2 * FloatPi;
       F32 f = (TNL::Random::readF() * 0.1 + 0.9) * 200 * size;
       F32 t = TNL::Random::readF();
 

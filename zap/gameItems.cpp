@@ -103,6 +103,17 @@ Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
    mSizeIndex = 0;     // Higher = smaller
    hasExploded = false;
    mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);
+
+   // Give the asteroids some intial motion in a random direction
+   F32 ang = TNL::Random::readF() * Float2Pi;
+   F32 vel = 50;
+
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].vel.x = vel * cos(ang);
+      mMoveState[i].vel.y = vel * sin(ang);
+   }
+
 }
 
 
@@ -153,18 +164,21 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.5;
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
    newItem->setRadius(AsteroidRadius * mRenderSize[mSizeIndex]);
+   F32 ang = 0;
+   while(abs(ang) < .5)
+      ang = TNL::Random::readF() * FloatPi - FloatHalfPi;
 
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       newItem->mMoveState[i].pos = mMoveState[i].pos;
-      newItem->mMoveState[i].angle = mMoveState[i].angle + FloatHalfPi;
-      newItem->mMoveState[i].vel.x = mMoveState[i].vel.x * TNL::Random::readF();
-      newItem->mMoveState[i].vel.y = mMoveState[i].vel.y * TNL::Random::readF();
-      newItem->mMoveState[i].vel.normalize(mMoveState[i].vel.len());
+      newItem->mMoveState[i].angle = mMoveState[i].angle;
+      newItem->mMoveState[i].vel.x = mMoveState[i].vel.len() * cos(ang);
+      newItem->mMoveState[i].vel.y = mMoveState[i].vel.len() * sin(ang);
+      newItem->mMoveState[i].vel.normalize(mMoveState[i].vel.len());     
    }
 
    newItem->mSizeIndex = mSizeIndex;
@@ -196,7 +210,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);     // No need to sync between client and server or between clients
 
       if(!mInitial)
-         SFXObject::play(SFXShipExplode, mMoveState[ActualState].pos, Point());
+         SFXObject::play(SFXShipExplode, mMoveState[RenderState].pos, Point());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -205,7 +219,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       hasExploded = true;
       disableCollision();
-      emitAsteroidExplosion(mMoveState[ActualState].pos);
+      emitAsteroidExplosion(mMoveState[RenderState].pos);
    }
 }
 
@@ -215,7 +229,7 @@ bool Asteroid::collide(GameObject *otherObject)
    // Asteroids don't collide with one another!
    if(dynamic_cast<Asteroid *>(otherObject))
       return false;
-
+   // else
    return true;
 }
 
@@ -223,16 +237,7 @@ bool Asteroid::collide(GameObject *otherObject)
 void Asteroid::emitAsteroidExplosion(Point pos)
 {
    SFXObject::play(SFXShipExplode, pos, Point());
-
-   //F32 a = TNL::Random::readF() * 0.4 + 0.5;
-   //F32 b = TNL::Random::readF() * 0.2 + 0.9;
-
-   //F32 c = TNL::Random::readF() * 0.15 + 0.125;
-   //F32 d = TNL::Random::readF() * 0.2 + 0.9;
-
-   //FXManager::emitExplosion(mMoveState[ActualState].pos, 0.9, ShipExplosionColors, NumShipExplosionColors);
-   FXManager::emitBurst(pos, Point(.5, .5), Color(1,1,1), Color(1,1, 1));
-   //FXManager::emitBurst(pos, Point(b,d), Color(1,1,0), Color(0,0.75,0));
+   // FXManager::emitBurst(pos, Point(.1, .1), Color(1,1,1), Color(1,1,1), 10);
 }
 
 
