@@ -42,6 +42,7 @@ SpeedZone::SpeedZone()
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask = CommandMapVisType;
+   mSpeed = defaultSpeed;
 }
 
 
@@ -88,7 +89,7 @@ S32 SpeedZone::getRenderSortValue()
 // Create objects from parameters stored in level file
 void SpeedZone::processArguments(S32 argc, const char **argv)
 {
-   if(argc != 4)
+   if(argc <= 4)
       return;
 
    pos.read(argv);
@@ -97,7 +98,6 @@ void SpeedZone::processArguments(S32 argc, const char **argv)
    dir.read(argv + 2);
    dir *= getGame()->getGridSize();
 
-   speed = dir.len();
 
    // Adjust the direction point so that it also represents the tip of the triangle
    Point offset(dir - pos);
@@ -105,6 +105,9 @@ void SpeedZone::processArguments(S32 argc, const char **argv)
    dir = Point(pos + offset * height);
 
    preparePoints();
+
+   if(argc == 5)
+      mSpeed = max(minSpeed, min(maxSpeed, atoi(argv[4])));
 }
 
 
@@ -147,8 +150,8 @@ bool SpeedZone::collide(GameObject *hitObject)
             return false;
 
       Point impulse = (dir - pos);
-      //impulse.normalize(speed); 
-      impulse.normalize(impulseSpeed); 
+      impulse.normalize(mSpeed); 
+      //impulse.normalize(impulseSpeed); 
       s->setActualVel(Point(0,0));
       s->setActualPos(pos);
       s->mImpulseVector = impulse * 1.5;
@@ -183,6 +186,8 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
    stream->write(dir.x);
    stream->write(dir.y);
 
+   stream->writeInt(mSpeed, 16);
+
    return 0;
 }
 
@@ -193,6 +198,8 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    stream->read(&dir.x);
    stream->read(&dir.y);
+
+   mSpeed = stream->readInt(16);
 
    preparePoints();
 }

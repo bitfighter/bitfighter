@@ -58,12 +58,14 @@ public:
    enum {
       halfWidth = 25,
       height = 64,
-      impulseSpeed = 3200,
+      defaultSpeed = 3200,
+      minSpeed = 1000,
+      maxSpeed = 5000,
    };
 
    Point pos;
    Point dir;
-   F32 speed;     // Speed at which ship is propelled
+   U16 mSpeed;    // Speed at which ship is propelled
    
    SpeedZone();   // Constructor
    static Vector<Point> generatePoints(Point pos, Point dir);

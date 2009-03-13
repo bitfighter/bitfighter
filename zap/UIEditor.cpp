@@ -452,6 +452,10 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
          if( (index == ItemTurret || index == ItemForceField) && argc == 5)
             i.repopDelay = atoi(argv[4]);
 
+         // SpeedZones have optional extra argument
+         if( (index == ItemSpeedZone) && argc == 6)
+            i.speed = atoi(argv[5]);
+
       mItems.push_back(i);    // Save item
    }
 
@@ -3001,17 +3005,21 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       for(S32 i = 0; i < mItems.size(); i++)
       {
          WorldItem &p = mItems[i];
-         fprintf(f, "%s ", gGameItemRecs[mItems[i].index].name);
+         fprintf(f, "%s", gGameItemRecs[mItems[i].index].name);
+
          if(gGameItemRecs[mItems[i].index].hasWidth)
-            fprintf(f, "%g ", mItems[i].width);
+            fprintf(f, " %g", mItems[i].width);
          if(gGameItemRecs[mItems[i].index].hasTeam)
-            fprintf(f, "%d ", mItems[i].team);
+            fprintf(f, " %d", mItems[i].team);
          for(S32 j = 0; j < p.verts.size(); j++)
-            fprintf(f, "%g %g%s", p.verts[j].x, p.verts[j].y, (j == p.verts.size() - 1) ? "" : " ");
+            fprintf(f, " %g %g", p.verts[j].x, p.verts[j].y);
          if(gGameItemRecs[mItems[i].index].hasText)
-            fprintf(f, "%d %s", mItems[i].textSize, mItems[i].text.c_str());
+            fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
          if(mItems[i].repopDelay != -1)
             fprintf(f, " %d", mItems[i].repopDelay);
+         if(mItems[i].speed != -1)     // Speedzones only!
+            fprintf(f, " %d", mItems[i].speed);
+
          fprintf(f, "\n");
       }
       fclose(f);
