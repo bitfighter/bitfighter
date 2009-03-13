@@ -48,6 +48,8 @@ public:
       mFlagTeam = -1;
    }
 
+   bool isFlagGame() { return true; }
+
    void onGhostAvailable(GhostConnection *theConnection)
    {
       Parent::onGhostAvailable(theConnection);
@@ -74,7 +76,7 @@ public:
 
    void renderInterfaceOverlay(bool scoreboardVisible);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
-   void majorScoringEventOcurred();    // Gets run when a touchdown is scored
+   void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
@@ -187,7 +189,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    Vector<StringTableEntry> e;
    e.push_back(mTeams[s->getTeam()].name);
    for(S32 i = 0; i < mClientList.size(); i++)
-      mClientList[i]->clientConnection->s2cTouchdownScored(tdString, e);
+      mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);     
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
@@ -271,8 +273,9 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
    }
 }
 
+
 // A major scoring event has ocurred -- in this case, it's a touchdown
-void ZoneControlGameType::majorScoringEventOcurred()
+void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
    Vector<GameObject *> fillVector;
 
@@ -290,6 +293,7 @@ void ZoneControlGameType::majorScoringEventOcurred()
    // ...then activate the glowing zone effect
    gClientGame->getGameType()->mZoneGlowTimer.reset();
 }
+
 
 // What does a particular scoring event score?
 S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)

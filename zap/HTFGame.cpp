@@ -39,12 +39,15 @@ class HTFGameType : public GameType
    static StringTableEntry theString;
 
    Vector<GoalZone *> mZones;
-   Vector<SafePtr<FlagItem> > mFlags;
+
    enum {
       ScoreTime = 5000,    // Time flag is in your zone to get points for your team
    };
 public:
    HTFGameType() { /* nothing here */ }    // Constructor, such as it is
+   
+   bool isFlagGame() { return true; }
+
 
    void addFlag(FlagItem *theFlag)
    {

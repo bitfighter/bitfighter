@@ -38,12 +38,15 @@ extern S32 gMaxPolygonPoints;
 
 class LoadoutZone : public GameObject
 {
+private:
    typedef GameObject Parent;
    Vector<Point> mPolyBounds;    // Outline of loadout zone polygon
    Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
 
-public:
+   Point mCentroid;
+   F32 mLabelAngle;
 
+public:
    // Constructor
    LoadoutZone()
    {
@@ -54,7 +57,7 @@ public:
 
    void render()
    {
-      renderLoadoutZone(getGame()->getGameType()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, getExtent());
+      renderLoadoutZone(getGame()->getGameType()->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle);
    }
 
    S32 getRenderSortValue()
@@ -134,6 +137,8 @@ public:
       {
          computeExtent();
          Triangulate::Process(mPolyBounds, mPolyFill);
+         mCentroid = centroid(mPolyBounds);
+         mLabelAngle = angleOfLongestSide(mPolyBounds);
       }
    }
 

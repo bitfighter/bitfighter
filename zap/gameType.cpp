@@ -88,6 +88,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mLocalClient = NULL;       // Will be assigned by the server after a connection is made
    //mUsingFlagSpawnPoints = false;      // Need to have at least one flagSpawnPoint to activate random flag spawning
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
+   mGlowingZoneTeam = -1;     // By default, all zones glow
 }
 
 
@@ -805,7 +806,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
 
       //mUsingFlagSpawnPoints = true;
 
-      if(teamIndex >= 0 && teamIndex < mTeams.size())    // Ignore if team is invalid
+      if( isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // Ignore if team is invalid
          mTeams[teamIndex].flagSpawnPoints.push_back(p);
       else if(teamIndex < 0)
          mFlagSpawnPoints.push_back(p);

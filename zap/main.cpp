@@ -41,13 +41,15 @@
 // Added screen saver supression (Windows only, sorry)
 // Username entry screen now remembers last name used
 // Enhanced flashing effect of zones in ZoneControl game
-// Added yellow flash to ZoneControl zones when touchdown is scored (like Nexus effect in Hunters game)
+// Added yellow flash to ZoneControl and Retrieve zones when touchdown is scored (like Nexus effect in Hunters game)
 // Indicator added to player's name when they are in chat, global chat, or options menus
 // Screenshots now saved in .BMP format
 // Scores displayed in LR corner of main game screen now sorted from high to low
 // Name of current game server now displayed on global chat screen
 // Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.
+// Changed Hunters game name to Nexus, a very controversial name change.  Nothing like instigating a nice ol' flamewar!!!
 // Team chat message entry box colored appropriately
+// Objective arrows now rendered correctly for levels with multiple Nexuses (Nexii??)
 
 
 // Items
@@ -75,17 +77,19 @@
 // Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
 // Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
 // Added scoring events when flag is removed from enemy zone in Retrieve and HTF games
-// HTF now requires flags actually be held 5 seconds before scoring occurs
+// HTF now requires flags actually be held full 5 seconds before scoring occurs
 
 // Editor:
 // Moved turrent/spybug ranges display onto Tab-down display
 // When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible
+// Added more editor checks (flags in non-flag games, team flags in non-team-flag games)
 
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones
 // Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
 // Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code
 // Changing other player's team in 3+ team game with 3+ players no longer switches a random player
+// Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points
 
 // Server menu enhancements:
 // Fixed minor rendering issue on servers menu

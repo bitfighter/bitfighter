@@ -466,7 +466,7 @@ bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, con
 
 static const float EPSILON=0.0000000001f;
 
-float Triangulate::Area(const Vector<Point> &contour)
+F32 area(const Vector<Point> contour)
 {
 
   int n = contour.size();
@@ -507,6 +507,7 @@ bool Triangulate::InsideTriangle(float Ax, float Ay,
   return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
 };
 
+
 bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V)
 {
   int p;
@@ -545,7 +546,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
   /* we want a counter-clockwise polygon in V */
 
-  if ( 0.0f < Area(contour) )
+  if ( 0.0f < area(contour) )
     for (int v=0; v<n; v++) V[v] = v;
   else
     for(int v=0; v<n; v++) V[v] = (n-1)-v;
@@ -594,6 +595,61 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
   delete V;
 
   return true;
+}
+
+
+// Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
+Point centroid(Vector<Point> polyPoints)
+{
+   F32 area6 = area(polyPoints) * 6;
+   F32 x = 0;
+   F32 y = 0;
+
+   for(S32 i = 0; i < polyPoints.size(); i++)
+   {
+      Point p1 = polyPoints[i];
+      Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
+
+      F32 z = (p1.x * p2.y - p2.x * p1.y);
+
+      x += (p1.x + p2.x) * z;
+      y += (p1.y + p2.y) * z;
+   }
+
+   x /= area6;
+   y /= area6;
+
+   return Point(x,y);
+}
+
+
+// Find longest edge, so we can align text with it...
+F32 angleOfLongestSide(Vector<Point> polyPoints)
+{
+   Point start;
+   Point end;
+   F32 maxlen = -1;
+
+   for(S32 i = 0; i < polyPoints.size(); i++)
+   {
+      Point p1 = polyPoints[i];
+      Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
+      F32 l = p1.distSquared(p2);
+
+      if(l > maxlen) 
+      {
+         start = p1;
+         end = p2;
+         maxlen = l;
+      }
+   }
+
+   F32 ang = start.angleTo(end);
+
+   // Make sure text is right-side-up
+   if(ang < -FloatHalfPi || ang > FloatHalfPi)
+      ang += FloatPi;
+   return ang;
 }
 
 

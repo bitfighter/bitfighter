@@ -34,9 +34,9 @@ namespace Zap
 
 class RetrieveGameType : public GameType
 {
+private:
    typedef GameType Parent;
    Vector<GoalZone *> mZones;
-   Vector<SafePtr<FlagItem> > mFlags;
 
 public:
    void addFlag(FlagItem *theFlag)
@@ -61,6 +61,8 @@ public:
    {
       mZones.push_back(zone);
    }
+
+   bool isFlagGame() { return true; }
 
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this will be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag)
@@ -197,8 +199,9 @@ public:
          {
             static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
             e[0] = mTeams[cl->teamId].name;
+
             for(S32 i = 0; i < mClientList.size(); i++)
-               mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capAllString, e);
+               mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
          }
 
          // Return all the flags to their starting locations
@@ -209,6 +212,15 @@ public:
          }
       }
    }
+
+
+   // A major scoring event has ocurred -- in this case, it's all flags being collected by one team
+   void majorScoringEventOcurred(S32 team)
+   {
+      gClientGame->getGameType()->mZoneGlowTimer.reset();
+      mGlowingZoneTeam = team;
+   }
+
 
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
    {

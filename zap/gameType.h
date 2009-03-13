@@ -83,7 +83,7 @@ class GameType : public GameObject
 private:
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
-   //bool mUsingFlagSpawnPoints;   // Controls how flags return to starting locations.  False = traditional method, each flag in its place, True = flags spawn at random point
+   
 
 public:
    static const S32 gMaxTeams = 9;                                   // Max teams allowed
@@ -97,11 +97,16 @@ public:
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
 
+   virtual bool isFlagGame() { return false; }              // Does game use flags?
+   virtual bool isTeamFlagGame() { return false; }          // Does flag-team orientation matter?  Only true in CTF, really.
+
    virtual bool isSpawnWithLoadoutGame() { return false; }                                // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   static void printRules();     // Dump game-rule info
+   Vector<SafePtr<FlagItem>> mFlags;     // List of flags for those games that keep lists of flags (retireve, HTF, CTF)
+
+   static void printRules();             // Dump game-rule info
 
    enum
    {
@@ -279,12 +284,12 @@ public:
    S32 getTeam(const char *playerName);         // Given a player, return their team
 
    // game type flag methods for CTF, Rabbit, Football
-   virtual void addFlag(FlagItem *theFlag) {}
-   virtual void flagDropped(Ship *theShip, FlagItem *theFlag) {}
-   virtual void shipTouchFlag(Ship *theShip, FlagItem *theFlag) {}
+   virtual void addFlag(FlagItem *theFlag) {  /* do nothing */  }
+   virtual void flagDropped(Ship *theShip, FlagItem *theFlag) {  /* do nothing */  }
+   virtual void shipTouchFlag(Ship *theShip, FlagItem *theFlag) {  /* do nothing */  }
 
-   virtual void addZone(GoalZone *theZone) {}
-   virtual void shipTouchZone(Ship *theShip, GoalZone *theZone) {}
+   virtual void addZone(GoalZone *theZone) {  /* do nothing */  }
+   virtual void shipTouchZone(Ship *theShip, GoalZone *theZone) {  /* do nothing */  }
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
@@ -351,8 +356,9 @@ public:
       mZoneGlowTime = 800,    // Time for visual effect, used by Nexus & GoalZone
    };
    Timer mZoneGlowTimer;
+   S32 mGlowingZoneTeam;      // Which team's zones are glowing, -1 for all
 
-   virtual void majorScoringEventOcurred() { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control game (football.cpp)
+   virtual void majorScoringEventOcurred(S32 team) { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \

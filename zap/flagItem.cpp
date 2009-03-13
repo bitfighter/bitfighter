@@ -59,7 +59,7 @@ void FlagItem::processArguments(S32 argc, const char **argv)
    initialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
-   if(mTeam < 0)
+   if(!gServerGame->getGameType()->isTeamFlagGame() || mTeam < 0)
       gServerGame->getGameType()->mFlagSpawnPoints.push_back(initialPos);
    else
       gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(initialPos);
@@ -88,16 +88,47 @@ void FlagItem::sendHome()
 {
    // Now that we have flag spawn points, we'll simply redefine "initial pos" as a random selection of the flag spawn points
    // Everything else should remain as it was
-   if(mTeam < 0)
+
+   // First, make list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
+
+   Vector<Point> spawnPoints;
+   GameType *gt = getGame()->getGameType();
+
+   if(!gt->isTeamFlagGame() || mTeam < 0)     // Neutral or hostile flag
+      spawnPoints = gt->mFlagSpawnPoints;
+   else              // Team flag
+      spawnPoints = gt->mTeams[mTeam].flagSpawnPoints;
+
+   // Now remove the occupied spots from our list of potential spawns
+   for(S32 i = 0; i < gt->mFlags.size(); i++)
    {
-      S32 spawnIndex = TNL::Random::readI() % getGame()->getGameType()->mFlagSpawnPoints.size();
-      initialPos = getGame()->getGameType()->mFlagSpawnPoints[spawnIndex];
+      FlagItem *flag = gt->mFlags[i];
+      if(flag->isAtHome() && (flag->mTeam < 0 || flag->mTeam == mTeam))
+      {
+         // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
+         for(S32 j = 0; j < spawnPoints.size(); j++)
+            if(spawnPoints[j] == flag->initialPos)
+            {
+               spawnPoints.erase(j);
+               break;
+            }
+      }
    }
-   else
-   {
-      S32 spawnIndex = TNL::Random::readI() % getGame()->getGameType()->mTeams[mTeam].flagSpawnPoints.size();
-      initialPos = getGame()->getGameType()->mTeams[mTeam].flagSpawnPoints[spawnIndex];
-   }
+
+   S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
+   initialPos = spawnPoints[spawnIndex];
+
+
+   //if(mTeam < 0)     // Neutral or hostile flag
+   //{
+   //   S32 spawnIndex = TNL::Random::readI() % getGame()->getGameType()->mFlagSpawnPoints.size();
+   //   initialPos = getGame()->getGameType()->mFlagSpawnPoints[spawnIndex];
+   //}
+   //else              // Team flag
+   //{
+   //   S32 spawnIndex = TNL::Random::readI() % getGame()->getGameType()->mTeams[mTeam].flagSpawnPoints.size();
+   //   initialPos = getGame()->getGameType()->mTeams[mTeam].flagSpawnPoints[spawnIndex];
+   //}
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
    mMoveState[ActualState].vel = Point(0,0);

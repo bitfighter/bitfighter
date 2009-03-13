@@ -72,6 +72,10 @@ bool segmentsColinear(Point p1, Point p2, Point p3, Point p4);
 bool segsOverlap(Point p1, Point p2, Point p3, Point p4, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(Point c, Point a, Point b);
 
+Point centroid(Vector<Point> polyPoints);
+F32 area(const Vector<Point> polyPoints);
+F32 angleOfLongestSide(Vector<Point> polyPoints);
+
 
 // Note that inlined functions seem to need to be defined in the header file, not just declared
 inline std::string trim_right(const std::string &source, const std::string &t = " ")
@@ -116,8 +120,6 @@ public:
   // as series of triangles.
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
-  // compute area of a contour/polygon
-  static float Area(const Vector<Point> &contour);
 
   // decide if point Px/Py is inside triangle defined by
   // (Ax,Ay) (Bx,By) (Cx,Cy)
@@ -130,7 +132,6 @@ private:
   static bool Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V);
 
 };
-
 
 
 };

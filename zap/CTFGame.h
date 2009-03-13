@@ -40,9 +40,8 @@ class CTFGameType : public GameType
 private:
    typedef GameType Parent;
 
-   Vector<SafePtr<FlagItem> > mFlags;
-
 public:
+   bool isFlagGame() { return true; }
    void addFlag(FlagItem *theFlag);
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
    void flagDropped(Ship *theShip, FlagItem *theFlag);
@@ -53,6 +52,7 @@ public:
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return false; }
+   bool isTeamFlagGame() { return true; }    // Teams matter with our flags in this game
 
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);

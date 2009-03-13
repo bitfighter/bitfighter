@@ -30,6 +30,8 @@
 #include "gameNetInterface.h"
 #include "ship.h"
 #include "gameObjectRender.h"
+#include "SweptEllipsoid.h"      // For centroid calculation for labeling
+
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -96,7 +98,7 @@ HuntersGameType::HuntersGameType() : GameType()
 
 void HuntersGameType::addNexus(HuntersNexusObject *nexus)
 {
-   mNexus = nexus;
+   mNexus.push_back(nexus);
 }
 
 
@@ -324,7 +326,8 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, Color(1,1,1));
-   renderObjectiveArrow(mNexus, mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);
+   for(S32 i = 0; i < mNexus.size(); i++)
+      renderObjectiveArrow(mNexus[i], mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);
 }
 
 #undef NEXUS_STR
@@ -356,6 +359,7 @@ void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, Ga
    }
 }
 
+
 // Special spawn function for Hunters games (runs only on server)
 void HuntersGameType::spawnShip(GameConnection *theClient)
 {
@@ -368,6 +372,7 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
 }
 
 TNL_IMPLEMENT_NETOBJECT(HuntersFlagItem);
+
 
 HuntersFlagItem::HuntersFlagItem(Point pos) : Item(pos, true, 30, 4)
 {
@@ -547,7 +552,6 @@ void HuntersNexusObject::processArguments(S32 argc, const char **argv)
       processPolyBounds(argc, argv, 0, mPolyBounds);
 
    computeExtent();
-
 }
 
 void HuntersNexusObject::computeExtent()
@@ -563,7 +567,6 @@ void HuntersNexusObject::onAddedToGame(Game *theGame)
    if(!isGhost())
       setScopeAlways();    // Always visible!
 
-
    dynamic_cast<HuntersGameType *>( getGame()->getGameType() )->addNexus(this);
    getGame()->mObjectsLoaded++;
 }
@@ -577,7 +580,7 @@ void HuntersNexusObject::idle(GameObject::IdleCallPath path)
 void HuntersNexusObject::render()
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(getGame()->getGameType());
-   renderNexus(mPolyBounds, getExtent(), (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
+   renderNexus(mPolyBounds, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
 }
 
 bool HuntersNexusObject::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
@@ -632,7 +635,11 @@ void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *st
       mPolyBounds.push_back(p);
    }
    if(size)
+   {
       computeExtent();
+      mCentroid = centroid(mPolyBounds);
+      mLabelAngle = angleOfLongestSide(mPolyBounds);
+   }
 }
 
 

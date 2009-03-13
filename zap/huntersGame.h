@@ -52,13 +52,18 @@ private:
       Point pos;
    };
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
-   SafePtr<HuntersNexusObject> mNexus;
+   Vector<SafePtr<HuntersNexusObject>> mNexus;
    U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 88; }
 
 public:
    bool mNexusIsOpen;      // Is the nexus open?
 
    HuntersGameType();
+   
+   bool isTeamGame() { return mTeams.size() > 1; }
+   bool isFlagGame() { return false; }
+   bool isSpawnWithLoadoutGame() { return true; }
+
    void processArguments(S32 argc, const char **argv);
    Vector<GameType::ParameterDescription> describeArguments();
 
@@ -70,13 +75,11 @@ public:
 
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
    void spawnShip(GameConnection *theClient);
-   const char *getGameTypeString() { return "Hunters"; }
+   const char *getGameTypeString() { return "Nexus"; }
    const char *getInstructionString() { return "Collect flags from opposing players and bring them to the Nexus!"; }
-   bool isTeamGame() { return mTeams.size() > 1; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 
-   bool isSpawnWithLoadoutGame() { return true; }
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 
@@ -138,6 +141,10 @@ class HuntersNexusObject : public GameObject
 private:
    typedef GameObject Parent;
    Vector<Point> mPolyBounds;
+
+   Point mCentroid;
+   F32 mLabelAngle;
+
    void computeExtent();
   
 public:

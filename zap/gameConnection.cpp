@@ -388,13 +388,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 }
 
 
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
-                  (StringTableEntry formatString, Vector<StringTableEntry> e), 
-                  (formatString, e),
+                  (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e), 
+                  (sfx, team, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   displayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, formatString, e);
-   gClientGame->getGameType()->majorScoringEventOcurred();
+   displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
+   gClientGame->getGameType()->majorScoringEventOcurred(team);
 }
 
 void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e)

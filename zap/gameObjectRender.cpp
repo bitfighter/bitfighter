@@ -665,10 +665,23 @@ void renderCenteredString(Point pos, U32 size, const char *string)
    UserInterface::drawString((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
 }
 
-void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fill, Rect extent)
+
+void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text)
+{
+   glPushMatrix();
+
+   glTranslatef(centroid.x, centroid.y, 0);
+   glRotatef(angle * 360 / Float2Pi, 0, 0, 1);
+   renderCenteredString(Point(0,0), size,  text);
+
+   glPopMatrix();
+}
+
+void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle)
 {
    F32 alpha = 0.5;
    glColor(theColor * 0.5);
+
 
    // Render loadout zone trinagle geometry
    for(S32 i = 0; i < fill.size(); i+=3)
@@ -685,22 +698,15 @@ void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fi
          glVertex2f(outline[i].x, outline[i].y);
    glEnd();
 
-   Point extents = extent.getExtents();
-   Point center = extent.getCenter();
-
-   glPushMatrix();
-   glTranslatef(center.x, center.y, 0);
-   if(extents.x < extents.y)
-      glRotatef(90, 0, 0, 1);
    glColor(theColor);
-   renderCenteredString(Point(0,0), 25, "LOADOUT ZONE");
-   glPopMatrix();
+   renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE");
 }
+
 
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-void renderNexus(Vector<Point> &bounds, Rect extent, bool open, F32 glowFraction)
+void renderNexus(Vector<Point> &bounds, Point centroid, F32 labelAngle, bool open, F32 glowFraction)
 {
    Color c;
 
@@ -723,19 +729,10 @@ void renderNexus(Vector<Point> &bounds, Rect extent, bool open, F32 glowFraction
          glVertex2f(bounds[i].x, bounds[i].y);
    glEnd();
 
-   Point extents = extent.getExtents();
-   Point center = extent.getCenter();
-
-   glPushMatrix();
-   glTranslatef(center.x, center.y, 0);
-   if(extents.x + .1 < extents.y)      // The .1 should fix the occasional rotation of labels on square nexii
-      glRotatef(90, 0, 0, 1);
-
-   // Label
    glColor(c);
-   renderCenteredString(Point(0,0), 25, "NEXUS");
-   glPopMatrix();
+   renderPolygonLabel(centroid, labelAngle, 25, "NEXUS");
 }
+
 
 void renderSlipZone(Vector<Point> &bounds, Rect extent)
 {

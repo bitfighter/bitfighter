@@ -40,10 +40,19 @@ GoalZone::GoalZone()
    mFlashCount = 0;
 }
 
+
 void GoalZone::render()
 {
-   renderGoalZone(mPolyBounds, getGame()->getGameType()->getTeamColor(getTeam()), isFlashing(), getGame()->getGameType()->mZoneGlowTimer.getFraction());
+   GameType *gt = getGame()->getGameType();
+   F32 glow = gt->mZoneGlowTimer.getFraction();
+
+   // Check if to make sure that the zone matches the glow team if we're glowing
+      if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
+      glow = 0;
+
+   renderGoalZone(mPolyBounds, gt->getTeamColor(getTeam()), isFlashing(), glow);
 }
+
 
 S32 GoalZone::getRenderSortValue()
 {

@@ -237,6 +237,30 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items)
    mRedoItems.clear();
 }
 
+
+bool EditorUserInterface::isFlagGame(char *mGameType)
+{
+   TNL::Object *theObject = TNL::Object::create(mGameType);  // Instantiate a gameType object
+   GameType *gameType = dynamic_cast<GameType*>(theObject);  // and cast it
+
+   if(!gameType)
+      return false;
+   else
+      return gameType->isFlagGame();
+}
+
+bool EditorUserInterface::isTeamFlagGame(char *mGameType)
+{
+   TNL::Object *theObject = TNL::Object::create(mGameType);  // Instantiate a gameType object
+   GameType *gameType = dynamic_cast<GameType*>(theObject);  // and cast it
+
+   if(!gameType)
+      return false;
+   else
+      return gameType->isTeamFlagGame();
+}
+
+
 // Wipe undo/redo history
 void EditorUserInterface::clearUndoHistory()
 {
@@ -483,6 +507,8 @@ void EditorUserInterface::validateLevel()
    mLevelErrorMsgs.clear();
    bool foundSoccerBall = false;
    bool foundNexus = false;
+   bool foundTeamFlags = false;
+   bool foundFlags = false;
 
    Vector<bool> foundSpawn;
    char buf[32];
@@ -500,6 +526,12 @@ void EditorUserInterface::validateLevel()
          foundSoccerBall = true;
       else if(mItems[i].index == ItemNexus)
          foundNexus = true;
+      else if(mItems[i].index == ItemFlag)
+      {
+         foundFlags = true;
+         if(mItems[i].team >= 0)
+            foundTeamFlags = true;
+      }
 
    for(S32 i = 0; i < foundSpawn.size(); i++)
       if(!foundSpawn[i])
@@ -532,6 +564,11 @@ void EditorUserInterface::validateLevel()
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
    if(!foundNexus && !strcmp(mGameType, "HuntersGameType"))
       mLevelErrorMsgs.push_back("ERROR: Hunters game must have a Nexus.");
+   if(foundTeamFlags && !isTeamFlagGame(mGameType))
+      mLevelErrorMsgs.push_back("ERROR: This game type does not use team flags.");
+   if(foundTeamFlags && !isFlagGame(mGameType))
+      mLevelErrorMsgs.push_back("ERROR: This game type does not use flags.");
+
 }
 
 // Check that each item has a valid team  (fixes any problems it finds)
@@ -1269,6 +1306,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             theFillColor = gNexusOpenColor;    // Render Nexus items in pale green to match the actual thing
         // Render polygons in two passes: fill then outline
          F32 minx = F32_MAX, miny = F32_MAX, maxx = -F32_MAX, maxy = -F32_MAX;
+         Vector<Point> convertedPoints;
 
          for(S32 pass = 0; pass <= 1; pass++)
          {
@@ -1288,34 +1326,30 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
                glBegin(GL_LINE_LOOP);
             }
 
-               for(S32 j = 0; j < item.verts.size(); j++)
-               {
-                  Point v;
-                  if(isDockItem)
-                     v = item.verts[j];
-                  else
-                     v = convertLevelToCanvasCoord(item.verts[j]);
-                  glVertex2f(v.x, v.y);
+            for(S32 j = 0; j < item.verts.size(); j++)
+            {
+               Point v;
+               if(isDockItem)
+                  v = item.verts[j];
+               else
+                  v = convertLevelToCanvasCoord(item.verts[j]);
 
-                  if (pass == 0)      // Find geometric center of polygon so we can label it nicely
-                  {
-                     if(v.x > maxx)
-                        maxx = v.x;
-                     if(v.x < minx)
-                        minx = v.x;
-                     if(v.y > maxy)
-                        maxy = v.y;
-                     if(v.y < miny)
-                        miny = v.y;
-                  }
-               }
+               if(pass == 0)     // To ensure we only add points once...
+                  convertedPoints.push_back(v);
+
+               glVertex2f(v.x, v.y);
+            }
             glEnd();
          }
          glLineWidth(gDefaultLineWidth);        // Restore line width
 
          // Let's add a label
          glColor(labelColor);
-         drawString((minx + maxx - getStringWidth(labelSize, gGameItemRecs[item.index].onScreenName)) / 2, (miny + maxy) / 2 - 5, labelSize, gGameItemRecs[item.index].onScreenName);
+
+         F32 ang = angleOfLongestSide(convertedPoints);
+         Point cent = centroid(convertedPoints);
+
+         renderPolygonLabel(cent, ang, labelSize, gGameItemRecs[item.index].onScreenName);
       }
 
       if((item.index == ItemBarrierMaker || showAllObjects) && !isDockItem)  // No verts on dock!
@@ -1481,6 +1515,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       if((item.selected || indx == itemToLightUp) && gGameItemRecs[item.index].onScreenName)
       {
          glColor(labelColor);
+         
          drawString(pos.x - getStringWidthf(labelSize, gGameItemRecs[item.index].onScreenName) / 2, pos.y + labelSize + 2, labelSize, gGameItemRecs[item.index].onScreenName);
       }
    }

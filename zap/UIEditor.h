@@ -222,6 +222,9 @@ public:
    char mGameType[gameTypeLen];
    Vector<S32> mGameTypeArgs;
 
+   bool isFlagGame(char *mGameType);
+   bool isTeamFlagGame(char *mGameType);
+
    void clearUndoHistory();      // Wipe undo/redo history
 
    Vector<Team> mTeams;          // Team list: needs to be public so we can edit from UITeamDefMenu

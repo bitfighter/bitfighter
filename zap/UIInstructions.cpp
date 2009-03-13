@@ -504,17 +504,17 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             break;
          case 13:
             {
-               Vector<Point> o;
+               Vector<Point> o;     // outline
                o.push_back(Point(-150, -30));
                o.push_back(Point(150, -30));
                o.push_back(Point(150, 30));
                o.push_back(Point(-150, 30));
 
-               Vector<Point> f;
+               Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
                Rect ext(o[0], o[2]);
-               renderLoadoutZone(Color(0, 0, 1), o, f, ext);
+               renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
             }
             break;
          case 14:
@@ -547,7 +547,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                p.push_back(Point(150, 30));
                p.push_back(Point(-150, 30));
                Rect ext(p[0], p[2]);
-            renderNexus(p, ext, gClientGame->getCurrentTime() % 5000 > 2500, 0);
+            renderNexus(p, centroid(p), angleOfLongestSide(p), gClientGame->getCurrentTime() % 5000 > 2500, 0);
             break;
 
       }

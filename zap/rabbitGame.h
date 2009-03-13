@@ -72,6 +72,7 @@ public:
    void addFlag(FlagItem *theFlag);
    void flagDropped(Ship *theShip, FlagItem *theFlag);
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
+   bool isFlagGame() { return true; }
 
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);

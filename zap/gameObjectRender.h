@@ -59,10 +59,14 @@ extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 
 
-extern void renderLoadoutZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Rect extent);
+extern void renderLoadoutZone(Color c, Vector<Point> &outline, Vector<Point> &fill,  Point centroid, F32 labelAngle);
+extern void renderNexus(Vector<Point> &bounds, Point centroid, F32 labelAngle, bool open, F32 glowFraction);
+
 extern void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing, F32 glowFraction);
 extern void renderSlipZone(Vector<Point> &bounds, Rect extent);
-extern void renderNexus(Vector<Point> &bounds, Rect extent, bool open, F32 glowFraction);
+
+extern void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text);
+
 
 extern void renderProjectile(Point pos, U32 type, U32 time);
 
