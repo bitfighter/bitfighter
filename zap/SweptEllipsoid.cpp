@@ -636,7 +636,7 @@ F32 angleOfLongestSide(Vector<Point> polyPoints)
       Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
       F32 l = p1.distSquared(p2);
 
-      if(l > maxlen) 
+      if(l > maxlen + .1)     // .1 helps in editor if two sides are essentially equal 
       {
          start = p1;
          end = p2;

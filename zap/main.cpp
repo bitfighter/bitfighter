@@ -51,6 +51,7 @@
 // Team chat message entry box colored appropriately
 // Objective arrows now rendered correctly for levels with multiple Nexuses (Nexii??)
 // Improved rendering of labelling of loadout zones and nexii
+// Added spaces to level files written by editor to make them easier to read
 
 
 // Items

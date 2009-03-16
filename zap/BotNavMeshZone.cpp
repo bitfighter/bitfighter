@@ -93,24 +93,21 @@ void BotNavMeshZone::render()     // For now... in future will be invisible!
    glTranslatef(center.x, center.y, 0);
       glColor3f(1,1,0);
       char buf[24];
-      dSprintf(buf, 24, "ZONE %d/%d", mNeighbors.size(), mZoneID);
+      dSprintf(buf, 24, "ZONE %d (tchs %d)", mZoneID, mNeighbors.size() );
       renderCenteredString(Point(0,0), 25, buf);
    glPopMatrix();
 
+   glColor3f(1,0,0);
+   for(S32 i = 0; i < mNeighbors.size(); i++)
+   {
+      glBegin(GL_LINES);
+      glVertex2f(mNeighbors[i].borderStart.x, mNeighbors[i].borderStart.y);
+      glVertex2f(mNeighbors[i].borderEnd.x, mNeighbors[i].borderEnd.y);
+      glEnd();
+   }
 
 
-
-      glColor3f(1,0,0);
-      for(S32 i = 0; i < mNeighbors.size(); i++)
-      {
-         glBegin(GL_LINES);
-         glVertex2f(mNeighbors[i].borderStart.x, mNeighbors[i].borderStart.y);
-         glVertex2f(mNeighbors[i].borderEnd.x, mNeighbors[i].borderEnd.y);
-         glEnd();
-      }
-
-  
-      glDisable(GL_BLEND);
+   glDisable(GL_BLEND);
 }
 
 
@@ -248,8 +245,20 @@ S32 findZoneContaining(Point p)
 
 extern bool segmentsCoincident(Point p1, Point p2, Point p3, Point p4);
 
+void testBotNavMeshZoneConnections()
+{
+   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+      for(S32 j = 0; j < gBotNavMeshZones.size(); j++)
+      {
+         Vector<S32> path = AStar::FindPath(i, j);
+         for(S32 k = 0; k < path.size(); k++)
+            logprintf("Path %d from %d to %d: %d", k, i, j, path[k]);
+         logprintf("");
+      }
+}
 
-void buildBotNavMeshZoneConnections()
+
+void BotNavMeshZone::buildBotNavMeshZoneConnections()
 {
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    {
@@ -302,6 +311,7 @@ void buildBotNavMeshZoneConnections()
                   n1.borderStart = bordStart;
                   n1.borderEnd = bordEnd;
                   n1.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(r.getCenter());     // Whew!
+                  n1.center = gBotNavMeshZones[j]->getCenter();
                   gBotNavMeshZones[i]->mNeighbors.push_back(n1);
 
                   NeighboringZone n2;
@@ -309,6 +319,7 @@ void buildBotNavMeshZoneConnections()
                   n2.borderStart = bordStart;
                   n2.borderEnd = bordEnd;
                   n2.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(r.getCenter());     
+                  n2.center = gBotNavMeshZones[i]->getCenter();
                   gBotNavMeshZones[j]->mNeighbors.push_back(n2);
 
                   logprintf("====================== %d Zones touch: %d - %d",gBotNavMeshZones[i]->mNeighbors.size(), i, j);
@@ -320,6 +331,278 @@ void buildBotNavMeshZoneConnections()
    }
    
 }
+
+
+// Rough guess as to distance from fromZone to toZone
+F32 AStar::heuristic(S32 fromZone, S32 toZone)
+{
+   return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() ) * 1.2;
+}
+
+
+// Returns a path, including the startZone and targetZone 
+Vector<S32> AStar::FindPath(S32 startZone, S32 targetZone)
+{
+   const S32 zones = 50;
+
+   U32 onClosedList = 0;
+   U32 onOpenList;
+   U32 whichList[zones];  // Record whether a zone is on the open or closed list
+
+   const int found = 1, nonexistent = 2; 
+
+   // These arrays can be reused without further initialization...
+   int openList[zones + 1]; 
+   int openZone[zones]; 
+   int parentZones[zones]; 
+
+   F32 Fcost[zones];	
+   F32 Gcost[zones]; 	
+   F32 Hcost[zones];	
+
+
+
+	S32 u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0,
+	path = 0;
+
+	S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
+
+   Vector<S32> pathZones;
+
+   // Quick checks: Under the some circumstances no path needs to be generated ...
+
+   //	If starting location and target are in the same location...
+	if (startZone == targetZone)
+   {
+      pathZones.push_back(startZone);
+
+		return pathZones;
+   }
+ 
+   // This block here lets us repeatedly reuse the whichList array without resetting it or recreating it
+   // which, for larger numbers of zones should be a real time saver.  It's not clear if it is particularly
+   // more efficient for the zone counts we typically see in Bitfighter levels.
+   if(onClosedList > U32_MAX - 3 ) // Reset whichList when we've run out of headroom
+	{
+		for(S32 i = 0; i < zones; i++) 
+		   whichList[i] = 0;
+		onClosedList = 0;	
+	}
+	onClosedList = onClosedList + 2; // Changing the values of onOpenList and onClosed list is faster than redimming whichList() array
+	onOpenList = onClosedList - 1;
+
+	Gcost[startZone] = 0;         // That's the cost of going from the startZone to the startZone!
+   Fcost[0] = Hcost[0] = heuristic(startZone, targetZone);
+
+	numberOfOpenListItems = 1;    // Start with one open item: the startZone
+
+	openList[1] = 0;              // Start with 1 item in the open list (must be index 1), which is maintained as a binary heap
+	openZone[0] = startZone;
+
+   // Loop until a path is found or deemed nonexistent.
+	while(true)
+	{
+	   if(numberOfOpenListItems == 0)      // List is empty, we're done
+	   {
+		   path = nonexistent; 
+         break;
+	   }  
+      else
+	   {
+         // The open list is not empty, so take the first cell off of the list.
+         //	Since the list is a binary heap, this will be the lowest F cost cell on the open list.
+	      S32 parentZone = openZone[openList[1]];
+
+         if(parentZone == targetZone)
+         {
+            path = found; 
+            break;
+         }
+
+         whichList[parentZone] = onClosedList;   // add the item to the closed list
+         numberOfOpenListItems--;	
+
+         //	Open List = Binary Heap: Delete this item from the open list, which
+         // is maintained as a binary heap. For more information on binary heaps, see:
+         //	http://www.policyalmanac.org/games/binaryHeaps.htm
+      		
+         //	Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
+	      openList[1] = openList[numberOfOpenListItems + 1];   // Move the last item in the heap up to slot #1
+	      v = 1; 
+
+         //	Loop until the new item in slot #1 sinks to its proper spot in the heap.
+	      while(true) // ***
+	      {
+	         u = v;		
+	         if (2*u+1 < numberOfOpenListItems) // if both children exist
+	         {
+	 	         //Check if the F cost of the parent is greater than each child.
+		         //Select the lowest of the two children.
+		         if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+			         v = 2*u;
+		         if(Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
+			         v = 2*u+1;		
+	         }
+	         else if (2*u < numberOfOpenListItems) // if only child (#1) exists
+	         {
+ 	            // Check if the F cost of the parent is greater than child #1	
+		         if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
+			         v = 2*u;
+	         }
+
+	         if(u != v) // If parent's F is > one of its children, swap them...
+	         {
+               temp = openList[u];
+               openList[u] = openList[v];
+               openList[v] = temp;			
+	         }
+	         else
+		         break; // ...otherwise, exit loop
+	      } // ***
+
+         // Check the adjacent zones. (Its "children" -- these path children
+         //	are similar, conceptually, to the binary heap children mentioned
+         //	above, but don't confuse them. They are different. 
+         // Add these adjacent child squares to the open list
+         //	for later consideration if appropriate.
+
+         Vector<NeighboringZone> neighboringZones = gBotNavMeshZones[parentZone]->mNeighbors;
+
+         for(S32 a = 0; a < neighboringZones.size(); a++)
+         {
+            NeighboringZone zone = neighboringZones[a];
+            S32 zoneID = zone.zoneID;
+
+            //	Check if zone is already on the closed list (items on the closed list have
+            //	already been considered and can now be ignored).			
+            if(whichList[zoneID] == onClosedList) 
+               continue;
+
+            //	Add zone to the open list if it's not already on it
+            if(whichList[zoneID] != onOpenList) 
+            {	
+               // Create a new open list item in the binary heap
+               newOpenListItemID = newOpenListItemID + 1;   // Give each new item a unique id
+               S32 m = numberOfOpenListItems + 1;
+               openList[m] = newOpenListItemID;             // Place the new open list item (actually, its ID#) at the bottom of the heap
+               openZone[newOpenListItemID] = zoneID;        // Record zone as a newly opened
+
+               Hcost[openList[m]] = heuristic(zoneID, targetZone);
+               Gcost[zoneID] = Gcost[parentZone] + zone.distTo;
+               Fcost[openList[m]] = Gcost[zoneID] + Hcost[openList[m]];
+               parentZones[zoneID] = parentZone; 
+
+               // Move the new open list item to the proper place in the binary heap.
+               // Starting at the bottom, successively compare to parent items,
+               // swapping as needed until the item finds its place in the heap
+               // or bubbles all the way to the top (if it has the lowest F cost).
+               while(m > 1 && Fcost[openList[m]] <= Fcost[openList[m/2]]) 
+               {
+                  temp = openList[m/2];
+                  openList[m/2] = openList[m];
+                  openList[m] = temp;
+                  m = m/2;
+               }
+
+               // Finally, put zone on the open list
+               whichList[zoneID] = onOpenList;
+               numberOfOpenListItems++;
+            }
+
+            // If zone is already on the open list, check to see if this 
+            //	path to that cell from the starting location is a better one. 
+            //	If so, change the parent of the cell and its G and F costs.
+
+            else // zone was already on the open list
+            {
+               // Figure out the G cost of this possible new path
+               S32 tempGcost = Gcost[parentZone] + zone.distTo;
+         		
+               // If this path is shorter (G cost is lower) then change
+               // the parent cell, G cost and F cost. 		
+               if (tempGcost < Gcost[zoneID])
+               {
+                  parentZones[zoneID] = parentZone; // Change the square's parent
+                  Gcost[zoneID] = tempGcost;        // and its G cost			
+
+                  // Because changing the G cost also changes the F cost, if
+                  // the item is on the open list we need to change the item's
+                  // recorded F cost and its position on the open list to make
+                  // sure that we maintain a properly ordered open list.
+
+                  for(S32 i = 1; i <= numberOfOpenListItems; i++) // Look for the item in the heap
+                  {
+                     if(openZone[openList[i]] == zoneID) 
+                     {
+	                     Fcost[openList[i]] = Gcost[zoneID] + Hcost[openList[i]]; // Change the F cost
+            				
+	                     // See if changing the F score bubbles the item up from it's current location in the heap
+	                     S32 m = i;
+	                     while(m > 1 && Fcost[openList[m]] < Fcost[openList[m/2]]) 
+	                     {
+		                     temp = openList[m/2];
+		                     openList[m/2] = openList[m];
+		                     openList[m] = temp;
+		                     m = m/2;
+	                     }
+	                
+                        break; 
+                     } 
+                  }
+               }
+
+            } // else If whichList(zoneID) = onOpenList	
+         } // for loop
+	   }  
+
+	   // If target is added to open list then path has been found.
+	   if(whichList[targetZone] == onOpenList)
+	   {
+		   path = found; 
+         break;
+	   }
+	}
+
+   // Save the path if it exists.
+	if(path == found)
+	{
+
+      // Working backwards from the target to the starting location by checking
+      //	each cell's parent, figure out the length of the path.
+	   path = targetZone; 
+   	S32 pathLength = 0;
+
+	   while(path != startZone)
+	   {
+		   // Find the parent of the current cell	
+		   path = parentZones[path];		
+		   pathLength++;
+	   }
+
+      // Note that we'll be working backwards from targetZone to startZone
+      // Since targetZone was never added to the path, we'll add it here.
+      pathZones.setSize(pathLength + 1);
+
+      path = targetZone;
+
+	   while(path != startZone)
+	   {
+         pathZones[pathLength] = path;
+	      path = parentZones[path];		
+         pathLength--;
+	   }
+
+      pathZones[0] = startZone;
+
+	   return pathZones;
+
+	}
+
+   // There is no path to the selected target.
+   pathZones.push_back(-1);
+	return pathZones;
+}
+
 
 
 };

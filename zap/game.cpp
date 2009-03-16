@@ -47,10 +47,10 @@
 
 #include "../glut/glutInclude.h"
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlRandom.h"
-#include "../tnl/tnlGhostConnection.h"
-#include "../tnl/tnlNetInterface.h"
+#include "tnl.h"
+#include "tnlRandom.h"
+#include "tnlGhostConnection.h"
+#include "tnlNetInterface.h"
 
 #include <sys/stat.h>
 using namespace TNL;
@@ -368,7 +368,8 @@ static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 }
 
 
-extern void buildBotNavMeshZoneConnections();
+//extern void buildBotNavMeshZoneConnections();
+extern void testBotNavMeshZoneConnections();
 
 
 // Pass -1 to go to next level, otherwise pass an absolute level number
@@ -398,7 +399,12 @@ void ServerGame::cycleLevel(S32 nextLevel)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
 
    // Analyze zone connections
-   buildBotNavMeshZoneConnections();
+   BotNavMeshZone::buildBotNavMeshZoneConnections();
+
+   // Test those connections  TODO: Remove this block
+   testBotNavMeshZoneConnections();
+
+
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;

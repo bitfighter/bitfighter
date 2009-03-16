@@ -42,6 +42,7 @@ struct NeighboringZone
    U16 zoneID;
    Point borderStart;
    Point borderEnd;
+   Point center;
    F32 distTo;
 };
 
@@ -56,9 +57,7 @@ Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
 public:
    U16 mZoneID;
 
-   // Constructor
-   BotNavMeshZone();
-
+   BotNavMeshZone();       // Constructor
    ~BotNavMeshZone();      // Destructor
 
    void render();
@@ -88,11 +87,28 @@ public:
    Vector<Point> mPolyBounds;
    Vector<NeighboringZone> mNeighbors;        // List of other zones this zone touches
 
+   static void buildBotNavMeshZoneConnections();
+
    TNL_DECLARE_CLASS(BotNavMeshZone);
 };
 
+extern Vector<SafePtr<BotNavMeshZone>> gBotNavMeshZones;     // List of all our zones
+
+
+
+class AStar
+{
+private:
+   static F32 heuristic(S32 fromZone, S32 toZone);
+
+public:
+   static Vector<S32> FindPath (S32 startZone, S32 targetZone);
+   
+};
+
 
 };
+
 
 #endif
 

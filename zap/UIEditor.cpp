@@ -3012,7 +3012,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          if(gGameItemRecs[mItems[i].index].hasTeam)
             fprintf(f, " %d", mItems[i].team);
          for(S32 j = 0; j < p.verts.size(); j++)
-            fprintf(f, "  %g %g  ", p.verts[j].x, p.verts[j].y);
+            fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
          if(gGameItemRecs[mItems[i].index].hasText)
             fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
          if(mItems[i].repopDelay != -1)
