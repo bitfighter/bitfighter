@@ -62,18 +62,18 @@ public:
       mZones.push_back(zone);
    }
 
+
    bool isFlagGame() { return true; }
+
 
    // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this will be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // See if the ship is already carrying a flag - can only carry one at a time
-      for(S32 i = 0; i < theShip->mMountedItems.size(); i++)
-         if(theShip->mMountedItems[i].isValid() && (theShip->mMountedItems[i]->getObjectTypeMask() & FlagType))
-            return;
+      if(theShip->carryingFlag() != NO_FLAG)
+         return;
 
       // Can only pick up flags on your team or neutral
-
       if(theFlag->getTeam() != -1 && theShip->getTeam() != theFlag->getTeam())
          return;
 
@@ -83,10 +83,10 @@ public:
          if(mFlags[flagIndex] == theFlag)
             break;
 
-      GameConnection *controlConnection = theShip->getControllingClient();
-      ClientRef *cl = controlConnection->getClientRef();
-      if(!cl)
-         return;
+      //GameConnection *controlConnection = theShip->getControllingClient();
+      //ClientRef *cl = controlConnection->getClientRef();
+      //if(!cl)
+      //   return;
 
       // See if this flag is already in a flag zone owned by the ship's team
       if(theFlag->getZone() != NULL && theFlag->getZone()->getTeam() == theShip->getTeam())
@@ -97,12 +97,13 @@ public:
       static StringTableEntry oneFlagTakeString("%e0 of team %e1 took the flag!");
 
       StringTableEntry r = takeString;
+
       if(mFlags.size() == 1)
          r = oneFlagTakeString;
-      S32 team;
 
+      S32 team;
       if(theFlag->getZone() == NULL)      // Picked up flag just sitting around
-         team = cl->teamId;
+         team = theShip->getTeam();
       else                                // Grabbed flag from enemy zone
       {
          r = stealString;
@@ -111,35 +112,31 @@ public:
       }
 
       Vector<StringTableEntry> e;
-      e.push_back(cl->name);
+      e.push_back(theShip->getName());
       e.push_back(mTeams[team].name);
 
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, r, e);
 
       theFlag->mountToShip(theShip);
-      updateScore(cl, RemoveFlagFromEnemyZone);
+      updateScore(theShip, RemoveFlagFromEnemyZone);
       theFlag->setZone(NULL);
    }
+
 
    void flagDropped(Ship *theShip, FlagItem *theFlag)
    {
       static StringTableEntry dropString("%e0 dropped a flag!");
       Vector<StringTableEntry> e;
-      e.push_back(theShip->mPlayerName);
+      e.push_back(theShip->getName());
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
 
+
    // The ship has entered a drop zone, either friend or foe
    void shipTouchZone(Ship *s, GoalZone *z)
    {
-      GameConnection *controlConnection = s->getControllingClient();
-      ClientRef *cl = controlConnection->getClientRef();
-
-      if(!cl)
-         return;
-
       // See if this is an opposing team's zone.  If so, do nothing.
       if(s->getTeam() != z->getTeam())
          return;
@@ -149,17 +146,14 @@ public:
          if(mFlags[i]->getZone() == z)
             return;
 
-      // Ok, it's an empty zone on our team:
-      // See if this ship is carrying a flag...
-      S32 i;
-      for(i = 0; i < s->mMountedItems.size(); i++)
-         if(s->mMountedItems[i].isValid() && (s->mMountedItems[i]->getObjectTypeMask() & FlagType))
-            break;
-      if(i == s->mMountedItems.size())    // ...if not, do nothing.
+      // Ok, it's an empty zone on our team: See if this ship is carrying a flag...
+      S32 flagIndex = s->carryingFlag();
+
+      if(flagIndex == NO_FLAG)
          return;
 
       // Ok, the ship has a flag and it's on the ship and we're in an empty zone
-      Item *theItem = s->mMountedItems[i];
+      Item *theItem = s->mMountedItems[flagIndex];
       FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
       if(mountedFlag)
       {
@@ -167,7 +161,7 @@ public:
          static StringTableEntry oneFlagCapString("%e0 retrieved the flag!");
 
          Vector<StringTableEntry> e;
-         e.push_back(cl->name);
+         e.push_back(s->getName());
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen,
             SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
@@ -184,13 +178,13 @@ public:
          mountedFlag->setActualPos(z->getExtent().getCenter());
 
          // Score the flag...
-         updateScore(cl, ReturnFlagToZone);
+         updateScore(s, ReturnFlagToZone);
 
          // See if all the flags are owned by one team...
          for(S32 i = 0; i < mFlags.size(); i++)
          {
-            bool ourFlag = (mFlags[i]->getTeam() == cl->teamId) || (mFlags[i]->getTeam() == -1);    // Team flag || neutral flag
-            if(ourFlag && (!mFlags[i]->getZone() || mFlags[i]->getZone()->getTeam() != cl->teamId))
+            bool ourFlag = (mFlags[i]->getTeam() == s->getTeam()) || (mFlags[i]->getTeam() == -1);    // Team flag || neutral flag
+            if(ourFlag && (!mFlags[i]->getZone() || mFlags[i]->getZone()->getTeam() != s->getTeam()))
                return;     // ...if not, we're done
          }
 
@@ -198,7 +192,7 @@ public:
          if(mFlags.size() != 1)
          {
             static StringTableEntry capAllString("Team %e0 retrieved all the flags!");
-            e[0] = mTeams[cl->teamId].name;
+            e[0] = mTeams[s->getTeam()].name;
 
             for(S32 i = 0; i < mClientList.size(); i++)
                mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);

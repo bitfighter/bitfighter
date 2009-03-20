@@ -60,10 +60,10 @@ public:
       return -1;
    }
 
-   void processArguments(S32 argc, const char **argv)
+   bool processArguments(S32 argc, const char **argv)
    {
       if(argc < 6)
-         return;
+         return false;
 
       processPolyBounds(argc, argv, 0, mPolyBounds);
       computeExtent();
@@ -79,6 +79,8 @@ public:
          p.y = atof(argv[i+1]) * getGame()->getGridSize();
          mPolyBounds.push_back(p);
       }*/
+
+      return true;
    }
 
    void onAddedToGame(Game *theGame)

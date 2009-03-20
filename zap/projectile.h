@@ -189,7 +189,7 @@ class SpyBug : public GrenadeProjectile
 
 public:
    SpyBug(Point pos = Point(), Ship *owner = NULL);      // Constructor
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *theGame);
 
 

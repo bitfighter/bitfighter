@@ -63,7 +63,7 @@ protected:
 
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
 
    void setResource(Item *resource);
    bool checkDeploymentPosition();

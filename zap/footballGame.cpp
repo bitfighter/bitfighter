@@ -96,18 +96,14 @@ GAMETYPE_RPC_S2C(ZoneControlGameType, s2cSetFlagTeam, (S32 flagTeam), (flagTeam)
 // Ship picks up the flag
 void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
-   GameConnection *controlConnection = theShip->getControllingClient();
-   ClientRef *cl = controlConnection->getClientRef();
-   if(!cl)
-      return;
-
    static StringTableEntry takeString("%e0 of team %e1 has the flag!");
    Vector<StringTableEntry> e;
-   e.push_back(cl->name);
-   e.push_back(mTeams[cl->teamId].name);
+   e.push_back(theShip->getName());
+   e.push_back(mTeams[theShip->getTeam()].name);
    for(S32 i = 0; i < mClientList.size(); i++)
       mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    theFlag->mountToShip(theShip);
+
    mFlagTeam = theShip->getTeam();
    s2cSetFlagTeam(mFlagTeam);
 
@@ -121,7 +117,7 @@ void ZoneControlGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
    s2cSetFlagTeam(-1);
    static StringTableEntry dropString("%e0 dropped the flag!");
    Vector<StringTableEntry> e;
-   e.push_back(theShip->mPlayerName);
+   e.push_back(theShip->getName());
    for(S32 i = 0; i < mClientList.size(); i++)
       mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
@@ -134,22 +130,8 @@ void ZoneControlGameType::addZone(GoalZone *z)
 // Ship enters a goal zone.  What happens?
 void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 {
-
-   // Does the zone already belong to the ship's team?
-   if(z->getTeam() == s->getTeam())
-      return;
-
-   // Is the ship carrying the flag?
-   S32 i;
-   for(i = 0; i < s->mMountedItems.size(); i++)
-      if(s->mMountedItems[i].isValid() && (s->mMountedItems[i]->getObjectTypeMask() & FlagType))
-         break;
-   if(i == s->mMountedItems.size())
-      return;
-
-   GameConnection *controlConnection = s->getControllingClient();
-	ClientRef *cl = controlConnection->getClientRef();
-	if(!cl)
+   // Zone already belongs to team, or ship has no flag
+   if(z->getTeam() == s->getTeam() || s->carryingFlag() == NO_FLAG)
       return;
 
    S32 oldTeam = z->getTeam();
@@ -157,7 +139,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    {
       static StringTableEntry takeString("%e0 captured a zone from team %e1!");
       Vector<StringTableEntry> e;
-      e.push_back(s->mPlayerName);
+      e.push_back(s->getName());
       e.push_back(mTeams[oldTeam].name);
 
       for(S32 i = 0; i < mClientList.size(); i++)
@@ -169,13 +151,14 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    {
       static StringTableEntry takeString("%e0 captured an unclaimed zone!");
       Vector<StringTableEntry> e;
-      e.push_back(s->mPlayerName);
+      e.push_back(s->getName());
 
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    }
 
-   updateScore(cl, CaptureZone);
+   updateScore(s, CaptureZone);  
+
 
    z->setTeam(s->getTeam());                       // Assign zone to capturing team
 
@@ -184,7 +167,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       if(mZones[i]->getTeam() != s->getTeam())     // ...no?...
          return;                                   // ...then bail
 
-   // Team DOES control all zones.  Broadcast a message
+   // Team DOES control all zones.  Broadcast a message, flash zones, and create hoopla!
    static StringTableEntry tdString("Team %e0 scored a touchdown!");
    Vector<StringTableEntry> e;
    e.push_back(mTeams[s->getTeam()].name);

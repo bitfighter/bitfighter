@@ -43,7 +43,7 @@ private:
 
 public:
    RepairItem(Point p = Point());   // Constructor
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    bool pickup(Ship *theShip);
    void onClientPickup();
    U32 getRepopDelay();

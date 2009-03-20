@@ -594,7 +594,7 @@ void GameUserInterface::renderCurrentChat()
 
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    S32 promptSize = getStringWidthf(FONTSIZE, "%s", promptStr);
-   S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->mPlayerName.getString());
+   S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
@@ -912,7 +912,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
             Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-            S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->mPlayerName.getString());
+            S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
             S32 nameWidth = max(nameSize, promptSize);
             // Above block repeated above
 

@@ -65,6 +65,10 @@ private:
 
    S32 mCurrentZone;            // Zone robot is currently in
 
+   enum {
+      RobotRespawnDelay = 1500,
+   };
+
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
    ~Robot();          // Destructor 
@@ -73,19 +77,28 @@ public:
 
    void processMove(U32 stateIndex);
 
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);
 
    void render(S32 layerIndex);
+
    S32 getCurrentZone();
    void setCurrentZone(S32 zone);
+   bool canSeePoint(Point point);         // Is point within robot's LOS?
+
+   Vector<S32> flightPlan;                // List of zones to get from one point to another
+   Point flightPlanTo;                    // Where our flightplan was calculated to
 
    // Some informational functions
    F32 getAngleXY(F32 x, F32 y);
 
-   // Robot functions
+   // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
+   Timer respawnTimer;
+   void resetLocation(Point location);    
+
+   bool isRobot() { return true; }
 
 private:
   int attribute;
@@ -100,6 +113,9 @@ private:
 
 class LuaGameObject{
 
+private:
+   Point getNextWaypoint();      // Helper function for getWaypoint()
+
 public:
   // Constants
 
@@ -107,14 +123,10 @@ public:
   LuaGameObject(lua_State *L);      // Constructor
   ~LuaGameObject();                 // Destructor
 
-  S32 testval; // ??
-
-
    static const char className[];
 
    static Luna<LuaGameObject>::RegType methods[];
 
- 
    void setObject(lua_State *L);
 
    // Methods we will need to use
@@ -131,7 +143,11 @@ public:
    S32 getAngleXY(lua_State *L);
    S32 hasLosXY(lua_State *L);
 
+   S32 hasFlag(lua_State *L);
+
+
    S32 findObjects(lua_State *L);
+   S32 getWaypoint(lua_State *L);
    
    S32 setThrustAng(lua_State *L);
    S32 setThrustXY(lua_State *L);
@@ -146,10 +162,44 @@ public:
   static int luaPanicked(lua_State *L);
   static void clearStack(lua_State *L);
 
+  static S32 returnPoint(lua_State *L, Point point);    // Returns a point... usage: return returnPoint(L, point);
+  static S32 returnNil(lua_State *L);                   // Returns nil... usage: return returnNil(L);
+
+
 private:
   Robot* thisRobot;              // The pointer to the actual C++ Robot object
 
 };
+
+
+// Class to restore Lua stack to the state it was in when we found it.
+// Concept based on code from http://www.codeproject.com/KB/cpp/luaincpp.aspx
+// ---------------------------------------------------------------------------
+// VERSION              : 1.00
+// DATE                 : 1-Sep-2005
+// AUTHOR               : Richard Shephard
+// ---------------------------------------------------------------------------
+
+//class LuaProtectStack
+//{
+//public:
+//   LuaProtectStack(LuaGameObject *lgo)
+//   {
+//      mLuaGameObject = lgo;
+//      mTop = lua_gettop(mLuaGameObject->mState);
+//   }
+//
+//   virtual ~LuaProtectStack(void)
+//   {
+//      if(mLuaGameObject->mState)
+//         lua_settop (mLuaGameObject->mState, mTop);
+//   }
+//
+//protected:
+//   LuaGameObject *mLuaGameObject;
+//   S32 mTop;
+//};
+
 
 
 };

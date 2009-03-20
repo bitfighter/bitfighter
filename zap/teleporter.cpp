@@ -59,10 +59,10 @@ void Teleporter::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
-void Teleporter::processArguments(S32 argc, const char **argv)
+bool Teleporter::processArguments(S32 argc, const char **argv)
 {
    if(argc != 4)
-      return;
+      return false;
 
    Point pos;
    pos.read(argv);
@@ -103,6 +103,8 @@ void Teleporter::processArguments(S32 argc, const char **argv)
       removeFromDatabase();
       this->destroySelf();
    }
+
+   return true;
 }
 
 

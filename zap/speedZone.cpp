@@ -87,17 +87,16 @@ S32 SpeedZone::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-void SpeedZone::processArguments(S32 argc, const char **argv)
+bool SpeedZone::processArguments(S32 argc, const char **argv)
 {
-   if(argc <= 4)
-      return;
+   if(argc < 4)      // Need two points at a minimum, with an optional speed item
+      return false;
 
    pos.read(argv);
    pos *= getGame()->getGridSize();
 
    dir.read(argv + 2);
    dir *= getGame()->getGridSize();
-
 
    // Adjust the direction point so that it also represents the tip of the triangle
    Point offset(dir - pos);
@@ -108,6 +107,8 @@ void SpeedZone::processArguments(S32 argc, const char **argv)
 
    if(argc == 5)
       mSpeed = max(minSpeed, min(maxSpeed, atoi(argv[4])));
+
+   return true;
 }
 
 
@@ -129,7 +130,7 @@ void SpeedZone::computeExtent()
    setExtent(extent);
 }
 
-// More precise boundary for precise collision detection
+// More precise boundary for more precise collision detection
 bool SpeedZone::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)

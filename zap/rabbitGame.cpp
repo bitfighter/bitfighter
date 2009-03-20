@@ -86,15 +86,18 @@ TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, Str
 //-----------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(RabbitGameType);
 
-void RabbitGameType::processArguments(S32 argc, const char **argv)
+bool RabbitGameType::processArguments(S32 argc, const char **argv)
 {
    if (argc != 4)
-      return;
+      return false;
 
-   Parent::processArguments(argc, argv);
+   if(!Parent::processArguments(argc, argv))
+      return false;
 
    mFlagReturnTimer = Timer(atoi(argv[2]) * 1000);
    mFlagScoreTimer = Timer((U32)(1.0f / atoi(argv[3]) * 60 * 1000)); //secs per point
+
+   return true;
 }
 
 // Describe the arguments processed above...
@@ -192,16 +195,6 @@ bool RabbitGameType::shipHasFlag(Ship *ship)
    return false;
 }
 
-void RabbitGameType::onClientScore(Ship *ship, ScoringEvent event)
-{
-   GameConnection *controlConnection = ship->getControllingClient();
-   ClientRef *cl = controlConnection->getClientRef();
-
-   if(!cl)
-      return;
-
-   updateScore(cl, event);
-}
 
 void RabbitGameType::idle(GameObject::IdleCallPath path)
 {
@@ -259,26 +252,30 @@ void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, Gam
    }
 }
 
+
 void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
-   s2cRabbitMessage(RabbitMsgGrab, ship->mPlayerName);
+   s2cRabbitMessage(RabbitMsgGrab, ship->getName());
 
    flag->mountToShip(ship);
 }
+
 
 void RabbitGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
 {
    mFlagScoreTimer.reset();
    mFlagReturnTimer.reset();
-   s2cRabbitMessage(RabbitMsgDrop, theShip->mPlayerName);
+   s2cRabbitMessage(RabbitMsgDrop, theShip->getName());
    Point vel = theShip->getActualVel();
    theFlag->setActualVel(vel);
 }
 
+
 void RabbitGameType::onFlagHeld(Ship *ship)
 {
-   onClientScore(ship, RabbitHoldsFlag);    // Event: RabbitHoldsFlag
+   updateScore(ship, RabbitHoldsFlag);    // Event: RabbitHoldsFlag
 }
+
 
 void RabbitGameType::addFlag(FlagItem *theFlag)
 {
@@ -289,14 +286,14 @@ void RabbitGameType::addFlag(FlagItem *theFlag)
 // Rabbit killed another ship
 void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 {
-   s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->mPlayerName);
-   onClientScore(rabbitShip, RabbitKills);      // Event: RabbitKills
+   s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getName());
+   updateScore(rabbitShip, RabbitKills);      // Event: RabbitKills
 }
 
 void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
-   s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->mPlayerName);
-   onClientScore(killerShip, RabbitKilled);        // Event: RabbitKilled
+   s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getName());
+   updateScore(killerShip, RabbitKilled);     // Event: RabbitKilled
 }
 
 
@@ -326,7 +323,7 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          	return 5;
          case RabbitKills:
          	return 5;
-         case RabbitHoldsFlag:		// Pts per second
+         case RabbitHoldsFlag:		// Points per second
          	return 1;
          default:
             return naScore;

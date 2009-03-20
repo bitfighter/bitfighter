@@ -49,13 +49,16 @@ void FlagItem::onAddedToGame(Game *theGame)
 }
 
 
-void FlagItem::processArguments(S32 argc, const char **argv)
+bool FlagItem::processArguments(S32 argc, const char **argv)
 {
    if(argc < 3)
-      return;
+      return false;
 
    mTeam = atoi(argv[0]);
-   Parent::processArguments(argc-1, argv+1);
+   
+   if(!Parent::processArguments(argc-1, argv+1))
+      return false;
+
    initialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
@@ -63,6 +66,8 @@ void FlagItem::processArguments(S32 argc, const char **argv)
       gServerGame->getGameType()->mFlagSpawnPoints.push_back(initialPos);
    else
       gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(initialPos);
+
+   return true;
 }
 
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
@@ -157,17 +162,25 @@ bool FlagItem::collide(GameObject *hitObject)
       return false;
    if(hitObject->getObjectTypeMask() & (BarrierType | ForceFieldType))
       return true;
-   if(!(hitObject->getObjectTypeMask() & ShipType))
+
+   bool hitShip = hitObject->getObjectTypeMask() & ShipType;
+   bool hitRobot = hitObject->getObjectTypeMask() & RobotType;
+
+   if( ! ( hitShip || hitRobot ))
       return false;
 
-   // We've hit a ship
+   // We've hit a ship or robot  (remember, a robot is a subtype of ship, so this will work for both)
    Ship *ship = dynamic_cast<Ship *>(hitObject);
    if(isGhost() || (ship->hasExploded))
       return false;
 
    GameType *gt = getGame()->getGameType();
-   if(gt)
-      gt->shipTouchFlag(ship, this);
+
+   if(!gt)
+      return false;
+   
+   gt->shipTouchFlag(ship, this);
+
    return false;
 }
 

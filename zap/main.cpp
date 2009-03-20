@@ -52,6 +52,7 @@
 // Objective arrows now rendered correctly for levels with multiple Nexuses (Nexii??)
 // Improved rendering of labelling of loadout zones and nexii
 // Added spaces to level files written by editor to make them easier to read
+// Better handling of items with invalid parameter lines in .level files
 
 
 // Items

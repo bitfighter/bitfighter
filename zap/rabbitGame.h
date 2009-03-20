@@ -63,7 +63,7 @@ public:
       mRabbitFlag = NULL;
    }
 
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
 
    Vector<GameType::ParameterDescription> describeArguments();
 
@@ -88,7 +88,6 @@ public:
    void onFlaggerKill(Ship *rabbitShip);
    void onFlagReturned();
 
-   void onClientScore(Ship *ship, ScoringEvent event);
    const char *getGameTypeString() { return "Rabbit"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    bool isTeamGame() { return false; }

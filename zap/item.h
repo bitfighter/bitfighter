@@ -58,7 +58,7 @@ protected:
 public:
    void idle(GameObject::IdleCallPath path);
 
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

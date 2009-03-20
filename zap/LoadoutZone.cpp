@@ -66,15 +66,17 @@ public:
    }
 
    // Create objects from parameters stored in level file
-   void processArguments(S32 argc, const char **argv)
+   bool processArguments(S32 argc, const char **argv)
    {
       if(argc < 7)
-         return;
+         return false;
 
       mTeam = atoi(argv[0]);     // Team is first arg
       processPolyBounds(argc, argv, 1, mPolyBounds);
 
       computeExtent();
+
+      return true;
    }
 
    void onAddedToGame(Game *theGame)

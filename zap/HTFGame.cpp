@@ -67,29 +67,25 @@ public:
          addItemOfInterest(theFlag);
    }
 
+
    void addZone(GoalZone *zone)
    {
       mZones.push_back(zone);
    }
 
-   // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this will be important!!!
+
+   // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this may be important!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // See if the ship is already carrying a flag - can only carry one at a time
-      for(S32 i = 0; i < theShip->mMountedItems.size(); i++)
-         if(theShip->mMountedItems[i].isValid() && (theShip->mMountedItems[i]->getObjectTypeMask() & FlagType))
-            return;
+      if(theShip->carryingFlag() != NO_FLAG)
+         return;
 
       S32 flagIndex;
 
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
          if(mFlags[flagIndex] == theFlag)
             break;
-
-      GameConnection *controlConnection = theShip->getControllingClient();
-      ClientRef *cl = controlConnection->getClientRef();
-      if(!cl)
-         return;
 
       // See if this flag is already in a flag zone owned by the ship's team
       if(theFlag->getZone() != NULL && theFlag->getZone()->getTeam() == theShip->getTeam())
@@ -101,14 +97,15 @@ public:
       U32 teamIndex;
 
       if(theFlag->getZone() == NULL)
-         teamIndex = cl->teamId;
+         teamIndex = theShip->getTeam();
       else
       {
          r = stealString;
          teamIndex = theFlag->getZone()->getTeam();
       }
+
       Vector<StringTableEntry> e;
-      e.push_back(cl->name);
+      e.push_back(theShip->getName());
       e.push_back(mTeams[teamIndex].name);
 
       if(mFlags.size() == 1)
@@ -121,8 +118,10 @@ public:
       theFlag->mountToShip(theShip);
       theFlag->setZone(NULL);
       theFlag->mTimer.clear();
-      updateScore(cl, RemoveFlagFromEnemyZone);
+
+      updateScore(theShip, RemoveFlagFromEnemyZone);
    }
+
 
    void flagDropped(Ship *theShip, FlagItem *theFlag)
    {
@@ -130,7 +129,7 @@ public:
       static StringTableEntry theString("the");
       static StringTableEntry dropString("%e0 dropped %e1 flag!");
       Vector<StringTableEntry> e;
-      e.push_back(theShip->mPlayerName);
+      e.push_back(theShip->getName());
       if(mFlags.size() == 1)
          e.push_back(theString);
       else
@@ -140,15 +139,10 @@ public:
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
    }
 
+
    void shipTouchZone(Ship *s, GoalZone *z)
    {
-      GameConnection *controlConnection = s->getControllingClient();
-      ClientRef *cl = controlConnection->getClientRef();
-
-      if(!cl)
-         return;
-
-      // see if this is an opposing team's zone
+      // See if this is an opposing team's zone
       if(s->getTeam() != z->getTeam())
          return;
 
@@ -158,28 +152,25 @@ public:
             return;
 
       // Ok, it's an empty zone on our team... See if this ship is carrying a flag
-      S32 i;
-      for(i = 0; i < s->mMountedItems.size(); i++)
-         if(s->mMountedItems[i].isValid() && (s->mMountedItems[i]->getObjectTypeMask() & FlagType))
-            break;
-      if(i == s->mMountedItems.size())
+      S32 flagIndex = s->carryingFlag();
+      if(flagIndex == NO_FLAG)
          return;
 
       // Ok, the ship has a flag and it's on the ship...
-      Item *theItem = s->mMountedItems[i];
+      Item *theItem = s->mMountedItems[flagIndex];
       FlagItem *mountedFlag = dynamic_cast<FlagItem *>(theItem);
       if(mountedFlag)
       {
          static StringTableEntry capString("%e0 retrieved %e1 flag.  Team %e2 holds %e1 flag!");
 
          Vector<StringTableEntry> e;
-         e.push_back(cl->name);
+         e.push_back(s->getName());
          if(mFlags.size() == 1)
             e.push_back(theString);
          else
             e.push_back(aString);
 
-         e.push_back(mTeams[cl->teamId].name);
+         e.push_back(mTeams[s->getTeam()].name);
 
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);
@@ -195,9 +186,10 @@ public:
          mFlags[flagIndex]->mTimer.reset(ScoreTime);              // Start countdown until scorin' time!
          mountedFlag->setActualPos(z->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
-         updateScore(cl, ReturnFlagToZone);
+         updateScore(s, ReturnFlagToZone);
       }
    }
+
 
    void idle(GameObject::IdleCallPath path)
    {

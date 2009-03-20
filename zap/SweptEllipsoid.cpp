@@ -88,7 +88,7 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
    Point p1, p2;
 
    p1 = inVertices[0];
-   for (i=1; i<=inNumVertices; i++) {
+   for(i = 1; i <= inNumVertices; i++) {
       p2 = inVertices[i % inNumVertices];
       if (inPoint.y > MIN(p1.y, p2.y)) {
          if (inPoint.y <= MAX(p1.y, p2.y)) {

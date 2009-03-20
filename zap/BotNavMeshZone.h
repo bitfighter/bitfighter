@@ -42,7 +42,8 @@ struct NeighboringZone
    U16 zoneID;
    Point borderStart;
    Point borderEnd;
-   Point center;
+   Point borderCenter;     // Simply a point half way between borderStart and borderEnd
+   Point center;           // Center of zone
    F32 distTo;
 };
 
@@ -65,7 +66,7 @@ public:
    S32 getRenderSortValue();
 
    // Create objects from parameters stored in level file
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
 
    void onAddedToGame(Game *theGame);
    Point getCenter();      // Return center of zone
@@ -81,11 +82,12 @@ public:
 
    // These methods will be empty later...
     U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-
-
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
    Vector<Point> mPolyBounds;
+
    Vector<NeighboringZone> mNeighbors;        // List of other zones this zone touches
+   S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
    static void buildBotNavMeshZoneConnections();
 
@@ -102,7 +104,7 @@ private:
    static F32 heuristic(S32 fromZone, S32 toZone);
 
 public:
-   static Vector<S32> FindPath (S32 startZone, S32 targetZone);
+   static Vector<S32> findPath (S32 startZone, S32 targetZone);
    
 };
 

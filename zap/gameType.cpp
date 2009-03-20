@@ -34,7 +34,8 @@
 #include "engineeredObjects.h"
 #include "gameObjectRender.h"
 #include "config.h"
-#include "projectile.h"          // For s2cClientJoinedTeam()
+#include "projectile.h"     // For s2cClientJoinedTeam()
+
 #include "../glut/glutInclude.h"
 
 #ifndef min
@@ -92,12 +93,15 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
 }
 
 
-void GameType::processArguments(S32 argc, const char **argv)
+bool GameType::processArguments(S32 argc, const char **argv)
 {
    if(argc > 0)      // First arg is game length, in minutes
       mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));
+
    if(argc > 1)      // Second arg is winning score
       mTeamScoreLimit = atoi(argv[1]);
+
+   return true;
 }
 
 
@@ -133,6 +137,7 @@ string itos(S32 i) // convert int to string
    sprintf(outString,"%d", i);
    return outString;
 }
+
 
 void GameType::printRules()
 {   
@@ -263,7 +268,6 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 }
 
 
-
 const char *GameType::validateGameType(const char *gtype)
 {
    for(S32 i = 0; gGameTypeNames[i]; i++)
@@ -274,6 +278,8 @@ const char *GameType::validateGameType(const char *gtype)
    return gGameTypeNames[gDefaultGameTypeIndex];
 }
 
+
+extern Vector<Robot *> gRobotList;
 
 void GameType::idle(GameObject::IdleCallPath path)
 {
@@ -332,6 +338,12 @@ void GameType::idle(GameObject::IdleCallPath path)
             NetObject::setRPCDestConnection(NULL);
          }
    }
+
+   // ...and all robots
+   for(S32 i = 0; i < gRobotList.size(); i++)
+      if(gRobotList[i]->respawnTimer.update(deltaT)) 
+         spawnRobot(gRobotList[i]);
+
    // If game time has expired... game is over, man, it's over
    if(mGameTimer.update(deltaT))
       gameOverManGameOver();
@@ -909,7 +921,7 @@ void GameType::spawnShip(GameConnection *theClient)
    ClientRef *cl = theClient->getClientRef();
    U32 teamIndex = cl->teamId;
 
-   TNLAssert(mTeams[teamIndex].spawnPoints.size(), "No spawn points!");   // Basically, game bails here if there are no spawn points for a team.  Don't let this happen.
+   TNLAssert(mTeams[teamIndex].spawnPoints.size(), "No spawn points!");   // Basically, game dies if there are no spawn points for a team.  Don't let this happen.
 
    Point spawnPoint;
    S32 spawnIndex = TNL::Random::readI() % mTeams[teamIndex].spawnPoints.size();    // Pick random spawn point
@@ -925,6 +937,28 @@ void GameType::spawnShip(GameConnection *theClient)
       setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game
 }
 
+
+void GameType::spawnRobot(Robot *robot)
+{
+   S32 teamIndex = robot->getTeam();
+   TNLAssert(mTeams[teamIndex].spawnPoints.size(), "No spawn points!");  
+
+   Point spawnPoint;
+   S32 spawnIndex = TNL::Random::readI() % mTeams[teamIndex].spawnPoints.size();    // Pick random spawn point
+   spawnPoint = mTeams[teamIndex].spawnPoints[spawnIndex];
+   //                       Player's name, team, and spawning location
+   //Robot *newRobot = new Robot("NewBot", teamIndex, spawnPoint);
+
+   robot->resetLocation(spawnPoint);
+   robot->respawnTimer.clear();
+   //robot->addToGame(getGame());
+
+   // Should probably do this, but... not now.
+   //if(isSpawnWithLoadoutGame())
+   //   setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game
+
+}
+
 // This gets run when the ship hits a loadout zone
 void GameType::updateShipLoadout(GameObject *shipObject)
 {
@@ -937,6 +971,7 @@ void GameType::updateShipLoadout(GameObject *shipObject)
    setClientShipLoadout(cl, gc->getLoadout());
 }
 
+
 void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout)
 {
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
@@ -947,6 +982,7 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout)
       theShip->setLoadout(loadout);
 }
 
+
 void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &loadout)
 {
    // Not CE
@@ -954,6 +990,7 @@ void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &l
    //if(clientIndex != -1)
    //   setClientShipLoadout(clientIndex, loadout);
 }
+
 
 extern Rect gServerWorldBounds;
 
@@ -1009,6 +1046,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    }
 }
 
+
 void GameType::addItemOfInterest(Item *theItem)
 {
    ItemOfInterest i;
@@ -1016,6 +1054,7 @@ void GameType::addItemOfInterest(Item *theItem)
    i.teamVisMask = 0;
    mItemsOfInterest.push_back(i);
 }
+
 
 void GameType::queryItemsOfInterest()
 {
@@ -1047,6 +1086,7 @@ void GameType::queryItemsOfInterest()
       fillVector.clear();
    }
 }
+
 
 // Here is where we determine which objects are visible from player's ships.  Only runs on server?
 void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
@@ -1281,9 +1321,11 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
    {
       if(killerRef == clientRef)    // We killed ourselves -- should have gone easy with the bouncers!
          updateScore(killerRef, KillSelf);
+
       // Punish those who kill members of their own team.  Should do nothing with friendly fire disabled
       else if(isTeamGame() && killerRef->teamId == clientRef->teamId)   // Same team in a team game
          updateScore(killerRef, KillTeammate);
+
       else                                                              // Different team, or not a team game
          updateScore(killerRef, KillEnemy);
 
@@ -1293,6 +1335,17 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
       s2cKillMessage(clientRef->name, NULL);
 
    clientRef->respawnTimer.reset(RespawnDelay);
+}
+
+
+// Handle score for ship and robot
+void GameType::updateScore(Ship *ship, ScoringEvent event, S32 data)
+{
+   ClientRef *cl = NULL;
+   if(!ship->isRobot())
+      cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
+
+   updateScore(cl, ship->getTeam(), CaptureZone);  
 }
 
 

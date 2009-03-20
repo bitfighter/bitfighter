@@ -113,10 +113,10 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mHealRate = 0;
 }
 
-void EngineeredObject::processArguments(S32 argc, const char **argv)
+bool EngineeredObject::processArguments(S32 argc, const char **argv)
 {
    if(argc < 3)
-      return;
+      return false;
 
    Point p;
    mTeam = atoi(argv[0]);
@@ -155,14 +155,18 @@ void EngineeredObject::processArguments(S32 argc, const char **argv)
          }
       }
    }
+
    if(minDist > 1)
-      return;
+      return true;      // I think?
+
    mAnchorPoint = anchor + normal;
    mAnchorNormal = normal;
    computeExtent();
 
    if(mHealth != 0)
       onEnabled();
+
+   return true;
 }
 
 
@@ -226,12 +230,11 @@ void EngineeredObject::damageObject(DamageInfo *di)
          if(s)
          {
             GameType *gt = getGame()->getGameType();
-            ClientRef *cl = s->getControllingClient()->getClientRef();
 
             if(gt->isTeamGame() && s->getTeam() == getTeam())
-               gt->updateScore(cl, GameType::KillOwnTurret);
+               gt->updateScore(s, GameType::KillOwnTurret);
             else
-               gt->updateScore(cl, GameType::KillEnemyTurret);
+               gt->updateScore(s, GameType::KillEnemyTurret);
          }
       }
    }

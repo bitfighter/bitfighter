@@ -961,12 +961,17 @@ SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 }
 
 
-void SpyBug::processArguments(S32 argc, const char **argv)
+bool SpyBug::processArguments(S32 argc, const char **argv)
 {
    if(argc < 3)
-      return;
-   mTeam = atoi(argv[0]);                    // Team first!
-   Parent::processArguments(2, &argv[1]);    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
+      return false;
+
+   mTeam = atoi(argv[0]);                        // Team first!
+   
+   if(!Parent::processArguments(2, &argv[1]))    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
+      return false;
+
+   return true;
 }
 
 // Spy bugs are always in scope.  This only really matters on pre-positioned spy bugs...

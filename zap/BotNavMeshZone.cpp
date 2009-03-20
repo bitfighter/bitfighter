@@ -131,13 +131,14 @@ S32 BotNavMeshZone::getRenderSortValue()
 }
 
 // Create objects from parameters stored in level file
-void BotNavMeshZone::processArguments(S32 argc, const char **argv)
+bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 {
    if(argc < 6)
-      return;
+      return false;
 
    processPolyBounds(argc, argv, 0, mPolyBounds);
    computeExtent();  // Not needed?
+   return true;
 }
 
 
@@ -208,7 +209,6 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       Triangulate::Process(mPolyBounds, mPolyFill);
    }
 
-
    size = stream->readEnum(15);
    for(U32 i = 0; i < size; i++)
    {
@@ -247,14 +247,27 @@ extern bool segmentsCoincident(Point p1, Point p2, Point p3, Point p4);
 
 void testBotNavMeshZoneConnections()
 {
+   return;
+
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
       for(S32 j = 0; j < gBotNavMeshZones.size(); j++)
       {
-         Vector<S32> path = AStar::FindPath(i, j);
+         Vector<S32> path = AStar::findPath(i, j);
          for(S32 k = 0; k < path.size(); k++)
             logprintf("Path %d from %d to %d: %d", k, i, j, path[k]);
          logprintf("");
       }
+}
+
+
+// Returns index of neighboring zone, or -1 if zone is not a neighbor
+S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
+{
+   for(S32 i = 0; i < mNeighbors.size(); i++)
+      if(mNeighbors[i].zoneID == zoneID)
+         return i;
+
+   return -1;
 }
 
 
@@ -271,12 +284,10 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          if(!gBotNavMeshZones[i]->getExtent().intersectsOrBorders(gBotNavMeshZones[j]->getExtent()))
             continue;
 
-         logprintf("+++++++Candidate: %d - %d", i, j);
-
          // Check for unlikely but fatal situation: Not enough vertices
           if(gBotNavMeshZones[i]->mPolyBounds.size() < 3 || gBotNavMeshZones[j]->mPolyBounds.size() < 3)
           {
-             logprintf("Too few pts!");
+             logprintf("ERROR!! Too few pts!");
             continue;
           }
 
@@ -304,13 +315,15 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 
                if(segsOverlap(pi1, pi2, pj1, pj2, bordStart, bordEnd))
                {
-                  Rect r(bordStart, bordEnd);      // Convience for computing center of border area
+                  Point bordCen = Rect(bordStart, bordEnd).getCenter();
 
                   NeighboringZone n1;
                   n1.zoneID = j;
                   n1.borderStart = bordStart;
                   n1.borderEnd = bordEnd;
-                  n1.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(r.getCenter());     // Whew!
+                  n1.borderCenter = bordCen;
+
+                  n1.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
                   n1.center = gBotNavMeshZones[j]->getCenter();
                   gBotNavMeshZones[i]->mNeighbors.push_back(n1);
 
@@ -318,18 +331,18 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
                   n2.zoneID = i;
                   n2.borderStart = bordStart;
                   n2.borderEnd = bordEnd;
-                  n2.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(r.getCenter());     
+                  n2.borderCenter = bordCen;
+
+                  n2.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
                   n2.center = gBotNavMeshZones[i]->getCenter();
                   gBotNavMeshZones[j]->mNeighbors.push_back(n2);
 
-                  logprintf("====================== %d Zones touch: %d - %d",gBotNavMeshZones[i]->mNeighbors.size(), i, j);
                   found = true;
                }
             }
          }
       }
    }
-   
 }
 
 
@@ -341,7 +354,7 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
 
 
 // Returns a path, including the startZone and targetZone 
-Vector<S32> AStar::FindPath(S32 startZone, S32 targetZone)
+Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
 {
    const S32 zones = 50;
 
@@ -359,8 +372,6 @@ Vector<S32> AStar::FindPath(S32 startZone, S32 targetZone)
    F32 Fcost[zones];	
    F32 Gcost[zones]; 	
    F32 Hcost[zones];	
-
-
 
 	S32 u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0,
 	path = 0;
@@ -551,8 +562,8 @@ Vector<S32> AStar::FindPath(S32 startZone, S32 targetZone)
                   }
                }
 
-            } // else If whichList(zoneID) = onOpenList	
-         } // for loop
+            } // else if whichList(zoneID) = onOpenList	
+         } // for loop looping through neighboring zones list
 	   }  
 
 	   // If target is added to open list then path has been found.
@@ -566,39 +577,25 @@ Vector<S32> AStar::FindPath(S32 startZone, S32 targetZone)
    // Save the path if it exists.
 	if(path == found)
 	{
-
       // Working backwards from the target to the starting location by checking
       //	each cell's parent, figure out the length of the path.
+      // Fortunately, we want our list to have the closest zone last (see getWaypoint),
+      // so it all works out nicely.
+
 	   path = targetZone; 
-   	S32 pathLength = 0;
+      pathZones.push_back(path);
 
 	   while(path != startZone)
 	   {
 		   // Find the parent of the current cell	
 		   path = parentZones[path];		
-		   pathLength++;
+         pathZones.push_back(path);
 	   }
-
-      // Note that we'll be working backwards from targetZone to startZone
-      // Since targetZone was never added to the path, we'll add it here.
-      pathZones.setSize(pathLength + 1);
-
-      path = targetZone;
-
-	   while(path != startZone)
-	   {
-         pathZones[pathLength] = path;
-	      path = parentZones[path];		
-         pathLength--;
-	   }
-
-      pathZones[0] = startZone;
 
 	   return pathZones;
-
 	}
 
-   // There is no path to the selected target.
+   // else there is no path to the selected target.
    pathZones.push_back(-1);
 	return pathZones;
 }

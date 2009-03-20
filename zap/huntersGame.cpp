@@ -102,7 +102,7 @@ void HuntersGameType::addNexus(HuntersNexusObject *nexus)
 }
 
 
-void HuntersGameType::processArguments(S32 argc, const char **argv)
+bool HuntersGameType::processArguments(S32 argc, const char **argv)
 {
    if(argc > 0)
    {
@@ -119,6 +119,8 @@ void HuntersGameType::processArguments(S32 argc, const char **argv)
       }
    }
    mNexusReturnTimer.reset(mNexusReturnDelay);
+
+   return true;
 }
 
 // Describe the arguments processed above...
@@ -166,10 +168,12 @@ Vector<GameType::ParameterDescription> HuntersGameType::describeArguments()
 void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus)
 {
    HuntersFlagItem *theFlag = NULL;
+
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
    {
       Item *theItem = theShip->mMountedItems[i];
       theFlag = dynamic_cast<HuntersFlagItem *>(theItem);
+
       if(theFlag)
          break;
    }
@@ -177,16 +181,16 @@ void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus
    if(!theFlag)      // Just in case!
       return;
 
-   ClientRef *cl = theShip->getControllingClient()->getClientRef();
-   updateScore(cl, ReturnFlagsToNexus, theFlag->getFlagCount());
+   updateScore(theShip, ReturnFlagsToNexus, theFlag->getFlagCount());
 
    if(theFlag->getFlagCount() > 0)
    {
-      s2cHuntersMessage(HuntersMsgScore, theShip->mPlayerName.getString(), theFlag->getFlagCount(), getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
+      s2cHuntersMessage(HuntersMsgScore, theShip->getName().getString(), theFlag->getFlagCount(), getEventScore(TeamScore, ReturnFlagsToNexus, theFlag->getFlagCount()) );
       theNexus->s2cFlagsReturned();    // Alert the Nexus that someone has returned flags to it
    }
    theFlag->changeFlagCount(0);
 }
+
 
 // Runs on the server
 void HuntersGameType::onGhostAvailable(GhostConnection *theConnection)
@@ -351,7 +355,7 @@ void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, Ga
          {
             Point pos = theFlag->getActualPos();
             s2cAddYardSaleWaypoint(pos.x, pos.y);
-            s2cHuntersMessage(HuntersMsgYardSale, theShip->mPlayerName.getString(), 0, 0);
+            s2cHuntersMessage(HuntersMsgYardSale, theShip->getName().getString(), 0, 0);
          }
 
          return;
@@ -523,10 +527,10 @@ extern S32 gMaxPolygonPoints;
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
-void HuntersNexusObject::processArguments(S32 argc, const char **argv)
+bool HuntersNexusObject::processArguments(S32 argc, const char **argv)
 {
    if(argc < 2)
-      return;
+      return false;
 
    if(argc <= 4)     // Zap! format
    {
@@ -552,6 +556,8 @@ void HuntersNexusObject::processArguments(S32 argc, const char **argv)
       processPolyBounds(argc, argv, 0, mPolyBounds);
 
    computeExtent();
+
+   return true;
 }
 
 void HuntersNexusObject::computeExtent()

@@ -210,7 +210,7 @@ public:
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
 
-   virtual void processArguments(S32 argc, const char**argv);
+   virtual bool processArguments(S32 argc, const char**argv);
    void setScopeAlways();
 
 };

@@ -41,16 +41,20 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
    mInitial = false;
 }
 
-void Item::processArguments(S32 argc, const char **argv)
+bool Item::processArguments(S32 argc, const char **argv)
 {
    if(argc < 2)
-      return;
+      return false;
+
    Point pos;
    pos.read(argv);
    pos *= getGame()->getGridSize();
    for(U32 i = 0; i < MoveStateCount; i++)
       mMoveState[i].pos = pos;
+
    updateExtent();
+
+   return true;
 }
 
 void Item::render()

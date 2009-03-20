@@ -225,7 +225,9 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
       if(!fillVector[i]->isCollisionEnabled())
          continue;
 
-      static Vector<Point> poly;
+GameObject *o = fillVector[i];
+
+      Vector<Point> poly;
       poly.clear();
       if(fillVector[i]->getCollisionPoly(stateIndex, poly))
       {

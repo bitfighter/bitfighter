@@ -86,7 +86,7 @@ public:
    void sendHome();
    void damageObject(DamageInfo *theInfo);
    void idle(GameObject::IdleCallPath path);
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    Vector<GameType::ParameterDescription> describeArguments();
 
    void onAddedToGame(Game *theGame);

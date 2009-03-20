@@ -30,6 +30,7 @@
 #include "sfx.h"
 #include "voiceCodec.h"
 #include "gameObject.h" 
+#include "robot.h"
 #include <string>
 
 namespace Zap
@@ -113,6 +114,7 @@ public:
       RespawnDelay = 1500,
       SwitchTeamsDelay = 60000,   // Time between team switches (ms) -->  60000 = 1 minute
       naScore = -99999,           // Score representing a nonsesical event
+      NO_FLAG = -1,               // Constant used for ship not having a flag
    };
 
    struct BarrierRec
@@ -123,7 +125,8 @@ public:
    };
 
    Vector<BarrierRec> mBarriers;
-   Vector<RefPtr<ClientRef> > mClientList;
+   Vector<RefPtr<ClientRef>> mClientList;
+
    ClientRef *mLocalClient;
 
    virtual ClientRef *allocClientRef() { return new ClientRef; }
@@ -242,7 +245,7 @@ public:
 
    ClientRef *findClientRef(const StringTableEntry &name);
 
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    virtual Vector<GameType::ParameterDescription> describeArguments();
 
    virtual bool processLevelItem(S32 argc, const char **argv);
@@ -261,6 +264,8 @@ public:
    virtual void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
 
    virtual void spawnShip(GameConnection *theClient);
+   virtual void spawnRobot(Robot *robot);
+
    virtual void changeClientTeam(GameConnection *theClient, S32 team);     // Change player to team indicated, -1 = cycle teams
 
    virtual void renderInterfaceOverlay(bool scoreboardVisible);
@@ -314,8 +319,10 @@ public:
 
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 
+   // Not all of these actually used?
+   void updateScore(Ship *ship, ScoringEvent event, S32 data = 0);               // used
    void updateScore(ClientRef *client, S32 team, ScoringEvent event, S32 data = 0);
-   void updateScore(ClientRef *client, ScoringEvent event, S32 data = 0);
+   void updateScore(ClientRef *client, ScoringEvent event, S32 data = 0);        // used
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
 
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, gMaxTeams> teamIndex, U32 score));

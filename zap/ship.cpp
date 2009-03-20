@@ -106,10 +106,10 @@ void Ship::onGhostRemove()
 }
 
 
-void Ship::processArguments(S32 argc, const char **argv)
+bool Ship::processArguments(S32 argc, const char **argv)
 {
    if(argc != 3)
-      return;
+      return false;
 
    Point pos;
    pos.read(argv + 1);
@@ -121,6 +121,8 @@ void Ship::processArguments(S32 argc, const char **argv)
    }
 
    updateExtent();
+
+   return true;
 } 
 
 
@@ -897,6 +899,16 @@ F32 getAngleDiff(F32 a, F32 b)
       return b-a;
    }
 }
+
+
+S32 Ship::carryingFlag()
+{
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeMask() & FlagType))
+         return i;
+   return GameType::NO_FLAG;
+}
+
 
 bool Ship::carryingResource()
 {

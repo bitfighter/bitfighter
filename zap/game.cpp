@@ -491,9 +491,19 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
       }
       else
       {
-         object->addToGame(this);                           // And add it to the list of game objects
-         object->processArguments(argc - 1, argv + 1);      //    with the rest of the line as parameters
-      }                                                     //    (see GameObject.cpp, & various game-specific subtypes)
+         gServerWorldBounds = gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
+         object->addToGame(this);
+
+         bool validArgs = object->processArguments(argc - 1, argv + 1);
+
+         if(!validArgs)
+         {
+            logprintf("Object %s had invalid parameters, ignoring...", argv[0]);
+            object->removeFromGame();
+            object->destroySelf();
+         }
+                                                            
+      }                                                    
    }
 }
 

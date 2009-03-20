@@ -462,10 +462,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\luaCall.h"
-				>
-			</File>
-			<File
 				RelativePath=".\moveObject.cpp"
 				>
 			</File>

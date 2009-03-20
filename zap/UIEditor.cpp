@@ -570,9 +570,8 @@ void EditorUserInterface::validateLevel()
       mLevelErrorMsgs.push_back("ERROR: Hunters game must have a Nexus.");
    if(foundTeamFlags && !isTeamFlagGame(mGameType))
       mLevelErrorMsgs.push_back("ERROR: This game type does not use team flags.");
-   if(foundTeamFlags && !isFlagGame(mGameType))
+   if(foundFlags && !isFlagGame(mGameType))
       mLevelErrorMsgs.push_back("ERROR: This game type does not use flags.");
-
 }
 
 // Check that each item has a valid team  (fixes any problems it finds)
@@ -660,7 +659,7 @@ void EditorUserInterface::onActivate()
 
       return;
    }
-
+   mLevelErrorMsgs.clear();
    mGameTypeArgs.clear();
 
    loadLevel();

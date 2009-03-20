@@ -42,12 +42,12 @@ RepairItem::RepairItem(Point p) : PickupItem(p, 20)
 }
 
 
-void RepairItem::processArguments(S32 argc, const char **argv)
+bool RepairItem::processArguments(S32 argc, const char **argv)
 {
    if(argc < 2)
-      return;
-   else
-      Parent::processArguments(argc, argv);
+      return false;
+   else if(!Parent::processArguments(argc, argv))
+      return false;
 
    if(argc == 3)
    {
@@ -55,6 +55,8 @@ void RepairItem::processArguments(S32 argc, const char **argv)
       if(repopDelay > 0)
          mRepopDelay = repopDelay;
    }
+
+   return true;
 }
 
 

@@ -50,6 +50,9 @@ private:
    typedef MoveObject Parent;
    bool isBusy;
 
+protected:
+   StringTableEntry mPlayerName;
+
 public:
    enum {
       MaxVelocity = 450,        // points per second
@@ -99,10 +102,11 @@ public:
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
-   StringTableEntry mPlayerName;
    bool mCooldown;
    U32 mSensorStartTime;
    Point mImpulseVector;
+
+   StringTableEntry getName() { return mPlayerName; }
 
    U32 mModule[ShipModuleCount];          // Modules ship is carrying
    bool mModuleActive[ModuleCount];       // Is that module active at this moment?
@@ -125,8 +129,8 @@ public:
    F32 mass;            // Mass of ship
    bool hasExploded;
 
-   Vector<SafePtr<Item> > mMountedItems;
-   Vector<SafePtr<GameObject> > mRepairTargets;
+   Vector<SafePtr<Item>> mMountedItems;
+   Vector<SafePtr<GameObject>> mRepairTargets;
 
    virtual void render(S32 layerIndex);
    
@@ -156,6 +160,7 @@ public:
 
    bool isDestroyed() { return hasExploded; }
    bool areItemsMounted() { return mMountedItems.size() != 0; }
+   S32 carryingFlag();
    bool carryingResource();
    Item *unmountResource();
 
@@ -189,7 +194,9 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   virtual void processArguments(S32 argc, const char **argv);
+   virtual bool processArguments(S32 argc, const char **argv);
+
+   virtual bool isRobot() { return false; }
 
    GameObject *isInZone(GameObjectType zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on an item

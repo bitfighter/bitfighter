@@ -38,6 +38,7 @@
 #include "shipItems.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
+#include "flagItem.h"
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "../glut/glutInclude.h"
@@ -188,26 +189,18 @@ S32 LuaGameObject::getZoneCenterXY(lua_State *L)
 {
    // You give us a nil, we'll give it right back!
    if(lua_isnil(L, 1))
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
 
    S32 z = luaL_checknumber(L, 1);   // Desired zone
 
    // In case this gets called too early...
    if(gBotNavMeshZones.size() == 0)
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
 
    // Bounds checking...
    if(z < 0 || z >= gBotNavMeshZones.size())
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
+
 
    Point c = gBotNavMeshZones[z]->getCenter();
 
@@ -221,27 +214,19 @@ S32 LuaGameObject::getGatewayToXY(lua_State *L)
 {
    // You give us a nil, we'll give it right back!
    if(lua_isnil(L, 1) || lua_isnil(L, 2))
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
+
 
    S32 from = luaL_checknumber(L, 1);     // From this zone
    S32 to = luaL_checknumber(L, 2);     // To this one
 
    // In case this gets called too early...
    if(gBotNavMeshZones.size() == 0)
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
 
    // Bounds checking...
    if(from < 0 || from >= gBotNavMeshZones.size() || to < 0 || to >= gBotNavMeshZones.size())
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
 
    // Is requested zone a neighbor?
    for(S32 i = 0; i < gBotNavMeshZones[from]->mNeighbors.size(); i++)
@@ -256,8 +241,7 @@ S32 LuaGameObject::getGatewayToXY(lua_State *L)
    }
 
    // Did not find requested neighbor... returning nil
-   lua_pushnil(L);
-   return 1;
+   return returnNil(L);
 }
 
 
@@ -268,9 +252,9 @@ S32 LuaGameObject::getCurrentZone(lua_State *L)
    S32 zone = thisRobot->getCurrentZone();
 
    if(zone == -1)
-      lua_pushnil(L);
-   else
-      lua_pushnumber(L, zone);
+      return returnNil(L);
+
+   lua_pushnumber(L, zone);
    return 1;
 }
 
@@ -294,22 +278,24 @@ S32 LuaGameObject::fire(lua_State *L)
 // Can robot see point XY?
 S32 LuaGameObject::hasLosXY(lua_State *L)
 {
-
    F32 x, y;
 
    if(lua_isnil(L, 1) || lua_isnil(L, 2))
-   {
-      lua_pushnil(L);
-      return 1;
-   }
+      return returnNil(L);
 
    x = luaL_checknumber(L, 1);
    y = luaL_checknumber(L, 2);
 
-   F32 time;
-   Point coll;
+   lua_pushboolean(L, thisRobot->canSeePoint(Point(x,y)) );
+   return 1;
+}
 
-   lua_pushboolean(L, (thisRobot->findObjectLOS(BarrierType, MoveObject::ActualState, thisRobot->getActualPos(), Point(x,y), time, coll)) == NULL);
+
+
+// Does robot have a flag?
+S32 LuaGameObject::hasFlag(lua_State *L)
+{
+   lua_pushboolean(L, (thisRobot->carryingFlag() != GameType::NO_FLAG));
    return 1;
 }
 
@@ -332,7 +318,7 @@ S32 LuaGameObject::globalMsg(lua_State *L)
 
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->s2cDisplayChatMessage(true, thisRobot->mPlayerName, lua_tostring(L, 1));
+      gt->s2cDisplayChatMessage(true, thisRobot->getName(), lua_tostring(L, 1));
    return 0;
 }
 
@@ -344,7 +330,7 @@ S32 LuaGameObject::teamMsg(lua_State *L)
 
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->s2cDisplayChatMessage(false, thisRobot->mPlayerName, lua_tostring(L, 1));
+      gt->s2cDisplayChatMessage(false, thisRobot->getName(), lua_tostring(L, 1));
    return 0;
 }
 
@@ -379,7 +365,7 @@ S32 LuaGameObject::getAimAngle(lua_State *L){
 S32 LuaGameObject::logprint(lua_State *L)
 {
    if(!lua_isnil(L, 1))
-      logprintf("RobotLog %s: %s", thisRobot->mPlayerName.getString(), lua_tostring(L, 1));
+      logprintf("RobotLog %s: %s", thisRobot->getName().getString(), lua_tostring(L, 1));
    return 0; 
 }  
 
@@ -394,9 +380,28 @@ static void setfield (lua_State *L, const char *key, F32 value)
 }
 
 
-//findClosest(enemy | health | friend | ...) --> ?
 S32 LuaGameObject::findObjects(lua_State *L)
 {
+   //LuaProtectStack x(this); <== good idea, not working right...  ;-(
+
+   S32 n = lua_gettop(L);  // Number of arguments
+   if (n != 1)
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "findObjects called with %d args, expected 1", n);
+      logprintf(msg);
+      throw(string(msg)); 
+   }
+
+   if(!lua_isnumber(L, 1))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "findObjects called with non-numeric arg");
+      logprintf(msg);
+      throw(string(msg)); 
+   }
+
+   U32 objectType = luaL_checknumber(L, 1);
 
    fillVector.clear();
 
@@ -404,31 +409,47 @@ S32 LuaGameObject::findObjects(lua_State *L)
 
    // thisRobot->findObjects(CommandMapVisType, fillVector, gServerWorldBounds);    // Get all globally visible objects
    //thisRobot->findObjects(ShipType, fillVector, Rect(thisRobot->getActualPos(), gServerGame->computePlayerVisArea(thisRobot)) );    // Get other objects on screen-visible area only
-   thisRobot->findObjects(ShipType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
+   thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
    
    F32 bestRange = F32_MAX;
    Point bestPoint;
 
+   GameType *gt = gServerGame->getGameType();
+   TNLAssert(gt, "Invaid game type!!");
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(fillVector[i]->getObjectTypeMask() & (ShipType))
+      // Some special rules for narrowing in on the objects we really want
+      if(fillVector[i]->getObjectTypeMask() & ShipType)
       {
-         Ship *potential = (Ship*)fillVector[i];
+         Ship *ship = (Ship*)fillVector[i];
 
          // If it's dead or cloaked, ignore it
-         if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
+         if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
             continue;
+      }
+      else if(fillVector[i]->getObjectTypeMask() & FlagType)
+      {
+         // For now, ignore flags not in their starting location
+         FlagItem *flag = (FlagItem*)fillVector[i];
+         if(!flag->isAtHome())
+            continue;
+      }
+      else if(fillVector[i]->getObjectTypeMask() & GoalZoneType)
+      {
+         // For now, ignore goalzones with flags in them
+         GoalZone *goal = (GoalZone*)fillVector[i];
+
+         for(S32 j = 0; j < gt->mFlags.size(); j++)
+            if(gt->mFlags[i]->getZone() == goal)      // Flag is in this goalzone!
+               continue;
       }
 
       GameObject *potential = fillVector[i];
 
-      // Can we see it?
-      F32 t;     // t is set in next statement
-      Point n;
-
-      // If this returns true, there is a BarrierType (i.e. wall) object obstructing our LOS
-      if(thisRobot->findObjectLOS(BarrierType, MoveObject::ActualState, thisRobot->getActualPos(), potential->getActualPos(), t, n))
-         continue;
+      // If object needs to be visible, uncomment following
+      //if( ! thisRobot->canSeePoint(potential->getActualPos()) )   // Can we see it?
+      //   continue;      // No
 
       F32 dist = thisRobot->getActualPos().distanceTo(potential->getActualPos());
 
@@ -441,16 +462,121 @@ S32 LuaGameObject::findObjects(lua_State *L)
 
    // Write the results to Lua
    if(bestRange < F32_MAX)
+      return returnPoint(L, bestPoint);
+
+   // else no targets found
+   return returnNil(L);
+}
+
+
+extern S32 findZoneContaining(Point p);
+
+// Get next waypoint to head toward when traveling from current location to x,y
+// Note that this function will be called frequently by various robots, so any
+// optimizations will be helpful.
+S32 LuaGameObject::getWaypoint(lua_State *L)
+{
+   S32 n = lua_gettop(L);  // Number of arguments
+   if (n != 2)
    {
-      lua_createtable(L, 0, 2);        // creates a table  with 2 fields
-      setfield(L, "x", bestPoint.x);        // table.x = x 
-      setfield(L, "y", bestPoint.y);        // table.y = y 
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "getWaypoint called with %d args, expected 2", n);
+      logprintf(msg);
+      throw(string(msg)); 
    }
-   else		// No targets found
+//alternatively: luaL_checktype(L,1,LUA_TNUMBER) , throws an error?
+   if(!lua_isnumber(L, 1) || !lua_isnumber(L, 2))
    {
-      lua_pushnil(L); 
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "getWaypoint called with non-numeric arg");
+      logprintf(msg);
+      throw(string(msg)); 
    }
 
+   F32 x = luaL_checknumber(L, 1);
+   F32 y = luaL_checknumber(L, 2);
+
+   Point target = Point(x,y);
+
+   // First, check to see if target is within our LOS...
+   if(thisRobot->canSeePoint(target))
+      return returnPoint(L, target);   // ...if so, that's our waypoint!
+
+   S32 currentZone = thisRobot->getCurrentZone();
+
+   if(currentZone == -1)      // We don't really know where we are... bad news!
+   {
+      return returnNil(L);    // We can do better than this, right?
+   }
+
+   // Second, see if we already have a valid path calculated to target zone.  Basically, we want
+   // to avoid doing pathfinding if we don't really need to.
+   // if no plan || invalid plan || we already have path to this target || target is in same zone we already have plan to
+   if(thisRobot->flightPlan.size() == 0 || thisRobot->flightPlan.first() == -1 || 
+      target == thisRobot->flightPlanTo || findZoneContaining(target) == thisRobot->flightPlan.first())
+   {
+      for(S32 i = thisRobot->flightPlan.size() - 1; i >= 0; i--)
+         if(thisRobot->flightPlan[i] == currentZone)     // This path will be valid from here on out
+         {
+            if(i == 0)     // Target is in this zone... should have been caught earlier (we should be able to see target), so shouldn't happen
+            {
+               TNLAssert(false, "Illogical condition in path finding code...");
+               return returnPoint(L, target);
+            }
+
+            return returnPoint(L, getNextWaypoint());
+         }
+         else
+            thisRobot->flightPlan.pop_back();            // Get rid of last zone... it's no longer relevant
+   }
+   
+   // If we get to here, then we need to find a new path.  Either our original path was invalid for some reason,
+   // or the path we had no longer applied to our current location
+
+   S32 targetZone = findZoneContaining(target);
+
+   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone);
+
+   //for(S32 i = 0; i < thisRobot->flightPlan.size(); i++)
+   //   logprintf("Flightplan zone %d = %d",i, thisRobot->flightPlan[i]);
+
+   TNLAssert(thisRobot->flightPlan.size() > 1, "Flight plan appears too small!");
+
+   return returnPoint(L, getNextWaypoint());
+}
+
+
+// Encapsulate some ugliness
+Point LuaGameObject::getNextWaypoint()
+{
+   TNLAssert(thisRobot->flightPlan.size() > 1, "FlightPlan has too few zones!");
+
+   S32 currentZone = thisRobot->getCurrentZone();
+   S32 nextZone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];    
+
+   // Note that getNeighborIndex could return -1.  It shouldn't, but it could.
+   S32 neighborZoneIndex = gBotNavMeshZones[currentZone]->getNeighborIndex(nextZone);
+
+   TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
+
+   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
+}
+
+
+// Returns a point to calling Lua function
+S32 LuaGameObject::returnPoint(lua_State *L, Point point)
+{
+   lua_createtable(L, 0, 2);        // creates a table  with 2 fields
+   setfield(L, "x", point.x);        // table.x = x 
+   setfield(L, "y", point.y);        // table.y = y 
+
+   return 1;
+}
+
+// Returns nil to calling Lua function
+S32 LuaGameObject::returnNil(lua_State *L)
+{
+   lua_pushnil(L); 
    return 1;
 }
 
@@ -479,6 +605,8 @@ Luna<LuaGameObject>::RegType LuaGameObject::methods[] = {
       method(LuaGameObject, getAngleXY),
       method(LuaGameObject, hasLosXY),
 
+      method(LuaGameObject, hasFlag),
+      method(LuaGameObject, getWaypoint),
 
       method(LuaGameObject, setThrustAng),
       method(LuaGameObject, setThrustXY),
@@ -535,10 +663,30 @@ getGameType()
 
 
 const char LuaGameObject::className[] = "LuaGameObject";
-//class LuaPlus::LuaState;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Robot);
+
+Vector<Robot *> gRobotList;        // List of all robots in the game
 
 // Constructor
 Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m)
@@ -577,11 +725,13 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    mWeapon[1] = WeaponMine;
    mWeapon[2] = WeaponBurst;
 
+   respawnTimer.reset(RobotRespawnDelay);
 
    mActiveWeaponIndx = 0;
 
    mCooldown = false;
 
+   gRobotList.push_back(this);
 
    // try http://csl.sublevel3.org/lua/
 
@@ -594,19 +744,74 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
 
   //luaopen_base(L);
  // luaopen_table(L);
-//  luaopen_io(L);  // Don't want robots writing to our terminal.  Besides, this crashes!!
   //luaopen_string(L);
   //luaopen_debug(L);
 
-  // Register the LuaGameObject data type with Lua
-  Luna<LuaGameObject>::Register(L);
-  
-  // Push a pointer to this Robot to the Lua stack
-  lua_pushlightuserdata(L, (void*)this);
-  
-  // And set the global name of this pointer.  This is the name that we'll use to refer
-  // to our robot from our Lua code.
-  lua_setglobal(L,"Robot");
+   // Register the LuaGameObject data type with Lua
+   Luna<LuaGameObject>::Register(L);
+     
+   // Push a pointer to this Robot to the Lua stack
+   lua_pushlightuserdata(L, (void*)this);
+
+   // And set the global name of this pointer.  This is the name that we'll use to refer
+   // to our robot from our Lua code.
+   lua_setglobal(L, "Robot");
+
+   // Set some more globals that we'll need in Lua
+
+   // Maybe...  this doesn't quite work...
+   //#define setEnum(name) {lua_pushinteger(L, name); lua_setglobal(L, "name");}
+   //setEnum(ShipType);
+   //setEnum(FlagType);
+
+   lua_pushinteger(L, ShipType);
+   lua_setglobal(L, "ShipType");
+
+   lua_pushinteger(L, FlagType);
+   lua_setglobal(L, "FlagType");
+
+   lua_pushinteger(L, GoalZoneType);
+   lua_setglobal(L, "GoalZoneType");
+
+    
+
+
+   //ShipType           = BIT(1),
+   //BarrierType        = BIT(2),
+   //MoveableType       = BIT(3),
+   //BulletType         = BIT(4),
+   //ItemType           = BIT(5),
+   //ResourceItemType   = BIT(6),
+   //EngineeredType     = BIT(7),
+   //ForceFieldType     = BIT(8),
+   //LoadoutZoneType    = BIT(9),
+   //MineType           = BIT(10),
+   //TestItemType       = BIT(11),
+   //FlagType           = BIT(12),
+   //TurretTargetType   = BIT(13),
+   //SlipZoneType       = BIT(14),
+   //HeatSeekerType     = BIT(15),
+   //SpyBugType         = BIT(16),
+   //NexusType          = BIT(17),
+   //BotNavMeshZoneType = BIT(18),
+   //RobotType          = BIT(19),
+   //TeleportType       = BIT(20),    
+   //GoalZoneType       = BIT(21),
+   //AsteroidType       = BIT(22),
+
+   //AllObjectTypes    = 0xFFFFFFFF,
+
+   //"GameType",                // Generic game type --> Bitmatch
+   //"CTFGameType",
+   //"HTFGameType",
+   //"HuntersGameType",
+   //"RabbitGameType",
+   //"RetrieveGameType",
+   //"SoccerGameType",
+   //"ZoneControlGameType",
+
+
+
 }
   
 
@@ -614,6 +819,15 @@ Robot::~Robot()
 {
    // Close down our Lua interpreter
    lua_close(L);
+
+   // Remove robot from robotList, as it's now an ex-robot.
+   for(S32 i = 0; i < gRobotList.size(); i++)
+      if(gRobotList[i] = this)
+      {
+         gRobotList.erase(i);
+         break;
+      }
+
 
    logprintf("Robot terminated [%s]", mFilename.c_str());
 }
@@ -629,24 +843,15 @@ void Robot::onAddedToGame(Game *)
 }
 
 
-void Robot::processArguments(S32 argc, const char **argv)
+bool Robot::processArguments(S32 argc, const char **argv)
 {
-   if(argc != 4)
-      return;
+   if(argc != 2)
+      return false;
 
-   Point pos;
-   pos.read(argv + 1);
-   pos *= getGame()->getGridSize();
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = pos;
-      mMoveState[i].angle = 0;
-   }
-
-   updateExtent();
+   mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
 
    mFilename = "robots/";
-   mFilename += argv[3];
+   mFilename += argv[1];
 
    try
    {
@@ -656,8 +861,8 @@ void Robot::processArguments(S32 argc, const char **argv)
       if(retCode)
       {
          logError("Error loading file:" + string(lua_tostring(L, -1)) + ".  Shutting robot down.");
-         delete this;
-         return;
+         delete this;      // Needed?
+         return false;
       }
 
       // Run main script body 
@@ -666,8 +871,8 @@ void Robot::processArguments(S32 argc, const char **argv)
    catch(string e)
    {
       logError("Error initializing robot: " + e + ".  Shutting robot down.");
-      delete this;
-      return;
+      delete this;   // Needed?
+      return false;
    }
   
    try
@@ -681,8 +886,10 @@ void Robot::processArguments(S32 argc, const char **argv)
    {
       logError("Robot error running getName(): " + e + ".  Shutting robot down.");
       delete this;
-      return;
+      return false;
    }
+
+   return true;
 }
 
 
@@ -693,8 +900,6 @@ void Robot::logError(string err)
    logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), err.c_str());
 }
 
-
-extern S32 findZoneContaining(Point p);
 
 S32 Robot::getCurrentZone()
 {
@@ -787,10 +992,28 @@ bool Robot::findNearestShip(Point &loc)
 }
 
 
+bool Robot::canSeePoint(Point point)
+{
+   F32 time;
+   Point coll;
+
+   return( findObjectLOS(BarrierType, MoveObject::ActualState, this->getActualPos(), point, time, coll) == NULL );
+}
+
+void Robot::resetLocation(Point location)
+{
+   for(S32 i = 0; i < MoveStateCount; i++)
+      {
+         mMoveState[i].pos = location;
+         mMoveState[i].angle = 0;
+         mMoveState[i].vel = Point(0,0);
+      }
+   updateExtent();
+}
+
 
 void Robot::idle(GameObject::IdleCallPath path)
 {
-
    // Never ClientIdleControlReplay, ClientIdleControlMain, or ServerIdleControlFromClient
    TNLAssert(path == ServerIdleMainLoop || path == ClientIdleMainRemote , "Unexpected idle call path in Robot::idle!");      
 
@@ -810,6 +1033,12 @@ void Robot::idle(GameObject::IdleCallPath path)
       catch (string e)
       {
          logError("Robot error running getMove(): " + e + ".  Shutting robot down.");
+         delete this;
+         return;
+      }
+      catch (...)    // Catches any other errors not caught above --> should never happen
+      {
+         logError("Robot error: Unknown exception.  Shutting robot down");
          delete this;
          return;
       }

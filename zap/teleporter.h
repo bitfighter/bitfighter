@@ -65,7 +65,7 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
 
    TNL_DECLARE_CLASS(Teleporter);

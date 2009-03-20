@@ -93,7 +93,7 @@ void SoccerGameType::setBall(SoccerBallItem *theBall)
 
 void SoccerGameType::scoreGoal(StringTableEntry playerName, S32 goalTeamIndex)
 {
-   ClientRef *cl = findClientRef(playerName);		// Need a better mechanism for this... time for shipIDs?
+   ClientRef *cl = findClientRef(playerName);		// Need a better mechanism for this... time for shipIDs?  Or attach ship object to soccer ball?
    S32 scoringTeam = -1;
    if(cl)
       scoringTeam = cl->teamId;
@@ -113,6 +113,7 @@ void SoccerGameType::scoreGoal(StringTableEntry playerName, S32 goalTeamIndex)
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
    }
 }
+
 
 void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
@@ -195,10 +196,13 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    initialPos = pos;
 }
 
-void SoccerBallItem::processArguments(S32 argc, const char **argv)
+bool SoccerBallItem::processArguments(S32 argc, const char **argv)
 {
-   Parent::processArguments(argc, argv);
+   if(!Parent::processArguments(argc, argv))
+      return false;
+
    initialPos = mMoveState[ActualState].pos;
+   return true;
 }
 
 
@@ -244,7 +248,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
    if(theInfo->damagingObject && (theInfo->damagingObject->getObjectTypeMask() & ShipType))
    {
-      lastPlayerTouch = (dynamic_cast<Ship *>(theInfo->damagingObject))->mPlayerName;
+      lastPlayerTouch = (dynamic_cast<Ship *>(theInfo->damagingObject))->getName();
    }
 }
 
@@ -263,7 +267,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
    if(hitObject->getObjectTypeMask() & ShipType)
    {
-      lastPlayerTouch = (dynamic_cast<Ship *>(hitObject))->mPlayerName;
+      lastPlayerTouch = (dynamic_cast<Ship *>(hitObject))->getName();
    }
    else
    {

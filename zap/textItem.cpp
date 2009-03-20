@@ -59,10 +59,10 @@ S32 TextItem::getRenderSortValue()
 
 // Create objects from parameters stored in level file
 // Entry looks like: TextItem 0 50 10 10 11 11 Message goes here
-void TextItem::processArguments(S32 argc, const char **argv)
+bool TextItem::processArguments(S32 argc, const char **argv)
 {
    if(argc < 7)
-      return;
+      return false;
 
    mTeam = atoi(argv[0]);
 
@@ -96,6 +96,8 @@ void TextItem::processArguments(S32 argc, const char **argv)
    }
 
    computeExtent();
+
+   return true;
 }
 
 

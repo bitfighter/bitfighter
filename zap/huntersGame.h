@@ -64,7 +64,7 @@ public:
    bool isFlagGame() { return false; }
    bool isSpawnWithLoadoutGame() { return true; }
 
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    Vector<GameType::ParameterDescription> describeArguments();
 
    void addNexus(HuntersNexusObject *theObject);
@@ -151,7 +151,7 @@ public:
    HuntersNexusObject();
 
    void onAddedToGame(Game *theGame);
-   void processArguments(S32 argc, const char **argv);
+   bool processArguments(S32 argc, const char **argv);
    void idle(GameObject::IdleCallPath path);
 
    void render();

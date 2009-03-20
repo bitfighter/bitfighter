@@ -1447,7 +1447,7 @@ void TeamMenuUserInterface::render()
    {
       Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
       if(ship)
-         name = ship->mPlayerName.getString();
+         name = ship->getName().getString();
    }
 
    if(strcmp(name.c_str(), nameToChange))    // i.e. names differ, this isn't the local player

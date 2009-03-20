@@ -61,10 +61,10 @@ S32 GoalZone::getRenderSortValue()
 
 extern S32 gMaxPolygonPoints;
 
-void GoalZone::processArguments(S32 argc, const char **argv)
+bool GoalZone::processArguments(S32 argc, const char **argv)
 {
    if(argc < 7)
-      return;
+      return false;
 
    mTeam = atoi(argv[0]);     // Team is first arg
    processPolyBounds(argc, argv, 1, mPolyBounds);
@@ -81,6 +81,7 @@ void GoalZone::processArguments(S32 argc, const char **argv)
       mPolyBounds.push_back(p);
    } */
 
+   return true;
 }
 
 void GoalZone::setTeam(S32 team)
@@ -116,7 +117,7 @@ bool GoalZone::getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints)
 
 bool GoalZone::collide(GameObject *hitObject)
 {
-   if(!isGhost() && (hitObject->getObjectTypeMask() & ShipType))
+   if(!isGhost() && ((hitObject->getObjectTypeMask() & ShipType) || (hitObject->getObjectTypeMask() & RobotType)) )
    {
       Ship *s = (Ship *)(hitObject);      // <--- Should be Ship *s = dynamic_cast<Ship *>(hitObject);... but it won't compile!
       getGame()->getGameType()->shipTouchZone(s, this);
