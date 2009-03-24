@@ -47,8 +47,11 @@ public:
    void flagDropped(Ship *theShip, FlagItem *theFlag);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
    void renderInterfaceOverlay(bool scoreboardVisible);
+
+   GameTypes getGameType() { return CTFGame; }
    const char *getGameTypeString() { return "Capture the Flag"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
+   
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return false; }
@@ -64,4 +67,3 @@ public:
 
 
 #endif
-

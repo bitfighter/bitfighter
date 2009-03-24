@@ -72,9 +72,10 @@ bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &in
    return true;
 }
 
-#define MIN(x, y) (x < y ? x : y)
-#define MAX(x, y) (x > y ? x : y)
-#define ABS(x) (x > 0 ? x : -x)
+
+#define MIN(x,y) (((x) < (y)) ? (x) : (y))
+#define MAX(x,y) (((x) > (y)) ? (x) : (y))
+#define ABS(x) (((x) > 0) ? (x) : -(x))
 
 
 // From http://local.wasp.uwa.edu.au/~pbourke/geometry/insidepoly/

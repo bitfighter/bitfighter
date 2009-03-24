@@ -46,6 +46,7 @@
 				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="../tnl;.;../openal;../glut;../lua/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;TNL_ENABLE_LOGGING;TNL_DEBUG"
+				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -550,10 +551,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\footballGame.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\gameType.cpp"
 				>
 			</File>
@@ -591,6 +588,10 @@
 			</File>
 			<File
 				RelativePath=".\soccerGame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zoneControlGame.cpp"
 				>
 			</File>
 		</Filter>

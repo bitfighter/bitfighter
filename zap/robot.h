@@ -26,8 +26,10 @@
 #ifndef _ROBOT_H_
 #define _ROBOT_H_
 
+#include "gameType.h"
 #include "gameObject.h"
 #include "moveObject.h"
+
 #include "sparkManager.h"
 #include "sfx.h"
 #include "timer.h"
@@ -96,6 +98,7 @@ public:
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
    Timer respawnTimer;
+   bool mInGame;
    void resetLocation(Point location);    
 
    bool isRobot() { return true; }
@@ -109,9 +112,25 @@ private:
 
 
 
-// The header file for the real C++ object
+class LuaClass
+{
 
-class LuaGameObject{
+protected:
+   static int luaPanicked(lua_State *L);
+   static void clearStack(lua_State *L);
+
+   static S32 returnPoint(lua_State *L, Point point);     // Returns a point... usage: return returnPoint(L, point);
+   S32 returnInt(lua_State *L, S32 num);                  // Usage: return returnInt(L, int);
+   S32 returnString(lua_State *L, const char *str);                
+   static S32 returnNil(lua_State *L);                    // Returns nil... usage: return returnNil(L);
+   static void setfield (lua_State *L, const char *key, F32 value);
+};
+
+
+extern enum ScoringEvent;
+
+class LuaRobot : public LuaClass
+{
 
 private:
    Point getNextWaypoint();      // Helper function for getWaypoint()
@@ -120,14 +139,12 @@ public:
   // Constants
 
   // Initialize the pointer
-  LuaGameObject(lua_State *L);      // Constructor
-  ~LuaGameObject();                 // Destructor
+  LuaRobot(lua_State *L);      // Constructor
+  ~LuaRobot();                 // Destructor
 
    static const char className[];
 
-   static Luna<LuaGameObject>::RegType methods[];
-
-   void setObject(lua_State *L);
+   static Luna<LuaRobot>::RegType methods[];
 
    // Methods we will need to use
    S32 getZoneCenterXY(lua_State *L);
@@ -146,9 +163,12 @@ public:
    S32 hasFlag(lua_State *L);
 
 
+   // Navigation
    S32 findObjects(lua_State *L);
    S32 getWaypoint(lua_State *L);
-   
+
+
+   // Ship control
    S32 setThrustAng(lua_State *L);
    S32 setThrustXY(lua_State *L);
 
@@ -157,17 +177,27 @@ public:
    S32 globalMsg(lua_State *L);
    S32 teamMsg(lua_State *L);
    S32 getAimAngle(lua_State *L);
-   S32 logprint(lua_State *L);
-  
-  static int luaPanicked(lua_State *L);
-  static void clearStack(lua_State *L);
 
-  static S32 returnPoint(lua_State *L, Point point);    // Returns a point... usage: return returnPoint(L, point);
-  static S32 returnNil(lua_State *L);                   // Returns nil... usage: return returnNil(L);
+   S32 logprint(lua_State *L);
+
+   // Game info
+   S32 getGameType(lua_State *L);
+   S32 getFlagCount(lua_State *L);
+   S32 getWinningScore(lua_State *L);
+   S32 getGameTimeTotal(lua_State *L);
+   S32 getGameTimeRemaining(lua_State *L);
+   S32 getLeadingScore(lua_State *L);
+   S32 getLeadingTeam(lua_State *L);
+  
+   S32 getLevelName(lua_State *L);
+   S32 getGridSize(lua_State *L);
+   S32 getIsTeamGame(lua_State *L);
+
+   S32 getEventScore(lua_State *L);
 
 
 private:
-  Robot* thisRobot;              // The pointer to the actual C++ Robot object
+  Robot* thisRobot;              // Pointer to an actual C++ Robot object
 
 };
 
@@ -183,20 +213,20 @@ private:
 //class LuaProtectStack
 //{
 //public:
-//   LuaProtectStack(LuaGameObject *lgo)
+//   LuaProtectStack(LuaRobot *lgo)
 //   {
-//      mLuaGameObject = lgo;
-//      mTop = lua_gettop(mLuaGameObject->mState);
+//      mLuaRobot = lgo;
+//      mTop = lua_gettop(mLuaRobot->mState);
 //   }
 //
 //   virtual ~LuaProtectStack(void)
 //   {
-//      if(mLuaGameObject->mState)
-//         lua_settop (mLuaGameObject->mState, mTop);
+//      if(mLuaRobot->mState)
+//         lua_settop (mLuaRobot->mState, mTop);
 //   }
 //
 //protected:
-//   LuaGameObject *mLuaGameObject;
+//   LuaRobot *mLuaRobot;
 //   S32 mTop;
 //};
 

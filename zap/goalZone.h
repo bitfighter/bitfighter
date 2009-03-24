@@ -51,6 +51,8 @@ public:
    GoalZone();
    void render();
 
+   bool mHasFlag;     // Is there a flag parked in this zone?
+
    bool isFlashing() { return mFlashCount & 1; }
    bool didRecentlyChangeTeam() { return mFlashCount != 0; }
    S32 getRenderSortValue();

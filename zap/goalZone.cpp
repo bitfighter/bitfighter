@@ -38,6 +38,7 @@ GoalZone::GoalZone()
    mNetFlags.set(Ghostable);
    mObjectTypeMask = CommandMapVisType | GoalZoneType;
    mFlashCount = 0;
+   mHasFlag = false;
 }
 
 

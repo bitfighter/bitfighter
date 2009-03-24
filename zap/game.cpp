@@ -401,11 +401,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Analyze zone connections
    BotNavMeshZone::buildBotNavMeshZoneConnections();
 
-   // Test those connections  TODO: Remove this block
-   testBotNavMeshZoneConnections();
-
-
-
+ 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())

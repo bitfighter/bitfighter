@@ -46,7 +46,6 @@ OBJECTS_ZAP=\
    controlObjectConnection.o\
    engineeredObjects.o\
    flagItem.o\
-   footballGame.o\
    keyCode.o\
    game.o\
    gameConnection.o\
@@ -82,6 +81,7 @@ OBJECTS_ZAP=\
    teleporter.o\
    textItem.o\
    voiceCodec.o\
+   zoneControlGame.o\
    gsm_encode.o\
    gsm_decode.o\
    gsm_state.o\

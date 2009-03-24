@@ -57,6 +57,7 @@ public:
          addItemOfInterest(theFlag);
    }
 
+
    void addZone(GoalZone *zone)
    {
       mZones.push_back(zone);
@@ -66,7 +67,7 @@ public:
    bool isFlagGame() { return true; }
 
 
-   // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  When we add robots, this will be important!!!
+   // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // See if the ship is already carrying a flag - can only carry one at a time
@@ -82,11 +83,6 @@ public:
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
          if(mFlags[flagIndex] == theFlag)
             break;
-
-      //GameConnection *controlConnection = theShip->getControllingClient();
-      //ClientRef *cl = controlConnection->getClientRef();
-      //if(!cl)
-      //   return;
 
       // See if this flag is already in a flag zone owned by the ship's team
       if(theFlag->getZone() != NULL && theFlag->getZone()->getTeam() == theShip->getTeam())
@@ -164,7 +160,7 @@ public:
          e.push_back(s->getName());
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen,
-            SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
+               SFXFlagCapture, (mFlags.size() == 1) ? oneFlagCapString : capString, e);
 
          // Drop the flag into the zone
          mountedFlag->dismount();
@@ -237,6 +233,7 @@ public:
       }
    }
 
+
    void renderInterfaceOverlay(bool scoreboardVisible)
    {
       Parent::renderInterfaceOverlay(scoreboardVisible);
@@ -292,6 +289,7 @@ public:
       }
    }
 
+
    // What does a particular scoring event score?
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
    {
@@ -345,7 +343,7 @@ public:
       }
    }
 
-
+   GameTypes getGameType() { return RetrieveGame; }
    const char *getGameTypeString() { return "Retrieve"; }
    const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
    bool isTeamGame() { return true; }

@@ -286,6 +286,8 @@ public:
          }
       }
    }
+
+   GameTypes getGameType() { return HTFGame; }
    const char *getGameTypeString() { return "Hold the Flag"; }
    const char *getInstructionString() { return "Hold the flags at your capture zones!"; }
    bool isTeamGame() { return true; }

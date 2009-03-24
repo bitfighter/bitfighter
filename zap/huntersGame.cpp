@@ -114,7 +114,7 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv)
          {
             mNexusCapDelay = atoi(argv[2]) * 1000;          // Time nexus remains open
             if(argc > 3)
-               mTeamScoreLimit = atoi(argv[3]);             // Winning score
+               mWinningScore = atoi(argv[3]);               // Winning score
          }
       }
    }

@@ -949,9 +949,10 @@ static bool processJoystickInputs( U32 &buttonMask )
    return true;      // true = processed joystick input
 }
 
+
 extern bool gShowAimVector;
 
-#define absf(a) a >= 0 ? a : -a
+#define absf(x) (((x) > 0) ? (x) : -(x))
 
 static void updateMoveInternal(Move *theMove)
 {

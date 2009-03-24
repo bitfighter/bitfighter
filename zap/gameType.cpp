@@ -82,7 +82,9 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
    mGameOver = false;
-   mTeamScoreLimit = DefaultTeamScoreLimit;
+   mWinningScore = DefaultWinningScore;
+   mLeadingTeam = -1;
+   mLeadingTeamScore = 0;
    minRecPlayers = -1;
    maxRecPlayers = -1;
    mCanSwitchTeams = true;    // Players can switch right away
@@ -99,7 +101,7 @@ bool GameType::processArguments(S32 argc, const char **argv)
       mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));
 
    if(argc > 1)      // Second arg is winning score
-      mTeamScoreLimit = atoi(argv[1]);
+      mWinningScore = atoi(argv[1]);
 
    return true;
 }
@@ -394,7 +396,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          }
 
          glColor4f(1, 1, 0, alpha);
-         UserInterface::drawCenteredStringf(UserInterface::canvasHeight / 2 - 50, 20, "Score to Win: %d", mTeamScoreLimit);
+         UserInterface::drawCenteredStringf(UserInterface::canvasHeight / 2 - 50, 20, "Score to Win: %d", mWinningScore);
 
       glDisable(GL_BLEND);
 
@@ -951,6 +953,8 @@ void GameType::spawnRobot(Robot *robot)
 
    robot->resetLocation(spawnPoint);
    robot->respawnTimer.clear();
+   robot->mInGame = true;
+
    //robot->addToGame(getGame());
 
    // Should probably do this, but... not now.
@@ -1339,25 +1343,25 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
 
 
 // Handle score for ship and robot
-void GameType::updateScore(Ship *ship, ScoringEvent event, S32 data)
+void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 {
    ClientRef *cl = NULL;
    if(!ship->isRobot())
       cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
 
-   updateScore(cl, ship->getTeam(), CaptureZone);  
+   updateScore(cl, ship->getTeam(), scoringEvent);  
 }
 
 
 // Handle both individual scores and team scores
-void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent event, S32 data)
+void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEvent, S32 data)
 {
    S32 newScore = 0;
 
    if(player != NULL)
    {
       // Individual scores
-      S32 points = getEventScore(IndividualScore, event, data);
+      S32 points = getEventScore(IndividualScore, scoringEvent, data);
       player->score += points;
       player->clientConnection->mCumScore += points;
 
@@ -1370,23 +1374,42 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent event, S32 
 
    if(isTeamGame())
    {
-      // Just in case...  completely superflous, gratuitous check
+      // Just in case...  completely superfluous, gratuitous check
       if(team < 0) 
          return;
 
-      newScore = mTeams[team].score + getEventScore(TeamScore, event, data);
+      newScore = mTeams[team].score + getEventScore(TeamScore, scoringEvent, data);
       mTeams[team].score = newScore;         
-      s2cSetTeamScore(team, newScore);       // Broadcast new team score
+      s2cSetTeamScore(team, newScore);          // Broadcast new team score
+
+      // Figure out which team is in the lead...
+      if(newScore < 0 && team == mLeadingTeam)  // Unusual case, but plausible: leading team loses point and is no longer leader
+      {
+         // Check to see if mLeadingTeam is still the leading team...
+         for(S32 i = 0; i < mTeams.size(); i++)
+            if(mTeams[i].score > mLeadingTeamScore)
+            {
+               mLeadingTeamScore = mTeams[i].score;
+               mLeadingTeam = i;
+            }  // no break statement in above!
+      }
+      else if(newScore > mLeadingTeamScore)     // Typical case
+      {
+         mLeadingTeamScore = newScore;
+         mLeadingTeam = team;
+      }
    }
 
-   checkForWinningScore(newScore);           // Check if score is high enough to trigger end-of-game
+   checkForWinningScore(newScore);              // Check if score is high enough to trigger end-of-game
 }
+
 
 // Different signature for more common usage
 void GameType::updateScore(ClientRef *client, ScoringEvent event, S32 data)
 {
    updateScore(client, client->teamId, event, data);
 }
+
 
 // Signature for team-only scoring event
 void GameType::updateScore(S32 team, ScoringEvent event, S32 data)
@@ -1397,7 +1420,7 @@ void GameType::updateScore(S32 team, ScoringEvent event, S32 data)
 
 void GameType::checkForWinningScore(S32 newScore)
 {
-   if(newScore >= mTeamScoreLimit)        // End game if max score has been reached
+   if(newScore >= mWinningScore)        // End game if max score has been reached
       gameOverManGameOver();
 }
 
@@ -1507,7 +1530,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
-   mTeamScoreLimit = teamScoreLimit;
+   mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
 
    gClientGame->mObjectsLoaded = 0;                      // Reset item counter
@@ -1721,7 +1744,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
 
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mTeamScoreLimit, mLevelCredits, gServerGame->mObjectsLoaded);
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded);
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {

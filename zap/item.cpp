@@ -27,6 +27,7 @@
 #include "ship.h"
 #include "goalZone.h"
 #include "gameType.h"     
+#include "flagItem.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -85,6 +86,7 @@ void Item::onMountDestroyed()
    dismount();
 }
 
+
 void Item::dismount()
 {
    if(mMount.isValid())
@@ -103,6 +105,7 @@ void Item::dismount()
    setMaskBits(MountMask);
 }
 
+
 void Item::setActualPos(Point p)
 {
    mMoveState[ActualState].pos = p;
@@ -110,27 +113,47 @@ void Item::setActualPos(Point p)
    setMaskBits(WarpPositionMask | PositionMask);
 }
 
+
 void Item::setActualVel(Point vel)
 {
    mMoveState[ActualState].vel = vel;
    setMaskBits(WarpPositionMask | PositionMask);
 }
 
+
 Ship *Item::getMount()
 {
    return mMount;
 }
 
+
 void Item::setZone(GoalZone *theZone)
 {
+   
+   // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
+   // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
+   // for objects that meet certain criteria, such as for zones that contain a flag.
+   FlagItem *flag = dynamic_cast<FlagItem *>(this);
+
+   if(flag)
+   {
+      GoalZone *z = ((theZone == NULL) ? flag->getZone() : theZone);
+
+      if(z)
+         z->mHasFlag = ((theZone == NULL) ? false : true );
+   }
+
+   // Now we can get around to setting the zone, like we came here to do
    mZone = theZone;
    setMaskBits(ZoneMask);
 }
+
 
 GoalZone *Item::getZone()
 {
    return mZone;
 }
+
 
 void Item::idle(GameObject::IdleCallPath path)
 {

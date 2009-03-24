@@ -39,6 +39,7 @@ FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
    mTeam = 0;
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= FlagType | CommandMapVisType;
+   setZone(NULL);
 }
 
 

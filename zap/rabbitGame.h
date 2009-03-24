@@ -59,7 +59,7 @@ public:
 
    RabbitGameType()
    {
-      mTeamScoreLimit = 100;
+      mWinningScore = 100;
       mRabbitFlag = NULL;
    }
 
@@ -73,6 +73,7 @@ public:
    void flagDropped(Ship *theShip, FlagItem *theFlag);
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
    bool isFlagGame() { return true; }
+   S32 getFlagCount() { return 1; }
 
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
@@ -88,6 +89,7 @@ public:
    void onFlaggerKill(Ship *rabbitShip);
    void onFlagReturned();
 
+   GameTypes getGameType() { return RabbitGame; }
    const char *getGameTypeString() { return "Rabbit"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    bool isTeamGame() { return false; }

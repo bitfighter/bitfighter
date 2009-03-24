@@ -79,27 +79,74 @@ public:
 
 //////////
 
+class Robot;
+
 class GameType : public GameObject
 {
 private:
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
-   
-
 public:
+   enum GameTypes
+   {
+      BitmatchGame,
+      CTFGame,
+      HTFGame,
+      NexusGame,
+      RabbitGame,
+      RetrieveGame,
+      SoccerGame,
+      ZoneControlGame,
+      GameTypesCount
+   };
+
+   // Potentially scoring events
+   enum ScoringEvent {
+      KillEnemy,              // all games
+      KillSelf,               // all games
+      KillTeammate,           // all games
+      KillEnemyTurret,        // all games
+      KillOwnTurret,          // all games
+
+      CaptureFlag,
+      CaptureZone,            // zone control -> gain zone
+      UncaptureZone,          // zone control -> lose zone
+      HoldFlagInZone,         // htf
+      RemoveFlagFromEnemyZone,// htf
+      RabbitHoldsFlag,        // rabbit, called every second
+      RabbitKilled,           // rabbit
+      RabbitKills,            // rabbit
+      ReturnFlagsToNexus,     // hunters game
+      ReturnFlagToZone,       // retrieve -> flag returned to zone
+      LostFlag,               // retrieve -> enemy took flag
+      ReturnTeamFlag,  	      // ctf -> holds enemy flag, touches own flag
+      ScoreGoalEnemyTeam,     // soccer
+      ScoreGoalHostileTeam,   // soccer
+      ScoreGoalOwnTeam,       // soccer -> score on self
+      ScoringEventsCount
+   };
+
+
    static const S32 gMaxTeams = 9;                                   // Max teams allowed
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = gMaxTeams - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed
 
+   virtual GameTypes getGameType() { return BitmatchGame; }
    virtual const char *getGameTypeString() { return "Bitmatch"; }                            // Will be overridden by other games
    virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }  //          -- ditto --
    virtual bool isTeamGame() { return mTeams.size() > 1; }                                // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
+   S32 getWinningScore() { return mWinningScore; }
+   U32 getTotalGameTime() { return (mGameTimer.getPeriod() / 1000); }
+   S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); }
+   S32 getLeadingScore() { return mLeadingTeamScore; }
+   S32 getLeadingTeam() { return mLeadingTeam; }
 
    virtual bool isFlagGame() { return false; }              // Does game use flags?
    virtual bool isTeamFlagGame() { return false; }          // Does flag-team orientation matter?  Only true in CTF, really.
+   virtual S32 getFlagCount() { return mFlags.size(); }     // Return the number of game-significant flags
 
    virtual bool isSpawnWithLoadoutGame() { return false; }                                // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
@@ -170,14 +217,17 @@ public:
    Timer mInputModeChangeAlertDisplayTimer;
    bool mCanSwitchTeams;         // Player can switch teams when this is true, not when it is false
 
-   S32 mTeamScoreLimit;
+   S32 mWinningScore;            // Game over when team (or player in individual games) gets this score
+   S32 mLeadingTeam;             // Team with highest score
+   S32 mLeadingTeamScore;        // Score of mLeadingTeam
+
    bool mBetweenLevels;          // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;               // Set to true when an end condition is met
 
    enum {
       MaxPing = 999,
       DefaultGameTime = 10 * 60 * 1000,
-      DefaultTeamScoreLimit = 8,
+      DefaultWinningScore = 8,
       LevelInfoDisplayTime = 6000,
    };
 
@@ -193,31 +243,6 @@ public:
       S32 maxval;    // Max value for this param
    };
 
-   // Potentially scoring events
-   enum ScoringEvent {
-      KillEnemy,              // all games
-      KillSelf,               // all games
-      KillTeammate,           // all games
-      KillEnemyTurret,        // all games
-      KillOwnTurret,          // all games
-
-      CaptureFlag,
-      CaptureZone,            // zone control -> gain zone
-      UncaptureZone,          // zone control -> lose zone
-      HoldFlagInZone,         // htf
-      RemoveFlagFromEnemyZone,// htf
-      RabbitHoldsFlag,        // rabbit, called every second
-      RabbitKilled,           // rabbit
-      RabbitKills,            // rabbit
-      ReturnFlagsToNexus,     // hunters game
-      ReturnFlagToZone,       // retrieve -> flag returned to zone
-      LostFlag,               // retrieve -> enemy took flag
-      ReturnTeamFlag,  	      // ctf -> holds enemy flag, touches own flag
-      ScoreGoalEnemyTeam,     // soccer
-      ScoreGoalHostileTeam,   // soccer
-      ScoreGoalOwnTeam,       // soccer -> score on self
-      ScoringEventsCount
-   };
 
    enum ScoringGroup {
       IndividualScore,
