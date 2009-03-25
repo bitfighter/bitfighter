@@ -96,6 +96,7 @@ public:
       HealthMask = BIT(5),
       PowersMask = BIT(6),       // Which modules are active
       LoadoutMask = BIT(7),
+      RespawnMask = BIT(8),      // For when robots respawn
    };
 
    Timer mFireTimer;
@@ -184,8 +185,9 @@ public:
    void emitShipExplosion(Point pos);
    void setActualPos(Point p);
 
-   void kill(DamageInfo *theInfo);
-   void kill();
+   virtual void kill(DamageInfo *theInfo);
+   virtual void kill();
+
    virtual void damageObject(DamageInfo *theInfo);
 
    void writeControlState(BitStream *stream);

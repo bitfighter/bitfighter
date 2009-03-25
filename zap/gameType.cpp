@@ -281,8 +281,6 @@ const char *GameType::validateGameType(const char *gtype)
 }
 
 
-extern Vector<Robot *> gRobotList;
-
 void GameType::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
@@ -342,9 +340,9 @@ void GameType::idle(GameObject::IdleCallPath path)
    }
 
    // ...and all robots
-   for(S32 i = 0; i < gRobotList.size(); i++)
-      if(gRobotList[i]->respawnTimer.update(deltaT)) 
-         spawnRobot(gRobotList[i]);
+   //for(S32 i = 0; i < mRobotList.size(); i++)
+   //   if(mRobotList[i]->respawnTimer.update(deltaT)) 
+   //      spawnRobot(mRobotList[i]);
 
    // If game time has expired... game is over, man, it's over
    if(mGameTimer.update(deltaT))
@@ -923,11 +921,8 @@ void GameType::spawnShip(GameConnection *theClient)
    ClientRef *cl = theClient->getClientRef();
    U32 teamIndex = cl->teamId;
 
-   TNLAssert(mTeams[teamIndex].spawnPoints.size(), "No spawn points!");   // Basically, game dies if there are no spawn points for a team.  Don't let this happen.
+   Point spawnPoint = getSpawnPoint(teamIndex);
 
-   Point spawnPoint;
-   S32 spawnIndex = TNL::Random::readI() % mTeams[teamIndex].spawnPoints.size();    // Pick random spawn point
-   spawnPoint = mTeams[teamIndex].spawnPoints[spawnIndex];
    //                       Player's name, team, and spawning location
    Ship *newShip = new Ship(cl->name, teamIndex, spawnPoint);
 
@@ -940,19 +935,17 @@ void GameType::spawnShip(GameConnection *theClient)
 }
 
 
+// Note that we need to have spawn method here so we can override it for different game types, such as Nexus (hunters)
 void GameType::spawnRobot(Robot *robot)
 {
-   S32 teamIndex = robot->getTeam();
-   TNLAssert(mTeams[teamIndex].spawnPoints.size(), "No spawn points!");  
+   Point spawnPoint = getSpawnPoint(robot->getTeam());
 
-   Point spawnPoint;
-   S32 spawnIndex = TNL::Random::readI() % mTeams[teamIndex].spawnPoints.size();    // Pick random spawn point
-   spawnPoint = mTeams[teamIndex].spawnPoints[spawnIndex];
-   //                       Player's name, team, and spawning location
-   //Robot *newRobot = new Robot("NewBot", teamIndex, spawnPoint);
+   if( !robot->initialize(spawnPoint))
+   {
+      robot->deleteObject();
+      return;
+   }
 
-   robot->resetLocation(spawnPoint);
-   robot->respawnTimer.clear();
    robot->mInGame = true;
 
    //robot->addToGame(getGame());
@@ -960,7 +953,15 @@ void GameType::spawnRobot(Robot *robot)
    // Should probably do this, but... not now.
    //if(isSpawnWithLoadoutGame())
    //   setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game
+}
 
+
+Point GameType::getSpawnPoint(S32 team)
+{
+   TNLAssert(mTeams[team].spawnPoints.size(), "No spawn points!");   // Basically, game dies if there are no spawn points for a team.  Don't let this happen.
+
+   S32 spawnIndex = TNL::Random::readI() % mTeams[team].spawnPoints.size();    // Pick random spawn point
+   return mTeams[team].spawnPoints[spawnIndex];
 }
 
 // This gets run when the ship hits a loadout zone
@@ -969,9 +970,11 @@ void GameType::updateShipLoadout(GameObject *shipObject)
    GameConnection *gc = shipObject->getControllingClient();
    if(!gc)
       return;
+
    ClientRef *cl = gc->getClientRef();
    if(!cl)
       return;
+
    setClientShipLoadout(cl, gc->getLoadout());
 }
 

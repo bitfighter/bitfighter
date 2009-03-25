@@ -61,6 +61,8 @@ public:
    GridDatabase();
 
    GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &surfaceNormal);
+   bool pointCanSeePoint(Point point1, Point point2);
+
    void findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &extents);
 
    void addToExtents(GameObject *theObject, Rect &extents);

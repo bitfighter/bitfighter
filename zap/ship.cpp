@@ -708,6 +708,10 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
       stream->writeFlag(false);
    }  // end initial update
 
+   if(stream->writeFlag(updateMask & RespawnMask))    // Respawn
+   {
+   }
+
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);
 
@@ -779,6 +783,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    }  // initial update
 
+
+   if(stream->readFlag())        // Health
+      hasExploded = false;
 
    if(stream->readFlag())        // Health
       mHealth = stream->readFloat(6);
@@ -989,7 +996,7 @@ void Ship::setLoadout(const Vector<U32> &loadout)
 
 void Ship::kill(DamageInfo *theInfo)
 {
-   if(isGhost())     // Servers only, please...
+   if(isGhost())     // Server only, please...
       return;
 
    GameConnection *controllingClient = getControllingClient();

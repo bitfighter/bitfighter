@@ -75,9 +75,15 @@ public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
    ~Robot();          // Destructor 
    
+   bool initialize(Point p);
+   void kill(DamageInfo *theInfo);
+   void kill();
+
    void idle(IdleCallPath path);
 
    void processMove(U32 stateIndex);
+
+  
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);
@@ -99,7 +105,6 @@ public:
 
    Timer respawnTimer;
    bool mInGame;
-   void resetLocation(Point location);    
 
    bool isRobot() { return true; }
 
@@ -133,7 +138,8 @@ class LuaRobot : public LuaClass
 {
 
 private:
-   Point getNextWaypoint();      // Helper function for getWaypoint()
+   Point getNextWaypoint();                          // Helper function for getWaypoint()
+   S32 findClosestZone(lua_State *L, Point point);   // Finds zone closest to point, used when robots get off the map
 
 public:
   // Constants
@@ -176,7 +182,6 @@ public:
    S32 setWeapon(lua_State *L);
    S32 globalMsg(lua_State *L);
    S32 teamMsg(lua_State *L);
-   S32 getAimAngle(lua_State *L);
 
    S32 logprint(lua_State *L);
 

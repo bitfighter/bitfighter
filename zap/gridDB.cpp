@@ -25,6 +25,7 @@
 
 #include "gridDB.h"
 #include "gameObject.h"
+#include "MoveObject.h"    // For def of ActualState
 
 namespace Zap
 {
@@ -299,6 +300,16 @@ GameObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayS
       surfaceNormal.normalize();
    return retObject;
 }
+
+
+bool GridDatabase::pointCanSeePoint(Point point1, Point point2)
+{
+   F32 time;
+   Point coll;
+
+   return( findObjectLOS(BarrierType, MoveObject::ActualState, point1, point2, time, coll) == NULL );
+}
+
 
 };
 

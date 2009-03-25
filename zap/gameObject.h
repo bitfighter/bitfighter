@@ -133,6 +133,7 @@ public:
    S32 getTeam() { return mTeam; }
    void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, Vector<Point> &polyBounds);    // Convert line of a level file into a Vector of Points
    void findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &extents);
+
    GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
 
    bool isControlled() { return mControllingClient.isValid(); }

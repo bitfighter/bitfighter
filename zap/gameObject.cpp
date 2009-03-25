@@ -220,6 +220,7 @@ void GameObject::setExtent(Rect &extents)
    extent = extents;
 }
 
+
 void GameObject::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &ext)
 {
    if(!mGame)
@@ -227,12 +228,14 @@ void GameObject::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, con
    mGame->getGridDatabase()->findObjects(typeMask, fillVector, ext);
 }
 
+
 GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal)
 {
    if(!mGame)
       return NULL;
    return mGame->getGridDatabase()->findObjectLOS(typeMask, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal);
 }
+
 
 void GameObject::addToDatabase()
 {
@@ -242,6 +245,7 @@ void GameObject::addToDatabase()
       mGame->getGridDatabase()->addToExtents(this, extent);
    }
 }
+
 
 void GameObject::removeFromDatabase()
 {

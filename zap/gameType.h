@@ -84,6 +84,7 @@ class Robot;
 class GameType : public GameObject
 {
 private:
+   Point getSpawnPoint(S32 team);      // Picks a spawn point for ship or robot
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
 public:
@@ -290,6 +291,7 @@ public:
 
    virtual void spawnShip(GameConnection *theClient);
    virtual void spawnRobot(Robot *robot);
+   //Vector<Robot *> mRobotList;        // List of all robots in the game
 
    virtual void changeClientTeam(GameConnection *theClient, S32 team);     // Change player to team indicated, -1 = cycle teams
 
