@@ -432,7 +432,7 @@ bool Ship::findRepairTargets()
    Point pos = getRenderPos();
    Point extend(RepairRadius, RepairRadius);
    Rect r(pos - extend, pos + extend);
-   findObjects(ShipType | EngineeredType, hitObjects, r);
+   findObjects(ShipType | RobotType | EngineeredType, hitObjects, r);
 
    mRepairTargets.clear();
    for(S32 i = 0; i < hitObjects.size(); i++)
@@ -516,7 +516,7 @@ void Ship::processEnergy()
       //   cloakCheck.expand(Point(CloakCheckRadius, CloakCheckRadius));
 
       //   fillVector.clear();
-      //   findObjects(ShipType, fillVector, cloakCheck);
+      //   findObjects(ShipType | RobotType, fillVector, cloakCheck);
 
       //   if(fillVector.size() > 0)
       //   {
@@ -708,9 +708,17 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
       stream->writeFlag(false);
    }  // end initial update
 
-   if(stream->writeFlag(updateMask & RespawnMask))    // Respawn
-   {
-   }
+
+
+if(isRobot())
+{   
+Robot *robot = dynamic_cast<Robot *>(this);
+stream->write((S32)robot->mTarget.x);
+stream->write((S32)robot->mTarget.y);
+}
+
+
+   stream->writeFlag(updateMask & RespawnMask);       // Respawn --> only used by robots
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);
@@ -784,8 +792,26 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }  // initial update
 
 
-   if(stream->readFlag())        // Health
+if(isRobot())
+{   
+Robot *robot = dynamic_cast<Robot *>(this);
+S32 x;
+S32 y;
+stream->read(&x);
+stream->read(&y);
+
+robot->mTarget.x = x;
+robot->mTarget.y = y;
+}
+
+
+   bool respawning = false;
+   if(stream->readFlag())        // Respawn
+   {
       hasExploded = false;
+      playSpawnEffect = true;
+      respawning = true;
+   }
 
    if(stream->readFlag())        // Health
       mHealth = stream->readFloat(6);
@@ -818,18 +844,20 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       */
    }
 
-   if(stream->readFlag())
+   if(stream->readFlag())     // UpdateMask
    {
       ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
       readCompressedVelocity(mMoveState[ActualState].vel, BoostMaxVelocity + 1, stream);
       positionChanged = true;
    }
-   if(stream->readFlag())
+
+   if(stream->readFlag())     // MoveMask
    {
       mCurrentMove = Move();  // A new, blank move
       mCurrentMove.unpack(stream, false);
    }
-   if(stream->readFlag())
+
+   if(stream->readFlag())     // PowersMask
    {
       bool wasActive[ModuleCount];
       for(S32 i = 0; i < ModuleCount; i++)
@@ -848,26 +876,24 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    mMoveState[ActualState].angle = mCurrentMove.angle;
 
+
    if(positionChanged)
    {
       mCurrentMove.time = (U32) connection->getOneWayTime();
       processMove(ActualState);
+   }
 
-      if(!warp)
-      {
-         mInterpolating = true;
-         // If the actual velocity is in the direction of the actual position
-         // then we'll set it into the render velocity
-      }
-      else           // Just warped
-      {
-         mInterpolating = false;
-         mMoveState[RenderState] = mMoveState[ActualState];
+   if(warp || respawning)
+   {
+      mInterpolating = false;
+      mMoveState[RenderState] = mMoveState[ActualState];
 
-         for(S32 i=0; i<TrailCount; i++)
-            mTrail[i].reset();
-      }
-   } // if positionChanged
+      for(S32 i=0; i<TrailCount; i++)
+         mTrail[i].reset();
+   }
+   else
+      mInterpolating = true;
+    
 
    if(explode && !hasExploded)
    {
@@ -1235,6 +1261,12 @@ void Ship::render(S32 layerIndex)
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
       string str = mPlayerName.getString(); 
+
+char x[100];
+char y[100];
+itoa((S32) getActualPos().x, x,10);
+itoa((S32) getActualPos().y, y,10);
+str = str + " {" + x + "," + y + "}";
                                                                                 
       // Modify name if owner is "busy"
       if(isBusy)
@@ -1254,7 +1286,22 @@ void Ship::render(S32 layerIndex)
       glDisable(GL_BLEND);
       glLineWidth(gDefaultLineWidth);
    }
-
+   else
+   {
+      char x[100];
+char y[100];
+itoa((S32) getActualPos().x, x,10);
+itoa((S32) getActualPos().y, y,10);
+string str = string("{ ") + x + " , " + y + " }";
+      glEnable(GL_BLEND);
+      F32 textAlpha = 0.5 * alpha;
+      U32 textSize = 14;
+      glLineWidth(1);
+      glColor4f(1,1,1,textAlpha);
+      UserInterface::drawString((UserInterface::getStringWidth(textSize, str.c_str()) * -0.5), 30, textSize, str.c_str() );
+      glDisable(GL_BLEND);
+      glLineWidth(gDefaultLineWidth);
+   }
 
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);
    glScalef(warpInScale, warpInScale, 1);
@@ -1333,6 +1380,20 @@ void Ship::render(S32 layerIndex)
 
    if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
       renderAimVector();
+
+if(isRobot())
+{
+Robot *robot = dynamic_cast<Robot *>(this);
+if(robot)
+{
+   glColor3f(0,1,1);
+   glBegin(GL_LINES);
+   Point shipPos = getRenderPos();
+   glVertex2f(robot->mTarget.x , robot->mTarget.y );
+   glVertex2f(0 ,0 );
+   glEnd();
+}
+}
 
    // Now render some "addons"  --> should these be in renderShip?
    glColor3f(1,1,1);

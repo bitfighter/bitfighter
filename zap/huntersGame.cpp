@@ -460,7 +460,7 @@ bool HuntersFlagItem::collide(GameObject *hitObject)
    if(hitObject->getObjectTypeMask() & BarrierType)
       return true;
 
-   if(isGhost() || !(hitObject->getObjectTypeMask() & ShipType))
+   if(isGhost() || ! (hitObject->getObjectTypeMask() & ShipType || hitObject->getObjectTypeMask() & RobotType))
       return false;
 
    Ship *theShip = static_cast<Ship *>(hitObject);
@@ -601,7 +601,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
    if(isGhost())
       return false;
 
-   if(!(hitObject->getObjectTypeMask() & ShipType))      // Ignore collisions with anything but ships
+   if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return false;
 
    Ship *theShip = dynamic_cast<Ship *>(hitObject);

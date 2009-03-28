@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory="$(TargetDir)"
-				CommandArguments=" -levels robot1 "
+				CommandArguments=" -levels robot2 robot1"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

@@ -359,7 +359,7 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool PickupItem::collide(GameObject *otherObject)
 {
-   if(mIsVisible && !isGhost() && otherObject->getObjectTypeMask() & ShipType)
+   if(mIsVisible && !isGhost() && otherObject->getObjectTypeMask() & (ShipType | RobotType))
    {
       if(pickup(dynamic_cast<Ship *>(otherObject)))
       {

@@ -200,7 +200,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
          if(mType == ProjectileBounce && (typeMask & BarrierType))
             bounce = true;
-         else if(typeMask & ShipType)
+         else if(typeMask & (ShipType | RobotType))
          {
             Ship *s = dynamic_cast<Ship *>(hitObject);
             if(s->isModuleActive(ModuleShield))
@@ -675,7 +675,7 @@ void HeatSeeker::idle(GameObject::IdleCallPath path)  // Not done yet
       Point maxXY(max(pos.x, max(vertex2.x, vertex3.x)), max(pos.y, max(vertex2.y, vertex3.y)));
       Rect boundingBox(minXY, maxXY);
 
-      findObjects(ShipType | TurretTargetType, fillVector, boundingBox);
+      findObjects(TurretTargetType, fillVector, boundingBox);
 
       F32 collisionTime;
       Point normalPoint;
@@ -754,6 +754,7 @@ void HeatSeeker::idle(GameObject::IdleCallPath path)  // Not done yet
       disableVector.push_back(this);
       this->disableCollision();
 
+
       GameObject *hitObject;
       Point surfNormal;
 
@@ -771,6 +772,7 @@ void HeatSeeker::idle(GameObject::IdleCallPath path)  // Not done yet
          // Disable collisions with this object and keep searching
          disableVector.push_back(hitObject);
          hitObject->disableCollision();
+
       }
 
       // Re-enable collison flag for ship and items in our path that don't want to be collided with
@@ -815,8 +817,6 @@ void HeatSeeker::idle(GameObject::IdleCallPath path)  // Not done yet
       updateInterpolation();
 
    updateExtent();
-
-
 }
 
 

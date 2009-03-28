@@ -521,8 +521,9 @@ bool ForceField::collide(GameObject *hitObject)
    if(!mFieldUp)
       return false;
 
-   if(!(hitObject->getObjectTypeMask() & ShipType))
+   if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return true;
+
 
    if(hitObject->getTeam() == mTeam)
    {
@@ -547,7 +548,7 @@ void ForceField::idle(GameObject::IdleCallPath path)
       // do an LOS test to see if anything is in the field:
       F32 t;
       Point n;
-      if(!findObjectLOS(ShipType | ItemType, MoveObject::ActualState, mStart, mEnd, t, n))
+      if(!findObjectLOS(ShipType | RobotType | ItemType, MoveObject::ActualState, mStart, mEnd, t, n))
       {
          mFieldUp = true;
          setMaskBits(StatusMask);
@@ -703,7 +704,7 @@ void Turret::idle(IdleCallPath path)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(fillVector[i]->getObjectTypeMask() & ShipType)
+      if(fillVector[i]->getObjectTypeMask() & ( ShipType | RobotType))
       {
          Ship *potential = (Ship*)fillVector[i];
 
@@ -746,7 +747,7 @@ void Turret::idle(IdleCallPath path)
       disableCollision();
       Point delta2 = delta;
       delta2.normalize(TurretRange);
-      GameObject *hitObject = findObjectLOS(ShipType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
+      GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
       if(hitObject && hitObject->getTeam() == mTeam)

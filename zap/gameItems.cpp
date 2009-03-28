@@ -297,8 +297,9 @@ bool ResourceItem::collide(GameObject *hitObject)
    if(mIsMounted)
       return false;
 
-   if(!(hitObject->getObjectTypeMask() & ShipType))
+   if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return true;
+
 
    Ship *ship = dynamic_cast<Ship *>(hitObject);
    if(ship->hasExploded)

@@ -185,7 +185,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    queryRect.expand(Point(TeleporterRadius, TeleporterRadius));
 
    fillVector2.clear();
-   findObjects(ShipType, fillVector2, queryRect);
+   findObjects(ShipType | RobotType, fillVector2, queryRect);
 
    // First see if we're triggered...
    bool isTriggered = false;

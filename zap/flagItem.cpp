@@ -164,10 +164,7 @@ bool FlagItem::collide(GameObject *hitObject)
    if(hitObject->getObjectTypeMask() & (BarrierType | ForceFieldType))
       return true;
 
-   bool hitShip = hitObject->getObjectTypeMask() & ShipType;
-   bool hitRobot = hitObject->getObjectTypeMask() & RobotType;
-
-   if( ! ( hitShip || hitRobot ))
+   if(!(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return false;
 
    // We've hit a ship or robot  (remember, a robot is a subtype of ship, so this will work for both)

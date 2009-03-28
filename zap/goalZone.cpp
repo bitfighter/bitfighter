@@ -118,7 +118,7 @@ bool GoalZone::getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints)
 
 bool GoalZone::collide(GameObject *hitObject)
 {
-   if(!isGhost() && ((hitObject->getObjectTypeMask() & ShipType) || (hitObject->getObjectTypeMask() & RobotType)) )
+   if( !isGhost() && (hitObject->getObjectTypeMask() & (ShipType | RobotType)) )
    {
       Ship *s = (Ship *)(hitObject);      // <--- Should be Ship *s = dynamic_cast<Ship *>(hitObject);... but it won't compile!
       getGame()->getGameType()->shipTouchZone(s, this);

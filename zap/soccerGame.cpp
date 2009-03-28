@@ -246,9 +246,10 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
-   if(theInfo->damagingObject && (theInfo->damagingObject->getObjectTypeMask() & ShipType))
+
+   if(theInfo->damagingObject && theInfo->damagingObject->getObjectTypeMask() & (ShipType | RobotType))
    {
-      lastPlayerTouch = (dynamic_cast<Ship *>(theInfo->damagingObject))->getName();
+      lastPlayerTouch = (dynamic_cast<Ship *>(theInfo->damagingObject))->getName();    // TODO: Should be ship object itself...
    }
 }
 
@@ -265,9 +266,9 @@ bool SoccerBallItem::collide(GameObject *hitObject)
    if(isGhost())
       return true;
 
-   if(hitObject->getObjectTypeMask() & ShipType)
+   if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
-      lastPlayerTouch = (dynamic_cast<Ship *>(hitObject))->getName();
+      lastPlayerTouch = (dynamic_cast<Ship *>(hitObject))->getName();      // TODO: Should be ship object itself... 
    }
    else
    {

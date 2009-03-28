@@ -39,8 +39,8 @@ namespace Zap
 
 class Item;
 
-const S32 ShipModuleCount = 2;                // Modules a ship can carry
-const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
+static const S32 ShipModuleCount = 2;                // Modules a ship can carry
+static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
 
 
 // class derived_class_name: public base_class_name

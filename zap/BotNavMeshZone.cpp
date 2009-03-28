@@ -106,7 +106,6 @@ void BotNavMeshZone::render()     // For now... in future will be invisible!
       glEnd();
    }
 
-
    glDisable(GL_BLEND);
 }
 
@@ -234,9 +233,8 @@ S32 findZoneContaining(Point p)
    {
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
-
       if( gBotNavMeshZones[i]->getExtent().contains(p) 
-                        && (PolygonContains(gBotNavMeshZones[i]->mPolyBounds.address(), gBotNavMeshZones[i]->mPolyBounds.size(), p)) )
+                        && (PolygonContains2(gBotNavMeshZones[i]->mPolyBounds.address(), gBotNavMeshZones[i]->mPolyBounds.size(), p)) )
          return i;
    }
    return -1;
@@ -352,50 +350,39 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
    return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() ) * 1.2;
 }
 
+const S32 gMaxNavMeshZones = 2000;     // Don't make this go above S16 max
 
 // Returns a path, including the startZone and targetZone 
 Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
-{
-   const S32 zones = 50;
+{   
+   // Because of these variables...
+   static U16 onClosedList = 0;
+   static U16 onOpenList;
 
-   U32 onClosedList = 0;
-   U32 onOpenList;
-   U32 whichList[zones];  // Record whether a zone is on the open or closed list
+   // ...these arrays can be reused without further initialization
+   static U16 whichList[gMaxNavMeshZones];  // Record whether a zone is on the open or closed list
+   static S16 openList[gMaxNavMeshZones + 1]; 
+   static S16 openZone[gMaxNavMeshZones]; 
+   static S16 parentZones[gMaxNavMeshZones]; 
 
-   const int found = 1, nonexistent = 2; 
+   static F32 Fcost[gMaxNavMeshZones];	
+   static F32 Gcost[gMaxNavMeshZones]; 	
+   static F32 Hcost[gMaxNavMeshZones];	
 
-   // These arrays can be reused without further initialization...
-   int openList[zones + 1]; 
-   int openZone[zones]; 
-   int parentZones[zones]; 
-
-   F32 Fcost[zones];	
-   F32 Gcost[zones]; 	
-   F32 Hcost[zones];	
-
-	S32 u=0, v=0, temp=0, corner=0, numberOfOpenListItems=0,
-	path = 0;
+	S16 numberOfOpenListItems = 0;
+	bool foundPath;
 
 	S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
 
    Vector<S32> pathZones;
 
-   // Quick checks: Under the some circumstances no path needs to be generated ...
-
-   //	If starting location and target are in the same location...
-	if (startZone == targetZone)
-   {
-      pathZones.push_back(startZone);
-
-		return pathZones;
-   }
- 
    // This block here lets us repeatedly reuse the whichList array without resetting it or recreating it
    // which, for larger numbers of zones should be a real time saver.  It's not clear if it is particularly
    // more efficient for the zone counts we typically see in Bitfighter levels.
-   if(onClosedList > U32_MAX - 3 ) // Reset whichList when we've run out of headroom
+
+   if(onClosedList > U16_MAX - 3 ) // Reset whichList when we've run out of headroom
 	{
-		for(S32 i = 0; i < zones; i++) 
+		for(S32 i = 0; i < gMaxNavMeshZones; i++) 
 		   whichList[i] = 0;
 		onClosedList = 0;	
 	}
@@ -415,7 +402,7 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
 	{
 	   if(numberOfOpenListItems == 0)      // List is empty, we're done
 	   {
-		   path = nonexistent; 
+		   foundPath = false; 
          break;
 	   }  
       else
@@ -426,7 +413,7 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
 
          if(parentZone == targetZone)
          {
-            path = found; 
+            foundPath = true; 
             break;
          }
 
@@ -439,31 +426,31 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
       		
          //	Delete the top item in binary heap and reorder the heap, with the lowest F cost item rising to the top.
 	      openList[1] = openList[numberOfOpenListItems + 1];   // Move the last item in the heap up to slot #1
-	      v = 1; 
+	      S16 v = 1; 
 
          //	Loop until the new item in slot #1 sinks to its proper spot in the heap.
 	      while(true) // ***
 	      {
-	         u = v;		
-	         if (2*u+1 < numberOfOpenListItems) // if both children exist
+	         S16 u = v;		
+	         if (2 * u + 1 < numberOfOpenListItems) // if both children exist
 	         {
 	 	         //Check if the F cost of the parent is greater than each child.
 		         //Select the lowest of the two children.
 		         if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
-			         v = 2*u;
+			         v = 2 * u;
 		         if(Fcost[openList[v]] >= Fcost[openList[2*u+1]]) 
-			         v = 2*u+1;		
+			         v = 2 * u + 1;		
 	         }
-	         else if (2*u < numberOfOpenListItems) // if only child (#1) exists
+	         else if (2 * u < numberOfOpenListItems) // if only child (#1) exists
 	         {
  	            // Check if the F cost of the parent is greater than child #1	
 		         if(Fcost[openList[u]] >= Fcost[openList[2*u]]) 
-			         v = 2*u;
+			         v = 2 * u;
 	         }
 
 	         if(u != v) // If parent's F is > one of its children, swap them...
 	         {
-               temp = openList[u];
+               S16 temp = openList[u];
                openList[u] = openList[v];
                openList[v] = temp;			
 	         }
@@ -509,7 +496,7 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
                // or bubbles all the way to the top (if it has the lowest F cost).
                while(m > 1 && Fcost[openList[m]] <= Fcost[openList[m/2]]) 
                {
-                  temp = openList[m/2];
+                  S16 temp = openList[m/2];
                   openList[m/2] = openList[m];
                   openList[m] = temp;
                   m = m/2;
@@ -551,7 +538,7 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
 	                     S32 m = i;
 	                     while(m > 1 && Fcost[openList[m]] < Fcost[openList[m/2]]) 
 	                     {
-		                     temp = openList[m/2];
+		                     S16 temp = openList[m/2];
 		                     openList[m/2] = openList[m];
 		                     openList[m] = temp;
 		                     m = m/2;
@@ -569,20 +556,20 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
 	   // If target is added to open list then path has been found.
 	   if(whichList[targetZone] == onOpenList)
 	   {
-		   path = found; 
+		   foundPath = true; 
          break;
 	   }
 	}
 
    // Save the path if it exists.
-	if(path == found)
+	if(foundPath)
 	{
       // Working backwards from the target to the starting location by checking
       //	each cell's parent, figure out the length of the path.
       // Fortunately, we want our list to have the closest zone last (see getWaypoint),
       // so it all works out nicely.
 
-	   path = targetZone; 
+	   S32 path = targetZone; 
       pathZones.push_back(path);
 
 	   while(path != startZone)

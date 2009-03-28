@@ -917,7 +917,7 @@ void ClientGame::renderCommander()
       for(S32 i = 0; i < renderObjects.size(); i++)
       {
          // Render ship visibility range, and that of our teammates
-         if(renderObjects[i]->getObjectTypeMask() & ShipType)
+         if(renderObjects[i]->getObjectTypeMask() & (ShipType | RobotType))
          {
             Ship *ship = (Ship*)(renderObjects[i]);
 

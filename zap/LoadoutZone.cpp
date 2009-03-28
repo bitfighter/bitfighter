@@ -106,7 +106,7 @@ public:
    bool collide(GameObject *hitObject)
    {
       // Anyone can use neutral loadout zones (team == -1)
-      if(!isGhost() && (hitObject->getTeam() == getTeam() || getTeam() == -1) && (hitObject->getObjectTypeMask() & ShipType))
+      if(!isGhost() && (hitObject->getTeam() == getTeam() || getTeam() == -1) && hitObject->getObjectTypeMask() & (ShipType | RobotType))
          getGame()->getGameType()->updateShipLoadout(hitObject);      
 
       return false;

@@ -946,7 +946,7 @@ void GameType::spawnRobot(Robot *robot)
       return;
    }
 
-   robot->mInGame = true;
+
 
    //robot->addToGame(getGame());
 
@@ -1076,7 +1076,7 @@ void GameType::queryItemsOfInterest()
       Rect queryRect(pos, pos);
 
       queryRect.expand(scopeRange);
-      findObjects(ShipType, fillVector, queryRect);
+      findObjects(ShipType | RobotType, fillVector, queryRect);
       for(S32 j = 0; j < fillVector.size(); j++)
       {
          Ship *theShip = dynamic_cast<Ship *>(fillVector[j]);

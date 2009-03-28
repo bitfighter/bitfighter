@@ -141,7 +141,7 @@ bool SpeedZone::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
-   if(!isGhost() && (hitObject->getObjectTypeMask() & ShipType))     // Only ships collide, and only happens on server
+   if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide, and only happens on server
    {
       Ship *s = dynamic_cast<Ship *>(hitObject);
 

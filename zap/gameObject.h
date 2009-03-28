@@ -67,8 +67,8 @@ enum GameObjectType
 
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map
-   DamagableTypes    = ShipType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | HeatSeekerType,
-   MotionTriggerTypes = ShipType | ResourceItemType | TestItemType,
+   DamagableTypes    = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | HeatSeekerType,
+   MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType,
    AllObjectTypes    = 0xFFFFFFFF,
 };
 

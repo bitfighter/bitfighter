@@ -108,7 +108,7 @@ public:
 
    bool collide(GameObject *hitObject) ////////////////////////////////////////////////////////////////////
    {
-      if(!isGhost() && (hitObject->getObjectTypeMask() & ShipType))
+      if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))
          //getGame()->getGameType()->updateShipLoadout(hitObject);
          logprintf("IN A SLIP ZONE!!");
       return false;

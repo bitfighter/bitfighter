@@ -736,11 +736,14 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    F32 x = luaL_checknumber(L, 1);
    F32 y = luaL_checknumber(L, 2);
 
-   Point target = Point(x,y);
+   Point target = Point(x, y);
 
    // First, check to see if target is within our LOS...
    if(thisRobot->canSeePoint(target))
+   {
+      //thisRobot->mTarget = target;
       return returnPoint(L, target);   // ...if so, that's our waypoint!
+   }
 
    S32 currentZone = thisRobot->getCurrentZone();
    S32 targetZone = findZoneContaining(target);
@@ -749,13 +752,24 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    // We'll catch that here with another, cheap, test.
 
    if(currentZone == targetZone)
+   {
+      //thisRobot->mTarget = target;
       return returnPoint(L, target);
+   }
 
    if(currentZone == -1)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
-      return findClosestZone(L, thisRobot->getActualPos());
+   {
+      S32 zone = findClosestZone(thisRobot->getActualPos());
+      //thisRobot->mTarget = (zone == -1) ? Point(0,0) : gBotNavMeshZones[zone]->getCenter();
+      return findAndReturnClosestZone(L, thisRobot->getActualPos());
+   }
 
    if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
-      return findClosestZone(L, target);
+   {
+      //S32 zone = findClosestZone(target);
+      //thisRobot->mTarget = zone == -1 ? Point(0,0) : gBotNavMeshZones[zone]->getCenter();
+      return findAndReturnClosestZone(L, target);
+   }
 
 
    // Second, see if we already have a valid path calculated to target zone.  Basically, we want
@@ -770,9 +784,11 @@ S32 LuaRobot::getWaypoint(lua_State *L)
             if(i == 0)     // Target is in this zone... should have been caught earlier (we should be able to see target), so shouldn't happen
             {
                TNLAssert(false, "Illogical condition in path finding code...");
+               //thisRobot->mTarget = target;
                return returnPoint(L, target);
             }
 
+            //thisRobot->mTarget = getNextWaypoint();
             return returnPoint(L, getNextWaypoint());
          }
          else
@@ -784,11 +800,9 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 
    thisRobot->flightPlan = AStar::findPath(currentZone, targetZone);
 
-   //for(S32 i = 0; i < thisRobot->flightPlan.size(); i++)
-   //   logprintf("Flightplan zone %d = %d",i, thisRobot->flightPlan[i]);
-
    TNLAssert(thisRobot->flightPlan.size() > 1, "Flight plan appears too small!");
 
+   //thisRobot->mTarget = getNextWaypoint();
    return returnPoint(L, getNextWaypoint());
 }
 
@@ -805,13 +819,15 @@ Point LuaRobot::getNextWaypoint()
    S32 neighborZoneIndex = gBotNavMeshZones[currentZone]->getNeighborIndex(nextZone);
 
    TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-
-   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
+   if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter)) 
+      return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
+   else
+      return gBotNavMeshZones[currentZone]->getCenter();
 }
 
 
 // Another helper function: finds closest zone to a given point
-S32 LuaRobot::findClosestZone(lua_State *L, Point point)
+S32 LuaRobot::findClosestZone(Point point)
 {
    F32 distsq = F32_MAX;
    S32 closest = -1;
@@ -830,6 +846,13 @@ S32 LuaRobot::findClosestZone(lua_State *L, Point point)
          }         
       }
    }
+
+   return closest;
+}
+
+S32 LuaRobot::findAndReturnClosestZone(lua_State *L, Point point)
+{
+   S32 closest = findClosestZone(point);
 
    if(closest != -1)
       return returnPoint(L, gBotNavMeshZones[closest]->getCenter());
@@ -890,10 +913,11 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
    respawnTimer.reset(100, RobotRespawnDelay);     
 
-   mInGame = false;
+   hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
+
+   disableCollision();
 
    // try http://csl.sublevel3.org/lua/
-
 }
   
 
@@ -947,11 +971,14 @@ bool Robot::initialize(Point p)
    mWeapon[1] = WeaponMine;
    mWeapon[2] = WeaponBurst;
 
+   hasExploded = false;
+   enableCollision();
 
    mActiveWeaponIndx = 0;
    mCooldown = false;
 
-   setMaskBits(RespawnMask | HealthMask | LoadoutMask);      // Make sure everything gets sent to the client
+   // WarpPositionMask triggers the spinny spawning visual effect
+   setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client
 
    if(L)
       lua_close(L);
@@ -1022,9 +1049,8 @@ void Robot::onAddedToGame(Game *)
 
 void Robot::kill()
 {
-   mInGame = false;
-   respawnTimer.reset();
    hasExploded = true;
+   respawnTimer.reset();
    setMaskBits(ExplosionMask);
    
    disableCollision();
@@ -1151,17 +1177,27 @@ bool Robot::findNearestShip(Point &loc)
 
 bool Robot::canSeePoint(Point point)
 {
-   return( gServerGame->getGridDatabase()->pointCanSeePoint(this->getActualPos(), point) );
+   // Need to check the two edge points perpendicular to the direction of looking to ensure we have an unobstructed 
+   // flight lane to point.  Radius of the robot is mRadius.  This keeps the ship from getting hung up on
+   // obstacles that appear visible from the center of the ship, but are actually blocked.
+
+   F32 ang = getActualPos().angleTo(point);
+   F32 cosang = cos(ang) * mRadius;
+   F32 sinang = sin(ang) * mRadius;
+
+   Point edgePoint1 = getActualPos() + Point(sinang, -cosang);
+   Point edgePoint2 = getActualPos() + Point(-sinang, cosang);
+
+   return( 
+      gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint1, point) &&
+      gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
 }
 
 
 void Robot::idle(GameObject::IdleCallPath path)
 {
-   // Never ClientIdleControlReplay, ClientIdleControlMain, or ServerIdleControlFromClient
-   TNLAssert(path == ServerIdleMainLoop || path == ClientIdleMainRemote , "Unexpected idle call path in Robot::idle!");      
-
    // Check to see if we need to respawn this robot
-   if(path == GameObject::ServerIdleMainLoop && !mInGame)
+   if(path == GameObject::ServerIdleMainLoop && hasExploded)
    {
       if(respawnTimer.update(mCurrentMove.time)) 
          gServerGame->getGameType()->spawnRobot(this);
@@ -1177,6 +1213,10 @@ void Robot::idle(GameObject::IdleCallPath path)
    if(path == GameObject::ServerIdleMainLoop)      // Running on server
    {
       mCurrentMove.fire = false;   // Don't fire unless we're told to!
+      mCurrentMove.up = 0;
+      mCurrentMove.down = 0;
+      mCurrentMove.right = 0;
+      mCurrentMove.left = 0;
 
       try
       {
@@ -1261,9 +1301,6 @@ void Robot::idle(GameObject::IdleCallPath path)
    }
 }
 
-extern F32 getAngleDiff(F32 a, F32 b);
-extern bool gShowAimVector;
-extern IniSettings gIniSettings;
 
 void Robot::render(S32 layerIndex)
 {

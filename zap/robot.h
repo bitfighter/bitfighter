@@ -83,7 +83,7 @@ public:
 
    void processMove(U32 stateIndex);
 
-  
+  Point mTarget;     // TODO: Get rid of this!!
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);
@@ -104,7 +104,6 @@ public:
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
    Timer respawnTimer;
-   bool mInGame;
 
    bool isRobot() { return true; }
 
@@ -139,7 +138,8 @@ class LuaRobot : public LuaClass
 
 private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
-   S32 findClosestZone(lua_State *L, Point point);   // Finds zone closest to point, used when robots get off the map
+   S32 findClosestZone(Point point);                 // Finds zone closest to point, used when robots get off the map
+   S32 findAndReturnClosestZone(lua_State *L, Point point); // Wraps findClosestZone and handles returning the result to Lua
 
 public:
   // Constants
