@@ -56,7 +56,7 @@ void InstructionsUserInterface::onActivate()
 }
 
 enum {
-   NumPages = 6,
+   NumPages = 7,
 };
 
 const char *pageHeaders[] = {
@@ -66,26 +66,11 @@ const char *pageHeaders[] = {
    "SPY BUGS",
    "GAME OBJECTS",
    "MORE GAME OBJECTS",
+   "ADVANCED COMMANDS",
 };
 
 void InstructionsUserInterface::render()
 {
-   /*
-   if(gClientGame->isConnectedToServer())
-   {
-      gGameUserInterface.render();
-      glEnable(GL_BLEND);
-         glBegin(GL_POLYGON);
-            glColor4f(0, 0, 0, 0.7);
-            glVertex2f(0, 0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0, canvasHeight);
-         glEnd();
-      glDisable(GL_BLEND);
-   }
-   */
-
    glColor3f(1,1,1);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage - 1]);
    drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NumPages);
@@ -116,6 +101,9 @@ void InstructionsUserInterface::render()
          break;
       case 6:
          renderPageObjectDesc(3);
+         break;
+      case 7:
+         renderPageCommand();
          break;
    }
 }
@@ -556,6 +544,100 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       start.y += 75;
    }
 }
+
+
+struct ControlStringsEditor
+{
+   const char *command;
+   const char *descr;
+};
+
+
+static ControlStringsEditor commands[] = {
+
+   { "/admin <password>", "Request admin permissions" },
+   { "/levpass <password>", "Request level change permission" },
+   { "-", NULL },       // Horiz. line
+   { "/add <time in minutes>", "Add time to the current game" },
+   { "/next", "Start next level" },
+   { "/prev", "Replay previous level" },
+   { "-", NULL },       // Horiz. line
+   { "/kick <player name>", "Kick a player from the game" },
+   { "-", NULL },       // Horiz. line
+   { "/mvol <0-10>", "Set music volume" },
+   { "/svol <0-10>", "Set SFX volume" },
+   { "/vvol <0-10>", "Set voice chat volume" },
+   { NULL, NULL },      // End of col1
+   { "/dcoords", "Show ship coordinates" },
+   
+   { NULL, NULL },      // End of list
+}
+
+
+void InstructionsUserInterface::renderPageCommands()
+{
+   S32 starty = 50;
+   S32 y;
+   S32 col1 = horizMargin;
+   S32 col2 = horizMargin + S32(canvasWidth * 0.25) + 45;     // +45 to make a little more room for  column
+   S32 col3 = horizMargin + S32(canvasWidth * 0.5);
+   S32 col4 = horizMargin + S32(canvasWidth * 0.75) + 45;
+   S32 actCol = col1;      // Action column
+   S32 contCol = col2;     // Control column
+   bool firstCol = true;
+   bool done = false;
+
+   glBegin(GL_LINES);
+      glVertex2f(col1, starty + 26);
+      glVertex2f(750, starty + 26);
+   glEnd();
+
+   Color cmdColor = Color(0, 1, 1);
+   Color descrColor = Color (1, 1, 1);
+   Color secColor = Color(1, 1, 0);
+
+   glColor(secColor);
+   drawString(col1, starty, 20, "Command");
+   drawString(col2, starty, 20, "Description");
+   drawString(col3, starty, 20, "Command");
+   drawString(col4, starty, 20, "Description");
+
+   y = starty + 28;
+   for(S32 i = 0; !done; i++)
+   {
+      if(!controls[i].actionString)
+      {
+         if(!firstCol)
+            done = true;
+         else
+         {  // Start second column
+            firstCol = false;
+            y = starty + 2;
+            actCol = col3;
+            contCol = col4;
+
+            glColor(secColor);
+         }
+      }
+      else if(!strcmp(controls[i].actionString, "-"))      // Horiz spacer
+      {
+         glColor3f(0.4, 0.4, 0.4);
+         glBegin(GL_LINES);
+            glVertex2f(actCol, y + 13);
+            glVertex2f(actCol + 335, y + 13);
+         glEnd();
+      }
+      else
+      {
+         glColor(cmdColor);
+         drawString(actCol, y, 18, controls[i].actionString);      // Textual description of function (1st arg in lists above)
+         glColor(descrColor);
+         drawString(contCol, y, 18, controls[i].keyString);
+      }
+      y += 26;
+   }
+}
+
 
 void InstructionsUserInterface::nextPage()
 {

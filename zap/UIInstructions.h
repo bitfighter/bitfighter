@@ -40,6 +40,7 @@ public:
    void renderPage1();
    void renderPage2();
    void renderPageObjectDesc(U32 index);
+   void renderPageCommands();
    void nextPage();
    void prevPage();
 
