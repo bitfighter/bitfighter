@@ -84,7 +84,6 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 }
 
 
-
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;

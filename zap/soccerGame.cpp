@@ -28,6 +28,7 @@
 #include "sfx.h"
 #include "gameNetInterface.h"
 #include "ship.h"
+#include "projectile.h"
 #include "gameObjectRender.h"
 #include "goalZone.h"
 #include "../glut/glutInclude.h"
@@ -49,12 +50,24 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    SFXObject::play(SFXFlagCapture);
 
    // Compose the message
-   if(msgIndex == SoccerMsgScoreGoal)
+
+   if(clientName.isNull())    // Unknown player scored
+   {
+      if(teamIndexAdjusted >= 0)
+         msg = "A goal was scored on team " + string(mTeams[teamIndexAdjusted].name.getString());
+      else if(teamIndexAdjusted == -1)
+         msg = "A goal was scored on a neutral goal!";
+      else if(teamIndexAdjusted == -2)
+         msg = "A goal was scored on a hostile goal!";
+      else
+         msg = "A goal was scored on an unknown goal!";
+   }
+   else if(msgIndex == SoccerMsgScoreGoal)
    {
       if(teamIndexAdjusted >= 0)
          msg = string(clientName.getString()) + " scored a goal on team " + string(mTeams[teamIndexAdjusted].name.getString());
       else if(teamIndexAdjusted == -1)
-         msg = string(clientName.getString()) + " scored a goal on a neutral goal!";
+         msg = string(clientName.getString()) + " scored a goal on a neutral goal!"; 
       else if(teamIndexAdjusted == -2)
          msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
       else
@@ -62,28 +75,18 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    }
    else if(msgIndex == SoccerMsgScoreOwnGoal)
    {
-      if(clientName.isNull())    // Unknown player scored
-      {
-         if(teamIndexAdjusted >= 0)
-            msg = "A goal was scored on team " + string(mTeams[teamIndexAdjusted].name.getString());
-         else if(teamIndexAdjusted == -1)
-            msg = "A goal was scored on a neutral goal!";
-         else if(teamIndexAdjusted == -2)
-            msg = "A goal was scored on a hostile goal!";
-         else
-            msg = "A goal was scored on an unknown goal!";
-      }
-      else
-         msg = string(clientName.getString()) + " scored an own-goal, losing their team a point!";
+      msg = string(clientName.getString()) + " scored an own-goal, losing their team a point!";
    }
    // Print the message
    gGameUserInterface.displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
 }
 
+
 void SoccerGameType::addZone(GoalZone *theZone)
 {
    mGoals.push_back(theZone);
 }
+
 
 void SoccerGameType::setBall(SoccerBallItem *theBall)
 {
@@ -91,26 +94,29 @@ void SoccerGameType::setBall(SoccerBallItem *theBall)
 }
 
 
-void SoccerGameType::scoreGoal(StringTableEntry playerName, S32 goalTeamIndex)
+void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
 {
-   ClientRef *cl = findClientRef(playerName);		// Need a better mechanism for this... time for shipIDs?  Or attach ship object to soccer ball?
-   S32 scoringTeam = -1;
-   if(cl)
-      scoringTeam = cl->teamId;
+   if(!ship)
+   {
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, StringTableEntry(NULL), (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
+      return;     
+   }
+
+   S32 scoringTeam = ship->getTeam();
 
    if(scoringTeam == -1 || scoringTeam == goalTeamIndex)    // Own-goal
    {
-      updateScore(cl, ScoreGoalOwnTeam);
-      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));   // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
+      updateScore(ship, ScoreGoalOwnTeam);
+      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));   // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
    }
    else	   // Goal on someone else's goal
    {
       if(goalTeamIndex == -2)
-         updateScore(cl, ScoreGoalHostileTeam);
+         updateScore(ship, ScoreGoalHostileTeam);
       else
-         updateScore(cl, ScoreGoalEnemyTeam);
+         updateScore(ship, ScoreGoalEnemyTeam);
 
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, playerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
    }
 }
 
@@ -194,6 +200,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    mObjectTypeMask |= CommandMapVisType | TurretTargetType;
    mNetFlags.set(Ghostable);
    initialPos = pos;
+   mLastPlayerTouch = NULL;
 }
 
 bool SoccerBallItem::processArguments(S32 argc, const char **argv)
@@ -247,9 +254,20 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    iv.normalize();
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
 
-   if(theInfo->damagingObject && theInfo->damagingObject->getObjectTypeMask() & (ShipType | RobotType))
+   if(theInfo->damagingObject)
    {
-      lastPlayerTouch = (dynamic_cast<Ship *>(theInfo->damagingObject))->getName();    // TODO: Should be ship object itself...
+      if(theInfo->damagingObject->getObjectTypeMask() & (ShipType | RobotType))
+         mLastPlayerTouch = dynamic_cast<Ship *>(theInfo->damagingObject);
+
+      else if(theInfo->damagingObject->getObjectTypeMask() & BulletType)
+      {
+         Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
+         Ship *s = dynamic_cast<Ship *>(p->mShooter.getPointer());
+         mLastPlayerTouch = s ? s : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
+      }
+
+      else 
+         mLastPlayerTouch = NULL;
    }
 }
 
@@ -268,7 +286,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
-      lastPlayerTouch = (dynamic_cast<Ship *>(hitObject))->getName();      // TODO: Should be ship object itself... 
+      mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
    }
    else
    {
@@ -277,7 +295,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       if(goal && !mSendHomeTimer.getCurrent())
       {
          SoccerGameType *g = (SoccerGameType *) getGame()->getGameType();
-         g->scoreGoal(lastPlayerTouch, goal->getTeam());
+         g->scoreGoal(mLastPlayerTouch, goal->getTeam());
          mSendHomeTimer.reset(1500);
       }
    }

@@ -94,6 +94,7 @@
 // Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code
 // Changing other player's team in 3+ team game with 3+ players no longer switches a random player
 // Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points
+// Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)
 
 // Server menu enhancements:
 // Fixed minor rendering issue on servers menu

@@ -1410,7 +1410,9 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
 // Different signature for more common usage
 void GameType::updateScore(ClientRef *client, ScoringEvent event, S32 data)
 {
-   updateScore(client, client->teamId, event, data);
+   if(client)
+      updateScore(client, client->teamId, event, data);
+   // else, no one to score...    sometimes client really does come in as null
 }
 
 

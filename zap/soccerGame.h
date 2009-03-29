@@ -43,7 +43,7 @@ class SoccerGameType : public GameType
 
 public:
 
-   void scoreGoal(StringTableEntry playerName, S32 goalTeamIndex);
+   void scoreGoal(Ship *ship, S32 goalTeamIndex);
    void addZone(GoalZone *theZone);
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(bool scoreboardVisible);
@@ -76,7 +76,7 @@ private:
    typedef Item Parent;
    Point initialPos;
    Timer mSendHomeTimer;
-   StringTableEntry lastPlayerTouch;
+   Ship *mLastPlayerTouch;
 
 public:
    SoccerBallItem(Point pos = Point());   // Constructor
