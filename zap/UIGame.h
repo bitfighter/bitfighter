@@ -81,6 +81,7 @@ private:
    enum ChatType {            // Types of in-game chat messages
       GlobalChat,
       TeamChat,
+      CmdChat,
    };
    ChatType mCurrentChatType; // Current in-game chat mode (global or local)
    char mChatBuffer[128];     // Message being composed
@@ -171,7 +172,7 @@ public:
    void processCommand(Vector<string> words);      // Process a cmd entered into the chat interface
    void populateChatCmdList();                     // Add all our chat cmds to a list for autocompletion purposes
 
-   void setVolume(VolumeType volType, string vol);
+   void setVolume(VolumeType volType, Vector<string> words);
 
    void onMouseMoved(S32 x, S32 y);
    void onMouseDragged(S32 x, S32 y);

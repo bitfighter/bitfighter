@@ -58,6 +58,7 @@ KeyCode keyCMDRMAP[2];        // Toggle commander's map
 KeyCode keyTEAMCHAT[2];       // Send team chat message
 KeyCode keyGLOBCHAT[2];       // Send global chat message
 KeyCode keyQUICKCHAT[2];      // Enter QuickChat mode
+KeyCode keyCMDCHAT[2];        // Go directly to command mode, bypassing chat
 KeyCode keyLOADOUT[2];        // Enter Loadout mode
 KeyCode keyMOD1[2];           // Activate module 1
 KeyCode keyMOD2[2];           // Activate module 2

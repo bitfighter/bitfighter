@@ -1226,8 +1226,10 @@ void Ship::emitMovementSparks()
    }
 }
 
+
 extern bool gShowAimVector;
 extern IniSettings gIniSettings;
+extern bool gDebugShowShipCoords;
 
 void Ship::render(S32 layerIndex)
 {
@@ -1267,7 +1269,7 @@ char y[100];
 itoa((S32) getActualPos().x, x,10);
 itoa((S32) getActualPos().y, y,10);
 str = str + " {" + x + "," + y + "}";
-                                                                                
+                                                                             
       // Modify name if owner is "busy"
       if(isBusy)
          str = "<<" + str + ">>";
@@ -1288,19 +1290,24 @@ str = str + " {" + x + "," + y + "}";
    }
    else
    {
-      char x[100];
-char y[100];
-itoa((S32) getActualPos().x, x,10);
-itoa((S32) getActualPos().y, y,10);
-string str = string("{ ") + x + " , " + y + " }";
-      glEnable(GL_BLEND);
-      F32 textAlpha = 0.5 * alpha;
-      U32 textSize = 14;
-      glLineWidth(1);
-      glColor4f(1,1,1,textAlpha);
-      UserInterface::drawString((UserInterface::getStringWidth(textSize, str.c_str()) * -0.5), 30, textSize, str.c_str() );
-      glDisable(GL_BLEND);
-      glLineWidth(gDefaultLineWidth);
+      if(gDebugShowShipCoords)
+      {
+         char x[20];
+         char y[20];
+         itoa((S32) getActualPos().x, x, 10);
+         itoa((S32) getActualPos().y, y, 10);
+         string str = string("@") + x + "," + y;
+
+         glEnable(GL_BLEND);
+            F32 textAlpha = 0.5 * alpha;
+            U32 textSize = 14;
+            glLineWidth(1);
+            glColor4f(1,1,1,textAlpha);
+
+            UserInterface::drawString((UserInterface::getStringWidth(textSize, str.c_str()) * -0.5), 30, textSize, str.c_str() );
+         glDisable(GL_BLEND);
+         glLineWidth(gDefaultLineWidth);
+      }
    }
 
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);

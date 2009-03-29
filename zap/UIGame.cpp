@@ -569,13 +569,12 @@ void GameUserInterface::renderCurrentChat()
                                (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + fontGap);
    const char *promptStr;
 
-
    Color baseColor;
 
-   if(mChatBuffer[0] == '/')      // Whatever the underlying chat mode, seems we're entering a command here
+   if(mChatBuffer[0] == '/' || mCurrentChatType == CmdChat)      // Whatever the underlying chat mode, seems we're entering a command here
    {
       baseColor = gCmdChatColor;
-      promptStr = "(Command): ";
+      promptStr = mCurrentChatType ? "(Command): /" : "(Command): ";
    }
    else if(mCurrentChatType == TeamChat)    // Team chat (goes to all players on team)
    {
@@ -851,6 +850,12 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mCurrentMode = ChatMode;
             setBusyChatting(true);
          }
+         else if(keyCode == keyCMDCHAT[inputMode])
+         {
+            mCurrentChatType = CmdChat;
+            mCurrentMode = ChatMode;
+            setBusyChatting(true);
+         }
          else if(keyCode == keyQUICKCHAT[inputMode])
             enterQuickChat();
          else if(keyCode == keyLOADOUT[inputMode])
@@ -879,13 +884,14 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          cancelChat();
       else if(keyCode == KEY_TAB)      // Auto complete any commands
       {
-         if(mChatBuffer[0] == '/')     // It's a command!
+         if(mChatBuffer[0] == '/' || mCurrentChatType == CmdChat)     // It's a command!
          {
             S32 found = -1;
+            S32 start = mCurrentChatType ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
 
             size_t len = strlen(mChatBuffer);    
             for(S32 i = 0; i < mChatCmds.size(); i++)
-               if( mChatCmds[i].substr(0, len) == string(mChatBuffer) )
+               if( mChatCmds[i].substr(start, len) == string(mChatBuffer) )
                {
                   if(found != -1)   // We've already found another command that matches this one, so that means it's not yet unique enough to autocomplete.
                      return;
@@ -895,7 +901,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             if(found == -1)      // Found no match
                return;
 
-            U32 clen = (U32) mChatCmds[found].copy(mChatBuffer, mChatCmds[found].length(), 0);      // Complete command
+            U32 clen = (U32) mChatCmds[found].copy(mChatBuffer, mChatCmds[found].length(), start);      // Complete command
             mChatBuffer[clen] = ' ';        // append trailing space for ready entry of next param
             mChatBuffer[clen + 1] = '\0';   // terminate the string
             mChatCursorPos = clen + 1;
@@ -1058,7 +1064,7 @@ void GameUserInterface::issueChat()
    if(mChatBuffer[0])
    {
       // Check if chat buffer holds a message or a command
-      if(mChatBuffer[0] != '/')     // It's a normal chat message
+      if(mChatBuffer[0] != '/' && mCurrentChatType != CmdChat)     // It's a normal chat message
       {
          GameType *gt = gClientGame->getGameType();
          if(gt)
@@ -1079,7 +1085,10 @@ Vector<string> GameUserInterface::parseString(char buffer[])
    // Parse the string
    string word = "";
    Vector<string> words;
-   for(size_t i = 1; i < strlen(mChatBuffer); i++)   // Start at 1 to omit the leading /
+
+   S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;  // Start at 1 to omit the leading /
+
+   for(size_t i = startIndex; i < strlen(mChatBuffer); i++)   
    {
       if(mChatBuffer[i] != ' ')
          word += words.size() == 0 ? tolower(mChatBuffer[i]) : mChatBuffer[i];      // Make first word all lower case for case insensitivity
@@ -1097,6 +1106,7 @@ Vector<string> GameUserInterface::parseString(char buffer[])
 
 
 extern md5wrapper md5;
+extern bool gDebugShowShipCoords;
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
@@ -1223,13 +1233,14 @@ void GameUserInterface::processCommand(Vector<string> words)
 
       gc->submitLevelChangePassword(words[1].c_str());
    }
-
+   else if(words[0] == "dcoords")
+         gDebugShowShipCoords = !gDebugShowShipCoords;
    else if(words[0] == "svol")      // SFX volume
-      setVolume(SfxVolumeType, words[1]);
+      setVolume(SfxVolumeType, words);
    else if(words[0] == "mvol")      // Music volume
-      setVolume(MusicVolumeType, words[1]);
+      setVolume(MusicVolumeType, words);
    else if(words[0] == "vvol")      // Voice chat volume
-      setVolume(VoiceVolumeType, words[1]);
+      setVolume(VoiceVolumeType, words);
 
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
@@ -1242,6 +1253,7 @@ void GameUserInterface::populateChatCmdList()
    // Our list of commands that can be entered at the chat prompt
    mChatCmds.push_back("/add");
    mChatCmds.push_back("/admin");
+   mChatCmds.push_back("/dcoords");
    mChatCmds.push_back("/kick");
    mChatCmds.push_back("/levpass");
    mChatCmds.push_back("/mvol");
@@ -1252,9 +1264,17 @@ void GameUserInterface::populateChatCmdList()
 }
 
 // Set specified volume to the specefied level
-void GameUserInterface::setVolume(VolumeType volType, string volstr)
+void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
 {
    S32 vol;
+
+   if(words.size() < 2)
+   {
+      displayMessage(gCmdChatColor, "!!! Need to specify volume");
+      return;
+   }  
+
+   string volstr = words[1];
 
    // Parse volstr -- if first digit isn't a number, user probably screwed up.  
    // atoi will return 0, but this probably isn't what the user wanted.

@@ -419,7 +419,7 @@ const char *gGameObjectInfo[] = {
  "Friendly Mine","Team's mines show trigger radius",
  "Enemy Mine","These are much harder to see",
 
- "Friendly Spy Bug", "Lets you see the surrounding area",
+ "Friendly Spy Bug", "Lets you surveil the area",
  "Enemy Spy Bug", "Destroy these when you find them",
  "", "",
  "", "",

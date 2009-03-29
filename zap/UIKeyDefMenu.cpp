@@ -97,7 +97,8 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(MenuItemExtended("Quick Chat", 10, 2, &keyQUICKCHAT[Joystick], ""));
       menuItems.push_back(MenuItemExtended("Team Chat", 11, 2, &keyTEAMCHAT[Joystick], ""));
       menuItems.push_back(MenuItemExtended("Global Chat", 12, 2, &keyGLOBCHAT[Joystick], ""));
-      menuItems.push_back(MenuItemExtended("Record Voice Msg", 13, 2, &keyTOGVOICE[Joystick], ""));
+      menuItems.push_back(MenuItemExtended("Enter Command", 13, 2, &keyCMDCHAT[Joystick], ""));
+      menuItems.push_back(MenuItemExtended("Record Voice Msg", 14, 2, &keyTOGVOICE[Joystick], ""));
    }
    else     // Keyboard mode
    {
@@ -123,7 +124,9 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(MenuItemExtended("Quick Chat", 14, 2, &keyQUICKCHAT[Keyboard], ""));
       menuItems.push_back(MenuItemExtended("Team Chat", 15, 2, &keyTEAMCHAT[Keyboard], ""));
       menuItems.push_back(MenuItemExtended("Global Chat", 16, 2, &keyGLOBCHAT[Keyboard], ""));
-      menuItems.push_back(MenuItemExtended("Record Voice Msg", 17, 2, &keyTOGVOICE[Keyboard], ""));
+      menuItems.push_back(MenuItemExtended("Enter Command", 17, 2, &keyCMDCHAT[Keyboard], ""));
+
+      menuItems.push_back(MenuItemExtended("Record Voice Msg", 18, 2, &keyTOGVOICE[Keyboard], ""));
    }
 }
 
@@ -235,17 +238,14 @@ void KeyDefMenuUserInterface::render()
    // Draw some suggestions
    glColor3f(1, 1, 0);
    if(gIniSettings.inputMode == Joystick)
-   {
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the left joystick to steer, the right to fire");
-   }
-   else
-   {
+   else 
       drawCenteredString(canvasHeight - vertMargin - 90, 15, "HINT: You will be using the mouse to aim, so make good use of your mouse buttons");
-   }
+
 
    // Draw the help string
    glColor3f(0, 1, 0);
-   drawCenteredString(canvasHeight - vertMargin - 160, 15, menuItems[selectedIndex].helpString.c_str());
+   drawCenteredString(canvasHeight - vertMargin - 110, 15, menuItems[selectedIndex].helpString.c_str());
 
    if(errorMsgTimer.getCurrent())
    {

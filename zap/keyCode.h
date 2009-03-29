@@ -151,6 +151,7 @@ extern KeyCode keyCMDRMAP[2];
 extern KeyCode keyTEAMCHAT[2];
 extern KeyCode keyGLOBCHAT[2];
 extern KeyCode keyQUICKCHAT[2];
+extern KeyCode keyCMDCHAT[2];
 extern KeyCode keyLOADOUT[2];
 extern KeyCode keyMOD1[2];
 extern KeyCode keyMOD2[2];

@@ -58,6 +58,7 @@ void loadKeyBindings()
    keyTEAMCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "TeamChat", keyCodeToString(KEY_T)).c_str());
    keyGLOBCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "GlobalChat", keyCodeToString(KEY_G)).c_str());
    keyQUICKCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "QuickChat", keyCodeToString(KEY_V)).c_str());
+   keyCMDCHAT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "Command", keyCodeToString(KEY_SLASH)).c_str());
    keyLOADOUT[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShowLoadoutMenu", keyCodeToString(KEY_Z)).c_str());
    keyMOD1[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule1", keyCodeToString(KEY_SPACE)).c_str());
    keyMOD2[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(MOUSE_RIGHT)).c_str());
@@ -77,6 +78,7 @@ void loadKeyBindings()
    keyTEAMCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "TeamChat", keyCodeToString(KEY_T)).c_str());
    keyGLOBCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "GlobalChat", keyCodeToString(KEY_G)).c_str());
    keyQUICKCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "QuickChat", keyCodeToString(BUTTON_3)).c_str());
+   keyCMDCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "Command", keyCodeToString(KEY_SLASH)).c_str());
    keyLOADOUT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShowLoadoutMenu", keyCodeToString(BUTTON_4)).c_str());
    keyMOD1[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule1", keyCodeToString(BUTTON_7)).c_str());
    keyMOD2[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(BUTTON_8)).c_str());
@@ -108,6 +110,7 @@ void saveKeyBindings()
    gINI.SetValue("KeyboardKeyBindings", "TeamChat", keyCodeToString(keyTEAMCHAT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "GlobalChat", keyCodeToString(keyGLOBCHAT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "QuickChat", keyCodeToString(keyQUICKCHAT[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "Command", keyCodeToString(keyCMDCHAT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ActivateModule1", keyCodeToString(keyMOD1[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(keyMOD2[Keyboard]), true);
@@ -127,6 +130,7 @@ void saveKeyBindings()
    gINI.SetValue("JoystickKeyBindings", "TeamChat", keyCodeToString(keyTEAMCHAT[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "GlobalChat", keyCodeToString(keyGLOBCHAT[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "QuickChat", keyCodeToString(keyQUICKCHAT[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "Command", keyCodeToString(keyCMDCHAT[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "ShowLoadoutMenu", keyCodeToString(keyLOADOUT[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "ActivateModule1", keyCodeToString(keyMOD1[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(keyMOD2[Joystick]), true);
