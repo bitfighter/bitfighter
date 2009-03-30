@@ -130,6 +130,7 @@ public:
    const char *menuSubTitle;
    Color menuSubTitleColor;
    const char *menuFooter;
+   bool menuFooterContainsInstructions;
 
    void idle(U32 timeDelta); 
 

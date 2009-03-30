@@ -58,6 +58,7 @@ MenuUserInterface::MenuUserInterface()    // Constructor
    menuSubTitle = "";
    //menuSubTitleColor = Color(1,1,1);
    menuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
+   menuFooterContainsInstructions = true;
    selectedIndex = 0;
    itemSelectedWithMouse = false;
    currOffset = 0;
@@ -127,6 +128,10 @@ S32 MenuUserInterface::getYStart()
 }
 
 
+extern IniSettings gIniSettings;
+extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
+extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
+
 void MenuUserInterface::render()
 {
    // Draw the game screen, then dim it out so you can still see it under our overlay
@@ -150,7 +155,36 @@ void MenuUserInterface::render()
 
    glColor(menuSubTitleColor);
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, menuFooter);
+
+   S32 y = canvasHeight - vertMargin - 20;
+   const S32 size = 18;
+
+   glColor3f(1, 1, 1);     // white
+   if(menuFooterContainsInstructions && gIniSettings.inputMode == Joystick)
+   {
+      S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + 
+                       getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
+                       getStringWidth(size, "to choose |  to select |  exits menu");
+      
+      S32 x = canvasWidth/2 - horizMargin - totalWidth/2;
+
+      renderControllerButton(x, y, BUTTON_DPAD_UP, false);
+      x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getStringWidth(size, " ");
+      renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
+      x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + getStringWidth(size, " ");
+      drawString(x, y, size, "to choose | ");
+      x += getStringWidth(size, "to choose | ");
+      renderControllerButton(x, y + 4, BUTTON_START, false);
+      x += getControllerButtonRenderedSize(BUTTON_START);
+      drawString(x, y, size, "to choose | ");
+      x += getStringWidth(size, "to choose | ");
+      renderControllerButton(x, y + 4, BUTTON_BACK, false);
+      x += getControllerButtonRenderedSize(BUTTON_BACK);
+      drawString(x, y, size, "exits menu");
+
+   }
+   else
+      drawCenteredString(y, size, menuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;
@@ -367,7 +401,7 @@ void MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode)
 // Process the keys that work on all menus
 void MenuUserInterface::processStandardKeys(KeyCode keyCode)
 {
-   if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || keyCode == BUTTON_DPAD_RIGHT || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)
+   if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || /*keyCode == BUTTON_DPAD_RIGHT ||*/ keyCode == BUTTON_START || keyCode == MOUSE_LEFT)
    {
       UserInterface::playBoop();
       if(keyCode != MOUSE_LEFT)
@@ -383,7 +417,7 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
       }
       processSelection(menuItems[selectedIndex].mIndex);
    }
-   else if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT || keyCode == MOUSE_RIGHT)
+   else if(keyCode == KEY_LEFT || /*keyCode == BUTTON_DPAD_LEFT ||*/ keyCode == MOUSE_RIGHT)
    {
       UserInterface::playBoop();
       processShiftSelection(menuItems[selectedIndex].mIndex);
@@ -466,6 +500,7 @@ MainMenuUserInterface::MainMenuUserInterface()
    menuSubTitle = "";
    //menuSubTitleColor = Color(1,1,1);
    menuFooter = "join us @ www.bitfighter.org";
+   menuFooterContainsInstructions = false;
    mNeedToUpgrade = false;                         // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;                    // So we don't show the upgrade message more than once
    levelLoadDisplayFadeTimer.setPeriod(1000);

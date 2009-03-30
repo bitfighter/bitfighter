@@ -486,6 +486,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGro
 }
 
 
+// Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+{
+   //setServerAlertVolume(vol);
+}
+
+
 extern IniSettings gIniSettings;
 
 // Send password, client's name, and version info to game server

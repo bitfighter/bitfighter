@@ -54,6 +54,8 @@
 // Added spaces to level files written by editor to make them easier to read
 // Better handling of items with invalid parameter lines in .level files
 // Enter commands using "/" key, or by starting a global or team chat message with "/"
+// Added instruction page to explain available chat commands
+// Improved menu navigation instructions for joystick users
 
 // Items
 // Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.

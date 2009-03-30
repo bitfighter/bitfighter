@@ -144,6 +144,7 @@ private:
       SfxVolumeType,
       MusicVolumeType,
       VoiceVolumeType,
+      ServerAlertVolumeType,
    };
 
    Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion

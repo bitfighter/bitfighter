@@ -163,6 +163,8 @@ public:
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
 
+   TNL_DECLARE_RPC(c2sSetServerAlertVolume, (S8 vol));
+
 
    static GameConnection *getClientList();
    GameConnection *getNextClient();

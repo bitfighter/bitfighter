@@ -1241,6 +1241,8 @@ void GameUserInterface::processCommand(Vector<string> words)
       setVolume(MusicVolumeType, words);
    else if(words[0] == "vvol")      // Voice chat volume
       setVolume(VoiceVolumeType, words);
+   else if(words[0] == "servvol")   // Server alerts volume
+      setVolume(ServerAlertVolumeType, words);
 
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
@@ -1260,6 +1262,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/next");
    mChatCmds.push_back("/prev");
    mChatCmds.push_back("/svol");
+   mChatCmds.push_back("/servvol");
    mChatCmds.push_back("/vvol");
 }
 
@@ -1300,6 +1303,11 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
       gIniSettings.voiceChatVolLevel = (F32) vol / 10.0;
       displayMessage(gCmdChatColor, "Voice chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
+   case ServerAlertVolumeType:
+      gClientGame->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
+      displayMessage(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
+      return;
+
   }
 }
 
