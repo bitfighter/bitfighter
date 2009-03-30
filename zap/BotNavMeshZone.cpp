@@ -231,8 +231,10 @@ S32 findZoneContaining(Point p)
 {
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    {
+      TNLAssert( gBotNavMeshZones[i]->mZoneID == i,"LLLLL"); 
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
+      // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
       if( gBotNavMeshZones[i]->getExtent().contains(p) 
                         && (PolygonContains2(gBotNavMeshZones[i]->mPolyBounds.address(), gBotNavMeshZones[i]->mPolyBounds.size(), p)) )
          return i;

@@ -812,17 +812,55 @@ Point LuaRobot::getNextWaypoint()
 {
    TNLAssert(thisRobot->flightPlan.size() > 1, "FlightPlan has too few zones!");
 
-   S32 currentZone = thisRobot->getCurrentZone();
-   S32 nextZone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];    
+   S32 currentzone = thisRobot->getCurrentZone();
+
+   S32 nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];    
 
    // Note that getNeighborIndex could return -1.  It shouldn't, but it could.
-   S32 neighborZoneIndex = gBotNavMeshZones[currentZone]->getNeighborIndex(nextZone);
-
+   S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
    TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-   if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter)) 
-      return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
-   else
-      return gBotNavMeshZones[currentZone]->getCenter();
+
+
+            /*   string plan = "";
+               for(S32 i = 0; i < thisRobot->flightPlan.size(); i++)
+               {
+                  char z[100];
+                  itoa(thisRobot->flightPlan[i], z, 10);
+                  plan = plan + " ==>"+z;
+               }*/
+
+
+   S32 i = 0;
+   Point currentwaypoint = gBotNavMeshZones[currentzone]->getCenter();
+   Point nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
+
+   while(thisRobot->canSeePoint(nextwaypoint))
+   {
+      currentzone = nextzone;
+      currentwaypoint = nextwaypoint;
+      i++;
+
+      if(thisRobot->flightPlan.size() - 2 - i < 0)
+         return nextwaypoint;
+
+      nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2 - i];  
+      S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
+      TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
+        
+      nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
+   }
+
+
+   return currentwaypoint;
+
+
+
+   //if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center)) 
+   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center;
+   //else if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter)) 
+   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
+   //else
+   //   return gBotNavMeshZones[currentZone]->getCenter();
 }
 
 
@@ -909,6 +947,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    mTeam = team;
    mass = m;            // Ship's mass
    L = NULL;
+   mCurrentZone = -1;
 
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
    respawnTimer.reset(100, RobotRespawnDelay);     
