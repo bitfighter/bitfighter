@@ -56,8 +56,7 @@ MenuUserInterface::MenuUserInterface()    // Constructor
    setMenuID(GenericUI);
    dSprintf(menuTitle, sizeof(menuTitle), "Menu:");
    menuSubTitle = "";
-   //menuSubTitleColor = Color(1,1,1);
-   menuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
+
    menuFooterContainsInstructions = true;
    selectedIndex = 0;
    itemSelectedWithMouse = false;
@@ -132,6 +131,50 @@ extern IniSettings gIniSettings;
 extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
+
+static void renderMenuInstructions(S32 variant)
+{
+   S32 y = canvasHeight - vertMargin - 20;
+   const S32 size = 18;
+
+   if(gIniSettings.inputMode == Keyboard)
+   {
+	  char *menuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
+	  drawCenteredString(y, size, menuFooter);
+   }
+   else
+   {
+	  S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) +
+					   getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
+					   getStringWidth(size, "to choose |  to select |  exits menu");
+
+	  S32 x = canvasWidth/2 - horizMargin - totalWidth/2;
+
+	  renderControllerButton(x, y, BUTTON_DPAD_UP, false);
+	  x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getStringWidth(size, " ");
+
+	  renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
+	  x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + getStringWidth(size, " ");
+
+	  static const char *msg1 = "to choose | ";
+	  drawString(x, y, size, msg1);
+	  x += getStringWidth(size, msg1);
+
+	  renderControllerButton(x, y + 4, BUTTON_START, false);
+	  x += getControllerButtonRenderedSize(BUTTON_START);
+
+	  static const char *msg2 = "to select | ";
+	  drawString(x, y, size, msg2);
+	  x += getStringWidth(size, msg2);
+
+	  renderControllerButton(x, y + 4, BUTTON_BACK, false);
+	  x += getControllerButtonRenderedSize(BUTTON_BACK);
+
+	  drawString(x, y, size, "exits menu");
+   }
+}
+
+
 void MenuUserInterface::render()
 {
    // Draw the game screen, then dim it out so you can still see it under our overlay
@@ -156,35 +199,11 @@ void MenuUserInterface::render()
    glColor(menuSubTitleColor);
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
 
-   S32 y = canvasHeight - vertMargin - 20;
-   const S32 size = 18;
-
    glColor3f(1, 1, 1);     // white
-   if(menuFooterContainsInstructions && gIniSettings.inputMode == Joystick)
-   {
-      S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + 
-                       getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
-                       getStringWidth(size, "to choose |  to select |  exits menu");
-      
-      S32 x = canvasWidth/2 - horizMargin - totalWidth/2;
-
-      renderControllerButton(x, y, BUTTON_DPAD_UP, false);
-      x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getStringWidth(size, " ");
-      renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
-      x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + getStringWidth(size, " ");
-      drawString(x, y, size, "to choose | ");
-      x += getStringWidth(size, "to choose | ");
-      renderControllerButton(x, y + 4, BUTTON_START, false);
-      x += getControllerButtonRenderedSize(BUTTON_START);
-      drawString(x, y, size, "to choose | ");
-      x += getStringWidth(size, "to choose | ");
-      renderControllerButton(x, y + 4, BUTTON_BACK, false);
-      x += getControllerButtonRenderedSize(BUTTON_BACK);
-      drawString(x, y, size, "exits menu");
-
-   }
+   if(menuFooterContainsInstructions)
+      renderMenuInstructions(1);
    else
-      drawCenteredString(y, size, menuFooter);
+      drawCenteredString(18, canvasHeight - vertMargin - 20, menuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;
@@ -556,7 +575,7 @@ extern S32 gHostingModePhase;
 void MainMenuUserInterface::render()
 {
    // If we're in LoadingLevels mode, show the progress panel...
-   renderProgressListItems();   
+   renderProgressListItems();
    if(gHostingModePhase == 1 || gHostingModePhase == 2) // LoadingLevels
    {
       // There will be exactly one new entry every time we get here!
