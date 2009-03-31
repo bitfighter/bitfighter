@@ -131,8 +131,7 @@ extern IniSettings gIniSettings;
 extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
-
-static void renderMenuInstructions(S32 variant)
+void MenuUserInterface::renderMenuInstructions(S32 variant)
 {
    S32 y = canvasHeight - vertMargin - 20;
    const S32 size = 18;
