@@ -763,7 +763,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
          // still see it, even though in some cases, the turning of the ship around a 
          // protruding corner may make it technically not visible.  This will prevent
          // rapidfire recalcuation of the path when it's not really necessary.
-         if(thisRobot->canSeePoint(last) || first)
+         if(first || thisRobot->canSeePoint(last))
          {
             dest = last;
             found = true;
