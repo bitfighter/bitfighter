@@ -102,9 +102,10 @@ class AStar
 {
 private:
    static F32 heuristic(S32 fromZone, S32 toZone);
+   static Point findGateway(S32 zone1, S32 zone2);
 
 public:
-   static Vector<S32> findPath (S32 startZone, S32 targetZone);
+   static Vector<Point> findPath (S32 startZone, S32 targetZone, Point target);
    
 };
 

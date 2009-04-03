@@ -46,7 +46,8 @@ const S32 gScreenHeight = 600;
 const S32 gScreenWidth = 800;
 const U32 gCursorBlinkTime = 100;
 
-const U32 gMaxGameDescrLength = 32;    // Any longer, and it won't fit on-screen
+const U32 gMaxGameNameLength = 32;     // Any longer, and it won't fit on-screen
+const U32 gMaxGameDescrLength = 60;    // Any longer, and it won't fit on-screen
 
 enum UIID {
    AdminPasswordEntryUI,

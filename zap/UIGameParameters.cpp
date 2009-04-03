@@ -133,11 +133,11 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    menuItems.clear();
 
    string fn = gEditorUserInterface.getLevelFileName();                 // We'll chop off the .level bit below...
-   menuItems.push_back(MenuItem2("Game Type:",    gameType->getGameTypeString(),  gtIndex,    0, 0, "", gameType->getInstructionString(),    TypeGameType,  KEY_G, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Filename:",     fn.substr(0,fn.find_last_of('.')), 0,       0, 0, "", "File this level is stored in",      TypeFileName,  KEY_F, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level Name:",   "New Bitfighter Level",            0,       0, 0, "", "Choose a short, catchy name",       TypeString,    KEY_N, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level Descr:",  "",                                0,       0, 0, "", "A brief description of the level",  TypeString,    KEY_D, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level By:",     "",                                0,       0, 0, "", "Who created this level",            TypeString,    KEY_C, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Game Type:",    gameType->getGameTypeString(),  gtIndex,    0, 0, "", gameType->getInstructionString(),    TypeGameType,      KEY_G, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Filename:",     fn.substr(0,fn.find_last_of('.')), 0,       0, 0, "", "File this level is stored in",      TypeFileName,      KEY_F, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Level Name:",   "New Bitfighter Level",            0,       0, 0, "", "Choose a short, catchy name",       TypeShortString,   KEY_N, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Level Descr:",  "",                                0,       0, 0, "", "A brief description of the level",  TypeLongString,    KEY_D, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Level By:",     "",                                0,       0, 0, "", "Who created this level",            TypeLongString,    KEY_B, KEY_UNKNOWN ));
 
    S32 i;
    for(i = 0; i < mGameSpecificParams; i++)
@@ -165,7 +165,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          string val = str.substr(lastPos, str.size() - lastPos);
 
          if (token == "LevelName")
-            menuItems[2].mValS = val.substr(0, gMaxGameDescrLength);
+            menuItems[2].mValS = val.substr(0, gMaxGameNameLength);
          else if (token == "LevelDescription")
             menuItems[3].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "LevelCredits")
@@ -248,7 +248,8 @@ void GameParamUserInterface::render()
       S32 space = getStringWidth(fontSize, " ");
       string dispString = menuItems[i].mValS != "" ? menuItems[i].mValS : "<none>";
 
-      if(menuItems[i].mValType == TypeString || menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName)
+      if(menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString  ||
+            menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName)
          xpos = (gScreenWidth - getStringWidth(fontSize, menuItems[i].mText) - getStringWidth(fontSize, dispString.c_str()) - space) / 2;
       else if(menuItems[i].mValType == TypeInt)
          xpos = (gScreenWidth - getStringWidthf(fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits) - getStringWidth(fontSize, menuItems[i].mText) - space) / 2;
@@ -264,7 +265,7 @@ void GameParamUserInterface::render()
          glColor3f(1, 1, 1);
 
 
-      if(menuItems[i].mValType == TypeString || menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName)
+      if(menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString || menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName)
          drawString(xpos + getStringWidth(fontSize, menuItems[i].mText) + space, y, fontSize, dispString.c_str());
       else if(menuItems[i].mValType == TypeInt)
          drawStringf(xpos + getStringWidth(fontSize, menuItems[i].mText) + space, y, fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits);
@@ -272,7 +273,7 @@ void GameParamUserInterface::render()
 
       if(selectedIndex == i)     // This is the currently selected item
          // Draw chat cursor
-         if((menuItems[i].mValType == TypeString || menuItems[i].mValType == TypeFileName) && cursorBlink)
+         if((menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString || menuItems[i].mValType == TypeFileName) && cursorBlink)
             drawString(xpos + getStringWidth(fontSize, menuItems[i].mText) + space + getStringWidth(fontSize, menuItems[i].mValS.c_str()), y, fontSize, "_");
    }
 
@@ -340,6 +341,7 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back(str);
 }
 
+
 // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
 bool GameParamUserInterface::didAnythingGetChanged()
 {
@@ -353,9 +355,12 @@ bool GameParamUserInterface::didAnythingGetChanged()
    return false;
 }
 
+
 void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if ((selectedIndex != -1 && menuItems[selectedIndex].mValType == TypeString || menuItems[selectedIndex].mValType == TypeFileName) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))    // Do backspacey things
+   if ((selectedIndex != -1 && (menuItems[selectedIndex].mValType == TypeShortString ||  menuItems[selectedIndex].mValType == TypeLongString || 
+                                menuItems[selectedIndex].mValType == TypeFileName)) && 
+            (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))    // Do backspacey things
    {     // (braces required)
       if(menuItems[selectedIndex].mValS.size())
          menuItems[selectedIndex].mValS.erase(menuItems[selectedIndex].mValS.size()-1);
@@ -431,9 +436,10 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       gChatInterface.activate();
    }
 
-   else if(menuItems[selectedIndex].mValType == TypeString && ascii)
+   else if((menuItems[selectedIndex].mValType == TypeShortString || menuItems[selectedIndex].mValType == TypeLongString) && ascii)
    {
-      if(menuItems[selectedIndex].mValS.size() < gMaxGameDescrLength) // gMaxGameDescrLength (64) is about the max number of characters you can display on the screen.  It's not an inherent limit.
+      // gMaxGameDescrLength is about the max number of characters you can display on the screen.  It's not an inherent limit.
+      if(menuItems[selectedIndex].mValS.size() < (menuItems[selectedIndex].mValType == TypeShortString ? gMaxGameNameLength : gMaxGameDescrLength))
          menuItems[selectedIndex].mValS += char(ascii);
    }
 
@@ -442,8 +448,6 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(menuItems[selectedIndex].mValS.size() < MAX_SHORT_TEXT_LEN)  // MAX_SHORT_TEXT_LEN is the length we're restricting file names to, for somewhat arbitrary reasons.
          menuItems[selectedIndex].mValS += char(ascii);
    }
-
-
 }
 
 };

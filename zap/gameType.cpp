@@ -863,7 +863,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          if(i < argc - 1)
             s += " ";
       }
-      mLevelName.set(s.substr(0, gMaxGameDescrLength).c_str());
+      mLevelName.set(s.substr(0, gMaxGameNameLength).c_str());
    }
    else if(!stricmp(argv[0], "LevelDescription"))
    {

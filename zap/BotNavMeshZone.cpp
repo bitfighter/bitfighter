@@ -249,14 +249,14 @@ void testBotNavMeshZoneConnections()
 {
    return;
 
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
-      for(S32 j = 0; j < gBotNavMeshZones.size(); j++)
-      {
-         Vector<S32> path = AStar::findPath(i, j);
-         for(S32 k = 0; k < path.size(); k++)
-            logprintf("Path %d from %d to %d: %d", k, i, j, path[k]);
-         logprintf("");
-      }
+   //for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   //   for(S32 j = 0; j < gBotNavMeshZones.size(); j++)
+   //   {
+   //      Vector<S32> path = AStar::findPath(i, j);
+   //      for(S32 k = 0; k < path.size(); k++)
+   //         logprintf("Path %d from %d to %d: %d", k, i, j, path[k]);
+   //      logprintf("");
+   //   }
 }
 
 
@@ -349,13 +349,13 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 // Rough guess as to distance from fromZone to toZone
 F32 AStar::heuristic(S32 fromZone, S32 toZone)
 {
-   return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() ) * 1.2;
+   return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() );
 }
 
 const S32 gMaxNavMeshZones = 2000;     // Don't make this go above S16 max
 
 // Returns a path, including the startZone and targetZone 
-Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
+Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
 {   
    // Because of these variables...
    static U16 onClosedList = 0;
@@ -376,7 +376,7 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
 
 	S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
 
-   Vector<S32> pathZones;
+   Vector<Point> path;
 
    // This block here lets us repeatedly reuse the whichList array without resetting it or recreating it
    // which, for larger numbers of zones should be a real time saver.  It's not clear if it is particularly
@@ -570,25 +570,54 @@ Vector<S32> AStar::findPath(S32 startZone, S32 targetZone)
       //	each cell's parent, figure out the length of the path.
       // Fortunately, we want our list to have the closest zone last (see getWaypoint),
       // so it all works out nicely.
+      // We'll store both the zone center and the gateway to the neighboring zone.  This
+      // will help keep the robot from getting hung up on blocked but technically visible
+      // paths, such as when we are trying to fly around a protruding wall stub.
 
-	   S32 path = targetZone; 
-      pathZones.push_back(path);
+      path.push_back(target);                                     // First point is the actual target itself
+      path.push_back(gBotNavMeshZones[targetZone]->getCenter());  // Second is the center of the target's zone
+      
 
-	   while(path != startZone)
+char hhh[100];
+itoa(targetZone,hhh,10);
+   string pathstr = hhh;
+
+
+      S32 zone = targetZone;
+
+	   while(zone != startZone)
 	   {
-		   // Find the parent of the current cell	
-		   path = parentZones[path];		
-         pathZones.push_back(path);
-	   }
+		   path.push_back(findGateway(zone, parentZones[zone]));
 
-	   return pathZones;
+		   zone = parentZones[zone];		// Find the parent of the current cell	
+
+
+char hhh[100];
+itoa(zone,hhh,10);
+   pathstr += string(" > ") + hhh;
+
+
+         path.push_back(gBotNavMeshZones[zone]->getCenter());
+	   }
+      path.push_back(gBotNavMeshZones[startZone]->getCenter());
+
+      logprintf("path: %s" , pathstr.c_str());
+	   return path;
 	}
 
-   // else there is no path to the selected target.
-   pathZones.push_back(-1);
-	return pathZones;
+   // else there is no path to the selected target
+   TNLAssert(path.size() == 0, "Expected empty path!");
+	return path;
 }
 
+// Return a point representing gateway between zones
+Point AStar::findGateway(S32 zone1, S32 zone2)
+{
+   S32 neighborIndex = gBotNavMeshZones[zone1]->getNeighborIndex(zone2);
+   TNLAssert(neighborIndex >= 0, "Invalid neighbor index!!");
+
+   return gBotNavMeshZones[zone1]->mNeighbors[neighborIndex].borderCenter;
+}
 
 
 };

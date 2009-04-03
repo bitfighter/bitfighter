@@ -199,10 +199,10 @@ void MenuUserInterface::render()
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
 
    glColor3f(1, 1, 1);     // white
-   if(menuFooterContainsInstructions)
+   if(menuFooterContainsInstructions) 
       renderMenuInstructions(1);
    else
-      drawCenteredString(18, canvasHeight - vertMargin - 20, menuFooter);
+      drawCenteredString(canvasHeight - vertMargin - 20, 18, menuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;
@@ -584,7 +584,7 @@ void MainMenuUserInterface::render()
 
    // else...
 
-   Parent::render();
+  Parent::render();
 
    if(motd[0])
    {

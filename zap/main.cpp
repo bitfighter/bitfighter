@@ -56,6 +56,7 @@
 // Enter commands using "/" key, or by starting a global or team chat message with "/"
 // Added instruction page to explain available chat commands
 // Improved menu navigation instructions for joystick users
+// Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits
 
 // Items
 // Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.

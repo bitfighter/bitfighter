@@ -884,7 +884,7 @@ void ClientGame::renderCommander()
       worldExtents.x *= screenAspectRatio / aspectRatio;
 
    Point offset = (worldCenter - position) * zoomFrac + position;
-   Point visSize = computePlayerVisArea(u) * 2;
+   Point visSize = gClientGame->computePlayerVisArea(u) * 2;
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    Point visScale(UserInterface::canvasWidth / modVisSize.x,

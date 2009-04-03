@@ -738,131 +738,146 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 
    Point target = Point(x, y);
 
-   // First, check to see if target is within our LOS...
-   if(thisRobot->canSeePoint(target))
+   S32 targetZone = findZoneContaining(target);       // Where we're going
+
+   // Make sure target is still in the same zone it was in when we created our flightplan.
+   // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
+   if(targetZone == thisRobot->flightPlanTo)
    {
-      //thisRobot->mTarget = target;
-      return returnPoint(L, target);   // ...if so, that's our waypoint!
-   }
 
-   S32 currentZone = thisRobot->getCurrentZone();
-   S32 targetZone = findZoneContaining(target);
+      // In case our target has moved, replace final point of our flightplan with the current target location
+      thisRobot->flightPlan[0] = target;
 
-   // Occasionally, the LOS test will fail (such as if the robot is directly atop the target)
-   // We'll catch that here with another, cheap, test.
+      // First, let's scan through our pre-calculated waypoints and see if we can see any of them.  
+      // If so, we'll just head there with no further rigamarole.  Remember that our flightplan is
+      // arranged so the closest points are at the end of the list, and the target is at index 0.
+      Point dest;
+      bool found = false;
+      bool first = true;
 
-   if(currentZone == targetZone)
-   {
-      //thisRobot->mTarget = target;
-      return returnPoint(L, target);
-   }
+      while(thisRobot->flightPlan.size() > 0)
+      {
+         Point last = thisRobot->flightPlan.last();
 
-   if(currentZone == -1)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
-   {
-      S32 zone = findClosestZone(thisRobot->getActualPos());
-      //thisRobot->mTarget = (zone == -1) ? Point(0,0) : gBotNavMeshZones[zone]->getCenter();
-      return findAndReturnClosestZone(L, thisRobot->getActualPos());
-   }
-
-   if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
-   {
-      //S32 zone = findClosestZone(target);
-      //thisRobot->mTarget = zone == -1 ? Point(0,0) : gBotNavMeshZones[zone]->getCenter();
-      return findAndReturnClosestZone(L, target);
-   }
-
-
-   // Second, see if we already have a valid path calculated to target zone.  Basically, we want
-   // to avoid doing pathfinding if we don't really need to.
-   // if no plan || invalid plan || we already have path to this target || target is in same zone we already have plan to
-   if(thisRobot->flightPlan.size() == 0 || thisRobot->flightPlan.first() == -1 || 
-      target == thisRobot->flightPlanTo || findZoneContaining(target) == thisRobot->flightPlan.first())
-   {
-      for(S32 i = thisRobot->flightPlan.size() - 1; i >= 0; i--)
-         if(thisRobot->flightPlan[i] == currentZone)     // This path will be valid from here on out
+         // We'll assume that if we could see the point on the previous turn, we can
+         // still see it, even though in some cases, the turning of the ship around a 
+         // protruding corner may make it technically not visible.  This will prevent
+         // rapidfire recalcuation of the path when it's not really necessary.
+         if(thisRobot->canSeePoint(last) || first)
          {
-            if(i == 0)     // Target is in this zone... should have been caught earlier (we should be able to see target), so shouldn't happen
-            {
-               TNLAssert(false, "Illogical condition in path finding code...");
-               //thisRobot->mTarget = target;
-               return returnPoint(L, target);
-            }
-
-            //thisRobot->mTarget = getNextWaypoint();
-            return returnPoint(L, getNextWaypoint());
+            dest = last;
+            found = true;
+            first = false;
+            thisRobot->flightPlan.pop_back();   // Discard now possibly superfluous waypoint
          }
          else
-            thisRobot->flightPlan.pop_back();            // Get rid of last zone... it's no longer relevant
+            break;
+      }
+
+      // If we found one, that means we found a visible waypoint, and we can head there...
+      if(found)
+      {
+         thisRobot->flightPlan.push_back(dest);    // Put dest back at the end of the flightplan
+         return returnPoint(L, dest);
+      }
    }
-   
-   // If we get to here, then we need to find a new path.  Either our original path was invalid for some reason,
-   // or the path we had no longer applied to our current location
 
-   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone);
+   // We need to calculate a new flightplan
+   thisRobot->flightPlan.clear();
 
-   TNLAssert(thisRobot->flightPlan.size() > 1, "Flight plan appears too small!");
+   S32 currentZone = thisRobot->getCurrentZone();     // Where we are
+   if(currentZone == -1)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
+      //return findAndReturnClosestZone(L, thisRobot->getActualPos());
+      return returnNil(L);
 
-   //thisRobot->mTarget = getNextWaypoint();
-   return returnPoint(L, getNextWaypoint());
-}
+   if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
+      //return findAndReturnClosestZone(L, target);
+      return returnNil(L);
 
-
-// Encapsulate some ugliness
-Point LuaRobot::getNextWaypoint()
-{
-   TNLAssert(thisRobot->flightPlan.size() > 1, "FlightPlan has too few zones!");
-
-   S32 currentzone = thisRobot->getCurrentZone();
-
-   S32 nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];    
-
-   // Note that getNeighborIndex could return -1.  It shouldn't, but it could.
-   S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
-   TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-
-
-            /*   string plan = "";
-               for(S32 i = 0; i < thisRobot->flightPlan.size(); i++)
-               {
-                  char z[100];
-                  itoa(thisRobot->flightPlan[i], z, 10);
-                  plan = plan + " ==>"+z;
-               }*/
-
-
-   S32 i = 0;
-   Point currentwaypoint = gBotNavMeshZones[currentzone]->getCenter();
-   Point nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
-
-   while(thisRobot->canSeePoint(nextwaypoint))
+   // We're in, or on the cusp of, the zone containing our target.  We're close!!
+   if(currentZone == targetZone)
    {
-      currentzone = nextzone;
-      currentwaypoint = nextwaypoint;
-      i++;
+      Point p;
+      if(!thisRobot->canSeePoint(target))    // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
+      {
+         p = gBotNavMeshZones[targetZone]->getCenter();
+         thisRobot->flightPlan.push_back(p);
+      }
+      else
+         p = target;
 
-      if(thisRobot->flightPlan.size() - 2 - i < 0)
-         return nextwaypoint;
+      thisRobot->flightPlan.push_back(target);
+      return returnPoint(L, p);
+   }   
 
-      nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2 - i];  
-      S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
-      TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-        
-      nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
-   }
+   // If we're still here, then we need to find a new path.  Either our original path was invalid for some reason,
+   // or the path we had no longer applied to our current location
+   thisRobot->flightPlanTo = targetZone;
+   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target);
 
-
-   return currentwaypoint;
-
-
-
-   //if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center)) 
-   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center;
-   //else if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter)) 
-   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
-   //else
-   //   return gBotNavMeshZones[currentZone]->getCenter();
+   if(thisRobot->flightPlan.size() > 0)
+      return returnPoint(L, thisRobot->flightPlan.last());
+   else
+      return returnNil(L);    // Out of options, end of the road
 }
-
+//
+//
+//// Encapsulate some ugliness
+//Point LuaRobot::getNextWaypoint()
+//{
+//   TNLAssert(thisRobot->flightPlan.size() > 1, "FlightPlan has too few zones!");
+//
+//   S32 currentzone = thisRobot->getCurrentZone();
+//
+//   S32 nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];    
+//
+//   // Note that getNeighborIndex could return -1.  It shouldn't, but it could.
+//   S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
+//   TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
+//
+//
+//            /*   string plan = "";
+//               for(S32 i = 0; i < thisRobot->flightPlan.size(); i++)
+//               {
+//                  char z[100];
+//                  itoa(thisRobot->flightPlan[i], z, 10);
+//                  plan = plan + " ==>"+z;
+//               }*/
+//
+//
+//   S32 i = 0;
+//   Point currentwaypoint = gBotNavMeshZones[currentzone]->getCenter();
+//   Point nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
+//
+//   while(thisRobot->canSeePoint(nextwaypoint))
+//   {
+//      currentzone = nextzone;
+//      currentwaypoint = nextwaypoint;
+//      i++;
+//
+//      if(thisRobot->flightPlan.size() - 2 - i < 0)
+//         return nextwaypoint;
+//
+//      nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2 - i];  
+//      S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
+//      TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
+//        
+//      nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
+//   }
+//
+//
+//   return currentwaypoint;
+//
+//
+//
+//   //if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center)) 
+//   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center;
+//   //else if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter)) 
+//   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
+//   //else
+//   //   return gBotNavMeshZones[currentZone]->getCenter();
+//}
+//
 
 // Another helper function: finds closest zone to a given point
 S32 LuaRobot::findClosestZone(Point point)
@@ -887,6 +902,7 @@ S32 LuaRobot::findClosestZone(Point point)
 
    return closest;
 }
+
 
 S32 LuaRobot::findAndReturnClosestZone(lua_State *L, Point point)
 {
@@ -942,12 +958,14 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
 {
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;  
 
+   S32 junk = this->mCurrentZone;
    mNetFlags.set(Ghostable);
    //getGame()->getGameType()->mRobotList.push_back(this);
    mTeam = team;
    mass = m;            // Ship's mass
    L = NULL;
    mCurrentZone = -1;
+   flightPlanTo = -1;
 
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
    respawnTimer.reset(100, RobotRespawnDelay);     
@@ -1344,6 +1362,54 @@ void Robot::idle(GameObject::IdleCallPath path)
 void Robot::render(S32 layerIndex)
 {
    Parent::render(layerIndex);
+
+//   GameObject *controlObject = gClientGame->getConnectionToServer()->getControlObject();
+//   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+//
+//   Point position = u->getRenderPos();
+//
+//   F32 zoomFrac = 1;
+//
+//glPopMatrix();
+//
+//      // Set up the view to show the whole level.
+//   Rect mWorldBounds = gClientGame->computeWorldObjectExtents(); // TODO: Cache this value!  ?  Or not?
+//
+//   Point worldCenter = mWorldBounds.getCenter();
+//   Point worldExtents = mWorldBounds.getExtents();
+//   worldExtents.x *= UserInterface::canvasWidth / F32(UserInterface::canvasWidth - (UserInterface::horizMargin * 2));
+//   worldExtents.y *= UserInterface::canvasHeight / F32(UserInterface::canvasHeight - (UserInterface::vertMargin * 2));
+//
+//   F32 aspectRatio = worldExtents.x / worldExtents.y;
+//   F32 screenAspectRatio = UserInterface::canvasWidth / F32(UserInterface::canvasHeight);
+//   if(aspectRatio > screenAspectRatio)
+//      worldExtents.y *= aspectRatio / screenAspectRatio;
+//   else
+//      worldExtents.x *= screenAspectRatio / aspectRatio;
+//
+   //Point offset = (worldCenter - position) * zoomFrac + position;
+//   Point visSize = gClientGame->computePlayerVisArea(u) * 2;
+//   Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
+//
+   //Point visScale(UserInterface::canvasWidth / modVisSize.x,
+                  //UserInterface::canvasHeight / modVisSize.y );
+
+   //glPushMatrix();
+   //glTranslatef(gScreenWidth / 2, gScreenHeight / 2, 0);    // Put (0,0) at the center of the screen
+
+   //glScalef(visScale.x, visScale.y, 1);
+   //glTranslatef(-offset.x, -offset.y, 0);
+
+glColor3f(1,1,1);
+   S32 xx = this->flightPlanTo;
+   glBegin(GL_LINE_STRIP);
+   for(S32 i = 0; i < flightPlan.size(); i++)
+   {
+      glVertex2f(flightPlan[i].x, flightPlan[i].y);
+   }
+   glEnd();
+
+   //glPopMatrix();
 }
 
 

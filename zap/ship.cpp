@@ -715,6 +715,13 @@ if(isRobot())
 Robot *robot = dynamic_cast<Robot *>(this);
 stream->write((S32)robot->mTarget.x);
 stream->write((S32)robot->mTarget.y);
+
+stream->write(robot->flightPlan.size());
+   for(S32 i = 0; i < robot->flightPlan.size(); i++)
+   {
+      stream->write(robot->flightPlan[i].x);
+      stream->write(robot->flightPlan[i].y);
+   }
 }
 
 
@@ -802,6 +809,19 @@ stream->read(&y);
 
 robot->mTarget.x = x;
 robot->mTarget.y = y;
+
+S32 ttt;
+stream->read(&ttt);
+robot->flightPlan.clear();
+for(S32 i = 0; i < ttt; i++)
+{
+   F32 x,y;
+   stream->read(&x);
+   stream->read(&y);
+   Point p(x,y);
+   robot->flightPlan.push_back(p);
+}
+
 }
 
 

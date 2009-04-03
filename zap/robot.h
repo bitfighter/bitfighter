@@ -94,8 +94,8 @@ public:
    void setCurrentZone(S32 zone);
    bool canSeePoint(Point point);         // Is point within robot's LOS?
 
-   Vector<S32> flightPlan;                // List of zones to get from one point to another
-   Point flightPlanTo;                    // Where our flightplan was calculated to
+   Vector<Point> flightPlan;              // List of points to get from one point to another
+   S32 flightPlanTo;                      // Zone our flightplan was calculated to
 
    // Some informational functions
    F32 getAngleXY(F32 x, F32 y);

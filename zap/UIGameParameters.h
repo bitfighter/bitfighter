@@ -41,7 +41,8 @@ using namespace std;
 
 enum ParamType
 {
-   TypeString,
+   TypeShortString,     // gMaxGameNameLength max length
+   TypeLongString,      // gMaxGameDescrLength max length
    TypeInt,
    TypeGameType,
    TypeFileName,
