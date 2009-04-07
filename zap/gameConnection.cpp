@@ -65,17 +65,31 @@ GameConnection::GameConnection()
    mSwitchTimer.reset(0);
    mCumScore = 0;    // Total points scored my this connection
    mTotalScore = 0;  // Total points scored by anyone while this connection is alive
+   mAcheivedConnection = false;
 }
 
+// Destructor
 GameConnection::~GameConnection()
 {
    // Unlink ourselves if we're in the client list
    mPrev->mNext = mNext;
    mNext->mPrev = mPrev;
 
-   // Tell the user...
-   TNL::logprintf("%s disconnected", getNetAddress().toString());
+   // Log the disconnect...
+   TNL::logprintf("%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
+
+   if(isConnectionToClient() && mAcheivedConnection)    // isConnectionToClient only true if we're the server
+   {  
+     // Compute time we were connected
+     time_t quitTime;
+     time(&quitTime);
+
+     double elapsed = difftime (quitTime, joinTime);
+
+     TNL::s_logprintf("%s [%s] quit :: %s (%.2lf secs)", mClientName.getString(), isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str(), elapsed);
+   }
 }
+
 
 /// Adds this connection to the doubly linked list of clients.
 void GameConnection::linkToClientList()
@@ -634,6 +648,9 @@ void GameConnection::onConnectionEstablished()
 
       s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
 
+      time(&joinTime);
+      mAcheivedConnection = true;
+         
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       if(isLocalConnection())
          TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), "Local Connection", getTimeStamp().c_str());

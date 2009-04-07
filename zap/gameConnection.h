@@ -31,6 +31,7 @@
 #include "controlObjectConnection.h"
 #include "../tnl/tnlNetConnection.h"
 #include "timer.h"
+#include <time.h>
 
 
 
@@ -58,6 +59,8 @@ class GameConnection: public ControlObjectConnection
 {
 private:
    typedef ControlObjectConnection Parent;
+   time_t joinTime;
+   bool mAcheivedConnection;
 
    // The server maintains a linked list of clients...
    GameConnection *mNext;
