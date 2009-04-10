@@ -67,6 +67,8 @@ private:
 
    S32 mCurrentZone;            // Zone robot is currently in
 
+   U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed
+
    enum {
       RobotRespawnDelay = 1500,
    };

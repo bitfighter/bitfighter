@@ -549,9 +549,11 @@ void ServerGame::idle(U32 timeDelta)
       if(mGameObjects[i]->getObjectTypeMask() & DeletedType)
          continue;
 
+      // Here is where the time gets set for all the various object moves
       Move thisMove = mGameObjects[i]->getCurrentMove();
       thisMove.time = timeDelta;
       mGameObjects[i]->setCurrentMove(thisMove);
+
       mGameObjects[i]->idle(GameObject::ServerIdleMainLoop);
    }
 

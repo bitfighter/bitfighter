@@ -672,7 +672,6 @@ extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type 
 // Choose target, aim, and, if possible, fire
 void Turret::idle(IdleCallPath path)
 {
-
    if(path != ServerIdleMainLoop)
       return;
 
@@ -694,8 +693,8 @@ void Turret::idle(IdleCallPath path)
    fillVector.clear();
    findObjects(TurretTargetType, fillVector, queryRect);    // Get all potential targets
 
-   GameObject * bestTarget = NULL;
-   F32 bestRange = 10000.f;
+   GameObject *bestTarget = NULL;
+   F32 bestRange = F32_MAX;
    Point bestDelta;
 
    Point delta;

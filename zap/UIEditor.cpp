@@ -1923,6 +1923,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
       }
 }
 
+
 extern Point gMousePos;
 
 void EditorUserInterface::onMouseMoved(S32 x, S32 y)
@@ -1930,35 +1931,36 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
    mMousePos = convertWindowToCanvasCoord(gMousePos);
 
-   if(!mCreatingPoly)// && !shiftKeyDown)
+   if(mCreatingPoly)// && !shiftKeyDown)
+      return;
+   
+   S32 vertexHit, vertexHitPoly;
+   S32 edgeHit, itemHit;
+
+   findHitVertex(mMousePos, vertexHitPoly, vertexHit);
+   findHitItemAndEdge(mMousePos, itemHit, edgeHit);
+
+   vertexToLightUp = -1;
+   itemToLightUp = -1;
+
+   if(vertexHit != -1 && !mItems[vertexHitPoly].vertSelected[vertexHit])   // Hit a vertex that wasn't already selected
    {
-      S32 vertexHit, vertexHitPoly;
-      S32 edgeHit, itemHit;
-
-      findHitVertex(mMousePos, vertexHitPoly, vertexHit);
-      findHitItemAndEdge(mMousePos, itemHit, edgeHit);
-
-      vertexToLightUp = -1;
-      itemToLightUp = -1;
-
-      if(vertexHit != -1 && !mItems[vertexHitPoly].vertSelected[vertexHit])   // Hit a vertex that wasn't already selected
-      {
-         vertexToLightUp = vertexHit;
-         itemToLightUp = vertexHitPoly;
-      }
-      else if(itemHit != -1 && !mItems[itemHit].selected)                     // We hit an item that wasn't already selected
-         itemToLightUp = itemHit;
-
-      if(itemHit != -1 && !mItems[itemHit].selected && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
-      {
-         itemToLightUp = itemHit;
-         vertexToLightUp = -1;
-      }
-
-      if(vertexToLightUp != -1 || itemToLightUp != -1)      // Set cursor to move arrows if we hit anything at all
-         glutSetCursor(GLUT_CURSOR_SPRAY);
+      vertexToLightUp = vertexHit;
+      itemToLightUp = vertexHitPoly;
    }
+   else if(itemHit != -1 && !mItems[itemHit].selected)                     // We hit an item that wasn't already selected
+      itemToLightUp = itemHit;
+
+   if(itemHit != -1 && !mItems[itemHit].selected && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
+   {
+      itemToLightUp = itemHit;
+      vertexToLightUp = -1;
+   }
+
+   if(vertexToLightUp != -1 || itemToLightUp != -1)      // Set cursor to move arrows if we hit anything at all
+      glutSetCursor(GLUT_CURSOR_SPRAY);
 }
+
 
 void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 {
@@ -2414,12 +2416,22 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          clearSelection();
 
          Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
-         // Insert an extra vertex at the mouse clicked point,
-         // and then select it.
+
+         // Insert an extra vertex at the mouse clicked point, and then select it.
          mItems[itemHit].verts.insert(edgeHit + 1);
          mItems[itemHit].verts[edgeHit + 1] = newVertex;
+
          mItems[itemHit].vertSelected.insert(edgeHit + 1);
          mItems[itemHit].vertSelected[edgeHit + 1] = true;
+
+         // Do the same for the mUnmovedItems list, to keep it in sync with mItems,
+         // which allows us to drag our vertex around without wierd snapping action
+         mUnmovedItems[itemHit].verts.insert(edgeHit + 1);
+         mUnmovedItems[itemHit].verts[edgeHit + 1] = newVertex;
+
+         mUnmovedItems[itemHit].vertSelected.insert(edgeHit + 1);
+         mUnmovedItems[itemHit].vertSelected[edgeHit + 1] = true;
+
          mMouseDownPos = newVertex;
       }
       else     // Start creating a new poly

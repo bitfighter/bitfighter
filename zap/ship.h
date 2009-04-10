@@ -173,6 +173,8 @@ public:
    virtual void idle(IdleCallPath path);
 
    virtual void processMove(U32 stateIndex);
+   F32 getMaxVelocity();
+
    void processWeaponFire();
    void processEnergy();
    void updateModuleSounds();

@@ -91,6 +91,7 @@
 // Moved turrent/spybug ranges display onto Tab-down display
 // When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible
 // Added more editor checks (flags in non-flag games, team flags in non-team-flag games)
+// Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor
 
 // Bug fixes:
 // Speed zones now rendered on top of loadout zones

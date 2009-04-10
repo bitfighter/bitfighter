@@ -134,12 +134,18 @@ void Ship::setActualPos(Point p)
 }
 
 
+F32 Ship::getMaxVelocity()
+{
+   return isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity;
+}
+
+
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
    mMoveState[LastProcessState] = mMoveState[stateIndex];
 
-   F32 maxVel = isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity;
+   F32 maxVel = getMaxVelocity();
 
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
@@ -710,19 +716,19 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 
 
 
-if(isRobot())
-{   
-Robot *robot = dynamic_cast<Robot *>(this);
-stream->write((S32)robot->mTarget.x);
-stream->write((S32)robot->mTarget.y);
-
-stream->write(robot->flightPlan.size());
-   for(S32 i = 0; i < robot->flightPlan.size(); i++)
-   {
-      stream->write(robot->flightPlan[i].x);
-      stream->write(robot->flightPlan[i].y);
-   }
-}
+//if(isRobot())
+//{   
+//Robot *robot = dynamic_cast<Robot *>(this);
+//stream->write((S32)robot->mTarget.x);
+//stream->write((S32)robot->mTarget.y);
+//
+//stream->write(robot->flightPlan.size());
+//   for(S32 i = 0; i < robot->flightPlan.size(); i++)
+//   {
+//      stream->write(robot->flightPlan[i].x);
+//      stream->write(robot->flightPlan[i].y);
+//   }
+//}
 
 
    stream->writeFlag(updateMask & RespawnMask);       // Respawn --> only used by robots
@@ -799,30 +805,30 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }  // initial update
 
 
-if(isRobot())
-{   
-Robot *robot = dynamic_cast<Robot *>(this);
-S32 x;
-S32 y;
-stream->read(&x);
-stream->read(&y);
-
-robot->mTarget.x = x;
-robot->mTarget.y = y;
-
-S32 ttt;
-stream->read(&ttt);
-robot->flightPlan.clear();
-for(S32 i = 0; i < ttt; i++)
-{
-   F32 x,y;
-   stream->read(&x);
-   stream->read(&y);
-   Point p(x,y);
-   robot->flightPlan.push_back(p);
-}
-
-}
+//if(isRobot())
+//{   
+//Robot *robot = dynamic_cast<Robot *>(this);
+//S32 x;
+//S32 y;
+//stream->read(&x);
+//stream->read(&y);
+//
+//robot->mTarget.x = x;
+//robot->mTarget.y = y;
+//
+//S32 ttt;
+//stream->read(&ttt);
+//robot->flightPlan.clear();
+//for(S32 i = 0; i < ttt; i++)
+//{
+//   F32 x,y;
+//   stream->read(&x);
+//   stream->read(&y);
+//   Point p(x,y);
+//   robot->flightPlan.push_back(p);
+//}
+//
+//}
 
 
    bool respawning = false;
@@ -897,7 +903,7 @@ for(S32 i = 0; i < ttt; i++)
    mMoveState[ActualState].angle = mCurrentMove.angle;
 
 
-   if(positionChanged)
+   if(positionChanged && !isRobot() )
    {
       mCurrentMove.time = (U32) connection->getOneWayTime();
       processMove(ActualState);

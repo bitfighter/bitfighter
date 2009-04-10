@@ -1167,7 +1167,7 @@ void Robot::processMove(U32 stateIndex)
 {
    mMoveState[LastProcessState] = mMoveState[stateIndex];
 
-   F32 maxVel = isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity;
+   F32 maxVel = getMaxVelocity();
 
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
@@ -1253,15 +1253,24 @@ bool Robot::canSeePoint(Point point)
 
 void Robot::idle(GameObject::IdleCallPath path)
 {
-   // Check to see if we need to respawn this robot
-   if(path == GameObject::ServerIdleMainLoop && hasExploded)
+   //U32 deltaT;
+
+   if(path == GameObject::ServerIdleMainLoop)
    {
-      if(respawnTimer.update(mCurrentMove.time)) 
-         gServerGame->getGameType()->spawnRobot(this);
+      //U32 ms = Platform::getRealMilliseconds();
+      //deltaT = (ms - mLastMoveTime);
+      //mLastMoveTime = ms;
+      //mCurrentMove.time = deltaT;
 
-      return;     
+      // Check to see if we need to respawn this robot
+      if(hasExploded)
+      {
+         if(respawnTimer.update(mCurrentMove.time)) 
+            gServerGame->getGameType()->spawnRobot(this);
+
+         return;     
+      }
    }
-
 
    // Don't process exploded ships
    if(hasExploded)
@@ -1269,7 +1278,9 @@ void Robot::idle(GameObject::IdleCallPath path)
 
    if(path == GameObject::ServerIdleMainLoop)      // Running on server
    {
-      mCurrentMove.fire = false;   // Don't fire unless we're told to!
+      // Clear out current move.  It will get set just below with the lua call, but if that function
+      // doesn't set the various move components, we want to make sure that they default to 0.
+      mCurrentMove.fire = false; 
       mCurrentMove.up = 0;
       mCurrentMove.down = 0;
       mCurrentMove.right = 0;
