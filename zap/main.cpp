@@ -692,7 +692,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
    
-   if(gHostingModePhase != Hosting)    // Don't idle games during level load
+   if(gHostingModePhase != LoadingLevels)    // Don't idle games during level load
    {
       if(gClientGame)
          gClientGame->idle(integerTime);

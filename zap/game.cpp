@@ -258,6 +258,7 @@ void ServerGame::resetLevelLoadIndex()
    mLevelLoadIndex = 0;
 }
 
+
 string ServerGame::getCurrentLevelLoadName()
 {
    if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
@@ -265,6 +266,7 @@ string ServerGame::getCurrentLevelLoadName()
    else
       return mLevelNames.last().getString();
 }
+
 
 extern enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
 extern HostingModePhases gHostingModePhase;
@@ -277,6 +279,7 @@ void ServerGame::loadNextLevel()
    if(mLevelLoadIndex < mLevelList.size())
    {
       string levelName = getLevelFileName(mLevelList[mLevelLoadIndex].getString());
+
       if(loadLevel(levelName))    // loadLevel returns true if the load was successful
       {
          string lname = trim(getGameType()->mLevelName.getString());
@@ -330,6 +333,7 @@ StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
       return StringTableEntry( mLevelNames[indx].getString() );
 }
 
+
 // Get the filename the level is saved under
 string ServerGame::getLevelFileNameFromIndex(S32 indx)
 {
@@ -375,6 +379,8 @@ extern void testBotNavMeshZoneConnections();
 
 
 // Pass -1 to go to next level, otherwise pass an absolute level number
+// Pass -2 to replay current level
+
 void ServerGame::cycleLevel(S32 nextLevel)
 {
    // Delete any objects on the delete list
@@ -391,17 +397,21 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    if(nextLevel >= 0)
       mCurrentLevelIndex = nextLevel;
-   else
+   else if(nextLevel == -1)    // Next level
       mCurrentLevelIndex++;
+   //else if(nextLevel == -2)  // Replay level, do nothing
+     
 
    if(S32(mCurrentLevelIndex) >= mLevelList.size())
       mCurrentLevelIndex = 0;
+
+   gBotNavMeshZones.clear();
 
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
 
    // Analyze zone connections
-   BotNavMeshZone::buildBotNavMeshZoneConnections();
+   BotNavMeshZone::buildBotNavMeshZoneConnections();     // Does nothing if there are no botNavMeshZones defined
 
  
    // Build a list of our current connections
