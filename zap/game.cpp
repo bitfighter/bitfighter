@@ -246,7 +246,6 @@ S32 ServerGame::getLevelNameCount()
 
 
 extern CmdLineSettings gCmdLineSettings;
-extern S32 gHostingModePhase;
  
 // This gets called when you first host a game.
 void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
@@ -266,6 +265,9 @@ string ServerGame::getCurrentLevelLoadName()
    else
       return mLevelNames.last().getString();
 }
+
+extern enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
+extern HostingModePhases gHostingModePhase;
 
 void ServerGame::loadNextLevel()
 {
@@ -315,7 +317,7 @@ void ServerGame::loadNextLevel()
    }
 
    if(mLevelLoadIndex == mLevelList.size())
-      gHostingModePhase = 2;     // DoneLoadingLevels
+      gHostingModePhase = DoneLoadingLevels;   
 }
 
 

@@ -81,7 +81,7 @@ public:
    bool collide(GameObject *hitObject);
 
    // These methods will be empty later...
-    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    Vector<Point> mPolyBounds;

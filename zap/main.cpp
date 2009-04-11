@@ -63,7 +63,7 @@
 // Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.
 // Turrets and Forcefields can now repair themselves, if you specify an additional argument on their definition line (secs / 10% repair... i.e. entering 1, item will fully repair in 10 seconds).  Again, cannot change value in editor, but will survive load/save cycle.
 // 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
-// Can specify speedzone speed as optional last argument in level definition file (min 1000, max 5000)... no editor UI available, but will survive load/save cycle in editor
+// Can specify speedzone speed as optional last argument in level definition file (min 100, max 5000)... no editor UI available, but will survive load/save cycle in editor
 // Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
 // If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)
 // Asteroids... you figure it out!
@@ -71,7 +71,7 @@
 
 // Specifiying levels
 // ".level" extension now optional when specifying levels with the -levels param
-// -leveldir can now specify any folder on disk, but can still be used to specify a specific subdir of the levels folder.  Be sure to use "s if path includes spaces!
+// -leveldir can now specify any folder on disk, but can still be used to specify a specific subdir of the levels folder.  Be sure to use quotes if path includes spaces!
 // example: -leveldir abc will load levels in abc subfolder under levels folder.  -leveldir c:\levels will load all levels in c:\levels
 // If no levels specified on cmd line or in INI file, all levels in levels folder will be loaded, much as if the -alllevels param was specified
 // Level folder can now be specified in the INI file, either as absolute or relative path.
@@ -254,7 +254,6 @@ char gJoystickName[gJoystickNameLength] = "";
 
 extern Point gMousePos;
 
-
 // Since GLUT reports the current mouse pos via a series of events, and does not make
 // its position available upon request, we'll store it when it changes so we'll have
 // it when we need it.
@@ -264,6 +263,8 @@ void setMousePos(S32 x, S32 y)
    gMousePos.y = y;
 }
 
+enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
+HostingModePhases gHostingModePhase;
 
 Screenshooter gScreenshooter;    // For taking screen shots
 
@@ -565,8 +566,6 @@ void abortHosting()
 }
 
 
-S32 gHostingModePhase = 0;    // NotHosting
-
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(Address bindAddress)
 {
@@ -584,12 +583,13 @@ void initHostGame(Address bindAddress)
       abortHosting();
       return;
    }
-  gHostingModePhase = 1;  // LoadingLevels      // Do this even if there are no levels, so hostGame error handling will be triggered
+  gHostingModePhase = LoadingLevels;      // Do this even if there are no levels, so hostGame error handling will be triggered
 }
+
 
 void hostGame()
 {
-   gHostingModePhase = 3;  // Hosting
+   gHostingModePhase = Hosting;
    s_logprintf("----------\nbitfighter server started %s", getTimeStamp().c_str());
    
    if(gServerGame->getLevelNameCount())   // Levels loaded --> start game!
@@ -614,9 +614,9 @@ void hostGame()
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
 {     
-   if(gHostingModePhase == 1)       // LoadingLevels
+   if(gHostingModePhase == LoadingLevels)    
       gServerGame->loadNextLevel();
-   else if(gHostingModePhase == 2)  // DoneLoadingLevels
+   else if(gHostingModePhase == DoneLoadingLevels)  
       hostGame();
 
    checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
@@ -692,7 +692,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
    
-   if(gHostingModePhase != 1)    // Don't idle games during level load
+   if(gHostingModePhase != Hosting)    // Don't idle games during level load
    {
       if(gClientGame)
          gClientGame->idle(integerTime);
@@ -1552,6 +1552,8 @@ int main(int argc, char **argv)
    buildLevelList();
 
    gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
+
+   gHostingModePhase = NotHosting;
 
    SFXObject::init();
 

@@ -79,6 +79,8 @@ using namespace std;
 namespace Zap
 {
 
+
+
 class MasterServerConnection;
 class GameNetInterface;
 class GameType;
@@ -171,6 +173,7 @@ public:
 
    S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };
+
 
 class ServerGame : public Game, public LevelLoader
 {
