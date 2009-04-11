@@ -84,6 +84,10 @@ Section "Install"
 
   SetOutPath "$INSTDIR\levels"
   File /r ".\levels\*.level"	
+
+  SetOutPath "$INSTDIR\robots"
+  File /r ".\robots\*.bot"	
+
   
   SetOutPath "$INSTDIR\screenshots"
   File ".\screenshots\readme.txt"
@@ -127,6 +131,7 @@ Section "Uninstall"
   ; And purge our install dirs, along with everything in them...
   RMDir /r $INSTDIR\sfx
   RMDir /r $INSTDIR\levels
+  RMDir /r $INSTDIR\robots
   RMDir /r $INSTDIR\screenshots
   RMDir /r $INSTDIR
   
