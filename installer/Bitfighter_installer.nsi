@@ -1,5 +1,5 @@
 # Script assumes that there is a /Dversion=curVersion
-!define curVersion "Seaside Build"		###### <<<-----  TODO: Remove this.  For testing only!
+!define curVersion "011 alpha test release 1"		###### <<<-----  TODO: Remove this.  For testing only!
 ;--------------------------------
 ; Include Modern UI
 
@@ -74,6 +74,8 @@ Section "Install"
   File ..\exe\Bitfighter.exe		
   File ".\Windows specific\OpenAL32.dll"		
   File ".\Windows specific\glut32.dll"
+  File ".\Windows specific\lua5.1.dll"
+  File ".\Windows specific\lua51.dll"
   File "readme.txt"
   File "End-User License.txt"
   File "..\exe\bitfighter.ini.sample"
