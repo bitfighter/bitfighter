@@ -43,7 +43,7 @@
 #include "UIMenus.h"
 #include "UINameEntry.h"
 
-#include "BotNavMeshZone.h"      // For misplaced zone clearing code
+#include "BotNavMeshZone.h"      // For zone clearing code
 
 #include "../glut/glutInclude.h"
 
@@ -227,22 +227,36 @@ extern string gHostName;
 extern string gHostDescr;
 
 // Constructor
-ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName) : Game(theBindAddress)
+ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : Game(theBindAddress)
 {
    mPlayerCount = 0;
    mMaxPlayers = maxPlayers;
    mHostName = gHostName.c_str();
    mHostDescr = gHostDescr.c_str();
-   mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propigates to master
+   mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
+
+   if(testMode)
+      mInfoFlags = 1;
+
+   mTestMode = testMode;
 
    mNetInterface->setAllowsConnections(true);
    mMasterUpdateTimer.reset(UpdateServerStatusTime);
 }
 
+
 S32 ServerGame::getLevelNameCount()
 {
    return mLevelNames.size();
 }
+
+
+class Robot;
+
+U32 ServerGame::getRobotCount() 
+{ 
+   return Robot::getRobotCount(); 
+} 
 
 
 extern CmdLineSettings gCmdLineSettings;
@@ -252,6 +266,7 @@ void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
 {
    mLevelList = levelList;
 }
+
 
 void ServerGame::resetLevelLoadIndex()
 {
@@ -351,14 +366,16 @@ string ServerGame::getLevelFileName(string base)
       return = "d:\\media\\levels\\" + base;
 #endif
 
-      return gLevelDir + (gLevelDir != "" ? "/" : "") + base;
+   return gLevelDir + (gLevelDir != "" ? "/" : "") + base;
 }
+
 
 // Return name of level currently in play
 StringTableEntry ServerGame::getCurrentLevelName()
 {
    return mLevelNames[mCurrentLevelIndex];
 }
+
 
 // Return type of level currently in play
 StringTableEntry ServerGame::getCurrentLevelType()
@@ -471,6 +488,7 @@ bool ServerGame::loadLevel(string filename)
    return true;
 }
 
+
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
 void ServerGame::processLevelLoadLine(int argc, const char **argv)
@@ -497,7 +515,7 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
          TNL::logprintf("Invalid object type: %s -- ignoring", argv[0]);
          delete theObject;
       }
-      else
+      else  // object was valid
       {
          gServerWorldBounds = gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
          object->addToGame(this);
@@ -509,11 +527,11 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
             logprintf("Object %s had invalid parameters, ignoring...", argv[0]);
             object->removeFromGame();
             object->destroySelf();
-         }
-                                                            
+         }                                                      
       }                                                    
    }
 }
+
 
 extern bool gDedicatedServer;
 
@@ -531,6 +549,7 @@ void ServerGame::addClient(GameConnection *theConnection)
       SFXObject::play(SFXPlayerJoined, 1);
 }
 
+
 void ServerGame::removeClient(GameConnection *theConnection)
 {
    if(mGameType.isValid())
@@ -539,6 +558,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
    if(gDedicatedServer)
       SFXObject::play(SFXPlayerLeft, 1);
 }
+
 
 // Top-level idle loop for server
 void ServerGame::idle(U32 timeDelta)
@@ -581,13 +601,14 @@ void ServerGame::idle(U32 timeDelta)
    {
       MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
       if(masterConn && masterConn->isEstablished())
-         masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), 0, mPlayerCount, mMaxPlayers, mInfoFlags);
+         masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
       mMasterUpdateTimer.reset(UpdateServerStatusTime);
    }
 
    // Lastly, play any sounds server might have made...
    SFXObject::process();
 }
+
 
 void ServerGame::gameEnded()
 {

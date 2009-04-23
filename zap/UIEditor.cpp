@@ -3055,14 +3055,12 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    return true;
 }
 
-extern void initHostGame(Address bindAddress);
+extern void initHostGame(Address bindAddress, bool testMode);
 extern CmdLineSettings gCmdLineSettings;
 
 void EditorUserInterface::testLevel()
 {
-   //string gameType = mGameType;
    bool gameTypeError = false;
-   //gameType += "GameType";
 
    if(strcmp(mGameType, GameType::validateGameType(mGameType)))
       gameTypeError = true;
@@ -3107,7 +3105,7 @@ void EditorUserInterface::testLevel()
       mWasTesting = true;
  
       gLevelList.push_front("editor.tmp");
-      initHostGame(Address(IPProtocol, Address::Any, 28000));
+      initHostGame(Address(IPProtocol, Address::Any, 28000), true);
    }
 
    mNeedToSave = nts;                  // Restore saved parameters

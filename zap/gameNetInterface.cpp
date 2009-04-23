@@ -131,7 +131,9 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
 
                queryResponse.write(gServerGame->getPlayerCount());
                queryResponse.write(gServerGame->getMaxPlayers());
+               queryResponse.write(gServerGame->getRobotCount());
                queryResponse.writeFlag(gDedicatedServer);
+               queryResponse.writeFlag(gServerGame->isTestServer());
                queryResponse.writeFlag(gServerPassword != NULL);
 
                queryResponse.sendto(mSocket, remoteAddress);
@@ -143,8 +145,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             Nonce theNonce;
             char nameString[256];
             char descrString[256];
-            U32 playerCount, maxPlayers;
-            bool dedicated, passwordRequired;
+            U32 playerCount, maxPlayers, botCount;
+            bool dedicated, test, passwordRequired;
 
             theNonce.read(stream);
             stream->readString(nameString);
@@ -152,10 +154,12 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
 
             stream->read(&playerCount);
             stream->read(&maxPlayers);
+            stream->read(&botCount);
             dedicated = stream->readFlag();
+            test = stream->readFlag();
             passwordRequired = stream->readFlag();
 
-            gQueryServersUserInterface.gotQueryResponse(remoteAddress, theNonce, nameString, descrString, playerCount, maxPlayers, dedicated, passwordRequired);
+            gQueryServersUserInterface.gotQueryResponse(remoteAddress, theNonce, nameString, descrString, playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
          }
          break;
    }

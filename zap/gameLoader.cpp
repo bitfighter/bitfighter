@@ -180,7 +180,7 @@ bool LevelLoader::initLevelFromFile(const char *file)
    if(!f)
       return false;
 
-   char fileData[65536];      // Max level size = 64k -- that's pretty big!
+   char fileData[98304];      // Max level size = 96k -- that's really big!
 
    size_t bytesRead = fread(fileData, 1, sizeof(fileData), f);
    fileData[bytesRead] = 0;

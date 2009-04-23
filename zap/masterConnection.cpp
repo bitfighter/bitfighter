@@ -237,10 +237,10 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    {
       bstream->write((U32) 1000);                              // CPU speed  (dummy)
       bstream->write((U32) 0xFFFFFFFF);                        // region code (dummy) --> want to use this?
-      bstream->write((U32) 0);                                 // num bots (dummy)  --> will always be starting number of bots
+      bstream->write((U32) gServerGame->getRobotCount());      // number of bots
       bstream->write((U32) gServerGame->getPlayerCount());     // num players       --> will always be 0 or 1?
       bstream->write((U32) gServerGame->getMaxPlayers());      // max players
-      bstream->write((U32) mInfoFlags);                        // info flags (sort of dummy)
+      bstream->write((U32) mInfoFlags);                        // info flags (1=>test host, i.e. from editor)
 
       bstream->writeString(gServerGame->getCurrentLevelName().getString());      // Level name
       bstream->writeString(gServerGame->getCurrentLevelType().getString());      // Level type

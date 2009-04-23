@@ -28,88 +28,113 @@
 //-----------------------------------------------------------------------------------
 // Done:
 
-// For 011
-// Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name
-// When hosting a game from the UI, game load progress info displayed
-// When loading a level from a local or remote server, progress bar is displayed
-// Retrieve game -> can't pick up enemy flags, so more complex level designs are possible.  Actually, maybe not true... maybe this is a lame feature.
-// Fixed scoring message on Hunters levels
-// ZoneControl -> When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter
-// Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)
-// Added client IP address to server log
-// Added time disconnected and connection duration to server log
-// Uneeded vertices now removed from walls to improve both appearance and performance
-// Added screen saver supression (Windows only, sorry)
-// Username entry screen now remembers last name used
-// Enhanced flashing effect of zones in ZoneControl game
-// Added yellow flash to ZoneControl and Retrieve zones when touchdown is scored (like Nexus effect in Hunters game)
-// Indicator added to player's name when they are in chat, global chat, or options menus
-// Screenshots now saved in .BMP format
-// Scores displayed in LR corner of main game screen now sorted from high to low
-// Name of current game server now displayed on global chat screen
-// Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.
-// Changed Hunters game name to Nexus, a very controversial name change.  Nothing like instigating a nice ol' flamewar!!!
-// Team chat message entry box colored appropriately
-// Objective arrows now rendered correctly for levels with multiple Nexuses (Nexii??)
-// Improved rendering of labelling of loadout zones and nexii
-// Added spaces to level files written by editor to make them easier to read
-// Better handling of items with invalid parameter lines in .level files
-// Enter commands using "/" key, or by starting a global or team chat message with "/"
-// Added instruction page to explain available chat commands
-// Improved menu navigation instructions for joystick users
-// Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits
-
-// Items
-// Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.
-// Turrets and Forcefields can now repair themselves, if you specify an additional argument on their definition line (secs / 10% repair... i.e. entering 1, item will fully repair in 10 seconds).  Again, cannot change value in editor, but will survive load/save cycle.
-// 4 alternate speedzone graphics available for testing... set in [Testing] section of INI file
-// Can specify speedzone speed as optional last argument in level definition file (min 100, max 5000)... no editor UI available, but will survive load/save cycle in editor
-// Speedzones are now almost deterministic in where you end up -- very precise corridors now possible
-// If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)
-// Asteroids... you figure it out!
-
-
-// Specifiying levels
-// ".level" extension now optional when specifying levels with the -levels param
-// -leveldir can now specify any folder on disk, but can still be used to specify a specific subdir of the levels folder.  Be sure to use quotes if path includes spaces!
-// example: -leveldir abc will load levels in abc subfolder under levels folder.  -leveldir c:\levels will load all levels in c:\levels
-// If no levels specified on cmd line or in INI file, all levels in levels folder will be loaded, much as if the -alllevels param was specified
-// Level folder can now be specified in the INI file, either as absolute or relative path.
-
-
+//<u>General Enhancements</u>
+//<ul>
+//<li>Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name</li>
+//<li>When hosting a game from the UI, game load progress info displayed</li>
+//<li>When loading a level from a local or remote server, progress bar is displayed</li>
+//<li>Retrieve game ->can't pick up enemy flags, so more complex level designs are possible.  Actually, maybe not true... maybe this is a lame feature.</li>
+//<li>Fixed scoring message on Hunters levels</li>
+//<li>ZoneControl ->When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter</li>
+//<li>Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)</li>
+//<li>Added client IP address to server log</li>
+//<li>Added time disconnected and connection duration to server log</li>
+//<li>Uneeded vertices now removed from walls to improve both appearance and performance</li>
+//<li>Added screen saver supression (Windows only, sorry)</li>
+//<li>Username entry screen now remembers last name used</li>
+//<li>Enhanced flashing effect of zones in ZoneControl game</li>
+//<li>Added yellow flash to ZoneControl and Retrieve zones when touchdown is scored (like Nexus effect in Hunters game)</li>
+//<li>Indicator added to player's name when they are in chat, global chat, or options menus</li>
+//<li>Screenshots now saved in .BMP format</li>
+//<li>Scores displayed in LR corner of main game screen now sorted from high to low</li>
+//<li>Name of current game server now displayed on global chat screen</li>
+//<li>Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.</li>
+//<li>Changed Hunters game name to Nexus, a very controversial name change.  Nothing like instigating a nice ol' flamewar!!!</li>
+//<li>Team chat message entry box colored appropriately</li>
+//<li>Objective arrows now rendered correctly for levels with multiple Nexuses (Nexii??)</li>
+//<li>Improved rendering of labelling of loadout zones and nexii</li>
+//<li>Added spaces to level files written by editor to make them easier to read</li>
+//<li>Better handling of items with invalid parameter lines in .level files</li>
+//<li>Enter commands using "/" key, or by starting a global or team chat message with "/"</li>
+//<li>Added instruction page to explain available chat commands</li>
+//<li>Improved menu navigation instructions for joystick users</li>
+//<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
+//<li>Increased max level size from 64K to 96K</li>
+//</ul>
 //
-// Scoring:
-// Full scoring information available with -rules option
-// Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
-//     of points player makes divided by total scores all players make during that players time in the game
-// Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)
-// Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams
-// Added scoring events when flag is removed from enemy zone in Retrieve and HTF games
-// HTF now requires flags actually be held full 5 seconds before scoring occurs
+//<u>Items</u>
+//<ul>
+//<li>Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.</li>
+//<li>Turrets and Forcefields can now repair themselves, if you specify an additional argument on their definition line (secs / 10% repair... i.e. entering 1, item will fully repair in 10 seconds).  Again, cannot change value in editor, but will survive load/save cycle.</li>
+//<li>4 alternate speedzone graphics available for testing... set in [Testing] section of INI file</li>
+//<li>Can specify speedzone speed as optional last argument in level definition file (min 100, max 5000)... no editor UI available, but will survive load/save cycle in editor</li>
+//<li>Speedzones are now almost deterministic in where you end up -- very precise corridors now possible</li>
+//<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
+//<li>Asteroids... you figure it out!</li>
+//</ul>
+//
+//<u>Specifiying levels</u>
+//<ul>
+//<li>".level" extension now optional when specifying levels with the -levels param</li>
+//<li>-leveldir can now specify any folder on disk, but can still be used to specify a specific subdir of the levels folder.  Be sure to use quotes if path includes spaces!
+//example: -leveldir abc will load levels in abc subfolder under levels folder.  -leveldir c:\levels will load all levels in c:\levels</li>
+//<li>If no levels specified on cmd line or in INI file, all levels in levels folder will be loaded, much as if the -alllevels param was specified</li>
+//<li>Level folder can now be specified in the INI file, either as absolute or relative path.</li>
+//</ul>
+//
+//<u>Scoring:</u>
+//<ul>
+//<li>Full scoring information available with -rules option</li>
+//<li>Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
+//    of points player makes divided by total scores all players make during that players time in the game</li>
+//<li>Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)</li>
+//<li>Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams</li>
+//<li>Added scoring events when flag is removed from enemy zone in Retrieve and HTF games</li>
+//<li>HTF now requires flags actually be held full 5 seconds before scoring occurs</li>
+//</ul>
+//
+//<u>Editor:</u>
+//<ul>
+//<li>Moved turrent/spybug ranges display onto Tab-down display</li>
+//<li>When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible</li>
+//<li>Added more editor checks (flags in non-flag games, team flags in non-team-flag games)</li>
+//<li>Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor</li>
+//</ul>
+//
+//<u>Bug fixes:</u>
+//<ul>
+//<li>Speed zones now rendered on top of loadout zones</li>
+//<li>Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!</li>
+//<li>Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code</li>
+//<li>Changing other player's team in 3+ team game with 3+ players no longer switches a random player</li>
+//<li>Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points</li>
+//<li>Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)</li>
+//</ul>
+//
+//<u>Server menu enhancements:</u>
+//<ul>
+//<li>Fixed minor rendering issue on servers menu</li>
+//<li>Color coded status messages on servers menu</li>
+//<li>Trim server names too long to fit in column on servers menu</li>
+//<li>Added indicator ("T") for servers in test mode</li>
+//<li>Replaced max player listing with number of robots</li>
+//</ul>
+//
+//<u>And, of course, Robots!</u>
 
-// Editor:
-// Moved turrent/spybug ranges display onto Tab-down display
-// When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible
-// Added more editor checks (flags in non-flag games, team flags in non-team-flag games)
-// Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor
 
-// Bug fixes:
-// Speed zones now rendered on top of loadout zones
-// Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!
-// Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code
-// Changing other player's team in 3+ team game with 3+ players no longer switches a random player
-// Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points
-// Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)
+//// New stuff this alpha release
+//<li>Increased max level size from 64K to 96K</li>
+//<li>Server menu: Added indicator ("T") for servers in test mode</li>
+//<li>Server menu: Replaced max player listing with number of robots</li>
 
-// Server menu enhancements:
-// Fixed minor rendering issue on servers menu
-// Color coded status messages on servers menu
-// Trim server names too long to fit in column on servers menu
 
-// Robots!
+
+
 
 // Mac Test:
 // New screen capture code
+// Robot folder in installer
 // Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
 // Ryan -- I changed getLevels() slightly... I tried to make the corresponding change in Directory.mm, by commenting out single line.  Hopefully the functionalities are still the same!
 // Robots
@@ -567,9 +592,9 @@ void abortHosting()
 
 
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(Address bindAddress)
+void initHostGame(Address bindAddress, bool testMode)
 {
-   gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str());
+   gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
 
 	// Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(gLevelList.size())
@@ -583,6 +608,7 @@ void initHostGame(Address bindAddress)
       abortHosting();
       return;
    }
+
   gHostingModePhase = LoadingLevels;      // Do this even if there are no levels, so hostGame error handling will be triggered
 }
 
@@ -1424,7 +1450,7 @@ void processStartupParams()
       gClientGame = new ClientGame(Address());   //   let the system figure out IP address and assign a port
 
    if(gCmdLineSettings.serverMode)
-      initHostGame(gBindAddress);                // Start hosting
+      initHostGame(gBindAddress, false);         // Start hosting
    else if(gCmdLineSettings.connectRemote)       //       or
       joinGame(gConnectAddress, false, false);   // Connect to a game server (i.e. bypass master matchmaking)
 
@@ -1568,6 +1594,7 @@ int main(int argc, char **argv)
       glutInitWindowSize(gScreenWidth, gScreenHeight);                      // Does this actually do anything?  Seem to get same result, regardless of params!
       glutInit(&argc, argv);
 
+
       // On OS X, glutInit changes the working directory to the app
       // bundle's resource directory.  We don't want that. (RDW)
 #ifdef TNL_OS_MAC_OSX
@@ -1610,5 +1637,6 @@ int main(int argc, char **argv)
    }
    else                       // We're running a dedicated server so...
       dedicatedServerLoop();  //    loop forever, running the idle command endlessly
+
    return 0;
 }

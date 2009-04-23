@@ -174,7 +174,6 @@ public:
    S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };
 
-
 class ServerGame : public Game, public LevelLoader
 {
 private:
@@ -185,7 +184,8 @@ private:
 
    U32 mPlayerCount;
    U32 mMaxPlayers;
-   U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propigates to master
+   U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
+   bool mTestMode;           // True if being tested from editor
    const char *mHostName;
    const char *mHostDescr;
 
@@ -211,7 +211,7 @@ public:
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
-   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName);
+   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();
@@ -232,9 +232,10 @@ public:
    void gameEnded();
 
    S32 getLevelNameCount();
+   U32 getRobotCount();
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
    S32 getLevelCount() { return mLevelList.size(); }
-
+   bool isTestServer() { return mTestMode; }
 };
 
 class Ship;
@@ -285,14 +286,14 @@ extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
 extern Address gMasterAddress;
 
-extern void initHostGame(Address bindAddress);
+extern void initHostGame(Address bindAddress, bool testMode);
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 // already bumbed master, release.  cs also ok
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
 #define CS_PROTOCOL_VERSION 16     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 280          // Version of the game according to SVN, will be unique every release (must be int)
+#define BUILD_VERSION 361          // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "011 preveiew alpha 1" //"Bitfighter Release Candidate 010"   // Change this with every release -- for display purposes only, string
 
 };

@@ -104,14 +104,16 @@ public:
       U32 sendCount;
       bool isFromMaster;
       bool dedicated;
+      bool test;
       bool passwordRequired;
       bool pingTimedOut;
+      bool everGotQueryResponse;
       Nonce sendNonce;
       char serverName[MaxServerNameLen+1];
       char serverDescr[MaxServerDescrLen+1];
       Color msgColor;
       Address serverAddress;
-      U32 playerCount, maxPlayers;     // U32 because that's what we use on the master
+      U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master
    };
    struct ColumnInfo
    {
@@ -149,7 +151,7 @@ public:
 
    // Handle responses to packets we sent
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken);
-   void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, U32 playerCount, U32 maxPlayers, bool dedicated, bool passwordRequired);
+   void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 };
 
 extern QueryServersUserInterface gQueryServersUserInterface;

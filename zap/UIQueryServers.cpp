@@ -182,9 +182,10 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          s.id = ++mLastUsedServerId;
          s.sendNonce.getRandom();
          s.serverAddress.set(ipList[i]);
+         s.everGotQueryResponse = false;
          s.sendCount = 0;
          s.pingTime = 9999;
-         s.playerCount = s.maxPlayers = -1;
+         s.playerCount = s.maxPlayers = s.botCount = -1;
          s.isFromMaster = true;
          strcpy(s.serverName, "Internet Server");
          strcpy(s.serverDescr, "Internet Server -- attempting to connect");
@@ -219,6 +220,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.sendCount = 0;
       s.playerCount = -1;
       s.maxPlayers = -1;
+      s.botCount = -1;
       s.isFromMaster = false;
       strcpy(s.serverName, "LAN Server");
       strcpy(s.serverDescr, "LAN Server -- attempting to connect");
@@ -244,7 +246,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
 }
 
 
-void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, U32 playerCount, U32 maxPlayers, bool dedicated, bool passwordRequired)
+void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired)
 {
    for(S32 i = 0; i < servers.size(); i++)
    {
@@ -253,8 +255,13 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
       {
          s.playerCount = playerCount;
          s.maxPlayers = maxPlayers;
+         s.botCount = botCount;
          s.dedicated = dedicated;
+         s.test = test;
          s.passwordRequired = passwordRequired;
+         if(!s.isFromMaster)
+            s.pingTimedOut = false;    // I think this makes sense... cures problem with local servers incorrectly displaying ?s for first 15 seconds
+         s.everGotQueryResponse = true;
 
          dSprintf(s.serverName, sizeof(s.serverName), "%s", serverName);
          dSprintf(s.serverDescr, sizeof(s.serverDescr), "%s", serverDescr);
@@ -309,6 +316,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.msgColor = Color(1,0,0);   // red for errors
                s.playerCount = 0;
                s.maxPlayers = 0;
+               s.botCount = 0;
                s.state = ServerRef::ReceivedQuery;    // In effect, this will tell app not to send any more pings or queries to this server
                mShouldSort = true;
                s.pingTimedOut = true;
@@ -349,7 +357,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                strcpy(s.serverName, "QueryTimedOut");
                strcpy(s.serverDescr, "Server not responding to status query");
                s.msgColor = Color(1,0,0);   // red for errors
-               s.playerCount = s.maxPlayers = 0;
+               s.playerCount = s.maxPlayers = s.botCount = 0;
                s.state = ServerRef::ReceivedQuery;
                mShouldSort = true;
                
@@ -411,9 +419,10 @@ S32 QueryServersUserInterface::getSelectedIndex()
    return -1;
 }
 
+
 extern void drawString(S32 x, S32 y, U32 size, const char *string);
 
-static void renderDedicatedIcon()      // Rectangular box with horizontal lines
+static void renderDedicatedIcon()      
 {
    // Draw a little rectangle
    //glBegin(GL_LINE_LOOP);
@@ -436,6 +445,14 @@ static void renderDedicatedIcon()      // Rectangular box with horizontal lines
    // Add a "D"
    UserInterface::drawString(0, 0, 4, "D");
 }
+
+
+static void renderTestIcon()
+{
+   // Add a "T"
+   UserInterface::drawString(0, 0, 4, "T");
+}
+
 
 static void renderLockIcon()
 {
@@ -660,12 +677,17 @@ void QueryServersUserInterface::render()
 
          // Render icons
          glColor3f(0,1,0);
-         if(s.dedicated || s.pingTimedOut)
+         if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
                glTranslatef(columns[1].xStart+5, y+2, 0);
-               if(s.pingTimedOut)
+               if( s.pingTimedOut || !s.everGotQueryResponse )
                   drawString(0, 0, 20, "?");
+               else if(s.test)
+               {
+                  glScalef(5, 5, 1);
+                  renderTestIcon();
+               }
                else
                {
                   glScalef(5, 5, 1);
@@ -673,11 +695,11 @@ void QueryServersUserInterface::render()
                }
             glPopMatrix();
          }
-         if(s.passwordRequired || s.pingTimedOut)
+         if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
                glTranslatef(columns[1].xStart + 25, y+2, 0);
-               if(s.pingTimedOut)
+               if(s.pingTimedOut || !s.everGotQueryResponse)
                   drawString(0, 0, 20, "?");
                else
                {
@@ -707,7 +729,7 @@ void QueryServersUserInterface::render()
          if(s.playerCount < 0)
             drawString(columns[3].xStart, y, fontSize, "?? / ??");
          else
-            drawStringf(columns[3].xStart, y, fontSize, "%d / %d", s.playerCount, s.maxPlayers);
+            drawStringf(columns[3].xStart, y, fontSize, "%d / %d", s.playerCount, s.botCount);
          glColor3f(1,1,1);
          drawString(columns[4].xStart, y, fontSize, s.serverAddress.toString());
       }

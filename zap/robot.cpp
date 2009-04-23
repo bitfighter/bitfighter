@@ -213,7 +213,7 @@ Luna<LuaRobot>::RegType LuaRobot::methods[] = {
       method(LuaRobot, getPosXY),
 
       method(LuaRobot, getZoneCenterXY),
-      method(LuaRobot, getGatewayToXY),
+      method(LuaRobot, getGatewayFromZoneToZone),
       method(LuaRobot, getZoneCount),
       method(LuaRobot, getCurrentZone),
          
@@ -380,7 +380,7 @@ S32 LuaRobot::getZoneCenterXY(lua_State *L)
 }
 
 // Get the coords of the gateway to the specified zone.  Returns nil, nil if requested zone doesn't border current zone.
-S32 LuaRobot::getGatewayToXY(lua_State *L)
+S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 {
    // You give us a nil, we'll give it right back!
    if(lua_isnil(L, 1) || lua_isnil(L, 2))
@@ -947,7 +947,7 @@ getHealth(ship)
 
 
 const char LuaRobot::className[] = "LuaRobot";
-
+U32 Robot::mRobotCount = 0;
 
 //------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Robot);
@@ -980,6 +980,9 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
 
 Robot::~Robot()
 {
+   if(getGame() && getGame()->isServer())
+      mRobotCount--;
+
    // Close down our Lua interpreter
    if(L)
       lua_close(L);
@@ -994,6 +997,7 @@ Robot::~Robot()
 
    logprintf("Robot terminated [%s]", mFilename.c_str());
 }
+
 
 // Reset everything on the robot back to the factory settings
 bool Robot::initialize(Point p)
@@ -1094,6 +1098,9 @@ void Robot::onAddedToGame(Game *)
    // Make them always visible on cmdr map --> del
    if(!isGhost())
       setScopeAlways();
+
+   if(getGame() && getGame()->isServer())
+      mRobotCount++;
 }
 
 

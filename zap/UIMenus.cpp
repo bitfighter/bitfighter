@@ -710,7 +710,7 @@ void MainMenuUserInterface::processSelection(U32 index)
          gQueryServersUserInterface.activate();
          break;
       case 1:
-         initHostGame(Address(IPProtocol, Address::Any, 28000));
+         initHostGame(Address(IPProtocol, Address::Any, 28000), false);
          break;
       case 2:
          gInstructionsUserInterface.activate();

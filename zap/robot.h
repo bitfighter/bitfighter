@@ -69,6 +69,8 @@ private:
 
    U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed
 
+   static U32 mRobotCount;
+
    enum {
       RobotRespawnDelay = 1500,
    };
@@ -108,6 +110,7 @@ public:
    Timer respawnTimer;
 
    bool isRobot() { return true; }
+   static U32 getRobotCount() { return mRobotCount; }
 
 private:
   int attribute;
@@ -156,7 +159,7 @@ public:
 
    // Methods we will need to use
    S32 getZoneCenterXY(lua_State *L);
-   S32 getGatewayToXY(lua_State *L);
+   S32 getGatewayFromZoneToZone(lua_State *L);
    S32 getZoneCount(lua_State *L);
    S32 getCurrentZone(lua_State *L);
 
