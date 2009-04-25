@@ -38,7 +38,7 @@
 #include "ship.h"
 
 #include "lua.h"
-#include "../lua/include/luna.h"
+#include "../lua/include/lunar.h"
 
 
 namespace Zap
@@ -128,13 +128,55 @@ protected:
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
 
-   static S32 returnPoint(lua_State *L, Point point);     // Returns a point... usage: return returnPoint(L, point);
-   S32 returnInt(lua_State *L, S32 num);                  // Usage: return returnInt(L, int);
-   S32 returnString(lua_State *L, const char *str);                
-   static S32 returnNil(lua_State *L);                    // Returns nil... usage: return returnNil(L);
+   static S32 returnPoint(lua_State *L, Point point);           // Returns a point... usage: return returnPoint(L, point);
+   static S32 returnInt(lua_State *L, S32 num);                 // Usage: return returnInt(L, int);
+   static S32 returnFloat(lua_State *L, F32 num);                 
+   
+   static S32 returnString(lua_State *L, const char *str);                
+   static S32 returnBool(lua_State *L, bool boolean); 
+
+   static S32 returnNil(lua_State *L);                          // Returns nil... usage: return returnNil(L);
    static void setfield (lua_State *L, const char *key, F32 value);
+
 };
 
+
+class LuaGame : public LuaClass
+{
+
+private:
+   Game *thisGame;              // Pointer to an actual C++ Game object
+   GameType *thisGameType;
+
+public:
+  // Constants
+
+  // Initialize the pointer
+  LuaGame(lua_State *L);      // Constructor
+  ~LuaGame();                 // Destructor
+
+   static const char className[];
+
+   static Lunar<LuaGame>::RegType methods[];
+
+   S32 getClassID(lua_State *L);
+
+   // Methods we will need to use
+   S32 getGameType(lua_State *L);
+   S32 getFlagCount(lua_State *L);
+   S32 getWinningScore(lua_State *L);
+   S32 getGameTimeTotal(lua_State *L);
+   S32 getGameTimeRemaining(lua_State *L);
+   S32 getLeadingScore(lua_State *L);
+   S32 getLeadingTeam(lua_State *L);
+  
+   S32 getLevelName(lua_State *L);
+   S32 getGridSize(lua_State *L);
+   S32 getIsTeamGame(lua_State *L);
+
+   S32 getEventScore(lua_State *L);
+
+};
 
 extern enum ScoringEvent;
 
@@ -145,6 +187,9 @@ private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    S32 findClosestZone(Point point);                 // Finds zone closest to point, used when robots get off the map
    S32 findAndReturnClosestZone(lua_State *L, Point point); // Wraps findClosestZone and handles returning the result to Lua
+   LuaGame *mLuaGameObj;           // Reference to object holding our game-specific data
+
+   Robot *thisRobot;              // Pointer to an actual C++ Robot object
 
 public:
   // Constants
@@ -155,7 +200,9 @@ public:
 
    static const char className[];
 
-   static Luna<LuaRobot>::RegType methods[];
+   static Lunar<LuaRobot>::RegType methods[];
+
+   S32 getClassID(lua_State *L);
 
    // Methods we will need to use
    S32 getZoneCenterXY(lua_State *L);
@@ -190,26 +237,10 @@ public:
 
    S32 logprint(lua_State *L);
 
-   // Game info
-   S32 getGameType(lua_State *L);
-   S32 getFlagCount(lua_State *L);
-   S32 getWinningScore(lua_State *L);
-   S32 getGameTimeTotal(lua_State *L);
-   S32 getGameTimeRemaining(lua_State *L);
-   S32 getLeadingScore(lua_State *L);
-   S32 getLeadingTeam(lua_State *L);
-  
-   S32 getLevelName(lua_State *L);
-   S32 getGridSize(lua_State *L);
-   S32 getIsTeamGame(lua_State *L);
-
-   S32 getEventScore(lua_State *L);
-
-
-private:
-  Robot* thisRobot;              // Pointer to an actual C++ Robot object
-
+   S32 getGame(lua_State *L);    // Get a pointer to a game object, where we can run game-info oriented methods
 };
+
+
 
 
 // Class to restore Lua stack to the state it was in when we found it.

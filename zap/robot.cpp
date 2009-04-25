@@ -55,14 +55,14 @@ static Vector<GameObject *> fillVector;
 // Returns a point to calling Lua function
 S32 LuaClass::returnPoint(lua_State *L, Point point)
 {
-   lua_createtable(L, 0, 2);        // creates a table  with 2 fields
+   lua_createtable(L, 0, 2);         // creates a table with 2 fields
    setfield(L, "x", point.x);        // table.x = x 
    setfield(L, "y", point.y);        // table.y = y 
 
    return 1;
 }
 
-// Returns an into to a calling Lua function
+// Returns an int to a calling Lua function
 S32 LuaClass::returnInt(lua_State *L, S32 num)
 {
    lua_pushinteger(L, num);
@@ -70,7 +70,23 @@ S32 LuaClass::returnInt(lua_State *L, S32 num)
 }
 
 
-// Returns an into to a calling Lua function
+// Returns a float to a calling Lua function
+S32 LuaClass::returnFloat(lua_State *L, F32 num)
+{
+   lua_pushnumber(L, num);
+   return 1;
+}
+
+
+// Returns a boolean to a calling Lua function
+S32 LuaClass::returnBool(lua_State *L, bool boolean)
+{
+   lua_pushboolean(L, boolean);
+   return 1;
+}
+
+
+// Returns a string to a calling Lua function
 S32 LuaClass::returnString(lua_State *L, const char *str)
 {
    lua_pushstring(L, str);
@@ -84,6 +100,8 @@ S32 LuaClass::returnNil(lua_State *L)
    lua_pushnil(L); 
    return 1;
 }
+
+
 
 
 
@@ -148,38 +166,40 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(TeleportType);
    setEnum(GoalZoneType);
    setEnum(AsteroidType);
+   // This one isn't an enum in the Bitfighter code, but we need it for the robot code
+   lua_pushinteger(L, BIT(30)); lua_setglobal(L, "GameType");  // Reuse BIT(30), which is currently used for deleted items
 
-   // Game Types
-   setGTEnum(BitmatchGame);
-   setGTEnum(CTFGame);
-   setGTEnum(HTFGame);
-   setGTEnum(NexusGame);
-   setGTEnum(RabbitGame);
-   setGTEnum(RetrieveGame);
-   setGTEnum(SoccerGame);
-   setGTEnum(ZoneControlGame);
+   //// Game Types
+   //setGTEnum(BitmatchGame);
+   //setGTEnum(CTFGame);
+   //setGTEnum(HTFGame);
+   //setGTEnum(NexusGame);
+   //setGTEnum(RabbitGame);
+   //setGTEnum(RetrieveGame);
+   //setGTEnum(SoccerGame);
+   //setGTEnum(ZoneControlGame);
 
-   // Scoring Events
-   setGTEnum(KillEnemy);
-   setGTEnum(KillSelf);
-   setGTEnum(KillTeammate);
-   setGTEnum(KillEnemyTurret);
-   setGTEnum(KillOwnTurret);
-   setGTEnum(CaptureFlag);
-   setGTEnum(CaptureZone);
-   setGTEnum(UncaptureZone);
-   setGTEnum(HoldFlagInZone);
-   setGTEnum(RemoveFlagFromEnemyZone);
-   setGTEnum(RabbitHoldsFlag);
-   setGTEnum(RabbitKilled);
-   setGTEnum(RabbitKills);
-   setGTEnum(ReturnFlagsToNexus);
-   setGTEnum(ReturnFlagToZone);
-   setGTEnum(LostFlag);
-   setGTEnum(ReturnTeamFlag);
-   setGTEnum(ScoreGoalEnemyTeam);
-   setGTEnum(ScoreGoalHostileTeam);
-   setGTEnum(ScoreGoalOwnTeam);
+   //// Scoring Events
+   //setGTEnum(KillEnemy);
+   //setGTEnum(KillSelf);
+   //setGTEnum(KillTeammate);
+   //setGTEnum(KillEnemyTurret);
+   //setGTEnum(KillOwnTurret);
+   //setGTEnum(CaptureFlag);
+   //setGTEnum(CaptureZone);
+   //setGTEnum(UncaptureZone);
+   //setGTEnum(HoldFlagInZone);
+   //setGTEnum(RemoveFlagFromEnemyZone);
+   //setGTEnum(RabbitHoldsFlag);
+   //setGTEnum(RabbitKilled);
+   //setGTEnum(RabbitKills);
+   //setGTEnum(ReturnFlagsToNexus);
+   //setGTEnum(ReturnFlagToZone);
+   //setGTEnum(LostFlag);
+   //setGTEnum(ReturnTeamFlag);
+   //setGTEnum(ScoreGoalEnemyTeam);
+   //setGTEnum(ScoreGoalHostileTeam);
+   //setGTEnum(ScoreGoalOwnTeam);
 
    // Modules
    setEnum(ModuleShield);
@@ -196,11 +216,16 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(WeaponBurst);
    setEnum(WeaponMine);
    setEnum(WeaponSpyBug);
+
+   //LuaGame *game = new LuaGame(L);
+   //mLuaGameObj = game;
 }
 
 // Destructor
-LuaRobot::~LuaRobot(){
-  logprintf("deleted Lua Object (%p)\n", this);
+LuaRobot::~LuaRobot()
+{
+  logprintf("deleted Lua Robot Object (%p)\n", this);
+  delete mLuaGameObj;
 }
 
 
@@ -208,48 +233,53 @@ LuaRobot::~LuaRobot(){
 // Methods defined here need to be defined in the LuaRobot in robot.h
 #define method(class, name) {#name, &class::name}
 
-Luna<LuaRobot>::RegType LuaRobot::methods[] = {
-      method(LuaRobot, getAngle),
-      method(LuaRobot, getPosXY),
+Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
+   method(LuaRobot, getClassID),
 
-      method(LuaRobot, getZoneCenterXY),
-      method(LuaRobot, getGatewayFromZoneToZone),
-      method(LuaRobot, getZoneCount),
-      method(LuaRobot, getCurrentZone),
-         
-      method(LuaRobot, setAngle),
-      method(LuaRobot, setAngleXY),
-      method(LuaRobot, getAngleXY),
-      method(LuaRobot, hasLosXY),
+   method(LuaRobot, getGame),
 
-      method(LuaRobot, hasFlag),
-      method(LuaRobot, getWaypoint),
+   method(LuaRobot, getAngle),
+   method(LuaRobot, getPosXY),
 
-      method(LuaRobot, setThrustAng),
-      method(LuaRobot, setThrustXY),
-      method(LuaRobot, fire),
-      method(LuaRobot, setWeapon),
-      method(LuaRobot, globalMsg),
-      method(LuaRobot, teamMsg),
+   method(LuaRobot, getZoneCenterXY),
+   method(LuaRobot, getGatewayFromZoneToZone),
+   method(LuaRobot, getZoneCount),
+   method(LuaRobot, getCurrentZone),
 
-      method(LuaRobot, logprint),
+   method(LuaRobot, setAngle),
+   method(LuaRobot, setAngleXY),
+   method(LuaRobot, getAngleXY),
+   method(LuaRobot, hasLosXY),
 
-      method(LuaRobot, findObjects),
+   method(LuaRobot, hasFlag),
+   method(LuaRobot, getWaypoint),
 
-      method(LuaRobot, getGameType),
-      method(LuaRobot, getFlagCount),
-      method(LuaRobot, getWinningScore),
-      method(LuaRobot, getGameTimeTotal),
-      method(LuaRobot, getGameTimeRemaining),
-      method(LuaRobot, getLeadingScore),
-      method(LuaRobot, getLeadingTeam),
-      method(LuaRobot, getLevelName),
-      method(LuaRobot, getGridSize),
-      method(LuaRobot, getIsTeamGame),
-      method(LuaRobot, getEventScore),
+   method(LuaRobot, setThrustAng),
+   method(LuaRobot, setThrustXY),
+   method(LuaRobot, fire),
+   method(LuaRobot, setWeapon),
+   method(LuaRobot, globalMsg),
+   method(LuaRobot, teamMsg),
 
-   {0,0}    // End list of methods
+   method(LuaRobot, logprint),
+
+   method(LuaRobot, findObjects),
+
+   {0,0}    // End method list
 };
+
+
+S32 LuaRobot::getGame(lua_State *L)
+{
+   lua_pushlightuserdata(L, mLuaGameObj); 
+   return 1;
+}
+
+
+S32 LuaRobot::getClassID(lua_State *L)
+{
+   return returnInt(L, RobotType);
+}
 
 
 // Turn to angle a (in radians)
@@ -286,6 +316,7 @@ S32 LuaRobot::getAngleXY(lua_State *L)
 {
    F32 x = luaL_checknumber(L, 1);
    F32 y = luaL_checknumber(L, 2);
+
    lua_pushnumber(L, thisRobot->getAngleXY(x, y));
    return 1;
 }
@@ -371,13 +402,9 @@ S32 LuaRobot::getZoneCenterXY(lua_State *L)
    if(z < 0 || z >= gBotNavMeshZones.size())
       return returnNil(L);
 
-
-   Point c = gBotNavMeshZones[z]->getCenter();
-
-   lua_pushnumber(L, c.x);
-   lua_pushnumber(L, c.y);
-   return 2;
+   return returnPoint(L, gBotNavMeshZones[z]->getCenter());
 }
+
 
 // Get the coords of the gateway to the specified zone.  Returns nil, nil if requested zone doesn't border current zone.
 S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
@@ -404,16 +431,13 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
       if(gBotNavMeshZones[from]->mNeighbors[i].zoneID == to)
       {
          Rect r(gBotNavMeshZones[from]->mNeighbors[i].borderStart, gBotNavMeshZones[from]->mNeighbors[i].borderEnd);
-         lua_pushnumber(L, r.getCenter().x);
-         lua_pushnumber(L, r.getCenter().y);
-         return 2;
+         return returnPoint(L, r.getCenter());
       }
    }
 
    // Did not find requested neighbor... returning nil
    return returnNil(L);
 }
-
 
 
 // Get the zone this robot is currently in.  If not in a zone, return nil
@@ -424,16 +448,15 @@ S32 LuaRobot::getCurrentZone(lua_State *L)
    if(zone == -1)
       return returnNil(L);
 
-   lua_pushnumber(L, zone);
-   return 1;
+   return returnInt(L, zone);
 }
 
 // Get a count of how many nav zones we have
 S32 LuaRobot::getZoneCount(lua_State *L)
 {
-   lua_pushnumber(L, gBotNavMeshZones.size());
-   return 1;
+   return returnInt(L, gBotNavMeshZones.size());
 }
+
 
 // Fire current weapon if possible
 S32 LuaRobot::fire(lua_State *L)
@@ -456,8 +479,7 @@ S32 LuaRobot::hasLosXY(lua_State *L)
    x = luaL_checknumber(L, 1);
    y = luaL_checknumber(L, 2);
 
-   lua_pushboolean(L, thisRobot->canSeePoint(Point(x,y)) );
-   return 1;
+   return returnBool(L, thisRobot->canSeePoint(Point(x,y)) );
 }
 
 
@@ -465,8 +487,7 @@ S32 LuaRobot::hasLosXY(lua_State *L)
 // Does robot have a flag?
 S32 LuaRobot::hasFlag(lua_State *L)
 {
-   lua_pushboolean(L, (thisRobot->carryingFlag() != GameType::NO_FLAG));
-   return 1;
+   return returnBool(L, (thisRobot->carryingFlag() != GameType::NO_FLAG));
 }
 
 
@@ -492,6 +513,7 @@ S32 LuaRobot::globalMsg(lua_State *L)
    return 0;
 }
 
+
 // Send message to team (what happens when neutral/enemytoall robot does this???)
 S32 LuaRobot::teamMsg(lua_State *L)
 {
@@ -508,17 +530,14 @@ S32 LuaRobot::teamMsg(lua_State *L)
 // Returns current aim angle of ship  --> needed?
 S32 LuaRobot::getAngle(lua_State *L)
 {
-  lua_pushnumber(L, thisRobot->getCurrentMove().angle);
-  return 1;
+  return returnFloat(L, thisRobot->getCurrentMove().angle);
 }
 
 
 // Returns current position of ship
 S32 LuaRobot::getPosXY(lua_State *L)
 {
-  lua_pushnumber(L, thisRobot->getActualPos().x);
-  lua_pushnumber(L, thisRobot->getActualPos().y);
-  return 2;
+  return returnPoint(L, thisRobot->getActualPos());
 }
 
 
@@ -529,57 +548,6 @@ S32 LuaRobot::logprint(lua_State *L)
       logprintf("RobotLog %s: %s", thisRobot->getName().getString(), lua_tostring(L, 1));
    return 0; 
 }  
-
-
-S32 LuaRobot::getGameType(lua_State *L)
-{
-   TNLAssert(gServerGame->getGameType(), "Need Gametype check in getGameType");
-   return returnInt(L, gServerGame->getGameType()->getGameType());
-}
-
-
-S32 LuaRobot::getFlagCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->getFlagCount()); }
-S32 LuaRobot::getWinningScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getWinningScore()); }
-S32 LuaRobot::getGameTimeTotal(lua_State *L)     { return returnInt(L, gServerGame->getGameType()->getTotalGameTime()); }
-S32 LuaRobot::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServerGame->getGameType()->getRemainingGameTime()); }
-S32 LuaRobot::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
-S32 LuaRobot::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam()); }
-
-S32 LuaRobot::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
-S32 LuaRobot::getGridSize(lua_State *L)          { return returnInt(L, gServerGame->getGridSize()); }
-S32 LuaRobot::getIsTeamGame(lua_State *L)        { return returnInt(L, gServerGame->getGameType()->isTeamGame()); }
-
-
-S32 LuaRobot::getEventScore(lua_State *L) 
-{ 
-   S32 n = lua_gettop(L);  // Number of arguments
-   if (n != 1)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getEventScore called with %d args, expected 1", n);
-      logprintf(msg);
-      throw(string(msg)); 
-   }
-
-   if(!lua_isnumber(L, 1))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getEventScore called with non-numeric arg");
-      logprintf(msg);
-      throw(string(msg)); 
-   }
-
-   U32 scoringEvent = luaL_checknumber(L, 1);
-   if(scoringEvent > GameType::ScoringEventsCount)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getEventScore called with out-of-bounds arg: %d", scoringEvent);
-      logprintf(msg);
-      throw(string(msg));
-   }
-
-   return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, (GameType::ScoringEvent) scoringEvent, 0));
-}
 
 
 extern Rect gServerWorldBounds;
@@ -946,12 +914,142 @@ getHealth(ship)
 */
 
 
-const char LuaRobot::className[] = "LuaRobot";
-U32 Robot::mRobotCount = 0;
+const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
+
 
 //------------------------------------------------------------------------
+
+// Constructor
+LuaGame::LuaGame(lua_State *L)
+{
+   lua_atpanic(L, luaPanicked);                 // Register our panic function
+
+   // Game Types
+   setGTEnum(BitmatchGame);
+   setGTEnum(CTFGame);
+   setGTEnum(HTFGame);
+   setGTEnum(NexusGame);
+   setGTEnum(RabbitGame);
+   setGTEnum(RetrieveGame);
+   setGTEnum(SoccerGame);
+   setGTEnum(ZoneControlGame);
+
+   // Scoring Events
+   setGTEnum(KillEnemy);
+   setGTEnum(KillSelf);
+   setGTEnum(KillTeammate);
+   setGTEnum(KillEnemyTurret);
+   setGTEnum(KillOwnTurret);
+   setGTEnum(CaptureFlag);
+   setGTEnum(CaptureZone);
+   setGTEnum(UncaptureZone);
+   setGTEnum(HoldFlagInZone);
+   setGTEnum(RemoveFlagFromEnemyZone);
+   setGTEnum(RabbitHoldsFlag);
+   setGTEnum(RabbitKilled);
+   setGTEnum(RabbitKills);
+   setGTEnum(ReturnFlagsToNexus);
+   setGTEnum(ReturnFlagToZone);
+   setGTEnum(LostFlag);
+   setGTEnum(ReturnTeamFlag);
+   setGTEnum(ScoreGoalEnemyTeam);
+   setGTEnum(ScoreGoalHostileTeam);
+   setGTEnum(ScoreGoalOwnTeam);
+}
+
+// Destructor
+LuaGame::~LuaGame(){
+  logprintf("deleted Lua Game Object (%p)\n", this);
+}
+
+
+// Define the methods we will expose to Lua
+// Methods defined here need to be defined in the LuaRobot in robot.h
+
+Lunar<LuaGame>::RegType LuaGame::methods[] = {
+   method(LuaGame, getClassID),
+
+   method(LuaGame, getGameType),
+   method(LuaGame, getFlagCount),
+   method(LuaGame, getWinningScore),
+   method(LuaGame, getGameTimeTotal),
+   method(LuaGame, getGameTimeRemaining),
+   method(LuaGame, getLeadingScore),
+   method(LuaGame, getLeadingTeam),
+   method(LuaGame, getLevelName),
+   method(LuaGame, getGridSize),
+   method(LuaGame, getIsTeamGame),
+   method(LuaGame, getEventScore),
+
+   {0,0}    // End method list
+};
+
+
+S32 LuaGame::getClassID(lua_State *L)
+{
+   return returnInt(L, BIT(30));    // TODO: Make this a constant
+}
+
+
+S32 LuaGame::getGameType(lua_State *L)
+{
+   TNLAssert(gServerGame->getGameType(), "Need Gametype check in getGameType");
+   return returnInt(L, gServerGame->getGameType()->getGameType());
+}
+
+
+S32 LuaGame::getFlagCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->getFlagCount()); }
+S32 LuaGame::getWinningScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getWinningScore()); }
+S32 LuaGame::getGameTimeTotal(lua_State *L)     { return returnInt(L, gServerGame->getGameType()->getTotalGameTime()); }
+S32 LuaGame::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServerGame->getGameType()->getRemainingGameTime()); }
+S32 LuaGame::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
+S32 LuaGame::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam()); }
+
+S32 LuaGame::getLevelName(lua_State *L)         { 
+   return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
+S32 LuaGame::getGridSize(lua_State *L)          { return returnInt(L, gServerGame->getGridSize()); }
+S32 LuaGame::getIsTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
+
+
+S32 LuaGame::getEventScore(lua_State *L) 
+{ 
+   S32 n = lua_gettop(L);  // Number of arguments
+   if (n != 1)
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "getEventScore called with %d args, expected 1", n);
+      logprintf(msg);
+      throw(string(msg)); 
+   }
+
+   if(!lua_isnumber(L, 1))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "getEventScore called with non-numeric arg");
+      logprintf(msg);
+      throw(string(msg)); 
+   }
+
+   U32 scoringEvent = luaL_checknumber(L, 1);
+   if(scoringEvent > GameType::ScoringEventsCount)
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "getEventScore called with out-of-bounds arg: %d", scoringEvent);
+      logprintf(msg);
+      throw(string(msg));
+   }
+
+   return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, (GameType::ScoringEvent) scoringEvent, 0));
+}
+
+const char LuaGame::className[] = "GameInfo";      // This is the class name as it appears to the Lua scripts
+
+//------------------------------------------------------------------------
+
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
+
+U32 Robot::mRobotCount = 0;
 
 // Constructor
 Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m)
@@ -1046,11 +1144,13 @@ bool Robot::initialize(Point p)
    
    L = lua_open();    // Create a new Lua interpreter
 
-   // Register the LuaRobot data type with Lua
-   Luna<LuaRobot>::Register(L);
+   // Register our connector types with Lua
+   Lunar<LuaRobot>::Register(L);
+   Lunar<LuaGame>::Register(L);
+
      
    // Push a pointer to this Robot to the Lua stack
-   lua_pushlightuserdata(L, (void*)this);
+   lua_pushlightuserdata(L, (void *)this);
 
    // And set the global name of this pointer.  This is the name that we'll use to refer
    // to our robot from our Lua code.
