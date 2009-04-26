@@ -712,6 +712,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\luaItem.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\luaItem.h"
+			>
+		</File>
+		<File
 			RelativePath=".\luaObject.cpp"
 			>
 		</File>
