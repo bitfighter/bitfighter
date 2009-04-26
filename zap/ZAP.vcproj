@@ -704,6 +704,22 @@
 			>
 		</File>
 		<File
+			RelativePath=".\luaGameInfo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\luaGameInfo.h"
+			>
+		</File>
+		<File
+			RelativePath=".\luaObject.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\luaObject.h"
+			>
+		</File>
+		<File
 			RelativePath=".\main.cpp"
 			>
 		</File>

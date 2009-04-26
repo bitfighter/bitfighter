@@ -42,6 +42,7 @@
 #include "goalZone.h"
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
+#include "luaGameInfo.h"
 #include "../glut/glutInclude.h"
 
 #define hypot _hypot    // Kill some warnings
@@ -51,97 +52,11 @@ namespace Zap
 
 static Vector<GameObject *> fillVector;
 
-
-// Returns a point to calling Lua function
-S32 LuaClass::returnPoint(lua_State *L, Point point)
-{
-   lua_createtable(L, 0, 2);         // creates a table with 2 fields
-   setfield(L, "x", point.x);        // table.x = x 
-   setfield(L, "y", point.y);        // table.y = y 
-
-   return 1;
-}
-
-// Returns an int to a calling Lua function
-S32 LuaClass::returnInt(lua_State *L, S32 num)
-{
-   lua_pushinteger(L, num);
-   return 1;
-}
-
-
-// Returns a float to a calling Lua function
-S32 LuaClass::returnFloat(lua_State *L, F32 num)
-{
-   lua_pushnumber(L, num);
-   return 1;
-}
-
-
-// Returns a boolean to a calling Lua function
-S32 LuaClass::returnBool(lua_State *L, bool boolean)
-{
-   lua_pushboolean(L, boolean);
-   return 1;
-}
-
-
-// Returns a string to a calling Lua function
-S32 LuaClass::returnString(lua_State *L, const char *str)
-{
-   lua_pushstring(L, str);
-   return 1;
-}
-
-
-// Returns nil to calling Lua function
-S32 LuaClass::returnNil(lua_State *L)
-{
-   lua_pushnil(L); 
-   return 1;
-}
-
-
-
-
-
-// Overwrite Lua's panicky panic function with something that doesn't kill the whole game
-// if something goes wrong!  
-int LuaClass::luaPanicked(lua_State *L)
-{
-   string msg = lua_tostring(L, 1);
-   lua_getglobal(L, "ERROR");    // <-- what is this for?
-
-   throw(msg);
-
-   return 0;
-}
-
-
-void LuaClass::clearStack(lua_State *L)
-{
-   lua_pop(L, lua_gettop(L));
-}
-
-
-// Assume that table is at the top of the stack
-void LuaClass::setfield (lua_State *L, const char *key, F32 value) 
-{
-   lua_pushnumber(L, value);
-   lua_setfield(L, -2, key);
-}
-
-///////////////////////////////////
-
 // Constructor
 LuaRobot::LuaRobot(lua_State *L)
 {
    lua_atpanic(L, luaPanicked);                 // Register our panic function
    thisRobot = (Robot*)lua_touserdata(L, 1);    // Register our robot
-
-   // Set some enumeration values that we'll need in Lua
-   #define setEnum(name) { lua_pushinteger(L, name); lua_setglobal(L, #name); }
-   #define setGTEnum(name) { lua_pushinteger(L, GameType::name); lua_setglobal(L, #name); }
       
    // Game Objects
    setEnum(ShipType);
@@ -169,38 +84,6 @@ LuaRobot::LuaRobot(lua_State *L)
    // This one isn't an enum in the Bitfighter code, but we need it for the robot code
    lua_pushinteger(L, BIT(30)); lua_setglobal(L, "GameType");  // Reuse BIT(30), which is currently used for deleted items
 
-   //// Game Types
-   //setGTEnum(BitmatchGame);
-   //setGTEnum(CTFGame);
-   //setGTEnum(HTFGame);
-   //setGTEnum(NexusGame);
-   //setGTEnum(RabbitGame);
-   //setGTEnum(RetrieveGame);
-   //setGTEnum(SoccerGame);
-   //setGTEnum(ZoneControlGame);
-
-   //// Scoring Events
-   //setGTEnum(KillEnemy);
-   //setGTEnum(KillSelf);
-   //setGTEnum(KillTeammate);
-   //setGTEnum(KillEnemyTurret);
-   //setGTEnum(KillOwnTurret);
-   //setGTEnum(CaptureFlag);
-   //setGTEnum(CaptureZone);
-   //setGTEnum(UncaptureZone);
-   //setGTEnum(HoldFlagInZone);
-   //setGTEnum(RemoveFlagFromEnemyZone);
-   //setGTEnum(RabbitHoldsFlag);
-   //setGTEnum(RabbitKilled);
-   //setGTEnum(RabbitKills);
-   //setGTEnum(ReturnFlagsToNexus);
-   //setGTEnum(ReturnFlagToZone);
-   //setGTEnum(LostFlag);
-   //setGTEnum(ReturnTeamFlag);
-   //setGTEnum(ScoreGoalEnemyTeam);
-   //setGTEnum(ScoreGoalHostileTeam);
-   //setGTEnum(ScoreGoalOwnTeam);
-
    // Modules
    setEnum(ModuleShield);
    setEnum(ModuleBoost);
@@ -216,27 +99,20 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(WeaponBurst);
    setEnum(WeaponMine);
    setEnum(WeaponSpyBug);
-
-   //LuaGame *game = new LuaGame(L);
-   //mLuaGameObj = game;
 }
 
 // Destructor
 LuaRobot::~LuaRobot()
 {
   logprintf("deleted Lua Robot Object (%p)\n", this);
-  delete mLuaGameObj;
 }
 
 
 // Define the methods we will expose to Lua
 // Methods defined here need to be defined in the LuaRobot in robot.h
-#define method(class, name) {#name, &class::name}
 
 Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getClassID),
-
-   method(LuaRobot, getGame),
 
    method(LuaRobot, getAngle),
    method(LuaRobot, getPosXY),
@@ -267,13 +143,6 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    {0,0}    // End method list
 };
-
-
-S32 LuaRobot::getGame(lua_State *L)
-{
-   lua_pushlightuserdata(L, mLuaGameObj); 
-   return 1;
-}
 
 
 S32 LuaRobot::getClassID(lua_State *L)
@@ -919,133 +788,6 @@ const char LuaRobot::className[] = "LuaRobot";     // This is the class name as 
 
 //------------------------------------------------------------------------
 
-// Constructor
-LuaGame::LuaGame(lua_State *L)
-{
-   lua_atpanic(L, luaPanicked);                 // Register our panic function
-
-   // Game Types
-   setGTEnum(BitmatchGame);
-   setGTEnum(CTFGame);
-   setGTEnum(HTFGame);
-   setGTEnum(NexusGame);
-   setGTEnum(RabbitGame);
-   setGTEnum(RetrieveGame);
-   setGTEnum(SoccerGame);
-   setGTEnum(ZoneControlGame);
-
-   // Scoring Events
-   setGTEnum(KillEnemy);
-   setGTEnum(KillSelf);
-   setGTEnum(KillTeammate);
-   setGTEnum(KillEnemyTurret);
-   setGTEnum(KillOwnTurret);
-   setGTEnum(CaptureFlag);
-   setGTEnum(CaptureZone);
-   setGTEnum(UncaptureZone);
-   setGTEnum(HoldFlagInZone);
-   setGTEnum(RemoveFlagFromEnemyZone);
-   setGTEnum(RabbitHoldsFlag);
-   setGTEnum(RabbitKilled);
-   setGTEnum(RabbitKills);
-   setGTEnum(ReturnFlagsToNexus);
-   setGTEnum(ReturnFlagToZone);
-   setGTEnum(LostFlag);
-   setGTEnum(ReturnTeamFlag);
-   setGTEnum(ScoreGoalEnemyTeam);
-   setGTEnum(ScoreGoalHostileTeam);
-   setGTEnum(ScoreGoalOwnTeam);
-}
-
-// Destructor
-LuaGame::~LuaGame(){
-  logprintf("deleted Lua Game Object (%p)\n", this);
-}
-
-
-// Define the methods we will expose to Lua
-// Methods defined here need to be defined in the LuaRobot in robot.h
-
-Lunar<LuaGame>::RegType LuaGame::methods[] = {
-   method(LuaGame, getClassID),
-
-   method(LuaGame, getGameType),
-   method(LuaGame, getFlagCount),
-   method(LuaGame, getWinningScore),
-   method(LuaGame, getGameTimeTotal),
-   method(LuaGame, getGameTimeRemaining),
-   method(LuaGame, getLeadingScore),
-   method(LuaGame, getLeadingTeam),
-   method(LuaGame, getLevelName),
-   method(LuaGame, getGridSize),
-   method(LuaGame, getIsTeamGame),
-   method(LuaGame, getEventScore),
-
-   {0,0}    // End method list
-};
-
-
-S32 LuaGame::getClassID(lua_State *L)
-{
-   return returnInt(L, BIT(30));    // TODO: Make this a constant
-}
-
-
-S32 LuaGame::getGameType(lua_State *L)
-{
-   TNLAssert(gServerGame->getGameType(), "Need Gametype check in getGameType");
-   return returnInt(L, gServerGame->getGameType()->getGameType());
-}
-
-
-S32 LuaGame::getFlagCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->getFlagCount()); }
-S32 LuaGame::getWinningScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getWinningScore()); }
-S32 LuaGame::getGameTimeTotal(lua_State *L)     { return returnInt(L, gServerGame->getGameType()->getTotalGameTime()); }
-S32 LuaGame::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServerGame->getGameType()->getRemainingGameTime()); }
-S32 LuaGame::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
-S32 LuaGame::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam()); }
-
-S32 LuaGame::getLevelName(lua_State *L)         { 
-   return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
-S32 LuaGame::getGridSize(lua_State *L)          { return returnInt(L, gServerGame->getGridSize()); }
-S32 LuaGame::getIsTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
-
-
-S32 LuaGame::getEventScore(lua_State *L) 
-{ 
-   S32 n = lua_gettop(L);  // Number of arguments
-   if (n != 1)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getEventScore called with %d args, expected 1", n);
-      logprintf(msg);
-      throw(string(msg)); 
-   }
-
-   if(!lua_isnumber(L, 1))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getEventScore called with non-numeric arg");
-      logprintf(msg);
-      throw(string(msg)); 
-   }
-
-   U32 scoringEvent = luaL_checknumber(L, 1);
-   if(scoringEvent > GameType::ScoringEventsCount)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getEventScore called with out-of-bounds arg: %d", scoringEvent);
-      logprintf(msg);
-      throw(string(msg));
-   }
-
-   return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, (GameType::ScoringEvent) scoringEvent, 0));
-}
-
-const char LuaGame::className[] = "GameInfo";      // This is the class name as it appears to the Lua scripts
-
-//------------------------------------------------------------------------
-
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
 
@@ -1146,7 +888,7 @@ bool Robot::initialize(Point p)
 
    // Register our connector types with Lua
    Lunar<LuaRobot>::Register(L);
-   Lunar<LuaGame>::Register(L);
+   Lunar<LuaGameInfo>::Register(L);
 
      
    // Push a pointer to this Robot to the Lua stack

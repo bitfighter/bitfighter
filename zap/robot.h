@@ -26,7 +26,7 @@
 #ifndef _ROBOT_H_
 #define _ROBOT_H_
 
-#include "gameType.h"
+
 #include "gameObject.h"
 #include "moveObject.h"
 
@@ -37,8 +37,7 @@
 #include "gameWeapons.h"
 #include "ship.h"
 
-#include "lua.h"
-#include "../lua/include/lunar.h"
+#include "luaObject.h"
 
 
 namespace Zap
@@ -120,74 +119,13 @@ private:
 };
 
 
-
-class LuaClass
-{
-
-protected:
-   static int luaPanicked(lua_State *L);
-   static void clearStack(lua_State *L);
-
-   static S32 returnPoint(lua_State *L, Point point);           // Returns a point... usage: return returnPoint(L, point);
-   static S32 returnInt(lua_State *L, S32 num);                 // Usage: return returnInt(L, int);
-   static S32 returnFloat(lua_State *L, F32 num);                 
-   
-   static S32 returnString(lua_State *L, const char *str);                
-   static S32 returnBool(lua_State *L, bool boolean); 
-
-   static S32 returnNil(lua_State *L);                          // Returns nil... usage: return returnNil(L);
-   static void setfield (lua_State *L, const char *key, F32 value);
-
-};
-
-
-class LuaGame : public LuaClass
-{
-
-private:
-   Game *thisGame;              // Pointer to an actual C++ Game object
-   GameType *thisGameType;
-
-public:
-  // Constants
-
-  // Initialize the pointer
-  LuaGame(lua_State *L);      // Constructor
-  ~LuaGame();                 // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaGame>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-
-   // Methods we will need to use
-   S32 getGameType(lua_State *L);
-   S32 getFlagCount(lua_State *L);
-   S32 getWinningScore(lua_State *L);
-   S32 getGameTimeTotal(lua_State *L);
-   S32 getGameTimeRemaining(lua_State *L);
-   S32 getLeadingScore(lua_State *L);
-   S32 getLeadingTeam(lua_State *L);
-  
-   S32 getLevelName(lua_State *L);
-   S32 getGridSize(lua_State *L);
-   S32 getIsTeamGame(lua_State *L);
-
-   S32 getEventScore(lua_State *L);
-
-};
-
-extern enum ScoringEvent;
-
-class LuaRobot : public LuaClass
+class LuaRobot : public LuaObject
 {
 
 private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    S32 findClosestZone(Point point);                 // Finds zone closest to point, used when robots get off the map
    S32 findAndReturnClosestZone(lua_State *L, Point point); // Wraps findClosestZone and handles returning the result to Lua
-   LuaGame *mLuaGameObj;           // Reference to object holding our game-specific data
 
    Robot *thisRobot;              // Pointer to an actual C++ Robot object
 
