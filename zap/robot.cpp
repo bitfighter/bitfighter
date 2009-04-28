@@ -1000,7 +1000,7 @@ bool Robot::initialize(Point p)
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
    Lunar<TestItem>::Register(L);
-   //Lunar<LuaAsteroid>::Register(L);
+   Lunar<Asteroid>::Register(L);
 
      
    // Push a pointer to this Robot to the Lua stack
