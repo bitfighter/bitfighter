@@ -490,7 +490,7 @@ S32 LuaRobot::findAsteroid(lua_State *L)
       return returnNil(L);
    else
    {
-       lua_pushlightuserdata(L, closest->getLuaProxy());
+       lua_pushlightuserdata(L, closest);
        return 1;
    }
 }
@@ -532,7 +532,7 @@ S32 LuaRobot::findTestItem(lua_State *L)
   //int tb = lua_gettop(L);
 
 
-      int A = Lunar<LuaTestItem>::push(L, closest->getLuaProxy());
+      int A = Lunar<TestItem>::push(L, closest);
   //      lua_pushliteral(L, "a");
   //lua_pushvalue(L, A);
   //lua_settable(L, LUA_GLOBALSINDEX);
@@ -1018,7 +1018,7 @@ bool Robot::initialize(Point p)
    // Register our connector types with Lua
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
-   Lunar<LuaTestItem>::Register(L);
+   Lunar<TestItem>::Register(L);
    //Lunar<LuaAsteroid>::Register(L);
 
      

@@ -117,16 +117,6 @@ Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
       mMoveState[i].vel.x = vel * cos(ang);
       mMoveState[i].vel.y = vel * sin(ang);
    }
-
-   mLuaProxy = new LuaAsteroid(this);
-}
-
-
-
-// Destructor
-Asteroid::~Asteroid()
-{
-   delete mLuaProxy;
 }
 
 
@@ -252,6 +242,36 @@ void Asteroid::emitAsteroidExplosion(Point pos)
 
 
 
+const char Asteroid::className[] = "Asteroid";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+Asteroid::Asteroid(lua_State *L)
+{
+
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<Asteroid>::RegType Asteroid::methods[] = 
+{
+   method(Asteroid, getClassID),
+   method(Asteroid, getSize),
+   method(Asteroid, getSizeCount),
+   method(Asteroid, getLoc),
+   method(Asteroid, getRad),     
+   method(Asteroid, getVel),  
+
+   {0,0}    // End method list
+};
+
+
+S32 Asteroid::getSize(lua_State *L) { return returnInt(L, getSizeIndex()); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); }    // Number of indexes of size we can have (returns int)
+S32 Asteroid::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }        // Center of asteroid (returns point)
+S32 Asteroid::getRad(lua_State *L) { return returnFloat(L, getRadius()); }           // Radius of asteroid (returns number)
+S32 Asteroid::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }        // Speed of asteroid (returns point)
+
+
 
 TNL_IMPLEMENT_NETOBJECT(TestItem);
 
@@ -261,14 +281,6 @@ TestItem::TestItem() : Item(Point(0,0), true, 60, 4)
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
 
-   mLuaProxy = new LuaTestItem(this);
-
-}
-
-// Destructor
-TestItem::~TestItem()
-{
-   delete mLuaProxy;
 }
 
 
@@ -298,6 +310,34 @@ bool TestItem::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 
    return false;
 }
+
+
+const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
+
+
+// Lua constructor
+TestItem::TestItem(lua_State *L) 
+{
+   // Do nothing, for now...  should take params from stack and create testItem object
+}
+
+
+
+// Define the methods we will expose to Lua
+Lunar<TestItem>::RegType TestItem::methods[] = 
+{
+   method(TestItem, getClassID),
+   method(TestItem, getLoc),
+   method(TestItem, getRad),     
+   method(TestItem, getVel),  
+
+   {0,0}    // End method list
+};
+
+S32 TestItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of testItem (returns point)
+S32 TestItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of testItem (returns number)
+S32 TestItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of testItem (returns point)
+
 
 
 TNL_IMPLEMENT_NETOBJECT(ResourceItem);

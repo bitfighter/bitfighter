@@ -32,6 +32,7 @@
 #include "luaItem.h"       // For mLuaProxy
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
+#include "luaObject.h"
 
 
 
@@ -77,7 +78,7 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 
 class LuaAsteroid;
 
-class Asteroid : public Item
+class Asteroid : public Item, public LuaObject
 {
 
 typedef Item Parent;
@@ -91,7 +92,6 @@ private:
 
 public:
    Asteroid();     // Constructor
-   ~Asteroid();    // Destructor
 
    void renderItem(Point pos);
    bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
@@ -106,31 +106,52 @@ public:
    S32 getSizeIndex() { return mSizeIndex; }
    S32 getSizeCount() { return mRenderSizes; }
 
-   LuaAsteroid *getLuaProxy() { return mLuaProxy; }
-
    TNL_DECLARE_CLASS(Asteroid);
+
+   ///// Lua interface
+
+   public:
+   Asteroid(lua_State *L);    // Constructor
+
+   static const char className[];
+
+   static Lunar<Asteroid>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, AsteroidType); }
+
+   S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
+   S32 getLoc(lua_State *L);         // Center of asteroid (returns point)
+   S32 getRad(lua_State *L);         // Radius of asteroid (returns number)
+   S32 getVel(lua_State *L);         // Speed of asteroid (returns point)
 };
 
 
-class LuaTestItem;
-
-class TestItem : public Item
+class TestItem : public Item, public LuaObject
 {
-
-private:
-    LuaTestItem *mLuaProxy;
 
 public:
    TestItem();     // Constructor
-   ~TestItem();    // Destructor
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
    bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
 
-   LuaTestItem *getLuaProxy() { return mLuaProxy; }
-
    TNL_DECLARE_CLASS(TestItem);
+
+   ///// Lua Interface
+
+   TestItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<TestItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
+
+   S32 getLoc(lua_State *L);    // Center of testItem (returns point)
+   S32 getRad(lua_State *L);     // Radius of testItem (returns number)
+   S32 getVel(lua_State *L);    // Speed of testItem (returns point)
 };
 
 
