@@ -26,6 +26,7 @@
 #include "gameItems.h"
 #include "item.h"
 #include "ship.h"
+#include "luaItem.h"
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 
@@ -96,6 +97,7 @@ void RepairItem::renderItem(Point pos)
 
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
+class LuaAsteroid;
 
 // Constructor
 Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
@@ -116,6 +118,15 @@ Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
       mMoveState[i].vel.y = vel * sin(ang);
    }
 
+   mLuaProxy = new LuaAsteroid(this);
+}
+
+
+
+// Destructor
+Asteroid::~Asteroid()
+{
+   delete mLuaProxy;
 }
 
 
@@ -229,10 +240,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
 bool Asteroid::collide(GameObject *otherObject)
 {
    // Asteroids don't collide with one another!
-   if(dynamic_cast<Asteroid *>(otherObject))
-      return false;
-   // else
-   return true;
+   return dynamic_cast<Asteroid *>(otherObject) ? false : true;
 }
 
 
@@ -243,6 +251,8 @@ void Asteroid::emitAsteroidExplosion(Point pos)
 }
 
 
+
+
 TNL_IMPLEMENT_NETOBJECT(TestItem);
 
 // Constructor
@@ -250,12 +260,23 @@ TestItem::TestItem() : Item(Point(0,0), true, 60, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
+
+   mLuaProxy = new LuaTestItem(this);
+
 }
+
+// Destructor
+TestItem::~TestItem()
+{
+   delete mLuaProxy;
+}
+
 
 void TestItem::renderItem(Point pos)
 {
    renderTestItem(pos);
 }
+
 
 void TestItem::damageObject(DamageInfo *theInfo)
 {
@@ -265,6 +286,7 @@ void TestItem::damageObject(DamageInfo *theInfo)
    iv.normalize();
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
 }
+
 
 bool TestItem::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 {
@@ -292,6 +314,7 @@ void ResourceItem::renderItem(Point pos)
    renderResourceItem(pos);
 }
 
+
 bool ResourceItem::collide(GameObject *hitObject)
 {
    if(mIsMounted)
@@ -313,6 +336,7 @@ bool ResourceItem::collide(GameObject *hitObject)
    }
    return true;
 }
+
 
 void ResourceItem::damageObject(DamageInfo *theInfo)
 {

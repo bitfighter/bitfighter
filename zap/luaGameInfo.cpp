@@ -27,52 +27,23 @@
 #include "luaGameInfo.h"
 #include "gameType.h"
 
+
 namespace Zap
 {
 
-const char LuaGameInfo::className[] = "GameInfo";      // This is the class name as it appears to the Lua scripts
+const char LuaGameInfo::className[] = "GameInfo";      // Class name as it appears to Lua scripts
 
 // Constructor
 LuaGameInfo::LuaGameInfo(lua_State *L)
 {
-   //lua_atpanic(L, luaPanicked);                 // Register our panic function
-
-   // Game Types
-   setGTEnum(BitmatchGame);
-   setGTEnum(CTFGame);
-   setGTEnum(HTFGame);
-   setGTEnum(NexusGame);
-   setGTEnum(RabbitGame);
-   setGTEnum(RetrieveGame);
-   setGTEnum(SoccerGame);
-   setGTEnum(ZoneControlGame);
-
-   // Scoring Events
-   setGTEnum(KillEnemy);
-   setGTEnum(KillSelf);
-   setGTEnum(KillTeammate);
-   setGTEnum(KillEnemyTurret);
-   setGTEnum(KillOwnTurret);
-   setGTEnum(CaptureFlag);
-   setGTEnum(CaptureZone);
-   setGTEnum(UncaptureZone);
-   setGTEnum(HoldFlagInZone);
-   setGTEnum(RemoveFlagFromEnemyZone);
-   setGTEnum(RabbitHoldsFlag);
-   setGTEnum(RabbitKilled);
-   setGTEnum(RabbitKills);
-   setGTEnum(ReturnFlagsToNexus);
-   setGTEnum(ReturnFlagToZone);
-   setGTEnum(LostFlag);
-   setGTEnum(ReturnTeamFlag);
-   setGTEnum(ScoreGoalEnemyTeam);
-   setGTEnum(ScoreGoalHostileTeam);
-   setGTEnum(ScoreGoalOwnTeam);
+   // Do nothing
 }
 
+
 // Destructor
-LuaGameInfo::~LuaGameInfo(){
-  logprintf("deleted Lua Game Object (%p)\n", this);
+LuaGameInfo::~LuaGameInfo()
+{
+  logprintf("deleted Lua Game Object (%p)\n", this);     // Never gets run...
 }
 
 
@@ -103,6 +74,8 @@ S32 LuaGameInfo::getClassID(lua_State *L)
    return returnInt(L, BIT(30));    // TODO: Make this a constant
 }
 
+
+extern ServerGame *gServerGame;
 
 S32 LuaGameInfo::getGameType(lua_State *L)
 {

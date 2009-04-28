@@ -36,6 +36,8 @@
 #include "UIGame.h"
 #include "gameConnection.h"
 #include "shipItems.h"
+#include "gameItems.h"
+#include "luaItem.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "flagItem.h"
@@ -99,6 +101,38 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(WeaponBurst);
    setEnum(WeaponMine);
    setEnum(WeaponSpyBug);
+
+      // Game Types
+   setGTEnum(BitmatchGame);
+   setGTEnum(CTFGame);
+   setGTEnum(HTFGame);
+   setGTEnum(NexusGame);
+   setGTEnum(RabbitGame);
+   setGTEnum(RetrieveGame);
+   setGTEnum(SoccerGame);
+   setGTEnum(ZoneControlGame);
+
+   // Scoring Events
+   setGTEnum(KillEnemy);
+   setGTEnum(KillSelf);
+   setGTEnum(KillTeammate);
+   setGTEnum(KillEnemyTurret);
+   setGTEnum(KillOwnTurret);
+   setGTEnum(CaptureFlag);
+   setGTEnum(CaptureZone);
+   setGTEnum(UncaptureZone);
+   setGTEnum(HoldFlagInZone);
+   setGTEnum(RemoveFlagFromEnemyZone);
+   setGTEnum(RabbitHoldsFlag);
+   setGTEnum(RabbitKilled);
+   setGTEnum(RabbitKills);
+   setGTEnum(ReturnFlagsToNexus);
+   setGTEnum(ReturnFlagToZone);
+   setGTEnum(LostFlag);
+   setGTEnum(ReturnTeamFlag);
+   setGTEnum(ScoreGoalEnemyTeam);
+   setGTEnum(ScoreGoalHostileTeam);
+   setGTEnum(ScoreGoalOwnTeam);
 }
 
 // Destructor
@@ -140,6 +174,11 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, logprint),
 
    method(LuaRobot, findObjects),
+
+method(LuaRobot, findTestItem),
+method(LuaRobot, findAsteroid),
+
+   
 
    {0,0}    // End method list
 };
@@ -420,6 +459,96 @@ S32 LuaRobot::logprint(lua_State *L)
 
 
 extern Rect gServerWorldBounds;
+
+
+// Probably temporary
+S32 LuaRobot::findAsteroid(lua_State *L)
+{
+   fillVector.clear();
+   thisRobot->findObjects(AsteroidType, fillVector, gServerWorldBounds ); 
+
+   // Now find the closest
+   F32 bestRange = F32_MAX;
+   Asteroid *closest;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Some special rules for narrowing in on the objects we really want
+      //if(fillVector[i]->getObjectTypeMask() & AsteroidType)
+
+      Asteroid *asteroid = (Asteroid*)fillVector[i];
+
+      F32 dist = asteroid->getActualPos().distSquared(thisRobot->getActualPos());
+      if(dist < bestRange)
+      {
+         bestRange = dist;
+         closest = asteroid;
+      }
+
+   }
+   if(closest == NULL)
+      return returnNil(L);
+   else
+   {
+       lua_pushlightuserdata(L, closest->getLuaProxy());
+       return 1;
+   }
+}
+
+
+
+S32 LuaRobot::findTestItem(lua_State *L)
+{
+   fillVector.clear();
+   thisRobot->findObjects(TestItemType, fillVector, gServerWorldBounds ); 
+
+   // Now find the closest
+   F32 bestRange = F32_MAX;
+   TestItem *closest;
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      // Some special rules for narrowing in on the objects we really want
+      //if(fillVector[i]->getObjectTypeMask() & AsteroidType)
+
+      TestItem *item = (TestItem*)fillVector[i];
+
+      F32 dist = item->getActualPos().distSquared(thisRobot->getActualPos());
+      if(dist < bestRange)
+      {
+         bestRange = dist;
+         closest = item;
+      }
+
+   }
+   if(closest == NULL)
+      return returnNil(L);
+   else
+   {
+
+  //lua_settop(L, 0);
+  //lua_pushliteral(L, "_TRACEBACK");
+  //lua_gettable(L, LUA_GLOBALSINDEX);   // get traceback function
+  //int tb = lua_gettop(L);
+
+
+      int A = Lunar<LuaTestItem>::push(L, closest->getLuaProxy());
+  //      lua_pushliteral(L, "a");
+  //lua_pushvalue(L, A);
+  //lua_settable(L, LUA_GLOBALSINDEX);
+
+
+  //lua_settop(L, 0);
+  //lua_pushliteral(L, "_TRACEBACK");
+  //lua_gettable(L, LUA_GLOBALSINDEX);   // get traceback function
+  //int tb2 = lua_gettop(L);
+
+      //lua_pushlightuserdata(L, closest->getLuaProxy());
+      return 1;
+   }
+}
+
+
 
 S32 LuaRobot::findObjects(lua_State *L)
 {
@@ -889,6 +1018,8 @@ bool Robot::initialize(Point p)
    // Register our connector types with Lua
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
+   Lunar<LuaTestItem>::Register(L);
+   //Lunar<LuaAsteroid>::Register(L);
 
      
    // Push a pointer to this Robot to the Lua stack

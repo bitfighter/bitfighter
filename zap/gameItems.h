@@ -29,8 +29,11 @@
 
 #include "item.h"
 #include "ship.h"
+#include "luaItem.h"       // For mLuaProxy
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
+
+
 
 namespace Zap
 {
@@ -56,7 +59,10 @@ public:
 
 static const S32 AsteroidDesigns = 4;
 static const S32 AsteroidPoints = 12;
+
 static const F32 mRenderSize[] = { .8, .4, .2, -1 };      // Must end in -1
+static const S32 mRenderSizes = sizeof(mRenderSize) / sizeof(F32) - 1;
+
 static const S32 mSizeIndexLength = sizeof(mRenderSize) / sizeof(S32) - 1;
 static const F32 AsteroidRadius = 89;
 
@@ -69,6 +75,7 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 };
 
 
+class LuaAsteroid;
 
 class Asteroid : public Item
 {
@@ -80,8 +87,11 @@ private:
    bool hasExploded;
    S32 mDesign;
 
+   LuaAsteroid *mLuaProxy;
+
 public:
    Asteroid();     // Constructor
+   ~Asteroid();    // Destructor
 
    void renderItem(Point pos);
    bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
@@ -93,18 +103,32 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void emitAsteroidExplosion(Point pos);
 
+   S32 getSizeIndex() { return mSizeIndex; }
+   S32 getSizeCount() { return mRenderSizes; }
+
+   LuaAsteroid *getLuaProxy() { return mLuaProxy; }
+
    TNL_DECLARE_CLASS(Asteroid);
 };
 
 
+class LuaTestItem;
+
 class TestItem : public Item
 {
+
+private:
+    LuaTestItem *mLuaProxy;
+
 public:
-   TestItem();   // Constructor
+   TestItem();     // Constructor
+   ~TestItem();    // Destructor
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
    bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
+
+   LuaTestItem *getLuaProxy() { return mLuaProxy; }
 
    TNL_DECLARE_CLASS(TestItem);
 };

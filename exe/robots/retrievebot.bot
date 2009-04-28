@@ -1,0 +1,122 @@
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--
+-- RetrieveBot, a simple robot that does nothing other than seeks out a flag,
+-- and attempts to return it to a friendly capture zone.  
+--
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- This is called by the robot's idle routine each tick.  
+-- This function must be present for the robot to work!
+
+function getMove()
+    -- Do we have the flag?
+    if( (not haveFlag) and bot:hasFlag()) then   -- Just got the flag
+
+        targetType = GoalZoneType                -- Set new destination
+        haveFlag = true
+
+    elseif(haveFlag and not bot:hasFlag()) then  -- Just lost flag
+
+        targetType = FlagType
+        haveFlag = false
+
+    end
+
+    dest = bot:findObjects(targetType)        -- Set new destination
+    if(dest == nil) then                      -- Check for bogus return value
+        return
+    end
+    
+    target = bot:getWaypoint(dest.x, dest.y)  -- The getWaypoint function will return a point that
+                                              -- we can fly straight towards that will get us closer
+                                              -- to dest
+                                                 
+    if(target == nil) then
+        bot:logprint("I'm stuck!");
+        return
+    end
+
+    bot:setAngleXY(target.x, target.y)        -- Doesn't really matter, but it looks better when we aim
+                                              -- the ship towards our target
+
+
+    bot:setThrustXY(1, target.x, target.y)    -- Travel towards target at full speed (valid speeds range 
+                                              -- from 0 (stopped) to 1 (full bore)
+        
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Support functions follow (not all needed for this bot, can be deleted)
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Are we at (or near) point dx, dy?
+
+function atDest()
+    delta = 50
+    pos = bot:getPosXY()
+    return (dist(pos.x, pos.y, dest.x, dest.y) < delta)
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Return the distance between points x1,y1 and x2,y2
+
+function dist(x1, y1, x2, y2)
+    return( math.sqrt((x2 - x1)^2 + (y2 - y1)^2) )
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Other required functions
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- This function is called once and should return the robot's name
+
+function getName()
+    return("RetrieveBot")
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Setup code here: this is run once when the robot is initialized, and
+-- any variables set here will persist throughout the robot's life.  These
+-- variables can be accessed from various functions defined in this file.
+
+-- Start up a new LuaGameObject wrapper class and pass the global gameobject
+-- C++ lightuserdata pointer into it.
+
+bot = LuaRobot(Robot) -- This is a reference to our bot.  All bots need this line
+
+
+-------------------------------------------------------------------------------
+-- Global variables
+
+haveFlag = true         -- Well we don't really, but this will trigger the flag
+                        -- seeking mechanism in the getMove() function to get us
+                        -- started on the right track.  Later, this will be used to
+                        -- track whether we have the flag or not.  If we don't,
+                        -- then our mission is to get the flag.  If we do, then
+                        -- our mission is to return it to one of our capture zones.
+                        
+bot:logprint("Hello, I'm "..getName() )        -- Print a message to the game log
+
+game = GameInfo()	    -- Create the GameInfo object so we can get information about
+					    -- the current game
+					    
+bot:logprint("Level ==> "..game:getLevelName())

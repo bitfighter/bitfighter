@@ -164,6 +164,10 @@ public:
    S32 getWaypoint(lua_State *L);
 
 
+   // Temp functions??
+   S32 findAsteroid(lua_State *L);
+   S32 findTestItem(lua_State *L);
+
    // Ship control
    S32 setThrustAng(lua_State *L);
    S32 setThrustXY(lua_State *L);

@@ -23,9 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "luaObject.h"
 #include "luaItem.h"
-#include "gameType.h"
+#include "gameItems.h"
 
 namespace Zap
 {
@@ -33,9 +32,9 @@ namespace Zap
 const char LuaAsteroid::className[] = "Asteroid";      // Class name as it appears to Lua scripts
 
 // Constructor
-LuaAsteroid::LuaAsteroid(lua_State *L)
+LuaAsteroid::LuaAsteroid(Asteroid *asteroid)
 {
-
+   thisAsteroid = asteroid;    // Register our asteroid
 }
 
 
@@ -47,61 +46,66 @@ LuaAsteroid::~LuaAsteroid()
 
 
 // Define the methods we will expose to Lua
-
-Lunar<LuaAsteroid>::RegType LuaAsteroid::methods[] = {
+Lunar<LuaAsteroid>::RegType LuaAsteroid::methods[] = 
+{
    method(LuaAsteroid, getClassID),
-
+   method(LuaAsteroid, getSize),
+   method(LuaAsteroid, getSizeCount),
+   method(LuaAsteroid, getLocation),
+   method(LuaAsteroid, getRadius),     
+   method(LuaAsteroid, getVelocity),  
 
    {0,0}    // End method list
 };
 
 
-S32 LuaAsteroid::getClassID(lua_State *L)
-{
-   return returnInt(L, AsteroidType);    
-}
+
+S32 LuaAsteroid::getSize(lua_State *L) { return returnInt(L, thisAsteroid->getSizeIndex()); }          // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+S32 LuaAsteroid::getSizeCount(lua_State *L) { return returnInt(L, thisAsteroid->getSizeCount()); }    // Number of indexes of size we can have (returns int)
+S32 LuaAsteroid::getLocation(lua_State *L) { return returnPoint(L, thisAsteroid->getActualPos()); }   // Center of asteroid (returns point)
+S32 LuaAsteroid::getRadius(lua_State *L) { return returnFloat(L, thisAsteroid->getRadius()); }        // Radius of asteroid (returns number)
+S32 LuaAsteroid::getVelocity(lua_State *L) { return returnPoint(L, thisAsteroid->getActualVel()); }   // Speed of asteroid (returns point)
 
 
 
-
-};
-
-
-
-
-// Template for new item:
-
-/*
-
-const char LuaAsteroid::className[] = "Asteroid";      // Class name as it appears to Lua scripts
+const char LuaTestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
 
 // Constructor
-LuaAsteroid::LuaAsteroid(lua_State *L)
+LuaTestItem::LuaTestItem(TestItem *testItem)
 {
-
+   thisTestItem = testItem;    // Register our testItem
 }
 
 
-// Destructor
-LuaAsteroid::~LuaAsteroid()
+LuaTestItem::LuaTestItem(lua_State *L) 
 {
-  logprintf("deleted Lua LuaAsteroid (%p)\n", this);
+   // Do nothing, for now...  should take object from stack and create testItem object
+}
+
+
+
+// Destructor
+LuaTestItem::~LuaTestItem()
+{
+  logprintf("deleted Lua LuaTestItem (%p)\n", this);
 }
 
 
 // Define the methods we will expose to Lua
-
-Lunar<LuaAsteroid>::RegType LuaAsteroid::methods[] = {
-   method(LuaAsteroid, getClassID),
-
+Lunar<LuaTestItem>::RegType LuaTestItem::methods[] = 
+{
+   method(LuaTestItem, getClassID),
+   method(LuaTestItem, getLocation),
+   method(LuaTestItem, getRadius),     
+   method(LuaTestItem, getVelocity),  
 
    {0,0}    // End method list
 };
 
+S32 LuaTestItem::getLocation(lua_State *L) { return returnPoint(L, thisTestItem->getActualPos()); }   // Center of testItem (returns point)
+S32 LuaTestItem::getRadius(lua_State *L) { return returnFloat(L, thisTestItem->getRadius()); }        // Radius of testItem (returns number)
+S32 LuaTestItem::getVelocity(lua_State *L) { return returnPoint(L, thisTestItem->getActualVel()); }   // Speed of testItem (returns point)
 
-S32 LuaAsteroid::getClassID(lua_State *L)
-{
-   return returnInt(L, AsteroidType);    
-}
 
-*/
+};
+

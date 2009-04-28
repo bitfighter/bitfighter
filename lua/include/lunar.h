@@ -1,5 +1,10 @@
 // From http://lua-users.org/wiki/CppBindingWithLunar
 
+
+
+#ifndef _LUNAR_H_
+#define _LUNAR_H_
+
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
@@ -212,3 +217,4 @@ private:
 
 #define LUNAR_DECLARE_METHOD(Class, Name) {#Name, &Class::Name}
 
+#endif

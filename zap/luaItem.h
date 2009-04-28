@@ -26,55 +26,66 @@
 #ifndef _LUAITEM_H_
 #define _LUAITEM_H_
 
+#include "gameItems.h"
 #include "luaObject.h"
 
 
 namespace Zap
 {
 
+class Asteroid;
+
 class LuaAsteroid : public LuaObject
 {
 
+private:
+   Asteroid *thisAsteroid;             // Pointer to an actual C++ Asteroid object
+
 public:
-  // Initialize the pointer
-  LuaAsteroid(lua_State *L);      // Constructor
-  ~LuaAsteroid();                 // Destructor
+   LuaAsteroid(Asteroid *asteroid);    // Constructor
+   ~LuaAsteroid();                     // Destructor
 
    static const char className[];
 
    static Lunar<LuaAsteroid>::RegType methods[];
 
-   S32 getClassID(lua_State *L);
+   S32 getClassID(lua_State *L) { return returnInt(L, AsteroidType); }
 
-   // Methods we will need to use
-
-
-
+   S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
+   S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
+   S32 getLocation(lua_State *L);    // Center of asteroid (returns point)
+   S32 getRadius(lua_State *L);      // Radius of asteroid (returns number)
+   S32 getVelocity(lua_State *L);    // Speed of asteroid (returns point)
 };
+
+
+class TestItem;
+
+class LuaTestItem : public LuaObject
+{
+
+private:
+   TestItem *thisTestItem;                // Pointer to an actual C++ TestItem object
+
+public:
+   LuaTestItem(TestItem *thisTestItem);  // Constructor
+   LuaTestItem(lua_State *L);             //  Other constructor
+   ~LuaTestItem();                       // Destructor
+
+
+
+   static const char className[];
+
+   static Lunar<LuaTestItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
+
+   S32 getLocation(lua_State *L);    // Center of testItem (returns point)
+   S32 getRadius(lua_State *L);      // Radius of testItem (returns number)
+   S32 getVelocity(lua_State *L);    // Speed of testItem (returns point)
+};
+
 
 };
 
 #endif
-
-
-// Template for additional items
-
-/*
-class LuaAsteroid : public LuaObject
-{
-
-public:
-  // Initialize the pointer
-  LuaAsteroid(lua_State *L);      // Constructor
-  ~LuaAsteroid();                 // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaAsteroid>::RegType methods[];
-
-   S32 getClassID(lua_State *L);
-
-   // Methods we will need to use
-};
-
-*/
