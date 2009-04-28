@@ -26,7 +26,6 @@
 #include "gameItems.h"
 #include "item.h"
 #include "ship.h"
-#include "luaItem.h"
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 

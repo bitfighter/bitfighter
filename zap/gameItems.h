@@ -29,7 +29,6 @@
 
 #include "item.h"
 #include "ship.h"
-#include "luaItem.h"       // For mLuaProxy
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 #include "luaObject.h"

@@ -37,7 +37,6 @@
 #include "gameConnection.h"
 #include "shipItems.h"
 #include "gameItems.h"
-#include "luaItem.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "flagItem.h"
@@ -490,7 +489,7 @@ S32 LuaRobot::findAsteroid(lua_State *L)
       return returnNil(L);
    else
    {
-       lua_pushlightuserdata(L, closest);
+       Lunar<Asteroid>::push(L, closest);
        return 1;
    }
 }
@@ -525,25 +524,7 @@ S32 LuaRobot::findTestItem(lua_State *L)
       return returnNil(L);
    else
    {
-
-  //lua_settop(L, 0);
-  //lua_pushliteral(L, "_TRACEBACK");
-  //lua_gettable(L, LUA_GLOBALSINDEX);   // get traceback function
-  //int tb = lua_gettop(L);
-
-
-      int A = Lunar<TestItem>::push(L, closest);
-  //      lua_pushliteral(L, "a");
-  //lua_pushvalue(L, A);
-  //lua_settable(L, LUA_GLOBALSINDEX);
-
-
-  //lua_settop(L, 0);
-  //lua_pushliteral(L, "_TRACEBACK");
-  //lua_gettable(L, LUA_GLOBALSINDEX);   // get traceback function
-  //int tb2 = lua_gettop(L);
-
-      //lua_pushlightuserdata(L, closest->getLuaProxy());
+      Lunar<TestItem>::push(L, closest);
       return 1;
    }
 }
