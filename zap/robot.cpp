@@ -468,7 +468,7 @@ S32 LuaRobot::findAsteroid(lua_State *L)
 
    // Now find the closest
    F32 bestRange = F32_MAX;
-   Asteroid *closest;
+   Asteroid *closest = NULL;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -503,7 +503,7 @@ S32 LuaRobot::findTestItem(lua_State *L)
 
    // Now find the closest
    F32 bestRange = F32_MAX;
-   TestItem *closest;
+   TestItem *closest = NULL;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
