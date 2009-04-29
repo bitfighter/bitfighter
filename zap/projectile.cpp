@@ -572,7 +572,7 @@ void GrenadeProjectile::renderItem(Point pos)
    //   FXManager::emitSpark(pos, sparkVel, Color(Random::readF() *.5 +.5, Random::readF() *.5, 0), Random::readF() * 2, FXManager::SparkTypePoint);
    //}
 
-   ShipWeaponInfo *wi = gWeapons + WeaponBurst;
+   WeaponInfo *wi = gWeapons + WeaponBurst;
    F32 initTTL = (F32) wi->projLiveTime;
    renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL );
 }

@@ -718,11 +718,11 @@ void Turret::idle(IdleCallPath path)
 
       // Calculate where we have to shoot to hit this...
       Point Vs = potential->getActualVel();
-      F32 S = gWeapons[WeaponTurretBlaster].projVelocity;
+      F32 S = gWeapons[WeaponTurret].projVelocity;
       Point d = potential->getRenderPos() - aimPos;
 
       F32 t;      // t is set in next statement
-      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[WeaponTurretBlaster].projLiveTime * 0.001f, t))
+      if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[WeaponTurret].projLiveTime * 0.001f, t))
          continue;
 
       Point leadPos = potential->getRenderPos() + Vs * t;
@@ -790,7 +790,7 @@ void Turret::idle(IdleCallPath path)
       {
          bestDelta.normalize();
          Point velocity;
-         createWeaponProjectiles(WeaponTurretBlaster, bestDelta, aimPos, velocity, 35.0f, this);
+         createWeaponProjectiles(WeaponTurret, bestDelta, aimPos, velocity, 35.0f, this);
          mFireTimer.reset(TurretFireDelay);
       }
    }

@@ -33,16 +33,16 @@ namespace Zap
 // do not add a weapon with a fire delay > Ship::MaxFireDelay
 // or update the constant.
 
-ShipWeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Dam-   Can damage  Can damage Projectile
+WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Dam-   Can damage  Can damage Projectile
 {                              //    Name         Delay  Energy Energy Vel. Life  age       self      teammate   Type
-   ShipWeaponInfo(StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   false,      false,   ProjectilePhaser ),
-   ShipWeaponInfo(StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   true,       false,   ProjectileBounce ),
-   ShipWeaponInfo(StringTableEntry("Triple"),      200,  2100,  2100,  550,  850, 0.14f,   true,       false,   ProjectileTriple ),
-   ShipWeaponInfo(StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   true,       false,   NotAProjectile ),
-   ShipWeaponInfo(StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   true,       false,   NotAProjectile ),
-   ShipWeaponInfo(StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   true,       true,    NotAProjectile ),
-   ShipWeaponInfo(StringTableEntry("Turret"),        0,     0,     0,  800,  800, 0.11f,   true,       true,    ProjectileTurret ),
-   ShipWeaponInfo(StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       true,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
+   WeaponInfo(StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   false,      false,   ProjectilePhaser ),
+   WeaponInfo(StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   true,       false,   ProjectileBounce ),
+   WeaponInfo(StringTableEntry("Triple"),      200,  2100,  2100,  550,  850, 0.14f,   true,       false,   ProjectileTriple ),
+   WeaponInfo(StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   true,       false,   NotAProjectile ),
+   WeaponInfo(StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   true,       false,   NotAProjectile ),
+   WeaponInfo(StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   true,       true,    NotAProjectile ),
+   WeaponInfo(StringTableEntry("Turret"),        0,     0,     0,  800,  800, 0.11f,   true,       true,    ProjectileTurret ),
+   WeaponInfo(StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       true,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
 };
 
 ProjectileInfo gProjInfo[ProjectileTypeCount] = {
@@ -58,7 +58,7 @@ ProjectileInfo gProjInfo[ProjectileTypeCount] = {
 void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, F32 shooterRadius, GameObject *shooter)
 {
    GameObject *proj = NULL;
-   ShipWeaponInfo *wi = gWeapons + weapon;
+   WeaponInfo *wi = gWeapons + weapon;
    Point projVel = dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
    Point firePos = shooterPos + dir * shooterRadius;
 
@@ -73,7 +73,7 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
          }
       case WeaponPhaser:
       case WeaponBounce:
-      case WeaponTurretBlaster:
+      case WeaponTurret:
          (new Projectile(weapon, firePos, projVel, wi->projLiveTime, shooter))->addToGame(shooter->getGame());
          break;
       case WeaponBurst:

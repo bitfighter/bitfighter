@@ -175,6 +175,9 @@ public:
    virtual void processMove(U32 stateIndex);
    F32 getMaxVelocity();
 
+   WeaponType getSelectedWeapon() { return mWeapon[mActiveWeaponIndx]; }   // Return currently selected weapon
+   U32 getSelectedWeaponIndex() { return mActiveWeaponIndx; }              // Return index of currently selected weapon (0, 1, 2)
+
    void processWeaponFire();
    void processEnergy();
    void updateModuleSounds();

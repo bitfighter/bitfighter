@@ -43,7 +43,7 @@ enum WeaponType
    WeaponBurst,          // Grenade
    WeaponHeatSeeker,     // Heatseeker
    WeaponMine,
-   WeaponTurretBlaster,
+   WeaponTurret,
    WeaponSpyBug,
    WeaponCount,
    InvalidWeapon,
@@ -66,9 +66,9 @@ enum ProjectileType
    NotAProjectile  // Need this so we can fit a non-ProjectileType (like mine) into a constructor intended for proper projectiles
 };
 
-struct ShipWeaponInfo
+struct WeaponInfo
 {
-   ShipWeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, F32 _damageAmount, bool _canDamageSelf, bool _canDamageTeammate, ProjectileType _projectileType)
+   WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, F32 _damageAmount, bool _canDamageSelf, bool _canDamageTeammate, ProjectileType _projectileType)
    {
       name = _name;
       fireDelay = _fireDelay;
@@ -95,7 +95,7 @@ struct ShipWeaponInfo
    ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
 };
 
-extern ShipWeaponInfo gWeapons[WeaponCount];
+extern WeaponInfo gWeapons[WeaponCount];
 extern void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, F32 shooterRadius, GameObject *shooter);
 
 enum {

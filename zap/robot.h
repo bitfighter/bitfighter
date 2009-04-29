@@ -142,7 +142,7 @@ public:
 
    S32 getClassID(lua_State *L);
 
-   // Methods we will need to use
+   
    S32 getZoneCenterXY(lua_State *L);
    S32 getGatewayFromZoneToZone(lua_State *L);
    S32 getZoneCount(lua_State *L);
@@ -176,6 +176,9 @@ public:
    S32 setWeapon(lua_State *L);
    S32 globalMsg(lua_State *L);
    S32 teamMsg(lua_State *L);
+
+   // Ship info
+   S32 getWeapon(lua_State *L);
 
    S32 logprint(lua_State *L);
 

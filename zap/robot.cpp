@@ -101,6 +101,7 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(WeaponBurst);
    setEnum(WeaponMine);
    setEnum(WeaponSpyBug);
+   setEnum(WeaponTurret);
 
       // Game Types
    setGTEnum(BitmatchGame);
@@ -170,6 +171,8 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, setWeapon),
    method(LuaRobot, globalMsg),
    method(LuaRobot, teamMsg),
+
+   method(LuaRobot, getWeapon),
 
    method(LuaRobot, logprint),
 
@@ -402,6 +405,17 @@ S32 LuaRobot::setWeapon(lua_State *L)
    U32 weap = luaL_checknumber(L, 1);
       thisRobot->selectWeapon(weap);
    return 0;
+}
+
+
+// Get WeaponInfo for current weapon
+S32 LuaRobot::getWeapon(lua_State *L)
+{
+   WeaponType weapon = thisRobot->getSelectedWeapon();
+   LuaWeaponInfo *weaponInfo = new LuaWeaponInfo(weapon);
+   Lunar<LuaWeaponInfo>::push(L, weaponInfo, true);     // true will allow Lua to delete this object when it goes out of scope
+
+   return 1;
 }
 
 
