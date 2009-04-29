@@ -965,6 +965,7 @@ bool Robot::initialize(Point p)
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaWeaponInfo>::Register(L);
+   Lunar<LuaModuleInfo>::Register(L);
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
 

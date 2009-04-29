@@ -29,6 +29,7 @@
 
 #include "luaObject.h"
 #include "gameWeapons.h"
+#include "shipItems.h"     // For module defs
 
 namespace Zap
 {
@@ -59,13 +60,13 @@ public:
    S32 getEventScore(lua_State *L);
 };
 
-
+///////////////////////////////
 
 class LuaWeaponInfo : public LuaObject
 {
 
 private:
-   ShipWeaponInfo *mWeaponInfo;
+   S32 mWeaponIndex;
 
 public:
    // Initialize the pointer
@@ -77,6 +78,9 @@ public:
    static Lunar<LuaWeaponInfo>::RegType methods[];
 
    S32 getName(lua_State *L);
+   S32 getID(lua_State *L);	
+
+   S32 getRange(lua_State *L);
    S32 getFireDelay(lua_State *L);
    S32 getMinEnergy(lua_State *L);
    S32 getEnergyDrain(lua_State *L);
@@ -85,6 +89,27 @@ public:
    S32 getDamage(lua_State *L);
    S32 getCanDamageSelf(lua_State *L);
    S32 getCanDamageTeammate(lua_State *L);
+};
+
+///////////////////////////////
+
+class LuaModuleInfo : public LuaObject
+{
+
+private:
+   S32 mModuleIndex;
+
+public:
+   // Initialize the pointer
+   LuaModuleInfo(lua_State *L);      // Constructor
+   ~LuaModuleInfo();                 // Destructor
+
+   static const char className[];
+
+   static Lunar<LuaModuleInfo>::RegType methods[];
+
+   S32 getName(lua_State *L);
+   S32 getID(lua_State *L);	
 
 };
 
