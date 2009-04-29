@@ -68,7 +68,7 @@ enum ProjectileType
 
 struct ShipWeaponInfo
 {
-   ShipWeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, U32 _projLiveTime, F32 _damageAmount, bool _canDamageSelf, bool _canDamageTeammate, ProjectileType _projectileType)
+   ShipWeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, F32 _damageAmount, bool _canDamageSelf, bool _canDamageTeammate, ProjectileType _projectileType)
    {
       name = _name;
       fireDelay = _fireDelay;
@@ -83,14 +83,12 @@ struct ShipWeaponInfo
    }
 
 
-can we change projLiveTime to S32, and set life of mines and spybugs to -1?
-
    StringTableEntry name; // Display name of the weapon.
    U32 fireDelay;         // Delay between shots.
    S32 minEnergy;         // Minimum energy to fire.  (Use S32 to avoid compiler warnings when comparing with other S32s)
    U32 drainEnergy;       // Amount of energy to drain per shot.
    U32 projVelocity;      // How fast shot travels (pix/second?)
-   U32 projLiveTime;      // How long shot lives (millisecs)
+   S32 projLiveTime;      // How long shot lives (millisecs)
    F32 damageAmount;      // Damage shot does
    bool canDamageSelf;
    bool canDamageTeammate;

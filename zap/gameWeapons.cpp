@@ -40,9 +40,9 @@ ShipWeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj
    ShipWeaponInfo(StringTableEntry("Triple"),      200,  2100,  2100,  550,  850, 0.14f,   true,       false,   ProjectileTriple ),
    ShipWeaponInfo(StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   true,       false,   NotAProjectile ),
    ShipWeaponInfo(StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   true,       false,   NotAProjectile ),
-   ShipWeaponInfo(StringTableEntry("Mine"),        900, 55000, 55000,  500, 1000, 0.50f,   true,       true,    NotAProjectile ),
+   ShipWeaponInfo(StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   true,       true,    NotAProjectile ),
    ShipWeaponInfo(StringTableEntry("Turret"),        0,     0,     0,  800,  800, 0.11f,   true,       true,    ProjectileTurret ),
-   ShipWeaponInfo(StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,  800, 0,       true,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
+   ShipWeaponInfo(StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       true,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
 };
 
 ProjectileInfo gProjInfo[ProjectileTypeCount] = {
