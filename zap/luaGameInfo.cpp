@@ -48,11 +48,7 @@ LuaGameInfo::~LuaGameInfo()
 
 
 // Define the methods we will expose to Lua
-// Methods defined here need to be defined in the LuaRobot in robot.h
-
 Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] = {
-   method(LuaGameInfo, getClassID),
-
    method(LuaGameInfo, getGameType),
    method(LuaGameInfo, getFlagCount),
    method(LuaGameInfo, getWinningScore),
@@ -67,12 +63,6 @@ Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] = {
 
    {0,0}    // End method list
 };
-
-
-S32 LuaGameInfo::getClassID(lua_State *L)
-{
-   return returnInt(L, BIT(30));    // TODO: Make this a constant
-}
 
 
 extern ServerGame *gServerGame;
@@ -91,21 +81,21 @@ S32 LuaGameInfo::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServe
 S32 LuaGameInfo::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
 S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam()); }
 
-S32 LuaGameInfo::getLevelName(lua_State *L)         { 
+S32 LuaGameInfo::getLevelName(lua_State *L)         {
    return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
 S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
 S32 LuaGameInfo::getIsTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
 
 
-S32 LuaGameInfo::getEventScore(lua_State *L) 
-{ 
+S32 LuaGameInfo::getEventScore(lua_State *L)
+{
    S32 n = lua_gettop(L);  // Number of arguments
    if (n != 1)
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "getEventScore called with %d args, expected 1", n);
       logprintf(msg);
-      throw(string(msg)); 
+      throw(string(msg));
    }
 
    if(!lua_isnumber(L, 1))
@@ -113,7 +103,7 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
       char msg[256];
       dSprintf(msg, sizeof(msg), "getEventScore called with non-numeric arg");
       logprintf(msg);
-      throw(string(msg)); 
+      throw(string(msg));
    }
 
    U32 scoringEvent = (U32) luaL_checkinteger(L, 1);
@@ -127,5 +117,54 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 
    return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, (GameType::ScoringEvent) scoringEvent, 0));
 };
+
+
+
+////////////////
+
+const char LuaWeaponInfo::className[] = "WeaponInfo";      // Class name as it appears to Lua scripts
+
+// Constructor
+LuaWeaponInfo::LuaWeaponInfo(lua_State *L)
+{
+   instnatiate mWeaponInfo from info on the stack
+}
+
+
+// Destructor
+LuaWeaponInfo::~LuaWeaponInfo()
+{
+  logprintf("deleted LuaWeaponInfo object (%p)\n", this);     // Never gets run...
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] = {
+   method(LuaWeaponInfo, getName),
+   method(LuaWeaponInfo, getFireDelay),
+   method(LuaWeaponInfo, getMinEnergy),
+   method(LuaWeaponInfo, getEnergyDrain),
+   method(LuaWeaponInfo, getProjVel),
+   method(LuaWeaponInfo, getProjLife),
+   method(LuaWeaponInfo, getDamage),
+   method(LuaWeaponInfo, getCanDamageSelf),
+   method(LuaWeaponInfo, getCanDamageTeammate),
+
+   {0,0}    // End method list
+};
+
+
+static Lunar<LuaWeaponInfo>::RegType methods[];
+
+S32 LuaWeaponInfo::getName(lua_State *L) { } { return ReturnString(L, mWeaponInfo.name) };						// Name of weapon ("Phaser", "Triple", etc.) (string)
+S32 LuaWeaponInfo::getFireDelay(lua_State *L) { return ReturnInt(L, mWeaponInfo.fireDelay) };					// Delay between shots in ms (integer)
+S32 LuaWeaponInfo::getMinEnergy(lua_State *L) { return ReturnInt(L, mWeaponInfo.minEnergy) };					// Minimum energy needed to use (integer)
+S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return ReturnInt(L, mWeaponInfo.drainEnergy) };				// Amount of energy weapon consumes (integer)
+S32 LuaWeaponInfo::getProjVel(lua_State *L) { return ReturnInt(L, mWeaponInfo.projVelocity) };					// Speed of projectile (units/sec) (integer)
+S32 LuaWeaponInfo::getProjLife(lua_State *L) { return ReturnInt(L, mWeaponInfo.projLiveTime) };					// Time projectile will live (ms) (integer, -1 == live forever)
+S32 LuaWeaponInfo::getDamage(lua_State *L) { return ReturnFloat(L, mWeaponInfo.damageAmount) };					// Damage projectile does (0-1, where 1 = total destruction) (float)
+S32 LuaWeaponInfo::getCanDamageSelf(lua_State *L) { return ReturnBool(L, mWeaponInfo.canDamageSelf) };			// Will weapon damage self? (boolean)
+S32 LuaWeaponInfo::getCanDamageTeammate(lua_State *L) { return ReturnBool(L, mWeaponInfo.canDamageTeammate) };	// Will weapon damage teammates? (boolean)
+
 
 };

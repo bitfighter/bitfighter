@@ -58,7 +58,7 @@ LuaRobot::LuaRobot(lua_State *L)
 {
    lua_atpanic(L, luaPanicked);                 // Register our panic function
    thisRobot = (Robot*)lua_touserdata(L, 1);    // Register our robot
-      
+
    // Game Objects
    setEnum(ShipType);
    setEnum(BarrierType);
@@ -177,7 +177,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 method(LuaRobot, findTestItem),
 method(LuaRobot, findAsteroid),
 
-   
+
 
    {0,0}    // End method list
 };
@@ -253,7 +253,7 @@ S32 LuaRobot::setThrustAng(lua_State *L)
    move.left = cos(ang) < 0 ? -vel * cos(ang) : 0;
 
    thisRobot->setCurrentMove(move);
-   
+
    return 0;
 }
 
@@ -322,7 +322,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 
 
    S32 from = luaL_checknumber(L, 1);     // From this zone
-   S32 to = luaL_checknumber(L, 2);     // To this one
+   S32 to = luaL_checknumber(L, 2);       // To this one
 
    // In case this gets called too early...
    if(gBotNavMeshZones.size() == 0)
@@ -390,13 +390,11 @@ S32 LuaRobot::hasLosXY(lua_State *L)
 }
 
 
-
 // Does robot have a flag?
 S32 LuaRobot::hasFlag(lua_State *L)
 {
    return returnBool(L, (thisRobot->carryingFlag() != GameType::NO_FLAG));
 }
-
 
 
 // Set weapon  to 1, 2, or 3
@@ -453,8 +451,8 @@ S32 LuaRobot::logprint(lua_State *L)
 {
    if(!lua_isnil(L, 1))
       logprintf("RobotLog %s: %s", thisRobot->getName().getString(), lua_tostring(L, 1));
-   return 0; 
-}  
+   return 0;
+}
 
 
 extern Rect gServerWorldBounds;
@@ -464,7 +462,7 @@ extern Rect gServerWorldBounds;
 S32 LuaRobot::findAsteroid(lua_State *L)
 {
    fillVector.clear();
-   thisRobot->findObjects(AsteroidType, fillVector, gServerWorldBounds ); 
+   thisRobot->findObjects(AsteroidType, fillVector, gServerWorldBounds );
 
    // Now find the closest
    F32 bestRange = F32_MAX;
@@ -499,7 +497,7 @@ S32 LuaRobot::findAsteroid(lua_State *L)
 S32 LuaRobot::findTestItem(lua_State *L)
 {
    fillVector.clear();
-   thisRobot->findObjects(TestItemType, fillVector, gServerWorldBounds ); 
+   thisRobot->findObjects(TestItemType, fillVector, gServerWorldBounds );
 
    // Now find the closest
    F32 bestRange = F32_MAX;
@@ -529,7 +527,7 @@ S32 LuaRobot::findTestItem(lua_State *L)
    }
 }
 
-
+y
 
 S32 LuaRobot::findObjects(lua_State *L)
 {
@@ -541,7 +539,7 @@ S32 LuaRobot::findObjects(lua_State *L)
       char msg[256];
       dSprintf(msg, sizeof(msg), "findObjects called with %d args, expected 1", n);
       logprintf(msg);
-      throw(string(msg)); 
+      throw(string(msg));
    }
 
    if(!lua_isnumber(L, 1))
@@ -549,7 +547,7 @@ S32 LuaRobot::findObjects(lua_State *L)
       char msg[256];
       dSprintf(msg, sizeof(msg), "findObjects called with non-numeric arg");
       logprintf(msg);
-      throw(string(msg)); 
+      throw(string(msg));
    }
 
    U32 objectType = luaL_checknumber(L, 1);
@@ -561,7 +559,7 @@ S32 LuaRobot::findObjects(lua_State *L)
    // thisRobot->findObjects(CommandMapVisType, fillVector, gServerWorldBounds);    // Get all globally visible objects
    //thisRobot->findObjects(ShipType, fillVector, Rect(thisRobot->getActualPos(), gServerGame->computePlayerVisArea(thisRobot)) );    // Get other objects on screen-visible area only
    thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
-   
+
    F32 bestRange = F32_MAX;
    Point bestPoint;
 
@@ -615,7 +613,7 @@ S32 LuaRobot::findObjects(lua_State *L)
          bool isNeutralZone = goal->getTeam() == -1;
          bool isEnemyZone = !(isOwnZone || isNeutralZone);
          bool isNotOwnZone = !isOwnZone;
-         bool isLeaderZone = goal->getTeam() == gServerGame->getGameType()->mLeadingTeam; 
+         bool isLeaderZone = goal->getTeam() == gServerGame->getGameType()->mLeadingTeam;
          //-----
          bool hasFlag = goal->mHasFlag;
          bool hasNoFlag = !hasFlag;
@@ -669,7 +667,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
       char msg[256];
       dSprintf(msg, sizeof(msg), "getWaypoint called with %d args, expected 2", n);
       logprintf(msg);
-      throw(string(msg)); 
+      throw(string(msg));
    }
 //alternatively: luaL_checktype(L,1,LUA_TNUMBER) , throws an error?
    if(!lua_isnumber(L, 1) || !lua_isnumber(L, 2))
@@ -677,7 +675,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
       char msg[256];
       dSprintf(msg, sizeof(msg), "getWaypoint called with non-numeric arg");
       logprintf(msg);
-      throw(string(msg)); 
+      throw(string(msg));
    }
 
    F32 x = luaL_checknumber(L, 1);
@@ -695,7 +693,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
       // In case our target has moved, replace final point of our flightplan with the current target location
       thisRobot->flightPlan[0] = target;
 
-      // First, let's scan through our pre-calculated waypoints and see if we can see any of them.  
+      // First, let's scan through our pre-calculated waypoints and see if we can see any of them.
       // If so, we'll just head there with no further rigamarole.  Remember that our flightplan is
       // arranged so the closest points are at the end of the list, and the target is at index 0.
       Point dest;
@@ -707,7 +705,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
          Point last = thisRobot->flightPlan.last();
 
          // We'll assume that if we could see the point on the previous turn, we can
-         // still see it, even though in some cases, the turning of the ship around a 
+         // still see it, even though in some cases, the turning of the ship around a
          // protruding corner may make it technically not visible.  This will prevent
          // rapidfire recalcuation of the path when it's not really necessary.
          if(first || thisRobot->canSeePoint(last))
@@ -755,7 +753,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 
       thisRobot->flightPlan.push_back(target);
       return returnPoint(L, p);
-   }   
+   }
 
    // If we're still here, then we need to find a new path.  Either our original path was invalid for some reason,
    // or the path we had no longer applied to our current location
@@ -776,7 +774,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 //
 //   S32 currentzone = thisRobot->getCurrentZone();
 //
-//   S32 nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];    
+//   S32 nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2];
 //
 //   // Note that getNeighborIndex could return -1.  It shouldn't, but it could.
 //   S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
@@ -805,10 +803,10 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 //      if(thisRobot->flightPlan.size() - 2 - i < 0)
 //         return nextwaypoint;
 //
-//      nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2 - i];  
+//      nextzone = thisRobot->flightPlan[thisRobot->flightPlan.size() - 2 - i];
 //      S32 neighborZoneIndex = gBotNavMeshZones[currentzone]->getNeighborIndex(nextzone);
 //      TNLAssert(neighborZoneIndex >= 0, "Invalid neighbor zone index!");
-//        
+//
 //      nextwaypoint = gBotNavMeshZones[currentzone]->mNeighbors[neighborZoneIndex].borderCenter;
 //   }
 //
@@ -817,9 +815,9 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 //
 //
 //
-//   //if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center)) 
+//   //if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center))
 //   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].center;
-//   //else if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter)) 
+//   //else if(thisRobot->canSeePoint( gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter))
 //   //   return gBotNavMeshZones[currentZone]->mNeighbors[neighborZoneIndex].borderCenter;
 //   //else
 //   //   return gBotNavMeshZones[currentZone]->getCenter();
@@ -843,7 +841,7 @@ S32 LuaRobot::findClosestZone(Point point)
          {
             closest = i;
             distsq = d;
-         }         
+         }
       }
    }
 
@@ -906,7 +904,7 @@ U32 Robot::mRobotCount = 0;
 // Constructor
 Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m)
 {
-   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;  
+   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;
 
    S32 junk = this->mCurrentZone;
    mNetFlags.set(Ghostable);
@@ -918,7 +916,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    flightPlanTo = -1;
 
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
-   respawnTimer.reset(100, RobotRespawnDelay);     
+   respawnTimer.reset(100, RobotRespawnDelay);
 
    hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
 
@@ -926,7 +924,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
 
    // try http://csl.sublevel3.org/lua/
 }
-  
+
 
 Robot::~Robot()
 {
@@ -993,16 +991,17 @@ bool Robot::initialize(Point p)
 
    if(L)
       lua_close(L);
-   
+
    L = lua_open();    // Create a new Lua interpreter
 
    // Register our connector types with Lua
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
+   Lunar<LuaWeaponInfo>::Register(L);
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
 
-     
+
    // Push a pointer to this Robot to the Lua stack
    lua_pushlightuserdata(L, (void *)this);
 
@@ -1012,7 +1011,7 @@ bool Robot::initialize(Point p)
 
    try
    {
-      // Load the script 
+      // Load the script
       S32 retCode = luaL_loadfile(L, mFilename.c_str());
 
       if(retCode)
@@ -1021,7 +1020,7 @@ bool Robot::initialize(Point p)
          return false;
       }
 
-      // Run main script body 
+      // Run main script body
       lua_pcall(L, 0, 0, 0);
    }
    catch(string e)
@@ -1029,12 +1028,12 @@ bool Robot::initialize(Point p)
       logError("Error initializing robot: " + e + ".  Shutting robot down.");
       return false;
    }
-  
+
    try
    {
       lua_getglobal(L, "getName");
       lua_call(L, 0, 1);                  // Passing 0 params, getting one back
-      mPlayerName = lua_tostring(L, -1);	
+      mPlayerName = lua_tostring(L, -1);
       lua_pop(L, 1);
    }
    catch (string e)
@@ -1070,7 +1069,7 @@ void Robot::kill()
    hasExploded = true;
    respawnTimer.reset();
    setMaskBits(ExplosionMask);
-   
+
    disableCollision();
 
    // Dump mounted items
@@ -1175,7 +1174,7 @@ bool Robot::findNearestShip(Point &loc)
 
    if(!foundObjects.size())
       return false;
-      
+
    F32 dist = F32_MAX;
    bool found = false;
 
@@ -1195,7 +1194,7 @@ bool Robot::findNearestShip(Point &loc)
 
 bool Robot::canSeePoint(Point point)
 {
-   // Need to check the two edge points perpendicular to the direction of looking to ensure we have an unobstructed 
+   // Need to check the two edge points perpendicular to the direction of looking to ensure we have an unobstructed
    // flight lane to point.  Radius of the robot is mRadius.  This keeps the ship from getting hung up on
    // obstacles that appear visible from the center of the ship, but are actually blocked.
 
@@ -1206,7 +1205,7 @@ bool Robot::canSeePoint(Point point)
    Point edgePoint1 = getActualPos() + Point(sinang, -cosang);
    Point edgePoint2 = getActualPos() + Point(-sinang, cosang);
 
-   return( 
+   return(
       gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint1, point) &&
       gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
 }
@@ -1226,10 +1225,10 @@ void Robot::idle(GameObject::IdleCallPath path)
       // Check to see if we need to respawn this robot
       if(hasExploded)
       {
-         if(respawnTimer.update(mCurrentMove.time)) 
+         if(respawnTimer.update(mCurrentMove.time))
             gServerGame->getGameType()->spawnRobot(this);
 
-         return;     
+         return;
       }
    }
 
@@ -1241,7 +1240,7 @@ void Robot::idle(GameObject::IdleCallPath path)
    {
       // Clear out current move.  It will get set just below with the lua call, but if that function
       // doesn't set the various move components, we want to make sure that they default to 0.
-      mCurrentMove.fire = false; 
+      mCurrentMove.fire = false;
       mCurrentMove.up = 0;
       mCurrentMove.down = 0;
       mCurrentMove.right = 0;
@@ -1264,9 +1263,9 @@ void Robot::idle(GameObject::IdleCallPath path)
          delete this;
          return;
       }
-      
 
-      // If we've changed the mCurrentMove, then we need to set 
+
+      // If we've changed the mCurrentMove, then we need to set
       // the MoveMask to ensure that it is sent to the clients
       setMaskBits(MoveMask);
 
@@ -1301,7 +1300,7 @@ void Robot::idle(GameObject::IdleCallPath path)
 
    //bool engineerWasActive = isModuleActive(ModuleEngineer);
 
-   if(path == GameObject::ServerIdleMainLoop)    // Was ClientIdleControlReplay  
+   if(path == GameObject::ServerIdleMainLoop)    // Was ClientIdleControlReplay
    {
       // Process weapons and energy on controlled object objects
       processWeaponFire();

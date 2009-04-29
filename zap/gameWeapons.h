@@ -28,8 +28,8 @@
 
 #include "../tnl/tnlPlatform.h"
 
-#include "point.h" 
-#include "gameObject.h"   
+#include "point.h"
+#include "gameObject.h"
 
 using namespace TNL;
 namespace Zap
@@ -81,6 +81,9 @@ struct ShipWeaponInfo
       canDamageTeammate = _canDamageTeammate;
       projectileType = _projectileType;
    }
+
+
+can we change projLiveTime to S32, and set life of mines and spybugs to -1?
 
    StringTableEntry name; // Display name of the weapon.
    U32 fireDelay;         // Delay between shots.

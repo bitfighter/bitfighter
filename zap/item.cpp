@@ -26,7 +26,7 @@
 #include "item.h"
 #include "ship.h"
 #include "goalZone.h"
-#include "gameType.h"     
+#include "gameType.h"
 #include "flagItem.h"
 #include "../glut/glutInclude.h"
 
@@ -129,7 +129,6 @@ Ship *Item::getMount()
 
 void Item::setZone(GoalZone *theZone)
 {
-   
    // If the item on which we're setting the zone is a flag (which, at this point, it always will be),
    // we want to make sure to update the zone itself.  This is mostly a convenience for robots searching
    // for objects that meet certain criteria, such as for zones that contain a flag.

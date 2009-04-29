@@ -1,3 +1,59 @@
+The Lua object structure follows that used by Bitfighter.  The GameItems group conisists of RepairItems, Asteroids, ResourceItems, and TestItems.  These all share similar properties, and have similar methods.  All of these implement the getLoc, getVel, and getRad methods for querying location, velocity, and radius respectively.  Some items have additional methods that apply only to them.  See below for details on these additional methods.
+
+
+== TestItems ==
+Category: GameItem<br>
+<br>
+<b>getLoc()</b> - Center of TestItem (returns point)<br>
+<b>getRad()</b> - Radius of TestItem (returns number)<br>
+<b>getVel()</b> - Speed of TestItem (returns point)<br>
+
+Example:
+<pre>ti = bot:findTestItem()	-- Function likely to change
+vel = ti:getVel()</pre>
+
+
+== ResourceItems ==
+Category: GameItem<br>
+<br>
+<b>getLoc()</b> - Center of ResourceItem (returns point)<br>
+<b>getRad()</b> - Radius of ResourceItem (returns number)<br>
+<b>getVel()</b> - Speed of ResourceItem (returns point)<br>
+
+Example:
+<pre>ri = bot:ResourceItem()	-- Function likely to change
+vel = ri:getVel()</pre>
+
+
+== RepairItems ==
+Category: GameItem<br>
+<br>
+<b>getLoc()</b> - Center of RepairItem (returns point)<br>
+<b>getRad()</b> - Radius of RepairItem (returns number)<br>
+<b>getVel()</b> - Speed of RepairItem (returns point, usually 0,0)<br>
+<b>isVisible()</b> - Is repair item currently visible? (returns boolean)<br>
+
+Example:
+<pre>ri = bot:findRepairItem()	-- Function likely to change
+vel = ri:getVel()</pre>
+
+
+
+== Weapon information ==
+
+<b>getName()</b> - Name of weapon ("Phaser", "Triple", etc.) (returns string)<br>
+<b>getFireDelay</b> - Delay between shots in ms (returns integer)<br>
+<b>getMinEnergy</b> - Minimum energy needed to use (returns integer)<br>
+<b>getEnergyDrain</b> - Amount of energy weapon consumes (returns integer)<br>
+<b>getProjVel(</b> - Speed of projectile (units/sec) (returns integer)<br>
+<b>getProjLife</b> - Time projectile will live (ms) (returns integer, -1 == live forever)<br>
+<b>getDamage(</b> - Damage projectile does (0-1, where 1 = total destruction) (returns float)<br>
+<b>getCanDamageSelf</b> - Will weapon damage self? (returns boolean)<br>
+<b>getCanDamageTeammate()</b> - Will weapon damage teammates? (returns boolean)<br>
+
+
+
+
 //-----------------------------------------------------------------------------------
 //
 // bitFighter - A multiplayer vector graphics space game
@@ -94,6 +150,35 @@ void RepairItem::renderItem(Point pos)
 }
 
 
+const char RepairItem::className[] = "RepairItem";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+RepairItem::RepairItem(lua_State *L)
+{
+   // Do nothing, for now...  should take params from stack and create RepairItem object
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<RepairItem>::RegType RepairItem::methods[] =
+{
+   // Standard gameItem methods
+   method(RepairItem, getClassID),
+   method(RepairItem, getLoc),
+   method(RepairItem, getRad),
+   method(RepairItem, getVel),
+
+   // Class specific methods
+   method(RepairItem, isVisible),
+   {0,0}    // End method list
+};
+
+S32 RepairItem::isVisible(lua_State *L) { return returnBool(L, isVisible); }      // Is RepairItem visible? (returns boolean)
+S32 RepairItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of RepairItem (returns point)
+S32 RepairItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of RepairItem (returns number)
+S32 RepairItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of RepairItem (returns point)
+
+
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 class LuaAsteroid;
@@ -180,14 +265,14 @@ void Asteroid::damageObject(DamageInfo *theInfo)
       newItem->mMoveState[i].angle = mMoveState[i].angle;
       newItem->mMoveState[i].vel.x = mMoveState[i].vel.len() * cos(ang);
       newItem->mMoveState[i].vel.y = mMoveState[i].vel.len() * sin(ang);
-      newItem->mMoveState[i].vel.normalize(mMoveState[i].vel.len());     
+      newItem->mMoveState[i].vel.normalize(mMoveState[i].vel.len());
    }
 
    newItem->mSizeIndex = mSizeIndex;
    newItem->addToGame(gServerGame);                    // And add it to the list of game objects
 }
 
-   
+
 U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
@@ -196,7 +281,7 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
       stream->writeEnum(mSizeIndex, mSizeIndexLength);
 
    stream->writeFlag(hasExploded);
-   
+
    return retMask;
 }
 
@@ -216,7 +301,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
-   
+
    if(explode && !hasExploded)
    {
       hasExploded = true;
@@ -251,14 +336,17 @@ Asteroid::Asteroid(lua_State *L)
 
 
 // Define the methods we will expose to Lua
-Lunar<Asteroid>::RegType Asteroid::methods[] = 
+Lunar<Asteroid>::RegType Asteroid::methods[] =
 {
+   // Standard gameItem methods
    method(Asteroid, getClassID),
+   method(Asteroid, getLoc),
+   method(Asteroid, getRad),
+   method(Asteroid, getVel),
+
+   // Class specific methods
    method(Asteroid, getSize),
    method(Asteroid, getSizeCount),
-   method(Asteroid, getLoc),
-   method(Asteroid, getRad),     
-   method(Asteroid, getVel),  
 
    {0,0}    // End method list
 };
@@ -313,22 +401,21 @@ bool TestItem::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
 
 const char TestItem::className[] = "TestItem";      // Class name as it appears to Lua scripts
 
-
 // Lua constructor
-TestItem::TestItem(lua_State *L) 
+TestItem::TestItem(lua_State *L)
 {
    // Do nothing, for now...  should take params from stack and create testItem object
 }
 
 
-
 // Define the methods we will expose to Lua
-Lunar<TestItem>::RegType TestItem::methods[] = 
+Lunar<TestItem>::RegType TestItem::methods[] =
 {
+   // Standard gameItem methods
    method(TestItem, getClassID),
    method(TestItem, getLoc),
-   method(TestItem, getRad),     
-   method(TestItem, getVel),  
+   method(TestItem, getRad),
+   method(TestItem, getVel),
 
    {0,0}    // End method list
 };
@@ -342,7 +429,7 @@ S32 TestItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   
 TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 
 // Constructor
-ResourceItem::ResourceItem() : Item(Point(0,0), true, 20, 1)     
+ResourceItem::ResourceItem() : Item(Point(0,0), true, 20, 1)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= ResourceItemType | TurretTargetType;
@@ -386,6 +473,31 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
 }
 
+
+const char ResourceItem::className[] = "ResourceItem";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+ResourceItem::ResourceItem(lua_State *L)
+{
+   // Do nothing, for now...  should take params from stack and create testItem object
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<ResourceItem>::RegType ResourceItem::methods[] =
+{
+   // Standard gameItem methods
+   method(ResourceItem, getClassID),
+   method(ResourceItem, getLoc),
+   method(ResourceItem, getRad),
+   method(ResourceItem, getVel),
+
+   {0,0}    // End method list
+};
+
+S32 ResourceItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of testItem (returns point)
+S32 ResourceItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of testItem (returns number)
+S32 ResourceItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of testItem (returns point)
 
 };
 

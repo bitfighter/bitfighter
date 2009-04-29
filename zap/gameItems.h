@@ -29,9 +29,9 @@
 
 #include "item.h"
 #include "ship.h"
+#include "luaObject.h"			// For Lua interfaces
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
-#include "luaObject.h"
 
 
 
@@ -53,6 +53,23 @@ public:
    void renderItem(Point pos);
 
    TNL_DECLARE_CLASS(RepairItem);
+
+   ///// Lua Interface
+
+   RepairItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<RepairItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, RepairItemType); }
+
+   S32 getLoc(lua_State *L);    // Center of RepairItem (returns point)
+   S32 getRad(lua_State *L);    // Radius of RepairItem (returns number)
+   S32 getVel(lua_State *L);    // Speed of RepairItem (returns point, always (0,0) since this item doesn't move!)
+
+   S32 isVisible(lua_State *L); // Is RepairItem visible? (returns boolean)
+
 };
 
 
@@ -70,8 +87,8 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 {
   { { 80, -43}, { 47, -84 }, { 5, -58 }, { -41, -81 }, { -79, -21 }, { -79, -0 }, { -79, 10 }, { -79, 47 }, { -49, 78 }, { 43, 78 }, { 80, 40 }, { 46, -0 } },
   { { -41, -83 }, { 18, -83 }, { 81, -42 }, { 83, -42 }, { 7, -2 }, { 81, 38 }, { 41, 79 }, { 10, 56 }, { -48, 79 }, { -80, 15 }, { -80, -43 }, { -17, -43 } },
-  { { -2, -56 }, { 40, -79 }, { 81, -39 }, { 34, -19 }, { 82, 22 }, { 32, 83 }, { -21, 59 }, { -40, 82 }, { -80, 42 }, { -57, 2 }, { -79, -38 }, { -31, -79 } }, 
-  { { 42, -82 }, { 82, -25 }, { 82, 5 }, { 21, 80 }, { -19, 80 }, { -8, 5 }, { -48, 79 }, { -79, 16 }, { -39, -4 }, { -79, -21 }, { -19, -82 }, { -4, -82 } }, 
+  { { -2, -56 }, { 40, -79 }, { 81, -39 }, { 34, -19 }, { 82, 22 }, { 32, 83 }, { -21, 59 }, { -40, 82 }, { -80, 42 }, { -57, 2 }, { -79, -38 }, { -31, -79 } },
+  { { 42, -82 }, { 82, -25 }, { 82, 5 }, { 21, 80 }, { -19, 80 }, { -8, 5 }, { -48, 79 }, { -79, 16 }, { -39, -4 }, { -79, -21 }, { -19, -82 }, { -4, -82 } },
 };
 
 
@@ -83,7 +100,7 @@ class Asteroid : public Item, public LuaObject
 typedef Item Parent;
 
 private:
-   S32 mSizeIndex;    
+   S32 mSizeIndex;
    bool hasExploded;
    S32 mDesign;
 
@@ -148,13 +165,13 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
 
-   S32 getLoc(lua_State *L);    // Center of testItem (returns point)
-   S32 getRad(lua_State *L);     // Radius of testItem (returns number)
-   S32 getVel(lua_State *L);    // Speed of testItem (returns point)
+   S32 getLoc(lua_State *L);    // Center of TestItem (returns point)
+   S32 getRad(lua_State *L);    // Radius of TestItem (returns number)
+   S32 getVel(lua_State *L);    // Speed of TestItem (returns point)
 };
 
 
-class ResourceItem : public Item
+class ResourceItem : public Item, public LuaObject
 {
 public:
    ResourceItem();      // Constructor
@@ -162,8 +179,23 @@ public:
    void renderItem(Point pos);
    bool collide(GameObject *hitObject);
    void damageObject(DamageInfo *theInfo);
-   
+
    TNL_DECLARE_CLASS(ResourceItem);
+
+   ///// Lua Interface
+
+   TestItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<ResourceItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemType); }
+
+   S32 getLoc(lua_State *L);    // Center of ResourceItem (returns point)
+   S32 getRad(lua_State *L);    // Radius of ResourceItem (returns number)
+   S32 getVel(lua_State *L);    // Speed of ResourceItem (returns point)
+
 };
 
 };
