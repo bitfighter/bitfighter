@@ -38,7 +38,7 @@
 namespace Zap
 {
 
-class RepairItem : public PickupItem
+class RepairItem : public PickupItem, public LuaObject
 {
 private:
    typedef PickupItem Parent;
@@ -68,7 +68,7 @@ public:
    S32 getRad(lua_State *L);    // Radius of RepairItem (returns number)
    S32 getVel(lua_State *L);    // Speed of RepairItem (returns point, always (0,0) since this item doesn't move!)
 
-   S32 isVisible(lua_State *L); // Is RepairItem visible? (returns boolean)
+   S32 isVis(lua_State *L); // Is RepairItem visible? (returns boolean)
 
 };
 
@@ -184,7 +184,7 @@ public:
 
    ///// Lua Interface
 
-   TestItem(lua_State *L);             //  Lua constructor
+   ResourceItem(lua_State *L);             //  Lua constructor
 
    static const char className[];
 

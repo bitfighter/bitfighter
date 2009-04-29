@@ -43,7 +43,7 @@ LuaGameInfo::LuaGameInfo(lua_State *L)
 // Destructor
 LuaGameInfo::~LuaGameInfo()
 {
-  logprintf("deleted Lua Game Object (%p)\n", this);     // Never gets run...
+   logprintf("deleted Lua Game Object (%p)\n", this);     // Never gets run...
 }
 
 
@@ -127,19 +127,21 @@ const char LuaWeaponInfo::className[] = "WeaponInfo";      // Class name as it a
 // Constructor
 LuaWeaponInfo::LuaWeaponInfo(lua_State *L)
 {
-   instnatiate mWeaponInfo from info on the stack
+   //instnatiate mWeaponInfo from info on the stack
+   //mWeaponInfo = *gWeapons[1];
 }
 
 
 // Destructor
 LuaWeaponInfo::~LuaWeaponInfo()
 {
-  logprintf("deleted LuaWeaponInfo object (%p)\n", this);     // Never gets run...
+   logprintf("deleted LuaWeaponInfo object (%p)\n", this);     // Never gets run...
 }
 
 
 // Define the methods we will expose to Lua
-Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] = {
+Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] = 
+{
    method(LuaWeaponInfo, getName),
    method(LuaWeaponInfo, getFireDelay),
    method(LuaWeaponInfo, getMinEnergy),
@@ -154,17 +156,15 @@ Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] = {
 };
 
 
-static Lunar<LuaWeaponInfo>::RegType methods[];
-
-S32 LuaWeaponInfo::getName(lua_State *L) { } { return ReturnString(L, mWeaponInfo.name) };						// Name of weapon ("Phaser", "Triple", etc.) (string)
-S32 LuaWeaponInfo::getFireDelay(lua_State *L) { return ReturnInt(L, mWeaponInfo.fireDelay) };					// Delay between shots in ms (integer)
-S32 LuaWeaponInfo::getMinEnergy(lua_State *L) { return ReturnInt(L, mWeaponInfo.minEnergy) };					// Minimum energy needed to use (integer)
-S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return ReturnInt(L, mWeaponInfo.drainEnergy) };				// Amount of energy weapon consumes (integer)
-S32 LuaWeaponInfo::getProjVel(lua_State *L) { return ReturnInt(L, mWeaponInfo.projVelocity) };					// Speed of projectile (units/sec) (integer)
-S32 LuaWeaponInfo::getProjLife(lua_State *L) { return ReturnInt(L, mWeaponInfo.projLiveTime) };					// Time projectile will live (ms) (integer, -1 == live forever)
-S32 LuaWeaponInfo::getDamage(lua_State *L) { return ReturnFloat(L, mWeaponInfo.damageAmount) };					// Damage projectile does (0-1, where 1 = total destruction) (float)
-S32 LuaWeaponInfo::getCanDamageSelf(lua_State *L) { return ReturnBool(L, mWeaponInfo.canDamageSelf) };			// Will weapon damage self? (boolean)
-S32 LuaWeaponInfo::getCanDamageTeammate(lua_State *L) { return ReturnBool(L, mWeaponInfo.canDamageTeammate) };	// Will weapon damage teammates? (boolean)
+S32 LuaWeaponInfo::getName(lua_State *L) { return returnString(L, mWeaponInfo->name.getString()); }					// Name of weapon ("Phaser", "Triple", etc.) (string)
+S32 LuaWeaponInfo::getFireDelay(lua_State *L) { return returnInt(L, mWeaponInfo->fireDelay); }					      // Delay between shots in ms (integer)
+S32 LuaWeaponInfo::getMinEnergy(lua_State *L) { return returnInt(L, mWeaponInfo->minEnergy); }				         // Minimum energy needed to use (integer)
+S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return returnInt(L, mWeaponInfo->drainEnergy); }				      // Amount of energy weapon consumes (integer)
+S32 LuaWeaponInfo::getProjVel(lua_State *L) { return returnInt(L, mWeaponInfo->projVelocity); }					      // Speed of projectile (units/sec) (integer)
+S32 LuaWeaponInfo::getProjLife(lua_State *L) { return returnInt(L, mWeaponInfo->projLiveTime); }					   // Time projectile will live (ms) (integer, -1 == live forever)
+S32 LuaWeaponInfo::getDamage(lua_State *L) { return returnFloat(L, mWeaponInfo->damageAmount); }				   	// Damage projectile does (0-1, where 1 = total destruction) (float)
+S32 LuaWeaponInfo::getCanDamageSelf(lua_State *L) { return returnBool(L, mWeaponInfo->canDamageSelf); }			   // Will weapon damage self? (boolean)
+S32 LuaWeaponInfo::getCanDamageTeammate(lua_State *L) { return returnBool(L, mWeaponInfo->canDamageTeammate); }	// Will weapon damage teammates? (boolean)
 
 
 };

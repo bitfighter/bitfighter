@@ -59,6 +59,8 @@ LuaRobot::LuaRobot(lua_State *L)
    lua_atpanic(L, luaPanicked);                 // Register our panic function
    thisRobot = (Robot*)lua_touserdata(L, 1);    // Register our robot
 
+   // The following sets scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
+
    // Game Objects
    setEnum(ShipType);
    setEnum(BarrierType);
@@ -82,8 +84,7 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(TeleportType);
    setEnum(GoalZoneType);
    setEnum(AsteroidType);
-   // This one isn't an enum in the Bitfighter code, but we need it for the robot code
-   lua_pushinteger(L, BIT(30)); lua_setglobal(L, "GameType");  // Reuse BIT(30), which is currently used for deleted items
+   setEnum(RepairItemType);
 
    // Modules
    setEnum(ModuleShield);
@@ -174,10 +175,8 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    method(LuaRobot, findObjects),
 
-method(LuaRobot, findTestItem),
-method(LuaRobot, findAsteroid),
-
-
+   method(LuaRobot, findTestItem),
+   method(LuaRobot, findAsteroid),
 
    {0,0}    // End method list
 };
@@ -527,7 +526,6 @@ S32 LuaRobot::findTestItem(lua_State *L)
    }
 }
 
-y
 
 S32 LuaRobot::findObjects(lua_State *L)
 {
@@ -860,37 +858,6 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, Point point)
 }
 
 
-/* Control:
-// setLoadout(m1, m2, w1, w2, w3)
-// useModule(S32) // 1 && 2 && 4 of modules
-
-// About us
-author()
-description()
-weaponOK()  -> weapon ready to fire?
-
-
-
-Info:
-getWeapRange() -> curr weapon range
-getWeapName() -> curr weapon name
-getHealth()
-getEnergy()
-getWeapon() -> returns id of weapon
-
-
-findAll()
-
-ship.speed
-ship.health
-ship.name
-
-getPlayerName(ship)
-getHealth(ship)
-
-*/
-
-
 const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
 
 
@@ -1110,6 +1077,7 @@ S32 Robot::getCurrentZone()
    return mCurrentZone;
 }
 
+
 // Setter method, not a robot function!
 void Robot::setCurrentZone(S32 zone)
 {
@@ -1121,6 +1089,7 @@ F32 Robot::getAngleXY(F32 x, F32 y)
 {
    return atan2(y - getActualPos().y, x - getActualPos().x);
 }
+
 
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Robot::processMove(U32 stateIndex)

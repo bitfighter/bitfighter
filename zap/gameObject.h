@@ -64,6 +64,7 @@ enum GameObjectType
    TeleportType       = BIT(20),    
    GoalZoneType       = BIT(21),
    AsteroidType       = BIT(22),
+   RepairItemType     = BIT(23),
 
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map

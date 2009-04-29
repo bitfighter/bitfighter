@@ -114,11 +114,11 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
    method(RepairItem, getVel),
 
    // Class specific methods
-   method(RepairItem, isVisible),
+   method(RepairItem, isVis),
    {0,0}    // End method list
 };
 
-S32 RepairItem::isVisible(lua_State *L) { return returnBool(L, isVisible); }      // Is RepairItem visible? (returns boolean)
+S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
 S32 RepairItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of RepairItem (returns point)
 S32 RepairItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of RepairItem (returns number)
 S32 RepairItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of RepairItem (returns point)
