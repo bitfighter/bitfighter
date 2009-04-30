@@ -46,6 +46,7 @@ public:
    static Lunar<LuaGameInfo>::RegType methods[];
 
    S32 getGameType(lua_State *L);
+   S32 getGameTypeName(lua_State *L);
    S32 getFlagCount(lua_State *L);
    S32 getWinningScore(lua_State *L);
    S32 getGameTimeTotal(lua_State *L);

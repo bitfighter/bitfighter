@@ -507,14 +507,10 @@ S32 LuaRobot::getReqLoadout(lua_State *L)
 }
 
 
-// Get WeaponInfo for current weapon
+// Get WeaponIndex for current weapon
 S32 LuaRobot::getWeapon(lua_State *L)
 {
-   WeaponType weapon = thisRobot->getSelectedWeapon();
-   LuaWeaponInfo *weaponInfo = new LuaWeaponInfo(weapon);
-   Lunar<LuaWeaponInfo>::push(L, weaponInfo, true);     // true will allow Lua to delete this object when it goes out of scope
-
-   return 1;
+   return returnInt(L, thisRobot->getSelectedWeapon());
 }
 
 
