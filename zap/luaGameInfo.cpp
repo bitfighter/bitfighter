@@ -104,19 +104,17 @@ const char LuaWeaponInfo::className[] = "WeaponInfo";      // Class name as it a
 // C++ constructor
 LuaWeaponInfo::LuaWeaponInfo(WeaponType weapon)
 {
-   mWeaponIndex = (S32) weapon;
+   mWeaponIndex = (U32) weapon;
 }
 
 
 // Lua constructor
 LuaWeaponInfo::LuaWeaponInfo(lua_State *L)
 {
-   mWeaponIndex = 0;
-
    static const char *methodName = "WeaponInfo constructor";
 
    checkArgCount(L, 1, methodName);
-   mWeaponIndex = getInt(L, 1, methodName, 0, WeaponCount - 1);
+   mWeaponIndex = (U32) getInt(L, 1, methodName, 0, WeaponCount - 1);
 }
 
 
@@ -169,11 +167,8 @@ const char LuaModuleInfo::className[] = "ModuleInfo";      // Class name as it a
 // Constructor
 LuaModuleInfo::LuaModuleInfo(lua_State *L)
 {
-   mModuleIndex = 0;
-
    checkArgCount(L, 1, "ModuleInfo constructor");
-
-   mModuleIndex = getInt(L, 1, "ModuleInfo constructor", 0, ModuleCount - 1);
+   mModuleIndex = (U32) getInt(L, 1, "ModuleInfo constructor", 0, ModuleCount - 1);
 }
 
 
@@ -269,7 +264,7 @@ S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config v
    {
       for(S32 j = 0; j < i; j++)
          if(mod[j] == mLoadout[i])     // Duplicate entry!
-            return ReturnBool(L, false);
+            return returnBool(L, false);
       mod[i] = mLoadout[i];
       if(mLoadout[i] == ModuleSensor)
          hasSensor = true;
@@ -282,7 +277,7 @@ S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config v
    {
       for(S32 j = 0; j < i; j++)
          if(weap[j] == mLoadout[i + ShipModuleCount])     // Duplicate entry!
-            return ReturnBool(L, false);
+            return returnBool(L, false);
       weap[i] = mLoadout[i + ShipModuleCount];
       if(mLoadout[i] == WeaponSpyBug)
          hasSpyBug = true;
@@ -290,15 +285,15 @@ S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config v
 
    // Make sure we don't have any invalid combos here!
    if(hasSpyBug && !hasSensor)
-      return ReturnBool(L, false);
+      return returnBool(L, false);
 
-   return ReturnBool(L, true);
+   return returnBool(L, true);
 }
 
 
 S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout the same as Loadout?
 {
-
+   return returnBool(L, true);
 }
 
 
@@ -306,14 +301,14 @@ S32 LuaLoadout::getWeapon(lua_State *L)     // getWeapon(i) ==> return weapon at
 {
    checkArgCount(L, 1, "Loadout:getWeapon()");
    U32 weap = (U32) getInt(L, 1, "Loadout:getWeapon()", 1, ShipWeaponCount);
-   return ReturnInt(mLoadout[i + ShipModuleCount - 1]);
+   return returnInt(L, mLoadout[weap + ShipModuleCount - 1]);
 }
 
 S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at index i (1, 2)
 {
    checkArgCount(L, 1, "Loadout:getModule()");
    U32 mod = (U32) getInt(L, 1, "Loadout:getModule()", 1, ShipModuleCount);
-   return ReturnInt(mLoadout[mod - 1]);
+   return returnInt(L, mLoadout[mod - 1]);
 }
 
 

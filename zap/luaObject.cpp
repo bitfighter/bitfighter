@@ -24,10 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "luaObject.h"
+#include "tnlLog.h"         // For logprintf
 #include <string>
 
 using namespace std;
-
 
 namespace Zap
 {
@@ -117,7 +117,7 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *function
    if(args != argsWanted)     // Problem!
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", functionName, n, argsWanted);
+      dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", functionName, args, argsWanted);
       logprintf(msg);
       throw(string(msg));
    }
@@ -128,6 +128,7 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *function
 lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal)
 {
    lua_Integer val = getInt(L, index, functionName);
+
    if(val < minVal || val > maxVal)
    {
       char msg[256];
@@ -135,6 +136,8 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName,
       logprintf(msg);
       throw(string(msg));
    }
+
+   return val;
 }
 
 
@@ -149,7 +152,7 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
       throw(string(msg));
    }
 
-   return lua_tointeger (lua_State *L, index);
+   return lua_tointeger(L, index);
 }
 
 };

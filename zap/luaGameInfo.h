@@ -66,7 +66,7 @@ class LuaWeaponInfo : public LuaObject
 {
 
 private:
-   S32 mWeaponIndex;
+   U32 mWeaponIndex;
 
 public:
    // Initialize the pointer
@@ -99,7 +99,7 @@ class LuaModuleInfo : public LuaObject
 {
 
 private:
-   S32 mModuleIndex;
+   U32 mModuleIndex;
 
 public:
    LuaModuleInfo(lua_State *L);      // Constructor
@@ -135,6 +135,8 @@ class LuaLoadout : public LuaObject
       S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
       S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
       S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
+};
+
 };
 
 #endif

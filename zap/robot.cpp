@@ -430,22 +430,21 @@ S32 LuaRobot::activateModuleIndex(lua_State *L)
       throw(string(msg));
    }
 
-xxx
-
+   return 0;
 }
 
 
 // Activate module this cycle --> takes module enum
 S32 LuaRobot::activateModule(lua_State *L)
 {
-
+   return 0;
 }
 
 
 // Sets loadout to specified --> takes 2 modules, 3 weapons
 S32 LuaRobot::setLoadout(lua_State *L)
 {
-
+   return 0;
 }
 
 
@@ -983,10 +982,10 @@ bool Robot::initialize(Point p)
 
    // Set initial module and weapon selections
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = DefaultLoadout[i];
+      mModule[i] = (ShipModule) DefaultLoadout[i];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mWeapon[i] = DefaultLoadout[i + ShipModuleCount];
+      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 
    hasExploded = false;
    enableCollision();

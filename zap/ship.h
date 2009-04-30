@@ -109,7 +109,7 @@ public:
 
    StringTableEntry getName() { return mPlayerName; }
 
-   U32 mModule[ShipModuleCount];          // Modules ship is carrying
+   ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    bool mModuleActive[ModuleCount];       // Is that module active at this moment?
    SFXHandle mModuleSound[ModuleCount];
 

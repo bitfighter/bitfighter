@@ -85,10 +85,10 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
    // Set initial module and weapon selections
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = DefaultLoadout[i];
+      mModule[i] = (ShipModule) DefaultLoadout[i];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mWeapon[i] = DefaultLoadout[i + ShipModuleCount];
+      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 
    mActiveWeaponIndx = 0;
 
@@ -1009,7 +1009,7 @@ void Ship::setLoadout(const Vector<U32> &loadout)
    WeaponType currentWeapon = mWeapon[mActiveWeaponIndx];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = loadout[i];
+      mModule[i] = (ShipModule) loadout[i];
 
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
       mWeapon[i - ShipModuleCount] = (WeaponType) loadout[i];
