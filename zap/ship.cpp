@@ -83,12 +83,12 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
       mModuleActive[i] = false;
 
    // Set initial module and weapon selections
-   mModule[0] = ModuleBoost;
-   mModule[1] = ModuleShield;
 
-   mWeapon[0] = WeaponPhaser;
-   mWeapon[1] = WeaponMine;
-   mWeapon[2] = WeaponBurst;
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mModule[i] = DefaultLoadout[i];
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mWeapon[i] = DefaultLoadout[i + ShipModuleCount];
 
    mActiveWeaponIndx = 0;
 
@@ -123,7 +123,7 @@ bool Ship::processArguments(S32 argc, const char **argv)
    updateExtent();
 
    return true;
-} 
+}
 
 
 void Ship::setActualPos(Point p)
@@ -222,10 +222,10 @@ bool Ship::isOnObject(GameObject *object)
    //if(getCollisionPoly(polyPoints))
    //   return object->collisionPolyPointIntersect(polyPoints);
    //
-   //else 
+   //else
           if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return object->collisionPolyPointIntersect(center, radius);
-   
+
    else
       return false;
 }
@@ -697,7 +697,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
       stream->writeStringTableEntry(mPlayerName);
       stream->write(mass);
       stream->write(mTeam);
-    
+
       // now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
       {
@@ -717,7 +717,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 
 
 //if(isRobot())
-//{   
+//{
 //Robot *robot = dynamic_cast<Robot *>(this);
 //stream->write((S32)robot->mTarget.x);
 //stream->write((S32)robot->mTarget.y);
@@ -746,7 +746,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    }
 
    stream->writeFlag(hasExploded);
-   stream->writeFlag(getControllingClient()->isBusy()); 
+   stream->writeFlag(getControllingClient()->isBusy());
 
    stream->writeFlag(updateMask & WarpPositionMask);
 
@@ -806,7 +806,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 //if(isRobot())
-//{   
+//{
 //Robot *robot = dynamic_cast<Robot *>(this);
 //S32 x;
 //S32 y;
@@ -919,7 +919,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    else
       mInterpolating = true;
-    
+
 
    if(explode && !hasExploded)
    {
@@ -1288,14 +1288,14 @@ void Ship::render(S32 layerIndex)
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
-      string str = mPlayerName.getString(); 
+      string str = mPlayerName.getString();
 
 char x[100];
 char y[100];
 itoa((S32) getActualPos().x, x,10);
 itoa((S32) getActualPos().y, y,10);
 str = str + " {" + x + "," + y + "}";
-                                                                             
+
       // Modify name if owner is "busy"
       if(isBusy)
          str = "<<" + str + ">>";

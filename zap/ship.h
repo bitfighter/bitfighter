@@ -26,7 +26,7 @@
 #ifndef _SHIP_H_
 #define _SHIP_H_
 
-#include "gameObject.h"     
+#include "gameObject.h"
 #include "moveObject.h"
 #include "sparkManager.h"
 #include "sfx.h"
@@ -41,7 +41,7 @@ class Item;
 
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
-
+static const U32 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -134,7 +134,7 @@ public:
    Vector<SafePtr<GameObject>> mRepairTargets;
 
    virtual void render(S32 layerIndex);
-   
+
    Ship(StringTableEntry playerName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
 
    F32 getHealth() { return mHealth; }

@@ -51,15 +51,19 @@ class LuaObject
 protected:
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
+   static void checkArgCount(lua_State *L, S32 argsWanted, const char *functionName);
+   static lua_Integer getInt(lua_State *L, S32 index, const char *functionName);
+   static lua_Integer getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal);
+
 
    // All of these return<T> functions work in the same way.  Include at the and of a child class method.
    // Usage: return returnInt(L, int);
-   static S32 returnPoint(lua_State *L, Point point);        
-   static S32 returnInt(lua_State *L, S32 num);                 
-   static S32 returnFloat(lua_State *L, F32 num);                 
-   static S32 returnString(lua_State *L, const char *str);                
-   static S32 returnBool(lua_State *L, bool boolean); 
-   static S32 returnNil(lua_State *L);                
+   static S32 returnPoint(lua_State *L, Point point);
+   static S32 returnInt(lua_State *L, S32 num);
+   static S32 returnFloat(lua_State *L, F32 num);
+   static S32 returnString(lua_State *L, const char *str);
+   static S32 returnBool(lua_State *L, bool boolean);
+   static S32 returnNil(lua_State *L);
 
    static void setfield (lua_State *L, const char *key, F32 value);
 };

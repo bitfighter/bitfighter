@@ -76,8 +76,8 @@ private:
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
-   ~Robot();          // Destructor 
-   
+   ~Robot();          // Destructor
+
    bool initialize(Point p);
    void kill(DamageInfo *theInfo);
    void kill();
@@ -142,7 +142,7 @@ public:
 
    S32 getClassID(lua_State *L);
 
-   
+
    S32 getZoneCenterXY(lua_State *L);
    S32 getGatewayFromZoneToZone(lua_State *L);
    S32 getZoneCount(lua_State *L);
@@ -176,6 +176,12 @@ public:
    S32 setWeapon(lua_State *L);
    S32 globalMsg(lua_State *L);
    S32 teamMsg(lua_State *L);
+
+   S32 activateModule(lua_State *L);       // Activate module this cycle --> takes module index
+   S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
+
+   S32 setLoadout(lua_State *L);          // Sets loadout to specified --> takes 2 modules, 3 weapons
+
 
    // Ship info
    S32 getWeapon(lua_State *L);

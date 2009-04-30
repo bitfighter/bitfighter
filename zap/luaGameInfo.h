@@ -80,7 +80,7 @@ public:
    static Lunar<LuaWeaponInfo>::RegType methods[];
 
    S32 getName(lua_State *L);
-   S32 getID(lua_State *L);	
+   S32 getID(lua_State *L);
 
    S32 getRange(lua_State *L);
    S32 getFireDelay(lua_State *L);
@@ -102,7 +102,6 @@ private:
    S32 mModuleIndex;
 
 public:
-   // Initialize the pointer
    LuaModuleInfo(lua_State *L);      // Constructor
    ~LuaModuleInfo();                 // Destructor
 
@@ -111,10 +110,31 @@ public:
    static Lunar<LuaModuleInfo>::RegType methods[];
 
    S32 getName(lua_State *L);
-   S32 getID(lua_State *L);	
+   S32 getID(lua_State *L);
 
 };
 
+///////////////////////////////
+
+class LuaLoadout : public LuaObject
+{
+   private:
+      U32 mLoadout[ShipModuleCount + ShipWeaponCount];
+
+   public:
+      LuaLoadout(lua_State *L);      // Constructor
+      ~LuaLoadout();                 // Destructor
+
+      static const char className[];
+
+      static Lunar<LuaLoadout>::RegType methods[];
+
+      S32 setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
+      S32 setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
+      S32 isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
+      S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
+      S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
+      S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
 };
 
 #endif

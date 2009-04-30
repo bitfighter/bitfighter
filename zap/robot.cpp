@@ -169,6 +169,11 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, setThrustXY),
    method(LuaRobot, fire),
    method(LuaRobot, setWeapon),
+
+   method(LuaRobot, activateModule),
+   method(LuaRobot, activateModuleIndex),
+   method(LuaRobot, setLoadout),
+
    method(LuaRobot, globalMsg),
    method(LuaRobot, teamMsg),
 
@@ -408,6 +413,42 @@ S32 LuaRobot::setWeapon(lua_State *L)
 }
 
 
+/////////////////////////////
+
+// Activate module this cycle --> takes module index
+S32 LuaRobot::activateModuleIndex(lua_State *L)
+{
+   checkArgCount(L, 1, "activateModuleIndex");
+
+
+
+   if(!lua_isnumber(L, 1))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "findObjects called with non-numeric arg");
+      logprintf(msg);
+      throw(string(msg));
+   }
+
+xxx
+
+}
+
+
+// Activate module this cycle --> takes module enum
+S32 LuaRobot::activateModule(lua_State *L)
+{
+
+}
+
+
+// Sets loadout to specified --> takes 2 modules, 3 weapons
+S32 LuaRobot::setLoadout(lua_State *L)
+{
+
+}
+
+
 // Get WeaponInfo for current weapon
 S32 LuaRobot::getWeapon(lua_State *L)
 {
@@ -545,14 +586,7 @@ S32 LuaRobot::findObjects(lua_State *L)
 {
    //LuaProtectStack x(this); <== good idea, not working right...  ;-(
 
-   S32 n = lua_gettop(L);  // Number of arguments
-   if (n != 1)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "findObjects called with %d args, expected 1", n);
-      logprintf(msg);
-      throw(string(msg));
-   }
+   checkArgCount(L, 1, "findObjects");
 
    if(!lua_isnumber(L, 1))
    {
@@ -673,14 +707,8 @@ extern S32 findZoneContaining(Point p);
 // optimizations will be helpful.
 S32 LuaRobot::getWaypoint(lua_State *L)
 {
-   S32 n = lua_gettop(L);  // Number of arguments
-   if (n != 2)
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getWaypoint called with %d args, expected 2", n);
-      logprintf(msg);
-      throw(string(msg));
-   }
+   checkArgCount(L, 2, "getWaypoint");
+
 //alternatively: luaL_checktype(L,1,LUA_TNUMBER) , throws an error?
    if(!lua_isnumber(L, 1) || !lua_isnumber(L, 2))
    {
@@ -954,12 +982,11 @@ bool Robot::initialize(Point p)
       mModuleActive[i] = false;
 
    // Set initial module and weapon selections
-   mModule[0] = ModuleBoost;
-   mModule[1] = ModuleShield;
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mModule[i] = DefaultLoadout[i];
 
-   mWeapon[0] = WeaponPhaser;
-   mWeapon[1] = WeaponMine;
-   mWeapon[2] = WeaponBurst;
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mWeapon[i] = DefaultLoadout[i + ShipModuleCount];
 
    hasExploded = false;
    enableCollision();
@@ -1232,8 +1259,8 @@ void Robot::idle(GameObject::IdleCallPath path)
 
       try
       {
-	      lua_getglobal(L, "getMove");
-	      lua_call(L, 0, 0);
+         lua_getglobal(L, "getMove");
+         lua_call(L, 0, 0);
       }
       catch (string e)
       {

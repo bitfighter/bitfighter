@@ -36,8 +36,8 @@ namespace Zap
 S32 LuaObject::returnPoint(lua_State *L, Point point)
 {
    lua_createtable(L, 0, 2);         // creates a table with 2 fields
-   setfield(L, "x", point.x);        // table.x = x 
-   setfield(L, "y", point.y);        // table.y = y 
+   setfield(L, "x", point.x);        // table.x = x
+   setfield(L, "y", point.y);        // table.y = y
 
    return 1;
 }
@@ -77,13 +77,13 @@ S32 LuaObject::returnString(lua_State *L, const char *str)
 // Returns nil to calling Lua function
 S32 LuaObject::returnNil(lua_State *L)
 {
-   lua_pushnil(L); 
+   lua_pushnil(L);
    return 1;
 }
 
 
 // Overwrite Lua's panicky panic function with something that doesn't kill the whole game
-// if something goes wrong!  
+// if something goes wrong!
 int LuaObject::luaPanicked(lua_State *L)
 {
    string msg = lua_tostring(L, 1);
@@ -102,10 +102,54 @@ void LuaObject::clearStack(lua_State *L)
 
 
 // Assume that table is at the top of the stack
-void LuaObject::setfield (lua_State *L, const char *key, F32 value) 
+void LuaObject::setfield (lua_State *L, const char *key, F32 value)
 {
    lua_pushnumber(L, value);
    lua_setfield(L, -2, key);
+}
+
+
+// Make sure we got the number of args we wanted
+void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *functionName)
+{
+   S32 args = lua_gettop(L);
+
+   if(args != argsWanted)     // Problem!
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", functionName, n, argsWanted);
+      logprintf(msg);
+      throw(string(msg));
+   }
+}
+
+
+// Pop integer off stack, check its type, do bounds checking, and return it
+lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal)
+{
+   lua_Integer val = getInt(L, index, functionName);
+   if(val < minVal || val > maxVal)
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", functionName, index, val);
+      logprintf(msg);
+      throw(string(msg));
+   }
+}
+
+
+// Pop integer off stack, check its type, and return it (no bounds check)
+lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
+{
+   if(!lua_isnumber(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", functionName, index);
+      logprintf(msg);
+      throw(string(msg));
+   }
+
+   return lua_tointeger (lua_State *L, index);
 }
 
 };
