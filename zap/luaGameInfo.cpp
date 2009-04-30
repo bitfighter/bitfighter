@@ -199,12 +199,20 @@ S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }   
 
 const char LuaLoadout::className[] = "Loadout";      // Class name as it appears to Lua scripts
 
-// Constructor
+// Lua Constructor
 LuaLoadout::LuaLoadout(lua_State *L)
+{
+   // When creating a new loadout object, load it up with the default items
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      mLoadout[i] = DefaultLoadout[i];
+}
+
+// C++ Constructor -- specify items
+LuaLoadout::LuaLoadout(U32 loadoutItems[])
 {
    // When creating a new loadout object, load it up with the
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
-      mLoadout[i] = DefaultLoadout[i];
+      mLoadout[i] = loadoutItems[i];
 }
 
 
@@ -293,7 +301,21 @@ S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config v
 
 S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout the same as Loadout?
 {
+   checkArgCount(L, 1, "Loadout:equals()");
+
+   LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      if(mLoadout[i] != loadout->getLoadoutItem(i))
+         return returnBool(L, false);
+
    return returnBool(L, true);
+}
+
+// Private helper function for above
+U32 LuaLoadout::getLoadoutItem(S32 indx)
+{
+   return mLoadout[indx];
 }
 
 
@@ -310,8 +332,6 @@ S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at
    U32 mod = (U32) getInt(L, 1, "Loadout:getModule()", 1, ShipModuleCount);
    return returnInt(L, mLoadout[mod - 1]);
 }
-
-
 
 
 };

@@ -52,6 +52,8 @@ private:
 
 protected:
    StringTableEntry mPlayerName;
+   bool mModuleActive[ModuleCount];       // Is that module active at this moment?
+
 
 public:
    enum {
@@ -110,14 +112,16 @@ public:
    StringTableEntry getName() { return mPlayerName; }
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
-   bool mModuleActive[ModuleCount];       // Is that module active at this moment?
+   WeaponType mWeapon[ShipWeaponCount];
+
    SFXHandle mModuleSound[ModuleCount];
 
-   WeaponType mWeapon[ShipWeaponCount];
    U32 mActiveWeaponIndx;                 // Index of selected weapon on ship
 
    void selectWeapon();
    void selectWeapon(U32 weaponIndex);
+
+   bool isModuleActive(U32 indx) { return mModuleActive[ModuleCount]; }
 
    Timer mSensorZoomTimer;
    Timer mWeaponFireDecloakTimer;
@@ -189,6 +193,8 @@ public:
 
    void emitShipExplosion(Point pos);
    void setActualPos(Point p);
+   void activateModule(U32 indx) { mCurrentMove.module[indx] = true; }     // Activate the specified module for the current move
+
 
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();

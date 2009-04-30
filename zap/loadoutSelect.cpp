@@ -262,12 +262,11 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
    {
       // Load the loadouts into a vector, and send them off to the GameConnection
       Vector<U32> loadout;
-      U32 i;
 
-      for(i = 0; i < ShipModuleCount; i++)
+      for(S32 i = 0; i < ShipModuleCount; i++)
          loadout.push_back(gLoadoutModules[mModule[i]].index);
 
-      for(i = 0; i < ShipWeaponCount; i++)
+      for(S32 i = 0; i < ShipWeaponCount; i++)
          loadout.push_back(gLoadoutWeapons[mWeapon[i]].index);
 
       gGameUserInterface.setPlayMode();                     // Exit loadout menu and resume play, however we leave this routine

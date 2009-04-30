@@ -466,7 +466,7 @@ void GameUserInterface::renderLoadoutIndicators()
    {
       U32 width = getStringWidth(fontSize, gModuleShortName[localShip->mModule[i]]);
 
-      if(localShip->mModuleActive[localShip->mModule[i]])
+      if(localShip->isModuleActive(localShip->mModule[i]))
          glColor4f(0, 1, 0, 1);
       else
          glColor4f(0, 1, 0, 0.5);

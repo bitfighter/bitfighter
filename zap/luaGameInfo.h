@@ -97,7 +97,6 @@ public:
 
 class LuaModuleInfo : public LuaObject
 {
-
 private:
    U32 mModuleIndex;
 
@@ -118,12 +117,14 @@ public:
 
 class LuaLoadout : public LuaObject
 {
-   private:
+private:
       U32 mLoadout[ShipModuleCount + ShipWeaponCount];
 
-   public:
-      LuaLoadout(lua_State *L);      // Constructor
-      ~LuaLoadout();                 // Destructor
+public:
+      LuaLoadout(lua_State *L);        // Lua constructor
+      LuaLoadout(U32 loadoutItems[]);  // C++ constructor
+
+      ~LuaLoadout();                   // Destructor
 
       static const char className[];
 
@@ -134,7 +135,10 @@ class LuaLoadout : public LuaObject
       S32 isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
       S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
       S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
-      S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
+      S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i      
+      
+      U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
+
 };
 
 };

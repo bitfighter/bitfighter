@@ -276,7 +276,7 @@ const char Asteroid::className[] = "Asteroid";      // Class name as it appears 
 // Lua constructor
 Asteroid::Asteroid(lua_State *L)
 {
-
+   // Do we want to construct these from Lua?  If so, do that here!
 }
 
 
@@ -312,7 +312,6 @@ TestItem::TestItem() : Item(Point(0,0), true, 60, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
-
 }
 
 

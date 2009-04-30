@@ -172,7 +172,9 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    method(LuaRobot, activateModule),
    method(LuaRobot, activateModuleIndex),
-   method(LuaRobot, setLoadout),
+   method(LuaRobot, setReqLoadout),
+   method(LuaRobot, getCurrLoadout),
+   method(LuaRobot, getReqLoadout),
 
    method(LuaRobot, globalMsg),
    method(LuaRobot, teamMsg),
@@ -418,33 +420,90 @@ S32 LuaRobot::setWeapon(lua_State *L)
 // Activate module this cycle --> takes module index
 S32 LuaRobot::activateModuleIndex(lua_State *L)
 {
-   checkArgCount(L, 1, "activateModuleIndex");
+   static const char *methodName = "Robot:activateModuleIndex()";
 
+   checkArgCount(L, 1, methodName);
+   U32 indx = getInt(L, 1, methodName, 0, ShipModuleCount);
 
-
-   if(!lua_isnumber(L, 1))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "findObjects called with non-numeric arg");
-      logprintf(msg);
-      throw(string(msg));
-   }
+   thisRobot->activateModule(indx);
 
    return 0;
 }
 
 
-// Activate module this cycle --> takes module enum
+// Activate module this cycle --> takes module enum.  
+// If specified module is not part of the loadout, does nothing.
 S32 LuaRobot::activateModule(lua_State *L)
 {
+   static const char *methodName = "Robot:activateModule()";
+
+   checkArgCount(L, 1, methodName);
+   ShipModule mod = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      if(thisRobot->mModule[i] == mod)
+      {
+         thisRobot->activateModule(i);
+         break;
+      }
+
    return 0;
 }
 
 
 // Sets loadout to specified --> takes 2 modules, 3 weapons
-S32 LuaRobot::setLoadout(lua_State *L)
+S32 LuaRobot::setReqLoadout(lua_State *L)
 {
+   checkArgCount(L, 1, "Robot:setReqLoadout()");
+
+   LuaLoadout *loadout = Lunar<LuaLoadout>::check(L, 1);
+   Vector<U32> vec;
+
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
+      vec.push_back(loadout->getLoadoutItem(i));
+
+   thisRobot->setLoadout(vec);
+
    return 0;
+}
+
+
+// Return current loadout
+S32 LuaRobot::getCurrLoadout(lua_State *L)
+{
+   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadoutItems[i] = (U32) thisRobot->mModule[i];
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadoutItems[i + ShipModuleCount] = (U32) thisRobot->mWeapon[i];
+
+   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
+   Lunar<LuaLoadout>::push(L, loadout, false);     // true will allow Lua to delete this object when it goes out of scope
+
+   return 1;
+}
+
+
+extern LoadoutItem gLoadoutModules[];
+extern LoadoutItem gLoadoutWeapons[];
+
+// Return requested loadout
+S32 LuaRobot::getReqLoadout(lua_State *L)
+{
+   U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadoutItems[i] = (U32) gLoadoutModules[thisRobot->mModule[i]].index;
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadoutItems[i + ShipModuleCount] = (U32) gLoadoutWeapons[thisRobot->mWeapon[i]].index;
+
+   LuaLoadout *loadout = new LuaLoadout(loadoutItems);
+   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
+
+   return 1;
 }
 
 
@@ -984,7 +1043,7 @@ bool Robot::initialize(Point p)
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModule[i] = (ShipModule) DefaultLoadout[i];
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; i++)
       mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 
    hasExploded = false;
@@ -1006,6 +1065,9 @@ bool Robot::initialize(Point p)
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
+   
+   Lunar<LuaLoadout>::Register(L);
+
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
 

@@ -180,7 +180,9 @@ public:
    S32 activateModule(lua_State *L);       // Activate module this cycle --> takes module index
    S32 activateModuleIndex(lua_State *L);  // Activate module this cycle --> takes module enum
 
-   S32 setLoadout(lua_State *L);          // Sets loadout to specified --> takes 2 modules, 3 weapons
+   S32 setReqLoadout(lua_State *L);        // Sets requested loadout to specified --> takes Loadout object
+   S32 getCurrLoadout(lua_State *L);       // Returns current loadout (Loadout)
+   S32 getReqLoadout(lua_State *L);        // Returns requested loadout (Loadout)
 
 
    // Ship info
