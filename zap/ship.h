@@ -54,6 +54,9 @@ protected:
    StringTableEntry mPlayerName;
    bool mModuleActive[ModuleCount];       // Is that module active at this moment?
 
+   ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
+   WeaponType mWeapon[ShipWeaponCount];
+
 
 public:
    enum {
@@ -111,15 +114,14 @@ public:
 
    StringTableEntry getName() { return mPlayerName; }
 
-   ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
-   WeaponType mWeapon[ShipWeaponCount];
-
    SFXHandle mModuleSound[ModuleCount];
 
    U32 mActiveWeaponIndx;                 // Index of selected weapon on ship
 
    void selectWeapon();                   // Select next weapon
    void selectWeapon(U32 weaponIndex);    // Select weapon by index
+   WeaponType getWeapon(U32 indx) { return mWeapon[indx]; }    // Returns weapon in slot indx
+   ShipModule getModule(U32 indx) { return mModule[indx]; }    // Returns module in slot indx
 
    bool isModuleActive(U32 indx) { return mModuleActive[ModuleCount]; }
 

@@ -283,10 +283,10 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       bool theSame = true;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
-         theSame = theSame && (gLoadoutModules[mModule[i]].index == ship->mModule[i]);
+         theSame = theSame && (gLoadoutModules[mModule[i]].index == ship->getModule(i));
 
       for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-         theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == ship->mWeapon[i - ShipModuleCount]);
+         theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == ship->getWeapon(i - ShipModuleCount));
 
       if(theSame)      // Don't bother if ship config hasn't changed
       {

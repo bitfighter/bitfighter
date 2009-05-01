@@ -48,7 +48,8 @@ LuaGameInfo::~LuaGameInfo()
 
 
 // Define the methods we will expose to Lua
-Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] = {
+Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] = 
+{
    method(LuaGameInfo, getGameType),
    method(LuaGameInfo, getGameTypeName),
    method(LuaGameInfo, getFlagCount),
@@ -85,7 +86,7 @@ S32 LuaGameInfo::getGameTimeRemaining(lua_State *L) { return returnInt(L, gServe
 S32 LuaGameInfo::getLeadingScore(lua_State *L)      { return returnInt(L, gServerGame->getGameType()->getLeadingScore()); }
 S32 LuaGameInfo::getLeadingTeam(lua_State *L)       { return returnInt(L, gServerGame->getGameType()->getLeadingTeam() + 1); }
 
-S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServerGame()->getGameType()->mTeams.count()); }
+S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServerGame->getGameType()->mTeams.size()); }
 
 S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
 S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
@@ -109,21 +110,22 @@ const char LuaTeamInfo::className[] = "TeamInfo";      // Class name as it appea
 // Lua constructor
 LuaTeamInfo::LuaTeamInfo(lua_State *L)
 {
-   checkArgCount(L, 1, "TeamInfo constructor");
-   teamIndx = getInt(L, 1, methodName, 1, gServerGame()->getGameType()->mTeams.count()) - 1;   // Lua thinks first team has index 1... we know better!
+   static const char *methodName = "TeamInfo constructor";
+   checkArgCount(L, 1, methodName);
+   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getGameType()->mTeams.size()) - 1;   // Lua thinks first team has index 1... we know better!
 
    mTeamIndex = teamIndx;
-   mTeam = gServerGame()->getGameType()->mTeams[teamIndx];
 }
 
 // C++ constructor
 LuaTeamInfo::LuaTeamInfo(Team team)
 {
-   mTeam = team;
    const char *teamName = team.name.getString();
 
-   for(S32 i = 0; i < gServerGame()->getGameType()->mTeams.count(); i ++)
-      if(!strcmp(mTeams[i].name.getString(), teamName)
+   Vector<Team> teams = gServerGame->getGameType()->mTeams;
+
+   for(S32 i = 0; i < teams.size(); i ++)
+      if(!strcmp(teams[i].name.getString(), teamName))
       {
          mTeamIndex = i;
          break;
@@ -138,7 +140,8 @@ LuaTeamInfo::~LuaTeamInfo()
 
 
 // Define the methods we will expose to Lua
-Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] = {
+Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] = 
+{
    method(LuaTeamInfo, getName),
    method(LuaTeamInfo, getIndex),
    method(LuaTeamInfo, getPlayerCount),
@@ -148,10 +151,10 @@ Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] = {
 };
 
 // We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
-S32 getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }             // getTeamIndex() ==> return team's index (returns int)
-S32 getName(lua_State *L) { return returnString(L, mTeam.name.getString()); }   // getTeamName() ==> return team name (returns string)
-S32 getPlayerCount(lua_State *L) { return returnInt(L, mTeam.numPlayers); }     // getPlayerCount() ==> return player count (returns int)
-S32 getScore(lua_State *L) { return returnInt(L, score); }                      // getScore() ==> return team score (returns int)
+S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }             // getTeamIndex() ==> return team's index (returns int)
+S32 LuaTeamInfo::getName(lua_State *L) { return returnString(L, gServerGame->getGameType()->mTeams[mTeamIndex].name.getString()); }   // getTeamName() ==> return team name (returns string)
+S32 LuaTeamInfo::getPlayerCount(lua_State *L) { return returnInt(L, gServerGame->getGameType()->mTeams[mTeamIndex].numPlayers); }     // getPlayerCount() ==> return player count (returns int)
+S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, gServerGame->getGameType()->mTeams[mTeamIndex].score); }                // getScore() ==> return team score (returns int)
 
 
 ////////////////////////////////////

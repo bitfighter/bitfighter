@@ -358,7 +358,7 @@ S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 
 
 // Sorts teams by score
-S32 QSORT_CALLBACK teamScoreSort(GameType::Team *a, GameType::Team *b)
+S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 {
    return a->score > b->score;
 }

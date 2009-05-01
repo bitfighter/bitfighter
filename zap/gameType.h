@@ -79,6 +79,21 @@ public:
 
 //////////
 
+struct Team
+{
+   StringTableEntry name;
+   Color color;
+   Vector<Point> spawnPoints;
+   Vector<Point> flagSpawnPoints;   // List of places for team flags to spawn
+
+   U32 numPlayers;                  // Needs to be computed before use, not dynamically tracked
+   S32 score;
+   F32 rating;
+   Team() { numPlayers = 0; score = 0; rating = 0; }     // Constructor
+};
+
+//////////
+
 class Robot;
 
 class GameType : public GameObject
@@ -179,19 +194,9 @@ public:
 
    virtual ClientRef *allocClientRef() { return new ClientRef; }
 
-   struct Team
-   {
-      StringTableEntry name;
-      Color color;
-      Vector<Point> spawnPoints;
-      Vector<Point> flagSpawnPoints;   // List of places for team flags to spawn
-
-      U32 numPlayers;                  // Needs to be computed before use, not dynamically tracked
-      S32 score;
-      F32 rating;
-      Team() { numPlayers = 0; score = 0; rating = 0; }     // Constructor
-   };
    Vector<Team> mTeams;
+
+
    Vector<Point> mFlagSpawnPoints;     // List of non-team specific spawn points for flags
 
    StringTableEntry mLevelName;

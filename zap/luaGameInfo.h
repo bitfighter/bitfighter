@@ -29,6 +29,7 @@
 
 #include "luaObject.h"
 #include "gameWeapons.h"
+#include "gameType.h"      // For Team def
 #include "shipItems.h"     // For module defs
 
 namespace Zap
@@ -68,7 +69,6 @@ class LuaTeamInfo : public LuaObject
 {
 
 private:
-   Team mTeam;
    U32 mTeamIndex;
 
 public:

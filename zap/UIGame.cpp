@@ -434,7 +434,7 @@ void GameUserInterface::renderLoadoutIndicators()
    // First, the weapons
    for(S32 i = 0; i < ShipWeaponCount; i++)
    {
-      U32 width = getStringWidth(fontSize, gWeapons[localShip->mWeapon[i]].name.getString());
+      U32 width = getStringWidth(fontSize, gWeapons[localShip->getWeapon(i)].name.getString());
 
       if(i == localShip->mActiveWeaponIndx)
          glColor4f(1, 1, 0, 1);
@@ -454,7 +454,7 @@ void GameUserInterface::renderLoadoutIndicators()
          glColor3f(.2,.2,.2);
 
       // Add the weapon name
-      drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, gWeapons[localShip->mWeapon[i]].name.getString());
+      drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, gWeapons[localShip->getWeapon(i)].name.getString());
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }
@@ -464,9 +464,9 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(S32 i = 0; i < ShipModuleCount; i++)
    {
-      U32 width = getStringWidth(fontSize, gModuleShortName[localShip->mModule[i]]);
+      U32 width = getStringWidth(fontSize, gModuleShortName[localShip->getModule(i)]);
 
-      if(localShip->isModuleActive(localShip->mModule[i]))
+      if(localShip->isModuleActive(localShip->getModule(i)))
          glColor4f(0, 1, 0, 1);
       else
          glColor4f(0, 1, 0, 0.5);
@@ -484,7 +484,7 @@ void GameUserInterface::renderLoadoutIndicators()
          glColor3f(.2,.2,.2);
 
       // Add the weapon name
-      drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, gModuleShortName[localShip->mModule[i]]);
+      drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, gModuleShortName[localShip->getModule(i)]);
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }

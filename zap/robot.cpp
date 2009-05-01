@@ -428,7 +428,7 @@ S32 LuaRobot::setWeapon(lua_State *L)
    U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(mWeapon[mActiveWeaponIndx] == weap)
+      if(thisRobot->getWeapon(i) == weap)
       {
          thisRobot->selectWeapon(i);
          break;
@@ -448,7 +448,7 @@ S32 LuaRobot::hasWeapon(lua_State *L)
    U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(mWeapon[mActiveWeaponIndx] == weap)
+      if(thisRobot->getWeapon(i) == weap)
          return returnBool(L, true);      // We have it!
 
    return returnBool(L, false);           // We don't!
@@ -482,7 +482,7 @@ S32 LuaRobot::activateModule(lua_State *L)
    ShipModule mod = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      if(thisRobot->mModule[i] == mod)
+      if(thisRobot->getModule(i) == mod)
       {
          thisRobot->activateModule(i);
          break;
@@ -515,10 +515,10 @@ S32 LuaRobot::getCurrLoadout(lua_State *L)
    U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U32) thisRobot->mModule[i];
+      loadoutItems[i] = (U32) thisRobot->getModule(i);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U32) thisRobot->mWeapon[i];
+      loadoutItems[i + ShipModuleCount] = (U32) thisRobot->getWeapon(i);
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    Lunar<LuaLoadout>::push(L, loadout, false);     // true will allow Lua to delete this object when it goes out of scope
@@ -536,10 +536,10 @@ S32 LuaRobot::getReqLoadout(lua_State *L)
    U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U32) gLoadoutModules[thisRobot->mModule[i]].index;
+      loadoutItems[i] = (U32) gLoadoutModules[thisRobot->getModule(i)].index;
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U32) gLoadoutWeapons[thisRobot->mWeapon[i]].index;
+      loadoutItems[i + ShipModuleCount] = (U32) gLoadoutWeapons[thisRobot->getWeapon(i)].index;
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
