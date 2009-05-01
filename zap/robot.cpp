@@ -169,6 +169,8 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, setThrustXY),
    method(LuaRobot, fire),
    method(LuaRobot, setWeapon),
+   method(LuaRobot, setWeaponIndex),
+   method(LuaRobot, hasWeapon),
 
    method(LuaRobot, activateModule),
    method(LuaRobot, activateModuleIndex),
@@ -406,13 +408,52 @@ S32 LuaRobot::hasFlag(lua_State *L)
 }
 
 
-// Set weapon  to 1, 2, or 3
-S32 LuaRobot::setWeapon(lua_State *L)
+// Set weapon to index
+S32 LuaRobot::setWeaponIndex(lua_State *L)
 {
-   U32 weap = luaL_checknumber(L, 1);
-      thisRobot->selectWeapon(weap);
+   static const char *methodName = "Robot:setWeaponIndex()";
+   checkArgCount(L, 1, methodName);
+   U32 weap = getInt(L, 1, methodName, 1, ShipWeaponCount);    // Acceptable range = (1, ShipWeaponCount)
+   thisRobot->selectWeapon(weap - 1);     // Correct for the fact that index in C++ is 0 based
+
    return 0;
 }
+
+
+// Set weapon to specified weapon, if we have it
+S32 LuaRobot::setWeapon(lua_State *L)
+{
+   static const char *methodName = "Robot:setWeapon()";
+   checkArgCount(L, 1, methodName);
+   U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if(mWeapon[mActiveWeaponIndx] == weap)
+      {
+         thisRobot->selectWeapon(i);
+         break;
+      }
+
+   // If we get here without having found our weapon, then nothing happens.  Better luck next time!
+
+   return 0;
+}
+
+
+// Do we have a given weapon in our current loadout?
+S32 LuaRobot::hasWeapon(lua_State *L)
+{
+   static const char *methodName = "Robot:hasWeapon()";
+   checkArgCount(L, 1, methodName);
+   U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      if(mWeapon[mActiveWeaponIndx] == weap)
+         return returnBool(L, true);      // We have it!
+
+   return returnBool(L, false);           // We don't!
+}
+
 
 
 /////////////////////////////
@@ -431,7 +472,7 @@ S32 LuaRobot::activateModuleIndex(lua_State *L)
 }
 
 
-// Activate module this cycle --> takes module enum.  
+// Activate module this cycle --> takes module enum.
 // If specified module is not part of the loadout, does nothing.
 S32 LuaRobot::activateModule(lua_State *L)
 {
@@ -1059,9 +1100,11 @@ bool Robot::initialize(Point p)
    // Register our connector types with Lua
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
+   Lunar<LuaTeamInfo>::Register(L);
+
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
-   
+
    Lunar<LuaLoadout>::Register(L);
 
    Lunar<TestItem>::Register(L);

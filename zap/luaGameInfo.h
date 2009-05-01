@@ -53,12 +53,38 @@ public:
    S32 getGameTimeRemaining(lua_State *L);
    S32 getLeadingScore(lua_State *L);
    S32 getLeadingTeam(lua_State *L);
+   S32 getTeamCount(lua_State *L);
 
    S32 getLevelName(lua_State *L);
    S32 getGridSize(lua_State *L);
    S32 getIsTeamGame(lua_State *L);
 
    S32 getEventScore(lua_State *L);
+};
+
+///////////////////////////////
+
+class LuaTeamInfo : public LuaObject
+{
+
+private:
+   Team mTeam;
+   U32 mTeamIndex;
+
+public:
+  LuaTeamInfo(lua_State *L);      // Lua constructor
+  LuaTeamInfo(Team team);         // C++ constructor
+
+  ~LuaTeamInfo();                 // Destructor
+
+   static const char className[];
+
+   static Lunar<LuaTeamInfo>::RegType methods[];
+
+   S32 getName(lua_State *L);
+   S32 getIndex(lua_State *L);
+   S32 getPlayerCount(lua_State *L);
+   S32 getScore(lua_State *L);
 };
 
 ///////////////////////////////
@@ -136,10 +162,9 @@ public:
       S32 isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
       S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
       S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
-      S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i      
-      
-      U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
+      S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
 
+      U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
 };
 
 };

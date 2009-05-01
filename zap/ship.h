@@ -118,8 +118,8 @@ public:
 
    U32 mActiveWeaponIndx;                 // Index of selected weapon on ship
 
-   void selectWeapon();
-   void selectWeapon(U32 weaponIndex);
+   void selectWeapon();                   // Select next weapon
+   void selectWeapon(U32 weaponIndex);    // Select weapon by index
 
    bool isModuleActive(U32 indx) { return mModuleActive[ModuleCount]; }
 

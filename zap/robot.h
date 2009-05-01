@@ -174,6 +174,9 @@ public:
 
    S32 fire(lua_State *L);
    S32 setWeapon(lua_State *L);
+   S32 setWeaponIndex(lua_State *L);
+   S32 hasWeapon(lua_State *L);
+
    S32 globalMsg(lua_State *L);
    S32 teamMsg(lua_State *L);
 
