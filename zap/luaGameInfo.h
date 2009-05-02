@@ -70,6 +70,7 @@ class LuaTeamInfo : public LuaObject
 
 private:
    U32 mTeamIndex;
+   Team mTeam;
 
 public:
   LuaTeamInfo(lua_State *L);      // Lua constructor

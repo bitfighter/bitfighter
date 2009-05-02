@@ -48,7 +48,7 @@ LuaGameInfo::~LuaGameInfo()
 
 
 // Define the methods we will expose to Lua
-Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] = 
+Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
 {
    method(LuaGameInfo, getGameType),
    method(LuaGameInfo, getGameTypeName),
@@ -112,14 +112,20 @@ LuaTeamInfo::LuaTeamInfo(lua_State *L)
 {
    static const char *methodName = "TeamInfo constructor";
    checkArgCount(L, 1, methodName);
-   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getGameType()->mTeams.size()) - 1;   // Lua thinks first team has index 1... we know better!
 
+   // Lua thinks first team has index 1... we know better, but we need to play along...
+   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getGameType()->mTeams.size()) - 1;
+
+   mTeam = gServerGame->getGameType()->mTeams[teamIndx];
    mTeamIndex = teamIndx;
 }
+
 
 // C++ constructor
 LuaTeamInfo::LuaTeamInfo(Team team)
 {
+   mTeam = team;
+
    const char *teamName = team.name.getString();
 
    Vector<Team> teams = gServerGame->getGameType()->mTeams;
@@ -140,7 +146,7 @@ LuaTeamInfo::~LuaTeamInfo()
 
 
 // Define the methods we will expose to Lua
-Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] = 
+Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] =
 {
    method(LuaTeamInfo, getName),
    method(LuaTeamInfo, getIndex),
@@ -152,9 +158,14 @@ Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] =
 
 // We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
 S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }             // getTeamIndex() ==> return team's index (returns int)
-S32 LuaTeamInfo::getName(lua_State *L) { return returnString(L, gServerGame->getGameType()->mTeams[mTeamIndex].name.getString()); }   // getTeamName() ==> return team name (returns string)
-S32 LuaTeamInfo::getPlayerCount(lua_State *L) { return returnInt(L, gServerGame->getGameType()->mTeams[mTeamIndex].numPlayers); }     // getPlayerCount() ==> return player count (returns int)
-S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, gServerGame->getGameType()->mTeams[mTeamIndex].score); }                // getScore() ==> return team score (returns int)
+S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam.name.getString()); }  // getTeamName() ==> return team name (returns string)
+S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.score); }                // getScore() ==> return team score (returns int)
+
+S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
+{
+   gServerGame->getGameType()->countTeamPlayers();    // Make sure player counts are up-to-date
+   return returnInt(L, mTeam.numPlayers);
+}
 
 
 ////////////////////////////////////
@@ -208,7 +219,7 @@ Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] =
 S32 LuaWeaponInfo::getName(lua_State *L) { return returnString(L, gWeapons[mWeaponIndex].name.getString()); }              // Name of weapon ("Phaser", "Triple", etc.) (string)
 S32 LuaWeaponInfo::getID(lua_State *L) { return returnInt(L, mWeaponIndex); }                                              // ID of module (WeaponPhaser, WeaponTriple, etc.) (integer)
 
-S32 LuaWeaponInfo::getRange(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projVelocity * gWeapons[mWeaponIndex].projVelocity / 1000 ); }                // Range of projectile (units) (integer)
+S32 LuaWeaponInfo::getRange(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projVelocity * gWeapons[mWeaponIndex].projLiveTime / 1000 ); }                // Range of projectile (units) (integer)
 S32 LuaWeaponInfo::getFireDelay(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].fireDelay); }                   // Delay between shots in ms (integer)
 S32 LuaWeaponInfo::getMinEnergy(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].minEnergy); }                   // Minimum energy needed to use (integer)
 S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].drainEnergy); }               // Amount of energy weapon consumes (integer)
