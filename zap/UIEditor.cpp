@@ -194,9 +194,9 @@ struct GameItemRec
 // Remember to keep these properly aligned with GameItems enum
 //   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText,   geom,        letter, special, prettyNamePlural     on-screen name   description
 GameItemRec gGameItemRecs[] = {
-   { "Spawn",               false,    true,      false,       false, geomPoint,      'S',    false,   "Spawn points",          "Spawn",    "Location where ships start.  At least one per team is required. [G]" },
-   { "SpeedZone",           false,    false,     true,        false, geomSimpleLine,  0,     false,   "Speed zones",           "Spd Zone", "Flings ships in direction of arrow. [P]" },
-   { "SoccerBallItem",      false,    false,     false,       false, geomPoint,      'B',    true,    "Soccer balls",          "Ball",     "Soccer ball, can only be used in Soccer games." },
+   { "Spawn",               false,    true,      false,       false, geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Location where ships start.  At least one per team is required. [G]" },
+   { "SpeedZone",           false,    false,     true,        false, geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "Makes ships go fast in direction of arrow. [P]" },
+   { "SoccerBallItem",      false,    false,     false,       false, geomPoint,      'B',    true,   "Soccer balls",           "Ball",     "Soccer ball, can only be used in Soccer games." },
    { "FlagItem",            false,    true,      true,        false, geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,        false, geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","Location where flags spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false, geomLine,        0,     false,  "Barrier makers",         "Wall",     "Run of the mill wall item." },

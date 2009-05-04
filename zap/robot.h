@@ -140,7 +140,11 @@ public:
 
    static Lunar<LuaRobot>::RegType methods[];
 
+   
+
    S32 getClassID(lua_State *L);
+
+   S32 getCPUTime(lua_State *L) { return returnInt(L, gServerGame->getCurrentTime()); }    // Return CPU time... use for timing things
 
 
    S32 getZoneCenterXY(lua_State *L);

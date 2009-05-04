@@ -422,7 +422,7 @@ const char *gGameObjectInfo[] = {
  "Force Field Emitter","Allows only one team to pass",
  "Teleporter","Warps ship to another location",
  "Flag","Objective item in some game types",
- "SpeedZone", "Flings ship at high speed",
+ "GoFast", "Makes ship go fast",
  "Nexus", "Bring flags here in Hunters game",
 };
 

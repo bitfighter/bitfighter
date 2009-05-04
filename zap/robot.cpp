@@ -153,6 +153,8 @@ LuaRobot::~LuaRobot()
 Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getClassID),
 
+   method(LuaRobot, getCPUTime),
+
    method(LuaRobot, getAngle),
    method(LuaRobot, getPosXY),
 
@@ -1111,9 +1113,13 @@ bool Robot::initialize(Point p)
 
    Lunar<LuaLoadout>::Register(L);
 
+   Lunar<RepairItem>::Register(L);
+   Lunar<ResourceItem>::Register(L);
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
-
+   Lunar<FlagItem>::Register(L);
+   Lunar<SoccerBallItem>::Register(L);
+   Lunar<NexusFlag>::Register(L);
 
    // Push a pointer to this Robot to the Lua stack
    lua_pushlightuserdata(L, (void *)this);
