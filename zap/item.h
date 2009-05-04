@@ -27,6 +27,7 @@
 #define _ITEM_H_
 
 #include "moveObject.h"
+#include "luaObject.h"
 #include "timer.h"
 
 namespace Zap
@@ -72,7 +73,8 @@ public:
 
    bool isMounted() { return mIsMounted; }
    void setZone(GoalZone *theZone);
-   GoalZone *getZone();
+   GoalZone *getZone() { return mZone; }
+   bool isInZone() { return mZone == NULL; }
 
    Ship *getMount();
    void dismount();
@@ -82,7 +84,15 @@ public:
    virtual void onMountDestroyed();
 
    bool collide(GameObject *otherObject);
+
+   // For Lua interfaces...
+   S32 Item::getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }     // Center of item (returns point)
+   S32 Item::getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        // Radius of item (returns number)
+   S32 Item::getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }     // Speed of item (returns point)
+
 };
+
+///////////////////
 
 class PickupItem : public Item
 {
@@ -110,6 +120,7 @@ public:
    virtual bool pickup(Ship *theShip) = 0;
    virtual U32 getRepopDelay() = 0;
    virtual void onClientPickup() = 0;
+
 };
 
 };

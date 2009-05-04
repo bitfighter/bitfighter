@@ -104,10 +104,11 @@ public:
    TNL_DECLARE_RPC(s2cHuntersMessage, (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score));
 
    TNL_DECLARE_CLASS(HuntersGameType);
+
 };
 
 
-class HuntersFlagItem : public Item
+class HuntersFlagItem : public Item, LuaObject
 {
 private:
    typedef Item Parent;
@@ -135,7 +136,18 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(HuntersFlagItem);
+
+   ///// Lua Interface
+
+   HuntersFlagItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+   static Lunar<HuntersFlagItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
 };
+
+
 
 class HuntersNexusObject : public GameObject
 {

@@ -375,15 +375,30 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
    newFlag->changeFlagCount(0);
 }
 
+///////////////////
+
 TNL_IMPLEMENT_NETOBJECT(HuntersFlagItem);
 
-
+// C++ constructor
 HuntersFlagItem::HuntersFlagItem(Point pos) : Item(pos, true, 30, 4)
 {
    mObjectTypeMask |= CommandMapVisType;
    mNetFlags.set(Ghostable);
    mFlagCount = 0;
 }
+
+// Define the methods we will expose to Lua
+Lunar<HuntersFlagItem>::RegType HuntersFlagItem::methods[] =
+{
+   // Standard gameItem methods
+   method(HuntersFlagItem, getClassID),
+   method(HuntersFlagItem, getLoc),
+   method(HuntersFlagItem, getRad),
+   method(HuntersFlagItem, getVel),
+
+   {0,0}    // End method list
+};
+
 
 extern Color gErrorMessageTextColor;
 

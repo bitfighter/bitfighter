@@ -41,30 +41,33 @@ class GridDatabase;
 
 enum GameObjectType
 {
-   UnknownType        = BIT(0),
-   ShipType           = BIT(1),
-   BarrierType        = BIT(2),
-   MoveableType       = BIT(3),
-   BulletType         = BIT(4),
-   ItemType           = BIT(5),
-   ResourceItemType   = BIT(6),
-   EngineeredType     = BIT(7),
-   ForceFieldType     = BIT(8),
-   LoadoutZoneType    = BIT(9),
-   MineType           = BIT(10),
-   TestItemType       = BIT(11),
-   FlagType           = BIT(12),
-   TurretTargetType   = BIT(13),
-   SlipZoneType       = BIT(14),
-   HeatSeekerType     = BIT(15),
-   SpyBugType         = BIT(16),
-   NexusType          = BIT(17),
-   BotNavMeshZoneType = BIT(18),
-   RobotType          = BIT(19),
-   TeleportType       = BIT(20),    
-   GoalZoneType       = BIT(21),
-   AsteroidType       = BIT(22),
-   RepairItemType     = BIT(23),
+   UnknownType         = BIT(0),
+   ShipType            = BIT(1),
+   BarrierType         = BIT(2),
+   MoveableType        = BIT(3),
+   BulletType          = BIT(4),
+   ItemType            = BIT(5),
+   ResourceItemType    = BIT(6),
+   EngineeredType      = BIT(7),
+   ForceFieldType      = BIT(8),
+   LoadoutZoneType     = BIT(9),
+   MineType            = BIT(10),
+   TestItemType        = BIT(11),
+   FlagType            = BIT(12),
+   TurretTargetType    = BIT(13),
+   SlipZoneType        = BIT(14),
+   HeatSeekerType      = BIT(15),
+   SpyBugType          = BIT(16),
+   NexusType           = BIT(17),
+   BotNavMeshZoneType  = BIT(18),
+   RobotType           = BIT(19),
+   TeleportType        = BIT(20),   
+   GoalZoneType        = BIT(21),
+   AsteroidType        = BIT(22),   // Only needed for Lua, maybe
+   RepairItemType      = BIT(23),   // Only needed for Lua...
+   SoccerBallItemType  = BIT(24),   // Only needed for Lua...
+   NexusFlagType       = BIT(25),   // Only needed for Lua...
+
 
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map

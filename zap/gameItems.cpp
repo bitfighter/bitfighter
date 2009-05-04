@@ -119,10 +119,6 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
 };
 
 S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
-S32 RepairItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of RepairItem (returns point)
-S32 RepairItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of RepairItem (returns number)
-S32 RepairItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of RepairItem (returns point)
-
 
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
@@ -299,9 +295,6 @@ Lunar<Asteroid>::RegType Asteroid::methods[] =
 
 S32 Asteroid::getSize(lua_State *L) { return returnInt(L, getSizeIndex()); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
 S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); }    // Number of indexes of size we can have (returns int)
-S32 Asteroid::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }        // Center of asteroid (returns point)
-S32 Asteroid::getRad(lua_State *L) { return returnFloat(L, getRadius()); }           // Radius of asteroid (returns number)
-S32 Asteroid::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }        // Speed of asteroid (returns point)
 
 
 
@@ -363,11 +356,6 @@ Lunar<TestItem>::RegType TestItem::methods[] =
 
    {0,0}    // End method list
 };
-
-S32 TestItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of testItem (returns point)
-S32 TestItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of testItem (returns number)
-S32 TestItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of testItem (returns point)
-
 
 
 TNL_IMPLEMENT_NETOBJECT(ResourceItem);
@@ -438,10 +426,6 @@ Lunar<ResourceItem>::RegType ResourceItem::methods[] =
 
    {0,0}    // End method list
 };
-
-S32 ResourceItem::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }   // Center of testItem (returns point)
-S32 ResourceItem::getRad(lua_State *L) { return returnFloat(L, getRadius()); }      // Radius of testItem (returns number)
-S32 ResourceItem::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }   // Speed of testItem (returns point)
 
 };
 

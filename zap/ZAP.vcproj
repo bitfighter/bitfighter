@@ -720,6 +720,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\lua\include\lunar.h"
+			>
+		</File>
+		<File
 			RelativePath=".\main.cpp"
 			>
 		</File>

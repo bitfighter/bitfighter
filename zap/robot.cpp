@@ -74,6 +74,7 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(MineType);
    setEnum(TestItemType);
    setEnum(FlagType);
+   setEnum(NexusFlagType);
    setEnum(TurretTargetType);
    setEnum(SlipZoneType);
    setEnum(HeatSeekerType);
@@ -85,6 +86,9 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(GoalZoneType);
    setEnum(AsteroidType);
    setEnum(RepairItemType);
+   setEnum(SoccerBallItemType);
+
+
 
    // Modules
    setEnum(ModuleShield);

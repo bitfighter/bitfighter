@@ -192,6 +192,8 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 }
 
 
+
+
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 // Constructor
@@ -211,6 +213,19 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv)
    initialPos = mMoveState[ActualState].pos;
    return true;
 }
+
+
+// Define the methods we will expose to Lua
+Lunar<SoccerBallItem>::RegType SoccerBallItem::methods[] =
+{
+   // Standard gameItem methods
+   method(SoccerBallItem, getClassID),
+   method(SoccerBallItem, getLoc),
+   method(SoccerBallItem, getRad),
+   method(SoccerBallItem, getVel),
+
+   {0,0}    // End method list
+};
 
 
 void SoccerBallItem::onAddedToGame(Game *theGame)

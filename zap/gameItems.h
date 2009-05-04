@@ -64,12 +64,7 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, RepairItemType); }
 
-   S32 getLoc(lua_State *L);    // Center of RepairItem (returns point)
-   S32 getRad(lua_State *L);    // Radius of RepairItem (returns number)
-   S32 getVel(lua_State *L);    // Speed of RepairItem (returns point, always (0,0) since this item doesn't move!)
-
    S32 isVis(lua_State *L); // Is RepairItem visible? (returns boolean)
-
 };
 
 
@@ -137,9 +132,6 @@ public:
 
    S32 getSize(lua_State *L);        // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
    S32 getSizeCount(lua_State *L);   // Number of indexes of size we can have (returns int)
-   S32 getLoc(lua_State *L);         // Center of asteroid (returns point)
-   S32 getRad(lua_State *L);         // Radius of asteroid (returns number)
-   S32 getVel(lua_State *L);         // Speed of asteroid (returns point)
 };
 
 
@@ -164,10 +156,6 @@ public:
    static Lunar<TestItem>::RegType methods[];
 
    S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
-
-   S32 getLoc(lua_State *L);    // Center of TestItem (returns point)
-   S32 getRad(lua_State *L);    // Radius of TestItem (returns number)
-   S32 getVel(lua_State *L);    // Speed of TestItem (returns point)
 };
 
 
@@ -191,11 +179,6 @@ public:
    static Lunar<ResourceItem>::RegType methods[];
 
    S32 getClassID(lua_State *L) { return returnInt(L, ResourceItemType); }
-
-   S32 getLoc(lua_State *L);    // Center of ResourceItem (returns point)
-   S32 getRad(lua_State *L);    // Radius of ResourceItem (returns number)
-   S32 getVel(lua_State *L);    // Speed of ResourceItem (returns point)
-
 };
 
 };

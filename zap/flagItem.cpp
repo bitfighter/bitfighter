@@ -34,6 +34,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
+// C++ constructor
 FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
 {
    mTeam = 0;
@@ -41,6 +42,26 @@ FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
    mObjectTypeMask |= FlagType | CommandMapVisType;
    setZone(NULL);
 }
+
+
+// Define the methods we will expose to Lua
+Lunar<FlagItem>::RegType FlagItem::methods[] =
+{
+   // Standard gameItem methods
+   method(FlagItem, getClassID),
+   method(FlagItem, getLoc),
+   method(FlagItem, getRad),
+   method(FlagItem, getVel),
+
+   // Flag specific methods
+   method(FlagItem, getTeamIndx),
+   method(FlagItem, isInInitLoc),
+   method(FlagItem, isInCaptureZone),
+   method(FlagItem, isOnShip),
+
+   {0,0}    // End method list
+};
+
 
 
 void FlagItem::onAddedToGame(Game *theGame)

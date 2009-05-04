@@ -148,12 +148,6 @@ void Item::setZone(GoalZone *theZone)
 }
 
 
-GoalZone *Item::getZone()
-{
-   return mZone;
-}
-
-
 void Item::idle(GameObject::IdleCallPath path)
 {
    if(!isInDatabase())

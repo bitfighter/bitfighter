@@ -31,12 +31,14 @@
 namespace Zap
 {
 
-class FlagItem : public Item
+class FlagItem : public Item, LuaObject
 {
+private:
    typedef Item Parent;
    Point initialPos;
+
 public:
-   FlagItem(Point pos = Point());
+   FlagItem(Point pos = Point());      // C++ constructor
    void onAddedToGame(Game *theGame);
    bool processArguments(S32 argc, const char **argv);
    void renderItem(Point pos);
@@ -51,6 +53,20 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(FlagItem);
+
+   ///// Lua Interface
+
+   FlagItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+   static Lunar<FlagItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, FlagType); }
+   
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, FlagType); }           // Index of owning team (-1 for neutral flag)
+   S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
+   S32 isInCaptureZone(lua_State *L) { return returnBool(L, isInZone()); }    // Is flag in a team's capture zone?
+   S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
 };
 
 extern void renderFlag(Point pos, Color c);

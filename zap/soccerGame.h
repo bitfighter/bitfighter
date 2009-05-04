@@ -70,7 +70,7 @@ public:
    TNL_DECLARE_CLASS(SoccerGameType);
 };
 
-class SoccerBallItem : public Item
+class SoccerBallItem : public Item, LuaObject
 {
 private:
    typedef Item Parent;
@@ -79,7 +79,7 @@ private:
    Ship *mLastPlayerTouch;
 
 public:
-   SoccerBallItem(Point pos = Point());   // Constructor
+   SoccerBallItem(Point pos = Point());   // C++ constructor
 
    static const S32 radius = 30;          // Radius of soccer ball
 
@@ -94,8 +94,17 @@ public:
 
    bool collide(GameObject *hitObject);
 
-
    TNL_DECLARE_CLASS(SoccerBallItem);
+
+   ///// Lua Interface
+
+   SoccerBallItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+   static Lunar<SoccerBallItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, SoccerBallItemType); }
+
 };
 
 };
