@@ -168,6 +168,27 @@ public:
       U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
 };
 
+
+///////////////////////////////
+
+class LuaTimer : public LuaObject      // Basically wraps our Bitfighter timer class
+{
+private:
+   Timer mTimer;
+
+public:
+   LuaTimer(lua_State *L);          // Lua constructor
+
+   static const char className[];
+
+   static Lunar<LuaTimer>::RegType methods[];
+
+   S32 reset(lua_State *L);
+   S32 update(lua_State *L);
+   S32 getCurrent(lua_State *L);
+   S32 getFraction(lua_State *L);
+   S32 setPeriod(lua_State *L);
+};
 };
 
 #endif

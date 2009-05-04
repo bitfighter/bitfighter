@@ -453,14 +453,12 @@ void GrenadeProjectile::idle(IdleCallPath path)
 {
    Parent::idle(path);
 
-   // Do some drag...
-   mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (F32(mCurrentMove.time) / 1000.f);
+   // Do some drag...  no, not that kind of drag!
+   mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (((F32)mCurrentMove.time) / 1000.f);
 
    if(!exploded)
-   {
       if(getActualVel().len() < 4.0)
         explode(getActualPos(), WeaponBurst);
-   }
 
    if(isGhost()) return;
 

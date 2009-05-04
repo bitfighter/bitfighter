@@ -41,6 +41,8 @@
 #include "gameObjectRender.h"
 #include "flagItem.h"
 #include "goalZone.h"
+#include "soccerGame.h"          // For lua object defs
+#include "huntersGame.h"         // For lua object defs
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
@@ -154,6 +156,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getClassID),
 
    method(LuaRobot, getCPUTime),
+   method(LuaRobot, getTime),
 
    method(LuaRobot, getAngle),
    method(LuaRobot, getPosXY),
@@ -1107,6 +1110,7 @@ bool Robot::initialize(Point p)
    Lunar<LuaRobot>::Register(L);
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
+   Lunar<LuaTimer>::Register(L);
 
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
@@ -1117,9 +1121,9 @@ bool Robot::initialize(Point p)
    Lunar<ResourceItem>::Register(L);
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
-   Lunar<FlagItem>::Register(L);
-   Lunar<SoccerBallItem>::Register(L);
-   Lunar<NexusFlag>::Register(L);
+   //Lunar<FlagItem>::Register(L);
+   //Lunar<SoccerBallItem>::Register(L);
+   //Lunar<HuntersFlagItem>::Register(L);
 
    // Push a pointer to this Robot to the Lua stack
    lua_pushlightuserdata(L, (void *)this);
@@ -1334,14 +1338,14 @@ bool Robot::canSeePoint(Point point)
 
 void Robot::idle(GameObject::IdleCallPath path)
 {
-   //U32 deltaT;
+   U32 deltaT;
 
    if(path == GameObject::ServerIdleMainLoop)
    {
-      //U32 ms = Platform::getRealMilliseconds();
-      //deltaT = (ms - mLastMoveTime);
-      //mLastMoveTime = ms;
-      //mCurrentMove.time = deltaT;
+      U32 ms = Platform::getRealMilliseconds();
+      deltaT = (ms - mLastMoveTime);
+      mLastMoveTime = ms;
+      mCurrentMove.time = deltaT;
 
       // Check to see if we need to respawn this robot
       if(hasExploded)

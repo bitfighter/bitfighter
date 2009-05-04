@@ -145,7 +145,8 @@ public:
    S32 getClassID(lua_State *L);
 
    S32 getCPUTime(lua_State *L) { return returnInt(L, gServerGame->getCurrentTime()); }    // Return CPU time... use for timing things
-
+   S32 getTime(lua_State *L) { return returnInt(L, thisRobot->getCurrentMove().time); }  
+   
 
    S32 getZoneCenterXY(lua_State *L);
    S32 getGatewayFromZoneToZone(lua_State *L);
