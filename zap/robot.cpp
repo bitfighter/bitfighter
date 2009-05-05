@@ -209,6 +209,12 @@ S32 LuaRobot::getClassID(lua_State *L)
 }
 
 
+S32 LuaRobot::getCPUTime(lua_State *L) 
+{ 
+   return returnInt(L, gServerGame->getCurrentTime());  
+}    // Return CPU time... use for timing things
+
+
 // Turn to angle a (in radians)
 S32 LuaRobot::setAngle(lua_State *L)
 {

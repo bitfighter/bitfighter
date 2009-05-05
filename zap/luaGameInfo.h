@@ -37,7 +37,6 @@ namespace Zap
 
 class LuaGameInfo : public LuaObject
 {
-
 public:
   LuaGameInfo(lua_State *L);      // Constructor
   ~LuaGameInfo();                 // Destructor
@@ -146,30 +145,32 @@ public:
 class LuaLoadout : public LuaObject
 {
 private:
-      U32 mLoadout[ShipModuleCount + ShipWeaponCount];
+   U32 mLoadout[ShipModuleCount + ShipWeaponCount];
 
 public:
-      LuaLoadout(lua_State *L);        // Lua constructor
-      LuaLoadout(U32 loadoutItems[]);  // C++ constructor
+   LuaLoadout(lua_State *L);        // Lua constructor
+   LuaLoadout(U32 loadoutItems[]);  // C++ constructor
 
-      ~LuaLoadout();                   // Destructor
+   ~LuaLoadout();                   // Destructor
 
-      static const char className[];
+   static const char className[];
 
-      static Lunar<LuaLoadout>::RegType methods[];
+   static Lunar<LuaLoadout>::RegType methods[];
 
-      S32 setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
-      S32 setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
-      S32 isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
-      S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
-      S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
-      S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
+   S32 setWeapon(lua_State *L);     // setWeapon(i, mod) ==> Set weapon at index i
+   S32 setModule(lua_State *L);     // setModule(i, mod) ==> Set module at index i
+   S32 isValid(lua_State *L);       // isValid() ==> Is loadout config valid?
+   S32 equals(lua_State *L);        // equals(Loadout) ==> is loadout the same as Loadout?
+   S32 getWeapon(lua_State *L);     // getWeapon(i) ==> return weapon at index i
+   S32 getModule(lua_State *L);     // getModule(i) ==> return module at index i
 
-      U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
+   U32 getLoadoutItem(S32 indx);    // Helper function, not accessible from Lua
 };
 
 
 ///////////////////////////////
+
+
 
 class LuaTimer : public LuaObject      // Basically wraps our Bitfighter timer class
 {
@@ -178,17 +179,19 @@ private:
 
 public:
    LuaTimer(lua_State *L);          // Lua constructor
-
+   ~LuaTimer() { /* Do nohting */ }
    static const char className[];
 
    static Lunar<LuaTimer>::RegType methods[];
 
    S32 reset(lua_State *L);
    S32 update(lua_State *L);
-   S32 getCurrent(lua_State *L);
+   S32 getTime(lua_State *L);
    S32 getFraction(lua_State *L);
    S32 setPeriod(lua_State *L);
 };
+
+
 };
 
 #endif

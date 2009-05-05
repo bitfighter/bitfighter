@@ -410,6 +410,9 @@ S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at
 ////////////////////////////////////
 ////////////////////////////////////
 
+
+
+
 const char LuaTimer::className[] = "Timer";      // Class name as it appears to Lua scripts
 
 // Lua Constructor
@@ -427,7 +430,7 @@ Lunar<LuaTimer>::RegType LuaTimer::methods[] =
 {
    method(LuaTimer, reset),
    method(LuaTimer, update),
-   method(LuaTimer, getCurrent),
+   method(LuaTimer, getTime),
    method(LuaTimer, getFraction),
    method(LuaTimer, setPeriod),
 
@@ -449,7 +452,7 @@ S32 LuaTimer::update(lua_State *L)
    return returnBool(L, mTimer.update((U32) getInt(L, 1, methodName)));
 }
 
-S32 LuaTimer::getCurrent(lua_State *L)
+S32 LuaTimer::getTime(lua_State *L)
 {
    return returnInt(L, mTimer.getCurrent());
 }
