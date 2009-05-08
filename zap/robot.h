@@ -168,6 +168,7 @@ public:
    S32 findObjects(lua_State *L);
    S32 getWaypoint(lua_State *L);
 
+   S32 findItems(lua_State *L);
 
    // Temp functions??
    S32 findAsteroid(lua_State *L);

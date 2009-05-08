@@ -212,7 +212,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
       {
          mLastDest = TNL::Random::readI(0, mDest.size() - 1);
          Point newPos = s->getActualPos() - mPos + mDest[mLastDest];    
-         s->setActualPos(newPos);
+         s->setActualPos(newPos, true);
       }
    }
 }

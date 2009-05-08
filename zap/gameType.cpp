@@ -136,7 +136,7 @@ Vector<GameType::ParameterDescription> GameType::describeArguments()
 string itos(S32 i) // convert int to string
 {
    char outString[100];
-   sprintf(outString,"%d", i);
+   dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
 

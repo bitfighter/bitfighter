@@ -194,8 +194,10 @@ public:
    void controlMoveReplayComplete();
 
    void emitShipExplosion(Point pos);
-   void setActualPos(Point p);
+   //void setActualPos(Point p);
+   void setActualPos(Point p, bool warp);
    void activateModule(U32 indx) { mCurrentMove.module[indx] = true; }     // Activate the specified module for the current move
+
 
 
    virtual void kill(DamageInfo *theInfo);

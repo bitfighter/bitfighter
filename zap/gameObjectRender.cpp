@@ -1289,7 +1289,7 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 
    c = gt->getTeamColor(team);      // Handles case of team = -1 & -2 properly
    glColor(c);
-   UserInterface::drawAngleString(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
+   UserInterface::drawAngleString_fixed(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
 }
 
 

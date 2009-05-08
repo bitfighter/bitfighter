@@ -125,12 +125,22 @@ bool Ship::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+// May not actually need this one...
+//void Ship::setActualPos(Point p)
+//{
+//   setActualPos(p, false);
+//}
 
-void Ship::setActualPos(Point p)
+
+void Ship::setActualPos(Point p, bool warp)
 {
    mMoveState[ActualState].pos = p;
    mMoveState[RenderState].pos = p;
-   setMaskBits(PositionMask | WarpPositionMask);
+
+   if(warp)
+      setMaskBits(PositionMask | WarpPositionMask);
+   else
+      setMaskBits(PositionMask);
 }
 
 

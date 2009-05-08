@@ -199,6 +199,8 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, findTestItem),
    method(LuaRobot, findAsteroid),
 
+   method(LuaRobot, findItems),
+
    {0,0}    // End method list
 };
 
@@ -622,6 +624,39 @@ S32 LuaRobot::logprint(lua_State *L)
 extern Rect gServerWorldBounds;
 
 
+
+S32 LuaRobot::findItems(lua_State *L)
+{
+   static const char *methodName = "findItems";
+
+   checkArgCount(L, 1, methodName);
+   U32 objectType = getInt(L, 1, methodName);
+
+   fillVector.clear();
+
+   //thisRobot->findObjects(ShipType, fillVector, Rect(thisRobot->getActualPos(), gServerGame->computePlayerVisArea(thisRobot)) );    // Get other objects on screen-visible area only
+   thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
+
+   lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+   
+
+   //lua_newtable(L);
+   //int top = lua_gettop(L);
+
+   //for(S32 i = 0; i < fillVector.size(); i++) 
+   //{
+   //    const char* key = it->first.c_str();
+   //    const char* value = it->second.c_str();
+   //    lua_pushstring(L, key);
+   //    lua_pushstring(L, value);
+   //    lua_settable(L, top);
+   //}
+
+   return 1;
+}
+
+
+
 // Probably temporary
 S32 LuaRobot::findAsteroid(lua_State *L)
 {
@@ -696,17 +731,10 @@ S32 LuaRobot::findObjects(lua_State *L)
 {
    //LuaProtectStack x(this); <== good idea, not working right...  ;-(
 
-   checkArgCount(L, 1, "findObjects");
+    static const char *methodName = "findObjects";
 
-   if(!lua_isnumber(L, 1))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "findObjects called with non-numeric arg");
-      logprintf(msg);
-      throw(string(msg));
-   }
-
-   U32 objectType = luaL_checknumber(L, 1);
+   checkArgCount(L, 1, methodName);
+   U32 objectType = getInt(L, 1, methodName);
 
    fillVector.clear();
 
@@ -1130,6 +1158,8 @@ bool Robot::initialize(Point p)
    //Lunar<FlagItem>::Register(L);
    //Lunar<SoccerBallItem>::Register(L);
    //Lunar<HuntersFlagItem>::Register(L);
+
+   luaopen_base(L);     // Make some basic functions available to bots
 
    // Push a pointer to this Robot to the Lua stack
    lua_pushlightuserdata(L, (void *)this);

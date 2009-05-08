@@ -66,9 +66,11 @@
 //<ul>
 //<li>Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.</li>
 //<li>Turrets and Forcefields can now repair themselves, if you specify an additional argument on their definition line (secs / 10% repair... i.e. entering 1, item will fully repair in 10 seconds).  Again, cannot change value in editor, but will survive load/save cycle.</li>
-//<li>4 alternate speedzone graphics available for testing... set in [Testing] section of INI file</li>
-//<li>Can specify speedzone speed as optional last argument in level definition file (min 100, max 5000)... no editor UI available, but will survive load/save cycle in editor</li>
-//<li>Speedzones are now almost deterministic in where you end up -- very precise corridors now possible</li>
+//<li>4 alternate gofast graphics available for testing... set in [Testing] section of INI file</li>
+//<li>Can specify gofast speed as optional last argument in level definition file (min 100, max 5000)... no editor UI available, but will survive load/save cycle in editor</li>
+//<li>Can specify whether ships snap to center of gofast with optional additional parameter in level file</li>
+//<li>Gofast are now almost deterministic in where you end up -- very precise corridors now possible, when snapping enabled</li>
+//<li>Default gofast speed reduced to 2000<li>
 //<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
 //<li>Asteroids... you figure it out!</li>
 //</ul>
@@ -99,6 +101,9 @@
 //<li>When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible</li>
 //<li>Added more editor checks (flags in non-flag games, team flags in non-team-flag games)</li>
 //<li>Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor</li>
+//<li>Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
+//<li>Display gofast speed and snapping on item</li>
+
 //</ul>
 //
 //<u>Bug fixes:</u>
@@ -127,9 +132,10 @@
 //<li>Increased max level size from 64K to 96K</li>
 //<li>Server menu: Added indicator ("T") for servers in test mode</li>
 //<li>Server menu: Replaced max player listing with number of robots</li>
-
-
-
+//<li>Editor: Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
+//<li>Editor: Display gofast speed and snapping on item</li>
+//<li>Can specify whether ships snap to center of gofast with optional additional parameter in level file</li>
+//<li>Default gofast speed reduced to 2000<li>
 
 
 // Mac Test:

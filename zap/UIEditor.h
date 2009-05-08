@@ -114,11 +114,13 @@ public:
       U32 textSize;        // For items that have an aux text field
       S32 repopDelay;      // For repair items, also used for engineered objects heal rate
       S32 speed;           // Speed for speedzone items
+      bool boolattr;       // Additional optional boolean attribute for some items (only speedzone so far...)
 
       WorldItem()    // Constructor
       {
          repopDelay = -1;
          speed = -1;
+         boolattr = false;
       }
    };
 

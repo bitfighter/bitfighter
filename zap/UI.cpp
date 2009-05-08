@@ -237,33 +237,47 @@ void UserInterface::renderCurrent()    // static
 
 extern const F32 radiansToDegreesConversion;
 
+#define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args);
 
-void UserInterface::drawAngleStringf(S32 x, S32 y, F32 size, F32 angle, const char *format, ...)
+
+// New, fixed version
+void UserInterface::drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
-   drawAngleString(x, y, size, angle, buffer);
+   makeBuffer;
+   doDrawAngleString((S32) x, (S32) y, size, angle, buffer, true);
 }
 
+// New, fixed version
+void UserInterface::drawAngleString_fixed(S32 x, S32 y, F32 size, F32 angle, const char *string)
+{
+   doDrawAngleString(x, y, size, angle, string, true);
+}
 
+// New, fixed version
+void UserInterface::drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string)
+{
+   doDrawAngleString(x, y, size, angle, string, true);
+}
+
+// Old, broken version
 void UserInterface::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
-   drawAngleString((S32) x, (S32) y, size, angle, buffer);
+   makeBuffer;
+   doDrawAngleString((S32) x, (S32) y, size, angle, buffer, false);
 }
 
 void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string)
 {
+   doDrawAngleString(x, y, size, angle, string, false);
+}
+
+#undef makeBuffer
+
+void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fix)
+{
    F32 scaleFactor = size / 120.0f;
    glPushMatrix();
-   glTranslatef(x, y + size, 0);
+   glTranslatef(x, y + (fix ? 0 : size), 0);
    glRotatef(angle * radiansToDegreesConversion, 0, 0, 1);
    glScalef(scaleFactor, -scaleFactor, 1);
    for(S32 i = 0; string[i]; i++)
@@ -271,10 +285,12 @@ void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const cha
    glPopMatrix();
 }
 
-void UserInterface::drawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string)
+// Same but accepts F32 args
+void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
 {
-	drawAngleString((S32) x, (S32) y, size, angle, string);
+	doDrawAngleString((S32) x, (S32) y, size, angle, string, fix);
 }
+
 
 //void UserInterface::drawAngleString(S32 x, S32 y, U32 size, F32 angle, const char *string)
 //{

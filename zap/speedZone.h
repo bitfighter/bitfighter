@@ -58,14 +58,16 @@ public:
    enum {
       halfWidth = 25,
       height = 64,
-      defaultSpeed = 3200,
+      defaultSpeed = 2000,
       minSpeed = 1000,
       maxSpeed = 5000,
+      defaultSnap = 0,     // 0 = false, 1 = true
    };
 
    Point pos;
    Point dir;
-   U16 mSpeed;    // Speed at which ship is propelled
+   U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
+   bool mSnapLocation;     // If true, ship will be snapped to center of speedzone before being ejected
    
    SpeedZone();   // Constructor
    static Vector<Point> generatePoints(Point pos, Point dir);

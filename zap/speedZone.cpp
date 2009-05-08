@@ -43,6 +43,7 @@ SpeedZone::SpeedZone()
    mNetFlags.set(Ghostable);
    mObjectTypeMask = CommandMapVisType;
    mSpeed = defaultSpeed;
+   mSnapLocation = false;     // Don't snap unless specified
 }
 
 
@@ -105,8 +106,13 @@ bool SpeedZone::processArguments(S32 argc, const char **argv)
 
    preparePoints();
 
-   if(argc == 5)
+   if(argc >= 5)
       mSpeed = max(minSpeed, min(maxSpeed, atoi(argv[4])));
+
+   if(argc >= 6)
+      mSnapLocation = true;   
+   else
+      mSnapLocation = false;
 
    return true;
 }
@@ -151,10 +157,16 @@ bool SpeedZone::collide(GameObject *hitObject)
             return false;
 
       Point impulse = (dir - pos);
-      impulse.normalize(mSpeed); 
+      impulse.normalize(mSpeed);
+
       //impulse.normalize(impulseSpeed); 
       s->setActualVel(Point(0,0));
-      s->setActualPos(pos);
+
+      // This following line will cause ships entering the speedzone to have their location set to the same point
+      // within the zone so that their path out will be very predictable.
+      if(mSnapLocation)
+         s->setActualPos(pos, false);
+
       s->mImpulseVector = impulse * 1.5;
 
       // To ensure we don't give multiple impulses to the same ship, we'll exclude it from
@@ -188,6 +200,7 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
    stream->write(dir.y);
 
    stream->writeInt(mSpeed, 16);
+   stream->writeFlag(mSnapLocation);
 
    return 0;
 }
@@ -201,6 +214,7 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    stream->read(&dir.y);
 
    mSpeed = stream->readInt(16);
+   mSnapLocation = stream->readFlag();
 
    preparePoints();
 }

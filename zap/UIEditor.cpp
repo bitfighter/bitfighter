@@ -44,6 +44,7 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "gameType.h"
 #include "engineeredObjects.h"   // For Turret properties
 #include "barrier.h"             // For BarrierWidth
+#include "speedZone.h"           // For default speed
 #include "config.h"
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -431,7 +432,12 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
             i.vertSelected.push_back(false);
       }
       else        // Anything but a textItem or old-school NexusObject
-         for(;arg < argc; arg += 2) // (no first arg)
+      {
+         S32 coords = argc;
+         if(index == ItemSpeedZone)
+            coords = 4;    // 2 pairs of coords = 2 * 2 = 4
+
+         for(;arg < coords; arg += 2) // (no first arg)
          {
             // Put a cap on the number of vertices in a polygon
             if(gGameItemRecs[index].geom == geomPoly && i.verts.size() >= gMaxPolygonPoints)
@@ -444,17 +450,26 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
                i.vertSelected.push_back(false);
             }
          }
+      }
 
-         // Repair, Turrets, Forcefields all have optional additional argument dealing with repair or repopulation
-         if( (index == ItemRepair) && argc == 4)
-            i.repopDelay = atoi(argv[3]);
+      // Repair, Turrets, Forcefields all have optional additional argument dealing with repair or repopulation
+      if( (index == ItemRepair) && argc == 4)
+         i.repopDelay = atoi(argv[3]);
 
-         if( (index == ItemTurret || index == ItemForceField) && argc == 5)
-            i.repopDelay = atoi(argv[4]);
+      if( (index == ItemTurret || index == ItemForceField) && argc == 5)
+         i.repopDelay = atoi(argv[4]);
 
-         // SpeedZones have optional extra argument
-         if( (index == ItemSpeedZone) && argc == 6)
+      // SpeedZones have 2 optional extra arguments
+      if(index == ItemSpeedZone)
+      {
+         if(argc >= 6)
             i.speed = atoi(argv[5]);
+         else
+            i.speed = SpeedZone::defaultSpeed;
+     
+         if(argc >= 7)
+            i.boolattr = true;
+       }
 
       mItems.push_back(i);    // Save item
    }
@@ -1201,22 +1216,52 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       // If this is a textItem, and either the item or either vertex is selected, draw the text
       if(!isDockItem && gGameItemRecs[item.index].hasText)
       {
-         // Recalc text size -- TODO:  this shouldn't be here
+         // Recalc text size -- TODO:  this shouldn't be here... this should only happen when text is created, not every time it's drawn
 
          F32 strWidth = getStringWidth(120, item.text.c_str());
          F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
+         F32 ang = pos.angleTo(dest);
+         F32 cosang = cos(ang);
+         F32 sinang = sin(ang);
 
          item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
 
          glColor(getTeamColor(item.team));
          F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);   // Use this more precise F32 calculation of size for smoother interactive rendering.  We'll use U32 approximation in game.
-         drawAngleStringf(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c", item.text.c_str(), cursorBlink && mEditingTextItem == indx ? '_' : 0);
+         drawAngleStringf_fixed(pos.x, pos.y, txtSize, ang, "%s%c", item.text.c_str(), cursorBlink && mEditingTextItem == indx ? '_' : 0);
+
          if((item.selected || indx == itemToLightUp) && mEditingTextItem == -1)
          {
+            const U32 instrSize = 8;
+            S32 len = getStringWidth(instrSize, "[Ctrl][T] to edit text");
+            S32 offset = (pos.distanceTo(dest) - len) / 2;
+
             glColor3f(1, 1, 1);     // white
-            drawAngleString(pos.x + 5, pos.y + txtSize + 5, 8, pos.angleTo(dest), "[Ctrl][T] to edit text");      // Doesn't quite draw in right place, but it will do for now
+            drawAngleString_fixed(pos.x + cosang * offset - (instrSize + 3) * sinang, pos.y + sinang * offset + (instrSize + 3) * cosang, instrSize, ang, "[Ctrl][T] to edit text");
          }
       }
+      else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
+      {
+         if(item.selected || indx == itemToLightUp)
+         {
+            const U32 txtSize = 10;
+
+            F32 ang = pos.angleTo(dest);
+            F32 cosang = cos(ang);
+            F32 sinang = sin(ang);
+
+            S32 len = getStringWidthf(txtSize, "Speed: %d", item.speed);
+            S32 offset = (pos.distanceTo(dest) - len) / 2;
+
+            drawAngleStringf_fixed(pos.x + cosang * offset + sinang * txtSize, pos.y + sinang * offset - cosang * txtSize, txtSize, ang, "Speed: %d", item.speed);
+
+            len = getStringWidthf(txtSize, "Snap: %s", item.boolattr ? "On" : "Off");
+            offset = (pos.distanceTo(dest) - len) / 2;
+
+            drawAngleStringf_fixed(pos.x + cosang * offset - sinang * (txtSize + 4), pos.y + sinang * offset + cosang * (txtSize + 4), txtSize, ang, "Snap: %s", item.boolattr ? "On" : "Off");
+         }
+      }
+
 
       // Label line with obj type
       //F32 lX = (pos.x + dest.x) / 2;
@@ -1254,7 +1299,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
          else if(item.index == ItemSpeedZone)
          {
-            drawString(pos.x - getStringWidth(labelSize, "Spd Zone") / 2, pos.y + labelSize + 2, labelSize, "Spd Zone");
+            drawString(pos.x - getStringWidth(labelSize, "GoFast") / 2, pos.y + labelSize + 2, labelSize, "GoFast");
             drawString(pos.x - getStringWidth(labelSize, "Location") / 2, pos.y + 2 * labelSize + 5, labelSize, "Location");
          }
          else if(item.index == ItemTextItem)
@@ -1282,7 +1327,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
          else if(item.index == ItemSpeedZone)
          {
-            drawString(dest.x - getStringWidth(labelSize, "Spd Zone") / 2, dest.y + labelSize + 2, labelSize, "Spd Zone");
+            drawString(dest.x - getStringWidth(labelSize, "GoFast") / 2, dest.y + labelSize + 2, labelSize, "GoFast");
             drawString(dest.x - getStringWidth(labelSize, "Direction") / 2, dest.y + 2 * labelSize + 5, labelSize, "Direction");
          }
          else if(item.index == ItemTextItem)
@@ -2327,6 +2372,13 @@ EditorUserInterface::WorldItem EditorUserInterface::constructItem(GameItems item
       item.textSize = 30;
       item.text = "Your text here";
    }
+
+   if(itemType == ItemSpeedZone)
+   {
+      item.speed = SpeedZone::defaultSpeed;
+      item.boolattr = SpeedZone::defaultSnap;
+   }
+
    return item;
 }
 
@@ -3028,8 +3080,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
          if(mItems[i].repopDelay != -1)
             fprintf(f, " %d", mItems[i].repopDelay);
-         if(mItems[i].speed != -1)     // Speedzones only!
-            fprintf(f, " %d", mItems[i].speed);
+         if(mItems[i].index == ItemSpeedZone)
+            fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
 
          fprintf(f, "\n");
       }
