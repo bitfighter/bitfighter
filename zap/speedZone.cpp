@@ -159,15 +159,15 @@ bool SpeedZone::collide(GameObject *hitObject)
       Point impulse = (dir - pos);
       impulse.normalize(mSpeed);
 
-      //impulse.normalize(impulseSpeed); 
-      s->setActualVel(Point(0,0));
-
       // This following line will cause ships entering the speedzone to have their location set to the same point
       // within the zone so that their path out will be very predictable.
       if(mSnapLocation)
+      {
          s->setActualPos(pos, false);
+         s->setActualVel(Point(0,0));
+      }
 
-      s->mImpulseVector = impulse * 1.5;
+      s->mImpulseVector = impulse * 1.5;     // <-- why???
 
       // To ensure we don't give multiple impulses to the same ship, we'll exclude it from
       // further action for about 300ms.  That should do the trick.
