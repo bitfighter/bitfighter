@@ -82,7 +82,7 @@ typedef double              F64;     ///< Compiler independent 64-bit float.
 /// the TNL_DECLARE_RPC_ENUM or TNL_DECLARE_RPC_MEM enum macros must
 /// be used to register the enumerations with the RPC system.
 struct NetType {
-
+   /* Intentionally empty */
 };
 
 /// Unsigned integer bit-level RPC template wrapper.

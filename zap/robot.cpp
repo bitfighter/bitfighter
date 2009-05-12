@@ -159,7 +159,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getTime),
 
    method(LuaRobot, getAngle),
-   method(LuaRobot, getPosXY),
+   method(LuaRobot, getLoc),
 
    method(LuaRobot, getZoneCenterXY),
    method(LuaRobot, getGatewayFromZoneToZone),
@@ -606,10 +606,13 @@ S32 LuaRobot::getAngle(lua_State *L)
 
 
 // Returns current position of ship
-S32 LuaRobot::getPosXY(lua_State *L)
+S32 LuaRobot::getLoc(lua_State *L)
 {
   return returnPoint(L, thisRobot->getActualPos());
 }
+
+
+
 
 
 // Write a message to the server logfile
@@ -624,7 +627,7 @@ S32 LuaRobot::logprint(lua_State *L)
 extern Rect gServerWorldBounds;
 
 
-
+// Return list of all items of specified type... does no screening at this point
 S32 LuaRobot::findItems(lua_State *L)
 {
    static const char *methodName = "findItems";
@@ -634,23 +637,17 @@ S32 LuaRobot::findItems(lua_State *L)
 
    fillVector.clear();
 
-   //thisRobot->findObjects(ShipType, fillVector, Rect(thisRobot->getActualPos(), gServerGame->computePlayerVisArea(thisRobot)) );    // Get other objects on screen-visible area only
    thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
 
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
-   
+   S32 tableIndx = lua_gettop(L);
 
-   //lua_newtable(L);
-   //int top = lua_gettop(L);
-
-   //for(S32 i = 0; i < fillVector.size(); i++) 
-   //{
-   //    const char* key = it->first.c_str();
-   //    const char* value = it->second.c_str();
-   //    lua_pushstring(L, key);
-   //    lua_pushstring(L, value);
-   //    lua_settable(L, top);
-   //}
+   for(S32 i = 0; i < fillVector.size(); i++) 
+   {
+      GameObject *obj = fillVector[i];
+      obj->push(L);
+      lua_rawseti(L, tableIndx, i + 1);
+   }
 
    return 1;
 }

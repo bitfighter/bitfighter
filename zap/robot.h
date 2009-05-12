@@ -154,7 +154,8 @@ public:
    S32 getCurrentZone(lua_State *L);
 
    S32 getAngle(lua_State *L);
-   S32 getPosXY(lua_State *L);
+   S32 getLoc(lua_State *L);
+
 
    S32 setAngle(lua_State *L);
    S32 setAngleXY(lua_State *L);

@@ -199,7 +199,6 @@ public:
    void activateModule(U32 indx) { mCurrentMove.module[indx] = true; }     // Activate the specified module for the current move
 
 
-
    virtual void kill(DamageInfo *theInfo);
    virtual void kill();
 

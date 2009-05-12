@@ -34,6 +34,8 @@
 #include "move.h"
 #include "point.h"    
 
+#include "lua.h"  // For push prototype
+
 namespace Zap
 {
 
@@ -217,6 +219,8 @@ public:
 
    virtual bool processArguments(S32 argc, const char**argv);
    void setScopeAlways();
+
+   virtual void push(lua_State *L) { /* Nothing here */ }    // Lua-aware classes will implement this
 
 };
 
