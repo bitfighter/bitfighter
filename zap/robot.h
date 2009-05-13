@@ -101,7 +101,7 @@ public:
    S32 flightPlanTo;                      // Zone our flightplan was calculated to
 
    // Some informational functions
-   F32 getAngleXY(F32 x, F32 y);
+   F32 getAngleXY(Point point);
 
    // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
@@ -140,15 +140,15 @@ public:
 
    static Lunar<LuaRobot>::RegType methods[];
 
-   
+
 
    S32 getClassID(lua_State *L);
 
    S32 getCPUTime(lua_State *L);
-   S32 getTime(lua_State *L) { return returnInt(L, thisRobot->getCurrentMove().time); }  
-   
+   S32 getTime(lua_State *L) { return returnInt(L, thisRobot->getCurrentMove().time); }
 
-   S32 getZoneCenterXY(lua_State *L);
+
+   S32 getZoneCenter(lua_State *L);
    S32 getGatewayFromZoneToZone(lua_State *L);
    S32 getZoneCount(lua_State *L);
    S32 getCurrentZone(lua_State *L);
@@ -171,13 +171,11 @@ public:
 
    S32 findItems(lua_State *L);
 
-   // Temp functions??
-   S32 findAsteroid(lua_State *L);
-   S32 findTestItem(lua_State *L);
-
    // Ship control
    S32 setThrustAng(lua_State *L);
    S32 setThrustXY(lua_State *L);
+
+   S32 getFiringSolution(lua_State *L);
 
    S32 fire(lua_State *L);
    S32 setWeapon(lua_State *L);

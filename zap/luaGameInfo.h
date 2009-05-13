@@ -31,6 +31,7 @@
 #include "gameWeapons.h"
 #include "gameType.h"      // For Team def
 #include "shipItems.h"     // For module defs
+#include "point.h"         // For LuaPoint
 
 namespace Zap
 {
@@ -170,7 +171,28 @@ public:
 
 ///////////////////////////////
 
+class LuaPoint : public Point, LuaObject
+{
+public:
+   LuaPoint(lua_State *L);        // Lua constructor
+   LuaPoint(F32 x, F32 y);        // C++ constructor  --> needed?
 
+   ~LuaPoint();                   // Destructor
+
+   static const char className[];
+
+   static Lunar<LuaPoint>::RegType methods[];
+
+   S32 equals(lua_State *L);     // Does point equal another point?
+
+   // Wrap some of our standard point methods
+   S32 distanceTo(lua_State *L);
+   S32 distSquared(lua_State *L);
+   S32 angleTo(lua_State *L);
+
+};
+
+///////////////////////////////
 
 class LuaTimer : public LuaObject      // Basically wraps our Bitfighter timer class
 {

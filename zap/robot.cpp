@@ -161,7 +161,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getAngle),
    method(LuaRobot, getLoc),
 
-   method(LuaRobot, getZoneCenterXY),
+   method(LuaRobot, getZoneCenter),
    method(LuaRobot, getGatewayFromZoneToZone),
    method(LuaRobot, getZoneCount),
    method(LuaRobot, getCurrentZone),
@@ -196,10 +196,8 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    method(LuaRobot, findObjects),
 
-   method(LuaRobot, findTestItem),
-   method(LuaRobot, findAsteroid),
-
    method(LuaRobot, findItems),
+   method(LuaRobot, getFiringSolution),
 
    {0,0}    // End method list
 };
@@ -211,48 +209,49 @@ S32 LuaRobot::getClassID(lua_State *L)
 }
 
 
-S32 LuaRobot::getCPUTime(lua_State *L) 
-{ 
-   return returnInt(L, gServerGame->getCurrentTime());  
-}    // Return CPU time... use for timing things
+// Return CPU time... use for timing things
+S32 LuaRobot::getCPUTime(lua_State *L)
+{
+   return returnInt(L, gServerGame->getCurrentTime());
+}
 
 
 // Turn to angle a (in radians)
 S32 LuaRobot::setAngle(lua_State *L)
 {
-   if(!lua_isnil(L, 1))
-   {
-      Move move = thisRobot->getCurrentMove();
-      move.angle = luaL_checknumber(L, 1);
-      thisRobot->setCurrentMove(move);
-   }
-   return 0;
-}
-
-// Turn towards point XY
-S32 LuaRobot::setAngleXY(lua_State *L)
-{
-   if(lua_isnil(L, 1) || lua_isnil(L, 2))
-      return 0;
-
-   F32 x = luaL_checknumber(L, 1);
-   F32 y = luaL_checknumber(L, 2);
+   static const char *methodName = "Robot:setAngle()";
+   checkArgCount(L, 1, methodName);
 
    Move move = thisRobot->getCurrentMove();
-   move.angle = thisRobot->getAngleXY(x, y);
+   move.angle = getFloat(L, 1, methodName);
    thisRobot->setCurrentMove(move);
 
    return 0;
 }
 
 
+// Turn towards point XY
+S32 LuaRobot::setAngleXY(lua_State *L)
+{
+   static const char *methodName = "Robot:setAngleXY()";
+   checkArgCount(L, 1, methodName);
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+
+   Move move = thisRobot->getCurrentMove();
+   move.angle = thisRobot->getAngleXY(&point);
+   thisRobot->setCurrentMove(move);
+
+   return 0;
+}
+
 // Get angle toward point XY
 S32 LuaRobot::getAngleXY(lua_State *L)
 {
-   F32 x = luaL_checknumber(L, 1);
-   F32 y = luaL_checknumber(L, 2);
+   static const char *methodName = "Robot:getAngleXY()";
+   checkArgCount(L, 1, methodName);
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   lua_pushnumber(L, thisRobot->getAngleXY(x, y));
+   lua_pushnumber(L, thisRobot->getAngleXY(&point));
    return 1;
 }
 
@@ -260,18 +259,10 @@ S32 LuaRobot::getAngleXY(lua_State *L)
 // Thrust at velocity v toward angle a
 S32 LuaRobot::setThrustAng(lua_State *L)
 {
-   F32 vel, ang;
-
-   if(lua_isnil(L, 1) || lua_isnil(L, 2))
-   {
-      vel = 0;
-      ang = 0;
-   }
-   else
-   {
-      vel = luaL_checknumber(L, 1);
-      ang = luaL_checknumber(L, 2);
-   }
+   static const char *methodName = "Robot:setThrustAng()";
+   checkArgCount(L, 2, methodName);
+   F32 vel = getFloat(L, 1, methodName);
+   F32 ang = getFloat(L, 2, methodName);
 
    Move move;
 
@@ -286,26 +277,79 @@ S32 LuaRobot::setThrustAng(lua_State *L)
 }
 
 
+extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
+
+// Given an object, which angle do we need to be at to fire to hit it?
+// Returns nil if a workable solution can't be found
+// Logic adapted from turret aiming algorithm
+//XXXXGameItem
+S32 LuaRobot::getFiringSolution(lua_State *L)
+{
+   Point aimPos = thisRobot->getActualPos();    // Probably need to account for the fact that the robot doesn't fire from its center
+
+   GameObject *target;
+read target from stack
+
+   if(target->getObjectTypeMask() & ( ShipType | RobotType))
+   {
+      Ship *potential = (Ship*)targetList[i];
+
+      // Is it dead or cloaked?  If so, ignore
+      if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
+         continue;
+   }
+
+   GameObject *potential = targetList[i];
+
+   if(potential->getTeam() == mTeam)      // Is target on our team?
+      continue;                           // ...if so, skip it!
+
+   // Calculate where we have to shoot to hit this...
+   Point Vs = potential->getActualVel();
+
+   WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
+
+   F32 S = weap.projVelocity;
+   Point d = potential->getRenderPos() - aimPos;
+
+   F32 t;      // t is set in next statement
+   if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weap.projLiveTime * 0.001f, t))
+      return returnNil(L);
+
+   Point leadPos = potential->getRenderPos() + Vs * t;
+
+   // Calculate distance
+   Point delta = (leadPos - aimPos);
+
+   // Make sure we can see it...
+   Point n;
+   if(findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
+      return returnNil(L);
+
+   // See if we're gonna clobber our own stuff...
+   disableCollision();
+   Point delta2 = delta;
+   delta2.normalize(TurretRange);
+   GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
+   enableCollision();
+
+   if(hitObject && hitObject->getTeam() == mTeam)
+      return returnNil(L);
+
+   return returnFloat(L, delta.ATAN2());
+}
+
 // Thrust at velocity v toward point x,y
 S32 LuaRobot::setThrustXY(lua_State *L)
 {
-   F32 vel, ang;
+   static const char *methodName = "Robot:setThrustXY()";
+   checkArgCount(L, 2, methodName);
+   F32 vel = getFloat(L, 1, methodName);
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 2);
 
-   if(lua_isnil(L, 1) || lua_isnil(L, 2) || lua_isnil(L, 3))
-   {
-      vel = 0;
-      ang = 0;
-   }
-   else
-   {
-      vel = luaL_checknumber(L, 1);
-      F32 x = luaL_checknumber(L, 2);
-      F32 y = luaL_checknumber(L, 3);
+   F32 ang = thisRobot->getAngleXY(&point) - 0 * FloatHalfPi;
 
-      ang = thisRobot->getAngleXY(x,y) - 0 * FloatHalfPi;
-   }
-
-   Move move;
+   Move move = thisRobot->getCurrentMove();
 
    move.up = sin(ang) < 0 ? -vel * sin(ang) : 0;
    move.down = sin(ang) > 0 ? vel * sin(ang) : 0;
@@ -321,13 +365,11 @@ S32 LuaRobot::setThrustXY(lua_State *L)
 extern Vector<SafePtr<BotNavMeshZone>> gBotNavMeshZones;
 
 // Get the coords of the center of mesh zone z
-S32 LuaRobot::getZoneCenterXY(lua_State *L)
+S32 LuaRobot::getZoneCenter(lua_State *L)
 {
-   // You give us a nil, we'll give it right back!
-   if(lua_isnil(L, 1))
-      return returnNil(L);
-
-   S32 z = luaL_checknumber(L, 1);   // Desired zone
+   static const char *methodName = "Robot:getZoneCenter()";
+   checkArgCount(L, 1, methodName);
+   S32 z = getInt(L, 1, methodName);
 
    // In case this gets called too early...
    if(gBotNavMeshZones.size() == 0)
@@ -341,16 +383,13 @@ S32 LuaRobot::getZoneCenterXY(lua_State *L)
 }
 
 
-// Get the coords of the gateway to the specified zone.  Returns nil, nil if requested zone doesn't border current zone.
+// Get the coords of the gateway to the specified zone.  Returns point, nil if requested zone doesn't border current zone.
 S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 {
-   // You give us a nil, we'll give it right back!
-   if(lua_isnil(L, 1) || lua_isnil(L, 2))
-      return returnNil(L);
-
-
-   S32 from = luaL_checknumber(L, 1);     // From this zone
-   S32 to = luaL_checknumber(L, 2);       // To this one
+   static const char *methodName = "Robot:getGatewayFromZoneToZone()";
+   checkArgCount(L, 2, methodName);
+   S32 from = getInt(L, 1, methodName);
+   S32 to = getInt(L, 2, methodName);
 
    // In case this gets called too early...
    if(gBotNavMeshZones.size() == 0)
@@ -403,18 +442,15 @@ S32 LuaRobot::fire(lua_State *L)
    return 0;
 }
 
+
 // Can robot see point XY?
 S32 LuaRobot::hasLosXY(lua_State *L)
 {
-   F32 x, y;
+   static const char *methodName = "Robot:hasLosXY()";
+   checkArgCount(L, 1, methodName);
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   if(lua_isnil(L, 1) || lua_isnil(L, 2))
-      return returnNil(L);
-
-   x = luaL_checknumber(L, 1);
-   y = luaL_checknumber(L, 2);
-
-   return returnBool(L, thisRobot->canSeePoint(Point(x,y)) );
+   return returnBool(L, thisRobot->canSeePoint(&point));
 }
 
 
@@ -575,12 +611,12 @@ S32 LuaRobot::getWeapon(lua_State *L)
 // Send message to all players
 S32 LuaRobot::globalMsg(lua_State *L)
 {
-   if(lua_isnil(L, 1))
-      return 0;
+   static const char *methodName = "Robot:globalMsg()";
+   checkArgCount(L, 1, methodName);
 
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->s2cDisplayChatMessage(true, thisRobot->getName(), lua_tostring(L, 1));
+      gt->s2cDisplayChatMessage(true, thisRobot->getName(), getString(L, 1, methodName));
    return 0;
 }
 
@@ -588,12 +624,12 @@ S32 LuaRobot::globalMsg(lua_State *L)
 // Send message to team (what happens when neutral/enemytoall robot does this???)
 S32 LuaRobot::teamMsg(lua_State *L)
 {
-   if(lua_isnil(L, 1))
-      return 0;
+   static const char *methodName = "Robot:teamMsg()";
+   checkArgCount(L, 1, methodName);
 
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->s2cDisplayChatMessage(false, thisRobot->getName(), lua_tostring(L, 1));
+      gt->s2cDisplayChatMessage(false, thisRobot->getName(), getString(L, 1, methodName));
    return 0;
 }
 
@@ -612,20 +648,18 @@ S32 LuaRobot::getLoc(lua_State *L)
 }
 
 
-
-
-
 // Write a message to the server logfile
 S32 LuaRobot::logprint(lua_State *L)
 {
-   if(!lua_isnil(L, 1))
-      logprintf("RobotLog %s: %s", thisRobot->getName().getString(), lua_tostring(L, 1));
+   static const char *methodName = "Robot:logprint()";
+   checkArgCount(L, 1, methodName);
+
+   logprintf("RobotLog %s: %s", thisRobot->getName().getString(), getString(L, 1, methodName));
    return 0;
 }
 
 
 extern Rect gServerWorldBounds;
-
 
 // Return list of all items of specified type... does no screening at this point
 S32 LuaRobot::findItems(lua_State *L)
@@ -642,7 +676,7 @@ S32 LuaRobot::findItems(lua_State *L)
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    S32 tableIndx = lua_gettop(L);
 
-   for(S32 i = 0; i < fillVector.size(); i++) 
+   for(S32 i = 0; i < fillVector.size(); i++)
    {
       GameObject *obj = fillVector[i];
       obj->push(L);
@@ -653,77 +687,7 @@ S32 LuaRobot::findItems(lua_State *L)
 }
 
 
-
-// Probably temporary
-S32 LuaRobot::findAsteroid(lua_State *L)
-{
-   fillVector.clear();
-   thisRobot->findObjects(AsteroidType, fillVector, gServerWorldBounds );
-
-   // Now find the closest
-   F32 bestRange = F32_MAX;
-   Asteroid *closest = NULL;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      // Some special rules for narrowing in on the objects we really want
-      //if(fillVector[i]->getObjectTypeMask() & AsteroidType)
-
-      Asteroid *asteroid = (Asteroid*)fillVector[i];
-
-      F32 dist = asteroid->getActualPos().distSquared(thisRobot->getActualPos());
-      if(dist < bestRange)
-      {
-         bestRange = dist;
-         closest = asteroid;
-      }
-
-   }
-   if(closest == NULL)
-      return returnNil(L);
-   else
-   {
-       Lunar<Asteroid>::push(L, closest);
-       return 1;
-   }
-}
-
-
-
-S32 LuaRobot::findTestItem(lua_State *L)
-{
-   fillVector.clear();
-   thisRobot->findObjects(TestItemType, fillVector, gServerWorldBounds );
-
-   // Now find the closest
-   F32 bestRange = F32_MAX;
-   TestItem *closest = NULL;
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      // Some special rules for narrowing in on the objects we really want
-      //if(fillVector[i]->getObjectTypeMask() & AsteroidType)
-
-      TestItem *item = (TestItem*)fillVector[i];
-
-      F32 dist = item->getActualPos().distSquared(thisRobot->getActualPos());
-      if(dist < bestRange)
-      {
-         bestRange = dist;
-         closest = item;
-      }
-
-   }
-   if(closest == NULL)
-      return returnNil(L);
-   else
-   {
-      Lunar<TestItem>::push(L, closest);
-      return 1;
-   }
-}
-
-
+// Get rid of??
 S32 LuaRobot::findObjects(lua_State *L)
 {
    //LuaProtectStack x(this); <== good idea, not working right...  ;-(
@@ -837,28 +801,17 @@ S32 LuaRobot::findObjects(lua_State *L)
 
 extern S32 findZoneContaining(Point p);
 
+
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
 S32 LuaRobot::getWaypoint(lua_State *L)
 {
-   checkArgCount(L, 2, "getWaypoint");
+   static const char *methodName = "Robot:getWaypoint()";
+   checkArgCount(L, 1, methodName);
+   LuaPoint *target = Lunar<LuaPoint>::check(L, 1);
 
-//alternatively: luaL_checktype(L,1,LUA_TNUMBER) , throws an error?
-   if(!lua_isnumber(L, 1) || !lua_isnumber(L, 2))
-   {
-      char msg[256];
-      dSprintf(msg, sizeof(msg), "getWaypoint called with non-numeric arg");
-      logprintf(msg);
-      throw(string(msg));
-   }
-
-   F32 x = luaL_checknumber(L, 1);
-   F32 y = luaL_checknumber(L, 2);
-
-   Point target = Point(x, y);
-
-   S32 targetZone = findZoneContaining(target);       // Where we're going
+   S32 targetZone = findZoneContaining(&target);       // Where we're going
 
    // Make sure target is still in the same zone it was in when we created our flightplan.
    // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
@@ -866,7 +819,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    {
 
       // In case our target has moved, replace final point of our flightplan with the current target location
-      thisRobot->flightPlan[0] = target;
+      thisRobot->flightPlan[0] = &target;
 
       // First, let's scan through our pre-calculated waypoints and see if we can see any of them.
       // If so, we'll just head there with no further rigamarole.  Remember that our flightplan is
@@ -918,22 +871,22 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    if(currentZone == targetZone)
    {
       Point p;
-      if(!thisRobot->canSeePoint(target))    // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
+      if(!thisRobot->canSeePoint(&target))    // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
          p = gBotNavMeshZones[targetZone]->getCenter();
          thisRobot->flightPlan.push_back(p);
       }
       else
-         p = target;
+         p = &target;
 
-      thisRobot->flightPlan.push_back(target);
+      thisRobot->flightPlan.push_back(&target);
       return returnPoint(L, p);
    }
 
    // If we're still here, then we need to find a new path.  Either our original path was invalid for some reason,
    // or the path we had no longer applied to our current location
    thisRobot->flightPlanTo = targetZone;
-   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target);
+   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, &target);
 
    if(thisRobot->flightPlan.size() > 0)
       return returnPoint(L, thisRobot->flightPlan.last());
@@ -1052,7 +1005,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
 
    S32 junk = this->mCurrentZone;
    mNetFlags.set(Ghostable);
-   //getGame()->getGameType()->mRobotList.push_back(this);
+
    mTeam = team;
    mass = m;            // Ship's mass
    L = NULL;
@@ -1065,9 +1018,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
 
    disableCollision();
-
-   // try http://csl.sublevel3.org/lua/
-}
+}
 
 
 Robot::~Robot()
@@ -1078,14 +1029,6 @@ Robot::~Robot()
    // Close down our Lua interpreter
    if(L)
       lua_close(L);
-
-   // Remove robot from robotList, as it's now an ex-robot.
-   //for(S32 i = 0; i < getGame()->getGameType()->mRobotList.size(); i++)
-   //   if(getGame()->getGameType()->mRobotList[i] = this)
-   //   {
-   //      getGame()->getGameType()->mRobotList.erase(i);
-   //      break;
-   //   }
 
    logprintf("Robot terminated [%s]", mFilename.c_str());
 }
@@ -1147,6 +1090,7 @@ bool Robot::initialize(Point p)
    Lunar<LuaModuleInfo>::Register(L);
 
    Lunar<LuaLoadout>::Register(L);
+   Lunar<LuaPoint>::Register(L);
 
    Lunar<RepairItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
@@ -1274,9 +1218,9 @@ void Robot::setCurrentZone(S32 zone)
 }
 
 
-F32 Robot::getAngleXY(F32 x, F32 y)
+F32 Robot::getAngleXY(Point point)
 {
-   return atan2(y - getActualPos().y, x - getActualPos().x);
+   return point.ATAN2(getActualPos());
 }
 
 

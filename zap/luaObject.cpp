@@ -155,4 +155,19 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
    return lua_tointeger(L, index);
 }
 
+
+// Pop a string or string-like object off stack, check its type, and return it
+const char *LuaObject::getString(lua_State *L, S32 index, const char *functionName)
+{
+   if(!lua_isstring(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", functionName, index);
+      logprintf(msg);
+      throw(string(msg));
+   }
+
+   return lua_tostring(L, index);
+}
+
 };

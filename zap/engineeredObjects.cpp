@@ -299,7 +299,7 @@ void EngineeredObject::explode()
    SFXObject::play(SFXShipExplode, getActualPos(), Point());
 
    F32 a, b;
-   
+
    a = TNL::Random::readF() * 0.4 + 0.5;
    b = TNL::Random::readF() * 0.2 + 0.9;
 
@@ -699,8 +699,6 @@ void Turret::idle(IdleCallPath path)
 
    Point delta;
 
-   F32 timeScale = F32(mCurrentMove.time) * 0.001f;
-
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       if(fillVector[i]->getObjectTypeMask() & ( ShipType | RobotType))
@@ -721,6 +719,7 @@ void Turret::idle(IdleCallPath path)
       F32 S = gWeapons[WeaponTurret].projVelocity;
       Point d = potential->getRenderPos() - aimPos;
 
+// This could possibly be combined with LuaRobot's getFiringSolution, as it's essentially the same thing
       F32 t;      // t is set in next statement
       if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), gWeapons[WeaponTurret].projLiveTime * 0.001f, t))
          continue;

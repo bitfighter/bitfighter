@@ -95,8 +95,9 @@ S32 LuaGameInfo::getIsTeamGame(lua_State *L)        { return returnBool(L, gServ
 
 S32 LuaGameInfo::getEventScore(lua_State *L)
 {
-   checkArgCount(L, 1, "GameInfo:getEventScore()");
-   GameType::ScoringEvent scoringEvent = (GameType::ScoringEvent) getInt(L, 1, "GameInfo:getEventScore()", 0, GameType::ScoringEventsCount - 1);
+   static const char *methodName = "GameInfo:getEventScore()";
+   checkArgCount(L, 1, methodName);
+   GameType::ScoringEvent scoringEvent = (GameType::ScoringEvent) getInt(L, 1, methodName, 0, GameType::ScoringEventsCount - 1);
 
    return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, scoringEvent, 0));
 };
@@ -394,15 +395,17 @@ U32 LuaLoadout::getLoadoutItem(S32 indx)
 
 S32 LuaLoadout::getWeapon(lua_State *L)     // getWeapon(i) ==> return weapon at index i (1, 2, 3)
 {
-   checkArgCount(L, 1, "Loadout:getWeapon()");
-   U32 weap = (U32) getInt(L, 1, "Loadout:getWeapon()", 1, ShipWeaponCount);
+   static const char *methodName = "Loadout:getWeapon()";
+   checkArgCount(L, 1, methodName);
+   U32 weap = (U32) getInt(L, 1, methodName, 1, ShipWeaponCount);
    return returnInt(L, mLoadout[weap + ShipModuleCount - 1]);
 }
 
 S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at index i (1, 2)
 {
-   checkArgCount(L, 1, "Loadout:getModule()");
-   U32 mod = (U32) getInt(L, 1, "Loadout:getModule()", 1, ShipModuleCount);
+   static const char *methodName = "Loadout:getModule()";
+   checkArgCount(L, 1, methodName);
+   U32 mod = (U32) getInt(L, 1, methodName, 1, ShipModuleCount);
    return returnInt(L, mLoadout[mod - 1]);
 }
 
@@ -410,7 +413,83 @@ S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at
 ////////////////////////////////////
 ////////////////////////////////////
 
+const char LuaPoint::className[] = "Point";      // Class name as it appears to Lua scripts
 
+// Lua Constructor
+LuaPoint::LuaPoint(lua_State *L)
+{
+   static const char *methodName = "LuaPoint constructor";
+
+   checkArgCount(L, 2, methodName);
+   x =  getFloat(L, 1, methodName);
+   y =  getFloat(L, 2, methodName);
+}
+
+// C++ Constructor -- specify items
+LuaPoint::LuaPoint(U32 loadoutItems[])
+{
+   // ???
+}
+
+
+// Destructor
+LuaPoint::~LuaPoint()
+{
+   logprintf("deleted LuaPoint object (%p)\n", this);     // Never gets run...
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<LuaPoint>::RegType LuaPoint::methods[] =
+{
+   method(LuaPoint, equals),
+   method(LuaPoint, distanceTo),
+   method(LuaPoint, distSquared),
+   method(LuaPoint, angleTo),
+
+
+   {0,0}    // End method list
+};
+
+
+// Are two points equal?
+S32 LuaPoint::equals(lua_State *L)
+{
+   checkArgCount(L, 1, "LuaPoint:equals()");
+
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+
+   F32 EPSILON = .000000001;
+   return returnBool(L, ((x - point.x < EPSILON) || (y - point.y < EPSILON)) );
+}
+
+
+S32 LuaPoint::distanceTo(lua_State *L)
+{
+   checkArgCount(L, 1, "LuaPoint:distanceTo()");
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+
+   return this->distanceTo(&point) );
+}
+
+S32 LuaPoint::distSquared(lua_State *L)
+{
+   checkArgCount(L, 1, "LuaPoint:distSquared()");
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+
+   return this->distanceSquared(&point) );
+}
+
+S32 LuaPoint::angleTo(lua_State *L)
+{
+   checkArgCount(L, 1, "LuaPoint:angleTo()");
+   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+
+   return this->angleTo(&point) );
+}
+
+////////////////////////////////////
+////////////////////////////////////
 
 
 const char LuaTimer::className[] = "Timer";      // Class name as it appears to Lua scripts
