@@ -52,10 +52,10 @@ protected:
    static int luaPanicked(lua_State *L);
    static void clearStack(lua_State *L);
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *functionName);
+   static F32 getFloat(lua_State *L, S32 index, const char *functionName);
    static lua_Integer getInt(lua_State *L, S32 index, const char *functionName);
    static lua_Integer getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal);
    static const char *getString(lua_State *L, S32 index, const char *functionName);
-
 
    static void setfield (lua_State *L, const char *key, F32 value);
 

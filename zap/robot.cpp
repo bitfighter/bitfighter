@@ -238,7 +238,7 @@ S32 LuaRobot::setAngleXY(lua_State *L)
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
    Move move = thisRobot->getCurrentMove();
-   move.angle = thisRobot->getAngleXY(&point);
+   move.angle = thisRobot->getAngleXY(point->getPoint());
    thisRobot->setCurrentMove(move);
 
    return 0;
@@ -251,7 +251,7 @@ S32 LuaRobot::getAngleXY(lua_State *L)
    checkArgCount(L, 1, methodName);
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   lua_pushnumber(L, thisRobot->getAngleXY(&point));
+   lua_pushnumber(L, thisRobot->getAngleXY(point->getPoint()));
    return 1;
 }
 
@@ -282,58 +282,54 @@ extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type 
 // Given an object, which angle do we need to be at to fire to hit it?
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
-//XXXXGameItem
 S32 LuaRobot::getFiringSolution(lua_State *L)
 {
    Point aimPos = thisRobot->getActualPos();    // Probably need to account for the fact that the robot doesn't fire from its center
 
-   GameObject *target;
-read target from stack
+   GameObject *target = Lunar<Asteroid>::check(L, 1);
 
    if(target->getObjectTypeMask() & ( ShipType | RobotType))
    {
-      Ship *potential = (Ship*)targetList[i];
+      Ship *potential = (Ship*)target;
 
       // Is it dead or cloaked?  If so, ignore
       if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
-         continue;
+         return returnNil(L);
    }
 
-   GameObject *potential = targetList[i];
-
-   if(potential->getTeam() == mTeam)      // Is target on our team?
-      continue;                           // ...if so, skip it!
+   if(target->getTeam() == thisRobot->getTeam())      // Is target on our team?
+      return returnNil(L);                // ...if so, skip it!
 
    // Calculate where we have to shoot to hit this...
-   Point Vs = potential->getActualVel();
+   Point Vs = target->getActualVel();
 
    WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
    F32 S = weap.projVelocity;
-   Point d = potential->getRenderPos() - aimPos;
+   Point d = target->getRenderPos() - aimPos;
 
    F32 t;      // t is set in next statement
    if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weap.projLiveTime * 0.001f, t))
       return returnNil(L);
 
-   Point leadPos = potential->getRenderPos() + Vs * t;
+   Point leadPos = target->getRenderPos() + Vs * t;
 
    // Calculate distance
    Point delta = (leadPos - aimPos);
 
    // Make sure we can see it...
    Point n;
-   if(findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, potential->getActualPos(), t, n))
+   if(target->findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
       return returnNil(L);
 
    // See if we're gonna clobber our own stuff...
-   disableCollision();
+   target->disableCollision();
    Point delta2 = delta;
-   delta2.normalize(TurretRange);
-   GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
-   enableCollision();
+   delta2.normalize(weap.projLiveTime * weap.projVelocity / 1000);
+   GameObject *hitObject = target->findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
+   target->enableCollision();
 
-   if(hitObject && hitObject->getTeam() == mTeam)
+   if(hitObject && hitObject->getTeam() == thisRobot->getTeam())
       return returnNil(L);
 
    return returnFloat(L, delta.ATAN2());
@@ -347,7 +343,7 @@ S32 LuaRobot::setThrustXY(lua_State *L)
    F32 vel = getFloat(L, 1, methodName);
    LuaPoint *point = Lunar<LuaPoint>::check(L, 2);
 
-   F32 ang = thisRobot->getAngleXY(&point) - 0 * FloatHalfPi;
+   F32 ang = thisRobot->getAngleXY(point->getPoint()) - 0 * FloatHalfPi;
 
    Move move = thisRobot->getCurrentMove();
 
@@ -418,11 +414,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 S32 LuaRobot::getCurrentZone(lua_State *L)
 {
    S32 zone = thisRobot->getCurrentZone();
-
-   if(zone == -1)
-      return returnNil(L);
-
-   return returnInt(L, zone);
+   return (zone == -1) ? returnNil(L) : returnInt(L, zone);
 }
 
 // Get a count of how many nav zones we have
@@ -450,7 +442,7 @@ S32 LuaRobot::hasLosXY(lua_State *L)
    checkArgCount(L, 1, methodName);
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   return returnBool(L, thisRobot->canSeePoint(&point));
+   return returnBool(L, thisRobot->canSeePoint(point->getPoint()));
 }
 
 
@@ -811,7 +803,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    checkArgCount(L, 1, methodName);
    LuaPoint *target = Lunar<LuaPoint>::check(L, 1);
 
-   S32 targetZone = findZoneContaining(&target);       // Where we're going
+   S32 targetZone = findZoneContaining(target->getPoint());       // Where we're going
 
    // Make sure target is still in the same zone it was in when we created our flightplan.
    // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
@@ -819,7 +811,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    {
 
       // In case our target has moved, replace final point of our flightplan with the current target location
-      thisRobot->flightPlan[0] = &target;
+      thisRobot->flightPlan[0] = target->getPoint();
 
       // First, let's scan through our pre-calculated waypoints and see if we can see any of them.
       // If so, we'll just head there with no further rigamarole.  Remember that our flightplan is
@@ -871,22 +863,22 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    if(currentZone == targetZone)
    {
       Point p;
-      if(!thisRobot->canSeePoint(&target))    // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
+      if(!thisRobot->canSeePoint(target->getPoint()))    // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
          p = gBotNavMeshZones[targetZone]->getCenter();
          thisRobot->flightPlan.push_back(p);
       }
       else
-         p = &target;
+         p = target->getPoint();
 
-      thisRobot->flightPlan.push_back(&target);
+      thisRobot->flightPlan.push_back(target->getPoint());
       return returnPoint(L, p);
    }
 
    // If we're still here, then we need to find a new path.  Either our original path was invalid for some reason,
    // or the path we had no longer applied to our current location
    thisRobot->flightPlanTo = targetZone;
-   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, &target);
+   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target->getPoint());
 
    if(thisRobot->flightPlan.size() > 0)
       return returnPoint(L, thisRobot->flightPlan.last());
@@ -1220,7 +1212,7 @@ void Robot::setCurrentZone(S32 zone)
 
 F32 Robot::getAngleXY(Point point)
 {
-   return point.ATAN2(getActualPos());
+   return getActualPos().angleTo(point);
 }
 
 

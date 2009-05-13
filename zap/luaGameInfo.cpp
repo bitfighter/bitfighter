@@ -421,15 +421,17 @@ LuaPoint::LuaPoint(lua_State *L)
    static const char *methodName = "LuaPoint constructor";
 
    checkArgCount(L, 2, methodName);
-   x =  getFloat(L, 1, methodName);
-   y =  getFloat(L, 2, methodName);
+   F32 x =  getFloat(L, 1, methodName);
+   F32 y =  getFloat(L, 2, methodName);
+
+   mPoint = Point(x, y);
 }
 
 // C++ Constructor -- specify items
-LuaPoint::LuaPoint(U32 loadoutItems[])
-{
-   // ???
-}
+//LuaPoint::LuaPoint()
+//{
+//   // ???
+//}
 
 
 // Destructor
@@ -447,7 +449,6 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
    method(LuaPoint, distSquared),
    method(LuaPoint, angleTo),
 
-
    {0,0}    // End method list
 };
 
@@ -459,8 +460,8 @@ S32 LuaPoint::equals(lua_State *L)
 
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   F32 EPSILON = .000000001;
-   return returnBool(L, ((x - point.x < EPSILON) || (y - point.y < EPSILON)) );
+   double EPSILON = .000000001;
+   return returnBool(L, ((mPoint.x - point->mPoint.x < EPSILON) || (mPoint.y - point->mPoint.y < EPSILON)) );
 }
 
 
@@ -469,23 +470,25 @@ S32 LuaPoint::distanceTo(lua_State *L)
    checkArgCount(L, 1, "LuaPoint:distanceTo()");
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   return this->distanceTo(&point) );
+   return returnFloat(L, mPoint.distanceTo(point->getPoint()));
 }
+
 
 S32 LuaPoint::distSquared(lua_State *L)
 {
    checkArgCount(L, 1, "LuaPoint:distSquared()");
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   return this->distanceSquared(&point) );
+   return returnFloat(L, mPoint.distSquared(point->getPoint()));
 }
+
 
 S32 LuaPoint::angleTo(lua_State *L)
 {
    checkArgCount(L, 1, "LuaPoint:angleTo()");
    LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
 
-   return this->angleTo(&point) );
+   return returnFloat(L, mPoint.angleTo(point->getPoint()));
 }
 
 ////////////////////////////////////

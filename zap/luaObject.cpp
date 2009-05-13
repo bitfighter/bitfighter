@@ -156,6 +156,21 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
 }
 
 
+// Pop a number off stack, convert to float, and return it (no bounds check)
+F32 LuaObject::getFloat(lua_State *L, S32 index, const char *functionName)
+{
+   if(!lua_isnumber(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", functionName, index);
+      logprintf(msg);
+      throw(string(msg));
+   }
+
+   return (F32) lua_tonumber(L, index);
+}
+
+
 // Pop a string or string-like object off stack, check its type, and return it
 const char *LuaObject::getString(lua_State *L, S32 index, const char *functionName)
 {

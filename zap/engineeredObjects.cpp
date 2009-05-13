@@ -744,7 +744,7 @@ void Turret::idle(IdleCallPath path)
       // See if we're gonna clobber our own stuff...
       disableCollision();
       Point delta2 = delta;
-      delta2.normalize(TurretRange);
+      delta2.normalize(gWeapons[WeaponTurret].projLiveTime * gWeapons[WeaponTurret].projVelocity / 1000);
       GameObject *hitObject = findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
       enableCollision();
 
@@ -790,7 +790,7 @@ void Turret::idle(IdleCallPath path)
          bestDelta.normalize();
          Point velocity;
          createWeaponProjectiles(WeaponTurret, bestDelta, aimPos, velocity, 35.0f, this);
-         mFireTimer.reset(TurretFireDelay);
+         mFireTimer.reset(gWeapons[WeaponTurret].fireDelay);
       }
    }
 }

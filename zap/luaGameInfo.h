@@ -171,8 +171,11 @@ public:
 
 ///////////////////////////////
 
-class LuaPoint : public Point, LuaObject
+class LuaPoint : public LuaObject
 {
+private:
+   Point mPoint;                  // Underlying point container
+   
 public:
    LuaPoint(lua_State *L);        // Lua constructor
    LuaPoint(F32 x, F32 y);        // C++ constructor  --> needed?
@@ -183,13 +186,14 @@ public:
 
    static Lunar<LuaPoint>::RegType methods[];
 
+   Point getPoint() { return mPoint; }
+
    S32 equals(lua_State *L);     // Does point equal another point?
 
    // Wrap some of our standard point methods
    S32 distanceTo(lua_State *L);
    S32 distSquared(lua_State *L);
    S32 angleTo(lua_State *L);
-
 };
 
 ///////////////////////////////

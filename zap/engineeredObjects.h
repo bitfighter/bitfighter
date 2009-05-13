@@ -148,9 +148,7 @@ public:
    enum {
       TurretAimOffset = 15,               // I think this is some factor to account for the fact that turrets do not shoot from their center
       TurretPerceptionDistance = 800,     // Area to search for potential targets...
-      TurretRange = 600,                  // ...but target needs to be within this range to be shot at
       TurretTurnRate = 4,                 // How fast can turrets turn to aim?
-      TurretFireDelay = 150,              // Delay between firing
       // Turret projectile characteristics (including bullet range) set in gameWeapons.cpp
 
       AimMask = EngineeredObject::NextFreeMask,

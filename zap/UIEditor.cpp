@@ -1524,7 +1524,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             glColor4f(getTeamColor(item.team).r, getTeamColor(item.team).g, getTeamColor(item.team).b, .25);
 
             glBegin(GL_POLYGON);
-            F32 size = mCurrentScale / mGridSize * Turret::TurretRange;
+            F32 size = mCurrentScale / mGridSize * (gWeapons[WeaponTurret].projLiveTime * gWeapons[WeaponTurret].projVelocity / 1000);
                glVertex2f(pos.x - size, pos.y - size);
                glVertex2f(pos.x + size, pos.y - size);
                glVertex2f(pos.x + size, pos.y + size);
