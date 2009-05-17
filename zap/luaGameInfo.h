@@ -73,10 +73,10 @@ private:
    Team mTeam;
 
 public:
-  LuaTeamInfo(lua_State *L);      // Lua constructor
-  LuaTeamInfo(Team team);         // C++ constructor
+   LuaTeamInfo(lua_State *L);      // Lua constructor
+   LuaTeamInfo(Team team);         // C++ constructor
 
-  ~LuaTeamInfo();                 // Destructor
+   ~LuaTeamInfo();                 // Destructor
 
    static const char className[];
 
@@ -178,7 +178,7 @@ private:
    
 public:
    LuaPoint(lua_State *L);        // Lua constructor
-   LuaPoint(F32 x, F32 y);        // C++ constructor  --> needed?
+   LuaPoint(Point point);         // C++ constructor
 
    ~LuaPoint();                   // Destructor
 
@@ -187,6 +187,13 @@ public:
    static Lunar<LuaPoint>::RegType methods[];
 
    Point getPoint() { return mPoint; }
+
+   S32 x(lua_State *L);
+   S32 y(lua_State *L);
+
+   S32 setxy(lua_State *L);
+   S32 setx(lua_State *L);
+   S32 sety(lua_State *L);
 
    S32 equals(lua_State *L);     // Does point equal another point?
 

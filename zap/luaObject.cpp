@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "luaObject.h"
+#include "luaGameInfo.h"    // For LuaPoint
 #include "tnlLog.h"         // For logprintf
 #include <string>
 
@@ -35,9 +36,12 @@ namespace Zap
 // Returns a point to calling Lua function
 S32 LuaObject::returnPoint(lua_State *L, Point point)
 {
-   lua_createtable(L, 0, 2);         // creates a table with 2 fields
-   setfield(L, "x", point.x);        // table.x = x
-   setfield(L, "y", point.y);        // table.y = y
+   //lua_createtable(L, 0, 2);         // creates a table with 2 fields
+   //setfield(L, "x", point.x);        // table.x = x
+   //setfield(L, "y", point.y);        // table.y = y
+
+   LuaPoint *pt = new LuaPoint(point);
+   Lunar<LuaPoint>::push(L, pt, true);     // true will allow Lua to delete this object when it goes out of scope
 
    return 1;
 }

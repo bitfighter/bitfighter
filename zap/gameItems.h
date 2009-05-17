@@ -88,8 +88,6 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 };
 
 
-class LuaAsteroid;
-
 class Asteroid : public Item, public LuaObject
 {
 
@@ -99,8 +97,6 @@ private:
    S32 mSizeIndex;
    bool hasExploded;
    S32 mDesign;
-
-   LuaAsteroid *mLuaProxy;
 
 public:
    Asteroid();     // Constructor

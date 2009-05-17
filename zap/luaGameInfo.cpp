@@ -365,7 +365,7 @@ S32 LuaLoadout::isValid(lua_State *L)       // isValid() ==> Is loadout config v
          hasSpyBug = true;
    }
 
-   // Make sure we don't have any invalid combos here!
+   // Make sure we don't have any invalid combos
    if(hasSpyBug && !hasSensor)
       return returnBool(L, false);
 
@@ -386,6 +386,7 @@ S32 LuaLoadout::equals(lua_State *L)        // equals(Loadout) ==> is loadout th
    return returnBool(L, true);
 }
 
+
 // Private helper function for above
 U32 LuaLoadout::getLoadoutItem(S32 indx)
 {
@@ -400,6 +401,7 @@ S32 LuaLoadout::getWeapon(lua_State *L)     // getWeapon(i) ==> return weapon at
    U32 weap = (U32) getInt(L, 1, methodName, 1, ShipWeaponCount);
    return returnInt(L, mLoadout[weap + ShipModuleCount - 1]);
 }
+
 
 S32 LuaLoadout::getModule(lua_State *L)     // getModule(i) ==> return module at index i (1, 2)
 {
@@ -427,11 +429,12 @@ LuaPoint::LuaPoint(lua_State *L)
    mPoint = Point(x, y);
 }
 
+
 // C++ Constructor -- specify items
-//LuaPoint::LuaPoint()
-//{
-//   // ???
-//}
+LuaPoint::LuaPoint(Point point)
+{
+   mPoint = point;
+}
 
 
 // Destructor
@@ -444,6 +447,13 @@ LuaPoint::~LuaPoint()
 // Define the methods we will expose to Lua
 Lunar<LuaPoint>::RegType LuaPoint::methods[] =
 {
+   method(LuaPoint, x),
+   method(LuaPoint, y),
+   
+   method(LuaPoint, setx),
+   method(LuaPoint, sety),
+   method(LuaPoint, setxy),
+
    method(LuaPoint, equals),
    method(LuaPoint, distanceTo),
    method(LuaPoint, distSquared),
@@ -451,6 +461,43 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
 
    {0,0}    // End method list
 };
+
+
+S32 LuaPoint::x(lua_State *L)  { return returnFloat(L, mPoint.x); }
+S32 LuaPoint::y(lua_State *L)  { return returnFloat(L, mPoint.y); }
+
+
+S32 LuaPoint::setxy(lua_State *L)  
+{ 
+   static const char *methodName = "LuaPoint:setxy()";
+   checkArgCount(L, 2, methodName);
+   F32 x =  getFloat(L, 1, methodName);
+   F32 y =  getFloat(L, 2, methodName);
+
+   mPoint = Point(x, y);
+   return 0;
+}
+
+S32 LuaPoint::setx(lua_State *L)  
+{ 
+   static const char *methodName = "LuaPoint:setx()";
+   checkArgCount(L, 1, methodName);
+   F32 x =  getFloat(L, 1, methodName);
+
+   mPoint.x = x;
+   return 0;
+}
+
+
+S32 LuaPoint::sety(lua_State *L)  
+{ 
+   static const char *methodName = "LuaPoint:sety()";
+   checkArgCount(L, 1, methodName);
+   F32 y =  getFloat(L, 1, methodName);
+
+   mPoint.y = y;
+   return 0;
+}
 
 
 // Are two points equal?
@@ -494,7 +541,6 @@ S32 LuaPoint::angleTo(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
-
 const char LuaTimer::className[] = "Timer";      // Class name as it appears to Lua scripts
 
 // Lua Constructor
@@ -520,12 +566,12 @@ Lunar<LuaTimer>::RegType LuaTimer::methods[] =
 };
 
 
-
 S32 LuaTimer::reset(lua_State *L)
 {
    mTimer.reset();
    return 0;
 }
+
 
 S32 LuaTimer::update(lua_State *L)
 {

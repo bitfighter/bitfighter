@@ -33,7 +33,7 @@
 namespace Zap
 {
 
-// Constructor
+   // Constructor
 Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
 {
    mIsMounted = false;

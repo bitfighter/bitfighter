@@ -277,16 +277,55 @@ S32 LuaRobot::setThrustAng(lua_State *L)
 }
 
 
+template <class T>
+T *checkItem(lua_State *L)
+{
+   luaL_getmetatable(L, T::className);
+   if(lua_rawequal(L, -1, -2))         // Lua object on the stack is of class <T>!
+   {
+      lua_pop(L, 2);                   // Remove both metatables
+      return Lunar<T>::check(L, 1);    // Return our object
+   }
+   else                                // Object on stack is something else
+   {
+      lua_pop(L, 1);    // Remove <T>'s metatable, leave the other in place for further comparison
+      return NULL;
+   }
+}
+
+
+
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 // Given an object, which angle do we need to be at to fire to hit it?
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
-S32 LuaRobot::getFiringSolution(lua_State *L)
+S32 LuaRobot::getFiringSolution(lua_State *L) 
 {
-   Point aimPos = thisRobot->getActualPos();    // Probably need to account for the fact that the robot doesn't fire from its center
+   Item *target; 
 
-   GameObject *target = Lunar<Asteroid>::check(L, 1);
+
+   lua_getmetatable(L, 1);    // Get metatable for first item on the stack
+
+   target = checkItem<Asteroid>(L);
+
+   if(!target)
+      target = checkItem<TestItem>(L);
+
+
+   if(!target)    // Ultimately failed to figure out what this object is.
+   {
+      lua_pop(L, 1);                      // Clean up
+      luaL_typerror(L, 1, "GameItem");    // Raise an error
+      return returnNil(L);                // Return nil, but I don't think this will ever get run
+   }
+
+
+
+   Point aimPos = thisRobot->getActualPos(); 
+   Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
+   offset.normalize(thisRobot->getRadius() * 1.2);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
+   aimPos += offset;
 
    if(target->getObjectTypeMask() & ( ShipType | RobotType))
    {
@@ -298,7 +337,7 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
    }
 
    if(target->getTeam() == thisRobot->getTeam())      // Is target on our team?
-      return returnNil(L);                // ...if so, skip it!
+      return returnNil(L);                            // ...if so, skip it!
 
    // Calculate where we have to shoot to hit this...
    Point Vs = target->getActualVel();
@@ -656,10 +695,17 @@ extern Rect gServerWorldBounds;
 // Return list of all items of specified type... does no screening at this point
 S32 LuaRobot::findItems(lua_State *L)
 {
-   static const char *methodName = "findItems";
+   // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
+   // lua can't do the bitwise or'ing itself.
+   U32 objectType = 0;
 
-   checkArgCount(L, 1, methodName);
-   U32 objectType = getInt(L, 1, methodName);
+   S32 index = 1;
+   while(lua_isnumber(L, index))
+   {
+      objectType |= lua_tointeger(L, index);
+      index++;
+   }
+
 
    fillVector.clear();
 
@@ -669,7 +715,7 @@ S32 LuaRobot::findItems(lua_State *L)
    S32 tableIndx = lua_gettop(L);
 
    for(S32 i = 0; i < fillVector.size(); i++)
-   {
+   { 
       GameObject *obj = fillVector[i];
       obj->push(L);
       lua_rawseti(L, tableIndx, i + 1);
