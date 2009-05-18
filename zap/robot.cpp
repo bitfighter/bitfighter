@@ -197,6 +197,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, findObjects),
 
    method(LuaRobot, findItems),
+   method(LuaRobot, findGlobalItems),
    method(LuaRobot, getFiringSolution),
 
    {0,0}    // End method list
@@ -294,7 +295,6 @@ T *checkItem(lua_State *L)
 }
 
 
-
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 // Given an object, which angle do we need to be at to fire to hit it?
@@ -319,8 +319,6 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
       luaL_typerror(L, 1, "GameItem");    // Raise an error
       return returnNil(L);                // Return nil, but I don't think this will ever get run
    }
-
-
 
    Point aimPos = thisRobot->getActualPos(); 
    Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
@@ -373,6 +371,7 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
 
    return returnFloat(L, delta.ATAN2());
 }
+
 
 // Thrust at velocity v toward point x,y
 S32 LuaRobot::setThrustXY(lua_State *L)
@@ -690,10 +689,27 @@ S32 LuaRobot::logprint(lua_State *L)
 }
 
 
+// Return list of all items of specified type within normal visible range... does no screening at this point
+S32 LuaRobot::findItems(lua_State *L)
+{
+   Point pos = thisRobot->getActualPos();
+   Rect queryRect(pos, pos);
+   queryRect.expand( gServerGame->computePlayerVisArea(thisRobot) );
+
+   return doFindItems( L, queryRect );
+}
+
+
 extern Rect gServerWorldBounds;
 
-// Return list of all items of specified type... does no screening at this point
-S32 LuaRobot::findItems(lua_State *L)
+// Same but gets all visible items from whole game... out-of-scope items will be ignored
+S32 LuaRobot::findGlobalItems(lua_State *L)
+{
+   return doFindItems(L, gServerWorldBounds);
+}
+
+
+S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 {
    // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
    // lua can't do the bitwise or'ing itself.
@@ -709,13 +725,22 @@ S32 LuaRobot::findItems(lua_State *L)
 
    fillVector.clear();
 
-   thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
+   thisRobot->findObjects(objectType, fillVector, scope);    // Get other objects on screen-visible area only
 
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
    S32 tableIndx = lua_gettop(L);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    { 
+      if(fillVector[i]->getObjectTypeMask() & (ShipType | RobotType))      // Skip cloaked ships & robots!
+      {
+         Ship *ship = (Ship*)fillVector[i];
+
+         // If it's dead or cloaked, ignore it
+         if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
+            continue;
+      }
+
       GameObject *obj = fillVector[i];
       obj->push(L);
       lua_rawseti(L, tableIndx, i + 1);
@@ -723,6 +748,7 @@ S32 LuaRobot::findItems(lua_State *L)
 
    return 1;
 }
+
 
 
 // Get rid of??

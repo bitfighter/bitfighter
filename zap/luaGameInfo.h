@@ -201,7 +201,11 @@ public:
    S32 distanceTo(lua_State *L);
    S32 distSquared(lua_State *L);
    S32 angleTo(lua_State *L);
+   S32 len(lua_State *L);
+   S32 lenSquared(lua_State *L);
+
 };
+
 
 ///////////////////////////////
 

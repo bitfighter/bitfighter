@@ -440,7 +440,7 @@ LuaPoint::LuaPoint(Point point)
 // Destructor
 LuaPoint::~LuaPoint()
 {
-   logprintf("deleted LuaPoint object (%p)\n", this);     // Never gets run...
+   // logprintf("deleted LuaPoint object (%p)\n", this);    
 }
 
 
@@ -458,6 +458,8 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
    method(LuaPoint, distanceTo),
    method(LuaPoint, distSquared),
    method(LuaPoint, angleTo),
+   method(LuaPoint, len),
+   method(LuaPoint, lenSquared),
 
    {0,0}    // End method list
 };
@@ -511,6 +513,19 @@ S32 LuaPoint::equals(lua_State *L)
    return returnBool(L, ((mPoint.x - point->mPoint.x < EPSILON) || (mPoint.y - point->mPoint.y < EPSILON)) );
 }
 
+
+S32 LuaPoint::len(lua_State *L)
+{
+   checkArgCount(L, 0, "LuaPoint:len()");
+   return returnFloat(L, mPoint.len());
+}
+
+
+S32 LuaPoint::lenSquared(lua_State *L)
+{
+   checkArgCount(L, 0, "LuaPoint:lenSquared()");
+   return returnFloat(L, mPoint.lenSquared());
+}
 
 S32 LuaPoint::distanceTo(lua_State *L)
 {
