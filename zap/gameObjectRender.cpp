@@ -40,11 +40,7 @@
 namespace Zap
 {
 
-#ifdef TNL_OS_XBOX
 const float gShapeLineWidth = 2.0f;
-#else
-const float gShapeLineWidth = 2.0f;
-#endif
 
 void glVertex(Point p)
 {
@@ -71,9 +67,7 @@ void drawArc(Point pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    glBegin(GL_LINE_STRIP);
 
-      F32 theta;
-
-      for(theta = startAngle; theta < endAngle; theta += 0.2)
+      for(F32 theta = startAngle; theta < endAngle; theta += 0.2)
          glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
 
       // Make sure arc makes it all the way to endAngle...  rounding errors look terrible!
@@ -521,6 +515,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
    glPopMatrix();
 }
 
+
 // Renders maze turret!
 void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset)
 {
@@ -562,24 +557,27 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
    // Render health bar
    glColor(c);
    S32 lineHeight = U32(28 * health);
+
    glBegin(GL_LINES);
-   for(S32 i = 0; i < lineHeight; i += 2)
-   {
-      Point lsegStart = anchor - cross * (14 - i) + normal * 5;
-      Point lsegEnd = lsegStart + normal * (aimOffset - 10);
+      for(S32 i = 0; i < lineHeight; i += 2)
+      {
+         Point lsegStart = anchor - cross * (14 - i) + normal * 5;
+         Point lsegEnd = lsegStart + normal * (aimOffset - 10);
+         glVertex(lsegStart);
+         glVertex(lsegEnd);
+      }
+
+      Point lsegStart = anchor - cross * 14 + normal * 3;
+      Point lsegEnd = anchor + cross * 14 + normal * 3;
+      Point n = normal * (aimOffset - 6);
+
       glVertex(lsegStart);
       glVertex(lsegEnd);
-   }
-
-   Point lsegStart = anchor - cross * 14 + normal * 3;
-   Point lsegEnd = anchor + cross * 14 + normal * 3;
-   Point n = normal * (aimOffset - 6);
-   glVertex(lsegStart);
-   glVertex(lsegEnd);
-   glVertex(lsegStart + n);
-   glVertex(lsegEnd + n);
+      glVertex(lsegStart + n);
+      glVertex(lsegEnd + n);
    glEnd();
 }
+
 
 void drawFlag(Color c)
 {
@@ -1330,11 +1328,12 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp)
       glColor(c);
    else
       glColor(c * 0.5);
+
    glBegin(GL_LINE_LOOP);
-   glVertex(start + normal);
-   glVertex(end + normal);
-   glVertex(end - normal);
-   glVertex(start - normal);
+      glVertex(start + normal);
+      glVertex(end + normal);
+      glVertex(end - normal);
+      glVertex(start - normal);
    glEnd();
 }
 

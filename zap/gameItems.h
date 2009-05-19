@@ -38,7 +38,7 @@
 namespace Zap
 {
 
-class RepairItem : public PickupItem, public LuaObject
+class RepairItem : public PickupItem
 {
 private:
    typedef PickupItem Parent;
@@ -88,7 +88,7 @@ static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wo
 };
 
 
-class Asteroid : public Item, public LuaObject
+class Asteroid : public Item
 {
 
 typedef Item Parent;
@@ -133,7 +133,7 @@ public:
 };
 
 
-class TestItem : public Item, public LuaObject
+class TestItem : public Item
 {
 
 public:
@@ -159,7 +159,7 @@ public:
 };
 
 
-class ResourceItem : public Item, public LuaObject
+class ResourceItem : public Item
 {
 public:
    ResourceItem();      // Constructor

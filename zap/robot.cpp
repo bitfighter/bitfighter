@@ -43,6 +43,7 @@
 #include "goalZone.h"
 #include "soccerGame.h"          // For lua object defs
 #include "huntersGame.h"         // For lua object defs
+#include "engineeredObjects.h"   // For lua object defs
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
@@ -70,7 +71,6 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(BulletType);
    setEnum(ItemType);
    setEnum(ResourceItemType);
-   setEnum(EngineeredType);
    setEnum(ForceFieldType);
    setEnum(LoadoutZoneType);
    setEnum(MineType);
@@ -89,7 +89,8 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(AsteroidType);
    setEnum(RepairItemType);
    setEnum(SoccerBallItemType);
-
+   setEnum(TurretType);
+   setEnum(ForceFieldProjectorType);
 
 
    // Modules
@@ -1160,6 +1161,9 @@ bool Robot::initialize(Point p)
    Lunar<ResourceItem>::Register(L);
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
+   Lunar<Turret>::Register(L);
+   Lunar<ForceFieldProjector>::Register(L);
+
    //Lunar<FlagItem>::Register(L);
    //Lunar<SoccerBallItem>::Register(L);
    //Lunar<HuntersFlagItem>::Register(L);

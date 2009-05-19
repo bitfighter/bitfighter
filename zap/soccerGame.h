@@ -70,7 +70,7 @@ public:
    TNL_DECLARE_CLASS(SoccerGameType);
 };
 
-class SoccerBallItem : public Item, LuaObject
+class SoccerBallItem : public Item
 {
 private:
    typedef Item Parent;
@@ -104,7 +104,8 @@ public:
    static Lunar<SoccerBallItem>::RegType methods[];
 
    S32 getClassID(lua_State *L) { return returnInt(L, SoccerBallItemType); }
-   //void push(lua_State *L) {  Lunar<SoccerBallItem>::push(L, this); }    <-- will need to uncomment!
+   void push(lua_State *L) {  Lunar<SoccerBallItem>::push(L, this); }   
+
 };
 
 };

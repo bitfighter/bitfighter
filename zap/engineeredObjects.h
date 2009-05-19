@@ -35,14 +35,14 @@ namespace Zap
 
 extern void engClientCreateObject(GameConnection *connection, U32 object);
 
-class EngineeredObject : public GameObject
+class EngineeredObject : public GameObject, public LuaItem
 {
 private:
    typedef GameObject Parent;
 
 protected:
    F32 mHealth;
-   Color mTeamColor;
+   //Color mTeamColor;   ok to delete
    SafePtr<Item> mResource;
    SafePtr<Ship> mOwner;
    Point mAnchorPoint;
@@ -61,6 +61,8 @@ protected:
       NextFreeMask = BIT(3),
    };
 
+   virtual void setObjectMask() { /* do nothing */ };    // Will be overridden by the only classes that care
+
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
    bool processArguments(S32 argc, const char **argv);
@@ -68,16 +70,15 @@ public:
    void setResource(Item *resource);
    bool checkDeploymentPosition();
    void computeExtent();
-   virtual void onDestroyed() { } // do nothing 
-   virtual void onDisabled() { }  // do nothing
-   virtual void onEnabled() { }   // do nothing
+   virtual void onDestroyed() { /* do nothing */ }  
+   virtual void onDisabled() { /* do nothing */ } 
+   virtual void onEnabled() { /* do nothing */ }  
    virtual bool isTurret() { return false; }
-   bool isEnabled();
+   bool isEnabled();    // True if still active, false otherwise
 
    void explode();
    bool isDestroyed() { return mIsDestroyed; }
-   void setOwner(Ship *owner);
-
+   void setOwner(Ship *owner);    
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
@@ -85,7 +86,18 @@ public:
    bool collide(GameObject *hitObject) { return true; }
    F32 getHealth() { return mHealth; }
    void healObject(S32 time);
+
+   // LuaItem interface
+   // S32 getLoc(lua_State *L) { }   ==> Will be implemented by derived objects
+   // S32 getRad(lua_State *L) { }   ==> Will be implemented by derived objects
+   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0, 0)); }   
+
+   // More Lua methods that are inherited by turrets and forcefield projectors
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam()); }
+   S32 getHealth(lua_State *L) { return returnFloat(L, mHealth); }
+   S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
 };
+
 
 class ForceField : public GameObject
 {
@@ -123,6 +135,7 @@ class ForceFieldProjector : public EngineeredObject
 private:
    typedef EngineeredObject Parent;
    SafePtr<ForceField> mField;
+   void setObjectMask() { mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType; }
 
 public:
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point()) :EngineeredObject(team, anchorPoint, anchorNormal) { mNetFlags.set(Ghostable); }
@@ -134,8 +147,30 @@ public:
    void render();
    void onEnabled();
    void onDisabled();
+
+
    TNL_DECLARE_CLASS(ForceFieldProjector);
+
+   ///// Lua Interface
+
+   ForceFieldProjector(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<ForceFieldProjector>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, ForceFieldProjectorType); }
+   void push(lua_State *L) {  Lunar<ForceFieldProjector>::push(L, this); }
+
+   // LuaItem methods
+   enum {
+      radius = 7,
+   };
+
+   S32 getRad(lua_State *L) { return returnInt(L, radius); }
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * radius ); } 
 };
+
 
 class Turret : public EngineeredObject
 {
@@ -143,10 +178,12 @@ private:
    typedef EngineeredObject Parent;
    Timer mFireTimer;
    F32 mCurrentAngle;
+   void setObjectMask() { mObjectTypeMask = TurretType | CommandMapVisType; }
 
 public:
    enum {
       TurretAimOffset = 15,               // I think this is some factor to account for the fact that turrets do not shoot from their center
+                                          // Also serves as radius of circle of turret's body, where the turret starts
       TurretPerceptionDistance = 800,     // Area to search for potential targets...
       TurretTurnRate = 4,                 // How fast can turrets turn to aim?
       // Turret projectile characteristics (including bullet range) set in gameWeapons.cpp
@@ -166,6 +203,21 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(Turret);
+
+   ///// Lua Interface
+
+   Turret(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<Turret>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, TurretType); }
+   void push(lua_State *L) {  Lunar<Turret>::push(L, this); }
+
+   // LuaItem methods
+   S32 getRad(lua_State *L) { return returnInt(L, TurretAimOffset); }
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TurretAimOffset)); } 
 };
 
 

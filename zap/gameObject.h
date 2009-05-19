@@ -50,7 +50,7 @@ enum GameObjectType
    BulletType          = BIT(4),
    ItemType            = BIT(5),
    ResourceItemType    = BIT(6),
-   EngineeredType      = BIT(7),
+         // slot available
    ForceFieldType      = BIT(8),
    LoadoutZoneType     = BIT(9),
    MineType            = BIT(10),
@@ -65,17 +65,21 @@ enum GameObjectType
    RobotType           = BIT(19),
    TeleportType        = BIT(20),   
    GoalZoneType        = BIT(21),
-   AsteroidType        = BIT(22),   // Only needed for Lua, maybe
-   RepairItemType      = BIT(23),   // Only needed for Lua...
-   SoccerBallItemType  = BIT(24),   // Only needed for Lua...
-   NexusFlagType       = BIT(25),   // Only needed for Lua...
-
+   AsteroidType        = BIT(22),      // Only needed for Lua...
+   RepairItemType      = BIT(23),      // Only needed for Lua...
+   SoccerBallItemType  = BIT(24),      // Only needed for Lua...
+   NexusFlagType       = BIT(25),      // Only needed for Lua...
+   TurretType          = BIT(26),      // Formerly EngineeredType
+   ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
 
    DeletedType       = BIT(30),
-   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map
-   DamagableTypes    = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | HeatSeekerType,
+   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map   ==> Could be made a derived type below, perhaps
+
+   // Derived types:
+   EngineeredType     =  TurretType | ForceFieldProjectorType,
+   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | HeatSeekerType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType,
-   AllObjectTypes    = 0xFFFFFFFF,
+   AllObjectTypes     = 0xFFFFFFFF,
 };
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?

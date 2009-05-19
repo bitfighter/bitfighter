@@ -108,10 +108,12 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mOriginalTeam = mTeam;
    mAnchorPoint = anchorPoint;
    mAnchorNormal= anchorNormal;
-   mObjectTypeMask = EngineeredType | CommandMapVisType;
    mIsDestroyed = false;
    mHealRate = 0;
+
+   setObjectMask();
 }
+
 
 bool EngineeredObject::processArguments(S32 argc, const char **argv)
 {
@@ -499,6 +501,35 @@ void ForceFieldProjector::render()
    renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getGameType()->getTeamColor(getTeam()), isEnabled());
 }
 
+
+const char ForceFieldProjector::className[] = "ForceFieldProjector";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+ForceFieldProjector::ForceFieldProjector(lua_State *L)
+{
+   // Do nothing
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
+{
+   // Standard gameItem methods
+   method(ForceFieldProjector, getClassID),
+   method(ForceFieldProjector, getLoc),
+   method(ForceFieldProjector, getRad),
+   method(ForceFieldProjector, getVel),
+
+   method(ForceFieldProjector, getTeamIndx),
+   method(ForceFieldProjector, getHealth),
+   method(ForceFieldProjector, isActive),
+
+   {0,0}    // End method list
+};
+
+
+
+
 TNL_IMPLEMENT_NETOBJECT(ForceField);
 
 ForceField::ForceField(S32 team, Point start, Point end)
@@ -595,6 +626,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
       SFXObject::play(mFieldUp ? SFXForceFieldUp : SFXForceFieldDown, mStart, Point());
 }
 
+
 bool ForceField::getCollisionPoly(U32 state, Vector<Point> &p)
 {
    Point normal(mEnd.y - mStart.y, mStart.x - mEnd.x);
@@ -607,11 +639,13 @@ bool ForceField::getCollisionPoly(U32 state, Vector<Point> &p)
    return true;
 }
 
+
 void ForceField::render()
 {
    Color c = getGame()->getGameType()->getTeamColor(mTeam);
    renderForceField(mStart, mEnd, c, mFieldUp);
 }
+
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
@@ -631,12 +665,14 @@ bool Turret::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
    return true;
 }
 
+
 void Turret::onAddedToGame(Game *theGame)
 {
    Parent::onAddedToGame(theGame);
    mCurrentAngle = atan2(mAnchorNormal.y, mAnchorNormal.x);
    getGame()->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
 }
+
 
 void Turret::render()
 {
@@ -650,6 +686,7 @@ void Turret::render()
    renderTurret(c, mAnchorPoint, mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, TurretAimOffset);
 }
 
+
 U32 Turret::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
@@ -658,6 +695,7 @@ U32 Turret::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
 
    return ret;
 }
+
 
 void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -795,5 +833,30 @@ void Turret::idle(IdleCallPath path)
    }
 }
 
+
+const char Turret::className[] = "Turret";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+Turret::Turret(lua_State *L)
+{
+   // Do nothing
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<Turret>::RegType Turret::methods[] =
+{
+   // Standard gameItem methods
+   method(Turret, getClassID),
+   method(Turret, getLoc),
+   method(Turret, getRad),
+   method(Turret, getVel),
+
+   method(Turret, getTeamIndx),
+   method(Turret, getHealth),
+   method(Turret, isActive),
+
+   {0,0}    // End method list
+};
 
 };

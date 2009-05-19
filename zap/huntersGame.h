@@ -108,7 +108,7 @@ public:
 };
 
 
-class HuntersFlagItem : public Item, LuaObject
+class HuntersFlagItem : public Item
 {
 private:
    typedef Item Parent;

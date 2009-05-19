@@ -205,6 +205,10 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    mLastPlayerTouch = NULL;
 }
 
+
+const char SoccerBallItem::className[] = "SoccerBallItem";      // Class name as it appears to Lua scripts
+
+
 bool SoccerBallItem::processArguments(S32 argc, const char **argv)
 {
    if(!Parent::processArguments(argc, argv))
@@ -242,10 +246,12 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
+
 void SoccerBallItem::renderItem(Point pos)
 {
    renderSoccerBall(pos);
 }
+
 
 void SoccerBallItem::idle(GameObject::IdleCallPath path)
 {
@@ -260,6 +266,7 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
    }
    Parent::idle(path);
 }
+
 
 void SoccerBallItem::damageObject(DamageInfo *theInfo)
 {
@@ -286,6 +293,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    }
 }
 
+
 void SoccerBallItem::sendHome()
 {
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point();
@@ -293,6 +301,7 @@ void SoccerBallItem::sendHome()
    setMaskBits(PositionMask);
    updateExtent();
 }
+
 
 bool SoccerBallItem::collide(GameObject *hitObject)
 {

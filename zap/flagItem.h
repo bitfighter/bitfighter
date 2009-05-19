@@ -31,7 +31,7 @@
 namespace Zap
 {
 
-class FlagItem : public Item, LuaObject
+class FlagItem : public Item
 {
 private:
    typedef Item Parent;

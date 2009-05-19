@@ -36,7 +36,7 @@ namespace Zap
 class Ship;
 class GoalZone;
 
-class Item : public MoveObject
+class Item : public MoveObject, public LuaObject
 {
 protected:
    enum MaskBits {
@@ -85,11 +85,22 @@ public:
 
    bool collide(GameObject *otherObject);
 
-   // For Lua interfaces...
-   S32 Item::getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }     // Center of item (returns point)
-   S32 Item::getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        // Radius of item (returns number)
-   S32 Item::getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }     // Speed of item (returns point)
+   // LuaItem interface
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }    
+   S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        
+   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }    
+};
 
+///////////////////
+
+class LuaItem : public LuaObject
+{  
+   // = 0 ==> make these methods "pure virtual" functions
+   virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
+   virtual S32 getRad(lua_State *L) = 0;     // Radius of item (returns number)
+   virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
+
+   virtual void push(lua_State *L) = 0;      // Push item onto stack
 };
 
 ///////////////////
