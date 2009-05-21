@@ -43,6 +43,7 @@ FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
    setZone(NULL);
 }
 
+const char FlagItem::className[] = "FlagItem";      // Class name as it appears to Lua scripts
 
 // Define the methods we will expose to Lua
 Lunar<FlagItem>::RegType FlagItem::methods[] =

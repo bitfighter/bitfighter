@@ -1164,9 +1164,9 @@ bool Robot::initialize(Point p)
    Lunar<Turret>::Register(L);
    Lunar<ForceFieldProjector>::Register(L);
 
-   //Lunar<FlagItem>::Register(L);
-   //Lunar<SoccerBallItem>::Register(L);
-   //Lunar<HuntersFlagItem>::Register(L);
+   Lunar<FlagItem>::Register(L);
+   Lunar<SoccerBallItem>::Register(L);
+   Lunar<HuntersFlagItem>::Register(L);
 
    luaopen_base(L);     // Make some basic functions available to bots
 
@@ -1180,20 +1180,40 @@ bool Robot::initialize(Point p)
    try
    {
       // Load the script
-      S32 retCode = luaL_loadfile(L, mFilename.c_str());
+      S32 retCode;
+
+
+      // And load our standard robot library
+      static const char *fname = "robot_helper_functions.lua";
+      retCode = luaL_loadfile(L, fname);
 
       if(retCode)
       {
-         logError("Error loading file:" + string(lua_tostring(L, -1)) + ".  Shutting robot down.");
+         logError("Error loading robot helper functions (%s).  Shutting robot down.", fname);
          return false;
       }
+
+      // Run main script body, which will have the effect of making our helper functions not get overwritten by the robot code
+      // See: http://lua-users.org/lists/lua-l/2005-09/msg00471.html
+      lua_pcall(L, 0, 0, 0);
+      
+
+      retCode = luaL_loadfile(L, mFilename.c_str());
+
+      if(retCode)
+      {
+         logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
+         return false;
+      }
+
+
 
       // Run main script body
       lua_pcall(L, 0, 0, 0);
    }
    catch(string e)
    {
-      logError("Error initializing robot: " + e + ".  Shutting robot down.");
+      logError("Error initializing robot: %s.  Shutting robot down.", e.c_str());
       return false;
    }
 
@@ -1206,7 +1226,7 @@ bool Robot::initialize(Point p)
    }
    catch (string e)
    {
-      logError("Robot error running getName(): " + e + ".  Shutting robot down.");
+      logError("Robot error running getName(): %s.  Shutting robot down.", e.c_str());
       return false;
    }
 
@@ -1262,9 +1282,16 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
 // Some rudimentary robot error logging.  Perhaps, someday, will become a sort of in-game error console.
 // For now, though, pass all errors through here.
-void Robot::logError(string err)
+void Robot::logError(const char *format, ...)
 {
-   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), err.c_str());
+   va_list args;
+   va_start(args, format);
+   char buffer[2048];
+
+   dVsprintf(buffer, sizeof(buffer), format, args);
+   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
+
+   va_end(args);
 }
 
 
@@ -1423,7 +1450,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       }
       catch (string e)
       {
-         logError("Robot error running getMove(): " + e + ".  Shutting robot down.");
+         logError("Robot error running getMove(): %s.  Shutting robot down.", e.c_str());
          delete this;
          return;
       }

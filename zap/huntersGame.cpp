@@ -387,6 +387,9 @@ HuntersFlagItem::HuntersFlagItem(Point pos) : Item(pos, true, 30, 4)
    mFlagCount = 0;
 }
 
+
+const char HuntersFlagItem::className[] = "HuntersFlagItem";      // Class name as it appears to Lua scripts
+
 // Define the methods we will expose to Lua
 Lunar<HuntersFlagItem>::RegType HuntersFlagItem::methods[] =
 {
@@ -485,8 +488,8 @@ bool HuntersFlagItem::collide(GameObject *hitObject)
    if(theShip->hasExploded)
       return false;
 
-   // don't mount to ship, instead increase current mounted HuntersFlag
-   //  flagCount, and remove collided flag from game
+   // Don't mount to ship, instead increase current mounted HuntersFlag
+   //    flagCount, and remove collided flag from game
    for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
    {
       Item *theItem = theShip->mMountedItems[i];

@@ -98,7 +98,7 @@ public:
 
    ///// Lua Interface
 
-   SoccerBallItem(lua_State *L);             //  Lua constructor
+   SoccerBallItem(lua_State *L) { /* Do nothing */ };   //  Lua constructor
 
    static const char className[];
    static Lunar<SoccerBallItem>::RegType methods[];

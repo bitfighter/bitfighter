@@ -139,7 +139,7 @@ public:
 
    ///// Lua Interface
 
-   HuntersFlagItem(lua_State *L);             //  Lua constructor
+   HuntersFlagItem(lua_State *L) { /* Do nothing */ };     //  Lua constructor
 
    static const char className[];
    static Lunar<HuntersFlagItem>::RegType methods[];

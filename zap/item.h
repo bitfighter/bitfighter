@@ -64,7 +64,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor// Lua constructor
+   Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
    void setActualPos(Point p);
    void setActualVel(Point vel);

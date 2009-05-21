@@ -237,7 +237,7 @@ void UserInterface::renderCurrent()    // static
 
 extern const F32 radiansToDegreesConversion;
 
-#define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args);
+#define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args); va_end(args);
 
 
 // New, fixed version
@@ -271,7 +271,6 @@ void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const cha
    doDrawAngleString(x, y, size, angle, string, false);
 }
 
-#undef makeBuffer
 
 void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fix)
 {
@@ -322,23 +321,19 @@ void UserInterface::drawString(F32 x, F32 y, U32 size, const char *string)
 
 void UserInterface::drawStringf(S32 x, S32 y, U32 size, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
+   makeBuffer;
    drawString(x, y, size, buffer);
+
+   va_end(args);
 }
 
 
 void UserInterface::drawStringf(F32 x, F32 y, U32 size, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
+   makeBuffer;
    drawString((S32) x, (S32) y, size, buffer);
+
+   va_end(args);
 }
 
 
@@ -351,12 +346,10 @@ void UserInterface::drawCenteredString(S32 y, U32 size, const char *string)
 
 void UserInterface::drawCenteredStringf(S32 y, U32 size, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
+   makeBuffer;
    drawCenteredString(y, size, buffer);
+
+   va_end(args);
 }
 
 
@@ -371,12 +364,10 @@ S32 UserInterface::getCenteredStringStartingPos(U32 size, const char *string)
 
 S32 UserInterface::getCenteredStringStartingPosf(U32 size, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
+   makeBuffer;
 
-   dVsprintf(buffer, sizeof(buffer), format, args);
    return getCenteredStringStartingPos(size, buffer);
+
 }
 
 
@@ -389,11 +380,7 @@ S32 UserInterface::getCenteredString2ColStartingPos(U32 size, bool leftCol, cons
 
 S32 UserInterface::getCenteredString2ColStartingPosf(U32 size, bool leftCol, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
+   makeBuffer;
    return getCenteredString2ColStartingPos(size, leftCol, buffer);
 }
 
@@ -407,11 +394,8 @@ void UserInterface::drawCenteredString2Col(S32 y, U32 size, bool leftCol, const 
 
 void UserInterface::drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
+   makeBuffer;
 
-   dVsprintf(buffer, sizeof(buffer), format, args);
    drawCenteredString2Col(y, size, leftCol, buffer);
 }
 
@@ -427,6 +411,7 @@ void UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, c
    va_start(args, right);
    char buffer[2048];
    dVsprintf(buffer, sizeof(buffer), right, args);
+   va_end(args);
 
    S32 offset = getStringWidth(size, left) + getStringWidth(size, " ");
    S32 width = offset + getStringWidth(size, buffer);
@@ -447,11 +432,7 @@ void UserInterface::drawString4Col(S32 y, U32 size, U32 col, const char *string)
 
 void UserInterface::drawString4Colf(S32 y, U32 size, U32 col, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
-
-   dVsprintf(buffer, sizeof(buffer), format, args);
+   makeBuffer;
    drawString4Col(y, size, col, buffer);
 }
 
@@ -471,13 +452,13 @@ S32 UserInterface::getStringWidth(U32 size, const char *string, U32 len)
 
 S32 UserInterface::getStringWidthf(U32 size, const char *format, ...)
 {
-   va_list args;
-   va_start(args, format);
-   char buffer[2048];
+   makeBuffer;
 
-   dVsprintf(buffer, sizeof(buffer), format, args);
    return getStringWidth(size, buffer);
 }
+
+#undef makeBuffer
+
 
 void UserInterface::playBoop()
 {

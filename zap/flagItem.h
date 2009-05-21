@@ -56,7 +56,7 @@ public:
 
    ///// Lua Interface
 
-   FlagItem(lua_State *L);             //  Lua constructor
+   FlagItem(lua_State *L) { /* Do nothing */ };    //  Lua constructor
 
    static const char className[];
    static Lunar<FlagItem>::RegType methods[];

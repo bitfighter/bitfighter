@@ -61,8 +61,8 @@ private:
    // Scripting stuff
    lua_State *L;                // Main Lua state variable
 
-   void logError(string err);   // In case of error...
-   string mFilename;            // Name of file script was loaded from
+   void logError(const char *format, ...);   // In case of error...
+   string mFilename;                         // Name of file script was loaded from
 
    S32 mCurrentZone;            // Zone robot is currently in
 

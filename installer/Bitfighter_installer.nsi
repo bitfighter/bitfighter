@@ -71,7 +71,8 @@ BrandingText " "
 Section "Install"
 
   SetOutPath "$INSTDIR"
-  File ..\exe\Bitfighter.exe		
+  File ..\exe\Bitfighter.exe
+  File ..\exe\robot_helper_functions.lua
   File ".\Windows specific\OpenAL32.dll"		
   File ".\Windows specific\glut32.dll"
   File ".\Windows specific\lua5.1.dll"
