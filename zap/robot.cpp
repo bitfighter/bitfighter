@@ -69,7 +69,6 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(BarrierType);
    setEnum(MoveableType);
    setEnum(BulletType);
-   setEnum(ItemType);
    setEnum(ResourceItemType);
    setEnum(ForceFieldType);
    setEnum(LoadoutZoneType);
@@ -191,7 +190,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, globalMsg),
    method(LuaRobot, teamMsg),
 
-   method(LuaRobot, getWeapon),
+   method(LuaRobot, getActiveWeapon),
 
    method(LuaRobot, logprint),
 
@@ -237,10 +236,10 @@ S32 LuaRobot::setAngleXY(lua_State *L)
 {
    static const char *methodName = "Robot:setAngleXY()";
    checkArgCount(L, 1, methodName);
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   Point point = getPoint(L, 1, methodName);
 
    Move move = thisRobot->getCurrentMove();
-   move.angle = thisRobot->getAngleXY(point->getPoint());
+   move.angle = thisRobot->getAngleXY(point);
    thisRobot->setCurrentMove(move);
 
    return 0;
@@ -251,9 +250,9 @@ S32 LuaRobot::getAngleXY(lua_State *L)
 {
    static const char *methodName = "Robot:getAngleXY()";
    checkArgCount(L, 1, methodName);
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   Point point = getPoint(L, 1, methodName);
 
-   lua_pushnumber(L, thisRobot->getAngleXY(point->getPoint()));
+   lua_pushnumber(L, thisRobot->getAngleXY(point));
    return 1;
 }
 
@@ -279,21 +278,21 @@ S32 LuaRobot::setThrustAng(lua_State *L)
 }
 
 
-template <class T>
-T *checkItem(lua_State *L)
-{
-   luaL_getmetatable(L, T::className);
-   if(lua_rawequal(L, -1, -2))         // Lua object on the stack is of class <T>!
-   {
-      lua_pop(L, 2);                   // Remove both metatables
-      return Lunar<T>::check(L, 1);    // Return our object
-   }
-   else                                // Object on stack is something else
-   {
-      lua_pop(L, 1);    // Remove <T>'s metatable, leave the other in place for further comparison
-      return NULL;
-   }
-}
+//template <class T>
+//T *checkItem(lua_State *L)
+//{
+//   luaL_getmetatable(L, T::className);
+//   if(lua_rawequal(L, -1, -2))         // Lua object on the stack is of class <T>!
+//   {
+//      lua_pop(L, 2);                   // Remove both metatables
+//      return Lunar<T>::check(L, 1);    // Return our object
+//   }
+//   else                                // Object on stack is something else
+//   {
+//      lua_pop(L, 1);    // Remove <T>'s metatable, leave the other in place for further comparison
+//      return NULL;
+//   }
+//}
 
 
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
@@ -303,30 +302,17 @@ extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type 
 // Logic adapted from turret aiming algorithm
 S32 LuaRobot::getFiringSolution(lua_State *L) 
 {
-   Item *target; 
-
-
-   lua_getmetatable(L, 1);    // Get metatable for first item on the stack
-
-   target = checkItem<Asteroid>(L);
-
-   if(!target)
-      target = checkItem<TestItem>(L);
-
-
-   if(!target)    // Ultimately failed to figure out what this object is.
-   {
-      lua_pop(L, 1);                      // Clean up
-      luaL_typerror(L, 1, "GameItem");    // Raise an error
-      return returnNil(L);                // Return nil, but I don't think this will ever get run
-   }
+   static const char *methodName = "Robot:getFiringSolution()";
+   checkArgCount(L, 2, methodName);
+   U32 type = getInt(L, 1, methodName);
+   GameObject *target = getItem(L, 2, type, methodName);
 
    Point aimPos = thisRobot->getActualPos(); 
    Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
    offset.normalize(thisRobot->getRadius() * 1.2);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
    aimPos += offset;
 
-   if(target->getObjectTypeMask() & ( ShipType | RobotType))
+   if(type & ( ShipType | RobotType))
    {
       Ship *potential = (Ship*)target;
 
@@ -344,13 +330,13 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
    WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
 
    F32 S = weap.projVelocity;
-   Point d = target->getRenderPos() - aimPos;
+   Point d = target->getActualPos() - aimPos;
 
    F32 t;      // t is set in next statement
    if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weap.projLiveTime * 0.001f, t))
       return returnNil(L);
 
-   Point leadPos = target->getRenderPos() + Vs * t;
+   Point leadPos = target->getActualPos() + Vs * t;
 
    // Calculate distance
    Point delta = (leadPos - aimPos);
@@ -380,9 +366,8 @@ S32 LuaRobot::setThrustXY(lua_State *L)
    static const char *methodName = "Robot:setThrustXY()";
    checkArgCount(L, 2, methodName);
    F32 vel = getFloat(L, 1, methodName);
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 2);
-
-   F32 ang = thisRobot->getAngleXY(point->getPoint()) - 0 * FloatHalfPi;
+   Point point = getPoint(L, 1, methodName);
+   F32 ang = thisRobot->getAngleXY(point) - 0 * FloatHalfPi;
 
    Move move = thisRobot->getCurrentMove();
 
@@ -479,9 +464,9 @@ S32 LuaRobot::hasLosXY(lua_State *L)
 {
    static const char *methodName = "Robot:hasLosXY()";
    checkArgCount(L, 1, methodName);
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   Point point = getPoint(L, 1, methodName);
 
-   return returnBool(L, thisRobot->canSeePoint(point->getPoint()));
+   return returnBool(L, thisRobot->canSeePoint(point));
 }
 
 
@@ -633,7 +618,7 @@ S32 LuaRobot::getReqLoadout(lua_State *L)
 
 
 // Get WeaponIndex for current weapon
-S32 LuaRobot::getWeapon(lua_State *L)
+S32 LuaRobot::getActiveWeapon(lua_State *L)
 {
    return returnInt(L, thisRobot->getSelectedWeapon());
 }
@@ -874,9 +859,9 @@ S32 LuaRobot::getWaypoint(lua_State *L)
 {
    static const char *methodName = "Robot:getWaypoint()";
    checkArgCount(L, 1, methodName);
-   LuaPoint *target = Lunar<LuaPoint>::check(L, 1);
+   Point target = getPoint(L, 1, methodName);
 
-   S32 targetZone = findZoneContaining(target->getPoint());       // Where we're going
+   S32 targetZone = findZoneContaining(target);       // Where we're going
 
    // Make sure target is still in the same zone it was in when we created our flightplan.
    // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
@@ -884,7 +869,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    {
 
       // In case our target has moved, replace final point of our flightplan with the current target location
-      thisRobot->flightPlan[0] = target->getPoint();
+      thisRobot->flightPlan[0] = target;
 
       // First, let's scan through our pre-calculated waypoints and see if we can see any of them.
       // If so, we'll just head there with no further rigamarole.  Remember that our flightplan is
@@ -936,22 +921,22 @@ S32 LuaRobot::getWaypoint(lua_State *L)
    if(currentZone == targetZone)
    {
       Point p;
-      if(!thisRobot->canSeePoint(target->getPoint()))    // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
+      if(!thisRobot->canSeePoint(target))           // Possible, if we're just on a boundary, and a protrusion's blocking a ship edge
       {
          p = gBotNavMeshZones[targetZone]->getCenter();
          thisRobot->flightPlan.push_back(p);
       }
       else
-         p = target->getPoint();
+         p = target;
 
-      thisRobot->flightPlan.push_back(target->getPoint());
+      thisRobot->flightPlan.push_back(target);
       return returnPoint(L, p);
    }
 
    // If we're still here, then we need to find a new path.  Either our original path was invalid for some reason,
    // or the path we had no longer applied to our current location
    thisRobot->flightPlanTo = targetZone;
-   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target->getPoint());
+   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target);
 
    if(thisRobot->flightPlan.size() > 0)
       return returnPoint(L, thisRobot->flightPlan.last());
@@ -1167,6 +1152,8 @@ bool Robot::initialize(Point p)
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);
    Lunar<HuntersFlagItem>::Register(L);
+   Lunar<ResourceItem>::Register(L);
+
 
    luaopen_base(L);     // Make some basic functions available to bots
 

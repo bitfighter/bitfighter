@@ -34,6 +34,14 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-function getXXX()
-    return( "XXX" )
+bot = LuaRobot(Robot) -- This is a reference to our bot.
+
+
+function getFiringSolution( item )
+   type = item:getClassID()
+   if( type == nil ) then
+      return nil
+    end
+   return bot:getFiringSolution( type, item )
 end
+

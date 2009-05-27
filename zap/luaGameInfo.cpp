@@ -460,6 +460,8 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
    method(LuaPoint, angleTo),
    method(LuaPoint, len),
    method(LuaPoint, lenSquared),
+   method(LuaPoint, normalize),
+   
 
    {0,0}    // End method list
 };
@@ -505,12 +507,12 @@ S32 LuaPoint::sety(lua_State *L)
 // Are two points equal?
 S32 LuaPoint::equals(lua_State *L)
 {
-   checkArgCount(L, 1, "LuaPoint:equals()");
-
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   static const char *methodName = "LuaPoint:equals()";
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
 
    double EPSILON = .000000001;
-   return returnBool(L, ((mPoint.x - point->mPoint.x < EPSILON) || (mPoint.y - point->mPoint.y < EPSILON)) );
+   return returnBool(L, ((mPoint.x - point.x < EPSILON) || (mPoint.y - point.y < EPSILON)) );
 }
 
 
@@ -529,29 +531,49 @@ S32 LuaPoint::lenSquared(lua_State *L)
 
 S32 LuaPoint::distanceTo(lua_State *L)
 {
-   checkArgCount(L, 1, "LuaPoint:distanceTo()");
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   static const char *methodName = "LuaPoint:distanceTo()";
 
-   return returnFloat(L, mPoint.distanceTo(point->getPoint()));
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   return returnFloat(L, mPoint.distanceTo(point));
 }
 
 
 S32 LuaPoint::distSquared(lua_State *L)
 {
-   checkArgCount(L, 1, "LuaPoint:distSquared()");
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   static const char *methodName = "LuaPoint:distSquared()";
 
-   return returnFloat(L, mPoint.distSquared(point->getPoint()));
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   return returnFloat(L, mPoint.distSquared(point));
 }
 
 
 S32 LuaPoint::angleTo(lua_State *L)
 {
-   checkArgCount(L, 1, "LuaPoint:angleTo()");
-   LuaPoint *point = Lunar<LuaPoint>::check(L, 1);
+   static const char *methodName = "LuaPoint:angleTo()";
 
-   return returnFloat(L, mPoint.angleTo(point->getPoint()));
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   return returnFloat(L, mPoint.angleTo(point));
 }
+
+
+S32 LuaPoint::normalize(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:normalize()";
+
+   checkArgCount(L, 1, methodName);
+   F32 len = LuaObject::getFloat(L, 1, methodName);
+
+   mPoint.normalize(len);
+   return returnLuaPoint(L, this);
+}
+
+
 
 ////////////////////////////////////
 ////////////////////////////////////

@@ -26,6 +26,15 @@
 #include "luaObject.h"
 #include "luaGameInfo.h"    // For LuaPoint
 #include "tnlLog.h"         // For logprintf
+
+#include "gameItems.h"     // For getItem()
+#include "Item.h"          // For getItem()
+#include "flagItem.h"      // For getItem()
+#include "robot.h"         // For getItem()
+#include "huntersGame.h"   // For getItem()
+#include "soccerGame.h"    // For getItem()
+#include "engineeredObjects.h"    // For getItem()
+
 #include <string>
 
 using namespace std;
@@ -45,6 +54,16 @@ S32 LuaObject::returnPoint(lua_State *L, Point point)
 
    return 1;
 }
+
+
+// Returns an existing LuaPoint to calling Lua function
+S32 LuaObject::returnLuaPoint(lua_State *L, LuaPoint *point)
+{
+   Lunar<LuaPoint>::push(L, point, true);     // true will allow Lua to delete this object when it goes out of scope
+
+   return 1;
+}
+
 
 // Returns an int to a calling Lua function
 S32 LuaObject::returnInt(lua_State *L, S32 num)
@@ -188,5 +207,68 @@ const char *LuaObject::getString(lua_State *L, S32 index, const char *functionNa
 
    return lua_tostring(L, index);
 }
+
+
+// Pop a point object off stack, check its type, and return it
+Point LuaObject::getPoint(lua_State *L, S32 index, const char *functionName)
+{
+   return Lunar<LuaPoint>::check(L, index)->getPoint();
+}
+
+
+GameObject *LuaObject::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
+{
+   switch(type)
+   {
+      case ShipType:
+        //return  Lunar<Ship>::check(L, index);
+
+      case BulletType:
+
+      case ResourceItemType:
+         return Lunar<ResourceItem>::check(L, index);
+
+      case MineType:
+
+      case TestItemType:
+         return Lunar<TestItem>::check(L, index);
+
+      case FlagType:
+         return Lunar<FlagItem>::check(L, index);
+
+      case SpyBugType:
+
+      case RobotType:
+         //return Lunar<LuaRobot>::check(L, index)->getRobot();
+
+      case TeleportType:
+
+      case AsteroidType:
+         return Lunar<Asteroid>::check(L, index);
+
+      case RepairItemType:
+         return Lunar<RepairItem>::check(L, index);
+
+      case SoccerBallItemType:
+         return Lunar<SoccerBallItem>::check(L, index);
+
+      case NexusFlagType:
+         return Lunar<HuntersFlagItem>::check(L, index);
+
+      case TurretType:
+         return Lunar<Turret>::check(L, index);
+
+      case ForceFieldProjectorType:
+         return Lunar<ForceFieldProjector>::check(L, index);
+   
+      default:
+         char msg[256];
+         dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
+         logprintf(msg);
+         throw(string(msg));
+   }
+}
+
+
 
 };

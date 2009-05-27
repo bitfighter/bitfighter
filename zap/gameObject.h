@@ -48,7 +48,7 @@ enum GameObjectType
    BarrierType         = BIT(2),
    MoveableType        = BIT(3),
    BulletType          = BIT(4),
-   ItemType            = BIT(5),
+   ItemType            = BIT(5),    // Not made available to Lua... could we get rid of this altogether?
    ResourceItemType    = BIT(6),
          // slot available
    ForceFieldType      = BIT(8),

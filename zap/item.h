@@ -88,7 +88,7 @@ public:
    // LuaItem interface
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }    
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        
-   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }    
+   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
 };
 
 ///////////////////
@@ -99,7 +99,7 @@ class LuaItem : public LuaObject
    virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
    virtual S32 getRad(lua_State *L) = 0;     // Radius of item (returns number)
    virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
-
+   virtual S32 getClassID(lua_State *L) = 0; // Object's class    
    virtual void push(lua_State *L) = 0;      // Push item onto stack
 };
 

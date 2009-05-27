@@ -31,6 +31,7 @@
 #include "../lua/include/lunar.h"
 #include "tnl.h"
 #include "point.h"
+//#include "luaGameInfo.h"      // For LuaPoint def
 
 using namespace TNL;
 
@@ -45,6 +46,9 @@ using namespace TNL;
 namespace Zap
 {
 
+class GameObject;
+class LuaPoint;
+
 class LuaObject
 {
 
@@ -56,6 +60,8 @@ protected:
    static lua_Integer getInt(lua_State *L, S32 index, const char *functionName);
    static lua_Integer getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal);
    static const char *getString(lua_State *L, S32 index, const char *functionName);
+   static Point getPoint(lua_State *L, S32 index, const char *functionName);
+   static GameObject *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
 
    static void setfield (lua_State *L, const char *key, F32 value);
 
@@ -63,6 +69,7 @@ public:
    // All of these return<T> functions work in the same way.  Include at the and of a child class method.
    // Usage: return returnInt(L, int);
    static S32 returnPoint(lua_State *L, Point point);
+   static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
    static S32 returnInt(lua_State *L, S32 num);
    static S32 returnFloat(lua_State *L, F32 num);
    static S32 returnString(lua_State *L, const char *str);

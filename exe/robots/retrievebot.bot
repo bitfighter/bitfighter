@@ -98,13 +98,6 @@ end
 -- any variables set here will persist throughout the robot's life.  These
 -- variables can be accessed from various functions defined in this file.
 
--- Start up a new LuaGameObject wrapper class and pass the global gameobject
--- C++ lightuserdata pointer into it.
-
-bot = LuaRobot(Robot) -- This is a reference to our bot.  All bots need this line
-
-
--------------------------------------------------------------------------------
 -- Global variables
 
 haveFlag = true         -- Well we don't really, but this will trigger the flag

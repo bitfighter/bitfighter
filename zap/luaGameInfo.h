@@ -203,6 +203,7 @@ public:
    S32 angleTo(lua_State *L);
    S32 len(lua_State *L);
    S32 lenSquared(lua_State *L);
+   S32 normalize(lua_State *L);
 
 };
 
