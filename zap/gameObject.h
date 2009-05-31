@@ -47,19 +47,21 @@ enum GameObjectType
    ShipType            = BIT(1),
    BarrierType         = BIT(2),
    MoveableType        = BIT(3),
-   BulletType          = BIT(4),
-   ItemType            = BIT(5),    // Not made available to Lua... could we get rid of this altogether?
-   ResourceItemType    = BIT(6),
+   ItemType            = BIT(4),    // Not made available to Lua... could we get rid of this altogether?
+   ResourceItemType    = BIT(5),
          // slot available
-   ForceFieldType      = BIT(8),
-   LoadoutZoneType     = BIT(9),
-   MineType            = BIT(10),
-   TestItemType        = BIT(11),
-   FlagType            = BIT(12),
-   TurretTargetType    = BIT(13),
-   SlipZoneType        = BIT(14),
+   ForceFieldType      = BIT(7),
+   LoadoutZoneType     = BIT(8),
+   TestItemType        = BIT(9),
+   FlagType            = BIT(10),
+   TurretTargetType    = BIT(11),
+   SlipZoneType        = BIT(12),
+
+   BulletType          = BIT(13),
+   MineType            = BIT(14),
    HeatSeekerType      = BIT(15),
    SpyBugType          = BIT(16),
+
    NexusType           = BIT(17),
    BotNavMeshZoneType  = BIT(18),
    RobotType           = BIT(19),
@@ -220,12 +222,10 @@ public:
    bool collisionPolyPointIntersect(Vector<Point> points);
    bool collisionPolyPointIntersect(Point center, F32 radius);
 
-
    virtual bool processArguments(S32 argc, const char**argv);
    void setScopeAlways();
 
-   virtual void push(lua_State *L) { /* Nothing here */ }    // Lua-aware classes will implement this
-
+   virtual void push(lua_State *L) { TNLAssert(false,"Unimplemented push function!"); }    // Lua-aware classes will implement this
 };
 
 };

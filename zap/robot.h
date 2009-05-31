@@ -29,13 +29,13 @@
 
 #include "gameObject.h"
 #include "moveObject.h"
+#include "ship.h"
 
 #include "sparkManager.h"
 #include "sfx.h"
 #include "timer.h"
 #include "shipItems.h"
 #include "gameWeapons.h"
-#include "ship.h"
 
 #include "luaObject.h"
 
@@ -44,6 +44,7 @@ namespace Zap
 {
 
 class Item;
+class LuaRobot;
 
 /**
  * This is the wrapper around the C++ object found in object.cc
@@ -52,7 +53,6 @@ class Item;
  * Notice that I kept the function names the same for simplicity.
  */
 
-// class derived_class_name: public base_class_name
 class Robot : public Ship
 {
    typedef Ship Parent;
@@ -65,7 +65,6 @@ private:
    string mFilename;                         // Name of file script was loaded from
 
    S32 mCurrentZone;            // Zone robot is currently in
-
    U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed
 
    static U32 mRobotCount;
@@ -73,6 +72,8 @@ private:
    enum {
       RobotRespawnDelay = 1500,
    };
+
+   //void push(lua_State *L) {  Lunar<LuaRobot>::push(L, mLuaRobot); }
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
@@ -86,7 +87,7 @@ public:
 
    void processMove(U32 stateIndex);
 
-  Point mTarget;     // TODO: Get rid of this!!
+   Point mTarget;     // TODO: Get rid of this!!
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);
@@ -111,6 +112,9 @@ public:
    bool isRobot() { return true; }
    static U32 getRobotCount() { return mRobotCount; }
 
+   LuaRobot *mLuaRobot;    // Could make private and make a public setter method...
+
+
 private:
   int attribute;
   std::string message;
@@ -119,9 +123,8 @@ private:
 };
 
 
-class LuaRobot : public LuaObject
+class LuaRobot : public LuaShip
 {
-
 private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    S32 findClosestZone(Point point);                 // Finds zone closest to point, used when robots get off the map
@@ -129,7 +132,6 @@ private:
    S32 doFindItems(lua_State *L, Rect scope);        // Worker method for various find functions
 
    Robot *thisRobot;              // Pointer to an actual C++ Robot object
-
 
 public:
   // Constants
@@ -142,8 +144,6 @@ public:
 
    static Lunar<LuaRobot>::RegType methods[];
 
-
-
    S32 getClassID(lua_State *L);
 
    S32 getCPUTime(lua_State *L);
@@ -155,8 +155,8 @@ public:
    S32 getZoneCount(lua_State *L);
    S32 getCurrentZone(lua_State *L);
 
-   S32 getAngle(lua_State *L);
-   S32 getLoc(lua_State *L);
+   //S32 getAngle(lua_State *L);
+   //S32 getLoc(lua_State *L);
 
 
    S32 setAngle(lua_State *L);
@@ -196,13 +196,13 @@ public:
    S32 getReqLoadout(lua_State *L);        // Returns requested loadout (Loadout)
 
 
-   // Ship info
-   S32 getActiveWeapon(lua_State *L);
+   //// Ship info
+   //S32 getActiveWeapon(lua_State *L);
 
    S32 logprint(lua_State *L);
 
-   S32 getGame(lua_State *L);    // Get a pointer to a game object, where we can run game-info oriented methods
-   //Robot getRobot() { return &thisRobot; }
+   S32 getGame(lua_State *L);             // Get a pointer to a game object, where we can run game-info oriented methods
+   Ship *getObj() { return thisRobot; }   // This handles delegation properly when we're dealing with methods inherited from LuaShip
 };
 
 

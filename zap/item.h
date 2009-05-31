@@ -36,12 +36,30 @@ namespace Zap
 class Ship;
 class GoalZone;
 
-class Item : public MoveObject, public LuaObject
+///////////////////
+
+class LuaItem : public LuaObject
+{  
+public:
+   // "= 0" ==> make these methods "pure virtual" functions
+   virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
+   virtual S32 getRad(lua_State *L) = 0;     // Radius of item (returns number)
+   virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
+   virtual S32 getClassID(lua_State *L) = 0; // Object's class    
+   virtual void push(lua_State *L) = 0;      // Push item onto stack
+   virtual GameObject *getGameObject() = 0;  // Return the underlying GameObject
+
+   static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
+};
+
+///////////////////
+
+class Item : public MoveObject, public LuaItem
 {
 protected:
    enum MaskBits {
       InitialMask = BIT(0),
-      PositionMask = BIT(1),     //<-- Indicates position has changed and needs to be updated
+      PositionMask = BIT(1),     // <-- Indicates position has changed and needs to be updated
       WarpPositionMask = BIT(2),
       MountMask = BIT(3),
       ZoneMask = BIT(4),
@@ -86,24 +104,16 @@ public:
    bool collide(GameObject *otherObject);
 
    // LuaItem interface
+   static const char className[];
+
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }    
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
+   GameObject *getGameObject() { return this; }
 };
 
 ///////////////////
 
-class LuaItem : public LuaObject
-{  
-   // = 0 ==> make these methods "pure virtual" functions
-   virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
-   virtual S32 getRad(lua_State *L) = 0;     // Radius of item (returns number)
-   virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
-   virtual S32 getClassID(lua_State *L) = 0; // Object's class    
-   virtual void push(lua_State *L) = 0;      // Push item onto stack
-};
-
-///////////////////
 
 class PickupItem : public Item
 {

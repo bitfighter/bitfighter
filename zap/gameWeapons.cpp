@@ -88,7 +88,6 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
       case WeaponSpyBug:
          (new SpyBug(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
          break;
-
    }
 }
 

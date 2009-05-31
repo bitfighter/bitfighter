@@ -145,6 +145,7 @@ public:
    static Lunar<HuntersFlagItem>::RegType methods[];
 
    S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
+   void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
 };
 
 

@@ -96,6 +96,9 @@ public:
    S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam()); }
    S32 getHealth(lua_State *L) { return returnFloat(L, mHealth); }
    S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
+
+   GameObject *getGameObject() { return this; }
+
 };
 
 

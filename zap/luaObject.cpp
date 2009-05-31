@@ -216,12 +216,12 @@ Point LuaObject::getPoint(lua_State *L, S32 index, const char *functionName)
 }
 
 
-GameObject *LuaObject::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
+LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functionName)
 {
    switch(type)
    {
       case ShipType:
-        //return  Lunar<Ship>::check(L, index);
+        return  Lunar<LuaShip>::check(L, index);
 
       case BulletType:
 
@@ -239,7 +239,7 @@ GameObject *LuaObject::getItem(lua_State *L, S32 index, U32 type, const char *fu
       case SpyBugType:
 
       case RobotType:
-         //return Lunar<LuaRobot>::check(L, index)->getRobot();
+         return Lunar<LuaShip>::check(L, index);
 
       case TeleportType:
 

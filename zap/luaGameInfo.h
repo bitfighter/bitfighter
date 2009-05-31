@@ -175,7 +175,7 @@ class LuaPoint : public LuaObject
 {
 private:
    Point mPoint;                  // Underlying point container
-   
+
 public:
    LuaPoint(lua_State *L);        // Lua constructor
    LuaPoint(Point point);         // C++ constructor

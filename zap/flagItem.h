@@ -36,6 +36,7 @@ class FlagItem : public Item
 private:
    typedef Item Parent;
    Point initialPos;
+   void push(lua_State *L) {  Lunar<FlagItem>::push(L, this); }
 
 public:
    FlagItem(Point pos = Point());      // C++ constructor

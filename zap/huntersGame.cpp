@@ -437,6 +437,7 @@ void HuntersFlagItem::renderItem(Point pos)
    }
 }
 
+
 void HuntersFlagItem::onMountDestroyed()
 {
    if(!mMount.isValid())
@@ -464,11 +465,13 @@ void HuntersFlagItem::onMountDestroyed()
    deleteObject();
 }
 
+
 void HuntersFlagItem::setActualVel(Point v)
 {
    mMoveState[ActualState].vel = v;
    setMaskBits(WarpPositionMask | PositionMask);
 }
+
 
 bool HuntersFlagItem::collide(GameObject *hitObject)
 {

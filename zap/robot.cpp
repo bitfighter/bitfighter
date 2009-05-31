@@ -60,7 +60,8 @@ static Vector<GameObject *> fillVector;
 LuaRobot::LuaRobot(lua_State *L)
 {
    lua_atpanic(L, luaPanicked);                 // Register our panic function
-   thisRobot = (Robot*)lua_touserdata(L, 1);    // Register our robot
+   thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
+   thisRobot->mLuaRobot = this;
 
    // The following sets scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
@@ -158,8 +159,13 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getCPUTime),
    method(LuaRobot, getTime),
 
+   // These inherited from LuaShip
    method(LuaRobot, getAngle),
    method(LuaRobot, getLoc),
+   method(LuaRobot, getVel),
+   method(LuaRobot, getTeamIndx),
+
+   method(LuaRobot, getRad),
 
    method(LuaRobot, getZoneCenter),
    method(LuaRobot, getGatewayFromZoneToZone),
@@ -278,34 +284,18 @@ S32 LuaRobot::setThrustAng(lua_State *L)
 }
 
 
-//template <class T>
-//T *checkItem(lua_State *L)
-//{
-//   luaL_getmetatable(L, T::className);
-//   if(lua_rawequal(L, -1, -2))         // Lua object on the stack is of class <T>!
-//   {
-//      lua_pop(L, 2);                   // Remove both metatables
-//      return Lunar<T>::check(L, 1);    // Return our object
-//   }
-//   else                                // Object on stack is something else
-//   {
-//      lua_pop(L, 1);    // Remove <T>'s metatable, leave the other in place for further comparison
-//      return NULL;
-//   }
-//}
-
-
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 // Given an object, which angle do we need to be at to fire to hit it?
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
+// Note that bot WILL fire at teammates if you ask it to!
 S32 LuaRobot::getFiringSolution(lua_State *L) 
 {
    static const char *methodName = "Robot:getFiringSolution()";
    checkArgCount(L, 2, methodName);
    U32 type = getInt(L, 1, methodName);
-   GameObject *target = getItem(L, 2, type, methodName);
+   GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
    Point aimPos = thisRobot->getActualPos(); 
    Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
@@ -321,8 +311,8 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
          return returnNil(L);
    }
 
-   if(target->getTeam() == thisRobot->getTeam())      // Is target on our team?
-      return returnNil(L);                            // ...if so, skip it!
+   //if(target->getTeam() == thisRobot->getTeam())      // Is target on our team?
+   //   return returnNil(L);                            // ...if so, skip it!
 
    // Calculate where we have to shoot to hit this...
    Point Vs = target->getActualVel();
@@ -617,13 +607,6 @@ S32 LuaRobot::getReqLoadout(lua_State *L)
 }
 
 
-// Get WeaponIndex for current weapon
-S32 LuaRobot::getActiveWeapon(lua_State *L)
-{
-   return returnInt(L, thisRobot->getSelectedWeapon());
-}
-
-
 // Send message to all players
 S32 LuaRobot::globalMsg(lua_State *L)
 {
@@ -650,20 +633,6 @@ S32 LuaRobot::teamMsg(lua_State *L)
 }
 
 
-// Returns current aim angle of ship  --> needed?
-S32 LuaRobot::getAngle(lua_State *L)
-{
-  return returnFloat(L, thisRobot->getCurrentMove().angle);
-}
-
-
-// Returns current position of ship
-S32 LuaRobot::getLoc(lua_State *L)
-{
-  return returnPoint(L, thisRobot->getActualPos());
-}
-
-
 // Write a message to the server logfile
 S32 LuaRobot::logprint(lua_State *L)
 {
@@ -680,9 +649,9 @@ S32 LuaRobot::findItems(lua_State *L)
 {
    Point pos = thisRobot->getActualPos();
    Rect queryRect(pos, pos);
-   queryRect.expand( gServerGame->computePlayerVisArea(thisRobot) );
+   queryRect.expand(gServerGame->computePlayerVisArea(thisRobot));
 
-   return doFindItems( L, queryRect );
+   return doFindItems(L, queryRect);
 }
 
 
@@ -704,23 +673,29 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
    S32 index = 1;
    while(lua_isnumber(L, index))
    {
-      objectType |= lua_tointeger(L, index);
+      objectType |= (U32) lua_tointeger(L, index);
       index++;
    }
 
+   clearStack(L);
 
    fillVector.clear();
 
    thisRobot->findObjects(objectType, fillVector, scope);    // Get other objects on screen-visible area only
 
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
-   S32 tableIndx = lua_gettop(L);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    { 
+
       if(fillVector[i]->getObjectTypeMask() & (ShipType | RobotType))      // Skip cloaked ships & robots!
       {
          Ship *ship = (Ship*)fillVector[i];
+
+         if(dynamic_cast<Robot *>(fillVector[i]) == thisRobot)     // Do not find self
+         {
+            continue;
+         }
 
          // If it's dead or cloaked, ignore it
          if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
@@ -729,12 +704,11 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 
       GameObject *obj = fillVector[i];
       obj->push(L);
-      lua_rawseti(L, tableIndx, i + 1);
+      lua_rawseti(L, 1, i + 1);
    }
 
    return 1;
 }
-
 
 
 // Get rid of??
@@ -749,10 +723,6 @@ S32 LuaRobot::findObjects(lua_State *L)
 
    fillVector.clear();
 
-   // ShipType BarrierType MoveableType BulletType ItemType ResourceItemType EngineeredType ForceFieldType LoadoutZoneType MineType TestItemType FlagType TurretTargetType SlipZoneType HeatSeekerType SpyBugType NexusType
-
-   // thisRobot->findObjects(CommandMapVisType, fillVector, gServerWorldBounds);    // Get all globally visible objects
-   //thisRobot->findObjects(ShipType, fillVector, Rect(thisRobot->getActualPos(), gServerGame->computePlayerVisArea(thisRobot)) );    // Get other objects on screen-visible area only
    thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
 
    F32 bestRange = F32_MAX;
@@ -792,7 +762,6 @@ S32 LuaRobot::findObjects(lua_State *L)
          //-----
          //closest
          //-----
-
 
          if(!isNotInOwnZone)
             continue;
@@ -1068,7 +1037,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
 
    disableCollision();
-}
+}
 
 
 Robot::~Robot()
@@ -1131,7 +1100,7 @@ bool Robot::initialize(Point p)
    L = lua_open();    // Create a new Lua interpreter
 
    // Register our connector types with Lua
-   Lunar<LuaRobot>::Register(L);
+
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
    Lunar<LuaTimer>::Register(L);
@@ -1142,13 +1111,15 @@ bool Robot::initialize(Point p)
    Lunar<LuaLoadout>::Register(L);
    Lunar<LuaPoint>::Register(L);
 
+   Lunar<LuaRobot>::Register(L);
+   Lunar<LuaShip>::Register(L);
+
    Lunar<RepairItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
    Lunar<Turret>::Register(L);
    Lunar<ForceFieldProjector>::Register(L);
-
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);
    Lunar<HuntersFlagItem>::Register(L);

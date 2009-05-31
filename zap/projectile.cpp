@@ -276,6 +276,8 @@ void Projectile::render()
 }
 
 
+//const char Projectile::className[] = "ProjectileItem";      // Class name as it appears to Lua scripts
+
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
@@ -423,6 +425,10 @@ void Mine::renderItem(Point pos)
    renderMine(pos, mArmed, visible);
 }
 
+
+const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
+
+
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
 
@@ -473,8 +479,8 @@ void GrenadeProjectile::idle(IdleCallPath path)
       else
          ttl -= deltaT;
    }
-
 }
+
 
 U32  GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -483,6 +489,7 @@ U32  GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, 
    stream->writeFlag(updateMask & InitialMask);
    return ret;
 }
+
 
 void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -503,6 +510,7 @@ void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *str
    }
 }
 
+
 void GrenadeProjectile::damageObject(DamageInfo *theInfo)
 {
    // If we're being damaged by another grenade, explode...
@@ -520,6 +528,7 @@ void GrenadeProjectile::damageObject(DamageInfo *theInfo)
 
    setMaskBits(PositionMask);
 }
+
 
 // Also used for mines and spybugs  --> not sure if we really need to pass weaponType
 void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
@@ -552,9 +561,9 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
 
       radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
    }
-
    exploded = true;
 }
+
 
 void GrenadeProjectile::renderItem(Point pos)
 {
@@ -576,12 +585,13 @@ void GrenadeProjectile::renderItem(Point pos)
 }
 
 
+const char GrenadeProjectile::className[] = "GrenadeItem";      // Class name as it appears to Lua scripts
+
 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
-
 
 
 
@@ -787,7 +797,6 @@ void HeatSeeker::idle(GameObject::IdleCallPath path)  // Not done yet
          mMoveState[ActualState].pos = endPos;
 
       mTarget = endPos;
-
    }
 
    // Kill old projectiles
@@ -842,9 +851,7 @@ void HeatSeeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       SFXObject::play(SFXGrenadeProjectile, getActualPos(), getActualVel());
    }
-
         // readCompressedVelocity(velocity, CompressedVelocityMax, stream);
-
 }
 
 
@@ -934,6 +941,8 @@ void HeatSeeker::explode(Point pos, WeaponType weaponType)
    }
    exploded = true;
 }
+
+const char HeatSeeker::className[] = "HeatSeekerItem";      // Class name as it appears to Lua scripts
 
 
 //-----------------------------------------------------------------------------
@@ -1051,6 +1060,9 @@ void SpyBug::renderItem(Point pos)
 
    renderSpyBug(pos, visible);
 }
+
+
+const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
 
 
 };

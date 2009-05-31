@@ -71,6 +71,11 @@ public:
 
    void render();
    TNL_DECLARE_CLASS(Projectile);
+
+   //// Lua interface
+   //void push(lua_State *L) {  Lunar<Projectile>::push(L, this); }
+   //S32 getClassID(lua_State *L) { return returnInt(L, ProjectileType); }
+
 };
 
 // GrenadeProjectiles are the base clase used for both mines and spybugs
@@ -105,6 +110,12 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(GrenadeProjectile);
+
+   // Lua interface
+   void push(lua_State *L) {  Lunar<GrenadeProjectile>::push(L, this); }
+   S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }
+   static const char className[];
+
 };
 
 class Mine : public GrenadeProjectile
@@ -136,10 +147,16 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(Mine);
+
+   // Lua interface
+   void push(lua_State *L) {  Lunar<Mine>::push(L, this); }
+   S32 getClassID(lua_State *L) { return returnInt(L, MineType); }
+   static const char className[];
+
 };
 
 
-class HeatSeeker : public Item
+class HeatSeeker : public Item      // Not working, not used.
 {
    typedef Item Parent;
 public:
@@ -179,8 +196,13 @@ public:
 
    SafePtr<GameObject> mShooter;
 
-
    TNL_DECLARE_CLASS(HeatSeeker);
+
+   // Lua interface
+   void push(lua_State *L) {  Lunar<HeatSeeker>::push(L, this); }
+   S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }
+   static const char className[];
+
 };
 
 class SpyBug : public GrenadeProjectile
@@ -204,6 +226,12 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(SpyBug);
+
+   // Lua interface
+   void push(lua_State *L) {  Lunar<SpyBug>::push(L, this); }
+   S32 getClassID(lua_State *L) { return returnInt(L, SpyBugType); }
+   static const char className[];
+
 };
 
 

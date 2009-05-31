@@ -26,8 +26,10 @@
 #ifndef _SHIP_H_
 #define _SHIP_H_
 
+#include "item.h"    // for Item and LuaItem
 #include "gameObject.h"
 #include "moveObject.h"
+#include "luaObject.h"
 #include "sparkManager.h"
 #include "sfx.h"
 #include "timer.h"
@@ -37,7 +39,42 @@
 namespace Zap
 {
 
-class Item;
+class LuaShip : public LuaItem
+{
+
+private:
+   Ship *thisShip;             // Pointer to an actual C++ ship object
+
+public:
+   LuaShip(lua_State *L);            // Lua constructor
+   LuaShip(Ship *ship);              // C++ constructor
+   //~LuaShip();                     // Destructor
+   LuaShip() { /* do nothing */ };   // C++ default constructor ==> not used
+
+
+   static const char className[];
+
+   static Lunar<LuaShip>::RegType methods[];
+
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, ShipType); }    // Robot will override this
+   
+   S32 getAngle(lua_State *L);
+   S32 getLoc(lua_State *L);
+   S32 getRad(lua_State *L);
+   S32 getVel(lua_State *L);
+
+   S32 getTeamIndx(lua_State *L);
+
+   GameObject *getGameObject();
+
+   void push(lua_State *L) {  Lunar<LuaShip>::push(L, this); }      // Push item onto stack
+
+   S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
+
+   virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
+};
+
+//////////////////////////////////////////////
 
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
@@ -49,6 +86,8 @@ class Ship : public MoveObject
 private:
    typedef MoveObject Parent;
    bool isBusy;
+   LuaShip mLuaShip;
+   void push(lua_State *L) { Lunar<LuaShip>::push(L, &mLuaShip); }
 
 protected:
    StringTableEntry mPlayerName;
@@ -56,7 +95,6 @@ protected:
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
-
 
 public:
    enum {
@@ -142,6 +180,7 @@ public:
    virtual void render(S32 layerIndex);
 
    Ship(StringTableEntry playerName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
+   Ship::~Ship();           // Destructor
 
    F32 getHealth() { return mHealth; }
 
@@ -219,6 +258,8 @@ public:
 
    TNL_DECLARE_CLASS(Ship);
 };
+
+
 
 };
 

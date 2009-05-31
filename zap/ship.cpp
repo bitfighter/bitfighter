@@ -94,6 +94,15 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
 
    mCooldown = false;
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
+
+   // Create Lua representation of this ship
+   mLuaShip = LuaShip(this);
+}
+
+
+Ship::~Ship()         // Destructor
+{
+   // Do nothing
 }
 
 
@@ -948,6 +957,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 }  // unpackUpdate
 
+
 F32 getAngleDiff(F32 a, F32 b)
 {
    // Figure out the shortest path from a to b...
@@ -1299,12 +1309,12 @@ void Ship::render(S32 layerIndex)
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
       string str = mPlayerName.getString();
-
-char x[100];
-char y[100];
-itoa((S32) getActualPos().x, x,10);
-itoa((S32) getActualPos().y, y,10);
-str = str + " {" + x + "," + y + "}";
+//
+//char x[100];
+//char y[100];
+//itoa((S32) getActualPos().x, x,10);
+//itoa((S32) getActualPos().y, y,10);
+//str = str + " {" + x + "," + y + "}";
 
       // Modify name if owner is "busy"
       if(isBusy)
@@ -1426,16 +1436,16 @@ str = str + " {" + x + "," + y + "}";
 
 if(isRobot())
 {
-Robot *robot = dynamic_cast<Robot *>(this);
-if(robot)
-{
-   glColor3f(0,1,1);
-   glBegin(GL_LINES);
-   Point shipPos = getRenderPos();
-   glVertex2f(robot->mTarget.x , robot->mTarget.y );
-   glVertex2f(0 ,0 );
-   glEnd();
-}
+   Robot *robot = dynamic_cast<Robot *>(this);
+   if(robot)
+   {
+      glColor3f(0,1,1);
+      glBegin(GL_LINES);
+      Point shipPos = getRenderPos();
+      glVertex2f(robot->mTarget.x , robot->mTarget.y );
+      glVertex2f(0 ,0 );
+      glEnd();
+   }
 }
 
    // Now render some "addons"  --> should these be in renderShip?
@@ -1475,5 +1485,51 @@ if(robot)
       glLineWidth(gDefaultLineWidth);
    }
 }
+
+
+
+const char LuaShip::className[] = "Ship";      // Class name as it appears to Lua scripts
+
+Lunar<LuaShip>::RegType LuaShip::methods[] = {
+   method(LuaShip, getClassID),
+   method(LuaShip, getLoc),
+   method(LuaShip, getRad),
+   method(LuaShip, getVel),
+   method(LuaShip, getTeamIndx),
+
+   method(LuaShip, getAngle),
+   method(LuaShip, getActiveWeapon),
+
+   {0,0}    // End method list
+};
+
+
+// C++ constructor -- automatically constructed when a ship is created
+LuaShip::LuaShip(Ship *ship)
+{
+   thisShip = ship;
+}
+
+
+// Lua constructor
+LuaShip::LuaShip(lua_State *L)
+{
+   // Don't instantiate from Lua!!
+}
+
+
+// Note: In methods that will be inherited by LuaRobot, which will be all of these, be sure to use getObj() instead of thisShip.
+// Otherwise, naughty crashy behavior will occur.
+
+S32 LuaShip::getRad(lua_State *L) { return returnFloat(L, getObj()->getRadius()); }
+S32 LuaShip::getLoc(lua_State *L) { return returnPoint(L, getObj()->getActualPos()); }
+S32 LuaShip::getVel(lua_State *L) { return returnPoint(L, getObj()->getActualVel()); }
+
+S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, getObj()->getTeam()); }
+
+S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
+S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSelectedWeapon()); }    // Get WeaponIndex for current weapon
+
+GameObject *LuaShip::getGameObject() { return getObj(); }
 
 };
