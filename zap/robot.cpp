@@ -671,6 +671,8 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
    U32 objectType = 0;
 
    S32 index = 1;
+   S32 pushed = 0;      // Count of items actually pushed onto the stack
+
    while(lua_isnumber(L, index))
    {
       objectType |= (U32) lua_tointeger(L, index);
@@ -693,18 +695,17 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
          Ship *ship = (Ship*)fillVector[i];
 
          if(dynamic_cast<Robot *>(fillVector[i]) == thisRobot)     // Do not find self
-         {
             continue;
-         }
 
-         // If it's dead or cloaked, ignore it
+         // Ignore ship/robot if it's dead or cloaked
          if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
             continue;
       }
 
       GameObject *obj = fillVector[i];
       obj->push(L);
-      lua_rawseti(L, 1, i + 1);
+      pushed++;      // Increment pushed before using it because lua used 1-based arrays
+      lua_rawseti(L, 1, pushed);
    }
 
    return 1;
