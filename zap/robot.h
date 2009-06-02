@@ -147,8 +147,7 @@ public:
    S32 getClassID(lua_State *L);
 
    S32 getCPUTime(lua_State *L);
-   S32 getTime(lua_State *L) { return returnInt(L, thisRobot->getCurrentMove().time); }
-
+   S32 getTime(lua_State *L);
 
    S32 getZoneCenter(lua_State *L);
    S32 getGatewayFromZoneToZone(lua_State *L);
@@ -168,17 +167,18 @@ public:
 
 
    // Navigation
-   S32 findObjects(lua_State *L);
    S32 getWaypoint(lua_State *L);
 
    S32 findItems(lua_State *L);
    S32 findGlobalItems(lua_State *L);
 
    // Ship control
-   S32 setThrustAng(lua_State *L);
+   S32 setThrust(lua_State *L);
    S32 setThrustXY(lua_State *L);
+   S32 setThrustToPt(lua_State *L);
 
    S32 getFiringSolution(lua_State *L);
+   S32 getInterceptCourse(lua_State *L);
 
    S32 fire(lua_State *L);
    S32 setWeapon(lua_State *L);

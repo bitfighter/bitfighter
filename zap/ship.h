@@ -64,6 +64,7 @@ public:
    S32 getVel(lua_State *L);
 
    S32 getTeamIndx(lua_State *L);
+   S32 isModActive(lua_State *L);
 
    GameObject *getGameObject();
 
@@ -161,7 +162,6 @@ public:
    WeaponType getWeapon(U32 indx) { return mWeapon[indx]; }    // Returns weapon in slot indx
    ShipModule getModule(U32 indx) { return mModule[indx]; }    // Returns module in slot indx
 
-   bool isModuleActive(U32 indx) { return mModuleActive[ModuleCount]; }
 
    Timer mSensorZoomTimer;
    Timer mWeaponFireDecloakTimer;
@@ -186,6 +186,7 @@ public:
 
    void onGhostRemove();
 
+   //bool isModuleActive(U32 indx) { return mModuleActive[ModuleCount]; }  <--- should be deleted... this makes no sense!
    bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
 
    bool engineerBuildObject()

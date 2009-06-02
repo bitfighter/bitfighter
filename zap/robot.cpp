@@ -163,9 +163,9 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getAngle),
    method(LuaRobot, getLoc),
    method(LuaRobot, getVel),
+   method(LuaRobot, getRad),
    method(LuaRobot, getTeamIndx),
 
-   method(LuaRobot, getRad),
 
    method(LuaRobot, getZoneCenter),
    method(LuaRobot, getGatewayFromZoneToZone),
@@ -180,8 +180,10 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, hasFlag),
    method(LuaRobot, getWaypoint),
 
-   method(LuaRobot, setThrustAng),
+   method(LuaRobot, setThrust),
    method(LuaRobot, setThrustXY),
+   method(LuaRobot, setThrustToPt),
+   
    method(LuaRobot, fire),
    method(LuaRobot, setWeapon),
    method(LuaRobot, setWeaponIndex),
@@ -200,11 +202,11 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    method(LuaRobot, logprint),
 
-   method(LuaRobot, findObjects),
-
    method(LuaRobot, findItems),
    method(LuaRobot, findGlobalItems),
    method(LuaRobot, getFiringSolution),
+   method(LuaRobot, getInterceptCourse),     // Doesn't work well...
+
 
    {0,0}    // End method list
 };
@@ -264,9 +266,9 @@ S32 LuaRobot::getAngleXY(lua_State *L)
 
 
 // Thrust at velocity v toward angle a
-S32 LuaRobot::setThrustAng(lua_State *L)
+S32 LuaRobot::setThrust(lua_State *L)
 {
-   static const char *methodName = "Robot:setThrustAng()";
+   static const char *methodName = "Robot:setThrust()";
    checkArgCount(L, 2, methodName);
    F32 vel = getFloat(L, 1, methodName);
    F32 ang = getFloat(L, 2, methodName);
@@ -290,6 +292,7 @@ extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type 
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
 // Note that bot WILL fire at teammates if you ask it to!
+/*
 S32 LuaRobot::getFiringSolution(lua_State *L) 
 {
    static const char *methodName = "Robot:getFiringSolution()";
@@ -348,6 +351,101 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
 
    return returnFloat(L, delta.ATAN2());
 }
+*/
+
+
+bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
+{
+   Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
+   offset.normalize(aimRadius * 1.2);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
+   aimPos += offset;
+
+   if(target->getObjectTypeMask() & ( ShipType | RobotType))
+   {
+      Ship *potential = (Ship*)target;
+
+      // Is it dead or cloaked?  If so, ignore
+      if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
+         return false;
+   }
+
+   if(ignoreFriendly && target->getTeam() == aimTeam)      // Is target on our team?
+      return false;                                        // ...if so, skip it!
+
+   // Calculate where we have to shoot to hit this...
+   Point Vs = target->getActualVel();
+
+   Point d = target->getActualPos() - aimPos;
+
+   F32 t;      // t is set in next statement
+   if(!FindLowestRootInInterval(Vs.dot(Vs) - aimVel * aimVel, 2 * Vs.dot(d), d.dot(d), aimLife * 0.001f, t))
+      return false;
+
+   Point leadPos = target->getActualPos() + Vs * t;
+
+   // Calculate distance
+   Point delta = (leadPos - aimPos);
+
+   // Make sure we can see it...
+   Point n;
+   if(target->findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
+      return false;
+
+   // See if we're gonna clobber our own stuff...
+   target->disableCollision();
+   Point delta2 = delta;
+   delta2.normalize(aimLife * aimVel / 1000);
+   GameObject *hitObject = target->findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
+   target->enableCollision();
+
+   if(ignoreFriendly && hitObject && hitObject->getTeam() == aimTeam)
+      return false;
+
+   interceptAngle = delta.ATAN2();
+
+   return true;
+}
+
+
+// Given an object, which angle do we need to be at to fire to hit it?
+// Returns nil if a workable solution can't be found
+// Logic adapted from turret aiming algorithm
+// Note that bot WILL fire at teammates if you ask it to!
+S32 LuaRobot::getFiringSolution(lua_State *L) {
+   static const char *methodName = "Robot:getFiringSolution()";
+   checkArgCount(L, 2, methodName);
+   U32 type = getInt(L, 1, methodName);
+   GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
+
+   WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
+ 
+   F32 interceptAngle;
+
+   if(calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle))
+      return returnFloat(L, interceptAngle);
+  
+   return returnNil(L);
+}
+
+
+// Given an object, what angle do we need to fly toward in order to collide with an object?  This
+// works a lot like getFiringSolution().
+S32 LuaRobot::getInterceptCourse(lua_State *L) 
+{
+   static const char *methodName = "Robot:getInterceptCourse()";
+   checkArgCount(L, 2, methodName);
+   U32 type = getInt(L, 1, methodName);
+   GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
+
+   WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
+ 
+   F32 interceptAngle;
+   bool ok = calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), 256, 3000, false, interceptAngle);
+   if(!ok)
+      return returnNil(L);
+
+   return returnFloat(L, interceptAngle);
+}
 
 
 // Thrust at velocity v toward point x,y
@@ -371,6 +469,30 @@ S32 LuaRobot::setThrustXY(lua_State *L)
   return 0;
 }
 
+
+// Thrust toward specified point, but slow speed so that we land directly on that point if it is within range
+S32 LuaRobot::setThrustToPt(lua_State *L)
+{
+   static const char *methodName = "Robot:setThrustToPt()";
+   checkArgCount(L, 1, methodName);
+   Point point = getPoint(L, 1, methodName);
+   F32 ang = thisRobot->getAngleXY(point) - 0 * FloatHalfPi;
+
+   Move move = thisRobot->getCurrentMove();
+
+   F32 dist = thisRobot->getActualPos().distanceTo(point);
+
+   F32 vel = dist / ((F32) move.time);      // v = d / t, t is in ms
+
+   move.up = sin(ang) < 0 ? -vel * sin(ang) : 0;
+   move.down = sin(ang) > 0 ? vel * sin(ang) : 0;
+   move.right = cos(ang) > 0 ? vel * cos(ang) : 0;
+   move.left = cos(ang) < 0 ? -vel * cos(ang) : 0;
+
+   thisRobot->setCurrentMove(move);
+
+  return 0;
+}
 
 extern Vector<SafePtr<BotNavMeshZone>> gBotNavMeshZones;
 
@@ -633,6 +755,12 @@ S32 LuaRobot::teamMsg(lua_State *L)
 }
 
 
+S32 LuaRobot::getTime(lua_State *L)
+{
+   return returnInt(L, thisRobot->getCurrentMove().time);
+}
+
+
 // Write a message to the server logfile
 S32 LuaRobot::logprint(lua_State *L)
 {
@@ -712,115 +840,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 }
 
 
-// Get rid of??
-S32 LuaRobot::findObjects(lua_State *L)
-{
-   //LuaProtectStack x(this); <== good idea, not working right...  ;-(
-
-    static const char *methodName = "findObjects";
-
-   checkArgCount(L, 1, methodName);
-   U32 objectType = getInt(L, 1, methodName);
-
-   fillVector.clear();
-
-   thisRobot->findObjects(objectType, fillVector, gServerWorldBounds );    // Get other objects on screen-visible area only
-
-   F32 bestRange = F32_MAX;
-   Point bestPoint;
-
-   GameType *gt = gServerGame->getGameType();
-   TNLAssert(gt, "Invaid game type!!");
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      // Some special rules for narrowing in on the objects we really want
-      if(fillVector[i]->getObjectTypeMask() & ShipType)
-      {
-         Ship *ship = (Ship*)fillVector[i];
-
-         // If it's dead or cloaked, ignore it
-         if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
-            continue;
-      }
-      else if(fillVector[i]->getObjectTypeMask() & FlagType)
-      {
-         FlagItem *flag = (FlagItem*)fillVector[i];
-
-         // Ignore flags mounted on ships
-         if(flag->isMounted())
-            continue;
-
-         TNLAssert(gServerGame->getGameType(), "Need to add gameType check in flagCheck/findObjects");
-
-         // Is flag in a zone?  Which kind?
-         bool isInZone = flag->getZone();
-         bool isInOwnZone = isInZone && flag->getZone()->getTeam() == thisRobot->getTeam();
-         bool isNotInOwnZone = !isInOwnZone;
-         bool isInEnemyZone = isInZone && !isInOwnZone;
-         bool isInLeaderZone = isInZone && flag->getZone()->getTeam() == gServerGame->getGameType()->mLeadingTeam;
-         bool isInNoZone = !isInZone;
-         //-----
-         //closest
-         //-----
-
-         if(!isNotInOwnZone)
-            continue;
-
-      }
-      else if(fillVector[i]->getObjectTypeMask() & GoalZoneType)
-      {
-         TNLAssert(gServerGame->getGameType(), "Need to add gameType check in goalZoneCheck/findObjects");
-
-         GoalZone *goal = (GoalZone*)fillVector[i];
-
-         bool isOwnZone = goal->getTeam() == thisRobot->getTeam();
-         bool isNeutralZone = goal->getTeam() == -1;
-         bool isEnemyZone = !(isOwnZone || isNeutralZone);
-         bool isNotOwnZone = !isOwnZone;
-         bool isLeaderZone = goal->getTeam() == gServerGame->getGameType()->mLeadingTeam;
-         //-----
-         bool hasFlag = goal->mHasFlag;
-         bool hasNoFlag = !hasFlag;
-         //-----
-         //closest
-         //-----
-
-         // Find only own goalzones
-         if(!isOwnZone)
-            continue;
-
-         // For now, ignore goalzones with flags in them
-         if(!hasNoFlag)
-            continue;
-      }
-
-      GameObject *potential = fillVector[i];
-
-      // If object needs to be in LOS, uncomment following
-      //if( ! thisRobot->canSeePoint(potential->getActualPos()) )   // Can we see it?
-      //   continue;      // No
-
-      F32 dist = thisRobot->getActualPos().distanceTo(potential->getActualPos());
-
-      if(dist < bestRange)
-      {
-         bestPoint  = potential->getActualPos();
-         bestRange  = dist;
-      }
-   }
-
-   // Write the results to Lua
-   if(bestRange < F32_MAX)
-      return returnPoint(L, bestPoint);
-
-   // else no targets found
-   return returnNil(L);
-}
-
-
 extern S32 findZoneContaining(Point p);
-
 
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
@@ -1099,6 +1119,8 @@ bool Robot::initialize(Point p)
       lua_close(L);
 
    L = lua_open();    // Create a new Lua interpreter
+
+   luaopen_math(L);     // Load the math library
 
    // Register our connector types with Lua
 

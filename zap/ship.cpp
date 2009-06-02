@@ -1496,6 +1496,7 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getRad),
    method(LuaShip, getVel),
    method(LuaShip, getTeamIndx),
+   method(LuaShip, isModActive),
 
    method(LuaShip, getAngle),
    method(LuaShip, getActiveWeapon),
@@ -1526,6 +1527,16 @@ S32 LuaShip::getLoc(lua_State *L) { return returnPoint(L, getObj()->getActualPos
 S32 LuaShip::getVel(lua_State *L) { return returnPoint(L, getObj()->getActualVel()); }
 
 S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, getObj()->getTeam()); }
+
+
+S32 LuaShip::isModActive(lua_State *L) { 
+   static const char *methodName = "Ship:isModActive()";
+   checkArgCount(L, 1, methodName);
+   ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
+   return returnBool(L, getObj()->isModuleActive(module)); 
+}
+
+
 
 S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
 S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSelectedWeapon()); }    // Get WeaponIndex for current weapon
