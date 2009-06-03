@@ -61,7 +61,7 @@ public:
    void setTeam(S32 team);
    void onAddedToGame(Game *theGame);
    void computeExtent();
-   bool getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints);
    bool collide(GameObject *hitObject);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

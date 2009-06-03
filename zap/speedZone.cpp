@@ -137,7 +137,7 @@ void SpeedZone::computeExtent()
 }
 
 // More precise boundary for more precise collision detection
-bool SpeedZone::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);

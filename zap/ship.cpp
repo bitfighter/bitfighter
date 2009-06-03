@@ -219,7 +219,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 
       // Get points that define the zone boundaries
       polyPoints.clear();
-      zone->getCollisionPoly(ActualState, polyPoints);
+      zone->getCollisionPoly(polyPoints);
 
       if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
          return zone;
@@ -1309,12 +1309,6 @@ void Ship::render(S32 layerIndex)
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
       string str = mPlayerName.getString();
-//
-//char x[100];
-//char y[100];
-//itoa((S32) getActualPos().x, x,10);
-//itoa((S32) getActualPos().y, y,10);
-//str = str + " {" + x + "," + y + "}";
 
       // Modify name if owner is "busy"
       if(isBusy)
@@ -1338,11 +1332,7 @@ void Ship::render(S32 layerIndex)
    {
       if(gDebugShowShipCoords)
       {
-         char x[20];
-         char y[20];
-         itoa((S32) getActualPos().x, x, 10);
-         itoa((S32) getActualPos().y, y, 10);
-         string str = string("@") + x + "," + y;
+         string str = string("@") + UserInterface::itos((S32) getActualPos().x) + "," + UserInterface::itos((S32) getActualPos().y);
 
          glEnable(GL_BLEND);
             F32 textAlpha = 0.5 * alpha;

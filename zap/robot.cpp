@@ -494,7 +494,7 @@ S32 LuaRobot::setThrustToPt(lua_State *L)
   return 0;
 }
 
-extern Vector<SafePtr<BotNavMeshZone>> gBotNavMeshZones;
+extern Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;
 
 // Get the coords of the center of mesh zone z
 S32 LuaRobot::getZoneCenter(lua_State *L)

@@ -170,7 +170,7 @@ public:
    /// method one time (when layerIndex == 0).
    virtual void render(S32 layerIndex);
 
-   virtual bool getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints);
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints);
    virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius);
    Rect getBounds(U32 stateIndex);
 

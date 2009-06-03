@@ -20,7 +20,6 @@
 		941E935D0DDF0B2600621981 /* CTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E93180DDF0B2600621981 /* CTFGame.cpp */; };
 		941E935E0DDF0B2600621981 /* engineeredObjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E93190DDF0B2600621981 /* engineeredObjects.cpp */; };
 		941E935F0DDF0B2600621981 /* flagItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E931A0DDF0B2600621981 /* flagItem.cpp */; };
-		941E93600DDF0B2600621981 /* footballGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E931B0DDF0B2600621981 /* footballGame.cpp */; };
 		941E93620DDF0B2600621981 /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E931D0DDF0B2600621981 /* game.cpp */; };
 		941E93630DDF0B2600621981 /* gameConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E931E0DDF0B2600621981 /* gameConnection.cpp */; };
 		941E93640DDF0B2600621981 /* gameItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E931F0DDF0B2600621981 /* gameItems.cpp */; };
@@ -130,7 +129,6 @@
 		941E93180DDF0B2600621981 /* CTFGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CTFGame.cpp; sourceTree = "<group>"; };
 		941E93190DDF0B2600621981 /* engineeredObjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = engineeredObjects.cpp; sourceTree = "<group>"; };
 		941E931A0DDF0B2600621981 /* flagItem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = flagItem.cpp; sourceTree = "<group>"; };
-		941E931B0DDF0B2600621981 /* footballGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = footballGame.cpp; sourceTree = "<group>"; };
 		941E931D0DDF0B2600621981 /* game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = game.cpp; sourceTree = "<group>"; };
 		941E931E0DDF0B2600621981 /* gameConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gameConnection.cpp; sourceTree = "<group>"; };
 		941E931F0DDF0B2600621981 /* gameItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gameItems.cpp; sourceTree = "<group>"; };
@@ -268,10 +266,10 @@
 		941E961B0DDF1F2800621981 /* zap_mac_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = zap_mac_icon.icns; sourceTree = "<group>"; };
 		94A551350DDF468100B89433 /* libtomcrypt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libtomcrypt.framework; path = ../libtomcrypt/build/Release/libtomcrypt.framework; sourceTree = SOURCE_ROOT; };
 		94A5513D0DDF46AF00B89433 /* tnl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = tnl.framework; path = ../tnl/build/Release/tnl.framework; sourceTree = SOURCE_ROOT; };
-		94C1B9040F1C0BB800548B70 /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5.cpp; path = ../md5/md5.cpp; sourceTree = SOURCE_ROOT; };
-		94C1B9050F1C0BB800548B70 /* md5wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = md5wrapper.cpp; path = ../md5/md5wrapper.cpp; sourceTree = SOURCE_ROOT; };
-		94C1B9080F1C0BC900548B70 /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md5.h; path = ../md5/md5.h; sourceTree = SOURCE_ROOT; };
-		94C1B9090F1C0BC900548B70 /* md5wrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md5wrapper.h; path = ../md5/md5wrapper.h; sourceTree = SOURCE_ROOT; };
+		94C1B9040F1C0BB800548B70 /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
+		94C1B9050F1C0BB800548B70 /* md5wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = md5wrapper.cpp; sourceTree = "<group>"; };
+		94C1B9080F1C0BC900548B70 /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
+		94C1B9090F1C0BC900548B70 /* md5wrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5wrapper.h; sourceTree = "<group>"; };
 		94C1B90A0F1C0BE700548B70 /* BotNavMeshZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BotNavMeshZone.h; sourceTree = "<group>"; };
 		94C1B90B0F1C0BE700548B70 /* robot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = robot.h; sourceTree = "<group>"; };
 		94C1B90C0F1C0BFA00548B70 /* BotNavMeshZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BotNavMeshZone.cpp; sourceTree = "<group>"; };
@@ -333,7 +331,6 @@
 				941E93180DDF0B2600621981 /* CTFGame.cpp */,
 				941E93190DDF0B2600621981 /* engineeredObjects.cpp */,
 				941E931A0DDF0B2600621981 /* flagItem.cpp */,
-				941E931B0DDF0B2600621981 /* footballGame.cpp */,
 				941E931D0DDF0B2600621981 /* game.cpp */,
 				941E931E0DDF0B2600621981 /* gameConnection.cpp */,
 				941E931F0DDF0B2600621981 /* gameItems.cpp */,
@@ -570,7 +567,6 @@
 				941E935D0DDF0B2600621981 /* CTFGame.cpp in Sources */,
 				941E935E0DDF0B2600621981 /* engineeredObjects.cpp in Sources */,
 				941E935F0DDF0B2600621981 /* flagItem.cpp in Sources */,
-				941E93600DDF0B2600621981 /* footballGame.cpp in Sources */,
 				941E93620DDF0B2600621981 /* game.cpp in Sources */,
 				941E93630DDF0B2600621981 /* gameConnection.cpp in Sources */,
 				941E93640DDF0B2600621981 /* gameItems.cpp in Sources */,
@@ -723,6 +719,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -741,6 +738,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
 				GCC_FAST_OBJC_DISPATCH = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_ALLOW_INCOMPLETE_PROTOCOL = NO;
 				GCC_WARN_UNUSED_VARIABLE = YES;

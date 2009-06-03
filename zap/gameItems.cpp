@@ -161,7 +161,7 @@ bool Asteroid::getCollisionCircle(U32 state, Point center, F32 radius)
 
 
 // This would be better, but causes crashes :-(
-bool Asteroid::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints)
 {
    //for(S32 i = 0; i < AsteroidPoints; i++)
    //{
@@ -197,7 +197,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
    newItem->setRadius(AsteroidRadius * mRenderSize[mSizeIndex]);
    F32 ang = 0;
-   while(abs(ang) < .5)
+   while(fabs(ang) < .5)
       ang = TNL::Random::readF() * FloatPi - FloatHalfPi;
 
    for(U32 i = 0; i < MoveStateCount; i++)
@@ -324,7 +324,7 @@ void TestItem::damageObject(DamageInfo *theInfo)
 }
 
 
-bool TestItem::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool TestItem::getCollisionPoly(Vector<Point> &polyPoints)
 {
    //for(S32 i = 0; i < 8; i++)    // 8 so that first point gets repeated!  Needed?  Maybe not
    //{

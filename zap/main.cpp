@@ -174,15 +174,15 @@
 
 #include "IniFile.h"
 
-#ifdef TNL_OS_MAC_OSX
-#include "Directory.h"
-#endif
-
 #include "../tnl/tnl.h"
 #include "../tnl/tnlRandom.h"
 #include "../tnl/tnlGhostConnection.h"
 #include "../tnl/tnlNetInterface.h"
 #include "../tnl/tnlJournal.h"
+
+#ifdef TNL_OS_MAC_OSX
+#include "Directory.h"
+#endif
 
 #include "zapjournal.h"
 

@@ -610,7 +610,7 @@ void HuntersNexusObject::render()
    renderNexus(mPolyBounds, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
 }
 
-bool HuntersNexusObject::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);

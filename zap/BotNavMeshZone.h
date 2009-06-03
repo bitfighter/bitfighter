@@ -75,7 +75,7 @@ public:
    void computeExtent();
 
    // More precise boundary for precise collision detection
-   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints);
 
    // Only gets run on the server, never on client
    bool collide(GameObject *hitObject);
@@ -94,7 +94,7 @@ public:
    TNL_DECLARE_CLASS(BotNavMeshZone);
 };
 
-extern Vector<SafePtr<BotNavMeshZone>> gBotNavMeshZones;     // List of all our zones
+extern Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
 
 

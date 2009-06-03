@@ -34,7 +34,10 @@
 #include "gameLoader.h"
 #include "point.h"
 
-#include <windows.h>   // For screensaver
+#ifdef TNL_OS_WIN32
+#include <windows.h>   // For screensaver... windows only feature, I'm afraid!
+#endif
+
 #include <string>
 
 ///

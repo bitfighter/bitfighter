@@ -45,3 +45,12 @@ function getFiringSolution( item )
    return bot:getFiringSolution( type, item )
 end
 
+
+function getInterceptCourse( item )
+   type = item:getClassID()
+   if( type == nil ) then
+      return nil
+    end
+   return bot:getInterceptCourse( type, item )
+end
+

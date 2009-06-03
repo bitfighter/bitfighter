@@ -133,14 +133,6 @@ Vector<GameType::ParameterDescription> GameType::describeArguments()
 }
 
 
-string itos(S32 i) // convert int to string
-{
-   char outString[100];
-   dSprintf(outString, sizeof(outString), "%d", i);
-   return outString;
-}
-
-
 void GameType::printRules()
 {   
    NetClassRep::initialize();
@@ -193,8 +185,8 @@ void GameType::printRules()
          if(teamScore == naScore && indScore == naScore)    // Skip non-scoring events
             continue;
 
-         string teamScoreStr = (teamScore == naScore) ? "N/A" : itos(teamScore);
-         string indScoreStr =  (indScore == naScore)  ? "N/A" : itos(indScore);
+         string teamScoreStr = (teamScore == naScore) ? "N/A" : UserInterface::itos(teamScore);
+         string indScoreStr =  (indScore == naScore)  ? "N/A" : UserInterface::itos(indScore);
 
          printf("%s: %s / %s\n", getScoringEventDescr((ScoringEvent) j).c_str(), indScoreStr.c_str(), teamScoreStr.c_str() );
       }
@@ -1898,8 +1890,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
 
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
-Vector<SignedInt<24>> GameType::mScores;
-Vector<RangedU32<0,200>> GameType::mRatings;
+Vector<SignedInt<24> > GameType::mScores;
+Vector<RangedU32<0,200> > GameType::mRatings;
 
 
 void GameType::updateClientScoreboard(ClientRef *cl)
@@ -1928,7 +1920,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
 
 
 GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, 
-                 (Vector<RangedU32<0, GameType::MaxPing>> pingTimes, Vector<SignedInt<24>> scores, Vector<RangedU32<0,200>> ratings), 
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings), 
                  (pingTimes, scores, ratings))
 {
    for(S32 i = 0; i < mClientList.size(); i++)

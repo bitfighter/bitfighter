@@ -187,7 +187,6 @@ extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
 
-
 // Clean up and get ready to render 
 void UserInterface::renderCurrent()    // static
 {
@@ -235,10 +234,18 @@ void UserInterface::renderCurrent()    // static
    // End diagnostic key dump mode
 }
 
+
+string UserInterface::itos(S32 i) // convert int to string
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), "%d", i);
+   return outString;
+}
+
+
 extern const F32 radiansToDegreesConversion;
 
 #define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args); va_end(args);
-
 
 // New, fixed version
 void UserInterface::drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)

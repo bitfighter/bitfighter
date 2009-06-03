@@ -174,8 +174,8 @@ public:
    F32 mass;            // Mass of ship
    bool hasExploded;
 
-   Vector<SafePtr<Item>> mMountedItems;
-   Vector<SafePtr<GameObject>> mRepairTargets;
+   Vector<SafePtr<Item> > mMountedItems;
+   Vector<SafePtr<GameObject> > mRepairTargets;
 
    virtual void render(S32 layerIndex);
 

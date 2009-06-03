@@ -102,7 +102,7 @@ public:
    Asteroid();     // Constructor
 
    void renderItem(Point pos);
-   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints);
    bool getCollisionCircle(U32 state, Point center, F32 radius);
    bool collide(GameObject *otherObject);
 
@@ -141,7 +141,7 @@ public:
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
-   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);
+   bool getCollisionPoly(Vector<Point> &polyPoints);
 
    TNL_DECLARE_CLASS(TestItem);
 

@@ -109,7 +109,7 @@ void GoalZone::computeExtent()
    setExtent(extent);
 }
 
-bool GoalZone::getCollisionPoly(U32 stateIndex, Vector<Point> &polyPoints)
+bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);

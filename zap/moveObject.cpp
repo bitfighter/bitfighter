@@ -229,7 +229,7 @@ GameObject *o = fillVector[i];      // For debugging  TODO: Delete
 
       Vector<Point> poly;
       poly.clear();
-      if(fillVector[i]->getCollisionPoly(stateIndex, poly))
+      if(fillVector[i]->getCollisionPoly(poly))
       {
          Point cp;
          if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,

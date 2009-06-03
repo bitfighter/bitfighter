@@ -269,7 +269,7 @@ void EngineeredObject::damageObject(DamageInfo *di)
 void EngineeredObject::computeExtent()
 {
    Vector<Point> v;
-   getCollisionPoly(MoveObject::ActualState, v);
+   getCollisionPoly(v);
    Rect r(v[0], v[0]);
    for(S32 i = 1; i < v.size(); i++)
       r.unionPoint(v[i]);
@@ -368,14 +368,14 @@ bool EngineeredObject::checkDeploymentPosition()
 {
    Vector<GameObject *> go;
    Vector<Point> polyBounds;
-   getCollisionPoly(MoveObject::ActualState, polyBounds);
+   getCollisionPoly(polyBounds);
 
    Rect queryRect = getExtent();
    gServerGame->getGridDatabase()->findObjects(BarrierType | EngineeredType, go, queryRect);
    for(S32 i = 0; i < go.size(); i++)
    {
       Vector<Point> compareBounds;
-      go[i]->getCollisionPoly(MoveObject::ActualState, compareBounds);
+      go[i]->getCollisionPoly(compareBounds);
       if(PolygonsIntersect(polyBounds, compareBounds))
          return false;
    }
@@ -481,7 +481,7 @@ void ForceFieldProjector::onEnabled()
    mField->addToGame(getGame());
 }
 
-bool ForceFieldProjector::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints)
 {
    Point cross(mAnchorNormal.y, -mAnchorNormal.x);
    polyPoints.push_back(mAnchorPoint + cross * 12);
@@ -627,7 +627,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-bool ForceField::getCollisionPoly(U32 state, Vector<Point> &p)
+bool ForceField::getCollisionPoly(Vector<Point> &p)
 {
    Point normal(mEnd.y - mStart.y, mStart.x - mEnd.x);
    normal.normalize(2.5);
@@ -655,7 +655,7 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
 }
 
 
-bool Turret::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool Turret::getCollisionPoly(Vector<Point> &polyPoints)
 {
    Point cross(mAnchorNormal.y, -mAnchorNormal.x);
    polyPoints.push_back(mAnchorPoint + cross * 25);

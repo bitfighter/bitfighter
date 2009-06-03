@@ -1,5 +1,4 @@
 //
-// Prefix header for all source files of the 'bitFighter' target in the 'bitFighter' project.
+// Prefix header for all source files of the 'Bitfighter' target in the 'Bitfighter' project.
 //
 
-#include <Carbon/Carbon.h>

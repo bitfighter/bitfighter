@@ -282,7 +282,7 @@ string ServerGame::getCurrentLevelLoadName()
 }
 
 
-extern enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
+enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      // TODO: Should NOT be duplicated!! (def appears elsewhere)
 extern HostingModePhases gHostingModePhase;
 
 void ServerGame::loadNextLevel()

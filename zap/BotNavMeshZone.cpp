@@ -159,7 +159,7 @@ void BotNavMeshZone::computeExtent()
 }
 
 // More precise boundary for precise collision detection
-bool BotNavMeshZone::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);
@@ -577,12 +577,6 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
       path.push_back(target);                                     // First point is the actual target itself
       path.push_back(gBotNavMeshZones[targetZone]->getCenter());  // Second is the center of the target's zone
       
-
-char hhh[100];
-itoa(targetZone,hhh,10);
-   string pathstr = hhh;
-
-
       S32 zone = targetZone;
 
 	   while(zone != startZone)
@@ -591,17 +585,10 @@ itoa(targetZone,hhh,10);
 
 		   zone = parentZones[zone];		// Find the parent of the current cell	
 
-
-char hhh[100];
-itoa(zone,hhh,10);
-   pathstr += string(" > ") + hhh;
-
-
          path.push_back(gBotNavMeshZones[zone]->getCenter());
 	   }
       path.push_back(gBotNavMeshZones[startZone]->getCenter());
 
-      logprintf("path: %s" , pathstr.c_str());
 	   return path;
 	}
 

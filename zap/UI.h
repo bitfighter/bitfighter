@@ -128,6 +128,7 @@ public:
    virtual void onMouseMoved(S32 x, S32 y);
    virtual void onMouseDragged(S32 x, S32 y);
 
+   static string itos(S32 i);     // Convert an integer to a string
 
    // Draw string at given location (normal and formatted versions)
    // Note it is important that x be S32 because for longer strings, they are occasionally drawn starting off-screen

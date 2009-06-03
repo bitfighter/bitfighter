@@ -99,7 +99,7 @@ public:
       setExtent(extent);
    }
 
-   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+   bool getCollisionPoly(Vector<Point> &polyPoints)
    {
       for(S32 i = 0; i < mPolyBounds.size(); i++)
          polyPoints.push_back(mPolyBounds[i]);

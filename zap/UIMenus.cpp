@@ -367,7 +367,7 @@ void MenuUserInterface::processMouse()
    }
 }
 
-extern enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
+enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
 extern HostingModePhases gHostingModePhase;
 
 

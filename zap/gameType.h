@@ -168,7 +168,7 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   Vector<SafePtr<FlagItem>> mFlags;     // List of flags for those games that keep lists of flags (retireve, HTF, CTF)
+   Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retireve, HTF, CTF)
 
    static void printRules();             // Dump game-rule info
 
@@ -188,7 +188,7 @@ public:
    };
 
    Vector<BarrierRec> mBarriers;
-   Vector<RefPtr<ClientRef>> mClientList;
+   Vector<RefPtr<ClientRef> > mClientList;
 
    ClientRef *mLocalClient;
 
@@ -259,9 +259,9 @@ public:
    static string GameType::getScoringEventDescr(ScoringEvent event);
    
    // Static vectors used for constructing update RPCs
-   static Vector<RangedU32<0, MaxPing>> mPingTimes;  
-   static Vector<SignedInt<24>> mScores;
-   static Vector<RangedU32<0, 200>> mRatings;                      
+   static Vector<RangedU32<0, MaxPing> > mPingTimes;  
+   static Vector<SignedInt<24> > mScores;
+   static Vector<RangedU32<0, 200> > mRatings;                      
 
    GameType();    // Constructor
    void countTeamPlayers();
@@ -360,7 +360,7 @@ public:
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, gMaxTeams> teamIndex, U32 score));
 
    TNL_DECLARE_RPC(c2sRequestScoreboardUpdates, (bool updates));
-   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200>> ratings));
+   TNL_DECLARE_RPC(s2cScoreboardUpdate, (Vector<RangedU32<0, MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings));
    virtual void updateClientScoreboard(ClientRef *theClient);
 
    TNL_DECLARE_RPC(c2sAdvanceWeapon, ());

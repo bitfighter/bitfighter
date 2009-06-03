@@ -58,11 +58,12 @@ public:
    enum {
       halfWidth = 25,
       height = 64,
-      defaultSpeed = 2000,
-      minSpeed = 1000,
-      maxSpeed = 5000,
       defaultSnap = 0,     // 0 = false, 1 = true
    };
+
+   static const U16 minSpeed = 1000;      // How slow can you go?
+   static const U16 maxSpeed = 5000;      // Max speed for the goFast
+   static const U16 defaultSpeed = 2000;  // Default speed if none specified
 
    Point pos;
    Point dir;
@@ -78,7 +79,7 @@ public:
    void onAddedToGame(Game *theGame);
    void computeExtent();                                         // Bounding box for quick collision-possibility elimination
 
-   bool getCollisionPoly(U32 state, Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
+   bool getCollisionPoly(Vector<Point> &polyPoints);  // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    void idle(GameObject::IdleCallPath path);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

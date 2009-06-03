@@ -285,7 +285,7 @@ void GameObject::removeFromGame()
    }
 }
 
-bool GameObject::getCollisionPoly(U32 state, Vector<Point> &polyPoints)
+bool GameObject::getCollisionPoly(Vector<Point> &polyPoints)
 {
    return false;
 }
@@ -321,7 +321,7 @@ Rect GameObject::getBounds(U32 stateIndex)
    float radius;
    Vector<Point> bounds;
 
-   if(getCollisionPoly(stateIndex, bounds))
+   if(getCollisionPoly(bounds))
    {
       ret.min = ret.max = bounds[0];
       for(S32 i = 1; i < bounds.size(); i++)
@@ -348,7 +348,7 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 
    polyPoints.clear();
 
-   if(getCollisionPoly(MoveObject::ActualState, polyPoints))
+   if(getCollisionPoly(polyPoints))
       return PolygonContains(polyPoints.address(), polyPoints.size(), point);
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return(center.distanceTo(point) <= radius);
@@ -370,7 +370,7 @@ bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
 
    polyPoints.clear();
 
-   if(getCollisionPoly(MoveObject::ActualState, polyPoints))
+   if(getCollisionPoly(polyPoints))
       return PolygonsIntersect(polyPoints, points);
 
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
@@ -393,7 +393,7 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 
    polyPoints.clear();
 
-   if(getCollisionPoly(MoveObject::ActualState, polyPoints))
+   if(getCollisionPoly(polyPoints))
       return PolygonCircleIntersect(&polyPoints[0], polyPoints.size(), center, radius * radius, pt);
 
    else if(getCollisionCircle(MoveObject::ActualState, c, r))
