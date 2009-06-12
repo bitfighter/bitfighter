@@ -57,9 +57,9 @@ enum GameObjectType
    TurretTargetType    = BIT(11),
    SlipZoneType        = BIT(12),
 
-   BulletType          = BIT(13),
+   BulletType          = BIT(13),      // All projectiles except grenades?
    MineType            = BIT(14),
-   HeatSeekerType      = BIT(15),
+         // slot available
    SpyBugType          = BIT(16),
 
    NexusType           = BIT(17),
@@ -79,7 +79,7 @@ enum GameObjectType
 
    // Derived types:
    EngineeredType     =  TurretType | ForceFieldProjectorType,
-   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | HeatSeekerType,
+   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType,
    AllObjectTypes     = 0xFFFFFFFF,
 };
@@ -118,6 +118,9 @@ private:
    SafePtr<GameConnection> mOwner;
    U32 mDisableCollisionCount;      // No collisions with this object if true
    bool mInDatabase;
+
+   F32 mRadius;
+   F32 mMass;
 
    Rect extent;
 
@@ -225,7 +228,7 @@ public:
    virtual bool processArguments(S32 argc, const char**argv);
    void setScopeAlways();
 
-   virtual void push(lua_State *L) { TNLAssert(false,"Unimplemented push function!"); }    // Lua-aware classes will implement this
+   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented push function!"); }    // Lua-aware classes will implement this
 };
 
 };

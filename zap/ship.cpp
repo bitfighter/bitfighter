@@ -968,15 +968,7 @@ F32 getAngleDiff(F32 a, F32 b)
    while(b<0)   b+=360;
    while(b>360) b-=360;
 
-   if(fabs(b-a) > 180)
-   {
-      // Go the other way
-      return  360-(b-a);
-   }
-   else
-   {
-      return b-a;
-   }
+   return  (fabs(b-a) > 180) ? 360-(b-a) : b-a;
 }
 
 

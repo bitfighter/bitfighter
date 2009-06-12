@@ -35,20 +35,23 @@
 namespace Zap
 {
 
-static Vector<GameObject*> fillVector;
+const char LuaProjectile::className[] = "ProjectileItem";      // Class name as it appears to Lua scripts
 
+//===========================================
+
+static Vector<GameObject*> fillVector;
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
 // Constructor
-Projectile::Projectile(WeaponType type, Point p, Point v, U32 time, GameObject *shooter)
+Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 {
    mObjectTypeMask = BulletType;
 
    mNetFlags.set(Ghostable);
    pos = p;
    velocity = v;
-   mTimeRemaining = time;
+   mTimeRemaining = gWeapons[type].projLiveTime;
    collided = false;
    alive = true;
    mShooter = shooter;
@@ -267,7 +270,8 @@ void Projectile::explode(GameObject *hitObject, Point thePos)
    }
 }
 
-void Projectile::render()
+
+void Projectile::renderItem(Point pos)
 {
    if(collided || !alive)
       return;
@@ -276,7 +280,207 @@ void Projectile::render()
 }
 
 
+//// Lua methods
+//
 //const char Projectile::className[] = "ProjectileItem";      // Class name as it appears to Lua scripts
+//
+S32 Projectile::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }     // Center of item (returns point)
+S32 Projectile::getRad(lua_State *L) { return returnInt(L, 10); }                   // TODO: Wrong!!  Radius of item (returns number)
+S32 Projectile::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }     // Speed of item (returns point)
+GameObject *Projectile::getGameObject() { return this; }            // Return the underlying GameObject
+
+
+// Define the methods we will expose to Lua
+Lunar<Projectile>::RegType Projectile::methods[] =
+{
+   // Standard gameItem methods
+   method(Projectile, getClassID),
+   method(Projectile, getLoc),
+   method(Projectile, getRad),
+   method(Projectile, getVel),
+
+   {0,0}    // End method list
+};
+
+//-----------------------------------------------------------------------------
+TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
+
+GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter): Item(pos, true, mRadius, mMass)
+{
+   mObjectTypeMask = MoveableType | BulletType;
+
+   mNetFlags.set(Ghostable);
+
+   mMoveState[ActualState].pos = pos;
+   mMoveState[ActualState].vel = vel;
+   setMaskBits(PositionMask);
+   mWeaponType = WeaponBurst;
+
+   updateExtent();
+
+   mTimeRemaining = gWeapons[WeaponBurst].projLiveTime;
+   exploded = false;
+   if(shooter)
+   {
+      setOwner(shooter->getOwner());
+      mTeam = shooter->getTeam();
+   }
+
+   mRadius = 7;
+   mMass = 1;
+
+}
+
+void GrenadeProjectile::idle(IdleCallPath path)
+{
+   Parent::idle(path);
+
+   // Do some drag...  no, not that kind of drag!
+   mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (((F32)mCurrentMove.time) / 1000.f);
+
+   if(!exploded)
+      if(getActualVel().len() < 4.0)
+         explode(getActualPos(), WeaponBurst);
+
+   if(isGhost()) return;
+
+   // Update TTL
+   S32 deltaT = mCurrentMove.time;
+   if(path == GameObject::ClientIdleMainRemote)
+      mTimeRemaining += deltaT;
+   else if(!exploded)
+   {
+      if(mTimeRemaining <= deltaT)
+        explode(getActualPos(), WeaponBurst);
+      else
+         mTimeRemaining -= deltaT;
+   }
+}
+
+
+U32  GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 ret = Parent::packUpdate(connection, updateMask, stream);
+   stream->writeFlag(exploded);
+   stream->writeFlag(updateMask & InitialMask);
+   return ret;
+}
+
+
+void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+
+   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   if(ship && ship->hasModule(ModuleSensor))
+      mObjectTypeMask |= CommandMapVisType;     // Bursts visible on commander's map if you have sensor
+
+   if(stream->readFlag())
+   {
+      explode(getActualPos(), WeaponBurst);
+   }
+
+   if(stream->readFlag())
+   {
+      SFXObject::play(SFXGrenadeProjectile, getActualPos(), getActualVel());
+   }
+}
+
+
+void GrenadeProjectile::damageObject(DamageInfo *theInfo)
+{
+   // If we're being damaged by another grenade, explode...
+   if(theInfo->damageType == DamageTypeArea)
+   {
+      explode(getActualPos(), WeaponBurst);
+      return;
+   }
+
+   // Bounce off of stuff.
+   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
+   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
+   iv.normalize();
+   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+
+   setMaskBits(PositionMask);
+}
+
+
+// Also used for mines and spybugs  --> not sure if we really need to pass weaponType
+void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
+{
+   if(exploded) return;
+
+   if(isGhost())
+   {
+      // Make us go boom!
+      Color b(1,1,1);
+
+      //FXManager::emitExplosion(getRenderPos(), 0.5, gProjInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
+      FXManager::emitBlast(pos, OuterBlastRadius);          // New, manly explosion
+
+      SFXObject::play(SFXMineExplode, getActualPos(), Point());
+   }
+
+   disableCollision();
+
+   if(!isGhost())
+   {
+      setMaskBits(PositionMask);
+      deleteObject(100);
+
+      DamageInfo info;
+      info.collisionPoint = pos;
+      info.damagingObject = this;
+      info.damageAmount   = gWeapons[weaponType].damageAmount;
+      info.damageType     = DamageTypeArea;
+
+      radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
+   }
+   exploded = true;
+}
+
+
+void GrenadeProjectile::renderItem(Point pos)
+{
+   if(exploded)
+      return;
+
+   // Add some sparks... this needs work, as it is rather dooky  Looks too much like a comet!
+   //S32 num = Random::readI(1, 10);
+   //for(S32 i = 0; i < num; i++)
+   //{
+   //   Point sparkVel = mMoveState[RenderState].vel * Point(Random::readF() * -.5 + .55, Random::readF() * -.5 + .55);
+   //   //sparkVel.normalize(Random::readF());
+   //   FXManager::emitSpark(pos, sparkVel, Color(Random::readF() *.5 +.5, Random::readF() *.5, 0), Random::readF() * 2, FXManager::SparkTypePoint);
+   //}
+
+   WeaponInfo *wi = gWeapons + WeaponBurst;
+   F32 initTTL = (F32) wi->projLiveTime;
+   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL );
+}
+
+
+//// Lua methods
+const char GrenadeProjectile::className[] = "GrenadeItem";      // Class name as it appears to Lua scripts
+//
+//S32 GrenadeProjectile::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }     // Center of item (returns point)
+//S32 GrenadeProjectile::getRad(lua_State *L) { return returnInt(L, mRadius); }                
+//S32 GrenadeProjectile::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }     // Speed of item (returns point)
+GameObject *GrenadeProjectile::getGameObject() { return this; }                            // Return the underlying GameObject
+//
+//
+//// Define the methods we will expose to Lua
+Lunar<GrenadeProjectile>::RegType GrenadeProjectile::methods[] =
+{
+   // Standard gameItem methods
+   method(GrenadeProjectile, getClassID),
+   method(GrenadeProjectile, getLoc),
+   method(GrenadeProjectile, getRad),
+   method(GrenadeProjectile, getVel),
+
+   {0,0}    // End method list
+};
 
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Mine);
@@ -426,523 +630,7 @@ void Mine::renderItem(Point pos)
 }
 
 
-const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
-
-
-//-----------------------------------------------------------------------------
-TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
-
-GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, U32 liveTime, GameObject *shooter)
- : Item(pos, true, 7.f, 1.f)
-{
-   mObjectTypeMask = MoveableType | BulletType;
-
-   mNetFlags.set(Ghostable);
-
-   mMoveState[ActualState].pos = pos;
-   mMoveState[ActualState].vel = vel;
-   setMaskBits(PositionMask);
-   mWeaponType = WeaponBurst;
-
-   updateExtent();
-
-   ttl = liveTime;
-   exploded = false;
-   if(shooter)
-   {
-      setOwner(shooter->getOwner());
-      mTeam = shooter->getTeam();
-   }
-}
-
-void GrenadeProjectile::idle(IdleCallPath path)
-{
-   Parent::idle(path);
-
-   // Do some drag...  no, not that kind of drag!
-   mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (((F32)mCurrentMove.time) / 1000.f);
-
-   if(!exploded)
-      if(getActualVel().len() < 4.0)
-        explode(getActualPos(), WeaponBurst);
-
-   if(isGhost()) return;
-
-   // Update TTL
-   S32 deltaT = mCurrentMove.time;
-   if(path == GameObject::ClientIdleMainRemote)
-      ttl += deltaT;
-   else if(!exploded)
-   {
-      if(ttl <= deltaT)
-        explode(getActualPos(), WeaponBurst);
-      else
-         ttl -= deltaT;
-   }
-}
-
-
-U32  GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
-{
-   U32 ret = Parent::packUpdate(connection, updateMask, stream);
-   stream->writeFlag(exploded);
-   stream->writeFlag(updateMask & InitialMask);
-   return ret;
-}
-
-
-void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
-{
-   Parent::unpackUpdate(connection, stream);
-
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(ship && ship->hasModule(ModuleSensor))
-      mObjectTypeMask |= CommandMapVisType;     // Bursts visible on commander's map if you have sensor
-
-   if(stream->readFlag())
-   {
-      explode(getActualPos(), WeaponBurst);
-   }
-
-   if(stream->readFlag())
-   {
-      SFXObject::play(SFXGrenadeProjectile, getActualPos(), getActualVel());
-   }
-}
-
-
-void GrenadeProjectile::damageObject(DamageInfo *theInfo)
-{
-   // If we're being damaged by another grenade, explode...
-   if(theInfo->damageType == DamageTypeArea)
-   {
-      explode(getActualPos(), WeaponBurst);
-      return;
-   }
-
-   // Bounce off of stuff.
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
-
-   setMaskBits(PositionMask);
-}
-
-
-// Also used for mines and spybugs  --> not sure if we really need to pass weaponType
-void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
-{
-   if(exploded) return;
-
-   if(isGhost())
-   {
-      // Make us go boom!
-      Color b(1,1,1);
-
-      //FXManager::emitExplosion(getRenderPos(), 0.5, gProjInfo[ProjectilePhaser].sparkColors, NumSparkColors);      // Original, nancy explosion
-      FXManager::emitBlast(pos, OuterBlastRadius);          // New, manly explosion
-
-      SFXObject::play(SFXMineExplode, getActualPos(), Point());
-   }
-
-   disableCollision();
-
-   if(!isGhost())
-   {
-      setMaskBits(PositionMask);
-      deleteObject(100);
-
-      DamageInfo info;
-      info.collisionPoint = pos;
-      info.damagingObject = this;
-      info.damageAmount   = gWeapons[weaponType].damageAmount;
-      info.damageType     = DamageTypeArea;
-
-      radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
-   }
-   exploded = true;
-}
-
-
-void GrenadeProjectile::renderItem(Point pos)
-{
-   if(exploded)
-      return;
-
-   // Add some sparks... this needs work, as it is rather dooky  Looks too much like a comet!
-   //S32 num = Random::readI(1, 10);
-   //for(S32 i = 0; i < num; i++)
-   //{
-   //   Point sparkVel = mMoveState[RenderState].vel * Point(Random::readF() * -.5 + .55, Random::readF() * -.5 + .55);
-   //   //sparkVel.normalize(Random::readF());
-   //   FXManager::emitSpark(pos, sparkVel, Color(Random::readF() *.5 +.5, Random::readF() *.5, 0), Random::readF() * 2, FXManager::SparkTypePoint);
-   //}
-
-   WeaponInfo *wi = gWeapons + WeaponBurst;
-   F32 initTTL = (F32) wi->projLiveTime;
-   renderGrenade( pos, (initTTL - (F32) (getGame()->getCurrentTime() - getCreationTime())) / initTTL );
-}
-
-
-const char GrenadeProjectile::className[] = "GrenadeItem";      // Class name as it appears to Lua scripts
-
-
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-
-
-
-TNL_IMPLEMENT_NETOBJECT(HeatSeeker);
-
-
-HeatSeeker::HeatSeeker(Point pos, Point vel, U32 liveTime, GameObject *shooter)
-
-{
-   mObjectTypeMask = MoveableType | HeatSeekerType; // BulletType;
-   mWeaponType = WeaponHeatSeeker;
-   mNetFlags.set(Ghostable);
-
-   mMoveState[ActualState].pos = pos;
-   mMoveState[ActualState].vel = vel;
-   setMaskBits(PositionMask);
-
-   updateExtent();
-
-   mTimeRemaining = liveTime;
-   collided = false;
-   alive = true;
-   mHasTarget = false;
-
-   mShooter = shooter;
-
-   if(shooter)
-   {
-      setOwner(shooter->getOwner());
-      mTeam = shooter->getTeam();
-   }
-}
-
-
-
-
-extern bool pointInTriangle(Point p, Point a, Point b, Point c);
-extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
-#define SIGN(x)   ((x) < 0 ? -1 : (x) == 0 ? 0 : 1)
-#define ABS(x) (((x) > 0) ? (x) : -(x))
-#define min(x,y) (((x) < (y)) ? (x) : (y))
-#define max(x,y) (((x) > (y)) ? (x) : (y))
-
-void HeatSeeker::idle(GameObject::IdleCallPath path)  // Not done yet
-{
-
-   //Parent::idle(path);     // Runs Item's idle routine
-
-
-   U32 deltaT = mCurrentMove.time;
-
-   if(!collided && alive)
-   {
-      mHasTarget = false;
-
-      // Steer heat seeker by modifying direction (but not magnitude) of velocity
-
-      // Find target: hottest item within searchAngle of straight ahead
-      F32 searchAngle = FloatPi * 0.25f;  // radians, of course
-      F32 maxAdjustmentAngle = 1.0f;      // Fastest seekers can turn, in radians/sec
-
-      Point velocity = mMoveState[ActualState].vel;
-      Point pos = mMoveState[ActualState].pos;
-
-      F32 speed = velocity.len();
-      F32 angle = velocity.ATAN2();       // Angle projectile is travelling
-
-      F32 distLeft = speed * mTimeRemaining * 0.001;
-
-      Point vertex2( distLeft * cos(angle + searchAngle) + pos.x, distLeft * sin(angle + searchAngle) + pos.y );
-      Point vertex3( distLeft * cos(angle - searchAngle) + pos.x, distLeft * sin(angle - searchAngle) + pos.y );
-
-      Vector<Point> searchTriangle;
-      searchTriangle.clear();    // Really needed?
-
-      searchTriangle.push_back(pos);      // First vertex -- current location
-      searchTriangle.push_back(vertex2);  // Next two represent furthest points we could hit
-      searchTriangle.push_back(vertex3);  // within searchAngle of our current heading
-
-      // Find all potential targets within searchTriangle
-
-      fillVector.clear();           // This vector will hold any potential targets
-
-      // Since we can only search for objects within a rectangular area, we'll create a bounding box
-      // for our triangle, search against that, then winnow any matches with a more precise comparison
-
-      Point minXY(min(pos.x, min(vertex2.x, vertex3.x)), min(pos.y, min(vertex2.y, vertex3.y)));
-      Point maxXY(max(pos.x, max(vertex2.x, vertex3.x)), max(pos.y, max(vertex2.y, vertex3.y)));
-      Rect boundingBox(minXY, maxXY);
-
-      findObjects(TurretTargetType, fillVector, boundingBox);
-
-      F32 collisionTime;
-      Point normalPoint;
-
-      GameObject *hottestObject = NULL;
-      F32 howHotIsIt = -1;
-
-      for(S32 i=0; i<fillVector.size(); i++)
-      {
-         GameObject *obj = fillVector[i];
-
-         // First, make sure object is really in our searchTriangle
-         if ( !PolygonContains2(searchTriangle.address(), searchTriangle.size(), obj->getActualPos()) )
-         //if (!pointInTriangle(obj->getActualPos(), pos, vertex2, vertex3))
-            continue;      // Obj not really in range
-
-         // Now, make sure we have a clear line of site to potential target
-         // Open question: Should forcefields block heat seekers as if they were walls?
-         if(findObjectLOS(BarrierType|ForceFieldType, MoveObject::ActualState, pos,     \
-                       obj->getActualPos(), collisionTime, normalPoint))
-            continue;      // Way is blocked
-
-         // Nothing blocking us, calculate heat intensity
-         // Heat falls off proprotional to distance^2, so we will find the object
-         // that minimizes heat / dist^2 within our searchTriangle
-
-         F32 d = pos.distanceTo(obj->getActualPos());
-         F32 heat = d;
-
-         if (heat > howHotIsIt)
-         {
-            hottestObject = obj;
-            howHotIsIt = heat;
-         }
-
-      }
-
-      // Now that we know what the seeker wants to attack, turn towards the target
-      if (hottestObject)
-      {
-         // Probably wrong, but if time increments are small enough it should work OK
-         // If game stuttered, it could allow the seeker to turn very sharply
-
-         mTarget = hottestObject->getActualPos();
-         mHasTarget = true;
-
-         F32 adjustmentAngle = min(ABS(pos.angleTo(hottestObject->getActualPos()) - angle), maxAdjustmentAngle *  (F32)deltaT * 0.001);
-
-         F32 adjustedAngle = angle + adjustmentAngle * SIGN(pos.angleTo(hottestObject->getActualPos()) - angle);
-
-         velocity.set(speed * cos(adjustedAngle), speed * sin(adjustedAngle));
-         mMoveState[ActualState].vel = velocity;
-
-      }
-
-
-      // Calculate where projectile will be at the end of the current interval
-      Point endPos = pos + velocity * (F32)deltaT * 0.001;
-
-      // Check for collision along projected route of movement
-      static Vector<GameObject *> disableVector;
-
-      Rect queryRect(pos, endPos);
-
-      disableVector.clear();
-
-      // Don't collide with self in first 500ms of projectile's life
-      U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();
-      if(mShooter.isValid() && aliveTime < 500)
-      {
-         disableVector.push_back(mShooter);
-         mShooter->disableCollision();
-      }
-
-      // And don't hit self
-      disableVector.push_back(this);
-      this->disableCollision();
-
-
-      GameObject *hitObject;
-      Point surfNormal;
-
-      // Do the search
-      for(;;)
-      {
-         hitObject = findObjectLOS(MoveableType | BarrierType | EngineeredType | ForceFieldType, \
-            MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);
-
-         if(!hitObject || hitObject->collide(this))  // If we hit nothing, or something that
-            break;                                   // wants to be collided with, drop out of loop
-
-         // We hit something that does not want to be collided with
-         // (i.e. whose collide methods return false)
-         // Disable collisions with this object and keep searching
-         disableVector.push_back(hitObject);
-         hitObject->disableCollision();
-
-      }
-
-      // Re-enable collison flag for ship and items in our path that don't want to be collided with
-      // Note that if we hit an object that does want to be collided with, it won't be in disableVector
-      // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
-      for(S32 i = 0; i < disableVector.size(); i++)
-         disableVector[i]->enableCollision();
-
-      if(hitObject)
-      {
-         Point collisionPoint = pos + (endPos - pos) * collisionTime;
-         handleCollision(hitObject, collisionPoint);     // What we hit, and where we hit it
-      }
-      else
-         mMoveState[ActualState].pos = endPos;
-
-      mTarget = endPos;
-   }
-
-   // Kill old projectiles
-   if(alive && path == GameObject::ServerIdleMainLoop)
-   {
-      if(mTimeRemaining <= deltaT)
-      {
-         deleteObject(500);
-         mTimeRemaining = 0;
-         alive = false;
-         setMaskBits(ExplodedMask);
-      }
-      else
-         mTimeRemaining -= deltaT;     // Decrement time left to live
-   }
-
-
-   if(path == GameObject::ServerIdleMainLoop)
-   {
-      setMaskBits(PositionMask);
-      mMoveState[RenderState] = mMoveState[ActualState];
-   }
-   else
-      updateInterpolation();
-
-   updateExtent();
-}
-
-
-
-//
-U32  HeatSeeker::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
-{
-   U32 ret = Parent::packUpdate(connection, updateMask, stream);
-   stream->writeFlag(exploded);
-   stream->writeFlag(updateMask & InitialMask);
-      //writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
-
-   return ret;
-}
-
-void HeatSeeker::unpackUpdate(GhostConnection *connection, BitStream *stream)
-{
-   Parent::unpackUpdate(connection, stream);
-
-   if(stream->readFlag())
-   {
-      explode(getActualPos(), WeaponBurst);
-   }
-
-   if(stream->readFlag())
-   {
-      SFXObject::play(SFXGrenadeProjectile, getActualPos(), getActualVel());
-   }
-        // readCompressedVelocity(velocity, CompressedVelocityMax, stream);
-}
-
-
-void HeatSeeker::handleCollision(GameObject *hitObject, Point collisionPoint)
-{
-   // Identical to Projectile...  create sub to handle both?
-   collided = true;
-
-   if(!isGhost())
-   {
-      DamageInfo theInfo;
-      theInfo.collisionPoint = collisionPoint;
-      theInfo.damageAmount = gWeapons[WeaponHeatSeeker].damageAmount;
-      theInfo.damageType = DamageTypePoint;
-      theInfo.damagingObject = this;
-      theInfo.impulseVector = velocity;
-
-      hitObject->damageObject(&theInfo);
-   }
-
-   mTimeRemaining = 0;
-   explode(hitObject, collisionPoint);
-}
-
-
-
-// Still need to customize this a bit!
-void HeatSeeker::explode(GameObject *hitObject, Point thePos)
-{
-   // Do some particle spew...
-   if(isGhost())
-   {
-      FXManager::emitExplosion(thePos, 0.3, gProjInfo[ProjectileBounce].sparkColors, NumSparkColors);
-
-      Ship *s = dynamic_cast<Ship *>(hitObject);
-      if(s && s->isModuleActive(ModuleShield))
-         SFXObject::play(SFXBounceShield, thePos, velocity);
-      else
-         SFXObject::play(gProjInfo[ProjectileBounce].impactSound, thePos, velocity);
-   }
-}
-
-void HeatSeeker::renderItem(Point p)
-{
-
-  if(collided || !alive)
-      return;
-
-   renderProjectile(p, ProjectileBounce, getGame()->getCurrentTime() - getCreationTime());
-
-   // Render target
-   if (mHasTarget)
-   {
-      glColor3f(0.5,0.5,0.5);
-      drawCircle(mTarget, 100);
-   }
-}
-
-
-void HeatSeeker::explode(Point pos, WeaponType weaponType)
-{
-   if(exploded) return;
-
-   if(isGhost())
-   {
-      // Make us go boom!
-      Color b(1,1,1);
-
-      FXManager::emitExplosion(getRenderPos(), 0.5, gProjInfo[ProjectilePhaser].sparkColors, NumSparkColors);
-      SFXObject::play(SFXMineExplode, getActualPos(), Point());
-   }
-
-   disableCollision();
-
-   if(!isGhost())
-   {
-      setMaskBits(PositionMask);
-      deleteObject(100);
-
-      DamageInfo info;
-      info.collisionPoint = pos;
-      info.damagingObject = this;
-      info.damageAmount   = gWeapons[weaponType].damageAmount;
-      info.damageType     = DamageTypeArea;
-
-      //radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
-   }
-   exploded = true;
-}
-
-const char HeatSeeker::className[] = "HeatSeekerItem";      // Class name as it appears to Lua scripts
+//const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
 
 
 //-----------------------------------------------------------------------------
@@ -1062,7 +750,7 @@ void SpyBug::renderItem(Point pos)
 }
 
 
-const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
+//const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
 
 
 };

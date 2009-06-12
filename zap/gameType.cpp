@@ -1292,8 +1292,6 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
       weaponType = proj->mWeaponType;
    else if( GrenadeProjectile *grenproj = dynamic_cast<GrenadeProjectile*>(damager) )
       weaponType = grenproj->mWeaponType;
-   else if(HeatSeeker *hs = dynamic_cast<HeatSeeker*>(damager) )
-      weaponType = hs->mWeaponType;
    else
       return false;
 

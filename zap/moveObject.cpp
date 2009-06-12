@@ -148,7 +148,7 @@ const F32 velocityEpsilon = 0.00001f;
 void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced)
 {
    U32 tryCount = 0;
-   while(moveTime > moveTimeEpsilon && tryCount < 8)
+   while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time
    {
       tryCount++;
 

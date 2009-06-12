@@ -33,6 +33,7 @@
 #include "robot.h"         // For getItem()
 #include "huntersGame.h"   // For getItem()
 #include "soccerGame.h"    // For getItem()
+#include "projectile.h"    // For getItem()
 #include "engineeredObjects.h"    // For getItem()
 
 #include <string>
@@ -224,6 +225,7 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
         return  Lunar<LuaShip>::check(L, index);
 
       case BulletType:
+         return Lunar<LuaProjectile>::check(L, index);
 
       case ResourceItemType:
          return Lunar<ResourceItem>::check(L, index);

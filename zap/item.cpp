@@ -153,7 +153,7 @@ void Item::idle(GameObject::IdleCallPath path)
    if(!isInDatabase())
       return;
 
-   if(mIsMounted)
+   if(mIsMounted)    // Item is mounted on something else
    {
       if(mMount.isNull() || mMount->hasExploded)
       {
@@ -166,7 +166,7 @@ void Item::idle(GameObject::IdleCallPath path)
          mMoveState[ActualState].pos = mMount->getActualPos();
       }
    }
-   else
+   else              // Not mounted
    {
       float time = mCurrentMove.time * 0.001f;
       move(time, ActualState, false);

@@ -41,7 +41,7 @@ class GoalZone;
 class LuaItem : public LuaObject
 {  
 public:
-   // "= 0" ==> make these methods "pure virtual" functions
+   // "= 0" ==> make these methods "pure virtual" functions, and must be implemented in child classes!
    virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
    virtual S32 getRad(lua_State *L) = 0;     // Radius of item (returns number)
    virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
@@ -75,14 +75,14 @@ protected:
    bool mInitial;       // True on initial unpack, false thereafter
 
 public:
+   Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
+
    void idle(GameObject::IdleCallPath path);
 
    bool processArguments(S32 argc, const char **argv);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
-
-   Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
    void setActualPos(Point p);
    void setActualVel(Point vel);
@@ -104,11 +104,10 @@ public:
    bool collide(GameObject *otherObject);
 
    // LuaItem interface
-   static const char className[];
-
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }    
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
+
    GameObject *getGameObject() { return this; }
 };
 

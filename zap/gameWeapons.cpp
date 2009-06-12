@@ -68,24 +68,21 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
          {
             Point velPerp(projVel.y, -projVel.x);
             velPerp.normalize(40.0f);
-            (new Projectile(weapon, firePos, projVel + velPerp, wi->projLiveTime, shooter))->addToGame(shooter->getGame());
-            (new Projectile(weapon, firePos, projVel - velPerp, wi->projLiveTime, shooter))->addToGame(shooter->getGame());
+            (new Projectile(weapon, firePos, projVel + velPerp, shooter))->addToGame(shooter->getGame());
+            (new Projectile(weapon, firePos, projVel - velPerp, shooter))->addToGame(shooter->getGame());
          }
       case WeaponPhaser:
       case WeaponBounce:
       case WeaponTurret:
-         (new Projectile(weapon, firePos, projVel, wi->projLiveTime, shooter))->addToGame(shooter->getGame());
+         (new Projectile(weapon, firePos, projVel, shooter))->addToGame(shooter->getGame());
          break;
       case WeaponBurst:
-         (new GrenadeProjectile(firePos, projVel, wi->projLiveTime, shooter))->addToGame(shooter->getGame());
+         (new GrenadeProjectile(firePos, projVel, shooter))->addToGame(shooter->getGame());
          break;
       case WeaponMine:
          (new Mine(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
          break;
-      case WeaponHeatSeeker:
-         (new HeatSeeker(firePos, projVel, wi->projLiveTime, shooter))->addToGame(shooter->getGame());
-         break;
-      case WeaponSpyBug:
+     case WeaponSpyBug:
          (new SpyBug(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
          break;
    }

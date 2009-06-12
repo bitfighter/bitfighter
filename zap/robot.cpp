@@ -79,7 +79,6 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(NexusFlagType);
    setEnum(TurretTargetType);
    setEnum(SlipZoneType);
-   setEnum(HeatSeekerType);
    setEnum(SpyBugType);
    setEnum(NexusType);
    setEnum(BotNavMeshZoneType);
@@ -832,7 +831,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 
       GameObject *obj = fillVector[i];
       obj->push(L);
-      pushed++;      // Increment pushed before using it because lua used 1-based arrays
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
    }
 
@@ -1147,6 +1146,8 @@ bool Robot::initialize(Point p)
    Lunar<SoccerBallItem>::Register(L);
    Lunar<HuntersFlagItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
+
+   Lunar<Projectile>::Register(L);
 
 
    luaopen_base(L);     // Make some basic functions available to bots

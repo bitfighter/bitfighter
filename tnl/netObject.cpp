@@ -177,6 +177,7 @@ U32 NetObject::packUpdate(GhostConnection*, U32, BitStream*)
 
 void NetObject::unpackUpdate(GhostConnection*, BitStream*)
 {
+   // Do nothing
 }
 
 void NetObject::performScopeQuery(GhostConnection *connection)

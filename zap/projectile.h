@@ -36,7 +36,26 @@ namespace Zap
 
 class Ship;
 
-class Projectile : public GameObject
+class LuaProjectile : public LuaItem
+{
+public:
+   //LuaProjectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
+
+   static const char className[];
+
+   S32 getLoc(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Center of item (returns point)
+   S32 getRad(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Radius of item (returns number)
+   S32 getVel(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Speed of item (returns point)
+
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class    
+
+ /*  void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }*/
+
+   virtual GameObject *getGameObject() { TNLAssert(false, "Unimplemented method!"); return NULL; }  // Return the underlying GameObject
+};
+
+
+class Projectile : public GameObject, public LuaProjectile
 {
 public:
    enum {
@@ -55,7 +74,7 @@ public:
    SafePtr<GameObject> mShooter;
 
    // Constructor
-   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), U32 liveTime = 0, GameObject *shooter = NULL);
+   Projectile(WeaponType type = WeaponPhaser, Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -68,24 +87,42 @@ public:
 
    virtual Point getRenderVel() { return velocity; }
    virtual Point getActualVel() { return velocity; }
+   virtual Point getActualPos() { return pos; }
 
-   void render();
+   void render() { renderItem(getActualPos()); }     // TODO: Get rid of this! (currently won't render without it)
+   void renderItem(Point p);
+
    TNL_DECLARE_CLASS(Projectile);
 
-   //// Lua interface
-   //void push(lua_State *L) {  Lunar<Projectile>::push(L, this); }
-   //S32 getClassID(lua_State *L) { return returnInt(L, ProjectileType); }
 
+   // Lua interface
+   Projectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
+
+   //static const char className[];
+   static Lunar<Projectile>::RegType methods[];
+
+   S32 getLoc(lua_State *L);     // Center of item (returns point)
+   S32 getRad(lua_State *L);     // Radius of item (returns number)
+   S32 getVel(lua_State *L);     // Speed of item (returns point)
+   GameObject *getGameObject();  // Return the underlying GameObject
+
+
+     void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }
+   //void push(lua_State *L) {  Lunar<Projectile>::push(L, this); }
+   //S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }
+
+   //static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
 };
 
+
 // GrenadeProjectiles are the base clase used for both mines and spybugs
-class GrenadeProjectile : public Item
+class GrenadeProjectile : public Item, public LuaProjectile
 {
 private:
    typedef Item Parent;
 
 public:
-   GrenadeProjectile(Point pos = Point(), Point vel = Point(), U32 liveTime = 0, GameObject *shooter = NULL);
+   GrenadeProjectile(Point pos = Point(), Point vel = Point(), GameObject *shooter = NULL);
 
    enum Constants
    {
@@ -95,7 +132,7 @@ public:
       OuterBlastRadius = 250,
    };
 
-   S32 ttl;
+   S32 mTimeRemaining;
    bool exploded;
    bool collide(GameObject *otherObj) { return true; };   // Things (like bullets) can collide with grenades
 
@@ -112,11 +149,27 @@ public:
    TNL_DECLARE_CLASS(GrenadeProjectile);
 
    // Lua interface
-   void push(lua_State *L) {  Lunar<GrenadeProjectile>::push(L, this); }
-   S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }
-   static const char className[];
+   GrenadeProjectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
 
+   S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }    // Why do we need this?
+   void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }    // Why do we need this?
+   static const char className[];
+   static Lunar<GrenadeProjectile>::RegType methods[];
+
+   // We're inheriting two copies of getLoc... one from Item and one from LuaProjectile.  
+   // We need to tell the compiler which one we're using.
+   using Item::getLoc;
+   using Item::getRad;
+   using Item::getVel;
+
+   //S32 getLoc(lua_State *L);     // Center of item (returns point)
+   //S32 getRad(lua_State *L);     // Radius of item (returns number)
+   //S32 getVel(lua_State *L);     // Speed of item (returns point)
+   GameObject *getGameObject();  // Return the underlying GameObject
+
+   //static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
 };
+
 
 class Mine : public GrenadeProjectile
 {
@@ -151,59 +204,9 @@ public:
    // Lua interface
    void push(lua_State *L) {  Lunar<Mine>::push(L, this); }
    S32 getClassID(lua_State *L) { return returnInt(L, MineType); }
-   static const char className[];
-
+   //static const char className[];
 };
 
-
-class HeatSeeker : public Item      // Not working, not used.
-{
-   typedef Item Parent;
-public:
-   HeatSeeker(Point pos = Point(), Point vel = Point(), U32 liveTime = 0, GameObject *shooter = NULL);
-
-   enum Constants {
-      CompressedVelocityMax = 2047,
-      InitialMask = BIT(0),
-      ExplodedMask = BIT(1),
-//      FirstFreeMask = ExplodeMask << 1,
-   };
-
-   bool collided;
-              bool exploded;    // TEMP
-           //    void damageObject(DamageInfo *damageInfo);
-              void explode(Point p, WeaponType weaponType);
-
-   bool alive;
-   Point pos;
-   Point velocity;
-   Point mTarget;
-   bool mHasTarget;
-
-   WeaponType mWeaponType;
-
-   U32 mTimeRemaining;
-
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void handleCollision(GameObject *theObject, Point collisionPoint);
-   void explode(GameObject *hitObject, Point p);
-   //void render();
-
-   void idle(GameObject::IdleCallPath path);
-   void renderItem(Point p);
-   bool collide(GameObject *otherObj) { return true; };     // What does this really mean?
-
-   SafePtr<GameObject> mShooter;
-
-   TNL_DECLARE_CLASS(HeatSeeker);
-
-   // Lua interface
-   void push(lua_State *L) {  Lunar<HeatSeeker>::push(L, this); }
-   S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }
-   static const char className[];
-
-};
 
 class SpyBug : public GrenadeProjectile
 {
@@ -228,9 +231,9 @@ public:
    TNL_DECLARE_CLASS(SpyBug);
 
    // Lua interface
-   void push(lua_State *L) {  Lunar<SpyBug>::push(L, this); }
-   S32 getClassID(lua_State *L) { return returnInt(L, SpyBugType); }
-   static const char className[];
+   //void push(lua_State *L) {  Lunar<SpyBug>::push(L, this); }
+   //S32 getClassID(lua_State *L) { return returnInt(L, SpyBugType); }
+   //static const char className[];
 
 };
 

@@ -37,20 +37,20 @@
 bot = LuaRobot(Robot) -- This is a reference to our bot.
 
 
-function getFiringSolution( item )
-   type = item:getClassID()
-   if( type == nil ) then
-      return nil
+function getFiringSolution(item)
+    if(item == nil) then
+        return nil
     end
-   return bot:getFiringSolution( type, item )
+
+   type = item:getClassID()
+    if(type == nil) then
+        return nil
+    end
+
+    return bot:getFiringSolution(type, item)
 end
 
 
-function getInterceptCourse( item )
-   type = item:getClassID()
-   if( type == nil ) then
-      return nil
-    end
-   return bot:getInterceptCourse( type, item )
+function logprint(msg)
+    bot:logprint(msg)
 end
-
