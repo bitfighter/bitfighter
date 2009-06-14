@@ -37,6 +37,19 @@ namespace Zap
 
 const char LuaProjectile::className[] = "ProjectileItem";      // Class name as it appears to Lua scripts
 
+// Define the methods we will expose to Lua
+Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
+{
+   // Standard gameItem methods
+   method(LuaProjectile, getClassID),
+   method(LuaProjectile, getLoc),
+   method(LuaProjectile, getRad),
+   method(LuaProjectile, getVel),
+   method(LuaProjectile, getWeapon),
+
+   {0,0}    // End method list
+};
+
 //===========================================
 
 static Vector<GameObject*> fillVector;
@@ -281,26 +294,12 @@ void Projectile::renderItem(Point pos)
 
 
 //// Lua methods
-//
-//const char Projectile::className[] = "ProjectileItem";      // Class name as it appears to Lua scripts
-//
+
 S32 Projectile::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }     // Center of item (returns point)
 S32 Projectile::getRad(lua_State *L) { return returnInt(L, 10); }                   // TODO: Wrong!!  Radius of item (returns number)
 S32 Projectile::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }     // Speed of item (returns point)
-GameObject *Projectile::getGameObject() { return this; }            // Return the underlying GameObject
+GameObject *Projectile::getGameObject() { return this; }                            // Return the underlying GameObject
 
-
-// Define the methods we will expose to Lua
-Lunar<Projectile>::RegType Projectile::methods[] =
-{
-   // Standard gameItem methods
-   method(Projectile, getClassID),
-   method(Projectile, getLoc),
-   method(Projectile, getRad),
-   method(Projectile, getVel),
-
-   {0,0}    // End method list
-};
 
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(GrenadeProjectile);
@@ -328,7 +327,6 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 
    mRadius = 7;
    mMass = 1;
-
 }
 
 void GrenadeProjectile::idle(IdleCallPath path)
@@ -461,34 +459,13 @@ void GrenadeProjectile::renderItem(Point pos)
 }
 
 
-//// Lua methods
-const char GrenadeProjectile::className[] = "GrenadeItem";      // Class name as it appears to Lua scripts
-//
-//S32 GrenadeProjectile::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }     // Center of item (returns point)
-//S32 GrenadeProjectile::getRad(lua_State *L) { return returnInt(L, mRadius); }                
-//S32 GrenadeProjectile::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }     // Speed of item (returns point)
-GameObject *GrenadeProjectile::getGameObject() { return this; }                            // Return the underlying GameObject
-//
-//
-//// Define the methods we will expose to Lua
-Lunar<GrenadeProjectile>::RegType GrenadeProjectile::methods[] =
-{
-   // Standard gameItem methods
-   method(GrenadeProjectile, getClassID),
-   method(GrenadeProjectile, getLoc),
-   method(GrenadeProjectile, getRad),
-   method(GrenadeProjectile, getVel),
-
-   {0,0}    // End method list
-};
-
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Mine);
 
 // Constructor (planter defaults to null)
 Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 {
-   mObjectTypeMask |= MineType;
+   mObjectTypeMask = MoveableType | MineType;
    mWeaponType = WeaponMine;
 
    if(planter)
@@ -558,18 +535,21 @@ void Mine::idle(IdleCallPath path)
    }
 }
 
+
 bool Mine::collide(GameObject *otherObj)
 {
-   if(otherObj->getObjectTypeMask() & (BulletType))
+   if(otherObj->getObjectTypeMask() & (BulletType | SpyBugType | MineType))
       explode(getActualPos(), WeaponMine);
    return false;
 }
+
 
 void Mine::damageObject(DamageInfo *info)
 {
    if(info->damageAmount > 0.f && !exploded)
       explode(getActualPos(), WeaponMine);
 }
+
 
 // Only runs on server side
 U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
@@ -591,6 +571,7 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    return ret;
 }
 
+
 void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
@@ -611,6 +592,7 @@ void Mine::unpackUpdate(GhostConnection *connection, BitStream *stream)
       SFXObject::play(SFXMineArm, getActualPos(), Point());
 }
 
+
 void Mine::renderItem(Point pos)
 {
    if(exploded)
@@ -630,8 +612,21 @@ void Mine::renderItem(Point pos)
 }
 
 
-//const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
+// Lua methods
+const char Mine::className[] = "MineItem";      // Class name as it appears to Lua scripts
 
+// Define the methods we will expose to Lua
+Lunar<Mine>::RegType Mine::methods[] =
+{
+   // Standard gameItem methods
+   method(Mine, getClassID),
+   method(Mine, getLoc),
+   method(Mine, getRad),
+   method(Mine, getVel),
+   method(Mine, getWeapon),
+
+   {0,0}    // End method list
+};
 
 //-----------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(SpyBug);
@@ -639,7 +634,7 @@ TNL_IMPLEMENT_NETOBJECT(SpyBug);
 // Constructor
 SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
 {
-   mObjectTypeMask |= SpyBugType;            // Flag this as a SpyBug
+   mObjectTypeMask = MoveableType | SpyBugType;
    //mObjectTypeMask &= ~CommandMapVisType;    // These items aren't shown on commander's map (well, sometimes they are, but through a special method)
 
    mWeaponType = WeaponSpyBug;
@@ -677,6 +672,7 @@ void SpyBug::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
+
 void SpyBug::idle(IdleCallPath path)
 {
    // Skip the grenade timing goofiness...
@@ -686,18 +682,21 @@ void SpyBug::idle(IdleCallPath path)
       return;
 }
 
+
 bool SpyBug::collide(GameObject *otherObj)
 {
-   if(otherObj->getObjectTypeMask() & (BulletType))
+   if(otherObj->getObjectTypeMask() & (BulletType | SpyBugType | MineType))
       explode(getActualPos(), WeaponSpyBug);
    return false;
 }
+
 
 void SpyBug::damageObject(DamageInfo *info)
 {
    if(info->damageAmount > 0.f && !exploded)    // Any damage will kill the SpyBug
       explode(getActualPos(), WeaponSpyBug);
 }
+
 
 U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -749,8 +748,22 @@ void SpyBug::renderItem(Point pos)
    renderSpyBug(pos, visible);
 }
 
+// Lua methods
+const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
 
-//const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
+// Define the methods we will expose to Lua
+Lunar<SpyBug>::RegType SpyBug::methods[] =
+{
+   // Standard gameItem methods
+   method(SpyBug, getClassID),
+   method(SpyBug, getLoc),
+   method(SpyBug, getRad),
+   method(SpyBug, getVel),
+   method(SpyBug, getWeapon),
+
+   {0,0}    // End method list
+};
+
 
 
 };

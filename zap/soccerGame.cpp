@@ -281,7 +281,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
       if(theInfo->damagingObject->getObjectTypeMask() & (ShipType | RobotType))
          mLastPlayerTouch = dynamic_cast<Ship *>(theInfo->damagingObject);
 
-      else if(theInfo->damagingObject->getObjectTypeMask() & BulletType)
+      else if(theInfo->damagingObject->getObjectTypeMask() & (BulletType | MineType | SpyBugType))
       {
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *s = dynamic_cast<Ship *>(p->mShooter.getPointer());

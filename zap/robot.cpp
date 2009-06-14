@@ -69,17 +69,19 @@ LuaRobot::LuaRobot(lua_State *L)
    setEnum(ShipType);
    setEnum(BarrierType);
    setEnum(MoveableType);
+
    setEnum(BulletType);
+   setEnum(MineType);
+   setEnum(SpyBugType);
+
    setEnum(ResourceItemType);
    setEnum(ForceFieldType);
    setEnum(LoadoutZoneType);
-   setEnum(MineType);
    setEnum(TestItemType);
    setEnum(FlagType);
    setEnum(NexusFlagType);
    setEnum(TurretTargetType);
    setEnum(SlipZoneType);
-   setEnum(SpyBugType);
    setEnum(NexusType);
    setEnum(BotNavMeshZoneType);
    setEnum(RobotType);
@@ -287,72 +289,6 @@ S32 LuaRobot::setThrust(lua_State *L)
 
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
-// Given an object, which angle do we need to be at to fire to hit it?
-// Returns nil if a workable solution can't be found
-// Logic adapted from turret aiming algorithm
-// Note that bot WILL fire at teammates if you ask it to!
-/*
-S32 LuaRobot::getFiringSolution(lua_State *L) 
-{
-   static const char *methodName = "Robot:getFiringSolution()";
-   checkArgCount(L, 2, methodName);
-   U32 type = getInt(L, 1, methodName);
-   GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
-
-   Point aimPos = thisRobot->getActualPos(); 
-   Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
-   offset.normalize(thisRobot->getRadius() * 1.2);    // 1.2 is a fudge factor to prevent robot from not shooting because it thinks it will hit itself
-   aimPos += offset;
-
-   if(type & ( ShipType | RobotType))
-   {
-      Ship *potential = (Ship*)target;
-
-      // Is it dead or cloaked?  If so, ignore
-      if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
-         return returnNil(L);
-   }
-
-   //if(target->getTeam() == thisRobot->getTeam())      // Is target on our team?
-   //   return returnNil(L);                            // ...if so, skip it!
-
-   // Calculate where we have to shoot to hit this...
-   Point Vs = target->getActualVel();
-
-   WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
-
-   F32 S = weap.projVelocity;
-   Point d = target->getActualPos() - aimPos;
-
-   F32 t;      // t is set in next statement
-   if(!FindLowestRootInInterval(Vs.dot(Vs) - S * S, 2 * Vs.dot(d), d.dot(d), weap.projLiveTime * 0.001f, t))
-      return returnNil(L);
-
-   Point leadPos = target->getActualPos() + Vs * t;
-
-   // Calculate distance
-   Point delta = (leadPos - aimPos);
-
-   // Make sure we can see it...
-   Point n;
-   if(target->findObjectLOS(BarrierType, MoveObject::ActualState, aimPos, target->getActualPos(), t, n))
-      return returnNil(L);
-
-   // See if we're gonna clobber our own stuff...
-   target->disableCollision();
-   Point delta2 = delta;
-   delta2.normalize(weap.projLiveTime * weap.projVelocity / 1000);
-   GameObject *hitObject = target->findObjectLOS(ShipType | RobotType | BarrierType | EngineeredType, 0, aimPos, aimPos + delta2, t, n);
-   target->enableCollision();
-
-   if(hitObject && hitObject->getTeam() == thisRobot->getTeam())
-      return returnNil(L);
-
-   return returnFloat(L, delta.ATAN2());
-}
-*/
-
-
 bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 aimTeam, F32 aimVel, F32 aimLife, bool ignoreFriendly, F32 &interceptAngle)
 {
    Point offset = target->getActualPos() - aimPos;    // Account for fact that robot doesn't fire from center
@@ -410,7 +346,8 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
 // Note that bot WILL fire at teammates if you ask it to!
-S32 LuaRobot::getFiringSolution(lua_State *L) {
+S32 LuaRobot::getFiringSolution(lua_State *L) 
+{
    static const char *methodName = "Robot:getFiringSolution()";
    checkArgCount(L, 2, methodName);
    U32 type = getInt(L, 1, methodName);
@@ -1147,8 +1084,9 @@ bool Robot::initialize(Point p)
    Lunar<HuntersFlagItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
 
-   Lunar<Projectile>::Register(L);
-
+   Lunar<LuaProjectile>::Register(L);
+   Lunar<Mine>::Register(L);
+   Lunar<SpyBug>::Register(L);
 
    luaopen_base(L);     // Make some basic functions available to bots
 
@@ -1163,7 +1101,6 @@ bool Robot::initialize(Point p)
    {
       // Load the script
       S32 retCode;
-
 
       // And load our standard robot library
       static const char *fname = "robot_helper_functions.lua";
@@ -1187,8 +1124,6 @@ bool Robot::initialize(Point p)
          logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
          return false;
       }
-
-
 
       // Run main script body
       lua_pcall(L, 0, 0, 0);

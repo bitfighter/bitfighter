@@ -59,9 +59,8 @@ enum GameObjectType
 
    BulletType          = BIT(13),      // All projectiles except grenades?
    MineType            = BIT(14),
+   SpyBugType          = BIT(15),
          // slot available
-   SpyBugType          = BIT(16),
-
    NexusType           = BIT(17),
    BotNavMeshZoneType  = BIT(18),
    RobotType           = BIT(19),

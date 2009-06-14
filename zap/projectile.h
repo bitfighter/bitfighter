@@ -39,19 +39,22 @@ class Ship;
 class LuaProjectile : public LuaItem
 {
 public:
-   //LuaProjectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
+   LuaProjectile() { /* Do not use */ };            //  C++ constructor
+
+   LuaProjectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
 
    static const char className[];
+   static Lunar<LuaProjectile>::RegType methods[];
+
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class   
 
    S32 getLoc(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Center of item (returns point)
    S32 getRad(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Radius of item (returns number)
    S32 getVel(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Speed of item (returns point)
 
-   virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class    
-
- /*  void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }*/
-
    virtual GameObject *getGameObject() { TNLAssert(false, "Unimplemented method!"); return NULL; }  // Return the underlying GameObject
+   virtual S32 getWeapon(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; };    // Return info about the weapon/projectile
+   void push(lua_State *L) {  TNLAssert(false, "Unimplemented method!"); }
 };
 
 
@@ -94,24 +97,14 @@ public:
 
    TNL_DECLARE_CLASS(Projectile);
 
-
    // Lua interface
-   Projectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
-
-   //static const char className[];
-   static Lunar<Projectile>::RegType methods[];
-
    S32 getLoc(lua_State *L);     // Center of item (returns point)
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
    GameObject *getGameObject();  // Return the underlying GameObject
+   S32 getWeapon(lua_State *L) { return returnInt(L, mWeaponType ); }       // Return which type of weapon this is
 
-
-     void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }
-   //void push(lua_State *L) {  Lunar<Projectile>::push(L, this); }
-   //S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }
-
-   //static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
+   void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }
 };
 
 
@@ -134,7 +127,7 @@ public:
 
    S32 mTimeRemaining;
    bool exploded;
-   bool collide(GameObject *otherObj) { return true; };   // Things (like bullets) can collide with grenades
+   bool collide(GameObject *otherObj) { return true; }   // Things (like bullets) can collide with grenades
 
    WeaponType mWeaponType;
    void renderItem(Point p);
@@ -151,23 +144,15 @@ public:
    // Lua interface
    GrenadeProjectile(lua_State *L) { /* Do not use */ };            //  Lua constructor
 
-   S32 getClassID(lua_State *L) { return returnInt(L, BulletType); }    // Why do we need this?
-   void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }    // Why do we need this?
-   static const char className[];
-   static Lunar<GrenadeProjectile>::RegType methods[];
+   // Need to provide these methods to deal with the complex web of inheritence... these come from both
+   // Item and LuaProjectile, and by providing these, everything works.
+   S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
+   S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)
+   S32 getVel(lua_State *L) { return Parent::getVel(L); }     // Speed of item (returns point)
+   GameObject *getGameObject() { return this; }               // Return the underlying GameObject
+   S32 getWeapon(lua_State *L) { return returnInt(L, WeaponBurst ); }       // Return which type of weapon this is
 
-   // We're inheriting two copies of getLoc... one from Item and one from LuaProjectile.  
-   // We need to tell the compiler which one we're using.
-   using Item::getLoc;
-   using Item::getRad;
-   using Item::getVel;
-
-   //S32 getLoc(lua_State *L);     // Center of item (returns point)
-   //S32 getRad(lua_State *L);     // Radius of item (returns number)
-   //S32 getVel(lua_State *L);     // Speed of item (returns point)
-   GameObject *getGameObject();  // Return the underlying GameObject
-
-   //static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
+   void push(lua_State *L) {  Lunar<LuaProjectile>::push(L, this); }
 };
 
 
@@ -182,13 +167,12 @@ public:
 
       SensorRadius     = 50,
       InnerBlastRadius = 75,
-      OuterBlastRadius = 100 ,
+      OuterBlastRadius = 100,
    };
 
    Mine(Point pos = Point(), Ship *owner=NULL);    // Constructor
 
    bool mArmed;
- //  StringTableEntry mSetBy;      // Who set the mine?
    SafePtr<GameConnection> mOwnerConnection;
    bool collide(GameObject *otherObj);
    void idle(IdleCallPath path);
@@ -202,9 +186,21 @@ public:
    TNL_DECLARE_CLASS(Mine);
 
    // Lua interface
-   void push(lua_State *L) {  Lunar<Mine>::push(L, this); }
-   S32 getClassID(lua_State *L) { return returnInt(L, MineType); }
-   //static const char className[];
+   Mine(lua_State *L) { /* Do not use */ };            //  Lua constructor
+
+   static const char className[];
+   static Lunar<Mine>::RegType methods[];
+
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, MineType); } // Object's class   
+
+   S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
+   S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)
+   S32 getVel(lua_State *L) { return Parent::getVel(L); }     // Speed of item (returns point)
+
+   GameObject *getGameObject() { return this; }               // Return the underlying GameObject
+   S32 getWeapon(lua_State *L) { return returnInt(L, WeaponMine ); }       // Return which type of weapon this is
+
+   void push(lua_State *L) { Lunar<LuaProjectile>::push(L, this); }
 };
 
 
@@ -231,10 +227,21 @@ public:
    TNL_DECLARE_CLASS(SpyBug);
 
    // Lua interface
-   //void push(lua_State *L) {  Lunar<SpyBug>::push(L, this); }
-   //S32 getClassID(lua_State *L) { return returnInt(L, SpyBugType); }
-   //static const char className[];
+   SpyBug(lua_State *L) { /* Do not use */ };            //  Lua constructor
 
+   static const char className[];
+   static Lunar<SpyBug>::RegType methods[];
+
+   virtual S32 getClassID(lua_State *L) { return returnInt(L, SpyBugType); } // Object's class   
+
+   S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
+   S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)
+   S32 getVel(lua_State *L) { return Parent::getVel(L); }     // Speed of item (returns point)
+
+   GameObject *getGameObject() { return this; }               // Return the underlying GameObject
+   S32 getWeapon(lua_State *L) { return returnInt(L, WeaponSpyBug ); }       // Return which type of weapon this is
+
+   void push(lua_State *L) { Lunar<LuaProjectile>::push(L, this); }
 };
 
 

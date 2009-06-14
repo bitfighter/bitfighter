@@ -225,41 +225,39 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
         return  Lunar<LuaShip>::check(L, index);
 
       case BulletType:
+            // pass through
+      case MineType:
+            // pass through
+      case SpyBugType:
          return Lunar<LuaProjectile>::check(L, index);
 
       case ResourceItemType:
          return Lunar<ResourceItem>::check(L, index);
-
-      case MineType:
-
       case TestItemType:
          return Lunar<TestItem>::check(L, index);
-
       case FlagType:
          return Lunar<FlagItem>::check(L, index);
 
-      case SpyBugType:
+
+
+         // gofast type
 
       case RobotType:
          return Lunar<LuaShip>::check(L, index);
 
       case TeleportType:
 
+
       case AsteroidType:
          return Lunar<Asteroid>::check(L, index);
-
       case RepairItemType:
          return Lunar<RepairItem>::check(L, index);
-
       case SoccerBallItemType:
          return Lunar<SoccerBallItem>::check(L, index);
-
       case NexusFlagType:
          return Lunar<HuntersFlagItem>::check(L, index);
-
       case TurretType:
          return Lunar<Turret>::check(L, index);
-
       case ForceFieldProjectorType:
          return Lunar<ForceFieldProjector>::check(L, index);
    
