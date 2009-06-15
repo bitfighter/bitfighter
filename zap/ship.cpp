@@ -87,7 +87,7 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModule[i] = (ShipModule) DefaultLoadout[i];
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipWeaponCount; i++)
       mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
 
    mActiveWeaponIndx = 0;
