@@ -55,9 +55,12 @@ namespace Zap
 
 GameUserInterface gGameUserInterface;
 
+// TODO: Make these static like privateF5MessageDisplayedInGameColor!
 Color gGlobalChatColor(0.9, 0.9, 0.9);
 Color gTeamChatColor(0, 1, 0);
 Color gCmdChatColor(1, 0, 0);
+
+Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 
 // Used to supply names for loutout indicators --> must correspond to enum ShipModule
 const char *gModuleShortName[] = {
@@ -118,8 +121,14 @@ void GameUserInterface::onActivate()
    mMissionOverlayActive = false;                         // Turn off the mission overlay (if it was on)
    glutSetCursor(GLUT_CURSOR_NONE);                       // Turn off cursor
    onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);    // Make sure ship pointed is towards mouse
-   mDisplayMessage[0][0] = 0;                             // Clear out any lingering chat messages
-   mStoreMessage[0][0] = 0;
+
+   // Clear out any lingering chat messages
+   for(S32 i = 0; i < MessageStoreCount; i++)   
+      mDisplayMessage[i][0] = 0; 
+
+   for(S32 i = 0; i < MessageDisplayCount; i++)   
+      mStoreMessage[i][0] = 0;  
+
    mMessageDisplayMode = ShortTimeout;                    // Start with normal chat msg display
    setPlayMode();                                         // Make sure we're not in chat or loadout-select mode
 

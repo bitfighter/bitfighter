@@ -28,6 +28,7 @@
 #include "masterConnection.h"
 #include "UINameEntry.h"
 #include "UIMenus.h"
+#include "UIGame.h"  // For putting private messages into game console
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
@@ -57,6 +58,7 @@ ChatUserInterface::ChatUserInterface()
    memset(mChatBuffer, 0, sizeof(mChatBuffer));
 }
 
+
 // We received a new incoming chat message...  Add it to the list
 void ChatUserInterface::newMessage(const char *nick, bool isPrivate, const char *message, ...)
 {
@@ -84,6 +86,14 @@ void ChatUserInterface::newMessage(const char *nick, bool isPrivate, const char 
          mNickColors[nick] = getNextColor();                   // If not, get a new one
 
       mDisplayMessageColor[0] = mNickColors[nick];
+
+      // If player not in UIChat, then display message in-game if possible.  2 line message. 
+      if(isPrivate && UserInterface::current->getMenuID() != getMenuID())    
+      {
+         gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
+            "Private message from %s: Press [%s] to enter chat mode", nick, keyCodeToString(keyOUTGAMECHAT));
+         gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "--> %s", message);
+      }
    }
 }
 
@@ -203,7 +213,7 @@ void ChatUserInterface::render()
    {
       glColor3f(1, 0, 0);
       drawCenteredString(200, 20, "Not connected to Master Server");
-      drawCenteredString(230, 20, "Chat messages cannot be relayed");
+      drawCenteredString(230, 20, "Your chat messages cannot be relayed");
    }
 }
 

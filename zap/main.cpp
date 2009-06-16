@@ -60,6 +60,7 @@
 //<li>Improved menu navigation instructions for joystick users</li>
 //<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
 //<li>Increased max level size from 64K to 96K</li>
+//<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
 //</ul>
 //
 //<u>Items</u>
@@ -114,6 +115,7 @@
 //<li>Changing other player's team in 3+ team game with 3+ players no longer switches a random player</li>
 //<li>Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points</li>
 //<li>Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)</li>
+//<li>Old messages now properly cleared out when game is started</li>
 //</ul>
 //
 //<u>Server menu enhancements:</u>
@@ -130,7 +132,8 @@
 
 //// New stuff this alpha release
 //<li>Fixed initial loadout bug</li>
-
+//<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
+//<li>Old messages now properly cleared out when game is started</li>
 
 // Mac Test:
 // New screen capture code
