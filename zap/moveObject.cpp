@@ -207,7 +207,7 @@ bool MoveObject::collide(GameObject *otherObject)
 
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
-   // check for collisions against other objects
+   // Check for collisions against other objects
    Point delta = mMoveState[stateIndex].vel * collisionTime;
 
    Rect queryRect(mMoveState[stateIndex].pos, mMoveState[stateIndex].pos + delta);
@@ -224,8 +224,6 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
    {
       if(!fillVector[i]->isCollisionEnabled())
          continue;
-
-GameObject *o = fillVector[i];      // For debugging  TODO: Delete
 
       Vector<Point> poly;
       poly.clear();

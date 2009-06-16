@@ -111,7 +111,7 @@ EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNorm
    mIsDestroyed = false;
    mHealRate = 0;
 
-   setObjectMask();
+   //setObjectMask();  // --> Moved to child classes for the moment, because there was a problem with inheritence.
 }
 
 
@@ -450,6 +450,13 @@ void EngineeredObject::healObject(S32 time)
 
 TNL_IMPLEMENT_NETOBJECT(ForceFieldProjector);
 
+// Constructor
+ForceFieldProjector::ForceFieldProjector(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
+{
+   mNetFlags.set(Ghostable);
+   setObjectMask();
+}
+
 void ForceFieldProjector::onDisabled()
 {
    if(mField.isValid())
@@ -649,9 +656,11 @@ void ForceField::render()
 
 TNL_IMPLEMENT_NETOBJECT(Turret);
 
+// Constructor
 Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObject(team, anchorPoint, anchorNormal)
 {
    mNetFlags.set(Ghostable);
+   setObjectMask();
 }
 
 

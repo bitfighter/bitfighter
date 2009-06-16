@@ -61,7 +61,7 @@ protected:
       NextFreeMask = BIT(3),
    };
 
-   virtual void setObjectMask() { /* do nothing */ };    // Will be overridden by the only classes that care
+   virtual void setObjectMask() = 0;   // Must be overridden by child classes
 
 public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
@@ -141,7 +141,7 @@ private:
    void setObjectMask() { mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType; }
 
 public:
-   ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point()) :EngineeredObject(team, anchorPoint, anchorNormal) { mNetFlags.set(Ghostable); }
+   ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
    void onAddedToGame(Game *theGame);
@@ -194,7 +194,7 @@ public:
       AimMask = EngineeredObject::NextFreeMask,
    };
 
-   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));
+   Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));     // Constructor
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
    void render();

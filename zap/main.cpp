@@ -129,13 +129,7 @@
 
 
 //// New stuff this alpha release
-//<li>Increased max level size from 64K to 96K</li>
-//<li>Server menu: Added indicator ("T") for servers in test mode</li>
-//<li>Server menu: Replaced max player listing with number of robots</li>
-//<li>Editor: Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
-//<li>Editor: Display gofast speed and snapping on item</li>
-//<li>Can specify whether ships snap to center of gofast with optional additional parameter in level file</li>
-//<li>Default gofast speed reduced to 2000<li>
+//<li>Fixed initial loadout bug</li>
 
 
 // Mac Test:

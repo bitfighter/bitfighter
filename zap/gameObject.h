@@ -43,7 +43,7 @@ class GridDatabase;
 
 enum GameObjectType
 {
-   UnknownType         = BIT(0),
+   UnknownType         = BIT(0),    // First bit, BIT(0) == 1, NOT 0!  (Well, yes, 0!, but not 0.  C'mon... get a life!)
    ShipType            = BIT(1),
    BarrierType         = BIT(2),
    MoveableType        = BIT(3),
@@ -74,12 +74,12 @@ enum GameObjectType
    ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
 
    DeletedType       = BIT(30),
-   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map   ==> Could be made a derived type below, perhaps
+   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map 
 
    // Derived types:
-   EngineeredType     =  TurretType | ForceFieldProjectorType,
-   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType,
-   MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType,
+   EngineeredType     = TurretType | ForceFieldProjectorType,
+   DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | AsteroidType,
+   MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
    AllObjectTypes     = 0xFFFFFFFF,
 };
 
