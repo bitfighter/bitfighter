@@ -36,22 +36,12 @@
 bot = LuaRobot(Robot) -- This is a reference to our bot.
 
 --
--- Convert indices of args table to numeric.  Don't know why this is necessary.
--- TODO: Find a way to get rid of this!
---
-for i, v in pairs(args) do
-    args[tonumber(i)] = v
-end
-
-
---
 -- strict.lua
 -- Checks uses of undeclared global variables
 -- All global variables must be 'declared' through a regular assignment
 -- (even assigning nil will do) in a main chunk before being used
 -- anywhere or assigned to inside a function.
 --
-
 local mt = getmetatable(_G)
 if mt == nil then
   mt = {}

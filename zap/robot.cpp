@@ -1101,15 +1101,12 @@ bool Robot::initialize(Point p)
    lua_setglobal(L, "Robot");
 
    // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot as the 0th element.
-   lua_createtable(L,  mArgs.size() + 1, 0);
+   lua_createtable(L,  mArgs.size(), 0);
    
-   lua_pushstring(L, mFilename.c_str());
-   lua_setfield(L, -2, "0");
-
    for(S32 i = 0; i < mArgs.size(); i++)
    {
       lua_pushstring(L, mArgs[i].c_str());
-      lua_setfield(L, -2, UserInterface::itos(i + 1).c_str());
+      lua_rawseti(L, -2, i);
    }
    lua_setglobal(L, "args");
 
@@ -1195,7 +1192,7 @@ void Robot::kill()
 
 bool Robot::processArguments(S32 argc, const char **argv)
 {
-   if(argc < 2)
+   if(argc < 2)               // Two required: team and bot file
       return false;
 
    mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
@@ -1203,11 +1200,12 @@ bool Robot::processArguments(S32 argc, const char **argv)
    mFilename = "robots/";
    mFilename += argv[1];
 
-   // Collect any remaining arguments to be passed into the args table in the robot
-   for(S32 i = 2; i < argc; i++)
-   {
+   // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
+   // Need to make a copy or containerize argv[i] somehow (using string, in this case) because otherwise
+   // new data will get written to the string location subsequently, and our vals will change from under
+   // us.  That's bad!
+   for(S32 i = 1; i < argc; i++)
       mArgs.push_back(string(argv[i]));
-   }
 
    return true;
 }
