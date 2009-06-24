@@ -200,10 +200,12 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced)
    }
 }
 
+
 bool MoveObject::collide(GameObject *otherObject)
 {
    return true;
 }
+
 
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {

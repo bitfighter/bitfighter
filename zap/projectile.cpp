@@ -64,6 +64,7 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
    mNetFlags.set(Ghostable);
    pos = p;
    velocity = v;
+   
    mTimeRemaining = gWeapons[type].projLiveTime;
    collided = false;
    alive = true;

@@ -67,6 +67,7 @@ public:
    S32 isModActive(lua_State *L);
 
    GameObject *getGameObject();
+   static const char *getClassName() { return "LuaShip"; }
 
    void push(lua_State *L) {  Lunar<LuaShip>::push(L, this); }      // Push item onto stack
 

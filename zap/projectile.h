@@ -45,6 +45,7 @@ public:
 
    static const char className[];
    static Lunar<LuaProjectile>::RegType methods[];
+   static const char *getClassName() { return "LuaProjectile"; }
 
    virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class   
 

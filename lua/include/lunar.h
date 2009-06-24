@@ -136,6 +136,7 @@ private:
     lua_remove(L, 1);  // remove self so member function args start at index 1
     // get member function from upvalue
     RegType *l = static_cast<RegType*>(lua_touserdata(L, lua_upvalueindex(1)));
+    /*printf("%s\n", l->name);*/
     return (obj->*(l->mfunc))(L);  // call member function
   }
 

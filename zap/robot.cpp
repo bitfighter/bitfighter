@@ -1056,7 +1056,6 @@ bool Robot::initialize(Point p)
 
    L = lua_open();    // Create a new Lua interpreter
 
-   luaopen_math(L);     // Load the math library
 
    // Register our connector types with Lua
 
@@ -1088,63 +1087,74 @@ bool Robot::initialize(Point p)
    Lunar<Mine>::Register(L);
    Lunar<SpyBug>::Register(L);
 
-   luaopen_base(L);     // Make some basic functions available to bots
+   // Load some libraries
+   luaopen_base(L);     
+   luaopen_math(L);     
+   luaopen_table(L);    // Needed for custom iterators and "values" function included in robot_helper_functions.lua
+   luaopen_debug(L);    // Needed for "strict" implementation
+   //luaopen_package(L);  // Crashes  
 
-   // Push a pointer to this Robot to the Lua stack
-   lua_pushlightuserdata(L, (void *)this);
-
-   // And set the global name of this pointer.  This is the name that we'll use to refer
+   // Push a pointer to this Robot to the Lua stack,
+   // then set the global name of this pointer.  This is the name that we'll use to refer
    // to our robot from our Lua code.
+   lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
 
-   try
+   // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot as the 0th element.
+   lua_createtable(L,  mArgs.size() + 1, 0);
+   
+   lua_pushstring(L, mFilename.c_str());
+   lua_setfield(L, -2, "0");
+
+   for(S32 i = 0; i < mArgs.size(); i++)
    {
-      // Load the script
-      S32 retCode;
-
-      // And load our standard robot library
-      static const char *fname = "robot_helper_functions.lua";
-      retCode = luaL_loadfile(L, fname);
-
-      if(retCode)
-      {
-         logError("Error loading robot helper functions (%s).  Shutting robot down.", fname);
-         return false;
-      }
-
-      // Run main script body, which will have the effect of making our helper functions not get overwritten by the robot code
-      // See: http://lua-users.org/lists/lua-l/2005-09/msg00471.html
-      lua_pcall(L, 0, 0, 0);
-      
-
-      retCode = luaL_loadfile(L, mFilename.c_str());
-
-      if(retCode)
-      {
-         logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
-         return false;
-      }
-
-      // Run main script body
-      lua_pcall(L, 0, 0, 0);
+      lua_pushstring(L, mArgs[i].c_str());
+      lua_setfield(L, -2, UserInterface::itos(i + 1).c_str());
    }
-   catch(string e)
+   lua_setglobal(L, "args");
+
+   // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
+   // every time a bot is created.
+   static const char *fname = "robot_helper_functions.lua";
+
+   if(luaL_loadfile(L, fname))
    {
-      logError("Error initializing robot: %s.  Shutting robot down.", e.c_str());
+      logError("Error loading robot helper functions (%s).  Shutting robot down.", fname);
+      return false;
+   }
+   
+   // Now run the loaded code
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting one back
+   {
+      logError("Robot error during initializing helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
    }
 
-   try
+   // Load the bot
+   if(luaL_loadfile(L, mFilename.c_str()))
    {
-      lua_getglobal(L, "getName");
-      lua_call(L, 0, 1);                  // Passing 0 params, getting one back
+      logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
+      return false;
+   }
+
+   // Run the bot
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting one back
+   {
+      logError("Robot error during initialization: %s.  Shutting robot down.", lua_tostring(L, -1));
+      return false;
+   }
+
+   // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
+   lua_getglobal(L, "getName");
+   if (!lua_isfunction(L, 0) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting one back
+   {
+      mPlayerName = "Nancy";
+      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), mPlayerName);
+   }
+   else
+   {
       mPlayerName = lua_tostring(L, -1);
       lua_pop(L, 1);
-   }
-   catch (string e)
-   {
-      logError("Robot error running getName(): %s.  Shutting robot down.", e.c_str());
-      return false;
    }
 
    return true;
@@ -1185,13 +1195,19 @@ void Robot::kill()
 
 bool Robot::processArguments(S32 argc, const char **argv)
 {
-   if(argc != 2)
+   if(argc < 2)
       return false;
 
    mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
 
    mFilename = "robots/";
    mFilename += argv[1];
+
+   // Collect any remaining arguments to be passed into the args table in the robot
+   for(S32 i = 2; i < argc; i++)
+   {
+      mArgs.push_back(string(argv[i]));
+   }
 
    return true;
 }
@@ -1333,15 +1349,27 @@ void Robot::idle(GameObject::IdleCallPath path)
    {
       U32 ms = Platform::getRealMilliseconds();
       deltaT = (ms - mLastMoveTime);
+
+      if(deltaT == 0)      // If deltaT is 0, this may cause problems down the line.  Best thing is just to skip this round.
+         return;
+
       mLastMoveTime = ms;
       mCurrentMove.time = deltaT;
 
       // Check to see if we need to respawn this robot
-      if(hasExploded)
+      if(hasExploded)         
       {
          if(respawnTimer.update(mCurrentMove.time))
-            gServerGame->getGameType()->spawnRobot(this);
-
+         {
+            try {
+               gServerGame->getGameType()->spawnRobot(this);
+            }
+            catch(string msg)
+            {
+               logError("Robot error during spawn: %s.  Shutting robot down.", msg.c_str());
+               delete this;
+            }
+         }
          return;
       }
    }
@@ -1360,23 +1388,32 @@ void Robot::idle(GameObject::IdleCallPath path)
       mCurrentMove.right = 0;
       mCurrentMove.left = 0;
 
-      try
+      //try
+      //{
+
+      lua_getglobal(L, "getMove");
+         //lua_call(L, 0, 0);
+
+      if (lua_pcall(L, 0, 0, 0) != 0)
       {
-         lua_getglobal(L, "getMove");
-         lua_call(L, 0, 0);
-      }
-      catch (string e)
-      {
-         logError("Robot error running getMove(): %s.  Shutting robot down.", e.c_str());
+         logError("Robot error running getMove(): %s.  Shutting robot down.", lua_tostring(L, -1));
          delete this;
          return;
       }
-      catch (...)    // Catches any other errors not caught above --> should never happen
-      {
-         logError("Robot error: Unknown exception.  Shutting robot down");
-         delete this;
-         return;
-      }
+      
+      //}
+      //catch (string e)
+      //{
+      //   logError("Robot error running getMove(): %s.  Shutting robot down.", e.c_str());
+      //   delete this;
+      //   return;
+      //}
+      //catch (...)    // Catches any other errors not caught above --> should never happen
+      //{
+      //   logError("Robot error: Unknown exception.  Shutting robot down");
+      //   delete this;
+      //   return;
+      //}
 
 
       // If we've changed the mCurrentMove, then we need to set
