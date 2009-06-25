@@ -87,6 +87,12 @@
 		941E94E90DDF1D0C00621981 /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 941E94E80DDF1D0C00621981 /* masterInterface.cpp */; };
 		941E94EF0DDF1D6800621981 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 941E94EE0DDF1D6800621981 /* IOKit.framework */; };
 		941E961C0DDF1F2800621981 /* zap_mac_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 941E961B0DDF1F2800621981 /* zap_mac_icon.icns */; };
+		943241AF0FEB086D0045A8A8 /* luaGameInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 943241AD0FEB086D0045A8A8 /* luaGameInfo.cpp */; };
+		943241B00FEB086D0045A8A8 /* luaObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 943241AE0FEB086D0045A8A8 /* luaObject.cpp */; };
+		943241B90FEB08A40045A8A8 /* screenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 943241B80FEB08A40045A8A8 /* screenShooter.cpp */; };
+		943241C00FEB099B0045A8A8 /* zoneControlGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 943241BF0FEB099B0045A8A8 /* zoneControlGame.cpp */; };
+		943243F90FEB13EE0045A8A8 /* lua.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 943243F80FEB13EE0045A8A8 /* lua.framework */; };
+		943243FE0FEB14300045A8A8 /* lua.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 943243F80FEB13EE0045A8A8 /* lua.framework */; };
 		94A551360DDF468100B89433 /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94A551350DDF468100B89433 /* libtomcrypt.framework */; };
 		94A5513E0DDF46AF00B89433 /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94A5513D0DDF46AF00B89433 /* tnl.framework */; };
 		94A5517D0DDF46EF00B89433 /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 94A5513D0DDF46AF00B89433 /* tnl.framework */; };
@@ -105,6 +111,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				9418DBBA0DFAE4D900518C14 /* ALUT.framework in CopyFiles */,
+				943243FE0FEB14300045A8A8 /* lua.framework in CopyFiles */,
 				94A5517D0DDF46EF00B89433 /* tnl.framework in CopyFiles */,
 				94A5517F0DDF46EF00B89433 /* libtomcrypt.framework in CopyFiles */,
 			);
@@ -264,6 +271,16 @@
 		941E94E80DDF1D0C00621981 /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		941E94EE0DDF1D6800621981 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		941E961B0DDF1F2800621981 /* zap_mac_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = zap_mac_icon.icns; sourceTree = "<group>"; };
+		943241AD0FEB086D0045A8A8 /* luaGameInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = luaGameInfo.cpp; sourceTree = "<group>"; };
+		943241AE0FEB086D0045A8A8 /* luaObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = luaObject.cpp; sourceTree = "<group>"; };
+		943241B10FEB08890045A8A8 /* gameItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameItems.h; sourceTree = "<group>"; };
+		943241B20FEB08890045A8A8 /* lua.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lua.h; sourceTree = "<group>"; };
+		943241B30FEB08890045A8A8 /* luaGameInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = luaGameInfo.h; sourceTree = "<group>"; };
+		943241B40FEB08890045A8A8 /* luaObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = luaObject.h; sourceTree = "<group>"; };
+		943241B80FEB08A40045A8A8 /* screenShooter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = screenShooter.cpp; sourceTree = "<group>"; };
+		943241BA0FEB08AF0045A8A8 /* screenShooter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screenShooter.h; sourceTree = "<group>"; };
+		943241BF0FEB099B0045A8A8 /* zoneControlGame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = zoneControlGame.cpp; sourceTree = "<group>"; };
+		943243F80FEB13EE0045A8A8 /* lua.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = lua.framework; path = ../lua/lua.framework; sourceTree = SOURCE_ROOT; };
 		94A551350DDF468100B89433 /* libtomcrypt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libtomcrypt.framework; path = ../libtomcrypt/build/Release/libtomcrypt.framework; sourceTree = SOURCE_ROOT; };
 		94A5513D0DDF46AF00B89433 /* tnl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = tnl.framework; path = ../tnl/build/Release/tnl.framework; sourceTree = SOURCE_ROOT; };
 		94C1B9040F1C0BB800548B70 /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
@@ -290,6 +307,7 @@
 				94A5513E0DDF46AF00B89433 /* tnl.framework in Frameworks */,
 				9418DBB70DFAE4D300518C14 /* ALUT.framework in Frameworks */,
 				9418DBD20DFAE61C00518C14 /* Cocoa.framework in Frameworks */,
+				943243F90FEB13EE0045A8A8 /* lua.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,6 +337,10 @@
 		20286C2AFDCF999611CA2CEA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				943241BF0FEB099B0045A8A8 /* zoneControlGame.cpp */,
+				943241B80FEB08A40045A8A8 /* screenShooter.cpp */,
+				943241AD0FEB086D0045A8A8 /* luaGameInfo.cpp */,
+				943241AE0FEB086D0045A8A8 /* luaObject.cpp */,
 				94C1B90C0F1C0BFA00548B70 /* BotNavMeshZone.cpp */,
 				94C1B90D0F1C0BFA00548B70 /* robot.cpp */,
 				94C1B9040F1C0BB800548B70 /* md5.cpp */,
@@ -410,6 +432,7 @@
 		20286C32FDCF999611CA2CEA /* External Frameworks and Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				943243F80FEB13EE0045A8A8 /* lua.framework */,
 				9418DBD10DFAE61C00518C14 /* Cocoa.framework */,
 				9418DBB60DFAE4D300518C14 /* ALUT.framework */,
 				94A5513D0DDF46AF00B89433 /* tnl.framework */,
@@ -426,6 +449,11 @@
 		941E93120DDF0ADD00621981 /* Headers */ = {
 			isa = PBXGroup;
 			children = (
+				943241BA0FEB08AF0045A8A8 /* screenShooter.h */,
+				943241B10FEB08890045A8A8 /* gameItems.h */,
+				943241B20FEB08890045A8A8 /* lua.h */,
+				943241B30FEB08890045A8A8 /* luaGameInfo.h */,
+				943241B40FEB08890045A8A8 /* luaObject.h */,
 				94C1B90A0F1C0BE700548B70 /* BotNavMeshZone.h */,
 				94C1B90B0F1C0BE700548B70 /* robot.h */,
 				94C1B9080F1C0BC900548B70 /* md5.h */,
@@ -634,6 +662,10 @@
 				94C1B9070F1C0BB800548B70 /* md5wrapper.cpp in Sources */,
 				94C1B90E0F1C0BFA00548B70 /* BotNavMeshZone.cpp in Sources */,
 				94C1B90F0F1C0BFA00548B70 /* robot.cpp in Sources */,
+				943241AF0FEB086D0045A8A8 /* luaGameInfo.cpp in Sources */,
+				943241B00FEB086D0045A8A8 /* luaObject.cpp in Sources */,
+				943241B90FEB08A40045A8A8 /* screenShooter.cpp in Sources */,
+				943241C00FEB099B0045A8A8 /* zoneControlGame.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -669,11 +701,15 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_5)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_6)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../tnl/build/Release\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../libtomcrypt/build/Release\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(SRCROOT)/../openal/ALUT/build/Release\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SRCROOT)/../openal/macosx/ALUT/build/Release\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_5 = "\"$(SRCROOT)/../lua/macosx/build/Release\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_6 = "\"$(SRCROOT)/../lua\"";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -698,11 +734,15 @@
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3)",
 					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_5)",
+					"$(FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_6)",
 				);
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../tnl/build/Release\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_2 = "\"$(SRCROOT)/../libtomcrypt/build/Release\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_3 = "\"$(SRCROOT)/../openal/ALUT/build/Release\"";
 				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_4 = "\"$(SRCROOT)/../openal/macosx/ALUT/build/Release\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_5 = "\"$(SRCROOT)/../lua/macosx/build/Release\"";
+				FRAMEWORK_SEARCH_PATHS_QUOTED_FOR_TARGET_6 = "\"$(SRCROOT)/../lua\"";
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = bitFighter_Prefix.pch;

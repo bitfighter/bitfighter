@@ -275,7 +275,9 @@ LoadDIBitmap(const char *filename, /* I - File to load */
                    (*info)->bmiHeader.biBitCount + 7) / 8 *
   	           abs((*info)->bmiHeader.biHeight);
 
-    if ((bits = malloc(bitsize)) == NULL)
+    // RDW: This conversion is illegal in C++, need a cast.
+    // CE: Not my fault!  It was a copy-paste job!
+    if ((bits = static_cast<GLubyte*>(malloc(bitsize))) == NULL)
         {
         /* Couldn't allocate memory - return NULL! */
         free(*info);

@@ -507,8 +507,8 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
    }
    else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
    {
-      // Minor security issue, to make sure we don't overflow the obj buffer
       const S32 MAXOBJLEN = 128;
+
       char obj[MAXOBJLEN + 1];
 
       // Kind of hacky, but if we encounter a FlagItem in a Nexus game, we'll convert it to a NexusFlag item.  This seems to make more sense.

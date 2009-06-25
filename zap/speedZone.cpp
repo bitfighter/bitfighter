@@ -35,6 +35,12 @@
 namespace Zap
 {
 
+// RDW
+// These constants need physical definitions.
+const U16 SpeedZone::minSpeed;
+const U16 SpeedZone::maxSpeed;
+const U16 SpeedZone::defaultSpeed;
+
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 
 // Constructor
@@ -107,7 +113,10 @@ bool SpeedZone::processArguments(S32 argc, const char **argv)
    preparePoints();
 
    if(argc >= 5)
-      mSpeed = max(minSpeed, min(maxSpeed, atoi(argv[4])));
+      // RDW
+      // The min template requires both arguments to be same type.
+      // Casting to U16 to fix this.
+      mSpeed = max(minSpeed, min(maxSpeed, static_cast<U16>(atoi(argv[4]))));
 
    if(argc >= 6)
       mSnapLocation = true;   

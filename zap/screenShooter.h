@@ -21,7 +21,11 @@ namespace Zap
  * Include necessary headers.
  */
 
+#ifdef WIN32
 #  include <../glut/glut.h>
+#elif defined __APPLE__
+#  include <GLUT/glut.h>
+#endif
 #  ifdef WIN32
 #    include <windows.h>
 #    include <wingdi.h>

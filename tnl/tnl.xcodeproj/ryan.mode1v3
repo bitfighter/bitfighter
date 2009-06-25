@@ -329,7 +329,7 @@
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
-							<string>{{0, 0}, {186, 824}}</string>
+							<string>{{0, 0}, {186, 811}}</string>
 						</dict>
 						<key>PBXTopSmartGroupGIDs</key>
 						<array/>
@@ -341,14 +341,14 @@
 					<key>GeometryConfiguration</key>
 					<dict>
 						<key>Frame</key>
-						<string>{{0, 0}, {203, 842}}</string>
+						<string>{{0, 0}, {203, 829}}</string>
 						<key>GroupTreeTableConfiguration</key>
 						<array>
 							<string>MainColumn</string>
 							<real>186</real>
 						</array>
 						<key>RubberWindowFrame</key>
-						<string>0 119 1280 883 0 0 1280 1002 </string>
+						<string>0 132 1280 870 0 0 1280 1002 </string>
 					</dict>
 					<key>Module</key>
 					<string>PBXSmartGroupTreeModule</string>
@@ -383,14 +383,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1072, 586}}</string>
+								<string>{{0, 0}, {1072, 577}}</string>
 								<key>RubberWindowFrame</key>
-								<string>0 119 1280 883 0 0 1280 1002 </string>
+								<string>0 132 1280 870 0 0 1280 1002 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>586pt</string>
+							<string>577pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -403,14 +403,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 591}, {1072, 251}}</string>
+								<string>{{0, 582}, {1072, 247}}</string>
 								<key>RubberWindowFrame</key>
-								<string>0 119 1280 883 0 0 1280 1002 </string>
+								<string>0 132 1280 870 0 0 1280 1002 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>251pt</string>
+							<string>247pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -429,9 +429,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>9455FAA20FD56E53003032B4</string>
+				<string>943242980FEB0FE10045A8A8</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>9455FAA30FD56E53003032B4</string>
+				<string>943242990FEB0FE10045A8A8</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -550,7 +550,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>265645651.093413</real>
+	<real>267063252.26358199</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -565,11 +565,10 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>941E927B0DDF07B900621981</string>
-		<string>/Users/ryan/Desktop/zap/trunk/tnl/tnl.xcodeproj</string>
+		<string>/Users/ryan/Desktop/zap/release-011-alpha2/tnl/tnl.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
-	<string>0 119 1280 883 0 0 1280 1002 </string>
+	<string>0 132 1280 870 0 0 1280 1002 </string>
 	<key>WindowToolsV3</key>
 	<array>
 		<dict>
@@ -648,7 +647,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>941E927B0DDF07B900621981</string>
-				<string>9455FAA10FD56E51003032B4</string>
+				<string>94CB41400FEB0229008D1EA9</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
