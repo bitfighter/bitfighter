@@ -492,7 +492,7 @@ bool ServerGame::loadLevel(string filename)
 // argc is the number of parameters on the line, argv is the params themselves
 void ServerGame::processLevelLoadLine(int argc, const char **argv)
 {
-   // Since we don't yet have bots, we'll just read and ignore any BotsPerTeam lines.  For now.
+   // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
    if(!stricmp(argv[0], "BotsPerTeam"))
       return;
 
@@ -507,11 +507,20 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
    }
    else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
    {
-      TNL::Object *theObject = TNL::Object::create(argv[0]);      // Create an object of the type specified on the line
+      char obj[256];
+
+      // Kind of hacky, but if we encounter a FlagItem in a Nexus game, we'll convert it to a NexusFlag item.  This seems to make more sense.
+      // This will work so long as FlagItem and HuntersFlagItem share a common attribute list.
+      if(!stricmp(argv[0], "FlagItem") && !mGameType.isNull() && mGameType->getGameType() == GameType::NexusGame)
+         strcpy(obj, "HuntersFlagItem");
+      else
+         strcpy(obj, argv[0]);
+
+      TNL::Object *theObject = TNL::Object::create(obj);      // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
       if(!object)    // Well... that was a bad idea!
       {
-         TNL::logprintf("Invalid object type: %s -- ignoring", argv[0]);
+         TNL::logprintf("Invalid object type: %s -- ignoring", obj);
          delete theObject;
       }
       else  // object was valid
@@ -523,7 +532,7 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
 
          if(!validArgs)
          {
-            logprintf("Object %s had invalid parameters, ignoring...", argv[0]);
+            logprintf("Object %s had invalid parameters, ignoring...", obj);
             object->removeFromGame();
             object->destroySelf();
          }                                                      

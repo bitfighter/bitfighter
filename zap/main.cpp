@@ -73,6 +73,7 @@
 //<li>Gofast are now almost deterministic in where you end up -- very precise corridors now possible, when snapping enabled</li>
 //<li>Default gofast speed reduced to 2000<li>
 //<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
+//<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
 //<li>Asteroids... you figure it out!</li>
 //</ul>
 //
@@ -134,6 +135,7 @@
 //<li>Fixed initial loadout bug</li>
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
 //<li>Old messages now properly cleared out when game is started</li>
+//<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
 
 // Mac Test:
 // New screen capture code

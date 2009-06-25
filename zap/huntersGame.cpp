@@ -388,6 +388,24 @@ HuntersFlagItem::HuntersFlagItem(Point pos) : Item(pos, true, 30, 4)
 }
 
 
+bool HuntersFlagItem::processArguments(S32 argc, const char **argv)
+{
+   if(argc < 2)
+      return false;
+
+   // If this is an FlagItem that was "recast" as a HuntersFlagItem at load time, it will have 3 args.  The first, team, 
+   // does not apply to this object, so we'll ignore it.  If there's only 2 args, those will be the coords.
+   S32 offset = 0;
+   if(argc >= 3)
+      offset++;
+   
+   if(!Parent::processArguments(argc - 1, argv + offset))
+      return false;
+
+   return true;
+}
+
+
 const char HuntersFlagItem::className[] = "HuntersFlagItem";      // Class name as it appears to Lua scripts
 
 // Define the methods we will expose to Lua
@@ -418,7 +436,7 @@ void HuntersFlagItem::renderItem(Point pos)
    Color c;
    GameType *gt = getGame()->getGameType();
 
-   c = gt->mTeams[0].color;
+   c = gt->mTeams[0].color;   // Maybe should always be rendered in player's team color?  Or unused color?
 
    renderFlag(offset, c);
 

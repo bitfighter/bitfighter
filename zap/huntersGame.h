@@ -61,7 +61,9 @@ public:
    HuntersGameType();
    
    bool isTeamGame() { return mTeams.size() > 1; }
-   bool isFlagGame() { return false; }
+   bool isFlagGame() { return true; }       // Well, technically not, but we'll morph flags to our own uses as we load the level
+   //bool isTeamFlagGame() { return true; }   // Ditto... team info will be ignored... no need to show warning in editor
+
    bool isSpawnWithLoadoutGame() { return true; }
 
    bool processArguments(S32 argc, const char **argv);
@@ -122,7 +124,9 @@ protected:
    U32 mFlagCount;
 
 public:
-   HuntersFlagItem(Point pos = Point());
+   HuntersFlagItem(Point pos = Point());     // Constructor
+
+   bool processArguments(S32 argc, const char **argv);
 
    void renderItem(Point pos);
    void onMountDestroyed();

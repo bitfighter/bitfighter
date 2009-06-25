@@ -808,8 +808,6 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       p.read(argv + 2);
       p *= getGame()->getGridSize();
 
-      //mUsingFlagSpawnPoints = true;
-
       if( isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // Ignore if team is invalid
          mTeams[teamIndex].flagSpawnPoints.push_back(p);
       else if(teamIndex < 0)
@@ -898,6 +896,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
 
    return true;
 }
+
 
 ClientRef *GameType::findClientRef(const StringTableEntry &name)
 {

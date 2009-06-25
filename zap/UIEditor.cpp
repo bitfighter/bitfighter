@@ -583,10 +583,10 @@ void EditorUserInterface::validateLevel()
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
    if(!foundNexus && !strcmp(mGameType, "HuntersGameType"))
       mLevelErrorMsgs.push_back("ERROR: Hunters game must have a Nexus.");
-   if(foundTeamFlags && !isTeamFlagGame(mGameType))
-      mLevelErrorMsgs.push_back("ERROR: This game type does not use team flags.");
    if(foundFlags && !isFlagGame(mGameType))
-      mLevelErrorMsgs.push_back("ERROR: This game type does not use flags.");
+      mLevelErrorMsgs.push_back("WARNING: This game type does not use flags.");
+   else if(foundTeamFlags && !isTeamFlagGame(mGameType))
+      mLevelErrorMsgs.push_back("WARNING: This game type does not use team flags.");
 }
 
 // Check that each item has a valid team  (fixes any problems it finds)
