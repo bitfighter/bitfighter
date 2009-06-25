@@ -507,14 +507,16 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
    }
    else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
    {
-      char obj[256];
+      // Minor security issue, to make sure we don't overflow the obj buffer
+      const S32 MAXOBJLEN = 128;
+      char obj[MAXOBJLEN + 1];
 
       // Kind of hacky, but if we encounter a FlagItem in a Nexus game, we'll convert it to a NexusFlag item.  This seems to make more sense.
       // This will work so long as FlagItem and HuntersFlagItem share a common attribute list.
       if(!stricmp(argv[0], "FlagItem") && !mGameType.isNull() && mGameType->getGameType() == GameType::NexusGame)
          strcpy(obj, "HuntersFlagItem");
       else
-         strcpy(obj, argv[0]);
+         strncpy(obj, argv[0], MAXOBJLEN);
 
       TNL::Object *theObject = TNL::Object::create(obj);      // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
