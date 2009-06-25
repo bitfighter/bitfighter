@@ -184,7 +184,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, setThrust),
    method(LuaRobot, setThrustXY),
    method(LuaRobot, setThrustToPt),
-   
+
    method(LuaRobot, fire),
    method(LuaRobot, setWeapon),
    method(LuaRobot, setWeaponIndex),
@@ -346,7 +346,7 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
 // Returns nil if a workable solution can't be found
 // Logic adapted from turret aiming algorithm
 // Note that bot WILL fire at teammates if you ask it to!
-S32 LuaRobot::getFiringSolution(lua_State *L) 
+S32 LuaRobot::getFiringSolution(lua_State *L)
 {
    static const char *methodName = "Robot:getFiringSolution()";
    checkArgCount(L, 2, methodName);
@@ -354,19 +354,19 @@ S32 LuaRobot::getFiringSolution(lua_State *L)
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
    WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
- 
+
    F32 interceptAngle;
 
    if(calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle))
       return returnFloat(L, interceptAngle);
-  
+
    return returnNil(L);
 }
 
 
 // Given an object, what angle do we need to fly toward in order to collide with an object?  This
 // works a lot like getFiringSolution().
-S32 LuaRobot::getInterceptCourse(lua_State *L) 
+S32 LuaRobot::getInterceptCourse(lua_State *L)
 {
    static const char *methodName = "Robot:getInterceptCourse()";
    checkArgCount(L, 2, methodName);
@@ -374,7 +374,7 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
    GameObject *target = getItem(L, 2, type, methodName)->getGameObject();
 
    WeaponInfo weap = gWeapons[thisRobot->getSelectedWeapon()];    // Robot's active weapon
- 
+
    F32 interceptAngle;
    bool ok = calcInterceptCourse(target, thisRobot->getActualPos(), thisRobot->getRadius(), thisRobot->getTeam(), 256, 3000, false, interceptAngle);
    if(!ok)
@@ -752,7 +752,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
 
    for(S32 i = 0; i < fillVector.size(); i++)
-   { 
+   {
 
       if(fillVector[i]->getObjectTypeMask() & (ShipType | RobotType))      // Skip cloaked ships & robots!
       {
@@ -1088,11 +1088,11 @@ bool Robot::initialize(Point p)
    Lunar<SpyBug>::Register(L);
 
    // Load some libraries
-   luaopen_base(L);     
-   luaopen_math(L);     
+   luaopen_base(L);
+   luaopen_math(L);
    luaopen_table(L);    // Needed for custom iterators and "values" function included in robot_helper_functions.lua
    luaopen_debug(L);    // Needed for "strict" implementation
-   //luaopen_package(L);  // Crashes  
+   //luaopen_package(L);  // Crashes
 
    // Push a pointer to this Robot to the Lua stack,
    // then set the global name of this pointer.  This is the name that we'll use to refer
@@ -1102,13 +1102,13 @@ bool Robot::initialize(Point p)
 
    // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot as the 0th element.
    lua_createtable(L,  mArgs.size(), 0);
-   
+
    for(S32 i = 0; i < mArgs.size(); i++)
    {
       lua_pushstring(L, mArgs[i].c_str());
       lua_rawseti(L, -2, i);
    }
-   lua_setglobal(L, "args");
+   lua_setglobal(L, "arg");
 
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
@@ -1119,7 +1119,7 @@ bool Robot::initialize(Point p)
       logError("Error loading robot helper functions (%s).  Shutting robot down.", fname);
       return false;
    }
-   
+
    // Now run the loaded code
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting one back
    {
@@ -1355,7 +1355,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       mCurrentMove.time = deltaT;
 
       // Check to see if we need to respawn this robot
-      if(hasExploded)         
+      if(hasExploded)
       {
          if(respawnTimer.update(mCurrentMove.time))
          {
@@ -1398,7 +1398,7 @@ void Robot::idle(GameObject::IdleCallPath path)
          delete this;
          return;
       }
-      
+
       //}
       //catch (string e)
       //{

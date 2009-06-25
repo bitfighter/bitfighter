@@ -27,13 +27,28 @@
 -------------------------------------------------------------------------------
 -- These functions will be included with every robot automatically.
 -- Do not tinker with these unless you are sure you know what you are doing!!
+-- And even then, be careful!
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-bot = LuaRobot(Robot) -- This is a reference to our bot.
+--
+-- Create a reference to our bot
+--
+bot = LuaRobot(Robot)
+
+--
+-- Blot out some functions that seem particularly insecure
+--
+--[[  -- Not sure about these...
+debug.debug = nil   
+debug.getfenv = getfenv
+debug.getregistry = nil
+--]]
+dofile = nil
+loadfile = nil
 
 --
 -- strict.lua
@@ -55,7 +70,7 @@ mt.__newindex = function (t, n, v)
   if __STRICT and not mt.__declared[n] then
     local w = debug.getinfo(2, "S").what
     if w ~= "main" and w ~= "C" then
-      error("assign to undeclared variable '"..n.."'", 2)
+      error("Attempted assign to undeclared variable '"..n.."'.  All vars must be declared 'local' or 'global'.", 2)
     end
     mt.__declared[n] = true
   end
@@ -64,7 +79,7 @@ end
 
 mt.__index = function (t, n)
   if not mt.__declared[n] and debug.getinfo(2, "S").what ~= "C" then
-    error("variable '"..n.."' is not declared", 2)
+    error("Variable '"..n.."' cannot be used if it is not first declared.", 2)
   end
   return rawget(t, n)
 end
@@ -108,6 +123,7 @@ end
 --
 -- Convenience function, use in place of ipairs, from PiL book sec 19.3
 --     e.g.  for item in values(items) do...
+-- Hopefully, this will make life easier for beginners.
 --
 function values(t)
     local i = 0
