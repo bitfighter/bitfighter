@@ -34,6 +34,7 @@
 #include "huntersGame.h"   // For getItem()
 #include "soccerGame.h"    // For getItem()
 #include "projectile.h"    // For getItem()
+#include "teleporter.h"
 #include "engineeredObjects.h"    // For getItem()
 
 #include <string>
@@ -244,10 +245,8 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
 
       case RobotType:
          return Lunar<LuaShip>::check(L, index);
-
       case TeleportType:
-
-
+         return Lunar<Teleporter>::check(L, index);
       case AsteroidType:
          return Lunar<Asteroid>::check(L, index);
       case RepairItemType:

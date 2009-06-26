@@ -236,4 +236,27 @@ void Teleporter::render()
    renderTeleporter(mPos, 0, true, mTime, r, TeleporterRadius, 1.0, mDest);
 }
 
+// Lua methods
+
+const char Teleporter::className[] = "Teleporter";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+Teleporter::Teleporter(lua_State *L)
+{
+   // Do nothing
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<Teleporter>::RegType Teleporter::methods[] =
+{
+   // Standard gameItem methods
+   method(Teleporter, getClassID),
+   method(Teleporter, getLoc),
+   method(Teleporter, getRad),
+   method(Teleporter, getVel),
+
+   {0,0}    // End method list
+};
+
 };

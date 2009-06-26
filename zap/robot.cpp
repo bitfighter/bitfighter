@@ -44,6 +44,7 @@
 #include "soccerGame.h"          // For lua object defs
 #include "huntersGame.h"         // For lua object defs
 #include "engineeredObjects.h"   // For lua object defs
+#include "teleporter.h"          // ""
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
@@ -1077,6 +1078,8 @@ bool Robot::initialize(Point p)
    Lunar<TestItem>::Register(L);
    Lunar<Asteroid>::Register(L);
    Lunar<Turret>::Register(L);
+   Lunar<Teleporter>::Register(L);
+
    Lunar<ForceFieldProjector>::Register(L);
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);

@@ -25,13 +25,15 @@
 
 #include "gameConnection.h"
 #include "gameObject.h"
+#include "projectile.h"   // For LuaItem
 #include "point.h"    
+
 #include "../tnl/tnlNetObject.h"
 
 namespace Zap
 {
 
-class Teleporter : public GameObject
+class Teleporter : public GameObject, public LuaItem
 {
 private:
    S32 mLastDest;    // Destination of last ship through
@@ -69,6 +71,20 @@ public:
    Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
 
    TNL_DECLARE_CLASS(Teleporter);
+
+   ///// Lua Interface
+
+   Teleporter(lua_State *L);             //  Lua constructor
+   static const char className[];
+   static Lunar<Teleporter>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, TeleportType); }   // Object's class    
+   void push(lua_State *L) { Lunar<Teleporter>::push(L, this); }         // Push item onto stack
+
+   S32 getLoc(lua_State *L) { return returnPoint(L, mPos); }                     // Center of item (returns point)
+   S32 getRad(lua_State *L) { return returnInt(L, TeleporterTriggerRadius); }    // Radius of item (returns number)
+   S32 getVel(lua_State *L) { return returnPoint(L, Point(0,0)); }               // Speed of item (returns point)
+   GameObject *getGameObject() { return this; }                                  // Return the underlying GameObject
 };
 
 };

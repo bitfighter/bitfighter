@@ -37,9 +37,11 @@ namespace Zap
 
 // RDW
 // These constants need physical definitions.
-const U16 SpeedZone::minSpeed;
-const U16 SpeedZone::maxSpeed;
-const U16 SpeedZone::defaultSpeed;
+// They cause link errors with VC++... perhaps put them in a ifdef construct?
+//const U16 SpeedZone::minSpeed;
+//const U16 SpeedZone::maxSpeed;
+//const U16 SpeedZone::defaultSpeed;
+
 
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 
@@ -116,7 +118,7 @@ bool SpeedZone::processArguments(S32 argc, const char **argv)
       // RDW
       // The min template requires both arguments to be same type.
       // Casting to U16 to fix this.
-      mSpeed = max(minSpeed, min(maxSpeed, static_cast<U16>(atoi(argv[4]))));
+      mSpeed = max(minSpeed, min(maxSpeed, (U16)(atoi(argv[4]))));
 
    if(argc >= 6)
       mSnapLocation = true;   

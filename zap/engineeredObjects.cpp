@@ -508,6 +508,7 @@ void ForceFieldProjector::render()
    renderForceFieldProjector(mAnchorPoint, mAnchorNormal, getGame()->getGameType()->getTeamColor(getTeam()), isEnabled());
 }
 
+// Lua methods
 
 const char ForceFieldProjector::className[] = "ForceFieldProjector";      // Class name as it appears to Lua scripts
 

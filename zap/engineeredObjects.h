@@ -210,13 +210,11 @@ public:
    ///// Lua Interface
 
    Turret(lua_State *L);             //  Lua constructor
-
    static const char className[];
-
    static Lunar<Turret>::RegType methods[];
 
    S32 getClassID(lua_State *L) { return returnInt(L, TurretType); }
-   void push(lua_State *L) {  Lunar<Turret>::push(L, this); }
+   void push(lua_State *L) { Lunar<Turret>::push(L, this); }
 
    // LuaItem methods
    S32 getRad(lua_State *L) { return returnInt(L, TurretAimOffset); }

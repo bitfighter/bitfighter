@@ -47,6 +47,11 @@ public:
    static Lunar<LuaProjectile>::RegType methods[];
    static const char *getClassName() { return "LuaProjectile"; }
 
+   virtual S32 getWeapon(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; };    // Return info about the weapon/projectile
+
+   //============================
+   // LuaItem interface
+
    virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class   
 
    S32 getLoc(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Center of item (returns point)
@@ -54,7 +59,7 @@ public:
    S32 getVel(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Speed of item (returns point)
 
    virtual GameObject *getGameObject() { TNLAssert(false, "Unimplemented method!"); return NULL; }  // Return the underlying GameObject
-   virtual S32 getWeapon(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; };    // Return info about the weapon/projectile
+   
    void push(lua_State *L) {  TNLAssert(false, "Unimplemented method!"); }
 };
 
