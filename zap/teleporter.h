@@ -57,7 +57,8 @@ public:
       TeleportInRadius = 120,
    };
 
-   Teleporter();
+   Teleporter();     // Constructor
+   bool processArguments(S32 argc, const char **argv);
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
@@ -67,7 +68,6 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   bool processArguments(S32 argc, const char **argv);
    Teleporter findTeleporterAt(Point pos);      // Find a teleporter at pos
 
    TNL_DECLARE_CLASS(Teleporter);

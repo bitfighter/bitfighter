@@ -393,7 +393,7 @@ bool HuntersFlagItem::processArguments(S32 argc, const char **argv)
    if(argc < 2)
       return false;
 
-   // If this is an FlagItem that was "recast" as a HuntersFlagItem at load time, it will have 3 args.  The first, team, 
+   // If this is a regular FlagItem that was "recast" as a HuntersFlagItem at load time, it will have 3 args.  The first, team, 
    // does not apply to this object, so we'll ignore it.  If there's only 2 args, those will be the coords.
    S32 offset = 0;
    if(argc >= 3)

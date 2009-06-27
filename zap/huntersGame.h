@@ -56,17 +56,16 @@ private:
    U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 88; }
 
 public:
-   bool mNexusIsOpen;      // Is the nexus open?
-
-   HuntersGameType();
+   HuntersGameType();      // Constructor
+   bool processArguments(S32 argc, const char **argv);
    
+   bool mNexusIsOpen;      // Is the nexus open?
    bool isTeamGame() { return mTeams.size() > 1; }
    bool isFlagGame() { return true; }       // Well, technically not, but we'll morph flags to our own uses as we load the level
    //bool isTeamFlagGame() { return true; }   // Ditto... team info will be ignored... no need to show warning in editor
 
    bool isSpawnWithLoadoutGame() { return true; }
 
-   bool processArguments(S32 argc, const char **argv);
    Vector<GameType::ParameterDescription> describeArguments();
 
    void addNexus(HuntersNexusObject *theObject);
@@ -125,7 +124,6 @@ protected:
 
 public:
    HuntersFlagItem(Point pos = Point());     // Constructor
-
    bool processArguments(S32 argc, const char **argv);
 
    void renderItem(Point pos);
@@ -166,10 +164,10 @@ private:
    void computeExtent();
   
 public:
-   HuntersNexusObject();
+   HuntersNexusObject();      // Constructor
+   bool processArguments(S32 argc, const char **argv);
 
    void onAddedToGame(Game *theGame);
-   bool processArguments(S32 argc, const char **argv);
    void idle(GameObject::IdleCallPath path);
 
    void render();

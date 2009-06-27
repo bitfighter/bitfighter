@@ -1113,6 +1113,8 @@ bool Robot::initialize(Point p)
    }
    lua_setglobal(L, "arg");
 
+   //lua_settop(L, 0);
+
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
    static const char *fname = "robot_helper_functions.lua";
@@ -1124,7 +1126,7 @@ bool Robot::initialize(Point p)
    }
 
    // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting one back
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
       logError("Robot error during initializing helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
@@ -1138,7 +1140,7 @@ bool Robot::initialize(Point p)
    }
 
    // Run the bot
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting one back
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
       logError("Robot error during initialization: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
@@ -1146,10 +1148,11 @@ bool Robot::initialize(Point p)
 
    // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
    lua_getglobal(L, "getName");
-   if (!lua_isfunction(L, 0) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting one back
+
+   if (!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting one back
    {
       mPlayerName = "Nancy";
-      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), mPlayerName);
+      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), mPlayerName.getString());
    }
    else
    {
