@@ -1185,6 +1185,18 @@ void GameUserInterface::processCommand(Vector<string> words)
          gc->c2sRequestLevelChange(-1, true);
    }
 
+   else if(words[0] == "restart")      // Restart current level
+   {
+      if(!gc->isLevelChanger())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
+         return;
+      }
+
+      //if(words.size() < 2 || words[1] == "")
+         gc->c2sRequestLevelChange(-2, false);
+   }
+
    else if(words[0] == "kick")      // Kick a player
    {
       if(!gc->isAdmin())
@@ -1270,6 +1282,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/mvol");
    mChatCmds.push_back("/next");
    mChatCmds.push_back("/prev");
+   mChatCmds.push_back("/restart");
    mChatCmds.push_back("/svol");
    mChatCmds.push_back("/servvol");
    mChatCmds.push_back("/vvol");

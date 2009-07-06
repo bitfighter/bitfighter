@@ -475,16 +475,24 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 {
    if(mIsLevelChanger)
    {
+      bool restart = false;
+
       if(isRelative)
          newLevelIndex = (gServerGame->getCurrentLevelIndex() + newLevelIndex ) % gServerGame->getLevelCount();
-
+      else if(newLevelIndex == -2)
+      {
+         restart = true;
+         newLevelIndex = gServerGame->getCurrentLevelIndex();
+      }
+         
       while(newLevelIndex < 0)
          newLevelIndex += gServerGame->getLevelCount();
 
-      static StringTableEntry msg("%e0 changed the level to %e1.");
+      static StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
       Vector<StringTableEntry> e;
       e.push_back(getClientName());
-      e.push_back(gServerGame->getLevelNameFromIndex(newLevelIndex));
+      if(!restart)
+         e.push_back(gServerGame->getLevelNameFromIndex(newLevelIndex));
 
       gServerGame->cycleLevel(newLevelIndex);
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())

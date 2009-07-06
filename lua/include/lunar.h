@@ -1,5 +1,5 @@
 // From http://lua-users.org/wiki/CppBindingWithLunar
-
+// More explanation at http://www.lua.org/notes/ltn005.html
 
 
 #ifndef _LUNAR_H_
@@ -21,7 +21,7 @@ public:
     int methods = lua_gettop(L);
 
     luaL_newmetatable(L, T::className);
-    int metatable = lua_gettop(L);
+    int metatable = lua_gettop(L);     // Index of metatable
 
     // store method table in globals so that
     // scripts can add functions written in Lua.

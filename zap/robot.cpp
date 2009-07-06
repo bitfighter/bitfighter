@@ -175,15 +175,15 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getCurrentZone),
 
    method(LuaRobot, setAngle),
-   method(LuaRobot, setAngleXY),
-   method(LuaRobot, getAngleXY),
-   method(LuaRobot, hasLosXY),
+   method(LuaRobot, setAnglePt),
+   method(LuaRobot, getAnglePt),
+   method(LuaRobot, hasLosPt),
 
    method(LuaRobot, hasFlag),
    method(LuaRobot, getWaypoint),
 
    method(LuaRobot, setThrust),
-   method(LuaRobot, setThrustXY),
+   method(LuaRobot, setThrustPt),
    method(LuaRobot, setThrustToPt),
 
    method(LuaRobot, fire),
@@ -242,27 +242,27 @@ S32 LuaRobot::setAngle(lua_State *L)
 
 
 // Turn towards point XY
-S32 LuaRobot::setAngleXY(lua_State *L)
+S32 LuaRobot::setAnglePt(lua_State *L)
 {
-   static const char *methodName = "Robot:setAngleXY()";
+   static const char *methodName = "Robot:setAnglePt()";
    checkArgCount(L, 1, methodName);
    Point point = getPoint(L, 1, methodName);
-
+   
    Move move = thisRobot->getCurrentMove();
-   move.angle = thisRobot->getAngleXY(point);
+   move.angle = thisRobot->getAnglePt(point);
    thisRobot->setCurrentMove(move);
 
    return 0;
 }
 
-// Get angle toward point XY
-S32 LuaRobot::getAngleXY(lua_State *L)
+// Get angle toward point
+S32 LuaRobot::getAnglePt(lua_State *L)
 {
-   static const char *methodName = "Robot:getAngleXY()";
+   static const char *methodName = "Robot:getAnglePt()";
    checkArgCount(L, 1, methodName);
    Point point = getPoint(L, 1, methodName);
 
-   lua_pushnumber(L, thisRobot->getAngleXY(point));
+   lua_pushnumber(L, thisRobot->getAnglePt(point));
    return 1;
 }
 
@@ -386,13 +386,14 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
 
 
 // Thrust at velocity v toward point x,y
-S32 LuaRobot::setThrustXY(lua_State *L)
+S32 LuaRobot::setThrustPt(lua_State *L)
 {
-   static const char *methodName = "Robot:setThrustXY()";
+   static const char *methodName = "Robot:setThrustPt()";
    checkArgCount(L, 2, methodName);
    F32 vel = getFloat(L, 1, methodName);
    Point point = getPoint(L, 1, methodName);
-   F32 ang = thisRobot->getAngleXY(point) - 0 * FloatHalfPi;
+
+   F32 ang = thisRobot->getAnglePt(point) - 0 * FloatHalfPi;
 
    Move move = thisRobot->getCurrentMove();
 
@@ -413,7 +414,8 @@ S32 LuaRobot::setThrustToPt(lua_State *L)
    static const char *methodName = "Robot:setThrustToPt()";
    checkArgCount(L, 1, methodName);
    Point point = getPoint(L, 1, methodName);
-   F32 ang = thisRobot->getAngleXY(point) - 0 * FloatHalfPi;
+
+   F32 ang = thisRobot->getAnglePt(point) - 0 * FloatHalfPi;
 
    Move move = thisRobot->getCurrentMove();
 
@@ -508,10 +510,10 @@ S32 LuaRobot::fire(lua_State *L)
 }
 
 
-// Can robot see point XY?
-S32 LuaRobot::hasLosXY(lua_State *L)
+// Can robot see point P?
+S32 LuaRobot::hasLosPt(lua_State *L)
 {
-   static const char *methodName = "Robot:hasLosXY()";
+   static const char *methodName = "Robot:hasLosPt()";
    checkArgCount(L, 1, methodName);
    Point point = getPoint(L, 1, methodName);
 
@@ -976,7 +978,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 U32 Robot::mRobotCount = 0;
 
 // Constructor
-Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m)
+Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m, true)
 {
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;
 
@@ -1250,7 +1252,7 @@ void Robot::setCurrentZone(S32 zone)
 }
 
 
-F32 Robot::getAngleXY(Point point)
+F32 Robot::getAnglePt(Point point)
 {
    return getActualPos().angleTo(point);
 }

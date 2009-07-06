@@ -199,7 +199,7 @@ private:
    Vector<S32> mMinRecPlayers;            // Recommended min number of players for this level
    Vector<S32> mMaxRecPlayers;            // Recommended max number of players for this level
 
-   U32 mCurrentLevelIndex;
+   U32 mCurrentLevelIndex;                // Index of level currently being played
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
@@ -214,7 +214,7 @@ public:
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
-   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);
+   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();

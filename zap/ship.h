@@ -39,18 +39,30 @@
 namespace Zap
 {
 
+static const S32 ShipModuleCount = 2;                // Modules a ship can carry
+static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
+static const U32 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
+
+//////////////////////////////////////////////
+
 class LuaShip : public LuaItem
 {
 
 private:
-   Ship *thisShip;             // Pointer to an actual C++ ship object
+   Ship *thisShip;    // Reference to actual C++ ship object
 
 public:
-   LuaShip(lua_State *L);            // Lua constructor
-   LuaShip(Ship *ship);              // C++ constructor
-   //~LuaShip();                     // Destructor
-   LuaShip() { /* do nothing */ };   // C++ default constructor ==> not used
+   
+   LuaShip(Ship *ship);                        // C++ constructor
+   LuaShip() { /* do nothing */ };             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
+   LuaShip(lua_State *L) { /* do nothing */ }; // Lua constructor ==> not used.  Class only instantiated from C++.
 
+   ~LuaShip(){
+       logprintf("Killing luaShip %d", mId);  
+   };                      // Destructor
+
+   static S32 id;
+   S32 mId;
 
    static const char className[];
 
@@ -74,13 +86,11 @@ public:
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 
    virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
+   bool isValid(lua_State *L);                       // Returns whether or not ship is still alive
+   void shipDied() { thisShip = NULL; }
 };
 
 //////////////////////////////////////////////
-
-static const S32 ShipModuleCount = 2;                // Modules a ship can carry
-static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
-static const U32 DefaultLoadout[] = { ModuleBoost, ModuleShield, WeaponPhaser, WeaponMine, WeaponBurst };
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -90,6 +100,7 @@ private:
    bool isBusy;
    LuaShip mLuaShip;
    void push(lua_State *L) { Lunar<LuaShip>::push(L, &mLuaShip); }
+   bool mIsRobot;
 
 protected:
    StringTableEntry mPlayerName;
@@ -180,7 +191,7 @@ public:
 
    virtual void render(S32 layerIndex);
 
-   Ship(StringTableEntry playerName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
+   Ship(StringTableEntry playerName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      // Constructor
    Ship::~Ship();           // Destructor
 
    F32 getHealth() { return mHealth; }
@@ -253,14 +264,13 @@ public:
 
    virtual bool processArguments(S32 argc, const char **argv);
 
-   virtual bool isRobot() { return false; }
+   bool isRobot() { return mIsRobot; }
 
    GameObject *isInZone(GameObjectType zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on an item
 
    TNL_DECLARE_CLASS(Ship);
 };
-
 
 
 };

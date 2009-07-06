@@ -233,6 +233,7 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
    mHostName = gHostName.c_str();
    mHostDescr = gHostDescr.c_str();
    mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
+   mCurrentLevelIndex = 0;
 
    if(testMode)
       mInfoFlags = 1;
@@ -395,8 +396,6 @@ extern void testBotNavMeshZoneConnections();
 
 
 // Pass -1 to go to next level, otherwise pass an absolute level number
-// Pass -2 to replay current level
-
 void ServerGame::cycleLevel(S32 nextLevel)
 {
    // Delete any objects on the delete list
@@ -415,8 +414,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
       mCurrentLevelIndex = nextLevel;
    else if(nextLevel == -1)    // Next level
       mCurrentLevelIndex++;
-   //else if(nextLevel == -2)  // Replay level, do nothing
-     
+   //else if(nextLevel == -2)    // Replay level, do nothing
+   //   mCurrentLevelIndex += 0;
 
    if(S32(mCurrentLevelIndex) >= mLevelList.size())
       mCurrentLevelIndex = 0;

@@ -56,6 +56,7 @@
 //<li>Added spaces to level files written by editor to make them easier to read</li>
 //<li>Better handling of items with invalid parameter lines in .level files</li>
 //<li>Enter commands using "/" key, or by starting a global or team chat message with "/"</li>
+//<li>Added /restart command to restart current level</li>
 //<li>Added instruction page to explain available chat commands</li>
 //<li>Improved menu navigation instructions for joystick users</li>
 //<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
@@ -136,6 +137,7 @@
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
 //<li>Old messages now properly cleared out when game is started</li>
 //<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
+//<li>Added /restart command to restart current level</li>
 
 // Mac Test:
 // New screen capture code
@@ -1489,7 +1491,7 @@ void buildLevelList()
    if(gCmdLineSettings.suppliedLevels)
    {
       if(gLevelList.size() > 0)     // If there's something here, they came from the cmd line
-      return;
+         return;
    }
 
    gLevelList.clear();
@@ -1578,13 +1580,14 @@ int main(int argc, char **argv)
    gZapJournal.readCmdLineParams(theArgv);   // Process normal command line params, read INI, and start up
    gZapJournal.processNextJournalEntry();    // If we're replaying a journal, this will cause the cmd line params to be read from the saved journal
 
+   gHostingModePhase = NotHosting;
+
    loadSettingsFromINI();                    // Read INI
    processStartupParams();                   // And process command lines and INI settings in a unified way
    buildLevelList();
 
    gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
 
-   gHostingModePhase = NotHosting;
 
    SFXObject::init();
 

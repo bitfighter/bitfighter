@@ -103,7 +103,7 @@ public:
    S32 flightPlanTo;                      // Zone our flightplan was calculated to
 
    // Some informational functions
-   F32 getAngleXY(Point point);
+   F32 getAnglePt(Point point);
 
    // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
@@ -160,9 +160,9 @@ public:
 
 
    S32 setAngle(lua_State *L);
-   S32 setAngleXY(lua_State *L);
-   S32 getAngleXY(lua_State *L);
-   S32 hasLosXY(lua_State *L);
+   S32 setAnglePt(lua_State *L);
+   S32 getAnglePt(lua_State *L);
+   S32 hasLosPt(lua_State *L);
 
    S32 hasFlag(lua_State *L);
 
@@ -175,7 +175,7 @@ public:
 
    // Ship control
    S32 setThrust(lua_State *L);
-   S32 setThrustXY(lua_State *L);
+   S32 setThrustPt(lua_State *L);
    S32 setThrustToPt(lua_State *L);
 
    S32 getFiringSolution(lua_State *L);

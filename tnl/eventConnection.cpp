@@ -54,7 +54,8 @@ EventConnection::EventConnection()
 
 EventConnection::~EventConnection()
 {
-   
+   clearAllPacketNotifies(); ///BUGFIX --> http://www.garagegames.com/community/forums/viewthread/80511
+
    while(mNotifyEventList)
    {
       EventNote *temp = mNotifyEventList;

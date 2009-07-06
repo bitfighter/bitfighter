@@ -552,7 +552,7 @@ struct ControlStringsEditor
    const char *descr;
 };
 
-
+// Note that the menu is now full.  Need to add new page or go to 2 cols if we need a new option.
 static ControlStringsEditor commands[] = {
    { "/admin <password>", "Request admin permissions" },
    { "/levpass <password>", "Request level change permissions" },
@@ -560,6 +560,7 @@ static ControlStringsEditor commands[] = {
    { "/add <time in minutes>", "Add time to the current game" },
    { "/next", "Start next level" },
    { "/prev", "Replay previous level" },
+   { "/restart", "Restart current level" },
    { "-", NULL },       // Horiz. line
    { "/kick <player name>", "Kick a player from the game" },
    { "-", NULL },       // Horiz. line

@@ -53,9 +53,13 @@ static Vector<GameObject *> fillVector;
 //------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
+#pragma warning(disable:4355)
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
-Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p, CollisionRadius)
+// Note also that using "this" in the initialization list here is totally legit, as all we're doing is storing a pointer to 
+// the object, not manipulating or casting it.  Doing it this way will prevent an unnecessary instantiation of a default LuaShip
+// object and it's associated destructor.
+Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mLuaShip(LuaShip(this))
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
 
@@ -74,6 +78,7 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
    updateExtent();      // Set initial extent
 
    mPlayerName = playerName;     // This will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
+   mIsRobot = isRobot;
 
    for(S32 i=0; i<TrailCount; i++)         // Don't draw any vehicle trails
       mTrail[i].reset();
@@ -94,14 +99,13 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m) : MoveObject(p
 
    mCooldown = false;
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
-
-   // Create Lua representation of this ship
-   mLuaShip = LuaShip(this);
 }
 
-
-Ship::~Ship()         // Destructor
+// Destructor
+Ship::~Ship()         
 {
+   int x = 1;
+   mLuaShip.shipDied();    // Set LuaShip's pointer back to this to NULL
    // Do nothing
 }
 
@@ -1468,7 +1472,7 @@ if(isRobot())
    }
 }
 
-
+S32 LuaShip::id = 99;
 
 const char LuaShip::className[] = "Ship";      // Class name as it appears to Lua scripts
 
@@ -1488,16 +1492,10 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 
 
 // C++ constructor -- automatically constructed when a ship is created
-LuaShip::LuaShip(Ship *ship)
+// This is the only constructor that's used.
+LuaShip::LuaShip(Ship *ship): thisShip(ship)
 {
-   thisShip = ship;
-}
-
-
-// Lua constructor
-LuaShip::LuaShip(lua_State *L)
-{
-   // Don't instantiate from Lua!!
+   // Do nothing
 }
 
 
@@ -1518,11 +1516,20 @@ S32 LuaShip::isModActive(lua_State *L) {
    return returnBool(L, getObj()->isModuleActive(module)); 
 }
 
-
-
 S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
 S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSelectedWeapon()); }    // Get WeaponIndex for current weapon
+bool LuaShip::isValid(lua_State *L) { return returnBool(L, thisShip != NULL); }
 
-GameObject *LuaShip::getGameObject() { return getObj(); }
+
+GameObject *LuaShip::getGameObject() 
+{ 
+   if(thisShip == NULL)    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
+   {
+      logprintf("Bad programmer!");
+      return NULL;      // Not right
+   }
+   else
+      return getObj(); 
+}
 
 };

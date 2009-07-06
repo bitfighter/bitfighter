@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory="$(TargetDir)"
-				CommandArguments=" -levels asteroid"
+				CommandArguments="-dedicated  -levels asteroid"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
