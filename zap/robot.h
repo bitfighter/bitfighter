@@ -81,6 +81,7 @@ public:
    ~Robot();          // Destructor
 
    bool initialize(Point p);
+   void cleanupAndTerminate(lua_State *L);
    void kill(DamageInfo *theInfo);
    void kill();
 

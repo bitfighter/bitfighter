@@ -59,7 +59,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Note also that using "this" in the initialization list here is totally legit, as all we're doing is storing a pointer to 
 // the object, not manipulating or casting it.  Doing it this way will prevent an unnecessary instantiation of a default LuaShip
 // object and it's associated destructor.
-Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mLuaShip(LuaShip(this))
+Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
 
@@ -104,8 +104,6 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
 // Destructor
 Ship::~Ship()         
 {
-   int x = 1;
-   mLuaShip.shipDied();    // Set LuaShip's pointer back to this to NULL
    // Do nothing
 }
 
@@ -1484,6 +1482,8 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getTeamIndx),
    method(LuaShip, isModActive),
 
+   method(LuaShip, isValid),
+
    method(LuaShip, getAngle),
    method(LuaShip, getActiveWeapon),
 
@@ -1495,6 +1495,12 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 // This is the only constructor that's used.
 LuaShip::LuaShip(Ship *ship): thisShip(ship)
 {
+   thisShip = ship;
+   id++;
+   mId = id;
+   logprintf("Creating lauaship %d", mId);
+
+
    // Do nothing
 }
 
@@ -1502,11 +1508,11 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
 // Note: In methods that will be inherited by LuaRobot, which will be all of these, be sure to use getObj() instead of thisShip.
 // Otherwise, naughty crashy behavior will occur.
 
-S32 LuaShip::getRad(lua_State *L) { return returnFloat(L, getObj()->getRadius()); }
-S32 LuaShip::getLoc(lua_State *L) { return returnPoint(L, getObj()->getActualPos()); }
-S32 LuaShip::getVel(lua_State *L) { return returnPoint(L, getObj()->getActualVel()); }
+S32 LuaShip::getRad(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getRadius()) : returnFloat(L, 0); }
+S32 LuaShip::getLoc(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualPos()) : returnPoint(L, Point(0,0)); }
+S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualVel()) : returnPoint(L, Point(0,0)); }
 
-S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, getObj()->getTeam()); }
+S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam()); }
 
 
 S32 LuaShip::isModActive(lua_State *L) { 
@@ -1518,12 +1524,12 @@ S32 LuaShip::isModActive(lua_State *L) {
 
 S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
 S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSelectedWeapon()); }    // Get WeaponIndex for current weapon
-bool LuaShip::isValid(lua_State *L) { return returnBool(L, thisShip != NULL); }
+S32 LuaShip::isValid(lua_State *L) { return returnBool(L, thisShip.isValid()); }
 
 
 GameObject *LuaShip::getGameObject() 
 { 
-   if(thisShip == NULL)    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
+   if(thisShip.isNull())    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
    {
       logprintf("Bad programmer!");
       return NULL;      // Not right

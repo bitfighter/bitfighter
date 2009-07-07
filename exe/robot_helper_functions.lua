@@ -88,6 +88,7 @@ function global(...)
    for _, v in ipairs{...} do mt.__declared[v] = true end
 end
 
+
 --
 -- Default robot name, can and should be overwritten by user robots, but we need to have something...
 --

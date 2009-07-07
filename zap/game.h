@@ -82,8 +82,6 @@ using namespace std;
 namespace Zap
 {
 
-
-
 class MasterServerConnection;
 class GameNetInterface;
 class GameType;
@@ -141,8 +139,7 @@ public:
 
 
    Game(const Address &theBindAddress);
-   virtual ~Game() {}
-
+   virtual ~Game() { /* do nothing */ };
    Rect computeWorldObjectExtents();
    Point computePlayerVisArea(Ship *ship);
 
@@ -205,6 +202,9 @@ private:
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
 public:
+   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
+   ~ServerGame();                                                                                     // Destructor
+
    U32 getPlayerCount() { return mPlayerCount; }
    U32 getMaxPlayers() { return mMaxPlayers; }
    const char *getHostName() { return mHostName; }
@@ -214,7 +214,6 @@ public:
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
-   ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();

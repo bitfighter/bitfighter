@@ -79,6 +79,7 @@ Game::Game(const Address &theBindAddress)
    mNetInterface = new GameNetInterface(theBindAddress, this);
 }
 
+
 void Game::setScopeAlwaysObject(GameObject *theObject)
 {
    mScopeAlwaysList.push_back(theObject);
@@ -242,6 +243,18 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
 
    mNetInterface->setAllowsConnections(true);
    mMasterUpdateTimer.reset(UpdateServerStatusTime);
+}
+
+
+// Destructor
+ServerGame::~ServerGame() 
+{  
+   // Delete any objects on the delete list
+   processDeleteList(0xFFFFFFFF);
+
+   // Delete any game objects that may exist
+   while(mGameObjects.size())
+      delete mGameObjects[0];
 }
 
 

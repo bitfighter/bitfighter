@@ -49,7 +49,7 @@ class LuaShip : public LuaItem
 {
 
 private:
-   Ship *thisShip;    // Reference to actual C++ ship object
+   SafePtr<Ship> thisShip;    // Reference to actual C++ ship object
 
 public:
    
@@ -81,13 +81,12 @@ public:
    GameObject *getGameObject();
    static const char *getClassName() { return "LuaShip"; }
 
-   void push(lua_State *L) {  Lunar<LuaShip>::push(L, this); }      // Push item onto stack
+   void push(lua_State *L) {  Lunar<LuaShip>::push(L, this, true); }      // Push item onto stack
 
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 
    virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
-   bool isValid(lua_State *L);                       // Returns whether or not ship is still alive
-   void shipDied() { thisShip = NULL; }
+   S32 isValid(lua_State *L);                       // Returns whether or not ship is still alive
 };
 
 //////////////////////////////////////////////
@@ -98,8 +97,7 @@ class Ship : public MoveObject
 private:
    typedef MoveObject Parent;
    bool isBusy;
-   LuaShip mLuaShip;
-   void push(lua_State *L) { Lunar<LuaShip>::push(L, &mLuaShip); }
+   void push(lua_State *L) { Lunar<LuaShip>::push(L, new LuaShip(this), true); }      // Lua will delete this object when it's done... I hope.
    bool mIsRobot;
 
 protected:

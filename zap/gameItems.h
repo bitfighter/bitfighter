@@ -138,6 +138,9 @@ class TestItem : public Item
 
 public:
    TestItem();     // Constructor
+   ~TestItem() { 
+      int x = 0;
+   };    // Destructor
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
@@ -155,7 +158,6 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
    void push(lua_State *L) {  Lunar<TestItem>::push(L, this); }
-
 };
 
 

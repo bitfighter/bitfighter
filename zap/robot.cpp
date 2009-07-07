@@ -1006,10 +1006,20 @@ Robot::~Robot()
       mRobotCount--;
 
    // Close down our Lua interpreter
-   if(L)
-      lua_close(L);
+    if(L)
+      cleanupAndTerminate(L);
 
    logprintf("Robot terminated [%s]", mFilename.c_str());
+}
+
+
+void Robot::cleanupAndTerminate(lua_State *L)
+{
+   logprintf("Cleaning up...");
+
+   // Force gc to clear out any lingering references
+   lua_gc(L, LUA_GCCOLLECT, 0);  // Fallback
+   lua_close(L);
 }
 
 
@@ -1055,7 +1065,7 @@ bool Robot::initialize(Point p)
    setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client
 
    if(L)
-      lua_close(L);
+      cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
 
