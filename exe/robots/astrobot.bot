@@ -1,0 +1,91 @@
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--
+-- OrbitBot, a simple robot that finds the nearest TestItem and orbits it
+-- Note that this relies on line-of-sight navigation, so only good for open levels
+--
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- This is called by the robot's idle routine each tick.  
+-- This function must be present for the robot to work!
+
+function getMove()
+
+    loc = bot:getLoc()
+	items = bot:findGlobalItems( TestItemType ) 	-- Find an TestItem
+
+	minDist = 999999
+	closestItem = nil
+    found = false
+
+    for indx, item in ipairs( items ) do      -- Iterate over our list
+        -- Use distSquared because it is less computationally expensive
+        -- and works great for comparing distances
+        d = loc:distSquared( item:getLoc() )  -- Dist btwn robot and TestItem
+ 
+        if( d < minDist ) then                -- Is it the closest yet?
+           closestItem = item
+           minDist = d
+        end
+    end
+ 
+	
+	
+	botLoc = bot:getLoc()
+	itemLoc = closestItem:getLoc()
+	
+	dist = botLoc:distanceTo( itemLoc )
+	orbitRadius = 300
+	
+	-- Here we use the getTime() function to make the motion look smooth.
+	-- If we just advanced orbitAng by a fixed amount each frame, it would
+	-- appear jerky, as each frame is a slightly different length.
+	
+	-- .0015 determined experimentally
+	
+	orbitAng = orbitAng + .0015 * bot:getTime()  
+	
+	if( dist <= orbitRadius * 1.1 ) then 
+		dest = itemLoc
+		dest:setxy( itemLoc:x() + orbitRadius * math.cos (orbitAng),
+		            itemLoc:y() + orbitRadius * math.sin (orbitAng)  )
+	else
+		dest = itemLoc
+		orbitAng = botLoc:angleTo( dest )
+	end
+	
+	bot:setThrustToPt( dest ) 		-- travel towards calculated point
+	
+	bot:setAngle( botLoc:angleTo( itemLoc) )
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- This function is called once and should return the robot's name
+
+function getName()
+    return( "OrbitBot")
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Setup code here: this is run once when the robot is initialized, and
+-- any variables set here will persist throughout the robot's life.  These
+-- variables can be accessed from various functions defined in this file.
+-------------------------------------------------------------------------------
+-- Global variables
+
+
+-- Other initialization code
+bot:logprint( "Hello, I'm "..getName() )        -- Print a message to the game log
+orbitAng = 0

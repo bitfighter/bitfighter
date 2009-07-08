@@ -1,0 +1,79 @@
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--
+-- OrbitBot, a simple robot that finds the nearest TestItem and orbits it
+-- Note that this relies on line-of-sight navigation, so only good for open levels
+--
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- This is called by the robot's idle routine each tick.
+-- This function must be present for the robot to work!
+
+function getMove()
+
+    local loc = bot:getLoc()
+    local items = bot:findItems(BulletType, MineType, SpyBugType)        -- Find a projectile
+
+    local minDist = 999999
+    local closestItem = nil
+
+    for indx, item in ipairs(items) do      -- Iterate over our list
+        -- Use distSquared because it is less computationally expensive
+        -- and works great for comparing distances
+        d = loc:distSquared(item:getLoc())  -- Dist btwn robot and TestItem
+
+        if(d < minDist) then                -- Is it the closest yet?
+           closestItem = item
+           minDist = d
+        end
+    end
+
+
+    if(closestItem == nil) then   -- Didn't find any bullets
+        return
+    end
+
+    local angle = getFiringSolution(closestItem)
+
+    if(angle == nil) then
+        return
+    end
+
+    bot:setAngle(angle)
+    bot:fire()
+
+    local weap = closestItem:getWeapon()
+    local weapInfo = WeaponInfo(weap)
+    logprint("Targeting " .. weapInfo:getName())
+
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- This function is called once and should return the robot's name
+
+function getName()
+    return("AegisBot")
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Setup code here: this is run once when the robot is initialized, and
+-- any variables set here will persist throughout the robot's life.  These
+-- variables can be accessed from various functions defined in this file.
+-------------------------------------------------------------------------------
+-- Global variables
+
+
+-- Other initialization code
+bot:logprint("Hello, I'm "..getName())        -- Print a message to the game log
