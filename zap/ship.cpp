@@ -56,9 +56,6 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 #pragma warning(disable:4355)
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
-// Note also that using "this" in the initialization list here is totally legit, as all we're doing is storing a pointer to 
-// the object, not manipulating or casting it.  Doing it this way will prevent an unnecessary instantiation of a default LuaShip
-// object and it's associated destructor.
 Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
@@ -107,6 +104,29 @@ Ship::~Ship()
    // Do nothing
 }
 
+
+// Push a LuaShip proxy onto the stack
+void Ship::push(lua_State *L) 
+{ 
+   LuaShip *luaship;
+
+   //lua_getglobal(L, "_lookupShipInDirectory");
+   //lua_pcall(L, 0, 1, 0)   // Passing 0 params, getting 1 back
+
+   //if(lua_isnil(L, 1))     // Didn't find one
+   //{
+   //   lua_pop(L, 1);       // Get rid of the nil!
+
+      luaship = new LuaShip(this);
+   //   lua_pushlightuserdata(L, luaship);
+   //   lua_pushlightuserdata(L, this);
+   //   storeShipInWeakTable(L, this, luaship);   // Store luaship in Lua table, using "this" as key
+   //}
+   //else
+   //   luaship = lua_getref
+
+   Lunar<LuaShip>::push(L, luaship, true);       // Lua will delete this object when it's done with it
+}
 
 void Ship::onGhostRemove()
 {
@@ -1499,9 +1519,6 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
    id++;
    mId = id;
    logprintf("Creating lauaship %d", mId);
-
-
-   // Do nothing
 }
 
 

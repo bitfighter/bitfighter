@@ -97,7 +97,7 @@ class Ship : public MoveObject
 private:
    typedef MoveObject Parent;
    bool isBusy;
-   void push(lua_State *L) { Lunar<LuaShip>::push(L, new LuaShip(this), true); }      // Lua will delete this object when it's done... I hope.
+   void push(lua_State *L);      // Push a LuaShip proxy object onto the stack
    bool mIsRobot;
 
 protected:
