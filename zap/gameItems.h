@@ -73,10 +73,10 @@ public:
 static const S32 AsteroidDesigns = 4;
 static const S32 AsteroidPoints = 12;
 
-static const F32 mRenderSize[] = { .8, .4, .2, -1 };      // Must end in -1
-static const S32 mRenderSizes = sizeof(mRenderSize) / sizeof(F32) - 1;
+static const F32 asteroidRenderSize[] = { .8, .4, .2, -1 };      // Must end in -1
+static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
 
-static const S32 mSizeIndexLength = sizeof(mRenderSize) / sizeof(S32) - 1;
+static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(S32) - 1;
 static const F32 AsteroidRadius = 89;
 
 static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wow!  A 3D array!
@@ -112,7 +112,7 @@ public:
    void emitAsteroidExplosion(Point pos);
 
    S32 getSizeIndex() { return mSizeIndex; }
-   S32 getSizeCount() { return mRenderSizes; }
+   S32 getSizeCount() { return asteroidRenderSizes; }
 
    TNL_DECLARE_CLASS(Asteroid);
 

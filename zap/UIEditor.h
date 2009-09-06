@@ -90,6 +90,7 @@ public:
       ItemTeleporter,
       ItemRepair,
       ItemBouncyBall,
+      ItemAsteroid,
       ItemMine,
       ItemSpyBug,
       ItemResource,
@@ -100,6 +101,7 @@ public:
       ItemForceField,
       ItemGoalZone,
       ItemTextItem,
+      ItemNavMeshZone,
    };
 
    struct WorldItem

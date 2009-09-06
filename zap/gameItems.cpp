@@ -148,14 +148,14 @@ Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
 void Asteroid::renderItem(Point pos)
 {
    if(!hasExploded)
-      renderAsteroid(pos, mDesign, mRenderSize[mSizeIndex]);
+      renderAsteroid(pos, mDesign, asteroidRenderSize[mSizeIndex]);
 }
 
 
 bool Asteroid::getCollisionCircle(U32 state, Point center, F32 radius)
 {
    center = mMoveState[state].pos;
-   radius = AsteroidRadius * mRenderSize[mSizeIndex];
+   radius = AsteroidRadius * asteroidRenderSize[mSizeIndex];
    return true;
 }
 
@@ -165,8 +165,8 @@ bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints)
 {
    //for(S32 i = 0; i < AsteroidPoints; i++)
    //{
-   //   Point p = Point(mMoveState[state].pos.x + (F32) AsteroidCoords[mDesign][i][0] * mRenderSize[mSizeIndex],
-   //                   mMoveState[state].pos.y + (F32) AsteroidCoords[mDesign][i][1] * mRenderSize[mSizeIndex] );
+   //   Point p = Point(mMoveState[state].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
+   //                   mMoveState[state].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
 
    //   polyPoints.push_back(p);
    //}
@@ -179,7 +179,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 {
    // Compute impulse direction
    mSizeIndex++;
-   if(mRenderSize[mSizeIndex] == -1)    // Kill small items
+   if(asteroidRenderSize[mSizeIndex] == -1)    // Kill small items
    {
       hasExploded = true;
       deleteObject(500);
@@ -187,7 +187,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    }
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
-   setRadius(AsteroidRadius * mRenderSize[mSizeIndex]);
+   setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
 
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
@@ -195,7 +195,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.5;
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
-   newItem->setRadius(AsteroidRadius * mRenderSize[mSizeIndex]);
+   newItem->setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
    F32 ang = 0;
    while(fabs(ang) < .5)
       ang = TNL::Random::readF() * FloatPi - FloatHalfPi;
@@ -234,7 +234,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       mSizeIndex = stream->readEnum(mSizeIndexLength);
-      setRadius(AsteroidRadius * mRenderSize[mSizeIndex]);
+      setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
       mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);     // No need to sync between client and server or between clients
 
       if(!mInitial)
