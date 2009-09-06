@@ -47,8 +47,8 @@ public:
    virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
    virtual GameObject *getGameObject() = 0;  // Return the underlying GameObject
 
-   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }      // Push item onto stack
-   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); } // Object's class    
+   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }                 // Push item onto stack
+   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class    
 
    static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
 };

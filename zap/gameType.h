@@ -256,7 +256,7 @@ public:
    };
 
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
-   static string GameType::getScoringEventDescr(ScoringEvent event);
+   static string getScoringEventDescr(ScoringEvent event);
    
    // Static vectors used for constructing update RPCs
    static Vector<RangedU32<0, MaxPing> > mPingTimes;  

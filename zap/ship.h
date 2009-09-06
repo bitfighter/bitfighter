@@ -190,7 +190,7 @@ public:
    virtual void render(S32 layerIndex);
 
    Ship(StringTableEntry playerName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      // Constructor
-   Ship::~Ship();           // Destructor
+   ~Ship();           // Destructor
 
    F32 getHealth() { return mHealth; }
 

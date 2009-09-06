@@ -218,7 +218,7 @@ public:
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();
    void loadNextLevel();
-   string ServerGame::getCurrentLevelLoadName();      // For updating the UI
+   string getCurrentLevelLoadName();      // For updating the UI
    bool loadLevel(string fileName);
 
    void cycleLevel(S32 newLevelIndex = -1);
