@@ -1560,8 +1560,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
       char letter = gGameItemRecs[item.index].letter;    // Get letter to represent object
 
-      // Mark the item with a letter
-      if(letter && !(gGameItemRecs[item.index].specialTabKeyRendering && mShowingReferenceShip))
+      // Mark the item with a letter, unless we're showing the reference ship
+      if(letter && !(gGameItemRecs[item.index].specialTabKeyRendering && mShowingReferenceShip) || isDockItem)
       {
          S32 vertOffset = 8;
          if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
