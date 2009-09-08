@@ -45,6 +45,9 @@ namespace Zap
 string gMusic = "ship_sensor.wav";     // Temp, obviously!
 F32 gMusicGainScale = 1.0f;
 
+//
+// Must keep this aligned with SFXProfiles!!
+//
 
 //   fileName     isRelative gainScale isLooping  fullGainDistance  zeroGainDistance
 static SFXProfile sfxProfilesModern[] = {
@@ -70,6 +73,8 @@ static SFXProfile sfxProfilesModern[] = {
 
  {  "spybug_deploy.wav",   false, 0.4f,  false, 150, 600 },
  {  "spybug_explode.wav",  false, 0.8f,  false, 300, 800 },
+
+ { "asteroid_explode.wav", false, 0.80f, false,  150, 800 },
 
  // Ship noises
  {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },
@@ -138,6 +143,8 @@ static SFXProfile sfxProfilesClassic[] = {
 
  {  "spybug_deploy.wav",   false, 0.4f,  false, 150, 600 },
  {  "spybug_explode.wav",  false, 0.8f,  false, 300, 800 },
+
+ { "asteroid_explode.wav", false, 0.8f, false,  150, 800 },
 
  // Ship noises
  {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },

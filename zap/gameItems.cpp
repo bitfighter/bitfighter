@@ -238,7 +238,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);     // No need to sync between client and server or between clients
 
       if(!mInitial)
-         SFXObject::play(SFXShipExplode, mMoveState[RenderState].pos, Point());
+         SFXObject::play(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());
    }
 
    bool explode = (stream->readFlag());     // Exploding!  Take cover!!
@@ -261,7 +261,7 @@ bool Asteroid::collide(GameObject *otherObject)
 
 void Asteroid::emitAsteroidExplosion(Point pos)
 {
-   SFXObject::play(SFXShipExplode, pos, Point());
+   SFXObject::play(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Color(1,1,1), Color(1,1,1), 10);
 }
 

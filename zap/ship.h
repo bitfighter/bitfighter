@@ -196,7 +196,6 @@ public:
 
    void onGhostRemove();
 
-   //bool isModuleActive(U32 indx) { return mModuleActive[ModuleCount]; }  <--- should be deleted... this makes no sense!
    bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
 
    bool engineerBuildObject()

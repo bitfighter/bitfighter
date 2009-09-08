@@ -38,9 +38,10 @@ using namespace TNL;
 namespace Zap
 {
 
+   // Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
 enum SFXProfiles
 {
-   // Utility sounds.
+   // Utility sounds
    SFXVoice,
    SFXNone,
 
@@ -62,6 +63,8 @@ enum SFXProfiles
 
    SFXSpyBugDeploy,
    SFXSpyBugExplode,
+
+   SFXAsteroidExplode,
 
    // Ship noises
    SFXShipExplode,
