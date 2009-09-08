@@ -124,6 +124,9 @@ S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 class LuaAsteroid;
 
+static F32 asteroidVel = 250;
+
+
 // Constructor
 Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
 {
@@ -135,7 +138,7 @@ Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
 
    // Give the asteroids some intial motion in a random direction
    F32 ang = TNL::Random::readF() * Float2Pi;
-   F32 vel = 50;
+   F32 vel = asteroidVel;
 
    for(U32 i = 0; i < MoveStateCount; i++)
    {
@@ -175,6 +178,9 @@ bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints)
 }
 
 
+#define ABS(x) (((x) > 0) ? (x) : -(x))
+
+
 void Asteroid::damageObject(DamageInfo *theInfo)
 {
    // Compute impulse direction
@@ -189,24 +195,31 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
 
-   Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
-   Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
-   iv.normalize();
-   mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.5;
+   F32 ang = TNL::Random::readF() * Float2Pi;
+   F32 vel = asteroidVel;
+
+   mMoveState[ActualState].angle = ang;
+   mMoveState[ActualState].vel.x = vel * cos(ang);
+   mMoveState[ActualState].vel.y = vel * sin(ang);
+
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
    newItem->setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
-   F32 ang = 0;
-   while(fabs(ang) < .5)
-      ang = TNL::Random::readF() * FloatPi - FloatHalfPi;
-
+ 
    for(U32 i = 0; i < MoveStateCount; i++)
    {
+      F32 ang2;
+      do
+         ang2 = TNL::Random::readF() * Float2Pi;
+      while(ABS(ang2 - ang) < .0436 );    // That's 20deg in radians, folks!
+
+
+      F32 vel2 = asteroidVel;
+
       newItem->mMoveState[i].pos = mMoveState[i].pos;
-      newItem->mMoveState[i].angle = mMoveState[i].angle;
-      newItem->mMoveState[i].vel.x = mMoveState[i].vel.len() * cos(ang);
-      newItem->mMoveState[i].vel.y = mMoveState[i].vel.len() * sin(ang);
-      newItem->mMoveState[i].vel.normalize(mMoveState[i].vel.len());
+      newItem->mMoveState[i].angle = ang2;
+      newItem->mMoveState[i].vel.x = vel2 * cos(ang2);
+      newItem->mMoveState[i].vel.y = vel2 * sin(ang2);
    }
 
    newItem->mSizeIndex = mSizeIndex;
@@ -264,7 +277,6 @@ void Asteroid::emitAsteroidExplosion(Point pos)
    SFXObject::play(SFXAsteroidExplode, pos, Point());
    // FXManager::emitBurst(pos, Point(.1, .1), Color(1,1,1), Color(1,1,1), 10);
 }
-
 
 
 const char Asteroid::className[] = "Asteroid";      // Class name as it appears to Lua scripts

@@ -244,7 +244,7 @@ RefPtr<SFXObject> SFXObject::playRecordedBuffer(ByteBufferPtr p, F32 gain)
 // Destructor
 SFXObject::~SFXObject()
 {
-
+   // Do nothing
 }
 
 extern CmdLineSettings gCmdLineSettings;
