@@ -128,6 +128,7 @@ protected:
    Move mLastMove;      // The move for the previous update
    Move mCurrentMove;   // The move for the current update
    S32 mTeam;
+   StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
 
 public:
    GameObject();                          // Constructor
@@ -143,6 +144,7 @@ public:
    U32 getCreationTime() { return mCreationTime; }
    bool isInDatabase() { return mInDatabase; }
    void setExtent(Rect &extentRect);
+   StringTableEntry getKillString() { return mKillString; }
    Rect getExtent() { return extent; }
    S32 getTeam() { return mTeam; }
    void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, Vector<Point> &polyBounds);    // Convert line of a level file into a Vector of Points

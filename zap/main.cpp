@@ -62,6 +62,7 @@
 //<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
 //<li>Increased max level size from 64K to 96K</li>
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
+//<li>Better messages when killed by turret or asteroid</li>
 //</ul>
 //
 //<u>Items</u>
@@ -76,6 +77,7 @@
 //<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
 //<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
 //<li>Asteroids... you figure it out!</li>
+
 //</ul>
 //
 //<u>Specifiying levels</u>
@@ -132,12 +134,9 @@
 //<u>And, of course, Robots!</u>
 
 
-//// New stuff this alpha release
-//<li>Fixed initial loadout bug</li>
-//<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
-//<li>Old messages now properly cleared out when game is started</li>
-//<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
-//<li>Added /restart command to restart current level</li>
+/////  Newest stuff
+//<li>Better messages when killed by turret or asteroid</li>
+
 
 // Mac Test:
 // New screen capture code

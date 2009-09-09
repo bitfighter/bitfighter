@@ -145,6 +145,8 @@ Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
       mMoveState[i].vel.x = vel * cos(ang);
       mMoveState[i].vel.y = vel * sin(ang);
    }
+
+   mKillString = "crashed into an asteroid";
 }
 
 

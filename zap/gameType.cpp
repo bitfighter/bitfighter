@@ -1313,6 +1313,8 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
    ClientRef *killerRef = killer ? killer->getClientRef() : NULL;
    ClientRef *clientRef = theClient->getClientRef();
 
+   StringTableEntry killerDescr = killerObject->getKillString();
+
    if(killerRef)     // Known killer
    {
       if(killerRef == clientRef)    // We killed ourselves -- should have gone easy with the bouncers!
@@ -1325,10 +1327,10 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
       else                                                              // Different team, or not a team game
          updateScore(killerRef, KillEnemy);
 
-      s2cKillMessage(clientRef->name, killerRef->name);
+      s2cKillMessage(clientRef->name, killerRef->name, "");             // Third param ignored if we provide a name
    }
    else              // Unknown killer... not a scorable event
-      s2cKillMessage(clientRef->name, NULL);
+      s2cKillMessage(clientRef->name, NULL, killerDescr);
 
    clientRef->respawnTimer.reset(RespawnDelay);
 }
@@ -1932,16 +1934,18 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer), (victim, killer))
+GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
-   if(killer)
+   if(killer)  // Known killer, was self, robot, or another player
    {
       if(killer == victim)
          gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", killer.getString(), victim.getString());
       else
          gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
    }
-   else
+   else if(killerDescr != "")   // Killer was some object with its own kill description string
+      gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
+   else         // Killer unknown
       gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 }
 

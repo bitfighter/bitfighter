@@ -818,7 +818,7 @@ void Turret::idle(IdleCallPath path)
    F32 angleDelta = destAngle - mCurrentAngle;
    if(angleDelta > FloatPi)
       angleDelta -= Float2Pi;
-   if(angleDelta < -FloatPi)
+   else if(angleDelta < -FloatPi)
       angleDelta += Float2Pi;
 
    F32 maxTurn = TurretTurnRate * mCurrentMove.time * 0.001f;
@@ -837,6 +837,11 @@ void Turret::idle(IdleCallPath path)
       {
          bestDelta.normalize();
          Point velocity;
+
+         // String handling in C++ is such a mess!!!
+         string killer = string("got blasted by ") + getGame()->getGameType()->mTeams[mTeam].name.getString() + " turret";
+         mKillString = killer.c_str();
+
          createWeaponProjectiles(WeaponTurret, bestDelta, aimPos, velocity, 35.0f, this);
          mFireTimer.reset(gWeapons[WeaponTurret].fireDelay);
       }

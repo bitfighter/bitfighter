@@ -69,10 +69,13 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
    collided = false;
    alive = true;
    mShooter = shooter;
+
+   // Copy some attributes from the shooter
    if(shooter)
    {
       setOwner(shooter->getOwner());
       mTeam = shooter->getTeam();
+      mKillString = shooter->getKillString();
    }
    mType = gWeapons[type].projectileType;
    mWeaponType = type;
@@ -118,7 +121,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       if(stream->readFlag())
          mShooter = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
-      pos += velocity * -0.020f; // What's this about?? -CE
+      pos -= velocity * 0.020f; // What's this about?? -CE
       Rect newExtent(pos,pos);
       setExtent(newExtent);
       initial = true;
@@ -162,7 +165,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 void Projectile::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
-
+ 
    if(!collided && alive)
    {
    // Calculate where projectile will be at the end of the current interval
