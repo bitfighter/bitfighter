@@ -62,7 +62,7 @@
 //<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
 //<li>Increased max level size from 64K to 96K</li>
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
-//<li>Better messages when killed by turret or asteroid</li>
+//<li>Better messages when killed by turret or asteroid or mine</li>
 //</ul>
 //
 //<u>Items</u>
@@ -135,7 +135,7 @@
 
 
 /////  Newest stuff
-//<li>Better messages when killed by turret or asteroid</li>
+//<li>Better messages when killed by turret or asteroid or mine</li>
 
 
 // Mac Test:

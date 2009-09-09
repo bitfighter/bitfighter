@@ -481,6 +481,7 @@ Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
       mTeam = -2;    // Hostile to all, as mines generally are!
 
    mArmed = false;
+   mKillString = "mine";      // Triggers special message when player killed
 }
 
 
