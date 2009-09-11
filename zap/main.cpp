@@ -108,6 +108,8 @@
 //<li>Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor</li>
 //<li>Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
 //<li>Display gofast speed and snapping on item</li>
+//<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
+
 
 //</ul>
 //
@@ -136,7 +138,7 @@
 
 /////  Newest stuff
 //<li>Better messages when killed by turret or asteroid or mine</li>
-
+//<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
 
 // Mac Test:
 // New screen capture code

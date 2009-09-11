@@ -488,7 +488,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 11:
             break;
          case 12:
-            renderRepairItem(Point(0, 0), false);
+            renderRepairItem(Point(0, 0));
             break;
          case 13:
             {

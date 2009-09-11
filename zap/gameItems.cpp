@@ -91,7 +91,7 @@ void RepairItem::renderItem(Point pos)
 {
    if(!isVisible())
       return;
-   renderRepairItem(pos, false);
+   renderRepairItem(pos);
 }
 
 

@@ -70,8 +70,9 @@ public:
    S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
 };
 
-extern void renderFlag(Point pos, Color c);
-extern void renderFlag(Point pos, Color c, F32 fraction);
+extern void renderFlag(Point pos, Color flagColor);
+extern void renderFlag(Point pos, Color flagColor, Color mastColor);
+//extern void renderFlag(Point pos, Color flagColor, F32 fraction);
 
 };
 

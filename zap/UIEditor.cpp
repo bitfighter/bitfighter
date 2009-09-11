@@ -169,9 +169,12 @@ void EditorUserInterface::populateDock()
       mDockItems.push_back(item);
       yPos += 25;
    }
-   item = constructItem(ItemGoalZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20);
-   mDockItems.push_back(item);
-   yPos += spacer;
+   else
+   {
+      item = constructItem(ItemGoalZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20);
+      mDockItems.push_back(item);
+      yPos += spacer;
+   }
 }
 
 enum geomType {
@@ -748,6 +751,9 @@ Point EditorUserInterface::snapToLevelGrid(Point p)
 
 extern Color gErrorMessageTextColor;
 
+static const Color grayedOutColorBright = Color(.5, .5, .5);
+static const Color grayedOutColorDim = Color(.25, .25, .25);
+
 
 void EditorUserInterface::render()
 {
@@ -893,7 +899,10 @@ void EditorUserInterface::render()
       glVertex2f(canvasWidth - dockWidth - horizMargin, canvasHeight - vertMargin);
    glEnd();
 
-   if(mouseOnDock())       // Bounding box
+   // Bounding box around dock
+   if(!showAllObjects)
+      glColor(grayedOutColorBright);
+   else if(mouseOnDock())       
       glColor3f(1, 1, 0);
    else
       glColor3f(1, 1, 1);
@@ -1169,21 +1178,25 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
    const S32 labelSize = 9;      // Size to label items we're hovering over
    const Color labelColor(1, 1, 1);    // white
 
+   bool hideit = !showAllObjects && !(mShowingReferenceShip && !isDockItem);
+
    if(isDockItem)
       pos = item.verts[0];
    else
       pos = convertLevelToCanvasCoord(item.verts[0]);
    Color c;
 
-   if(gGameItemRecs[item.index].geom == geomSimpleLine && (showAllObjects || isDockItem))    // Draw teleporters, speedZones, and other "two-point" simple line structures
+   if(gGameItemRecs[item.index].geom == geomSimpleLine && (showAllObjects || isDockItem || mShowingReferenceShip))    // Draw "two-point" items
    {
       if(isDockItem)
          dest = item.verts[1];
       else
          dest = convertLevelToCanvasCoord(item.verts[1]);
-
+ 
       glLineWidth(4);
-      if(item.index == ItemTeleporter)
+      if(hideit) 
+         glColor(grayedOutColorDim);
+      else if(item.index == ItemTeleporter)
          glColor3f(0, 1, 0);
       else if(item.index == ItemSpeedZone)
          glColor3f(1, 0, 0);
@@ -1239,11 +1252,12 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          if((item.selected || indx == itemToLightUp) && mEditingTextItem == -1)
          {
             const U32 instrSize = 8;
-            S32 len = getStringWidth(instrSize, "[Ctrl][T] to edit text");
+            const char *instr = "[Ctrl-T] to edit text";
+            S32 len = getStringWidth(instrSize, instr);
             S32 offset = (pos.distanceTo(dest) - len) / 2;
 
             glColor3f(1, 1, 1);     // white
-            drawAngleString_fixed(pos.x + cosang * offset - (instrSize + 3) * sinang, pos.y + sinang * offset + (instrSize + 3) * cosang, instrSize, ang, "[Ctrl][T] to edit text");
+            drawAngleString_fixed(pos.x + cosang * offset - (instrSize + 3) * sinang, pos.y + sinang * offset + (instrSize + 3) * cosang, instrSize, ang, instr);
          }
       }
       else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
@@ -1353,25 +1367,28 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
    else if(gGameItemRecs[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
    {
-      if(showAllObjects || isDockItem)   // Anything that is not a wall
+      if(showAllObjects || isDockItem || mShowingReferenceShip)   // Anything that is not a wall
       {
-         Color theFillColor = getTeamColor(item.team);
-         if(item.index == ItemNexus)
+         Color theFillColor = !hideit ? getTeamColor(item.team) : grayedOutColorDim;
+         if(item.index == ItemNexus && !hideit)
             theFillColor = gNexusOpenColor;    // Render Nexus items in pale green to match the actual thing
-        // Render polygons in two passes: fill then outline
+
+         // Render polygons in two passes: fill then outline
          F32 minx = F32_MAX, miny = F32_MAX, maxx = -F32_MAX, maxy = -F32_MAX;
          Vector<Point> convertedPoints;
 
          for(S32 pass = 0; pass <= 1; pass++)
          {
-            if(pass == 0)
+            if(pass == 0)  // First pass: Fill
             {
-               glColor(theFillColor);
+               glColor(!hideit ? theFillColor : grayedOutColorDim);
                glBegin(GL_POLYGON);
             }
-            else
+            else           // Second pass: Outline
             {
-               if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
+               if(hideit)
+                  glColor(grayedOutColorBright);
+               else if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
                   glColor3f(1, 1, 0);     // yellow
                else
                   glColor3f(1, 1, 1);     // white
@@ -1398,7 +1415,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          glLineWidth(gDefaultLineWidth);        // Restore line width
 
          // Let's add a label
-         glColor(labelColor);
+         glColor(!hideit ? labelColor : grayedOutColorBright);
 
          F32 ang = angleOfLongestSide(convertedPoints);
          Point cent = centroid(convertedPoints);
@@ -1410,26 +1427,26 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          renderLinePolyVertices(item, indx, false);      // Draw vertices for this polygon
    }
 
-   else if((showAllObjects || isDockItem))               // Draw remaining point objects
+   else if((showAllObjects || isDockItem || mShowingReferenceShip))    // Draw remaining point objects
    {
-      c = getTeamColor(item.team);        // And a color (based on team affiliation)
+      c = !hideit ? getTeamColor(item.team) : grayedOutColorDim;       // And a color (based on team affiliation)
 
-      if(item.index == ItemFlag)          // Draw flag
+      if(item.index == ItemFlag)             // Draw flag
       {
          glPushMatrix();
             glTranslatef(pos.x, pos.y, 0);
             glScalef(0.6, 0.6, 1);
-            renderFlag(Point(0,0), c);
+            renderFlag(Point(0,0), c, !hideit ? NULL : grayedOutColorDim);
          glPopMatrix();
       }
-      else if(item.index == ItemFlagSpawn)          // Draw flag spawn point
+      else if(item.index == ItemFlagSpawn)    // Draw flag spawn point
       {
          glPushMatrix();
             glTranslatef(pos.x+1, pos.y, 0);
             glScalef(0.4, 0.4, 1);
-            renderFlag(Point(0,0), c);
+            renderFlag(Point(0,0), c, !hideit ? NULL : grayedOutColorDim);
             
-            glColor3f(1,1,1);
+            glColor(!hideit ? Color(1,1,1) : grayedOutColorDim);
             drawCircle(Point(-4,0), 26);
          glPopMatrix();
       }
@@ -1458,7 +1475,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             glPopMatrix(); 
          }
          else
-            renderAsteroid(pos, design, .1);   
+            renderAsteroid(pos, design, .1, !hideit ? NULL : grayedOutColorDim);   
       }
 
       else if(item.index == ItemResource)   // Draw resourceItem
@@ -1490,21 +1507,21 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       }
       else if(item.index == ItemMine)  // And a mine
       {
-         glColor3f(.7, .7, .7);
+         glColor(!hideit ? Color(.7, .7, .7) : grayedOutColorDim);
          drawCircle(pos, 9);
 
-         glColor3f(1, .3, .3);
+         glColor(!hideit ? Color(.1, .3, .3) : grayedOutColorDim);
          drawCircle(pos, 5);
       }
       else if(item.index == ItemSpyBug)  // And a spy bug
       {
-         glColor3f(.7, .7, .7);
+         glColor(!hideit ? Color(.7, .7, .7) : grayedOutColorDim);
          drawCircle(pos, 9);
 
-         glColor(getTeamColor(item.team));
+         glColor(!hideit ? getTeamColor(item.team) : grayedOutColorDim);
          drawCircle(pos, 5);
 
-        // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
+         // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
          if(!isDockItem && mShowingReferenceShip)
          {
             glEnable(GL_BLEND);     // Enable transparency
@@ -1521,7 +1538,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
       }
       else if(item.index == ItemRepair)
-         renderRepairItem(pos, true);
+         renderRepairItem(pos, true, !hideit ? NULL : grayedOutColorDim);
 
       else                             // Draw anything else
          renderGenericItem(pos, c);
@@ -1567,13 +1584,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
             vertOffset = 10;
 
-         glColor(labelColor);
+         glColor(!hideit ? labelColor : grayedOutColorBright);
          drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
       }
       // And label it if we're hovering over it (or not)
       if((item.selected || indx == itemToLightUp) && gGameItemRecs[item.index].onScreenName)
       {
-         glColor(labelColor);
+         glColor(!hideit ? labelColor : grayedOutColorBright);
          
          drawString(pos.x - getStringWidthf(labelSize, gGameItemRecs[item.index].onScreenName) / 2, pos.y + labelSize + 2, labelSize, gGameItemRecs[item.index].onScreenName);
       }
@@ -1581,11 +1598,12 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
    // Label our dock items
    if(isDockItem && gGameItemRecs[item.index].geom != geomPoly)      // Polys are already labeled internally
    {
-      glColor(labelColor);
+      glColor(!hideit ? labelColor : grayedOutColorBright);
       F32 maxy = -F32_MAX;
       for(S32 j = 0; j < item.verts.size(); j++)
          if (item.verts[j].y > maxy)
             maxy = item.verts[j].y;
+
       // Make some label position adjustments
       if(gGameItemRecs[item.index].geom == geomSimpleLine)
          maxy -= 2;
@@ -1839,7 +1857,7 @@ void EditorUserInterface::flipSelectionVertical()
 
    Point min, max;
    computeSelectionMinMax(min, max);
-   for(S32 i = 0; i < mItems.size(); i++)
+   for(S32 i = 0; i < mItems.size(); i++)  
       if(mItems[i].selected || (itemToLightUp == i && vertexToLightUp == -1))
          for(S32 j = 0; j < mItems[i].verts.size(); j++)
             mItems[i].verts[j].y = min.y + (max.y - mItems[i].verts[j].y);
@@ -1858,6 +1876,8 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
    {
+      if(!showAllObjects && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
+         continue;
       WorldItem &p = mItems[i];
       if(gGameItemRecs[p.index].geom <= geomPoint)
          continue;
@@ -1879,6 +1899,9 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 void EditorUserInterface::findHitItemOnDock(Point canvasPos, S32 &hitItem)
 {
    hitItem = -1;
+
+   if(!showAllObjects)           // Only add dock items when objects are visible
+      return;
 
    if(mEditingTextItem != -1)    // If we're editing a text item, disable this functionality
       return;
@@ -1910,9 +1933,10 @@ void EditorUserInterface::findHitItemOnDock(Point canvasPos, S32 &hitItem)
       }
 }
 
+
 void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 &hitEdge)
 {
-   hitItem = -1;
+   hitItem = -1;  
    hitEdge = -1;
 
    if(mEditingTextItem != -1)    // If we're editing a text item, disable this functionality
@@ -1920,8 +1944,11 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
    {
+      if(!showAllObjects && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
+         continue;
+
       WorldItem &p = mItems[i];
-      if(gGameItemRecs[mItems[i].index].geom == geomPoint)
+      if(gGameItemRecs[mItems[i].index].geom == geomPoint)  
       {
          Point pos = convertLevelToCanvasCoord(p.verts[0]);
          if(fabs(canvasPos.x - pos.x) < 8 && fabs(canvasPos.y - pos.y) < 8)
@@ -1947,7 +1974,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
          float lenSquared = edgeDelta.dot(edgeDelta);
          if(fraction > 0 && fraction < lenSquared)
          {
-            // compute the closest point:
+            // Compute the closest point:
             Point closest = p1 + edgeDelta * (fraction / lenSquared);
             float distance = (canvasPos - closest).len();
             if(distance < 5)
@@ -1960,6 +1987,9 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
          p1 = p2;
       }
    }
+
+   if(!showAllObjects)
+      return; 
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
@@ -2697,7 +2727,13 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mDown = true;
    }
    else if(keyCode == KEY_A && getKeyState(KEY_CTRL))    // Ctrl A - toggle see all objects
+   {
       showAllObjects = !showAllObjects;
+      if(!showAllObjects && !mDraggingObjects)
+         glutSetCursor(GLUT_CURSOR_RIGHT_ARROW); 
+
+      onMouseMoved(gMousePos.x, gMousePos.y);   // Reset mouse to spray if appropriate
+   }
    else if(keyCode == KEY_LEFT || keyCode == KEY_A)   // Left or A - Pan left
       mLeft = true;
    else if(keyCode == KEY_EQUALS)         // Plus (+) - Increase barrier width

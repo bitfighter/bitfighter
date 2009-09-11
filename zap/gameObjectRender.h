@@ -54,8 +54,11 @@ extern void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius
 extern void renderAimVector();
 extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests);
 extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset);
-extern void renderFlag(Point pos, Color c);
-extern void renderFlag(Point pos, Color c, F32 timerFraction);
+
+extern void renderFlag(Point pos, Color flagColor);
+extern void renderFlag(Point pos, Color flagColor, Color mastColor);
+
+//extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 
 
@@ -74,12 +77,14 @@ extern void renderMine(Point pos, bool armed, bool visible);
 extern void renderGrenade(Point pos, F32 vel);
 extern void renderSpyBug(Point pos, bool visible);
 
-extern void renderRepairItem(Point pos, bool forEditor);
+extern void renderRepairItem(Point pos);
+extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor);
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(Point pos, Point dir, U32 time);
 
 void renderTestItem(Point pos);
 void renderAsteroid(Point pos, S32 design, F32 radius);
+void renderAsteroid(Point pos, S32 design, F32 radius, Color c);
 void renderResourceItem(Point pos);
 void renderSoccerBall(Point pos);
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);

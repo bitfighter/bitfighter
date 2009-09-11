@@ -579,53 +579,65 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
 }
 
 
-void drawFlag(Color c)
+void drawFlag(Color flagColor, Color mastColor)
 {
-   glColor(c);
+   glColor(flagColor);
    glBegin(GL_LINES);
-   glVertex2f(-15, -15);
-   glVertex2f(15, -5);
 
-   glVertex2f(15, -5);
-   glVertex2f(-15, 5);
+      // First, the flag itself
+      glVertex2f(-15, -15);
+      glVertex2f(15, -5);
 
-   glVertex2f(-15, -10);
-   glVertex2f(10, -5);
+      glVertex2f(15, -5);
+      glVertex2f(-15, 5);
 
-   glVertex2f(10, -5);
-   glVertex2f(-15, 0);
-   glColor3f(1,1,1);
-   glVertex2f(-15, -15);
-   glVertex2f(-15, 15);
+      glVertex2f(-15, -10);
+      glVertex2f(10, -5);
+
+      glVertex2f(10, -5);
+      glVertex2f(-15, 0);
+
+      // Now the flag's mast
+      glColor(mastColor == NULL ? Color(1,1,1) : mastColor);
+
+      glVertex2f(-15, -15);
+      glVertex2f(-15, 15);
    glEnd();
 }
 
 
-void renderFlag(Point pos, Color c)
+void renderFlag(Point pos, Color flagColor, Color mastColor)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   drawFlag(c);
+   drawFlag(flagColor, mastColor);
 
    glPopMatrix();
+}
+
+// Could be eliminated with by using an optional param for mastColor, but
+// this seems to cause problems with our extern statements...
+void renderFlag(Point pos, Color flagColor)
+{
+   renderFlag(pos, flagColor, NULL);
 }
 
 
 // Not used
-void renderFlag(Point pos, Color c, F32 timerFraction)
-{
-   glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
-
-   drawFlag(c);
-
-   drawCircle(Point(1,1), 5);
-
-   drawFilledSector(Point(1,1), 5, 0, timerFraction * Float2Pi);
-
-   glPopMatrix();
-}
+//void renderFlag(Point pos, Color c, F32 timerFraction)
+//{
+//   glPushMatrix();
+//   glTranslatef(pos.x, pos.y, 0);
+//
+//   drawFlag(c, NULL);
+//
+//   drawCircle(Point(1,1), 5);
+//
+//   drawFilledSector(Point(1,1), 5, 0, timerFraction * Float2Pi);
+//
+//   glPopMatrix();
+//}
 
 void renderSmallFlag(Point pos, Color c, F32 parentAlpha)
 {
@@ -1021,7 +1033,13 @@ void renderSpyBug(Point pos, bool visible)
 }
 
 
-void renderRepairItem(Point pos, bool forEditor)
+void renderRepairItem(Point pos)
+{
+   renderRepairItem(pos, false, NULL);
+}
+
+
+void renderRepairItem(Point pos, bool forEditor, Color overrideColor)
 {
    F32 crossWidth;
    F32 crossLen;
@@ -1043,29 +1061,28 @@ void renderRepairItem(Point pos, bool forEditor)
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   glColor3f(1,1,1);
+   glColor(overrideColor == NULL ? Color(1,1,1) : overrideColor);
    glBegin(GL_LINE_LOOP);
-   glVertex2f(-size , -size );
-   glVertex2f(size , -size );
-   glVertex2f(size , size );
-   glVertex2f(-size , size );
+      glVertex2f(-size , -size );
+      glVertex2f(size , -size );
+      glVertex2f(size , size );
+      glVertex2f(-size , size );
    glEnd();
 
-   glColor3f(1,0,0);
+   glColor(overrideColor == NULL ? Color(1,0,0) : overrideColor);
    glBegin(GL_LINE_LOOP);
-
-   glVertex2f(crossWidth, crossWidth);
-   glVertex2f(crossLen, crossWidth);
-   glVertex2f(crossLen, -crossWidth);
-   glVertex2f(crossWidth, -crossWidth);
-   glVertex2f(crossWidth, -crossLen);
-   glVertex2f(-crossWidth, -crossLen);
-   glVertex2f(-crossWidth, -crossWidth);
-   glVertex2f(-crossLen, -crossWidth);
-   glVertex2f(-crossLen, crossWidth);
-   glVertex2f(-crossWidth, crossWidth);
-   glVertex2f(-crossWidth, crossLen);
-   glVertex2f(crossWidth, crossLen);
+      glVertex2f(crossWidth, crossWidth);
+      glVertex2f(crossLen, crossWidth);
+      glVertex2f(crossLen, -crossWidth);
+      glVertex2f(crossWidth, -crossWidth);
+      glVertex2f(crossWidth, -crossLen);
+      glVertex2f(-crossWidth, -crossLen);
+      glVertex2f(-crossWidth, -crossWidth);
+      glVertex2f(-crossLen, -crossWidth);
+      glVertex2f(-crossLen, crossWidth);
+      glVertex2f(-crossWidth, crossWidth);
+      glVertex2f(-crossWidth, crossLen);
+      glVertex2f(crossWidth, crossLen);
    glEnd();
 
    glPopMatrix();
@@ -1213,12 +1230,12 @@ void renderTestItem(Point pos)
 }
 
 
-void renderAsteroid(Point pos, S32 design, F32 scaleFact)
+void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0); 
 
-   glColor3f(.7, .7, .7);
+   glColor(color == NULL ? Color(.7, .7, .7) : color);
       // Design 1
       glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < AsteroidPoints; i++)
@@ -1231,6 +1248,12 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact)
    glPopMatrix();
 
    //drawCircle(pos, 86 * scaleFact);
+}
+
+
+void renderAsteroid(Point pos, S32 design, F32 scaleFact)
+{
+   renderAsteroid(pos, design, scaleFact, NULL);
 }
 
 
