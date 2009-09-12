@@ -477,7 +477,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
                glVertex2f(xr, yt + teamAreaHeight);
             glEnd();
 
-            UserInterface::drawString(xl + 40, yt + 2, 30, mTeams[i].name.getString());
+            UserInterface::drawString(xl + 40, yt + 2, 30, getTeamName(i));
             UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].score);
          }
 
@@ -1184,6 +1184,19 @@ S32 GameType::getTeam(const char *playerName)
 }
 
 
+const char *GameType::getTeamName(S32 team)
+{
+   if(team >= 0)
+      return mTeams[team].name.getString();
+   else if(team == -2)
+      return "Hostile";
+   else if(team == -1)
+      return "Neutral";
+   else 
+      return "UNKNOWN";
+}
+
+
 Color GameType::getTeamColor(GameObject *theObject)
 {
    return getTeamColor(theObject->getTeam());
@@ -1693,7 +1706,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, (StringTableEntry name, RangedU3
 {
    ClientRef *cl = findClientRef(name);
    cl->teamId = (S32) teamIndex;
-   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), mTeams[teamIndex].name.getString());
+   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex));
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can

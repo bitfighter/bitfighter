@@ -320,6 +320,8 @@ public:
 
    S32 getTeam(const char *playerName);         // Given a player, return their team
 
+   const char *getTeamName(S32 team);           // Return the name of the team
+
    // game type flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *theFlag) {  /* do nothing */  }
    virtual void flagDropped(Ship *theShip, FlagItem *theFlag) {  /* do nothing */  }
