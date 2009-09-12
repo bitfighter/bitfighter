@@ -61,9 +61,9 @@ public:
    GameTypes getGameType() { return SoccerGame; }
    const char *getGameTypeString() { return "Soccer"; }
    virtual const char *getInstructionString() { return "Push the ball into the opposing team's goal."; }
-   //bool isTeamGame() { return true; }
+   bool isTeamGame() { return mTeams.size() > 1; } 
    bool canBeTeamGame() { return true; }
-   bool canBeIndividualGame() { return false; }
+   bool canBeIndividualGame() { return true; }
 
 
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
