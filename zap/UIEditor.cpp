@@ -2323,6 +2323,9 @@ void EditorUserInterface::joinBarrier()
 
 void EditorUserInterface::insertNewItem(GameItems itemType)
 {
+   if(!showAllObjects)     // No inserting when items are hidden!
+      return;
+
    clearSelection();
    saveUndoState(mItems);
 
@@ -2656,7 +2659,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mRight = true;
    else if(keyCode == KEY_F)              // F - Flip horizontal
       flipSelectionHorizontal();
-   else if(keyCode == KEY_V && getKeyState(KEY_CTRL))    // Ctrl V - Paste selection
+   else if(keyCode == KEY_V && getKeyState(KEY_CTRL))    // Ctrl-V - Paste selection
       pasteSelection();
    else if(keyCode == KEY_V)              // V - Flip vertical
       flipSelectionVertical();
@@ -2710,23 +2713,23 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_UP && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
       mUp = true;
-   else if(keyCode == KEY_UP && getKeyState(KEY_CTRL))      // Ctrl Up - Zoom in
+   else if(keyCode == KEY_UP && getKeyState(KEY_CTRL))      // Ctrl-Up - Zoom in
       mIn = true;
    else if(keyCode == KEY_DOWN)
    {
-      if(getKeyState(KEY_CTRL))           // Ctrl Down - Zoom out
+      if(getKeyState(KEY_CTRL))           // Ctrl-Down - Zoom out
          mOut = true;
       else                                // Down - Pan down
          mDown = true;
    }
    else if(keyCode == KEY_S)
    {
-      if(getKeyState(KEY_CTRL))           // Ctrl S - Save
+      if(getKeyState(KEY_CTRL))           // Ctrl-S - Save
          gEditorUserInterface.saveLevel(true, true);
       else                                // S - Pan down
          mDown = true;
    }
-   else if(keyCode == KEY_A && getKeyState(KEY_CTRL))    // Ctrl A - toggle see all objects
+   else if(keyCode == KEY_A && getKeyState(KEY_CTRL))    // Ctrl-A - toggle see all objects
    {
       showAllObjects = !showAllObjects;
       if(!showAllObjects && !mDraggingObjects)
@@ -2757,12 +2760,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       splitBarrier();
    else if(keyCode == KEY_J)
       joinBarrier();
-   else if(keyCode == KEY_X && getKeyState(KEY_CTRL))    // Ctrl X - Cut selection
+   else if(keyCode == KEY_X && getKeyState(KEY_CTRL))    // Ctrl-X - Cut selection
    {
       copySelection();
       deleteSelection(true);
    }
-   else if(keyCode == KEY_C && getKeyState(KEY_CTRL))    // Ctrl C - Copy selection to clipboard
+   else if(keyCode == KEY_C && getKeyState(KEY_CTRL))    // Ctrl-C - Copy selection to clipboard
       copySelection();
    else if(keyCode == KEY_C )             // C - Zoom out
       mOut = true;
