@@ -30,17 +30,17 @@
 #include "sfx.h"
 #include "voiceCodec.h"
 #include "gameObject.h" 
+#include "flagItem.h"
 #include "robot.h"
 #include <string>
+
 
 namespace Zap
 {
 
-class FlagItem;
 class GoalZone;
 struct MenuItem;
 class Item;
-
 
 class ClientRef : public Object
 {
@@ -84,7 +84,7 @@ struct Team
    StringTableEntry name;
    Color color;
    Vector<Point> spawnPoints;
-   Vector<Point> flagSpawnPoints;   // List of places for team flags to spawn
+   Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
 
    U32 numPlayers;                  // Needs to be computed before use, not dynamically tracked
    S32 score;
@@ -197,7 +197,7 @@ public:
    Vector<Team> mTeams;
 
 
-   Vector<Point> mFlagSpawnPoints;     // List of non-team specific spawn points for flags
+   Vector<FlagSpawn> mFlagSpawnPoints;     // List of non-team specific spawn points for flags
 
    StringTableEntry mLevelName;
    StringTableEntry mLevelDescription;

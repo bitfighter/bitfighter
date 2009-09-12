@@ -807,11 +807,12 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       Point p;
       p.read(argv + 2);
       p *= getGame()->getGridSize();
+      FlagSpawn spawn = FlagSpawn(p, 30);
 
       if( isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // Ignore if team is invalid
-         mTeams[teamIndex].flagSpawnPoints.push_back(p);
+         mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
       else if(teamIndex < 0)
-         mFlagSpawnPoints.push_back(p);
+         mFlagSpawnPoints.push_back(spawn);
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {

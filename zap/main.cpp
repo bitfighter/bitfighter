@@ -63,6 +63,7 @@
 //<li>Increased max level size from 64K to 96K</li>
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
 //<li>Better messages when killed by turret or asteroid or mine</li>
+//<li>Soccer game can now be played in no-teams mode by defining only one team</li>
 //</ul>
 //
 //<u>Items</u>
@@ -139,6 +140,8 @@
 /////  Newest stuff
 //<li>Better messages when killed by turret or asteroid or mine</li>
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
+//<li>Soccer game can now be played in no-teams mode by defining only one team</li>
+//<li></li>
 
 // Mac Test:
 // New screen capture code

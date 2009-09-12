@@ -74,6 +74,22 @@ extern void renderFlag(Point pos, Color flagColor);
 extern void renderFlag(Point pos, Color flagColor, Color mastColor);
 //extern void renderFlag(Point pos, Color flagColor, F32 fraction);
 
+
+////////////////////////////////
+
+
+class FlagSpawn
+{
+private:
+   Point mPos;
+   S32 mDelay;
+
+public:
+   FlagSpawn(Point pos, S32 delay);    // C++ constructor (no lua constructor)
+   Point getPos() { return mPos; }
+   S32 getDelay() { return mDelay; }
+};
+
 };
 
 #endif

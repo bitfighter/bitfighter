@@ -86,9 +86,9 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
 
    // Now add the flag starting point to the list of flag spawn points
    if(!gServerGame->getGameType()->isTeamFlagGame() || mTeam < 0)
-      gServerGame->getGameType()->mFlagSpawnPoints.push_back(initialPos);
+      gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, 30));
    else
-      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(initialPos);
+      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(initialPos, 30));
 
    return true;
 }
@@ -119,7 +119,7 @@ void FlagItem::sendHome()
 
    // First, make list of valid spawn points -- start with a list of all spawn points, then remove any occupied ones
 
-   Vector<Point> spawnPoints;
+   Vector<FlagSpawn> spawnPoints;
    GameType *gt = getGame()->getGameType();
 
    if(!gt->isTeamFlagGame() || mTeam < 0)     // Neutral or hostile flag
@@ -135,7 +135,7 @@ void FlagItem::sendHome()
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          for(S32 j = 0; j < spawnPoints.size(); j++)
-            if(spawnPoints[j] == flag->initialPos)
+            if(spawnPoints[j].getPos() == flag->initialPos)
             {
                spawnPoints.erase(j);
                break;
@@ -144,19 +144,7 @@ void FlagItem::sendHome()
    }
 
    S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-   initialPos = spawnPoints[spawnIndex];
-
-
-   //if(mTeam < 0)     // Neutral or hostile flag
-   //{
-   //   S32 spawnIndex = TNL::Random::readI() % getGame()->getGameType()->mFlagSpawnPoints.size();
-   //   initialPos = getGame()->getGameType()->mFlagSpawnPoints[spawnIndex];
-   //}
-   //else              // Team flag
-   //{
-   //   S32 spawnIndex = TNL::Random::readI() % getGame()->getGameType()->mTeams[mTeam].flagSpawnPoints.size();
-   //   initialPos = getGame()->getGameType()->mTeams[mTeam].flagSpawnPoints[spawnIndex];
-   //}
+   initialPos = spawnPoints[spawnIndex].getPos();
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
    mMoveState[ActualState].vel = Point(0,0);
@@ -217,5 +205,13 @@ void FlagItem::onMountDestroyed()
    dismount();
 }
 
+
+//////////////////////////////////////////
+
+FlagSpawn::FlagSpawn(Point pos, S32 delay)
+{
+   mPos = pos;
+   mDelay = delay;
 };
 
+};
