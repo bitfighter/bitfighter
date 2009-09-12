@@ -1284,6 +1284,7 @@ void renderSoccerBall(Point pos)
    drawCircle(pos, SoccerBallItem::radius);
 }
 
+
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 {
    Color c;

@@ -61,7 +61,7 @@ public:
    GameTypes getGameType() { return SoccerGame; }
    const char *getGameTypeString() { return "Soccer"; }
    virtual const char *getInstructionString() { return "Push the ball into the opposing team's goal."; }
-   bool isTeamGame() { return true; }
+   //bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return false; }
 

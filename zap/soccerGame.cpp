@@ -63,15 +63,25 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
          msg = "A goal was scored on an unknown goal!";
    }
    else if(msgIndex == SoccerMsgScoreGoal)
-   {
-      if(teamIndexAdjusted >= 0)
-         msg = string(clientName.getString()) + " scored a goal on team " + string(mTeams[teamIndexAdjusted].name.getString());
-      else if(teamIndexAdjusted == -1)
-         msg = string(clientName.getString()) + " scored a goal on a neutral goal!"; 
-      else if(teamIndexAdjusted == -2)
-         msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
-      else
-         msg = string(clientName.getString()) + " scored a goal on an unknown goal!";
+   { 
+      if(isTeamGame())
+      {
+         if(teamIndexAdjusted >= 0)
+            msg = string(clientName.getString()) + " scored a goal on team " + string(mTeams[teamIndexAdjusted].name.getString());
+         else if(teamIndexAdjusted == -1)
+            msg = string(clientName.getString()) + " scored a goal on a neutral goal!"; 
+         else if(teamIndexAdjusted == -2)
+            msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+         else
+            msg = string(clientName.getString()) + " scored a goal on an unknown goal!";
+      }
+      else  // every man for himself
+      {
+         if(teamIndexAdjusted >= -1)      // including neutral goals
+            msg = string(clientName.getString()) + " scored a goal!";
+         else if(teamIndexAdjusted == -2)
+            msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
+      }
    }
    else if(msgIndex == SoccerMsgScoreOwnGoal)
    {
@@ -104,7 +114,7 @@ void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
 
    S32 scoringTeam = ship->getTeam();
 
-   if(scoringTeam == -1 || scoringTeam == goalTeamIndex)    // Own-goal
+   if(isTeamGame() && (scoringTeam == -1 || scoringTeam == goalTeamIndex))    // Own-goal
    {
       updateScore(ship, ScoreGoalOwnTeam);
       s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));   // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container

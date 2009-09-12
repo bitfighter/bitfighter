@@ -1501,9 +1501,11 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
                renderSoccerBall(pos);
             glPopMatrix(); 
          }
-         else
+         else  
+         {
+            glColor3f(.7, .7, .7);
             drawCircle(pos, 9);
-         
+         } 
       }
       else if(item.index == ItemMine)  // And a mine
       {
