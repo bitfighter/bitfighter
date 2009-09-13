@@ -77,6 +77,7 @@
 //<li>Default gofast speed reduced to 2000<li>
 //<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
 //<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
+//<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds).  Cannot modify value in editor, but entries survive editing process when level is manually edited.</li>
 //<li>Asteroids... you figure it out!</li>
 
 //</ul>
@@ -141,6 +142,8 @@
 //<li>Better messages when killed by turret or asteroid or mine</li>
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
+//<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds). 
+// Cannot modify number in editor, but entries survive editing process when level is manually edited.</li>
 //<li></li>
 
 // Mac Test:
