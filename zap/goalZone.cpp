@@ -27,6 +27,7 @@
 #include "gameType.h"
 #include "gameObjectRender.h"
 
+
 namespace Zap
 {
 
@@ -51,7 +52,8 @@ void GoalZone::render()
       if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(mPolyBounds, gt->getTeamColor(getTeam()), isFlashing(), glow);
+   renderGoalZone(mPolyBounds, mPolyFill, gt->getTeamColor(getTeam()), isFlashing(), glow);
+
 }
 
 
@@ -68,7 +70,7 @@ bool GoalZone::processArguments(S32 argc, const char **argv)
       return false;
 
    mTeam = atoi(argv[0]);     // Team is first arg
-   processPolyBounds(argc, argv, 1, mPolyBounds);
+   processPolyBounds(argc, argv, 1, mPolyBounds, getGame()->getGridSize());
    computeExtent();
 
    /*for(S32 i = 2; i < argc; i += 2)
@@ -130,16 +132,11 @@ bool GoalZone::collide(GameObject *hitObject)
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
-   {
-      stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
-      for(S32 i = 0; i < mPolyBounds.size(); i++)
-      {
-         stream->write(mPolyBounds[i].x);
-         stream->write(mPolyBounds[i].y);
-      }
-   }
+      packPolygonUpdate(connection, stream);
+
    if(stream->writeFlag(updateMask & TeamMask))
       stream->write(mTeam);
+
    return 0;
 }
 
@@ -147,17 +144,10 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())
    {
-      U32 size = stream->readEnum(gMaxPolygonPoints);
-      for(U32 i = 0; i < size; i++)
-      {
-         Point p;
-         stream->read(&p.x);
-         stream->read(&p.y);
-         mPolyBounds.push_back(p);
-      }
-      if(size)
+      if(unpackPolygonUpdate(connection, stream))
          computeExtent();
    }
+
    if(stream->readFlag())
    {
       stream->read(&mTeam);                      // Zone was captured by team mTeam
@@ -168,6 +158,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
    }
 }
+
 
 void GoalZone::idle(GameObject::IdleCallPath path)
 {

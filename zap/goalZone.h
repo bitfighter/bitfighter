@@ -27,15 +27,16 @@
 #define _GOALZONE_H_
 
 #include "gameObject.h"
+#include "polygon.h"
 
 namespace Zap
 {
 
-class GoalZone : public GameObject
+class GoalZone : public GameObject, public Polygon
 {
 private:
    typedef GameObject Parent;
-   Vector<Point> mPolyBounds;
+
    enum {
       FlashDelay = 500,
       FlashCount = 5,

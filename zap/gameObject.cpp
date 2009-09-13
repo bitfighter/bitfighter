@@ -295,24 +295,6 @@ bool GameObject::getCollisionCircle(U32 stateIndex, Point &point, float &radius)
    return false;
 }
 
-extern S32 gMaxPolygonPoints;
-
-// Read a series of points from a command line, and add them to a Vector of points
-void GameObject::processPolyBounds(S32 argc, const char **argv, S32 firstCoord, Vector<Point> &polyBounds)
-{
-   for(S32 i = firstCoord; i < argc; i += 2)
-   {
-      // Put a cap on the number of vertices in a polygon
-      if(polyBounds.size() >= gMaxPolygonPoints)
-         break;
-
-      Point p;
-      p.x = (F32) atof(argv[i]) * getGame()->getGridSize();
-      p.y = (F32) atof(argv[i+1]) * getGame()->getGridSize();
-      polyBounds.push_back(p);
-   }
-}
-
 
 Rect GameObject::getBounds(U32 stateIndex)
 {

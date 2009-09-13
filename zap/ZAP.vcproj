@@ -471,6 +471,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\polygon.h"
+				>
+			</File>
+			<File
 				RelativePath=".\projectile.cpp"
 				>
 			</File>

@@ -29,22 +29,17 @@
 #include "UI.h"
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
-#include "SweptEllipsoid.h"      // For polygon triangulation
+#include "polygon.h"
 
 namespace Zap
 {
 
 extern S32 gMaxPolygonPoints;
 
-class LoadoutZone : public GameObject
+class LoadoutZone : public GameObject, public Polygon
 {
 private:
    typedef GameObject Parent;
-   Vector<Point> mPolyBounds;    // Outline of loadout zone polygon
-   Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
-
-   Point mCentroid;
-   F32 mLabelAngle;
 
 public:
    // Constructor
@@ -72,7 +67,7 @@ public:
          return false;
 
       mTeam = atoi(argv[0]);     // Team is first arg
-      processPolyBounds(argc, argv, 1, mPolyBounds);
+      processPolyBounds(argc, argv, 1, mPolyBounds, getGame()->getGridSize());
 
       computeExtent();
 
@@ -112,36 +107,23 @@ public:
       return false;
    }
 
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
    {
       stream->write(mTeam);
-      stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
-      for(S32 i = 0; i < mPolyBounds.size(); i++)
-      {
-         stream->write(mPolyBounds[i].x);
-         stream->write(mPolyBounds[i].y);
-      }
+
+      packPolygonUpdate(connection, stream);
+
       return 0;
    }
+
 
    void unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       stream->read(&mTeam);
-      U32 size = stream->readEnum(gMaxPolygonPoints);
-      for(U32 i = 0; i < size; i++)
-      {
-         Point p;
-         stream->read(&p.x);
-         stream->read(&p.y);
-         mPolyBounds.push_back(p);
-      }
-      if(size)
-      {
+
+      if(unpackPolygonUpdate(connection, stream))
          computeExtent();
-         Triangulate::Process(mPolyBounds, mPolyFill);
-         mCentroid = centroid(mPolyBounds);
-         mLabelAngle = angleOfLongestSide(mPolyBounds);
-      }
    }
 
    TNL_DECLARE_CLASS(LoadoutZone);

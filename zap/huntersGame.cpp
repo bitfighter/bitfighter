@@ -608,7 +608,7 @@ bool HuntersNexusObject::processArguments(S32 argc, const char **argv)
       mPolyBounds.push_back(p);
    }
    else           // Bitfighter format
-      processPolyBounds(argc, argv, 0, mPolyBounds);
+      processPolyBounds(argc, argv, 0, mPolyBounds, getGame()->getGridSize());
 
    computeExtent();
 
@@ -641,8 +641,9 @@ void HuntersNexusObject::idle(GameObject::IdleCallPath path)
 void HuntersNexusObject::render()
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(getGame()->getGameType());
-   renderNexus(mPolyBounds, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
+   renderNexus(mPolyBounds, mPolyFill, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
 }
+
 
 bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)
 {
@@ -671,36 +672,19 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
    return false;
 }
 
+
 U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
-   //logprintf("Writing %d nexus boundary points (of %d possible)...", mPolyBounds.size(), gMaxPolygonPoints);
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-   {
-      stream->write(mPolyBounds[i].x);
-      stream->write(mPolyBounds[i].y);
-   }
+   packPolygonUpdate(connection, stream);
 
    return 0;
 }
 
+
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   U32 size = stream->readEnum(gMaxPolygonPoints);
-   //logprintf("Reading %d nexus boundary points", size);
-   for(U32 i = 0; i < size; i++)
-   {
-      Point p;
-      stream->read(&p.x);
-      stream->read(&p.y);
-      mPolyBounds.push_back(p);
-   }
-   if(size)
-   {
+   if(unpackPolygonUpdate(connection, stream))
       computeExtent();
-      mCentroid = centroid(mPolyBounds);
-      mLabelAngle = angleOfLongestSide(mPolyBounds);
-   }
 }
 
 

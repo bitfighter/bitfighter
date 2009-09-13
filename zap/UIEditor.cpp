@@ -1372,56 +1372,51 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
    {
       if(showAllObjects || isDockItem || mShowingReferenceShip)   // Anything that is not a wall
       {
+         Vector<Point> outline;
+         Vector<Point> fill;
+
+         // First, draw the polygon fill
+         for(S32 i = 0; i < item.verts.size(); i++)
+            outline.push_back(isDockItem ? item.verts[i] : convertLevelToCanvasCoord(item.verts[i]));
+
+         Triangulate::Process(outline, fill);     // Horribly inefficient to do this every time we draw, but easy.
+
          Color theFillColor = !hideit ? getTeamColor(item.team) : grayedOutColorDim;
          if(item.index == ItemNexus && !hideit)
             theFillColor = gNexusOpenColor;    // Render Nexus items in pale green to match the actual thing
 
-         // Render polygons in two passes: fill then outline
-         F32 minx = F32_MAX, miny = F32_MAX, maxx = -F32_MAX, maxy = -F32_MAX;
-         Vector<Point> convertedPoints;
+         glColor(!hideit ? theFillColor : grayedOutColorDim);
 
-         for(S32 pass = 0; pass <= 1; pass++)
+         for(S32 i = 0; i < fill.size(); i+=3)
          {
-            if(pass == 0)  // First pass: Fill
-            {
-               glColor(!hideit ? theFillColor : grayedOutColorDim);
-               glBegin(GL_POLYGON);
-            }
-            else           // Second pass: Outline
-            {
-               if(hideit)
-                  glColor(grayedOutColorBright);
-               else if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
-                  glColor3f(1, 1, 0);     // yellow
-               else
-                  glColor3f(1, 1, 1);     // white
-
-               glLineWidth(3);
-               glBegin(GL_LINE_LOOP);
-            }
-
-            for(S32 j = 0; j < item.verts.size(); j++)
-            {
-               Point v;
-               if(isDockItem)
-                  v = item.verts[j];
-               else
-                  v = convertLevelToCanvasCoord(item.verts[j]);
-
-               if(pass == 0)     // To ensure we only add points once...
-                  convertedPoints.push_back(v);
-
-               glVertex2f(v.x, v.y);
-            }
+            glBegin(GL_POLYGON);
+               for(S32 j = i; j < i + 3; j++)
+                  glVertex2f(fill[j].x, fill[j].y);
             glEnd();
          }
+
+         // Now the polygon outline
+         if(hideit)
+            glColor(grayedOutColorBright);
+         else if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
+            glColor3f(1, 1, 0);     // yellow
+         else
+            glColor3f(1, 1, 1);     // white
+
+         glLineWidth(3);
+
+         glBegin(GL_LINE_LOOP);
+            for(S32 i = 0; i < outline.size(); i++)
+               glVertex2f(outline[i].x, outline[i].y);
+         glEnd();
+
          glLineWidth(gDefaultLineWidth);        // Restore line width
 
          // Let's add a label
          glColor(!hideit ? labelColor : grayedOutColorBright);
 
-         F32 ang = angleOfLongestSide(convertedPoints);
-         Point cent = centroid(convertedPoints);
+         F32 ang = angleOfLongestSide(outline);
+         Point cent = centroid(outline);
 
          renderPolygonLabel(cent, ang, labelSize, gGameItemRecs[item.index].onScreenName);
       }

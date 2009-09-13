@@ -687,13 +687,10 @@ void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text)
    glPopMatrix();
 }
 
-void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle)
+
+void renderPolygon(Vector<Point> &fill, Vector<Point> &outline, Color fillColor, Color outlineColor)
 {
-   F32 alpha = 0.5;
-   glColor(theColor * 0.5);
-
-
-   // Render loadout zone trinagle geometry
+   glColor(fillColor);
    for(S32 i = 0; i < fill.size(); i+=3)
    {
       glBegin(GL_POLYGON);
@@ -702,21 +699,39 @@ void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fi
       glEnd();
    }
 
-   glColor(theColor * 0.7);
+   glColor(outlineColor);
    glBegin(GL_LINE_LOOP);
       for(S32 i = 0; i < outline.size(); i++)
          glVertex2f(outline[i].x, outline[i].y);
    glEnd();
+}
 
-   glColor(theColor);
+
+void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle)
+{
+   renderPolygon(fill, outline, theColor * 0.7, theColor);
    renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE");
+}
+
+
+// Goal zone flashes after capture, but glows after touchdown...
+void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Color c, bool isFlashing, F32 glowFraction)
+{
+   F32 alpha = isFlashing ? 0.75 : 0.5;
+
+   Color h(1,1,0);      // Yellow highlight
+
+   Color fillColor = Color(h * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction));
+   Color outlineColor = Color(h * (glowFraction * glowFraction) + c * (1 - glowFraction * glowFraction));
+
+   renderPolygon(fill, outline, fillColor, outlineColor);
 }
 
 
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-void renderNexus(Vector<Point> &bounds, Point centroid, F32 labelAngle, bool open, F32 glowFraction)
+void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, F32 glowFraction)
 {
    Color c;
 
@@ -725,19 +740,9 @@ void renderNexus(Vector<Point> &bounds, Point centroid, F32 labelAngle, bool ope
    else
       c = gNexusClosedColor;
 
-   // Fill
-   glColor(c * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
-   glBegin(GL_POLYGON);
-      for(S32 i = 0; i < bounds.size(); i++)
-         glVertex2f(bounds[i].x, bounds[i].y);
-   glEnd();
+   Color fillColor = Color(c * (glowFraction * glowFraction  + (1 - glowFraction * glowFraction) * 0.5));
 
-   // Outline
-   glColor(c * 0.7);
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < bounds.size(); i++)
-         glVertex2f(bounds[i].x, bounds[i].y);
-   glEnd();
+   renderPolygon(fill, outline, fillColor, c * 0.7);
 
    glColor(c);
    renderPolygonLabel(centroid, labelAngle, 25, "NEXUS");
@@ -1361,31 +1366,6 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp)
    glEnd();
 }
 
-// Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(Vector<Point> &bounds, Color c, bool isFlashing, F32 glowFraction)
-{
-   F32 alpha = 0.5;
-
-   if(isFlashing)
-      alpha = 0.75;
-
-   Color h(1,1,0);      // Yellow highlight
-
-   glColor(h * (glowFraction * glowFraction) + c * alpha * (1 - glowFraction * glowFraction));
-
-   // Fill
-   glBegin(GL_POLYGON);
-   for(S32 i = 0; i < bounds.size(); i++)
-      glVertex(bounds[i]);
-   glEnd();
-
-   // Outline
-   glColor(h * (glowFraction * glowFraction) + c * (1 - glowFraction * glowFraction));
-   glBegin(GL_LINE_LOOP);
-   for(S32 i = 0; i < bounds.size(); i++)
-      glVertex(bounds[i]);
-   glEnd();
-}
 
 struct pixLoc
 {

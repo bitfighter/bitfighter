@@ -529,15 +529,18 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderSpeedZone(Point(-SpeedZone::height / 2, 0), Point(1, 0), gClientGame->getCurrentTime());
             break;
          case 21:
-               Vector<Point> p;
-               p.push_back(Point(-150, -30));
-               p.push_back(Point(150, -30));
-               p.push_back(Point(150, 30));
-               p.push_back(Point(-150, 30));
-               Rect ext(p[0], p[2]);
-            renderNexus(p, centroid(p), angleOfLongestSide(p), gClientGame->getCurrentTime() % 5000 > 2500, 0);
-            break;
+               Vector<Point> o;     // outline
+               o.push_back(Point(-150, -30));
+               o.push_back(Point(150, -30));
+               o.push_back(Point(150, 30));
+               o.push_back(Point(-150, 30));
 
+               Vector<Point> f;     // fill
+               Triangulate::Process(o, f);
+
+               Rect ext(o[0], o[2]);
+               renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
+            break;
       }
       glPopMatrix();
       objStart.y += 75;

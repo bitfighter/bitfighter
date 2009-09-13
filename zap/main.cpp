@@ -126,6 +126,7 @@
 //<li>Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points</li>
 //<li>Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)</li>
 //<li>Old messages now properly cleared out when game is started</li>
+//<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
 //</ul>
 //
 //<u>Server menu enhancements:</u>
@@ -149,6 +150,7 @@
 //<li>Switched F2 and F3 keys in editor</li>
 //<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
 //<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
+//<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
 //<li></li>
 
 // Mac Test:

@@ -31,16 +31,16 @@
 #include "UI.h"
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
+#include "polygon.h"
 
 namespace Zap
 {
 
 extern S32 gMaxPolygonPoints;
 
-class SlipZone : public GameObject
+class SlipZone : public GameObject, public Polygon
 {
    typedef GameObject Parent;
-   Vector<Point> mPolyBounds;
 
 public:
    SlipZone()     // Constructor
@@ -65,7 +65,7 @@ public:
       if(argc < 6)
          return false;
 
-      processPolyBounds(argc, argv, 0, mPolyBounds);
+      processPolyBounds(argc, argv, 0, mPolyBounds, getGame()->getGridSize());
       computeExtent();
 
       /*for(S32 i = 1; i < argc; i += 2)
@@ -114,28 +114,18 @@ public:
       return false;
    }
 
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
    {
-      stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
-      for(S32 i = 0; i < mPolyBounds.size(); i++)
-      {
-         stream->write(mPolyBounds[i].x);
-         stream->write(mPolyBounds[i].y);
-      }
+      packPolygonUpdate(connection, stream);
+
       return 0;
    }
 
+
    void unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
-      U32 size = stream->readEnum(gMaxPolygonPoints);
-      for(U32 i = 0; i < size; i++)
-      {
-         Point p;
-         stream->read(&p.x);
-         stream->read(&p.y);
-         mPolyBounds.push_back(p);
-      }
-      if(size)
+      if(unpackPolygonUpdate(connection, stream))
          computeExtent();
    }
 

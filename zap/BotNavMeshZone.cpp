@@ -33,8 +33,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
-extern S32 gMaxPolygonPoints;
-
 
 Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
@@ -135,7 +133,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   processPolyBounds(argc, argv, 0, mPolyBounds);
+   processPolyBounds(argc, argv, 0, mPolyBounds, getGame()->getGridSize());
    computeExtent();  // Not needed?
    return true;
 }
@@ -171,12 +169,8 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
  U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    stream->writeInt(mZoneID, 16);
-   stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-   {
-      stream->write(mPolyBounds[i].x);
-      stream->write(mPolyBounds[i].y);
-   }
+
+   packPolygonUpdate(connection, stream);
 
    stream->writeEnum(mNeighbors.size(), 15);
    for(S32 i = 0; i < mNeighbors.size(); i++)
@@ -194,21 +188,11 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    mZoneID = stream->readInt(16);
-   U32 size = stream->readEnum(gMaxPolygonPoints);
-   for(U32 i = 0; i < size; i++)
-   {
-      Point p;
-      stream->read(&p.x);
-      stream->read(&p.y);
-      mPolyBounds.push_back(p);
-   }
-   if(size)
-   {
-      computeExtent();
-      Triangulate::Process(mPolyBounds, mPolyFill);
-   }
 
-   size = stream->readEnum(15);
+   if(unpackPolygonUpdate(connection, stream))
+      computeExtent();
+
+   U32 size = stream->readEnum(15);
    for(U32 i = 0; i < size; i++)
    {
       NeighboringZone n;
@@ -222,7 +206,6 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       n.borderEnd = p2;
       mNeighbors.push_back(n);
    }
-
 }
 
 extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint);

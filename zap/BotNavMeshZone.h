@@ -33,6 +33,7 @@
 #include "gameObjectRender.h"
 #include "tnlNetBase.h"
 #include "../glut/glutInclude.h"
+#include "polygon.h"
 
 namespace Zap
 {
@@ -47,13 +48,11 @@ struct NeighboringZone
    F32 distTo;
 };
 
-class BotNavMeshZone : public GameObject
+class BotNavMeshZone : public GameObject, public Polygon
 {
 
 private:   
    typedef GameObject Parent;
-
-Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
 
 public:
    U16 mZoneID;

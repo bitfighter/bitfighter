@@ -28,6 +28,7 @@
 
 #include "gameType.h"
 #include "item.h"
+#include "polygon.h"
 
 namespace Zap
 {
@@ -152,15 +153,10 @@ public:
 
 
 
-class HuntersNexusObject : public GameObject
+class HuntersNexusObject : public GameObject, public Polygon
 {
 private:
    typedef GameObject Parent;
-   Vector<Point> mPolyBounds;
-
-   Point mCentroid;
-   F32 mLabelAngle;
-
    void computeExtent();
   
 public:
