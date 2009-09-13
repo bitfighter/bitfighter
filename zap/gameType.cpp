@@ -799,7 +799,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       if(teamIndex >= 0 && teamIndex < mTeams.size())    // Ignore if team is invalid
          mTeams[teamIndex].spawnPoints.push_back(p);
    }
-   else if(!stricmp(argv[0], "FlagSpawn"))
+   else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
    {
       if(argc < 4)
          return false;
@@ -807,12 +807,15 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       Point p;
       p.read(argv + 2);
       p *= getGame()->getGridSize();
-      FlagSpawn spawn = FlagSpawn(p, 30);
 
-      if( isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // Ignore if team is invalid
+      S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::defaultFlagSpawnRepopDelay;
+
+      FlagSpawn spawn = FlagSpawn(p, time * 1000);
+
+      if(isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // If we can't find a valid team...
          mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
-      else if(teamIndex < 0)
-         mFlagSpawnPoints.push_back(spawn);
+      else
+         mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {

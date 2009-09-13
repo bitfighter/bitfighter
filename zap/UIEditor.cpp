@@ -46,6 +46,7 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "barrier.h"             // For BarrierWidth
 #include "speedZone.h"           // For default speed
 #include "gameItems.h"           // For Asteroid defs
+//#include "flagItem.h"            // For default spawn time for FlagSpawn
 #include "config.h"
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -462,11 +463,14 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
          }
       }
 
-      // Repair, Turrets, Forcefields all have optional additional argument dealing with repair or repopulation
+      // Repair, Turrets, Forcefields, FlagSpawns all have optional additional argument dealing with repair or repopulation
       if( (index == ItemRepair) && argc == 4)
          i.repopDelay = atoi(argv[3]);
 
-      if( (index == ItemTurret || index == ItemForceField) && argc == 5)
+      if(index == ItemFlagSpawn)
+         i.repopDelay = FlagSpawn::defaultFlagSpawnRepopDelay;
+
+      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 5)
          i.repopDelay = atoi(argv[4]);
 
       // SpeedZones have 2 optional extra arguments

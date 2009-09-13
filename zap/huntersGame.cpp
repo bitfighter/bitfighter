@@ -206,6 +206,22 @@ void HuntersGameType::onGhostAvailable(GhostConnection *theConnection)
 }
 
 
+// Runs on the server
+// If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
+void releaseFlag(Game *game, Point pos, Point startVel)
+{
+   HuntersFlagItem *newFlag = new HuntersFlagItem(pos);
+   newFlag->addToGame(game);
+
+   F32 th = TNL::Random::readF() * Float2Pi;
+   F32 f = (TNL::Random::readF() * 2 - 1) * 100;
+   Point vel(cos(th) * f, sin(th) * f);
+   vel += startVel;
+
+   newFlag->setActualVel(vel);
+}
+
+
 void HuntersGameType::idle(GameObject::IdleCallPath path)
 {
    Parent::idle(path);
@@ -257,6 +273,16 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       static StringTableEntry msg("The Nexus is now CLOSED.");
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
+   }
+
+   // Advance all flagSpawn timers and see if it's time for a new flag
+   for(S32 i = 0; i < mFlagSpawnPoints.size(); i++)
+   {
+      if(mFlagSpawnPoints[i].timer.update(deltaT))
+      {
+         releaseFlag(getGame(), mFlagSpawnPoints[i].getPos(), Point(0,0));   // Release a flag
+         mFlagSpawnPoints[i].timer.reset();                                  // Reset the timer
+      }
    }
 }
   
@@ -461,23 +487,13 @@ void HuntersFlagItem::onMountDestroyed()
    if(!mMount.isValid())
       return;
 
-   // drop at least one flag plus as many as the ship
-   //  carries
+   // Drop at least one flag plus as many as the ship carries
    for(U32 i = 0; i < mFlagCount + 1; i++)
-   {
-      HuntersFlagItem *newFlag = new HuntersFlagItem(mMount->getActualPos());
-      newFlag->addToGame(getGame());
+      releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
-      F32 th = TNL::Random::readF() * 2 * 3.14;
-      F32 f = (TNL::Random::readF() * 2 - 1) * 100;
-      Point vel(cos(th) * f, sin(th) * f);
-      vel += mMount->getActualVel();
-
-      newFlag->setActualVel(vel);
-   }
    changeFlagCount(0);
 
-   // now delete yourself
+   // Now delete yourself
    dismount();
    removeFromDatabase();
    deleteObject();

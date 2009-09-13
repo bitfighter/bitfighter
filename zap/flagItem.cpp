@@ -74,7 +74,7 @@ void FlagItem::onAddedToGame(Game *theGame)
 
 bool FlagItem::processArguments(S32 argc, const char **argv)
 {
-   if(argc < 3)
+   if(argc < 3)         // FlagSpawn <team> <x> <y> [timer]
       return false;
 
    mTeam = atoi(argv[0]);
@@ -82,13 +82,15 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    if(!Parent::processArguments(argc-1, argv+1))
       return false;
 
+   S32 time = (argc >= 4) ? atoi(argv[4]) : 0;
+
    initialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
    if(!gServerGame->getGameType()->isTeamFlagGame() || mTeam < 0)
-      gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, 30));
+      gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, time));
    else
-      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(initialPos, 30));
+      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(initialPos, time));
 
    return true;
 }
@@ -211,7 +213,7 @@ void FlagItem::onMountDestroyed()
 FlagSpawn::FlagSpawn(Point pos, S32 delay)
 {
    mPos = pos;
-   mDelay = delay;
+   timer = Timer(delay);
 };
 
 };
