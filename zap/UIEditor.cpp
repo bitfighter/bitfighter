@@ -46,7 +46,6 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "barrier.h"             // For BarrierWidth
 #include "speedZone.h"           // For default speed
 #include "gameItems.h"           // For Asteroid defs
-//#include "flagItem.h"            // For default spawn time for FlagSpawn
 #include "config.h"
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -136,12 +135,12 @@ void EditorUserInterface::populateDock()
    {
       item = constructItem(ItemFlag, Point(xPos, yPos), 0, 0, 0);
       mDockItems.push_back(item);
-
-      yPos += spacer;
-
-      item = constructItem(ItemFlagSpawn, Point(xPos, yPos), 0, 0, 0);
-      mDockItems.push_back(item);
    }
+   yPos += spacer;
+
+   item = constructItem(ItemFlagSpawn, Point(xPos, yPos), 0, 0, 0);
+   mDockItems.push_back(item);
+
 
    yPos += spacer;
    item = constructItem(ItemMine, Point(xPos, yPos), 0, 0, 0);
@@ -210,8 +209,8 @@ GameItemRec gGameItemRecs[] = {
    { "SpeedZone",           false,    false,     true,        false, geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",     "Makes ships go fast in direction of arrow. [P]" },
    { "SoccerBallItem",      false,    false,     false,       false, geomPoint,      'B',    true,   "Soccer balls",           "Ball",     "Ball",       "Soccer ball, can only be used in Soccer games." },
    { "FlagItem",            false,    true,      true,        false, geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",       "Flag item, used by a variety of game types." },
-   { "FlagSpawn",           false,    true,      true,        false, geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",  "Location where flags spawn after capture." },
-   { "BarrierMaker",        true,     false,     false,       false, geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",       "Run of the mill wall item." },
+   { "FlagSpawn",           false,    true,      true,        false, geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",  "Location where flags (or balls in Soccer) spawn after capture." },
+   { "BarrierMaker",        true,     false,     false,       false, geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",       "Run-of-the-mill wall item." },
    { "Teleporter",          false,    false,     false,       false, geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",   "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false, geomPoint,       0,     false,  "Repair items",           "Repair",   "Repair",     "Repairs damage to ships. [B]" },
    { "TestItem",            false,    false,     false,       false, geomPoint,      'x',    true,   "Test items",             "Test",     "Test Item",  "Bouncy object that floats around and gets in the way." },
@@ -508,7 +507,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
          strcpy(mGameType, GameType::validateGameType(argv[0]) );    // validateGameType will return a valid game type, regradless of what's put in
 
          if(strcmp(mGameType, argv[0]))      // If these differ, then what we put in was invalid
-            gEditorUserInterface.setWarnMessage("Invalid or missing GameType parameter", "Press [F2] to configure level");
+            gEditorUserInterface.setWarnMessage("Invalid or missing GameType parameter", "Press [F3] to configure level");
 
          // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
          for(S32 i = 1; i < argc; i++)
@@ -2775,12 +2774,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       copySelection();
    else if(keyCode == KEY_C )             // C - Zoom out
       mOut = true;
-   else if(keyCode == KEY_F2)             // F2 - Level Parameter Editor
+   else if(keyCode == KEY_F3)             // F3 - Level Parameter Editor
    {
       UserInterface::playBoop();
       gGameParamUserInterface.activate();
    }
-   else if(keyCode == KEY_F3)             // F3 - Team Editor Menu
+   else if(keyCode == KEY_F2)             // F2 - Team Editor Menu
    {
       gTeamDefUserInterface.activate();
       UserInterface::playBoop();
@@ -3093,7 +3092,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          gErrorMsgUserInterface.setTitle("INVALID FILE NAME");
          gErrorMsgUserInterface.setMessage(1, "The level file name is invalid or empty.  The level cannot be saved.");
          gErrorMsgUserInterface.setMessage(2, "To correct the problem, please change the file name using the");
-         gErrorMsgUserInterface.setMessage(3, "Game Parameters menu, which you can access by pressing [F2].");
+         gErrorMsgUserInterface.setMessage(3, "Game Parameters menu, which you can access by pressing [F3].");
 
          gErrorMsgUserInterface.activate();
 
@@ -3185,7 +3184,7 @@ void EditorUserInterface::testLevel()
       if(gameTypeError)
       {
          gErrorMsgUserInterface.setMessage(i + 1, "ERROR: GameType is invalid.");
-         gErrorMsgUserInterface.setMessage(i + 2, "(Fix in Level Parameters screen [F2])");
+         gErrorMsgUserInterface.setMessage(i + 2, "(Fix in Level Parameters screen [F3])");
          i+=2;
       }
       gErrorMsgUserInterface.setMessage(i + 3, "Loading this level may cause the game to crash.");
@@ -3251,8 +3250,8 @@ void EditorMenuUserInterface::setupMenus()
    menuItems.push_back(MenuItem("TEST LEVEL",   2, KEY_T, KEY_UNKNOWN));
    menuItems.push_back(MenuItem("SAVE LEVEL",   3, KEY_S, KEY_UNKNOWN));
    menuItems.push_back(MenuItem("INSTRUCTIONS", 4, KEY_I, keyHELP));
-   menuItems.push_back(MenuItem("LEVEL PARAMETERS", 9, KEY_L, KEY_F2));
-   menuItems.push_back(MenuItem("MANAGE TEAMS", 5, KEY_M, KEY_F3));
+   menuItems.push_back(MenuItem("LEVEL PARAMETERS", 9, KEY_L, KEY_F3));
+   menuItems.push_back(MenuItem("MANAGE TEAMS", 5, KEY_M, KEY_F2));
    menuItems.push_back(MenuItem("QUIT",         6, KEY_Q, KEY_UNKNOWN));
 }
 

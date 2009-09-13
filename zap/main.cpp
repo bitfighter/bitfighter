@@ -78,6 +78,7 @@
 //<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
 //<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
 //<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds).  Cannot modify value in editor, but entries survive editing process when level is manually edited.</li>
+//<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
 //<li>Asteroids... you figure it out!</li>
 
 //</ul>
@@ -111,7 +112,8 @@
 //<li>Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
 //<li>Display gofast speed and snapping on item</li>
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
-
+//<li>Switched F2 and F3 keys</li>
+//<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
 
 //</ul>
 //
@@ -144,6 +146,9 @@
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
 //<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds). 
 // Cannot modify number in editor, but entries survive editing process when level is manually edited.</li>
+//<li>Switched F2 and F3 keys in editor</li>
+//<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
+//<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
 //<li></li>
 
 // Mac Test:

@@ -202,20 +202,22 @@ void EditorInstructionsUserInterface::renderPage1()
    drawStringf(col2, y, 18, "[%s]", keyCodeToString(keyHELP));
 
    glColor(txtColor);
-   drawString(col3, y, 18, "Team Editor");
+   drawString(col3, y, 18, "Game Params Editor");
    glColor(keyColor);
    drawStringf(col4, y, 18, "[%s]", keyCodeToString(KEY_F3));
 
    y+=26;
    glColor(txtColor);
-   drawString(col1, y, 18, "Game Params Editor");
+   drawString(col1, y, 18, "Team Editor");
    glColor(keyColor);
    drawStringf(col2, y, 18, "[%s]", keyCodeToString(KEY_F2));
+
    glColor(txtColor);
    drawString(col3, y, 18, "Universal Chat");
    glColor(keyColor);
    drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyOUTGAMECHAT));
 }
+
 
 static const char *page2Strings[] =
 {

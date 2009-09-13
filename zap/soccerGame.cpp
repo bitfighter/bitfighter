@@ -117,7 +117,9 @@ void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
    if(isTeamGame() && (scoringTeam == -1 || scoringTeam == goalTeamIndex))    // Own-goal
    {
       updateScore(ship, ScoreGoalOwnTeam);
-      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));   // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
+
+      // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
+      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));   
    }
    else	   // Goal on someone else's goal
    {
@@ -202,8 +204,6 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 }
 
 
-
-
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 // Constructor
@@ -225,6 +225,10 @@ bool SoccerBallItem::processArguments(S32 argc, const char **argv)
       return false;
 
    initialPos = mMoveState[ActualState].pos;
+
+   // Add the ball's starting point to the list of flag spawn points
+   gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, 0));
+
    return true;
 }
 
@@ -306,8 +310,16 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
 
 void SoccerBallItem::sendHome()
 {
-   mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point();
+   // In soccer game, we use flagSpawn points to designate where the soccer ball should spawn.
+   // We'll simply redefine "initial pos" as a random selection of the flag spawn points
+
+   Vector<FlagSpawn> spawnPoints = getGame()->getGameType()->mFlagSpawnPoints;
+
+   S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
+   initialPos = spawnPoints[spawnIndex].getPos();
+
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
+   mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
    setMaskBits(PositionMask);
    updateExtent();
 }

@@ -812,6 +812,9 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
 
       FlagSpawn spawn = FlagSpawn(p, time * 1000);
 
+      // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
+      // TeamFlagGame is CTF.
+
       if(isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // If we can't find a valid team...
          mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
       else

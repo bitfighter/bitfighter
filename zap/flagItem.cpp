@@ -74,7 +74,7 @@ void FlagItem::onAddedToGame(Game *theGame)
 
 bool FlagItem::processArguments(S32 argc, const char **argv)
 {
-   if(argc < 3)         // FlagSpawn <team> <x> <y> [timer]
+   if(argc < 3)         // FlagItem <team> <x> <y>
       return false;
 
    mTeam = atoi(argv[0]);
@@ -149,7 +149,7 @@ void FlagItem::sendHome()
    initialPos = spawnPoints[spawnIndex].getPos();
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
-   mMoveState[ActualState].vel = Point(0,0);
+   mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
    setMaskBits(PositionMask);
    updateExtent();
 }

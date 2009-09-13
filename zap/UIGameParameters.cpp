@@ -365,52 +365,6 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(menuItems[selectedIndex].mValS.size())
          menuItems[selectedIndex].mValS.erase(menuItems[selectedIndex].mValS.size()-1);
    }
-
-   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_RIGHT))   // Increment value by mMinVal, use shift to go faster!
-   {
-      S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
-
-      if(menuItems[selectedIndex].mValI + inc <= menuItems[selectedIndex].mMaxVal)
-         menuItems[selectedIndex].mValI += inc;
-      else
-         menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMaxVal;
-   }
-   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_LEFT))    // Decrement value by mMinVal, use shift to go faster!
-   {
-      S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
-
-      if(menuItems[selectedIndex].mValI - inc >= menuItems[selectedIndex].mMinVal)
-         menuItems[selectedIndex].mValI -= inc;
-      else
-         menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMinVal;
-   }
-
-   else if (menuItems[selectedIndex].mValType == TypeGameType && (keyCode == KEY_RIGHT))    // Next game type
-   {
-      menuItems[selectedIndex].mValI++;
-      ignoreGameParams = true;              // Game parameters specified in level file no longer make sense if we've changed game type!
-      if(!gGameTypeNames[menuItems[selectedIndex].mValI])
-         menuItems[selectedIndex].mValI = 0;
-
-      //menuItems[selectedIndex].mValS = gGameTypeNames[menuItems[selectedIndex].mValI];
-      updateMenuItems(menuItems[selectedIndex].mValI);
-   }
-   else if (menuItems[selectedIndex].mValType == TypeGameType && (keyCode == KEY_LEFT))    // Prev game type
-   {
-      menuItems[selectedIndex].mValI--;
-      if(menuItems[selectedIndex].mValI < 0)
-      {
-         // Find last menuItem string
-         S32 indx;
-         for(indx = 0; gGameTypeNames[indx]; indx++)
-            ;     // Do nothing...
-         indx--;
-         menuItems[selectedIndex].mValI = indx;
-      }
-       //menuItems[selectedIndex].mValS = gGameTypeNames[menuItems[selectedIndex].mValI];
-       updateMenuItems(menuItems[selectedIndex].mValI);
-   }
-
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK || (selectedIndex == mQuitItemIndex && keyCode == KEY_ENTER))       // Esc - Quit
    {
       UserInterface::playBoop();
@@ -434,6 +388,67 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       UserInterface::playBoop();
       gChatInterface.activate();
+   }
+
+   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_RIGHT))   // Increment value by mMinVal, use shift to go faster!
+   {
+      S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
+
+      if(menuItems[selectedIndex].mValI + inc <= menuItems[selectedIndex].mMaxVal)
+         menuItems[selectedIndex].mValI += inc;
+      else
+         menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMaxVal;
+   }
+   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_LEFT))    // Decrement value by mMinVal, use shift to go faster!
+   {
+      S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
+
+      if(menuItems[selectedIndex].mValI - inc >= menuItems[selectedIndex].mMinVal)
+         menuItems[selectedIndex].mValI -= inc;
+      else
+         menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMinVal;
+   }
+   else if(menuItems[selectedIndex].mValType == TypeGameType)     // Game type menu item
+   {
+      if(keyCode == KEY_RIGHT)         // Next game type
+      {
+         menuItems[selectedIndex].mValI++;
+         ignoreGameParams = true;              // Game parameters specified in level file no longer make sense if we've changed game type!
+         if(!gGameTypeNames[menuItems[selectedIndex].mValI])
+            menuItems[selectedIndex].mValI = 0;
+
+         //menuItems[selectedIndex].mValS = gGameTypeNames[menuItems[selectedIndex].mValI];
+         updateMenuItems(menuItems[selectedIndex].mValI);
+      }
+      else if(keyCode == KEY_LEFT)    // Prev game type
+      {
+         menuItems[selectedIndex].mValI--;
+         if(menuItems[selectedIndex].mValI < 0)
+         {
+            // Find last menuItem string
+            S32 indx;
+            for(indx = 0; gGameTypeNames[indx]; indx++)
+               ;     // Do nothing...
+            indx--;
+            menuItems[selectedIndex].mValI = indx;
+         }
+          updateMenuItems(menuItems[selectedIndex].mValI);
+      }
+      else    // First letter of a game type?
+      {
+         for(S32 i = 0; gGameTypeNames[i]; i++)
+         {
+            // The following seems rather wasteful, but this is hardly a performance sensitive area...
+            GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
+
+            if(toupper(gameType->getGameTypeString()[0]) == toupper(ascii))      // Compare first letter of game name with what user typed
+            {
+               menuItems[selectedIndex].mValI = i;
+               updateMenuItems(i);
+               break;
+            }
+         }
+      }
    }
 
    else if((menuItems[selectedIndex].mValType == TypeShortString || menuItems[selectedIndex].mValType == TypeLongString) && ascii)
