@@ -770,23 +770,40 @@ extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 wid
 extern S32 gMaxPlayers;
 
 
+Team GameType::readTeamFromLevelLine(S32 argc, const char **argv)
+{
+   Team t;
+   if(argc < 5)                     // Enough arguments?
+   {
+      t.numPlayers = -1;            // Signal that this is a bogus object
+      return t;
+   }
+
+   t.numPlayers = 0;
+
+   t.name.set(argv[1]);
+   t.color.read(argv + 2);
+
+   return t;
+}
+
+
 // Returns true if we ceated an object here, false otherwise
 bool GameType::processLevelItem(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Team"))
    {
-      if(argc < 5)                     // Enough arguments?
-         return false;
-
       if(mTeams.size() >= gMaxTeams)   // Too many teams?
          return false;
 
-      Team t;
-      t.numPlayers = 0;
-
-      t.name.set(argv[1]);
-      t.color.read(argv + 2);
-      mTeams.push_back(t);
+      Team team = readTeamFromLevelLine(argc, argv);
+      if(team.numPlayers != -1)
+         mTeams.push_back(team);
+   }
+   else if(!strcmp(argv[0], "Script"))
+   {
+      for(S32 i = 1; i < argc; i++)
+         mScriptArgs.push_back(argv[i]);
    }
    else if(!stricmp(argv[0], "Spawn"))
    {

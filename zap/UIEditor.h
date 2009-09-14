@@ -41,6 +41,8 @@ namespace Zap
 #define nameLen 256
 #define gameTypeLen 256
 
+class Team;
+
 enum VertexRenderStyles
 {
    HighlightedVertex,               // Highlighted vertex
@@ -213,12 +215,6 @@ private:
 public:
    EditorUserInterface();           // Constructor
 
-   struct Team    // Pretty basic: correlates a name and a color
-   {
-      char name[nameLen];
-      Color color;
-   };
-
    void setLevelFileName(string name);
    string getLevelFileName();
    void loadLevel();
@@ -259,6 +255,9 @@ public:
    void populateDock();                         // Load up dock with game-specific items to drag and drop
 
    F32 mGridSize;
+
+   Vector<const char *>mScriptArgs;             // Script and args, if any
+
 
    void idle(U32 timeDelta);
    void deleteSelection(bool objectsOnly);      // Delete selected items (true = items only, false = items & vertices)

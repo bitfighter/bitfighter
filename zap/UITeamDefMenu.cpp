@@ -184,7 +184,7 @@ void TeamDefUserInterface::render()
          glColor(gEditorUserInterface.mTeams[j].color);
          drawCenteredStringf(y, fontsize,
                      "Team %d: %s   (%2.0f, %2.0f, %2.0f)",
-                      j+1, gEditorUserInterface.mTeams[j].name,
+                      j+1, gEditorUserInterface.mTeams[j].name.getString(),
                       gEditorUserInterface.mTeams[j].color.r * 100,
                       gEditorUserInterface.mTeams[j].color.g * 100,
                       gEditorUserInterface.mTeams[j].color.b * 100);
@@ -217,6 +217,9 @@ void TeamDefUserInterface::onEscape()
    UserInterface::reactivatePrevUI();
 }
 
+
+class Team;
+
 void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_RIGHT  || keyCode == BUTTON_DPAD_RIGHT || keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)    // Change col
@@ -236,8 +239,8 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          gEditorUserInterface.mTeams.clear();
          for(U32 i = 0; i < count; i++)
          {
-            EditorUserInterface::Team t;
-            strcpy(t.name, gTeamPresets[i].name);
+            Team t;
+            t.name = gTeamPresets[i].name;
             t.color.set(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
             gEditorUserInterface.mTeams.push_back(t);
          }
@@ -245,7 +248,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                          // Replace selection with preset of number pressed
       {
          U32 indx = (ascii - '1');
-         strcpy(gEditorUserInterface.mTeams[selectedIndex].name, gTeamPresets[indx].name);
+         gEditorUserInterface.mTeams[selectedIndex].name = gTeamPresets[indx].name;
          gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
       }
    }
@@ -268,7 +271,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       gEditorUserInterface.mTeams.insert(selectedIndex);
 
-      strcpy(gEditorUserInterface.mTeams[selectedIndex].name, gTeamPresets[0].name);
+      gEditorUserInterface.mTeams[selectedIndex].name = gTeamPresets[0].name;
       gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
 
       if(selectedIndex < 0)      // It can happen with too many deletes

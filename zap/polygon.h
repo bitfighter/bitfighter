@@ -45,7 +45,6 @@ protected:
    F32 mLabelAngle;
 
 
-
    void packPolygonUpdate(GhostConnection *connection, BitStream *stream)
    {
       stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
@@ -93,10 +92,7 @@ protected:
          polyBounds.push_back(p);
       }
    }
-
 };
-
-
 
 
 };

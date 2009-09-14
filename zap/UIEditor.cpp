@@ -80,7 +80,7 @@ EditorUserInterface::EditorUserInterface()
 {
    setMenuID(EditorUI);
 
-   // Create some items for the dock...  One of each, please
+   // Create some items for the dock...  One of each, please!
    showAllObjects = true;
    mWasTesting = false;
 
@@ -296,7 +296,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
    if(mTeams.size() == 0)
    {
       Team t;
-      strcpy(t.name, gTeamPresets[0].name);
+      t.name = gTeamPresets[0].name;
       t.color.set(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
       mTeams.push_back(t);
    }
@@ -520,15 +520,25 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
             mGridSize = atof(argv[1]);
       }
 
+      else if(!strcmp(argv[0], "Script"))
+      {
+         // Put the command and params into a vector for later reference.  We only run when playing
+         for(S32 i = 1; i < argc; i++)
+            mScriptArgs.push_back(argv[i]);
+      }
+
       // Parse Team definition line
       else if(!strcmp(argv[0], "Team"))
-         if(argc == 5 && mTeams.size() < GameType::gMaxTeams)      // Check for right number of args, and make sure we don't have too many teams
-         {
-            Team t;
-            strcpy(t.name, argv[1]);
-            t.color.read(argv + 2);
-            mTeams.push_back(t);
-         }
+      {
+         if(mTeams.size() >= GameType::gMaxTeams)
+            return;
+
+         Team team = GameType::readTeamFromLevelLine(argc, argv);
+
+         // If team was read and processed properly, numPlayers will be 0
+         if(team.numPlayers != -1)
+            mTeams.push_back(team);
+      }
    }
 }     // end processLevelLoadLine
 
@@ -634,9 +644,8 @@ void EditorUserInterface::teamsHaveChanged()
       teamsChanged = true;
    else
       for(S32 i = 0; i < mTeams.size(); i++)
-         if(mTeams[i].color != mOldTeams[i].color || strcmp(mTeams[i].name, mOldTeams[i].name))
+         if(mTeams[i].color != mOldTeams[i].color || mTeams[i].name != mOldTeams[i].name)
          {
-           logprintf("%s != %s",mTeams[i].name, mOldTeams[i].name);
             teamsChanged = true;
             break;
          }
@@ -3111,8 +3120,17 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       }
 
       for(S32 i = 0; i < mTeams.size(); i++)
-         fprintf(f, "Team %s %g %g %g\n", mTeams[i].name,
+         fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
+
+      // Save script and parameters, if any.  If none, omit the line altogether.
+      if(mScriptArgs.size() > 0)
+      {
+         string scriptLine = "Script";
+         for(S32 i = 0; i < mScriptArgs.size(); i++)
+            scriptLine += string(" ") + mScriptArgs[i];
+         fprintf(f, scriptLine.c_str());
+      }
 
       // Write out all maze items
       for(S32 i = 0; i < mItems.size(); i++)

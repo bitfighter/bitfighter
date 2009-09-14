@@ -79,16 +79,18 @@ public:
 
 //////////
 
-struct Team
+class Team
 {
+public:
    StringTableEntry name;
    Color color;
    Vector<Point> spawnPoints;
    Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
 
-   U32 numPlayers;                  // Needs to be computed before use, not dynamically tracked
+   U32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
    S32 score;
    F32 rating;
+
    Team() { numPlayers = 0; score = 0; rating = 0; }     // Constructor
 };
 
@@ -194,10 +196,9 @@ public:
 
    virtual ClientRef *allocClientRef() { return new ClientRef; }
 
-   Vector<Team> mTeams;
-
-
-   Vector<FlagSpawn> mFlagSpawnPoints;     // List of non-team specific spawn points for flags
+   Vector<Team> mTeams;                   // List of teams
+   Vector<const char *> mScriptArgs;      // List of script params.  Script name itself is the first one.
+   Vector<FlagSpawn> mFlagSpawnPoints;    // List of non-team specific spawn points for flags
 
    StringTableEntry mLevelName;
    StringTableEntry mLevelDescription;
@@ -279,7 +280,6 @@ public:
    bool processArguments(S32 argc, const char **argv);
    virtual Vector<GameType::ParameterDescription> describeArguments();
 
-   virtual bool processLevelItem(S32 argc, const char **argv);
    void onAddedToGame(Game *theGame);
 
    void idle(GameObject::IdleCallPath path);
@@ -333,6 +333,11 @@ public:
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
    virtual void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
+
+   // Functions related to loading levels
+   virtual bool processLevelItem(S32 argc, const char **argv);
+   static Team readTeamFromLevelLine(S32 argc, const char **argv);
+
 
    void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount));
