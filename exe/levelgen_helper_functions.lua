@@ -25,7 +25,7 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
--- These functions will be included with every robot automatically.
+-- These functions will be included with every levelgen script automatically.
 -- Do not tinker with these unless you are sure you know what you are doing!!
 -- And even then, be careful!
 -------------------------------------------------------------------------------
@@ -35,70 +35,20 @@
 -------------------------------------------------------------------------------
 
 --
--- Create a reference to our bot
+-- Create a reference to our levelgen
 --
-bot = LuaRobot(Robot)
-
-
---
--- Default robot name, can and should be overwritten by user robots, but we need to have something...
---
-function getName()
-    return("FancyNancy")
-end
-
---
--- Wrap getFiringSolution with some code that helps C++ sort out what type of item
--- we're handing it
---
-function getFiringSolution(item)
-    if(item == nil) then
-        return nil
-    end
-
-    type = item:getClassID()
-    if(type == nil) then
-        return nil
-    end
-
-    return bot:getFiringSolution(type, item)
-end
-
-
---
--- Convenience function: find closest item in a list of items
--- Will return nil if items has 0 elements
---
-function findClosest(items)
-
-    local closest = nil
-    local minDist = 999999999
-    local loc = bot:getLoc()
-
-    for indx, item in ipairs(items) do              -- Iterate over our list
-        -- Use distSquared because it is less computationally expensive
-        -- and works great for comparing distances
-        local d = loc:distSquared(item:getLoc() )   -- Dist btwn robot and TestItem
-
-        if(d < minDist) then                        -- Is it the closest yet?
-           closest = item
-           minDist = d
-        end
-    end
-
-    return closest
-end
+levelgen = LuaLevelGenerator(LevelGen)
 
 
 --
 -- Convenience function... let user use logprint directly, without referencing the bot
 --
 function logprint(msg)
-    bot:logprint(tostring(msg))
+    levelgen:logprint(tostring(msg))
 end
 
 
 --
 -- Let the log know that this file was processed correctly
 --
-logprint("Loaded robot helper functions...")
+logprint("Loaded levelgen helper functions...")

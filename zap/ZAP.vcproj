@@ -716,6 +716,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\luaLevelGenerator.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\luaLevelGenerator.h"
+			>
+		</File>
+		<File
 			RelativePath=".\luaObject.cpp"
 			>
 		</File>

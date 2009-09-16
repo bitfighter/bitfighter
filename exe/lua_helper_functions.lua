@@ -25,7 +25,7 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
--- These functions will be included with every robot automatically.
+-- These functions will be included with every robot and levelgen script automatically.
 -- Do not tinker with these unless you are sure you know what you are doing!!
 -- And even then, be careful!
 -------------------------------------------------------------------------------
@@ -35,70 +35,65 @@
 -------------------------------------------------------------------------------
 
 --
--- Create a reference to our bot
+-- Blot out some functions that seem particularly insecure
 --
-bot = LuaRobot(Robot)
+--[[  -- Not sure about these...
+debug.debug = nil
+debug.getfenv = getfenv
+debug.getregistry = nil
+--]]
+dofile = nil
+loadfile = nil
 
-
 --
--- Default robot name, can and should be overwritten by user robots, but we need to have something...
+-- strict.lua
+-- Checks uses of undeclared global variables
+-- All global variables must be 'declared' through a regular assignment
+-- (even assigning nil will do) in a main chunk before being used
+-- anywhere or assigned to inside a function.
 --
-function getName()
-    return("FancyNancy")
+local mt = getmetatable(_G)
+if mt == nil then
+  mt = {}
+  setmetatable(_G, mt)
 end
 
---
--- Wrap getFiringSolution with some code that helps C++ sort out what type of item
--- we're handing it
---
-function getFiringSolution(item)
-    if(item == nil) then
-        return nil
+__STRICT = true
+mt.__declared = {}
+
+mt.__newindex = function (t, n, v)
+  if __STRICT and not mt.__declared[n] then
+    local w = debug.getinfo(2, "S").what
+    if w ~= "main" and w ~= "C" then
+      error("Attempted assign to undeclared variable '"..n.."'.  All vars must be declared 'local' or 'global'.", 2)
     end
+    mt.__declared[n] = true
+  end
+  rawset(t, n, v)
+end
 
-    type = item:getClassID()
-    if(type == nil) then
-        return nil
+mt.__index = function (t, n)
+  if not mt.__declared[n] and debug.getinfo(2, "S").what ~= "C" then
+    error("Variable '"..n.."' cannot be used if it is not first declared.", 2)
+  end
+  return rawget(t, n)
+end
+
+function global(...)
+   for _, v in ipairs{...} do mt.__declared[v] = true end
+end
+
+
+--
+-- Convenience function, use in place of ipairs, from PiL book sec 19.3
+--     e.g.  for item in values(items) do...
+-- Hopefully, this will make life easier for beginners.
+--
+function values(t)
+    local i = 0
+    local n = table.getn(t)
+    return function()
+        i = i + 1
+        if i <= n then return t[i] end
     end
-
-    return bot:getFiringSolution(type, item)
 end
-
-
---
--- Convenience function: find closest item in a list of items
--- Will return nil if items has 0 elements
---
-function findClosest(items)
-
-    local closest = nil
-    local minDist = 999999999
-    local loc = bot:getLoc()
-
-    for indx, item in ipairs(items) do              -- Iterate over our list
-        -- Use distSquared because it is less computationally expensive
-        -- and works great for comparing distances
-        local d = loc:distSquared(item:getLoc() )   -- Dist btwn robot and TestItem
-
-        if(d < minDist) then                        -- Is it the closest yet?
-           closest = item
-           minDist = d
-        end
-    end
-
-    return closest
-end
-
-
---
--- Convenience function... let user use logprint directly, without referencing the bot
---
-function logprint(msg)
-    bot:logprint(tostring(msg))
-end
-
-
---
--- Let the log know that this file was processed correctly
---
-logprint("Loaded robot helper functions...")

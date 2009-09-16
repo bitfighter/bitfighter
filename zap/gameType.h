@@ -197,7 +197,7 @@ public:
    virtual ClientRef *allocClientRef() { return new ClientRef; }
 
    Vector<Team> mTeams;                   // List of teams
-   Vector<const char *> mScriptArgs;      // List of script params.  Script name itself is the first one.
+   Vector<string> mScriptArgs;            // List of script params.  Script name itself is the first one.
    Vector<FlagSpawn> mFlagSpawnPoints;    // List of non-team specific spawn points for flags
 
    StringTableEntry mLevelName;

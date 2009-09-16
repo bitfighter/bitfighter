@@ -256,7 +256,7 @@ public:
 
    F32 mGridSize;
 
-   Vector<const char *>mScriptArgs;             // Script and args, if any
+   Vector<string>mScriptArgs;                   // Script and args, if any
 
 
    void idle(U32 timeDelta);

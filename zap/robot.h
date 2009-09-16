@@ -81,9 +81,14 @@ public:
    ~Robot();          // Destructor
 
    bool initialize(Point p);
-   void cleanupAndTerminate(lua_State *L);
+
+   // Static methods that should probably moved elsewhere, as we're using them from the levelgen scripts
+   static void cleanupAndTerminate(lua_State *L);
+   
    void kill(DamageInfo *theInfo);
    void kill();
+
+
 
    void idle(IdleCallPath path);
 

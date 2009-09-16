@@ -31,8 +31,9 @@
 #include "../lua/include/lunar.h"
 #include "tnl.h"
 #include "point.h"
-//#include "luaGameInfo.h"      // For LuaPoint def
+#include <string>
 
+using namespace std;
 using namespace TNL;
 
 
@@ -57,12 +58,15 @@ protected:
    static void clearStack(lua_State *L);
    static void checkArgCount(lua_State *L, S32 argsWanted, const char *functionName);
    static F32 getFloat(lua_State *L, S32 index, const char *functionName);
+   static bool getBool(lua_State *L, S32 index, const char *functionName);
    static lua_Integer getInt(lua_State *L, S32 index, const char *functionName);
    static lua_Integer getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal);
    static const char *getString(lua_State *L, S32 index, const char *functionName);
    static Point getPoint(lua_State *L, S32 index, const char *functionName);
 
    static void setfield (lua_State *L, const char *key, F32 value);
+
+   void setLuaArgs(lua_State *L, Vector<string> args);
 
 
 public:
@@ -76,8 +80,48 @@ public:
    static S32 returnBool(lua_State *L, bool boolean);
    static S32 returnNil(lua_State *L);
 
+   static void LuaObject::stackdump(lua_State* L);
+
+
 };
 
+///////////////////////////////
+
+class LuaPoint : public LuaObject
+{
+private:
+   Point mPoint;                  // Underlying point container
+
+public:
+   LuaPoint(lua_State *L);        // Lua constructor
+   LuaPoint(Point point);         // C++ constructor
+
+   ~LuaPoint();                   // Destructor
+
+   static const char className[];
+
+   static Lunar<LuaPoint>::RegType methods[];
+
+   Point getPoint() { return mPoint; }
+
+   S32 x(lua_State *L);
+   S32 y(lua_State *L);
+
+   S32 setxy(lua_State *L);
+   S32 setx(lua_State *L);
+   S32 sety(lua_State *L);
+
+   S32 equals(lua_State *L);     // Does point equal another point?
+
+   // Wrap some of our standard point methods
+   S32 distanceTo(lua_State *L);
+   S32 distSquared(lua_State *L);
+   S32 angleTo(lua_State *L);
+   S32 len(lua_State *L);
+   S32 lenSquared(lua_State *L);
+   S32 normalize(lua_State *L);
+
+};
 
 };
 

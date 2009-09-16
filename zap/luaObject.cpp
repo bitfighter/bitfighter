@@ -37,12 +37,24 @@
 #include "teleporter.h"
 #include "engineeredObjects.h"    // For getItem()
 
-#include <string>
 
-using namespace std;
 
 namespace Zap
 {
+
+void LuaObject::setLuaArgs(lua_State *L, Vector<string> args)
+{
+   // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot/script as the 0th element.
+   lua_createtable(L, args.size(), 0);
+
+   for(S32 i = 0; i < args.size(); i++)
+   {
+      lua_pushstring(L, args[i].c_str());
+      lua_rawseti(L, -2, i);
+   }
+   lua_setglobal(L, "arg");
+}
+
 
 // Returns a point to calling Lua function
 S32 LuaObject::returnPoint(lua_State *L, Point point)
@@ -196,6 +208,21 @@ F32 LuaObject::getFloat(lua_State *L, S32 index, const char *functionName)
 }
 
 
+// Pop a boolean off stack, and return it
+bool LuaObject::getBool(lua_State *L, S32 index, const char *functionName)
+{
+   if(!lua_isboolean(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", functionName, index);
+      logprintf(msg);
+      throw(string(msg));
+   }
+
+   return (bool) lua_toboolean(L, index);
+}
+
+
 // Pop a string or string-like object off stack, check its type, and return it
 const char *LuaObject::getString(lua_State *L, S32 index, const char *functionName)
 {
@@ -269,5 +296,193 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
 }
 
 
+// Adapted from http://cc.byexamples.com/20081119/lua-stack-dump-for-c/ 
+void LuaObject::stackdump(lua_State* l)  
+{  
+    int top = lua_gettop(l); 
+  
+    logprintf("total in stack %d\n",top);  
+  
+    for (S32 i = 1; i <= top; i++)  
+    {  /* repeat for each level */  
+        int t = lua_type(l, i);  
+        switch (t) {  
+            case LUA_TSTRING:  /* strings */  
+                logprintf("string: '%s'", lua_tostring(l, i));  
+                break;  
+            case LUA_TBOOLEAN:  /* booleans */  
+                logprintf("boolean %s",lua_toboolean(l, i) ? "true" : "false");  
+                break;  
+            case LUA_TNUMBER:  /* numbers */  
+                logprintf("number: %g", lua_tonumber(l, i));  
+                break;  
+            default:  /* other values */  
+                logprintf("%s", lua_typename(l, t));  
+                break;  
+        }  
+    }  
+ }
 
+////////////////////////////////////
+////////////////////////////////////
+
+const char LuaPoint::className[] = "Point";      // Class name as it appears to Lua scripts
+
+// Lua Constructor
+LuaPoint::LuaPoint(lua_State *L)
+{
+   static const char *methodName = "LuaPoint constructor";
+
+   checkArgCount(L, 2, methodName);
+   F32 x =  getFloat(L, 1, methodName);
+   F32 y =  getFloat(L, 2, methodName);
+
+   mPoint = Point(x, y);
+}
+
+
+// C++ Constructor -- specify items
+LuaPoint::LuaPoint(Point point)
+{
+   mPoint = point;
+}
+
+
+// Destructor
+LuaPoint::~LuaPoint()
+{
+   // logprintf("deleted LuaPoint object (%p)\n", this);    
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<LuaPoint>::RegType LuaPoint::methods[] =
+{
+   method(LuaPoint, x),
+   method(LuaPoint, y),
+   
+   method(LuaPoint, setx),
+   method(LuaPoint, sety),
+   method(LuaPoint, setxy),
+
+   method(LuaPoint, equals),
+   method(LuaPoint, distanceTo),
+   method(LuaPoint, distSquared),
+   method(LuaPoint, angleTo),
+   method(LuaPoint, len),
+   method(LuaPoint, lenSquared),
+   method(LuaPoint, normalize),
+   
+
+   {0,0}    // End method list
 };
+
+
+S32 LuaPoint::x(lua_State *L)  { return returnFloat(L, mPoint.x); }
+S32 LuaPoint::y(lua_State *L)  { return returnFloat(L, mPoint.y); }
+
+
+S32 LuaPoint::setxy(lua_State *L)  
+{ 
+   static const char *methodName = "LuaPoint:setxy()";
+   checkArgCount(L, 2, methodName);
+   F32 x =  getFloat(L, 1, methodName);
+   F32 y =  getFloat(L, 2, methodName);
+
+   mPoint = Point(x, y);
+   return 0;
+}
+
+S32 LuaPoint::setx(lua_State *L)  
+{ 
+   static const char *methodName = "LuaPoint:setx()";
+   checkArgCount(L, 1, methodName);
+   F32 x =  getFloat(L, 1, methodName);
+
+   mPoint.x = x;
+   return 0;
+}
+
+
+S32 LuaPoint::sety(lua_State *L)  
+{ 
+   static const char *methodName = "LuaPoint:sety()";
+   checkArgCount(L, 1, methodName);
+   F32 y =  getFloat(L, 1, methodName);
+
+   mPoint.y = y;
+   return 0;
+}
+
+
+// Are two points equal?
+S32 LuaPoint::equals(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:equals()";
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   double EPSILON = .000000001;
+   return returnBool(L, ((mPoint.x - point.x < EPSILON) || (mPoint.y - point.y < EPSILON)) );
+}
+
+
+S32 LuaPoint::len(lua_State *L)
+{
+   checkArgCount(L, 0, "LuaPoint:len()");
+   return returnFloat(L, mPoint.len());
+}
+
+
+S32 LuaPoint::lenSquared(lua_State *L)
+{
+   checkArgCount(L, 0, "LuaPoint:lenSquared()");
+   return returnFloat(L, mPoint.lenSquared());
+}
+
+S32 LuaPoint::distanceTo(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:distanceTo()";
+
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   return returnFloat(L, mPoint.distanceTo(point));
+}
+
+
+S32 LuaPoint::distSquared(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:distSquared()";
+
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   return returnFloat(L, mPoint.distSquared(point));
+}
+
+
+S32 LuaPoint::angleTo(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:angleTo()";
+
+   checkArgCount(L, 1, methodName);
+   Point point = LuaObject::getPoint(L, 1, methodName);
+
+   return returnFloat(L, mPoint.angleTo(point));
+}
+
+
+S32 LuaPoint::normalize(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:normalize()";
+
+   checkArgCount(L, 1, methodName);
+   F32 len = LuaObject::getFloat(L, 1, methodName);
+
+   mPoint.normalize(len);
+   return returnLuaPoint(L, this);
+}
+
+
+}  

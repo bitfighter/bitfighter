@@ -802,8 +802,9 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    }
    else if(!strcmp(argv[0], "Script"))
    {
+      mScriptArgs.clear();    // Clear out any args from a previous Script line
       for(S32 i = 1; i < argc; i++)
-         mScriptArgs.push_back(argv[i]);
+         mScriptArgs.push_back(string(argv[i]).c_str());    // Use string to make a const char copy of the param 
    }
    else if(!stricmp(argv[0], "Spawn"))
    {

@@ -42,6 +42,7 @@
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
+#include "LuaLevelGenerator.h"
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 
@@ -473,6 +474,22 @@ void ServerGame::cycleLevel(S32 nextLevel)
 }
 
 
+// Need to handle both forward and backward slashes... will return pathname with trailing delimeter.
+inline string getPathFromFilename( const string& filename )
+{
+   size_t pos1 = filename.rfind("/");
+   size_t pos2 = filename.rfind("\\");
+
+   if(pos1 == string::npos)
+      pos1 = 0;
+
+   if(pos2 == string::npos)
+      pos2 = 0;
+
+   return filename.substr( 0, max(pos1, pos2) + 1 );
+}
+
+
 bool ServerGame::loadLevel(string filename)
 {
    string origFilename = filename;
@@ -490,10 +507,21 @@ bool ServerGame::loadLevel(string filename)
       }
    }
 
+   // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())
    {
+      logprintf("Warning: Missing game type... using default");
       GameType *g = new GameType;
       g->addToGame(this);
+   }
+
+   // If there was a script specified in the level file, now might be a fine time to try running it!
+   if(getGameType()->mScriptArgs.size() > 0)
+   {
+      // The script file will be the first argument, subsequent args will be passed on to the script.
+      // We'll assume that the script lives in the same folder as the level file.  Hope we don't need to get too fancy here...
+      // Now we've crammed all our action into the constructor... is this ok design?
+      LuaLevelGenerator levelgen = LuaLevelGenerator(getPathFromFilename(filename), getGameType()->mScriptArgs);
    }
 
    return true;

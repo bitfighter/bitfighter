@@ -219,7 +219,8 @@ public:
    void resetLevelLoadIndex();
    void loadNextLevel();
    string getCurrentLevelLoadName();      // For updating the UI
-   bool loadLevel(string fileName);
+
+   bool loadLevel(string fileName);       // Load a level
 
    void cycleLevel(S32 newLevelIndex = -1);
    string getLevelFileName(string base);     // Handles prepending subfolder, if needed

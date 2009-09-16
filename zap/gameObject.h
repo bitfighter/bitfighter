@@ -26,8 +26,8 @@
 #ifndef _GAMEOBJECT_H_
 #define _GAMEOBJECT_H_
 
-#include "../tnl/tnlTypes.h"
-#include "../tnl/tnlNetObject.h"
+#include "tnlTypes.h"
+#include "tnlNetObject.h"
 
 #include "gameConnection.h"
 #include "game.h"

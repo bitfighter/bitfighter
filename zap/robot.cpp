@@ -60,7 +60,7 @@ static Vector<GameObject *> fillVector;
 // Constructor
 LuaRobot::LuaRobot(lua_State *L)
 {
-   lua_atpanic(L, luaPanicked);                 // Register our panic function
+   lua_atpanic(L, luaPanicked);                  // Register our panic function
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
 
@@ -148,7 +148,7 @@ LuaRobot::LuaRobot(lua_State *L)
 // Destructor
 LuaRobot::~LuaRobot()
 {
-  logprintf("deleted Lua Robot Object (%p)\n", this);
+   logprintf("deleted Lua Robot Object (%p)\n", this);
 }
 
 
@@ -1013,13 +1013,15 @@ Robot::~Robot()
 }
 
 
+// Also called by levelgen scripts
 void Robot::cleanupAndTerminate(lua_State *L)
 {
-   logprintf("Cleaning up...");
-
-   // Force gc to clear out any lingering references
-   lua_gc(L, LUA_GCCOLLECT, 0);  // Fallback
-   lua_close(L);
+   if(L)
+   {
+      // Force gc to clear out any lingering references
+      lua_gc(L, LUA_GCCOLLECT, 0);  // Fallback
+      lua_close(L);
+   }
 }
 
 
@@ -1115,32 +1117,38 @@ bool Robot::initialize(Point p)
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
 
-   // Now pass in any args specified in the level file.  By convention, we'll pass in the name of the robot as the 0th element.
-   lua_createtable(L,  mArgs.size(), 0);
-
-   for(S32 i = 0; i < mArgs.size(); i++)
-   {
-      lua_pushstring(L, mArgs[i].c_str());
-      lua_rawseti(L, -2, i);
-   }
-   lua_setglobal(L, "arg");
-
    //lua_settop(L, 0);
 
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   static const char *fname = "robot_helper_functions.lua";
+   static const char *luafname = "lua_helper_functions.lua";
 
-   if(luaL_loadfile(L, fname))
+   if(luaL_loadfile(L, luafname))
    {
-      logError("Error loading robot helper functions (%s).  Shutting robot down.", fname);
+      logError("Error loading lua helper functions %s.  Shutting robot down.", luafname);
       return false;
    }
 
    // Now run the loaded code
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
-      logError("Robot error during initializing helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
+      logError("Error during initializing lua helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
+      return false;
+   }
+
+
+   static const char *robotfname = "robot_helper_functions.lua";
+
+   if(luaL_loadfile(L, robotfname))
+   {
+      logError("Error loading robot helper functions %s.  Shutting robot down.", robotfname);
+      return false;
+   }
+
+   // Now run the loaded code
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
+   {
+      logError("Error during initializing robot helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
    }
 
@@ -1219,11 +1227,13 @@ bool Robot::processArguments(S32 argc, const char **argv)
    mFilename += argv[1];
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
-   // Need to make a copy or containerize argv[i] somehow (using string, in this case) because otherwise
-   // new data will get written to the string location subsequently, and our vals will change from under
-   // us.  That's bad!
+   // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
+   // to the string location subsequently, and our vals will change from under us.  That's bad!
+   
+   // We're using string here as a stupid way to get done what we need to do... perhaps there is a better way.
+
    for(S32 i = 1; i < argc; i++)
-      mArgs.push_back(string(argv[i]));
+      mArgs.push_back(string(argv[i]).c_str());
 
    return true;
 }

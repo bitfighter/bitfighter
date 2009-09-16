@@ -171,45 +171,6 @@ public:
 
 ///////////////////////////////
 
-class LuaPoint : public LuaObject
-{
-private:
-   Point mPoint;                  // Underlying point container
-
-public:
-   LuaPoint(lua_State *L);        // Lua constructor
-   LuaPoint(Point point);         // C++ constructor
-
-   ~LuaPoint();                   // Destructor
-
-   static const char className[];
-
-   static Lunar<LuaPoint>::RegType methods[];
-
-   Point getPoint() { return mPoint; }
-
-   S32 x(lua_State *L);
-   S32 y(lua_State *L);
-
-   S32 setxy(lua_State *L);
-   S32 setx(lua_State *L);
-   S32 sety(lua_State *L);
-
-   S32 equals(lua_State *L);     // Does point equal another point?
-
-   // Wrap some of our standard point methods
-   S32 distanceTo(lua_State *L);
-   S32 distSquared(lua_State *L);
-   S32 angleTo(lua_State *L);
-   S32 len(lua_State *L);
-   S32 lenSquared(lua_State *L);
-   S32 normalize(lua_State *L);
-
-};
-
-
-///////////////////////////////
-
 class LuaTimer : public LuaObject      // Basically wraps our Bitfighter timer class
 {
 private:
