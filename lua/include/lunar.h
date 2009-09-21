@@ -142,10 +142,18 @@ private:
   // create a new T object and
   // push onto the Lua stack a userdata containing a pointer to T object
   static int new_T(lua_State *L) {
+     try
+     {
     lua_remove(L, 1);   // use classname:new(), instead of classname.new()
     T *obj = new T(L);  // call constructor for T objects
     push(L, obj, true); // gc_T will delete this object
     return 1;           // userdata containing pointer to T object
+     }
+     catch(string msg)
+     {
+        logprintf("LUA ERROR: Cannot instantiate object %s", typeid(T).name() );
+        return 0;
+     }
   }
 
   // garbage collection metamethod

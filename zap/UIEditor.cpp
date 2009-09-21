@@ -3114,22 +3114,22 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       {
          if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
          {
-            fprintf(f, gGameParamUserInterface.gameParams[i].c_str());
+            fprintf(f, "%s", gGameParamUserInterface.gameParams[i].c_str());
             fprintf(f, "\n");
          }
       }
 
       for(S32 i = 0; i < mTeams.size(); i++)
          fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
-            mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
+            mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b); 
 
       // Save script and parameters, if any.  If none, omit the line altogether.
-      if(mScriptArgs.size() > 0)
+      if(mScriptArgs.size() > 0) 
       {
          string scriptLine = "Script";
          for(S32 i = 0; i < mScriptArgs.size(); i++)
             scriptLine += string(" ") + mScriptArgs[i];
-         fprintf(f, scriptLine.c_str());
+         fprintf(f, "%s%s", scriptLine.c_str(), "\n");
       }
 
       // Write out all maze items

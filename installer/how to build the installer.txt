@@ -2,6 +2,6 @@ bitFighter uses NSIS (Nullsoft Scriptable Install System) to manage the install/
 
 http://nsis.sourceforge.net/Main_Page
 
-You can create an install by "compiling" bitFighter_installer.nsi.
+You can create an install by "compiling" Bitfighter_installer.nsi.
 
 Note that the installer will include all levels in the clean-levels folder, but none from elsewhere (such as the exe folder)

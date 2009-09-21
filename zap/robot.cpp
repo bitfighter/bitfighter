@@ -48,6 +48,7 @@
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
+#include "luaUtil.h"
 #include "../glut/glutInclude.h"
 
 #define hypot _hypot    // Kill some warnings
@@ -201,8 +202,6 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, teamMsg),
 
    method(LuaRobot, getActiveWeapon),
-
-   method(LuaRobot, logprint),
 
    method(LuaRobot, findItems),
    method(LuaRobot, findGlobalItems),
@@ -700,17 +699,6 @@ S32 LuaRobot::getTime(lua_State *L)
 }
 
 
-// Write a message to the server logfile
-S32 LuaRobot::logprint(lua_State *L)
-{
-   static const char *methodName = "Robot:logprint()";
-   checkArgCount(L, 1, methodName);
-
-   logprintf("RobotLog %s: %s", thisRobot->getName().getString(), getString(L, 1, methodName));
-   return 0;
-}
-
-
 // Return list of all items of specified type within normal visible range... does no screening at this point
 S32 LuaRobot::findItems(lua_State *L)
 {
@@ -1073,6 +1061,8 @@ bool Robot::initialize(Point p)
 
 
    // Register our connector types with Lua
+
+   Lunar<LuaUtil>::Register(L);
 
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);

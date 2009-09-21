@@ -23,45 +23,42 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LUALEVELGENERATOR_H_
-#define _LUALEVELGENERATOR_H_
-
-#include "luaObject.h"
 #include "luaUtil.h"
-#include "tnlLog.h"
-
-using namespace std;
 
 namespace Zap
 {
 
 
-class LuaLevelGenerator: public LuaObject
+const char LuaUtil::className[] = "LuaUtil";      // Class name as it appears to Lua scripts
+
+
+// Lua Constructor
+LuaUtil::LuaUtil(lua_State *L)
 {
-private:
-   string mFilename;
-   bool loadLuaHelperFunctions(lua_State *L);
-   bool loadLevelGenHelperFunctions(lua_State *L);
+   // Do nothing
+}
 
-public:
-   void runScript(lua_State *L, Vector<string> scriptArgs);
-   void logError(const char *format, ...);
 
-   LuaLevelGenerator(string path, Vector<string> scriptArgs);   // C++ constructor
-   LuaLevelGenerator(lua_State *L);      // Lua constructor
-   ~LuaLevelGenerator();                 // Destructor
+// Define the methods we will expose to Lua... basically everything we want to use in lua code
+// like LuaUtil:blah needs to be defined here.
+Lunar<LuaUtil>::RegType LuaUtil::methods[] =
+{
+   method(LuaUtil, getMachineTime),
+   method(LuaUtil, logprint),
 
-   static const char className[];
-
-   static Lunar<LuaLevelGenerator>::RegType methods[];
-
-   // Lua methods
-   S32 addWall(lua_State *L);
-   S32 logprint(lua_State *L);
-   S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
-   S32 getGridSize(lua_State *L);
+   {0,0}    // End method list
 };
 
-};
 
-#endif
+// Write a message to the server logfile
+S32 LuaUtil::logprint(lua_State *L)
+{
+   static const char *methodName = "LuaUtil:logprint()";
+   checkArgCount(L, 2, methodName);
+
+   logprintf("%s: %s", getString(L, 1, methodName), getString(L, 2, methodName));
+   return 0;
+}
+
+
+};

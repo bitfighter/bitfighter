@@ -94,7 +94,7 @@ end
 -- Convenience function... let user use logprint directly, without referencing the bot
 --
 function logprint(msg)
-    bot:logprint(tostring(msg))
+    luaUtil:logprint("Robot", tostring(msg))
 end
 
 

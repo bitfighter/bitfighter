@@ -732,6 +732,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\luaUtil.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\luaUtil.h"
+			>
+		</File>
+		<File
 			RelativePath="..\lua\include\lunar.h"
 			>
 		</File>

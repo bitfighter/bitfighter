@@ -64,7 +64,9 @@ OBJECTS_ZAP=\
    $(linuxInput)\
    loadoutSelect.o\
    luaGameInfo.o\
+   luaLevelGenerator.o\
    luaObject.o\
+   luaUtil.o\
    main.o\
    masterConnection.o\
    move.o\

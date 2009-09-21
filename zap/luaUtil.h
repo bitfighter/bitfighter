@@ -23,43 +23,34 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _LUALEVELGENERATOR_H_
-#define _LUALEVELGENERATOR_H_
+#ifndef _LUAUTIL_H_
+#define _LUAUTIL_H_
 
 #include "luaObject.h"
-#include "luaUtil.h"
-#include "tnlLog.h"
+#include "tnlLog.h"     // for logprintf
 
 using namespace std;
 
 namespace Zap
 {
 
+// Some util functions for scripts and levelgen files
 
-class LuaLevelGenerator: public LuaObject
+class LuaUtil: public LuaObject
 {
-private:
-   string mFilename;
-   bool loadLuaHelperFunctions(lua_State *L);
-   bool loadLevelGenHelperFunctions(lua_State *L);
 
 public:
-   void runScript(lua_State *L, Vector<string> scriptArgs);
    void logError(const char *format, ...);
 
-   LuaLevelGenerator(string path, Vector<string> scriptArgs);   // C++ constructor
-   LuaLevelGenerator(lua_State *L);      // Lua constructor
-   ~LuaLevelGenerator();                 // Destructor
+   LuaUtil(lua_State *L);      // Lua constructor
 
    static const char className[];
 
-   static Lunar<LuaLevelGenerator>::RegType methods[];
+   static Lunar<LuaUtil>::RegType methods[];
 
    // Lua methods
-   S32 addWall(lua_State *L);
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
-   S32 getGridSize(lua_State *L);
 };
 
 };
