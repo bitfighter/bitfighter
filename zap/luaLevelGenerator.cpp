@@ -91,10 +91,6 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
 };
 
 
-         extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
-         extern ServerGame *gServerGame;
-
-
 // Note that this uses rawgeti and therefore bypasses any metamethods set on the table
 S32 getIntegerFromTable(lua_State *L, int tableIndex, int key)
 {
@@ -126,6 +122,8 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
    return point;
 }
 
+
+extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
 
 S32 LuaLevelGenerator::addWall(lua_State *L)
 {
@@ -160,6 +158,35 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 
    return 0;
 }
+
+
+//S32 LuaLevelGenerator::addRepairItem(lua_State *L)
+//{
+//
+   //// Lua supplies a location and a respawn time
+
+   //static const char *methodName = "LevelGenerator:addRepairItem()";
+
+   //TNL::Object *theObject = TNL::Object::create("RepairItem");      // Create an object of the type specified on the line
+   //GameObject *object = dynamic_cast<GameObject*>(theObject);       // Force our new object to be a GameObject
+
+
+   //// From game.cpp #548
+   //gServerWorldBounds = gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
+   //object->addToGame(this);
+
+   //bool validArgs = object->processArguments(argc - 1, argv + 1);
+
+   //if(!validArgs)
+   //{
+   //   logprintf("Object %s had invalid parameters, ignoring...", obj);
+   //   object->removeFromGame();
+   //   object->destroySelf();
+   //}                                                      
+   //              
+
+   //return 0;
+//}
 
 
 // Write a message to the server logfile
