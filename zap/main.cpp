@@ -64,6 +64,8 @@
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
 //<li>Better messages when killed by turret or asteroid or mine</li>
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
+//<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
+//<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
 //</ul>
 //
 //<u>Items</u>
@@ -114,9 +116,8 @@
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
 //<li>Switched F2 and F3 keys</li>
 //<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
-
 //</ul>
-//
+
 //<u>Bug fixes:</u>
 //<ul>
 //<li>Speed zones now rendered on top of loadout zones</li>
@@ -127,6 +128,7 @@
 //<li>Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)</li>
 //<li>Old messages now properly cleared out when game is started</li>
 //<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
+///<li>Fixed rendering bug on ship config menu in joystick mode</li>
 //</ul>
 //
 //<u>Server menu enhancements:</u>
@@ -151,6 +153,9 @@
 //<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
 //<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
 //<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
+//<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
+//<li>Fixed rendering bug on ship config menu in joystick mode</li>
+//<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
 //<li></li>
 
 // Mac Test:

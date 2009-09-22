@@ -43,6 +43,7 @@ struct QuickChatNode
    bool teamOnly;
    string caption;
    string msg;
+   bool isMsgItem;    // False for groups, true for messages
 };
 
 class QuickChatHelper

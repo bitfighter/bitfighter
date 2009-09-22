@@ -163,16 +163,19 @@ void saveDefaultQuickChatMessages()
       gINI.KeyComment("QuickChatMessages", " displayed in the QuickChat menu, so make sure you are familiar with that before you start modifying these items.");
       gINI.KeyComment("QuickChatMessages", " Messages are grouped, and each group has a Caption (short name shown on screen), a Key (the shortcut key used to select");
       gINI.KeyComment("QuickChatMessages", " the group), and a Button (a shortcut button used when in joystick mode).  If the Button is \"Undefined key\", then that");
-      gINI.KeyComment("QuickChatMessages", " item will not be shown in joystick mode.  Groups can be defined in any order, but will be displayed sorted by [section]");
-      gINI.KeyComment("QuickChatMessages", " name.  Groups are designated by the [QuickChatMessagesGroupXXX] sections, where XXX is a unique suffix, usually a number.");
-      gINI.KeyComment("QuickChatMessages", "");
+      gINI.KeyComment("QuickChatMessages", " item will not be shown in joystick mode, unless the ShowKeyboardKeysInStickMode setting is true.  Groups can be defined ");
+      gINI.KeyComment("QuickChatMessages", " in any order, but will be displayed sorted by [section] name.  Groups are designated by the [QuickChatMessagesGroupXXX]");
+      gINI.KeyComment("QuickChatMessages", " sections, where XXX is a unique suffix, usually a number.");
+      gINI.KeyComment("QuickChatMessages", " ");
       gINI.KeyComment("QuickChatMessages", " Each group can have one or more messages, as specified by the [QuickChatMessagesGroupXXX_MessageYYY] sections, where XXX");
       gINI.KeyComment("QuickChatMessages", " is the unique group suffix, and YYY is a unique message suffix.  Again, messages can be defined in any order, and will");
       gINI.KeyComment("QuickChatMessages", " appear sorted by their [section] name.  Key, Button, and Caption serve the same purposes as in the group definitions.");
       gINI.KeyComment("QuickChatMessages", " Message is the actual message text that is sent, and MessageType should be either \"Team\" or \"Global\", depending on which");
       gINI.KeyComment("QuickChatMessages", " users the message should be sent to.  You can mix Team and Global messages in the same section, but it may be less");
       gINI.KeyComment("QuickChatMessages", " confusing not to do so.");
-      gINI.KeyComment("QuickChatMessages", "");
+      gINI.KeyComment("QuickChatMessages", " ");
+      gINI.KeyComment("QuickChatMessages", " Messages can also be added to the top-tier of items, by specifying a section like [QuickChat_MessageZZZ].");
+      gINI.KeyComment("QuickChatMessages", " ");
       gINI.KeyComment("QuickChatMessages", " Note that no quotes are required around Messages or Captions, and if included, they will be sent as part");
       gINI.KeyComment("QuickChatMessages", " of the message.  Also, if you bullocks things up too badly, simply delete all QuickChatMessage sections,");
       gINI.KeyComment("QuickChatMessages", " and they will be regenerated the next time you run the game (though your modifications will be lost).");
@@ -646,6 +649,15 @@ void loadSettingsFromINI()
    Caption=Flag Gone!
    Message=Our flag is not in the base!
    MessageType=Team     -or-     MessageType=Global
+
+   == or, a top tiered message might look like this ==
+   
+   [QuickChat_Message1]
+   Key=A
+   Button=Button 1
+   Caption=Hello
+   MessageType=Hello there!
+
    */
 
    // Add initial node
@@ -657,10 +669,37 @@ void loadSettingsFromINI()
    emptynode.caption = "";
    emptynode.msg = "";
    gQuickChatTree.push_back(emptynode);
+   emptynode.isMsgItem = false;
 
    // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
    S32 keys = gINI.GetNumKeys();
    Vector<string> groups;
+
+   // Next, read any top-level messages
+   Vector<string> messages;
+   for(S32 i = 0; i < keys; i++)
+   {
+      string keyName = gINI.GetKeyName(i);
+      if(keyName.substr(0, 17) == "QuickChat_Message")   // Found message group
+         messages.push_back(keyName);
+   }
+
+   messages.sort(alphaSort);
+
+   for(S32 i = messages.size()-1; i >= 0; i--)
+   {
+      QuickChatNode node;
+      node.depth = 1;   // This is a top-level message node
+      node.keyCode = stringToKeyCode(gINI.GetValue(messages[i], "Key", "A").c_str());
+      node.buttonCode = stringToKeyCode(gINI.GetValue(messages[i], "Button", "Button 1").c_str());
+      node.teamOnly = lcase(gINI.GetValue(messages[i], "MessageType", "Team")) == "team";          // lcase for case insensitivity
+      node.caption = gINI.GetValue(messages[i], "Caption", "Caption");
+      node.msg = gINI.GetValue(messages[i], "Message", "Message");
+      gQuickChatTree.push_back(node);
+      node.isMsgItem = true;
+   }
+
+
    for(S32 i = 0; i < keys; i++)
    {
       string keyName = gINI.GetKeyName(i);
@@ -693,6 +732,7 @@ void loadSettingsFromINI()
       node.teamOnly = lcase(gINI.GetValue(groups[i], "MessageType", "Team")) == "team";
       node.caption = gINI.GetValue(groups[i], "Caption", "Caption");
       node.msg = "";
+      node.isMsgItem = false;
       gQuickChatTree.push_back(node);
 
       for(S32 j = messages.size()-1; j >= 0; j--)
@@ -703,6 +743,7 @@ void loadSettingsFromINI()
          node.teamOnly = lcase(gINI.GetValue(messages[j], "MessageType", "Team")) == "team";          // lcase for case insensitivity
          node.caption = gINI.GetValue(messages[j], "Caption", "Caption");
          node.msg = gINI.GetValue(messages[j], "Message", "Message");
+         node.isMsgItem = true;
          gQuickChatTree.push_back(node);
       }
    }

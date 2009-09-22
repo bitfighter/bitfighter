@@ -140,8 +140,10 @@ void LoadoutHelper::render()
             renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list[i].button, false);
 
          if(showKeys)
+         {
             glColor3f(1, 1, 1);     // Render key in white
-         renderControllerButton(UserInterface::horizMargin + 20, yPos, list[i].key, false);
+            renderControllerButton(UserInterface::horizMargin + 20, yPos, list[i].key, false);
+         }
 
          if(selected)
             glColor3f(1.0, 0.1, 0.1);      // Color of already selected item

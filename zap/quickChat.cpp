@@ -92,9 +92,13 @@ bool QuickChatHelper::render()
    if(!renderNodes.size())    // Nothing to render, let's go home
       return false;
 
-   S32 xPos = UserInterface::horizMargin + (showKeys ? 0 : 20);
+   S32 xPosBase = UserInterface::horizMargin + (showKeys ? 0 : 20);
+   S32 messageIndent = (matchLevel == 1) ? 20 : 0;    // No indenting on submenus
+
    for(S32 i = 0; i < renderNodes.size(); i++)
    {
+      S32 xPos = xPosBase + (renderNodes[i].isMsgItem ? messageIndent : 0);
+
       // Draw key controls for selecting quick chat items
       if(inputMode == Joystick && renderNodes[i].buttonCode != KEY_UNKNOWN)     // Only draw joystick buttons when in joystick mode
          renderControllerButton(xPos, curPos, renderNodes[i].buttonCode, false, 0);
@@ -103,11 +107,11 @@ bool QuickChatHelper::render()
       if(showKeys)
       {
          glColor(color);
-         renderControllerButton(xPos + 20, curPos, renderNodes[i].keyCode, false, 0);
+         renderControllerButton(xPos + 20, curPos, renderNodes[i].keyCode, false, 0); 
       }
-
+ 
       glColor(color);
-      UserInterface::drawStringf(UserInterface::horizMargin + 50, curPos, fontSize, "%s", renderNodes[i].caption.c_str());
+      UserInterface::drawStringf(UserInterface::horizMargin + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), curPos, fontSize, "%s", renderNodes[i].caption.c_str());
       curPos += fontSize + 7;
    }
 
@@ -129,7 +133,7 @@ bool QuickChatHelper::render()
    }
    else
    {
-      xPos = UserInterface::horizMargin + 20;
+      S32 xPos = UserInterface::horizMargin + 20;
       glColor3f(1,0,0);
       UserInterface::drawString( xPos, curPos, fontSizeSm, "Press ");
       xPos += UserInterface::getStringWidth(fontSizeSm, "Press ");
