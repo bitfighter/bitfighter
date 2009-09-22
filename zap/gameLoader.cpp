@@ -37,14 +37,16 @@ using namespace TNL;
 namespace Zap
 {
 
-const S32 MaxArgc = 128;    // At most MaxArgc args on a single line,
-const S32 MaxArgLen = 100;  // each at most MaxArgLen bytes long  (enforced in addCharToArg)
+// For readability and laziness...
+#define MaxArgc LevelLoader::MaxArgc
+#define MaxArgLen LevelLoader::MaxArgLen
 
 static char *argv[MaxArgc];
 static char argv_buffer[MaxArgc][MaxArgLen];
 static int argc;
 static int argLen = 0;
 static const char *argString;
+
 
 inline char getNextChar()
 {
@@ -74,8 +76,9 @@ inline void addArg()
    }
 }
 
+
 // Parse the contents of the level file string is the file data itself
-// This is rather ugly!
+// This is rather ugly!  Totally old school!
 
 // Each line of the file is parsed separately by processLevelLoadLine in game.cpp or UIEditor.cpp
 
@@ -192,6 +195,9 @@ bool LevelLoader::initLevelFromFile(const char *file)
    return true;
 }
 
+
+#undef MaxArgc
+#undef MaxArgLen
 
 
 };

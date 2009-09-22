@@ -28,7 +28,9 @@
 
 #include "luaObject.h"
 #include "luaUtil.h"
+#include "gameLoader.h"
 #include "tnlLog.h"
+
 
 using namespace std;
 
@@ -36,7 +38,7 @@ namespace Zap
 {
 
 
-class LuaLevelGenerator: public LuaObject
+class LuaLevelGenerator: public LuaObject, public LevelLoader
 {
 private:
    string mFilename;
@@ -56,10 +58,16 @@ public:
    static Lunar<LuaLevelGenerator>::RegType methods[];
 
    // Lua methods
-   S32 addWall(lua_State *L);
+   S32 addWall(lua_State *L);       // Add a wall
+   S32 addItem(lua_State *L);       // Add item using a series of parameters
+   S32 addLevelLine(lua_State *L);  // Add raw level line
+
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
    S32 getGridSize(lua_State *L);
+
+   // Implement LevelLoader abstract method
+   void processLevelLoadLine(int argc, const char **argv);
 };
 
 };

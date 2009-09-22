@@ -36,6 +36,10 @@ protected:
    int parseArgs(const char *string);
 
 public:
+   // Put these in here so we can access them from luaLevelGenerator
+   const static int MaxArgc = 128;    // At most MaxArgc args on a single line,
+   const static int MaxArgLen = 100;  // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
+
    bool initLevelFromFile(const char *file);
 };
 

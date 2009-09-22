@@ -50,11 +50,17 @@ LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs)
 
 const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class name as it appears to Lua scripts
 
+// Used in addItem() below...
+static const char *argv[LevelLoader::MaxArgc];
+static const char argv_buffer[LevelLoader::MaxArgc][LevelLoader::MaxArgLen];
+
 
 // Lua Constructor
 LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 {
-   // Do nothing
+   // Initialize some primitive string handling stuff, used in addItem() below
+   for(U32 i = 0; i < LevelLoader::MaxArgc; i++)
+      argv[i] = argv_buffer[i];
 }
 
 
@@ -85,6 +91,9 @@ void LuaLevelGenerator::logError(const char *format, ...)
 Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
 {
    method(LuaLevelGenerator, addWall),
+   method(LuaLevelGenerator, addItem),
+   method(LuaLevelGenerator, addLevelLine),
+   
    method(LuaLevelGenerator, getGridSize),
 
    {0,0}    // End method list
@@ -160,33 +169,53 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 }
 
 
-//S32 LuaLevelGenerator::addRepairItem(lua_State *L)
-//{
-//
-   //// Lua supplies a location and a respawn time
+// Simply grabs parameters from the Lua stack, and passes them off to processLevelLoadLine().  Unfortunately,
+// this involves packing everything into an array of char strings, which is frightfully prone to programmer
+// error and buffer overflows and such...
+S32 LuaLevelGenerator::addItem(lua_State *L)
+{
+   static const char *methodName = "LevelGenerator:addItem()";
 
-   //static const char *methodName = "LevelGenerator:addRepairItem()";
+   S32 argc = min(lua_gettop(L), LevelLoader::MaxArgc);     // Never more that MaxArgc args, please.
 
-   //TNL::Object *theObject = TNL::Object::create("RepairItem");      // Create an object of the type specified on the line
-   //GameObject *object = dynamic_cast<GameObject*>(theObject);       // Force our new object to be a GameObject
+   if(argc == 0)
+   {
+      logError("Object had no parameters, ignoring...");
+      return 0;
+   }
+
+   for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
+      argv[i] = getString(L, i + 1, methodName);
+
+   processLevelLoadLine(argc, argv);                                                 
+                 
+   //clearStack();
+
+   return 0;
+}
 
 
-   //// From game.cpp #548
-   //gServerWorldBounds = gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
-   //object->addToGame(this);
+// Let someone else do the work!
+void LuaLevelGenerator::processLevelLoadLine(int argc, const char **argv)
+{
+   gServerGame->processLevelLoadLine(argc, argv);                                                 
+}
 
-   //bool validArgs = object->processArguments(argc - 1, argv + 1);
 
-   //if(!validArgs)
-   //{
-   //   logprintf("Object %s had invalid parameters, ignoring...", obj);
-   //   object->removeFromGame();
-   //   object->destroySelf();
-   //}                                                      
-   //              
+// Feed a raw level line into the level processor
+S32 LuaLevelGenerator::addLevelLine(lua_State *L)
+{
+   static const char *methodName = "LevelGenerator:addLevelLine()";
 
-   //return 0;
-//}
+   checkArgCount(L, 1, methodName);
+   const char *line = getString(L, 1, methodName);
+
+   parseArgs(line);                                                 
+                 
+   //clearStack();
+
+   return 0;
+}
 
 
 // Write a message to the server logfile
