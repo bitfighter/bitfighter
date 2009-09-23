@@ -68,7 +68,7 @@ public:
    void render(S32 layer);
 
    /// returns a sorting key for the object.  Barriers should sort behind other objects
-   S32 getRenderSortValue() { return -1; }
+   S32 getRenderSortValue() { return 0; }
 
    /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
    bool getCollisionPoly(Vector<Point> &polyPoints);

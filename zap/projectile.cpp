@@ -563,12 +563,6 @@ U32 Mine::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(updateMask & InitialMask))
    {
       stream->write(mTeam);
-
-      // RDW It isn't legal to bind a reference to NULL, this shouldn't compile.
-      // Well, we have to send something here, otherwise mines will crash the game (pack and unpack need to be symmetrical)
-      // perhaps this is why laying mines was causing problems?
-      // Anyway, how does this modification work?  Better?
-      // stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : NULL);  // <--- Original
       StringTableEntryRef noOwner = "";
       stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : noOwner);
    }

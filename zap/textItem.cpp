@@ -53,7 +53,7 @@ void TextItem::render()
 // This object should be drawn below others
 S32 TextItem::getRenderSortValue()
 {
-   return -1;
+   return 1;
 }
 
 

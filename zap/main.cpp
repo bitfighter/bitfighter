@@ -121,6 +121,7 @@
 //<u>Bug fixes:</u>
 //<ul>
 //<li>Speed zones now rendered on top of loadout zones</li>
+//<li>Walls now rendered on top of loadout zones, goal zones, and the like</li>
 //<li>Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!</li>
 //<li>Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code</li>
 //<li>Changing other player's team in 3+ team game with 3+ players no longer switches a random player</li>
@@ -128,7 +129,7 @@
 //<li>Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)</li>
 //<li>Old messages now properly cleared out when game is started</li>
 //<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
-///<li>Fixed rendering bug on ship config menu in joystick mode</li>
+//<li>Fixed rendering bug on ship config menu in joystick mode</li>
 //</ul>
 //
 //<u>Server menu enhancements:</u>
@@ -156,6 +157,7 @@
 //<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
 //<li>Fixed rendering bug on ship config menu in joystick mode</li>
 //<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
+//<li>Walls now rendered on top of loadout zones, goal zones, and the like</li>
 //<li></li>
 
 // Mac Test:

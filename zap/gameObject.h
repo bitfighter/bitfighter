@@ -165,7 +165,7 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   virtual S32 getRenderSortValue() { return 0; }
+   virtual S32 getRenderSortValue() { return 2; }
    virtual void render();
 
    /// render is called twice for every object that is in the

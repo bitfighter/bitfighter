@@ -127,7 +127,7 @@ public:
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
    void render();
-   S32 getRenderSortValue() { return -1; }
+   S32 getRenderSortValue() { return 0; }
 
    TNL_DECLARE_CLASS(ForceField);
 };
