@@ -116,6 +116,7 @@
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
 //<li>Switched F2 and F3 keys</li>
 //<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
+//<li>Can edit respawing times for items that support them in the editor</li>
 //</ul>
 
 //<u>Bug fixes:</u>
@@ -158,6 +159,7 @@
 //<li>Fixed rendering bug on ship config menu in joystick mode</li>
 //<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
 //<li>Walls now rendered on top of loadout zones, goal zones, and the like</li>
+//<li>Can edit respawing times for items that support them in the editor</li>
 //<li></li>
 
 // Mac Test:

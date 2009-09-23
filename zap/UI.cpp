@@ -344,6 +344,22 @@ void UserInterface::drawStringf(F32 x, F32 y, U32 size, const char *format, ...)
 }
 
 
+void UserInterface::drawStringfc(F32 x, F32 y, U32 size, const char *format, ...)
+{
+   makeBuffer;
+
+   S32 len = getStringWidth(size, buffer);
+   drawString((S32) x - len / 2, (S32) y, size, buffer);
+}
+
+
+void UserInterface::drawStringc(F32 x, F32 y, U32 size, const char *string)
+{
+   S32 len = getStringWidth(size, string);
+   drawAngleString((S32) x - len / 2, (S32) y, size, 0, string);
+}
+
+
 void UserInterface::drawCenteredString(S32 y, U32 size, const char *string)
 {
    S32 x = (S32)((S32) canvasWidth - getStringWidth(size, string)) / 2;

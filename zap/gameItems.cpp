@@ -39,7 +39,7 @@ TNL_IMPLEMENT_NETOBJECT(RepairItem);
 RepairItem::RepairItem(Point p) : PickupItem(p, 20)
 {
    mNetFlags.set(Ghostable);
-   mRepopDelay = 20000;       // Default to 20 seconds
+   mRepopDelay = defaultRespawnTime * 1000;
 }
 
 
@@ -55,6 +55,8 @@ bool RepairItem::processArguments(S32 argc, const char **argv)
       S32 repopDelay = atoi(argv[2]) * 1000;    // 3rd param is time for this to regenerate in seconds
       if(repopDelay > 0)
          mRepopDelay = repopDelay;
+      else
+         mRepopDelay = -1;
    }
 
    return true;
@@ -83,7 +85,7 @@ void RepairItem::onClientPickup()
 
 U32 RepairItem::getRepopDelay()
 {
-   return mRepopDelay;     // 20 seconds until the health item reappears
+   return mRepopDelay;    
 }
 
 

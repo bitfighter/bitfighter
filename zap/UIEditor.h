@@ -106,6 +106,13 @@ public:
       ItemNavMeshZone,
    };
 
+   enum SpecialAttribute   // Some items have special attributes.  These are the ones
+   {                       // we can edit in the editor
+      Text,
+      RepopDelay,
+      None,
+   };
+
    struct WorldItem
    {
       GameItems index;
@@ -167,7 +174,10 @@ private:
    string mEditFileName;               // Manipulate with get/setLevelFileName
 
    bool mDraggingObjects;
-   S32 mEditingTextItem;               // Index of item we're editing text of
+   
+   S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
+   SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
+
    WorldItem mNewItem;
    F32 mCurrentScale;
    Point mCurrentOffset;
@@ -275,6 +285,8 @@ public:
 
    void incBarrierWidth(S32 amt);      // Increase selected wall thickness by amt
    void decBarrierWidth(S32 amt);      // Decrease selected wall thickness by amt
+
+   S32 getDefaultRepopDelay(GameItems itemType);
 
    bool saveLevel(bool showFailMessages, bool showSuccessMessages);
    void testLevel();

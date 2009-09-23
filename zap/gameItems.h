@@ -45,6 +45,8 @@ private:
    S32 mRepopDelay;
 
 public:
+   static const S32 defaultRespawnTime = 20;
+
    RepairItem(Point p = Point());   // Constructor
    bool processArguments(S32 argc, const char **argv);
    bool pickup(Ship *theShip);

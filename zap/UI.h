@@ -139,6 +139,10 @@ public:
    static void drawStringf(F32 x, F32 y, U32 size, const char *format, ...);
    static void drawString(F32 x, F32 y, U32 size, const char *string);
 
+   // Draw strings centered at point
+   static void drawStringfc(F32 x, F32 y, U32 size, const char *format, ...);
+   static void drawStringc(F32 x, F32 y, U32 size, const char *string);
+
    // Draw text at an angle...
    static void drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
    static void drawAngleStringf(S32 x, S32 y, F32 size, F32 angle, const char *format, ...);

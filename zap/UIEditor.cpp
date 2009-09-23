@@ -192,6 +192,7 @@ struct GameItemRec
    bool hasTeam;        // Item can be associated with team
    bool canHaveNoTeam;  // Item can be neutral or hostile
    bool hasText;        // Item has a text string attached to it
+   bool hasRepop;       // Item has a repop delay that can be set
    geomType geom;
    char letter;         // How item is represented by editor
    bool specialTabKeyRendering;  // true if item is rendered in a special way when tab is down
@@ -203,31 +204,31 @@ struct GameItemRec
 
 
 // Remember to keep these properly aligned with GameItems enum
-//   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText,   geom,        letter, special, prettyNamePlural     on-dock name    on-screen name description
+//   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural     on-dock name    on-screen name description
 GameItemRec gGameItemRecs[] = {
-   { "Spawn",               false,    true,      false,       false, geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",      "Location where ships start.  At least one per team is required. [G]" },
-   { "SpeedZone",           false,    false,     true,        false, geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",     "Makes ships go fast in direction of arrow. [P]" },
-   { "SoccerBallItem",      false,    false,     false,       false, geomPoint,      'B',    true,   "Soccer balls",           "Ball",     "Ball",       "Soccer ball, can only be used in Soccer games." },
-   { "FlagItem",            false,    true,      true,        false, geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",       "Flag item, used by a variety of game types." },
-   { "FlagSpawn",           false,    true,      true,        false, geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",  "Location where flags (or balls in Soccer) spawn after capture." },
-   { "BarrierMaker",        true,     false,     false,       false, geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",       "Run-of-the-mill wall item." },
-   { "Teleporter",          false,    false,     false,       false, geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",   "Teleports ships from one place to another. [T]" },
-   { "RepairItem",          false,    false,     false,       false, geomPoint,       0,     false,  "Repair items",           "Repair",   "Repair",     "Repairs damage to ships. [B]" },
-   { "TestItem",            false,    false,     false,       false, geomPoint,      'x',    true,   "Test items",             "Test",     "Test Item",  "Bouncy object that floats around and gets in the way." },
-   { "Asteroid",            false,    false,     false,       false, geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",   "Shootable asteroid object.  Just like the arcade game." },
-   { "Mine",                false,    false,     true,        false, geomPoint,      'M',    false,  "Mines",                  "Mine",     "Mine",       "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
-   { "SpyBug",              false,    true,      true,        false, geomPoint,      'S',    false,  "Spy bugs",               "Spy Bug",  "Spy Bug",    "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
-   { "ResourceItem",        false,    false,     false,       false, geomPoint,      'r',    true,   "Resource items",         "Resource", "Resource",   "Small bouncy object that floats around and gets in the way." },
-   { "LoadoutZone",         false,    true,      true,        false, geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Loadout",    "Area to finalize ship modifications.  Each team should have at least one." },
-   { "HuntersNexusObject",  false,    false,     true,        false, geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",      "Area to bring flags in Hunter game.  Cannot be used in other games." },
-   { "SlipZone",            false,    false,     true,        false, geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Slip Zone",  "Not yet implemented." },
-   { "Turret",              false,    true,      true,        false, geomPoint,      'T',    false,  "Turrets",                "Turret",   "Turret",     "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
-   { "ForceFieldProjector", false,    true,      true,        false, geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "ForceFld",   "Creates a force field that lets only team members pass. [H]" },
-   { "GoalZone",            false,    true,      true,        false, geomPoly,        0,     false,  "Goal zones",             "Goal",     "Goal",       "Target area used in a variety of games." },
-   { "TextItem",            false,    true,      true,        true,  geomSimpleLine,  0,     false,  "Text Items",             "Text",     "Text",       "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
-   { "BotNavMeshZone",      false,    false,     true,        false, geomPoly,        0,     false,  "NavMesh Zones",          "NavMesh",  "NavMesh",    "Creates navigational mesh zone for robots." },
+   { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",      "Location where ships start.  At least one per team is required. [G]" },
+   { "SpeedZone",           false,    false,     true,        false,   false,   geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",     "Makes ships go fast in direction of arrow. [P]" },
+   { "SoccerBallItem",      false,    false,     false,       false,   false,   geomPoint,      'B',    true,   "Soccer balls",           "Ball",     "Ball",       "Soccer ball, can only be used in Soccer games." },
+   { "FlagItem",            false,    true,      true,        false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",       "Flag item, used by a variety of game types." },
+   { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",  "Location where flags (or balls in Soccer) spawn after capture." },
+   { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",       "Run-of-the-mill wall item." },
+   { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",   "Teleports ships from one place to another. [T]" },
+   { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",   "Repair",     "Repairs damage to ships. [B]" },
+   { "TestItem",            false,    false,     false,       false,   false,   geomPoint,      'x',    true,   "Test items",             "Test",     "Test Item",  "Bouncy object that floats around and gets in the way." },
+   { "Asteroid",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",   "Shootable asteroid object.  Just like the arcade game." },
+   { "Mine",                false,    false,     true,        false,   false,   geomPoint,      'M',    false,  "Mines",                  "Mine",     "Mine",       "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
+   { "SpyBug",              false,    true,      true,        false,   false,   geomPoint,      'S',    false,  "Spy bugs",               "Spy Bug",  "Spy Bug",    "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
+   { "ResourceItem",        false,    false,     false,       false,   false,   geomPoint,      'r',    true,   "Resource items",         "Resource", "Resource",   "Small bouncy object that floats around and gets in the way." },
+   { "LoadoutZone",         false,    true,      true,        false,   false,   geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Loadout",    "Area to finalize ship modifications.  Each team should have at least one." },
+   { "HuntersNexusObject",  false,    false,     true,        false,   false,   geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",      "Area to bring flags in Hunter game.  Cannot be used in other games." },
+   { "SlipZone",            false,    false,     true,        false,   false,   geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Slip Zone",  "Not yet implemented." },
+   { "Turret",              false,    true,      true,        false,   true,    geomPoint,      'T',    false,  "Turrets",                "Turret",   "Turret",     "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
+   { "ForceFieldProjector", false,    true,      true,        false,   true ,   geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "ForceFld",   "Creates a force field that lets only team members pass. [H]" },
+   { "GoalZone",            false,    true,      true,        false,   false,   geomPoly,        0,     false,  "Goal zones",             "Goal",     "Goal",       "Target area used in a variety of games." },
+   { "TextItem",            false,    true,      true,        true,    false,   geomSimpleLine,  0,     false,  "Text Items",             "Text",     "Text",       "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
+   { "BotNavMeshZone",      false,    false,     true,        false,   false,   geomPoly,        0,     false,  "NavMesh Zones",          "NavMesh",  "NavMesh",    "Creates navigational mesh zone for robots." },
   
-   { NULL,                  false,    false,     false,       false, geomNone,        0,     false,  "",                       "",         "",           "" },
+   { NULL,                  false,    false,     false,       false,   false,   geomNone,        0,     false,  "",                       "",         "",           "" },
 };
 
 
@@ -290,6 +291,22 @@ void EditorUserInterface::setLevelFileName(string name)
       if(mEditFileName.find('.') == std::string::npos)      // Append extension, if one is needed
          mEditFileName = name + ".level";
 }
+
+
+S32 EditorUserInterface::getDefaultRepopDelay(GameItems itemType)
+{
+   if(itemType == ItemFlagSpawn)
+      return FlagSpawn::defaultRespawnTime;
+   else if(itemType == ItemTurret)
+      return Turret::defaultRespawnTime;
+   else if(itemType == ItemForceField)
+      return ForceFieldProjector::defaultRespawnTime;
+   else if(itemType == ItemRepair)
+      return RepairItem::defaultRespawnTime;
+   else 
+      return -1;
+}
+
 
 void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
@@ -462,12 +479,12 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
          }
       }
 
-      // Repair, Turrets, Forcefields, FlagSpawns all have optional additional argument dealing with repair or repopulation
-      if( (index == ItemRepair) && argc == 4)
-         i.repopDelay = atoi(argv[3]);
+      // Add a default spawn time, which may well be overridden below
+      i.repopDelay = getDefaultRepopDelay(i.index);
 
-      if(index == ItemFlagSpawn)
-         i.repopDelay = FlagSpawn::defaultFlagSpawnRepopDelay;
+      // Repair, Turrets, Forcefields, FlagSpawns all have optional additional argument dealing with repair or repopulation
+      if(index == ItemRepair && argc == 4)
+         i.repopDelay = atoi(argv[3]);
 
       if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 5)
          i.repopDelay = atoi(argv[4]);
@@ -718,7 +735,9 @@ void EditorUserInterface::onActivate()
 
    itemToLightUp = -1;
    vertexToLightUp = -1;
-   mEditingTextItem = -1;
+
+   mEditingSpecialAttrItem = -1;
+   mSpecialAttribute = None;
 }
 
 extern Vector<StringTableEntry> gLevelList;
@@ -726,7 +745,10 @@ extern Vector<StringTableEntry> gLevelList;
 void EditorUserInterface::onReactivate()
 {
    mDraggingObjects = false;
-   mEditingTextItem = -1;     // Probably not necessary
+
+   mEditingSpecialAttrItem = -1;     // Probably not necessary
+   mSpecialAttribute = None;
+
 //   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
    populateDock();            // If game type changed, we'll need to update the dock
 
@@ -1259,9 +1281,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
          glColor(getTeamColor(item.team));
          F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);   // Use this more precise F32 calculation of size for smoother interactive rendering.  We'll use U32 approximation in game.
-         drawAngleStringf_fixed(pos.x, pos.y, txtSize, ang, "%s%c", item.text.c_str(), cursorBlink && mEditingTextItem == indx ? '_' : 0);
 
-         if((item.selected || indx == itemToLightUp) && mEditingTextItem == -1)
+         drawAngleStringf_fixed(pos.x, pos.y, txtSize, ang, "%s%c", item.text.c_str(), cursorBlink && mSpecialAttribute == Text && mEditingSpecialAttrItem == indx ? '_' : 0);
+
+         if((item.selected || indx == itemToLightUp) && mEditingSpecialAttrItem == -1)
          {
             const U32 instrSize = 8;
             const char *instr = "[Ctrl-T] to edit text";
@@ -1271,6 +1294,27 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             glColor3f(1, 1, 1);     // white
             drawAngleString_fixed(pos.x + cosang * offset - (instrSize + 3) * sinang, pos.y + sinang * offset + (instrSize + 3) * cosang, instrSize, ang, instr);
          }
+      }
+      else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
+      {
+         if(item.selected || indx == itemToLightUp)
+         {
+            const U32 txtSize = 10;
+
+            F32 ang = pos.angleTo(dest);
+            F32 cosang = cos(ang);
+            F32 sinang = sin(ang);
+
+            S32 len = getStringWidthf(txtSize, "Speed: %d", item.speed);
+            S32 offset = (pos.distanceTo(dest) - len) / 2;
+
+            drawAngleStringf_fixed(pos.x + cosang * offset + sinang * txtSize, pos.y + sinang * offset - cosang * txtSize, txtSize, ang, "Speed: %d", item.speed);
+
+            len = getStringWidthf(txtSize, "Snap: %s", item.boolattr ? "On" : "Off");
+            offset = (pos.distanceTo(dest) - len) / 2;
+
+            drawAngleStringf_fixed(pos.x + cosang * offset - sinang * (txtSize + 4), pos.y + sinang * offset + cosang * (txtSize + 4), txtSize, ang, "Snap: %s", item.boolattr ? "On" : "Off");
+         } 
       }
       else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
       {
@@ -1369,8 +1413,6 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
       }
    }
-
-
    else if(gGameItemRecs[item.index].geom == geomLine )  // Can only be barrierMaker -- it's the only geomLine we have
    {
       renderBarrier(item.verts, item.selected || (indx == itemToLightUp && vertexToLightUp == -1), item.width / mGridSize, false);
@@ -1468,7 +1510,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             glPopMatrix(); 
          }
          else
+         {
+            glColor3f(.8,.8,.8);
             drawPolygon(pos, 7, 8, 0);
+         } 
       }
       else if(item.index == ItemAsteroid)   // Draw asteroid
       {
@@ -1552,6 +1597,33 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       else                             // Draw anything else
          renderGenericItem(pos, c);
 
+
+      // If this is an item that has a repop attirbute, and the item is selected, draw the text
+      if(!isDockItem && gGameItemRecs[item.index].hasRepop)
+      {
+         const U32 instrSize = 8;
+ 
+         if(item.selected || indx == itemToLightUp || mEditingSpecialAttrItem == indx) 
+         {
+            glColor3f(1,1,1);
+            if(item.repopDelay == 0)
+               drawStringc(pos.x, pos.y + 10, instrSize, "Repop: Disabled");
+            else
+               drawStringfc(pos.x, pos.y + 10, instrSize, "Repop: %d", item.repopDelay);
+
+
+            const char *msg; 
+
+            if(mEditingSpecialAttrItem == -1)
+               msg = "[Ctrl-R] to edit";
+            else if(mEditingSpecialAttrItem == indx && mSpecialAttribute == RepopDelay)
+               msg = "Up/Dn to change";
+            else
+               msg = "???";
+            drawStringc(pos.x, pos.y + instrSize + 13, instrSize, msg);
+         }
+      }
+
       // If we have a turret, render it's range (if tab is depressed)
       if(item.index == ItemTurret)
       {
@@ -1600,8 +1672,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       if((item.selected || indx == itemToLightUp) && gGameItemRecs[item.index].onScreenName)
       {
          glColor(!hideit ? labelColor : grayedOutColorBright);
-         
-         drawString(pos.x - getStringWidthf(labelSize, gGameItemRecs[item.index].onScreenName) / 2, pos.y + labelSize + 2, labelSize, gGameItemRecs[item.index].onScreenName);
+         drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, gGameItemRecs[item.index].onScreenName);     // Label on top
       }
    }
    // Label our dock items
@@ -1880,7 +1951,7 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
    hitItem = -1;
    hitVertex = -1;
 
-   if(mEditingTextItem != -1)    // If we're editing a text item, disable this functionality
+   if(mEditingSpecialAttrItem != -1)    // If we're editing a text special attribute, disable this functionality
       return;
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
@@ -1912,7 +1983,7 @@ void EditorUserInterface::findHitItemOnDock(Point canvasPos, S32 &hitItem)
    if(!showAllObjects)           // Only add dock items when objects are visible
       return;
 
-   if(mEditingTextItem != -1)    // If we're editing a text item, disable this functionality
+   if(mEditingSpecialAttrItem != -1)    // If we're editing a text item, disable this functionality
       return;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
@@ -1948,7 +2019,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
    hitItem = -1;  
    hitEdge = -1;
 
-   if(mEditingTextItem != -1)    // If we're editing a text item, disable this functionality
+   if(mEditingSpecialAttrItem  != -1)    // If we're editing special attributes, disable this functionality
       return;
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
@@ -2426,6 +2497,11 @@ EditorUserInterface::WorldItem EditorUserInterface::constructItem(GameItems item
       item.text = "Your text here";
    }
 
+   if(gGameItemRecs[itemType].hasRepop)
+   {
+      item.repopDelay = getDefaultRepopDelay(itemType);
+   }
+
    if(itemType == ItemSpeedZone)
    {
       item.speed = SpeedZone::defaultSpeed;
@@ -2456,30 +2532,39 @@ void EditorUserInterface::restoreSelection()
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(mEditingTextItem != -1)
-   {
-      if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER || keyCode == KEY_T && getKeyState(KEY_CTRL))
-         mEditingTextItem = -1;
-      else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-         mItems[mEditingTextItem].text = mItems[mEditingTextItem].text.substr(0, mItems[mEditingTextItem].text.length() - 1);
-      else if(keyCode == KEY_UP)
+   if(mEditingSpecialAttrItem != -1)
+   {  /* braces required */
+      if(mSpecialAttribute == Text)
       {
-         mItems[mEditingTextItem].textSize+=3;
-         if(mItems[mEditingTextItem].textSize > MAX_TEXT_SIZE)
-            mItems[mEditingTextItem].textSize = MAX_TEXT_SIZE;
-      }
-      else if(keyCode == KEY_DOWN)
-      {
-         mItems[mEditingTextItem].textSize-=3;
-         if(mItems[mEditingTextItem].textSize < MIN_TEXT_SIZE)
-            mItems[mEditingTextItem].textSize = MIN_TEXT_SIZE;
-      }
+         if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER || keyCode == KEY_T && getKeyState(KEY_CTRL))
+            mEditingSpecialAttrItem = -1;
+         else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+            mItems[mEditingSpecialAttrItem].text = mItems[mEditingSpecialAttrItem].text.substr(0, mItems[mEditingSpecialAttrItem].text.length() - 1);
+         else if(keyCode == KEY_UP)
+         {
+            mItems[mEditingSpecialAttrItem].textSize+=3;
+            if(mItems[mEditingSpecialAttrItem].textSize > MAX_TEXT_SIZE)
+               mItems[mEditingSpecialAttrItem].textSize = MAX_TEXT_SIZE;
+         }
+         else if(keyCode == KEY_DOWN)
+         {
+            mItems[mEditingSpecialAttrItem].textSize-=3;
+            if(mItems[mEditingSpecialAttrItem].textSize < MIN_TEXT_SIZE)
+               mItems[mEditingSpecialAttrItem].textSize = MIN_TEXT_SIZE;
+         }
 
-      else if(ascii)
-         if(mItems[mEditingTextItem].text.length() < MAX_TEXTITEM_LEN)
-            mItems[mEditingTextItem].text += ascii;
+         else if(ascii)
+            if(mItems[mEditingSpecialAttrItem].text.length() < MAX_TEXTITEM_LEN)
+               mItems[mEditingSpecialAttrItem].text += ascii;
 
-      return;
+         return;
+      }
+      else if(mSpecialAttribute == RepopDelay)
+         if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER || keyCode == KEY_R && getKeyState(KEY_CTRL))
+         {
+            mEditingSpecialAttrItem = -1;
+            return;
+         }
    }
 
    if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
@@ -2715,18 +2800,44 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_R)
    {
-      if(getKeyState(KEY_SHIFT))          // Shift-R - Rotate CW
+      if(getKeyState(KEY_CTRL))           // Ctrl-R - Modify respawn time for supporting items
+      {
+         for(S32 i = 0; i < mItems.size(); i++)
+            if(gGameItemRecs[mItems[i].index].hasRepop && (mItems[i].selected || itemToLightUp == i))
+            {
+               mEditingSpecialAttrItem = i;
+               mSpecialAttribute = RepopDelay;
+               saveUndoState(mItems);
+               break;
+            }
+      }
+      else if(getKeyState(KEY_SHIFT))     // Shift-R - Rotate CW
          rotateSelection(15.0f);
       else
          rotateSelection(-15.0f);         // R - Rotate CCW
    }
    else if(keyCode == KEY_UP && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
-      mUp = true;
+   {  /* braces required */
+      // First, need to check if we're editing an item that needs the up key for something else
+      if(mEditingSpecialAttrItem != -1 && mSpecialAttribute == RepopDelay)    
+      { /* braces required */
+         if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
+            mItems[mEditingSpecialAttrItem].repopDelay++;
+      }
+      else
+         mUp = true;
+   }
    else if(keyCode == KEY_UP && getKeyState(KEY_CTRL))      // Ctrl-Up - Zoom in
       mIn = true;
    else if(keyCode == KEY_DOWN)
-   {
-      if(getKeyState(KEY_CTRL))           // Ctrl-Down - Zoom out
+   { /* braces required */
+      // First, need to check if we're editing an item that needs the down key for something else
+      if(mEditingSpecialAttrItem != -1 && mSpecialAttribute == RepopDelay)    
+      {  /* braces required */
+         if(mItems[mEditingSpecialAttrItem].repopDelay > 0)
+            mItems[mEditingSpecialAttrItem].repopDelay--;
+      }
+      else if(getKeyState(KEY_CTRL))      // Ctrl-Down - Zoom out
          mOut = true;
       else                                // Down - Pan down
          mDown = true;
@@ -2793,7 +2904,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       for(S32 i = 0; i < mItems.size(); i++)
          if(mItems[i].index == ItemTextItem && (mItems[i].selected || itemToLightUp == i))
          {
-            mEditingTextItem = i;
+            mEditingSpecialAttrItem = i;
+            mSpecialAttribute = Text;
             saveUndoState(mItems);
             break;
          }
@@ -3146,7 +3258,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
          if(gGameItemRecs[mItems[i].index].hasText)
             fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
-         if(mItems[i].repopDelay != -1)
+         if(gGameItemRecs[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
             fprintf(f, " %d", mItems[i].repopDelay);
          if(mItems[i].index == ItemSpeedZone)
             fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
@@ -3220,7 +3332,7 @@ void EditorUserInterface::testLevel()
       gLevelList.clear();
 
       mgLevelDir = gLevelDir;
-      gLevelDir = "levels";           // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param
+      gLevelDir = "levels";            // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param
 
       mWasTesting = true;
  

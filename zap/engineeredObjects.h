@@ -141,6 +141,8 @@ private:
    void setObjectMask() { mObjectTypeMask = ForceFieldProjectorType | CommandMapVisType; }
 
 public:
+   static const S32 defaultRespawnTime = 0;
+
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
@@ -184,6 +186,8 @@ private:
    void setObjectMask() { mObjectTypeMask = TurretType | CommandMapVisType; }
 
 public:
+   static const S32 defaultRespawnTime = 0;
+
    enum {
       TurretAimOffset = 15,               // I think this is some factor to account for the fact that turrets do not shoot from their center
                                           // Also serves as radius of circle of turret's body, where the turret starts

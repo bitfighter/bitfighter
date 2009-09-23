@@ -826,7 +826,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       p.read(argv + 2);
       p *= getGame()->getGridSize();
 
-      S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::defaultFlagSpawnRepopDelay;
+      S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::defaultRespawnTime;
 
       FlagSpawn spawn = FlagSpawn(p, time * 1000);
 
