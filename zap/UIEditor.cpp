@@ -1511,7 +1511,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
          else
          {
-            glColor3f(.8,.8,.8);
+            glColor(hideit ? grayedOutColorBright : Color(.7,.7,.7));
             drawPolygon(pos, 7, 8, 0);
          } 
       }
@@ -1555,7 +1555,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
          else  
          {
-            glColor3f(.7, .7, .7);
+            glColor(hideit ? grayedOutColorBright : Color(.7,.7,.7));
             drawCircle(pos, 9);
          } 
       }
@@ -1603,7 +1603,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       {
          const U32 instrSize = 8;
  
-         if(item.selected || indx == itemToLightUp || mEditingSpecialAttrItem == indx) 
+         if(showAllObjects && (item.selected || indx == itemToLightUp || mEditingSpecialAttrItem == indx))
          {
             glColor3f(1,1,1);
             if(item.repopDelay == 0)
@@ -1643,9 +1643,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          }
       }
 
-      if(item.selected || indx == itemToLightUp)                  // Draw highlighted border around item if selected
+      if(showAllObjects && (item.selected || indx == itemToLightUp))   // Draw highlighted border around item if selected
       {
-         Point pos = convertLevelToCanvasCoord(item.verts[0]);    // note that dockItems are never selected!
+         Point pos = convertLevelToCanvasCoord(item.verts[0]);         // note that dockItems are never selected!
 
          glColor(labelColor);
          glBegin(GL_LINE_LOOP);
@@ -1669,11 +1669,11 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
       }
       // And label it if we're hovering over it (or not)
-      if((item.selected || indx == itemToLightUp) && gGameItemRecs[item.index].onScreenName)
+      if(showAllObjects && (item.selected || indx == itemToLightUp) && gGameItemRecs[item.index].onScreenName)
       {
          glColor(!hideit ? labelColor : grayedOutColorBright);
          drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, gGameItemRecs[item.index].onScreenName);     // Label on top
-      }
+      } 
    }
    // Label our dock items
    if(isDockItem && gGameItemRecs[item.index].geom != geomPoly)      // Polys are already labeled internally
