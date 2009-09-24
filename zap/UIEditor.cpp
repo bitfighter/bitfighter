@@ -1273,47 +1273,31 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
          F32 strWidth = getStringWidth(120, item.text.c_str());
          F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
-         F32 ang = pos.angleTo(dest);
-         F32 cosang = cos(ang);
-         F32 sinang = sin(ang);
 
          item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
 
          glColor(getTeamColor(item.team));
          F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);   // Use this more precise F32 calculation of size for smoother interactive rendering.  We'll use U32 approximation in game.
 
-         drawAngleStringf_fixed(pos.x, pos.y, txtSize, ang, "%s%c", item.text.c_str(), cursorBlink && mSpecialAttribute == Text && mEditingSpecialAttrItem == indx ? '_' : 0);
+         drawAngleStringf_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c", item.text.c_str(), cursorBlink && mSpecialAttribute == Text && mEditingSpecialAttrItem == indx ? '_' : 0);
 
-         if((item.selected || indx == itemToLightUp) && mEditingSpecialAttrItem == -1)
+         if((item.selected || indx == itemToLightUp) && mSpecialAttribute == None)
          {
-            const U32 instrSize = 8;
-            const char *instr = "[Ctrl-T] to edit text";
-            S32 len = getStringWidth(instrSize, instr);
-            S32 offset = (pos.distanceTo(dest) - len) / 2;
-
             glColor3f(1, 1, 1);     // white
-            drawAngleString_fixed(pos.x + cosang * offset - (instrSize + 3) * sinang, pos.y + sinang * offset + (instrSize + 3) * cosang, instrSize, ang, instr);
+            drawStringf_2pt(pos, dest, 8, -22, "[Ctrl-Enter] to edit text");
          }
       }
       else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
       {
          if(item.selected || indx == itemToLightUp)
          {
-            const U32 txtSize = 10;
+            drawStringf_2pt(pos, dest, 10, 0, "Speed: %d / Snap: %s", item.speed, item.boolattr ? "On" : "Off");
 
-            F32 ang = pos.angleTo(dest);
-            F32 cosang = cos(ang);
-            F32 sinang = sin(ang);
-
-            S32 len = getStringWidthf(txtSize, "Speed: %d", item.speed);
-            S32 offset = (pos.distanceTo(dest) - len) / 2;
-
-            drawAngleStringf_fixed(pos.x + cosang * offset + sinang * txtSize, pos.y + sinang * offset - cosang * txtSize, txtSize, ang, "Speed: %d", item.speed);
-
-            len = getStringWidthf(txtSize, "Snap: %s", item.boolattr ? "On" : "Off");
-            offset = (pos.distanceTo(dest) - len) / 2;
-
-            drawAngleStringf_fixed(pos.x + cosang * offset - sinang * (txtSize + 4), pos.y + sinang * offset + cosang * (txtSize + 4), txtSize, ang, "Snap: %s", item.boolattr ? "On" : "Off");
+            if((item.selected || indx == itemToLightUp) && (mSpecialAttribute == None || mSpecialAttribute == GoFastSpeed))
+            {
+               glColor3f(1, 1, 1);     // white
+               drawStringf_2pt(pos, dest, 8, -22, mSpecialAttribute == None ? "[Ctrl-Enter] to edit speed" : "[Ctrl-Enter] to edit snapping");
+            }
          } 
       }
       else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
@@ -1614,8 +1598,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
             const char *msg; 
 
-            if(mEditingSpecialAttrItem == -1)
-               msg = "[Ctrl-R] to edit";
+            if(mSpecialAttribute == None)
+               msg = "[Ctrl-Enter] to edit";
             else if(mEditingSpecialAttrItem == indx && mSpecialAttribute == RepopDelay)
                msg = "Up/Dn to change";
             else
@@ -2529,45 +2513,94 @@ void EditorUserInterface::restoreSelection()
    }
 }
 
+U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can't return a SpecialAttribute...  hrm...
+{
+   // Advance to the next attribute. If we were at None, start with the first.
+   U32 curr = (mSpecialAttribute == None) ? 0 : mSpecialAttribute + 1;      
+
+   // Find next attribute that applies to selected object
+   for(U32 i = curr; i <= None; i++)
+   {
+      if( ((i == Text) && gGameItemRecs[mItems[item].index].hasText) ||
+          ((i == RepopDelay) && gGameItemRecs[mItems[item].index].hasRepop) ||
+          ((i == GoFastSpeed || i == GoFastSnap) && !strcmp(gGameItemRecs[mItems[item].index].name, "SpeedZone")) ||   // strcmp ==> kind of janky
+          (i == None ) )
+         return i;
+   }
+   return None;      // Should never get here...
+}
+
+
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    if(mEditingSpecialAttrItem != -1)
    {  /* braces required */
-      if(mSpecialAttribute == Text)
+      if( keyCode == KEY_J && getKeyState(KEY_CTRL) )    // Let Ctrl-Enter, which GLUT reports as Ctrl-J, drop through
+      { /* Do nothing */ }
+      else if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER)      // End editing
       {
-         if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER || keyCode == KEY_T && getKeyState(KEY_CTRL))
-            mEditingSpecialAttrItem = -1;
-         else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-            mItems[mEditingSpecialAttrItem].text = mItems[mEditingSpecialAttrItem].text.substr(0, mItems[mEditingSpecialAttrItem].text.length() - 1);
-         else if(keyCode == KEY_UP)
-         {
-            mItems[mEditingSpecialAttrItem].textSize+=3;
-            if(mItems[mEditingSpecialAttrItem].textSize > MAX_TEXT_SIZE)
-               mItems[mEditingSpecialAttrItem].textSize = MAX_TEXT_SIZE;
-         }
-         else if(keyCode == KEY_DOWN)
-         {
-            mItems[mEditingSpecialAttrItem].textSize-=3;
-            if(mItems[mEditingSpecialAttrItem].textSize < MIN_TEXT_SIZE)
-               mItems[mEditingSpecialAttrItem].textSize = MIN_TEXT_SIZE;
-         }
+         mEditingSpecialAttrItem = -1;
+         mSpecialAttribute = None;
+         return;
+      }
 
-         else if(ascii)
+      else if(mSpecialAttribute == Text)
+      {
+         if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+            mItems[mEditingSpecialAttrItem].text = mItems[mEditingSpecialAttrItem].text.substr(0, mItems[mEditingSpecialAttrItem].text.length() - 1);
+
+         else if(ascii)       // User typed a character -- add it to the string
             if(mItems[mEditingSpecialAttrItem].text.length() < MAX_TEXTITEM_LEN)
                mItems[mEditingSpecialAttrItem].text += ascii;
 
          return;
       }
       else if(mSpecialAttribute == RepopDelay)
-         if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER || keyCode == KEY_R && getKeyState(KEY_CTRL))
-         {
-            mEditingSpecialAttrItem = -1;
-            return;
+      {
+         if(keyCode == KEY_UP)         // Up - increase delay
+         {  /* braces required */
+            if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
+               mItems[mEditingSpecialAttrItem].repopDelay++;
          }
+         else if(keyCode == KEY_DOWN)  // Down - decrease delay
+         {  /* braces required */
+            if(mItems[mEditingSpecialAttrItem].repopDelay > 0)
+               mItems[mEditingSpecialAttrItem].repopDelay--;
+         }
+      }
+      else if(mSpecialAttribute == GoFastSpeed)   
+      {
+
+      }
+      else if(mSpecialAttribute == GoFastSnap)   
+      {
+
+      }
    }
 
-   if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
+   if(keyCode == KEY_J && getKeyState(KEY_CTRL))       // Ctrl-Enter - Edit props  (loser GLUT sees Ctrl-Enter as Ctrl-J)
+   {
+      for(S32 i = 0; i < mItems.size(); i++)
+      {
+         if(mItems[i].selected || itemToLightUp == i)
+         {
+            mEditingSpecialAttrItem = i;
+            mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
+
+            if(mSpecialAttribute != None)
+            {
+               mEditingSpecialAttrItem = i;
+               saveUndoState(mItems);
+            }
+            else
+               mEditingSpecialAttrItem = -1;
+
+            break;
+         }
+      }
+   }
+   else if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
    {
       setCurrentTeam(-2);
       return;
@@ -2786,7 +2819,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             mRedoItems.push_back(mItems);          // Save state onto redo buffer
 
-            mItems = mUndoItems.last();        // Restore state from undo buffer
+            mItems = mUndoItems.last();            // Restore state from undo buffer
             mUndoItems.pop_back();
 
             if(mAllUndoneUndoLevel != mUndoItems.size())
@@ -2799,45 +2832,15 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
         centerView();
    }
    else if(keyCode == KEY_R)
-   {
-      if(getKeyState(KEY_CTRL))           // Ctrl-R - Modify respawn time for supporting items
-      {
-         for(S32 i = 0; i < mItems.size(); i++)
-            if(gGameItemRecs[mItems[i].index].hasRepop && (mItems[i].selected || itemToLightUp == i))
-            {
-               mEditingSpecialAttrItem = i;
-               mSpecialAttribute = RepopDelay;
-               saveUndoState(mItems);
-               break;
-            }
-      }
-      else if(getKeyState(KEY_SHIFT))     // Shift-R - Rotate CW
-         rotateSelection(15.0f);
-      else
-         rotateSelection(-15.0f);         // R - Rotate CCW
-   }
-   else if(keyCode == KEY_UP && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
-   {  /* braces required */
-      // First, need to check if we're editing an item that needs the up key for something else
-      if(mEditingSpecialAttrItem != -1 && mSpecialAttribute == RepopDelay)    
-      { /* braces required */
-         if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
-            mItems[mEditingSpecialAttrItem].repopDelay++;
-      }
-      else
-         mUp = true;
-   }
+      rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
+
+   else if((keyCode == KEY_UP) && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
+      mUp = true;
    else if(keyCode == KEY_UP && getKeyState(KEY_CTRL))      // Ctrl-Up - Zoom in
       mIn = true;
    else if(keyCode == KEY_DOWN)
    { /* braces required */
-      // First, need to check if we're editing an item that needs the down key for something else
-      if(mEditingSpecialAttrItem != -1 && mSpecialAttribute == RepopDelay)    
-      {  /* braces required */
-         if(mItems[mEditingSpecialAttrItem].repopDelay > 0)
-            mItems[mEditingSpecialAttrItem].repopDelay--;
-      }
-      else if(getKeyState(KEY_CTRL))      // Ctrl-Down - Zoom out
+      if(getKeyState(KEY_CTRL))           // Ctrl-Down - Zoom out
          mOut = true;
       else                                // Down - Pan down
          mDown = true;
@@ -2875,7 +2878,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    else if(keyCode == KEY_E)              // E - Zoom In
-      mIn = true;
+         mIn = true;
    else if(keyCode == KEY_SLASH)          // / - Split barrier on selected vertex
       splitBarrier();
    else if(keyCode == KEY_J)
@@ -2898,17 +2901,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       gTeamDefUserInterface.activate();
       UserInterface::playBoop();
-   }
-   else if(keyCode == KEY_T && getKeyState(KEY_CTRL))    // Ctrl-T - Edit text item
-   {
-      for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i].index == ItemTextItem && (mItems[i].selected || itemToLightUp == i))
-         {
-            mEditingSpecialAttrItem = i;
-            mSpecialAttribute = Text;
-            saveUndoState(mItems);
-            break;
-         }
    }
    else if(keyCode == KEY_T)              // T - Teleporter
       insertNewItem(ItemTeleporter);

@@ -247,12 +247,29 @@ extern const F32 radiansToDegreesConversion;
 
 #define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args); va_end(args);
 
+
+// Center text between two points
+void UserInterface::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...)
+{
+   F32 ang = p1.angleTo(p2);
+   F32 cosang = cos(ang);
+   F32 sinang = sin(ang);
+
+   makeBuffer;
+   S32 len = getStringWidthf(size, buffer);
+   S32 offset = (p1.distanceTo(p2) - len) / 2;
+
+   drawAngleString_fixed(p1.x + cosang * offset + sinang * (size + vert_offset), p1.y + sinang * offset - cosang * (size + vert_offset), size, ang, buffer);
+}
+
+
 // New, fixed version
 void UserInterface::drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
 {
    makeBuffer;
    doDrawAngleString((S32) x, (S32) y, size, angle, buffer, true);
 }
+
 
 // New, fixed version
 void UserInterface::drawAngleString_fixed(S32 x, S32 y, F32 size, F32 angle, const char *string)

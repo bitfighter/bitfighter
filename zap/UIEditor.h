@@ -108,9 +108,11 @@ public:
 
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
    {                       // we can edit in the editor
-      Text,
+      Text = 0,
       RepopDelay,
-      None,
+      GoFastSpeed,
+      GoFastSnap,
+      None,                // Must be last
    };
 
    struct WorldItem
@@ -177,6 +179,8 @@ private:
    
    S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
    SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
+   U32 getNextAttr(S32 item);          // Assist on finding the next attribute this item is capable of editing,
+                                       // for cycling through the various editable attributes
 
    WorldItem mNewItem;
    F32 mCurrentScale;

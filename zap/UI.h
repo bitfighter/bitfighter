@@ -40,6 +40,8 @@ using namespace std;
 namespace Zap
 {
 
+struct Point;
+
 static const float gDefaultLineWidth = 2.0f;
 
 const S32 gScreenHeight = 600;
@@ -155,6 +157,9 @@ public:
    static void drawAngleString_fixed(S32 x, S32 y, F32 size, F32 angle, const char *string);
    static void drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
    static void drawAngleStringf_fixed(F32 x, F32 y, F32 size, F32 angle, const char *format, ...);
+
+   // Center text between two points
+   void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
 
    // Draw text centered on screen (normal and formatted versions)
    static void drawCenteredString(S32 y, U32 size, const char *str);
