@@ -296,7 +296,7 @@ extern void endGame();
 // already bumbed master, release.  cs also ok
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
 #define CS_PROTOCOL_VERSION 18     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 405          // Version of the game according to SVN, will be unique every release (must be int)
+#define BUILD_VERSION 456          // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "011 preveiew alpha 2" //"Bitfighter Release Candidate 010"   // Change this with every release -- for display purposes only, string
 
 };
