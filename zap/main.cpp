@@ -108,7 +108,7 @@
 //<u>Editor:</u>
 //<ul>
 //<li>Moved turrent/spybug ranges display onto Tab-down display</li>
-//<li>When tab down, test items, resource items, and soccer balls all display at actual size, making precise positioning possible</li>
+//<li>When tab down, test items, resource items, gofasts, teleports, asteroids, and soccer balls all display at actual size, making precise positioning possible</li>
 //<li>Added more editor checks (flags in non-flag games, team flags in non-team-flag games)</li>
 //<li>Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor</li>
 //<li>Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
