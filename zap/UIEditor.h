@@ -189,6 +189,7 @@ private:
    Point mMouseDownPos;
 
    void renderGenericItem(Point pos, Color c);
+   void setTranslationAndScale(Point pos);
 
    bool mCreatingPoly;
    bool mDragSelecting;

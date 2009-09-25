@@ -52,7 +52,7 @@ extern void drawPolygon(Point pos, S32 sides, F32 radius, F32 angle);
 extern void renderCenteredString(Point pos, U32 size, const char *string);
 extern void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive);
 extern void renderAimVector();
-extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests);
+extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests, bool showDestOverride);
 extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset);
 
 extern void renderFlag(Point pos, Color flagColor);
@@ -65,7 +65,7 @@ extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 extern void renderLoadoutZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle);
 extern void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, F32 glowFraction);
 
-extern void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Color c, bool isFlashing, F32 glowFraction);
+extern void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Point centroid, Color c, F32 labelAngle, bool isFlashing, F32 glowFraction);
 extern void renderSlipZone(Vector<Point> &bounds, Rect extent);
 
 extern void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text);

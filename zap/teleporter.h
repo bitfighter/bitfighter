@@ -45,11 +45,13 @@ public:
    U32 timeout;
    U32 mTime;
 
+   static const S32 TeleporterRadius = 75;       // Overall size of the teleporter
+
+
    enum {
       InitMask     = BIT(0),
       TeleportMask = BIT(1),
 
-      TeleporterRadius        = 75,       // Overall size of the teleporter
       TeleporterTriggerRadius = 50,
       TeleporterDelay = 1500,             // Time teleporter remains idle after it has been used
       TeleporterExpandTime = 1350,

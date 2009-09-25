@@ -46,6 +46,7 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "barrier.h"             // For BarrierWidth
 #include "speedZone.h"           // For default speed
 #include "gameItems.h"           // For Asteroid defs
+#include "teleporter.h"          // For teleporter radius
 #include "config.h"
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
@@ -60,6 +61,15 @@ namespace Zap
 EditorUserInterface gEditorUserInterface;
 
 const U32 dockWidth = 50;
+
+// Some colors
+
+extern Color gNexusOpenColor;
+static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
+static const Color white = Color(1, 1, 1);
+static const Color red = Color(1, 0, 0);
+static const Color yellow = Color(1, 1, 0);
+
 
 void saveLevelCallback()
 {
@@ -204,7 +214,7 @@ struct GameItemRec
 
 
 // Remember to keep these properly aligned with GameItems enum
-//   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural     on-dock name    on-screen name description
+//   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural        onDockName   onScreenName    description
 GameItemRec gGameItemRecs[] = {
    { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",      "Location where ships start.  At least one per team is required. [G]" },
    { "SpeedZone",           false,    false,     true,        false,   false,   geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",     "Makes ships go fast in direction of arrow. [P]" },
@@ -903,7 +913,7 @@ void EditorUserInterface::render()
          glTranslatef(mMousePos.x, mMousePos.y, 0);
          glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
          glRotatef(90, 0, 0, 1);
-         renderShip(Color(1, 0, 0), 1, thrusts, 1, 5, false, false);
+         renderShip(red, 1, thrusts, 1, 5, false, false);
          glRotatef(-90, 0, 0, 1);
 
          // And show how far it can see
@@ -939,7 +949,7 @@ void EditorUserInterface::render()
    else if(mouseOnDock())       
       glColor3f(1, 1, 0);
    else
-      glColor3f(1, 1, 1);
+      glColor(white);
 
    glBegin(GL_LINE_LOOP);
       glVertex2f(canvasWidth - dockWidth - horizMargin, vertMargin);
@@ -952,25 +962,25 @@ void EditorUserInterface::render()
    Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
    char text[50];
-   glColor3f(1,1,1);
+   glColor(white);
    dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
    drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 15, 7, text);
 
    // And scale
-   glColor3f(1,1,1);
+   glColor(white);
    dSprintf(text, sizeof(text), "%2.2f", mCurrentScale);
    drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 25, 7, text);
 
    // Show number of teams
-   glColor3f(1, 1, 1);
+   glColor(white);
    dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
    drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 35, 7, text);
 
    // Show level name, and whether it needs to be saved or not
    if(mNeedToSave)
-      glColor3f(1, 0, 0);
+      glColor(red);
    else
-      glColor3f(1,1,1);
+      glColor(white);
 
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
    drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 45, 7, text);
@@ -978,7 +988,7 @@ void EditorUserInterface::render()
    // And wall width as needed
    if (width > 0)
    {
-      glColor3f(1,1,1);
+      glColor(white);
       dSprintf(text, sizeof(text), "Width: %2.0f", width);
       drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 55, 7, text);
    }
@@ -991,7 +1001,7 @@ void EditorUserInterface::render()
 
    if(mDragSelecting)      // Draw box for selecting items
    {
-      glColor3f(1,1,1);
+      glColor(white);
       Point downPos = convertLevelToCanvasCoord(mMouseDownPos);
       glBegin(GL_LINE_LOOP);
          glVertex2f(downPos.x, downPos.y);
@@ -1110,10 +1120,7 @@ void EditorUserInterface::renderLinePolyVertices(WorldItem item, S32 itemID, boo
 // Draw a vertex of a selected editor item,
 void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 number, S32 size)
 {
-   if(style == HighlightedVertex)
-      glColor3f(1, 1, 0);     // yellow
-   else
-      glColor3f(1, 0, 0);     // red
+   glColor((style == HighlightedVertex) ? yellow : red);
 
    if(style == HighlightedVertex || style == SelectedItemVertex)  // Hollow boxes
    {
@@ -1126,7 +1133,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
    }
    else     // Solid boxes
    {
-      glColor3f(1, 0, 0);     // red
+      glColor(red);
       glBegin(GL_POLYGON);
          glVertex2f(v.x - size, v.y - size);
          glVertex2f(v.x + size, v.y - size);
@@ -1137,7 +1144,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 
    if(number != -1)     // Draw vertex numbers
    {
-      glColor3f(1, 1, 1);     // white
+      glColor(white);
       drawStringf(v.x - getStringWidthf(6, "%d", number) / 2, v.y - 3, 6, "%d", number);
    }
 }
@@ -1203,14 +1210,16 @@ void EditorUserInterface::renderPoly(Vector<Point> verts, bool isDockItem)
    glEnd();
 }
 
-extern Color gNexusOpenColor;
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
 void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 {
    Point pos, dest;
    const S32 labelSize = 9;      // Size to label items we're hovering over
-   const Color labelColor(1, 1, 1);    // white
+   const S32 instrSize = 9;      // Size of instructions for special items
+   const S32 attrSize = 10;
+
+   const Color labelColor = white;
 
    bool hideit = !showAllObjects && !(mShowingReferenceShip && !isDockItem);
 
@@ -1226,178 +1235,178 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          dest = item.verts[1];
       else
          dest = convertLevelToCanvasCoord(item.verts[1]);
- 
-      glLineWidth(4);
-      if(hideit) 
-         glColor(grayedOutColorDim);
-      else if(item.index == ItemTeleporter)
-         glColor3f(0, 1, 0);
-      else if(item.index == ItemSpeedZone)
-         glColor3f(1, 0, 0);
-      else if(item.index == ItemTextItem)
-         glColor3f(0, 0, 1);
 
-      if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
-         glColor3f(1, 1, 0);
-
-      glBegin(GL_POLYGON);
-         glVertex2f(pos.x - 5, pos.y - 5);   // Draw origin of item (square box)
-         glVertex2f(pos.x + 5, pos.y - 5);
-         glVertex2f(pos.x + 5, pos.y + 5);
-         glVertex2f(pos.x - 5, pos.y + 5);
-      glEnd();
-
-      if(!isDockItem)
+      // First check if we should show the schematic version or the real object rendering
+      if((mShowingReferenceShip && (item.index == ItemTeleporter || item.index == ItemSpeedZone)) && !isDockItem)
       {
-         glBegin(GL_LINES);
-            glVertex2f(pos.x, pos.y);           // Draw connecting line
-            glVertex2f(dest.x, dest.y);
-
-            F32 ang = pos.angleTo(dest);
-            const F32 al = 15;                  // Length of arrow-head
-            const F32 angoff = .5;              // Pitch of arrow-head prongs
-
-            glVertex2f(dest.x, dest.y);         // Draw arrow-head
-            glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
-            glVertex2f(dest.x, dest.y);
-            glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
-         glEnd();
-      }
-
-      glLineWidth(gDefaultLineWidth);
-
-      // If this is a textItem, and either the item or either vertex is selected, draw the text
-      if(!isDockItem && gGameItemRecs[item.index].hasText)
-      {
-         // Recalc text size -- TODO:  this shouldn't be here... this should only happen when text is created, not every time it's drawn
-
-         F32 strWidth = getStringWidth(120, item.text.c_str());
-         F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
-
-         item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
-
-         glColor(getTeamColor(item.team));
-         F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);   // Use this more precise F32 calculation of size for smoother interactive rendering.  We'll use U32 approximation in game.
-
-         drawAngleStringf_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c", item.text.c_str(), cursorBlink && mSpecialAttribute == Text && mEditingSpecialAttrItem == indx ? '_' : 0);
-
-         if((item.selected || indx == itemToLightUp) && mSpecialAttribute == None)
-         {
-            glColor3f(1, 1, 1);     // white
-            drawStringf_2pt(pos, dest, 8, -22, "[Ctrl-Enter] to edit text");
-         }
-      }
-      else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
-      {
-         if(item.selected || indx == itemToLightUp)
-         {
-            drawStringf_2pt(pos, dest, 10, 0, "Speed: %d / Snap: %s", item.speed, item.boolattr ? "On" : "Off");
-
-            if((item.selected || indx == itemToLightUp) && (mSpecialAttribute == None || mSpecialAttribute == GoFastSpeed))
+         glPushMatrix();
+            setTranslationAndScale(pos);
+            if(item.index == ItemTeleporter)
             {
-               glColor3f(1, 1, 1);     // white
-               drawStringf_2pt(pos, dest, 8, -22, mSpecialAttribute == None ? "[Ctrl-Enter] to edit speed" : "[Ctrl-Enter] to edit snapping");
+               Vector<Point> dest;
+               dest.push_back(convertLevelToCanvasCoord(item.verts[1]));
+
+               renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TeleporterRadius, 1, dest, false);
             }
-         } 
+            else if(item.index == ItemSpeedZone)
+               renderSpeedZone(pos, convertLevelToCanvasCoord(item.verts[1]), gClientGame->getCurrentTime());
+         glPopMatrix(); 
       }
-      else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
+      else
       {
-         if(item.selected || indx == itemToLightUp)
-         {
-            const U32 txtSize = 10;
+         glLineWidth(4);
+         if(hideit) 
+            glColor(grayedOutColorDim);
+         else if(item.index == ItemTeleporter)
+            glColor3f(0, 1, 0);
+         else if(item.index == ItemSpeedZone)
+            glColor(red);
+         else if(item.index == ItemTextItem)
+            glColor3f(0, 0, 1);
 
-            F32 ang = pos.angleTo(dest);
-            F32 cosang = cos(ang);
-            F32 sinang = sin(ang);
+         if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
+            glColor3f(1, 1, 0);
 
-            S32 len = getStringWidthf(txtSize, "Speed: %d", item.speed);
-            S32 offset = (pos.distanceTo(dest) - len) / 2;
-
-            drawAngleStringf_fixed(pos.x + cosang * offset + sinang * txtSize, pos.y + sinang * offset - cosang * txtSize, txtSize, ang, "Speed: %d", item.speed);
-
-            len = getStringWidthf(txtSize, "Snap: %s", item.boolattr ? "On" : "Off");
-            offset = (pos.distanceTo(dest) - len) / 2;
-
-            drawAngleStringf_fixed(pos.x + cosang * offset - sinang * (txtSize + 4), pos.y + sinang * offset + cosang * (txtSize + 4), txtSize, ang, "Snap: %s", item.boolattr ? "On" : "Off");
-         }
-      }
-
-
-      // Label line with obj type
-      //F32 lX = (pos.x + dest.x) / 2;
-      //F32 lY = (pos.y + dest.y) / 2;
-
-      //char msg[32];
-
-      //if(item.index == ItemTeleporter)
-      //   strcpy(msg, "TEL");
-      //else if(item.index == ItemSpeedZone)
-      //   strcpy(msg, "SPD");
-      //else if(item.index == ItemTextItem)
-      //   strcpy(msg, "TXT");
-
-      //glLineWidth(2);
-      //glColor3f(1,1,1);
-      //drawString(lX - getStringWidth(10, msg)/2, lY - 5, 10, msg);
-
-
-      // If either end is selected, draw a little white box around it
-      glColor(labelColor);
-      if(item.vertSelected[0] || (indx == itemToLightUp && vertexToLightUp == 0))
-      {
-         glBegin(GL_LINE_LOOP);
-            glVertex2f(pos.x - 7, pos.y - 7);
-            glVertex2f(pos.x + 7, pos.y - 7);
-            glVertex2f(pos.x + 7, pos.y + 7);
-            glVertex2f(pos.x - 7, pos.y + 7);
+         glBegin(GL_POLYGON);
+            glVertex2f(pos.x - 5, pos.y - 5);   // Draw origin of item (square box)
+            glVertex2f(pos.x + 5, pos.y - 5);
+            glVertex2f(pos.x + 5, pos.y + 5);
+            glVertex2f(pos.x - 5, pos.y + 5);
          glEnd();
 
-         if(item.index == ItemTeleporter)
+         if(!isDockItem)
          {
-            drawString(pos.x - getStringWidth(labelSize, "Teleport") / 2, pos.y + labelSize + 2, labelSize, "Teleport");
-            drawString(pos.x - getStringWidth(labelSize, "Intake Vortex") / 2, pos.y + 2 * labelSize + 5, labelSize, "Intake Vortex");
-         }
-         else if(item.index == ItemSpeedZone)
-         {
-            drawString(pos.x - getStringWidth(labelSize, "GoFast") / 2, pos.y + labelSize + 2, labelSize, "GoFast");
-            drawString(pos.x - getStringWidth(labelSize, "Location") / 2, pos.y + 2 * labelSize + 5, labelSize, "Location");
-         }
-         else if(item.index == ItemTextItem)
-         {
-            drawString(pos.x - getStringWidth(labelSize, "Text Item") / 2, pos.y + labelSize + 2, labelSize, "Text Item");
-            drawString(pos.x - getStringWidth(labelSize, "Start") / 2, pos.y + 2 * labelSize + 5, labelSize, "Start");
-         }
-      }
+            glBegin(GL_LINES);
+               glVertex2f(pos.x, pos.y);           // Draw connecting line
+               glVertex2f(dest.x, dest.y);
 
-      // Outline selected vertex, and label it
-      if(item.vertSelected[1] || (indx == itemToLightUp && vertexToLightUp == 1))
-      {
+               F32 ang = pos.angleTo(dest);
+               const F32 al = 15;                  // Length of arrow-head
+               const F32 angoff = .5;              // Pitch of arrow-head prongs
+
+               glVertex2f(dest.x, dest.y);         // Draw arrow-head
+               glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
+               glVertex2f(dest.x, dest.y);
+               glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
+            glEnd();
+         }
+
+         glLineWidth(gDefaultLineWidth);
+
+         // If this is a textItem, and either the item or either vertex is selected, draw the text
+         if(!isDockItem && gGameItemRecs[item.index].hasText)
+         {
+            // Recalc text size -- TODO:  this shouldn't be here... this should only happen when text is created, not every time it's drawn
+
+            F32 strWidth = getStringWidth(120, item.text.c_str());
+            F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
+
+            item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
+
+            glColor(getTeamColor(item.team));
+            F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);   // Use this more precise F32 calculation of size for smoother interactive rendering.  We'll use U32 approximation in game.
+
+            drawAngleStringf_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c", item.text.c_str(), cursorBlink && mSpecialAttribute == Text && mEditingSpecialAttrItem == indx ? '_' : 0);
+
+            if((item.selected || indx == itemToLightUp) && mSpecialAttribute == None)
+            {
+               glColor(white);
+               drawStringf_2pt(pos, dest, instrSize, -22, "[Ctrl-Enter] to edit text");
+            }
+         }
+         else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
+         {
+            if(item.selected || indx == itemToLightUp)
+            {
+               glColor((mSpecialAttribute != GoFastSnap) ? white : inactiveSpecialAttributeColor);
+               drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", item.speed);
+
+               glColor((mSpecialAttribute != GoFastSpeed) ? white : inactiveSpecialAttributeColor);
+               drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", item.boolattr ? "On" : "Off");
+
+              glColor(white);
+
+               const char *msg, *instr;
+
+               if(mSpecialAttribute == None)
+               { 
+                  msg = "[Ctrl-Enter] to edit speed";
+                  instr = "";
+               }
+               else if(mSpecialAttribute == GoFastSpeed)
+               {
+                  msg = "[Ctrl-Enter] to edit snapping";
+                  instr = "Up/Dn to change speed";
+               }
+               else if(mSpecialAttribute == GoFastSnap)
+               {
+                  msg = "[Ctrl-Enter] to stop editing";
+                  instr = "Up/Dn to toggle snapping";
+               }
+               else
+               {
+                  msg = "???";
+                  instr = "???";
+               }
+
+               drawStringf_2pt(pos, dest, instrSize, -22, msg);
+               drawStringf_2pt(pos, dest, instrSize, -22 - instrSize - 2, instr);
+            } 
+         }
+
+         // If either end is selected, draw a little white box around it
          glColor(labelColor);
-         glBegin(GL_LINE_LOOP);
-            glVertex2f(dest.x - 7, dest.y - 7);
-            glVertex2f(dest.x + 7, dest.y - 7);
-            glVertex2f(dest.x + 7, dest.y + 7);
-            glVertex2f(dest.x - 7, dest.y + 7);
-         glEnd();
+         if(item.vertSelected[0] || (indx == itemToLightUp && vertexToLightUp == 0))
+         {
+            glBegin(GL_LINE_LOOP);
+               glVertex2f(pos.x - 7, pos.y - 7);
+               glVertex2f(pos.x + 7, pos.y - 7);
+               glVertex2f(pos.x + 7, pos.y + 7);
+               glVertex2f(pos.x - 7, pos.y + 7);
+            glEnd();
 
-         if(item.index == ItemTeleporter)
-         {
-            drawString(dest.x - getStringWidth(labelSize, "Teleport") / 2, dest.y + labelSize + 2, labelSize, "Teleport");
-            drawString(dest.x - getStringWidth(labelSize, "Destination") / 2, dest.y + 2 * labelSize + 5, labelSize, "Destination");
+            if(item.index == ItemTeleporter)
+            {
+               drawString(pos.x - getStringWidth(labelSize, "Teleport") / 2, pos.y + labelSize + 2, labelSize, "Teleport");
+               drawString(pos.x - getStringWidth(labelSize, "Intake Vortex") / 2, pos.y + 2 * labelSize + 5, labelSize, "Intake Vortex");
+            }
+            else if(item.index == ItemSpeedZone)
+            {
+               drawString(pos.x - getStringWidth(labelSize, "GoFast") / 2, pos.y + labelSize + 2, labelSize, "GoFast");
+               drawString(pos.x - getStringWidth(labelSize, "Location") / 2, pos.y + 2 * labelSize + 5, labelSize, "Location");
+            }
+            else if(item.index == ItemTextItem)
+            {
+               drawString(pos.x - getStringWidth(labelSize, "Text Item") / 2, pos.y + labelSize + 2, labelSize, "Text Item");
+               drawString(pos.x - getStringWidth(labelSize, "Start") / 2, pos.y + 2 * labelSize + 5, labelSize, "Start");
+            }
          }
-         else if(item.index == ItemSpeedZone)
+
+         // Outline selected vertex, and label it
+         if(item.vertSelected[1] || (indx == itemToLightUp && vertexToLightUp == 1))
          {
-            drawString(dest.x - getStringWidth(labelSize, "GoFast") / 2, dest.y + labelSize + 2, labelSize, "GoFast");
-            drawString(dest.x - getStringWidth(labelSize, "Direction") / 2, dest.y + 2 * labelSize + 5, labelSize, "Direction");
+            glColor(labelColor);
+            glBegin(GL_LINE_LOOP);
+               glVertex2f(dest.x - 7, dest.y - 7);
+               glVertex2f(dest.x + 7, dest.y - 7);
+               glVertex2f(dest.x + 7, dest.y + 7);
+               glVertex2f(dest.x - 7, dest.y + 7);
+            glEnd();
+
+            if(item.index == ItemTeleporter)
+            {
+               drawStringc(dest.x, dest.y + labelSize + 2, labelSize, "Teleport");
+               drawStringc(dest.x, dest.y + 2 * labelSize + 5, labelSize, "Destination");
+            }
+            else if(item.index == ItemSpeedZone)
+            {
+               drawStringc(dest.x, dest.y + labelSize + 2, labelSize, "GoFast");
+               drawStringc(dest.x, dest.y + 2 * labelSize + 5, labelSize, "Direction");
+            }
          }
-         else if(item.index == ItemTextItem)
-         {
-            //drawString(dest.x - getStringWidth(labelSize, "Text Item") / 2, dest.y + labelSize + 2, labelSize, "Text Item");
-            //drawString(dest.x - getStringWidth(labelSize, "Direction") / 2, dest.y + 2 * labelSize + 5, labelSize, "Direction");
-         }
-      }
+      }     
    }
-   else if(gGameItemRecs[item.index].geom == geomLine )  // Can only be barrierMaker -- it's the only geomLine we have
+   else if(gGameItemRecs[item.index].geom == geomLine )   // Can only be barrierMaker -- it's the only geomLine we have
    {
       renderBarrier(item.verts, item.selected || (indx == itemToLightUp && vertexToLightUp == -1), item.width / mGridSize, false);
       renderLinePolyVertices(item, indx, false);
@@ -1414,13 +1423,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          for(S32 i = 0; i < item.verts.size(); i++)
             outline.push_back(isDockItem ? item.verts[i] : convertLevelToCanvasCoord(item.verts[i]));
 
-         Triangulate::Process(outline, fill);     // Horribly inefficient to do this every time we draw, but easy.
+         Triangulate::Process(outline, fill);     // Horribly inefficient to do this every time we draw, but easy
 
          Color theFillColor = !hideit ? getTeamColor(item.team) : grayedOutColorDim;
          if(item.index == ItemNexus && !hideit)
-            theFillColor = gNexusOpenColor;    // Render Nexus items in pale green to match the actual thing
+            theFillColor = gNexusOpenColor;      // Render Nexus items in pale green to match the actual thing
 
-         glColor(!hideit ? theFillColor : grayedOutColorDim);
+         glColor(hideit ? grayedOutColorDim : theFillColor);
 
          for(S32 i = 0; i < fill.size(); i+=3)
          {
@@ -1436,7 +1445,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          else if(item.selected || (indx == itemToLightUp && vertexToLightUp == -1))
             glColor3f(1, 1, 0);     // yellow
          else
-            glColor3f(1, 1, 1);     // white
+            glColor(white);
 
          glLineWidth(3);
 
@@ -1448,7 +1457,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          glLineWidth(gDefaultLineWidth);        // Restore line width
 
          // Let's add a label
-         glColor(!hideit ? labelColor : grayedOutColorBright);
+         glColor(hideit ? grayedOutColorBright : labelColor);
 
          F32 ang = angleOfLongestSide(outline);
          Point cent = centroid(outline);
@@ -1462,7 +1471,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
 
    else if((showAllObjects || isDockItem || mShowingReferenceShip))    // Draw remaining point objects
    {
-      c = !hideit ? getTeamColor(item.team) : grayedOutColorDim;       // And a color (based on team affiliation)
+      c = hideit ? grayedOutColorDim : getTeamColor(item.team);        // And a color (based on team affiliation)
 
       if(item.index == ItemFlag)             // Draw flag
       {
@@ -1479,7 +1488,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
             glScalef(0.4, 0.4, 1);
             renderFlag(Point(0,0), c, !hideit ? NULL : grayedOutColorDim);
             
-            glColor(!hideit ? Color(1,1,1) : grayedOutColorDim);
+            glColor(!hideit ? white : grayedOutColorDim);
             drawCircle(Point(-4,0), 26);
          glPopMatrix();
       }
@@ -1488,8 +1497,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          if(mShowingReferenceShip && !isDockItem)
          {
             glPushMatrix();
-               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
-               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               setTranslationAndScale(pos);
                renderTestItem(pos);
             glPopMatrix(); 
          }
@@ -1505,8 +1513,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          if(mShowingReferenceShip && !isDockItem)
          {
             glPushMatrix();
-               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
-               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               setTranslationAndScale(pos);
                renderAsteroid(pos, design, asteroidRenderSize[0]);
             glPopMatrix(); 
          }
@@ -1519,8 +1526,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          if(mShowingReferenceShip && !isDockItem)
          {
             glPushMatrix();
-               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
-               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               setTranslationAndScale(pos);
                renderResourceItem(pos);
             glPopMatrix(); 
          }
@@ -1532,8 +1538,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
          if(mShowingReferenceShip && !isDockItem)
          {
             glPushMatrix();
-               glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
-               glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+               setTranslationAndScale(pos);
                renderSoccerBall(pos);
             glPopMatrix(); 
          }
@@ -1585,15 +1590,16 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 indx, bool isDockItem)
       // If this is an item that has a repop attirbute, and the item is selected, draw the text
       if(!isDockItem && gGameItemRecs[item.index].hasRepop)
       {
-         const U32 instrSize = 8;
- 
          if(showAllObjects && (item.selected || indx == itemToLightUp || mEditingSpecialAttrItem == indx))
          {
-            glColor3f(1,1,1);
+            glColor(white);
+
+            const char *healword = (item.index == ItemTurret || item.index == ItemForceField) ? "10% Heal" : "Regen";
+
             if(item.repopDelay == 0)
-               drawStringc(pos.x, pos.y + 10, instrSize, "Repop: Disabled");
+               drawStringfc(pos.x, pos.y + attrSize, attrSize, "%s: Disabled", healword);
             else
-               drawStringfc(pos.x, pos.y + 10, instrSize, "Repop: %d", item.repopDelay);
+               drawStringfc(pos.x, pos.y + 10, attrSize, "%s: %d sec%c", healword, item.repopDelay, item.repopDelay != 1 ? 's' : 0);
 
 
             const char *msg; 
@@ -1687,6 +1693,16 @@ void EditorUserInterface::renderGenericItem(Point pos, Color c)
       glVertex2f(pos.x + 8, pos.y + 8);
       glVertex2f(pos.x - 8, pos.y + 8);
    glEnd();
+}
+
+
+// Will set the correct translation and scale to render items at correct location and scale as if it were a real level.
+// Unclear enough??
+
+void EditorUserInterface::setTranslationAndScale(Point pos)
+{
+   glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
+   glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
 }
 
 
@@ -2078,17 +2094,19 @@ extern Point gMousePos;
 
 void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
    mMousePos = convertWindowToCanvasCoord(gMousePos);
 
-   if(mCreatingPoly)// && !shiftKeyDown)
+   if(mCreatingPoly)
       return;
    
    S32 vertexHit, vertexHitPoly;
    S32 edgeHit, itemHit;
+   bool showMoveCursor;
 
    findHitVertex(mMousePos, vertexHitPoly, vertexHit);
    findHitItemAndEdge(mMousePos, itemHit, edgeHit);
+
+   showMoveCursor = (vertexHitPoly != -1 || vertexHit != -1 || itemHit != -1 || edgeHit != -1);
 
    vertexToLightUp = -1;
    itemToLightUp = -1;
@@ -2099,7 +2117,9 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       itemToLightUp = vertexHitPoly;
    }
    else if(itemHit != -1 && !mItems[itemHit].selected)                     // We hit an item that wasn't already selected
+   {
       itemToLightUp = itemHit;
+   }
 
    if(itemHit != -1 && !mItems[itemHit].selected && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
    {
@@ -2107,8 +2127,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       vertexToLightUp = -1;
    }
 
-   if(vertexToLightUp != -1 || itemToLightUp != -1)      // Set cursor to move arrows if we hit anything at all
-      glutSetCursor(GLUT_CURSOR_SPRAY);
+   glutSetCursor(showMoveCursor ? GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW);
 }
 
 
@@ -2116,7 +2135,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 {
    mMousePos = convertWindowToCanvasCoord(Point(x,y));
 
-   if(mCreatingPoly || mDragSelecting)
+   if(mCreatingPoly || mDragSelecting || mEditingSpecialAttrItem != -1)
       return;
 
    if(mDraggingDockItem != -1)      // We just started dragging an item off the dock
@@ -2534,10 +2553,14 @@ U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(mEditingSpecialAttrItem != -1)
+   // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
+   // key actions are handled below.
+   if(mEditingSpecialAttrItem != -1)      
    {  /* braces required */
       if( keyCode == KEY_J && getKeyState(KEY_CTRL) )    // Let Ctrl-Enter, which GLUT reports as Ctrl-J, drop through
       { /* Do nothing */ }
+      else if(keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)    // Trap mouse clicks... do nothing
+         return;
       else if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER)      // End editing
       {
          mEditingSpecialAttrItem = -1;
@@ -2562,29 +2585,54 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {  /* braces required */
             if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
                mItems[mEditingSpecialAttrItem].repopDelay++;
+            return;
          }
          else if(keyCode == KEY_DOWN)  // Down - decrease delay
          {  /* braces required */
             if(mItems[mEditingSpecialAttrItem].repopDelay > 0)
                mItems[mEditingSpecialAttrItem].repopDelay--;
+            return;
          }
       }
       else if(mSpecialAttribute == GoFastSpeed)   
       {
-
+         if(keyCode == KEY_UP)         // Up - increase speed
+         {  /* braces required */
+            if(mItems[mEditingSpecialAttrItem].speed < SpeedZone::maxSpeed)
+               mItems[mEditingSpecialAttrItem].speed += 10;
+            return;
+         }
+         else if(keyCode == KEY_DOWN)  // Down - decrease speed
+         {  /* braces required */
+            if(mItems[mEditingSpecialAttrItem].speed > SpeedZone::minSpeed)
+               mItems[mEditingSpecialAttrItem].speed -= 10;
+            return;
+         }
       }
       else if(mSpecialAttribute == GoFastSnap)   
       {
-
+         if(keyCode == KEY_UP || keyCode == KEY_DOWN)   // Up/Down - toggle snapping
+         {  /* braces required */
+            mItems[mEditingSpecialAttrItem].boolattr = !mItems[mEditingSpecialAttrItem].boolattr;
+            return;
+         }
       }
    }
 
+   // Regular key handling from here on down
    if(keyCode == KEY_J && getKeyState(KEY_CTRL))       // Ctrl-Enter - Edit props  (loser GLUT sees Ctrl-Enter as Ctrl-J)
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
          if(mItems[i].selected || itemToLightUp == i)
          {
+            // Force item i to be the one and only selected item.  This will clear up some problems that
+            // might otherwise occur.  If you have multiple items selected, this might not pick the right
+            // one... but at least we'll force the issue.  And anyway, how could we know which one the 
+            // user wants, anyway?
+            clearSelection();
+            mItems[i].selected = true;
+            
             mEditingSpecialAttrItem = i;
             mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
 
@@ -3178,7 +3226,7 @@ void EditorUserInterface::setSaveMessage(string msg, bool savedOK)
 {
    mSaveMsg = msg;
    mSaveMsgTimer = saveMsgDisplayTime;
-   mSaveMsgColor = (savedOK ? Color(0, 1, 0) : Color(1, 0, 0));
+   mSaveMsgColor = (savedOK ? Color(0, 1, 0) : red);
 }
 
 void EditorUserInterface::setWarnMessage(string msg1, string msg2)

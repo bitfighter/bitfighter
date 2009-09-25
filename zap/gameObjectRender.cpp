@@ -347,7 +347,7 @@ void renderAimVector()
 
 #define ABS(x) (((x) > 0) ? (x) : -(x))
 
-void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests)
+void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests, bool showDestOverride)
 {
    enum {
       NumColors = 6,
@@ -404,12 +404,13 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 
    glEnable(GL_BLEND);
 
-   if(gClientGame->getCommanderZoomFraction() > 0) 
+   if(gClientGame->getCommanderZoomFraction() > 0 || showDestOverride) 
    {
       const F32 wid = 6.0;
+      const F32 alpha = showDestOverride ? 1.0 : gClientGame->getCommanderZoomFraction();
 
       // Show teleport destinations on commander's map only
-      glColor4f(1, 1, 1, .25 * gClientGame->getCommanderZoomFraction());
+      glColor4f(1, 1, 1, .25 * alpha );
 
       glEnable(GL_POLYGON_SMOOTH);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -428,7 +429,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
          Point mid = Point(pos.x + .75 * cosa * dist, pos.y + .75 * sina * dist);
 
          glBegin(GL_POLYGON);
-            glColor4f(1, 1, 1, .25 * gClientGame->getCommanderZoomFraction());
+            glColor4f(1, 1, 1, .25 * alpha);
             glVertex2f(pos.x + asina * wid, pos.y + acosa * wid);
             glVertex2f(mid.x + asina * wid, mid.y + acosa * wid);
             glVertex2f(mid.x - asina * wid, mid.y - acosa * wid);
@@ -440,7 +441,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
             glColor4f(1, 1, 1, 0);
             glVertex2f(dests[i].x + asina * wid, dests[i].y + acosa * wid);
             glVertex2f(dests[i].x - asina * wid, dests[i].y - acosa * wid);
-            glColor4f(1, 1, 1, .25 * gClientGame->getCommanderZoomFraction());
+            glColor4f(1, 1, 1, .25 * alpha);
             glVertex2f(mid.x - asina * wid, mid.y - acosa * wid);
          glEnd();
       }
@@ -679,11 +680,9 @@ void renderCenteredString(Point pos, U32 size, const char *string)
 void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text)
 {
    glPushMatrix();
-
-   glTranslatef(centroid.x, centroid.y, 0);
-   glRotatef(angle * 360 / Float2Pi, 0, 0, 1);
-   renderCenteredString(Point(0,0), size,  text);
-
+      glTranslatef(centroid.x, centroid.y, 0);
+      glRotatef(angle * 360 / Float2Pi, 0, 0, 1);
+      renderCenteredString(Point(0,0), size,  text);
    glPopMatrix();
 }
 
@@ -715,7 +714,7 @@ void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fi
 
 
 // Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Color c, bool isFlashing, F32 glowFraction)
+void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Point centroid, Color c, F32 labelAngle, bool isFlashing, F32 glowFraction)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 
@@ -725,6 +724,7 @@ void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Color c, bool i
    Color outlineColor = Color(h * (glowFraction * glowFraction) + c * (1 - glowFraction * glowFraction));
 
    renderPolygon(fill, outline, fillColor, outlineColor);
+   renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
 }
 
 

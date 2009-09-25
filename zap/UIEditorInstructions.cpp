@@ -102,7 +102,7 @@ static ControlStringsEditor gControls[] = {
          { "Zoom In", "E or Ctrl-Up" },
          { "Zoom Out", "C or Ctrl-Dwn" },
          { "Center Display", "Z" },
-         { "Edit text TextItem", "Ctrl-T" },
+         { "Edit item properties", "Ctrl-Enter" },
          { "-", NULL },       // Horiz. line
          { "Cut/Copy/Paste", "Ctrl-X/C/V"},
          { "Flip Horiz/Vertical", "F/V" },

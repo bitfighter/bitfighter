@@ -233,7 +233,7 @@ void Teleporter::render()
    else
       r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
 
-   renderTeleporter(mPos, 0, true, mTime, r, TeleporterRadius, 1.0, mDest);
+   renderTeleporter(mPos, 0, true, mTime, r, TeleporterRadius, 1.0, mDest, false);
 }
 
 // Lua methods

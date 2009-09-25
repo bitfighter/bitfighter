@@ -189,7 +189,7 @@ void render(S32 renderPass)
          F32 alpha = 1.0;
          if(radius > 0.5)
             alpha = (1 - radius) / 0.5;
-         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, radius, Teleporter::TeleportInRadius, alpha, Vector<Point>());
+         renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
    }
    else if(renderPass == 1)

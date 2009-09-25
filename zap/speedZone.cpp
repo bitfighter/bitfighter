@@ -115,9 +115,6 @@ bool SpeedZone::processArguments(S32 argc, const char **argv)
    preparePoints();
 
    if(argc >= 5)
-      // RDW
-      // The min template requires both arguments to be same type.
-      // Casting to U16 to fix this.
       mSpeed = max(minSpeed, min(maxSpeed, (U16)(atoi(argv[4]))));
 
    if(argc >= 6)

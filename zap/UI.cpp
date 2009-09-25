@@ -248,10 +248,20 @@ extern const F32 radiansToDegreesConversion;
 #define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args); va_end(args);
 
 
-// Center text between two points
+// Center text between two points, adjust angle so it's always right-side-up
 void UserInterface::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...)
 {
    F32 ang = p1.angleTo(p2);
+
+   // Make sure text is right-side-up
+   if(ang < -FloatHalfPi || ang > FloatHalfPi)
+   {
+      Point temp = p2;
+      p2 = p1;
+      p1 = temp;
+      ang = p1.angleTo(p2);
+   }
+
    F32 cosang = cos(ang);
    F32 sinang = sin(ang);
 
