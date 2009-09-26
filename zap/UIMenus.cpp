@@ -121,13 +121,11 @@ S32 MenuUserInterface::getOffset()
 }
 
 
-#define MENU_ITEM_HEIGHT 45
-
 // Get vert pos of first menu item
 S32 MenuUserInterface::getYStart()
 {
    S32 vertOff = (getMenuID() == MainUI) ? 40 : 0;    // Make room for the logo on the main menu
-   return (canvasHeight - min(menuItems.size(), gMaxMenuSize) * MENU_ITEM_HEIGHT) / 2 + vertOff;
+   return (canvasHeight - min(menuItems.size(), gMaxMenuSize) * UserInterface::MenuItemHeight) / 2 + vertOff;
 }
 
 
@@ -221,7 +219,7 @@ void MenuUserInterface::render()
 
    for(S32 i = 0; i < count; i++)
    {
-      S32 y = yStart + i * MENU_ITEM_HEIGHT;
+      S32 y = yStart + i * UserInterface::MenuItemHeight;
 
       if(selectedIndex == i + offset)  // Highlight selected item
       {
@@ -274,7 +272,7 @@ void MenuUserInterface::render()
          renderArrowAbove(yStart);
 
       if(offset < menuItems.size() - gMaxMenuSize)    // There are items below
-         renderArrowBelow(yStart + MENU_ITEM_HEIGHT * gMaxMenuSize);
+         renderArrowBelow(yStart + UserInterface::MenuItemHeight * gMaxMenuSize);
    }
 
    renderExtras();  // Draw something unique on a menu.  Not currently used anywhere...
@@ -325,7 +323,7 @@ void MenuUserInterface::onMouseMoved(S32 x, S32 y)
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
    Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
-   selectedIndex = floor(( mousePos.y - getYStart() + 10 ) / MENU_ITEM_HEIGHT) + currOffset;
+   selectedIndex = floor(( mousePos.y - getYStart() + 10 ) / UserInterface::MenuItemHeight) + currOffset;
 
    processMouse();
 }
@@ -447,7 +445,7 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
          S32 yStart = getYStart();
          Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
 
-         if(mousePos.y < yStart || mousePos.y > yStart + (menuItems.size() + 1) * MENU_ITEM_HEIGHT)
+         if(mousePos.y < yStart || mousePos.y > yStart + (menuItems.size() + 1) * UserInterface::MenuItemHeight)
             return;
       }
       processSelection(menuItems[selectedIndex].mIndex);
@@ -514,8 +512,6 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
       glutSetCursor(GLUT_CURSOR_NONE);
 }
 
-
-#undef MENU_ITEM_HEIGHT
 
 void MenuUserInterface::onEscape()
 {

@@ -82,6 +82,8 @@ public:
    void idle(U32 timeDelta);
    void onKeyDown(KeyCode keyCode, char ascii);
 
+   void onMouseMoved(S32 x, S32 y);
+
    void onActivate();
 };
 

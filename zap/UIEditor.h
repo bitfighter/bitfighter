@@ -298,7 +298,6 @@ public:
    void setSaveMessage(string msg, bool savedOK);
    void setWarnMessage(string msg1, string msg2);
 
-   Point convertWindowToCanvasCoord(Point p) { return Point(p.x * canvasWidth / windowWidth, p.y * canvasHeight / windowHeight); }
    Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
    Point convertLevelToCanvasCoord(Point p) { return p * mCurrentScale + mCurrentOffset; }
    Point snapToLevelGrid(Point p);

@@ -106,7 +106,6 @@ public:
    TNL_DECLARE_RPC(s2cHuntersMessage, (U32 msgIndex, StringTableEntry clientName, U32 flagCount, U32 score));
 
    TNL_DECLARE_CLASS(HuntersGameType);
-
 };
 
 

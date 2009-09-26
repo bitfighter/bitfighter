@@ -29,6 +29,7 @@
 #include "keyCode.h"
 #include "SharedConstants.h"
 #include "timer.h"
+#include "point.h"
 
 #include "../tnl/tnl.h"
 
@@ -39,8 +40,6 @@ using namespace std;
 
 namespace Zap
 {
-
-struct Point;
 
 static const float gDefaultLineWidth = 2.0f;
 
@@ -85,6 +84,7 @@ enum UIID {
    InvalidUI,        // Not a valid UI
 };
 
+
 class UserInterface
 {
 private:
@@ -96,6 +96,9 @@ public:
    // Vars for tracking cursor blinks.  Yippee!!!
    bool cursorBlink;
    Timer mBlinkTimer;
+
+   static const S32 MenuItemHeight = 45;
+
 
    static UserInterface *current;            // Currently active menu
    static Vector<UserInterface *> prevUIs;   // Previously active menus
@@ -184,6 +187,9 @@ public:
    // Return string rendering width (normal and formatted versions)
    static S32 getStringWidth(U32 size, const char *str, U32 len = 0);
    static S32 getStringWidthf(U32 size, const char *format, ...);
+
+   Point convertWindowToCanvasCoord(Point p) { return Point(p.x * canvasWidth / windowWidth, p.y * canvasHeight / windowHeight); }
+
 
    static void playBoop();    // Make some noise!
 };
