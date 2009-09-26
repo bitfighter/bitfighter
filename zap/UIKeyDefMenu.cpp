@@ -56,6 +56,14 @@ KeyDefMenuUserInterface::KeyDefMenuUserInterface()
    menuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";
 }
 
+
+// Some constants used for positioning menu items and coordinating mouse position
+static S32 offset = 5; 
+static S32 yStart = UserInterface::vertMargin + 115;
+static S32 height = 30; 
+static S32 firstItemInCol2 = 0;
+
+
 void KeyDefMenuUserInterface::onActivate()
 {
    gDisableShipKeyboardInput = true;      // Keep keystrokes from getting to game
@@ -87,17 +95,17 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(MenuItemExtended("Config. Ship Loadouts", 3, 1, &keyLOADOUT[Joystick], ""));
       menuItems.push_back(MenuItemExtended("Toggle Map Mode", 4, 1, &keyCMDRMAP[Joystick], ""));
       menuItems.push_back(MenuItemExtended("Show Scoreboard", 5, 1, &keySCRBRD[Joystick], "Scoreboard will be visible while this key/button is held down"));
-      menuItems.push_back(MenuItemExtended("", 6, 1, NULL, ""));     // Dummy spacer item
 
       // Col 2
-      menuItems.push_back(MenuItemExtended("Select Weapon 1", 7, 2, &keySELWEAP1[Joystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(MenuItemExtended("Select Weapon 2", 8, 2, &keySELWEAP2[Joystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(MenuItemExtended("Select Weapon 3", 9, 2, &keySELWEAP3[Joystick], "Use as an alternative to Advance Weapon"));
-      menuItems.push_back(MenuItemExtended("Quick Chat", 10, 2, &keyQUICKCHAT[Joystick], ""));
-      menuItems.push_back(MenuItemExtended("Team Chat", 11, 2, &keyTEAMCHAT[Joystick], ""));
-      menuItems.push_back(MenuItemExtended("Global Chat", 12, 2, &keyGLOBCHAT[Joystick], ""));
-      menuItems.push_back(MenuItemExtended("Enter Command", 13, 2, &keyCMDCHAT[Joystick], ""));
-      menuItems.push_back(MenuItemExtended("Record Voice Msg", 14, 2, &keyTOGVOICE[Joystick], ""));
+      firstItemInCol2 = 6;
+      menuItems.push_back(MenuItemExtended("Select Weapon 1", 6, 2, &keySELWEAP1[Joystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(MenuItemExtended("Select Weapon 2", 7, 2, &keySELWEAP2[Joystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(MenuItemExtended("Select Weapon 3", 8, 2, &keySELWEAP3[Joystick], "Use as an alternative to Advance Weapon"));
+      menuItems.push_back(MenuItemExtended("Quick Chat", 9, 2, &keyQUICKCHAT[Joystick], ""));
+      menuItems.push_back(MenuItemExtended("Team Chat", 10, 2, &keyTEAMCHAT[Joystick], ""));
+      menuItems.push_back(MenuItemExtended("Global Chat", 11, 2, &keyGLOBCHAT[Joystick], ""));
+      menuItems.push_back(MenuItemExtended("Enter Command", 12, 2, &keyCMDCHAT[Joystick], ""));
+      menuItems.push_back(MenuItemExtended("Record Voice Msg", 13, 2, &keyTOGVOICE[Joystick], ""));
    }
    else     // Keyboard mode
    {
@@ -115,6 +123,7 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(MenuItemExtended("Show Scoreboard", 8, 1, &keySCRBRD[Keyboard], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
+      firstItemInCol2 = 9;
       menuItems.push_back(MenuItemExtended("Select Weapon 1", 9, 2, &keySELWEAP1[Keyboard], "Use as an alternative to Advance Weapon"));
       menuItems.push_back(MenuItemExtended("Select Weapon 2", 10, 2, &keySELWEAP2[Keyboard], "Use as an alternative to Advance Weapon"));
       menuItems.push_back(MenuItemExtended("Select Weapon 3", 11, 2, &keySELWEAP3[Keyboard], "Use as an alternative to Advance Weapon"));
@@ -134,25 +143,19 @@ void KeyDefMenuUserInterface::idle(U32 timeDelta)
    errorMsgTimer.update(timeDelta);
 }
 
-// Finds out if key is a duplicate value
+// Finds out if key is already assigned to something else
 inline bool isDuplicate(S32 key)
 {
    S32 size = gKeyDefMenuUserInterface.menuItems.size();
    S32 count = 0;
 
    for(S32 i = 0; i < size && count < 2; i++)
-      if((gKeyDefMenuUserInterface.menuItems[i].mText[0] != '\0') && (*gKeyDefMenuUserInterface.menuItems[i].primaryControl == *gKeyDefMenuUserInterface.menuItems[key].primaryControl))
+      if(*gKeyDefMenuUserInterface.menuItems[i].primaryControl == *gKeyDefMenuUserInterface.menuItems[key].primaryControl)
          count++;
 
    return count >= 2;
 }
 
-
-// Some constants used for positioning menu items and coordinating mouse position
-static S32 offset = 5; 
-static S32 yStart = UserInterface::vertMargin + 115;
-static S32 height = 30; 
-   
 
 void KeyDefMenuUserInterface::render()
 {
@@ -187,56 +190,48 @@ void KeyDefMenuUserInterface::render()
 
    for(S32 i = 0; i < size; i++)
    {
-      S32 y = yStart + (i - ((i < itemsPerCol) ? 0 : itemsPerCol)) * height;
+      S32 y = yStart + (i - ((i < firstItemInCol2) ? 0 : firstItemInCol2)) * height;
 
       if(selectedIndex == i)       // Highlight selected item
       {
          glColor3f(0, 0, 0.4);     // Fill
          glBegin(GL_POLYGON);
-            glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2) , y);
-            glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y);
-            glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y + height+ 1);
-            glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2), y + height + 1);
+            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2) , y);
+            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y);
+            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y + height+ 1);
+            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y + height + 1);
          glEnd();
 
          glColor3f(0, 0, 1);       // Outline
          glBegin(GL_LINE_LOOP);
-            glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2), y);
-            glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y);
-            glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y + height + 1);
-            glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2 ), y + height + 1);
+            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2), y);
+            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y);
+            glVertex2f((menuItems[i].mColumn == 1 ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y + height + 1);
+            glVertex2f((menuItems[i].mColumn == 1 ? horizMargin : canvasWidth / 2 ), y + height + 1);
          glEnd();
       }
 
-      if(menuItems[i].mText[0] != '\0')
+      // Draw item text
+      glColor3f(0, 1, 1);
+      drawString((menuItems[i].mColumn == 1 ? 2 * horizMargin : canvasWidth / 2 + horizMargin), y + offset, 15, menuItems[i].mText);
+
+      if(changingItem == i)
       {
-         // Draw item text
-         glColor3f(0, 1, 1);
-         drawString((i < itemsPerCol ? 2 * horizMargin : canvasWidth / 2 + horizMargin), y + offset, 15, menuItems[i].mText);
-
-         if(changingItem == i)
-         {
-            glColor3f(1, 0, 0);
-            drawString(canvasWidth * (i < itemsPerCol ? 0.25 : 0.75) + horizMargin, y + offset + 1, 13, "Press Key or Button");
-         }
+         glColor3f(1, 0, 0);
+         drawString(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75) + horizMargin, y + offset + 1, 13, "Press Key or Button");
+      }
+      else
+      {
+         bool dupe = isDuplicate(i); 
+         if(dupe)
+            glColor3f(1,0,0);
          else
-         {
-            bool stat;     // A total hack
-            if(isDuplicate(i))
-            {
-               stat = true;
-               glColor3f(1,0,0);
-            }
-            else
-            {
-               glColor3f(1, 1, 1);
-               stat = false;
-            }
+            glColor3f(1, 1, 1);
 
-            renderControllerButton(canvasWidth * (i < itemsPerCol ? 0.25 : 0.75) + horizMargin, y + offset, *menuItems[i].primaryControl, stat, 10);
-         }
+         renderControllerButton(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75) + horizMargin, y + offset, *menuItems[i].primaryControl, dupe, 10);
       }
    }
+   
 
    // Draw some suggestions
    glColor3f(1, 1, 0);
@@ -311,9 +306,6 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // We're not doing KeyCode entry, so let's try menu navigation
    if(keyCode == KEY_SPACE || keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)      // Set key for selected item
    {
-      if(menuItems[selectedIndex].mText[0] == '\0')    // Can't change blank items
-         return;
-
       UserInterface::playBoop();
       changingItem = selectedIndex;
    }
@@ -321,15 +313,14 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       UserInterface::playBoop();
 
-      if(selectedIndex < itemsPerCol)
-         selectedIndex += itemsPerCol;
-      else
-         selectedIndex -= itemsPerCol;
-
-      // May need to change if we add any dummy items into menu on the right
-      while(menuItems[selectedIndex].mText[0] == '\0')   
-         selectedIndex--;
-
+      if(menuItems[selectedIndex].mColumn == 1)    // Switching to right column
+         selectedIndex += firstItemInCol2;
+      else                                         // Switching to left column
+      {
+         selectedIndex -= firstItemInCol2;
+         while(menuItems[selectedIndex].mColumn == 2)
+            selectedIndex--;
+      }
 
       glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
    }
@@ -348,9 +339,6 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex < 0)
          selectedIndex = menuItems.size() - 1;
 
-      while(menuItems[selectedIndex].mText[0] == '\0')   
-         selectedIndex--;
-
       glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
@@ -360,9 +348,6 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       selectedIndex++;
       if(selectedIndex >= menuItems.size())
          selectedIndex = 0;
-
-      while(menuItems[selectedIndex].mText[0] == '\0')   
-         selectedIndex++;
 
       glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
    }
@@ -391,18 +376,22 @@ void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 
    // Which column is the mouse in?  Left half of screen = 0, right half = 1
    S32 col = (mousePos.x < (canvasWidth - horizMargin) / 2) ? 0 : 1;
-   S32 row = min(max(floor(( mousePos.y - yStart ) / height), 0), itemsPerCol);
+   S32 row = min(max(floor(( mousePos.y - yStart ) / height), 0), menuItems.size() - 1);
 
-   selectedIndex = min(max(row + itemsPerCol * col, 0), menuItems.size());    // Bounds checking
+   selectedIndex = min(max(row + firstItemInCol2 * col, 0), menuItems.size() - 1);    // Bounds checking
 
    // If we're in the wrong column, get back to the right one.  This can happen if there are more
    // items in the right column than the left.  Note that our column numbering scheme is different
    // between col and the mColumn field.  Also corrects for that dummy null item in the joystick
    // section of the controls.
    if(col == 0)
-      while(menuItems[selectedIndex].mColumn == 2 || menuItems[selectedIndex].mText[0] == '\0')
+      while(menuItems[selectedIndex].mColumn == 2)
          selectedIndex--;
+   else
+      while(menuItems[selectedIndex].mColumn == 1)
+         selectedIndex++;
 }
+
 
 
 };
