@@ -285,6 +285,8 @@ public:
    LevelMenuSelectUserInterface();        // Constructor
    string category;
    void onActivate();
+   void processMenuSpecificKeys(KeyCode keyCode);  // Custom key handling for level selection menus
+
    void processSelection(U32 index);
    void processShiftSelection(U32 index);
    void onEscape();

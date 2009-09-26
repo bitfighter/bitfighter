@@ -1379,6 +1379,32 @@ void LevelMenuSelectUserInterface::onActivate()
 
 #undef ALL_LEVELS
 
+
+// Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
+void LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode)
+{
+   // First check for some shortcut keys
+   for(S32 i = 0; i < menuItems.size(); i++)
+   {
+      // Lets us advance to next level with same starting letter  
+      S32 indx = selectedIndex + i + 1;
+      if(indx >= menuItems.size())
+         indx -= menuItems.size();
+
+      if(keyCode == menuItems[indx].key1 || keyCode == menuItems[indx].key2)
+      {
+         selectedIndex = indx;
+         UserInterface::playBoop();
+
+         return;
+      }
+   }
+
+   // Still here?  Try the parent
+   Parent::processMenuSpecificKeys(keyCode);
+}
+
+
 void LevelMenuSelectUserInterface::processSelection(U32 index)             // Handler for unshifted menu shortcut key
 {
    Parent::onActivate();

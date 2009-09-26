@@ -37,8 +37,6 @@
 //<u>General Enhancements</u>
 //<ul>
 //<li>Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name</li>
-//<li>When hosting a game from the UI, game load progress info displayed</li>
-//<li>When loading a level from a local or remote server, progress bar is displayed</li>
 //<li>Retrieve game ->can't pick up enemy flags, so more complex level designs are possible.  Actually, maybe not true... maybe this is a lame feature.</li>
 //<li>Fixed scoring message on Hunters levels</li>
 //<li>ZoneControl ->When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter</li>
@@ -47,7 +45,6 @@
 //<li>Added time disconnected and connection duration to server log</li>
 //<li>Uneeded vertices now removed from walls to improve both appearance and performance</li>
 //<li>Added screen saver supression (Windows only, sorry)</li>
-//<li>Username entry screen now remembers last name used</li>
 //<li>Enhanced flashing effect of zones in ZoneControl game</li>
 //<li>Added yellow flash to ZoneControl and Retrieve zones when touchdown is scored (like Nexus effect in Hunters game)</li>
 //<li>Indicator added to player's name when they are in chat, global chat, or options menus</li>
@@ -64,7 +61,6 @@
 //<li>Enter commands using "/" key, or by starting a global or team chat message with "/"</li>
 //<li>Added /restart command to restart current level</li>
 //<li>Added instruction page to explain available chat commands</li>
-//<li>Improved menu navigation instructions for joystick users</li>
 //<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
 //<li>Increased max level size from 64K to 96K</li>
 //<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
@@ -72,7 +68,15 @@
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
 //<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
 //<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
+
+//
+//<u>UI/Menus</u>
+//<li>Improved menu navigation instructions for joystick users</li>
 //<li>More intelligent wrapping on long menus</li>
+//<li>On levels menu, pressing first key of level name will take you to levels starting with that letter, the next press will take you to the next, etc.</li>
+//<li>Username entry screen now remembers last name used</li>
+//<li>When hosting a game from the UI, game load progress info displayed</li>
+//<li>When loading a level from a local or remote server, progress bar is displayed</li>
 //</ul>
 //
 //<u>Items</u>
@@ -171,6 +175,7 @@
 //<li>Can edit respawing times for items that support them in the editor</li>
 //<li>Can edit GoFast params in editor</li>
 //<li>More intelligent wrapping on long menus</li>
+//<li>On levels menu, pressing first key of level name will take you to levels starting with that letter, the next press will take you to the next, etc.</li>
 //<li></li>
 
 // Mac Test:
