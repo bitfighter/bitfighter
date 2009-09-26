@@ -28,6 +28,12 @@
 //-----------------------------------------------------------------------------------
 // Done:
 
+// Levelgen scripts
+// Asteroids
+// Chat /commands
+// Level file specifications of many new properties, including auto-healing of turrets & force fields, GoFast speed & accuracy, etc.
+// Much improved level editor, including dynamic level preview
+
 //<u>General Enhancements</u>
 //<ul>
 //<li>Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name</li>
@@ -66,6 +72,7 @@
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
 //<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
 //<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
+//<li>More intelligent wrapping on long menus</li>
 //</ul>
 //
 //<u>Items</u>
@@ -163,6 +170,7 @@
 //<li>Walls now rendered on top of loadout zones, goal zones, and the like</li>
 //<li>Can edit respawing times for items that support them in the editor</li>
 //<li>Can edit GoFast params in editor</li>
+//<li>More intelligent wrapping on long menus</li>
 //<li></li>
 
 // Mac Test:

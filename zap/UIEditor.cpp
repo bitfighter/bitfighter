@@ -3183,6 +3183,7 @@ void EditorUserInterface::idle(U32 timeDelta)
    updateCursorBlink(timeDelta);
 }
 
+// Unused??
 static void escapeString(const char *src, char dest[1024])
 {
    S32 i;

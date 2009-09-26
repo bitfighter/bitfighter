@@ -74,10 +74,12 @@ void MenuUserInterface::onActivate()
    currOffset = 0;
 }
 
+
 void MenuUserInterface::onReactivate()
 {
    gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
+
 
 void MenuUserInterface::idle(U32 timeDelta)
 {
@@ -89,6 +91,7 @@ void MenuUserInterface::idle(U32 timeDelta)
    if(itemSelectedWithMouse)
       processMouse();
 }
+
 
 // Return index offset to account for scrolling menus
 S32 MenuUserInterface::getOffset()
@@ -116,6 +119,7 @@ S32 MenuUserInterface::getOffset()
 
    return offset;
 }
+
 
 #define MENU_ITEM_HEIGHT 45
 
@@ -377,6 +381,10 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(keyCode == KEY_UNKNOWN)
       return;
 
+   // Check for in autorepeat mode
+   mRepeatMode = mKeyDown;
+   mKeyDown = true;
+
    // Handle special case of keystrokes during hosting preparation phases
    if(gHostingModePhase == LoadingLevels || gHostingModePhase == DoneLoadingLevels) 
    {
@@ -391,6 +399,14 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    gMainMenuUserInterface.firstTime = false;    // Stop animations if a key is pressed
    processMenuSpecificKeys(keyCode);            // This will, in turn, call the more generic keyboard handler if needed
 }
+
+
+void MenuUserInterface::onKeyUp(KeyCode keyCode)
+{
+   mKeyDown = false;
+   mRepeatMode = false;
+}
+
 
 // Generic handler looks for keystrokes and translates them into menu actions
 void MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode)
@@ -453,13 +469,13 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
 
       if(selectedIndex < 0)                        // Scrolling off the top
       {
-         if(menuItems.size() > gMaxMenuSize)       // No wrapping on long menus...
+         if((menuItems.size() > gMaxMenuSize) && mRepeatMode)        // Allow wrapping on long menus only when not in repeat mode
          {
-            selectedIndex = 0;               // (select first item)
+            selectedIndex = 0;               // No wrap --> (first item)
             return;                          // (leave before playBoop)
          }
-         else                                      // ...but there is on shorter ones
-            selectedIndex = menuItems.size() - 1;  // (select last item)
+         else                                      // Always wrap on shorter menus
+            selectedIndex = menuItems.size() - 1;  // Wrap --> (select last item)
       }
       UserInterface::playBoop();
    }
@@ -471,13 +487,13 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
 
       if(selectedIndex >= menuItems.size())     // Scrolling off the bottom
       {
-         if(menuItems.size() > gMaxMenuSize)    // Again, no wrapping on long menus
+         if((menuItems.size() > gMaxMenuSize) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
          {
-            selectedIndex = menuItems.size() - 1;      // (last item)
-            return;  // leave before playBoop
+            selectedIndex = menuItems.size() - 1;                 // No wrap --> (last item)
+            return;                                               // (leave before playBoop)
          }
-         else
-            selectedIndex = 0;    // (first item)
+         else                     // Always wrap on shorter menus
+            selectedIndex = 0;    // Wrap --> (first item)
       }
       UserInterface::playBoop();
    }

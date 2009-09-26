@@ -63,7 +63,7 @@ struct MenuItem
    S32 mScore;          // Team score, for team select menu
    bool mCurrTeam;      // Is this a player's current team? (for team select menu)
 
-   // Constructor
+   // Constructor I
    MenuItem(const char *text = 0, U32 index = 0, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1))
    {
       mText = text;
@@ -112,6 +112,10 @@ private:
    S32 getYStart();     // Get vert pos of first menu item
    S32 getOffset(); 
    Timer mScrollTimer;
+   
+   // For detecting keys being held down
+   bool mRepeatMode;
+   bool mKeyDown;
 
 protected:
    S32 currOffset;
@@ -143,6 +147,7 @@ public:
    virtual void renderExtras() { /* Do nothing */ }     // For drawing something extra on a menu, not currently used...
 
    void onKeyDown(KeyCode keyCode, char ascii);
+   void onKeyUp(KeyCode keyCode);
    void onMouseMoved(S32 x, S32 y);
    void processMouse();
 
