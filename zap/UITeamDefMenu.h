@@ -50,12 +50,8 @@ struct TeamPreset
 class TeamDefUserInterface : public UserInterface
 {
 private:
-   S32 itemsPerCol;
    Timer errorMsgTimer;
    string errorMsg;
-   enum {
-      errorMsgDisplayTime = 6000,
-   };
 
 public:
    TeamDefUserInterface();      // Constructor
@@ -70,9 +66,11 @@ public:
    void render();              // Draw the menu
    void idle(U32 timeDelta);
    void onKeyDown(KeyCode keyCode, char ascii);
+   void onMouseMoved(S32 x, S32 y);
 
    void onActivate();
    void onEscape();
+      
 };
 
 extern TeamDefUserInterface gTeamDefUserInterface;

@@ -83,8 +83,13 @@ TeamDefUserInterface::TeamDefUserInterface()
    menuTitle = "Configure Teams";
    menuSubTitle = "For quick configuration, press [ALT]1-9 to specify number of teams";
    menuSubTitleColor = Color(1,1,1);
-   itemsPerCol = 12;
 }
+
+static const U32 errorMsgDisplayTime = 4000; // 4 seconds
+static const S32 fontsize = 21;
+static const S32 fontgap = 12;
+static const U32 yStart = UserInterface::vertMargin + 90;
+static const U32 itemHeight = fontsize + 5;
 
 void TeamDefUserInterface::onActivate()
 {
@@ -99,7 +104,8 @@ void TeamDefUserInterface::onActivate()
 
 void TeamDefUserInterface::idle(U32 timeDelta)
 {
-   errorMsgTimer.update(timeDelta);
+   if(errorMsgTimer.update(timeDelta))
+      errorMsg = "";
 }
 
 extern void glColor(Color c, float alpha = 1);
@@ -109,9 +115,6 @@ extern Color gHostileTeamColor;
 // TODO: Clean this up a bit...  this menu was two-cols before, and some of that garbage is still here...
 void TeamDefUserInterface::render()
 {
-   const S32 fontsize = 21;
-   const S32 fontgap = 12;
-
    glColor3f(1, 1, 1);
    drawCenteredString(vertMargin, 30, menuTitle);
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
@@ -129,7 +132,6 @@ void TeamDefUserInterface::render()
    if(selectedIndex >= size)
       selectedIndex = 0;
 
-   U32 yStart = vertMargin + 90;
 
    // Draw the fixed teams
    glColor(gNeutralTeamColor);
@@ -141,7 +143,7 @@ void TeamDefUserInterface::render()
    {
       S32 i = j + 2;    // Take account of the two fixed teams (neutral & hostile)
 
-      U32 y = yStart + (i - ((i < itemsPerCol) ? 0 : itemsPerCol)) * (fontsize + fontgap);
+      U32 y = yStart + i * (fontsize + fontgap);
 
       if(selectedIndex == j)       // Highlight selected item
       {
@@ -165,16 +167,16 @@ void TeamDefUserInterface::render()
          glBegin(GL_POLYGON);
             glVertex2f(0, y - 2);
             glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + fontsize + 5);
-            glVertex2f(0, y + fontsize + 5);
+            glVertex2f(canvasWidth, y + itemHeight);
+            glVertex2f(0, y + itemHeight);
          glEnd();
 
          glColor3f(0, 0, 1);           // Outline
          glBegin(GL_LINES);
             glVertex2f(0, y - 2);
             glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + fontsize + 5);
-            glVertex2f(0, y + fontsize + 5);
+            glVertex2f(canvasWidth, y + itemHeight);
+            glVertex2f(0, y + itemHeight);
          glEnd();
       }
 
@@ -222,16 +224,7 @@ class Team;
 
 void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(keyCode == KEY_RIGHT  || keyCode == BUTTON_DPAD_RIGHT || keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)    // Change col
-   {
-      UserInterface::playBoop();
-      if(selectedIndex < itemsPerCol)
-         selectedIndex += itemsPerCol;
-      else
-         selectedIndex -= itemsPerCol;
-   }
-
-   else if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
+   if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
    {
       if(getKeyState(KEY_ALT))      // Replace all teams with # of teams based on presets
       {
@@ -263,7 +256,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_INSERT || keyCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
       S32 maxTeams = GameType::gMaxTeams;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
-      if(gEditorUserInterface.mTeams.size() >= min(maxTeams, 2 * itemsPerCol))
+      if(gEditorUserInterface.mTeams.size() >= maxTeams)
       {
          errorMsgTimer.reset(errorMsgDisplayTime);
          errorMsg = "Too many teams for this interface";
@@ -342,6 +335,29 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       gChatInterface.activate();
       UserInterface::playBoop();
    }
+}
+
+
+void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
+{
+   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
+
+   Point mousePos = convertWindowToCanvasCoord(Point(x, y));
+
+   // Which column is the mouse in?
+   S32 col = (mousePos.x < canvasWidth / 2) ? 0 : 1;
+   
+   S32 teams = gEditorUserInterface.mTeams.size();
+
+   selectedIndex = (mousePos.y - yStart + 6) / (fontsize + fontgap) - 2; 
+
+   if(selectedIndex >= teams)
+      selectedIndex = teams - 1;
+
+   if(selectedIndex < 0)
+      selectedIndex = 0;
+
+
 }
 
 

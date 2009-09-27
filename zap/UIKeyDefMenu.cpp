@@ -61,7 +61,7 @@ KeyDefMenuUserInterface::KeyDefMenuUserInterface()
 static S32 offset = 5; 
 static S32 yStart = UserInterface::vertMargin + 115;
 static S32 height = 30; 
-static S32 firstItemInCol2 = 0;
+static S32 firstItemInCol2 = 0;     // Set later
 
 
 void KeyDefMenuUserInterface::onActivate()
@@ -365,14 +365,12 @@ void KeyDefMenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 }
 
 
-extern Point gMousePos;
-
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
-   Point mousePos = convertWindowToCanvasCoord(gMousePos);
+   Point mousePos = convertWindowToCanvasCoord(Point(x,y));
 
    // Which column is the mouse in?  Left half of screen = 0, right half = 1
    S32 col = (mousePos.x < (canvasWidth - horizMargin) / 2) ? 0 : 1;
