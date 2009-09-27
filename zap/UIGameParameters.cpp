@@ -133,11 +133,12 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    menuItems.clear();
 
    string fn = gEditorUserInterface.getLevelFileName();                 // We'll chop off the .level bit below...
-   menuItems.push_back(MenuItem2("Game Type:",    gameType->getGameTypeString(),  gtIndex,    0, 0, "", gameType->getInstructionString(),    TypeGameType,      KEY_G, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Filename:",     fn.substr(0,fn.find_last_of('.')), 0,       0, 0, "", "File this level is stored in",      TypeFileName,      KEY_F, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level Name:",   "New Bitfighter Level",            0,       0, 0, "", "Choose a short, catchy name",       TypeShortString,   KEY_N, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level Descr:",  "",                                0,       0, 0, "", "A brief description of the level",  TypeLongString,    KEY_D, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level By:",     "",                                0,       0, 0, "", "Who created this level",            TypeLongString,    KEY_B, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Game Type:",       gameType->getGameTypeString(),  gtIndex,    0, 0, "", gameType->getInstructionString(),                        TypeGameType,      KEY_G, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Filename:",        fn.substr(0,fn.find_last_of('.')), 0,       0, 0, "", "File this level is stored in",                          TypeFileName,      KEY_F, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Level Name:",      "New Bitfighter Level",            0,       0, 0, "", "Choose a short, catchy name",                           TypeShortString,   KEY_N, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Level Descr:",     "",                                0,       0, 0, "", "A brief description of the level",                      TypeLongString,    KEY_D, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Level By:",        "",                                0,       0, 0, "", "Who created this level",                                TypeLongString,    KEY_B, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Levelgen Script:", "",                                0,       0, 0, "", "Levelgen script & args to be run when level is loaded", TypeLongString,    KEY_L, KEY_UNKNOWN ));
 
    S32 i;
    for(i = 0; i < mGameSpecificParams; i++)
@@ -170,12 +171,14 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
             menuItems[3].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "LevelCredits")
             menuItems[4].mValS = val.substr(0, gMaxGameDescrLength);
+         else if (token == "LevelGenScript")
+            menuItems[5].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "GridSize")
-            menuItems[mGameSpecificParams + 5].mValI = max(min(atoi(val.c_str()), Game::maxGridSize), Game::minGridSize);
+            menuItems[mGameSpecificParams + 6].mValI = max(min(atoi(val.c_str()), Game::maxGridSize), Game::minGridSize);
          else if (token == "MinPlayers")
-            menuItems[mGameSpecificParams + 6].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
-         else if (token == "MaxPlayers")
             menuItems[mGameSpecificParams + 7].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+         else if (token == "MaxPlayers")
+            menuItems[mGameSpecificParams + 8].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
       }
 
       // And apply our GameType arguments to the game specific parameter settings, if any were provided in a level file we loaded
@@ -200,6 +203,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       }
    }
 }
+
 
 void GameParamUserInterface::idle(U32 timeDelta)
 {
@@ -300,6 +304,7 @@ void GameParamUserInterface::onEscape()
 
    // Compose GameType string from GameType and level-specific params
    gEditorUserInterface.setLevelFileName(menuItems[1].mValS);                    // Save level file name, if it changed.  Or hell, even if it didn't
+   gEditorUserInterface.setLevelGenScriptName(menuItems[5].mValS);                    
    gEditorUserInterface.mGridSize = menuItems[mGameSpecificParams + 5].mValI;    // Set mGridSize for proper scaling of walls on map
    buildGameParamList();
 
@@ -336,6 +341,7 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back("LevelName " + menuItems[2].mValS);
    gameParams.push_back("LevelDescription " + menuItems[3].mValS);
    gameParams.push_back("LevelCredits " + menuItems[4].mValS);
+   gameParams.push_back("LevelGenScript " + menuItems[5].mValS);
    dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + 5].mValI);
    gameParams.push_back(str);
    dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[mGameSpecificParams + 6].mValI);

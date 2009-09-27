@@ -231,6 +231,8 @@ public:
    EditorUserInterface();           // Constructor
 
    void setLevelFileName(string name);
+   void setLevelGenScriptName(string name);
+
    string getLevelFileName();
    void loadLevel();
    bool mNeedToSave;          // Have we modified the level such that we need to save?

@@ -291,15 +291,28 @@ void EditorUserInterface::clearUndoHistory()
    mRedoItems.clear();
 }
 
+
 extern TeamPreset gTeamPresets[];
 
 void EditorUserInterface::setLevelFileName(string name)
 {
-   if (name == "")
+   if(name == "")
       mEditFileName = "";
    else  
       if(mEditFileName.find('.') == std::string::npos)      // Append extension, if one is needed
          mEditFileName = name + ".level";
+}
+
+
+void EditorUserInterface::setLevelGenScriptName(string line)
+{
+   mScriptArgs.clear();
+
+   if(line != "")
+   {
+      mScriptArgs.clear();
+      mScriptArgs.push_back(line.c_str());
+   }
 }
 
 
