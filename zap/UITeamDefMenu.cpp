@@ -108,6 +108,7 @@ void TeamDefUserInterface::idle(U32 timeDelta)
       errorMsg = "";
 }
 
+
 extern void glColor(Color c, float alpha = 1);
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
@@ -322,6 +323,8 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex < 0)
          selectedIndex = gEditorUserInterface.mTeams.size() - 1;
       UserInterface::playBoop();
+      glutSetCursor(GLUT_CURSOR_NONE);
+
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
    {
@@ -329,6 +332,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex >= gEditorUserInterface.mTeams.size())
          selectedIndex = 0;
       UserInterface::playBoop();
+      glutSetCursor(GLUT_CURSOR_NONE);
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
@@ -343,9 +347,6 @@ void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
    Point mousePos = convertWindowToCanvasCoord(Point(x, y));
-
-   // Which column is the mouse in?
-   S32 col = (mousePos.x < canvasWidth / 2) ? 0 : 1;
    
    S32 teams = gEditorUserInterface.mTeams.size();
 
@@ -356,8 +357,6 @@ void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
 
    if(selectedIndex < 0)
       selectedIndex = 0;
-
-
 }
 
 

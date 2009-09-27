@@ -101,6 +101,7 @@ private:
 
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
+
 public:
    GameParamUserInterface();         // Constructor
    const char *menuTitle;
@@ -117,6 +118,8 @@ public:
    void render();              // Draw the menu
    void idle(U32 timeDelta);
    void onKeyDown(KeyCode keyCode, char ascii);
+   void onMouseMoved(S32 x, S32 y);
+
 
    void onActivate();
    void onEscape();

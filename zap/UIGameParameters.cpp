@@ -206,7 +206,11 @@ void GameParamUserInterface::idle(U32 timeDelta)
    updateCursorBlink(timeDelta);
 }
 
+
 extern void glColor(Color c, float alpha = 1);
+
+static const U32 itemHeight = 30;
+static const U32 yStart = UserInterface::vertMargin + 90;
 
 void GameParamUserInterface::render()
 {
@@ -219,27 +223,26 @@ void GameParamUserInterface::render()
    glColor3f(1, 1, 1);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "UP, DOWN to choose | ESC exits menu");
 
-   U32 yStart = vertMargin + 90;
 
    for(S32 i = 0; i < menuItems.size(); i++)
    {
-      U32 y = yStart + i * 30;
+      U32 y = yStart + i * itemHeight;
 
       if(selectedIndex == i)           // Highlight selected item
       {
          glColor3f(0, 0, 0.4);         // Fill
          glBegin(GL_POLYGON);
             glVertex2f(0, y - 2);
-            glVertex2f(800, y - 2);
-            glVertex2f(800, y + fontSize + 8);
+            glVertex2f(canvasWidth, y - 2);
+            glVertex2f(canvasWidth, y + fontSize + 8);
             glVertex2f(0, y + fontSize + 8);
          glEnd();
 
          glColor3f(0, 0, 1);           // Outline
          glBegin(GL_LINES);
             glVertex2f(0, y - 2);
-            glVertex2f(799, y - 2);
-            glVertex2f(799, y + fontSize + 8);
+            glVertex2f(canvasWidth - 1, y - 2);
+            glVertex2f(canvasWidth - 1, y + fontSize + 8);
             glVertex2f(0, y + fontSize + 8);
          glEnd();
       }
@@ -365,7 +368,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(menuItems[selectedIndex].mValS.size())
          menuItems[selectedIndex].mValS.erase(menuItems[selectedIndex].mValS.size()-1);
    }
-   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK || (selectedIndex == mQuitItemIndex && keyCode == KEY_ENTER))       // Esc - Quit
+   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK || (selectedIndex == mQuitItemIndex && (keyCode == KEY_ENTER || keyCode == MOUSE_LEFT)))   // Esc - Quit
    {
       UserInterface::playBoop();
       onEscape();
@@ -376,6 +379,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       selectedIndex--;
       if(selectedIndex < 0)
          selectedIndex = menuItems.size() - 1;
+      glutSetCursor(GLUT_CURSOR_NONE);
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
    {
@@ -383,6 +387,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       selectedIndex++;
       if(selectedIndex >= menuItems.size())
          selectedIndex = 0;
+      glutSetCursor(GLUT_CURSOR_NONE);
    }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
@@ -390,7 +395,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       gChatInterface.activate();
    }
 
-   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_RIGHT))   // Increment value by mMinVal, use shift to go faster!
+   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_RIGHT  || keyCode == MOUSE_LEFT))   // Inc. by mMinVal, use shift to go faster!
    {
       S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
 
@@ -399,7 +404,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else
          menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMaxVal;
    }
-   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_LEFT))    // Decrement value by mMinVal, use shift to go faster!
+   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT))    // Dec. by mMinVal, use shift to go faster!
    {
       S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
 
@@ -410,7 +415,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(menuItems[selectedIndex].mValType == TypeGameType)     // Game type menu item
    {
-      if(keyCode == KEY_RIGHT)         // Next game type
+      if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)           // Next game type
       {
          menuItems[selectedIndex].mValI++;
          ignoreGameParams = true;              // Game parameters specified in level file no longer make sense if we've changed game type!
@@ -420,7 +425,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          //menuItems[selectedIndex].mValS = gGameTypeNames[menuItems[selectedIndex].mValI];
          updateMenuItems(menuItems[selectedIndex].mValI);
       }
-      else if(keyCode == KEY_LEFT)    // Prev game type
+      else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)     // Prev game type
       {
          menuItems[selectedIndex].mValI--;
          if(menuItems[selectedIndex].mValI < 0)
@@ -463,6 +468,22 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(menuItems[selectedIndex].mValS.size() < MAX_SHORT_TEXT_LEN)  // MAX_SHORT_TEXT_LEN is the length we're restricting file names to, for somewhat arbitrary reasons.
          menuItems[selectedIndex].mValS += char(ascii);
    }
+}
+
+
+void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
+{
+   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
+
+   Point mousePos = convertWindowToCanvasCoord(Point(x, y));
+
+   selectedIndex = (mousePos.y - yStart + 6) / itemHeight; 
+
+   if(selectedIndex >= menuItems.size())
+      selectedIndex = menuItems.size() - 1;
+
+   if(selectedIndex < 0)
+      selectedIndex = 0;
 }
 
 };
