@@ -273,7 +273,7 @@ public:
 
    F32 mGridSize;
 
-   Vector<string>mScriptArgs;                   // Script and args, if any
+   string mScriptLine;                          // Script and args, if any
 
 
    void idle(U32 timeDelta);

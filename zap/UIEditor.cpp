@@ -306,13 +306,7 @@ void EditorUserInterface::setLevelFileName(string name)
 
 void EditorUserInterface::setLevelGenScriptName(string line)
 {
-   mScriptArgs.clear();
-
-   if(line != "")
-   {
-      mScriptArgs.clear();
-      mScriptArgs.push_back(line.c_str());
-   }
+   mScriptLine = trim(line);
 }
 
 
@@ -562,9 +556,14 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
 
       else if(!strcmp(argv[0], "Script"))
       {
-         // Put the command and params into a vector for later reference.  We only run when playing
+         // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
          for(S32 i = 1; i < argc; i++)
-            mScriptArgs.push_back(argv[i]);
+         {
+            if(i > 1)
+               mScriptLine += " ";
+
+            mScriptLine += argv[i];
+         }
       }
 
       // Parse Team definition line
@@ -3289,14 +3288,9 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b); 
 
-      // Save script and parameters, if any.  If none, omit the line altogether.
-      if(mScriptArgs.size() > 0) 
-      {
-         string scriptLine = "Script";
-         for(S32 i = 0; i < mScriptArgs.size(); i++)
-            scriptLine += string(" ") + mScriptArgs[i];
-         fprintf(f, "%s%s", scriptLine.c_str(), "\n");
-      }
+      //// Save script and parameters, if any.  If none, omit the line altogether.
+      //if(mScriptLine != "") 
+      //   fprintf(f, "Script %s%s", mScriptLine.c_str(), "\n");
 
       // Write out all maze items
       for(S32 i = 0; i < mItems.size(); i++)

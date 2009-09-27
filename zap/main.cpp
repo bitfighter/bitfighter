@@ -77,6 +77,7 @@
 //<li>Username entry screen now remembers last name used</li>
 //<li>When hosting a game from the UI, game load progress info displayed</li>
 //<li>When loading a level from a local or remote server, progress bar is displayed</li>
+//<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
 //</ul>
 //
 //<u>Items</u>
@@ -129,6 +130,7 @@
 //<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
 //<li>Can edit respawing times for items that support them in the editor</li>
 //<li>Can edit GoFast params in editor</li>
+//<lu>Added script/params to game config menu</li>
 //<li>Many minor rendering improvements</li>
 //</ul>
 
@@ -176,6 +178,8 @@
 //<li>Can edit GoFast params in editor</li>
 //<li>More intelligent wrapping on long menus</li>
 //<li>On levels menu, pressing first key of level name will take you to levels starting with that letter, the next press will take you to the next, etc.</li>
+//<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
+//<lu>Added script/params to game config menu</li>
 //<li></li>
 
 // Mac Test:

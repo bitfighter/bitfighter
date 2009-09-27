@@ -171,7 +171,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
             menuItems[3].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "LevelCredits")
             menuItems[4].mValS = val.substr(0, gMaxGameDescrLength);
-         else if (token == "LevelGenScript")
+         else if (token == "Script")
             menuItems[5].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "GridSize")
             menuItems[mGameSpecificParams + 6].mValI = max(min(atoi(val.c_str()), Game::maxGridSize), Game::minGridSize);
@@ -341,7 +341,7 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back("LevelName " + menuItems[2].mValS);
    gameParams.push_back("LevelDescription " + menuItems[3].mValS);
    gameParams.push_back("LevelCredits " + menuItems[4].mValS);
-   gameParams.push_back("LevelGenScript " + menuItems[5].mValS);
+   gameParams.push_back("Script " + menuItems[5].mValS);
    dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + 5].mValI);
    gameParams.push_back(str);
    dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[mGameSpecificParams + 6].mValI);
