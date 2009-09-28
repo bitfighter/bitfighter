@@ -61,6 +61,8 @@ namespace Zap
 EditorUserInterface gEditorUserInterface;
 
 const U32 dockWidth = 50;
+const S32 MIN_SCALE = 200;    // Most zoomed-in scale
+const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 
 // Some colors
 
@@ -2448,8 +2450,8 @@ void EditorUserInterface::centerView()
 {
    if(mItems.size())
    {
-      F32 minx = F32_MAX, miny = F32_MAX;
-      F32 maxx = -F32_MAX, maxy = -F32_MAX;
+      F32 minx =  F32_MAX,   miny =  F32_MAX;
+      F32 maxx = -F32_MAX,   maxy = -F32_MAX;
 
       for(S32 i = 0; i < mItems.size(); i++)
          for(S32 j = 0; j < mItems[i].verts.size(); j++)
@@ -2464,12 +2466,23 @@ void EditorUserInterface::centerView()
                maxy = mItems[i].verts[j].y;
          }
 
-      F32 midx = (minx + maxx) / 2;
-      F32 midy = (miny + maxy) / 2;
+      // If we have only one point object in our level, the following will correct
+      // for any display weirdness.
+      if(minx == maxx && miny == maxy)
+      {
+         mCurrentScale = MIN_SCALE;
+         mCurrentOffset.set(canvasWidth/2 - mCurrentScale * minx, canvasHeight/2 - mCurrentScale * miny);
+      } 
+   
+      else
+      {
+         F32 midx = (minx + maxx) / 2;
+         F32 midy = (miny + maxy) / 2;
 
-      mCurrentScale = min(canvasWidth / (maxx - minx), canvasHeight / (maxy - miny));
-      mCurrentScale /= 1.3;      // Zoom out a bit
-      mCurrentOffset.set(canvasWidth/2 - mCurrentScale * midx, canvasHeight/2 - mCurrentScale * midy);
+         mCurrentScale = min(canvasWidth / (maxx - minx), canvasHeight / (maxy - miny));
+         mCurrentScale /= 1.3;      // Zoom out a bit
+         mCurrentOffset.set(canvasWidth/2 - mCurrentScale * midx, canvasHeight/2 - mCurrentScale * midy);
+      }
    }
    else
    {
@@ -3182,10 +3195,10 @@ void EditorUserInterface::idle(U32 timeDelta)
       mCurrentScale *= 1 + timeDelta * 0.002;
    if(mOut && !mIn)
       mCurrentScale *= 1 - timeDelta * 0.002;
-   if(mCurrentScale > 200)
-     mCurrentScale = 200;
-   else if(mCurrentScale < 10)
-      mCurrentScale = 10;
+   if(mCurrentScale > MIN_SCALE)
+     mCurrentScale = MIN_SCALE;
+   else if(mCurrentScale < MAX_SCALE)
+      mCurrentScale = MAX_SCALE;
    Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
    mCurrentOffset += mMousePos - newMousePoint;
 
