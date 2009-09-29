@@ -159,7 +159,7 @@ void Asteroid::renderItem(Point pos)
 }
 
 
-bool Asteroid::getCollisionCircle(U32 state, Point center, F32 radius)
+bool Asteroid::getCollisionCircle(U32 state, Point &center, F32 &radius)
 {
    center = mMoveState[state].pos;
    radius = AsteroidRadius * asteroidRenderSize[mSizeIndex];
@@ -167,18 +167,17 @@ bool Asteroid::getCollisionCircle(U32 state, Point center, F32 radius)
 }
 
 
-// This would be better, but causes crashes :-(
 bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   //for(S32 i = 0; i < AsteroidPoints; i++)
-   //{
-   //   Point p = Point(mMoveState[state].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
-   //                   mMoveState[state].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
+   for(S32 i = 0; i < AsteroidPoints; i++)
+   {
+      Point p = Point(mMoveState[MoveObject::ActualState].pos.x + (F32) AsteroidCoords[mDesign][i][0] * asteroidRenderSize[mSizeIndex],
+                      mMoveState[MoveObject::ActualState].pos.y + (F32) AsteroidCoords[mDesign][i][1] * asteroidRenderSize[mSizeIndex] );
 
-   //   polyPoints.push_back(p);
-   //}
+      polyPoints.push_back(p);
+   }
 
-   return false;
+   return true;
 }
 
 
@@ -227,7 +226,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    }
 
    newItem->mSizeIndex = mSizeIndex;
-   newItem->addToGame(gServerGame);                    // And add it to the list of game objects
+   newItem->addToGame(gServerGame);           // And add it to the list of game objects
 }
 
 
@@ -236,7 +235,10 @@ U32 Asteroid::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
 
    if(stream->writeFlag(updateMask & ItemChangedMask))
+   {
       stream->writeEnum(mSizeIndex, mSizeIndexLength);
+      stream->writeEnum(mDesign, AsteroidDesigns);
+   }
 
    stream->writeFlag(hasExploded);
 
@@ -252,7 +254,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       mSizeIndex = stream->readEnum(mSizeIndexLength);
       setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
-      mDesign = TNL::Random::readI(0, AsteroidDesigns - 1);     // No need to sync between client and server or between clients
+      mDesign = stream->readEnum(AsteroidDesigns);
 
       if(!mInitial)
          SFXObject::play(SFXAsteroidExplode, mMoveState[RenderState].pos, Point());

@@ -1,7 +1,7 @@
 #
 # Building under Windows using MinGW:
 #
-# You can build bitFighter under Windows using MinGW by following these steps:
+# You can build Bitfighter under Windows using MinGW by following these steps:
 # 1. Download and install MinGW
 # 2. Follow the steps in the readme in the win_include_do_not_distribute folder
 # 3. Build the program using mingw32-make

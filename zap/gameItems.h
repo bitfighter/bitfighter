@@ -105,7 +105,7 @@ public:
 
    void renderItem(Point pos);
    bool getCollisionPoly(Vector<Point> &polyPoints);
-   bool getCollisionCircle(U32 state, Point center, F32 radius);
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius);
    bool collide(GameObject *otherObject);
 
    void damageObject(DamageInfo *theInfo);

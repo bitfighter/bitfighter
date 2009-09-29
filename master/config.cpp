@@ -31,6 +31,7 @@
 #include "../tnl/tnlLog.h"
 #include <stdio.h>
 
+
 using namespace TNL;
 
 extern U32 gMasterPort;
@@ -44,8 +45,6 @@ extern Vector<char *> MOTDStringVecOld;
 
 extern Vector<U32> MOTDVersionVec;
 extern Vector<char *> MOTDStringVec;
-
-class MasterServerConnection;
 
 void processConfigLine(int argc, const char **argv)
 {
@@ -87,7 +86,7 @@ void processConfigLine(int argc, const char **argv)
       }
 
       char message[MOTDLen];
-      fgets (message, MOTDLen, f);
+      fgets(message, MOTDLen, f);
       fclose(f);
 
       MOTDVersionVec.push_back(version);

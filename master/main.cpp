@@ -151,7 +151,7 @@ public:
    /// right away.
    MasterServerConnection()
    {
-      mStrikeCount = 0;
+      mStrikeCount = 0; 
       mLastActivityTime = 0;
       mNext = this;
       mPrev = this;

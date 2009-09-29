@@ -1,4 +1,4 @@
-bitFighter uses NSIS (Nullsoft Scriptable Install System) to manage the install/uninstall process on Windows systems.  Download it here:
+ Bitfighter uses NSIS (Nullsoft Scriptable Install System) to manage the install/uninstall process on Windows systems.  Download it here:
 
 http://nsis.sourceforge.net/Main_Page
 
