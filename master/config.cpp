@@ -25,6 +25,8 @@
 
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 
+#include "../zap/SharedConstants.h"
+
 #include "../tnl/tnl.h"
 #include "../tnl/tnlLog.h"
 #include <stdio.h>
@@ -43,6 +45,7 @@ extern Vector<char *> MOTDStringVecOld;
 extern Vector<U32> MOTDVersionVec;
 extern Vector<char *> MOTDStringVec;
 
+class MasterServerConnection;
 
 void processConfigLine(int argc, const char **argv)
 {
@@ -69,6 +72,28 @@ void processConfigLine(int argc, const char **argv)
       MOTDVersionVec.push_back(version);
       MOTDStringVec.push_back(message);
    }
+
+   // New usemotd directive tells server to use the message stored in the file motd
+   else if(!stricmp(argv[0], "usemotd") && argc > 2)        // usemotd --> read motd file from local folder
+   {
+      U32 version = atoi(argv[1]);        // Build version this message corresponds to, allows us to set different messages for different clients
+      char *file = strdup(argv[2]);       // Message stored in this file
+
+      FILE *f = fopen(file, "r");
+      if(!f)
+      {
+         logprintf("Unable to open motd file %s.", file);
+         return;
+      }
+
+      char message[MOTDLen];
+      fgets (message, MOTDLen, f);
+      fclose(f);
+
+      MOTDVersionVec.push_back(version);
+      MOTDStringVec.push_back(message);
+   }
+
 
    else if(!stricmp(argv[0], "name") && argc > 1)        // name --> set server's name
       gMasterName = strdup(argv[1]);

@@ -50,6 +50,7 @@ const U32 gCursorBlinkTime = 100;
 const U32 gMaxGameNameLength = 32;     // Any longer, and it won't fit on-screen
 const U32 gMaxGameDescrLength = 60;    // Any longer, and it won't fit on-screen
 
+
 enum UIID {
    AdminPasswordEntryUI,
    ChatUI,

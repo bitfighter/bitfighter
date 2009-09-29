@@ -146,6 +146,7 @@
 //<li>Old messages now properly cleared out when game is started</li>
 //<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
 //<li>Fixed rendering bug on ship config menu in joystick mode</li>
+//<li>Fixed scaling issue in editor when only one point item is present</li>
 //</ul>
 //
 //<u>Server menu enhancements:</u>
@@ -180,6 +181,7 @@
 //<li>On levels menu, pressing first key of level name will take you to levels starting with that letter, the next press will take you to the next, etc.</li>
 //<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
 //<lu>Added script/params to game config menu</li>
+//<li>Fixed scaling issue in editor when only one point item is present</li>
 //<li></li>
 
 // Mac Test:

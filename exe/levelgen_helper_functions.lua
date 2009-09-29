@@ -40,7 +40,7 @@
 levelgen = LuaLevelGenerator(LevelGen)
 
 --
--- Convenience function... let user use logprint directly, without referencing the bot
+-- Convenience function... let user use logprint directly, without referencing luaUtil
 --
 function logprint(msg)
     luaUtil:logprint("Levelgen", tostring(msg))

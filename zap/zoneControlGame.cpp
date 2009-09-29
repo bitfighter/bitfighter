@@ -70,7 +70,7 @@ public:
 
    GameTypes getGameType() { return ZoneControlGame; }
    const char *getGameTypeString() { return "Zone Control"; }
-   const char *getInstructionString() { return "Capture each zone by carrying the flag into it!"; }
+   const char *getInstructionString() { return "Capture all the zones by carrying the flag into them! "; }
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return false; }

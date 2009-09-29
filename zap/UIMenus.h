@@ -36,7 +36,7 @@
 
 #include <string>
 
-#define MOTDLen 256
+
 
 
 namespace Zap

@@ -29,3 +29,5 @@
 
 #define MAX_CHAT_MSG_LENGTH 2048
 #define MAX_SHORT_TEXT_LEN 32
+static const int MOTDLen = 256;
+
