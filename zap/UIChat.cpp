@@ -38,6 +38,8 @@ namespace Zap
 
 extern void glColor(Color c, float alpha = 1);
 
+const char *arrow = " -> ";
+
 // Constructor
 ChatUserInterface::ChatUserInterface()
 {
@@ -92,7 +94,7 @@ void ChatUserInterface::newMessage(const char *nick, bool isPrivate, const char 
       {
          gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
             "Private message from %s: Press [%s] to enter chat mode", nick, keyCodeToString(keyOUTGAMECHAT));
-         gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "--> %s", message);
+         gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
       }
    }
 }
@@ -188,8 +190,8 @@ void ChatUserInterface::render()
             drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, "*");
             nickWidth += getStringWidth(GlobalChatFontSize, "*");
          }
-         drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, " -> ");
-         nickWidth += getStringWidth(GlobalChatFontSize, " -> ");
+         drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, arrow);
+         nickWidth += getStringWidth(GlobalChatFontSize, arrow);
          drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, mMessages[i]);
 
          y += GlobalChatFontSize + 4;
@@ -251,7 +253,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       // Limit chat messages to the size that can be displayed on the screen
 
-      S32 nickWidth = getStringWidthf(GlobalChatFontSize, "%s%s", gNameEntryUserInterface.getText(), " -> " );    //TODO: Put " -> " into a constant
+      S32 nickWidth = getStringWidthf(GlobalChatFontSize, "%s%s", gNameEntryUserInterface.getText(), arrow);
       if((mChatCursorPos < sizeof(mChatBuffer) - 2 )  && nickWidth + (S32) getStringWidthf(GlobalChatFontSize, "%s%c", mChatBuffer, ascii) < UserInterface::canvasWidth - 2 * horizMargin )
       {
          mChatBuffer[mChatCursorPos] = ascii;
@@ -259,6 +261,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }
 }
+
 
 // Send chat message
 void ChatUserInterface::issueChat()
@@ -276,6 +279,7 @@ void ChatUserInterface::issueChat()
    cancelChat();
 }
 
+
 // Clear current message
 void ChatUserInterface::cancelChat()
 {
@@ -290,6 +294,7 @@ void ChatUserInterface::onActivate()
 {
    gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
+
 
 void ChatUserInterface::onEscape()
 {
