@@ -173,6 +173,17 @@ void ChatUserInterface::render()
    S32 vertFooterPos = canvasHeight - vertMargin - 20;
    drawCenteredString(vertFooterPos, 18, menuFooter);
 
+   S32 xpos = horizMargin;
+   S32 ypos = vertFooterPos - 16;
+
+   glColor3f(1,1,0);
+   for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
+   {
+      drawStringf(xpos, ypos, 11, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+      xpos += getStringWidthf(11, "%s ;",mPlayersInGlobalChat[i].getString());
+   }
+
+
    // Render incoming chat msgs
    glColor3f(1,1,1);
 
@@ -292,12 +303,21 @@ extern bool gDisableShipKeyboardInput;
 
 void ChatUserInterface::onActivate()
 {
+   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   if(conn)
+      conn->c2mJoinGlobalChat();
+
+   mPlayersInGlobalChat.clear();
    gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
 
 
 void ChatUserInterface::onEscape()
 {
+   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   if(conn)
+      conn->c2mLeaveGlobalChat();
+
    UserInterface::reactivatePrevUI();   //gMainMenuUserInterface
 }
 

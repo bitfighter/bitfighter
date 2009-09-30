@@ -66,6 +66,8 @@ public:
    char mChatBuffer[200];     // Outgoing chat msg
    U32 mChatCursorPos;        // Where is cursor?
 
+   Vector<StringTableEntry> mPlayersInGlobalChat;
+
    Color mDisplayMessageColor[MessageDisplayCount];               // Chat message colors
    char mMessages[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];      // Hold chat messages
    char mNicks[MessageDisplayCount][MAX_SHORT_TEXT_LEN];          // Hold corresponding nicks

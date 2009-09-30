@@ -43,7 +43,6 @@ Vector<U32> MOTDVersionVec;
 Vector<char *> MOTDStringVec;
 U32 gLatestReleasedCSProtocol = 0;
 
-
 const char *gMasterName;           // Name of the master server
 const char *gJasonOutFile;         // File where JSON data gets dumped
 bool gNeedToWriteStatus = true;    // Tracks whether we need to update our status file, for possible display on a website
@@ -136,6 +135,7 @@ protected:
    StringTableEntry mLevelType;
    StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
    StringTableEntry mServerDescr;              ///< Server description
+   bool isInGlobalChat;
 
    StringTableEntry mAutoDetectStr;             // Player's joystick autodetect string, for research purposes
 
@@ -178,6 +178,11 @@ public:
          gClientListCount--;
          logprintf("[%s] Client disconnected", getTimeStamp().c_str());
       }
+
+      if(isInGlobalChat)
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+            if (walk->isInGlobalChat)
+               walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
 
       gNeedToWriteStatus = true;
    }
@@ -700,6 +705,35 @@ public:
    //      i++;
    //   }
    //}
+
+
+   TNL_DECLARE_RPC_OVERRIDE(c2mJoinGlobalChat, ())
+   { 
+      isInGlobalChat = true;
+      
+      Vector<StringTableEntry> names;
+
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         if (walk != this && walk->isInGlobalChat)
+         {
+            walk->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);
+            names.push_back(walk->mPlayerOrServerName);
+         }
+
+      if(names.size() > 0)
+         m2cPlayersInGlobalChat(names);
+   }
+
+
+   TNL_DECLARE_RPC_OVERRIDE(c2mLeaveGlobalChat, ())
+   {
+      isInGlobalChat = false;
+
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         if (walk != this && walk->isInGlobalChat)
+            walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
+   }
+
 
    // Got out-of-game chat message from client, need to relay it to others
    TNL_DECLARE_RPC_OVERRIDE(c2mSendChat, (StringPtr message))

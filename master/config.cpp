@@ -48,7 +48,6 @@ extern Vector<char *> MOTDStringVec;
 
 void processConfigLine(int argc, const char **argv)
 {
-
    if(!stricmp(argv[0], "port") && argc > 1)             // port --> set port
       gMasterPort = atoi(argv[1]);
 
@@ -82,15 +81,23 @@ void processConfigLine(int argc, const char **argv)
       if(!f)
       {
          logprintf("Unable to open motd file %s.", file);
+
+         // Save a default message
+         MOTDStringVec.push_back("Welcome to Bitfighter!");
+         MOTDVersionVec.push_back(version);
+
          return;
       }
 
       char message[MOTDLen];
-      fgets(message, MOTDLen, f);
-      fclose(f);
+      if(fgets(message, MOTDLen, f))
+         MOTDStringVec.push_back(message);
+      else
+         MOTDStringVec.push_back("Welcome to Bitfighter!");
 
       MOTDVersionVec.push_back(version);
-      MOTDStringVec.push_back(message);
+      
+      fclose(f);
    }
 
 

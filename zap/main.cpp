@@ -68,6 +68,7 @@
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
 //<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
 //<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
+//<li>List of players in global chat mode now displayed when in global chat</li>
 
 //
 //<u>UI/Menus</u>
@@ -182,6 +183,7 @@
 //<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
 //<lu>Added script/params to game config menu</li>
 //<li>Fixed scaling issue in editor when only one point item is present</li>
+//<li>List of players in global chat mode now displayed when in global chat</li>
 //<li></li>
 
 // Mac Test:

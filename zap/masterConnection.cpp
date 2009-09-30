@@ -199,12 +199,45 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool 
 
 
 // Handle incoming chat message
-// Runs on client only (but initiated by server)
+// Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntry playerNick, bool isPrivate, StringPtr message))
 {
    if(!mIsGameServer)
       gChatInterface.newMessage(playerNick.getString(), isPrivate, message.getString());
 }
+
+
+// Handle players joining or leaving chat session
+// Runs on client only (but initiated by master)
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick))
+{
+   gChatInterface.mPlayersInGlobalChat.push_back(playerNick);
+}
+
+
+// Handle players joining or leaving chat session
+// Runs on client only (but initiated by master)
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks))
+{
+   gChatInterface.mPlayersInGlobalChat.clear();
+
+   for(S32 i = 0; i < playerNicks.size(); i++)
+      gChatInterface.mPlayersInGlobalChat.push_back(playerNicks[i]);
+}
+
+
+// Handle players joining or leaving chat session
+// Runs on client only (but initiated by master)
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (StringTableEntry playerNick))
+{
+   for(S32 i = 0; i < gChatInterface.mPlayersInGlobalChat.size(); i++)
+      if(gChatInterface.mPlayersInGlobalChat[i] == playerNick)
+      {
+         gChatInterface.mPlayersInGlobalChat.erase_fast(i);
+         break;
+      }
+}
+
 
 // Set master server name
 void MasterServerConnection::setMasterName(string name)
