@@ -304,6 +304,9 @@ public:
    Point convertLevelToCanvasCoord(Point p) { return p * mCurrentScale + mCurrentOffset; }
    Point snapToLevelGrid(Point p);
 
+   void EditorUserInterface::runScript();    // Run associated levelgen script
+
+
    //MeshBox testBox[5][5];  //TODO: del
 
 };

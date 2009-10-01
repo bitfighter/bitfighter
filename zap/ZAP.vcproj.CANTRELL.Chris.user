@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory="$(TargetDir)"
-				CommandArguments=" -master localhost:25955 -levels hh "
+				CommandArguments=" -levels hh "
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

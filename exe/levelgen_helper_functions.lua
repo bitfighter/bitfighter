@@ -46,9 +46,6 @@ function logprint(msg)
     luaUtil:logprint("Levelgen", tostring(msg))
 end
 
-
-
-
 --
 -- Let the log know that this file was processed correctly
 --

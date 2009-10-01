@@ -50,6 +50,7 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "config.h"
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
+#include "LuaLevelGenerator.h"
 
 #include "../glut/glutInclude.h"
 #include <ctype.h>
@@ -582,6 +583,28 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       }
    }
 }     // end processLevelLoadLine
+
+
+
+void EditorUserInterface::runScript()
+{
+   // Parse mScriptLine
+
+   Vector<string> scriptArgs;
+   
+   string::size_type lastPos = mScriptLine.find_first_not_of(" ", 0);       // Skip leading delimiters
+   string::size_type pos     = mScriptLine.find_first_of(" ", lastPos);     // Find first non-space
+
+   while (string::npos != pos || string::npos != lastPos)
+   {
+      scriptArgs.push_back(mScriptLine.substr(lastPos, pos - lastPos));    // Found a token
+      
+      lastPos = mScriptLine.find_first_not_of(" ", pos);      // Skip spaces...  Note the "not_of"
+      pos = mScriptLine.find_first_of(" ", lastPos);          // Find next non-space
+   }
+
+   LuaLevelGenerator levelgen = LuaLevelGenerator("./levels/", scriptArgs, mGridSize, this);
+}
 
 
 void EditorUserInterface::validateLevel()
@@ -2905,7 +2928,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
         centerView();
    }
    else if(keyCode == KEY_R)
-      rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
+      if(getKeyState(KEY_CTRL))        // Ctrl-R - Run levelgen script
+         runScript();
+      else
+         rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
 
    else if((keyCode == KEY_UP) && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
       mUp = true;

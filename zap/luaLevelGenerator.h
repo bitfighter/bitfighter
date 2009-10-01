@@ -46,10 +46,10 @@ private:
    bool loadLevelGenHelperFunctions(lua_State *L);
 
 public:
-   void runScript(lua_State *L, Vector<string> scriptArgs);
+   void runScript(lua_State *L, Vector<string> scriptArgs, F32 gridSize);
    void logError(const char *format, ...);
 
-   LuaLevelGenerator(string path, Vector<string> scriptArgs);   // C++ constructor
+   LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridsize, LevelLoader *caller);   // C++ constructor
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    ~LuaLevelGenerator();                 // Destructor
 
@@ -58,9 +58,9 @@ public:
    static Lunar<LuaLevelGenerator>::RegType methods[];
 
    // Lua methods
-   S32 addWall(lua_State *L);       // Add a wall
-   S32 addItem(lua_State *L);       // Add item using a series of parameters
-   S32 addLevelLine(lua_State *L);  // Add raw level line
+   virtual S32 addWall(lua_State *L);       // Add a wall
+   virtual S32 addItem(lua_State *L);       // Add item using a series of parameters
+   virtual S32 addLevelLine(lua_State *L);  // Add raw level line
 
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
@@ -69,6 +69,7 @@ public:
    // Implement LevelLoader abstract method
    void processLevelLoadLine(int argc, const char **argv);
 };
+
 
 };
 
