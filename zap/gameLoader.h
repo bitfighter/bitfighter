@@ -26,24 +26,19 @@
 #ifndef _GAMELOADER_H_
 #define _GAMELOADER_H_
 
-#include "tnlAssert.h"
-#include "tnlPlatform.h"
-
 namespace Zap
 {
 
 class LevelLoader
 {
-protected:
-   int parseArgs(const char *string);
-
 public:
    // Put these in here so we can access them from luaLevelGenerator
    const static int MaxArgc = 128;    // At most MaxArgc args on a single line,
    const static int MaxArgLen = 100;  // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
 
    bool initLevelFromFile(const char *file);
-   virtual void processLevelLoadLine(int argc, const char **argv) { TNLAssert(false, "Needs to be overridded!"); }
+   virtual void processLevelLoadLine(int argc, const char **argv) = 0;
+   int parseArgs(const char *string);
 };
 
 

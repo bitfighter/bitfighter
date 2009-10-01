@@ -38,7 +38,7 @@ namespace Zap
 {
 
 
-class LuaLevelGenerator: public LuaObject, public LevelLoader
+class LuaLevelGenerator: public LuaObject
 {
 private:
    string mFilename;
