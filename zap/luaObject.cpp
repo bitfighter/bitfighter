@@ -138,6 +138,16 @@ void LuaObject::clearStack(lua_State *L)
 }
 
 
+void LuaObject::cleanupAndTerminate(lua_State *L)
+{
+   if(L)
+   {
+      // Force gc to clear out any lingering references
+      lua_gc(L, LUA_GCCOLLECT, 0);  // Fallback
+      lua_close(L);
+   }
+}
+
 // Assume that table is at the top of the stack
 void LuaObject::setfield (lua_State *L, const char *key, F32 value)
 {

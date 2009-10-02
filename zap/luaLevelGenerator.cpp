@@ -24,7 +24,6 @@
 //------------------------------------------------------------------------------------
 
 #include "luaLevelGenerator.h"
-#include "robot.h"      // For static methods, which should be moved elsewhere...
 #include "gameType.h"  
 
 namespace Zap
@@ -48,7 +47,7 @@ LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32
    mGridSize = gridSize;
    mCaller = caller;
    runScript(L, scriptArgs, gridSize);
-   Robot::cleanupAndTerminate(L);
+   cleanupAndTerminate(L);
 }
 
 
@@ -134,42 +133,6 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
    return point;
 }
 
-
-//extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
-//
-//S32 LuaLevelGenerator::addWall(lua_State *L)
-//{
-//
-//// Lua supplies a width, a boolean (solid), and a series of points
-//
-//   static const char *methodName = "LevelGenerator:addWall()";
-//   GameType::BarrierRec barrier;
-//
-//   try 
-//   {
-//      barrier.width = getFloat(L, 1, methodName);      // Width is first arg
-//      barrier.solid = getBool(L, 2, methodName);       // Solid param is second arg
-//
-//      // Third arg is a table of coordinate values in "editor space" (i.e. these will be multiplied by gridsize before being used)
-//      S32 points = (S32)lua_objlen(L, 3);    // Get the number of points in our table of points
-//
-//     for(S32 i = 1; i <= points; i++)       // Remember, Lua tables start with index 1
-//     {
-//        Point p = getPointFromTable(L, 3, i);
-//        barrier.verts.push_back(p.x * gServerGame->getGridSize());  
-//        barrier.verts.push_back(p.y * gServerGame->getGridSize());  
-//     }
-//   }
-//   catch(string err)
-//   {
-//      logError("Error adding wall in %s: %s", methodName, err);
-//   }
-//
-//   gServerGame->getGameType()->mBarriers.push_back(barrier);
-//   constructBarriers(gServerGame, barrier.verts, barrier.width, barrier.solid);
-//
-//   return 0;
-//}
 
 
 string ftos(F32 i) // convert float to string

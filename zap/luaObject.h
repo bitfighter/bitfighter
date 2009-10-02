@@ -82,6 +82,7 @@ public:
 
    static void LuaObject::stackdump(lua_State* L);
 
+   static void LuaObject::cleanupAndTerminate(lua_State *L);
 
 };
 

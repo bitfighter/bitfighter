@@ -48,6 +48,7 @@ enum VertexRenderStyles
    HighlightedVertex,               // Highlighted vertex
    SelectedItemVertex,              // Non-highlighted vertex of a selected item
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
+   ScriptItemVertex
 };
 
 
@@ -122,6 +123,7 @@ public:
       F32 width;
       Vector<Point> verts;
       bool selected;
+      bool litUp;
       Vector<bool> vertSelected;
       string text;         // For items that have an aux text field
       U32 textSize;        // For items that have an aux text field
@@ -134,6 +136,8 @@ public:
          repopDelay = -1;
          speed = -1;
          boolattr = false;
+         selected = false;
+         litUp = false;
       }
    };
 
@@ -159,6 +163,8 @@ private:
    Vector<Vector<WorldItem> > mRedoItems;    // Redo history
    Vector<WorldItem> mMostRecentState;       // Copy of most recent state, to facilitate dragging
    Vector<WorldItem> mUnmovedItems;          // Copy of items where they were before they moved... different than mMostRecentState when dragging from dock
+
+   Vector<WorldItem> mLevelGenItems;         // Items added by a levelgen script
 
    void saveUndoState(Vector<WorldItem> items);    // Save current state into undo history buffer
 
@@ -252,10 +258,10 @@ public:
    Vector<WorldItem> mItems;     // Item list: needs to be public so we can check team affiliation from UITeamDefMenu
 
    void render();
-   void renderItem(WorldItem &i, S32 itemID, bool isDockItem);
-   void renderLinePolyVertices(WorldItem item, S32 itemID, bool isDockItem);
+   void renderItem(WorldItem &i, bool isBeingEdited, bool isDockItem, bool isScriptItem);
+   void renderLinePolyVertices(WorldItem item, bool isScriptItem);
 
-   void renderBarrier(Vector<Point> verts, bool selected, F32 width, bool isDockItem);
+   void renderBarrier(Vector<Point> verts, bool selected, F32 width, bool isScriptItem);
    void renderPoly(Vector<Point> verts, bool isDockItem);
    static void renderVertex(VertexRenderStyles style, Point v, S32 number, S32 size = 5);
 
