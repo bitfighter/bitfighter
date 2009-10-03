@@ -48,7 +48,6 @@ enum VertexRenderStyles
    HighlightedVertex,               // Highlighted vertex
    SelectedItemVertex,              // Non-highlighted vertex of a selected item
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
-   ScriptItemVertex
 };
 
 
@@ -194,7 +193,7 @@ private:
    Point mMousePos;
    Point mMouseDownPos;
 
-   void renderGenericItem(Point pos, Color c);
+   void renderGenericItem(Point pos, Color c, F32 alpha);
    void setTranslationAndScale(Point pos);
 
    bool mCreatingPoly;
@@ -259,11 +258,11 @@ public:
 
    void render();
    void renderItem(WorldItem &i, bool isBeingEdited, bool isDockItem, bool isScriptItem);
-   void renderLinePolyVertices(WorldItem item, bool isScriptItem);
+   void renderLinePolyVertices(WorldItem item, F32 alpha);
 
-   void renderBarrier(Vector<Point> verts, bool selected, F32 width, bool isScriptItem);
+   void renderBarrier(Vector<Point> verts, bool selected, F32 width, F32 alpha);
    void renderPoly(Vector<Point> verts, bool isDockItem);
-   static void renderVertex(VertexRenderStyles style, Point v, S32 number, S32 size = 5);
+   static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 
 
    // Handle input

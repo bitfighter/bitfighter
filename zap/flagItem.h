@@ -71,8 +71,7 @@ public:
 };
 
 extern void renderFlag(Point pos, Color flagColor);
-extern void renderFlag(Point pos, Color flagColor, Color mastColor);
-//extern void renderFlag(Point pos, Color flagColor, F32 fraction);
+extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);
 
 
 ////////////////////////////////

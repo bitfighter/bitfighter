@@ -56,7 +56,7 @@ extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusF
 extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset);
 
 extern void renderFlag(Point pos, Color flagColor);
-extern void renderFlag(Point pos, Color flagColor, Color mastColor);
+extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
@@ -78,15 +78,15 @@ extern void renderGrenade(Point pos, F32 vel);
 extern void renderSpyBug(Point pos, bool visible);
 
 extern void renderRepairItem(Point pos);
-extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor);
+extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(Point pos, Point dir, U32 time);
 
-void renderTestItem(Point pos);
+void renderTestItem(Point pos, F32 alpha = 1);
 void renderAsteroid(Point pos, S32 design, F32 radius);
-void renderAsteroid(Point pos, S32 design, F32 radius, Color c);
-void renderResourceItem(Point pos);
-void renderSoccerBall(Point pos);
+void renderAsteroid(Point pos, S32 design, F32 radius, Color c, F32 alpha = 1);
+void renderResourceItem(Point pos, F32 alpha = 1);
+void renderSoccerBall(Point pos, F32 alpha = 1);
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);
 
 extern void renderForceFieldProjector(Point pos, Point normal);

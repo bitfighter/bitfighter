@@ -580,9 +580,9 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
 }
 
 
-void drawFlag(Color flagColor, Color mastColor)
+void drawFlag(Color flagColor, Color mastColor, F32 alpha)
 {
-   glColor(flagColor);
+   glColor(flagColor, alpha);
    glBegin(GL_LINES);
 
       // First, the flag itself
@@ -599,7 +599,7 @@ void drawFlag(Color flagColor, Color mastColor)
       glVertex2f(-15, 0);
 
       // Now the flag's mast
-      glColor(mastColor == NULL ? Color(1,1,1) : mastColor);
+      glColor(mastColor == NULL ? Color(1,1,1) : mastColor, alpha);
 
       glVertex2f(-15, -15);
       glVertex2f(-15, 15);
@@ -607,12 +607,12 @@ void drawFlag(Color flagColor, Color mastColor)
 }
 
 
-void renderFlag(Point pos, Color flagColor, Color mastColor)
+void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   drawFlag(flagColor, mastColor);
+   drawFlag(flagColor, mastColor, alpha);
 
    glPopMatrix();
 }
@@ -621,7 +621,7 @@ void renderFlag(Point pos, Color flagColor, Color mastColor)
 // this seems to cause problems with our extern statements...
 void renderFlag(Point pos, Color flagColor)
 {
-   renderFlag(pos, flagColor, NULL);
+   renderFlag(pos, flagColor, NULL, 1);
 }
 
 
@@ -1040,11 +1040,11 @@ void renderSpyBug(Point pos, bool visible)
 
 void renderRepairItem(Point pos)
 {
-   renderRepairItem(pos, false, NULL);
+   renderRepairItem(pos, false, NULL, 1);
 }
 
 
-void renderRepairItem(Point pos, bool forEditor, Color overrideColor)
+void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
 {
    F32 crossWidth;
    F32 crossLen;
@@ -1066,7 +1066,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor)
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   glColor(overrideColor == NULL ? Color(1,1,1) : overrideColor);
+   glColor(overrideColor == NULL ? Color(1,1,1) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-size , -size );
       glVertex2f(size , -size );
@@ -1074,7 +1074,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor)
       glVertex2f(-size , size );
    glEnd();
 
-   glColor(overrideColor == NULL ? Color(1,0,0) : overrideColor);
+   glColor(overrideColor == NULL ? Color(1,0,0) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(crossWidth, crossWidth);
       glVertex2f(crossLen, crossWidth);
@@ -1224,23 +1224,23 @@ void renderSpeedZone(Point pos, Point dir, U32 time)
 }
 
 
-void renderTestItem(Point pos)
+void renderTestItem(Point pos, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0); 
 
-   glColor3f(1, 1, 0);
+   glColor4f(1, 1, 0, alpha);
    drawPolygon(Point(0,0), 7, 60, 0);
    glPopMatrix();
 }
 
 
-void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color)
+void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0); 
 
-   glColor(color == NULL ? Color(.7, .7, .7) : color);
+   glColor(color == NULL ? Color(.7, .7, .7) : color, alpha);
       // Design 1
       glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < AsteroidPoints; i++)
@@ -1262,12 +1262,12 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact)
 }
 
 
-void renderResourceItem(Point pos)
+void renderResourceItem(Point pos, F32 alpha)
 {
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
 
-      glColor3f(1,1,1);
+      glColor4f(1, 1, 1, alpha);
       glBegin(GL_LINE_LOOP);
          glVertex2f(-8, 8);
          glVertex2f(0, 20);
@@ -1283,9 +1283,9 @@ void renderResourceItem(Point pos)
 }
 
 
-void renderSoccerBall(Point pos)
+void renderSoccerBall(Point pos, F32 alpha)
 {
-   glColor3f(1, 1, 1);
+   glColor4f(1, 1, 1, alpha);
    drawCircle(pos, SoccerBallItem::radius);
 }
 

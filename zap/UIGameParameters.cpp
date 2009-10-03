@@ -61,31 +61,12 @@ void GameParamUserInterface::onActivate()
    glutSetCursor(GLUT_CURSOR_NONE);
 }
 
-/*
-// From http://www.linuxselfhelp.com/HOWTO/C++Programming-HOWTO-7.html
-// TODO: This not used, delete?
-void Tokenize(const string& str, vector<string>& tokens, const string& delimiters = " \t")
-{
-    string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip delimiters at beginning.
-    string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter".
-
-    while (string::npos != pos || string::npos != lastPos)
-    {
-        tokens.push_back(str.substr(lastPos, pos - lastPos));     // Found a token, add it to the vector.
-        lastPos = str.find_first_not_of(delimiters, pos);         // Skip delimiters.  Note the "not_of"
-        pos = str.find_first_of(delimiters, lastPos);             // Find next "non-delimiter"
-    }
-}
-*/
 
 extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
 extern S32 gMaxPlayers;
 
-#ifndef min
-#define min(a,b) ((a) <= (b) ? (a) : (b))
-#define max(a,b) ((a) >= (b) ? (a) : (b))
-#endif
+static S32 NumberOfPreGameSpecificParams;
 
 
 void GameParamUserInterface::updateMenuItems(const char *gt)
@@ -140,6 +121,8 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    menuItems.push_back(MenuItem2("Level By:",        "",                                0,       0, 0, "", "Who created this level",                                TypeLongString,    KEY_B, KEY_UNKNOWN ));
    menuItems.push_back(MenuItem2("Levelgen Script:", "",                                0,       0, 0, "", "Levelgen script & args to be run when level is loaded", TypeLongString,    KEY_L, KEY_UNKNOWN ));
 
+   NumberOfPreGameSpecificParams = 6;
+
    S32 i;
    for(i = 0; i < mGameSpecificParams; i++)
       menuItems.push_back(MenuItem2(params[i].name,  "", params[i].value,  params[i].minval, params[i].maxval,   params[i].units,    params[i].help,   TypeInt,   KEY_UNKNOWN, KEY_UNKNOWN ));
@@ -174,11 +157,11 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          else if (token == "Script")
             menuItems[5].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "GridSize")
-            menuItems[mGameSpecificParams + 6].mValI = max(min(atoi(val.c_str()), Game::maxGridSize), Game::minGridSize);
+            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), Game::maxGridSize), Game::minGridSize);
          else if (token == "MinPlayers")
-            menuItems[mGameSpecificParams + 7].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
          else if (token == "MaxPlayers")
-            menuItems[mGameSpecificParams + 8].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 2].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
       }
 
       // And apply our GameType arguments to the game specific parameter settings, if any were provided in a level file we loaded
@@ -190,9 +173,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    // Lastly, scan through our list of saved items and replace the default values with those modified here in this interface
    // This operates like a poor man's dictionary
    if(savedMenuItems.size())
-   {
       for(S32 i = 1; i < menuItems.size(); i++)                         // Start with 1 because we don't want to overwrite our game type, which is #0!
-      {
          for(S32 j = 0; j < savedMenuItems.size(); j++)
             if(!strcmp(savedMenuItems[j].mText, menuItems[i].mText))    // Found a match
             {
@@ -200,8 +181,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                menuItems[i].mValS = savedMenuItems[j].mValS;
                break;
             }
-      }
-   }
 }
 
 
@@ -305,7 +284,8 @@ void GameParamUserInterface::onEscape()
    // Compose GameType string from GameType and level-specific params
    gEditorUserInterface.setLevelFileName(menuItems[1].mValS);                    // Save level file name, if it changed.  Or hell, even if it didn't
    gEditorUserInterface.setLevelGenScriptName(menuItems[5].mValS);                    
-   gEditorUserInterface.mGridSize = menuItems[mGameSpecificParams + 5].mValI;    // Set mGridSize for proper scaling of walls on map
+
+   gEditorUserInterface.mGridSize = menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI;    // Set mGridSize for proper scaling of walls on map
    buildGameParamList();
 
    if(didAnythingGetChanged())
@@ -342,11 +322,11 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back("LevelDescription " + menuItems[3].mValS);
    gameParams.push_back("LevelCredits " + menuItems[4].mValS);
    gameParams.push_back("Script " + menuItems[5].mValS);
-   dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + 5].mValI);
+   dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI);
    gameParams.push_back(str);
-   dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[mGameSpecificParams + 6].mValI);
+   dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI);
    gameParams.push_back(str);
-   dSprintf(str, sizeof(str), "MaxPlayers %d", menuItems[mGameSpecificParams + 7].mValI);
+   dSprintf(str, sizeof(str), "MaxPlayers %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 2].mValI);
    gameParams.push_back(str);
 }
 
