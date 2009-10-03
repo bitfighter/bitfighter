@@ -92,7 +92,7 @@ function outputMaze()
    --           | UL | UR |    * denotes point (cenx, ceny)
    --           |    |    |    size of each cell is (gridXSize, gridXSize)
    --           +----*----+    coords of point X on upper left cell are
-   --       | LL | LR |       (ulCornerX, ulCornerY)
+   --           | LL | LR |       (ulCornerX, ulCornerY)
    --           |    |    |    UL is always filled in, LR is always open
    --           +----+----+    LL is filled in when an E wall is present
    --                          UR is filled in when a N wall is present
@@ -109,10 +109,12 @@ function outputMaze()
                                                -- overlap to make walls merge
    local wallsize = gridsize * cellsize
    local points
+   local vwallstart = { }
+   local vwallend = { }
 
    for y = 1, gridYSize do
 
-      local xpoints = { }
+      local xstart = nil
 
       for x = 1, gridXSize do
          local cenx = ulCornerX + (2 * x - 1) * cellsize
@@ -121,32 +123,47 @@ function outputMaze()
 
 
          -- UL quadrant is always drawn
-         if(#xpoints == 0) then        -- No line in progress
-            xpoints = { Point(cenx - cellsize, ceny - cellsize * 0.5) }
+         if(xstart == nil) then        -- No line in progress
+            xstart = cenx - cellsize
          end
 
          -- UR quadrant drawn only when a N wall is present
-       local endx
+         local endx
 
-       if(cell["N Wall"]) then
-         endx = cenx + cellsize
-       else
-         endx = cenx
+         if(cell["N Wall"]) then
+           endx = cenx + cellsize
+         else
+           endx = cenx
          end
 
 
-       if(not cell["N Wall"] or cell["E Edge"]) then
-             table.insert(xpoints, Point(endx, ceny - cellsize * 0.5) )
+         if(not cell["N Wall"] or cell["E Edge"]) then
 
-          levelgen:addWall(wallsize, false, xpoints)
-          xpoints = { }
-       end
+            -- Skip a horizontal wall if it's only one cell wide, because
+            -- that portion will get covered by a vertical segment later.
+            if(endx - xstart > cellsize) then
+               local pts = { Point(xstart, ceny - cellsize * 0.5), Point(endx, ceny - cellsize * 0.5) }
+               levelgen:addWall(wallsize, false, pts)
+            end
+
+            xstart = nil
+         end
 
          -- LL quadrant drawn only when a W wall is present
          if(cell["W Wall"]) then
-            local pts = { Point(cenx - cellsize, ceny + cellsize * 0.5),
-                          Point(cenx            , ceny + cellsize * 0.5) }
-            levelgen:addWall(wallsize, false, pts)
+            if vwallstart[x] == nil then
+               vwallstart[x] = Point(cenx - cellsize * 0.5, ceny - cellsize )
+            end
+
+            vwallend[x] = Point(cenx - cellsize * 0.5, ceny + cellsize * 2)
+
+         else  -- Finish vertical wall
+            if(vwallstart[x]) then
+               local pts = { vwallstart[x], vwallend[x] }
+
+               levelgen:addWall(wallsize, false, pts)
+               vwallstart[x] = nil
+            end
          end
 
          -- LR quadrant is always open, so do nothing
@@ -154,9 +171,11 @@ function outputMaze()
 
    end
 
-   -- Now add walls along entire bottom and right sides of the maze
-   local pts = { Point(ulCornerX,
-                     ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
+   -- Now add walls along entire left, bottom and right sides of the maze
+   local pts = { Point(ulCornerX  + cellsize * 0.5,
+                       ulCornerY),
+                 Point(ulCornerX  + cellsize * 0.5,
+                       ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
                  Point(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
                        ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
                  Point(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
@@ -238,4 +257,3 @@ end
 
 -- Output the results
 outputMaze()
-
