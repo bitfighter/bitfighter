@@ -99,11 +99,10 @@ function outputMaze()
    --  When a series of these tiles are tiled together, a maze will be drawn
    --  with an open bottom and open right side, which will be closed at the end.
    --
-   --  Wall segments are drawn as 2-pt horizontal lines with the appropriate
-   --  thickness to make them square.  Adjacent wall segments are partially
-   --  merged into longer horizontal lines to reduce vertices and therefore
-   --  level transfer size.  Note we're taking advantage of Bitfighter's vertex
-   --  thinning algorithms to make our job just a bit easier.
+   --  Wall segments are drawn as 2-pt horizontal or vertical lines with the
+   --  appropriate thickness to make them square.  Adjacent wall segments are
+   --  partially merged into longer lines to reduce vertices and therefore
+   --  level transfer size.  .
 
    local gridsize = levelgen:getGridSize() + 1 -- Add 1 to get a tiny bit of
                                                -- overlap to make walls merge
