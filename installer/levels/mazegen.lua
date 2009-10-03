@@ -114,10 +114,10 @@ function outputMaze()
    for y = 1, gridYSize do
 
       local xstart = nil
+      local ceny = ulCornerY + (2 * y - 1) * cellsize
 
       for x = 1, gridXSize do
          local cenx = ulCornerX + (2 * x - 1) * cellsize
-         local ceny = ulCornerY + (2 * y - 1) * cellsize
          local cell = cells[x][y]
 
 
@@ -170,10 +170,21 @@ function outputMaze()
 
    end
 
-   -- Now add walls along entire left, bottom and right sides of the maze
-   local pts = { Point(ulCornerX  + cellsize * 0.5,
-                       ulCornerY),
-                 Point(ulCornerX  + cellsize * 0.5,
+   -- Make one final sweep across the bottom to ensure that all vertical walls are finished
+   local ceny = ulCornerY + (2 * gridYSize - 1) * cellsize
+
+   for x = 1, gridXSize do
+      local cenx = ulCornerX + (2 * x - 1) * cellsize
+      if(vwallstart[x]) then
+         local pts = { vwallstart[x], Point(cenx - cellsize * 0.5, ceny + cellsize * 2) }
+
+         levelgen:addWall(wallsize, false, pts)
+         vwallstart[x] = nil
+      end
+   end
+
+   -- Now add walls along entire bottom and right sides of the maze
+   local pts = { Point(ulCornerX,
                        ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
                  Point(ulCornerX + 2 * gridXSize * cellsize + cellsize * 0.5,
                        ulCornerY + 2 * gridYSize * cellsize + cellsize * 0.5),
