@@ -695,8 +695,8 @@ void loadSettingsFromINI()
       node.teamOnly = lcase(gINI.GetValue(messages[i], "MessageType", "Team")) == "team";          // lcase for case insensitivity
       node.caption = gINI.GetValue(messages[i], "Caption", "Caption");
       node.msg = gINI.GetValue(messages[i], "Message", "Message");
-      gQuickChatTree.push_back(node);
       node.isMsgItem = true;
+      gQuickChatTree.push_back(node);
    }
 
 

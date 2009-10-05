@@ -573,6 +573,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
 
       else if(!strcmp(argv[0], "Script"))
       {
+         mScriptLine = "";
          // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
          for(S32 i = 1; i < argc; i++)
          {
@@ -2187,7 +2188,8 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       vertexToLightUp = -1;
    }
 
-   mItems[itemToLightUp].litUp = true;
+   if(itemToLightUp != -1)
+      mItems[itemToLightUp].litUp = true;
 
    glutSetCursor(showMoveCursor ? GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW);
 }
@@ -2498,7 +2500,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
 
 void EditorUserInterface::centerView()
 {
-   if(mItems.size())
+   if(mItems.size() || mLevelGenItems.size())
    {
       F32 minx =  F32_MAX,   miny =  F32_MAX;
       F32 maxx = -F32_MAX,   maxy = -F32_MAX;
@@ -2515,6 +2517,21 @@ void EditorUserInterface::centerView()
             if(mItems[i].verts[j].y > maxy)
                maxy = mItems[i].verts[j].y;
          }
+
+      for(S32 i = 0; i < mLevelGenItems.size(); i++)
+         for(S32 j = 0; j < mLevelGenItems[i].verts.size(); j++)
+         {
+            if(mLevelGenItems[i].verts[j].x < minx)
+               minx = mLevelGenItems[i].verts[j].x;
+            if(mLevelGenItems[i].verts[j].x > maxx)
+               maxx = mLevelGenItems[i].verts[j].x;
+            if(mLevelGenItems[i].verts[j].y < miny)
+               miny = mLevelGenItems[i].verts[j].y;
+            if(mLevelGenItems[i].verts[j].y > maxy)
+               maxy = mLevelGenItems[i].verts[j].y;
+         }
+
+
 
       // If we have only one point object in our level, the following will correct
       // for any display weirdness.

@@ -211,17 +211,11 @@ end
 -- Remember, in Bitfighter, all global variables must be
 -- defined in the main block!
 
-gridXSize = tonumber(arg[1])
-gridYSize = tonumber(arg[2])
-ulCornerX = tonumber(arg[3])
-ulCornerY = tonumber(arg[4])
-cellsize = tonumber(arg[5])
-
-if gridXSize == nil then gridXSize = 10 end
-if gridYSize == nil then gridYSize = 10 end
-if ulCornerX == nil then ulCornerX = 0 end
-if ulCornerY == nil then ulCornerY = 0 end
-if cellsize == nil then cellsize = 1 end
+gridXSize = tonumber(arg[1]) or 10
+gridYSize = tonumber(arg[2]) or 10
+ulCornerX = tonumber(arg[3]) or 0
+ulCornerY = tonumber(arg[4]) or 0
+cellsize = tonumber(arg[5]) or 1
 
 
 cellStack = List:new()
