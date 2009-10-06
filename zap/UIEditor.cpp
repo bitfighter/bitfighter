@@ -2470,6 +2470,7 @@ void EditorUserInterface::joinBarrier()
 
 }
 
+
 void EditorUserInterface::insertNewItem(GameItems itemType)
 {
    if(!showAllObjects)     // No inserting when items are hidden!
@@ -2497,6 +2498,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
    validateLevel();
    mNeedToSave = true;
 }
+
 
 void EditorUserInterface::centerView()
 {
@@ -2531,8 +2533,6 @@ void EditorUserInterface::centerView()
                maxy = mLevelGenItems[i].verts[j].y;
          }
 
-
-
       // If we have only one point object in our level, the following will correct
       // for any display weirdness.
       if(minx == maxx && miny == maxy)
@@ -2540,7 +2540,6 @@ void EditorUserInterface::centerView()
          mCurrentScale = MIN_SCALE;
          mCurrentOffset.set(canvasWidth/2 - mCurrentScale * minx, canvasHeight/2 - mCurrentScale * miny);
       }
-
       else
       {
          F32 midx = (minx + maxx) / 2;

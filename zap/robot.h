@@ -128,6 +128,8 @@ private:
 
 class LuaRobot : public LuaShip
 {
+   typedef LuaShip Parent;
+
 private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
    S32 findClosestZone(Point point);                 // Finds zone closest to point, used when robots get off the map
@@ -140,7 +142,7 @@ public:
   // Constants
 
   // Initialize the pointer
-  LuaRobot(lua_State *L);      // Constructor
+   LuaRobot(lua_State *L);     // Constructor
   ~LuaRobot();                 // Destructor
 
    static const char className[];

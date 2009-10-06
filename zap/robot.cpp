@@ -59,11 +59,13 @@ namespace Zap
 static Vector<GameObject *> fillVector;
 
 // Constructor
-LuaRobot::LuaRobot(lua_State *L)
+LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
 {
    lua_atpanic(L, luaPanicked);                  // Register our panic function
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
+
+   logprintf("ID = %d",this->mId);
 
    // The following sets scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
