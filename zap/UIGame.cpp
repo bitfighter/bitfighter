@@ -231,9 +231,11 @@ void GameUserInterface::idle(U32 timeDelta)
       gMainMenuUserInterface.clearLevelLoadDisplay();
 }
 
+
 #ifdef TNL_OS_WIN32
 extern void checkMousePos(S32 maxdx, S32 maxdy);
 #endif
+
 
 // Draw main game screen (client only)
 void GameUserInterface::render()
@@ -246,6 +248,7 @@ void GameUserInterface::render()
 
       if(gClientGame->getConnectionToServer())
          drawCenteredString(330, 16, gConnectStatesTable[gClientGame->getConnectionToServer()->getConnectionState()]);
+
       drawCenteredString(370, 20, "Press <ESC> to abort");
    }
 
@@ -304,6 +307,7 @@ void GameUserInterface::render()
       drawString(710, 10, 30, "CU");
 #endif
 }
+
 
 // Draws level-load progress bar across the bottom of the screen
 void GameUserInterface::renderProgressBar()

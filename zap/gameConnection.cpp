@@ -748,6 +748,8 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
       gServerGame->removeClient(this);
 }
 
+
+// I'm thinking that this function only gets called while the player is trying to connect to a server.
 void GameConnection::onConnectTerminated(TerminationReason r, const char *string)
 {
    if(isInitiator())
@@ -762,8 +764,19 @@ void GameConnection::onConnectTerminated(TerminationReason r, const char *string
          gReservedNamePasswordEntryUserInterface.setConnectServer(getNetAddress());
          gReservedNamePasswordEntryUserInterface.activate();
       }
-      else
+      else  // Looks like the connection failed for some unknown reason.  Server died?
+      {
+         UserInterface::reactivateMenu(gMainMenuUserInterface);
+
+         // Display a context-appropriate error message
+         gErrorMsgUserInterface.reset();
+         gErrorMsgUserInterface.setTitle("Connection Terminated");
+
          gMainMenuUserInterface.activate();
+         gErrorMsgUserInterface.setMessage(2, "Lost connection with the server.");
+         gErrorMsgUserInterface.setMessage(3, "Unable to join game.  Please try again.");
+         gErrorMsgUserInterface.activate();
+      }
    }
 }
 

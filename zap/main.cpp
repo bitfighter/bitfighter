@@ -44,7 +44,7 @@
 //<li>Added client IP address to server log</li>
 //<li>Added time disconnected and connection duration to server log</li>
 //<li>Uneeded vertices now removed from walls to improve both appearance and performance</li>
-//<li>Added screen saver supression (Windows only, sorry)</li>
+//<li>Added screen saver supression (Windows only, sorry, and only kind of works)</li>
 //<li>Enhanced flashing effect of zones in ZoneControl game</li>
 //<li>Added yellow flash to ZoneControl and Retrieve zones when touchdown is scored (like Nexus effect in Hunters game)</li>
 //<li>Indicator added to player's name when they are in chat, global chat, or options menus</li>
@@ -1630,6 +1630,7 @@ int main(int argc, char **argv)
    gHostingModePhase = NotHosting;
 
    loadSettingsFromINI();                    // Read INI
+
    processStartupParams();                   // And process command lines and INI settings in a unified way
    buildLevelList();
 

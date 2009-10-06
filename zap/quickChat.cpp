@@ -200,6 +200,9 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
             GameType *gt = gClientGame->getGameType();
             gGameUserInterface.setPlayMode();
 
+QuickChatNode test = gQuickChatTree[mCurNode];
+test.caption="LLLLL";
+
             StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
             if(gt)
                gt->c2sSendChatSTE(!gQuickChatTree[mCurNode].teamOnly, entry);
