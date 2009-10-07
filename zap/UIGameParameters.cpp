@@ -131,7 +131,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    menuItems.push_back(MenuItem2("Min Players:",     "", 0,                                      1,      gMaxPlayers, "players",  "Min. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
    menuItems.push_back(MenuItem2("Max Players:",     "", 0,                                      1,      gMaxPlayers, "players",  "Max. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
    menuItems.push_back(MenuItem2("RETURN TO EDITOR", "", 0,                                      0,                0, "",         "",                                                                                     TypeNone,  KEY_Q, KEY_R       ));
-   mQuitItemIndex = i + 8;
+   mQuitItemIndex = i + 9;
 
    // Now populate the menu with values derived from our saved values
 
@@ -167,7 +167,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       // And apply our GameType arguments to the game specific parameter settings, if any were provided in a level file we loaded
       if(!ignoreGameParams)
          for(i = 0; i < min(gEditorUserInterface.mGameTypeArgs.size(), mGameSpecificParams); i++)
-            menuItems[i + 5].mValI = gEditorUserInterface.mGameTypeArgs[i];
+            menuItems[i + NumberOfPreGameSpecificParams].mValI = gEditorUserInterface.mGameTypeArgs[i];
    }
 
    // Lastly, scan through our list of saved items and replace the default values with those modified here in this interface
@@ -312,8 +312,8 @@ void GameParamUserInterface::buildGameParamList()
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
    for(S32 i = 0; i < mGameSpecificParams; i++)
    {
-      dSprintf(str, sizeof(str), "%s %d", str, menuItems[i + 5].mValI);
-      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i + 5].mValI);      // Save the already-parsed GameType args in a vector for use if we re-enter this interface
+      dSprintf(str, sizeof(str), "%s %d", str, menuItems[i + NumberOfPreGameSpecificParams].mValI);
+      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i + NumberOfPreGameSpecificParams].mValI);      // Save the already-parsed GameType args in a vector for use if we re-enter this interface
    }
 
    // Compose other game description strings

@@ -2558,7 +2558,6 @@ void EditorUserInterface::centerView()
 }
 
 
-
 EditorUserInterface::WorldItem EditorUserInterface::constructItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height)
 {
    WorldItem item;

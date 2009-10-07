@@ -76,7 +76,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
-// Constructor  ---> what does this line actually do??
+// Constructor 
 GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
 {
    mNetFlags.set(Ghostable);
@@ -89,7 +89,6 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    maxRecPlayers = -1;
    mCanSwitchTeams = true;    // Players can switch right away
    mLocalClient = NULL;       // Will be assigned by the server after a connection is made
-   //mUsingFlagSpawnPoints = false;      // Need to have at least one flagSpawnPoint to activate random flag spawning
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;     // By default, all zones glow
 }
@@ -316,7 +315,7 @@ void GameType::idle(GameObject::IdleCallPath path)
       s2cSetTimeRemaining(mGameTimer.getCurrent());
    }
 
-   // Cycle through all clients...
+   // Cycle through all clients
    for(S32 i = 0; i < mClientList.size(); i++)
    {
       if(mClientList[i]->respawnTimer.update(deltaT))                            // Need to respawn?
@@ -330,11 +329,6 @@ void GameType::idle(GameObject::IdleCallPath path)
             NetObject::setRPCDestConnection(NULL);
          }
    }
-
-   // ...and all robots
-   //for(S32 i = 0; i < mRobotList.size(); i++)
-   //   if(mRobotList[i]->respawnTimer.update(deltaT)) 
-   //      spawnRobot(mRobotList[i]);
 
    // If game time has expired... game is over, man, it's over
    if(mGameTimer.update(deltaT))
@@ -659,7 +653,7 @@ void GameType::renderTalkingClients()
 
 void GameType::gameOverManGameOver()
 {
-   if(mGameOver)
+   if(mGameOver)     // Only do this once
       return;
 
    mBetweenLevels = true;
@@ -669,6 +663,7 @@ void GameType::gameOverManGameOver()
 
    onGameOver();
 }
+
 
 // Handle the end-of-game...  handles all games... not in any subclasses
 void GameType::onGameOver()
@@ -1233,6 +1228,9 @@ Color GameType::getShipColor(Ship *s)
 }
 
 
+extern  F32 getCurrentRating(GameConnection *conn);
+
+
 // Make sure that the mTeams[] structure has the proper player counts
 // Needs to be called manually before accessing the structure
 // Rating may only work on server... not tested on client
@@ -1250,7 +1248,7 @@ void GameType::countTeamPlayers()
 
       GameConnection *cc = mClientList[i]->clientConnection;
       if(cc)
-         mTeams[mClientList[i]->teamId].rating += (cc->mTotalScore == 0) ? .5 : max((F32)cc->mCumScore / (F32)cc->mTotalScore, .1);
+         mTeams[mClientList[i]->teamId].rating += (cc->mTotalScore == 0) ? .5 : max(getCurrentRating(cc), .1);
    }
 }
 
@@ -1395,7 +1393,7 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       // Individual scores
       S32 points = getEventScore(IndividualScore, scoringEvent, data);
       player->score += points;
-      player->clientConnection->mCumScore += points;
+      player->clientConnection->mScore += points;
 
       // Accumulate every client's total score counter
       for(S32 i = 0; i < mClientList.size(); i++)
@@ -1449,6 +1447,20 @@ void GameType::updateScore(ClientRef *client, ScoringEvent event, S32 data)
 void GameType::updateScore(S32 team, ScoringEvent event, S32 data)
 {
    updateScore(NULL, team, event, data);
+}
+
+
+// At game end, we need to update everyone's game-normalized ratings
+void GameType::updateRatings()
+{
+   for(S32 i = 0; i < mClientList.size(); i++)
+   {
+      GameConnection *conn = mClientList[i]->clientConnection;
+      conn->mRating = getCurrentRating(conn);
+      conn->mGamesPlayed++;
+      conn->mScore = 0;
+      conn->mTotalScore = 0;
+   }
 }
 
 
@@ -1926,6 +1938,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 }
 
 
+
+
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
 Vector<SignedInt<24> > GameType::mScores;
 Vector<RangedU32<0,200> > GameType::mRatings;
@@ -1946,8 +1960,10 @@ void GameType::updateClientScoreboard(ClientRef *cl)
 
       mScores.push_back(mClientList[i]->score);
 
+      GameConnection *conn = mClientList[i]->clientConnection;
+
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back((mClientList[i]->clientConnection->mTotalScore == 0) ? 100 : ((F32) mClientList[i]->clientConnection->mCumScore / (F32) mClientList[i]->clientConnection->mTotalScore * 100.0 + 100));
+      mRatings.push_back(getCurrentRating(conn) * 100.0 + 100);
    }
 
    NetObject::setRPCDestConnection(cl->clientConnection);

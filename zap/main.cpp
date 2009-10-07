@@ -79,6 +79,7 @@
 //<li>When hosting a game from the UI, game load progress info displayed</li>
 //<li>When loading a level from a local or remote server, progress bar is displayed</li>
 //<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
+//<li>Message displayed when connection to game server fails for some unknown reason</li>
 //</ul>
 //
 //<u>Items</u>
@@ -162,7 +163,7 @@
 //<u>And, of course, Robots!</u>
 
 
-/////  Newest stuff
+/////  Newest stuff since alpha 2
 //<li>Better messages when killed by turret or asteroid or mine</li>
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
@@ -184,6 +185,7 @@
 //<lu>Added script/params to game config menu</li>
 //<li>Fixed scaling issue in editor when only one point item is present</li>
 //<li>List of players in global chat mode now displayed when in global chat</li>
+//<li>Message displayed when connection to game server fails for some unknown reason</li>
 //<li></li>
 
 // Mac Test:

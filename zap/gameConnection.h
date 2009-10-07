@@ -104,8 +104,10 @@ public:
    GameConnection();    // Constructor
    ~GameConnection();   // Destructor
 
-   S32 mCumScore;    // Total points scored my this connection
+   S32 mScore;       // Total points scored my this connection
    S32 mTotalScore;  // Total points scored by anyone while this connection is alive
+   U32 mGamesPlayed; // Number of games played, obviously
+   F32 mRating;      // Game-normalized rating
 
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
 

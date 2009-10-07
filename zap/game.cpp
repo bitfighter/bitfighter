@@ -398,10 +398,21 @@ StringTableEntry ServerGame::getCurrentLevelType()
 }
 
 
+inline F32 getCurrentRating(GameConnection *conn)
+{
+   if(conn->mTotalScore == 0 && conn->mGamesPlayed == 0)
+      return 0;
+   else if(conn->mTotalScore == 0)
+      return (((conn->mGamesPlayed) * conn->mRating)) / (conn->mGamesPlayed + 1);
+   else
+      return ((conn->mGamesPlayed * conn->mRating) + ((F32) conn->mScore / (F32) conn->mTotalScore)) / (conn->mGamesPlayed + 1);
+}
+
+
 static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 {
-   return ( ((*a)->mTotalScore == 0) ? .5 : (*a)->mCumScore / (*a)->mTotalScore ) <  
-          ( ((*b)->mTotalScore == 0) ? .5 : (*b)->mCumScore / (*b)->mTotalScore );
+   return ( ((*a)->mTotalScore == 0) ? .5 : getCurrentRating(*a) ) <  
+          ( ((*b)->mTotalScore == 0) ? .5 : getCurrentRating(*b) );
 }
 
 
@@ -644,7 +655,11 @@ void ServerGame::idle(U32 timeDelta)
 
    // Load a new level if the time is out on the current one
    if(mLevelSwitchTimer.update(timeDelta))
+   {
+      // Normalize ratings for this game
+      getGameType()->updateRatings();
       cycleLevel();
+   }
 
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
