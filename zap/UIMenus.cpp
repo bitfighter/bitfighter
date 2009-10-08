@@ -389,6 +389,7 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(keyCode == KEY_ESCAPE)
       {
          gHostingModePhase = NotHosting;
+         gMainMenuUserInterface.clearLevelLoadDisplay();
          endGame();
       }
       return;
@@ -549,7 +550,7 @@ MainMenuUserInterface::MainMenuUserInterface()
 
 void MainMenuUserInterface::onActivate()
 {
-   // Time for a clean start.  No matter how we got here, there's no backtracking from here.
+   // Time for a clean start.  No matter how we got here, there's no going back.
    // Needed mainly because the editor makes things confusing.  Now that that's been reworked,
    // it's probably not needed at all.
    prevUIs.clear();
@@ -632,16 +633,7 @@ void MainMenuUserInterface::render()
 // Add bit of text to progress item, and manage the list
 void MainMenuUserInterface::addProgressListItem(string item)
 {
-   //char buff[100];
-   //dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal);
-
-   //if(mLevelLoadDisplayNames.size() && (item + "[" + buff + "]" == mLevelLoadDisplayNames.last() || item == mLevelLoadDisplayNames.last()) )
-   //{
-   //   dSprintf(buff, 100, "%i", mLevelLoadDisplayTotal + 1);
-   //   mLevelLoadDisplayNames[mLevelLoadDisplayNames.size() - 1] = item + "[" + buff + "]";
-   //}
-   //else
-      mLevelLoadDisplayNames.push_back(item);
+   mLevelLoadDisplayNames.push_back(item);
 
    mLevelLoadDisplayTotal++;
 

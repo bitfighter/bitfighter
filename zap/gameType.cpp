@@ -1236,7 +1236,7 @@ extern  F32 getCurrentRating(GameConnection *conn);
 // Rating may only work on server... not tested on client
 void GameType::countTeamPlayers()
 {
-   for(S32 i = 0; i < mTeams.size(); i ++)
+   for(S32 i = 0; i < mTeams.size(); i++)
    {
       mTeams[i].numPlayers = 0;
       mTeams[i].rating = 0;
@@ -1248,7 +1248,7 @@ void GameType::countTeamPlayers()
 
       GameConnection *cc = mClientList[i]->clientConnection;
       if(cc)
-         mTeams[mClientList[i]->teamId].rating += (cc->mTotalScore == 0) ? .5 : max(getCurrentRating(cc), .1);
+         mTeams[mClientList[i]->teamId].rating += max(getCurrentRating(cc), .1);
    }
 }
 
@@ -1262,7 +1262,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    cref->name = theClient->getClientName();
 
    cref->clientConnection = theClient;
-   countTeamPlayers();
+   countTeamPlayers();     // Also calcs team ratings 
 
    // Figure out which team has the fewest players...
    //S32 minTeamIndex = 0;
@@ -1283,6 +1283,7 @@ void GameType::serverAddClient(GameConnection *theClient)
 
    for(S32 i = 1; i < mTeams.size(); i++)
    {
+
       if(mTeams[i].rating < minRating)
       {
          minTeamIndex = i;

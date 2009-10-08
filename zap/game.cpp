@@ -398,12 +398,13 @@ StringTableEntry ServerGame::getCurrentLevelType()
 }
 
 
-inline F32 getCurrentRating(GameConnection *conn)
+// Should return a number between -1 and 1
+inline F32 getCurrentRating(GameConnection *conn) 
 {
    if(conn->mTotalScore == 0 && conn->mGamesPlayed == 0)
-      return 0;
+      return .5;
    else if(conn->mTotalScore == 0)
-      return (((conn->mGamesPlayed) * conn->mRating)) / (conn->mGamesPlayed + 1);
+      return (((conn->mGamesPlayed) * conn->mRating)) / (conn->mGamesPlayed);
    else
       return ((conn->mGamesPlayed * conn->mRating) + ((F32) conn->mScore / (F32) conn->mTotalScore)) / (conn->mGamesPlayed + 1);
 }
@@ -411,8 +412,7 @@ inline F32 getCurrentRating(GameConnection *conn)
 
 static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 {
-   return ( ((*a)->mTotalScore == 0) ? .5 : getCurrentRating(*a) ) <  
-          ( ((*b)->mTotalScore == 0) ? .5 : getCurrentRating(*b) );
+   return getCurrentRating(*a) < getCurrentRating(*b);
 }
 
 
