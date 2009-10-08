@@ -199,6 +199,8 @@ public:
 
    void receivedControlUpdate(bool recvd) { mGotControlUpdate = recvd; }
 
+   bool isInScoreboardMode() { return mInScoreboardMode; }
+
    Move *getCurrentMove();
    Timer mProgressBarFadeTimer;     // For fading out progress bar after level is loaded
    bool mShowProgressBar;

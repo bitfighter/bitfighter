@@ -432,17 +432,15 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       U32 numTeamRows = (mTeams.size() + 1) >> 1;
 
       U32 totalHeight = (UserInterface::canvasHeight - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
-      U32 maxHeight = (totalHeight - teamAreaHeight) / maxTeamPlayers;
-      if(maxHeight > 30)
-         maxHeight = 30;
+      U32 maxHeight = min(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
 
       U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
       totalHeight = sectionHeight * numTeamRows + (numTeamRows - 1) * 2;
 
       for(S32 i = 0; i < teams; i++)
       {
-         S32 yt = (UserInterface::canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);
-         S32 yb = yt + sectionHeight;
+         S32 yt = (UserInterface::canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
+         S32 yb = yt + sectionHeight;     // y-bottom
          S32 xl = 10 + (i & 1) * teamWidth;
          S32 xr = xl + teamWidth - 2;
 
@@ -1400,7 +1398,7 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->mTotalScore += abs(points);
 
-      newScore = player->score;
+      newScore = player->score; 
    }
 
    if(isTeamGame())
@@ -1679,7 +1677,15 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
    gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());
 
    if(isMyClient)
+   {
       mLocalClient = cref;
+      if(gGameUserInterface.isInScoreboardMode())
+      {
+         GameType *g = gClientGame->getGameType();
+         if(g)
+            g->c2sRequestScoreboardUpdates(true);
+      }
+   }
 }
 
 void GameType::serverRemoveClient(GameConnection *theClient)
@@ -1790,8 +1796,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
-
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded);
+
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
@@ -1981,9 +1987,9 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
    {
       if(i >= pingTimes.size())
          break;
-
+ 
       mClientList[i]->ping = pingTimes[i];
-      mClientList[i]->score = scores[i];
+      mClientList[i]->score = scores[i]; 
       mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0;
    }
 }
@@ -1996,7 +2002,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
       if(killer == victim)
          if(killerDescr == "mine")
             gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
-         else   
+         else                                      
             gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")

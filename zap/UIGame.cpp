@@ -835,7 +835,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       else if(keyCode == keySCRBRD[inputMode])
       {     // (braces needed)
-         if (!mInScoreboardMode)    // We're activating the scoreboard
+         if(!mInScoreboardMode)    // We're activating the scoreboard
          {
             mInScoreboardMode = true;
             GameType *g = gClientGame->getGameType();
