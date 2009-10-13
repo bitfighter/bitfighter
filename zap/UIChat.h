@@ -39,7 +39,6 @@ namespace Zap
 
 class ChatUserInterface : public UserInterface
 {
-
 public:
    const char *menuTitle;
    Color menuSubTitleColor;

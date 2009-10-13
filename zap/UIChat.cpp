@@ -126,28 +126,25 @@ Color ChatUserInterface::getNextColor()
    return colorList[mColorPtr];
 }
 
-// Also put hooks in all UIs
-// Also remember instruction screen, selected menu option
-///////////////
 
 void ChatUserInterface::idle(U32 timeDelta)
 {
    updateCursorBlink(timeDelta);
 }
 
+
 void ChatUserInterface::render()
 {
    if (prevUIs.size())           // If there is an underlying menu...
    {
       prevUIs.last()->render();  // ...render it...
-
       glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
       glEnable(GL_BLEND);
       glBegin(GL_POLYGON);
-      glVertex2f(0, 0);
-      glVertex2f(canvasWidth, 0);
-      glVertex2f(canvasWidth, canvasHeight);
-      glVertex2f(0, canvasHeight);
+         glVertex2f(0, 0);
+         glVertex2f(canvasWidth, 0);
+         glVertex2f(canvasWidth, canvasHeight);
+         glVertex2f(0, canvasHeight);
       glEnd();
       glDisable(GL_BLEND);
    }
@@ -177,11 +174,15 @@ void ChatUserInterface::render()
    S32 ypos = vertFooterPos - 16;
 
    glColor3f(1,1,0);
-   for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
-   {
-      drawStringf(xpos, ypos, 11, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
-      xpos += getStringWidthf(11, "%s ;",mPlayersInGlobalChat[i].getString());
-   }
+
+   if(mPlayersInGlobalChat.size() == 0)
+      drawString(xpos, ypos, 11, "No other players currently in chat room");
+   else
+      for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
+      {
+         drawStringf(xpos, ypos, 11, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+         xpos += getStringWidthf(11, "%s ;",mPlayersInGlobalChat[i].getString());
+      }
 
 
    // Render incoming chat msgs
@@ -228,6 +229,8 @@ void ChatUserInterface::render()
       drawCenteredString(200, 20, "Not connected to Master Server");
       drawCenteredString(230, 20, "Your chat messages cannot be relayed");
    }
+
+   glPopMatrix();
 }
 
 

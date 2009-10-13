@@ -736,7 +736,6 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
 
       stream->setBytePosition(decryptPos);
       theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
-      //logprintf("shared secret (server) %s", theParams.mSharedSecret->encodeBase64()->getBuffer());
 
       SymmetricCipher theCipher(theParams.mSharedSecret);
 
@@ -906,9 +905,9 @@ void NetInterface::handleConnectReject(const Address &address, BitStream *stream
    char reasonStr[256];
    stream->readString(reasonStr);
 
-   TNLLogMessageV(LogNetInterface, ("Received Connect Reject - reason %s", reasonStr));
-   // if the reason is a bad puzzle solution, try once more with a
-   // new nonce.
+   TNLLogMessageV(LogNetInterface, ("Received Connect Reject - reason code %d (%s)", reason, reasonStr));
+
+   // If the reason is a bad puzzle solution, try once more with a new nonce
    if(reason == NetConnection::ReasonPuzzle && !p.mPuzzleRetried)
    {
       p.mPuzzleRetried = true;

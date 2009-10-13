@@ -43,7 +43,7 @@ struct QuickChatNode
    bool teamOnly;
    string caption;
    string msg;
-   bool isMsgItem;    // False for groups, true for messages
+   bool isMsgItem;         // False for groups, true for messages
 };
 
 class QuickChatHelper
@@ -58,8 +58,7 @@ private:
    };
 
 public:
-
-   QuickChatHelper();
+   QuickChatHelper();      // Constructor
 
    void idle(U32 delta);
    bool render();

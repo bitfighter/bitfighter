@@ -1679,6 +1679,9 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
    if(isMyClient)
    {
       mLocalClient = cref;
+      
+      // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
+      // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
       if(gGameUserInterface.isInScoreboardMode())
       {
          GameType *g = gClientGame->getGameType();

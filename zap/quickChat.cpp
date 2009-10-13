@@ -87,7 +87,7 @@ bool QuickChatHelper::render()
       walk--;
    }
 
-   bool showKeys = gIniSettings.showKeyboardKeys || inputMode == Keyboard;
+   bool showKeys = gIniSettings.showKeyboardKeys || (inputMode == Keyboard);
 
    if(!renderNodes.size())    // Nothing to render, let's go home
       return false;
@@ -199,9 +199,6 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
          {
             GameType *gt = gClientGame->getGameType();
             gGameUserInterface.setPlayMode();
-
-QuickChatNode test = gQuickChatTree[mCurNode];
-test.caption="LLLLL";
 
             StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
             if(gt)

@@ -42,6 +42,14 @@
 
 namespace Zap
 {
+
+// Some colors
+static const Color red = Color(1,0,0);
+static const Color green = Color(0,1,0);
+static const Color yellow = Color(1,1,0);
+static const Color blue = Color(0,0,1);
+static const Color white = Color(1,1,1);
+
 // Our one and only instantiation of this interface!
 QueryServersUserInterface gQueryServersUserInterface;
 
@@ -162,8 +170,8 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
             isHidden = true;
          break;
       }
-      
-      if(isHidden) 
+
+      if(isHidden)
          break;
 
       bool found = false;
@@ -192,8 +200,8 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          s.msgColor = Color(1,1,1);   // white messages
          servers.push_back(s);
          mShouldSort = true;
-      } 
-   } 
+      }
+   }
 
    mMasterRequeryTimer.reset(MasterRequeryTime);
    mWaitingForResponseFromMaster = false;
@@ -206,7 +214,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
    if(mNonce == theNonce)
    {
       for(S32 i = 0; i < servers.size(); i++)
-         if(servers[i].serverAddress == theAddress)      // servers[i].sendNonce == theNonce && 
+         if(servers[i].serverAddress == theAddress)      // servers[i].sendNonce == theNonce &&
             return;
 
       // Yes, it was from a local ping
@@ -313,7 +321,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.pingTime = 999;
                strcpy(s.serverName, "PingTimedOut");
                strcpy(s.serverDescr, "Server not responding to pings");
-               s.msgColor = Color(1,0,0);   // red for errors
+               s.msgColor = red;   // red for errors
                s.playerCount = 0;
                s.maxPlayers = 0;
                s.botCount = 0;
@@ -356,11 +364,11 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                // Otherwise, we can deal with timeouts on remote servers
                strcpy(s.serverName, "QueryTimedOut");
                strcpy(s.serverDescr, "Server not responding to status query");
-               s.msgColor = Color(1,0,0);   // red for errors
+               s.msgColor = red;   // red for errors
                s.playerCount = s.maxPlayers = s.botCount = 0;
                s.state = ServerRef::ReceivedQuery;
                mShouldSort = true;
-               
+
             }
             else
             {
@@ -383,10 +391,10 @@ void QueryServersUserInterface::idle(U32 timeDelta)
       {
          if(s.pingTimedOut)
          {
-            s.state = ServerRef::Start;            // Will trigger a new round of pinging 
-         } 
+            s.state = ServerRef::Start;            // Will trigger a new round of pinging
+         }
          else
-            s.state = ServerRef::ReceivedPing;     // Will trigger a new round of querying 
+            s.state = ServerRef::ReceivedPing;     // Will trigger a new round of querying
 
          s.sendCount = 0;
       }
@@ -422,7 +430,7 @@ S32 QueryServersUserInterface::getSelectedIndex()
 
 extern void drawString(S32 x, S32 y, U32 size, const char *string);
 
-static void renderDedicatedIcon()      
+static void renderDedicatedIcon()
 {
    // Draw a little rectangle
    //glBegin(GL_LINE_LOOP);
@@ -508,12 +516,12 @@ void QueryServersUserInterface::render()
    }
    else
    {
-      glColor3f(1, 0, 0);
+      glColor(red);
       drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
    }
 
    // Instructions at bottom of screen
-   glColor3f(1,1,1);
+   glColor(white);
    drawCenteredString(vertMargin + 7, 35, "CHOOSE A SERVER TO JOIN:");
    drawCenteredString(canvasHeight - vertMargin - 40, 18, "UP, DOWN to select, ENTER to join.");
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "LEFT, RIGHT select sort column, SPACE to sort.  ESC exits.");
@@ -536,7 +544,7 @@ void QueryServersUserInterface::render()
       glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
    glEnd();
 
-   glColor3f(1,1,1);
+   glColor(white);
    glBegin(GL_LINE_LOOP);
       glVertex2f(x1, COLUMNS_TOP + 5);
       glVertex2f(x2, COLUMNS_TOP + 5);
@@ -551,7 +559,7 @@ void QueryServersUserInterface::render()
    else
       x2 = columns[mHighlightColumn+1].xStart - 5;
 
-   glColor3f(1,1,1);
+   glColor(white);
    glBegin(GL_LINE_LOOP);
       glVertex2f(x1, COLUMNS_TOP + 5);
       glVertex2f(x2, COLUMNS_TOP + 5);
@@ -574,9 +582,9 @@ void QueryServersUserInterface::render()
       if(selectedIndex == -1)
          selectedIndex = 0;
 
-      S32 bonusTopOffset = 0; 
+      S32 bonusTopOffset = 0;
       // We can show a couple more if we don't need to scroll...
-      if(servers.size() <= totalRows + 2)    
+      if(servers.size() <= totalRows + 2)
       {
          mFirstServer = 0;
          mLastServer = servers.size() - 1;
@@ -602,7 +610,7 @@ void QueryServersUserInterface::render()
          mLastServer = mFirstServer + totalRows;
          if(mLastServer >= servers.size())
             mLastServer = servers.size() - 1;
-         
+
          if(mFirstServer == 0)    // First sever should replace arrow
          {
             mLastServer++;        // (will need one more to fill in the list if we're shifting it up)
@@ -620,7 +628,7 @@ void QueryServersUserInterface::render()
          if(mLastServer < servers.size() - 1)
             drawScrollDnArrow = true;
          else if(selectedIndex == mLastServer)     // Want to select last server without any scrolling action
-            mScrollingUpMode = true; 
+            mScrollingUpMode = true;
       }
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;
@@ -636,7 +644,7 @@ void QueryServersUserInterface::render()
          glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
       glEnd();
 
-      glColor3f(0,0,1);       // blue
+      glColor(blue);       // blue
       glBegin(GL_LINE_LOOP);
          glVertex2f(0, y);
          glVertex2f(799, y);
@@ -654,11 +662,11 @@ void QueryServersUserInterface::render()
          if(i == selectedIndex)
          {
             // Render description of selected server at bottom
-            glColor(s.msgColor);   
+            glColor(s.msgColor);
             drawString(horizMargin, canvasHeight - vertMargin - 62, 18, s.serverDescr);
          }
 
-         
+
          // Truncate server name to fit in the first column...
          string sname = "";
 
@@ -672,11 +680,11 @@ void QueryServersUserInterface::render()
                else
                   break;
 
-         glColor3f(1,1,1);
+         glColor(white);
          drawString(columns[0].xStart, y, fontSize, sname.c_str());
 
          // Render icons
-         glColor3f(0,1,0);
+         glColor(green);
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
@@ -711,26 +719,27 @@ void QueryServersUserInterface::render()
 
          // Set color based on ping time
          if(s.pingTime < 100)
-            glColor3f(0,1,0);    // green
+            glColor(green);
          else if(s.pingTime < 250)
-            glColor3f(1,1,0);    // yellow
+            glColor(yellow);
          else
-            glColor3f(1,0,0);    // red
+            glColor(red);
+
          drawStringf(columns[2].xStart, y, fontSize, "%d", s.pingTime);
 
          // Color by number of players
          if(s.playerCount == s.maxPlayers)
-            glColor3f(1,0,0);    // max players -> red
+            glColor(red);       // max players
          else if(s.playerCount == 0)
-            glColor3f(1,1,0);    // no players -> yellow
+            glColor(yellow);    // no players
          else
-            glColor3f(0,1,0);    // 1 or more players -> green
+            glColor(green);     // 1 or more players
 
          if(s.playerCount < 0)
             drawString(columns[3].xStart, y, fontSize, "?? / ??");
          else
             drawStringf(columns[3].xStart, y, fontSize, "%d / %d", s.playerCount, s.botCount);
-         glColor3f(1,1,1);
+         glColor(white);
          drawString(columns[4].xStart, y, fontSize, s.serverAddress.toString());
       }
    }
@@ -760,16 +769,17 @@ void QueryServersUserInterface::render()
    if(drawScrollDnArrow)
       MenuUserInterface::renderArrowBelow(ITEMS_TOP + (totalRows + 1) * MENU_ITEM_HEIGHT + 5);
 
-#define msg "There are currently no games online."
 
    if(drawmsg1)
    {
+      static const char *msg = "There are currently no games online.";
+
       S32 strwid = getStringWidth(fontsize, msg);
-      glColor3f(1,0,0);
+      glColor(red);
       for(S32 i = 0; i < 2; i++)    // First fill, then outline
       {
          if(!i)
-            glColor3f(1, 0, 0);
+            glColor(red);
          else
             glColor3f(.4, 0, 0);
 
@@ -781,10 +791,9 @@ void QueryServersUserInterface::render()
          glEnd();
       }
 
-      glColor3f(1,1,1);
+      glColor(white);
       drawCenteredString(canvasHeight / 2 - 2 * (fontsize + fontgap), fontsize, msg);
       drawCenteredString(canvasHeight / 2 - (fontsize + fontgap), fontsize, "Why don't you host one?");
-#undef msg
    }
    else if(drawmsg2)
    {
@@ -793,7 +802,7 @@ void QueryServersUserInterface::render()
       for(S32 i = 0; i < 2; i++)    // First fill, then outline
       {
          if(!i)
-            glColor3f(1, 0, 0);
+            glColor(red);
          else
             glColor3f(.4, 0, 0);
 
@@ -805,7 +814,7 @@ void QueryServersUserInterface::render()
       glEnd();
       }
 
-      glColor3f(1,1,1);
+      glColor(white);
       drawCenteredString(canvasHeight / 2 - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
    }
 }
@@ -857,13 +866,13 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       gChatInterface.activate();
 
 
-  else if(keyCode == KEY_LEFT)
+  else if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)
   {
       mHighlightColumn--;
       if(mHighlightColumn < 0)
          mHighlightColumn = 0;
   }
-  else if(keyCode == KEY_RIGHT)
+  else if(keyCode == KEY_RIGHT || keyCode == BUTTON_DPAD_RIGHT)
   {
       mHighlightColumn++;
       if(mHighlightColumn >= columns.size())
@@ -871,34 +880,33 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
   }
 
    // The following keys only make sense if there are some servers to browse through
-   if(!servers.size())
+   if(servers.size() == 0)
       return;
 
    S32 currentIndex = getSelectedIndex();
    if(currentIndex == -1)
       currentIndex = 0;
 
-   switch(keyCode)
+   if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)
    {
-      case KEY_UP:
-         currentIndex--;
-         glutSetCursor(GLUT_CURSOR_NONE);            // Hide cursor when navigating with keyboard
-         mItemSelectedWithMouse = false;
-         break;
-      case KEY_DOWN:
-         currentIndex++;
-         glutSetCursor(GLUT_CURSOR_NONE);            // Hide cursor when navigating with keyboard
-         mItemSelectedWithMouse = false;
-         break;
+      currentIndex--;
+      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      mItemSelectedWithMouse = false;
+   }
+   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)
+   {
+      currentIndex++;
+      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      mItemSelectedWithMouse = false;
    }
 
-   if(currentIndex < 0)
-      currentIndex = 0;
-   if(currentIndex >= servers.size())
-      currentIndex = servers.size() - 1;
+   // Bounds checking
+   currentIndex = max(currentIndex, 0);
+   currentIndex = min(currentIndex, servers.size() - 1);
 
    selectedId = servers[currentIndex].id;
 }
+
 
 // User is sorting by selected column
 void QueryServersUserInterface::sortSelected()
@@ -935,7 +943,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    // It only makes sense to select a server if there are any servers to select... get it?
    if(servers.size() > 0)
    {
-      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP ) / MENU_ITEM_HEIGHT) + mFirstServer + 1 - (mScrollingUpMode ? 1 : 0); 
+      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP ) / MENU_ITEM_HEIGHT) + mFirstServer + 1 - (mScrollingUpMode ? 1 : 0);
 
       // See if this requires scrolling.  If so, limit speed.
       if(indx <= mFirstServer - 1)
@@ -966,7 +974,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 
       selectedId = servers[indx].id;
 
-      mItemSelectedWithMouse = true; 
+      mItemSelectedWithMouse = true;
    }
 
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
