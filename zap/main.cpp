@@ -80,6 +80,7 @@
 //<li>When loading a level from a local or remote server, progress bar is displayed</li>
 //<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
 //<li>Message displayed when connection to game server fails for some unknown reason</li>
+//<li>Joystick now works on all menus except for those in the editor</li>
 //</ul>
 //
 //<u>Items</u>
@@ -186,6 +187,7 @@
 //<li>Fixed scaling issue in editor when only one point item is present</li>
 //<li>List of players in global chat mode now displayed when in global chat</li>
 //<li>Message displayed when connection to game server fails for some unknown reason</li>
+//<li>Joystick now works on all menus except for those in the editor</li>
 //<li></li>
 
 // Mac Test:

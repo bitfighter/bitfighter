@@ -184,6 +184,8 @@ private:
    
    S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
    SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
+   
+   void doneEditingSpecialItem();      // Gets run when user exits special-item editing mode
    U32 getNextAttr(S32 item);          // Assist on finding the next attribute this item is capable of editing,
                                        // for cycling through the various editable attributes
 
@@ -206,6 +208,8 @@ private:
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 
    void clearSelection();        // Mark all objects and vertices as unselected
+   void unselectItem(S32 i);     // Mark item and vertices as unselected
+
    void clearDockSelection();    // Mark all objects on dock as unselected
 
    void centerView();            // Center display on all objects

@@ -937,8 +937,9 @@ void EditorUserInterface::render()
          renderItem(mItems[i], mEditingSpecialAttrItem == i, false, false);
 
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
+   // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].litUp)
+      if(mItems[i].selected || mItems[i].litUp)
          renderItem(mItems[i], mEditingSpecialAttrItem == i, false, false);
 
 
@@ -1371,7 +1372,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          }
          else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
          {
-            if(item.selected || item.litUp)
+            if(((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited) 
             {
                glColor((mSpecialAttribute != GoFastSnap) ? white : inactiveSpecialAttributeColor);
                drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", item.speed);
@@ -1649,7 +1650,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
       // If this is an item that has a repop attribute, and the item is selected, draw the text
       if(!isDockItem && gGameItemRecs[item.index].hasRepop)
       {
-         if(showAllObjects && (item.selected || item.litUp || isBeingEdited))
+         if(showAllObjects && ((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
          {
             glColor(white);
 
@@ -1661,10 +1662,10 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
                drawStringfc(pos.x, pos.y + 10, attrSize, "%s: %d sec%c", healword, item.repopDelay, item.repopDelay != 1 ? 's' : 0);
 
 
-            const char *msg;
+            const char *msg; 
 
             if(mSpecialAttribute == None)
-               msg = "[Ctrl-Enter] to edit";
+               msg = "[Ctrl-Enter] to edit";   
             else if(isBeingEdited && mSpecialAttribute == RepopDelay)
                msg = "Up/Dn to change";
             else
@@ -1768,12 +1769,17 @@ void EditorUserInterface::setTranslationAndScale(Point pos)
 void EditorUserInterface::clearSelection()
 {
    for(S32 i = 0; i < mItems.size(); i++)
-   {
-      mItems[i].selected = false;
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
-         mItems[i].vertSelected[j] = false;
-   }
+      unselectItem(i);
 }
+
+
+void EditorUserInterface::unselectItem(S32 i)
+{
+   mItems[i].selected = false;
+   for(S32 j = 0; j < mItems[i].verts.size(); j++)
+      mItems[i].vertSelected[j] = false;
+}
+
 
 void EditorUserInterface::clearDockSelection()     // Not used?
 {
@@ -2467,7 +2473,6 @@ void EditorUserInterface::joinBarrier()
       saveUndoState(undoItems);
       mNeedToSave = true;
    }
-
 }
 
 
@@ -2622,6 +2627,7 @@ void EditorUserInterface::restoreSelection()
    }
 }
 
+
 U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can't return a SpecialAttribute...  hrm...
 {
    // Advance to the next attribute. If we were at None, start with the first.
@@ -2640,6 +2646,28 @@ U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can
 }
 
 
+// Gets run when user exits special-item editing mode
+void EditorUserInterface::doneEditingSpecialItem()
+{
+   // Find any other selected items of the same type of the item we just edited, and update their values too
+
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(i == mEditingSpecialAttrItem)
+         continue;
+      else if(mItems[i].selected && mItems[i].index == mItems[mEditingSpecialAttrItem].index)     // || mItems[i].litUp
+      {
+         // We'll ignore text here, because that really makes less sense
+         mItems[i].repopDelay = mItems[mEditingSpecialAttrItem].repopDelay;
+         mItems[i].speed = mItems[mEditingSpecialAttrItem].speed;
+         mItems[i].boolattr = mItems[mEditingSpecialAttrItem].boolattr;
+      }
+   }
+
+   mEditingSpecialAttrItem = -1;
+   mSpecialAttribute = None;
+}
+
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -2653,8 +2681,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          return;
       else if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER)      // End editing
       {
-         mEditingSpecialAttrItem = -1;
-         mSpecialAttribute = None;
+         doneEditingSpecialItem();
          return;
       }
 
@@ -2716,12 +2743,13 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          if(mItems[i].selected || mItems[i].litUp)
          {
-            // Force item i to be the one and only selected item.  This will clear up some problems that
-            // might otherwise occur.  If you have multiple items selected, this might not pick the right
-            // one... but at least we'll force the issue.  And anyway, how could we know which one the
-            // user wants, anyway?
-            clearSelection();
+            // Force item i to be the one and only selected item type.  This will clear up some problems that
+            // might otherwise occur.  If you have multiple items selected, all will end up with the same values
             mItems[i].selected = true;
+
+            for(S32 j = 0; j < mItems.size(); j++)
+               if(mItems[j].selected && mItems[j].index != mItems[i].index)
+                  unselectItem(j);
 
             mEditingSpecialAttrItem = i;
             mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
@@ -2732,7 +2760,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                saveUndoState(mItems);
             }
             else
-               mEditingSpecialAttrItem = -1;
+               doneEditingSpecialItem();
 
             break;
          }
@@ -2866,14 +2894,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             }
             if (itemHit != -1 && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
             {
-               if(!mItems[itemHit].selected)    // Item was not already selected
-               {
-                  clearSelection();
-                  saveSelection();  // Basically, save the fact that nothing is selected
-                  mItems[itemHit].selected = true;
-               }
-               else                             // Item was already selected
-                  saveSelection();
+               clearSelection();
+               saveSelection();  // Basically, save the fact that nothing is selected
+               mItems[itemHit].selected = true;
             }
             else if(vertexHit != -1 && (itemHit == -1 || !mItems[itemHit].selected))      // Hit a vertex of an unselected item
             {        // (braces required)
@@ -2885,15 +2908,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                }
             }
             else if(itemHit != -1)                                                        // Hit a non-point item, but not a vertex
-            {        // (braces required)
-               if(!mItems[itemHit].selected)    // Item was not already selected
-               {
-                  clearSelection();
-                  saveSelection();  // Basically, save the fact that nothing is selected
-                  mItems[itemHit].selected = true;
-               }
-               else                             // Item was already selected
-                  saveSelection();
+            {        
+               clearSelection();
+               saveSelection();  // Basically, save the fact that nothing is selected
+               mItems[itemHit].selected = true;
             }
             else     // Clicked off in space.  Starting to draw a bounding rectangle?
             {
@@ -2915,6 +2933,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mMostRecentState = mItems;
          mUnmovedItems = mItems;
       }     // end mouse not on dock block, doc
+
    }     // end if keyCode == MOUSE_LEFT
 
    // Neither mouse button, let's try some keys

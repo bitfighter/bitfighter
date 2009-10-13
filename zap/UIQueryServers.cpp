@@ -895,7 +895,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)
    {
-      currentIndex++;
+      currentIndex++; 
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }
