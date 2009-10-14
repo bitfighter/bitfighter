@@ -227,6 +227,8 @@ public:
    void damageObject(DamageInfo *damageInfo);
    void renderItem(Point p);
 
+   bool isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame);
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 

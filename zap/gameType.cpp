@@ -1014,17 +1014,15 @@ void GameType::performScopeQuery(GhostConnection *connection)
 {
    GameConnection *gc = (GameConnection *) connection;
    GameObject *co = gc->getControlObject();
+   ClientRef *cr = gc->getClientRef();
 
    const Vector<SafePtr<GameObject> > &scopeAlwaysList = getGame()->getScopeAlwaysList();
 
    gc->objectInScope(this);
 
    for(S32 i = 0; i < scopeAlwaysList.size(); i++)
-   {
-      if(scopeAlwaysList[i].isNull())
-         continue;
-      gc->objectInScope(scopeAlwaysList[i]);
-   }
+      if(!scopeAlwaysList[i].isNull())
+         gc->objectInScope(scopeAlwaysList[i]);
 
    // readyForRegularGhosts is set once all the RPCs from the GameType
    // have been received and acknowledged by the client
@@ -1039,24 +1037,26 @@ void GameType::performScopeQuery(GhostConnection *connection)
    }
 
    // What does the spy bug see?
-   Vector<GameObject*> spyBugs;
+   Vector<GameObject *> spyBugs;
    Vector<GameObject *> fillVector;
 
    S32 teamId = gc->getClientRef()->teamId;
 
+   // Find all spybugs in the game
    findObjects(SpyBugType, spyBugs, gServerWorldBounds);
 
    for(S32 i = 0; i < spyBugs.size(); i++)
    {
-      if(spyBugs[i]->getTeam() != teamId)       // Only process bugs on same team as player
+      SpyBug *sb = dynamic_cast<SpyBug *>(spyBugs[i]);     
+      if(!sb->isVisibleToPlayer( cr->teamId, cr->name, getGame()->getGameType()->isTeamGame() ))
          break;
       fillVector.clear();
-      Point pos = spyBugs[i]->getActualPos();
+      Point pos = sb->getActualPos();
       Point scopeRange(gSpyBugRange, gSpyBugRange);
       Rect queryRect(pos, pos);
       queryRect.expand(scopeRange);
       findObjects(AllObjectTypes, fillVector, queryRect);
-
+   
       for(S32 j = 0; j < fillVector.size(); j++)
          connection->objectInScope(fillVector[j]);
    }

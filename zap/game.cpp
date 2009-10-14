@@ -922,8 +922,8 @@ S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 Point ClientGame::worldToScreenPoint(Point p)
 {
    GameObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *u = dynamic_cast<Ship *>(controlObject);
-   Point position = u->getRenderPos();    // Ship's location (which will be coords of screen's center)
+   Ship *ship = dynamic_cast<Ship *>(controlObject);
+   Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
 
    if(mCommanderZoomDelta)    // In commander's map, or zooming in/out
    {
@@ -941,7 +941,7 @@ Point ClientGame::worldToScreenPoint(Point p)
          worldExtents.x *= screenAspectRatio / aspectRatio;
 
       Point offset = (worldCenter - position) * zoomFrac + position;
-      Point visSize = computePlayerVisArea(u) * 2;
+      Point visSize = computePlayerVisArea(ship) * 2;
       Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
       Point visScale(UserInterface::canvasWidth / modVisSize.x,
@@ -952,7 +952,7 @@ Point ClientGame::worldToScreenPoint(Point p)
    }
    else                       // Normal map view
    {
-      Point visExt = computePlayerVisArea(dynamic_cast<Ship *>(u));
+      Point visExt = computePlayerVisArea(ship);
       Point scaleFactor((gScreenWidth / 2) / visExt.x, (gScreenHeight / 2) / visExt.y);
       Point ret = (p - position) * scaleFactor + Point((gScreenWidth / 2), (gScreenHeight / 2));
       return ret;
@@ -985,7 +985,7 @@ void ClientGame::renderCommander()
       worldExtents.x *= screenAspectRatio / aspectRatio;
 
    Point offset = (worldCenter - position) * zoomFrac + position;
-   Point visSize = gClientGame->computePlayerVisArea(u) * 2;
+   Point visSize = computePlayerVisArea(u) * 2;
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
    Point visScale(UserInterface::canvasWidth / modVisSize.x,
@@ -1048,11 +1048,11 @@ void ClientGame::renderCommander()
       {
          if(spyBugObjects[i]->getObjectTypeMask() & SpyBugType)
          {
-            S32 spyBugTeam = spyBugObjects[i]->getTeam();
-            Zap::SpyBug *sb = dynamic_cast<Zap::SpyBug *>(spyBugObjects[i]);     // Why do we need to prefix SpyBug with Zap::??
+            SpyBug *sb = dynamic_cast<SpyBug *>(spyBugObjects[i]);
 
-            // On our team (in a team game) || was set by us (in any game) || is neutral (in any game)
-            if(spyBugTeam == playerTeam && getGameType()->isTeamGame() || (getGameType()->mLocalClient && getGameType()->mLocalClient->name == sb->mSetBy) || spyBugTeam == -1)
+            // Use the following if this crashes
+            // if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : StringTableEntry(""), getGameType()->isTeamGame());
+            if(sb->isVisibleToPlayer( playerTeam, getGameType()->mLocalClient->name, getGameType()->isTeamGame() ))
             {
                Point p = spyBugObjects[i]->getRenderPos();
                Point visExt(gSpyBugRange, gSpyBugRange);

@@ -747,6 +747,16 @@ void SpyBug::renderItem(Point pos)
    renderSpyBug(pos, visible);
 }
 
+
+// Can the player see the spybug?
+bool SpyBug::isVisibleToPlayer(S32 playerTeam, StringTableEntry playerName, bool isTeamGame)
+{
+   // On our team (in a team game) || was set by us (in any game) || is neutral (in any game)
+   return ((getTeam() == playerTeam) && isTeamGame) || playerName == mSetBy || mTeam == -1;
+}
+
+
+
 // Lua methods
 const char SpyBug::className[] = "SpyBugItem";      // Class name as it appears to Lua scripts
 
