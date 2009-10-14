@@ -169,7 +169,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 }
 
 
-   // These methods will be empty later...
+// These methods will be empty later...
  U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    stream->writeInt(mZoneID, 16);
@@ -188,6 +188,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 
    return 0;
 }
+
 
 void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
