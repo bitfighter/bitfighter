@@ -1932,7 +1932,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
          dSprintf(msg, sizeof(msg), "Only 1 team has been configured.");
       else
          dSprintf(msg, sizeof(msg), "Only %d teams have been configured.", mTeams.size());
-      gEditorUserInterface.setWarnMessage(msg, "Hit [F3] to configure teams.");
+      gEditorUserInterface.setWarnMessage(msg, "Hit [F2] to configure teams.");
       return;
    }
 
@@ -2860,7 +2860,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          clearSelection();
          findHitItemOnDock(mMousePos, mDraggingDockItem);
          itemCameFromDock = true;
-
       }
       else                 // Mouse is not on dock
       {
@@ -2892,7 +2891,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                //vertexHit = -1;
                //itemHit = vertexHitPoly;
             }
-            if (itemHit != -1 && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
+            if(itemHit != -1 && mItems[itemHit].selected) 
+            {
+               // Hit an already selected item... do nothing
+               saveSelection();
+            }
+            else if(itemHit != -1 && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
             {
                clearSelection();
                saveSelection();  // Basically, save the fact that nothing is selected

@@ -313,6 +313,7 @@ void EditorInstructionsUserInterface::nextPage()
    mAnimStage = 0;
 }
 
+
 void EditorInstructionsUserInterface::prevPage()
 {
    if(mCurPage > 1)
@@ -324,10 +325,9 @@ void EditorInstructionsUserInterface::prevPage()
    mAnimStage = 0;
 }
 
+
 void EditorInstructionsUserInterface::idle(U32 timeDelta)
 {
-
-
    if(mAnimTimer.update(timeDelta))
    {
       mAnimTimer.reset(1000);
@@ -337,11 +337,13 @@ void EditorInstructionsUserInterface::idle(U32 timeDelta)
    }
 }
 
+
 void EditorInstructionsUserInterface::exitInstructions()
 {
    UserInterface::playBoop();
    reactivatePrevUI();      //gEditorUserInterface, probably
 }
+
 
 void EditorInstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {

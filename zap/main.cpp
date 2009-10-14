@@ -169,7 +169,6 @@
 //<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
 //<li>Soccer game can now be played in no-teams mode by defining only one team</li>
 //<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds). 
-// Cannot modify number in editor, but entries survive editing process when level is manually edited.</li>
 //<li>Switched F2 and F3 keys in editor</li>
 //<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
 //<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
