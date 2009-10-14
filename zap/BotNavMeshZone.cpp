@@ -65,6 +65,10 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render()     // For now... in future will be invisible!
 {
+   // Disable for 011
+   if(true)
+      return;
+
    glEnable(GL_BLEND);
       F32 alpha = 0.5;
    glColor3f(.2, .2, 0);

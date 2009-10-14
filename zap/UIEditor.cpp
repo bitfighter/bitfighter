@@ -2891,9 +2891,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                //vertexHit = -1;
                //itemHit = vertexHitPoly;
             }
-            if(itemHit != -1 && mItems[itemHit].selected) 
+            if(itemHit != -1 && mItems[itemHit].selected)   // Hit an already selected item
             {
-               // Hit an already selected item... do nothing
                saveSelection();
             }
             else if(itemHit != -1 && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
