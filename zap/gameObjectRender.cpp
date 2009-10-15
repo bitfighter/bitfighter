@@ -1250,9 +1250,10 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha
             glVertex2f(x, y);
          }
       glEnd();
+
    glPopMatrix();
 
-   //drawCircle(pos, 86 * scaleFact);
+   //drawCircle(pos, 89 * scaleFact);
 }
 
 

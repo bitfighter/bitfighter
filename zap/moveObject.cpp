@@ -118,8 +118,11 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
    Point myPos;
    Point contactShipPos;
 
-   getCollisionCircle(stateIndex, myPos, myRadius);
+   getCollisionCircle(stateIndex, myPos, myRadius);   // getCollisionCircle sets myPos and myRadius
    contactShip->getCollisionCircle(stateIndex, contactShipPos, contactShipRadius);
+
+   Vector<Point> dummy;
+   F32 fixfact = (getCollisionPoly(dummy) || contactShip->getCollisionPoly(dummy)) ? 0 : 1;
 
    Point v = contactShip->mMoveState[stateIndex].vel;
    Point posDelta = contactShipPos - intendedPos;
@@ -128,8 +131,12 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 
    F32 a = v.dot(v);
    F32 b = 2 * v.dot(posDelta);
-   F32 c = posDelta.dot(posDelta) - R * R;
-
+   F32 c = posDelta.dot(posDelta) - R * R * fixfact;  // Adding the * 0 seems to fix the problem with asteroid-ship collision infitinte loop
+                                                      // Note that that problem can also be fixed by making the asteroids only use their
+                                                      // collision circle.  While this adds some wonkiness with the collisions (makes asteroids
+                                                      // appear somehow "sticky", the fact is that ship-asteroid collision will be brief and usually
+                                                      // fatal, so they can't really interact much, even with shields on.  For gross movements, this
+                                                      // works fine.
    F32 t;
 
    bool result = FindLowestRootInInterval(a, b, c, 100000, t);
@@ -187,8 +194,10 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced)
 
             F32 displaceEpsilon = 0.002f;
             F32 t = computeMinSeperationTime(stateIndex, shipHit, intendedPos);
+
             if(t <= 0)
                return; // Some kind of math error - just stop simulating this ship
+
             shipHit->move(t + displaceEpsilon, stateIndex, true);    // Move the displaced object
          }
       }
