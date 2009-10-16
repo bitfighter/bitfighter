@@ -131,7 +131,7 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 
    F32 a = v.dot(v);
    F32 b = 2 * v.dot(posDelta);
-   F32 c = posDelta.dot(posDelta) - R * R * fixfact;  // Adding the * 0 seems to fix the problem with asteroid-ship collision infitinte loop
+   F32 c = posDelta.dot(posDelta) - R * R * fixfact;  // Adding the * 0 seems to fix the problem with asteroid-ship collision infininte loop
                                                       // Note that that problem can also be fixed by making the asteroids only use their
                                                       // collision circle.  While this adds some wonkiness with the collisions (makes asteroids
                                                       // appear somehow "sticky", the fact is that ship-asteroid collision will be brief and usually
@@ -380,7 +380,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       // Check for asteroids hitting a ship
       Ship *ship = dynamic_cast<Ship *>(shipHit);
       Asteroid *asteroid = dynamic_cast<Asteroid *>(this);
- 
+
       if(!ship)
       {
          // Since asteroids and ships are both MoveObjects, we should also check to see if ship hit an asteroid
