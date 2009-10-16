@@ -63,30 +63,57 @@ void SpeedZone::preparePoints()
    computeExtent();
 }
 
+
 Vector<Point> SpeedZone::generatePoints(Point pos, Point dir)
 {
    Vector<Point> points;
 
-   // Yes, we already did this if we came from processArguments,
-   // but not if we came from elsewhere, like UIInstructions
-   Point offset(dir - pos);
-   offset.normalize();
-   dir = Point(pos + offset * SpeedZone::height);
+   //// Yes, we already did this if we came from processArguments,
+   //// but not if we came from elsewhere, like UIInstructions
+   //Point offset(dir - pos);
+   //offset.normalize();
+   //dir = Point(pos + offset * SpeedZone::height);
 
-   Point perpendic(pos.y - dir.y, dir.x - pos.x);
-   perpendic.normalize();
+   //Point perpendic(pos.y - dir.y, dir.x - pos.x);
+   //perpendic.normalize();
 
-   points.push_back(pos + perpendic * SpeedZone::halfWidth);
-   points.push_back(dir);
-   points.push_back(pos - perpendic * SpeedZone::halfWidth);
+   //points.push_back(pos + perpendic * SpeedZone::halfWidth);
+   //points.push_back(dir);
+   //points.push_back(pos - perpendic * SpeedZone::halfWidth);
+
+   Point parallel(dir - pos);
+   parallel.normalize();
+
+   Point tip = pos + parallel * SpeedZone::height;
+   Point perpendic(pos.y - tip.y, tip.x - pos.x);
+   perpendic.normalize();   
+
+   const S32 inset = 3;
+   const F32 chevronThickness = SpeedZone::height / 3;
+   const F32 chevronDepth = SpeedZone::halfWidth - inset;
+   
+   for(S32 j = 0; j < 2; j++)
+   {
+      S32 offset = SpeedZone::halfWidth * 2 * j - (j * 4);
+
+      // Red chevron
+      points.push_back(pos + parallel * (chevronThickness + offset));                                          
+      points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (inset + offset));                                   //  2   3
+      points.push_back(pos + perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (chevronThickness + inset + offset));                //    1    4
+      points.push_back(pos + parallel * (chevronDepth + chevronThickness + inset + offset));                                              //  6    5
+      points.push_back(pos - perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (chevronThickness + inset + offset));
+      points.push_back(pos - perpendic * (SpeedZone::halfWidth-2*inset) + parallel * (inset + offset));
+   }
 
    return points;
 }
 
+
 void SpeedZone::render()
 {
-   renderSpeedZone(pos, dir, gClientGame->getCurrentTime());
+   renderSpeedZone(mPolyBounds, gClientGame->getCurrentTime());
 }
+
 
 // This object should be drawn above polygons
 S32 SpeedZone::getRenderSortValue()
@@ -134,6 +161,7 @@ void SpeedZone::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
+
 // Bounding box for quick collision-possibility elimination
 void SpeedZone::computeExtent()
 {
@@ -144,6 +172,7 @@ void SpeedZone::computeExtent()
    setExtent(extent);
 }
 
+
 // More precise boundary for more precise collision detection
 bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
@@ -151,6 +180,7 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
       polyPoints.push_back(mPolyBounds[i]);
    return true;
 }
+
 
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
@@ -190,6 +220,7 @@ bool SpeedZone::collide(GameObject *hitObject)
    return false;
 }
 
+
 // Runs only on server!
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
@@ -198,6 +229,7 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
       if(mExclusions[i].time < gServerGame->getCurrentTime())     // Exclusion has expired
          mExclusions.erase(i);
 }
+
 
 U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -212,6 +244,7 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
 
    return 0;
 }
+
 
 void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {

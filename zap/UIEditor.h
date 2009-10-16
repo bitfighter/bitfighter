@@ -185,9 +185,9 @@ private:
    S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
    SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
    
-   void doneEditingSpecialItem();      // Gets run when user exits special-item editing mode
-   U32 getNextAttr(S32 item);          // Assist on finding the next attribute this item is capable of editing,
-                                       // for cycling through the various editable attributes
+   void doneEditingSpecialItem(bool save);    // Gets run when user exits special-item editing mode
+   U32 getNextAttr(S32 item);                 // Assist on finding the next attribute this item is capable of editing,
+                                              // for cycling through the various editable attributes
 
    WorldItem mNewItem;
    F32 mCurrentScale;

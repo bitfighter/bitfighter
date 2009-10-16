@@ -100,6 +100,8 @@ private:
    void push(lua_State *L);      // Push a LuaShip proxy object onto the stack
    bool mIsRobot;
 
+   bool mJustTeleported;
+
 protected:
    StringTableEntry mPlayerName;
    bool mModuleActive[ModuleCount];       // Is that module active at this moment?
@@ -145,7 +147,7 @@ public:
       InitialMask = BIT(0),      // Initial ship position
       PositionMask = BIT(1),     // Ship position to be sent
       MoveMask = BIT(2),         // New user input
-      WarpPositionMask = BIT(3),
+      WarpPositionMask = BIT(3), // When ship makes a big jump in position
       ExplosionMask = BIT(4),
       HealthMask = BIT(5),
       PowersMask = BIT(6),       // Which modules are active

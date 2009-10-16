@@ -34,7 +34,7 @@
 #include "teleporter.h"
 #include "engineeredObjects.h"
 #include "input.h"
-#include "speedZone.h"           // For SpeedZone::generatePoints()
+#include "speedZone.h"           // For SpeedZone::height
 #include "SweptEllipsoid.h"      // For polygon triangulation
 #include "config.h"
 #include "../glut/glutInclude.h"
@@ -427,8 +427,6 @@ const char *gGameObjectInfo[] = {
 };
 
 
-extern Vector<Point> generateSpeedZonePoints(Point pos, Point dir);
-
 void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 {
    U32 objectsPerPage = 6;
@@ -526,7 +524,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderFlag(Point(0, 0), Color(1, 0, 0));
             break;
          case 20:
-            renderSpeedZone(Point(-SpeedZone::height / 2, 0), Point(1, 0), gClientGame->getCurrentTime());
+            renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
             break;
          case 21:
                Vector<Point> o;     // outline

@@ -80,7 +80,7 @@ extern void renderSpyBug(Point pos, bool visible);
 extern void renderRepairItem(Point pos);
 extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
-void renderSpeedZone(Point pos, Point dir, U32 time);
+void renderSpeedZone(Vector<Point>, U32 time);
 
 void renderTestItem(Point pos, F32 alpha = 1);
 void renderAsteroid(Point pos, S32 design, F32 radius);

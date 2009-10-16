@@ -1301,7 +1301,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
                renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TeleporterRadius, 1, dest, false);
             }
             else if(item.index == ItemSpeedZone)
-               renderSpeedZone(pos, convertLevelToCanvasCoord(item.verts[1]), gClientGame->getCurrentTime());
+               renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.verts[1])), gClientGame->getCurrentTime());
          glPopMatrix();
       }
       else
@@ -2647,22 +2647,28 @@ U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can
 
 
 // Gets run when user exits special-item editing mode
-void EditorUserInterface::doneEditingSpecialItem()
+void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 {
    // Find any other selected items of the same type of the item we just edited, and update their values too
 
-   for(S32 i = 0; i < mItems.size(); i++)
+   if(!saveChanges)
    {
-      if(i == mEditingSpecialAttrItem)
-         continue;
-      else if(mItems[i].selected && mItems[i].index == mItems[mEditingSpecialAttrItem].index)     // || mItems[i].litUp
-      {
-         // We'll ignore text here, because that really makes less sense
-         mItems[i].repopDelay = mItems[mEditingSpecialAttrItem].repopDelay;
-         mItems[i].speed = mItems[mEditingSpecialAttrItem].speed;
-         mItems[i].boolattr = mItems[mEditingSpecialAttrItem].boolattr;
-      }
+      mItems = mUndoItems.last();            // Restore state from undo buffer
+      mUndoItems.pop_back();
    }
+   else
+      for(S32 i = 0; i < mItems.size(); i++)
+      {
+         if(i == mEditingSpecialAttrItem)
+            continue;
+         else if(mItems[i].selected && mItems[i].index == mItems[mEditingSpecialAttrItem].index)     // || mItems[i].litUp
+         {
+            // We'll ignore text here, because that really makes less sense
+            mItems[i].repopDelay = mItems[mEditingSpecialAttrItem].repopDelay;
+            mItems[i].speed = mItems[mEditingSpecialAttrItem].speed;
+            mItems[i].boolattr = mItems[mEditingSpecialAttrItem].boolattr;
+         }
+      }
 
    mEditingSpecialAttrItem = -1;
    mSpecialAttribute = None;
@@ -2679,12 +2685,16 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       { /* Do nothing */ }
       else if(keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)    // Trap mouse clicks... do nothing
          return;
-      else if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER)      // End editing
+      else if(keyCode == KEY_ENTER)        // End editing, save
       {
-         doneEditingSpecialItem();
+         doneEditingSpecialItem(true);
          return;
       }
-
+      else if(keyCode == KEY_ESCAPE)      // End editing, revert
+      {
+         doneEditingSpecialItem(false);
+         return;
+      }
       else if(mSpecialAttribute == Text)
       {
          if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
@@ -2760,7 +2770,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                saveUndoState(mItems);
             }
             else
-               doneEditingSpecialItem();
+               doneEditingSpecialItem(true);
 
             break;
          }

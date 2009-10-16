@@ -96,6 +96,8 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
 
    mCooldown = false;
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
+
+   mJustTeleported = false;
 }
 
 // Destructor
@@ -169,7 +171,10 @@ void Ship::setActualPos(Point p, bool warp)
    mMoveState[RenderState].pos = p;
 
    if(warp)
+   {
       setMaskBits(PositionMask | WarpPositionMask);
+      mJustTeleported = true;
+   }
    else
       setMaskBits(PositionMask);
 }
@@ -223,7 +228,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
  {
    // Create a small rectagle centered on the ship that we can use for findObjects
    Rect shipRect(getActualPos(), getActualPos());
-   shipRect.expand(Point(.1,.1));
+   shipRect.expand(Point(.1, .1));
 
    fillVector.clear();           // This vector will hold any matching zones
    findObjects(zoneType, fillVector, shipRect);
@@ -253,7 +258,6 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 // Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.b.)
 bool Ship::isOnObject(GameObject *object)
 {
-
    Point center;
    float radius;
    Vector<Point> polyPoints;
@@ -713,6 +717,7 @@ void Ship::writeControlState(BitStream *stream)
    stream->writeRangedU32(mActiveWeaponIndx, 0, WeaponCount);
 }
 
+
 void Ship::readControlState(BitStream *stream)
 {
    stream->read(&mMoveState[ActualState].pos.x);
@@ -725,6 +730,7 @@ void Ship::readControlState(BitStream *stream)
    mFireTimer.reset(fireTimer);
    mActiveWeaponIndx = stream->readRangedU32(0, WeaponCount);
 }
+
 
 // Writes the player's ghost update from the server to the client
 // Any changes here need to be reflected in Ship::unpackUpdate
@@ -771,8 +777,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 //   }
 //}
 
-
-   stream->writeFlag(updateMask & RespawnMask);       // Respawn --> only used by robots
+   stream->writeFlag(updateMask & RespawnMask && updateMask != -1);       // Respawn --> only used by robots... don't send this when all flags are set
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);
@@ -789,7 +794,9 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    stream->writeFlag(hasExploded);
    stream->writeFlag(getControllingClient()->isBusy());
 
-   stream->writeFlag(updateMask & WarpPositionMask);
+   stream->writeFlag(updateMask & WarpPositionMask && updateMask != -1);
+   stream->writeFlag(mJustTeleported);      // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
+   mJustTeleported = false;
 
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
    if(!shouldWritePosition)
@@ -822,14 +829,18 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   bool positionChanged = false;
-   bool wasInitialUpdate = false;
+   bool positionChanged = false;    // True when position changes a little
+   bool shipwarped = false;         // True when position changes a lot
+
+   bool wasInitialUpdate = false; 
    bool playSpawnEffect = false;
+
 
    if(isInitialUpdate())
    {
       wasInitialUpdate = true;
-      playSpawnEffect = stream->readFlag();          // Makes ship all spinny
+      shipwarped = true;
+      playSpawnEffect = stream->readFlag();
 
       stream->readStringTableEntry(&mPlayerName);
       stream->read(&mass);
@@ -871,13 +882,11 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 //
 //}
 
-
-   bool respawning = false;
    if(stream->readFlag())        // Respawn
    {
       hasExploded = false;
       playSpawnEffect = true;
-      respawning = true;
+      shipwarped = true;
    }
 
    if(stream->readFlag())        // Health
@@ -895,36 +904,29 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool explode = stream->readFlag();
    isBusy = stream->readFlag();
 
-   bool warp = stream->readFlag();
-   if(warp)    // Ship just teleported/warped
+   if(stream->readFlag())        // Ship just teleported 
+      shipwarped = true;
+
+   if(stream->readFlag())        // Ship just teleported 
    {
-      mWarpInTimer.reset(WarpFadeInTime);
-
-      // This is the controversial warping zoomy effect.  It has been disabled for now.  Uncomment the lines below to re-enable.
-      // Now switch to commander's map and zoom in on new location.  Basically simulates leaving commander's map.
-      // Only do this if the teleporting ship is the local ship.
-      /*
-      GameConnection *conn = gClientGame->getConnectionToServer();
-
-      if(gClientGame && !gClientGame->getInCommanderMap() && conn && conn->getControlObject() == this)
-         gClientGame->resetZoomDelta();
-      */
+      shipwarped = true;
+      mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny (sfx, spiral bg are done by the teleporter itself)
    }
 
-   if(stream->readFlag())     // UpdateMask
+   if(stream->readFlag())        // UpdateMask
    {
       ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
       readCompressedVelocity(mMoveState[ActualState].vel, BoostMaxVelocity + 1, stream);
       positionChanged = true;
-   }
+   } 
 
-   if(stream->readFlag())     // MoveMask
+   if(stream->readFlag())       // MoveMask
    {
-      mCurrentMove = Move();  // A new, blank move
+      mCurrentMove = Move();    // A new, blank move
       mCurrentMove.unpack(stream, false);
    }
 
-   if(stream->readFlag())     // PowersMask
+   if(stream->readFlag())       // PowersMask
    {
       bool wasActive[ModuleCount];
       for(S32 i = 0; i < ModuleCount; i++)
@@ -950,7 +952,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       processMove(ActualState);
    }
 
-   if(warp || respawning)
+   if(shipwarped)
    {
       mInterpolating = false;
       mMoveState[RenderState] = mMoveState[ActualState];
@@ -971,8 +973,10 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          emitShipExplosion(mMoveState[ActualState].pos);    // Boom!
    }
 
-   if(playSpawnEffect)     // Make ship all spinny-like
+   if(playSpawnEffect)   
    {
+      mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny
+
       FXManager::emitTeleportInEffect(mMoveState[ActualState].pos, 1);
       SFXObject::play(SFXTeleportIn, mMoveState[ActualState].pos, Point());
    }
