@@ -97,7 +97,7 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
    mCooldown = false;
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
-   mJustTeleported = false;
+   mJustTeleported = 0;
 }
 
 // Destructor
@@ -173,7 +173,7 @@ void Ship::setActualPos(Point p, bool warp)
    if(warp)
    {
       setMaskBits(PositionMask | WarpPositionMask);
-      mJustTeleported = true;
+      mJustTeleported = 5;
    }
    else
       setMaskBits(PositionMask);
@@ -185,7 +185,7 @@ F32 Ship::getMaxVelocity()
    return isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity;
 }
 
-
+ 
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
@@ -263,14 +263,11 @@ bool Ship::isOnObject(GameObject *object)
    Vector<Point> polyPoints;
 
 
-   // Ships don't have collisionPolys, so this first check, while technically right, is utterly unneeded, and is hence commented out.
-   //if(getCollisionPoly(polyPoints))
-   //   return object->collisionPolyPointIntersect(polyPoints);
-   //
-   //else
-          if(getCollisionCircle(MoveObject::ActualState, center, radius))
+   // Ships don't have collisionPolys, so this first check is utterly unneeded unless we change that
+   if(getCollisionPoly(polyPoints))
+      return object->collisionPolyPointIntersect(polyPoints);
+   else if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return object->collisionPolyPointIntersect(center, radius);
-
    else
       return false;
 }
@@ -345,11 +342,11 @@ void Ship::controlMoveReplayComplete()
    Point delta = mMoveState[ActualState].pos - mMoveState[RenderState].pos;
    F32 deltaLen = delta.len();
 
-   // if the delta is either very small, or greater than the
+   // If the delta is either very small, or greater than the
    // max interpolation threshold, just warp to the new position
    if(deltaLen <= 0.5 || deltaLen > MaxControlObjectInterpDistance)
    {
-      // if it's a large delta, get rid of the movement trails.
+      // If it's a large delta, get rid of the movement trails
       if(deltaLen > MaxControlObjectInterpDistance)
          for(S32 i=0; i<TrailCount; i++)
             mTrail[i].reset();
@@ -362,9 +359,10 @@ void Ship::controlMoveReplayComplete()
       mInterpolating = true;
 }
 
+
 void Ship::idle(GameObject::IdleCallPath path)
 {
-   // don't process exploded ships
+   // Don't process exploded ships
    if(hasExploded)
       return;
 
@@ -424,14 +422,13 @@ void Ship::idle(GameObject::IdleCallPath path)
       }
    }
 
-   // update the object in the game's extents database.
+   // Update the object in the game's extents database
    updateExtent();
 
-   // if this is a move executing on the server and it's
+   // If this is a move executing on the server and it's
    // different from the last move, then mark the move to
    // be updated to the ghosts.
-   if(path == GameObject::ServerIdleControlFromClient &&
-         !mCurrentMove.isEqualMove(&mLastMove))
+   if(path == GameObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
       setMaskBits(MoveMask);
 
    mLastMove = mCurrentMove;
@@ -444,15 +441,14 @@ void Ship::idle(GameObject::IdleCallPath path)
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
    {
-      // process weapons and energy on controlled object objects
+      // Process weapons and energy on controlled object objects
       processWeaponFire();
       processEnergy();
    }
 
    if(path == GameObject::ClientIdleMainRemote)
    {
-      // for ghosts, find some repair targets for rendering the
-      // repair effect.
+      // For ghosts, find some repair targets for rendering the repair effect
       if(isModuleActive(ModuleRepair))
          findRepairTargets();
    }
@@ -469,7 +465,11 @@ void Ship::idle(GameObject::IdleCallPath path)
          mTrail[i].tick(mCurrentMove.time);
       updateModuleSounds();
    }
+
+   if(mJustTeleported)
+      mJustTeleported--;
 }
+
 
 // Returns true if we found a suitable target
 bool Ship::findRepairTargets()
@@ -500,6 +500,7 @@ bool Ship::findRepairTargets()
    return mRepairTargets.size() != 0;
 }
 
+
 // Repairs ALL repair targets found above
 void Ship::repairTargets()
 {
@@ -515,6 +516,7 @@ void Ship::repairTargets()
    for(S32 i = 0; i < mRepairTargets.size(); i++)
       mRepairTargets[i]->damageObject(&di);
 }
+
 
 void Ship::processEnergy()
 {
@@ -796,7 +798,6 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 
    stream->writeFlag(updateMask & WarpPositionMask && updateMask != -1);
    stream->writeFlag(mJustTeleported);      // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
-   mJustTeleported = false;
 
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
    if(!shouldWritePosition)

@@ -871,12 +871,19 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mHighlightColumn--;
       if(mHighlightColumn < 0)
          mHighlightColumn = 0;
+
+      if(keyCode == BUTTON_DPAD_LEFT)
+         sortSelected();
+
   }
   else if(keyCode == KEY_RIGHT || keyCode == BUTTON_DPAD_RIGHT)
   {
       mHighlightColumn++;
       if(mHighlightColumn >= columns.size())
          mHighlightColumn = columns.size() - 1;
+
+      if(keyCode == BUTTON_DPAD_RIGHT)
+         sortSelected();
   }
 
    // The following keys only make sense if there are some servers to browse through

@@ -100,7 +100,7 @@ private:
    void push(lua_State *L);      // Push a LuaShip proxy object onto the stack
    bool mIsRobot;
 
-   bool mJustTeleported;
+   S32 mJustTeleported;
 
 protected:
    StringTableEntry mPlayerName;
