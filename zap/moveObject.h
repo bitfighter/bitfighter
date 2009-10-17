@@ -28,7 +28,7 @@
 
 #include "../tnl/tnlTypes.h"
 
-#include "gameObject.h" 
+#include "gameObject.h"
 
 namespace Zap
 {
@@ -77,7 +77,7 @@ public:
    Point getActualVel() { return mMoveState[ActualState].vel; }
    void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
 
-   void move(F32 time, U32 stateIndex, bool displacing);
+   void move(F32 time, U32 stateIndex, bool displacing = false, MoveObject *displacer = NULL);
    bool collide(GameObject *otherObject);
 
    GameObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);

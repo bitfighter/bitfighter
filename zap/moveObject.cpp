@@ -104,14 +104,13 @@ void MoveObject::updateExtent()
 //    }
 // }
 
+
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 static Vector<GameObject *> fillVector;
 
+// See http://flipcode.com/archives/Theory_Practice-Issue_01_Collision_Detection.shtml --> Example 1  May or may not be relevant
 F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)
 {
-   // ok, this ship wants to move to intendedPos
-   // so we need to figure out how far contactShip has to move so it won't be in the way
-
    F32 myRadius;
    F32 contactShipRadius;
 
@@ -121,6 +120,7 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
    getCollisionCircle(stateIndex, myPos, myRadius);   // getCollisionCircle sets myPos and myRadius
    contactShip->getCollisionCircle(stateIndex, contactShipPos, contactShipRadius);
 
+   // Find out if either of the colliding objects uses collisionPolys or not
    Vector<Point> dummy;
    F32 fixfact = (getCollisionPoly(dummy) || contactShip->getCollisionPoly(dummy)) ? 0 : 1;
 
@@ -131,19 +131,15 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 
    F32 a = v.dot(v);
    F32 b = 2 * v.dot(posDelta);
-   F32 c = posDelta.dot(posDelta) - R * R * fixfact;  // Adding the * 0 seems to fix the problem with asteroid-ship collision infininte loop
-                                                      // Note that that problem can also be fixed by making the asteroids only use their
-                                                      // collision circle.  While this adds some wonkiness with the collisions (makes asteroids
-                                                      // appear somehow "sticky", the fact is that ship-asteroid collision will be brief and usually
-                                                      // fatal, so they can't really interact much, even with shields on.  For gross movements, this
-                                                      // works fine.
+   F32 c = posDelta.dot(posDelta) - R * R;
+
    F32 t;
 
    bool result = FindLowestRootInInterval(a, b, c, 100000, t);
-   if(!result)
-      return 0;
-   return t;
+
+   return result ? t : -1;
 }
+
 
 const F32 moveTimeEpsilon = 0.000001f;
 const F32 velocityEpsilon = 0.00001f;
@@ -152,7 +148,7 @@ const F32 velocityEpsilon = 0.00001f;
 // isBeingDisplaced is true when the object is being pushed by something else, which will only happen in a collision
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
 
-void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced)
+void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, MoveObject *displacer)
 {
    U32 tryCount = 0;
    while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time
@@ -169,26 +165,30 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced)
       GameObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
       {
-         mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * moveTime;
+         mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * moveTime;    // Move to desired destination
          return;
       }
 
       // Collision!  Advance to the point of collision
       mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * collisionTime;
 
-      if(objectHit->getObjectTypeMask() & MoveableType)
-      {     // Collided with movable object
+      if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
+      {
          MoveObject *shipHit = (MoveObject *) objectHit;    // shipHit isn't necessarily a ship -- it could be any MoveableType object
          Point velDelta = shipHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
          Point posDelta = shipHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
-         if(posDelta.dot(velDelta) < 0) // There is a collision
+         // Prevent infinite loops with two objects trying to displace each other forever
+         if(isBeingDisplaced && shipHit == displacer)
+            return;
+
+         if(posDelta.dot(velDelta) < 0)   // shipHit is closing faster than we are ???
          {
             computeCollisionResponseMoveObject(stateIndex, shipHit);
             if(isBeingDisplaced)
                return;
          }
-         else
+         else                            // We're moving faster than the object we hit (I think)
          {
             Point intendedPos = mMoveState[stateIndex].pos + mMoveState[stateIndex].vel * moveTime;
 
@@ -196,9 +196,11 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced)
             F32 t = computeMinSeperationTime(stateIndex, shipHit, intendedPos);
 
             if(t <= 0)
-               return; // Some kind of math error - just stop simulating this ship
+               return;   // Some kind of math error, couldn't find result: stop simulating this ship
 
-            shipHit->move(t + displaceEpsilon, stateIndex, true);    // Move the displaced object
+            // Note that we could end up with an infinite feedback loop here, if, for some reason, two objects keep trying to displace
+            // one another, as this will just recurse deeper and deeper.
+            shipHit->move(t + displaceEpsilon, stateIndex, true, this);    // Move the displaced object a tiny bit, true -> isBeingDisplaced
          }
       }
       else if(objectHit->getObjectTypeMask() & (BarrierType | EngineeredType | ForceFieldType))
@@ -238,6 +240,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
       Vector<Point> poly;
       poly.clear();
+
       if(fillVector[i]->getCollisionPoly(poly))
       {
          Point cp;
@@ -251,10 +254,12 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
                if(!(collide1 && collide2))
                   continue;
+
                collisionPoint = cp;
                delta *= collisionFraction;
                collisionTime *= collisionFraction;
                collisionObject = fillVector[i];
+
                if(!collisionTime)
                   break;
             }
@@ -326,7 +331,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
    mMoveState[stateIndex].vel -= normal * MoveObjectCollisionElasticity * normal.dot(mMoveState[stateIndex].vel);
 
    // Emit some bump particles (try not to if we're running server side)
-   if(isGhost())
+   if(isGhost())     // i.e. on client side
    {
       F32 scale = normal.dot(mMoveState[stateIndex].vel) * 0.01f;
       if(scale > 0.5f)
@@ -353,26 +358,29 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 
 
 // Note that shipHit isn't necessarily a ship -- it could be any MoveObject
-// Also stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
-// Seems to run on both client and server side...
+// Runs on both client and server side...
 void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *shipHit)
 {
-   Point collisionVector = shipHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
+   // collisionVector is simply a line from the center of shipHit to the center of this
+   Point collisionVector = shipHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
    collisionVector.normalize();
-   F32 m1 = getMass();
-   F32 m2 = shipHit->getMass();
+   // F32 m1 = getMass();             <-- May be useful in future
+   // F32 m2 = shipHit->getMass();
 
-   F32 v1i = mMoveState[stateIndex].vel.dot(collisionVector);
+   // Initial velocities projected onto collisionVector
+   F32 v1i =          mMoveState[stateIndex].vel.dot(collisionVector);
    F32 v2i = shipHit->mMoveState[stateIndex].vel.dot(collisionVector);
 
-   F32 v1f, v2f;
+   F32 v1f, v2f;     // Final velocities
 
-   F32 e = 0.9f;  // What is this?
+   F32 e = 0.9f;     // Elasticity, I think
+
+   // Could incorporate m1 & m2 here in future
    v2f = ( e * (v1i - v2i) + v1i + v2i) / 2;
    v1f = ( v1i + v2i - v2f);
 
-   mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
+            mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
    shipHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
 
    if(!isGhost())    // i.e., we're on the server
@@ -383,11 +391,10 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
       if(!ship)
       {
-         // Since asteroids and ships are both MoveObjects, we should also check to see if ship hit an asteroid
+         // Since asteroids and ships are both MoveObjects, we'll also check to see if ship hit an asteroid
          ship = dynamic_cast<Ship *>(this);
          asteroid = dynamic_cast<Asteroid *>(shipHit);
       }
-
 
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
       {
@@ -402,9 +409,10 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
       }
    }
 
-   if(v1i > 0.25)
+   if(v1i > 0.25)    // Only make sound if the objects are moving fast enough
       SFXObject::play(SFXBounceObject, shipHit->mMoveState[stateIndex].pos, Point());
 }
+
 
 void MoveObject::updateInterpolation()
 {
