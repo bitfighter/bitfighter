@@ -1526,14 +1526,14 @@ void Robot::render(S32 layerIndex)
    //glScalef(visScale.x, visScale.y, 1);
    //glTranslatef(-offset.x, -offset.y, 0);
 
-glColor3f(1,1,1);
-   S32 xx = this->flightPlanTo;
-   glBegin(GL_LINE_STRIP);
-   for(S32 i = 0; i < flightPlan.size(); i++)
-   {
-      glVertex2f(flightPlan[i].x, flightPlan[i].y);
-   }
-   glEnd();
+//glColor3f(1,1,1);
+//   S32 xx = this->flightPlanTo;
+//   glBegin(GL_LINE_STRIP);
+//   for(S32 i = 0; i < flightPlan.size(); i++)
+//   {
+//      glVertex2f(flightPlan[i].x, flightPlan[i].y);
+//   }
+//   glEnd();
 
    //glPopMatrix();
 }

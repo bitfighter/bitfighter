@@ -173,6 +173,15 @@ void Ship::setActualPos(Point p, bool warp)
    if(warp)
    {
       setMaskBits(PositionMask | WarpPositionMask);
+
+      // OK, so what's going on here is this: when a ship comes into scope, TNL sets all the mask bits to 1.  Unfortunately, this triggers
+      // the spinny spawn effect, even if the ship isn't spawning, just flying into scope range.  To avoid this, we need an "out-of-
+      // channel", non-bitmap method of tracking when the teleport effect should be displayed.  That's what mJustTeleported is about.
+      // However, for some reason, this variable needs to persist for a time in order for it to be properly propagated to all the clients.
+      // Therefore, we set the value to 5 (determined experimentally), which means the value will be "true" for 5 frames.  1, 2, and 3 were
+      // all unsufficient to get the effect out to all clients.  5 works under lab conditions; only time will tell how it works in the field.
+      // It may be that this number needs to be bumped up a bit, or that it needs to work as some sort of timer, or other mechanism.  For now,
+      // though, this seems good.
       mJustTeleported = 5;
    }
    else
@@ -905,7 +914,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool explode = stream->readFlag();
    isBusy = stream->readFlag();
 
-   if(stream->readFlag())        // Ship just teleported 
+   if(stream->readFlag())        // Ship made a large change in position
       shipwarped = true;
 
    if(stream->readFlag())        // Ship just teleported 
