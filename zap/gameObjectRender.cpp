@@ -1095,7 +1095,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
 
 void renderSpeedZone(Vector<Point> points, U32 time)
 {
-   glColor3f(1, 0, 0);
+         glColor3f(1, 0, 0);
    for(S32 j = 0; j < 2; j++)
    {
       S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
@@ -1134,7 +1134,6 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha
             glVertex2f(x, y);
          }
       glEnd();
-
    glPopMatrix();
 
    //drawCircle(pos, 89 * scaleFact);

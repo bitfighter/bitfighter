@@ -63,7 +63,6 @@ void SpeedZone::preparePoints()
    computeExtent();
 }
 
-
 Vector<Point> SpeedZone::generatePoints(Point pos, Point dir)
 {
    Vector<Point> points;
@@ -86,7 +85,7 @@ Vector<Point> SpeedZone::generatePoints(Point pos, Point dir)
 
    Point tip = pos + parallel * SpeedZone::height;
    Point perpendic(pos.y - tip.y, tip.x - pos.x);
-   perpendic.normalize();   
+   perpendic.normalize();
 
    const S32 inset = 3;
    const F32 chevronThickness = SpeedZone::height / 3;
@@ -108,12 +107,10 @@ Vector<Point> SpeedZone::generatePoints(Point pos, Point dir)
    return points;
 }
 
-
 void SpeedZone::render()
 {
    renderSpeedZone(mPolyBounds, gClientGame->getCurrentTime());
 }
-
 
 // This object should be drawn above polygons
 S32 SpeedZone::getRenderSortValue()
@@ -161,7 +158,6 @@ void SpeedZone::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
-
 // Bounding box for quick collision-possibility elimination
 void SpeedZone::computeExtent()
 {
@@ -172,7 +168,6 @@ void SpeedZone::computeExtent()
    setExtent(extent);
 }
 
-
 // More precise boundary for more precise collision detection
 bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
@@ -180,7 +175,6 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
       polyPoints.push_back(mPolyBounds[i]);
    return true;
 }
-
 
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
@@ -220,7 +214,6 @@ bool SpeedZone::collide(GameObject *hitObject)
    return false;
 }
 
-
 // Runs only on server!
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
@@ -229,7 +222,6 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
       if(mExclusions[i].time < gServerGame->getCurrentTime())     // Exclusion has expired
          mExclusions.erase(i);
 }
-
 
 U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -244,7 +236,6 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
 
    return 0;
 }
-
 
 void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {

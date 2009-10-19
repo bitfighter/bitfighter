@@ -194,7 +194,7 @@ F32 Ship::getMaxVelocity()
    return isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity;
 }
 
- 
+
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
@@ -237,7 +237,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
  {
    // Create a small rectagle centered on the ship that we can use for findObjects
    Rect shipRect(getActualPos(), getActualPos());
-   shipRect.expand(Point(.1, .1));
+   shipRect.expand(Point(.1,.1));
 
    fillVector.clear();           // This vector will hold any matching zones
    findObjects(zoneType, fillVector, shipRect);
@@ -267,6 +267,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 // Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.b.)
 bool Ship::isOnObject(GameObject *object)
 {
+
    Point center;
    float radius;
    Vector<Point> polyPoints;
@@ -277,6 +278,7 @@ bool Ship::isOnObject(GameObject *object)
       return object->collisionPolyPointIntersect(polyPoints);
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return object->collisionPolyPointIntersect(center, radius);
+
    else
       return false;
 }
@@ -351,7 +353,7 @@ void Ship::controlMoveReplayComplete()
    Point delta = mMoveState[ActualState].pos - mMoveState[RenderState].pos;
    F32 deltaLen = delta.len();
 
-   // If the delta is either very small, or greater than the
+   // if the delta is either very small, or greater than the
    // max interpolation threshold, just warp to the new position
    if(deltaLen <= 0.5 || deltaLen > MaxControlObjectInterpDistance)
    {
@@ -368,10 +370,9 @@ void Ship::controlMoveReplayComplete()
       mInterpolating = true;
 }
 
-
 void Ship::idle(GameObject::IdleCallPath path)
 {
-   // Don't process exploded ships
+   // don't process exploded ships
    if(hasExploded)
       return;
 
@@ -434,7 +435,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    // Update the object in the game's extents database
    updateExtent();
 
-   // If this is a move executing on the server and it's
+   // if this is a move executing on the server and it's
    // different from the last move, then mark the move to
    // be updated to the ghosts.
    if(path == GameObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
@@ -450,7 +451,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
    {
-      // Process weapons and energy on controlled object objects
+      // process weapons and energy on controlled object objects
       processWeaponFire();
       processEnergy();
    }
@@ -478,7 +479,6 @@ void Ship::idle(GameObject::IdleCallPath path)
    if(mJustTeleported)
       mJustTeleported--;
 }
-
 
 // Returns true if we found a suitable target
 bool Ship::findRepairTargets()
@@ -509,7 +509,6 @@ bool Ship::findRepairTargets()
    return mRepairTargets.size() != 0;
 }
 
-
 // Repairs ALL repair targets found above
 void Ship::repairTargets()
 {
@@ -525,7 +524,6 @@ void Ship::repairTargets()
    for(S32 i = 0; i < mRepairTargets.size(); i++)
       mRepairTargets[i]->damageObject(&di);
 }
-
 
 void Ship::processEnergy()
 {
@@ -728,7 +726,6 @@ void Ship::writeControlState(BitStream *stream)
    stream->writeRangedU32(mActiveWeaponIndx, 0, WeaponCount);
 }
 
-
 void Ship::readControlState(BitStream *stream)
 {
    stream->read(&mMoveState[ActualState].pos.x);
@@ -741,7 +738,6 @@ void Ship::readControlState(BitStream *stream)
    mFireTimer.reset(fireTimer);
    mActiveWeaponIndx = stream->readRangedU32(0, WeaponCount);
 }
-
 
 // Writes the player's ghost update from the server to the client
 // Any changes here need to be reflected in Ship::unpackUpdate
@@ -788,7 +784,10 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 //   }
 //}
 
-   stream->writeFlag(updateMask & RespawnMask && updateMask != -1);       // Respawn --> only used by robots... don't send this when all flags are set
+
+   stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits 
+                                                               // are set (as happens when a ship comes into scope).  Therefore, we'll force 
+                                                               // this to be robot only.
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);
@@ -839,10 +838,10 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   bool positionChanged = false;    // True when position changes a little
+   bool positionChanged = false;    // True when position changes a little 
    bool shipwarped = false;         // True when position changes a lot
 
-   bool wasInitialUpdate = false; 
+   bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
 
 
@@ -923,20 +922,20 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny (sfx, spiral bg are done by the teleporter itself)
    }
 
-   if(stream->readFlag())        // UpdateMask
+   if(stream->readFlag())     // UpdateMask
    {
       ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
       readCompressedVelocity(mMoveState[ActualState].vel, BoostMaxVelocity + 1, stream);
       positionChanged = true;
-   } 
+   }
 
-   if(stream->readFlag())       // MoveMask
+   if(stream->readFlag())     // MoveMask
    {
-      mCurrentMove = Move();    // A new, blank move
+      mCurrentMove = Move();  // A new, blank move
       mCurrentMove.unpack(stream, false);
    }
 
-   if(stream->readFlag())       // PowersMask
+   if(stream->readFlag())     // PowersMask
    {
       bool wasActive[ModuleCount];
       for(S32 i = 0; i < ModuleCount; i++)

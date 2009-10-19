@@ -28,7 +28,7 @@
 
 #include "../tnl/tnlTypes.h"
 
-#include "gameObject.h"
+#include "gameObject.h" 
 
 namespace Zap
 {
