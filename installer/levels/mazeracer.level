@@ -1,7 +1,7 @@
 ZoneControlGameType 8 1
 LevelName MazeRacer
 LevelDescription The maze is different every time!!
-LevelCredits Watusimoto
+LevelCredits Watusimoto 
 GridSize 255
 MinPlayers 1
 MaxPlayers 6
