@@ -1,0 +1,17 @@
+ZoneControlGameType 8 1
+LevelName MazeRacer
+LevelDescription The maze is different every time!!
+LevelCredits Watusimoto 
+GridSize 255
+MinPlayers 1
+MaxPlayers 6
+Script mazegen.levelgen 10 10 0 0 1
+Team Blue 0 0 1
+Team Red 1 0 0
+GoalZone -1 19.2 19.8  19.5 19.8  19.7 19.7  19.8 19.5  19.8 19.2  19.9 19.1  19.9 19.9  19.1 19.9 
+Teleporter 5.5 5.5  13.5 13.5 
+Teleporter 17.5 13.5  13.5 17.5 
+Teleporter 5.5 17.5  17.5 5.5 
+Spawn 0 1.5 1.5 
+Spawn 1 1.5 1.5 
+FlagItem -1 19.5 19.5 
