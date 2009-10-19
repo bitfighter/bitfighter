@@ -90,6 +90,7 @@ Section "Install"
 
   SetOutPath "$INSTDIR\levels"
   File /r ".\levels\*.level"  
+  File /r ".\levels\*.levelgen"
 
   SetOutPath "$INSTDIR\robots"
   File /r ".\robots\*.bot" 
