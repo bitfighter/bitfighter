@@ -151,6 +151,11 @@ public:
 
    void setGridSize(F32 gridSize) { mGridSize = gridSize; }
 
+   static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PlayerSensorHorizVisDistance + PlayerScopeMargin,
+                                                                                   PlayerSensorVertVisDistance  + PlayerScopeMargin)
+                                                                           : Point(PlayerHorizVisDistance + PlayerScopeMargin,
+                                                                                   PlayerVertVisDistance  + PlayerScopeMargin); }
+
    F32 getGridSize() { return mGridSize; }
    U32 getCurrentTime() { return mCurrentTime; }
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)

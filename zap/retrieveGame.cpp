@@ -211,7 +211,7 @@ public:
       mGlowingZoneTeam = team;
    }
 
-
+   // Same code as in HTF, CTF
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
    {
       Parent::performProxyScopeQuery(scopeObject, connection);

@@ -220,10 +220,10 @@ class NetObject : public Object
 protected:
    enum NetFlag
    {
-    IsGhost =              BIT(1),  ///< Set if this is a ghost.
+      IsGhost =            BIT(1),  ///< Set if this is a ghost.
       ScopeLocal =         BIT(2),  ///< If set, this object ghosts only to the local client.
       Ghostable =          BIT(3),  ///< Set if this object can ghost at all.
-    MaxNetFlagBit = 15
+      MaxNetFlagBit = 15
    };
 
    BitSet32 mNetFlags;  ///< Flags field describing this object, from NetFlag.

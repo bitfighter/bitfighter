@@ -536,6 +536,8 @@ bool ServerGame::loadLevel(string filename)
       LuaLevelGenerator levelgen = LuaLevelGenerator(getPathFromFilename(filename), getGameType()->mScriptArgs, gServerGame->getGridSize(), this);
    }
 
+   getGameType()->onLevelLoaded();
+
    return true;
 }
 

@@ -195,6 +195,8 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    s2cSetFlagTeam(-1);
 }
 
+
+// Could probably be consolodated with HTF & others
 void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
 {
    Parent::performProxyScopeQuery(scopeObject, connection);
@@ -214,6 +216,8 @@ void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, GameCo
       }
    }
 }
+
+
 
 // Do some extra rendering required by this game
 void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)

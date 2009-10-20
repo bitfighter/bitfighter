@@ -103,9 +103,11 @@ class Robot;
 class GameType : public GameObject
 {
 private:
-   Point getSpawnPoint(S32 team);      // Picks a spawn point for ship or robot
+   Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
+   Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
+
 public:
    enum GameTypes
    {
@@ -155,7 +157,7 @@ public:
    virtual GameTypes getGameType() { return BitmatchGame; }
    virtual const char *getGameTypeString() { return "Bitmatch"; }                            // Will be overridden by other games
    virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }  //          -- ditto --
-   virtual bool isTeamGame() { return mTeams.size() > 1; }                                // Team game if we have teams.  Otherwise it's every man for himself.
+   virtual bool isTeamGame() { return mTeams.size() > 1; }                                   // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
    S32 getWinningScore() { return mWinningScore; }
@@ -168,7 +170,7 @@ public:
    virtual bool isTeamFlagGame() { return false; }          // Does flag-team orientation matter?  Only true in CTF, really.
    virtual S32 getFlagCount() { return mFlags.size(); }     // Return the number of game-significant flags
 
-   virtual bool isSpawnWithLoadoutGame() { return false; }                                // We do not spawn with our loadout, but instead need to pass through a loadout zone
+   virtual bool isSpawnWithLoadoutGame() { return false; }  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
@@ -212,7 +214,7 @@ public:
    struct ItemOfInterest
    {
       SafePtr<Item> theItem;
-      U32 teamVisMask;
+      U32 teamVisMask;        // Bitmask, where 1 = object is visible to team in that position, 0 if not
    };
 
    Vector<ItemOfInterest> mItemsOfInterest;
@@ -252,7 +254,6 @@ public:
       S32 maxval;    // Max value for this param
    };
 
-
    enum ScoringGroup {
       IndividualScore,
       TeamScore,
@@ -283,6 +284,7 @@ public:
    virtual Vector<GameType::ParameterDescription> describeArguments();
 
    void onAddedToGame(Game *theGame);
+   void onLevelLoaded();
 
    void idle(GameObject::IdleCallPath path);
 
@@ -316,13 +318,13 @@ public:
    void setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout);
 
    virtual Color getShipColor(Ship *s);         // Get the color of a ship
-
    virtual Color getTeamColor(S32 team);        // Get the color of a team, based on index
    Color getTeamColor(GameObject *theObject);   // Get the color of a team, based on object
 
    S32 getTeam(const char *playerName);         // Given a player, return their team
 
    const char *getTeamName(S32 team);           // Return the name of the team
+
 
    // game type flag methods for CTF, Rabbit, Football
    virtual void addFlag(FlagItem *theFlag) {  /* do nothing */  }
@@ -339,7 +341,6 @@ public:
    // Functions related to loading levels
    virtual bool processLevelItem(S32 argc, const char **argv);
    static Team readTeamFromLevelLine(S32 argc, const char **argv);
-
 
    void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount));

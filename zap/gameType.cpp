@@ -554,6 +554,7 @@ void GameType::renderObjectiveArrow(GameObject *target, Color c, F32 alphaMod)
    renderObjectiveArrow(nearestPoint, c, alphaMod);
 }
 
+
 void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
@@ -752,6 +753,16 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 }
 
 
+extern Rect gServerWorldBounds;
+
+void GameType::onLevelLoaded()
+{
+   mSpyBugs.clear();
+
+   // Find all spybugs in the game
+   gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
+}
+
 
 void GameType::onAddedToGame(Game *theGame)
 {
@@ -761,7 +772,6 @@ void GameType::onAddedToGame(Game *theGame)
 
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
 extern S32 gMaxPlayers;
-
 
 Team GameType::readTeamFromLevelLine(S32 argc, const char **argv)
 {
@@ -973,6 +983,7 @@ Point GameType::getSpawnPoint(S32 team)
    return mTeams[team].spawnPoints[spawnIndex];
 }
 
+
 // This gets run when the ship hits a loadout zone
 void GameType::updateShipLoadout(GameObject *shipObject)
 {
@@ -1008,8 +1019,8 @@ void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &l
 }
 
 
-extern Rect gServerWorldBounds;
 
+// Runs only on server, I think
 void GameType::performScopeQuery(GhostConnection *connection)
 {
    GameConnection *gc = (GameConnection *) connection;
@@ -1018,36 +1029,33 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    const Vector<SafePtr<GameObject> > &scopeAlwaysList = getGame()->getScopeAlwaysList();
 
-   gc->objectInScope(this);
+   gc->objectInScope(this);   // Put GameType in scope, always
 
+   // Make sure the "always-in-scope" objects are actually in scope
    for(S32 i = 0; i < scopeAlwaysList.size(); i++)
       if(!scopeAlwaysList[i].isNull())
          gc->objectInScope(scopeAlwaysList[i]);
 
    // readyForRegularGhosts is set once all the RPCs from the GameType
    // have been received and acknowledged by the client
-   ClientRef *cl = gc->getClientRef();
-   if(cl)
+   ClientRef *clientRef = gc->getClientRef();
+   if(clientRef)
    {
-      if(cl->readyForRegularGhosts && co)
+      if(clientRef->readyForRegularGhosts && co)
       {
          performProxyScopeQuery(co, (GameConnection *) connection);
-         gc->objectInScope(co);
+         gc->objectInScope(co);     // Put controlObject in scope ==> This is where the update mask gets set to 0xFFFFFFFF
       }
    }
 
-   // What does the spy bug see?
-   Vector<GameObject *> spyBugs;
-   Vector<GameObject *> fillVector;
+   static Vector<GameObject *> fillVector;
 
+   // What does the spy bug see?
    S32 teamId = gc->getClientRef()->teamId;
 
-   // Find all spybugs in the game
-   findObjects(SpyBugType, spyBugs, gServerWorldBounds);
-
-   for(S32 i = 0; i < spyBugs.size(); i++)
+   for(S32 i = 0; i < mSpyBugs.size(); i++)
    {
-      SpyBug *sb = dynamic_cast<SpyBug *>(spyBugs[i]);     
+      SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);     
       if(!sb->isVisibleToPlayer( cr->teamId, cr->name, getGame()->getGameType()->isTeamGame() ))
          break;
       fillVector.clear();
@@ -1063,6 +1071,72 @@ void GameType::performScopeQuery(GhostConnection *connection)
 }
 
 
+// Here is where we determine which objects are visible from player's ships.  Only runs on server.
+void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
+{
+   static Vector<GameObject *> fillVector;
+   fillVector.clear();
+
+   // If this block proves unnecessary, then we can remove the whole itemsOfInterest thing, I think...
+   //if(isTeamGame())
+   //{
+   //   // Start by scanning over all items located in queryItemsOfInterest()
+   //   for(S32 i = 0; i < mItemsOfInterest.size(); i++)   
+   //   {
+   //      if(mItemsOfInterest[i].teamVisMask & (1 << scopeObject->getTeam()))    // Item is visible to scopeObject's team
+   //      {
+   //         Item *theItem = mItemsOfInterest[i].theItem;
+   //         connection->objectInScope(theItem);
+
+   //         if(theItem->isMounted())                                 // If item is mounted...
+   //            connection->objectInScope(theItem->getMount());       // ...then the mount is visible too
+   //      }
+   //   }
+   //}
+
+   // If we're in commander's map mode, then we can see what our teammates can see.  This will
+   // also scope what we can see.
+   if(isTeamGame() && connection->isInCommanderMap())
+   {
+      S32 teamId = connection->getClientRef()->teamId;
+
+      for(S32 i = 0; i < mClientList.size(); i++)
+      {
+         if(mClientList[i]->teamId != teamId)      // Wrong team
+            continue;
+
+         if(!mClientList[i]->clientConnection)     // No client
+            continue;                          
+
+         Ship *co = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
+         TNLAssert(co, "Null control object!");
+
+         Point pos = co->getActualPos();
+         Rect queryRect(pos, pos);
+         queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
+
+         findObjects(scopeObject == co ? AllObjectTypes : CommandMapVisType, fillVector, queryRect);
+      }
+   } 
+   else     // Do a simple query of the objects within scope range of the ship
+   {
+      // Note that if we make mine visibility controlled by server, here's where we'd put the code
+      Point pos = scopeObject->getActualPos();
+      Ship *co = dynamic_cast<Ship *>(scopeObject);
+      TNLAssert(co, "Null control object!");
+
+      Rect queryRect(pos, pos);
+      queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
+
+      findObjects(AllObjectTypes, fillVector, queryRect);
+   }
+
+   // Set object-in-scope for all objects found above
+   for(S32 i = 0; i < fillVector.size(); i++)
+      connection->objectInScope(fillVector[i]);
+}
+
+
 void GameType::addItemOfInterest(Item *theItem)
 {
    ItemOfInterest i;
@@ -1072,16 +1146,18 @@ void GameType::addItemOfInterest(Item *theItem)
 }
 
 
+// Here we'll cycle through all itemsOfInterest, then find any ships within scope range of each.  We'll then mark the object as being visible
+// to those teams with ships close enough to see it, if any.  Called from idle()
 void GameType::queryItemsOfInterest()
 {
    static Vector<GameObject *> fillVector;
+
    for(S32 i = 0; i < mItemsOfInterest.size(); i++)
    {
       ItemOfInterest &ioi = mItemsOfInterest[i];
-      ioi.teamVisMask = 0;
+      ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
       Point pos = ioi.theItem->getActualPos();
-      Point scopeRange(Game::PlayerSensorHorizVisDistance,
-         Game::PlayerSensorVertVisDistance);
+      Point scopeRange(Game::PlayerSensorHorizVisDistance, Game::PlayerSensorVertVisDistance);
       Rect queryRect(pos, pos);
 
       queryRect.expand(scopeRange);
@@ -1093,89 +1169,14 @@ void GameType::queryItemsOfInterest()
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
 
-         if( (theShip->isModuleActive(ModuleSensor) && delta.x < Game::PlayerSensorHorizVisDistance &&
-               delta.y < Game::PlayerSensorVertVisDistance) ||
-               (delta.x < Game::PlayerHorizVisDistance &&
-               delta.y < Game::PlayerVertVisDistance))
-               ioi.teamVisMask |= (1 << theShip->getTeam());
+         if( (theShip->isModuleActive(ModuleSensor) && delta.x < Game::PlayerSensorHorizVisDistance && delta.y < Game::PlayerSensorVertVisDistance) ||
+               (delta.x < Game::PlayerHorizVisDistance && delta.y < Game::PlayerVertVisDistance) )
+            ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
       fillVector.clear();
    }
 }
 
-
-// Here is where we determine which objects are visible from player's ships.  Only runs on server?
-void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
-{
-   static Vector<GameObject *> fillVector;
-   fillVector.clear();
-
-   if(isTeamGame())
-   {
-      for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-      {
-         if(mItemsOfInterest[i].teamVisMask & (1 << scopeObject->getTeam()))
-         {
-            Item *theItem = mItemsOfInterest[i].theItem;
-            connection->objectInScope(theItem);
-            if(theItem->isMounted())
-               connection->objectInScope(theItem->getMount());
-         }
-      }
-   }
-
-   if(connection->isInCommanderMap() && isTeamGame())
-   {
-      S32 teamId = connection->getClientRef()->teamId;
-
-      for(S32 i = 0; i < mClientList.size(); i++)
-      {
-         if(mClientList[i]->teamId == teamId)      // All members of a team can see the same objects
-         {
-            if(!mClientList[i]->clientConnection)
-               continue;
-
-            Ship *co = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
-            if(!co)
-               continue;
-
-            Point pos = co->getActualPos();
-            Point scopeRange;
-            if(co->isModuleActive(ModuleSensor))
-               scopeRange.set(Game::PlayerSensorHorizVisDistance + Game::PlayerScopeMargin,
-                              Game::PlayerSensorVertVisDistance + Game::PlayerScopeMargin);
-            else
-               scopeRange.set(Game::PlayerHorizVisDistance + Game::PlayerScopeMargin,
-                              Game::PlayerVertVisDistance + Game::PlayerScopeMargin);
-
-            Rect queryRect(pos, pos);
-
-            queryRect.expand(scopeRange);
-            findObjects(scopeObject == co ? AllObjectTypes : CommandMapVisType, fillVector, queryRect);
-         }
-      } // end for
-   }
-   else     // Not in commander's map, or only 1 team
-   {
-      Point pos = scopeObject->getActualPos();
-      Ship *co = dynamic_cast<Ship *>(scopeObject);
-      Point scopeRange;
-
-      if(co->isModuleActive(ModuleSensor))
-         scopeRange.set(Game::PlayerSensorHorizVisDistance + Game::PlayerScopeMargin,
-                        Game::PlayerSensorVertVisDistance + Game::PlayerScopeMargin);
-      else
-         scopeRange.set(Game::PlayerHorizVisDistance + Game::PlayerScopeMargin,
-                        Game::PlayerVertVisDistance + Game::PlayerScopeMargin);
-
-      Rect queryRect(pos, pos);
-      queryRect.expand(scopeRange);
-      findObjects(AllObjectTypes, fillVector, queryRect);
-   }
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-      connection->objectInScope(fillVector[i]);
-}
 
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
@@ -1190,6 +1191,7 @@ Color GameType::getTeamColor(S32 team)
    else
       return mTeams[team].color;
 }
+
 
 // Given a player's name, return his team
 S32 GameType::getTeam(const char *playerName)
@@ -1527,7 +1529,6 @@ void GameType::addClientGameMenuOptions(Vector<MenuItem> &menuOptions)
       }
    }
 }
-
 
 
 // Process any additional game-specific menu items added above

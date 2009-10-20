@@ -205,19 +205,19 @@ void GhostConnection::prepareWritePacket()
 
    if(!doesGhostFrom() && !mGhosting)
       return;
-   // first step is to check all our polled ghosts:
+   // First step is to check all our polled ghosts:
 
    // 1. Scope query - find if any new objects have come into
    //    scope and if any have gone out.
 
    // Each packet we loop through all the objects with non-zero masks and
    // mark them as "out of scope" before the scope query runs.
-   // if the object has a zero update mask, we wait to remove it until it requests
-   // an update
+   // If the object has a zero update mask, we wait to remove it until it requests
+   // an update.
 
    for(S32 i = 0; i < mGhostZeroUpdateIndex; i++)
    {
-      // increment the updateSkip for everyone... it's all good
+      // Increment the updateSkip for everyone... it's all good
       GhostInfo *walk = mGhostArray[i];
       walk->updateSkipCount++;
       if(!(walk->flags & (GhostInfo::ScopeLocalAlways)))
@@ -230,7 +230,7 @@ void GhostConnection::prepareWritePacket()
 
 bool GhostConnection::isDataToTransmit()
 {
-   // once we've run the scope query - if there are no objects that need to be updated,
+   // Once we've run the scope query - if there are no objects that need to be updated,
    // we return false
    return Parent::isDataToTransmit() || mGhostZeroUpdateIndex != 0;
 }
@@ -620,19 +620,21 @@ bool GhostConnection::validateGhostArray()
    return true;
 }
 
+
 void GhostConnection::objectInScope(NetObject *obj)
 {
-   if (!mScoping || !doesGhostFrom())
+   if (!mScoping || !doesGhostFrom())     // doesGhostFrom ==>  Does this GhostConnection ghost NetObjects to the remote host?
       return;
+
 	if (!obj->isGhostable() || (obj->isScopeLocal() && !isLocalConnection()))
 		return;
+
    S32 index = obj->getHashId() & GhostLookupTableMask;
    
-   // check if it's already in scope
-   // the object may have been cleared out without the lookupTable being cleared
+   // Check if it's already in scope:
+   // The object may have been cleared out without the lookupTable being cleared
    // so validate that the object pointers are the same.
-
-   for(GhostInfo *walk = mGhostLookupTable[index ]; walk; walk = walk->nextLookupInfo)
+   for(GhostInfo *walk = mGhostLookupTable[index]; walk; walk = walk->nextLookupInfo)
    {
       if(walk->obj != obj)
          continue;
@@ -640,7 +642,7 @@ void GhostConnection::objectInScope(NetObject *obj)
       return;
    }
 
-   if (mGhostFreeIndex == MaxGhostCount)
+   if(mGhostFreeIndex == MaxGhostCount)
       return;
 
    GhostInfo *giptr = mGhostArray[mGhostFreeIndex];

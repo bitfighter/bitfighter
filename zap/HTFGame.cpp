@@ -210,7 +210,7 @@ public:
       }
    }
 
-
+   // Same code as in retrieveGame, CTF
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
    {
       Parent::performProxyScopeQuery(scopeObject, connection);

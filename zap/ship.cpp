@@ -435,7 +435,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    // Update the object in the game's extents database
    updateExtent();
 
-   // if this is a move executing on the server and it's
+   // If this is a move executing on the server and it's
    // different from the last move, then mark the move to
    // be updated to the ghosts.
    if(path == GameObject::ServerIdleControlFromClient && !mCurrentMove.isEqualMove(&mLastMove))
@@ -451,7 +451,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
    {
-      // process weapons and energy on controlled object objects
+      // Process weapons and energy on controlled object objects
       processWeaponFire();
       processEnergy();
    }
@@ -561,11 +561,11 @@ void Ship::processEnergy()
       mModuleActive[ModuleBoost] = false;
    }
 
-   // No repair with no targets.
+   // No repair with no targets
    if(mModuleActive[ModuleRepair] && !findRepairTargets())
       mModuleActive[ModuleRepair] = false;
 
-   // No cloak with nearby sensored people.
+   // No cloak with nearby sensored people
    if(mModuleActive[ModuleCloak])
    {
       if(mWeaponFireDecloakTimer.getCurrent() != 0)

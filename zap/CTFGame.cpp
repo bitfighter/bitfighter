@@ -120,6 +120,8 @@ void CTFGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
       mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
 }
 
+
+// Identical to HTF, Retrieve
 void CTFGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
 {
    Parent::performProxyScopeQuery(scopeObject, connection);
