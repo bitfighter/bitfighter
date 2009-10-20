@@ -19,7 +19,10 @@ InstallDir "$PROGRAMFILES\Bitfighter"
 InstallDirRegKey HKCU "Software\Bitfighter" ""
 
 ;Request application privileges for Windows Vista
-RequestExecutionLevel user
+RequestExecutionLevel admin
+
+
+!SetCompressor /SOLID lzma
 
 ;--------------------------------
 ; Overall Interface Settings
@@ -119,11 +122,7 @@ Section "Install"
       SetOutPath $INSTDIR
       CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe"
    NoDesktopIcon:
-  
-   ;MessageBox MB_YESNO|MB_ICONQUESTION "Bitfighter installation has completed.  Would you like to play?" IDNO NoPlay
-   ;ExecShell open '$INSTDIR\Bitfighter.exe'
-   ;NoPlay:
-   
+     
    SetOutPath $INSTDIR     
 SectionEnd
 
