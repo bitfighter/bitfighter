@@ -1015,8 +1015,6 @@ void ClientGame::renderCommander()
       playerTeam = u->getTeam();
       Color teamColor = gt->getTeamColor(playerTeam);
 
-      Color coreColor = teamColor * zoomFrac * 0.35;
-
       for(S32 i = 0; i < renderObjects.size(); i++)
       {
          // Render ship visibility range, and that of our teammates
@@ -1031,7 +1029,7 @@ void ClientGame::renderCommander()
                Point p = ship->getRenderPos();
                Point visExt = computePlayerVisArea(ship);
 
-               glColor(coreColor);
+               glColor(teamColor * zoomFrac * 0.35);
 
                glBegin(GL_POLYGON);
                   glVertex2f(p.x - visExt.x, p.y - visExt.y);
@@ -1039,19 +1037,6 @@ void ClientGame::renderCommander()
                   glVertex2f(p.x + visExt.x, p.y + visExt.y);
                   glVertex2f(p.x - visExt.x, p.y + visExt.y);
                glEnd();
-
-               // Now render a fading gradient to the edge of the truly visible area
-               glEnable(GL_BLEND);
-                  glBegin(GL_POLYGON);
-                     glColor(coreColor, 1);
-                     glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                     glVertex2f(p.x + visExt.x, p.y - visExt.y);
-
-                     glColor(coreColor, 0.10);     // Blackish
-                     glVertex2f(p.x - entireExtent.x - margin, p.y - entireExtent.y - margin);
-                     glVertex2f(p.x + entireExtent.x + margin, p.y - entireExtent.y - margin);
-                  glEnd();
-               glDisable(GL_BLEND);
             }
          }
       }
