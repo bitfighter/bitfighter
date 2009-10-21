@@ -248,8 +248,8 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
 
 
 // Destructor
-ServerGame::~ServerGame() 
-{  
+ServerGame::~ServerGame()
+{
    // Delete any objects on the delete list
    processDeleteList(0xFFFFFFFF);
 
@@ -267,14 +267,14 @@ S32 ServerGame::getLevelNameCount()
 
 class Robot;
 
-U32 ServerGame::getRobotCount() 
-{ 
-   return Robot::getRobotCount(); 
-} 
+U32 ServerGame::getRobotCount()
+{
+   return Robot::getRobotCount();
+}
 
 
 extern CmdLineSettings gCmdLineSettings;
- 
+
 // This gets called when you first host a game.
 void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
 {
@@ -319,7 +319,7 @@ void ServerGame::loadNextLevel()
             name = lname.c_str();
 
          StringTableEntry type(getGameType()->getGameTypeString());
-         
+
          // Save some key level parameters
          mLevelNames.push_back(name);
          mLevelTypes.push_back(type);
@@ -349,7 +349,7 @@ void ServerGame::loadNextLevel()
    }
 
    if(mLevelLoadIndex == mLevelList.size())
-      gHostingModePhase = DoneLoadingLevels;   
+      gHostingModePhase = DoneLoadingLevels;
 }
 
 
@@ -399,7 +399,7 @@ StringTableEntry ServerGame::getCurrentLevelType()
 
 
 // Should return a number between -1 and 1
-inline F32 getCurrentRating(GameConnection *conn) 
+inline F32 getCurrentRating(GameConnection *conn)
 {
    if(conn->mTotalScore == 0 && conn->mGamesPlayed == 0)
       return .5;
@@ -454,7 +454,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Analyze zone connections
    BotNavMeshZone::buildBotNavMeshZoneConnections();     // Does nothing if there are no botNavMeshZones defined
 
- 
+
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -591,8 +591,8 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
             logprintf("Object %s had invalid parameters, ignoring...", obj);
             object->removeFromGame();
             object->destroySelf();
-         }                                                      
-      }                                                    
+         }
+      }
    }
 }
 
@@ -838,10 +838,10 @@ void ClientGame::supressScreensaver()
    keyup.time = NULL;
    keyup.dwExtraInfo = NULL;
 
-	tagINPUT array[1];
-	array[0].type = INPUT_KEYBOARD;
-	array[0].ki = keyup;
-	SendInput(1, array, sizeof(INPUT));
+   tagINPUT array[1];
+   array[0].type = INPUT_KEYBOARD;
+   array[0].ki = keyup;
+   SendInput(1, array, sizeof(INPUT));
 #endif
 }
 
@@ -1015,8 +1015,8 @@ void ClientGame::renderCommander()
       playerTeam = u->getTeam();
       Color teamColor = gt->getTeamColor(playerTeam);
 
-      F32 colorFactor = zoomFrac * 0.35;
-      glColor(teamColor * colorFactor);
+      Color coreColor = teamColor * zoomFrac * 0.35;
+
       for(S32 i = 0; i < renderObjects.size(); i++)
       {
          // Render ship visibility range, and that of our teammates
@@ -1031,12 +1031,27 @@ void ClientGame::renderCommander()
                Point p = ship->getRenderPos();
                Point visExt = computePlayerVisArea(ship);
 
+               glColor(coreColor);
+
                glBegin(GL_POLYGON);
                   glVertex2f(p.x - visExt.x, p.y - visExt.y);
                   glVertex2f(p.x + visExt.x, p.y - visExt.y);
                   glVertex2f(p.x + visExt.x, p.y + visExt.y);
                   glVertex2f(p.x - visExt.x, p.y + visExt.y);
                glEnd();
+
+               // Now render a fading gradient to the edge of the truly visible area
+               glEnable(GL_BLEND);
+                  glBegin(GL_POLYGON);
+                     glColor(coreColor, 1);
+                     glVertex2f(p.x - visExt.x, p.y - visExt.y);
+                     glVertex2f(p.x + visExt.x, p.y - visExt.y);
+
+                     glColor(coreColor, 0.10);     // Blackish
+                     glVertex2f(p.x - entireExtent.x - margin, p.y - entireExtent.y - margin);
+                     glVertex2f(p.x + entireExtent.x + margin, p.y - entireExtent.y - margin);
+                  glEnd();
+               glDisable(GL_BLEND);
             }
          }
       }
@@ -1045,7 +1060,6 @@ void ClientGame::renderCommander()
       mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldBounds);
 
       // Render spy bug visibility range second, so ranges appear above ship scanner range
-      colorFactor = zoomFrac * 0.45;     // Slightly different color than that used for ships
       for(S32 i = 0; i < spyBugObjects.size(); i++)
       {
          if(spyBugObjects[i]->getObjectTypeMask() & SpyBugType)
@@ -1058,7 +1072,7 @@ void ClientGame::renderCommander()
             {
                Point p = spyBugObjects[i]->getRenderPos();
                Point visExt(gSpyBugRange, gSpyBugRange);
-               glColor(teamColor * colorFactor);
+               glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
 
                glBegin(GL_POLYGON);
                   glVertex2f(p.x - visExt.x, p.y - visExt.y);
