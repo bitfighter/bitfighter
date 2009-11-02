@@ -77,7 +77,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 // Constructor 
-GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
+GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000), mZoneGlowTimer(mZoneGlowTime)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
@@ -89,7 +89,6 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    maxRecPlayers = -1;
    mCanSwitchTeams = true;    // Players can switch right away
    mLocalClient = NULL;       // Will be assigned by the server after a connection is made
-   mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;     // By default, all zones glow
 }
 
@@ -194,6 +193,7 @@ void GameType::printRules()
    }
 }
 
+
 string GameType::getScoringEventDescr(ScoringEvent event)
 {
    switch(event)
@@ -209,6 +209,8 @@ string GameType::getScoringEventDescr(ScoringEvent event)
          return "Kill enemy turret";
       case KillOwnTurret:
          return "Kill own turret";
+      case KilledByAsteroid:
+         return "Killed by asteroid";
 
       // CTF specific:
       case CaptureFlag:
@@ -1366,8 +1368,13 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
 
       s2cKillMessage(clientRef->name, killerRef->name, killerObject->getKillString());
    }
-   else              // Unknown killer... not a scorable event
+   else              // Unknown killer... not a scorable event.  Unless killer was an asteroid!
+   {
+      if( dynamic_cast<Asteroid *>(killerObject) )
+         updateScore(clientRef, KilledByAsteroid, 0);
+
       s2cKillMessage(clientRef->name, NULL, killerDescr);
+   }
 
    clientRef->respawnTimer.reset(RespawnDelay);
 }
@@ -1393,6 +1400,9 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
    {
       // Individual scores
       S32 points = getEventScore(IndividualScore, scoringEvent, data);
+      if(points == 0)
+         return;
+
       player->score += points;
       player->clientConnection->mScore += points;
 
@@ -1409,7 +1419,11 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       if(team < 0) 
          return;
 
-      newScore = mTeams[team].score + getEventScore(TeamScore, scoringEvent, data);
+      S32 points = getEventScore(TeamScore, scoringEvent, data);
+      if(points == 0)
+         return;
+
+      newScore = mTeams[team].score + points;
       mTeams[team].score = newScore;         
       s2cSetTeamScore(team, newScore);          // Broadcast new team score
 
@@ -1489,6 +1503,8 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
             return 0;
          case KillOwnTurret:
             return 0;
+         case KilledByAsteroid:
+            return 0;
          default:
             return naScore;
       }
@@ -1506,6 +1522,8 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
+            return 0;
+         case KilledByAsteroid:
             return 0;
          default:
             return naScore;

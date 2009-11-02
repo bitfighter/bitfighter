@@ -572,8 +572,11 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
       else
          strncpy(obj, argv[0], MAXOBJLEN);
 
-      TNL::Object *theObject = TNL::Object::create(obj);      // Create an object of the type specified on the line
+      TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
+
+
+
       if(!object)    // Well... that was a bad idea!
       {
          TNL::logprintf("Invalid object type: %s -- ignoring", obj);

@@ -648,6 +648,13 @@ void Ship::processEnergy()
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
+   // Deal with grenades and other explody things, even if they cause no damage                    
+   if(theInfo->damageType == DamageTypeArea)
+      mImpulseVector += theInfo->impulseVector; 
+
+   if (theInfo->damageAmount == 0)
+      return;
+
    if(theInfo->damageAmount > 0)
    {
       if(!getGame()->getGameType()->objectCanDamageObject(theInfo->damagingObject, this))
@@ -657,16 +664,15 @@ void Ship::damageObject(DamageInfo *theInfo)
       if(isModuleActive(ModuleShield)) // && mEnergy >= EnergyShieldHitDrain)     // Commented code will cause
       {                                                                           // shields to drain when they
          //mEnergy -= EnergyShieldHitDrain;                                       // have been hit.
-
-         // Deal with grenades                              // Should probably find a way not to
-         if(theInfo->damageType == DamageTypeArea)          // duplicate this block with that
-            mImpulseVector += theInfo->impulseVector;       // down a little lower...
          return;
       }
    }
 
+   // Remember that healing things will do negative damage
+
    mHealth -= theInfo->damageAmount;
    setMaskBits(HealthMask);
+
    if(mHealth <= 0)
    {
       mHealth = 0;
@@ -674,10 +680,6 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
    else if(mHealth > 1)
       mHealth = 1;
-
-   // Deal with grenades
-   if(theInfo->damageType == DamageTypeArea)
-      mImpulseVector += theInfo->impulseVector;
 }
 
 

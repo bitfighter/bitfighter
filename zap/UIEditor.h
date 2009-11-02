@@ -51,6 +51,17 @@ enum VertexRenderStyles
 };
 
 
+
+// From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
+struct SaveException : public std::exception
+{
+   string msg;
+
+   SaveException(string str) : msg(str) { }    // Constructor
+   const char* what() const throw() { return msg.c_str(); }
+};
+
+
 //class MeshBox
 //{
 //public:
@@ -181,10 +192,10 @@ private:
    string mEditFileName;               // Manipulate with get/setLevelFileName
 
    bool mDraggingObjects;
-   
+
    S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
    SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
-   
+
    void doneEditingSpecialItem(bool save);    // Gets run when user exits special-item editing mode
    U32 getNextAttr(S32 item);                 // Assist on finding the next attribute this item is capable of editing,
                                               // for cycling through the various editable attributes

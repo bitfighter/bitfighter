@@ -307,6 +307,8 @@ public:
                return 0;
             case KillOwnTurret:
                return 0;
+            case KilledByAsteroid:
+               return 0;
 		      case ReturnFlagToZone:
                return 1;
             case RemoveFlagFromEnemyZone:
@@ -331,6 +333,8 @@ public:
                return 1;
             case KillOwnTurret:
                return -1;
+            case KilledByAsteroid:
+               return 0;
             case ReturnFlagToZone:
                return 2;
             case RemoveFlagFromEnemyZone:

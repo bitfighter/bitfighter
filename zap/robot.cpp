@@ -131,6 +131,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setGTEnum(KillTeammate);
    setGTEnum(KillEnemyTurret);
    setGTEnum(KillOwnTurret);
+   setGTEnum(KilledByAsteroid);
    setGTEnum(CaptureFlag);
    setGTEnum(CaptureZone);
    setGTEnum(UncaptureZone);
@@ -248,7 +249,7 @@ S32 LuaRobot::setAnglePt(lua_State *L)
    static const char *methodName = "Robot:setAnglePt()";
    checkArgCount(L, 1, methodName);
    Point point = getPoint(L, 1, methodName);
-   
+
    Move move = thisRobot->getCurrentMove();
    move.angle = thisRobot->getAnglePt(point);
    thisRobot->setCurrentMove(move);
@@ -1207,7 +1208,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
    // to the string location subsequently, and our vals will change from under us.  That's bad!
-   
+
    // We're using string here as a stupid way to get done what we need to do... perhaps there is a better way.
 
    for(S32 i = 1; i < argc; i++)
@@ -1368,9 +1369,9 @@ void Robot::idle(GameObject::IdleCallPath path)
             try {
                gServerGame->getGameType()->spawnRobot(this);
             }
-            catch(string msg)
+            catch(LuaException &e)
             {
-               logError("Robot error during spawn: %s.  Shutting robot down.", msg.c_str());
+               logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
                delete this;
             }
          }
@@ -1392,32 +1393,20 @@ void Robot::idle(GameObject::IdleCallPath path)
       mCurrentMove.right = 0;
       mCurrentMove.left = 0;
 
-      //try
-      //{
-
-      lua_getglobal(L, "getMove");
+      try
+      {
+         lua_getglobal(L, "getMove");
          //lua_call(L, 0, 0);
 
-      if (lua_pcall(L, 0, 0, 0) != 0)
+         if (lua_pcall(L, 0, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
       {
-         logError("Robot error running getMove(): %s.  Shutting robot down.", lua_tostring(L, -1));
+         logError("Robot error running getMove(): %s.  Shutting robot down.", e.what());
          delete this;
          return;
       }
-
-      //}
-      //catch (string e)
-      //{
-      //   logError("Robot error running getMove(): %s.  Shutting robot down.", e.c_str());
-      //   delete this;
-      //   return;
-      //}
-      //catch (...)    // Catches any other errors not caught above --> should never happen
-      //{
-      //   logError("Robot error: Unknown exception.  Shutting robot down");
-      //   delete this;
-      //   return;
-      //}
 
 
       // If we've changed the mCurrentMove, then we need to set

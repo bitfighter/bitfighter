@@ -311,6 +311,8 @@ public:
                return 0;
             case KillOwnTurret:
                return 0;
+            case KilledByAsteroid:
+               return 0;
             case ReturnFlagToZone:
                return 0;
             case HoldFlagInZone:		// Per ScoreTime ms
@@ -335,6 +337,8 @@ public:
                return 1;
             case KillOwnTurret:
                return -1;
+            case KilledByAsteroid:
+               return 0;
 		      case ReturnFlagToZone:
 			      return 2;
 		      case HoldFlagInZone:		// There's not a good way to award these points

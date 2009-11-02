@@ -80,8 +80,10 @@ static Vector<EditorUserInterface::WorldItem> *mLoadTarget;
 
 void saveLevelCallback()
 {
-   gEditorUserInterface.saveLevel(true, true);
-   UserInterface::reactivateMenu(gMainMenuUserInterface);
+   if(gEditorUserInterface.saveLevel(true, true))
+      UserInterface::reactivateMenu(gMainMenuUserInterface);
+   else
+      gEditorUserInterface.reactivate();
 }
 
 
@@ -816,6 +818,8 @@ void EditorUserInterface::onActivate()
 
    mEditingSpecialAttrItem = -1;
    mSpecialAttribute = None;
+
+   mSaveMsgTimer = 0;
 }
 
 extern Vector<StringTableEntry> gLevelList;
@@ -1239,9 +1243,9 @@ void EditorUserInterface::renderBarrier(Vector<Point> verts, bool selected, F32 
    }
 
    if(selected)
-      glColor(yellow, alpha); 
+      glColor(yellow, alpha);
    else
-      glColor(blue, alpha);    
+      glColor(blue, alpha);
 
    glLineWidth(3);
    renderPoly(verts, false);
@@ -1316,7 +1320,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          else if(item.index == ItemTextItem)
             glColor(blue, alpha);
 
-         if(item.selected || (item.litUp && vertexToLightUp == -1))		// ScriptItems are never selected
+         if(item.selected || (item.litUp && vertexToLightUp == -1))     // ScriptItems are never selected
             glColor(yellow);
 
          glBegin(GL_POLYGON);
@@ -1343,7 +1347,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             glEnd();
          }
 
-         glLineWidth(gDefaultLineWidth);			// Restore default value
+         glLineWidth(gDefaultLineWidth);        // Restore default value
 
          // If this is a textItem, and either the item or either vertex is selected, draw the text
          if(!isDockItem && gGameItemRecs[item.index].hasText)
@@ -1356,13 +1360,13 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
             item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
 
-			// Use this more precise F32 calculation of size for smoother interactive rendering.
-			// We'll use U32 approximation in game.
+         // Use this more precise F32 calculation of size for smoother interactive rendering.
+         // We'll use U32 approximation in game.
             glColor(getTeamColor(item.team), alpha);
             F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);
 
             drawAngleStringf_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c",
-            		item.text.c_str(), cursorBlink && mSpecialAttribute == Text && isBeingEdited ? '_' : 0);
+                  item.text.c_str(), cursorBlink && mSpecialAttribute == Text && isBeingEdited ? '_' : 0);
 
             if((item.selected || item.litUp) && mSpecialAttribute == None)
             {
@@ -1372,7 +1376,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          }
          else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
          {
-            if(((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited) 
+            if(((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
             {
                glColor((mSpecialAttribute != GoFastSnap) ? white : inactiveSpecialAttributeColor);
                drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", item.speed);
@@ -1424,23 +1428,23 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             if(item.index == ItemTeleporter)
             {
                drawString(pos.x - getStringWidth(labelSize, "Teleport") / 2, pos.y + labelSize + 2,
-               		labelSize, "Teleport");
+                     labelSize, "Teleport");
                drawString(pos.x - getStringWidth(labelSize, "Intake Vortex") / 2, pos.y + 2 * labelSize + 5,
-               		labelSize, "Intake Vortex");
+                     labelSize, "Intake Vortex");
             }
             else if(item.index == ItemSpeedZone)
             {
                drawString(pos.x - getStringWidth(labelSize, "GoFast") / 2, pos.y + labelSize + 2,
-               		labelSize, "GoFast");
+                     labelSize, "GoFast");
                drawString(pos.x - getStringWidth(labelSize, "Location") / 2, pos.y + 2 * labelSize + 5,
-               		labelSize, "Location");
+                     labelSize, "Location");
             }
             else if(item.index == ItemTextItem)
             {
                drawString(pos.x - getStringWidth(labelSize, "Text Item") / 2, pos.y + labelSize + 2,
-               		labelSize, "Text Item");
+                     labelSize, "Text Item");
                drawString(pos.x - getStringWidth(labelSize, "Start") / 2, pos.y + 2 * labelSize + 5,
-               		labelSize, "Start");
+                     labelSize, "Start");
             }
          }
 
@@ -1631,7 +1635,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          {
             glColor4f(getTeamColor(item.team).r, getTeamColor(item.team).g, getTeamColor(item.team).b, .25 * alpha);
 
-		    F32 size = mCurrentScale / mGridSize * gSpyBugRange;
+          F32 size = mCurrentScale / mGridSize * gSpyBugRange;
             glBegin(GL_POLYGON);
                glVertex2f(pos.x - size, pos.y - size);
                glVertex2f(pos.x + size, pos.y - size);
@@ -1662,10 +1666,10 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
                drawStringfc(pos.x, pos.y + 10, attrSize, "%s: %d sec%c", healword, item.repopDelay, item.repopDelay != 1 ? 's' : 0);
 
 
-            const char *msg; 
+            const char *msg;
 
             if(mSpecialAttribute == None)
-               msg = "[Ctrl-Enter] to edit";   
+               msg = "[Ctrl-Enter] to edit";
             else if(isBeingEdited && mSpecialAttribute == RepopDelay)
                msg = "Up/Dn to change";
             else
@@ -2921,7 +2925,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                }
             }
             else if(itemHit != -1)                                                        // Hit a non-point item, but not a vertex
-            {        
+            {
                clearSelection();
                saveSelection();  // Basically, save the fact that nothing is selected
                mItems[itemHit].selected = true;
@@ -3368,6 +3372,25 @@ void EditorUserInterface::setWarnMessage(string msg1, string msg2)
    mWarnMsgColor = gErrorMessageTextColor;
 }
 
+
+// Safe fprintf ==> throws exception if writing fails
+static void s_fprintf(FILE *stream, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+
+    char buffer[2048]; 
+    dVsprintf(buffer, sizeof(buffer), format, args); 
+
+    va_end(args);
+
+    if(fprintf(stream, buffer) < 0)     // Uh-oh...
+    {
+       throw(SaveException("Error writing to file"));
+    }
+}
+
+
 bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessages)
 {
    try
@@ -3390,55 +3413,46 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "levels/%s", mEditFileName.c_str());
       FILE *f = fopen(fileNameBuffer, "w");
       if(!f)
-         throw("Could not open file for writing");
+         throw(SaveException("Could not open file for writing"));
 
       // Write out our game parameters --> first one will be the gameType, along with all required parameters
       for(S32 i = 0; i < gGameParamUserInterface.gameParams.size(); i++)
       {
          if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
-         {
-            fprintf(f, "%s", gGameParamUserInterface.gameParams[i].c_str());
-            fprintf(f, "\n");
-         }
+            s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
       }
 
       for(S32 i = 0; i < mTeams.size(); i++)
-         fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
+         s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
       // Write out all maze items
       for(S32 i = 0; i < mItems.size(); i++)
       {
          WorldItem &p = mItems[i];
-         fprintf(f, "%s", gGameItemRecs[mItems[i].index].name);
+         s_fprintf(f, "%s", gGameItemRecs[mItems[i].index].name);
 
          if(gGameItemRecs[mItems[i].index].hasWidth)
-            fprintf(f, " %g", mItems[i].width);
+            s_fprintf(f, " %g", mItems[i].width);
          if(gGameItemRecs[mItems[i].index].hasTeam)
-            fprintf(f, " %d", mItems[i].team);
+            s_fprintf(f, " %d", mItems[i].team);
          for(S32 j = 0; j < p.verts.size(); j++)
-            fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
+            s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
          if(gGameItemRecs[mItems[i].index].hasText)
-            fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
+            s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
          if(gGameItemRecs[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
-            fprintf(f, " %d", mItems[i].repopDelay);
+            s_fprintf(f, " %d", mItems[i].repopDelay);
          if(mItems[i].index == ItemSpeedZone)
-            fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
+            s_fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
 
-         fprintf(f, "\n");
+         s_fprintf(f, "\n");
       }
       fclose(f);
    }
-   catch (char *msg)
+   catch (SaveException &e)
    {
       if(showFailMessages)
-         gEditorUserInterface.setSaveMessage("Error Saving: " + string(msg), false);
-      return false;
-   }
-   catch (...)    // Catches any other errors not caught above
-   {
-      if(showFailMessages)
-         gEditorUserInterface.setSaveMessage("Error Saving: Unknown Error", false);
+         gEditorUserInterface.setSaveMessage("Error Saving: " + string(e.what()), false);
       return false;
    }
 

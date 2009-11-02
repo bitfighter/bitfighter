@@ -214,7 +214,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
       F32 ang2;
       do
          ang2 = TNL::Random::readF() * Float2Pi;
-      while(ABS(ang2 - ang) < .0436 );    // That's 20deg in radians, folks!
+      while(ABS(ang2 - ang) < .0436 );    // That's 20 degrees in radians, folks!
 
 
       F32 vel2 = asteroidVel;

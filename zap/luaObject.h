@@ -50,6 +50,17 @@ namespace Zap
 class GameObject;
 class LuaPoint;
 
+
+// From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
+struct LuaException : public std::exception
+{
+   string msg;
+
+   LuaException(string str) : msg(str) { }    // Constructor
+   const char* what() const throw() { return msg.c_str(); }
+};
+
+
 class LuaObject
 {
 

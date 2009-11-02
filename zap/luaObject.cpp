@@ -74,7 +74,6 @@ S32 LuaObject::returnPoint(lua_State *L, Point point)
 S32 LuaObject::returnLuaPoint(lua_State *L, LuaPoint *point)
 {
    Lunar<LuaPoint>::push(L, point, true);     // true will allow Lua to delete this object when it goes out of scope
-
    return 1;
 }
 
@@ -126,7 +125,7 @@ int LuaObject::luaPanicked(lua_State *L)
    string msg = lua_tostring(L, 1);
    lua_getglobal(L, "ERROR");    // <-- what is this for?
 
-   throw(msg);
+   throw LuaException(msg);
 
    return 0;
 }
@@ -166,7 +165,8 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *function
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", functionName, args, argsWanted);
       logprintf(msg);
-      throw(string(msg));
+
+      throw LuaException(msg);
    }
 }
 
@@ -181,7 +181,8 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName,
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", functionName, index, val);
       logprintf(msg);
-      throw(string(msg));
+
+      throw LuaException(msg);
    }
 
    return val;
@@ -196,7 +197,8 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", functionName, index);
       logprintf(msg);
-      throw(string(msg));
+
+      throw LuaException(msg);
    }
 
    return lua_tointeger(L, index);
@@ -211,7 +213,8 @@ F32 LuaObject::getFloat(lua_State *L, S32 index, const char *functionName)
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", functionName, index);
       logprintf(msg);
-      throw(string(msg));
+
+      throw LuaException(msg);
    }
 
    return (F32) lua_tonumber(L, index);
@@ -226,7 +229,8 @@ bool LuaObject::getBool(lua_State *L, S32 index, const char *functionName)
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", functionName, index);
       logprintf(msg);
-      throw(string(msg));
+
+      throw LuaException(msg);
    }
 
    return (bool) lua_toboolean(L, index);
@@ -241,7 +245,8 @@ const char *LuaObject::getString(lua_State *L, S32 index, const char *functionNa
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", functionName, index);
       logprintf(msg);
-      throw(string(msg));
+
+      throw LuaException(msg);
    }
 
    return lua_tostring(L, index);
@@ -296,41 +301,42 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
          return Lunar<Turret>::check(L, index);
       case ForceFieldProjectorType:
          return Lunar<ForceFieldProjector>::check(L, index);
-   
+
       default:
          char msg[256];
          dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
          logprintf(msg);
-         throw(string(msg));
+
+         throw LuaException(msg);
    }
 }
 
 
-// Adapted from http://cc.byexamples.com/20081119/lua-stack-dump-for-c/ 
-void LuaObject::stackdump(lua_State* l)  
-{  
-    int top = lua_gettop(l); 
-  
-    logprintf("total in stack %d\n",top);  
-  
-    for (S32 i = 1; i <= top; i++)  
-    {  /* repeat for each level */  
-        int t = lua_type(l, i);  
-        switch (t) {  
-            case LUA_TSTRING:  /* strings */  
-                logprintf("string: '%s'", lua_tostring(l, i));  
-                break;  
-            case LUA_TBOOLEAN:  /* booleans */  
-                logprintf("boolean %s",lua_toboolean(l, i) ? "true" : "false");  
-                break;  
-            case LUA_TNUMBER:  /* numbers */  
-                logprintf("number: %g", lua_tonumber(l, i));  
-                break;  
-            default:  /* other values */  
-                logprintf("%s", lua_typename(l, t));  
-                break;  
-        }  
-    }  
+// Adapted from http://cc.byexamples.com/20081119/lua-stack-dump-for-c/
+void LuaObject::stackdump(lua_State* l)
+{
+    int top = lua_gettop(l);
+
+    logprintf("total in stack %d\n",top);
+
+    for (S32 i = 1; i <= top; i++)
+    {  /* repeat for each level */
+        int t = lua_type(l, i);
+        switch (t) {
+            case LUA_TSTRING:  /* strings */
+                logprintf("string: '%s'", lua_tostring(l, i));
+                break;
+            case LUA_TBOOLEAN:  /* booleans */
+                logprintf("boolean %s",lua_toboolean(l, i) ? "true" : "false");
+                break;
+            case LUA_TNUMBER:  /* numbers */
+                logprintf("number: %g", lua_tonumber(l, i));
+                break;
+            default:  /* other values */
+                logprintf("%s", lua_typename(l, t));
+                break;
+        }
+    }
  }
 
 ////////////////////////////////////
@@ -361,7 +367,7 @@ LuaPoint::LuaPoint(Point point)
 // Destructor
 LuaPoint::~LuaPoint()
 {
-   // logprintf("deleted LuaPoint object (%p)\n", this);    
+   // logprintf("deleted LuaPoint object (%p)\n", this);
 }
 
 
@@ -370,7 +376,7 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
 {
    method(LuaPoint, x),
    method(LuaPoint, y),
-   
+
    method(LuaPoint, setx),
    method(LuaPoint, sety),
    method(LuaPoint, setxy),
@@ -382,7 +388,7 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
    method(LuaPoint, len),
    method(LuaPoint, lenSquared),
    method(LuaPoint, normalize),
-   
+
 
    {0,0}    // End method list
 };
@@ -392,8 +398,8 @@ S32 LuaPoint::x(lua_State *L)  { return returnFloat(L, mPoint.x); }
 S32 LuaPoint::y(lua_State *L)  { return returnFloat(L, mPoint.y); }
 
 
-S32 LuaPoint::setxy(lua_State *L)  
-{ 
+S32 LuaPoint::setxy(lua_State *L)
+{
    static const char *methodName = "LuaPoint:setxy()";
    checkArgCount(L, 2, methodName);
    F32 x =  getFloat(L, 1, methodName);
@@ -403,8 +409,9 @@ S32 LuaPoint::setxy(lua_State *L)
    return 0;
 }
 
-S32 LuaPoint::setx(lua_State *L)  
-{ 
+
+S32 LuaPoint::setx(lua_State *L)
+{
    static const char *methodName = "LuaPoint:setx()";
    checkArgCount(L, 1, methodName);
    F32 x =  getFloat(L, 1, methodName);
@@ -414,8 +421,8 @@ S32 LuaPoint::setx(lua_State *L)
 }
 
 
-S32 LuaPoint::sety(lua_State *L)  
-{ 
+S32 LuaPoint::sety(lua_State *L)
+{
    static const char *methodName = "LuaPoint:sety()";
    checkArgCount(L, 1, methodName);
    F32 y =  getFloat(L, 1, methodName);
@@ -433,7 +440,7 @@ S32 LuaPoint::equals(lua_State *L)
    Point point = LuaObject::getPoint(L, 1, methodName);
 
    double EPSILON = .000000001;
-   return returnBool(L, ((mPoint.x - point.x < EPSILON) || (mPoint.y - point.y < EPSILON)) );
+   return returnBool(L, (abs(mPoint.x - point.x) < EPSILON)  &&  (abs(mPoint.y - point.y) < EPSILON) );
 }
 
 
@@ -449,6 +456,7 @@ S32 LuaPoint::lenSquared(lua_State *L)
    checkArgCount(L, 0, "LuaPoint:lenSquared()");
    return returnFloat(L, mPoint.lenSquared());
 }
+
 
 S32 LuaPoint::distanceTo(lua_State *L)
 {
@@ -495,4 +503,4 @@ S32 LuaPoint::normalize(lua_State *L)
 }
 
 
-}  
+}

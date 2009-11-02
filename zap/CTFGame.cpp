@@ -185,6 +185,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 0;
          case KillOwnTurret:
             return 0;
+         case KilledByAsteroid:
+            return 0;
 		   case ReturnTeamFlag:
 			   return 0;
 		   case CaptureFlag:
@@ -207,6 +209,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 1;
          case KillOwnTurret:
             return -1;
+         case KilledByAsteroid:
+            return 0;
 		   case ReturnTeamFlag:
 			   return 1;
 		   case CaptureFlag:

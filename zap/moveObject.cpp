@@ -146,7 +146,7 @@ const F32 velocityEpsilon = 0.00001f;
 // isBeingDisplaced is true when the object is being pushed by something else, which will only happen in a collision
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
 
-void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, MoveObject *displacer)
+void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject>> displacerList)
 {
    U32 tryCount = 0;
    while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time
@@ -176,10 +176,11 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, MoveO
          Point velDelta = shipHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
          Point posDelta = shipHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
-         // Prevent infinite loops with two objects trying to displace each other forever
-         if(isBeingDisplaced && shipHit == displacer)
-            return;
-
+         // Prevent infinite loops with a series of objects trying to displace each other forever
+         for(S32 i = 0; i < displacerList.size(); i++)
+            if(isBeingDisplaced && (shipHit == displacerList[i]))
+              return;
+ 
          if(posDelta.dot(velDelta) < 0)   // shipHit is closing faster than we are ???
          {
             computeCollisionResponseMoveObject(stateIndex, shipHit);
@@ -197,7 +198,9 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, MoveO
 
             // Note that we could end up with an infinite feedback loop here, if, for some reason, two objects keep trying to displace
             // one another, as this will just recurse deeper and deeper.
-            shipHit->move(t + displaceEpsilon, stateIndex, true, this);    // Move the displaced object a tiny bit, true -> isBeingDisplaced
+
+            displacerList.push_back(this);
+            shipHit->move(t + displaceEpsilon, stateIndex, true, displacerList);    // Move the displaced object a tiny bit, true -> isBeingDisplaced
          }
       }
       else if(objectHit->getObjectTypeMask() & (BarrierType | EngineeredType | ForceFieldType))

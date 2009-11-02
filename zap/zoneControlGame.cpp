@@ -301,6 +301,8 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 0;
          case KillOwnTurret:
             return 0;
+         case KilledByAsteroid:
+            return 0;
          case CaptureZone:
          	return 1;
          case UncaptureZone:
@@ -323,6 +325,8 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 1;
          case KillOwnTurret:
             return -1;
+         case KilledByAsteroid:
+            return 0;
          case CaptureZone:
          	return 1;
 		 case UncaptureZone:    // This pretty much has to stay at 0, as the player doing the "uncapturing" will

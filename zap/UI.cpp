@@ -143,6 +143,7 @@ UIID UserInterface::getMenuID()
    return mInternalMenuID;
 }
 
+
 // Retrieve previous interface's name
 UIID UserInterface::getPrevMenuID()
 {
@@ -152,18 +153,17 @@ UIID UserInterface::getPrevMenuID()
       return InvalidUI;
 }
 
+
 // Reactivate previous interface, going to fallback if there is none
 void UserInterface::reactivatePrevUI()
 {
-   if(prevUIs.size())
-   {
-      UserInterface *prev = prevUIs.last();
-      prevUIs.pop_back();
-      prev->reactivate();
-   }
-   else
-      throw("No previous menu to go to!!");
+   TNLAssert(prevUIs.size(), "Trying to reactivate a non-existant UI!");
+
+   UserInterface *prev = prevUIs.last();
+   prevUIs.pop_back();
+   prev->reactivate();
 }
+
 
 // Like above, except we specify a target menu to go to.
 void UserInterface::reactivateMenu(UserInterface target)
@@ -179,6 +179,7 @@ void UserInterface::reactivateMenu(UserInterface target)
       reactivatePrevUI();
 }
 
+
 void UserInterface::onActivate()   { /* Do nothing */ }
 void UserInterface::onReactivate() { /* Do nothing */ }
 
@@ -187,7 +188,7 @@ extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
 
-// Clean up and get ready to render 
+// Clean up and get ready to render
 void UserInterface::renderCurrent()    // static
 {
    glViewport(0, 0, windowWidth, windowHeight);
@@ -235,7 +236,8 @@ void UserInterface::renderCurrent()    // static
 }
 
 
-string UserInterface::itos(S32 i) // convert int to string
+// Convert int to string
+string UserInterface::itos(S32 i)
 {
    char outString[100];
    dSprintf(outString, sizeof(outString), "%d", i);
@@ -287,11 +289,13 @@ void UserInterface::drawAngleString_fixed(S32 x, S32 y, F32 size, F32 angle, con
    doDrawAngleString(x, y, size, angle, string, true);
 }
 
+
 // New, fixed version
 void UserInterface::drawAngleString_fixed(F32 x, F32 y, F32 size, F32 angle, const char *string)
 {
    doDrawAngleString(x, y, size, angle, string, true);
 }
+
 
 // Old, broken version
 void UserInterface::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const char *format, ...)
@@ -299,6 +303,7 @@ void UserInterface::drawAngleStringf(F32 x, F32 y, F32 size, F32 angle, const ch
    makeBuffer;
    doDrawAngleString((S32) x, (S32) y, size, angle, buffer, false);
 }
+
 
 void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string)
 {
@@ -321,7 +326,7 @@ void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const c
 // Same but accepts F32 args
 void UserInterface::doDrawAngleString(F32 x, F32 y, F32 size, F32 angle, const char *string, bool fix)
 {
-	doDrawAngleString((S32) x, (S32) y, size, angle, string, fix);
+   doDrawAngleString((S32) x, (S32) y, size, angle, string, fix);
 }
 
 
@@ -357,8 +362,6 @@ void UserInterface::drawStringf(S32 x, S32 y, U32 size, const char *format, ...)
 {
    makeBuffer;
    drawString(x, y, size, buffer);
-
-   va_end(args);
 }
 
 
@@ -366,8 +369,6 @@ void UserInterface::drawStringf(F32 x, F32 y, U32 size, const char *format, ...)
 {
    makeBuffer;
    drawString((S32) x, (S32) y, size, buffer);
-
-   va_end(args);
 }
 
 
@@ -398,8 +399,6 @@ void UserInterface::drawCenteredStringf(S32 y, U32 size, const char *format, ...
 {
    makeBuffer;
    drawCenteredString(y, size, buffer);
-
-   va_end(args);
 }
 
 
@@ -415,9 +414,7 @@ S32 UserInterface::getCenteredStringStartingPos(U32 size, const char *string)
 S32 UserInterface::getCenteredStringStartingPosf(U32 size, const char *format, ...)
 {
    makeBuffer;
-
    return getCenteredStringStartingPos(size, buffer);
-
 }
 
 
@@ -445,14 +442,15 @@ void UserInterface::drawCenteredString2Col(S32 y, U32 size, bool leftCol, const 
 void UserInterface::drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...)
 {
    makeBuffer;
-
    drawCenteredString2Col(y, size, leftCol, buffer);
 }
+
 
 S32 UserInterface::get2ColStartingPos(bool leftCol)      // Must be S32 to avoid problems downstream
 {
    return leftCol ? (canvasWidth / 4) : (canvasWidth - (canvasWidth / 4));
 }
+
 
 // Draws a string centered in the left or right half of the screen, with different parts colored differently
 void UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, const char *left, const char *right, ...)
@@ -480,6 +478,7 @@ void UserInterface::drawString4Col(S32 y, U32 size, U32 col, const char *string)
    drawString(horizMargin + ((canvasWidth - 2 * horizMargin) / 4 * (col - 1)), y, size, string);
 }
 
+
 void UserInterface::drawString4Colf(S32 y, U32 size, U32 col, const char *format, ...)
 {
    makeBuffer;
@@ -500,10 +499,10 @@ S32 UserInterface::getStringWidth(U32 size, const char *string, U32 len)
    return U32((width * size) / 120.0f);
 }
 
+
 S32 UserInterface::getStringWidthf(U32 size, const char *format, ...)
 {
    makeBuffer;
-
    return getStringWidth(size, buffer);
 }
 
@@ -515,34 +514,12 @@ void UserInterface::playBoop()
    SFXObject::play(SFXUIBoop, 1);
 }
 
-void UserInterface::render()
-{
-   // Do nothing
-}
-
-void UserInterface::idle(U32 timeDelta)
-{
-   // Do nothing
-}
-
-void UserInterface::onMouseMoved(S32 x, S32 y)
-{
-   // Do nothing
-}
-
-void UserInterface::onMouseDragged(S32 x, S32 y)
-{
-   // Do nothing
-}
-
-void UserInterface::onKeyDown(KeyCode keyCode, char ascii)
-{
-   // Do nothing
-}
-
-void UserInterface::onKeyUp(KeyCode keyCode)
-{
-   // Do nothing
-}
+// These will be overridden in child classes if needed
+void UserInterface::render()                               { /* Do nothing */ }
+void UserInterface::idle(U32 timeDelta)                    { /* Do nothing */ }
+void UserInterface::onMouseMoved(S32 x, S32 y)             { /* Do nothing */ }
+void UserInterface::onMouseDragged(S32 x, S32 y)           { /* Do nothing */ }
+void UserInterface::onKeyDown(KeyCode keyCode, char ascii) { /* Do nothing */ }
+void UserInterface::onKeyUp(KeyCode keyCode)               { /* Do nothing */ }
 
 };

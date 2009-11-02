@@ -24,7 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "luaLevelGenerator.h"
-#include "gameType.h"  
+#include "gameType.h"
 
 namespace Zap
 {
@@ -33,7 +33,7 @@ static F32 mGridSize;
 static LevelLoader *mCaller;
 
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, LevelLoader *caller)    
+LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, LevelLoader *caller)
 {
    mFilename = path + scriptArgs[0];
 
@@ -69,7 +69,7 @@ LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 // Destructor
 LuaLevelGenerator::~LuaLevelGenerator()
 {
-   logprintf("deleted LuaLevelGenerator (%p)\n", this);     
+   logprintf("deleted LuaLevelGenerator (%p)\n", this);
 }
 
 
@@ -95,7 +95,7 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
    method(LuaLevelGenerator, addWall),
    method(LuaLevelGenerator, addItem),
    method(LuaLevelGenerator, addLevelLine),
-   
+
    method(LuaLevelGenerator, getGridSize),
 
    {0,0}    // End method list
@@ -129,7 +129,7 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
 
    Point point = Lunar<LuaPoint>::check(L, -1)->getPoint();
    lua_pop(L, 1);    // Clear value from stack
-   
+
    return point;
 }
 
@@ -141,7 +141,7 @@ string ftos(F32 i) // convert float to string
    dSprintf(outString, sizeof(outString), "%2.2f", i);
    return outString;
 }
-   
+
 
 S32 LuaLevelGenerator::addWall(lua_State *L)
 {
@@ -150,7 +150,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 
    string line = "BarrierMaker";
 
-   try 
+   try
    {
       F32 width = getFloat(L, 1, methodName);      // Width is first arg
       line += " " + ftos(width);
@@ -165,12 +165,13 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
          line = line + " " + ftos(p.x) + " " + ftos(p.y);
       }
    }
-   catch(string err)
+
+   catch(LuaException &e)
    {
-      logError("Error adding wall in %s: %s", methodName, err);
+      logError("Error adding wall in %s: %s", methodName, e.what());
    }
 
-   mCaller->parseArgs(line.c_str());                                                 
+   mCaller->parseArgs(line.c_str());
 
    return 0;
 }
@@ -195,8 +196,8 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
    for(S32 i = 0; i < argc; i++)      // argc was already bounds checked above
       argv[i] = getString(L, i + 1, methodName);
 
-   processLevelLoadLine(argc, argv);                                                 
-                 
+   processLevelLoadLine(argc, argv);
+
    //clearStack();
 
    return 0;
@@ -206,7 +207,7 @@ S32 LuaLevelGenerator::addItem(lua_State *L)
 // Let someone else do the work!
 void LuaLevelGenerator::processLevelLoadLine(int argc, const char **argv)
 {
-   mCaller->processLevelLoadLine(argc, argv);                                                 
+   mCaller->processLevelLoadLine(argc, argv);
 }
 
 
@@ -218,8 +219,8 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getString(L, 1, methodName);
 
-   mCaller->parseArgs(line);                                                 
-                 
+   mCaller->parseArgs(line);
+
    //clearStack();
 
    return 0;
@@ -237,9 +238,9 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
 }
 
 
-S32 LuaLevelGenerator::getGridSize(lua_State *L)    
-{ 
-   return returnFloat(L, mGridSize); 
+S32 LuaLevelGenerator::getGridSize(lua_State *L)
+{
+   return returnFloat(L, mGridSize);
 }
 
 
@@ -309,7 +310,7 @@ void LuaLevelGenerator::runScript(lua_State *L, Vector<string> scriptArgs, F32 g
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "LevelGen");
 
-   setLuaArgs(L, scriptArgs);    // Put our args in to the Lua table "args" 
+   setLuaArgs(L, scriptArgs);    // Put our args in to the Lua table "args"
                                  // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
 
    if(!loadLuaHelperFunctions(L)) return;

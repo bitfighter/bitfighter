@@ -129,6 +129,7 @@ public:
       KillTeammate,           // all games
       KillEnemyTurret,        // all games
       KillOwnTurret,          // all games
+      KilledByAsteroid,       // all games
 
       CaptureFlag,
       CaptureZone,            // zone control -> gain zone

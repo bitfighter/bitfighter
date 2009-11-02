@@ -798,7 +798,9 @@ void NetConnection::connect(NetInterface *theInterface, const Address &address, 
    mInterface->startConnection(this);
 }
 
-void NetConnection::connectArranged(NetInterface *connectionInterface, const Vector<Address> &possibleAddresses, Nonce &nonce, Nonce &serverNonce, ByteBufferPtr sharedSecret, bool isInitiator, bool requestsKeyExchange, bool requestsCertificate)
+void NetConnection::connectArranged(NetInterface *connectionInterface, const Vector<Address> &possibleAddresses, 
+                                    Nonce &nonce, Nonce &serverNonce, ByteBufferPtr sharedSecret, bool isInitiator, 
+                                    bool requestsKeyExchange, bool requestsCertificate)
 {
    mConnectionParameters.mRequestKeyExchange = requestsKeyExchange;
    mConnectionParameters.mRequestCertificate = requestsCertificate;

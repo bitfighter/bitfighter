@@ -1,5 +1,5 @@
 # Script assumes that there is a /Dversion=curVersion
-!define curVersion "011 alpha test release 4"      ###### <<<-----  TODO: Remove this.  For testing only!
+!define curVersion "011 prelease 5"      ###### <<<-----  TODO: Remove this.  For testing only!
 ;--------------------------------
 ; Include Modern UI
 
@@ -22,7 +22,7 @@ InstallDirRegKey HKCU "Software\Bitfighter" ""
 RequestExecutionLevel admin
 
 
-!SetCompressor /SOLID lzma
+SetCompressor /SOLID lzma
 
 ;--------------------------------
 ; Overall Interface Settings

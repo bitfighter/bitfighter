@@ -406,7 +406,7 @@ public:
       IPAddress remoteAddress, IPAddress internalAddress,
       ByteBufferPtr connectionParameters))
    {
-      // First, make sure that we're connected with the server that they're requesting a connection with.
+      // First, make sure that we're connected with the server that they're requesting a connection with
       MasterServerConnection *conn = (MasterServerConnection *) gNetInterface->findConnection(remoteAddress);
       if(!conn)
       {

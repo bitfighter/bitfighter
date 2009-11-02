@@ -130,10 +130,10 @@ Vector<GameType::ParameterDescription> RabbitGameType::describeArguments()
    item.maxval = 99;
    descr.push_back(item);
 
-   item.name = "Point Earn Time:";
+   item.name = "Point Earn Rate:";
    item.help = "Time you must hold the flag to earn a point";
    item.value = 30;
-   item.units = "secs";
+   item.units = "points per minute";
    item.minval = 1;
    item.maxval = 99;
    descr.push_back(item);
@@ -152,14 +152,14 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
    if( (!damagerOwner || !victimOwner) || (damagerOwner == victimOwner))      // Can damage self
       return true;
 
-   Ship *damnShip = dynamic_cast<Ship *>(damagerOwner->getControlObject());
+   Ship *attackShip = dynamic_cast<Ship *>(damagerOwner->getControlObject());
    Ship *victimShip = dynamic_cast<Ship *>(victimOwner->getControlObject());
 
-   if(!damnShip || !victimShip)
+   if(!attackShip || !victimShip)
       return true;
 
    // Hunters can only hurt rabbits and only rabbits can hurt hunters -- no "friendly fire"
-   return shipHasFlag(damnShip) != shipHasFlag(victimShip);
+   return shipHasFlag(attackShip) != shipHasFlag(victimShip);
 }
 
 
@@ -318,6 +318,8 @@ S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
+            return 0;
+         case KilledByAsteroid:
             return 0;
          case RabbitKilled:
          	return 5;

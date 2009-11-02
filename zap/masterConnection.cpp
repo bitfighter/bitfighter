@@ -83,6 +83,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cQueryServersResponse, (U32
    }
 }
 
+
 void MasterServerConnection::requestArrangedConnection(const Address &remoteAddress)
 {
    mCurrentQueryId++;
@@ -91,6 +92,7 @@ void MasterServerConnection::requestArrangedConnection(const Address &remoteAddr
       getInterface()->getFirstBoundInterfaceAddress().toIPAddress(),
       new ByteBuffer((U8 *) "ZAP!", 5));
 }
+
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
    ByteBufferPtr connectionParameters))

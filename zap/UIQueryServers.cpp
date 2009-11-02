@@ -283,6 +283,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
    mShouldSort = true;
 }
 
+
 void QueryServersUserInterface::idle(U32 timeDelta)
 {
    U32 elapsedTime = Platform::getRealMilliseconds() - time;
