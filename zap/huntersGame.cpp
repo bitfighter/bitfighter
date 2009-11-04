@@ -256,7 +256,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       for(S32 i = 0; i < mClientList.size(); i++)
       {
          Ship *client_ship = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
-         
+
          if(!client_ship)
             continue;
 
@@ -285,7 +285,7 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
       }
    }
 }
-  
+
 // What does a particular scoring event score?
 S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 flags)
 {
@@ -299,6 +299,8 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
       {
          case KillEnemy:
             return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -307,10 +309,8 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
             return 0;
          case KillOwnTurret:
             return 0;
-         case KilledByAsteroid:
-            return 0;
          case ReturnFlagsToNexus:
-         	return score;
+            return score;
          default:
             return naScore;
       }
@@ -321,6 +321,8 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
       {
          case KillEnemy:
             return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -328,8 +330,6 @@ S32 HuntersGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEv
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
-            return 0;
-         case KilledByAsteroid:
             return 0;
          case ReturnFlagsToNexus:
             return score;
@@ -423,12 +423,12 @@ bool HuntersFlagItem::processArguments(S32 argc, const char **argv)
    if(argc < 2)
       return false;
 
-   // If this is a regular FlagItem that was "recast" as a HuntersFlagItem at load time, it will have 3 args.  The first, team, 
+   // If this is a regular FlagItem that was "recast" as a HuntersFlagItem at load time, it will have 3 args.  The first, team,
    // does not apply to this object, so we'll ignore it.  If there's only 2 args, those will be the coords.
    S32 offset = 0;
    if(argc >= 3)
       offset++;
-   
+
    if(!Parent::processArguments(argc - 1, argv + offset))
       return false;
 

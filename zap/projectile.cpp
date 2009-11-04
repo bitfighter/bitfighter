@@ -64,7 +64,7 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
    mNetFlags.set(Ghostable);
    pos = p;
    velocity = v;
-   
+
    mTimeRemaining = gWeapons[type].projLiveTime;
    collided = false;
    alive = true;
@@ -145,7 +145,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 {
    collided = true;
 
-   if(!isGhost())
+   if(!isGhost())    // If we're on the server, that is
    {
       DamageInfo theInfo;
       theInfo.collisionPoint = collisionPoint;
@@ -165,7 +165,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 void Projectile::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
- 
+
    if(!collided && alive)
    {
    // Calculate where projectile will be at the end of the current interval
@@ -602,9 +602,9 @@ void Mine::renderItem(Point pos)
    if(!ship)
       return;
 
-   // Can see mine if laid by teammate in team game || sensor is active || 
+   // Can see mine if laid by teammate in team game || sensor is active ||
    //  you laid it yourself
-   bool visible = ( (ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame() ) || ship->isModuleActive(ModuleSensor) || 
+   bool visible = ( (ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame() ) || ship->isModuleActive(ModuleSensor) ||
       (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy);
 
    renderMine(pos, mArmed, visible);
@@ -655,7 +655,7 @@ bool SpyBug::processArguments(S32 argc, const char **argv)
       return false;
 
    mTeam = atoi(argv[0]);                        // Team first!
-   
+
    if(!Parent::processArguments(2, &argv[1]))    // Strips off first arg from argv, so the parent gets the straight coordinate pair it's expecting
       return false;
 
@@ -738,10 +738,10 @@ void SpyBug::renderItem(Point pos)
       return;
 
 
-   // Can see bug if laid by teammate in team game || sensor is active || 
+   // Can see bug if laid by teammate in team game || sensor is active ||
    //       you laid it yourself || spyBug is neutral
 
-   bool visible = ( (ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame() || ship->isModuleActive(ModuleSensor) || 
+   bool visible = ( (ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame() || ship->isModuleActive(ModuleSensor) ||
             (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy) || getTeam() == -1);
 
    renderSpyBug(pos, visible);

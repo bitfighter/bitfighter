@@ -45,7 +45,7 @@ class HTFGameType : public GameType
    };
 public:
    HTFGameType() { /* nothing here */ }    // Constructor, such as it is
-   
+
    bool isFlagGame() { return true; }
 
 
@@ -195,7 +195,7 @@ public:
    {
       Parent::idle(path);
 
-      if(path != GameObject::ServerIdleMainLoop)      
+      if(path != GameObject::ServerIdleMainLoop)
          return;
 
       // Server only, from here on out
@@ -205,7 +205,7 @@ public:
          {
             S32 team = mFlags[flagIndex]->getZone()->getTeam();
             updateScore(team, HoldFlagInZone);     // Team only --> No logical way to award individual points for this event!!
-            mFlags[flagIndex]->mTimer.reset();     
+            mFlags[flagIndex]->mTimer.reset();
          }
       }
    }
@@ -303,6 +303,8 @@ public:
          {
             case KillEnemy:
                return 0;
+            case KilledByAsteroid:  // Fall through OK
+            case KilledByTurret:    // Fall through OK
             case KillSelf:
                return 0;
             case KillTeammate:
@@ -311,11 +313,9 @@ public:
                return 0;
             case KillOwnTurret:
                return 0;
-            case KilledByAsteroid:
-               return 0;
             case ReturnFlagToZone:
                return 0;
-            case HoldFlagInZone:		// Per ScoreTime ms
+            case HoldFlagInZone:    // Per ScoreTime ms
                return 1;
             case RemoveFlagFromEnemyZone:
                return 0;
@@ -329,6 +329,8 @@ public:
          {
             case KillEnemy:
                return 1;
+            case KilledByAsteroid:  // Fall through OK
+            case KilledByTurret:    // Fall through OK
             case KillSelf:
                return -1;
             case KillTeammate:
@@ -337,12 +339,10 @@ public:
                return 1;
             case KillOwnTurret:
                return -1;
-            case KilledByAsteroid:
-               return 0;
-		      case ReturnFlagToZone:
-			      return 2;
-		      case HoldFlagInZone:		// There's not a good way to award these points
-		      	return naScore;      // and unless we really want them, let's not bother
+            case ReturnFlagToZone:
+               return 2;
+            case HoldFlagInZone:    // There's not a good way to award these points
+               return naScore;      // and unless we really want them, let's not bother
             case RemoveFlagFromEnemyZone:
                return 1;
             default:

@@ -197,7 +197,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          s.isFromMaster = true;
          strcpy(s.serverName, "Internet Server");
          strcpy(s.serverDescr, "Internet Server -- attempting to connect");
-         s.msgColor = Color(1,1,1);   // white messages
+         s.msgColor = white;   // white messages
          servers.push_back(s);
          mShouldSort = true;
       }
@@ -232,7 +232,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.isFromMaster = false;
       strcpy(s.serverName, "LAN Server");
       strcpy(s.serverDescr, "LAN Server -- attempting to connect");
-      s.msgColor = Color(1,1,1);   // white messages
+      s.msgColor = white;   // white messages
       servers.push_back(s);
       return;
    }
@@ -903,7 +903,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)
    {
-      currentIndex++; 
+      currentIndex++;
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
    }

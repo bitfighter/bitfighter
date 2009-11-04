@@ -29,7 +29,7 @@
 #include "timer.h"
 #include "sfx.h"
 #include "voiceCodec.h"
-#include "gameObject.h" 
+#include "gameObject.h"
 #include "flagItem.h"
 #include "robot.h"
 #include <string>
@@ -129,7 +129,9 @@ public:
       KillTeammate,           // all games
       KillEnemyTurret,        // all games
       KillOwnTurret,          // all games
+
       KilledByAsteroid,       // all games
+      KilledByTurret,         // all games
 
       CaptureFlag,
       CaptureZone,            // zone control -> gain zone
@@ -142,7 +144,7 @@ public:
       ReturnFlagsToNexus,     // hunters game
       ReturnFlagToZone,       // retrieve -> flag returned to zone
       LostFlag,               // retrieve -> enemy took flag
-      ReturnTeamFlag,  	      // ctf -> holds enemy flag, touches own flag
+      ReturnTeamFlag,         // ctf -> holds enemy flag, touches own flag
       ScoreGoalEnemyTeam,     // soccer
       ScoreGoalHostileTeam,   // soccer
       ScoreGoalOwnTeam,       // soccer -> score on self
@@ -262,11 +264,11 @@ public:
 
    virtual S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
    static string getScoringEventDescr(ScoringEvent event);
-   
+
    // Static vectors used for constructing update RPCs
-   static Vector<RangedU32<0, MaxPing> > mPingTimes;  
+   static Vector<RangedU32<0, MaxPing> > mPingTimes;
    static Vector<SignedInt<24> > mScores;
-   static Vector<RangedU32<0, 200> > mRatings;                      
+   static Vector<RangedU32<0, 200> > mRatings;
 
    GameType();    // Constructor
    void countTeamPlayers();
@@ -385,7 +387,7 @@ public:
    virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
 
    virtual void addAdminGameMenuOptions(Vector<MenuItem> &menuOptions);
-   
+
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams
 
@@ -396,10 +398,10 @@ public:
 
    TNL_DECLARE_RPC(s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message));
    TNL_DECLARE_RPC(s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message));
-   
+
 
    // killerName will be ignored if killer is supplied
-   TNL_DECLARE_RPC(s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerName)); 
+   TNL_DECLARE_RPC(s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerName));
 
    TNL_DECLARE_RPC(c2sVoiceChat, (bool echo, ByteBufferPtr compressedVoice));
    TNL_DECLARE_RPC(s2cVoiceChat, (StringTableEntry client, ByteBufferPtr compressedVoice));

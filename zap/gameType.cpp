@@ -76,7 +76,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
-// Constructor 
+// Constructor
 GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000), mZoneGlowTimer(mZoneGlowTime)
 {
    mNetFlags.set(Ghostable);
@@ -132,7 +132,7 @@ Vector<GameType::ParameterDescription> GameType::describeArguments()
 
 
 void GameType::printRules()
-{   
+{
    NetClassRep::initialize();
    printf("\n\n");
    printf("Bitfighter rules\n");
@@ -194,67 +194,70 @@ void GameType::printRules()
 }
 
 
+// These are really only used for displaying scoring with the -rules option
 string GameType::getScoringEventDescr(ScoringEvent event)
 {
    switch(event)
    {
       // General scoring events:
       case KillEnemy:
-	      return "Kill enemy player";
+         return "Kill enemy player";
       case KillSelf:
-	      return "Kill self";
+         return "Kill self";
       case KillTeammate:
-	      return "Kill teammate";
+         return "Kill teammate";
       case KillEnemyTurret:
          return "Kill enemy turret";
       case KillOwnTurret:
          return "Kill own turret";
       case KilledByAsteroid:
          return "Killed by asteroid";
+      case KilledByTurret:
+         return "Killed by turret";
 
       // CTF specific:
       case CaptureFlag:
-	      return "Touch enemy flag to your flag";   
+         return "Touch enemy flag to your flag";
       case ReturnTeamFlag:
-	      return "Return own flag to goal";         
+         return "Return own flag to goal";
 
       // ZC specific:
      case  CaptureZone:
-	      return "Capture zone";                       
+         return "Capture zone";
       case UncaptureZone:
-	      return "Lose captured zone to other team";   
+         return "Lose captured zone to other team";
 
       // HTF specific:
       case HoldFlagInZone:
-	      return "Hold flag in zone for time";   
+         return "Hold flag in zone for time";
       case RemoveFlagFromEnemyZone:
          return "Remove flag from enemy zone";
 
       // Rabbit specific:
       case RabbitHoldsFlag:
-	      return "Hold flag, per second";              
+         return "Hold flag, per second";
       case RabbitKilled:
-	      return "Kill the rabbit";                    
+         return "Kill the rabbit";
       case RabbitKills:
-	      return "Kill other player if you are rabbit"; 
+         return "Kill other player if you are rabbit";
 
       // Hunters specific:
       case ReturnFlagsToNexus:
-	      return "Return flags to Nexus";
+         return "Return flags to Nexus";
 
       // Retrieve specific:
       case ReturnFlagToZone:
-	      return "Return flags to own zone";     
+         return "Return flags to own zone";
       case LostFlag:
-	      return "Lose captured flag to other team";  
+         return "Lose captured flag to other team";
 
       // Soccer specific:
       case ScoreGoalEnemyTeam:
-	      return "Score a goal against other team";
+         return "Score a goal against other team";
       case ScoreGoalHostileTeam:
-	      return "Score a goal against Hostile team";
+         return "Score a goal against Hostile team";
       case ScoreGoalOwnTeam:
-	      return "Score a goal against own team";
+         return "Score a goal against own team";
 
       // Other:
       default:
@@ -746,7 +749,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cCanSwitchTeams, (bool allowed), (allowe
 }
 
 
-// Need to bump the priority of the gameType up really high, to ensure it gets ghosted first, before any game-specific objects like nexuses and 
+// Need to bump the priority of the gameType up really high, to ensure it gets ghosted first, before any game-specific objects like nexuses and
 // other things that need to get registered with the gameType.  This will fix (I hope) the random crash-at-level start issues that have
 // been annoying everyone so much.
 F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
@@ -809,7 +812,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    {
       mScriptArgs.clear();    // Clear out any args from a previous Script line
       for(S32 i = 1; i < argc; i++)
-         mScriptArgs.push_back(string(argv[i]).c_str());    // Use string to make a const char copy of the param 
+         mScriptArgs.push_back(string(argv[i]).c_str());    // Use string to make a const char copy of the param
    }
    else if(!stricmp(argv[0], "Spawn"))
    {
@@ -1057,7 +1060,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    for(S32 i = 0; i < mSpyBugs.size(); i++)
    {
-      SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);     
+      SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);
       if(!sb->isVisibleToPlayer( cr->teamId, cr->name, getGame()->getGameType()->isTeamGame() ))
          break;
       fillVector.clear();
@@ -1066,7 +1069,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
       Rect queryRect(pos, pos);
       queryRect.expand(scopeRange);
       findObjects(AllObjectTypes, fillVector, queryRect);
-   
+
       for(S32 j = 0; j < fillVector.size(); j++)
          connection->objectInScope(fillVector[j]);
    }
@@ -1083,7 +1086,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
    //if(isTeamGame())
    //{
    //   // Start by scanning over all items located in queryItemsOfInterest()
-   //   for(S32 i = 0; i < mItemsOfInterest.size(); i++)   
+   //   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
    //   {
    //      if(mItemsOfInterest[i].teamVisMask & (1 << scopeObject->getTeam()))    // Item is visible to scopeObject's team
    //      {
@@ -1108,7 +1111,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
             continue;
 
          if(!mClientList[i]->clientConnection)     // No client
-            continue;                          
+            continue;
 
          Ship *co = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
          TNLAssert(co, "Null control object!");
@@ -1119,7 +1122,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
 
          findObjects(scopeObject == co ? AllObjectTypes : CommandMapVisType, fillVector, queryRect);
       }
-   } 
+   }
    else     // Do a simple query of the objects within scope range of the ship
    {
       // Note that if we make mine visibility controlled by server, here's where we'd put the code
@@ -1214,7 +1217,7 @@ const char *GameType::getTeamName(S32 team)
       return "Hostile";
    else if(team == -1)
       return "Neutral";
-   else 
+   else
       return "UNKNOWN";
 }
 
@@ -1264,7 +1267,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    cref->name = theClient->getClientName();
 
    cref->clientConnection = theClient;
-   countTeamPlayers();     // Also calcs team ratings 
+   countTeamPlayers();     // Also calcs team ratings
 
    // Figure out which team has the fewest players...
    //S32 minTeamIndex = 0;
@@ -1370,8 +1373,15 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
    }
    else              // Unknown killer... not a scorable event.  Unless killer was an asteroid!
    {
-      if( dynamic_cast<Asteroid *>(killerObject) )
+      if( dynamic_cast<Asteroid *>(killerObject) )       // Asteroid
          updateScore(clientRef, KilledByAsteroid, 0);
+      else                                               // Check for turret shot
+      {
+         Projectile *projectile = dymanic_cast<Projectile *>(killerObject);
+
+         if( projectile && dynamic_cast<Turret *>(projectile->shooter) )
+            updateScore(clientRef, KilledByTurret, 0);
+      }
 
       s2cKillMessage(clientRef->name, NULL, killerDescr);
    }
@@ -1387,7 +1397,7 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
    if(!ship->isRobot())
       cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
 
-   updateScore(cl, ship->getTeam(), scoringEvent);  
+   updateScore(cl, ship->getTeam(), scoringEvent);
 }
 
 
@@ -1410,22 +1420,36 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->mTotalScore += abs(points);
 
-      newScore = player->score; 
+      newScore = player->score;
    }
 
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(team < 0) 
+      if(team < 0)
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
       if(points == 0)
          return;
 
-      newScore = mTeams[team].score + points;
-      mTeams[team].score = newScore;         
-      s2cSetTeamScore(team, newScore);          // Broadcast new team score
+      // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
+      // deducted, then the same amount is added to every team.  Assumes that points < 0.
+      if(scoringEvent == ScoreOwnGoal)
+      {
+         mTeams[team].score += points;                // Add negative score to scoring team
+
+         for(S32 i = 0; i < mTeams.size(); i++)
+         {
+            mTeams[i].score -= points;                // Add magnitiude of negative score to all teams
+            s2cSetTeamScore(i, mTeams[i].score);      // Broadcast result
+         }
+      }
+      else
+      {
+         newScore = mTeams[team].score + points;
+         s2cSetTeamScore(team, newScore);          // Broadcast new team score
+      }
 
       // Figure out which team is in the lead...
       if(newScore < 0 && team == mLeadingTeam)  // Unusual case, but plausible: leading team loses point and is no longer leader
@@ -1495,6 +1519,8 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
       {
          case KillEnemy:
             return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -1502,8 +1528,6 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
-            return 0;
-         case KilledByAsteroid:
             return 0;
          default:
             return naScore;
@@ -1515,15 +1539,15 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
       {
          case KillEnemy:
             return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
-            return 0;
+            return -1;
          case KillTeammate:
             return 0;
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
-            return 0;
-         case KilledByAsteroid:
             return 0;
          default:
             return naScore;
@@ -1588,7 +1612,7 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
 
 
 // Broadcast info about the current level
-GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount), 
+GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount),
                                             (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount))
 {
    mLevelName = levelName;
@@ -1698,7 +1722,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
    if(isMyClient)
    {
       mLocalClient = cref;
-      
+
       // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
       // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
       if(gGameUserInterface.isInScoreboardMode())
@@ -2001,17 +2025,17 @@ void GameType::updateClientScoreboard(ClientRef *cl)
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate, 
-                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings), 
+GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings),
                  (pingTimes, scores, ratings))
 {
    for(S32 i = 0; i < mClientList.size(); i++)
    {
       if(i >= pingTimes.size())
          break;
- 
+
       mClientList[i]->ping = pingTimes[i];
-      mClientList[i]->score = scores[i]; 
+      mClientList[i]->score = scores[i];
       mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0;
    }
 }
@@ -2024,7 +2048,7 @@ GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTable
       if(killer == victim)
          if(killerDescr == "mine")
             gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
-         else                                      
+         else
             gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")

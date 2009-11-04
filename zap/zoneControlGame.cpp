@@ -159,7 +159,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    }
 
-   updateScore(s, CaptureZone);  
+   updateScore(s, CaptureZone);
 
 
    z->setTeam(s->getTeam());                       // Assign zone to capturing team
@@ -174,7 +174,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    Vector<StringTableEntry> e;
    e.push_back(mTeams[s->getTeam()].name);
    for(S32 i = 0; i < mClientList.size(); i++)
-      mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);     
+      mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
 
    // Reset zones to neutral
    for(S32 i = 0; i < mZones.size(); i++)
@@ -293,6 +293,8 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
       {
          case KillEnemy:
             return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -301,10 +303,8 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 0;
          case KillOwnTurret:
             return 0;
-         case KilledByAsteroid:
-            return 0;
          case CaptureZone:
-         	return 1;
+            return 1;
          case UncaptureZone:
             return -1;
          default:
@@ -317,6 +317,8 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
       {
          case KillEnemy:
             return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return -1;
          case KillTeammate:
@@ -325,12 +327,10 @@ S32 ZoneControlGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent sco
             return 1;
          case KillOwnTurret:
             return -1;
-         case KilledByAsteroid:
-            return 0;
          case CaptureZone:
-         	return 1;
-		 case UncaptureZone:    // This pretty much has to stay at 0, as the player doing the "uncapturing" will
-			   return 0;         // also be credited for a CaptureZone event
+            return 1;
+       case UncaptureZone:    // This pretty much has to stay at 0, as the player doing the "uncapturing" will
+            return 0;         // also be credited for a CaptureZone event
        default:
             return naScore;
       }

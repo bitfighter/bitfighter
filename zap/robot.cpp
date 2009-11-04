@@ -132,6 +132,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setGTEnum(KillEnemyTurret);
    setGTEnum(KillOwnTurret);
    setGTEnum(KilledByAsteroid);
+   setGTEnum(KilledByTurret);
    setGTEnum(CaptureFlag);
    setGTEnum(CaptureZone);
    setGTEnum(UncaptureZone);

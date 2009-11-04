@@ -63,13 +63,13 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
          msg = "A goal was scored on an unknown goal!";
    }
    else if(msgIndex == SoccerMsgScoreGoal)
-   { 
+   {
       if(isTeamGame())
       {
          if(teamIndexAdjusted >= 0)
             msg = string(clientName.getString()) + " scored a goal on team " + string(mTeams[teamIndexAdjusted].name.getString());
          else if(teamIndexAdjusted == -1)
-            msg = string(clientName.getString()) + " scored a goal on a neutral goal!"; 
+            msg = string(clientName.getString()) + " scored a goal on a neutral goal!";
          else if(teamIndexAdjusted == -2)
             msg = string(clientName.getString()) + " scored a goal on a hostile goal (for negative points!)";
          else
@@ -109,7 +109,7 @@ void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
    if(!ship)
    {
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, StringTableEntry(NULL), (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
-      return;     
+      return;
    }
 
    S32 scoringTeam = ship->getTeam();
@@ -119,9 +119,9 @@ void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
       updateScore(ship, ScoreGoalOwnTeam);
 
       // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
-      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));   
+      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));
    }
-   else	   // Goal on someone else's goal
+   else     // Goal on someone else's goal
    {
       if(goalTeamIndex == -2)
          updateScore(ship, ScoreGoalHostileTeam);
@@ -159,6 +159,8 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
       {
          case KillEnemy:
             return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -166,8 +168,6 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case KillEnemyTurret:
             return 0;
          case KillOwnTurret:
-            return 0;
-         case KilledByAsteroid:
             return 0;
          case ScoreGoalEnemyTeam:
             return 1;
@@ -185,6 +185,8 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
       {
          case KillEnemy:
             return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return -1;
          case KillTeammate:
@@ -193,14 +195,12 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
             return 1;
          case KillOwnTurret:
             return -1;
-         case KilledByAsteroid:
-            return 0;
-		   case ScoreGoalEnemyTeam:
-			   return 5;
-		   case ScoreGoalOwnTeam:
-			   return -5;
+         case ScoreGoalEnemyTeam:
+            return 5;
+         case ScoreGoalOwnTeam:
+            return -5;
          case ScoreGoalHostileTeam:
-			   return -5;
+            return -5;
          default:
             return naScore;
       }
@@ -306,7 +306,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
          mLastPlayerTouch = s ? s : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
       }
 
-      else 
+      else
          mLastPlayerTouch = NULL;
    }
 }

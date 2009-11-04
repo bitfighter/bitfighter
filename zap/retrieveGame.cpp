@@ -67,7 +67,7 @@ public:
    bool isFlagGame() { return true; }
 
 
-   // Note -- neutral or enemy-to-all robots can't pick up the flag!!!  
+   // Note -- neutral or enemy-to-all robots can't pick up the flag!!!
    void shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    {
       // See if the ship is already carrying a flag - can only carry one at a time
@@ -299,6 +299,8 @@ public:
          {
             case KillEnemy:
                return 0;
+            case KilledByAsteroid:  // Fall through OK
+            case KilledByTurret:    // Fall through OK
             case KillSelf:
                return 0;
             case KillTeammate:
@@ -307,9 +309,7 @@ public:
                return 0;
             case KillOwnTurret:
                return 0;
-            case KilledByAsteroid:
-               return 0;
-		      case ReturnFlagToZone:
+            case ReturnFlagToZone:
                return 1;
             case RemoveFlagFromEnemyZone:
                return 0;
@@ -325,6 +325,8 @@ public:
          {
             case KillEnemy:
                return 1;
+            case KilledByAsteroid:  // Fall through OK
+            case KilledByTurret:    // Fall through OK
             case KillSelf:
                return -1;
             case KillTeammate:
@@ -333,8 +335,6 @@ public:
                return 1;
             case KillOwnTurret:
                return -1;
-            case KilledByAsteroid:
-               return 0;
             case ReturnFlagToZone:
                return 2;
             case RemoveFlagFromEnemyZone:

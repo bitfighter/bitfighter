@@ -177,6 +177,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
       {
          case KillEnemy:
             return 0;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -185,12 +187,10 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 0;
          case KillOwnTurret:
             return 0;
-         case KilledByAsteroid:
+         case ReturnTeamFlag:
             return 0;
-		   case ReturnTeamFlag:
-			   return 0;
-		   case CaptureFlag:
-			   return 1;
+         case CaptureFlag:
+            return 1;
          default:
             return naScore;
       }
@@ -201,6 +201,8 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
       {
          case KillEnemy:
             return 1;
+         case KilledByAsteroid:  // Fall through OK
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return -1;
          case KillTeammate:
@@ -209,12 +211,10 @@ S32 CTFGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent,
             return 1;
          case KillOwnTurret:
             return -1;
-         case KilledByAsteroid:
-            return 0;
-		   case ReturnTeamFlag:
-			   return 1;
-		   case CaptureFlag:
-			   return 5;
+         case ReturnTeamFlag:
+            return 1;
+         case CaptureFlag:
+            return 5;
          default:
             return naScore;
       }
