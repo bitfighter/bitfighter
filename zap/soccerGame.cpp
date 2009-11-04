@@ -85,7 +85,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    }
    else if(msgIndex == SoccerMsgScoreOwnGoal)
    {
-      msg = string(clientName.getString()) + " scored an own-goal, losing their team a point!";
+      msg = string(clientName.getString()) + " scored an own-goal, giving the other team" + (mTeams.size() == 2 ? "" : "s") + " a point!";
    }
    // Print the message
    gGameUserInterface.displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());

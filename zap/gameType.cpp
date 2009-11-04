@@ -1377,9 +1377,9 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
          updateScore(clientRef, KilledByAsteroid, 0);
       else                                               // Check for turret shot
       {
-         Projectile *projectile = dymanic_cast<Projectile *>(killerObject);
+         Projectile *projectile = dynamic_cast<Projectile *>(killerObject);
 
-         if( projectile && dynamic_cast<Turret *>(projectile->shooter) )
+         if( projectile && projectile->mShooter.isValid() && dynamic_cast<Turret *>(projectile->mShooter.getPointer()) )
             updateScore(clientRef, KilledByTurret, 0);
       }
 
@@ -1402,9 +1402,10 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 
 
 // Handle both individual scores and team scores
+// Runs on server only
 void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEvent, S32 data)
 {
-   S32 newScore = 0;
+   S32 newScore = S32_MIN;
 
    if(player != NULL)
    {
@@ -1418,9 +1419,12 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
 
       // Accumulate every client's total score counter
       for(S32 i = 0; i < mClientList.size(); i++)
+      {
          mClientList[i]->clientConnection->mTotalScore += abs(points);
 
-      newScore = player->score;
+         if(mClientList[i]->clientConnection->mScore > newScore)
+            newScore = mClientList[i]->clientConnection->mScore;
+      }
    }
 
    if(isTeamGame())
@@ -1433,12 +1437,12 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       if(points == 0)
          return;
 
+      mTeams[team].score += points;
+
       // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
       // deducted, then the same amount is added to every team.  Assumes that points < 0.
-      if(scoringEvent == ScoreOwnGoal)
+      if(scoringEvent == ScoreGoalOwnTeam)
       {
-         mTeams[team].score += points;                // Add negative score to scoring team
-
          for(S32 i = 0; i < mTeams.size(); i++)
          {
             mTeams[i].score -= points;                // Add magnitiude of negative score to all teams
@@ -1446,27 +1450,19 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
          }
       }
       else
-      {
-         newScore = mTeams[team].score + points;
-         s2cSetTeamScore(team, newScore);          // Broadcast new team score
-      }
+         s2cSetTeamScore(team, mTeams[team].score);          // Broadcast new team score
 
-      // Figure out which team is in the lead...
-      if(newScore < 0 && team == mLeadingTeam)  // Unusual case, but plausible: leading team loses point and is no longer leader
-      {
-         // Check to see if mLeadingTeam is still the leading team...
-         for(S32 i = 0; i < mTeams.size(); i++)
-            if(mTeams[i].score > mLeadingTeamScore)
-            {
-               mLeadingTeamScore = mTeams[i].score;
-               mLeadingTeam = i;
-            }  // no break statement in above!
-      }
-      else if(newScore > mLeadingTeamScore)     // Typical case
-      {
-         mLeadingTeamScore = newScore;
-         mLeadingTeam = team;
-      }
+      mLeadingTeamScore = S32_MIN;
+
+      // Check to see if mLeadingTeam is still the leading team...
+      for(S32 i = 0; i < mTeams.size(); i++)
+         if(mTeams[i].score > mLeadingTeamScore)
+         {
+            mLeadingTeamScore = mTeams[i].score;
+            mLeadingTeam = i;
+         }  // no break statement in above!
+
+      newScore = mLeadingTeamScore;
    }
 
    checkForWinningScore(newScore);              // Check if score is high enough to trigger end-of-game
@@ -1520,7 +1516,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillEnemy:
             return 1;
          case KilledByAsteroid:  // Fall through OK
-         case KilledByTurret:    // Fall through OK
+         case KilledByTurret:    // Fall through OK   
          case KillSelf:
             return 0;
          case KillTeammate:
