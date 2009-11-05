@@ -1411,19 +1411,21 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
    {
       // Individual scores
       S32 points = getEventScore(IndividualScore, scoringEvent, data);
-      if(points == 0)
-         return;
-
-      player->score += points;
-      player->clientConnection->mScore += points;
-
-      // Accumulate every client's total score counter
-      for(S32 i = 0; i < mClientList.size(); i++)
+      if(points != 0)
       {
-         mClientList[i]->clientConnection->mTotalScore += abs(points);
+         player->score += points;
+         player->clientConnection->mScore += points;
+         // (No need to broadcast score because individual scores are only displayed when Tab is held,
+         // in which case scores, along with data like ping time, are streamed in)
 
-         if(mClientList[i]->clientConnection->mScore > newScore)
-            newScore = mClientList[i]->clientConnection->mScore;
+         // Accumulate every client's total score counter
+         for(S32 i = 0; i < mClientList.size(); i++)
+         {
+            mClientList[i]->clientConnection->mTotalScore += max(points, 0);
+
+            if(mClientList[i]->clientConnection->mScore > newScore)
+               newScore = mClientList[i]->clientConnection->mScore;
+         }
       }
    }
 
@@ -1449,12 +1451,12 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
             s2cSetTeamScore(i, mTeams[i].score);      // Broadcast result
          }
       }
-      else
+      else  // All other scoring events
          s2cSetTeamScore(team, mTeams[team].score);          // Broadcast new team score
 
       mLeadingTeamScore = S32_MIN;
 
-      // Check to see if mLeadingTeam is still the leading team...
+      // Find the leading team...
       for(S32 i = 0; i < mTeams.size(); i++)
          if(mTeams[i].score > mLeadingTeamScore)
          {
