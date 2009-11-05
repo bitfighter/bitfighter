@@ -138,8 +138,7 @@ SaveDIBitmap(const char *filename, /* I - File to load */
             if (info->bmiHeader.biClrUsed == 0)
 	      break;
 	case BI_RGB :
-            if (info->bmiHeader.biBitCount > 8 &&
-        	info->bmiHeader.biClrUsed == 0)
+            if (info->bmiHeader.biBitCount > 8 && info->bmiHeader.biClrUsed == 0)
 	      break;
 	case BI_RLE8 :
 	case BI_RLE4 :
@@ -294,8 +293,8 @@ LoadDIBitmap(const char *filename, /* I - File to load */
         return (NULL);
         }
 
-    /* Swap red and blue */
-    length = ((*info)->bmiHeader.biWidth * 3 + 3) & ~3;
+    /* Swap red and blue ==> appears to cause broken colors on Mac.  Try without and see what happens  Nov 2009 */
+    /*length = ((*info)->bmiHeader.biWidth * 3 + 3) & ~3;
     for (y = 0; y < (*info)->bmiHeader.biHeight; y ++)
         for (ptr = bits + y * length, x = (*info)->bmiHeader.biWidth;
              x > 0;
@@ -304,7 +303,7 @@ LoadDIBitmap(const char *filename, /* I - File to load */
 	    temp   = ptr[0];
 	    ptr[0] = ptr[2];
 	    ptr[2] = temp;
-	    }
+	    }*/
 
     /* OK, everything went fine - return the allocated bitmap... */
     fclose(fp);
@@ -575,7 +574,7 @@ void Screenshooter::saveScreenshot()
       header.biHeight = h;         /* Height of image */
       header.biPlanes = 1;         /* Number of color planes */
       header.biBitCount = 24;       /* Number of bits per pixel */
-      header.biCompression = 0;    /* Type of compression to use */
+      header.biCompression = BI_RGB;    /* Type of compression to use */
       header.biSizeImage = w * h * 3;      /* Size of image data */
       header.biXPelsPerMeter = 0;  /* X pixels per meter */
       header.biYPelsPerMeter = 0;  /* Y pixels per meter */
