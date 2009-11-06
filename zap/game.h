@@ -298,11 +298,10 @@ extern void initHostGame(Address bindAddress, bool testMode);
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
-// already bumped master, release.  cs also ok
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
 #define CS_PROTOCOL_VERSION 19     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 517          // Version of the game according to SVN, will be unique every release (must be int)
-#define ZAP_GAME_RELEASE "011"     //"Bitfighter Release Candidate 010"   // Change this with every release -- for display purposes only, string
+#define ZAP_GAME_RELEASE "011"     // Change this with every release -- for display purposes only, string, will also be used for name of installer on windows
 
 };
 
