@@ -57,7 +57,7 @@ Object* NetClassRep::create(const char* className)
       if (!strcmp(walk->getClassName(), className))
          return walk->create();
 
-   TNLAssertV(0,("Couldn't find class rep for dynamic class: %s", className));
+   TNLAssertV(0,("Couldn't find class rep for dynamic class: %s", className));   // Bad level line, typically not fatal in production
    return NULL;
 }
 

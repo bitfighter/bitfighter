@@ -1371,7 +1371,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             if((item.selected || item.litUp) && mSpecialAttribute == None)
             {
                glColor(white);
-               drawStringf_2pt(pos, dest, instrSize, -22, "[Ctrl-Enter] to edit text");
+               drawStringf_2pt(pos, dest, instrSize, -22, "[Enter] to edit text");
             }
          }
          else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
@@ -1390,17 +1390,17 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
                if(mSpecialAttribute == None)
                {
-                  msg = "[Ctrl-Enter] to edit speed";
+                  msg = "[Enter] to edit speed";
                   instr = "";
                }
                else if(mSpecialAttribute == GoFastSpeed)
                {
-                  msg = "[Ctrl-Enter] to edit snapping";
+                  msg = "[Enter] to edit snapping";
                   instr = "Up/Dn to change speed";
                }
                else if(mSpecialAttribute == GoFastSnap)
                {
-                  msg = "[Ctrl-Enter] to stop editing";
+                  msg = "[Enter] to stop editing";
                   instr = "Up/Dn to toggle snapping";
                }
                else
@@ -1669,7 +1669,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             const char *msg;
 
             if(mSpecialAttribute == None)
-               msg = "[Ctrl-Enter] to edit";
+               msg = "[Enter] to edit";
             else if(isBeingEdited && mSpecialAttribute == RepopDelay)
                msg = "Up/Dn to change";
             else
@@ -2685,7 +2685,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // key actions are handled below.
    if(mEditingSpecialAttrItem != -1)
    {  /* braces required */
-      if( keyCode == KEY_J && getKeyState(KEY_CTRL) )    // Let Ctrl-Enter, which GLUT reports as Ctrl-J, drop through
+      if( keyCode == KEY_J && getKeyState(KEY_CTRL) )   
       { /* Do nothing */ }
       else if(keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)    // Trap mouse clicks... do nothing
          return;
@@ -2751,7 +2751,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    // Regular key handling from here on down
-   if(keyCode == KEY_J && getKeyState(KEY_CTRL))       // Ctrl-Enter - Edit props  (loser GLUT sees Ctrl-Enter as Ctrl-J)
+   if(keyCode == KEY_ENTER)       // Enter - Edit props 
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
