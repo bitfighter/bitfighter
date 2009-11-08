@@ -42,7 +42,7 @@ int yarrow_start(prng_state *prng)
    prng->yarrow.cipher = register_cipher(&safer_sk128_desc);
 #elif defined(DES)
    prng->yarrow.cipher = register_cipher(&des3_desc);
-#elif
+#else
    #error YARROW needs at least one CIPHER
 #endif
    if ((err = cipher_is_valid(prng->yarrow.cipher)) != CRYPT_OK) {

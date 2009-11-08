@@ -55,14 +55,15 @@ const char LuaLevelGenerator::className[] = "LuaLevelGenerator";      // Class n
 
 // Used in addItem() below...
 static const char *argv[LevelLoader::MaxArgc];
-static const char argv_buffer[LevelLoader::MaxArgc][LevelLoader::MaxArgLen];
+//static const char argv_buffer[LevelLoader::MaxArgc][LevelLoader::MaxArgLen];
+
 
 // Lua Constructor
 LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 {
    // Initialize some primitive string handling stuff, used in addItem() below
-   for(U32 i = 0; i < LevelLoader::MaxArgc; i++)
-      argv[i] = argv_buffer[i];
+   /*for(U32 i = 0; i < LevelLoader::MaxArgc; i++)
+      argv[i] = argv_buffer[i];*/
 }
 
 

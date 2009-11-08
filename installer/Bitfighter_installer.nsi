@@ -1,5 +1,6 @@
-# Script assumes that there is a /Dversion=curVersion
-!define curVersion "011 prelease 5"      ###### <<<-----  TODO: Remove this.  For testing only!
+# Script grabs version number from game.h
+!searchparse /file "../zap/game.h" `ZAP_GAME_RELEASE "` versionNumber `"`
+!define curVersion "${versionNumber}"  
 ;--------------------------------
 ; Include Modern UI
 

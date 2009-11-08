@@ -157,7 +157,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          else if (token == "Script")
             menuItems[5].mValS = val.substr(0, gMaxGameDescrLength);
          else if (token == "GridSize")
-            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), Game::maxGridSize), Game::minGridSize);
+            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), static_cast<int>(Game::maxGridSize)), static_cast<int>(Game::minGridSize));
          else if (token == "MinPlayers")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
          else if (token == "MaxPlayers")
@@ -202,7 +202,8 @@ void GameParamUserInterface::render()
    glColor3f(1, 1, 1);
    drawCenteredString(vertMargin, 30, menuTitle);
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
-
+
+
    glColor3f(1, 1, 1);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "UP, DOWN to choose | ESC exits menu");
 

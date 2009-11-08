@@ -38,10 +38,11 @@ namespace Zap
 // RDW
 // These constants need physical definitions.
 // They cause link errors with VC++... perhaps put them in a ifdef construct?
-//const U16 SpeedZone::minSpeed;
-//const U16 SpeedZone::maxSpeed;
-//const U16 SpeedZone::defaultSpeed;
-
+#ifndef __WIN32__
+const U16 SpeedZone::minSpeed;
+const U16 SpeedZone::maxSpeed;
+const U16 SpeedZone::defaultSpeed;
+#endif
 
 TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 

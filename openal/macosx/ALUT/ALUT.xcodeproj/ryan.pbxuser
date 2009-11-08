@@ -66,8 +66,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 267059725;
-			PBXWorkspaceStateSaveDate = 267059725;
+			PBXPerProjectTemplateStateSaveDate = 278601773;
+			PBXWorkspaceStateSaveDate = 278601773;
 		};
 		sourceControlManager = 94EB40220DDEF6760040A389 /* Source Control */;
 		userBuildSettings = {
@@ -81,6 +81,9 @@
 		fallbackIsa = XCSourceControlManager;
 		isSCMEnabled = 0;
 		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
 		};
 	};
 	94EB40230DDEF6760040A389 /* Code sense */ = {

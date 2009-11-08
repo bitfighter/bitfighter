@@ -52,16 +52,14 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 267064203;
-			PBXWorkspaceStateSaveDate = 267064203;
+			PBXPerProjectTemplateStateSaveDate = 278601713;
+			PBXWorkspaceStateSaveDate = 278601713;
 		};
 		perUserProjectItems = {
 			9428209B0DDF34B200D4F2DF /* PBXTextBookmark */ = 9428209B0DDF34B200D4F2DF /* PBXTextBookmark */;
 			9428209C0DDF34B200D4F2DF /* PBXTextBookmark */ = 9428209C0DDF34B200D4F2DF /* PBXTextBookmark */;
-			9428209E0DDF34B200D4F2DF /* PBXTextBookmark */ = 9428209E0DDF34B200D4F2DF /* PBXTextBookmark */;
-			9428209F0DDF34B200D4F2DF /* PBXTextBookmark */ = 9428209F0DDF34B200D4F2DF /* PBXTextBookmark */;
-			943242800FEB0E020045A8A8 /* PBXTextBookmark */ = 943242800FEB0E020045A8A8 /* PBXTextBookmark */;
 			943243F20FEB13900045A8A8 /* PBXTextBookmark */ = 943243F20FEB13900045A8A8 /* PBXTextBookmark */;
+			94BCBE97109B2025003BE6A7 /* PBXTextBookmark */ = 94BCBE97109B2025003BE6A7 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 941E8FD70DDF066800621981 /* Source Control */;
 		userBuildSettings = {
@@ -82,6 +80,9 @@
 		fallbackIsa = XCSourceControlManager;
 		isSCMEnabled = 0;
 		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
 		};
 	};
 	941E8FD80DDF066800621981 /* Code sense */ = {
@@ -90,9 +91,9 @@
 	};
 	941E90970DDF069A00621981 /* aes.c */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1011, 8526}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1023, 7904}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 1194}";
+			sepNavVisRange = "{0, 855}";
 		};
 	};
 	941E91050DDF06A900621981 /* mycrypt.h */ = {
@@ -122,36 +123,6 @@
 		vrLen = 75;
 		vrLoc = 0;
 	};
-	9428209E0DDF34B200D4F2DF /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 941E91050DDF06A900621981 /* mycrypt.h */;
-		name = "mycrypt.h: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 1130;
-		vrLoc = 0;
-	};
-	9428209F0DDF34B200D4F2DF /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 089C1667FE841158C02AAC07 /* English */;
-		name = "InfoPlist.strings: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 75;
-		vrLoc = 0;
-	};
-	943242800FEB0E020045A8A8 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 941E90970DDF069A00621981 /* aes.c */;
-		name = "aes.c: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 1194;
-		vrLoc = 0;
-	};
 	943243F20FEB13900045A8A8 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 941E90970DDF069A00621981 /* aes.c */;
@@ -160,6 +131,16 @@
 		rLoc = 0;
 		rType = 0;
 		vrLen = 1194;
+		vrLoc = 0;
+	};
+	94BCBE97109B2025003BE6A7 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 941E90970DDF069A00621981 /* aes.c */;
+		name = "aes.c: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 855;
 		vrLoc = 0;
 	};
 }

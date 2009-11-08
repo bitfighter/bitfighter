@@ -5,6 +5,9 @@
 #ifndef _LUNAR_H_
 #define _LUNAR_H_
 
+#include <typeinfo>
+#include <string>
+
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
@@ -149,7 +152,7 @@ private:
     push(L, obj, true); // gc_T will delete this object
     return 1;           // userdata containing pointer to T object
      }
-     catch(string msg)
+     catch(std::string msg)
      {
         logprintf("LUA ERROR: Cannot instantiate object %s", typeid(T).name() );
         return 0;

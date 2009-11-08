@@ -77,7 +77,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
 // Constructor
-GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000), mZoneGlowTimer(mZoneGlowTime)
+GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime) , mGameTimeUpdateTimer(30000)
 {
    mNetFlags.set(Ghostable);
    mBetweenLevels = true;
@@ -89,6 +89,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    maxRecPlayers = -1;
    mCanSwitchTeams = true;    // Players can switch right away
    mLocalClient = NULL;       // Will be assigned by the server after a connection is made
+   mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;     // By default, all zones glow
 }
 

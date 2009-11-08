@@ -374,7 +374,7 @@ void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 
    // Which column is the mouse in?  Left half of screen = 0, right half = 1
    S32 col = (mousePos.x < (canvasWidth - horizMargin) / 2) ? 0 : 1;
-   S32 row = min(max(floor(( mousePos.y - yStart ) / height), 0), menuItems.size() - 1);
+   S32 row = min(max(static_cast<int>(floor(( mousePos.y - yStart ) / height)), 0), menuItems.size() - 1);
 
    selectedIndex = min(max(row + firstItemInCol2 * col, 0), menuItems.size() - 1);    // Bounds checking
 

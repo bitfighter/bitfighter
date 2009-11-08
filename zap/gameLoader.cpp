@@ -37,6 +37,10 @@ using namespace TNL;
 namespace Zap
 {
 
+// GCC wants storage for these, for some reason.
+const int LevelLoader::MaxArgc;
+const int LevelLoader::MaxArgLen;
+
 // For readability and laziness...
 #define MaxArgc LevelLoader::MaxArgc
 #define MaxArgLen LevelLoader::MaxArgLen

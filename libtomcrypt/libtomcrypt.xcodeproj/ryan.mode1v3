@@ -244,6 +244,30 @@
 				<integer>2</integer>
 			</dict>
 		</dict>
+		<dict>
+			<key>XCObserverAutoDisconnectKey</key>
+			<true/>
+			<key>XCObserverDefintionKey</key>
+			<dict>
+				<key>PBXStatusAnalyzerResultsKey</key>
+				<integer>0</integer>
+			</dict>
+			<key>XCObserverFactoryKey</key>
+			<string>XCPerspectivesSpecificationIdentifier</string>
+			<key>XCObserverGUIDKey</key>
+			<string>XCObserverProjectIdentifier</string>
+			<key>XCObserverNotificationKey</key>
+			<string>PBXStatusBuildStateMessageNotification</string>
+			<key>XCObserverTargetKey</key>
+			<string>XCMainBuildResultsModuleGUID</string>
+			<key>XCObserverTriggerKey</key>
+			<string>awakenModuleWithObserver:</string>
+			<key>XCObserverValidationKey</key>
+			<dict>
+				<key>PBXStatusAnalyzerResultsKey</key>
+				<integer>2</integer>
+			</dict>
+		</dict>
 	</array>
 	<key>OpenEditors</key>
 	<array/>
@@ -257,15 +281,13 @@
 		<dict>
 			<key>ChosenToolbarItems</key>
 			<array>
-				<string>active-target-popup</string>
+				<string>active-combo-popup</string>
+				<string>action</string>
 				<string>NSToolbarFlexibleSpaceItem</string>
-				<string>buildOrClean</string>
-				<string>build-and-goOrGo</string>
-				<string>go-debug</string>
-				<string>clean-target</string>
+				<string>build</string>
+				<string>build-and-go</string>
 				<string>clean</string>
 				<string>com.apple.ide.PBXToolbarStopButton</string>
-				<string>toggle-editor</string>
 				<string>NSToolbarFlexibleSpaceItem</string>
 				<string>com.apple.pbx.toolbar.searchfield</string>
 			</array>
@@ -288,7 +310,6 @@
 						<array>
 							<string>1C37FBAC04509CD000000102</string>
 							<string>1C37FAAC04509CD000000102</string>
-							<string>1C08E77C0454961000C914BD</string>
 							<string>1C37FABC05509CD000000102</string>
 							<string>1C37FABC05539CD112110102</string>
 							<string>E2644B35053B69B200211256</string>
@@ -320,12 +341,14 @@
 								<string>0867D691FE84028FC02AAC07</string>
 								<string>941E8FD60DDF066700621981</string>
 								<string>034768DDFF38A45A11DB9C8B</string>
+								<string>1C37FBAC04509CD000000102</string>
 								<string>1C37FABC05509CD000000102</string>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateSelectionKey</key>
 							<array>
 								<array>
-									<integer>0</integer>
+									<integer>22</integer>
+									<integer>21</integer>
 								</array>
 							</array>
 							<key>PBXSmartGroupTreeModuleOutlineStateVisibleRectKey</key>
@@ -376,17 +399,12 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>943243F20FEB13900045A8A8</string>
+										<string>94BCBE97109B2025003BE6A7</string>
 										<key>history</key>
 										<array>
 											<string>9428209B0DDF34B200D4F2DF</string>
 											<string>9428209C0DDF34B200D4F2DF</string>
-											<string>943242800FEB0E020045A8A8</string>
-										</array>
-										<key>prevStack</key>
-										<array>
-											<string>9428209E0DDF34B200D4F2DF</string>
-											<string>9428209F0DDF34B200D4F2DF</string>
+											<string>943243F20FEB13900045A8A8</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -398,14 +416,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1072, 824}}</string>
+								<string>{{0, 0}, {1072, 577}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 132 1280 870 0 0 1280 1002 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>824pt</string>
+							<string>577pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -418,14 +436,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 829}, {1072, 0}}</string>
+								<string>{{0, 582}, {1072, 247}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 132 1280 870 0 0 1280 1002 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>0pt</string>
+							<string>247pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -444,12 +462,14 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>943243F30FEB13900045A8A8</string>
+				<string>94BCBE98109B2025003BE6A7</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>943243F40FEB13900045A8A8</string>
+				<string>94BCBE99109B2025003BE6A7</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
+			<key>ToolbarConfigUserDefaultsMinorVersion</key>
+			<string>2</string>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.defaultV3</string>
 		</dict>
@@ -565,7 +585,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>267064203.69251001</real>
+	<real>278601765.67601901</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -580,7 +600,8 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>/Users/ryan/Desktop/zap/release-011-alpha2/libtomcrypt/libtomcrypt.xcodeproj</string>
+		<string>941E912D0DDF072300621981</string>
+		<string>/Users/ryan/Desktop/zap/trunk/libtomcrypt/libtomcrypt.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>0 132 1280 870 0 0 1280 1002 </string>
@@ -626,7 +647,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>XCMainBuildResultsModuleGUID</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>Build</string>
+								<string>Build Results</string>
 								<key>XCBuildResultsTrigger_Collapse</key>
 								<integer>1021</integer>
 								<key>XCBuildResultsTrigger_Open</key>
@@ -660,7 +681,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>941E912D0DDF072300621981</string>
-				<string>94CB41260FEB0206008D1EA9</string>
+				<string>94BCBE9A109B2025003BE6A7</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
