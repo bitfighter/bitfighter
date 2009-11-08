@@ -16,14 +16,15 @@ OBJECTS_MASTER=\
 CFLAGS=
 
 .cpp.o : 
-   $(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) $<
 
 default: $(OBJECTS_MASTER)
 # For linux and Mac, uncomment the following, and comment out the Windows line below
-#  $(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm 
+
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm 
 # For windows, uncomment out the line below, and comment out the line above
-   $(CC) -o ../exe/master $(OBJECTS_MASTER)  ../tnl/libtnl.a   ../libtomcrypt/libtomcrypt.a   C:/MinGW/lib/libwsock32.a  -lstdc++ -lm  
+#   $(CC) -o ../exe/master $(OBJECTS_MASTER)  ../tnl/libtnl.a   ../libtomcrypt/libtomcrypt.a   C:/MinGW/lib/libwsock32.a  -lstdc++ -lm  
 
 
 clean:
-   rm -f $(OBJECTS_MASTER) ../exe/master
+	rm -f $(OBJECTS_MASTER) ../exe/master
