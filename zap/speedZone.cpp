@@ -35,10 +35,8 @@
 namespace Zap
 {
 
-// RDW
-// These constants need physical definitions.
-// They cause link errors with VC++... perhaps put them in a ifdef construct?
-#ifndef __WIN32__
+// Needed on OS X, but cause link errors in VC++
+#ifndef WIN32
 const U16 SpeedZone::minSpeed;
 const U16 SpeedZone::maxSpeed;
 const U16 SpeedZone::defaultSpeed;

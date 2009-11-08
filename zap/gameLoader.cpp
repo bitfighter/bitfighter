@@ -37,9 +37,11 @@ using namespace TNL;
 namespace Zap
 {
 
-// GCC wants storage for these, for some reason.
+// GCC wants storage for these, for some reason.  Unfortunately VC++ doesn't want that.
+#ifndef WIN32
 const int LevelLoader::MaxArgc;
 const int LevelLoader::MaxArgLen;
+#endif
 
 // For readability and laziness...
 #define MaxArgc LevelLoader::MaxArgc

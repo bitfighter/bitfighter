@@ -62,7 +62,7 @@ namespace Zap
 EditorUserInterface gEditorUserInterface;
 
 const U32 dockWidth = 50;
-const S32 MIN_SCALE = 200;    // Most zoomed-in scale
+const S32 MIN_SCALE = 300;    // Most zoomed-in scale
 const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 
 // Some colors
