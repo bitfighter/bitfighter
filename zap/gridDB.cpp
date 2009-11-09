@@ -25,7 +25,7 @@
 
 #include "gridDB.h"
 #include "gameObject.h"
-#include "MoveObject.h"    // For def of ActualState
+#include "moveObject.h"    // For def of ActualState
 
 namespace Zap
 {

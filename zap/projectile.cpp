@@ -707,7 +707,7 @@ U32 SpyBug::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *s
       //stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : NULL);
       // Just don't kill the coder who keeps doing it! -CE
       // And remember, pack and unpack must match, so if'ing this out won't work unless we do the same on unpack.
-      StringTableEntryRef noOwner = StringTableEntryRef();
+      StringTableEntryRef noOwner = StringTableEntryRef("");
       stream->writeStringTableEntry(getOwner() ? getOwner()->getClientName() : noOwner);
    }
    return ret;

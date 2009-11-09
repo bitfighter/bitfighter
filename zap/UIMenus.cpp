@@ -140,7 +140,7 @@ void MenuUserInterface::renderMenuInstructions(S32 variant)
 
    if(gIniSettings.inputMode == Keyboard)
    {
-	  char *menuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
+	  const char *menuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
 	  drawCenteredString(y, size, menuFooter);
    }
    else

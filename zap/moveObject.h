@@ -77,7 +77,7 @@ public:
    Point getActualVel() { return mMoveState[ActualState].vel; }
    void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
 
-   void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject>> = Vector<SafePtr<MoveObject>>());
+   void move(F32 time, U32 stateIndex, bool displacing = false, Vector<SafePtr<MoveObject> > = Vector<SafePtr<MoveObject> >());
    bool collide(GameObject *otherObject);
 
    GameObject *findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint);

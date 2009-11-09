@@ -42,7 +42,7 @@
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
-#include "LuaLevelGenerator.h"
+#include "luaLevelGenerator.h"
 
 #include "BotNavMeshZone.h"      // For zone clearing code
 

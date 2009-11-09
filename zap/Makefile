@@ -6,16 +6,16 @@
 
 #######################################
 # For Linux/Mac users, uncomment the following line, and comment out the Windows line below
-#CC=g++ -g -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING #-O2
-#threadLib= -lpthread
-#glut=-lGL -lGLU -lglut
-#linuxInput=linuxInput.o
+CC=g++ -g -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING #-O2
+threadLib= -lpthread
+glut=-lGL -lGLU -lglut
+linuxInput=linuxInput.o
 #######################################
 # For Windows users, uncomment the following line, and comment out the line above
-CC=g++ -g -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING -DWIN32 -D_STDCALL_SUPPORTED #-O2
-threadLib=
-glut=-lglut32
-linuxInput=winJoystick.o
+#CC=g++ -g -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING -DWIN32 -D_STDCALL_SUPPORTED #-O2
+#threadLib=
+#glut=-lglut32
+#linuxInput=winJoystick.o
 #######################################
 
 
@@ -114,8 +114,8 @@ bitfightered: ../exe/bitfightered
 #	rm -f *.gch		
 
 
-	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a -s -lglut32 -mwindows
-	#$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) $(threadLib) -lstdc++  -lm
+#	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a -s -lglut32 -mwindows
+	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) ../lua/liblua.a  $(threadLib) -lstdc++  -lm
 #../exe/bitfightered: CFLAGS=-DZAP_DEDICATED
 #../exe/bitfightered: $(OBJECTS_ZAP)
 #	$(CC) -o ../exe/bitfightered $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(threadLib) -lstdc++ -lm

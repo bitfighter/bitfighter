@@ -28,7 +28,7 @@
 #include "tnlLog.h"         // For logprintf
 
 #include "gameItems.h"     // For getItem()
-#include "Item.h"          // For getItem()
+#include "item.h"          // For getItem()
 #include "flagItem.h"      // For getItem()
 #include "robot.h"         // For getItem()
 #include "huntersGame.h"   // For getItem()

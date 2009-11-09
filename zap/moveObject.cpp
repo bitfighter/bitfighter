@@ -146,7 +146,7 @@ const F32 velocityEpsilon = 0.00001f;
 // isBeingDisplaced is true when the object is being pushed by something else, which will only happen in a collision
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
 
-void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject>> displacerList)
+void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
    U32 tryCount = 0;
    while(moveTime > moveTimeEpsilon && tryCount < 8)     // moveTimeEpsilon is a very short, but non-zero, bit of time

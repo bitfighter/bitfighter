@@ -98,10 +98,10 @@ private:
 
 public:
    // Initialize the pointer
-   LuaWeaponInfo(lua_State *L);                      // Lua constructor
-   LuaWeaponInfo::LuaWeaponInfo(WeaponType weapon);  // C++ constructor
+   LuaWeaponInfo(lua_State *L);            // Lua constructor
+   LuaWeaponInfo(WeaponType weapon);       // C++ constructor
 
-   ~LuaWeaponInfo();                                 // Destructor
+   ~LuaWeaponInfo();                       // Destructor
 
    static const char className[];
 

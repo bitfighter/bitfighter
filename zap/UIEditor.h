@@ -57,7 +57,8 @@ struct SaveException : public std::exception
 {
    string msg;
 
-   SaveException(string str) : msg(str) { }    // Constructor
+   SaveException(string str) : msg(str) { /* do nothing */ }    // Constructor
+   ~SaveException() throw() { /* do nothing */ }                // Destructor, needed to avoid "looser throw specifier" errors with gcc
    const char* what() const throw() { return msg.c_str(); }
 };
 
@@ -324,7 +325,7 @@ public:
    Point convertLevelToCanvasCoord(Point p) { return p * mCurrentScale + mCurrentOffset; }
    Point snapToLevelGrid(Point p);
 
-   void EditorUserInterface::runScript();    // Run associated levelgen script
+   void runScript();    // Run associated levelgen script
 
 
    //MeshBox testBox[5][5];  //TODO: del

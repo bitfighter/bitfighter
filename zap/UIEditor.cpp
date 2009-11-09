@@ -50,7 +50,7 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "config.h"
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
-#include "LuaLevelGenerator.h"
+#include "luaLevelGenerator.h"
 
 #include "../glut/glutInclude.h"
 #include <ctype.h>
@@ -3384,7 +3384,7 @@ static void s_fprintf(FILE *stream, const char *format, ...)
 
     va_end(args);
 
-    if(fprintf(stream, buffer) < 0)     // Uh-oh...
+    if(fprintf(stream, "%s", buffer) < 0)     // Uh-oh...
     {
        throw(SaveException("Error writing to file"));
     }

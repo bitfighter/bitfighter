@@ -9,6 +9,12 @@
 #
 #
 # Building under Linux:
+# install freeGlut
+# build lua.a:
+#	download source ==> wget http://www.lua.org/ftp/lua-5.1.4.tar.gz
+#       uncompress ==> tar zxf lua-5.1.4.tar.gz
+#       compile ==> make linux
+#       move liblua.a to Bitfighter's lua folder ==> mv src/liblua.a ../lua
 #
 # Do some stuff
 #
