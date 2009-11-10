@@ -32,6 +32,10 @@ namespace Zap
 static F32 mGridSize;
 static LevelLoader *mCaller;
 
+#ifdef TNL_OS_LINUX
+const S32 LevelLoader::MaxArgc;
+#endif
+
 // C++ Constructor
 LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, LevelLoader *caller)
 {

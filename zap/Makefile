@@ -91,6 +91,9 @@ OBJECTS_ZAP=\
    gsm_state.o\
    lpc10enc.o\
    lpc10dec.o\
+   md5wrapper.o\
+   md5.o\
+   BotNavMeshZone.o\
    ../master/masterInterface.o\
 
 CFLAGS=

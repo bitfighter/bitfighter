@@ -25,7 +25,7 @@
 
 #include "BotNavMeshZone.h"
 #include "SweptEllipsoid.h"
-#include "Robot.h"
+#include "robot.h"
 #include "UIMenus.h"
 
 namespace Zap
