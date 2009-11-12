@@ -6,7 +6,7 @@
 
 #######################################
 # For Linux/Mac users, uncomment the following line, and comment out the Windows line below
-CC=g++ -g -ggdb -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING #-O2
+CC=g++ -g  -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING #-O2
 threadLib= -lpthread
 glut=-lGL -lGLU -lglut
 linuxInput=linuxInput.o
