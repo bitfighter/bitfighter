@@ -448,15 +448,21 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeyup, (U32 key), (key))
 }
 
 
-// Exit the game, back to the OS
-void exitGame()
+void exitGame(S32 errcode)
 {
    #ifdef TNL_OS_XBOX
       extern void xboxexit();
       xboxexit();
    #else
-      exit(0);
+      exit(errcode);
    #endif
+}
+
+
+// Exit the game, back to the OS
+void exitGame()
+{
+   exitGame(0);
 }
 
 
@@ -466,7 +472,9 @@ void abortHosting()
    if(gDedicatedServer)
    {
       logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
-      exitGame(); 
+      s_logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
+      //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
+      exitGame(1); 
    }
    else
    {
@@ -533,6 +541,8 @@ void hostGame()
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
       joinGame(Address(), false, true);   // ...then we'll play, too!
       //      (let the system assign ip and port, false -> not from master, true -> local connection)
+   //else
+   //   printf("Bitfighter host launched.\n");     ==> Does nothing
 }
 
 
@@ -916,7 +926,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a server address to connect to with the -connect option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Specify a master server
@@ -927,7 +937,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a master server address with -master option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Address to use when we're hosting
@@ -938,7 +948,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)");
-            exitGame();
+            exitGame(1);
          }
       }
       // Simulate packet loss 0 (none) - 1 (total)  [I think]
@@ -949,7 +959,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a loss rate between 0 and 1 with the -loss option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Simulate network lag
@@ -960,7 +970,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a lag (in ms) with the -lag option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Run as a dedicated server
@@ -984,7 +994,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must enter a nickname with the -name option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Specify password for accessing locked ser vers
@@ -995,7 +1005,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must enter a password with the -password option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Specify admin password for server
@@ -1006,7 +1016,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify an admin password with the -adminpassword option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Specify level change password for server
@@ -1017,7 +1027,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify an level-change password with the -levelchangepassword option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Specify to include all levels in levels folder -- not really needed any more, but can be used as a shortcut to tell game to ignore levels in INI file...
@@ -1033,7 +1043,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          if(!hasAdditionalArg)
          {
             logprintf("You must specify a levels subfolder with the -leveldir option");
-            exitGame();
+            exitGame(1);
          }
 
          gCmdLineSettings.suppliedLevels = true;
@@ -1046,7 +1056,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          if(!hasAdditionalArg)
          {
             logprintf("You must specify one or more levels to load with the -levels option");
-            exitGame();
+            exitGame(1);
          }
          
          // We'll overwrite our main level list directly, so if we're writing the INI for the first time,
@@ -1066,7 +1076,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a server name with the -hostname option");
-            exitGame();
+            exitGame(1);
          }
       }
       else if(!stricmp(argv[i], "-hostdescr"))   // additional arg required
@@ -1076,7 +1086,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify a description (use quotes) with the -hostdescr option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Change max players on server
@@ -1087,7 +1097,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify the max number of players on your server with the -maxplayers option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Start in window mode
@@ -1114,7 +1124,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify the x and y position of the window with the -winpos option");
-            exitGame();
+            exitGame(1);
          }
       }
       // Specify width of the game window
@@ -1125,14 +1135,14 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify the width of the game window with the -winwidth option");
-            exitGame();
+            exitGame(1);
          }
       }
       else if(!stricmp(argv[i], "-help"))       // no additional args
       {
          i--;
          logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
-         exitGame();
+         exitGame(0);
       }
       // Highly speculative use of different joysticks
       else if(!stricmp(argv[i], "-usestick")) // additional arg required
@@ -1142,7 +1152,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          else
          {
             logprintf("You must specify the joystick you want to use with the -usestick option");
-            exitGame();
+            exitGame(1);
          }
       }
    }
@@ -1399,7 +1409,7 @@ void processStartupParams()
       else
       {
          gMainMenuUserInterface.activate();
-         gReadyToConnectToMaster = true;
+         gReadyToConnectToMaster = true;         // Set elsewhere if in dedicated server mode
       }
    }
 }
@@ -1447,12 +1457,12 @@ int main(int argc, char **argv)
       {
          gINI.Path("bitfighter.ini.sample");
          saveSettingsToINI();
-         exitGame();
+         exitGame(0);
       }
       if(!stricmp(argv[i], "-rules"))            // Print current rules and exit
       {
          GameType::printRules();
-         exitGame();
+         exitGame(0);
       }
       else if(!stricmp(argv[i], "-jsave"))      // Write game to journal
       {
