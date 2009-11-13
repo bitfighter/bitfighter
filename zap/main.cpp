@@ -13,7 +13,7 @@
 
 // Long term
 // Admin select level w/ preview(?)
-// Implement level selection based on MinPlayers.MaxPlayers
+// Implement level selection based on MinPlayers & MaxPlayers
 
 //Test:
 
@@ -26,171 +26,14 @@
 // Wiki:
 // Create wiki page showing how to parse json data
 //-----------------------------------------------------------------------------------
-// Done:
 
-// Levelgen scripts
-// Asteroids
-// Chat /commands
-// Level file specifications of many new properties, including auto-healing of turrets & force fields, GoFast speed & accuracy, etc.
-// Much improved level editor, including dynamic level preview
-
-//<u>General Enhancements</u>
+//<h2>Changes since 011</h2>
 //<ul>
-//<li>Levels that don't have designer-specified names can now be accessed from the Level Change menu on in-game options via their file name</li>
-//<li>Retrieve game ->can't pick up enemy flags, so more complex level designs are possible.  Actually, maybe not true... maybe this is a lame feature.</li>
-//<li>Fixed scoring message on Hunters levels</li>
-//<li>ZoneControl ->When ship takes flag in an uncaptured zone, they immediately take control of zone without having to leave/reenter</li>
-//<li>Reassigned default key for loading loadout menu from Q to Z (Mac build, change made in Windows version in 010)</li>
-//<li>Added client IP address to server log</li>
-//<li>Added time disconnected and connection duration to server log</li>
-//<li>Uneeded vertices now removed from walls to improve both appearance and performance</li>
-//<li>Added screen saver supression (Windows only, sorry, and only kind of works)</li>
-//<li>Enhanced flashing effect of zones in ZoneControl game</li>
-//<li>Added yellow flash to ZoneControl and Retrieve zones when touchdown is scored (like Nexus effect in Hunters game)</li>
-//<li>Indicator added to player's name when they are in chat, global chat, or options menus</li>
-//<li>Screenshots now saved in .BMP format</li>
-//<li>Scores displayed in LR corner of main game screen now sorted from high to low</li>
-//<li>Name of current game server now displayed on global chat screen</li>
-//<li>Changed Zapmatch to Bitmatch, the least controversial of the proposed game name changes.</li>
-//<li>Changed Hunters game name to Nexus, a very controversial name change.  Nothing like instigating a nice ol' flamewar!!!</li>
-//<li>Team chat message entry box colored appropriately</li>
-//<li>Objective arrows now rendered correctly for levels with multiple Nexuses (Nexii??)</li>
-//<li>Improved rendering of labelling of loadout zones and nexii</li>
-//<li>Added spaces to level files written by editor to make them easier to read</li>
-//<li>Better handling of items with invalid parameter lines in .level files</li>
-//<li>Enter commands using "/" key, or by starting a global or team chat message with "/"</li>
-//<li>Added /restart command to restart current level</li>
-//<li>Added instruction page to explain available chat commands</li>
-//<li>Increased level description length from 32 chars to 60 (thanks Bobdaduck!), and enhanced parameter editor to better enforce those limits</li>
-//<li>Increased max level size from 64K to 96K</li>
-//<li>Private chat messages entered in [F5] chat now relayed to players in-game</li>
-//<li>Better messages when killed by turret or asteroid or mine</li>
-//<li>Soccer game can now be played in no-teams mode by defining only one team</li>
-//<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
-//<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
-//<li>List of players in global chat mode now displayed when in global chat</li>
-
-//
-//<u>UI/Menus</u>
-//<li>Improved menu navigation instructions for joystick users</li>
-//<li>More intelligent wrapping on long menus</li>
-//<li>On levels menu, pressing first key of level name will take you to levels starting with that letter, the next press will take you to the next, etc.</li>
-//<li>Username entry screen now remembers last name used</li>
-//<li>When hosting a game from the UI, game load progress info displayed</li>
-//<li>When loading a level from a local or remote server, progress bar is displayed</li>
-//<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
-//<li>Message displayed when connection to game server fails for some unknown reason</li>
-//<li>Joystick now works on all menus except for those in the editor</li>
-//</ul>
-//
-//<u>Items</u>
-//<ul>
-//<li>Can now specify regen time for health packs... currently, add 3rd number on definition line to specify respawn time in seconds (min val = 1 sec, default is 20secs).  Cannot change value in editor, but will survive load/save cycle.</li>
-//<li>Turrets and Forcefields can now repair themselves, if you specify an additional argument on their definition line (secs / 10% repair... i.e. entering 1, item will fully repair in 10 seconds).  Again, cannot change value in editor, but will survive load/save cycle.</li>
-//<li>4 alternate gofast graphics available for testing... set in [Testing] section of INI file</li>
-//<li>Can specify gofast speed as optional last argument in level definition file (min 100, max 5000)... no editor UI available, but will survive load/save cycle in editor</li>
-//<li>Can specify whether ships snap to center of gofast with optional additional parameter in level file</li>
-//<li>Gofast are now almost deterministic in where you end up -- very precise corridors now possible, when snapping enabled</li>
-//<li>Default gofast speed reduced to 2000<li>
-//<li>If ship is sitting on repair when it respawns, ship gets the repair (no longer have to move)</li>
-//<li>FlagItems are automatically converted to HuntersFlagItems when loading Nexus levels</li>
-//<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds).  Cannot modify value in editor, but entries survive editing process when level is manually edited.</li>
-//<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
-//<li>Asteroids... you figure it out!</li>
-
-//</ul>
-//
-//<u>Specifiying levels</u>
-//<ul>
-//<li>".level" extension now optional when specifying levels with the -levels param</li>
-//<li>-leveldir can now specify any folder on disk, but can still be used to specify a specific subdir of the levels folder.  Be sure to use quotes if path includes spaces!
-//example: -leveldir abc will load levels in abc subfolder under levels folder.  -leveldir c:\levels will load all levels in c:\levels</li>
-//<li>If no levels specified on cmd line or in INI file, all levels in levels folder will be loaded, much as if the -alllevels param was specified</li>
-//<li>Level folder can now be specified in the INI file, either as absolute or relative path.</li>
-//</ul>
-//
-//<u>Scoring:</u>
-//<ul>
-//<li>Full scoring information available with -rules option</li>
-//<li>Individual scores now replaced with rating (from 0 to 1) that persists between games.  Rating calculated as ratio
-//    of points player makes divided by total scores all players make during that players time in the game</li>
-//<li>Killing turrets now a scorable event, 0 for all team scores, 1 for individual scores (-1 for own turrets)</li>
-//<li>Teams now assigned on basis of individual ratings, rather than randomly... should help better balance teams</li>
-//<li>Added scoring events when flag is removed from enemy zone in Retrieve and HTF games</li>
-//<li>HTF now requires flags actually be held full 5 seconds before scoring occurs</li>
-//</ul>
-//
-//<u>Editor:</u>
-//<ul>
-//<li>Moved turrent/spybug ranges display onto Tab-down display</li>
-//<li>When tab down, test items, resource items, gofasts, teleports, asteroids, and soccer balls all display at actual size, making precise positioning possible</li>
-//<li>Added more editor checks (flags in non-flag games, team flags in non-team-flag games)</li>
-//<li>Fixed problem with inserting vertices into wall segments that caused vertex to jump to location of its neighbor</li>
-//<li>Improved operation of text labeling, may cause slight change in text placed in earlier version of game</li>
-//<li>Display gofast speed and snapping on item</li>
-//<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
-//<li>Switched F2 and F3 keys</li>
-//<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
-//<li>Can edit respawing times for items that support them in the editor</li>
-//<li>Can edit GoFast params in editor</li>
-//<lu>Added script/params to game config menu</li>
-//<li>Many minor rendering improvements</li>
+//<li>Dedicated server level-list handling now the same as when hosting in interactive mode</li>
 //</ul>
 
-//<u>Bug fixes:</u>
-//<ul>
-//<li>Speed zones now rendered on top of loadout zones</li>
-//<li>Walls now rendered on top of loadout zones, goal zones, and the like</li>
-//<li>Fixed heap corruption error in editor that caused crashes after some deletes.  Bad, long term problem now resolved!</li>
-//<li>Fixed (I hope) seemingly random crashes that occurred with a new level is loaded, lingering from original Zap code</li>
-//<li>Changing other player's team in 3+ team game with 3+ players no longer switches a random player</li>
-//<li>Fixed problem with mutliple flags returning to single spawn point in Retrieve games... Flags now only return to an empty spawn points</li>
-//<li>Fixed problem with mis-crediting players for shooting soccer ball into goal (also caused crashes in some cases)</li>
-//<li>Old messages now properly cleared out when game is started</li>
-//<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
-//<li>Fixed rendering bug on ship config menu in joystick mode</li>
-//<li>Fixed scaling issue in editor when only one point item is present</li>
-//</ul>
-//
-//<u>Server menu enhancements:</u>
-//<ul>
-//<li>Fixed minor rendering issue on servers menu</li>
-//<li>Color coded status messages on servers menu</li>
-//<li>Trim server names too long to fit in column on servers menu</li>
-//<li>Added indicator ("T") for servers in test mode</li>
-//<li>Replaced max player listing with number of robots</li>
-//</ul>
-//
-//<u>And, of course, Robots!</u>
-
-
-/////  Newest stuff since alpha 2
-//<li>Better messages when killed by turret or asteroid or mine</li>
-//<li>Better display in editor when in ctrl-A mode, can no longer select hidden items, tab now shows all items</li>
-//<li>Soccer game can now be played in no-teams mode by defining only one team</li>
-//<li>Flag spawns now spawn flags periodically in Nexus games.  Can control rate by appending a number to the FlagSpawn entry in the level file (number in seconds). 
-//<li>Switched F2 and F3 keys in editor</li>
-//<li>Flag spawn points now work as soccer ball spawn points in soccer game</li>
-//<li>Can now type first letter of game type in GameParams menus to quickly select (still have conflict with "R"s Rabbit/Retrieve)</li>
-//<li>Fixed rendering wonkiness with really goofball loadout zones/goal zones/nexii in editor and in main game</li>
-//<li>Levelgen scripts offer options for more dynamic and flexible levels.  See the wiki for details.</li>
-//<li>Fixed rendering bug on ship config menu in joystick mode</li>
-//<li>It is now possible to add top-level quick chat items, meaning you can now create a flat, one level simpler quick chat menu with section like [QuickChat_Message1]</li>
-//<li>Walls now rendered on top of loadout zones, goal zones, and the like</li>
-//<li>Can edit respawing times for items that support them in the editor</li>
-//<li>Can edit GoFast params in editor</li>
-//<li>More intelligent wrapping on long menus</li>
-//<li>On levels menu, pressing first key of level name will take you to levels starting with that letter, the next press will take you to the next, etc.</li>
-//<li>Mouse now works on Define Keys, Level Params, and Team Config menus (should now work on every menu)</li>
-//<lu>Added script/params to game config menu</li>
-//<li>Fixed scaling issue in editor when only one point item is present</li>
-//<li>List of players in global chat mode now displayed when in global chat</li>
-//<li>Message displayed when connection to game server fails for some unknown reason</li>
-//<li>Joystick now works on all menus except for those in the editor</li>
-//<li></li>
 
 // Mac Test:
-// New screen capture code
 // Robot folder in installer
 // Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
 // Ryan -- I changed getLevels() slightly... I tried to make the corresponding change in Directory.mm, by commenting out single line.  Hopefully the functionalities are still the same!
@@ -1388,6 +1231,40 @@ void InitSdlVideo()
 */
 
 
+
+// Create the definititve list of levels for hosting a game
+void buildLevelList()
+{
+   // If no levels were specified on the cmd line, and the INI file has some specified, use those
+   if(!gCmdLineSettings.suppliedLevels && gIniSettings.levelList.size() > 0)
+   {
+      gLevelList = gIniSettings.levelList;
+      return;
+   }
+
+   // Otherwise, use the levels gleaned from the cmd line, or, if nothing specified on the cmd line, 
+   // use all the levels in leveldir (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
+   if(gCmdLineSettings.suppliedLevels)
+   {
+      if(gLevelList.size() > 0)     // If there's something here, they came from the cmd line
+         return;
+   }
+
+   gLevelList.clear();
+   Vector<string> levelfiles;
+
+   if(!getLevels(gLevelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
+   {
+      logprintf("Could not read any levels from the levels folder \"%s\".", gLevelDir.c_str());
+   }
+
+   levelfiles.sort(alphaSort);   // Just to be sure...
+
+   for (S32 i = 0; i < levelfiles.size(); i++)
+      gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
+}
+
+
 // Basically checks if the folder base exists, and if not, makes it a subdir of levels
 // Typos on the user's part can lead to hilarity!
 string getLevelsFolder(string base)
@@ -1506,6 +1383,8 @@ void processStartupParams()
    if(gCmdLineSettings.clientMode)               // Create ClientGame object
       gClientGame = new ClientGame(Address());   //   let the system figure out IP address and assign a port
 
+   buildLevelList();                             // Get our level list squared away before we jump off to initHostGame() if that's what's going to happen
+
    if(gCmdLineSettings.serverMode)
       initHostGame(gBindAddress, false);         // Start hosting
    else if(gCmdLineSettings.connectRemote)       //       or
@@ -1525,38 +1404,6 @@ void processStartupParams()
    }
 }
 
-
-// Create the definititve list of levels for hosting a game
-void buildLevelList()
-{
-   // If no levels were specified on the cmd line, and the INI file has some specified, use those
-   if(!gCmdLineSettings.suppliedLevels && gIniSettings.levelList.size() > 0)
-   {
-      gLevelList = gIniSettings.levelList;
-      return;
-   }
-
-   // Otherwise, use the levels gleaned from the cmd line, or, if nothing specified on the cmd line, 
-   // use all the levels in leveldir (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
-   if(gCmdLineSettings.suppliedLevels)
-   {
-      if(gLevelList.size() > 0)     // If there's something here, they came from the cmd line
-         return;
-   }
-
-   gLevelList.clear();
-   Vector<string> levelfiles;
-
-   if(!getLevels(gLevelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
-   {
-      logprintf("Could not read any levels from the levels folder \"%s\".", gLevelDir.c_str());
-   }
-
-   levelfiles.sort(alphaSort);   // Just to be sure...
-
-   for (S32 i = 0; i < levelfiles.size(); i++)
-      gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
-}
 
 
 };  // namespace Zap
@@ -1635,7 +1482,7 @@ int main(int argc, char **argv)
    loadSettingsFromINI();                    // Read INI
 
    processStartupParams();                   // And process command lines and INI settings in a unified way
-   buildLevelList();
+   //buildLevelList();
 
    gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
 
