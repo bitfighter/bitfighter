@@ -1309,7 +1309,9 @@ void processStartupParams()
       gNameEntryUserInterface.setText(gCmdLineSettings.name.c_str());
    else if(gIniSettings.name != "")
       gNameEntryUserInterface.setText(gIniSettings.name.c_str());
-   // else rely on gNameEntryUserInterface default of ""
+   else
+      gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
+
 
    if(gCmdLineSettings.password != "")
       gServerPassword = gCmdLineSettings.password.c_str();
@@ -1493,9 +1495,6 @@ int main(int argc, char **argv)
 
    processStartupParams();                   // And process command lines and INI settings in a unified way
    //buildLevelList();
-
-   gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
-
 
    SFXObject::init();
 
