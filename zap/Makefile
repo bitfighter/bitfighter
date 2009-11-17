@@ -118,7 +118,7 @@ bitfightered: ../exe/bitfightered
 
 
 #	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a -s -lglut32 -mwindows
-	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) ../lua/liblua.a  $(threadLib) -lstdc++  -lm
+	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) $(threadLib) -llua5.1 -lstdc++  -lm
 #../exe/bitfightered: CFLAGS=-DZAP_DEDICATED
 #../exe/bitfightered: $(OBJECTS_ZAP)
 #	$(CC) -o ../exe/bitfightered $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(threadLib) -lstdc++ -lm
