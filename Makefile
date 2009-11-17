@@ -12,28 +12,11 @@
 # Here are the steps needed to install on a fresh Ubuntu install:
 #
 # Download the source code from SVN repository
-# svn co https://zap.svn.sourceforge.net/svnroot/zap bitfighter
+# svn co https://zap.svn.sourceforge.net/svnroot/zap/trunk bitfighter
 #
 # Install g++
-# sudo apt-get install g++
+# Install freeglut-dev and liblua5.1-0
 #
-# Install freeglut
-# sudo apt-get install freeglut3            (maybe not needed)
-# sudo apt-get install freeglut3-dev
-#
-# Install OpenGL (maybe not needed)
-# sudo apt-get install libgl1-mesa-dev
-#
-# Install libreadline lib, present on most Linux installs, absent on Ubuntu
-# sudo apt-get install libreadline5-dev
-#
-# build lua.a:
-#       download source ==> wget http://www.lua.org/ftp/lua-5.1.4.tar.gz
-#       uncompress ==> tar zxf lua-5.1.4.tar.gz
-#       compile ==> make linux
-#       move liblua.a to Bitfighter's lua folder ==> mv src/liblua.a ../lua
-#       You can now remove all the other lua stuff if you want
-#     
 # change to root bitfighter folder (where you downloaded the code from SVN)
 # build game ==> make
 # 
