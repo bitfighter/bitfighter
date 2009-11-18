@@ -139,7 +139,7 @@ void DiagnosticUserInterface::render()
    // Display a bunch of settings using our new 2Col rendering functions (hooray!)
 
    S32 vpos = 100;
-   const S32 textsize = 16;
+   S32 textsize = 14;
    const S32 gap = 5;
 
    x = getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %d | CPU: %s | OS: %s | Cmplr: %s",
@@ -178,6 +178,8 @@ void DiagnosticUserInterface::render()
    glColor3f(1,1,1);
 
    vpos += textsize + gap;
+
+   textsize = 16;
    // Can have a left-value here
    drawCenteredString2Colf(vpos, textsize, false, "%s", gMainMenuUserInterface.getNeedToUpgrade() ? "<<Update available>>" : "<<Current version>>");
 
