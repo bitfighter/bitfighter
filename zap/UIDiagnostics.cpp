@@ -142,7 +142,7 @@ void DiagnosticUserInterface::render()
    const S32 textsize = 16;
    const S32 gap = 5;
 
-   x = getCenteredStringStartingPos(textsize, false, "M/C Ver: %d | C/S Ver: %d | Build: %d | CPU: %s | OS: %s | Cmplr: %s",
+   x = getCenteredStringStartingPosf(textsize, false, "M/C Ver: %d | C/S Ver: %d | Build: %d | CPU: %s | OS: %s | Cmplr: %s",
          MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
 
       glColor3f(1,1,1);

@@ -384,7 +384,7 @@ void UserInterface::drawStringfc(F32 x, F32 y, U32 size, const char *format, ...
 S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, U32 size, const char *format, ...)
 {
    makeBuffer;
-   drawString(x, vpos, size, buffer);
+   drawString(x, y, size, buffer);
    return getStringWidth(size, buffer);
 }
 
