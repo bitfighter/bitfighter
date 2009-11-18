@@ -51,10 +51,12 @@ GameObject::GameObject()
    mCreationTime = 0;
 }
 
+
 void GameObject::setOwner(GameConnection *c)
 {
    mOwner = c;
 }
+
 
 GameConnection *GameObject::getOwner()
 {
@@ -70,24 +72,30 @@ void GameObject::deleteObject(U32 deleteTimeInterval)
       mGame->addToDeleteList(this, deleteTimeInterval);
 }
 
+
 Point GameObject::getRenderPos()
 {
    return extent.getCenter();
 }
+
 
 Point GameObject::getActualPos()
 {
    return extent.getCenter();
 }
 
+
 void GameObject::setScopeAlways()
 {
    getGame()->setScopeAlwaysObject(this);
 }
 
+
 void GameObject::setActualPos(Point p)
 {
+   // Do nothing
 }
+
 
 F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
@@ -171,7 +179,7 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
       //// Check if damager is an area weapon, and damagee is a projectile... if so, kill it
       //if(Projectile *proj = dynamic_cast<Projectile*>(fillVector[i]))
       //{
-      //   proj->explode(proj, proj->getActualPos()); 
+      //   proj->explode(proj, proj->getActualPos());
       //}
 
       // Do an LOS check...
@@ -308,7 +316,7 @@ Rect GameObject::getBounds(U32 stateIndex)
       ret.min = ret.max = bounds[0];
       for(S32 i = 1; i < bounds.size(); i++)
          ret.unionPoint(bounds[i]);
-   }   
+   }
    else if(getCollisionCircle(stateIndex, p, radius))
    {
       ret.max = p + Point(radius, radius);
@@ -439,7 +447,7 @@ void GameObject::writeCompressedVelocity(Point &vel, U32 max, BitStream *stream)
    else
    {
       F32 theta = atan2(vel.y, vel.x);
-      
+
       //RDW This needs to be writeSignedFloat.
       //Otherwise, it keeps dropping negative thetas.
       stream->writeSignedFloat(theta * FloatInverse2Pi, 10);

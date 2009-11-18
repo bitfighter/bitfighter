@@ -44,8 +44,8 @@ public:
    Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
    bool mSolid;
    // By precomputing and storing, we should ease the rendering cost
-   Vector<Point> mRenderFillGeometry; ///< Actual geometry used for rendering fill.  
-   Vector<Point> mRenderOutlineGeometry; ///< Actual geometry used for rendering outline.  
+   Vector<Point> mRenderFillGeometry; ///< Actual geometry used for rendering fill.
+   Vector<Point> mRenderOutlineGeometry; ///< Actual geometry used for rendering outline.
 
    F32 mWidth;
 
@@ -58,7 +58,7 @@ public:
 
    Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
 
-   /// Barrier constructor.
+   /// Barrier constructor
    Barrier(Vector<Point> points = Vector<Point>(), F32 width = BarrierWidth, bool solid = false);
 
    /// Adds the server object to the net interface's scope always list

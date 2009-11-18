@@ -381,6 +381,14 @@ void UserInterface::drawStringfc(F32 x, F32 y, U32 size, const char *format, ...
 }
 
 
+S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, U32 size, const char *format, ...)
+{
+   makeBuffer;
+   drawString(x, vpos, size, buffer);
+   return getStringWidth(size, buffer);
+}
+
+
 void UserInterface::drawStringc(F32 x, F32 y, U32 size, const char *string)
 {
    S32 len = getStringWidth(size, string);
@@ -410,6 +418,7 @@ S32 UserInterface::getCenteredStringStartingPos(U32 size, const char *string)
 
    return x;
 }
+
 
 S32 UserInterface::getCenteredStringStartingPosf(U32 size, const char *format, ...)
 {

@@ -55,7 +55,7 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
       Point e = vec[i+1] - vec[i];
       e.normalize();
       edgeVector.push_back(e);
-   }  // Crashed here once -- corrupt stack error
+   }
 
 
    Point lastEdge = edgeVector[edgeVector.size() - 1];
@@ -71,7 +71,7 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
          cosTheta = 1.0;
       else if(cosTheta < -1.0)
          cosTheta = -1.0;
-          
+
       if(cosTheta >= -0.01)
       {
          F32 extendAmt = width * 0.5 * tan( acos(cosTheta) / 2 );
@@ -142,7 +142,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
 
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
-      constructBarrierPoints(vec, width, barrierEnds);     
+      constructBarrierPoints(vec, width, barrierEnds);
 
       // Then add individual segments to the game
       for(S32 i = 0; i < barrierEnds.size(); i += 2)
@@ -198,7 +198,7 @@ void Barrier::onAddedToGame(Game *theGame)
 }
 
 
-bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)   
+bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 {
    if(mPoints.size() == 2)    // It's a regular segment, so apply width
    {
@@ -232,23 +232,23 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &polyPoints)
       Point rp1 = mRenderLineSegments[i];
       Point rp2 = mRenderLineSegments[i + 1];
 
-      Point cp1 = polyPoints[polyPoints.size() - 1];     
-      for(S32 j = 0; j < polyPoints.size(); j++)         
+      Point cp1 = polyPoints[polyPoints.size() - 1];
+      for(S32 j = 0; j < polyPoints.size(); j++)
       {
          Point cp2 = polyPoints[j];
-         Point ce = cp2 - cp1;         
-         Point n(-ce.y, ce.x);         
+         Point ce = cp2 - cp1;
+         Point n(-ce.y, ce.x);
 
-         n.normalize();               
+         n.normalize();
          F32 distToZero = n.dot(cp1);
 
          F32 d1 = n.dot(rp1);
          F32 d2 = n.dot(rp2);
 
-         // Setting the following comparisons to >= will cause collinear end segments to go away, but will 
-         // cause overlapping walls to disappear.  
+         // Setting the following comparisons to >= will cause collinear end segments to go away, but will
+         // cause overlapping walls to disappear.
          bool d1in = (d1 > distToZero);
-         bool d2in = (d2 > distToZero); 
+         bool d2in = (d2 > distToZero);
 
          if(!d1in && !d2in) // Both points are outside this edge of the poly...
          {
@@ -286,8 +286,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &polyPoints)
 
 void Barrier::render(S32 layerIndex)
 {
-   Color b(0, 0, 0.15), f(0, 0, 1);
-   //Color b(0.0,0.0,0.075), f(.3 ,0.3,0.8);
+   Color b(0, 0, 0.15), f(0, 0, 1);    // Fill, border   ???
 
    if(layerIndex == 0)           // First, draw the fill
    {
@@ -328,7 +327,7 @@ void Barrier::render(S32 layerIndex)
          static Vector<GameObject *> fillObjects;
          fillObjects.clear();
 
-         findObjects(BarrierType, fillObjects, getExtent());   
+         findObjects(BarrierType, fillObjects, getExtent());
 
          for(S32 i = 0; i < fillObjects.size(); i++)
          {

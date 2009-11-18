@@ -32,7 +32,7 @@
 #include "gameConnection.h"
 #include "game.h"
 #include "move.h"
-#include "point.h"    
+#include "point.h"
 
 #include "lua.h"  // For push prototype
 
@@ -64,7 +64,7 @@ enum GameObjectType
    NexusType           = BIT(17),
    BotNavMeshZoneType  = BIT(18),
    RobotType           = BIT(19),
-   TeleportType        = BIT(20),   
+   TeleportType        = BIT(20),
    GoalZoneType        = BIT(21),
    AsteroidType        = BIT(22),      // Only needed for Lua...
    RepairItemType      = BIT(23),      // Only needed for Lua...
@@ -74,7 +74,7 @@ enum GameObjectType
    ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
 
    DeletedType       = BIT(30),
-   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map 
+   CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map
 
    // Derived types:
    EngineeredType     = TurretType | ForceFieldProjectorType,
@@ -168,9 +168,9 @@ public:
    virtual S32 getRenderSortValue() { return 2; }
    virtual void render();
 
-   /// render is called twice for every object that is in the
-   /// render list.  By default GameObject will call the render()
-   /// method one time (when layerIndex == 0).
+   // Render is called twice for every object that is in the
+   // render list.  By default GameObject will call the render()
+   // method one time (when layerIndex == 0).
    virtual void render(S32 layerIndex);
 
    virtual bool getCollisionPoly(Vector<Point> &polyPoints);
@@ -185,7 +185,7 @@ public:
    enum IdleCallPath {
       ServerIdleMainLoop,              // Idle called from top-level idle loop on server
       ServerIdleControlFromClient,
-      ClientIdleMainRemote,            // Idle run on the client 
+      ClientIdleMainRemote,            // Idle run on the client
       ClientIdleControlMain,
       ClientIdleControlReplay,
    };

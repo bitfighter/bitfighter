@@ -137,7 +137,7 @@ bool BitStream::writeBits(U32 bitCount, const void *bitPtr)
 
    bitNum += bitCount;
 
-   for(;bitCount >= 8; bitCount -= 8)
+   for(/* empty */;bitCount >= 8; bitCount -= 8)
    {
       sourceByte = *sourcePtr++;
       *destPtr++ = destByte | (sourceByte << upShift);

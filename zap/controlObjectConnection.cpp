@@ -53,7 +53,7 @@ void ControlObjectConnection::setControlObject(GameObject *theObject)
 
 void ControlObjectConnection::packetReceived(PacketNotify *notify)
 {
-   for(; firstMoveIndex < ((GamePacketNotify *) notify)->firstUnsentMoveIndex; firstMoveIndex++)
+   for(/* empty */; firstMoveIndex < ((GamePacketNotify *) notify)->firstUnsentMoveIndex; firstMoveIndex++)
       pendingMoves.erase(U32(0));
    mServerPosition = ((GamePacketNotify *) notify)->lastControlObjectPosition;
    Parent::packetReceived(notify);
@@ -117,7 +117,7 @@ void ControlObjectConnection::writePacket(BitStream *bstream, PacketNotify *noti
          mServerPosition = controlObject->getActualPos();
       }
 
-      // we only compress points relative if we know that the
+      // We only compress points relative if we know that the
       // remote side has a copy of the control object already
       mCompressPointsRelative = bstream->writeFlag(ghostIndex != -1);
 
@@ -153,12 +153,12 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
       U32 count = bstream->readRangedU32(0, MaxPendingMoves);
 
       Move theMove;
-      for(; firstMove < firstMoveIndex && count > 0; firstMove++)
+      for(/* empty */; firstMove < firstMoveIndex && count > 0; firstMove++)
       {
          count--;
          theMove.unpack(bstream, true);
       }
-      for(; count > 0; count--)
+      for(/* empty */; count > 0; count--)
       {
          theMove.unpack(bstream, true);
          // Process the move, including crediting time to the client

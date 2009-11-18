@@ -142,45 +142,55 @@ void DiagnosticUserInterface::render()
    const S32 textsize = 16;
    const S32 gap = 5;
 
-   // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
-   // If the server modifies a user name to make it unique, this will display the modified version.
-   drawCenteredStringPair2Colf(vpos, textsize, true, "Nickname:", "%s", gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
-                                                                        gClientGame->getGameType()->mLocalClient->name.getString() : gNameEntryUserInterface.getText());
-
-   // Below replaces: drawCenteredString2Colf(vpos, textsize, false, "MC Ver. %d|CS Ver. %d|Build %d", MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, BUILD_VERSION);
-
-   x = getCenteredString2ColStartingPosf(textsize, false, "MC Ver: %d | CS Ver: %d | Build: %d", MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, BUILD_VERSION);
+   x = getCenteredStringStartingPos(textsize, false, "M/C Ver: %d | C/S Ver: %d | Build: %d | CPU: %s | OS: %s | Cmplr: %s",
+         MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
 
       glColor3f(1,1,1);
-      drawString(x, vpos, textsize, "MC Ver:");
-      x += getStringWidth(textsize, "MC Ver: ");
+      x += drawStringAndGetWidthf(x, vpos, textsize, "M/C Ver: ");
       glColor3f(1,1,0);
-      drawStringf(x, vpos, textsize, "%d", MASTER_PROTOCOL_VERSION);
-      x += getStringWidthf(textsize, "%d", MASTER_PROTOCOL_VERSION);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", MASTER_PROTOCOL_VERSION);
 
       glColor3f(1,1,1);
-      drawString(x, vpos, textsize, " | CS Ver:");
-      x += getStringWidth(textsize, " | CS Ver: ");
+      x += drawStringAndGetWidthf(x, vpos, textsize, " | C/S Ver: ");
       glColor3f(1,1,0);
-      drawStringf(x, vpos, textsize, "%d", CS_PROTOCOL_VERSION);
-      x += getStringWidthf(textsize, "%d", CS_PROTOCOL_VERSION);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", CS_PROTOCOL_VERSION);
 
       glColor3f(1,1,1);
-      drawString(x, vpos, textsize, " | Build:");
-      x += getStringWidth(textsize, " | Build: ");
+      x += drawStringAndGetWidthf(x, vpos, textsize, " | Build: ");
       glColor3f(1,1,0);
-      drawStringf(x, vpos, textsize, "%d", BUILD_VERSION);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", BUILD_VERSION);
+
+      glColor3f(1,1,1);
+      x += drawStringAndGetWidthf(x, vpos, textsize, " | CPU: ");
+      glColor3f(1,1,0);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_CPU_STRING);
+
+      glColor3f(1,1,1);
+      x += drawStringAndGetWidthf(x, vpos, textsize, " | OS: ");
+      glColor3f(1,1,0);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_OS_STRING);
+
+      glColor3f(1,1,1);
+      x += drawStringAndGetWidthf(x, vpos, textsize, " | Cmplr: ");
+      glColor3f(1,1,0);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_COMPILER_STRING);
 
    glColor3f(1,1,1);
 
    vpos += textsize + gap;
    // Can have a left-value here
    drawCenteredString2Colf(vpos, textsize, false, "%s", gMainMenuUserInterface.getNeedToUpgrade() ? "<<Update available>>" : "<<Current version>>");
-   drawCenteredStringPair2Colf(vpos, textsize, true, "Server PW:", "%s", gServerPassword);
+
+   // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
+   // If the server modifies a user name to make it unique, this will display the modified version.
+   drawCenteredStringPair2Colf(vpos, textsize, true, "Nickname:", "%s", gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
+                                                                        gClientGame->getGameType()->mLocalClient->name.getString() : gNameEntryUserInterface.getText());
+
+
    vpos += textsize + gap;
    drawCenteredStringPair2Colf(vpos, textsize, false, "Host Name:", "%s", gHostName.c_str());
    drawCenteredStringPair2Colf(vpos, textsize, true, "Master Srvr Addr:", "%s", gMasterAddress.toString());
-   vpos += textsize + gap;    
+   vpos += textsize + gap;
    if(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished())
    {
       glColor(gMasterServerBlue);
@@ -190,7 +200,7 @@ void DiagnosticUserInterface::render()
    {
       glColor3f(1, 0, 0);
       drawCenteredString2Col(vpos, 14, true, "Could not establish connection with Master Server" );
-   }  
+   }
    drawCenteredStringPair2Colf(vpos, textsize, false, "Host Addr:", "%s", gBindAddress.toString());
    vpos += textsize + gap;
 
@@ -200,12 +210,25 @@ void DiagnosticUserInterface::render()
 
    glColor3f(0,1,1);
    drawCenteredStringPair2Colf(vpos, textsize, true, "Input Mode:", "%s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
-   drawCenteredStringPair2Colf(vpos, textsize, false, "Max Players:", "%d", gMaxPlayers);
+
+
+   x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d | Server PW: %s", gMaxPlayers, gServerPassword);
+
+      glColor3f(1,1,1);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "Max Players: ");
+      glColor3f(1,1,0);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", gMaxPlayers);
+
+      glColor3f(1,1,1);
+      x += drawStringAndGetWidthf(x, vpos, textsize, " | Server PW: ");
+      glColor3f(1,1,0);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", gServerPassword);
+
+   glColor3f(1,1,1);
 
    vpos += textsize + gap;
    drawCenteredStringPair2Colf(vpos, textsize, true, "Curr. Joystick:", "%s", joystickTypeToString(gIniSettings.joystickType).c_str());
    vpos += textsize + gap;
-
 
    drawCenteredStringPair2Colf(vpos, textsize, true, "Autodetect Str.:", "%s", strcmp(gJoystickName,"") ? gJoystickName : "<None>");
    drawCenteredStringPair2Colf(vpos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms/%2.0f%%", gSimulatedLag, gSimulatedPacketLoss * 100);
@@ -244,23 +267,16 @@ void DiagnosticUserInterface::render()
 
   for (U32 i = 0; i < MAX_KEYS; i++)
      if(getKeyState((KeyCode) i))
-     {
-        drawStringf( hpos, vpos, textsize - 2, "[%s]", keyCodeToString((KeyCode) i) );
-        hpos += getStringWidthf(textsize - 2, "[%s]", keyCodeToString( (KeyCode) i) ) + 5;
-     }
+        hpos += drawStringAndGetWidthf( hpos, vpos, textsize - 2, "[%s]", keyCodeToString((KeyCode) i) ) + 5;
 
    glColor3f(1, 0, 1);
    vpos += textsize + gap;
    hpos = horizMargin;
-   drawStringf( hpos, vpos, textsize - 2, "Raw Controller Input [%d]: ", gSticksFound);
-   hpos += getStringWidthf(textsize - 2, "Raw Controller Input [%d]: ", gSticksFound);
+   hpos += drawStringAndGetWidthf( hpos, vpos, textsize - 2, "Raw Controller Input [%d]: ", gSticksFound);
 
    for(S32 i = 0; i < MaxJoystickButtons; i++)
       if(gRawJoystickButtonInputs & (1 << i))
-      {
-         drawStringf( hpos, vpos, textsize - 2, "(%d)", i );
-         hpos += getStringWidthf(textsize - 2, "(%d)", i ) + 5;
-      }
+         hpos += drawStringAndGetWidthf( hpos, vpos, textsize - 2, "(%d)", i ) + 5;
 
    vpos += textsize + gap + 10;
 
@@ -286,23 +302,23 @@ void DiagnosticUserInterface::render()
    hpos += 55;
 
    renderControllerButton(hpos, vpos, BUTTON_1, getKeyState(BUTTON_1));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_2, getKeyState(BUTTON_2));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_3, getKeyState(BUTTON_3));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_4, getKeyState(BUTTON_4));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_5, getKeyState(BUTTON_5));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_6, getKeyState(BUTTON_6));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_7, getKeyState(BUTTON_7));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_8, getKeyState(BUTTON_8));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_BACK, getKeyState(BUTTON_BACK));
-   hpos+=40;
+   hpos += 40;
    renderControllerButton(hpos, vpos, BUTTON_START, getKeyState(BUTTON_START));
 }
 

@@ -78,7 +78,7 @@ function findClosest(items)
     for indx, item in ipairs(items) do              -- Iterate over our list
         -- Use distSquared because it is less computationally expensive
         -- and works great for comparing distances
-        local d = loc:distSquared(item:getLoc() )   -- Dist btwn robot and TestItem
+        local d = loc:distSquared(item:getLoc())    -- Dist btwn robot and TestItem
 
         if(d < minDist) then                        -- Is it the closest yet?
            closest = item
