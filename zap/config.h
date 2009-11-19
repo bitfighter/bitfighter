@@ -164,7 +164,17 @@ struct IniSettings      // With defaults specified
 
    // Testing values
    S32 burstGraphicsMode;           // Choose a burst graphic representation
-   S32 szGraphicsMode;              // Choose a speedzone graphic
+
+   // Logging options   --   true will enable logging these events, false will disable
+   bool logConnectionProtocol;
+   bool logNetConnection;
+   bool logEventConnection;
+   bool logGhostConnection;
+   bool logNetInterface;
+   bool logPlatform;
+   bool logNetBase;
+   bool logUDP;
+
 
    Vector<StringTableEntry> levelList;
  
@@ -214,7 +224,16 @@ struct IniSettings      // With defaults specified
       winSizeFact = 1.0;
 
       burstGraphicsMode = 1;
-      szGraphicsMode = 1;
+
+      logConnectionProtocol = false;
+      logNetConnection = false;
+      logEventConnection = false;
+      logGhostConnection = false;
+      logNetInterface = false;
+      logPlatform = false;
+      logNetBase = false;
+      logUDP = false;
+
    }
 };
 

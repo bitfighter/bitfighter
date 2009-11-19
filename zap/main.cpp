@@ -30,6 +30,9 @@
 //<h2>Changes since 011</h2>
 //<ul>
 //<li>Dedicated server level-list handling now the same as when hosting in interactive mode</li>
+//<h3>Configuration</h3>
+//<li>Added detailed logging options to the INI</li>
+//<li>Cleaned up unused INI settings</li>
 //</ul>
 
 
@@ -1304,6 +1307,21 @@ void processStartupParams()
    gSimulatedLag = gCmdLineSettings.lag;
 
 
+
+   // Enable some logging...
+   TNLLogEnable(LogConnectionProtocol, gIniSettings.logConnectionProtocol);
+   TNLLogEnable(LogNetConnection, gIniSettings.logNetConnection);
+   TNLLogEnable(LogEventConnection, gIniSettings.logEventConnection);
+   TNLLogEnable(LogGhostConnection, gIniSettings.logGhostConnection);
+
+   TNLLogEnable(LogNetInterface, gIniSettings.logNetInterface);
+   TNLLogEnable(LogPlatform, gIniSettings.logPlatform);
+   TNLLogEnable(LogNetBase, gIniSettings.logNetBase);
+   TNLLogEnable(LogUDP, gIniSettings.logUDP);
+
+
+
+
    // These options can come either from cmd line or INI file
    if(gCmdLineSettings.name != "")
       gNameEntryUserInterface.setText(gCmdLineSettings.name.c_str());
@@ -1437,18 +1455,9 @@ int main(int argc, char **argv)
 #endif
 
 
-
-   // Enable some logging...
-   TNLLogEnable(LogConnectionProtocol, true);
-   TNLLogEnable(LogNetConnection, true);
-   
-   TNLLogEnable(LogNetInterface, true);
-   TNLLogEnable(LogPlatform, true);
-   TNLLogEnable(LogNetBase, true);
-
    gCmdLineSettings.init();      // Init cmd line settings struct
    gIniSettings.init();          // Init struct that holds INI settings
-      
+
    //setDefaultLevelList();        // Levels we'll play, unless we're told otherwise
 
    Vector<TNL::StringPtr> theArgv;

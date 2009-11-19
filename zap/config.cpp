@@ -582,13 +582,18 @@ void loadSettingsFromINI()
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
 
-
-
    gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
+   gIniSettings.logConnectionProtocol = (lcase(gINI.GetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"))) == "yes");
+   gIniSettings.logNetConnection      = (lcase(gINI.GetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"))) == "yes");
+   gIniSettings.logEventConnection    = (lcase(gINI.GetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"))) == "yes");
+   gIniSettings.logGhostConnection    = (lcase(gINI.GetValue("Diagnostics", "LogGhostConnection",    (gIniSettings.logGhostConnection    ? "Yes" : "No"))) == "yes");
+   gIniSettings.logNetInterface       = (lcase(gINI.GetValue("Diagnostics", "LogNetInterface",       (gIniSettings.logNetInterface       ? "Yes" : "No"))) == "yes");
+   gIniSettings.logPlatform           = (lcase(gINI.GetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"))) == "yes");
+   gIniSettings.logNetBase            = (lcase(gINI.GetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"))) == "yes");
+   gIniSettings.logUDP                = (lcase(gINI.GetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"))) == "yes");
+
 
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);  
-   gIniSettings.szGraphicsMode = max(gINI.GetValueI("Testing", "SZGraphics", gIniSettings.szGraphicsMode), 0);  
-
 
    // Load the ReservedNames section...
    if(gINI.FindKey("ReservedNames") != gINI.noID)
@@ -874,10 +879,26 @@ void saveSettingsToINI()
       gINI.KeyComment("Diagnostics", "----------------");
       gINI.KeyComment("Diagnostics", " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
       gINI.KeyComment("Diagnostics", " You probably can't use any of these settings to enhance your gameplay experience!");
-      gINI.KeyComment("Diagnostics", " DumpKeys - Enable this to dump raw input to the screen");
+      gINI.KeyComment("Diagnostics", " DumpKeys - Enable this to dump raw input to the screen (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogConnectionProtocol - Log ConnectionProtocol events (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogNetConnection - Log NetConnectionEvents (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogEventConnection - Log EventConnection events (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogGhostConnection - Log GhostConnection events (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogNetInterface - Log NetInterface events (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogPlatform - Log Platform events (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogNetBase - Log NetBase events (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogUDP - Log UDP events (Yes/No)");
       gINI.KeyComment("Diagnostics", "----------------");
    }
    gINI.SetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogGhostConnection",    (gIniSettings.logGhostConnection    ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogNetInterface",       (gIniSettings.logNetInterface       ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"), true);
 
 
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
@@ -931,11 +952,9 @@ void saveSettingsToINI()
       gINI.KeyComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
       gINI.KeyComment("Testing", " short lived, and will likely be removed in the next version of Bitfighter");
       gINI.KeyComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
-      gINI.KeyComment("Testing", " SZGraphics - Select which graphic to use for speed zones (1-4 -- note that for 3 & 4, collisions will not be quite right)");
       gINI.KeyComment("Testing", "----------------");
    }
    gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
-   gINI.SetValueI("Testing", "SZGraphics",  (S32) (gIniSettings.szGraphicsMode), true);
 
    saveKeyBindings();
    //saveDefaultQuickChatMessages();  <-- no need to save now... we ran save while initializing, and nothing would have changed
