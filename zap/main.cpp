@@ -1439,8 +1439,9 @@ int main(int argc, char **argv)
 
 
    // Enable some logging...
-   //TNLLogEnable(LogConnectionProtocol, true);
-   //TNLLogEnable(LogNetConnection, true);
+   TNLLogEnable(LogConnectionProtocol, true);
+   TNLLogEnable(LogNetConnection, true);
+   
    TNLLogEnable(LogNetInterface, true);
    TNLLogEnable(LogPlatform, true);
    TNLLogEnable(LogNetBase, true);

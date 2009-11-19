@@ -79,6 +79,7 @@ OBJECTS_ZAP=\
    screenShooter.o \
    sfx.o\
    ship.o\
+   SlipZone.o\
    soccerGame.o\
    sparkManager.o\
    speedZone.o\

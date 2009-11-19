@@ -192,6 +192,7 @@ static const F32 F32_MAX = F32(3.402823466e+38F);                 ///< Constant 
 typedef signed _int64   S64;
 typedef unsigned _int64 U64;
 
+
 #define TNL_COMPILER_VISUALC _MSC_VER
 
 #if _MSC_VER < 1200
