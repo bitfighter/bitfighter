@@ -80,8 +80,8 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 278630969;
-			PBXWorkspaceStateSaveDate = 278630969;
+			PBXPerProjectTemplateStateSaveDate = 279640901;
+			PBXWorkspaceStateSaveDate = 279640901;
 		};
 		perUserProjectItems = {
 			943241CE0FEB0A3E0045A8A8 /* PBXTextBookmark */ = 943241CE0FEB0A3E0045A8A8 /* PBXTextBookmark */;
@@ -215,12 +215,12 @@
 			9455FB900FD56FE7003032B4 /* PBXTextBookmark */ = 9455FB900FD56FE7003032B4 /* PBXTextBookmark */;
 			9455FBBA0FD5712D003032B4 /* PBXTextBookmark */ = 9455FBBA0FD5712D003032B4 /* PBXTextBookmark */;
 			9455FBE70FD57477003032B4 /* PBXTextBookmark */ = 9455FBE70FD57477003032B4 /* PBXTextBookmark */;
-			948220A9109B935E00DCD97A /* XCBuildMessageTextBookmark */ = 948220A9109B935E00DCD97A /* XCBuildMessageTextBookmark */;
 			948220B1109B936E00DCD97A /* PBXTextBookmark */ = 948220B1109B936E00DCD97A /* PBXTextBookmark */;
 			948220B2109B936E00DCD97A /* PBXTextBookmark */ = 948220B2109B936E00DCD97A /* PBXTextBookmark */;
 			948220C0109B938800DCD97A /* PBXTextBookmark */ = 948220C0109B938800DCD97A /* PBXTextBookmark */;
 			949CE1E80DFD7DC30032D576 /* PBXTextBookmark */ = 949CE1E80DFD7DC30032D576 /* PBXTextBookmark */;
 			949CE1E90DFD7DC30032D576 /* PBXTextBookmark */ = 949CE1E90DFD7DC30032D576 /* PBXTextBookmark */;
+			94A22DE710AAFCF700B829DA /* PBXTextBookmark */ = 94A22DE710AAFCF700B829DA /* PBXTextBookmark */;
 			94BCBEF5109B2170003BE6A7 /* PBXTextBookmark */ = 94BCBEF5109B2170003BE6A7 /* PBXTextBookmark */;
 			94C1B9190F1C0C3000548B70 /* PBXTextBookmark */ = 94C1B9190F1C0C3000548B70 /* PBXTextBookmark */;
 			94C1B91A0F1C0C3000548B70 /* PBXTextBookmark */ = 94C1B91A0F1C0C3000548B70 /* PBXTextBookmark */;
@@ -549,9 +549,9 @@
 	};
 	941E93380DDF0B2600621981 /* moveObject.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1020, 6006}}";
-			sepNavSelRange = "{10415, 0}";
-			sepNavVisRange = "{0, 1918}";
+			sepNavIntBoundsRect = "{{0, 0}, {1188, 6123}}";
+			sepNavSelRange = "{4658, 0}";
+			sepNavVisRange = "{4176, 1227}";
 		};
 	};
 	941E93390DDF0B2600621981 /* osxInput.cpp */ = {
@@ -984,9 +984,9 @@
 	};
 	941E93BB0DDF0B5F00621981 /* moveObject.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1011, 1414}}";
-			sepNavSelRange = "{1260, 0}";
-			sepNavVisRange = "{0, 1822}";
+			sepNavIntBoundsRect = "{{0, 0}, {901, 1274}}";
+			sepNavSelRange = "{2660, 0}";
+			sepNavVisRange = "{2173, 1107}";
 		};
 	};
 	941E93BC0DDF0B5F00621981 /* point.h */ = {
@@ -1140,9 +1140,9 @@
 	};
 	941E93D10DDF0B5F00621981 /* UIEditor.h */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1011, 4298}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 1763}";
+			sepNavIntBoundsRect = "{{0, 0}, {835, 4927}}";
+			sepNavSelRange = "{2035, 0}";
+			sepNavVisRange = "{1450, 699}";
 		};
 	};
 	941E93D20DDF0B5F00621981 /* UIEditorInstructions.h */ = {
@@ -1269,6 +1269,20 @@
 			sepNavIntBoundsRect = "{{0, 0}, {1011, 1344}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 3092}";
+		};
+	};
+	943241AE0FEB086D0045A8A8 /* luaObject.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {835, 6838}}";
+			sepNavSelRange = "{11932, 0}";
+			sepNavVisRange = "{11494, 611}";
+		};
+	};
+	943241B40FEB08890045A8A8 /* luaObject.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {835, 1807}}";
+			sepNavSelRange = "{1751, 0}";
+			sepNavVisRange = "{1387, 771}";
 		};
 	};
 	943241B80FEB08A40045A8A8 /* screenShooter.cpp */ = {
@@ -2250,7 +2264,7 @@
 		fRef = 941E93380DDF0B2600621981 /* moveObject.cpp */;
 		name = "moveObject.cpp: 324";
 		rLen = 0;
-		rLoc = 10415;
+		rLoc = 10416;
 		rType = 0;
 		vrLen = 1918;
 		vrLoc = 0;
@@ -2595,15 +2609,6 @@
 		vrLen = 1596;
 		vrLoc = 54314;
 	};
-	948220A9109B935E00DCD97A /* XCBuildMessageTextBookmark */ = {
-		isa = PBXTextBookmark;
-		comments = "Cannot pass objects of non-POD type 'struct std::string' through '...'; call will abort at runtime";
-		fRef = 94F05A8E109B23210025AC28 /* luaLevelGenerator.cpp */;
-		fallbackIsa = XCBuildMessageTextBookmark;
-		rLen = 1;
-		rLoc = 170;
-		rType = 1;
-	};
 	948220B1109B936E00DCD97A /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 941E93A90DDF0B5F00621981 /* gameLoader.h */;
@@ -2653,6 +2658,16 @@
 		rType = 0;
 		vrLen = 780;
 		vrLoc = 0;
+	};
+	94A22DE710AAFCF700B829DA /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 94F05A8E109B23210025AC28 /* luaLevelGenerator.cpp */;
+		name = "luaLevelGenerator.cpp: 172";
+		rLen = 0;
+		rLoc = 5198;
+		rType = 0;
+		vrLen = 1587;
+		vrLoc = 5027;
 	};
 	94BCBEF5109B2170003BE6A7 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -2744,9 +2759,9 @@
 	};
 	94F05A8E109B23210025AC28 /* luaLevelGenerator.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {922, 4420}}";
-			sepNavSelRange = "{5267, 0}";
-			sepNavVisRange = "{4505, 884}";
+			sepNavIntBoundsRect = "{{0, 0}, {1023, 4524}}";
+			sepNavSelRange = "{5198, 0}";
+			sepNavVisRange = "{5027, 1587}";
 		};
 	};
 	94F05A9A109B28D80025AC28 /* PBXTextBookmark */ = {

@@ -37,7 +37,6 @@
 
 
 // Mac Test:
-// Robot folder in installer
 // Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
 // Ryan -- I changed getLevels() slightly... I tried to make the corresponding change in Directory.mm, by commenting out single line.  Hopefully the functionalities are still the same!
 // Robots

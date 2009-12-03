@@ -153,15 +153,15 @@ void ChatUserInterface::render()
    glColor3f(1, 1, 1);
    drawCenteredString(vertMargin, 30, menuTitle);
 
-   string subtitle = "Not currently connected to game server";
+   string subtitle = "Not currently connected to any game server";
    
    if(gClientGame && gClientGame->getConnectionToServer())
    {
       string name = gClientGame->getConnectionToServer()->getServerName();
       if(name == "")
-         subtitle = "";
+         subtitle = "Connected to game server with no name";
       else
-         subtitle = "Connected to game server \"" + gClientGame->getConnectionToServer()->getServerName() + "\"";
+         subtitle = "Connected to game server \"" + name + "\"";
    }
 
    glColor3f(0, 1, 0);

@@ -399,7 +399,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>948220C0109B938800DCD97A</string>
+										<string>94A22DE710AAFCF700B829DA</string>
 										<key>history</key>
 										<array>
 											<string>949CE1E80DFD7DC30032D576</string>
@@ -546,7 +546,7 @@
 											<string>94F05A9D109B28D80025AC28</string>
 											<string>948220B1109B936E00DCD97A</string>
 											<string>948220B2109B936E00DCD97A</string>
-											<string>948220A9109B935E00DCD97A</string>
+											<string>948220C0109B938800DCD97A</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -604,9 +604,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>948220B4109B936E00DCD97A</string>
+				<string>94A22DC110AAFC6A00B829DA</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>948220B5109B936E00DCD97A</string>
+				<string>94A22DC210AAFC6A00B829DA</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -727,7 +727,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>278631304.49689102</real>
+	<real>279641335.83223999</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -742,12 +742,9 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
-		<string>948220BD109B936E00DCD97A</string>
-		<string>948220BF109B936E00DCD97A</string>
 		<string>1CD10A99069EF8BA00B06720</string>
 		<string>941E93F60DDF0BAC00621981</string>
-		<string>1C78EAAD065D492600B07095</string>
-		<string>/Users/ryan/Desktop/zap/trunk/zap/Bitfighter.xcodeproj</string>
+		<string>/Users/ryan/Desktop/zap/release-011/zap/Bitfighter.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>0 132 1280 870 0 0 1280 1002 </string>
@@ -771,7 +768,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CD0528F0623707200166675</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>luaLevelGenerator.cpp</string>
+								<string>moveObject.cpp</string>
 								<key>StatusBarVisibility</key>
 								<true/>
 							</dict>
@@ -829,7 +826,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>941E93F60DDF0BAC00621981</string>
-				<string>94822097109B925000DCD97A</string>
+				<string>94A22DBF10AAFC6700B829DA</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>
@@ -949,13 +946,13 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>1CD10A99069EF8BA00B06720</string>
-				<string>948220B6109B936E00DCD97A</string>
+				<string>94A22DDE10AAFCF100B829DA</string>
 				<string>1C162984064C10D400B95A72</string>
-				<string>948220B7109B936E00DCD97A</string>
-				<string>948220B8109B936E00DCD97A</string>
-				<string>948220B9109B936E00DCD97A</string>
-				<string>948220BA109B936E00DCD97A</string>
-				<string>948220BB109B936E00DCD97A</string>
+				<string>94A22DDF10AAFCF100B829DA</string>
+				<string>94A22DE010AAFCF100B829DA</string>
+				<string>94A22DE110AAFCF100B829DA</string>
+				<string>94A22DE210AAFCF100B829DA</string>
+				<string>94A22DE310AAFCF100B829DA</string>
 			</array>
 			<key>ToolbarConfiguration</key>
 			<string>xcode.toolbar.config.debugV3</string>

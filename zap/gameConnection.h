@@ -41,15 +41,15 @@ using TNL::StringPtr;
     
 static const char *gConnectStatesTable[] = {
       "Not connected...",
-      "Sending challenge request.",
-      "Punching through firewalls.",
-      "Computing puzzle solution.",
-      "Sent connect request.",
-      "Connection timed out.",
-      "Connection rejected.",
-      "Connected.",
-      "Disconnected.",
-      "Connection timed out.",
+      "Sending challenge request...",
+      "Punching through firewalls...",
+      "Computing puzzle solution...",
+      "Sent connect request...",
+      "Connection timed out",
+      "Connection rejected",
+      "Connected",
+      "Disconnected",
+      "Connection timed out",
       ""
 };
 

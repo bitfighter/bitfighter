@@ -244,12 +244,14 @@ void GameUserInterface::render()
    if(!gClientGame->isConnectedToServer())
    {
       glColor3f(1, 1, 1);
-      drawCenteredString(290, 30, "Connecting to server...");
+      drawCenteredString(260, 30, "Connecting to server...");
 
+      glColor3f(0, 1, 0);
       if(gClientGame->getConnectionToServer())
-         drawCenteredString(330, 16, gConnectStatesTable[gClientGame->getConnectionToServer()->getConnectionState()]);
+         drawCenteredString(310, 16, gConnectStatesTable[gClientGame->getConnectionToServer()->getConnectionState()]);
 
-      drawCenteredString(370, 20, "Press <ESC> to abort");
+      glColor3f(1, 1, 1);
+      drawCenteredString(346, 20, "Press <ESC> to abort");
    }
 
    gClientGame->render();

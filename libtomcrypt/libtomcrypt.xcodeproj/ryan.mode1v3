@@ -399,12 +399,12 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>94BCBE97109B2025003BE6A7</string>
+										<string>94A22D7D10AAFB1800B829DA</string>
 										<key>history</key>
 										<array>
 											<string>9428209B0DDF34B200D4F2DF</string>
 											<string>9428209C0DDF34B200D4F2DF</string>
-											<string>943243F20FEB13900045A8A8</string>
+											<string>94BCBE97109B2025003BE6A7</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -416,14 +416,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {1072, 577}}</string>
+								<string>{{0, 0}, {1072, 571}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 132 1280 870 0 0 1280 1002 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>577pt</string>
+							<string>571pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -436,14 +436,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 582}, {1072, 247}}</string>
+								<string>{{0, 576}, {1072, 253}}</string>
 								<key>RubberWindowFrame</key>
 								<string>0 132 1280 870 0 0 1280 1002 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>247pt</string>
+							<string>253pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -462,9 +462,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>94BCBE98109B2025003BE6A7</string>
+				<string>94A22D7E10AAFB1800B829DA</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>94BCBE99109B2025003BE6A7</string>
+				<string>94A22D7F10AAFB1800B829DA</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -585,7 +585,7 @@
 	<key>StatusbarIsVisible</key>
 	<true/>
 	<key>TimeStamp</key>
-	<real>278601765.67601901</real>
+	<real>279640856.04949301</real>
 	<key>ToolbarDisplayMode</key>
 	<integer>1</integer>
 	<key>ToolbarIsVisible</key>
@@ -601,7 +601,7 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>941E912D0DDF072300621981</string>
-		<string>/Users/ryan/Desktop/zap/trunk/libtomcrypt/libtomcrypt.xcodeproj</string>
+		<string>/Users/ryan/Desktop/zap/release-011/libtomcrypt/libtomcrypt.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>0 132 1280 870 0 0 1280 1002 </string>
@@ -681,7 +681,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>941E912D0DDF072300621981</string>
-				<string>94BCBE9A109B2025003BE6A7</string>
+				<string>94A22D8010AAFB1800B829DA</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

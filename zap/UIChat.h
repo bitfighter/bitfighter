@@ -60,7 +60,7 @@ public:
       MessageDisplayCount = 18,  // How many chat messages do we display?
    };
 
-   static const U32 GlobalChatFontSize = 20;   // Font size to display those messages
+   static const U32 GlobalChatFontSize = 16;   // Font size to display those messages
 
    char mChatBuffer[200];     // Outgoing chat msg
    U32 mChatCursorPos;        // Where is cursor?
