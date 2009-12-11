@@ -431,6 +431,7 @@ S32 LuaPoint::sety(lua_State *L)
    return 0;
 }
 
+#define abs(x) (x) > 0 ? (x) : -(x)
 
 // Are two points equal?
 S32 LuaPoint::equals(lua_State *L)

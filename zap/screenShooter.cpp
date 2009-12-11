@@ -12,7 +12,7 @@
 
 using namespace TNL;
 
-
+#ifndef ZAP_DEDICATED
 namespace Zap
 {
 
@@ -601,3 +601,5 @@ void Screenshooter::saveScreenshot()
 }
 
 }
+
+#endif

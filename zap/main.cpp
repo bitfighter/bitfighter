@@ -84,6 +84,7 @@
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
+#include <sys/stat.h>
 
 using namespace TNL;
 
@@ -104,6 +105,7 @@ using namespace TNL;
 #include "keyCode.h"
 #include "config.h"
 #include "md5wrapper.h"
+
 #include "screenShooter.h"
 
 
@@ -323,6 +325,8 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
    }
 }
 
+#ifndef ZAP_DEDICATED
+
 // GLUT handler for key-up events
 void GLUT_CB_keyup(unsigned char key, int x, int y)
 {
@@ -410,6 +414,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, specialkeyup, (S32 key), (key))
    setKeyState(keyCode, false);
    keyUp(keyCode);
 }
+#endif
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, modifierkeydown, (U32 key), (key))
 {
@@ -648,6 +653,7 @@ void dedicatedServerLoop()
       idle();     // Idly!
 }
 
+#ifndef ZAP_DEDICATED
 void GLUT_CB_display(void)
 {
    gZapJournal.display();
@@ -655,6 +661,7 @@ void GLUT_CB_display(void)
    if(gScreenshooter.phase)      // We're in mid-shot, so be sure to visit the screenshooter!
       gScreenshooter.saveScreenshot();
 }
+#endif
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
 {
@@ -1505,6 +1512,7 @@ int main(int argc, char **argv)
    processStartupParams();                   // And process command lines and INI settings in a unified way
    //buildLevelList();
 
+#ifndef ZAP_DEDICATED
    SFXObject::init();
 
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
@@ -1560,6 +1568,7 @@ int main(int argc, char **argv)
 
    }
    else                       // We're running a dedicated server so...
+#endif
       dedicatedServerLoop();  //    loop forever, running the idle command endlessly
 
    return 0;

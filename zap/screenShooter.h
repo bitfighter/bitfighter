@@ -21,17 +21,19 @@ namespace Zap
  * Include necessary headers.
  */
 
-#ifdef _APPLE_
-#  include <GLUT/glut.h>
-#else
-#  include <../glut/glut.h>         // Needed for Windows and Linux
+#ifndef ZAP_DEDICATED
+#   ifdef _APPLE_
+#      include <GLUT/glut.h>
+#   else
+#      include <../glut/glut.h>         // Needed for Windows and Linux
+#   endif
 #endif
 
-#  ifdef WIN32
-#    include <windows.h>
-#    include <wingdi.h>
-#    define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen
-#  endif /* WIN32 */
+#ifdef WIN32
+#   include <windows.h>
+#   include <wingdi.h>
+#   define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about fopen
+#endif /* WIN32 */
 
 /*
  * Make this header file work with C and C++ source code...
@@ -106,8 +108,10 @@ typedef struct                       /**** Bitmap information structure ****/
  * Prototypes...
  */
 
+#ifndef ZAP_DEDICATED
 extern GLubyte *LoadDIBitmap(const char *filename, BITMAPINFO **info);
 extern int     SaveDIBitmap(const char *filename, BITMAPINFO *info, GLubyte *bits);
+#endif
 
 #  ifdef __cplusplus
 }

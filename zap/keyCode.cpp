@@ -34,10 +34,13 @@
 
 #include "../tnl/tnlJournal.h"
 #include "../tnl/tnlLog.h"         // For logprintf
-#ifdef TNL_OS_MAC_OSX
-#include "GLUT/glut.h"
-#else
-#include "../glut/glut.h"          // For glut's key defs
+
+#ifndef ZAP_DEDICATED
+#   ifdef TNL_OS_MAC_OSX
+#      include "GLUT/glut.h"
+#   else
+#      include "../glut/glut.h"          // For glut's key defs
+#   endif
 #endif
 
 #include "zapjournal.h"    // For journaling support
@@ -843,6 +846,7 @@ KeyCode standardGLUTKeyToKeyCode(int key)
    }
 }
 
+#ifndef ZAP_DEDICATED
 // Translate GLUT "special keys" to our KeyCodes
 KeyCode specialGLUTKeyToKeyCode(int key)
 {
@@ -897,6 +901,7 @@ KeyCode specialGLUTKeyToKeyCode(int key)
    }
 }
 
+#endif
 
 extern ZapJournal gZapJournal;
 extern void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown );
