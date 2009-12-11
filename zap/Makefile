@@ -97,8 +97,8 @@ OBJECTS_ZAP=\
    BotNavMeshZone.o\
    ../master/masterInterface.o\
 
-#CFLAGS=
-CFLAGS=-DZAP_DEDICATED
+CFLAGS=
+#CFLAGS=-DZAP_DEDICATED
 
 .c.o:
 	$(CC) -c $(CFLAGS) $<
@@ -120,9 +120,9 @@ bitfightered: ../exe/bitfightered
 
 
 #	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a -s -lglut32 -mwindows
-#	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) $(threadLib) -llua5.1 -lstdc++  -lm
+	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) $(threadLib) -llua5.1 -lstdc++  -lm
 #CENTOS:
-	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(threadLib) /usr/lib/liblua.a -lstdc++  -lm
+#	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(threadLib) /usr/lib/liblua.a -lstdc++  -lm
 #../exe/bitfightered: CFLAGS=-DZAP_DEDICATED
 #../exe/bitfightered: $(OBJECTS_ZAP)
 #	$(CC) -o ../exe/bitfightered $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(threadLib) -lstdc++ -lm
