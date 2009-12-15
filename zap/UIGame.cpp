@@ -86,9 +86,14 @@ GameUserInterface::GameUserInterface()
    mFPSVisible = false;
 #endif
    mFPSAvg = 0;
+   mPingAvg = 0;
    mFrameIndex = 0;
    for(U32 i = 0; i < FPSAvgCount; i++)
+   {
       mIdleTimeDelta[i] = 50;
+      mPing[i] = 100;
+   }
+
 
    memset(mChatBuffer, 0, sizeof(mChatBuffer));
 
@@ -201,10 +206,16 @@ void GameUserInterface::idle(U32 timeDelta)
    {
       if(timeDelta > mRecalcFPSTimer)
       {
-         U32 sum = 0;
+         U32 sum = 0, sumping = 0;
+
          for(U32 i = 0; i < FPSAvgCount; i++)
+         {
             sum += mIdleTimeDelta[i];
+            sumping += mPing[i];
+         }
+
          mFPSAvg = (1000 * FPSAvgCount) / F32(sum);
+         mPingAvg = F32(sumping) / 32;
          mRecalcFPSTimer = 1000;
       }
       else
@@ -219,7 +230,13 @@ void GameUserInterface::idle(U32 timeDelta)
       mLoadout.idle(timeDelta);
 
    mVoiceRecorder.idle(timeDelta);
-   mIdleTimeDelta[mFrameIndex % FPSAvgCount] = timeDelta;
+
+   U32 indx = mFrameIndex % FPSAvgCount;
+   mIdleTimeDelta[indx] = timeDelta;
+
+   if(gClientGame->getConnectionToServer())
+      mPing[indx] = gClientGame->getConnectionToServer()->getRoundTripTime();
+
    mFrameIndex++;
 
    mWrongModeMsgDisplay.update(timeDelta);
@@ -274,7 +291,7 @@ void GameUserInterface::render()
    if(mFPSVisible)
    {
       glColor3f(1, 1, 1);
-      drawStringf(canvasWidth - horizMargin - 170, vertMargin, 30, "%4.1f fps", mFPSAvg);
+      drawStringf(canvasWidth - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
    }
 
    // Render QuickChat / Loadout menus

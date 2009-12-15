@@ -345,6 +345,7 @@ extern Color gNexusClosedColor;
 
 #define NEXUS_STR mNexusIsOpen ?  "Nexus closes: " : "Nexus opens: "
 
+
 void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
@@ -365,6 +366,7 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 #undef NEXUS_STR
+
 
 void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
 {

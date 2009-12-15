@@ -291,7 +291,7 @@ const char Asteroid::className[] = "Asteroid";      // Class name as it appears 
 Asteroid::Asteroid(lua_State *L)
 {
    // Do we want to construct these from Lua?  If so, do that here!
-}
+} 
 
 
 // Define the methods we will expose to Lua

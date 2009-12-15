@@ -289,7 +289,7 @@ void InstructionsUserInterface::renderPage1()
    glColor(keyColor);
    drawStringf(col2, y, 18, "[%s]", keyCodeToString(keyMISSION));
    glColor(txtColor);
-   drawString(col3, y, 18, "Display FPS");
+   drawString(col3, y, 18, "Display FPS / Lag");
    glColor(keyColor);
    drawStringf(col4, y, 18, "[%s]", keyCodeToString(keyFPS));
    y+=26;

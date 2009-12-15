@@ -99,8 +99,10 @@ private:
    };
    Timer mWrongModeMsgDisplay;       // Help if user is trying to use keyboard in joystick mode
    F32 mFPSAvg;
+   F32 mPingAvg;
 
    U32 mIdleTimeDelta[FPSAvgCount];
+   U32 mPing[FPSAvgCount];
    U32 mFrameIndex;
 
    QuickChatHelper mQuickChat;
