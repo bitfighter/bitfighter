@@ -216,7 +216,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
          mFPSAvg = (1000 * FPSAvgCount) / F32(sum);
          mPingAvg = F32(sumping) / 32;
-         mRecalcFPSTimer = 1000;
+         mRecalcFPSTimer = 750;
       }
       else
          mRecalcFPSTimer -= timeDelta;
