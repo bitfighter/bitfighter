@@ -33,6 +33,9 @@
 //<h3>Configuration</h3>
 //<li>Added detailed logging options to the INI</li>
 //<li>Cleaned up unused INI settings</li>
+
+//<li>Added lag to FPS display</li>
+//<li>Fixed Nexus scoring issue</li>
 //</ul>
 
 

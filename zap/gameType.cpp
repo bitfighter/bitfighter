@@ -1392,13 +1392,14 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
 
 
 // Handle score for ship and robot
+// Runs on server only?
 void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 {
    ClientRef *cl = NULL;
    if(!ship->isRobot())
       cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
 
-   updateScore(cl, ship->getTeam(), scoringEvent);
+   updateScore(cl, ship->getTeam(), scoringEvent, data);
 }
 
 

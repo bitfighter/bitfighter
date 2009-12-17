@@ -165,6 +165,7 @@ Vector<GameType::ParameterDescription> HuntersGameType::describeArguments()
 }
 
 // The nexus is open.  A ship has entered it.  Now what?
+// Runs on server only
 void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus)
 {
    HuntersFlagItem *theFlag = NULL;
@@ -662,6 +663,8 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
 {
    if(isGhost())
       return false;
+
+   // From here on out, runs on server only
 
    if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return false;
