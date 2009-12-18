@@ -261,7 +261,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 {
    Parent::writeConnectRequest(bstream);
 
-   bstream->writeString("+");                // Just a dummy string to indicate we'll be using a different protocol than the default
+   bstream->writeString("+");                // Just a dummy string to indicate we'll be using a different protocol than the original, version will be specified
    bstream->write(MASTER_PROTOCOL_VERSION);  // Version of the protocol we'll be using to communicate with the master
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game

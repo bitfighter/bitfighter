@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory="$(TargetDir)"
-				CommandArguments=""
+				CommandArguments="  -dedicated -hostname &quot;Chicago Tersteroo&quot; -hostdescr &quot;Testeroo Bonzai&quot; -leveldir levels"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

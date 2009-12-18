@@ -36,6 +36,7 @@
 
 //<li>Added lag to FPS display</li>
 //<li>Fixed Nexus scoring issue</li>
+//<li>Fixed issue with blank server name</li>
 //</ul>
 
 
@@ -535,7 +536,12 @@ void hostGame()
 {
    gHostingModePhase = Hosting;
    s_logprintf("----------\nbitfighter server started %s", getTimeStamp().c_str());
-   
+   s_logprintf("hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
+   s_logprintf("hosting %d levels:", gServerGame->getLevelNameCount());
+
+   for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
+      s_logprintf("\t%s ==> %s", gServerGame->getLevelFileNameFromIndex(i).c_str(), gServerGame->getLevelNameFromIndex(i).getString());
+
    if(gServerGame->getLevelNameCount())   // Levels loaded --> start game!
       gServerGame->cycleLevel(0);         // Start the first level
 
@@ -1315,8 +1321,6 @@ void processStartupParams()
    gSimulatedPacketLoss = gCmdLineSettings.loss;
    gSimulatedLag = gCmdLineSettings.lag;
 
-
-
    // Enable some logging...
    TNLLogEnable(LogConnectionProtocol, gIniSettings.logConnectionProtocol);
    TNLLogEnable(LogNetConnection, gIniSettings.logNetConnection);
@@ -1327,8 +1331,6 @@ void processStartupParams()
    TNLLogEnable(LogPlatform, gIniSettings.logPlatform);
    TNLLogEnable(LogNetBase, gIniSettings.logNetBase);
    TNLLogEnable(LogUDP, gIniSettings.logUDP);
-
-
 
 
    // These options can come either from cmd line or INI file
@@ -1368,6 +1370,7 @@ void processStartupParams()
    if(gCmdLineSettings.levelDir != "")
       gLevelDir = getLevelsFolder(gCmdLineSettings.levelDir);
    else 
+      gLevelDir = getLevelsFolder(gIniSettings.levelDir);
    // else leave gLevelDir at it's default setting, "levels"
 
    if(gCmdLineSettings.hostname != "")
@@ -1515,9 +1518,9 @@ int main(int argc, char **argv)
    processStartupParams();                   // And process command lines and INI settings in a unified way
    //buildLevelList();
 
-#ifndef ZAP_DEDICATED
    SFXObject::init();
 
+#ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
    {
       FXManager::init();                     // Get ready for sparks!!  C'mon baby!!

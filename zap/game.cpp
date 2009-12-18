@@ -234,6 +234,7 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
    mMaxPlayers = maxPlayers;
    mHostName = gHostName.c_str();
    mHostDescr = gHostDescr.c_str();
+
    mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
    mCurrentLevelIndex = 0;
 

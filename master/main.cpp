@@ -574,8 +574,8 @@ public:
          bstream->readString(readstr);          // Client's joystick autodetect string
          mAutoDetectStr = readstr;
       }
-      else                                      // Otherwise, set some defaults
-      {
+      else                                      // Otherwise, set some defaults  --->> this stuff below here is old, and 
+      {                                         // only applies to very old versions of Bitfighter.... probably safe to delete.
          mCMProtocolVersion = 0;                // This is a version 0 protocol
          mCSProtocolVersion = 0;
          mClientBuild = 0;
