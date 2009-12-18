@@ -540,7 +540,7 @@ void hostGame()
    s_logprintf("hosting %d levels:", gServerGame->getLevelNameCount());
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
-      s_logprintf("\t%s ==> %s", gServerGame->getLevelFileNameFromIndex(i).c_str(), gServerGame->getLevelNameFromIndex(i).getString());
+      s_logprintf("\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
 
    if(gServerGame->getLevelNameCount())   // Levels loaded --> start game!
       gServerGame->cycleLevel(0);         // Start the first level

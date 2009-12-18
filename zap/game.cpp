@@ -449,8 +449,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    gBotNavMeshZones.clear();
 
+   s_logprintf("Loading %s [%s]...", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
+
+   s_logprintf("Done. [%s]", getTimeStamp().c_str());
+
 
    // Analyze zone connections
    BotNavMeshZone::buildBotNavMeshZoneConnections();     // Does nothing if there are no botNavMeshZones defined
