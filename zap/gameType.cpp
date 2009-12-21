@@ -761,12 +761,20 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 
 extern Rect gServerWorldBounds;
 
+// Runs on server, after level has been loaded from a file
 void GameType::onLevelLoaded()
 {
    mSpyBugs.clear();
 
    // Find all spybugs in the game
    gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
+}
+
+
+// Runs on client, after level has been successfully downloaded
+void GameType::onLevelReceived()
+{
+
 }
 
 
@@ -1520,7 +1528,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
          case KillEnemy:
             return 1;
          case KilledByAsteroid:  // Fall through OK
-         case KilledByTurret:    // Fall through OK   
+         case KilledByTurret:    // Fall through OK
          case KillSelf:
             return 0;
          case KillTeammate:
@@ -1881,6 +1889,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
 
    gGameUserInterface.mShowProgressBar = false;
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
+   onLevelReceived();
 }
 
 GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))

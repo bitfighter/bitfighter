@@ -287,7 +287,9 @@ public:
    virtual Vector<GameType::ParameterDescription> describeArguments();
 
    void onAddedToGame(Game *theGame);
-   void onLevelLoaded();
+
+   void onLevelLoaded();      // Server-side version
+   void onLevelReceived();    // Client-side version
 
    void idle(GameObject::IdleCallPath path);
 
