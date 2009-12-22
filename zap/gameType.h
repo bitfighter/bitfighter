@@ -107,6 +107,7 @@ private:
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
    Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
+   boolean mLevelHasLoadoutZone;    
 
 public:
    enum GameTypes
@@ -180,6 +181,8 @@ public:
    Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retireve, HTF, CTF)
 
    static void printRules();             // Dump game-rule info
+
+   boolean levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
 
    enum
    {
@@ -288,8 +291,7 @@ public:
 
    void onAddedToGame(Game *theGame);
 
-   void onLevelLoaded();      // Server-side version
-   void onLevelReceived();    // Client-side version
+   void onLevelLoaded();      // Server-side function run once level is loaded from file
 
    void idle(GameObject::IdleCallPath path);
 
@@ -348,7 +350,7 @@ public:
    static Team readTeamFromLevelLine(S32 argc, const char **argv);
 
    void onGhostAvailable(GhostConnection *theConnection);
-   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount));
+   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin));

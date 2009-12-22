@@ -210,6 +210,7 @@ void LoadoutHelper::idle(U32 timeDelta)
 }
 
 // Return true if key did something, false if key had no effect
+// Runs on client
 bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 {
    // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
@@ -300,25 +301,17 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       gc->c2sRequestLoadout(loadout);     // Tell server our loadout has changed.  Server will check if we're in the zone and activate loadout, if needed
 
       GameType *gt = gClientGame->getGameType();
-      bool spawnWithLoadout = gt->isSpawnWithLoadoutGame();
-
-      bool gameHasLoadoutZone = false;
-
-      if(spawnWithLoadout)    // If spawnWithLoadout is false, it doesn't really matter what gameHasLoadoutZone is, so we can skip the following block.
-      {
-         Vector<GameObject *> fillVector;
-         Rect worldBounds = gClientGame->computeWorldObjectExtents();
-         gClientGame->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, worldBounds);
-
-         gameHasLoadoutZone = fillVector.size();
-      }
+      bool spawnWithLoadout = gt->isSpawnWithLoadoutGame() || ! gt->levelHasLoadoutZone();
 
       // Check if we are in a loadout zone...  if so, it will be changed right away...
       // ...otherwise, display a notice to the player to head for a LoadoutZone
       // We've done a lot of work to get this message just right!  I hope players appreciate it!
       if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneType)) )          
-         gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), "Ship design changed -- %s%s", spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", spawnWithLoadout && gameHasLoadoutZone ? " or enter Loadout Zone." : ".");
+         gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), 
+                                           "Ship design changed -- %s%s", spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
+                                           spawnWithLoadout && gt->levelHasLoadoutZone() ? " or enter Loadout Zone." : ".");
    }
+
    return true;
 }
 

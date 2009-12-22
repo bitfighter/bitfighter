@@ -200,7 +200,7 @@ Rect Game::computeWorldObjectExtents()
       return Rect();
 
    Rect theRect = mGameObjects[0]->getExtent();
-   for(S32 i = 0; i < mGameObjects.size(); i++)
+   for(S32 i = 1; i < mGameObjects.size(); i++)
       theRect.unionRect(mGameObjects[i]->getExtent());
    return theRect;
 }

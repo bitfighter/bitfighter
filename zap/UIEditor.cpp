@@ -266,7 +266,7 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items)
    mUndoItems.push_back(items);
    if(mUndoItems.size() > 128)      // Keep the undo state from getting too large.  This is quite a lot of undo.
    {
-      mUndoItems.pop_front();
+      mUndoItems.pop_front();    
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
       logprintf("Undo buffer full... discarding oldest undo state");
    }

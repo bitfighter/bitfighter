@@ -91,6 +91,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mLocalClient = NULL;       // Will be assigned by the server after a connection is made
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;     // By default, all zones glow
+   mLevelHasLoadoutZone = false;
 }
 
 
@@ -282,18 +283,18 @@ void GameType::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
 
-   // Update overlay message timers
-   mLevelInfoDisplayTimer.update(deltaT);
-   mInputModeChangeAlertDisplayTimer.update(deltaT);
-
-   if(isGhost())     // i.e. we're a client
+   if(isGhost())     // i.e. client only
    {
+      // Update overlay message timers
+      mLevelInfoDisplayTimer.update(deltaT);
+      mInputModeChangeAlertDisplayTimer.update(deltaT);
+
       mGameTimer.update(deltaT);
       mZoneGlowTimer.update(deltaT);
       return;
    }
 
-   // From here on, only gets run on the server
+   // From here on, server only
    queryItemsOfInterest();
    if(mScoreboardUpdateTimer.update(deltaT))
    {
@@ -768,13 +769,11 @@ void GameType::onLevelLoaded()
 
    // Find all spybugs in the game
    gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
-}
+  
+   Vector<GameObject *> fillVector;
+   getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, gServerWorldBounds);
 
-
-// Runs on client, after level has been successfully downloaded
-void GameType::onLevelReceived()
-{
-
+   mLevelHasLoadoutZone = (fillVector.size() > 0);
 }
 
 
@@ -963,8 +962,8 @@ void GameType::spawnShip(GameConnection *theClient)
    theClient->setControlObject(newShip);
    newShip->setOwner(theClient);
 
-   if(isSpawnWithLoadoutGame())
-      setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game
+   if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
+      setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
 }
 
 
@@ -1619,15 +1618,16 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
 }
 
 
-// Broadcast info about the current level
-GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount),
-                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount))
+// Broadcast info about the current level... code gets run on client, obviously
+GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone),
+                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount, levelHasLoadoutZone))
 {
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
    mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
+   mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
 
    gClientGame->mObjectsLoaded = 0;                      // Reset item counter
    gGameUserInterface.mShowProgressBar = true;           // Show progress bar
@@ -1845,12 +1845,12 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
       gGameUserInterface.displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
 }
 
-/// onGhostAvailable is called on the server side after the server knows that
-/// the ghost is available and addressable via the getGhostIndex()
+// Runs after the server knows that the ghost is available and addressable via the getGhostIndex()
+// Runs on server, obviously
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded);
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, mLevelHasLoadoutZone);
 
 
    for(S32 i = 0; i < mTeams.size(); i++)
@@ -1881,6 +1881,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    NetObject::setRPCDestConnection(NULL);    // Set RPCs to go to all players
 }
 
+
 GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
 {
    // Now we know the game is ready to begin...
@@ -1889,8 +1890,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
 
    gGameUserInterface.mShowProgressBar = false;
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
-   onLevelReceived();
 }
+
 
 GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 {
@@ -1910,6 +1911,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
       constructBarriers(getGame(), barrier, width, solid);
 }
 
+
 // Client sends chat message to/via game server
 GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (global, message))
 {
@@ -1923,8 +1925,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
 }
 
 
-// Sends a quick-chat message (which, due to its repeated
-// nature can be encapsulated in a StringTableEntry item)
+// Sends a quick-chat message (which, due to its repeated nature can be encapsulated in a StringTableEntry item)
 GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -2001,8 +2002,8 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
 
 
-#define minRating 0
-#define maxRating 200
+const U32 minRating = 0;
+const U32 maxRating = 200;
 
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
 Vector<SignedInt<24> > GameType::mScores;
@@ -2051,8 +2052,6 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
    }
 }
 
-#undef minRating
-#undef maxRating
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
