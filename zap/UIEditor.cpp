@@ -378,8 +378,8 @@ void EditorUserInterface::loadLevel()
    mGridSize = Game::DefaultGridSize;              // Used in editor for scaling walls and text items appropriately
 
    mGameType[0] = 0;                   // Clear mGameType
-   char fileBuffer[512];
-   dSprintf(fileBuffer, sizeof(fileBuffer), "levels/%s", mEditFileName.c_str());
+   char fileBuffer[1024];
+   dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gLevelDir, mEditFileName.c_str());
 
    if(initLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
@@ -837,7 +837,7 @@ void EditorUserInterface::onReactivate()
    if(mWasTesting)
    {
       gLevelList = mgLevelList;        // Restore level list
-      gLevelDir = mgLevelDir;          // Restore gLevelDir
+      //gLevelDir = mgLevelDir;          // Restore gLevelDir
       mWasTesting = false;
    }
 
@@ -2685,7 +2685,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // key actions are handled below.
    if(mEditingSpecialAttrItem != -1)
    {  /* braces required */
-      if( keyCode == KEY_J && getKeyState(KEY_CTRL) )   
+      if( keyCode == KEY_J && getKeyState(KEY_CTRL) )
       { /* Do nothing */ }
       else if(keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)    // Trap mouse clicks... do nothing
          return;
@@ -2751,7 +2751,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    // Regular key handling from here on down
-   if(keyCode == KEY_ENTER)       // Enter - Edit props 
+   if(keyCode == KEY_ENTER)       // Enter - Edit props
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
@@ -3379,8 +3379,8 @@ static void s_fprintf(FILE *stream, const char *format, ...)
     va_list args;
     va_start(args, format);
 
-    char buffer[2048]; 
-    dVsprintf(buffer, sizeof(buffer), format, args); 
+    char buffer[2048];
+    dVsprintf(buffer, sizeof(buffer), format, args);
 
     va_end(args);
 
@@ -3410,7 +3410,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       }
 
       char fileNameBuffer[256];
-      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "levels/%s", mEditFileName.c_str());
+      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gLevelDir, mEditFileName.c_str());
       FILE *f = fopen(fileNameBuffer, "w");
       if(!f)
          throw(SaveException("Could not open file for writing"));
@@ -3507,8 +3507,8 @@ void EditorUserInterface::testLevel()
       mgLevelList = gLevelList;
       gLevelList.clear();
 
-      mgLevelDir = gLevelDir;
-      gLevelDir = "levels";            // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param
+      //mgLevelDir = gLevelDir;
+      //gLevelDir = "levels";            // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param.  Why??
 
       mWasTesting = true;
 

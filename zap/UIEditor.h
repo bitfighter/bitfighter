@@ -244,7 +244,7 @@ private:
 
    Color getTeamColor(S32 team);    // Return a color based on team index
 
-   string mgLevelDir;
+//   string mgLevelDir;
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 

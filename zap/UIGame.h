@@ -33,7 +33,7 @@
 #include "timer.h"
 #include "sfx.h"
 #include "voiceCodec.h"
-#include "point.h"  
+#include "point.h"
 
 namespace Zap
 {
@@ -51,7 +51,7 @@ private:
    bool mDownDisabled;
 
    void disableMovementKey(KeyCode keyCode);
-   
+
    // Related to display of in-game chat and status messages
    enum {
       MessageStoreCount = 20,          // How many messages to store (only top MessageDisplayCount are normally displayed)
@@ -150,10 +150,11 @@ private:
    };
 
    Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
-public:
 
+public:
    bool displayInputModeChangeAlert;
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
+   bool mDebugShowShipCoords;       // Show coords on ship?
 
    GameUserInterface();
 

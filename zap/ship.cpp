@@ -101,15 +101,15 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
 }
 
 // Destructor
-Ship::~Ship()         
+Ship::~Ship()
 {
    // Do nothing
 }
 
 
 // Push a LuaShip proxy onto the stack
-void Ship::push(lua_State *L) 
-{ 
+void Ship::push(lua_State *L)
+{
    LuaShip *luaship;
 
    //lua_getglobal(L, "_lookupShipInDirectory");
@@ -648,9 +648,9 @@ void Ship::processEnergy()
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
-   // Deal with grenades and other explody things, even if they cause no damage                    
+   // Deal with grenades and other explody things, even if they cause no damage
    if(theInfo->damageType == DamageTypeArea)
-      mImpulseVector += theInfo->impulseVector; 
+      mImpulseVector += theInfo->impulseVector;
 
    if (theInfo->damageAmount == 0)
       return;
@@ -787,8 +787,8 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 //}
 
 
-   stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits 
-                                                               // are set (as happens when a ship comes into scope).  Therefore, we'll force 
+   stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits
+                                                               // are set (as happens when a ship comes into scope).  Therefore, we'll force
                                                                // this to be robot only.
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
@@ -840,7 +840,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   bool positionChanged = false;    // True when position changes a little 
+   bool positionChanged = false;    // True when position changes a little
    bool shipwarped = false;         // True when position changes a lot
 
    bool wasInitialUpdate = false;
@@ -918,7 +918,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())        // Ship made a large change in position
       shipwarped = true;
 
-   if(stream->readFlag())        // Ship just teleported 
+   if(stream->readFlag())        // Ship just teleported
    {
       shipwarped = true;
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny (sfx, spiral bg are done by the teleporter itself)
@@ -984,7 +984,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
          emitShipExplosion(mMoveState[ActualState].pos);    // Boom!
    }
 
-   if(playSpawnEffect)   
+   if(playSpawnEffect)
    {
       mWarpInTimer.reset(WarpFadeInTime);    // Make ship all spinny
 
@@ -1304,7 +1304,6 @@ void Ship::emitMovementSparks()
 
 extern bool gShowAimVector;
 extern IniSettings gIniSettings;
-extern bool gDebugShowShipCoords;
 
 void Ship::render(S32 layerIndex)
 {
@@ -1359,7 +1358,7 @@ void Ship::render(S32 layerIndex)
    }
    else
    {
-      if(gDebugShowShipCoords)
+      if(gGameUserInterface.mDebugShowShipCoords)
       {
          string str = string("@") + UserInterface::itos((S32) getActualPos().x) + "," + UserInterface::itos((S32) getActualPos().y);
 
@@ -1547,11 +1546,11 @@ S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->g
 S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam()); }
 
 
-S32 LuaShip::isModActive(lua_State *L) { 
+S32 LuaShip::isModActive(lua_State *L) {
    static const char *methodName = "Ship:isModActive()";
    checkArgCount(L, 1, methodName);
    ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
-   return returnBool(L, getObj()->isModuleActive(module)); 
+   return returnBool(L, getObj()->isModuleActive(module));
 }
 
 S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
@@ -1559,15 +1558,15 @@ S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSe
 S32 LuaShip::isValid(lua_State *L) { return returnBool(L, thisShip.isValid()); }
 
 
-GameObject *LuaShip::getGameObject() 
-{ 
+GameObject *LuaShip::getGameObject()
+{
    if(thisShip.isNull())    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
    {
       logprintf("Bad programmer!");
       return NULL;      // Not right
    }
    else
-      return getObj(); 
+      return getObj();
 }
 
 };

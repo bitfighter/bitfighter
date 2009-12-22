@@ -2001,10 +2001,12 @@ GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx)
 
 
 
+#define minRating 0
+#define maxRating 200
 
 Vector<RangedU32<0, GameType::MaxPing> > GameType::mPingTimes; ///< Static vector used for constructing update RPCs
 Vector<SignedInt<24> > GameType::mScores;
-Vector<RangedU32<0,200> > GameType::mRatings;
+Vector<RangedU32<minRating,maxRating> > GameType::mRatings;
 
 
 void GameType::updateClientScoreboard(ClientRef *cl)
@@ -2035,7 +2037,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
 
 
 GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
-                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<0,200> > ratings),
+                 (Vector<RangedU32<0, GameType::MaxPing> > pingTimes, Vector<SignedInt<24> > scores, Vector<RangedU32<minRating,maxRating> > ratings),
                  (pingTimes, scores, ratings))
 {
    for(S32 i = 0; i < mClientList.size(); i++)
@@ -2045,10 +2047,12 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
       mClientList[i]->ping = pingTimes[i];
       mClientList[i]->score = scores[i];
-      mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0;
+      mClientList[i]->rating = min(max(((F32)ratings[i] - 100.0) / 100.0, minRating), maxRating);    // Ensure our rating is within the ranged limits used above
    }
 }
 
+#undef minRating
+#undef maxRating
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {

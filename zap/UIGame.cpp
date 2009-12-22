@@ -128,11 +128,11 @@ void GameUserInterface::onActivate()
    onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);    // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
-   for(S32 i = 0; i < MessageStoreCount; i++)   
-      mDisplayMessage[i][0] = 0; 
+   for(S32 i = 0; i < MessageStoreCount; i++)
+      mDisplayMessage[i][0] = 0;
 
-   for(S32 i = 0; i < MessageDisplayCount; i++)   
-      mStoreMessage[i][0] = 0;  
+   for(S32 i = 0; i < MessageDisplayCount; i++)
+      mStoreMessage[i][0] = 0;
 
    mMessageDisplayMode = ShortTimeout;                    // Start with normal chat msg display
    setPlayMode();                                         // Make sure we're not in chat or loadout-select mode
@@ -156,7 +156,7 @@ void GameUserInterface::onReactivate()
 }
 
 
-// A new chat message is here!  We don't actually display anything here, despite the name...  
+// A new chat message is here!  We don't actually display anything here, despite the name...
 // just add it to the list, will be displayed in render()
 void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
 {
@@ -173,7 +173,7 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
       strcpy(mStoreMessage[i], mStoreMessage[i-1]);
       mStoreMessageColor[i] = mStoreMessageColor[i-1];
    }
-   
+
    va_list args;
    va_start(args, format);
 
@@ -565,7 +565,7 @@ void GameUserInterface::renderMessageDisplay()
             drawString(UserInterface::horizMargin, y, FONTSIZE, mStoreMessage[i]);
             y += FONTSIZE + fontGap;
          }
-      }   
+      }
 
    // Render faint gray background box... probably better without this...
    //S32 ypos1 = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin);
@@ -597,7 +597,7 @@ void GameUserInterface::renderCurrentChat()
    if(mCurrentMode != ChatMode)
       return;
 
-   const S32 chatComposeYPos = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) + 
+   const S32 chatComposeYPos = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) +
                                (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + fontGap);
    const char *promptStr;
 
@@ -786,7 +786,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       S32 m = mMessageDisplayMode + 1;
       if(m >= MessageDisplayModes)
          m = 0;
-      mMessageDisplayMode = MessageDisplayMode(m); 
+      mMessageDisplayMode = MessageDisplayMode(m);
 
       return;
    }
@@ -921,7 +921,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 found = -1;
             S32 start = mCurrentChatType ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
 
-            size_t len = strlen(mChatBuffer);    
+            size_t len = strlen(mChatBuffer);
             for(S32 i = 0; i < mChatCmds.size(); i++)
                if( mChatCmds[i].substr(start, len) == string(mChatBuffer) )
                {
@@ -1120,7 +1120,7 @@ Vector<string> GameUserInterface::parseString(char buffer[])
 
    S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;  // Start at 1 to omit the leading /
 
-   for(size_t i = startIndex; i < strlen(mChatBuffer); i++)   
+   for(size_t i = startIndex; i < strlen(mChatBuffer); i++)
    {
       if(mChatBuffer[i] != ' ')
          word += words.size() == 0 ? tolower(mChatBuffer[i]) : mChatBuffer[i];      // Make first word all lower case for case insensitivity
@@ -1138,7 +1138,6 @@ Vector<string> GameUserInterface::parseString(char buffer[])
 
 
 extern md5wrapper md5;
-extern bool gDebugShowShipCoords;
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
@@ -1163,9 +1162,9 @@ void GameUserInterface::processCommand(Vector<string> words)
       }
 
       U8 mins;    // Use U8 to limit number of mins that can be added, while nominally having no limit!
-      // Parse 2nd arg -- if first digit isn't a number, user probably screwed up.  
+      // Parse 2nd arg -- if first digit isn't a number, user probably screwed up.
       // atoi will return 0, but this probably isn't what the user wanted.
-      
+
       bool err = false;
       if(words[1][0] >= '0' && words[1][0] <= '9')
          mins = atoi(words[1].c_str());
@@ -1177,7 +1176,7 @@ void GameUserInterface::processCommand(Vector<string> words)
          displayMessage(gCmdChatColor, "!!! Invalid value... game time not changed");
          return;
       }
-      
+
       displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
 
       if(gClientGame->getGameType())
@@ -1278,7 +1277,7 @@ void GameUserInterface::processCommand(Vector<string> words)
       gc->submitLevelChangePassword(words[1].c_str());
    }
    else if(words[0] == "dcoords")
-         gDebugShowShipCoords = !gDebugShowShipCoords;
+      mDebugShowShipCoords = !mDebugShowShipCoords;
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);
    else if(words[0] == "mvol")      // Music volume
@@ -1320,11 +1319,11 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
    {
       displayMessage(gCmdChatColor, "!!! Need to specify volume");
       return;
-   }  
+   }
 
    string volstr = words[1];
 
-   // Parse volstr -- if first digit isn't a number, user probably screwed up.  
+   // Parse volstr -- if first digit isn't a number, user probably screwed up.
    // atoi will return 0, but this probably isn't what the user wanted.
    if(volstr[0] >= '0' && volstr[0] <= '9')
       vol = max(min(atoi(volstr.c_str()), 10), 0);
@@ -1352,7 +1351,6 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
       gClientGame->getConnectionToServer()->c2sSetServerAlertVolume((S8) vol);
       displayMessage(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
-
   }
 }
 
@@ -1374,6 +1372,7 @@ GameUserInterface::VoiceRecorder::VoiceRecorder()
    mVoiceEncoder = new LPC10VoiceEncoder;
 }
 
+
 void GameUserInterface::VoiceRecorder::idle(U32 timeDelta)
 {
    if(mRecordingAudio)
@@ -1385,6 +1384,7 @@ void GameUserInterface::VoiceRecorder::idle(U32 timeDelta)
       }
    }
 }
+
 
 void GameUserInterface::VoiceRecorder::render()
 {
@@ -1415,6 +1415,7 @@ void GameUserInterface::VoiceRecorder::render()
       glEnd();
    }
 }
+
 
 void GameUserInterface::VoiceRecorder::start()
 {

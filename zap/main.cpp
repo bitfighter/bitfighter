@@ -129,7 +129,13 @@ S32 gMaxPlayers;                 // Max players allowed -- can change on cmd lin
 U32 gSimulatedLag;               // Simulate a slow network -- can change on cmd line
 F32 gSimulatedPacketLoss;        // Simulate a bad network -- can change on cmd line
 
+
+#ifdef ZAP_DEDICATED
+bool gDedicatedServer = true;    // This will allow us to omit the -dedicated parameter when compiled in dedicated mode
+#else
 bool gDedicatedServer = false;   // Usually, we just want to play.  If true, we'll be in server-only, no-player mode
+#endif
+
 bool gQuit = false;
 bool gIsServer = false;
 
@@ -167,9 +173,6 @@ bool gReadyToConnectToMaster = false;           // When we're sure we have a nic
 const char *gServerPassword = NULL;
 const char *gAdminPassword = NULL;
 const char *gLevelChangePassword = NULL;
-
-
-bool gDebugShowShipCoords = false;              // When true, your ship will display its coordinates
 
 Address gMasterAddress;
 Address gConnectAddress;
@@ -312,7 +315,7 @@ void GLUT_CB_keydown(unsigned char key, S32 x, S32 y)
    gZapJournal.keydown(key);
 }
 
- 
+
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
 {
    // First check for some "universal" keys.  If keydown isn't one of those, we'll pass the key onto the keyDown handler
@@ -485,7 +488,7 @@ void abortHosting()
       logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
       s_logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
       //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
-      exitGame(1); 
+      exitGame(1);
    }
    else
    {
@@ -515,7 +518,7 @@ void initHostGame(Address bindAddress, bool testMode)
 {
    gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
 
-	// Parse all levels, make sure they are in some sense valid, and record some critical parameters
+   // Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(gLevelList.size())
    {
       gServerGame->setLevelList(gLevelList);
@@ -565,10 +568,10 @@ void hostGame()
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
-{     
-   if(gHostingModePhase == LoadingLevels)    
+{
+   if(gHostingModePhase == LoadingLevels)
       gServerGame->loadNextLevel();
-   else if(gHostingModePhase == DoneLoadingLevels)  
+   else if(gHostingModePhase == DoneLoadingLevels)
       hostGame();
 
    checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
@@ -609,7 +612,7 @@ void idle()
          case SDL_MOUSEMOTION:
             break;
          case SDL_VIDEORESIZE:
-				window_resized(e.resize.w, e.resize.h);
+            window_resized(e.resize.w, e.resize.h);
             break;
          case SDL_QUIT:       // User closed game window
             exitGame();
@@ -643,7 +646,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
 {
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
-   
+
    if(gHostingModePhase != LoadingLevels)    // Don't idle games during level load
    {
       if(gClientGame)
@@ -921,6 +924,19 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 }
 
 
+// If we're running in dedicated mode, these things need to be set as such.
+void setParamsForDedicatedMode()
+{
+   gCmdLineSettings.clientMode = false;
+   gCmdLineSettings.serverMode = true;
+   gDedicatedServer = true;
+   gReadyToConnectToMaster = true;
+
+   gCmdLineSettings.connectRemote = false;
+}
+
+
+
 // Read the command line params... if we're replaying a journal, we'll process those params as if they were actually there, while
 // ignoring those params that were provided.
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPtr> argv), (argv))
@@ -994,10 +1010,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       // Run as a dedicated server
       else if(!stricmp(argv[i], "-dedicated"))     // additional arg optional
       {
-         gCmdLineSettings.clientMode = false;
-         gCmdLineSettings.serverMode = true;
-         gDedicatedServer = true;
-         gReadyToConnectToMaster = true;     // Normally is false if you haven't entered a name...
+         setParamsForDedicatedMode();
 
          if(hasAdditionalArg)
             gCmdLineSettings.dedicated = argv[i+1];
@@ -1076,7 +1089,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             logprintf("You must specify one or more levels to load with the -levels option");
             exitGame(1);
          }
-         
+
          // We'll overwrite our main level list directly, so if we're writing the INI for the first time,
          // we'll use the cmd line args to generate the INI Level keys, rather than the built-in defaults.
          gLevelList.clear();
@@ -1084,7 +1097,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          for(S32 j = i+1; j < argc; j++)
             gLevelList.push_back(StringTableEntry(argv[j]));
          return;     // This param must be last, so no more args to process.  We can return.
-         
+
       }
       // Specify name of the server as others will see it from the Join menu
       else if(!stricmp(argv[i], "-hostname"))   // additional arg required
@@ -1175,11 +1188,9 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       }
    }
 
-   // Override some settings if we're compiling ZAP_DEDICATED
+// Override some settings if we're compiling ZAP_DEDICATED
 #ifdef ZAP_DEDICATED
-   gCmdLineSettings.clientMode = false;
-   gCmdLineSettings.serverMode = true;
-   gCmdLineSettings.connectRemote = false;
+   setParamsForDedicatedMode();
 #endif
 }
 
@@ -1270,7 +1281,7 @@ void buildLevelList()
       return;
    }
 
-   // Otherwise, use the levels gleaned from the cmd line, or, if nothing specified on the cmd line, 
+   // Otherwise, use the levels gleaned from the cmd line, or, if nothing specified on the cmd line,
    // use all the levels in leveldir (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
    if(gCmdLineSettings.suppliedLevels)
    {
@@ -1299,7 +1310,7 @@ string getLevelsFolder(string base)
 {
    // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
    struct stat st;
-   if(stat(base.c_str(), &st) != 0 )  
+   if(stat(base.c_str(), &st) != 0 )
       return gLevelDir + "/" + base;      // It doesn't
    else
       return base;                        // It does
@@ -1362,14 +1373,14 @@ void processStartupParams()
 
    if(gIniSettings.levelDir != "")
       gLevelDir = gIniSettings.levelDir;
-   else 
+   else
       gIniSettings.levelDir = gLevelDir;     // So a good default will be written to the INI
 
-   // This way, the main level dir can be specified in the INI, but it can either be overridden here, 
+   // This way, the main level dir can be specified in the INI, but it can either be overridden here,
    // or a subfolder can be specified, depending on what's in the leveldir param
    if(gCmdLineSettings.levelDir != "")
       gLevelDir = getLevelsFolder(gCmdLineSettings.levelDir);
-   else 
+   else
       gLevelDir = getLevelsFolder(gIniSettings.levelDir);
    // else leave gLevelDir at it's default setting, "levels"
 
@@ -1420,7 +1431,7 @@ void processStartupParams()
       gIniSettings.name = gCmdLineSettings.name;         // setting is never saved, we won't mess up our INI
 
 
-   // Note that we can be in both clientMode and serverMode
+   // Note that we can be in both clientMode and serverMode (such as when we're hosting a game interactively)
 
    if(gCmdLineSettings.clientMode)               // Create ClientGame object
       gClientGame = new ClientGame(Address());   //   let the system figure out IP address and assign a port
