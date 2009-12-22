@@ -630,22 +630,32 @@ F32 angleOfLongestSide(Vector<Point> polyPoints)
    Point start;
    Point end;
    F32 maxlen = -1;
+   F32 ang;
 
    for(S32 i = 0; i < polyPoints.size(); i++)
    {
       Point p1 = polyPoints[i];
       Point p2 = polyPoints[(i < polyPoints.size() - 1) ? i + 1 : 0];
-      F32 l = p1.distSquared(p2);
+      F32 len = p1.distSquared(p2);
 
-      if(l > maxlen + .1)     // .1 helps in editor if two sides are essentially equal 
-      {
+      if(len > maxlen + .1)     // .1 helps in editor if two sides are essentially equal 
+      { 
          start = p1;
          end = p2;
-         maxlen = l;
+         maxlen = len;
+
+         ang = start.angleTo(end);
+      }
+      else if(len > maxlen - .1)    // Lengths are essentially equal... align text along "more horizontal" axis
+      {
+         if(abs(p1.angleTo(p2)) < abs(ang))
+         {
+            start = p1;
+            end = p2;
+            ang = start.angleTo(end);
+         }
       }
    }
-
-   F32 ang = start.angleTo(end);
 
    // Make sure text is right-side-up
    if(ang < -FloatHalfPi || ang > FloatHalfPi)

@@ -40,8 +40,12 @@
 //</ul>
 
 
-//<ul>
-//<li>Games without loadout zones automatically set new loadout upon respawn</li>
+//<ul>  011c
+//<li>Games without loadout zones automatically set new loadout upon respawn, for all game types</li>
+//<li>Fixed crash with invalid player ratings</li>
+//<li>Improved dedicated-only server compilation -- should no longer need to run with -dedicated parameter</li>
+//<li>Fixed rare glitch with rendering labels on square loadout/goal zones -- labels will prefer more horizontal alignment
+//</ul>
 
 // Mac Test:
 // Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
