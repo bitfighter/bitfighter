@@ -1619,15 +1619,18 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
 
 
 // Broadcast info about the current level... code gets run on client, obviously
-GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone),
-                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount, levelHasLoadoutZone))
+GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount /* , bool levelHasLoadoutZone [RELEASE 012]*/),
+                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount/*, levelHasLoadoutZone [RELEASE 012] */))
 {
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
    mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
+   /*
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
+   [RELEASE 012]
+   */
 
    gClientGame->mObjectsLoaded = 0;                      // Reset item counter
    gGameUserInterface.mShowProgressBar = true;           // Show progress bar
@@ -1850,7 +1853,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, mLevelHasLoadoutZone);
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded/*, mLevelHasLoadoutZone [RELEASE 012] */);
 
 
    for(S32 i = 0; i < mTeams.size(); i++)

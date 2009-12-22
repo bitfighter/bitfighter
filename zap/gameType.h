@@ -183,6 +183,8 @@ public:
    static void printRules();             // Dump game-rule info
 
    boolean levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
+   void setLevelHasLoadoutZone(bool hasLZ) { mLevelHasLoadoutZone = hasLZ; }  /* Delete this line  [RELEASE 012] */
+
 
    enum
    {
@@ -350,7 +352,7 @@ public:
    static Team readTeamFromLevelLine(S32 argc, const char **argv);
 
    void onGhostAvailable(GhostConnection *theConnection);
-   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone));
+   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount/*, bool levelHasLoadoutZone [RELEASE 012] */));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin));

@@ -124,6 +124,7 @@ public:
 
       if(unpackPolygonUpdate(connection, stream))
          computeExtent();
+      gClientGame->getGameType()->setLevelHasLoadoutZone(true);     /* Delete this line [RELEASE 012] */
    }
 
    TNL_DECLARE_CLASS(LoadoutZone);
