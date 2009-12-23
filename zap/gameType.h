@@ -107,7 +107,7 @@ private:
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
    Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
-   boolean mLevelHasLoadoutZone;    
+   bool mLevelHasLoadoutZone;    
 
 public:
    enum GameTypes
@@ -182,7 +182,7 @@ public:
 
    static void printRules();             // Dump game-rule info
 
-   boolean levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
+   bool levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
    void setLevelHasLoadoutZone(bool hasLZ) { mLevelHasLoadoutZone = hasLZ; }  /* Delete this line  [RELEASE 012] */
 
 
