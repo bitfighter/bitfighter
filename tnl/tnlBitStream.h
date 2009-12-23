@@ -35,6 +35,8 @@
 #include "tnlConnectionStringTable.h"
 #endif
 
+#include "tnl.h"
+
 namespace TNL {
 
 class SymmetricCipher;
@@ -345,6 +347,7 @@ inline bool BitStream::readFlag()
    bitNum++;
    return ret;
 }
+extern void logprintf(const char *format, ...);
 
 inline void BitStream::writeIntAt(U32 value, U8 bitCount, U32 bitPosition)
 {
@@ -354,6 +357,7 @@ inline void BitStream::writeIntAt(U32 value, U8 bitCount, U32 bitPosition)
    setBitPosition(curPos);
 }
 
+#include <stdio.h>
 inline void BitStream::writeRangedU32(U32 value, U32 rangeStart, U32 rangeEnd)
 {
    TNLAssert(value >= rangeStart && value <= rangeEnd, "Out of bounds value!");
