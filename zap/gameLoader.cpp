@@ -28,12 +28,16 @@
 #include "gameLoader.h"
 #include "teleporter.h"
 
+#include "config.h"     // For CmdLineSettings
+
 #include "../tnl/tnl.h"
 #include "../tnl/tnlLog.h"
 
 #include <stdio.h>
 
 using namespace TNL;
+
+
 namespace Zap
 {
 
@@ -205,5 +209,89 @@ bool LevelLoader::initLevelFromFile(const char *file)
 #undef MaxArgc
 #undef MaxArgLen
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef TNL_OS_MAC_OSX
+
+#  ifdef TNL_OS_WIN32
+#     include "dirent.h"        // Need local copy for Windows builds
+#  else
+#     include <dirent.h>        // Need standard copy for Linux
+#  endif
+
+using namespace std;
+
+// Read files from folder
+// Based on http://www.linuxquestions.org/questions/programming-9/c-list-files-in-directory-379323/
+// Is this platform independent?  Works on Windows and now on Linux, but apparently not on a Mac
+// OSX version in Directory.mm
+bool getLevels(string dir, Vector<string> &files)
+{
+   DIR *dp;
+   struct dirent *dirp;
+
+   //string dir = "levels";
+   //if (subdir != "")
+   //   dir += "\\" + subdir;         // OK, this isn't really cross platform, but this will likely need to be modded
+   //                                 // for Linux anyway, and the Mac stuff is handled elsewhere...
+   if((dp = opendir(dir.c_str())) == NULL)
+      return false;
+
+   while ((dirp = readdir(dp)) != NULL)
+   {
+      string name = string(dirp->d_name);
+      if(name.length() > 6 && name.substr(name.length() - 6, 6) == ".level")
+         files.push_back(name);
+   }
+
+   closedir(dp);
+   return true;
+}
+#endif      // #ifndef TNL_OS_MAC_OSX
+
+
+// Sorts alphanumerically
+S32 QSORT_CALLBACK alphaSort(string *a, string *b)
+{
+   return stricmp((a)->c_str(), (b)->c_str());        // Is there something analagous to stricmp for strings (as opposed to c_strs)?
+}
+
+
+extern CmdLineSettings gCmdLineSettings;
+extern IniSettings gIniSettings;
+extern Vector<StringTableEntry> gLevelList;
+
+
+// Create the definititve list of levels for hosting a game
+void LevelListLoader::buildLevelList()
+{
+   // If user specified a list of levels on the command line, use those
+   if(gCmdLineSettings.specifiedLevels.size() > 0)
+   {
+      gLevelList = gCmdLineSettings.specifiedLevels;
+      return;
+   }
+
+   // If neither -leveldir nor -alllevels were not specified on the cmd line, and the INI file has some specified, use those
+   if(gCmdLineSettings.levelDir == "" && !gCmdLineSettings.alllevels && gIniSettings.levelList.size() > 0)
+   {
+      gLevelList = gIniSettings.levelList;
+      return;
+   }
+
+   // Otherwise we need to build our level list by looking at the filesystem  (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
+   gLevelList.clear();
+   Vector<string> levelfiles;
+
+   if(!getLevels(gLevelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
+   {
+      logprintf("Could not read any levels from the levels folder \"%s\".", gLevelDir.c_str());
+   }
+
+   levelfiles.sort(alphaSort);   // Just to be sure...
+
+   for (S32 i = 0; i < levelfiles.size(); i++)
+      gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
+}
 
 };

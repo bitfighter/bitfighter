@@ -379,7 +379,7 @@ void EditorUserInterface::loadLevel()
 
    mGameType[0] = 0;                   // Clear mGameType
    char fileBuffer[1024];
-   dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gLevelDir, mEditFileName.c_str());
+   dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gLevelDir.c_str(), mEditFileName.c_str());
 
    if(initLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
@@ -626,7 +626,7 @@ void EditorUserInterface::runScript()
    // Set the load target to the levelgen list, as that's where we want our items stored
    mLoadTarget = &mLevelGenItems;
 
-   LuaLevelGenerator levelgen = LuaLevelGenerator("./levels/", scriptArgs, mGridSize, this);
+   LuaLevelGenerator levelgen = LuaLevelGenerator(gLevelDir + "/", scriptArgs, mGridSize, this);
 
    // Reset the target
    mLoadTarget = &mItems;
@@ -822,6 +822,7 @@ void EditorUserInterface::onActivate()
    mSaveMsgTimer = 0;
 }
 
+
 extern Vector<StringTableEntry> gLevelList;
 
 void EditorUserInterface::onReactivate()
@@ -837,7 +838,6 @@ void EditorUserInterface::onReactivate()
    if(mWasTesting)
    {
       gLevelList = mgLevelList;        // Restore level list
-      //gLevelDir = mgLevelDir;          // Restore gLevelDir
       mWasTesting = false;
    }
 
@@ -3410,7 +3410,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       }
 
       char fileNameBuffer[256];
-      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gLevelDir, mEditFileName.c_str());
+      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gLevelDir.c_str(), mEditFileName.c_str());
       FILE *f = fopen(fileNameBuffer, "w");
       if(!f)
          throw(SaveException("Could not open file for writing"));

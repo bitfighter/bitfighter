@@ -87,6 +87,7 @@ void UserInterface::activate(bool save)
    onActivate();              // Activate the now current current UI
 }
 
+
 void UserInterface::reactivate()
 {
    current = this;
@@ -103,6 +104,7 @@ void UserInterface::dumpPreviousQueue()
       TNL::logprintf("    ->%d", prev->getMenuID());
    }
 }
+
 
 // Did we arrive at our current interface via the Editor?
 // If the editor is in prevUIs, then we came from there

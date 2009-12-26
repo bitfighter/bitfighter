@@ -978,8 +978,6 @@ void GameType::spawnRobot(Robot *robot)
       return;
    }
 
-
-
    //robot->addToGame(getGame());
 
    // Should probably do this, but... not now.
@@ -990,7 +988,7 @@ void GameType::spawnRobot(Robot *robot)
 
 Point GameType::getSpawnPoint(S32 team)
 {
-   TNLAssert(mTeams[team].spawnPoints.size(), "No spawn points!");   // Basically, game dies if there are no spawn points for a team.  Don't let this happen.
+   TNLAssert(mTeams[team].spawnPoints.size(), "No spawn points!");             // Game dies if there are no spawn points for a team.  Don't let this happen.
 
    S32 spawnIndex = TNL::Random::readI() % mTeams[team].spawnPoints.size();    // Pick random spawn point
    return mTeams[team].spawnPoints[spawnIndex];

@@ -31,7 +31,7 @@
 #include "masterConnection.h"
 #include "input.h"
 
-#include "../tnl/tnl.h"
+#include "tnl.h"
 
 #include "../glut/glutInclude.h"
 #include <stdio.h>
@@ -43,7 +43,6 @@ extern string gHostName;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern F32 gSimulatedPacketLoss;
-extern Vector<StringTableEntry> gLevelList;
 extern const char *gServerPassword;
 extern const char *gAdminPassword;
 extern const char *gLevelChangePassword;
@@ -91,6 +90,7 @@ extern U32 gSticksFound;
 extern Color gMasterServerBlue;
 extern void glColor(Color c, float alpha = 1);
 extern string gLevelDir;
+extern Vector<StringTableEntry> gLevelList;
 
 void DiagnosticUserInterface::render()
 {

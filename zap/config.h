@@ -70,6 +70,8 @@ struct CmdLineSettings
    string adminPassword;
    string levelChangePassword;
    string levelDir;        // Subfolder under levels specified with -leveldir parameter
+   bool alllevels;         // Did user specify -alllevels param?
+
    S32 maxplayers;
 
    bool window;            // Window param supplied
@@ -79,7 +81,7 @@ struct CmdLineSettings
    S32 xpos;
    S32 ypos;
 
-   bool suppliedLevels;    // Did the user specify any levels on the cmd line?
+   Vector<StringTableEntry> specifiedLevels;
 
    void init()
    {
@@ -106,10 +108,10 @@ struct CmdLineSettings
       maxplayers = -1;
       window = false;
       fullscreen = false;
-      suppliedLevels = false;
       winWidth = -1;
       xpos = -9999;
       ypos = -9999;
+      alllevels = false;
    };
 };
 

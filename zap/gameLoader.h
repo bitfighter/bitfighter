@@ -26,6 +26,12 @@
 #ifndef _GAMELOADER_H_
 #define _GAMELOADER_H_
 
+#include "tnl.h"
+#include "tnlNetStringTable.h"
+#include "tnlVector.h"
+
+using namespace TNL;
+
 namespace Zap
 {
 
@@ -39,6 +45,13 @@ public:
    bool initLevelFromFile(const char *file);
    virtual void processLevelLoadLine(int argc, const char **argv) = 0;
    int parseArgs(const char *string);
+};
+
+// Provide a class to help organize loading of levels from disk
+class LevelListLoader
+{
+public:
+   static void buildLevelList();
 };
 
 

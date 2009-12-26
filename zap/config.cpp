@@ -27,6 +27,7 @@
 #include "IniFile.h"
 #include "config.h"
 #include "quickChat.h"
+#include "gameLoader.h"    // For LevelListLoader::levelList
 
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 
@@ -759,6 +760,7 @@ void loadSettingsFromINI()
    saveSettingsToINI();      // Save to fill in any missing settings
 }
 
+
 extern Vector<StringTableEntry> gLevelList;
 
 void saveSettingsToINI()
@@ -853,7 +855,7 @@ void saveSettingsToINI()
       gINI.KeyComment("Host", " Password - You can require players to use a password to play on your server.  Leave blank to disable.");
       gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.  Leave blank to disable.");
       gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to disable.");
-      gINI.KeyComment("Host", " LevelDir - Specify where level files are stored");
+      gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
       
@@ -916,6 +918,7 @@ void saveSettingsToINI()
          gINI.KeyComment("Levels", " Level1=ctf.level");
          gINI.KeyComment("Levels", " Level2=zonecontrol.level");
          gINI.KeyComment("Levels", " ... etc ...");
+         gINI.KeyComment("Levels", "This list can be overidden on the command line with the -leveldir, -levels, or -alllevels parameters.");
          gINI.KeyComment("Levels", "----------------");
       }
 

@@ -565,6 +565,7 @@ void MainMenuUserInterface::onActivate()
       gSplashUserInterface.activate();          // Show splash screen the first time throug
 }
 
+
 // Set the MOTD we recieved from the master
 void MainMenuUserInterface::setMOTD(const char *motdString)
 {
