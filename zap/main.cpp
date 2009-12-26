@@ -526,7 +526,9 @@ void initHostGame(Address bindAddress, bool testMode)
 {
    gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
 
-   LevelListLoader::buildLevelList();
+   // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
+   if(!testMode) 
+      LevelListLoader::buildLevelList();
 
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(gLevelList.size())
