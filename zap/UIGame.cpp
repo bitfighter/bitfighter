@@ -674,13 +674,17 @@ void GameUserInterface::onMouseMoved(S32 x, S32 y)
 
    if (gClientGame->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
-      // Here it is...
-      GameObject *controlObject = gClientGame->getConnectionToServer()->getControlObject();
-      Ship *u = dynamic_cast<Ship *>(controlObject);
-
-      if(!u)      // Can sometimes happen when switching mazes. This will stop the ensuing crashing.
+      // If we join a server while in commander's map, we'll be here without a gameConnection and we'll get a crash without this check
+      GameConnection *gameConnection = gClientGame->getConnectionToServer();
+      if(!gameConnection)
          return;
-      Point p = gClientGame->worldToScreenPoint( u->getRenderPos() );
+
+      // Here's our ship...
+      Ship *ship = dynamic_cast<Ship *>(gameConnection->getControlObject());
+
+      if(!ship)      // Can sometimes happen when switching levels. This will stop the ensuing crashing.
+         return;
+      Point p = gClientGame->worldToScreenPoint( ship->getRenderPos() );
 
       mCurrentMove.angle = atan2(mMousePoint.y + canvasHeight / 2 - p.y, mMousePoint.x + canvasWidth / 2 - p.x);
    }
