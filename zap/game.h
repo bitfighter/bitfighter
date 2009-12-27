@@ -297,7 +297,7 @@ extern Address gMasterAddress;
 extern void initHostGame(Address bindAddress, bool testMode);
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
-
+ 
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
 #define CS_PROTOCOL_VERSION 20     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 580          // Version of the game according to SVN, will be unique every release (must be int)
