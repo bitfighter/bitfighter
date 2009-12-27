@@ -2681,6 +2681,37 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   if(keyCode == KEY_ENTER)       // Enter - Edit props
+   {
+      for(S32 i = 0; i < mItems.size(); i++)
+      {
+         if(mItems[i].selected || mItems[i].litUp)
+         {
+            // Force item i to be the one and only selected item type.  This will clear up some problems that
+            // might otherwise occur.  If you have multiple items selected, all will end up with the same values
+            mItems[i].selected = true;
+
+            for(S32 j = 0; j < mItems.size(); j++)
+               if(mItems[j].selected && mItems[j].index != mItems[i].index)
+                  unselectItem(j);
+
+            mEditingSpecialAttrItem = i;
+            mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
+
+            if(mSpecialAttribute != None)
+            {
+               mEditingSpecialAttrItem = i;
+               saveUndoState(mItems);
+            }
+            else
+               doneEditingSpecialItem(true);
+
+            break;
+         }
+      }
+      return;
+   }
+
    // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
    // key actions are handled below.
    if(mEditingSpecialAttrItem != -1)
@@ -2689,11 +2720,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       { /* Do nothing */ }
       else if(keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)    // Trap mouse clicks... do nothing
          return;
-      else if(keyCode == KEY_ENTER)        // End editing, save
-      {
-         doneEditingSpecialItem(true);
-         return;
-      }
       else if(keyCode == KEY_ESCAPE)      // End editing, revert
       {
          doneEditingSpecialItem(false);
@@ -2751,36 +2777,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    // Regular key handling from here on down
-   if(keyCode == KEY_ENTER)       // Enter - Edit props
-   {
-      for(S32 i = 0; i < mItems.size(); i++)
-      {
-         if(mItems[i].selected || mItems[i].litUp)
-         {
-            // Force item i to be the one and only selected item type.  This will clear up some problems that
-            // might otherwise occur.  If you have multiple items selected, all will end up with the same values
-            mItems[i].selected = true;
-
-            for(S32 j = 0; j < mItems.size(); j++)
-               if(mItems[j].selected && mItems[j].index != mItems[i].index)
-                  unselectItem(j);
-
-            mEditingSpecialAttrItem = i;
-            mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
-
-            if(mSpecialAttribute != None)
-            {
-               mEditingSpecialAttrItem = i;
-               saveUndoState(mItems);
-            }
-            else
-               doneEditingSpecialItem(true);
-
-            break;
-         }
-      }
-   }
-   else if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
+   if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
    {
       setCurrentTeam(-2);
       return;

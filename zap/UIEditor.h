@@ -170,7 +170,7 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   Vector<Vector<WorldItem> > mUndoItems;    // Undo history
+   Vector<Vector<WorldItem> > mUndoItems;    // Undo history  [[note that g++ requires space btwn >>]]
    Vector<Vector<WorldItem> > mRedoItems;    // Redo history
    Vector<WorldItem> mMostRecentState;       // Copy of most recent state, to facilitate dragging
    Vector<WorldItem> mUnmovedItems;          // Copy of items where they were before they moved... different than mMostRecentState when dragging from dock
@@ -348,9 +348,6 @@ public:
 
 extern EditorUserInterface gEditorUserInterface;
 extern EditorMenuUserInterface gEditorMenuUserInterface;
-
-
-
 
 
 };
