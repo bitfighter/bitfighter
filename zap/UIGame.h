@@ -137,6 +137,8 @@ private:
    void enterQuickChat();
    void enterLoadout();
 
+   void dropItem();                       // User presses drop item key
+
    bool mFiring;                          // Are we firing?
    bool mModActivated[ShipModuleCount];
 

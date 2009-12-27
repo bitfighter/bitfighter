@@ -1026,6 +1026,7 @@ bool Ship::carryingResource()
    return false;
 }
 
+
 Item *Ship::unmountResource()
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)

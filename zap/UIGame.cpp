@@ -693,6 +693,7 @@ void GameUserInterface::onMouseMoved(S32 x, S32 y)
       mCurrentMove.angle = atan2(mMousePoint.y, mMousePoint.x);
 }
 
+
 // Enter quick chat mode
 void GameUserInterface::enterQuickChat()
 {
@@ -702,6 +703,7 @@ void GameUserInterface::enterQuickChat()
    mCurrentMode = QuickChatMode;
 }
 
+
 // Enter loadout mode
 void GameUserInterface::enterLoadout()
 {
@@ -710,6 +712,31 @@ void GameUserInterface::enterLoadout()
    mLoadout.show(fromController);
    mCurrentMode = LoadoutMode;
 }
+
+
+// Runs on client
+void GameUserInterface::dropItem()
+{
+   if(!gClientGame->getConnectionToServer())
+      return;
+
+   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   if(!ship)
+      return;
+
+   GameType *gt = gClientGame->getGameType();
+   if(!gt)
+      return;
+
+   if(!gt->isCarryingItems(ship))
+   {
+      displayMessage(Color(1.0, 0.5, 0.5), "You don't have any items to drop!");
+      return;
+   }
+   
+   gt->c2sDropItem();
+}
+
 
 // Set current mode to playout, duh!
 void GameUserInterface::setPlayMode()
@@ -896,6 +923,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             enterQuickChat();
          else if(keyCode == keyLOADOUT[inputMode])
             enterLoadout();
+         else if(keyCode == keyDROPITEM[inputMode])
+            dropItem();
 
          else if(inputMode == Joystick)      // Check if the user is trying to use keyboard to move when in joystick mode
             if(keyCode == keyUP[Keyboard] || keyCode == keyDOWN[Keyboard] || keyCode == keyLEFT[Keyboard] || keyCode == keyRIGHT[Keyboard])

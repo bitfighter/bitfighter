@@ -95,12 +95,14 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
       stream->writeInt(mTeam + 1, 4);
    return Parent::packUpdate(connection, updateMask, stream);
 }
+
 
 void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -109,10 +111,24 @@ void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    Parent::unpackUpdate(connection, stream);
 }
 
+
+void FlagItem::idle(GameObject::IdleCallPath path)
+{
+   Parent::idle(path);
+
+   if(isGhost()) 
+      return;
+   
+   U32 deltaT = mCurrentMove.time;
+   mDroppedTimer.update(deltaT);
+}
+
+
 bool FlagItem::isAtHome()
 {
    return mMoveState[ActualState].pos == initialPos;
 }
+
 
 void FlagItem::sendHome()
 {
@@ -154,6 +170,7 @@ void FlagItem::sendHome()
    updateExtent();
 }
 
+
 void FlagItem::renderItem(Point pos)
 {
    Point offset;
@@ -169,6 +186,7 @@ void FlagItem::renderItem(Point pos)
    renderFlag(pos + offset, c);
 }
 
+
 bool FlagItem::collide(GameObject *hitObject)
 {
    if(mIsMounted)
@@ -179,9 +197,14 @@ bool FlagItem::collide(GameObject *hitObject)
    if(!(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return false;
 
-   // We've hit a ship or robot  (remember, a robot is a subtype of ship, so this will work for both)
+   // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
    Ship *ship = dynamic_cast<Ship *>(hitObject);
    if(isGhost() || (ship->hasExploded))
+      return false;
+
+   // Server only from here on out...
+
+   if(mDroppedTimer.getCurrent())    // Dropped flag not ready to be picked up! 
       return false;
 
    GameType *gt = getGame()->getGameType();
@@ -194,19 +217,30 @@ bool FlagItem::collide(GameObject *hitObject)
    return false;
 }
 
-void FlagItem::onMountDestroyed()
+
+// Private helper function
+void FlagItem::flagDropped()
 {
    GameType *gt = getGame()->getGameType();
-   if(!gt)
-      return;
-
-   if(!mMount.isValid())
+   if(!gt || !mMount.isValid())
       return;
 
    gt->flagDropped(mMount, this);
    dismount();
 }
 
+
+void FlagItem::onMountDestroyed()
+{
+   flagDropped();
+}
+
+
+void FlagItem::onItemDropped(Ship *ship)
+{
+   flagDropped();
+   mDroppedTimer.reset(dropDelay);
+}
 
 //////////////////////////////////////////
 

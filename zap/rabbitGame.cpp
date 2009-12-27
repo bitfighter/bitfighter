@@ -266,7 +266,15 @@ void RabbitGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
    mFlagScoreTimer.reset();
    mFlagReturnTimer.reset();
    s2cRabbitMessage(RabbitMsgDrop, theShip->getName());
+
    Point vel = theShip->getActualVel();
+
+   //// Add a random vector to the flag
+   //F32 th = TNL::Random::readF() * Float2Pi;
+   //F32 f = (TNL::Random::readF() * 2 - 1) * 100;
+   //Point dvel(cos(th) * f, sin(th) * f);
+   //vel += dvel;
+
    theFlag->setActualVel(vel);
 }
 

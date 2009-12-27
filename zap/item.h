@@ -57,6 +57,9 @@ public:
 
 class Item : public MoveObject, public LuaItem
 {
+private:
+   void flagDropped();
+
 protected:
    enum MaskBits {
       InitialMask = BIT(0),
@@ -101,6 +104,7 @@ public:
    virtual void renderItem(Point pos) = 0;
 
    virtual void onMountDestroyed();
+   virtual void onItemDropped(Ship *ship) { /* do nothing */ };
 
    bool collide(GameObject *otherObject);
 

@@ -90,14 +90,16 @@ void KeyDefMenuUserInterface::onActivate()
 
       // Col 1
       menuItems.push_back(MenuItemExtended("Advance Weapon", 0, 1, &keyADVWEAP[Joystick], "Toggles your weapons, use as an alternative to Select Weapon commands"));
-      menuItems.push_back(MenuItemExtended("Activate Module 1", 1, 1, &keyMOD1[Joystick], "Module will be active while this key/button is held down"));
-      menuItems.push_back(MenuItemExtended("Activate Module 2", 2, 1, &keyMOD2[Joystick], "Module will be active while this key/button is held down"));
+      menuItems.push_back(MenuItemExtended("Activate Module 1", 1, 1, &keyMOD1[Joystick], "Module 1 will be active while this key/button is held down"));
+      menuItems.push_back(MenuItemExtended("Activate Module 2", 2, 1, &keyMOD2[Joystick], "Module 2 will be active while this key/button is held down"));
+      menuItems.push_back(MenuItemExtended("Drop Flag", 2, 1, &keyDROPITEM[Joystick], ""));
+
       menuItems.push_back(MenuItemExtended("Config. Ship Loadouts", 3, 1, &keyLOADOUT[Joystick], ""));
       menuItems.push_back(MenuItemExtended("Toggle Map Mode", 4, 1, &keyCMDRMAP[Joystick], ""));
       menuItems.push_back(MenuItemExtended("Show Scoreboard", 5, 1, &keySCRBRD[Joystick], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
-      firstItemInCol2 = 6;
+      firstItemInCol2 = 7;
       menuItems.push_back(MenuItemExtended("Select Weapon 1", 6, 2, &keySELWEAP1[Joystick], "Use as an alternative to Advance Weapon"));
       menuItems.push_back(MenuItemExtended("Select Weapon 2", 7, 2, &keySELWEAP2[Joystick], "Use as an alternative to Advance Weapon"));
       menuItems.push_back(MenuItemExtended("Select Weapon 3", 8, 2, &keySELWEAP3[Joystick], "Use as an alternative to Advance Weapon"));
@@ -117,13 +119,14 @@ void KeyDefMenuUserInterface::onActivate()
       menuItems.push_back(MenuItemExtended("Ship Left", 2, 1, &keyLEFT[Keyboard], ""));
       menuItems.push_back(MenuItemExtended("Ship Right", 3, 1, &keyRIGHT[Keyboard], ""));
       menuItems.push_back(MenuItemExtended("Fire", 4, 1, &keyFIRE[Keyboard], "The mouse will always be used to aim your ship"));
-      menuItems.push_back(MenuItemExtended("Activate Module 1", 5, 1, &keyMOD1[Keyboard], "Module will be active while this key/button is held down"));
-      menuItems.push_back(MenuItemExtended("Activate Module 2", 6, 1, &keyMOD2[Keyboard], "Module will be active while this key/button is held down"));
+      menuItems.push_back(MenuItemExtended("Activate Module 1", 5, 1, &keyMOD1[Keyboard], "Module 1 will be active while this key/button is held down"));
+      menuItems.push_back(MenuItemExtended("Activate Module 2", 6, 1, &keyMOD2[Keyboard], "Module 2 will be active while this key/button is held down"));
+      menuItems.push_back(MenuItemExtended("Drop Flag", 2, 1, &keyDROPITEM[Keyboard], "Drop flag when this key is pressed"));
       menuItems.push_back(MenuItemExtended("Toggle Map Mode", 7, 1, &keyCMDRMAP[Keyboard], ""));
       menuItems.push_back(MenuItemExtended("Show Scoreboard", 8, 1, &keySCRBRD[Keyboard], "Scoreboard will be visible while this key/button is held down"));
 
       // Col 2
-      firstItemInCol2 = 9;
+      firstItemInCol2 = 10;
       menuItems.push_back(MenuItemExtended("Select Weapon 1", 9, 2, &keySELWEAP1[Keyboard], "Use as an alternative to Advance Weapon"));
       menuItems.push_back(MenuItemExtended("Select Weapon 2", 10, 2, &keySELWEAP2[Keyboard], "Use as an alternative to Advance Weapon"));
       menuItems.push_back(MenuItemExtended("Select Weapon 3", 11, 2, &keySELWEAP3[Keyboard], "Use as an alternative to Advance Weapon"));

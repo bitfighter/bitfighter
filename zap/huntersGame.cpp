@@ -123,6 +123,65 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+
+bool HuntersGameType::isCarryingItems(Ship *ship)
+{
+   if(ship->mMountedItems.size() > 1)     // Currently impossible, but in future may be possible
+      return true;
+   if(ship->mMountedItems.size() == 0)    // Should never happen
+      return false;
+
+   Item *item = ship->mMountedItems[0];   // Currently, ship always has a NexusFlagItem... this is it
+   return ( ((HuntersFlagItem *) item)->getFlagCount() > 0 );    
+}
+
+
+// Cycle through mounted items and find the first one (last one, actually) that's a HuntersFlagItem.
+// Returns NULL if it can't find one.
+HuntersFlagItem *findFirstNexusFlag(Ship *ship)
+{
+   HuntersFlagItem *theFlag = NULL;
+
+   for(S32 i = ship->mMountedItems.size() - 1; i >= 0; i--)
+   {
+      Item *theItem = ship->mMountedItems[i];
+      theFlag = dynamic_cast<HuntersFlagItem *>(theItem);
+
+      if(theFlag)
+         return theFlag;
+   }
+
+   return NULL;
+}
+
+
+static StringTableEntry dropOneString( "%e0 dropped a flag!");
+static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
+
+void HuntersGameType::flagDropped(Ship *theShip, FlagItem *flag)
+{
+   HuntersFlagItem *theFlag = findFirstNexusFlag(theShip);
+   U32 flagCount = theFlag ? theFlag->getFlagCount() : 0;
+
+   if(flagCount == 0)
+      return;
+
+   Vector<StringTableEntry> e;
+
+   e.push_back(theShip->getName());
+   if(flagCount > 1)
+      e.push_back(UserInterface::itos(flagCount).c_str());
+
+   for(S32 i = 0; i < mClientList.size(); i++)
+   {
+      if(flagCount > 1)
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropManyString, e);
+      else
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropOneString, e);
+   }
+}
+
+
 // Describe the arguments processed above...
 Vector<GameType::ParameterDescription> HuntersGameType::describeArguments()
 {
@@ -164,20 +223,12 @@ Vector<GameType::ParameterDescription> HuntersGameType::describeArguments()
    return descr;
 }
 
+
 // The nexus is open.  A ship has entered it.  Now what?
 // Runs on server only
 void HuntersGameType::shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus)
 {
-   HuntersFlagItem *theFlag = NULL;
-
-   for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
-   {
-      Item *theItem = theShip->mMountedItems[i];
-      theFlag = dynamic_cast<HuntersFlagItem *>(theItem);
-
-      if(theFlag)
-         break;
-   }
+   HuntersFlagItem *theFlag = findFirstNexusFlag(theShip);
 
    if(!theFlag)      // Just in case!
       return;
@@ -220,6 +271,8 @@ void releaseFlag(Game *game, Point pos, Point startVel)
    vel += startVel;
 
    newFlag->setActualVel(vel);
+
+   newFlag->mDroppedTimer.reset(newFlag->dropDelay);
 }
 
 
@@ -489,21 +542,34 @@ void HuntersFlagItem::renderItem(Point pos)
 }
 
 
-void HuntersFlagItem::onMountDestroyed()
+// Private helper function
+void HuntersFlagItem::dropFlags(U32 flags)
 {
    if(!mMount.isValid())
       return;
 
-   // Drop at least one flag plus as many as the ship carries
-   for(U32 i = 0; i < mFlagCount + 1; i++)
+   for(U32 i = 0; i < flags; i++)
       releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
    changeFlagCount(0);
+}
 
-   // Now delete yourself
+
+void HuntersFlagItem::onMountDestroyed()
+{
+   dropFlags(mFlagCount + 1);    // Drop at least one flag plus as many as the ship carries
+
+   // Now delete the flag itself
    dismount();
    removeFromDatabase();
    deleteObject();
+}
+
+
+void HuntersFlagItem::onItemDropped(Ship *ship)
+{
+   getGame()->getGameType()->flagDropped(mMount, NULL);
+   dropFlags(mFlagCount);        // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
 
 
@@ -523,6 +589,9 @@ bool HuntersFlagItem::collide(GameObject *hitObject)
       return true;
 
    if(isGhost() || ! (hitObject->getObjectTypeMask() & ShipType || hitObject->getObjectTypeMask() & RobotType))
+      return false;
+
+   if(mDroppedTimer.getCurrent())    // Dropped flag not ready to be picked up! 
       return false;
 
    Ship *theShip = static_cast<Ship *>(hitObject);
@@ -567,6 +636,19 @@ void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *strea
    if(stream->readFlag())
       stream->read(&mFlagCount);
 }
+
+
+void HuntersFlagItem::idle(GameObject::IdleCallPath path)
+{
+   Parent::idle(path);
+
+   if(isGhost()) 
+      return;
+   
+   U32 deltaT = mCurrentMove.time;
+   mDroppedTimer.update(deltaT);
+}
+
 
 TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
 

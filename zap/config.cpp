@@ -64,6 +64,9 @@ void loadKeyBindings()
    keyMOD1[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule1", keyCodeToString(KEY_SPACE)).c_str());
    keyMOD2[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(MOUSE_RIGHT)).c_str());
    keyFIRE[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "Fire", keyCodeToString(MOUSE_LEFT)).c_str());
+   keyDROPITEM[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "DropItem", keyCodeToString(KEY_B)).c_str());
+
+
    keyTOGVOICE[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "VoiceChat", keyCodeToString(KEY_R)).c_str());
    keyUP[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipUp", keyCodeToString(KEY_W)).c_str());
    keyDOWN[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipDown", keyCodeToString(KEY_S)).c_str());
@@ -82,9 +85,10 @@ void loadKeyBindings()
    keyCMDCHAT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "Command", keyCodeToString(KEY_SLASH)).c_str());
    keyLOADOUT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShowLoadoutMenu", keyCodeToString(BUTTON_4)).c_str());
    keyMOD1[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule1", keyCodeToString(BUTTON_7)).c_str());
-   keyMOD2[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(BUTTON_8)).c_str());
+   keyMOD2[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(BUTTON_6)).c_str());
    keyFIRE[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "Fire", keyCodeToString(MOUSE_LEFT)).c_str());
-   keyTOGVOICE[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "VoiceChat", keyCodeToString(BUTTON_6)).c_str());
+   keyDROPITEM[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "DropItem", keyCodeToString(BUTTON_8)).c_str());
+   keyTOGVOICE[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "VoiceChat", keyCodeToString(KEY_R)).c_str());
    keyUP[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipUp", keyCodeToString(KEY_UP)).c_str());
    keyDOWN[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipDown", keyCodeToString(KEY_DOWN)).c_str());
    keyLEFT[Joystick] = stringToKeyCode(gINI.GetValue("JoystickKeyBindings", "ShipLeft", keyCodeToString(KEY_LEFT)).c_str());
@@ -116,12 +120,14 @@ void saveKeyBindings()
    gINI.SetValue("KeyboardKeyBindings", "ActivateModule1", keyCodeToString(keyMOD1[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(keyMOD2[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "Fire", keyCodeToString(keyFIRE[Keyboard]), true);
+   gINI.SetValue("KeyboardKeyBindings", "DropItem", keyCodeToString(keyDROPITEM[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "VoiceChat", keyCodeToString(keyTOGVOICE[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShipUp", keyCodeToString(keyUP[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShipDown", keyCodeToString(keyDOWN[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShipLeft", keyCodeToString(keyLEFT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShipRight", keyCodeToString(keyRIGHT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShowScoreboard", keyCodeToString(keySCRBRD[Keyboard]), true);
+
 
    gINI.SetValue("JoystickKeyBindings", "SelWeapon1", keyCodeToString(keySELWEAP1[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "SelWeapon2", keyCodeToString(keySELWEAP2[Joystick]), true);
@@ -136,6 +142,7 @@ void saveKeyBindings()
    gINI.SetValue("JoystickKeyBindings", "ActivateModule1", keyCodeToString(keyMOD1[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "ActivateModule2", keyCodeToString(keyMOD2[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "Fire", keyCodeToString(keyFIRE[Joystick]), true);
+   gINI.SetValue("JoystickKeyBindings", "DropItem", keyCodeToString(keyDROPITEM[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "VoiceChat", keyCodeToString(keyTOGVOICE[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "ShipUp", keyCodeToString(keyUP[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "ShipDown", keyCodeToString(keyDOWN[Joystick]), true);

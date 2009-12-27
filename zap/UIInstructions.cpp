@@ -133,8 +133,9 @@ static ControlString controlsKeyboard[] = {
          { "-", NULL },
          { "Open ship config menu", &keyLOADOUT[Keyboard] },
          { "Toggle map view", &keyCMDRMAP[Keyboard] },
+         { "Drop flag", &keyDROPITEM[Keyboard] },
          { "Show scoreboard", &keySCRBRD[Keyboard] },
-         { NULL, NULL },
+         { NULL, NULL },      // End col 1
          { "Cycle current weapon", &keyADVWEAP[Keyboard] },
          { "Select weapon 1", &keySELWEAP1[Keyboard] },
          { "Select weapon 2", &keySELWEAP2[Keyboard] },
@@ -146,7 +147,7 @@ static ControlString controlsKeyboard[] = {
          { "Record voice chat", &keyTOGVOICE[Keyboard] },
          { "Message display mode", &dummyMsgMode },
          { "Save screenshot", &dummySSMode },
-         { NULL, NULL },
+         { NULL, NULL },   // End col 2
       };
 
 static ControlString controlsGamepad[] = {
@@ -157,6 +158,7 @@ static ControlString controlsGamepad[] = {
          { "-", NULL },
          { "Open ship config menu", &keyLOADOUT[Joystick] },
          { "Toggle map view", &keyCMDRMAP[Joystick] },
+         { "Drop flag", &keyDROPITEM[Joystick] },
          { "Show scoreboard", &keySCRBRD[Joystick] },
          { NULL, NULL },
          { "Cycle current weapon", &keyADVWEAP[Joystick] },

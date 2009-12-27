@@ -156,6 +156,7 @@ extern KeyCode keyLOADOUT[2];
 extern KeyCode keyMOD1[2];
 extern KeyCode keyMOD2[2];
 extern KeyCode keyFIRE[2];
+extern KeyCode keyDROPITEM[2];
 extern KeyCode keyTOGVOICE[2];
 extern KeyCode keyUP[2];
 extern KeyCode keyDOWN[2];

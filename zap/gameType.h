@@ -174,6 +174,8 @@ public:
    virtual bool isTeamFlagGame() { return false; }          // Does flag-team orientation matter?  Only true in CTF, really.
    virtual S32 getFlagCount() { return mFlags.size(); }     // Return the number of game-significant flags
 
+   virtual bool isCarryingItems(Ship *ship) { return ship->mMountedItems.size() > 0; }     // Nexus game will override this
+
    virtual bool isSpawnWithLoadoutGame() { return false; }  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
@@ -183,8 +185,6 @@ public:
    static void printRules();             // Dump game-rule info
 
    bool levelHasLoadoutZone() { return mLevelHasLoadoutZone; }        // Does the level have a loadout zone?
-   void setLevelHasLoadoutZone(bool hasLZ) { mLevelHasLoadoutZone = hasLZ; }  /* Delete this line  [RELEASE 012] */
-
 
    enum
    {
@@ -352,7 +352,7 @@ public:
    static Team readTeamFromLevelLine(S32 argc, const char **argv);
 
    void onGhostAvailable(GhostConnection *theConnection);
-   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount/*, bool levelHasLoadoutZone [RELEASE 012] */));
+   TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin));
@@ -387,6 +387,8 @@ public:
 
    TNL_DECLARE_RPC(c2sAdvanceWeapon, ());
    TNL_DECLARE_RPC(c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index));
+   TNL_DECLARE_RPC(c2sDropItem, ());
+
 
    // Handle additional game-specific menu options for the client and the admin
    virtual void addClientGameMenuOptions(Vector<MenuItem> &menuOptions);

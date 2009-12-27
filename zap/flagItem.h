@@ -37,6 +37,9 @@ private:
    typedef Item Parent;
    Point initialPos;
    void push(lua_State *L) {  Lunar<FlagItem>::push(L, this); }
+   void flagDropped();
+   Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
+   static const U32 dropDelay = 500;    // in ms
 
 public:
    FlagItem(Point pos = Point());      // C++ constructor
@@ -46,12 +49,15 @@ public:
    void sendHome();
 
    void onMountDestroyed();
+   void onItemDropped(Ship *ship);
    bool collide(GameObject *hitObject);
    bool isAtHome();
    Timer mTimer;
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void idle(GameObject::IdleCallPath path);
+
 
    TNL_DECLARE_CLASS(FlagItem);
 

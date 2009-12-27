@@ -84,7 +84,6 @@ public:
 
    void onFlagGrabbed(Ship *ship, RabbitFlagItem *flag);
    void onFlagHeld(Ship *ship);
-   void onFlagDropped(Ship *victimShip);
    void onFlaggerDead(Ship *killerShip);
    void onFlaggerKill(Ship *rabbitShip);
    void onFlagReturned();

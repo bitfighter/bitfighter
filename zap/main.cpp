@@ -46,6 +46,8 @@
 //<li>Improved dedicated-only server compilation -- should no longer need to run with -dedicated parameter</li>
 //<li>Fixed minor glitch with rendering labels on square loadout/goal zones -- labels will prefer more horizontal alignment</li>
 //<li>Level editor now edits levels in same level specified by leveldir param or INI setting.  Seems to make much more sense than always editing in the levels folder.</li>
+//<li>Fixed crash when joining new server in commander's map mode</li>
+//<li>Can drop items.  Provisionally mapped to the "B" key in keyboard mode.  See help for key bindings.</li>
 //</ul>
 
 // Mac Test:

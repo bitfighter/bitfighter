@@ -66,6 +66,7 @@ KeyCode keyLOADOUT[2];        // Enter Loadout mode
 KeyCode keyMOD1[2];           // Activate module 1
 KeyCode keyMOD2[2];           // Activate module 2
 KeyCode keyFIRE[2];           // Fire
+KeyCode keyDROPITEM[2];       // Drop flag or other item
 KeyCode keyTOGVOICE[2];       // Toggle voice chat
 KeyCode keyUP[2];             // Move ship
 KeyCode keyDOWN[2];

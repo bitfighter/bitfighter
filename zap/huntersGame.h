@@ -62,10 +62,13 @@ public:
    
    bool mNexusIsOpen;      // Is the nexus open?
    bool isTeamGame() { return mTeams.size() > 1; }
-   bool isFlagGame() { return true; }       // Well, technically not, but we'll morph flags to our own uses as we load the level
+   bool isFlagGame() { return true; }         // Well, technically not, but we'll morph flags to our own uses as we load the level
    //bool isTeamFlagGame() { return true; }   // Ditto... team info will be ignored... no need to show warning in editor
 
    bool isSpawnWithLoadoutGame() { return true; }
+
+   bool isCarryingItems(Ship *ship);
+   void flagDropped(Ship *theShip, FlagItem *theFlag);
 
    Vector<GameType::ParameterDescription> describeArguments();
 
@@ -113,6 +116,7 @@ class HuntersFlagItem : public Item
 {
 private:
    typedef Item Parent;
+   void dropFlags(U32 flags);
 
 protected:
    enum MaskBits {
@@ -128,6 +132,7 @@ public:
 
    void renderItem(Point pos);
    void onMountDestroyed();
+   void onItemDropped(Ship *ship);
    void setActualVel(Point v);
    bool collide(GameObject *hitObject);
 
@@ -136,6 +141,7 @@ public:
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   void idle(IdleCallPath path);
 
    TNL_DECLARE_CLASS(HuntersFlagItem);
 
@@ -148,6 +154,10 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
    void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
+
+   Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
+   static const U32 dropDelay = 500;    // in ms
+
 };
 
 
