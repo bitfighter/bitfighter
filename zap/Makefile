@@ -1,23 +1,32 @@
 # Bitfighter Makefile
-
+#######################################
 # 
 # Configuration
 #
+# 
+# Some installs of Lua call the lua library by different names, and you may need
+# to override the default lua library path.  For the ServerHitch CENTOS installs, 
+# for example, you will need to specify the lua library on the make command line:
+#     LUALIB=/usr/lib/liblua.a
+#
+#
+# To compile Bitfighter with debugging enabled, specify
+#     DFLAGS=-DTNL_DEBUG
+# on the make command line
+#
+#
+# Building with make on Windows is still higly experiemntal. You will probably need
+# to add
+#     WFLAGS="-DWIN32 -D_STDCALL_SUPPORTED" THREADLIB= GLUT=-lglut32 INPUT=winJoystick.o
+# to the make command line to have any hope of getting it to work!  :-)
+#
+#
+#######################################
 
-#######################################
-# For Linux/Mac users, uncomment the following line, and comment out the Windows line below
-CC=g++ -g  -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING #-O2
-threadLib= -lpthread
-glut=-lGL -lGLU -lglut
-linuxInput=linuxInput.o 
-#######################################
-# For Windows users, uncomment the following line, and comment out the line above
-#CC=g++ -g -I../tnl -I../glut -I../openal -DTNL_DEBUG -DTNL_ENABLE_LOGGING -DWIN32 -D_STDCALL_SUPPORTED #-O2
-#threadLib=
-#glut=-lglut32
-#linuxInput=winJoystick.o
-#######################################
-
+CC=g++ -g  -I../tnl -I../glut -I../openal -DTNL_ENABLE_LOGGING #-O2
+THREADLIB= -lpthread
+GLUT=-lGL -lGLU -lglut
+INPUT=linuxInput.o 
 
 OBJECTS_ZAP=\
    CTFGame.o\
@@ -61,7 +70,7 @@ OBJECTS_ZAP=\
    huntersGame.o\
    input.o\
    item.o\
-   $(linuxInput)\
+   $(INPUT)\
    loadoutSelect.o\
    luaGameInfo.o\
    luaLevelGenerator.o\
@@ -98,13 +107,19 @@ OBJECTS_ZAP=\
    ../master/masterInterface.o\
 
 CFLAGS=
-#CFLAGS=-DZAP_DEDICATED
+DFLAGS=
+EXEFILE=bitfighter
+OPENAL=../openal/linux/libopenal.a
+LUALIB=-llua5.1
+WFLAGS=
+
+
 
 .c.o:
-	$(CC) -c $(CFLAGS) $<
+	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
 .cpp.o : 
-	$(CC) -c $(CFLAGS) $<
+	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
 
 default: ../exe/bitfighter
@@ -113,19 +128,17 @@ bitfighter: ../exe/bitfighter
 
 bitfightered: ../exe/bitfightered
 
+dedicated: CFLAGS=-DZAP_DEDICATED 
+dedicated: GLUT=
+dedicated: OPENAL=
+dedicated: EXEFILE=bitfighterd
+dedicated: ../exe/bitfighter
+
 
 ../exe/bitfighter: $(OBJECTS_ZAP)
-# Avoid errors with mingw by removing gch files 
+# Avoid errors with mingw by removing gch files with mingw 
 #  rm -f *.gch    
-
-
-#  $(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a -s -lglut32 -mwindows
-	$(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(glut) $(threadLib) -llua5.1 -lstdc++  -lm
-#CENTOS:
-#  $(CC) -o ../exe/bitfighter $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  ../openal/linux/libopenal.a $(threadLib) /usr/lib/liblua.a -lstdc++  -lm
-#../exe/bitfightered: CFLAGS=-DZAP_DEDICATED
-#../exe/bitfightered: $(OBJECTS_ZAP)
-#  $(CC) -o ../exe/bitfightered $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(threadLib) -lstdc++ -lm
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(OPENAL) $(GLUT) $(THREADLIB) $(LUALIB) -lstdc++  -lm
 
 ../master/masterInterface.o:
 	make -C ../master
@@ -135,3 +148,4 @@ clean:
 
 cleano:
 	rm -f $(OBJECTS_ZAP)
+
