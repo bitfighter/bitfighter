@@ -485,7 +485,6 @@ static void renderLockIcon()
 }
 
 extern Color gMasterServerBlue;
-extern void glColor(Color c, float alpha = 1);
 
 #define MENU_ITEM_HEIGHT 24
 #define ITEMS_TOP (vertMargin + 55 + 30 + MENU_ITEM_HEIGHT)     // Need parens here because this is used in a subtraction below

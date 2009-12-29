@@ -337,6 +337,23 @@ void GameType::idle(GameObject::IdleCallPath path)
          }
    }
 
+   // Need more asteroids?
+   for(S32 i = 0; i < mAsteroidSpawnPoints.size(); i++)
+   {
+      if(mAsteroidSpawnPoints[i].timer.update(deltaT))
+      {
+         Asteroid *asteroid = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));   // Create a new asteroid
+
+         F32 ang = TNL::Random::readF() * Float2Pi;
+
+         asteroid->setPosAng(mAsteroidSpawnPoints[i].getPos(), ang);
+
+         asteroid->addToGame(gServerGame);                                                 // And add it to the list of game objects
+   
+         mAsteroidSpawnPoints[i].timer.reset();                                            // Reset the spawn timer
+      }
+   }
+
    // If game time has expired... game is over, man, it's over
    if(mGameTimer.update(deltaT))
       gameOverManGameOver();
@@ -853,6 +870,19 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
       else
          mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
+   }
+   else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]
+   {
+      if(argc < 3)
+         return false;
+      Point p;
+      p.read(argv + 1);
+      p *= getGame()->getGridSize();
+
+      S32 time = (argc > 3) ? atoi(argv[3]) : AsteroidSpawn::defaultRespawnTime;
+
+      AsteroidSpawn spawn = AsteroidSpawn(p, time * 1000);
+      mAsteroidSpawnPoints.push_back(spawn);   
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {

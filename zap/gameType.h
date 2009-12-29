@@ -31,6 +31,7 @@
 #include "voiceCodec.h"
 #include "gameObject.h"
 #include "flagItem.h"
+#include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
 #include <string>
 
@@ -99,6 +100,7 @@ public:
 //////////
 
 class Robot;
+class AsteroidSpawn;
 
 class GameType : public GameObject
 {
@@ -211,6 +213,7 @@ public:
    Vector<Team> mTeams;                   // List of teams
    Vector<string> mScriptArgs;            // List of script params.  Script name itself is the first one.
    Vector<FlagSpawn> mFlagSpawnPoints;    // List of non-team specific spawn points for flags
+   Vector<AsteroidSpawn> mAsteroidSpawnPoints;    // List of spawn points for asteroids
 
    StringTableEntry mLevelName;
    StringTableEntry mLevelDescription;

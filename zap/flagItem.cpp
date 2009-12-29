@@ -244,6 +244,7 @@ void FlagItem::onItemDropped(Ship *ship)
 
 //////////////////////////////////////////
 
+// Constructor
 FlagSpawn::FlagSpawn(Point pos, S32 delay)
 {
    mPos = pos;

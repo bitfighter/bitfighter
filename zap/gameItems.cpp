@@ -123,6 +123,18 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
 S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
 
 
+//////////////////////////////////////////
+
+// Constructor
+AsteroidSpawn::AsteroidSpawn(Point pos, S32 delay) 
+{
+   mPos = pos;
+   timer = Timer(delay);
+};
+
+//////////////////////////////////////////
+
+
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 class LuaAsteroid;
 
@@ -201,32 +213,32 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    F32 ang = TNL::Random::readF() * Float2Pi;
    F32 vel = asteroidVel;
 
-   mMoveState[ActualState].angle = ang;
-   mMoveState[ActualState].vel.x = vel * cos(ang);
-   mMoveState[ActualState].vel.y = vel * sin(ang);
-
+   setPosAng(getActualPos(), ang);
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
    newItem->setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
  
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      F32 ang2;
-      do
-         ang2 = TNL::Random::readF() * Float2Pi;
-      while(ABS(ang2 - ang) < .0436 );    // That's 20 degrees in radians, folks!
+   F32 ang2;
+   do
+      ang2 = TNL::Random::readF() * Float2Pi;
+   while(ABS(ang2 - ang) < .0436 );    // That's 20 degrees in radians, folks!
 
-
-      F32 vel2 = asteroidVel;
-
-      newItem->mMoveState[i].pos = mMoveState[i].pos;
-      newItem->mMoveState[i].angle = ang2;
-      newItem->mMoveState[i].vel.x = vel2 * cos(ang2);
-      newItem->mMoveState[i].vel.y = vel2 * sin(ang2);
-   }
+   newItem->setPosAng(getActualPos(), ang2);
 
    newItem->mSizeIndex = mSizeIndex;
    newItem->addToGame(gServerGame);           // And add it to the list of game objects
+}
+
+
+void Asteroid::setPosAng(Point pos, F32 ang)
+{
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].pos = pos;
+      mMoveState[i].angle = ang;
+      mMoveState[i].vel.x = asteroidVel * cos(ang);
+      mMoveState[i].vel.y = asteroidVel * sin(ang);
+   }
 }
 
 

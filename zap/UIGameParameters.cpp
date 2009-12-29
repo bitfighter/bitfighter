@@ -190,8 +190,6 @@ void GameParamUserInterface::idle(U32 timeDelta)
 }
 
 
-extern void glColor(Color c, float alpha = 1);
-
 static const U32 itemHeight = 30;
 static const U32 yStart = UserInterface::vertMargin + 90;
 
@@ -368,7 +366,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          selectedIndex = menuItems.size() - 1;
       glutSetCursor(GLUT_CURSOR_NONE);
    }
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)    // Next item
+   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER)    // Next item
    {
       UserInterface::playBoop();
       selectedIndex++;

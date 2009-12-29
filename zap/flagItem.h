@@ -89,7 +89,7 @@ private:
    Point mPos;
 
 public:
-   static const S32 defaultRespawnTime = 30;
+   static const S32 defaultRespawnTime = 30;    // in seconds
 
    FlagSpawn(Point pos, S32 delay);    // C++ constructor (no lua constructor)
    Point getPos() { return mPos; }

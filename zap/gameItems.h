@@ -71,6 +71,8 @@ public:
 };
 
 
+////////////////////////////////
+
 
 static const S32 AsteroidDesigns = 4;
 static const S32 AsteroidPoints = 12;
@@ -107,6 +109,7 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints);
    bool getCollisionCircle(U32 state, Point &center, F32 &radius);
    bool collide(GameObject *otherObject);
+   void setPosAng(Point pos, F32 ang);
 
    void damageObject(DamageInfo *theInfo);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -135,6 +138,26 @@ public:
 };
 
 
+////////////////////////////////
+
+
+class AsteroidSpawn     // Essentially the same as a FlagSpawn... merge classes?
+{
+private:
+   Point mPos;
+
+public:
+   static const S32 defaultRespawnTime = 30;    // in seconds
+
+   AsteroidSpawn(Point pos, S32 delay);  // C++ constructor (no lua constructor)
+   Point getPos() { return mPos; }
+   Timer timer;
+};
+
+
+////////////////////////////////
+
+
 class TestItem : public Item
 {
 
@@ -161,6 +184,9 @@ public:
    S32 getClassID(lua_State *L) { return returnInt(L, TestItemType); }
    void push(lua_State *L) {  Lunar<TestItem>::push(L, this); }
 };
+
+
+////////////////////////////////
 
 
 class ResourceItem : public Item

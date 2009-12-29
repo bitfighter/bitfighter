@@ -105,6 +105,7 @@ public:
       ItemRepair,
       ItemBouncyBall,
       ItemAsteroid,
+      ItemAsteroidSpawn,
       ItemMine,
       ItemSpyBug,
       ItemResource,

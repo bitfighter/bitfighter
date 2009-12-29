@@ -9,7 +9,7 @@
 			Name="Debug|Win32"
 			>
 			<DebugSettings
-				Command=""
+				Command="C:\Documents and Settings\Chris\Desktop\ZapSVN\exe\zap_d.exe"
 				WorkingDirectory=""
 				CommandArguments=""
 				Attach="false"

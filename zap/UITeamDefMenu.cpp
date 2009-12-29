@@ -109,7 +109,6 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 }
 
 
-extern void glColor(Color c, float alpha = 1);
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 

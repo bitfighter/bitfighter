@@ -36,8 +36,6 @@
 namespace Zap
 {
 
-extern void glColor(Color c, float alpha = 1);
-
 const char *arrow = " -> ";
 
 // Constructor

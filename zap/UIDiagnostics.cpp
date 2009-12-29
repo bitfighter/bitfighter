@@ -88,7 +88,6 @@ extern char gJoystickName[gJoystickNameLength];
 extern ControllerTypeType gAutoDetectedJoystickType;
 extern U32 gSticksFound;
 extern Color gMasterServerBlue;
-extern void glColor(Color c, float alpha = 1);
 extern string gLevelDir;
 extern Vector<StringTableEntry> gLevelList;
 
