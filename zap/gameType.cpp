@@ -1293,8 +1293,10 @@ void GameType::countTeamPlayers()
    }
 }
 
-// Adds a new client to the game when a player joins, or when a level cycles
-// runs on the server
+// Adds a new client to the game when a player joins, or when a level cycles.
+// Runs on the server, can be overridden.
+// Note that when a new game starts, players will be added in order from
+// strongest to weakest.
 void GameType::serverAddClient(GameConnection *theClient)
 {
    theClient->setScopeObject(this);
@@ -1305,27 +1307,22 @@ void GameType::serverAddClient(GameConnection *theClient)
    cref->clientConnection = theClient;
    countTeamPlayers();     // Also calcs team ratings
 
-   // Figure out which team has the fewest players...
-   //S32 minTeamIndex = 0;
-   //U32 minPlayers = mTeams[0].numPlayers;
-
-   //for(S32 i = 1; i < mTeams.i(); size++)
-   //{
-   //   if(mTeams[i].numPlayers < minPlayers)
-   //   {
-   //      minTeamIndex = i;
-   //      minPlayers = mTeams[i].numPlayers;
-   //   }
-   //}
-
-   // Figure out which team has lowest total ratings...
-   S32 minTeamIndex = 0;
-   F32 minRating = mTeams[0].rating;
+   // Figure out how many players the team with the fewest players has
+   U32 minPlayers = mTeams[0].numPlayers;
 
    for(S32 i = 1; i < mTeams.size(); i++)
    {
+      if(mTeams[i].numPlayers < minPlayers)
+         minPlayers = mTeams[i].numPlayers;
+   }
 
-      if(mTeams[i].rating < minRating)
+   // Of the teams with minPlayers, find the one with the lowest total rating...
+   S32 minTeamIndex = 0;
+   F32 minRating = F32_MAX;
+
+   for(S32 i = 0; i < mTeams.size(); i++)
+   {
+      if(mTeams[i].numPlayers == minPlayers && mTeams[i].rating < minRating)
       {
          minTeamIndex = i;
          minRating = mTeams[i].rating;

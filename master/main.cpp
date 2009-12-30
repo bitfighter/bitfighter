@@ -822,7 +822,7 @@ class StdoutLogConsumer : public LogConsumer
 public:
    void logString(const char *string)
    {
-      printf("%s\n", string);
+      printf("%s", string);
    }
 } gStdoutLogConsumer;
 
@@ -848,7 +848,7 @@ public:
    {
       if(f)
       {
-         fprintf(f, "%s\n", string);
+         fprintf(f, "%s", string);
          fflush(f);
       }
    }

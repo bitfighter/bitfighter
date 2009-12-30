@@ -49,6 +49,8 @@
 //<li>Fixed crash when joining new server in commander's map mode</li>
 //<li>Can drop items.  Provisionally mapped to the "B" key in keyboard mode.  See help for key bindings.</li>
 //<li>Fixed attribute editor for gofasts in editor</li>
+//<li>Teams should now be numerically balnaced, though still ratings based</li>
+//<li>New object: Asteroid generator</li>
 //</ul>
 
 // Mac Test:
@@ -718,7 +720,7 @@ class StdoutLogConsumer : public LogConsumer   // Dumps logs to stdout
 public:
    void logString(const char *string)
    {
-      printf("%s\n", string);
+      printf("%s", string);
    }
 } gStdoutLogConsumer;
 
@@ -744,7 +746,7 @@ public:
    {
       if(f)
       {
-         fprintf(f, "%s\n", string);
+         fprintf(f, "%s", string);
          fflush(f);
       }
    }
@@ -773,7 +775,7 @@ public:
    {
       if(f)
       {
-         fprintf(f, "%s\n", string);
+         fprintf(f, "%s", string);
          fflush(f);
       }
    }

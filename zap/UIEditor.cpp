@@ -1438,24 +1438,18 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
             if(item.index == ItemTeleporter)
             {
-               drawString(pos.x - getStringWidth(labelSize, "Teleport") / 2, pos.y + labelSize + 2,
-                     labelSize, "Teleport");
-               drawString(pos.x - getStringWidth(labelSize, "Intake Vortex") / 2, pos.y + 2 * labelSize + 5,
-                     labelSize, "Intake Vortex");
+               drawStringc(pos.x, pos.y + labelSize + 2, labelSize, "Teleport");
+               drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, "Intake Vortex");
             }
             else if(item.index == ItemSpeedZone)
             {
-               drawString(pos.x - getStringWidth(labelSize, "GoFast") / 2, pos.y + labelSize + 2,
-                     labelSize, "GoFast");
-               drawString(pos.x - getStringWidth(labelSize, "Location") / 2, pos.y + 2 * labelSize + 5,
-                     labelSize, "Location");
+               drawStringc(pos.x, pos.y + labelSize + 2, labelSize, "GoFast");
+               drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, "Location");
             }
             else if(item.index == ItemTextItem)
             {
-               drawString(pos.x - getStringWidth(labelSize, "Text Item") / 2, pos.y + labelSize + 2,
-                     labelSize, "Text Item");
-               drawString(pos.x - getStringWidth(labelSize, "Start") / 2, pos.y + 2 * labelSize + 5,
-                     labelSize, "Start");
+               drawStringc(pos.x, pos.y + labelSize + 2, labelSize, "Text Item");
+               drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, "Start");
             }
          }
 

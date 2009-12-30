@@ -91,7 +91,6 @@ void LogConsumer::logString(const char *string)
    // this will be overridden by child classes
 #ifdef TNL_DEBUG
    Platform::outputDebugString(string);
-   Platform::outputDebugString("\n");
 #endif
 }
 
@@ -109,14 +108,22 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
       bufferStart += 2;
    }
 
-   dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart, format, (va_list) args);
+   // -1 below makes sure we have enough room for a "\n" if we need to append one
+   dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
    
+   // If last char is a "\", chop it off, otherwise append newline
+   U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length
+
+   if(buffer[last] == '\\')
+      buffer[last] = NULL;
+   else
+      strcat(buffer, "\n");
+
    for(LogConsumer *walk = LogConsumer::getLinkedList(); walk; walk = walk->getNext())
       if(walk->mFilterType == filtertype)     // Only log to the requested type of logfile
          walk->logString(buffer);
 
    Platform::outputDebugString(buffer);
-   Platform::outputDebugString("\n");
 }
 
 

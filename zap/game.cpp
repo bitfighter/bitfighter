@@ -34,7 +34,7 @@
 #include "masterConnection.h"
 #include "move.h"
 #include "moveObject.h"
-#include "projectile.h"       // For SpyBug class
+#include "projectile.h"          // For SpyBug class
 #include "sfx.h"
 #include "ship.h"
 #include "sparkManager.h"
@@ -86,27 +86,30 @@ void Game::setScopeAlwaysObject(GameObject *theObject)
    mScopeAlwaysList.push_back(theObject);
 }
 
+
 GameNetInterface *Game::getNetInterface()
 {
    return mNetInterface;
 }
+
 
 MasterServerConnection *Game::getConnectionToMaster()
 {
    return mConnectionToMaster;
 }
 
+
 GameType *Game::getGameType()
 {
    return mGameType;
 }
 
+
 U32 Game::getTeamCount()
 {
-   if(mGameType.isValid())
-      return mGameType->mTeams.size();
-   return 0;
+   return(mGameType.isValid() ? mGameType->mTeams.size() : 0);
 }
+
 
 void Game::setGameType(GameType *theGameType)
 {
@@ -449,7 +452,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    gBotNavMeshZones.clear();
 
-   s_logprintf("Loading %s [%s]...", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+   s_logprintf("Loading %s [%s]... \\", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
 
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
@@ -465,18 +468,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
    Vector<GameConnection *> connectionList;
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
       connectionList.push_back(walk);
-
-   // Now add the connections to the game type, in a random order --> will create random teams
-   //while(connectionList.size())
-   //{
-   //   U32 index = TNL::Random::readI() % connectionList.size();
-   //   GameConnection *gc = connectionList[index];
-   //   connectionList.erase(index);     // Remove the connection from our list
-
-   //   if(mGameType.isValid())
-   //      mGameType->serverAddClient(gc);
-   //   gc->activateGhosting();
-   //}
 
    // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
    connectionList.sort(RatingSort);
