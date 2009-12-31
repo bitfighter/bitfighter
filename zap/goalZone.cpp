@@ -121,7 +121,7 @@ bool GoalZone::collide(GameObject *hitObject)
 {
    if( !isGhost() && (hitObject->getObjectTypeMask() & (ShipType | RobotType)) )
    {
-      Ship *s = (Ship *)(hitObject);      // <--- Should be Ship *s = dynamic_cast<Ship *>(hitObject);... but it won't compile!
+      Ship *s = dynamic_cast<Ship *>(hitObject); 
       getGame()->getGameType()->shipTouchZone(s, this);
    }
 

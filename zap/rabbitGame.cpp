@@ -184,12 +184,12 @@ Color RabbitGameType::getTeamColor(S32 team)
 
 bool RabbitGameType::shipHasFlag(Ship *ship)
 {
-   if (!ship)
+   if(!ship)
       return false;
 
    for (S32 k = 0; k < ship->mMountedItems.size(); k++)
    {
-      if (dynamic_cast<FlagItem *>(ship->mMountedItems[k].getPointer()))
+      if(dynamic_cast<FlagItem *>(ship->mMountedItems[k].getPointer()))
          return true;
    }
    return false;
@@ -237,14 +237,14 @@ void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, Gam
 
    Ship *victimShip = dynamic_cast<Ship *>(clientObject);
 
-   if (killerShip)
+   if(killerShip)
    {
       if (shipHasFlag(killerShip))
       {
          // Rabbit killed another person
          onFlaggerKill(killerShip);
       }
-      else if (shipHasFlag(victimShip))
+      else if(shipHasFlag(victimShip))
       {
          // Someone killed the rabbit!  Poor rabbit!
          onFlaggerDead(killerShip);

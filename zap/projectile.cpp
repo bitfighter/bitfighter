@@ -115,6 +115,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
+      TNLAssert(gClientGame->getConnectionToServer(), "Defunct connection to server in projectile.cpp!");
       Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
       if(ship && ship->hasModule(ModuleSensor))
          mObjectTypeMask |= CommandMapVisType;     // Bullets visible on commander's map if you have sensor
@@ -373,6 +374,7 @@ void GrenadeProjectile::unpackUpdate(GhostConnection *connection, BitStream *str
 {
    Parent::unpackUpdate(connection, stream);
 
+   TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in GrenadeProjectile//projectile.cpp");
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    if(ship && ship->hasModule(ModuleSensor))
       mObjectTypeMask |= CommandMapVisType;     // Bursts visible on commander's map if you have sensor
@@ -597,6 +599,7 @@ void Mine::renderItem(Point pos)
    if(exploded)
       return;
 
+   TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in Mine//projectile.cpp");
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
 
    if(!ship)
@@ -733,6 +736,7 @@ void SpyBug::renderItem(Point pos)
    if(exploded)
       return;
 
+   TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in SpyBug//projectile.cpp");
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    if(!ship)
       return;

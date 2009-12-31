@@ -446,7 +446,7 @@ extern LoadoutItem gLoadoutModules[];
 #define fontSize 15
 #define gapSize 3       // Gap between text and box
 
-// Draw weapon indicators at top of the screen
+// Draw weapon indicators at top of the screen, runs on client
 void GameUserInterface::renderLoadoutIndicators()
 {
    if (!gIniSettings.showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
@@ -454,10 +454,7 @@ void GameUserInterface::renderLoadoutIndicators()
 
    U32 xPos = UserInterface::horizMargin;
 
-   if(!gClientGame || !gClientGame->getConnectionToServer())
-      return;
    Ship *localShip = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-
    if (!localShip)
       return;
 
@@ -619,11 +616,14 @@ void GameUserInterface::renderCurrentChat()
       promptStr = "(Global): ";
    }
 
-   // Protect against crashes while game is initializing
-   if(! (gClientGame && gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject()))
+   // Protect against crashes while game is initializing... is this really needed??
+   if(! (gClientGame && gClientGame->getConnectionToServer()))
       return;
 
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   if(!ship)
+      return;
+
    S32 promptSize = getStringWidthf(FONTSIZE, "%s", promptStr);
    S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
    S32 nameWidth = max(nameSize, promptSize);
@@ -681,9 +681,9 @@ void GameUserInterface::onMouseMoved(S32 x, S32 y)
 
       // Here's our ship...
       Ship *ship = dynamic_cast<Ship *>(gameConnection->getControlObject());
-
       if(!ship)      // Can sometimes happen when switching levels. This will stop the ensuing crashing.
          return;
+
       Point p = gClientGame->worldToScreenPoint( ship->getRenderPos() );
 
       mCurrentMove.angle = atan2(mMousePoint.y + canvasHeight / 2 - p.y, mMousePoint.x + canvasWidth / 2 - p.x);
@@ -975,7 +975,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else if(ascii)     // Append any other keys to the chat message
       {
          // Protect against crashes while game is initializing
-         if(gClientGame && gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject())
+         if(gClientGame && gClientGame->getConnectionToServer())
          {
             for(U32 i = sizeof(mChatBuffer) - 2; i > mChatCursorPos; i--)
                mChatBuffer[i] = mChatBuffer[i-1];
@@ -983,6 +983,9 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
             Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+            if(!ship)
+               return;
+
             S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
             S32 nameWidth = max(nameSize, promptSize);
             // Above block repeated above

@@ -58,6 +58,7 @@ bool Item::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+
 void Item::render()
 {
    // if the item is mounted, renderItem will be called from the
@@ -67,6 +68,7 @@ void Item::render()
 
    renderItem(mMoveState[RenderState].pos);
 }
+
 
 void Item::mountToShip(Ship *theShip)
 {
@@ -303,6 +305,7 @@ void PickupItem::idle(GameObject::IdleCallPath path)
          {
             for(S32 i = 0; i < gt->mClientList.size(); i++)
             {
+               TNLAssert(gt->mClientList[i]->clientConnection, "Defunct client connection in item.cpp!");
                Ship *client_ship = dynamic_cast<Ship *>(gt->mClientList[i]->clientConnection->getControlObject());
 
                if(!client_ship)

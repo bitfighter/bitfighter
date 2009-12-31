@@ -181,6 +181,8 @@ bool SpeedZone::collide(GameObject *hitObject)
    if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide, and only happens on server
    {
       Ship *s = dynamic_cast<Ship *>(hitObject);
+      if(!s)
+         return false;
 
      // Make sure ship hasn't been excluded
       for(S32 i = 0; i < mExclusions.size(); i++)

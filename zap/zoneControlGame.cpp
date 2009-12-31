@@ -218,8 +218,7 @@ void ZoneControlGameType::performProxyScopeQuery(GameObject *scopeObject, GameCo
 }
 
 
-
-// Do some extra rendering required by this game
+// Do some extra rendering required by this game, runs on client
 void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);

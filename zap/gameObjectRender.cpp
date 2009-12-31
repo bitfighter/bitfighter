@@ -1194,8 +1194,11 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
    }
 
    // Don't render opposing team's text items
+   if(!gClientGame || !gClientGame->getConnectionToServer())      // Not sure if this is really needed...
+      return;
+
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(!ship && team != -1 || ship && ship->getTeam() != team && team != -1)
+   if( (!ship && team != -1) || (ship && ship->getTeam() != team && team != -1) )
       return;
 
    c = gt->getTeamColor(team);      // Handles case of team = -1 & -2 properly

@@ -720,6 +720,7 @@ GameConnection *ClientGame::getConnectionToServer()
 
 void ClientGame::setConnectionToServer(GameConnection *theConnection)
 {
+   TNLAssert(theConnection, "Passing null connection.  Bah!");
    TNLAssert(mConnectionToServer.isNull(), "Error, a connection already exists here.");
    mConnectionToServer = theConnection;
 }
@@ -924,7 +925,11 @@ S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 Point ClientGame::worldToScreenPoint(Point p)
 {
    GameObject *controlObject = mConnectionToServer->getControlObject();
+   
    Ship *ship = dynamic_cast<Ship *>(controlObject);
+   if(!ship)
+      return Point(0,0);
+
    Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
 
    if(mCommanderZoomDelta)    // In commander's map, or zooming in/out
@@ -966,6 +971,8 @@ void ClientGame::renderCommander()
 {
    GameObject *controlObject = mConnectionToServer->getControlObject();
    Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+   if(!u)
+      return;
 
    Point position = u->getRenderPos();
 
@@ -1163,8 +1170,12 @@ void ClientGame::renderOverlayMap()
 
 void ClientGame::renderNormal()
 {
-   GameObject *u = mConnectionToServer->getControlObject();    // Returns player's ship...
-   Point position = u->getRenderPos();                         // ...and it's location
+   GameObject *controlObject = mConnectionToServer->getControlObject();
+   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+   if(!u)
+      return;
+
+   Point position = u->getRenderPos();
 
    glPushMatrix();
    glTranslatef(gScreenWidth / 2, gScreenHeight / 2, 0);       // Put (0,0) at the center of the screen

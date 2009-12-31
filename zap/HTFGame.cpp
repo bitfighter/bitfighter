@@ -239,6 +239,7 @@ public:
       if(!u)
          return;
       bool uFlag = false;
+      S32 team = u->getTeam();
 
       for(S32 i = 0; i < mFlags.size(); i++)
       {
@@ -247,7 +248,7 @@ public:
             for(S32 j = 0; j < mZones.size(); j++)
             {
                // see if this is one of our zones and that it doesn't have a flag in it.
-               if(mZones[j]->getTeam() != u->getTeam())
+               if(mZones[j]->getTeam() != team)
                   continue;
                S32 k;
                for(k = 0; k < mFlags.size(); k++)
@@ -258,7 +259,7 @@ public:
                      break;
                }
                if(k == mFlags.size())
-                  renderObjectiveArrow( mZones[j], getTeamColor(u->getTeam()) );
+                  renderObjectiveArrow( mZones[j], getTeamColor(team) );
             }
             uFlag = true;
             break;
@@ -273,7 +274,7 @@ public:
          if(!mFlags[i]->isMounted() && !uFlag)
          {
             GoalZone *gz = mFlags[i]->getZone();
-            if(gz && gz->getTeam() != u->getTeam())
+            if(gz && gz->getTeam() != team)
                renderObjectiveArrow(mFlags[i], getTeamColor(gz->getTeam()));
             else if(!gz)
                renderObjectiveArrow(mFlags[i], getTeamColor(-1));

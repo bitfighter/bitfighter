@@ -1139,6 +1139,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
    // also scope what we can see.
    if(isTeamGame() && connection->isInCommanderMap())
    {
+      TNLAssert(connection->getClientRef(), "ClientRef should never be NULL!");
       S32 teamId = connection->getClientRef()->teamId;
 
       for(S32 i = 0; i < mClientList.size(); i++)
@@ -1146,17 +1147,17 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
          if(mClientList[i]->teamId != teamId)      // Wrong team
             continue;
 
-         if(!mClientList[i]->clientConnection)     // No client
+         TNLAssert(mClientList[i]->clientConnection, "No client connection in PerformScopequery");     // Should never happen
+
+         Ship *ship = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());   
+         if(!ship)       // Can happen!
             continue;
 
-         Ship *co = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
-         TNLAssert(co, "Null control object!");
-
-         Point pos = co->getActualPos();
+         Point pos = ship->getActualPos();
          Rect queryRect(pos, pos);
-         queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
+         queryRect.expand( Game::getScopeRange(ship->isModuleActive(ModuleSensor)) );
 
-         findObjects(scopeObject == co ? AllObjectTypes : CommandMapVisType, fillVector, queryRect);
+         findObjects(( (scopeObject == ship) ? AllObjectTypes : CommandMapVisType), fillVector, queryRect);
       }
    }
    else     // Do a simple query of the objects within scope range of the ship
@@ -1205,7 +1206,7 @@ void GameType::queryItemsOfInterest()
       findObjects(ShipType | RobotType, fillVector, queryRect);
       for(S32 j = 0; j < fillVector.size(); j++)
       {
-         Ship *theShip = dynamic_cast<Ship *>(fillVector[j]);
+         Ship *theShip = dynamic_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
          Point delta = theShip->getActualPos() - pos;
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
@@ -1296,9 +1297,12 @@ void GameType::countTeamPlayers()
 // Adds a new client to the game when a player joins, or when a level cycles.
 // Runs on the server, can be overridden.
 // Note that when a new game starts, players will be added in order from
-// strongest to weakest.
+// strongest to weakest.  
+// Note also that theClient should never be NULL.
 void GameType::serverAddClient(GameConnection *theClient)
 {
+   TNLAssert(theClient,"Attempting to add a NULL client to the server!");
+
    theClient->setScopeObject(this);
 
    ClientRef *cref = allocClientRef();
@@ -1617,14 +1621,17 @@ void GameType::processClientGameMenuOption(U32 index)
          if(!gt)
             return;
 
-         Ship *s = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
-         gt->c2sChangeTeams(1 - s->getTeam());                    // If two teams, team will either be 0 or 1, so "1 - " will toggle
+         Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
+         if(!ship)
+            return;
+
+         gt->c2sChangeTeams(1 - ship->getTeam());                 // If two teams, team will either be 0 or 1, so "1 - " will toggle
          UserInterface::reactivateMenu(gGameUserInterface);       // Jump back into the game (this option takes place immediately)
       }
       else
       {
          gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-         gTeamMenuUserInterface.nameToChange = gNameEntryUserInterface.getText();      // TODO: Better place to get curernt player's name?  This may fail if users have same name, and system has changed it
+         gTeamMenuUserInterface.nameToChange = gNameEntryUserInterface.getText();      // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
       }
    }
    else if(index == 2000)
@@ -1739,6 +1746,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    spawnShip(source);                                    // Create a new ship
 }
 
+
 GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient, bool admin), (name, isMyClient, admin))
 {
    ClientRef *cref = allocClientRef();
@@ -1782,7 +1790,11 @@ void GameType::serverRemoveClient(GameConnection *theClient)
    // Blow up the ship...
    GameObject *theControlObject = theClient->getControlObject();
    if(theControlObject)
-      (dynamic_cast<Ship *>(theControlObject))->kill();
+   {
+      Ship *ship = dynamic_cast<Ship *>(theControlObject);
+      if(ship)
+         ship->kill();
+   }
 
    s2cRemoveClient(theClient->getClientName());
 }
@@ -2011,9 +2023,9 @@ GAMETYPE_RPC_C2S(GameType, c2sRequestScoreboardUpdates, (bool updates), (updates
 GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   Ship *s = dynamic_cast<Ship *>(source->getControlObject());
-   if(s)
-      s->selectWeapon();
+   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+   if(ship)
+      ship->selectWeapon();
 }
 
 
@@ -2021,9 +2033,10 @@ GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
 GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   GameType *gt = gServerGame->getGameType();
-   if(!gt)
-      return;
+   //GameType *gt = gServerGame->getGameType();
+   //if(!gt)
+   //   return;
+
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
    if(!ship)
       return;
@@ -2040,11 +2053,10 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   Ship *s = dynamic_cast<Ship *>(source->getControlObject());
-   if(s)
-      s->selectWeapon(indx);
+   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+   if(ship)
+      ship->selectWeapon(indx);
 }
-
 
 
 const U32 minRating = 0;

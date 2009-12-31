@@ -1479,8 +1479,10 @@ void Robot::render(S32 layerIndex)
 {
    Parent::render(layerIndex);
 
-//   GameObject *controlObject = gClientGame->getConnectionToServer()->getControlObject();
+//      TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in Robot//projectile.cpp");
+
 //   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+//   if(!u) return;
 //
 //   Point position = u->getRenderPos();
 //

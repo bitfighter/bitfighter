@@ -147,8 +147,10 @@ void CTFGameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection
 void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *u = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(!u)
+
+   // Rendering objective arrows makes no sense if there is no ship at the moment...
+   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   if(!ship)
       return;
 
    for(S32 i = 0; i < mFlags.size(); i++)

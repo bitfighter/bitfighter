@@ -132,17 +132,19 @@ void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
    }
 }
 
-
+// Runs on client
 void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    Parent::renderInterfaceOverlay(scoreboardVisible);
-   Ship *u = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(!u)
+   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   if(!ship)
       return;
+
+   S32 team = ship->getTeam();
 
    for(S32 i = 0; i < mGoals.size(); i++)
    {
-      if(mGoals[i]->getTeam() != u->getTeam())
+      if(mGoals[i]->getTeam() != team)
          renderObjectiveArrow(mGoals[i], getTeamColor(mGoals[i]->getTeam()));
    }
    if(mBall.isValid())
@@ -288,7 +290,7 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
 
 void SoccerBallItem::damageObject(DamageInfo *theInfo)
 {
-   // compute impulse direction
+   // Compute impulse direction
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
@@ -302,10 +304,9 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
       else if(theInfo->damagingObject->getObjectTypeMask() & (BulletType | MineType | SpyBugType))
       {
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
-         Ship *s = dynamic_cast<Ship *>(p->mShooter.getPointer());
-         mLastPlayerTouch = s ? s : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
+         Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
+         mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
       }
-
       else
          mLastPlayerTouch = NULL;
    }
@@ -333,6 +334,8 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 {
    if(isGhost())
       return true;
+
+   // From here on, runs on server
 
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {

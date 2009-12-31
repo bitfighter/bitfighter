@@ -199,7 +199,7 @@ bool FlagItem::collide(GameObject *hitObject)
 
    // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
    Ship *ship = dynamic_cast<Ship *>(hitObject);
-   if(isGhost() || (ship->hasExploded))
+   if(isGhost() || !ship || (ship->hasExploded))
       return false;
 
    // Server only from here on out...

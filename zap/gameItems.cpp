@@ -413,7 +413,7 @@ bool ResourceItem::collide(GameObject *hitObject)
 
 
    Ship *ship = dynamic_cast<Ship *>(hitObject);
-   if(ship->hasExploded)
+   if(!ship || ship->hasExploded)
       return false;
 
    if(ship->hasModule(ModuleEngineer) && !ship->carryingResource())

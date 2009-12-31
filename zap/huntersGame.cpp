@@ -457,7 +457,7 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
 
    HuntersFlagItem *newFlag = new HuntersFlagItem(theClient->getControlObject()->getActualPos());
    newFlag->addToGame(getGame());
-   newFlag->mountToShip(dynamic_cast<Ship *>(theClient->getControlObject()));
+   newFlag->mountToShip(dynamic_cast<Ship *>(theClient->getControlObject()));    // mountToShip() can handle NULL
    newFlag->changeFlagCount(0);
 }
 
@@ -741,6 +741,7 @@ bool HuntersNexusObject::getCollisionPoly(Vector<Point> &polyPoints)
    return true;
 }
 
+
 bool HuntersNexusObject::collide(GameObject *hitObject)
 {
    if(isGhost())
@@ -752,6 +753,8 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
       return false;
 
    Ship *theShip = dynamic_cast<Ship *>(hitObject);
+   if(!theShip)
+      return false;
 
    if(theShip->hasExploded)                              // Ignore collisions with exploded ships
       return false;

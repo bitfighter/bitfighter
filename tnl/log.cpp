@@ -112,7 +112,7 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
    dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
    
    // If last char is a "\", chop it off, otherwise append newline
-   U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length
+   U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length, so appending newline should be ok
 
    if(buffer[last] == '\\')
       buffer[last] = NULL;

@@ -107,6 +107,7 @@ GameConnection *GameConnection::getClientList()
    return gClientList.getNextClient();
 }
 
+
 GameConnection *GameConnection::getNextClient()
 {
    if(mNext == &gClientList)
@@ -114,10 +115,14 @@ GameConnection *GameConnection::getNextClient()
    return mNext;
 }
 
+
+//  Runs on server, theRef should never be null; therefore mClientRef should never be null.
 void GameConnection::setClientRef(ClientRef *theRef)
 {
+   TNLAssert(theRef, "NULL ClientRef!");
    mClientRef = theRef;
 }
+
 
 ClientRef *GameConnection::getClientRef()
 {
