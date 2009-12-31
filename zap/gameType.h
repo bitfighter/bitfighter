@@ -162,6 +162,7 @@ public:
 
    virtual GameTypes getGameType() { return BitmatchGame; }
    virtual const char *getGameTypeString() { return "Bitmatch"; }                            // Will be overridden by other games
+   virtual const char *getShortName() { return "BM"; }                                       //          -- ditto --
    virtual const char *getInstructionString() { return "Blast as many ships as you can!"; }  //          -- ditto --
    virtual bool isTeamGame() { return mTeams.size() > 1; }                                   // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }

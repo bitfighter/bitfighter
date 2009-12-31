@@ -60,6 +60,7 @@ public:
 
    GameTypes getGameType() { return SoccerGame; }
    const char *getGameTypeString() { return "Soccer"; }
+   const char *getShortName() { return "S"; }
    virtual const char *getInstructionString() { return "Push the ball into the opposing team's goal!"; }
    bool isTeamGame() { return mTeams.size() > 1; } 
    bool canBeTeamGame() { return true; }

@@ -283,7 +283,7 @@ public:
                renderObjectiveArrow(mFlags[i], getTeamColor(-1));
          }
          else
-         {
+         { 
             Ship *mount = mFlags[i]->getMount();
             if(mount && mount != u)
                renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
@@ -351,6 +351,7 @@ public:
 
    GameTypes getGameType() { return RetrieveGame; }
    const char *getGameTypeString() { return "Retrieve"; }
+   const char *getShortName() { return "Ret"; }
    const char *getInstructionString() { return "Find all the flags, and bring them to your capture zones!"; }
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }

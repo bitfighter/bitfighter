@@ -90,6 +90,7 @@ public:
 
    GameTypes getGameType() { return RabbitGame; }
    const char *getGameTypeString() { return "Rabbit"; }
+   const char *getShortName() { return "Rab"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
    bool isTeamGame() { return false; }
    bool canBeTeamGame() { return false; }

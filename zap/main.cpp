@@ -51,6 +51,8 @@
 //<li>Fixed attribute editor for gofasts in editor</li>
 //<li>Teams should now be numerically balnaced, though still ratings based</li>
 //<li>New object: Asteroid generator</li>
+//<li>Fixed crashes</li>
+//<li>Added gametype/score indicator on screen</li>
 //</ul>
 
 // Mac Test:

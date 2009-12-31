@@ -82,6 +82,7 @@ public:
    void spawnShip(GameConnection *theClient);
    GameTypes getGameType() { return NexusGame; }
    const char *getGameTypeString() { return "Nexus"; }      // Official game name
+   const char *getShortName() { return "N"; }
    const char *getInstructionString() { return "Collect flags from opposing players and bring them to the Nexus!"; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }

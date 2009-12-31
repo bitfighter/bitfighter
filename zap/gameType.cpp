@@ -551,6 +551,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
    renderTalkingClients();
 }
 
+
 void GameType::renderObjectiveArrow(GameObject *target, Color c, F32 alphaMod)
 {
    if(!target)
@@ -648,16 +649,29 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
    //renderSmallFlag(cen, c, alpha);
 }
 
+
 void GameType::renderTimeLeft()
 {
-   glColor3f(1,1,1);
+   
    U32 timeLeft = mGameTimer.getCurrent();      // Time remaining in game
+
+   const S32 size = 20;       // Size of time
+   const S32 gtsize = 12;     // Size of game type/score indicator
 
    U32 minsRemaining = timeLeft / (60000);
    U32 secsRemaining = (timeLeft - (minsRemaining * 60000)) / 1000;
+   S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", getShortName(), mWinningScore);
+
+   glColor3f(0,1,1);
+   UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65 - len - 5,
+      UserInterface::canvasHeight - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, gtsize, "[%s/%d]", getShortName(), mWinningScore);
+
+   glColor3f(1,1,1); 
    UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65,
-      UserInterface::canvasHeight - UserInterface::vertMargin - 20, 20, "%02d:%02d", minsRemaining, secsRemaining);
+      UserInterface::canvasHeight - UserInterface::vertMargin - 20, size, "%02d:%02d", minsRemaining, secsRemaining);
+
 }
+
 
 void GameType::renderTalkingClients()
 {

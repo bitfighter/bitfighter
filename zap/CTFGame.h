@@ -50,6 +50,7 @@ public:
 
    GameTypes getGameType() { return CTFGame; }
    const char *getGameTypeString() { return "Capture the Flag"; }
+   const char *getShortName() { return "CTF"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
    
    bool isTeamGame() { return true; }
