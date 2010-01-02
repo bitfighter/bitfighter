@@ -1353,7 +1353,7 @@ void Ship::render(S32 layerIndex)
       glLineWidth(1);
 #endif
       glColor4f(1,1,1,textAlpha);
-      UserInterface::drawString((UserInterface::getStringWidth(textSize, str.c_str()) * -0.5), 30, textSize, str.c_str() );
+      UserInterface::drawStringc(0, 30, textSize, str.c_str());
       glDisable(GL_BLEND);
       glLineWidth(gDefaultLineWidth);
    }
@@ -1369,7 +1369,7 @@ void Ship::render(S32 layerIndex)
             glLineWidth(1);
             glColor4f(1,1,1,textAlpha);
 
-            UserInterface::drawString((UserInterface::getStringWidth(textSize, str.c_str()) * -0.5), 30, textSize, str.c_str() );
+            UserInterface::drawStringc(0, 30, textSize, str.c_str() );
          glDisable(GL_BLEND);
          glLineWidth(gDefaultLineWidth);
       }

@@ -673,6 +673,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\glut.rc"
+			>
+		</File>
+		<File
 			RelativePath=".\gridDB.cpp"
 			>
 		</File>
@@ -806,10 +810,6 @@
 		</File>
 		<File
 			RelativePath=".\winmain.cpp"
-			>
-		</File>
-		<File
-			RelativePath=".\ZAP.rc"
 			>
 		</File>
 		<File

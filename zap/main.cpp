@@ -27,33 +27,6 @@
 // Create wiki page showing how to parse json data
 //-----------------------------------------------------------------------------------
 
-//<h2>Changes since 011</h2>
-//<ul>
-//<li>Dedicated server level-list handling now the same as when hosting in interactive mode</li>
-//<h3>Configuration</h3>
-//<li>Added detailed logging options to the INI</li>
-//<li>Cleaned up unused INI settings</li>
-
-//<li>Added lag to FPS display</li>
-//<li>Fixed Nexus scoring issue</li>
-//<li>Fixed issue with blank server name</li>
-//</ul>
-
-
-//<ul>  011c
-//<li>Games without loadout zones automatically set new loadout upon respawn, for all game types</li>
-//<li>Fixed crash with invalid player ratings</li>
-//<li>Improved dedicated-only server compilation -- should no longer need to run with -dedicated parameter</li>
-//<li>Fixed minor glitch with rendering labels on square loadout/goal zones -- labels will prefer more horizontal alignment</li>
-//<li>Level editor now edits levels in same level specified by leveldir param or INI setting.  Seems to make much more sense than always editing in the levels folder.</li>
-//<li>Fixed crash when joining new server in commander's map mode</li>
-//<li>Can drop items.  Provisionally mapped to the "B" key in keyboard mode.  See help for key bindings.</li>
-//<li>Fixed attribute editor for gofasts in editor</li>
-//<li>Teams should now be numerically balnaced, though still ratings based</li>
-//<li>New object: Asteroid generator</li>
-//<li>Fixed crashes</li>
-//<li>Added gametype/score indicator on screen</li>
-//</ul>
 
 // Mac Test:
 // Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
