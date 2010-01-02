@@ -1401,6 +1401,7 @@ int main(int argc, char **argv)
       {
          gINI.Path("bitfighter.ini.sample");
          saveSettingsToINI();
+         printf("Wrote bitfighter.ini.sample, for version %s/%s", ZAP_GAME_RELEASE, BUILD_VERSION);
          exitGame(0);
       }
       if(!stricmp(argv[i], "-rules"))            // Print current rules and exit
