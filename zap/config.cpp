@@ -590,7 +590,7 @@ void loadSettingsFromINI()
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
 
-   gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
+   gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys",              (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
    gIniSettings.logConnectionProtocol = (lcase(gINI.GetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"))) == "yes");
    gIniSettings.logNetConnection      = (lcase(gINI.GetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"))) == "yes");
    gIniSettings.logEventConnection    = (lcase(gINI.GetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"))) == "yes");

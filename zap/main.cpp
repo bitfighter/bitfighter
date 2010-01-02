@@ -716,7 +716,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
 
 #include <stdio.h>
 // Each instnatiation of a LogConsumer subclass gets a copy of all log messages.  Here we'll log both
-// to the screen as well as to a file called zap.log
+// to the screen as well as to a file called bitfighter.log
 class StdoutLogConsumer : public LogConsumer   // Dumps logs to stdout
 {
 public:
@@ -1397,13 +1397,13 @@ int main(int argc, char **argv)
    // Process some command line args that need to be handled early, like journaling options
    for(S32 i = 1; i < argc; i++)
    {
-      if(!stricmp(argv[i], "-createsampleini")) // Create sample INI file and exit
-      {
-         gINI.Path("bitfighter.ini.sample");
-         saveSettingsToINI();
-         printf("Wrote bitfighter.ini.sample, for version %s/%s", ZAP_GAME_RELEASE, BUILD_VERSION);
-         exitGame(0);
-      }
+      //if(!stricmp(argv[i], "-createsampleini")) // Create sample INI file and exit
+      //{
+      //   gINI.Path("bitfighter.ini.sample");
+      //   saveSettingsToINI();
+      //   logprintf("Wrote bitfighter.ini.sample, for version %s/%d", ZAP_GAME_RELEASE, BUILD_VERSION);
+      //   exitGame(0);
+      //}
       if(!stricmp(argv[i], "-rules"))            // Print current rules and exit
       {
          GameType::printRules();
