@@ -349,7 +349,7 @@ void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
    
    S32 teams = gEditorUserInterface.mTeams.size();
 
-   selectedIndex = (mousePos.y - yStart + 6) / (fontsize + fontgap) - 2; 
+   selectedIndex = (S32)((mousePos.y - yStart + 6) / (fontsize + fontgap)) - 2; 
 
    if(selectedIndex >= teams)
       selectedIndex = teams - 1;
@@ -360,3 +360,4 @@ void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
 
 
 };
+

@@ -260,9 +260,9 @@ void SplashUserInterface::render()
       glColor3f(0, mSplashTimer.getFraction(), 1);
 
       if(mType == 1)          // Twirl
-         renderBitfighterLogo(canvasHeight / 2, (1 - mSplashTimer.getFraction()), (1 - mSplashTimer.getFraction()) * 360.0f);
+         renderBitfighterLogo((S32)canvasHeight / 2, (1 - mSplashTimer.getFraction()), (1 - mSplashTimer.getFraction()) * 360.0f);
       else if(mType == 2)     // Zoom in
-         renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, (mSplashTimer.getFraction()) * 20);
+         renderBitfighterLogo((S32)canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, (mSplashTimer.getFraction()) * 20);
       else if(mType == 3)     // Single letters
       {
  	  F32 ch = (F32) canvasHeight;
@@ -286,7 +286,7 @@ void SplashUserInterface::render()
    else if(mPhase == 3)           // Rising phase
    {
       glColor3f(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
-      renderBitfighterLogo(73.0f + ((F32) canvasHeight / 2.0f - 73.0f) * mSplashTimer.getFraction(), 1, 0);
+      renderBitfighterLogo((S32)(73.0f + ((F32) canvasHeight / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1, 0);
    }
 }
 
@@ -304,9 +304,10 @@ void SplashUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       current->onKeyDown(keyCode, ascii);                // pass keystroke on  (after reactivate in quit(), current is now the underlying UI)
 
    if(keyCode == MOUSE_LEFT && keyCode == MOUSE_MIDDLE && keyCode == MOUSE_RIGHT)
-      current->onMouseMoved(gMousePos.x, gMousePos.y);
+      current->onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);
 }
 
 
 };
+
 

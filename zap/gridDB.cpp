@@ -313,3 +313,4 @@ bool GridDatabase::pointCanSeePoint(Point point1, Point point2)
 
 };
 
+

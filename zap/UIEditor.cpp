@@ -3052,7 +3052,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(!showAllObjects && !mDraggingObjects)
          glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 
-      onMouseMoved(gMousePos.x, gMousePos.y);   // Reset mouse to spray if appropriate
+      onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);   // Reset mouse to spray if appropriate
    }
    else if(keyCode == KEY_LEFT || keyCode == KEY_A)   // Left or A - Pan left
       mLeft = true;
@@ -3732,3 +3732,4 @@ void EditorMenuUserInterface::render()
 //}
 
 };
+

@@ -136,3 +136,4 @@ private:
 
 };
 #endif // _SWEPT_ELLIPSOID_H_
+

@@ -70,3 +70,4 @@ void destroy_lpc10_decoder_state (lpc10_decoder_state *st);
 #endif
 
 #endif /* LPC10_H */
+

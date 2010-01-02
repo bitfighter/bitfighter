@@ -505,3 +505,4 @@ S32 LuaPoint::normalize(lua_State *L)
 
 
 }
+

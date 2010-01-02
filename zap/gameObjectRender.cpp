@@ -493,7 +493,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
          glColor(tpColors[t.ci], alpha * alphaMod);
 
          F32 arcLength = (end * endRadius - start * startRadius).len();
-         U32 vertexCount = floor(arcLength / 10) + 2;
+         U32 vertexCount = (U32)(floor(arcLength / 10)) + 2;
 
          glVertex(start * (startRadius + beamWidth * 0.3) + n * 2);
          glVertex(start * (startRadius - beamWidth * 0.3) + n * 2);
@@ -599,7 +599,7 @@ void drawFlag(Color flagColor, Color mastColor, F32 alpha)
       glVertex2f(-15, 0);
 
       // Now the flag's mast
-      glColor(mastColor == NULL ? Color(1,1,1) : mastColor, alpha);
+      glColor((mastColor == NULL) ? Color(1,1,1) : mastColor, alpha);
 
       glVertex2f(-15, -15);
       glVertex2f(-15, 15);
@@ -1423,4 +1423,5 @@ void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask)
 }
 
 };
+
 

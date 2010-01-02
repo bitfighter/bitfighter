@@ -323,7 +323,7 @@ void MenuUserInterface::onMouseMoved(S32 x, S32 y)
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
    Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
-   selectedIndex = floor(( mousePos.y - getYStart() + 10 ) / UserInterface::MenuItemHeight) + currOffset;
+   selectedIndex = (U32)(floor(( mousePos.y - getYStart() + 10 ) / UserInterface::MenuItemHeight)) + currOffset;
 
    processMouse();
 }
@@ -1361,7 +1361,7 @@ void LevelMenuSelectUserInterface::onActivate()
    currOffset = 0;
 
    if(itemSelectedWithMouse)
-      onMouseMoved(gMousePos.x, gMousePos.y);
+      onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);
    else
       selectedIndex = 0;
 }
@@ -1584,3 +1584,4 @@ void TeamMenuUserInterface::processShiftSelection(U32 index)   // Handler for sh
 
 
 };
+

@@ -71,3 +71,4 @@ extern Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat
 };
 
 #endif
+

@@ -648,7 +648,7 @@ F32 angleOfLongestSide(Vector<Point> polyPoints)
       }
       else if(len > maxlen - .1)    // Lengths are essentially equal... align text along "more horizontal" axis
       {
-         if(abs(p1.angleTo(p2)) < abs(ang))
+         if(ABS(p1.angleTo(p2)) < ABS(ang))
          {
             start = p1;
             end = p2;
@@ -670,3 +670,4 @@ F32 angleOfLongestSide(Vector<Point> polyPoints)
 #undef MIN
 #undef MAX
 #undef ABS
+

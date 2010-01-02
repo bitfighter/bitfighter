@@ -270,8 +270,8 @@ void UserInterface::drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offse
    F32 sinang = sin(ang);
 
    makeBuffer;
-   S32 len = getStringWidthf(size, buffer);
-   S32 offset = (p1.distanceTo(p2) - len) / 2;
+   S32 len = getStringWidthf((U32)size, buffer);
+   F32 offset = (p1.distanceTo(p2) - len) / 2;
 
    drawAngleString_fixed(p1.x + cosang * offset + sinang * (size + vert_offset), p1.y + sinang * offset - cosang * (size + vert_offset), size, ang, buffer);
 }
@@ -534,3 +534,4 @@ void UserInterface::onKeyDown(KeyCode keyCode, char ascii) { /* Do nothing */ }
 void UserInterface::onKeyUp(KeyCode keyCode)               { /* Do nothing */ }
 
 };
+

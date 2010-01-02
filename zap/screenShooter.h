@@ -144,3 +144,4 @@ public:
 
 
 #endif /* !_SCREENSHOOTER_H_ */
+

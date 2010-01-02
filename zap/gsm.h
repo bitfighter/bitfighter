@@ -56,3 +56,4 @@ int gsm_decode(struct gsm_state *st, unsigned char *in, short *out);
 #endif
 
 #endif	/* GSM_H */
+

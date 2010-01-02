@@ -912,3 +912,4 @@ void SFXObject::stopRecording()
 
 #endif
 
+

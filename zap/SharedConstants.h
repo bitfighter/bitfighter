@@ -31,3 +31,4 @@
 #define MAX_SHORT_TEXT_LEN 32
 static const int MOTDLen = 256;
 
+

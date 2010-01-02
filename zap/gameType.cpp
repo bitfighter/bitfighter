@@ -2099,7 +2099,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
       GameConnection *conn = mClientList[i]->clientConnection;
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back(getCurrentRating(conn) * 100.0 + 100);
+      mRatings.push_back((U32)(getCurrentRating(conn) * 100.0) + 100);
    }
 
    NetObject::setRPCDestConnection(cl->clientConnection);
@@ -2180,4 +2180,5 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cVoiceChat, (StringTableEntry clientName
 }
 
 };
+
 

@@ -94,3 +94,4 @@ extern ChatUserInterface gChatInterface;
 };
 
 #endif
+

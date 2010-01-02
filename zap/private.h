@@ -104,3 +104,4 @@ INLINE gsmword gsm_div (gsmword num, gsmword denum)
 }
 
 #endif	/* PRIVATE_H */
+

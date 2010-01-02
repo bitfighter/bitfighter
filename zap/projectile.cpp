@@ -780,3 +780,4 @@ Lunar<SpyBug>::RegType SpyBug::methods[] =
 
 
 };
+

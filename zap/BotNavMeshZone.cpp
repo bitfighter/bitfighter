@@ -504,7 +504,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
             else // zone was already on the open list
             {
                // Figure out the G cost of this possible new path
-               S32 tempGcost = Gcost[parentZone] + zone.distTo;
+               S32 tempGcost = (S32)(Gcost[parentZone] + zone.distTo);
          		
                // If this path is shorter (G cost is lower) then change
                // the parent cell, G cost and F cost. 		
@@ -596,4 +596,5 @@ Point AStar::findGateway(S32 zone1, S32 zone2)
 
 
 };
+
 

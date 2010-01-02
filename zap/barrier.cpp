@@ -348,3 +348,4 @@ void Barrier::render(S32 layerIndex)
 
 };
 
+

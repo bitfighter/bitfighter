@@ -603,3 +603,4 @@ void Screenshooter::saveScreenshot()
 }
 
 #endif
+

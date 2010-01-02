@@ -459,3 +459,4 @@ Lunar<ResourceItem>::RegType ResourceItem::methods[] =
 
 };
 
+

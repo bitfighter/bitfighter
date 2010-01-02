@@ -593,3 +593,4 @@ string CIniFile::CheckCase( string s) const
 
 
 };
+

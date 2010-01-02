@@ -236,3 +236,4 @@ struct Rect
 };	// namespace
 
 #endif
+

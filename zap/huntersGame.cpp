@@ -783,3 +783,4 @@ void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *st
 
 
 };
+

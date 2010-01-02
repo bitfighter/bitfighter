@@ -462,7 +462,7 @@ void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
 
    Point mousePos = convertWindowToCanvasCoord(Point(x, y));
 
-   selectedIndex = (mousePos.y - yStart + 6) / itemHeight; 
+   selectedIndex = (S32)((mousePos.y - yStart + 6) / itemHeight); 
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = menuItems.size() - 1;
@@ -472,3 +472,4 @@ void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
 }
 
 };
+

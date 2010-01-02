@@ -1571,3 +1571,4 @@ GameObject *LuaShip::getGameObject()
 }
 
 };
+

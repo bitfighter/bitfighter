@@ -213,3 +213,4 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
 }
 
 };
+

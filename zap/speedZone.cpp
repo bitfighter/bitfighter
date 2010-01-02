@@ -256,3 +256,4 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 };
 
+

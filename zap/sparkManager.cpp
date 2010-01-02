@@ -167,7 +167,7 @@ void tick( F32 dT )
    for(TeleporterEffect **walk = &teleporterEffects; *walk; )
    {
       TeleporterEffect *temp = *walk;
-      temp->time += dT * 1000;
+      temp->time += (S32)(dT * 1000);
       if(temp->time > Teleporter::TeleportInExpandTime)
       {
          *walk = temp->nextEffect;
@@ -405,4 +405,5 @@ void FXTrail::renderTrails()
 }
 
 };
+
 

@@ -235,7 +235,7 @@ void GameUserInterface::idle(U32 timeDelta)
    mIdleTimeDelta[indx] = timeDelta;
 
    if(gClientGame->getConnectionToServer())
-      mPing[indx] = gClientGame->getConnectionToServer()->getRoundTripTime();
+      mPing[indx] = (U32)gClientGame->getConnectionToServer()->getRoundTripTime();
 
    mFrameIndex++;
 
@@ -1536,3 +1536,4 @@ void GameUserInterface::VoiceRecorder::process()
 }
 
 };
+

@@ -32,3 +32,4 @@ int PASCAL WinMain (HINSTANCE theInstance, HINSTANCE, LPSTR cmdLine, int )
 {
    main(__argc, __argv);
 }
+

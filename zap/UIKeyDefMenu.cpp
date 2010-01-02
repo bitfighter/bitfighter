@@ -221,7 +221,7 @@ void KeyDefMenuUserInterface::render()
       if(changingItem == i)
       {
          glColor3f(1, 0, 0);
-         drawString(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75) + horizMargin, y + offset + 1, 13, "Press Key or Button");
+         drawString((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset + 1, 13, "Press Key or Button");
       }
       else
       {
@@ -231,7 +231,7 @@ void KeyDefMenuUserInterface::render()
          else
             glColor3f(1, 1, 1);
 
-         renderControllerButton(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75) + horizMargin, y + offset, *menuItems[i].primaryControl, dupe, 10);
+         renderControllerButton((S32)(canvasWidth * (menuItems[i].mColumn == 1 ? 0.25 : 0.75)) + horizMargin, y + offset, *menuItems[i].primaryControl, dupe, 10);
       }
    }
    
@@ -396,4 +396,5 @@ void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 
 
 };
+
 
