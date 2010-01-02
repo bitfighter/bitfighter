@@ -35,6 +35,10 @@
 
 #include <stdio.h>
 
+#ifdef __APPLE__
+#include "Directory.h" // For GetLevels
+#endif
+
 using namespace TNL;
 
 

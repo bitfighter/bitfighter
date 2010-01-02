@@ -271,7 +271,7 @@ typedef unsigned long long  U64;  ///< Compiler independent unsigned 64-bit inte
 #  define FN_CDECL
 
 #elif defined(__APPLE__)
-#  define TNL_OS_MAC
+#  define TNL_OS_STRING "MacOSX"
 #  define TNL_OS_MAC_OSX
 #  define FN_CDECL
 

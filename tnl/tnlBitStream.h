@@ -360,8 +360,8 @@ inline void BitStream::writeIntAt(U32 value, U8 bitCount, U32 bitPosition)
 #include <stdio.h>
 inline void BitStream::writeRangedU32(U32 value, U32 rangeStart, U32 rangeEnd)
 {
-   TNLAssert(value >= rangeStart && value <= rangeEnd, "Out of bounds value!");
-   TNLAssert(rangeEnd >= rangeStart, "error, end of range less than start");
+   TNLAssertV(value >= rangeStart && value <= rangeEnd, ("Out of bounds value! [val=%d, start=%d, end=%d]", value, rangeStart, rangeEnd));
+   TNLAssert(rangeEnd >= rangeStart, "error, end of range less than start in writeRangedU32()");
 
    U32 rangeSize = rangeEnd - rangeStart + 1;
    U32 rangeBits = getNextBinLog2(rangeSize);
@@ -371,7 +371,7 @@ inline void BitStream::writeRangedU32(U32 value, U32 rangeStart, U32 rangeEnd)
 
 inline U32 BitStream::readRangedU32(U32 rangeStart, U32 rangeEnd)
 {
-   TNLAssert(rangeEnd >= rangeStart, "error, end of range less than start");
+   TNLAssert(rangeEnd >= rangeStart, "error, end of range less than start in readRangedU32()");
 
    U32 rangeSize = rangeEnd - rangeStart + 1;
    U32 rangeBits = getNextBinLog2(rangeSize);

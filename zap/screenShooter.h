@@ -22,7 +22,7 @@ namespace Zap
  */
 
 #ifndef ZAP_DEDICATED
-#   ifdef _APPLE_
+#   ifdef __APPLE__
 #      include <GLUT/glut.h>
 #   else
 #      include <../glut/glut.h>         // Needed for Windows and Linux
