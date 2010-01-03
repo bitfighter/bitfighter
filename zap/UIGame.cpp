@@ -454,6 +454,9 @@ void GameUserInterface::renderLoadoutIndicators()
 
    U32 xPos = UserInterface::horizMargin;
 
+   if(!gClientGame->getConnectionToServer())		// Can happen when first joining a game.  This was XelloBlue's crash...
+	return;
+
    Ship *localShip = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    if (!localShip)
       return;
