@@ -86,7 +86,6 @@ Section "Install"
   File ".\Windows specific\lua51.dll"
   File "readme.txt"
   File "End-User License.txt"
-  File "..\exe\bitfighter.ini.sample"
   File ".\Windows specific\twoplayers.bat"
 
   SetOutPath "$INSTDIR\sfx"
