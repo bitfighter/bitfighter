@@ -299,9 +299,9 @@ extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
  
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
-#define CS_PROTOCOL_VERSION 20     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 592          // Version of the game according to SVN, will be unique every release (must be int)
-#define ZAP_GAME_RELEASE "012"     // Change this with every release -- for display purposes only, string, will also be used for name of installer on windows
+#define CS_PROTOCOL_VERSION 21     // Change this when releasing an incompatible cs protocol (must be int)
+#define BUILD_VERSION 605          // Version of the game according to SVN, will be unique every release (must be int)
+#define ZAP_GAME_RELEASE "012a"    // Change this with every release -- for display purposes only, string, will also be used for name of installer on windows
  
 };
 

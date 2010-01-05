@@ -673,7 +673,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\glut.rc"
+			RelativePath=".\glut.rc"
 			>
 		</File>
 		<File
