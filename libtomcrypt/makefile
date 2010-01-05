@@ -15,7 +15,7 @@ VERSION=0.92
 # Compiler and Linker Names
 
 #######################################
-CC=gcc		# <--- Need to uncomment for Windows/MinGW, comment out for Linux/OSX?
+#CC=gcc		# <--- Need to uncomment for Windows/MinGW, comment out for Linux/OSX?
 #######################################
 
 
@@ -31,13 +31,13 @@ CC=gcc		# <--- Need to uncomment for Windows/MinGW, comment out for Linux/OSX?
 CFLAGS += -c -I./ -Wall -Wsign-compare -W -Wno-unused -Wshadow -Werror
 
 # optimize for SPEED
-#CFLAGS += -O3 -funroll-loops
+CFLAGS += -O3 -funroll-loops
 
 #add -fomit-frame-pointer.  v3.2 is buggy for certain platforms!
 #CFLAGS += -fomit-frame-pointer
 
 # optimize for SIZE
-CFLAGS += -Os
+#CFLAGS += -Os
 
 # compile for DEBUGING
 #CFLAGS += -g3
@@ -146,6 +146,12 @@ install: library docs
 #documentation.
 clean:
 	rm -f $(OBJECTS) $(TESTOBJECTS) $(HASHOBJECTS) $(CRYPTOBJECTS) $(SMALLOBJECTS) $(LEFTOVERS) $(LIBNAME)
+	rm -f $(TEST) $(HASH) $(COMPRESSED) $(PROFS) $(PROF) $(TVS) $(TV)
+	rm -f *.a *.dll *stackdump *.lib *.exe *.obj demos/*.obj demos/*.o *.bat *.txt
+
+# This rule removes everything except the library file
+cleano:
+	rm -f $(OBJECTS) $(TESTOBJECTS) $(HASHOBJECTS) $(CRYPTOBJECTS) $(SMALLOBJECTS) $(LEFTOVERS) 
 	rm -f $(TEST) $(HASH) $(COMPRESSED) $(PROFS) $(PROF) $(TVS) $(TV)
 	rm -f *.a *.dll *stackdump *.lib *.exe *.obj demos/*.obj demos/*.o *.bat *.txt
 

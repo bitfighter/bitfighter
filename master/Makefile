@@ -26,5 +26,7 @@ default: $(OBJECTS_MASTER)
 #   $(CC) -o ../exe/master $(OBJECTS_MASTER)  ../tnl/libtnl.a   ../libtomcrypt/libtomcrypt.a   C:/MinGW/lib/libwsock32.a  -lstdc++ -lm  
 
 
+cleano:
+	rm -f $(OBJECTS_MASTER) 
 clean:
 	rm -f $(OBJECTS_MASTER) ../exe/master

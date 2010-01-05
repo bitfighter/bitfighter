@@ -1,3 +1,27 @@
+# Bitfighter Makefile
+#######################################
+#
+# Configuration
+#
+#
+# Some installs of Lua call the lua library by different names, and you may need
+# to override the default lua library path.  For the ServerHitch CENTOS installs,
+# for example, you will need to specify the lua library on the make command line:
+#     LUALIB=/usr/lib/liblua.a
+#
+#
+# To compile Bitfighter with debugging enabled, specify
+#     DFLAGS=-DTNL_DEBUG
+# on the make command line
+#
+#
+# Building with make on Windows is still higly experiemntal. You will probably need
+# to add
+#     WFLAGS="-DWIN32 -D_STDCALL_SUPPORTED" THREADLIB= GLUT=-lglut32 INPUT=winJoystick.o
+# to the make command line to have any hope of getting it to work!  :-)
+#
+#
+########################################
 #
 # Building under Windows using MinGW:
 #
@@ -8,6 +32,7 @@
 # 4. Need to figure out linking to GLUT
 # DOESN'T FULLY WORK
 #
+########################################
 #
 # Here are the steps needed to install on a fresh Ubuntu install:
 #
@@ -28,11 +53,17 @@
 # Building for Mac:
 #
 
-default:
-	@$(MAKE) -C tnl
+
+dedicated:
+	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
 	@$(MAKE) -C master
-#	@$(MAKE) -C md5
+	@$(MAKE) -C zap	dedicated
+
+default:
+	@$(MAKE) -C tnl 
+	@$(MAKE) -C libtomcrypt
+	@$(MAKE) -C master
 	@$(MAKE) -C zap	
 
 zap:
@@ -44,8 +75,13 @@ clean:
 	@$(MAKE) -C tnl clean
 	@$(MAKE) -C libtomcrypt clean
 	@$(MAKE) -C master clean
-#	@$(MAKE) -C md5	
 	@$(MAKE) -C zap	clean
+
+cleano:
+	@$(MAKE) -C tnl cleano
+	@$(MAKE) -C libtomcrypt cleano
+	@$(MAKE) -C master cleano
+	@$(MAKE) -C zap	cleano
 
 docs:
 #	@$(MAKE) -C docs

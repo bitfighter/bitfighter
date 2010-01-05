@@ -115,7 +115,7 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
    U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length, so appending newline should be ok
 
    if(buffer[last] == '\\')
-      buffer[last] = NULL;
+      buffer[last] = '\0';
    else
       strcat(buffer, "\n");
 
