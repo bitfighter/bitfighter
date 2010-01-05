@@ -1082,6 +1082,10 @@ void GameType::performScopeQuery(GhostConnection *connection)
    GameObject *co = gc->getControlObject();
    ClientRef *cr = gc->getClientRef();
 
+   //TNLAssert(gc, "Invalid GameConnection in gameType.cpp!");
+   //TNLAssert(co, "Invalid ControlObject in gameType.cpp!");
+   //TNLAssert(cr, "Invalid ClientRef in gameType.cpp!");
+
    const Vector<SafePtr<GameObject> > &scopeAlwaysList = getGame()->getScopeAlwaysList();
 
    gc->objectInScope(this);   // Put GameType in scope, always
@@ -1098,7 +1102,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    {
       if(clientRef->readyForRegularGhosts && co)
       {
-         performProxyScopeQuery(co, (GameConnection *) connection);
+         performProxyScopeQuery(co, gc);
          gc->objectInScope(co);     // Put controlObject in scope ==> This is where the update mask gets set to 0xFFFFFFFF
       }
    }
@@ -1111,7 +1115,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    for(S32 i = 0; i < mSpyBugs.size(); i++)
    {
       SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);
-      if(!sb->isVisibleToPlayer( cr->teamId, cr->name, getGame()->getGameType()->isTeamGame() ))
+      if(!sb->isVisibleToPlayer( cr->teamId, cr->name, isTeamGame() ))
          break;
       fillVector.clear();
       Point pos = sb->getActualPos();
