@@ -99,11 +99,12 @@ end
 
 
 --
--- This will be called every tick... update timer, then call robot's onTick() method
+-- This will be called every tick... update timer, then call robot's onTick() method if it exists
 --
 function _onTick(deltaT)
    Timer:_tick(deltaT)
-   onTick()
+   if onTick then onTick() end
+   if getMove then getMove() end      -- TODO: Here for compatibility with older bots.  Remove this in a later release
 end
 
 
