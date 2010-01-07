@@ -59,6 +59,9 @@ public:
       halfWidth = 25,
       height = 64,
       defaultSnap = 0,     // 0 = false, 1 = true
+
+      InitMask     = BIT(0),
+      HitMask      = BIT(1),
    };
 
    static const U16 minSpeed = 500;       // How slow can you go?

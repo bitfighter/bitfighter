@@ -99,6 +99,15 @@ end
 
 
 --
+-- This will be called every tick... update timer, then call robot's onTick() method
+--
+function _onTick(deltaT)
+   Timer:_tick(deltaT)
+   onTick()
+end
+
+
+--
 -- Let the log know that this file was processed correctly
 --
 logprint("Loaded robot helper functions...")

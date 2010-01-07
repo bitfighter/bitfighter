@@ -90,7 +90,7 @@ public:
 
    void processMove(U32 stateIndex);
 
-   Point mTarget;     // TODO: Get rid of this!!
+   Point mTarget;     // TODO: Get rid of this!!  why?
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);

@@ -74,8 +74,8 @@ public:
 ////////////////////////////////
 
 
-static const S32 AsteroidDesigns = 4;
-static const S32 AsteroidPoints = 12;
+static const U32 AsteroidDesigns = 4;
+static const U32 AsteroidPoints = 12;
 
 static const F32 asteroidRenderSize[] = { .8, .4, .2, -1 };      // Must end in -1
 static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
@@ -115,6 +115,8 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void emitAsteroidExplosion(Point pos);
+
+   static U32 getDesignCount() { return AsteroidDesigns; }
 
    S32 getSizeIndex() { return mSizeIndex; }
    S32 getSizeCount() { return asteroidRenderSizes; }

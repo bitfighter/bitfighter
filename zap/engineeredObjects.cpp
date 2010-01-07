@@ -715,6 +715,8 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+#define SIGN(x) (x) < 0 ? -1 : 1
+
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 // Choose target, aim, and, if possible, fire
@@ -811,11 +813,14 @@ void Turret::idle(IdleCallPath path)
 
    if(!bestTarget)      // No target, nothing to do
       return;
-
-   // Aim towards the best target
-   F32 destAngle = atan2(bestDelta.y, bestDelta.x);
+ 
+   // Aim towards the best target.  Note that if the turret is at one extreme of its range, and the target is at the other,
+   // then the turret will rotate the wrong-way around to aim at the target.  If we were to detect that condition here, and
+   // constrain our turret to turning the correct direction, that would be great!!
+   F32 destAngle = bestDelta.ATAN2();
 
    F32 angleDelta = destAngle - mCurrentAngle;
+
    if(angleDelta > FloatPi)
       angleDelta -= Float2Pi;
    else if(angleDelta < -FloatPi)

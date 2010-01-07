@@ -709,7 +709,7 @@ void Ship::updateModuleSounds()
          if(mModuleSound[i].isValid())
          {
             mModuleSound[i]->stop();
-            mModuleSound[i] = 0;
+            mModuleSound[i] = NULL;
          }
       }
    }

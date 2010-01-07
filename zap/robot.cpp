@@ -1351,7 +1351,7 @@ void Robot::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT;
 
-   if(path == GameObject::ServerIdleMainLoop)
+   if(path == GameObject::ServerIdleMainLoop)      // Running on server... but then, aren't we always??
    {
       U32 ms = Platform::getRealMilliseconds();
       deltaT = (ms - mLastMoveTime);
@@ -1396,15 +1396,15 @@ void Robot::idle(GameObject::IdleCallPath path)
 
       try
       {
-         lua_getglobal(L, "getMove");
-         //lua_call(L, 0, 0);
+         lua_getglobal(L, "_onTick");
+         lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
 
-         if (lua_pcall(L, 0, 0, 0) != 0)
+         if (lua_pcall(L, 1, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
       {
-         logError("Robot error running getMove(): %s.  Shutting robot down.", e.what());
+         logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
          delete this;
          return;
       }

@@ -138,9 +138,6 @@ public:
 
    void idle(U32 timeDelta); 
 
-   // Track if certain menu options are active, for keyboard shortcut entry
-   U32 mAdminActiveOption;
-
    S32 selectedIndex;
 
    void render();    // Draw the basic menu

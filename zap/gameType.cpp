@@ -291,7 +291,7 @@ void GameType::idle(GameObject::IdleCallPath path)
 
       mGameTimer.update(deltaT);
       mZoneGlowTimer.update(deltaT);
-      return;
+      return;  // We're out of here!
    }
 
    // From here on, server only
@@ -1656,7 +1656,6 @@ void GameType::processClientGameMenuOption(U32 index)
    {
       gPlayerMenuUserInterface.action = PlayerMenuUserInterface::ChangeTeam;
       gPlayerMenuUserInterface.activate();
-      //UserInterface::reactivatePrevUI();                       // Should take us back to game options menu
    }
 }
 
@@ -1688,7 +1687,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
 {
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
 
-   if(!source->isAdmin())                // Admins only, please!
+   if(!source->isLevelChanger())                         // Level changers and above
       return;
 
    mGameTimer.reset(mGameTimer.getCurrent() + time);     // Increment "official time"

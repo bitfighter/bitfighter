@@ -71,7 +71,7 @@ const char *pageHeaders[] = {
 
 void InstructionsUserInterface::render()
 {
-   glColor3f(1,1,1);
+   glColor3f(1,0,0);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage - 1]);
    drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NumPages);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
@@ -397,17 +397,13 @@ void InstructionsUserInterface::renderPage2()
    }
 }
 
-enum {
-   GameObjectCount = 22,
-};
-
 const char *gGameObjectInfo[] = {
- "Phaser","The default weapon",
- "Bouncer","Bounces off walls",
- "Triple","Fires three diverging shots",
- "Burst","Explosive projectile",
- "Friendly Mine","Team's mines show trigger radius",
- "Enemy Mine","These are much harder to see",
+ "Phaser", "The default weapon",
+ "Bouncer", "Bounces off walls",
+ "Triple", "Fires three diverging shots",
+ "Burst", "Explosive projectile",
+ "Friendly Mine", "Team's mines show trigger radius",
+ "Enemy Mine", "These are much harder to see",
 
  "Friendly Spy Bug", "Lets you surveil the area",
  "Enemy Spy Bug", "Destroy these when you find them",
@@ -416,17 +412,19 @@ const char *gGameObjectInfo[] = {
  "", "",
  "", "",
 
- "Repair Item","Repairs damage done to a ship",
- "Loadout Zone","Updates ship configuration",
- "Neutral Turret","Repair to take team ownership",
- "Active Turret","Fires at enemy team",
+ "Repair Item", "Repairs damage done to a ship",
+ "Loadout Zone", "Updates ship configuration",
+ "Neutral Turret", "Repair to take team ownership",
+ "Active Turret", "Fires at enemy team",
  "Neutral Emitter", "Repair to take team ownership",
- "Force Field Emitter","Allows only one team to pass",
- "Teleporter","Warps ship to another location",
- "Flag","Objective item in some game types",
+ "Force Field Emitter", "Allows only one team to pass",
+ "Teleporter", "Warps ship to another location",
+ "Flag", "Objective item in some game types",
  "GoFast", "Makes ship go fast",
- "Nexus", "Bring flags here in Hunters game",
+ "Nexus", "Bring flags here in Nexus game",
+ "Asteroid", "Silent but deadly",
 };
+static U32 GameObjectCount = 23;      // <=== If you add something above, increment this!
 
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index)
@@ -439,7 +437,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
    for(U32 i = startIndex; i < endIndex; i++)
    {
-      glColor3f(1,1,1);
       const char *text = gGameObjectInfo[i * 2];
       const char *desc = gGameObjectInfo[i * 2 + 1];
       U32 index = i - startIndex;
@@ -448,9 +445,11 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       objStart += Point(200, 90);
       Point start = objStart + Point(0, 55);
 
+      glColor3f(1,1,0);
       renderCenteredString(start, 20, text);
+
+      glColor3f(1,1,1);
       renderCenteredString(start + Point(0, 25), 20, desc);
-      //drawString(start.x, start.y, 20, text);
 
       glPushMatrix();
       glTranslatef(objStart.x, objStart.y, 0);
@@ -528,19 +527,23 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 20:
             renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
             break;
-         case 21:
-               Vector<Point> o;     // outline
-               o.push_back(Point(-150, -30));
-               o.push_back(Point(150, -30));
-               o.push_back(Point(150, 30));
-               o.push_back(Point(-150, 30));
-
-               Vector<Point> f;     // fill
-               Triangulate::Process(o, f);
-
-               Rect ext(o[0], o[2]);
-               renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
+         case 22:    // Up here because it wouldn't compile down there
+            renderAsteroid(Point(0,-10), (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    // Using goofball factor to keep out of sync with Nexus graphic
             break;
+         case 21:
+            Vector<Point> o;     // outline
+            o.push_back(Point(-150, -30));
+            o.push_back(Point(150, -30));
+            o.push_back(Point(150, 30));
+            o.push_back(Point(-150, 30));
+
+            Vector<Point> f;     // fill
+            Triangulate::Process(o, f);
+
+            Rect ext(o[0], o[2]);
+            renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
+            break;
+
       }
       glPopMatrix();
       objStart.y += 75;

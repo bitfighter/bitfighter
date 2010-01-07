@@ -106,10 +106,12 @@ Vector<Point> SpeedZone::generatePoints(Point pos, Point dir)
    return points;
 }
 
+
 void SpeedZone::render()
 {
    renderSpeedZone(mPolyBounds, gClientGame->getCurrentTime());
 }
+
 
 // This object should be drawn above polygons
 S32 SpeedZone::getRenderSortValue()
@@ -157,6 +159,7 @@ void SpeedZone::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
+
 // Bounding box for quick collision-possibility elimination
 void SpeedZone::computeExtent()
 {
@@ -167,6 +170,7 @@ void SpeedZone::computeExtent()
    setExtent(extent);
 }
 
+
 // More precise boundary for more precise collision detection
 bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
@@ -175,10 +179,11 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
    return true;
 }
 
+
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
-   if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide, and only happens on server
+   if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide, and only runs on server
    {
       Ship *s = dynamic_cast<Ship *>(hitObject);
       if(!s)
@@ -186,7 +191,7 @@ bool SpeedZone::collide(GameObject *hitObject)
 
      // Make sure ship hasn't been excluded
       for(S32 i = 0; i < mExclusions.size(); i++)
-         if (mExclusions[i].ship == s)
+         if(mExclusions[i].ship == s)
             return false;
 
       Point impulse = (dir - pos);
@@ -210,12 +215,14 @@ bool SpeedZone::collide(GameObject *hitObject)
       exclusion.time = gServerGame->getCurrentTime() + 300;
 
       mExclusions.push_back(exclusion);
+
+      setMaskBits(HitMask);
    }
 
    return false;
 }
 
-// Runs only on server!
+
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
    // Check for old exclusions that no longer apply
@@ -224,35 +231,43 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
          mExclusions.erase(i);
 }
 
+
 U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   stream->write(pos.x);
-   stream->write(pos.y);
+   //if(stream->writeFlag(updateMask & InitMask))    // Uncomment for 013
+   //{
+      stream->write(pos.x);
+      stream->write(pos.y);
 
-   stream->write(dir.x);
-   stream->write(dir.y);
+      stream->write(dir.x);
+      stream->write(dir.y);
 
-   stream->writeInt(mSpeed, 16);
-   stream->writeFlag(mSnapLocation);
+      stream->writeInt(mSpeed, 16);
+      stream->writeFlag(mSnapLocation);
+   //}                                            // Uncomment for 013
 
    return 0;
 }
 
+
 void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   stream->read(&pos.x);
-   stream->read(&pos.y);
+   //if(stream->readFlag())// Uncomment for 013
+   //{
+      stream->read(&pos.x);
+      stream->read(&pos.y);
 
-   stream->read(&dir.x);
-   stream->read(&dir.y);
+      stream->read(&dir.x);
+      stream->read(&dir.y);
 
-   mSpeed = stream->readInt(16);
-   mSnapLocation = stream->readFlag();
+      mSpeed = stream->readInt(16);
+      mSnapLocation = stream->readFlag();
 
-   preparePoints();
+      preparePoints();
+   //}// Uncomment for 013
+   //else // Uncomment for 013
+      //SFXObject::play(SFXGoFast, pos, pos);// Uncomment for 013
 }
-
-
 
 };
 

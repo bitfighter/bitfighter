@@ -776,7 +776,7 @@ void ClientGame::idle(U32 timeDelta)
 
    if(mConnectionToServer.isValid())
    {
-      // Disable controls if we are going too fast (usually by being blasted around by a SpeedZone or mine)
+      // Disable controls if we are going too fast (usually by being blasted around by a GoFast or mine or whatever)
       GameObject *controlObject = mConnectionToServer->getControlObject();
       Ship *ship = dynamic_cast<Ship *>(controlObject);
 

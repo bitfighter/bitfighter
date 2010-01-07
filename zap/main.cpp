@@ -20,18 +20,15 @@
 // TODO:
 // Turrets at end of wall can rotate through wall.  Why?
 // Create color global for reticle color
-// Test level loading and folder reading on Linux
-// Sound on linux
-
-// Wiki:
-// Create wiki page showing how to parse json data
-//-----------------------------------------------------------------------------------
 
 
-// Mac Test:
-// Leveldir specification: Can aboslute and relative paths be specified in INI?  How bout on the command line?
-// Ryan -- I changed getLevels() slightly... I tried to make the corresponding change in Directory.mm, by commenting out single line.  Hopefully the functionalities are still the same!
-// Robots
+/*
+<ul>
+<li>Added Restart Level to game options menu if you have level change permissions</li>
+<li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
+<li>Added asteroids to help screen, enhanced colors</li>
+
+*/
 
 //-----------------------------------------------------------------------------------
 //

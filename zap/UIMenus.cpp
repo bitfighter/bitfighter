@@ -1139,15 +1139,27 @@ void GameMenuUserInterface::onReactivate()
 }
 
 
+enum {
+   OPT_OPTIONS,
+   OPT_HELP,
+   OPT_ADMIN,
+   OPT_KICK,
+   OPT_LEVEL_CHANGE_PW,
+   OPT_CHOOSELEVEL,
+   OPT_ADD2MINS,
+   OPT_RESTART,
+   OPT_QUIT
+};
+
+
 void GameMenuUserInterface::buildMenu()
 {
    menuItems.clear();
-   mAdminActiveOption = 0;
 
    lastInputMode = gIniSettings.inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
 
-   menuItems.push_back(MenuItem("OPTIONS",      1, KEY_O, KEY_UNKNOWN));
-   menuItems.push_back(MenuItem("INSTRUCTIONS", 2, KEY_I, keyHELP));
+   menuItems.push_back(MenuItem("OPTIONS",      OPT_OPTIONS, KEY_O, KEY_UNKNOWN));
+   menuItems.push_back(MenuItem("INSTRUCTIONS", OPT_HELP, KEY_I, keyHELP));
    GameType *theGameType = gClientGame->getGameType();
 
    // Add any game-specific menu items
@@ -1162,18 +1174,15 @@ void GameMenuUserInterface::buildMenu()
    {
       if(gc->isLevelChanger())
       {
-         mAdminActiveOption = 7;
-         menuItems.push_back(MenuItem("PLAY DIFFERENT LEVEL", mAdminActiveOption, KEY_L, KEY_P));
+         menuItems.push_back(MenuItem("PLAY DIFFERENT LEVEL", OPT_CHOOSELEVEL, KEY_L, KEY_P));
+         menuItems.push_back(MenuItem("ADD TIME (2 MINS)", OPT_ADD2MINS, KEY_T, KEY_2));
+         menuItems.push_back(MenuItem("RESTART LEVEL", OPT_RESTART, KEY_R, KEY_UNKNOWN));
       }
       else
-      {
-         mAdminActiveOption = 8;
-         menuItems.push_back(MenuItem("ENTER LEVEL CHANGE PASSWORD", mAdminActiveOption, KEY_L, KEY_P));
-      }
+         menuItems.push_back(MenuItem("ENTER LEVEL CHANGE PASSWORD", OPT_LEVEL_CHANGE_PW, KEY_L, KEY_P));
 
       if(gc->isAdmin())
       {
-         mAdminActiveOption = 4;
          GameType *theGameType = gClientGame->getGameType();
 
          // Add any game-specific menu items
@@ -1183,55 +1192,57 @@ void GameMenuUserInterface::buildMenu()
             theGameType->addAdminGameMenuOptions(menuItems);
          }
 
-         menuItems.push_back(MenuItem("KICK A PLAYER", 4, KEY_K, KEY_UNKNOWN));
-         menuItems.push_back(MenuItem("ADD TIME (2 MINS)", 5, KEY_T, KEY_2));
+         menuItems.push_back(MenuItem("KICK A PLAYER", OPT_KICK, KEY_K, KEY_UNKNOWN));
       }
       else
-      {
-         mAdminActiveOption = 6;
-         menuItems.push_back(MenuItem("ENTER ADMIN PASSWORD", mAdminActiveOption, KEY_A, KEY_E));
-      }
+         menuItems.push_back(MenuItem("ENTER ADMIN PASSWORD", OPT_ADMIN, KEY_A, KEY_E));
    }
 
    if(cameFromEditor())    // Came from editor
-      menuItems.push_back(MenuItem("RETURN TO EDITOR", 3, KEY_Q, (cameFromEditor() ? KEY_R : KEY_UNKNOWN) ));
+      menuItems.push_back(MenuItem("RETURN TO EDITOR", OPT_QUIT, KEY_Q, (cameFromEditor() ? KEY_R : KEY_UNKNOWN) ));
    else
-      menuItems.push_back(MenuItem("QUIT GAME", 3, KEY_Q, KEY_UNKNOWN));
+      menuItems.push_back(MenuItem("QUIT GAME", OPT_QUIT, KEY_Q, KEY_UNKNOWN));
 }
+
+
 
 
 void GameMenuUserInterface::processSelection(U32 index)        // Handler for unshifted menu shortcut key
 {
    switch(index)
    {
-      case 1:
+      case OPT_OPTIONS:
          gOptionsMenuUserInterface.activate();
          break;
-      case 2:
+      case OPT_HELP:
          gInstructionsUserInterface.activate();
          break;
-      case 3:
+      case OPT_QUIT:
          endGame();            // No matter where we came from, end the game
          break;
-      case 4:
+      case OPT_KICK:
          gPlayerMenuUserInterface.action = PlayerMenuUserInterface::Kick;
          gPlayerMenuUserInterface.activate();
          break;
-      case 5:     // Add 2 mins to game
+      case OPT_ADD2MINS:     // Add 2 mins to game
          if(gClientGame->getGameType())
             gClientGame->getGameType()->addTime(2 * 60 * 1000);
             reactivatePrevUI();     // And back to our regularly scheduled programming!
          break;
-      case 6:
+      case OPT_ADMIN:
          gAdminPasswordEntryUserInterface.activate();
          break;
-      case 7:
+      case OPT_CHOOSELEVEL:
          gLevelMenuUserInterface.activate();
          break;
-      case 8:
+      case OPT_RESTART:
+         gClientGame->getConnectionToServer()->c2sRequestLevelChange(-2, false);
+         reactivatePrevUI();     // And back to our regularly scheduled programming! 
+         break;
+      case OPT_LEVEL_CHANGE_PW:
          gLevelChangePasswordEntryUserInterface.activate();
          break;
-      default:    // A game-specific menu option must have been selected
+      default:    // A game-specific menu option must have been selected because it's not one we added here
          if(mGameType.isValid())
             mGameType->processClientGameMenuOption(index);        // Process the selected option
          break;
