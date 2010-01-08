@@ -1111,6 +1111,8 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    // What does the spy bug see?
    S32 teamId = gc->getClientRef()->teamId;
+      mSpyBugs.clear();
+      gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
 
    for(S32 i = 0; i < mSpyBugs.size(); i++)
    {
@@ -2102,7 +2104,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
       GameConnection *conn = mClientList[i]->clientConnection;
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      mRatings.push_back((U32)(getCurrentRating(conn) * 100.0) + 100);
+      mRatings.push_back(max(min((U32)(getCurrentRating(conn) * 100.0) + 100, maxRating), minRating));
    }
 
    NetObject::setRPCDestConnection(cl->clientConnection);
@@ -2122,7 +2124,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
       mClientList[i]->ping = pingTimes[i];
       mClientList[i]->score = scores[i];
-      mClientList[i]->rating = min(max(((F32)ratings[i] - 100.0) / 100.0, minRating), maxRating);    // Ensure our rating is within the ranged limits used above
+      mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0; 
    }
 }
 
