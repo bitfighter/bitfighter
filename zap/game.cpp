@@ -63,7 +63,7 @@ namespace Zap
 ServerGame *gServerGame = NULL;
 ClientGame *gClientGame = NULL;
 
-Rect gServerWorldBounds;
+Rect gServerWorldBounds = Rect();
 
 extern const S32 gScreenHeight;
 extern const S32 gScreenWidth;

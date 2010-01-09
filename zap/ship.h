@@ -180,7 +180,7 @@ public:
    Timer mCloakTimer;
 
    U32 mSparkElapsed;
-   S32 mLastTrailPoint[TrailCount];
+   S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
    FXTrail mTrail[TrailCount];
 
    F32 mass;            // Mass of ship

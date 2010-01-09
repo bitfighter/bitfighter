@@ -271,12 +271,15 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items)
       mAllUndoneUndoLevel = -1;
 
    mUndoItems.push_back(items);
+
+/*  This is probably the source of some problems...
    if(mUndoItems.size() > 128)      // Keep the undo state from getting too large.  This is quite a lot of undo.
    {
       mUndoItems.pop_front();    
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
       logprintf("Undo buffer full... discarding oldest undo state");
    }
+*/
 
    mRedoItems.clear();
 }
@@ -2193,7 +2196,10 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
    showMoveCursor = (vertexHitPoly != -1 || vertexHit != -1 || itemHit != -1 || edgeHit != -1);
 
    if(itemToLightUp != -1)
+   {
+      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");	  // valgrind suggests there is an invalid write here
       mItems[itemToLightUp].litUp = false;
+   }
    vertexToLightUp = -1;
    itemToLightUp = -1;
 

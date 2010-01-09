@@ -68,6 +68,11 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
       mMoveState[i].angle = 0;
    }
 
+   for(U32 i = 0; i < TrailCount; i++)
+   {
+      mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
+   }
+
    mTeam = team;
    mHealth = 1.0;       // Start at full health
    mass = m;            // Ship's mass
@@ -98,6 +103,8 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
    mJustTeleported = 0;
+
+   mSparkElapsed = 0;
 }
 
 // Destructor
@@ -1165,11 +1172,12 @@ void Ship::emitMovementSparks()
    if(hasExploded || mMoveState[ActualState].vel.len() < 0.1)
       return;
 
+/*  Provisionally delete this...
    mSparkElapsed += deltaT;
 
-   if(mSparkElapsed <= 32)
+   if(mSparkElapsed <= 32)  // What is the purpose of this?  To prevent sparks for the first 32ms of ship's life?!?
       return;
-
+*/
    bool boostActive = isModuleActive(ModuleBoost);
    bool cloakActive = isModuleActive(ModuleCloak);
 

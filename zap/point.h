@@ -118,7 +118,7 @@ struct Rect
    typedef float member_type;
    Point min, max;
 
-   Rect() {}                                    // Constuctor
+   Rect() { set(Point(), Point()); }            // Constuctor
    Rect(Point p1, Point p2) { set(p1, p2); }    // Constuctor
    Rect(Point p, member_type size) {            // Constuctor
       min.x = p.x - size/2;

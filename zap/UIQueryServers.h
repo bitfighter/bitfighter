@@ -114,6 +114,20 @@ public:
       Color msgColor;
       Address serverAddress;
       U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master
+
+      ServerRef() // Quickie constructor
+      {
+         pingTimedOut = false;
+         everGotQueryResponse = false;
+         passwordRequired = false;
+         test = false;
+         dedicated = false;
+         sendCount = 0;
+         pingTime = 9999;
+         playerCount = -1;
+         maxPlayers = -1;
+         botCount = -1;
+      }
    };
    struct ColumnInfo
    {

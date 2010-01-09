@@ -49,6 +49,7 @@ GameObject::GameObject()
    mDisableCollisionCount = 0;
    mInDatabase = false;
    mCreationTime = 0;
+   extent = Rect();
 }
 
 

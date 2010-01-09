@@ -99,6 +99,9 @@ void QueryServersUserInterface::onActivate()
       s.serverAddress.netNum[0] = Random::readI();
       s.maxPlayers = Random::readF() * 16 + 8;
       s.playerCount = Random::readF() * s.maxPlayers;
+      s.pingTimedOut = false;
+      s.everGotQueryResponse = false;
+      
       servers.push_back(s);
    }
    */
@@ -189,12 +192,9 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          s.state = ServerRef::Start;
          s.id = ++mLastUsedServerId;
          s.sendNonce.getRandom();
-         s.serverAddress.set(ipList[i]);
-         s.everGotQueryResponse = false;
-         s.sendCount = 0;
-         s.pingTime = 9999;
-         s.playerCount = s.maxPlayers = s.botCount = -1;
          s.isFromMaster = true;
+         s.serverAddress.set(ipList[i]);
+
          strcpy(s.serverName, "Internet Server");
          strcpy(s.serverDescr, "Internet Server -- attempting to connect");
          s.msgColor = white;   // white messages
@@ -225,10 +225,6 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.sendNonce = theNonce;
       s.identityToken = clientIdentityToken;
       s.serverAddress = theAddress;
-      s.sendCount = 0;
-      s.playerCount = -1;
-      s.maxPlayers = -1;
-      s.botCount = -1;
       s.isFromMaster = false;
       strcpy(s.serverName, "LAN Server");
       strcpy(s.serverDescr, "LAN Server -- attempting to connect");
@@ -323,9 +319,6 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                strcpy(s.serverName, "PingTimedOut");
                strcpy(s.serverDescr, "Server not responding to pings");
                s.msgColor = red;   // red for errors
-               s.playerCount = 0;
-               s.maxPlayers = 0;
-               s.botCount = 0;
                s.state = ServerRef::ReceivedQuery;    // In effect, this will tell app not to send any more pings or queries to this server
                mShouldSort = true;
                s.pingTimedOut = true;
@@ -366,7 +359,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                strcpy(s.serverName, "QueryTimedOut");
                strcpy(s.serverDescr, "Server not responding to status query");
                s.msgColor = red;   // red for errors
-               s.playerCount = s.maxPlayers = s.botCount = 0;
+               s.playerCount = s.maxPlayers = s.botCount = -1;
                s.state = ServerRef::ReceivedQuery;
                mShouldSort = true;
 

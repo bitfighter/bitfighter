@@ -106,7 +106,7 @@ template<class T> class Vector
 
    void push_front(const T&);
    void push_back(const T&);
-   T& pop_front();      /// Modified these to return element being deleted, as they should
+   T& pop_front();
    T& pop_back();
 
    T& operator[](U32);
@@ -144,13 +144,13 @@ template<class T> class Vector
    /// @}
 };
 
-template<class T> inline Vector<T>::~Vector()
+template<class T> inline Vector<T>::~Vector()                        // Destructor
 {
    destroy(0, mElementCount);
    free(mArray);
 }
 
-template<class T> inline Vector<T>::Vector(const U32 initialSize)
+template<class T> inline Vector<T>::Vector(const U32 initialSize)   // Constructor
 {
    mArray        = 0;
    mElementCount = 0;
@@ -159,7 +159,7 @@ template<class T> inline Vector<T>::Vector(const U32 initialSize)
       reserve(initialSize);
 }
 
-template<class T> inline Vector<T>::Vector(const Vector& p)
+template<class T> inline Vector<T>::Vector(const Vector& p)        // Copy constructor
 {
    mArray = 0;
    mArraySize = 0;
