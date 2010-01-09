@@ -51,7 +51,7 @@ namespace TNL {
 /// @defgroup BasicTypes Basic Compiler Independent Types
 /// These types are defined so that we know exactly what we have, sign and bit wise.
 ///
-/// The number represents number of bits, the letters represent <b>S</b>igned,
+//
 /// <b>U</b>nsigned, or <b>F</b>loating point (implicitly signed).
 /// @{
 

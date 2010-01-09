@@ -54,19 +54,19 @@
 #
 
 
-dedicated:
-	@$(MAKE) -C tnl 
-	@$(MAKE) -C libtomcrypt
-	@$(MAKE) -C master
-	@$(MAKE) -C zap	dedicated
-
 default:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
 	@$(MAKE) -C master
 	@$(MAKE) -C zap	
 
-zap:
+dedicated:
+	@$(MAKE) -C tnl 
+	@$(MAKE) -C libtomcrypt
+	@$(MAKE) -C master
+	@$(MAKE) -C zap	dedicated
+
+bitfighter:
 	@$(MAKE) -C zap
 
 .PHONY: clean 
