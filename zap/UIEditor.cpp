@@ -75,7 +75,7 @@ static const Color yellow = Color(1,1,0);
 static const Color blue = Color(0,0,1);
 static const Color green = Color(0,1,0);
 
-static Vector<EditorUserInterface::WorldItem> *mLoadTarget;
+static Vector<WorldItem> *mLoadTarget;
 
 
 void saveLevelCallback()
@@ -117,7 +117,6 @@ EditorUserInterface::EditorUserInterface()
 
 void EditorUserInterface::populateDock()
 {
-   WorldItem item;
    S32 xPos = canvasWidth - horizMargin - dockWidth / 2;
    S32 yPos = 40;
    const S32 spacer = 35;
@@ -125,82 +124,59 @@ void EditorUserInterface::populateDock()
    //while(mDockItems.size())    // Don't just to a .clear() because we want to make sure destructors run and memory gets cleared, as in game.cpp
    //   delete mDockItems[0];
 
-   item = constructItem(ItemRepair, Point(xPos, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemRepair, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemForceField, Point(xPos, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemSpawn, Point(xPos, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemTurret, Point(xPos, yPos), 0, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemTeleporter, Point(xPos, yPos), -1, 0, 0);
-   mDockItems.push_back(constructItem(ItemTeleporter, Point(xPos, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemSpeedZone, Point(xPos, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemTextItem, Point(xPos, yPos), 0, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
 
    if(!strcmp(mGameType, "SoccerGameType"))
-   {
-      item = constructItem(ItemSoccerBall, Point(xPos, yPos), -1, 0, 0);
-      mDockItems.push_back(item);
-   }
+      mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), -1, 0, 0));
    else
-   {
-      item = constructItem(ItemFlag, Point(xPos, yPos), 0, 0, 0);
-      mDockItems.push_back(item);
-   }
+      mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
 
-   item = constructItem(ItemFlagSpawn, Point(xPos, yPos), 0, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), 0, 0, 0));
 
 
    yPos += spacer;
-   item = constructItem(ItemMine, Point(xPos, yPos), 0, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
-   item = constructItem(ItemSpyBug, Point(xPos, yPos), 0, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
 
    // These two will share a line
-   item = constructItem(ItemAsteroid, Point(xPos - 10, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
-   item = constructItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), -1, 0, 0));
 
    yPos += spacer;
 
    // These two will share a line
 
-   item = constructItem(ItemBouncyBall, Point(xPos - 10, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
-   item = constructItem(ItemResource, Point(xPos + 10, yPos), -1, 0, 0);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), -1, 0, 0));
 
    yPos += 25;
-   item = constructItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20);
-   mDockItems.push_back(item);
+   mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20));
    yPos += 25;
 
    if(!strcmp(mGameType, "HuntersGameType"))
    {
-      item = constructItem(ItemNexus, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20);
-      mDockItems.push_back(item);
+      mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20));
       yPos += 25;
    }
    else
    {
-      item = constructItem(ItemGoalZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20);
-      mDockItems.push_back(item);
+      mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20));
       yPos += spacer;
    }
 }
@@ -272,14 +248,13 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items)
 
    mUndoItems.push_back(items);
 
-/*  This is probably the source of some problems...
+  // This is probably the source of some problems...
    if(mUndoItems.size() > 128)      // Keep the undo state from getting too large.  This is quite a lot of undo.
    {
       mUndoItems.pop_front();    
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
       logprintf("Undo buffer full... discarding oldest undo state");
    }
-*/
 
    mRedoItems.clear();
 }
@@ -335,7 +310,7 @@ void EditorUserInterface::setLevelGenScriptName(string line)
 }
 
 
-S32 EditorUserInterface::getDefaultRepopDelay(GameItems itemType)
+S32 EditorUserInterface::getDefaultRepopDelay(GameItems itemType)    // static
 {
    if(itemType == ItemFlagSpawn)
       return FlagSpawn::defaultRespawnTime;
@@ -365,7 +340,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 
 
 // This sort will put points on top of lines on top of polygons...  as they should be
-S32 QSORT_CALLBACK sortItems(EditorUserInterface::WorldItem *a, EditorUserInterface::WorldItem *b)
+S32 QSORT_CALLBACK sortItems(WorldItem *a, WorldItem *b)
 {
    return (gGameItemRecs[a->index].geom < gGameItemRecs[b->index].geom);
 }
@@ -1180,7 +1155,7 @@ void EditorUserInterface::render()
 }
 
 // Draw the vertices for a polygon or line item (i.e. walls)
-void EditorUserInterface::renderLinePolyVertices(WorldItem item, F32 alpha)
+void EditorUserInterface::renderLinePolyVertices(WorldItem &item, F32 alpha)
 {
    bool anyVertSelected = false;
    for(S32 j = 0; j < item.verts.size(); j++)
@@ -1803,13 +1778,6 @@ void EditorUserInterface::unselectItem(S32 i)
 }
 
 
-void EditorUserInterface::clearDockSelection()     // Not used?
-{
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      mDockItems[i].selected = false;
-}
-
-
 S32 EditorUserInterface::countSelectedItems()
 {
    S32 count = 0;
@@ -1833,6 +1801,9 @@ S32 EditorUserInterface::countSelectedVerts()
 // Paste items on the clipboard
 void EditorUserInterface::pasteSelection()
 {
+   if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
+      return;
+
    S32 itemCount = mClipboard.size();
 
     if (!itemCount)                           // Nothing on clipboard, nothing to do
@@ -2197,7 +2168,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 
    if(itemToLightUp != -1)
    {
-      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");	  // valgrind suggests there is an invalid write here
+      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");   // valgrind suggests there is an invalid write here
       mItems[itemToLightUp].litUp = false;
    }
    vertexToLightUp = -1;
@@ -2238,13 +2209,13 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       // Instantiate object so we are in essence dragging a non-dock item
       Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
-      WorldItem item;
-      if(gGameItemRecs[mDockItems[mDraggingDockItem].index].geom == geomPoly)
+      // Gross lionstruct avoids extra construction
+      WorldItem item = 
+         (gGameItemRecs[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
          // For polygon items, try to match proportions of the dock rendering.  Size will vary by map scale.
-         item = constructItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .68, .35);
-      else
+         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .68, .35) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
-         item = constructItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, 1, 0);
+         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, 1, 0);
 
       clearSelection();          // No items are selected...
       item.selected = true;      // ...except for the new one
@@ -2288,6 +2259,9 @@ done:
 
 void EditorUserInterface::deleteSelection(bool objectsOnly)
 {
+   if(mDraggingObjects)          // No deleting while we're dragging, please...
+      return;     
+
    Vector<WorldItem> items = mItems;
    bool deleted = false;
 
@@ -2503,7 +2477,7 @@ void EditorUserInterface::joinBarrier()
 
 void EditorUserInterface::insertNewItem(GameItems itemType)
 {
-   if(!showAllObjects)     // No inserting when items are hidden!
+   if(!showAllObjects || mDraggingObjects)     // No inserting when items are hidden or being dragged!
       return;
 
    clearSelection();
@@ -2520,10 +2494,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
          break;
       }
 
-   WorldItem item;
-   item = constructItem(itemType, pos, team, 1, 1);
-
-   mItems.push_back(item);
+   mItems.push_back(WorldItem(itemType, pos, team, 1, 1));
    mItems.sort(sortItems);
    validateLevel();
    mNeedToSave = true;
@@ -2587,52 +2558,6 @@ void EditorUserInterface::centerView()
    }
 }
 
-
-EditorUserInterface::WorldItem EditorUserInterface::constructItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height)
-{
-   WorldItem item;
-   item.index = itemType;
-   item.team = team;
-
-   item.selected = false;
-   item.verts.push_back(pos);
-   item.vertSelected.push_back(false);
-
-   // Handle multiple-point items
-   if(gGameItemRecs[itemType].geom == geomSimpleLine)       // Start with diagonal line
-   {
-      item.verts.push_back(item.verts[0] + Point(width, height));
-      item.vertSelected.push_back(false);
-   }
-   else if(gGameItemRecs[itemType].geom == geomPoly)        // Start with a size x size square
-   {
-      item.verts.push_back(item.verts[0] + Point(width, 0));
-      item.verts.push_back(item.verts[0] + Point(width, height));
-      item.verts.push_back(item.verts[0] + Point(0, height));
-      item.vertSelected.push_back(false);
-      item.vertSelected.push_back(false);
-      item.vertSelected.push_back(false);
-   }
-
-   if(gGameItemRecs[itemType].hasText)
-   {
-      item.textSize = 30;
-      item.text = "Your text here";
-   }
-
-   if(gGameItemRecs[itemType].hasRepop)
-   {
-      item.repopDelay = getDefaultRepopDelay(itemType);
-   }
-
-   if(itemType == ItemSpeedZone)
-   {
-      item.speed = SpeedZone::defaultSpeed;
-      item.boolattr = SpeedZone::defaultSnap;
-   }
-
-   return item;
-}
 
 // Save selection mask, which can be retrieved later, as long as mItems hasn't changed.
 // For now, we'll be lazy and just save mItems, but we could save a little memory by being smarter
@@ -2964,10 +2889,11 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                mItems[itemHit].selected = !mItems[itemHit].selected;    // Toggle selection of hit item
             else
                mDragSelecting = true;
-         }
-         mMostRecentState = mItems;
-         mUnmovedItems = mItems;
-      }     // end mouse not on dock block, doc
+         }  
+     }     // end mouse not on dock block, doc
+
+     mMostRecentState = mItems;
+     mUnmovedItems = mItems;
 
    }     // end if keyCode == MOUSE_LEFT
 
@@ -3279,6 +3205,10 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                else                          // We were moving something... need to save an undo state if anything changed
                {
                   restoreSelection();
+
+                  TNLAssert(mItems.size() == mUnmovedItems.size(), "Selection size changed while dragging!");   // Happens if we somehow insert/paste/whatever while we're dragging
+                  if(mItems.size() != mUnmovedItems.size())
+                     return;     // it's this or crash... 
 
                   // Check if anything changed... (i.e. did we move?)
                   for(S32 i = 0; i < mItems.size(); i++)
@@ -3639,6 +3569,96 @@ void EditorMenuUserInterface::render()
    Parent::render();
 }
 
+///////////////////////////////////////////////////////////////////
+
+// Default constructor  --> can probably remove all code from in here
+WorldItem::WorldItem()
+{
+   repopDelay = -1;
+   speed = -1;
+   boolattr = false;
+   selected = false;
+   litUp = false;
+   team = -1;
+}
+
+
+// Alternate constructor
+WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height)
+{
+   index = itemType;
+   team = xteam;
+
+   selected = false;
+   verts.push_back(pos);
+   vertSelected.push_back(false);
+
+   // Handle multiple-point items
+   if(gGameItemRecs[itemType].geom == geomSimpleLine)       // Start with diagonal line
+   {
+      verts.push_back(verts[0] + Point(width, height));
+      vertSelected.push_back(false);
+   }
+   else if(gGameItemRecs[itemType].geom == geomPoly)        // Start with a size x size square
+   {
+      verts.push_back(verts[0] + Point(width, 0));
+      verts.push_back(verts[0] + Point(width, height));
+      verts.push_back(verts[0] + Point(0, height));
+      vertSelected.push_back(false);
+      vertSelected.push_back(false);
+      vertSelected.push_back(false);
+   }
+
+   if(gGameItemRecs[itemType].hasText)
+   {
+      textSize = 30;
+      text = "Your text here";
+   }
+
+   repopDelay = EditorUserInterface::getDefaultRepopDelay(itemType);
+
+   if(itemType == ItemSpeedZone)
+   {
+      speed = SpeedZone::defaultSpeed;
+      boolattr = SpeedZone::defaultSnap;
+   }
+   else
+   {
+      speed = -1;
+      boolattr = false;
+   }
+
+   selected = false;
+   litUp = false;
+}
+
+
+// Copy constructor
+WorldItem::WorldItem(const WorldItem &worldItem)          
+{
+   // First the simple stuff
+   index = worldItem.index;
+   team = worldItem.team;
+   width = worldItem.width;
+   selected = worldItem.selected;
+   litUp = worldItem.litUp;
+   text = worldItem.text;
+   textSize = worldItem.textSize;
+   repopDelay = worldItem.repopDelay;
+   speed = worldItem.speed;
+   boolattr = worldItem.boolattr;
+
+   S32 size = worldItem.verts.size();
+   for(S32 i = 0; i < size; i++)
+      verts.push_back(Point(worldItem.verts[i]));
+   
+   size = worldItem.vertSelected.size();
+   for(S32 i = 0; i < size; i++)
+      vertSelected.push_back(worldItem.vertSelected[i]);
+}
+
+
+///////////////////////////////////////////////////////////////////
 //// Constructor
 //MeshBox::MeshBox(Point center, F32 size)
 //{

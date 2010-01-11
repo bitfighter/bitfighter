@@ -51,6 +51,32 @@ enum VertexRenderStyles
 };
 
 
+enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
+{
+   ItemSpawn,
+   ItemSpeedZone,
+   ItemSoccerBall,
+   ItemFlag,
+   ItemFlagSpawn,
+   ItemBarrierMaker,
+   ItemTeleporter,
+   ItemRepair,
+   ItemBouncyBall,
+   ItemAsteroid,
+   ItemAsteroidSpawn,
+   ItemMine,
+   ItemSpyBug,
+   ItemResource,
+   ItemLoadoutZone,
+   ItemNexus,
+   ItemSlipZone,
+   ItemTurret,
+   ItemForceField,
+   ItemGoalZone,
+   ItemTextItem,
+   ItemNavMeshZone,
+};
+
 
 // From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
 struct SaveException : public std::exception
@@ -90,34 +116,57 @@ struct SaveException : public std::exception
 //   bool checkWallCollision();
 //};
 
+
+
+class WorldItem
+{
+
+public:
+   WorldItem();                                                                // Default constructor
+   WorldItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height);  // Alternate constructor
+   WorldItem(const WorldItem &worldItem);                                      // Copy constructor
+
+   GameItems index;
+   S32 team;
+   F32 width;
+   Vector<Point> verts;
+   bool selected;
+   bool litUp;
+   Vector<bool> vertSelected;
+   string text;         // For items that have an aux text field
+   U32 textSize;        // For items that have an aux text field
+   S32 repopDelay;      // For repair items, also used for engineered objects heal rate
+   S32 speed;           // Speed for speedzone items
+   bool boolattr;       // Additional optional boolean attribute for some items (only speedzone so far...)
+
+};
+
+
+class EditorCommand
+{
+public:
+    virtual bool Execute();
+    virtual bool Undo();
+    virtual ~EditorCommand() { }
+};
+
+class PlaceItemCommand : public EditorCommand
+{
+   PlaceItemCommand(WorldItem item, Point pos) : mItem(item), mPos(pos) { }
+
+   WorldItem mItem;
+   Point mPos;
+
+   bool Execute();
+   bool Undo();
+};
+
+
+
 class EditorUserInterface : public UserInterface, public LevelLoader
 {
 public:
-   enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
-   {
-      ItemSpawn,
-      ItemSpeedZone,
-      ItemSoccerBall,
-      ItemFlag,
-      ItemFlagSpawn,
-      ItemBarrierMaker,
-      ItemTeleporter,
-      ItemRepair,
-      ItemBouncyBall,
-      ItemAsteroid,
-      ItemAsteroidSpawn,
-      ItemMine,
-      ItemSpyBug,
-      ItemResource,
-      ItemLoadoutZone,
-      ItemNexus,
-      ItemSlipZone,
-      ItemTurret,
-      ItemForceField,
-      ItemGoalZone,
-      ItemTextItem,
-      ItemNavMeshZone,
-   };
+   EditorUserInterface();  // Constructor
 
    enum SpecialAttribute   // Some items have special attributes.  These are the ones
    {                       // we can edit in the editor
@@ -126,31 +175,6 @@ public:
       GoFastSpeed,
       GoFastSnap,
       None,                // Must be last
-   };
-
-   struct WorldItem
-   {
-      GameItems index;
-      S32 team;
-      F32 width;
-      Vector<Point> verts;
-      bool selected;
-      bool litUp;
-      Vector<bool> vertSelected;
-      string text;         // For items that have an aux text field
-      U32 textSize;        // For items that have an aux text field
-      S32 repopDelay;      // For repair items, also used for engineered objects heal rate
-      S32 speed;           // Speed for speedzone items
-      bool boolattr;       // Additional optional boolean attribute for some items (only speedzone so far...)
-
-      WorldItem()    // Constructor
-      {
-         repopDelay = -1;
-         speed = -1;
-         boolattr = false;
-         selected = false;
-         litUp = false;
-      }
    };
 
 private:
@@ -201,7 +225,6 @@ private:
    void doneEditingSpecialItem(bool save);    // Gets run when user exits special-item editing mode
    U32 getNextAttr(S32 item);                 // Assist on finding the next attribute this item is capable of editing,
                                               // for cycling through the various editable attributes
-
    WorldItem mNewItem;
    F32 mCurrentScale;
    Point mCurrentOffset;
@@ -223,8 +246,6 @@ private:
    void clearSelection();        // Mark all objects and vertices as unselected
    void unselectItem(S32 i);     // Mark item and vertices as unselected
 
-   void clearDockSelection();    // Mark all objects on dock as unselected
-
    void centerView();            // Center display on all objects
    void splitBarrier();          // Split wall on selected vertex/vertices
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
@@ -241,17 +262,13 @@ private:
    void processLevelLoadLine(int argc, const char **argv);
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
-   WorldItem constructItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height);   // Construct a new object
 
    Color getTeamColor(S32 team);    // Return a color based on team index
 
-//   string mgLevelDir;
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 
 public:
-   EditorUserInterface();           // Constructor
-
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
@@ -275,7 +292,7 @@ public:
 
    void render();
    void renderItem(WorldItem &i, bool isBeingEdited, bool isDockItem, bool isScriptItem);
-   void renderLinePolyVertices(WorldItem item, F32 alpha);
+   void renderLinePolyVertices(WorldItem &item, F32 alpha);
 
    void renderBarrier(Vector<Point> verts, bool selected, F32 width, F32 alpha);
    void renderPoly(Vector<Point> verts, bool isDockItem);
@@ -315,7 +332,7 @@ public:
    void incBarrierWidth(S32 amt);      // Increase selected wall thickness by amt
    void decBarrierWidth(S32 amt);      // Decrease selected wall thickness by amt
 
-   S32 getDefaultRepopDelay(GameItems itemType);
+   static S32 getDefaultRepopDelay(GameItems itemType);
 
    bool saveLevel(bool showFailMessages, bool showSuccessMessages);
    void testLevel();
@@ -333,12 +350,16 @@ public:
 
 };
 
+
 class EditorMenuUserInterface : public MenuUserInterface
 {
+public:
+   EditorMenuUserInterface();    // Constructor
+
+private:
    typedef MenuUserInterface Parent;
 
 public:
-   EditorMenuUserInterface();    // Constructor
    void render();
    void onActivate();
    void setupMenus();
@@ -349,7 +370,6 @@ public:
 
 extern EditorUserInterface gEditorUserInterface;
 extern EditorMenuUserInterface gEditorMenuUserInterface;
-
 
 };
 
