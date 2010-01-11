@@ -159,7 +159,7 @@ public: \
    TNL_DECLARE_CLASS( RPC_##className##_##name ); \
    bool checkClassType(TNL::Object *theObject) { return dynamic_cast<className *>(theObject) != NULL; } }; \
    TNL_IMPLEMENT_NETEVENT( RPC_##className##_##name, groupMask, rpcVersion ); \
-   void className::name args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; postNetEvent(theEvent); } \
+   void className::name args { if(!canPostNetEvent()) return; RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; postNetEvent(theEvent); } \
    TNL::NetEvent * className::name##_construct args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; return theEvent; } \
    void className::name##_test args { RPC_##className##_##name *theEvent = new RPC_##className##_##name; theEvent->mFunctorDecl.set argNames ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); } \
    void className::name##_remote args

@@ -82,7 +82,7 @@ public:
    }
 
    /// Constructs an AsymmetricKey by reading it from a BitStream.
-   AsymmetricKey(BitStream *theStream)
+   AsymmetricKey(BitStream *theStream) : mKeyData(NULL)
    {
       ByteBuffer theBuffer;
       theStream->read(&theBuffer);

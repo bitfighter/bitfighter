@@ -151,6 +151,9 @@ public:
 
    /// Posts a NetEvent for processing on the remote host
    bool postNetEvent(NetEvent *event);
+
+   /// For fake connections (AI for instance)
+   virtual bool canPostNetEvent() const { return true; }
 };
 
 };
