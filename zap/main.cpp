@@ -29,12 +29,14 @@
 <li>Added asteroids to help screen, enhanced colors</li>
 <li>Fixed several crashing issues</li>
 <li>Added enhanced timer class to Lua scripting</li>
-<li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
+<li>Minor efficiency improvements on rendering routines</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>
-<li>Fixed editor crashing issue</li>
+<li>Fixed editor crashing issue caused by double-delete of item</li>
+<li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
 <li>Undo/redo more efficient -- will perform better with large levels and deep undo states</li>
+<li>Added autosave -- will keep a current copy of the l
 
 */
 

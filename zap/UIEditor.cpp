@@ -244,13 +244,15 @@ GameItemRec gGameItemRecs[] = {
 void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRedo)
 {
    if(!cameFromRedo)
-      mRedoItems.clear();
+      mLastRedoIndex = mLastUndoIndex;
 
-   if(mAllUndoneUndoLevel > mLastUndoIndex + mRedoItems.size())     // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  Our "no need to save" undo point is lost forever.
+   if(mAllUndoneUndoLevel > mLastRedoIndex)     // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  Our "no need to save" undo point is lost forever.
       mAllUndoneUndoLevel = -1;
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
+   //logprintf("Saving: %d", mLastUndoIndex);
    mLastUndoIndex++;
+   mLastRedoIndex++;
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full... 
    {
@@ -259,6 +261,9 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
    }
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+   mRedoingAnUndo = false;
+
+   //logprintf("save undo firstundo: %d, lastundo: %d, redo: %d, redoing:%s", mFirstUndoIndex, mLastUndoIndex, mLastRedoIndex, mRedoingAnUndo ? "T" : "F");
 }
  
 
@@ -273,15 +278,39 @@ void EditorUserInterface::undo(bool addToRedoStack)
    if(!undoAvailable()) 
       return;
 
-   if(addToRedoStack)
-      mRedoItems.push_back(mItems);                        // Save state onto redo buffer
+   if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
+   {
+      saveUndoState(mItems);
+      mLastUndoIndex--;
+      mLastRedoIndex--;
+      mRedoingAnUndo = true;
+   }
 
    mLastUndoIndex--;
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
+   //logprintf("Undoing: %d", mLastUndoIndex);
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    itemToLightUp = -1;
    autoSave();
+
+   //logprintf("undo firstundo: %d, lastundo: %d, redo: %d, redoing:%s", mFirstUndoIndex, mLastUndoIndex, mLastRedoIndex, mRedoingAnUndo ? "T" : "F");
+}
+
+
+void EditorUserInterface::redo()
+{
+   if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
+   {
+      mLastUndoIndex++; 
+      mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
+      //logprintf("Redoing: %d", mLastUndoIndex);
+
+      mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+      itemToLightUp = -1;
+      autoSave();
+   }
+   //logprintf("redo firstundo: %d, lastundo: %d, redo: %d, redoing:%s", mFirstUndoIndex, mLastUndoIndex, mLastRedoIndex, mRedoingAnUndo ? "T" : "F");
 }
 
 
@@ -296,7 +325,8 @@ void EditorUserInterface::clearUndoHistory()
 {
    mFirstUndoIndex = 0;
    mLastUndoIndex = 1;
-   mRedoItems.clear();
+   mLastRedoIndex = 1;
+   mRedoingAnUndo = false;
 }
 
 
@@ -2970,22 +3000,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_Z)
    {
       if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))   // Ctrl-Shift-Z - Redo
-      {
-         if(mRedoItems.size())                     // If there's a redo state available...
-         {
-            saveUndoState(mItems, true);
-
-            mItems = mRedoItems.last();            // Restore state from redo buffer
-            mRedoItems.pop_back();
-            autoSave();
-         }
-      }
-
+         redo();
       else if(getKeyState(KEY_CTRL))    // Ctrl-Z - Undo
-      {
-         if(undoAvailable())
-            undo(true);
-      }
+         undo(true);
       else                             // Z - Reset veiw
         centerView();
    }

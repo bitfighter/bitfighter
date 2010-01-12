@@ -1139,12 +1139,29 @@ bool Robot::initialize(Point p)
       return false;
    }
 
-   // Run the bot
+   // Run the bot -- this loads all the functions into the global namespace
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
       logError("Robot error during initialization: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
    }
+
+
+   try
+   {
+      lua_getglobal(L, "_main");
+
+      if (lua_pcall(L, 0, 0, 0) != 0)
+         throw LuaException(lua_tostring(L, -1));
+   }
+
+   catch(LuaException &e)
+   {
+      logError("Robot error running main(): %s.  Shutting robot down.", e.what());
+      delete this;
+      return false;
+   }
+
 
    // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
    lua_getglobal(L, "getName");

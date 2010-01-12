@@ -223,8 +223,7 @@ private:
    Timer mSaveMsgTimer;
    Timer mWarnMsgTimer;
 
-   Vector<Vector<WorldItem> > mUndoItems;    // Undo history  [[note that g++ requires space btwn >>]]
-   Vector<Vector<WorldItem> > mRedoItems;    // Redo history
+   Vector<Vector<WorldItem> > mUndoItems;    // Undo/redo history  [[note that g++ requires space btwn >>]]
    Vector<WorldItem> mMostRecentState;       // Copy of most recent state, to facilitate dragging
    Vector<WorldItem> mUnmovedItems;          // Copy of items where they were before they moved... different than mMostRecentState when dragging from dock
 
@@ -232,10 +231,14 @@ private:
 
    U32 mFirstUndoIndex;
    U32 mLastUndoIndex;
+   U32 mLastRedoIndex;
+   bool mRedoingAnUndo;
+
    static const U32 UNDO_STATES = 128;
    void saveUndoState(Vector<WorldItem> items, bool cameFromRedo = false);    // Save current state into undo history buffer
    bool undoAvailable();               // Is an undo state available?
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
+   void redo();                        // Redo latest undo
    
    void autoSave();                    // Hope for the best, prepare for the worst
 

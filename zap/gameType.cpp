@@ -1016,9 +1016,10 @@ void GameType::spawnRobot(Robot *robot)
 {
    Point spawnPoint = getSpawnPoint(robot->getTeam());
 
-   if( !robot->initialize(spawnPoint))
+   if(!robot->initialize(spawnPoint))
    {
-      robot->deleteObject();
+      if(robot)
+         robot->deleteObject();
       return;
    }
 
