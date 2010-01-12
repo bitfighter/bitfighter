@@ -234,12 +234,13 @@ private:
    U32 mLastUndoIndex;
    static const U32 UNDO_STATES = 128;
    void saveUndoState(Vector<WorldItem> items, bool cameFromRedo = false);    // Save current state into undo history buffer
-   bool undoAvailable();                           // Is an undo state available?
-   void undo(bool addToRedoStack);                 // Restore mItems to latest undo state
+   bool undoAvailable();               // Is an undo state available?
+   void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    
+   void autoSave();                    // Hope for the best, prepare for the worst
 
-   Vector<WorldItem> mDockItems;                   // Items sitting in the dock
-   Vector<WorldItem> mClipboard;                   // Items on clipboard
+   Vector<WorldItem> mDockItems;       // Items sitting in the dock
+   Vector<WorldItem> mClipboard;       // Items on clipboard
 
    void saveSelection();               // Save selection mask
    void restoreSelection();            // Restore selection mask
@@ -369,7 +370,7 @@ public:
 
    static S32 getDefaultRepopDelay(GameItems itemType);
 
-   bool saveLevel(bool showFailMessages, bool showSuccessMessages);
+   bool saveLevel(bool showFailMessages, bool showSuccessMessages, bool autosave = false);
    void testLevel();
    void setSaveMessage(string msg, bool savedOK);
    void setWarnMessage(string msg1, string msg2);

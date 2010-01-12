@@ -256,18 +256,20 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
    {
       mFirstUndoIndex++;
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
-      logprintf("Undo buffer full... discarding oldest undo state");
    }
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
-   
-
 }
  
- 
+
+void EditorUserInterface::autoSave()
+{
+   gEditorUserInterface.saveLevel(false, false, true); 
+}
+
+
 void EditorUserInterface::undo(bool addToRedoStack)
 {
-   logprintf("UNdoing: Lst=%d, frst=%d",mLastUndoIndex, mFirstUndoIndex);
    if(!undoAvailable()) 
       return;
 
@@ -279,6 +281,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    itemToLightUp = -1;
+   autoSave();
 }
 
 
@@ -776,6 +779,7 @@ void EditorUserInterface::teamsHaveChanged()
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
    mNeedToSave = true;
+   autoSave();
    mAllUndoneUndoLevel = -1; // This change can't be undone
 }
 
@@ -813,6 +817,8 @@ void EditorUserInterface::onActivate()
       return;
    }
    mLevelErrorMsgs.clear();
+   mSaveMsgTimer.clear();
+
    mGameTypeArgs.clear();
 
    loadLevel();
@@ -857,7 +863,8 @@ void EditorUserInterface::onReactivate()
    if(mWasTesting)
    {
       gLevelList = mgLevelList;        // Restore level list
-      mWasTesting = false;
+      mWasTesting = false; 
+      mSaveMsgTimer.clear();
    }
 
    remove("editor.tmp");      // Delete temp file
@@ -1863,6 +1870,7 @@ void EditorUserInterface::pasteSelection()
    mItems.sort(sortItems);
    validateLevel();
    mNeedToSave = true;
+   autoSave();
 }
 
 
@@ -1924,6 +1932,7 @@ void EditorUserInterface::rotateSelection(F32 angle)
       }
    }
    mNeedToSave = true;
+   autoSave();
 }
 
 void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
@@ -2015,6 +2024,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
       saveUndoState(undoItems);      // If anything changed, push our temp state onto the undo stack
       validateLevel();
       mNeedToSave = true;
+      autoSave();
    }
 }
 
@@ -2033,6 +2043,7 @@ void EditorUserInterface::flipSelectionHorizontal()
             mItems[i].verts[j].x = min.x + (max.x - mItems[i].verts[j].x);
 
    mNeedToSave = true;
+   autoSave();
 }
 
 void EditorUserInterface::flipSelectionVertical()
@@ -2050,6 +2061,7 @@ void EditorUserInterface::flipSelectionVertical()
             mItems[i].verts[j].y = min.y + (max.y - mItems[i].verts[j].y);
 
    mNeedToSave = true;
+   autoSave();
 }
 
 void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex)
@@ -2369,6 +2381,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       saveUndoState(items);
       validateLevel();
       mNeedToSave = true;
+      autoSave();
 
       itemToLightUp = -1;     // In case we just deleted a lit item
       vertexToLightUp = -1;
@@ -2439,6 +2452,7 @@ done2:
       clearSelection();
       saveUndoState(undoItems);
       mNeedToSave = true;
+      autoSave();
    }
 }
 
@@ -2522,6 +2536,7 @@ void EditorUserInterface::joinBarrier()
       clearSelection();
       saveUndoState(undoItems);
       mNeedToSave = true;
+      autoSave();
    }
 }
 
@@ -2549,6 +2564,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
    mItems.sort(sortItems);
    validateLevel();
    mNeedToSave = true;
+   autoSave();
 }
 
 
@@ -2961,6 +2977,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
             mItems = mRedoItems.last();            // Restore state from redo buffer
             mRedoItems.pop_back();
+            autoSave();
          }
       }
 
@@ -3220,9 +3237,6 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                   else        // Dragged item off the dock, then back on  ==> nothing really changed
                   {
                      mItems = mMostRecentState; // Essential undoes the dragging, so if we undo delete, our object will be back where it was before the delete
-                     //deleteSelection(true);
-                     //mNeedToSave = true;
-                     //validateLevel();
                   }
                }
                else      // Mouse not on dock... we were either dragging from the dock or moving something, need to save an undo state if anything changed
@@ -3245,6 +3259,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                            {
                               saveUndoState(mMostRecentState);    // Something changed... save an undo state!
                               mNeedToSave = true;
+                              autoSave();
                               return;
                            }
                   }
@@ -3395,12 +3410,14 @@ static void s_fprintf(FILE *stream, const char *format, ...)
 }
 
 
-bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessages)
+bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessages, bool autosave)
 {
+   string saveName = autosave ? "auto.save" : mEditFileName;
+   
    try
    {
       // Check if we have a valid (i.e. non-null) filename
-      if(mEditFileName == "")
+      if(saveName == "")
       {
          gErrorMsgUserInterface.reset();
          gErrorMsgUserInterface.setTitle("INVALID FILE NAME");
@@ -3414,7 +3431,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       }
 
       char fileNameBuffer[256];
-      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gLevelDir.c_str(), mEditFileName.c_str());
+      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gLevelDir.c_str(), saveName.c_str());
       FILE *f = fopen(fileNameBuffer, "w");
       if(!f)
          throw(SaveException("Could not open file for writing"));
@@ -3460,12 +3477,18 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       return false;
    }
 
-   mNeedToSave = false;
-   mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save.
+   if(!autosave)     // Doesn't count as a save!
+   {
+      mNeedToSave = false;
+      mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save.
+   }
+
    if(showSuccessMessages)
       gEditorUserInterface.setSaveMessage("Saved " + getLevelFileName(), true);
+   
    return true;
 }
+
 
 extern void initHostGame(Address bindAddress, bool testMode);
 extern CmdLineSettings gCmdLineSettings;
