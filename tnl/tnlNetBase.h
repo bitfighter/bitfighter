@@ -624,8 +624,8 @@ public:
       set(ptr);
       return *this;
    }
-   bool isNull() const   { return mObject == 0; }
-   bool isValid() const  { return mObject != 0; }
+   bool isNull() const   { return mObject == NULL; }
+   bool isValid() const  { return mObject != NULL; }
    T* operator->() const { return static_cast<T*>(mObject); }
    T& operator*() const  { return *static_cast<T*>(mObject); }
    operator T*() const   { return static_cast<T*>(mObject); }

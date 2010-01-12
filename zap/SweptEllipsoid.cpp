@@ -467,7 +467,7 @@ bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, con
 
 static const float EPSILON=0.0000000001f;
 
-F32 area(const Vector<Point> contour)
+F32 area(const Vector<Point> &contour)
 {
 
   int n = contour.size();
@@ -600,7 +600,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
-Point centroid(Vector<Point> polyPoints)
+Point centroid(Vector<Point> &polyPoints)
 {
    F32 area6 = area(polyPoints) * 6;
    F32 x = 0;
@@ -625,7 +625,7 @@ Point centroid(Vector<Point> polyPoints)
 
 
 // Find longest edge, so we can align text with it...
-F32 angleOfLongestSide(Vector<Point> polyPoints)
+F32 angleOfLongestSide(Vector<Point> &polyPoints)
 {
    Point start;
    Point end;

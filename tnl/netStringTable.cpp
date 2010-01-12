@@ -432,6 +432,9 @@ const char *getString(StringTableEntryId index)
 {
    if(!index)
       return "";
+      logprintf("indx, size: %d, %d", index, mNodeListSize);
+
+
    return mNodeList[index]->stringData;
 }
 

@@ -27,6 +27,14 @@
 <li>Added Restart Level to game options menu if you have level change permissions</li>
 <li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
 <li>Added asteroids to help screen, enhanced colors</li>
+<li>Fixed several crashing issues</li>
+<li>Added enhanced timer class to Lua scripting</li>
+<li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
+
+<h4>Editor</h4>
+<li>Many small improvements to editor</li>
+<li>Fixed editor crashing issue</li>
+<li>Undo/redo more efficient -- will perform better with large levels and deep undo states</li>
 
 */
 

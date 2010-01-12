@@ -117,7 +117,7 @@ void NetClassRep::initialize()
 
          mClassTable[group][type] = dynamicTable;
    
-         for(U32 i = 0; i < mClassTable[group][type].size(); i++)
+         for(S32 i = 0; i < mClassTable[group][type].size(); i++)
             mClassTable[group][type][i]->mClassId[group] = i;
 
          mNetClassBitSize[group][type] = 

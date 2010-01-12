@@ -105,6 +105,8 @@ EditorUserInterface::EditorUserInterface()
    showAllObjects = true;
    mWasTesting = false;
 
+   mUndoItems.setSize(UNDO_STATES);
+
    //MeshBox::init();
 
    //gBoxesH = 20;
@@ -121,8 +123,6 @@ void EditorUserInterface::populateDock()
    S32 yPos = 40;
    const S32 spacer = 35;
    mDockItems.clear();
-   //while(mDockItems.size())    // Don't just to a .clear() because we want to make sure destructors run and memory gets cleared, as in game.cpp
-   //   delete mDockItems[0];
 
    mDockItems.push_back(WorldItem(ItemRepair, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
@@ -241,21 +241,58 @@ GameItemRec gGameItemRecs[] = {
 
 
 // Save the current state of the editor objects for later undoing
-void EditorUserInterface::saveUndoState(Vector<WorldItem> items)
+void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRedo)
 {
-   if(mAllUndoneUndoLevel > mUndoItems.size())     // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  Our "no need to save" undo point is lost forever.
+   if(!cameFromRedo)
+      mRedoItems.clear();
+
+   if(mAllUndoneUndoLevel > mLastUndoIndex + mRedoItems.size())     // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  Our "no need to save" undo point is lost forever.
       mAllUndoneUndoLevel = -1;
 
-   mUndoItems.push_back(items);
+   mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
+   mLastUndoIndex++;
 
-  // This is probably the source of some problems...
-   if(mUndoItems.size() > 128)      // Keep the undo state from getting too large.  This is quite a lot of undo.
+   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full... 
    {
-      mUndoItems.pop_front();    
+      mFirstUndoIndex++;
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
       logprintf("Undo buffer full... discarding oldest undo state");
    }
 
+   mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+   
+
+}
+ 
+ 
+void EditorUserInterface::undo(bool addToRedoStack)
+{
+   logprintf("UNdoing: Lst=%d, frst=%d",mLastUndoIndex, mFirstUndoIndex);
+   if(!undoAvailable()) 
+      return;
+
+   if(addToRedoStack)
+      mRedoItems.push_back(mItems);                        // Save state onto redo buffer
+
+   mLastUndoIndex--;
+   mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
+
+   mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+   itemToLightUp = -1;
+}
+
+
+bool EditorUserInterface::undoAvailable()
+{
+   return mLastUndoIndex - mFirstUndoIndex != 1;
+}
+
+
+// Wipe undo/redo history
+void EditorUserInterface::clearUndoHistory()
+{
+   mFirstUndoIndex = 0;
+   mLastUndoIndex = 1;
    mRedoItems.clear();
 }
 
@@ -284,12 +321,6 @@ bool EditorUserInterface::isTeamFlagGame(char *mGameType)
 }
 
 
-// Wipe undo/redo history
-void EditorUserInterface::clearUndoHistory()
-{
-   mUndoItems.clear();
-   mRedoItems.clear();
-}
 
 
 extern TeamPreset gTeamPresets[];
@@ -384,9 +415,10 @@ void EditorUserInterface::loadLevel()
       gGameParamUserInterface.ignoreGameParams = true;               // Don't rely on the above for populating GameParameters menus... only to make sure something is there if we save
    }
    clearUndoHistory();                 // Clean out undo/redo buffers
+   clearSelection();                   // Nothing starts selected 
    showAllObjects = true;              // Turn everything on
    mNeedToSave = false;                // Why save when we just loaded?
-   mAllUndoneUndoLevel = 0;
+   mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
 }
 
@@ -789,7 +821,7 @@ void EditorUserInterface::onActivate()
    mUnmovedItems = mItems;
 
    snapDisabled = false;      // Hold [space] to temporarily disable snapping
-   mSelectedSet.clear();
+   //mSelectedSet.clear();
 
    // Reset display parameters...
    centerView();
@@ -1084,8 +1116,7 @@ void EditorUserInterface::render()
    // Render messages
    if(mouseOnDock())    // On the dock?  Then render help string if hovering over item
    {
-      S32 hoverItem;
-      findHitItemOnDock(mMousePos, hoverItem);
+      S32 hoverItem = findHitItemOnDock(mMousePos);
 
       if(hoverItem != -1)
       {
@@ -1773,6 +1804,8 @@ void EditorUserInterface::clearSelection()
 void EditorUserInterface::unselectItem(S32 i)
 {
    mItems[i].selected = false;
+   mItems[i].litUp = false;
+
    for(S32 j = 0; j < mItems[i].verts.size(); j++)
       mItems[i].vertSelected[j] = false;
 }
@@ -1806,10 +1839,12 @@ void EditorUserInterface::pasteSelection()
 
    S32 itemCount = mClipboard.size();
 
-    if (!itemCount)                           // Nothing on clipboard, nothing to do
+    if(!itemCount)            // Nothing on clipboard, nothing to do
       return;
 
-   saveUndoState(mItems);                    // So we can undo the paste
+   saveUndoState(mItems);     // So we can undo the paste
+
+   clearSelection();          // Only the pasted items should be selected         
 
    for(S32 i = 0; i < mItems.size(); i++)    // Unselect everything, so pasted items will be the new selection
       mItems[i].selected = false;
@@ -1830,9 +1865,13 @@ void EditorUserInterface::pasteSelection()
    mNeedToSave = true;
 }
 
+
 // Copy selection to the clipboard
 void EditorUserInterface::copySelection()
 {
+   if(!anyItemsSelected())
+      return;
+
    bool alreadyCleared = false;
 
    S32 itemCount = mItems.size();
@@ -1855,9 +1894,13 @@ void EditorUserInterface::copySelection()
    }
 }
 
+
 // Rotate selected objects around their center point by angle
 void EditorUserInterface::rotateSelection(F32 angle)
 {
+   if(!anyItemsSelected())
+      return;
+
    saveUndoState(mItems);
 
    Point min, max;
@@ -1977,6 +2020,9 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
 void EditorUserInterface::flipSelectionHorizontal()
 {
+   if(!anyItemsSelected())
+      return;
+
    saveUndoState(mItems);
 
    Point min, max;
@@ -1991,6 +2037,9 @@ void EditorUserInterface::flipSelectionHorizontal()
 
 void EditorUserInterface::flipSelectionVertical()
 {
+   if(!anyItemsSelected())
+      return;
+
    saveUndoState(mItems);
 
    Point min, max;
@@ -2034,25 +2083,20 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 }
 
 
-void EditorUserInterface::findHitItemOnDock(Point canvasPos, S32 &hitItem)
+S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 {
-   hitItem = -1;
-
    if(!showAllObjects)           // Only add dock items when objects are visible
-      return;
+      return -1;
 
    if(mEditingSpecialAttrItem != -1)    // If we're editing a text item, disable this functionality
-      return;
+      return -1;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
    {
       Point pos = mDockItems[i].verts[0];
 
       if(fabs(canvasPos.x - pos.x) < 8 && fabs(canvasPos.y - pos.y) < 8)
-      {
-         hitItem = i;
-         return;
-      }
+         return i;
    }
 
    // Now check for polygon interior hits
@@ -2064,11 +2108,10 @@ void EditorUserInterface::findHitItemOnDock(Point canvasPos, S32 &hitItem)
             verts.push_back(mDockItems[i].verts[j]);
 
          if(PolygonContains2(verts.address(),verts.size(), canvasPos))
-         {
-            hitItem = i;
-            return;
-         }
+            return i;
       }
+
+   return -1;
 }
 
 
@@ -2168,7 +2211,10 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 
    if(itemToLightUp != -1)
    {
-      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");   // valgrind suggests there is an invalid write here
+      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");   
+      if(itemToLightUp >= mItems.size())     // Just in case...
+         return;     
+
       mItems[itemToLightUp].litUp = false;
    }
    vertexToLightUp = -1;
@@ -2262,19 +2308,21 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    if(mDraggingObjects)          // No deleting while we're dragging, please...
       return;     
 
+   if(!anyItemsOrVertsSelected())  // Nothing to delete
+      return;
+
    Vector<WorldItem> items = mItems;
    bool deleted = false;
 
-   mSelectedSet.clear();         // Do this to avoid corrupting the heap... somehow...
-
+   //mSelectedSet.clear();         
    for(S32 i = 0; i < mItems.size(); ) // no i++
    {
       if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
       {
-         if(mItems[i].litUp)  // Since indices change as items are deleted, this will keep incorrect items from being deleted
-            itemToLightUp = -1;
-         else
-            itemToLightUp--;
+         //if(mItems[i].litUp)  // Since indices change as items are deleted, this will keep incorrect items from being deleted
+         //   itemToLightUp = -1;
+         //else
+         //   itemToLightUp--;
 
          mItems.erase(i);
          deleted = true;
@@ -2289,13 +2337,13 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                mItems[i].verts.erase(j);
                mItems[i].vertSelected.erase(j);
                deleted = true;
-               if(vertexToLightUp == j)
-               {
-                  vertexToLightUp = -1;
-                  itemToLightUp = -1;
-               }
-               else
-                  vertexToLightUp--;
+               //if(vertexToLightUp == j)
+               //{
+               //   vertexToLightUp = -1;
+               //   //itemToLightUp = -1;
+               //}
+               //else
+               //   vertexToLightUp--;
             }
             else
                j++;
@@ -2316,11 +2364,14 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          i++;
    }  // for
 
-   if (deleted)
+   if(deleted)
    {
       saveUndoState(items);
       validateLevel();
       mNeedToSave = true;
+
+      itemToLightUp = -1;     // In case we just deleted a lit item
+      vertexToLightUp = -1;
    }
 }
 
@@ -2560,21 +2611,16 @@ void EditorUserInterface::centerView()
 
 
 // Save selection mask, which can be retrieved later, as long as mItems hasn't changed.
-// For now, we'll be lazy and just save mItems, but we could save a little memory by being smarter
 void EditorUserInterface::saveSelection()
 {
-   mSelectedSet = mItems;
+   mSelectedSet = Selection(mItems);
 }
+
 
 // Restore selection mask
 void EditorUserInterface::restoreSelection()
 {
-   for(S32 i = 0; i < mSelectedSet.size(); i++)
-   {
-      mItems[i].selected = mSelectedSet[i].selected;
-      for(S32 j = 0; j < mSelectedSet[i].verts.size(); j++)
-         mItems[i].vertSelected[j] = mSelectedSet[i].vertSelected[j];
-   }
+   mSelectedSet.restore(mItems);
 }
 
 
@@ -2602,10 +2648,7 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
    // Find any other selected items of the same type of the item we just edited, and update their values too
 
    if(!saveChanges)
-   {
-      mItems = mUndoItems.last();            // Restore state from undo buffer
-      mUndoItems.pop_back();
-   }
+      undo(false);
    else
       for(S32 i = 0; i < mItems.size(); i++)
       {
@@ -2797,7 +2840,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    if(keyCode == MOUSE_LEFT)
    {
-      itemCameFromDock = false;
+      mDraggingDockItem = -1;
       mMousePos = convertWindowToCanvasCoord(gMousePos);
       if(mCreatingPoly)          // Save any polygon we might be creating
       {
@@ -2811,17 +2854,17 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
 
       mMouseDownPos = convertCanvasToLevelCoord(mMousePos);
+      mMostRecentState = mItems;    // For later saving to the undo stack if need be
 
       if(mouseOnDock())    // On the dock?  Did we hit something to start dragging off the dock?
       {
          clearSelection();
-         findHitItemOnDock(mMousePos, mDraggingDockItem);
-         itemCameFromDock = true;
+         mDraggingDockItem = findHitItemOnDock(mMousePos);
       }
       else                 // Mouse is not on dock
       {
          mDraggingDockItem = -1;
-
+        
          // rules for mouse down:
          // if the click has no shift- modifier, then
          //   if the click was on something that was selected
@@ -2842,7 +2885,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          {
             if(vertexHit != -1 && mItems[vertexHitPoly].selected)    // Hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection
             {
-               saveSelection();
                clearSelection();
                mItems[vertexHitPoly].vertSelected[vertexHit] = true;
                //vertexHit = -1;
@@ -2850,12 +2892,11 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             }
             if(itemHit != -1 && mItems[itemHit].selected)   // Hit an already selected item
             {
-               saveSelection();
+               // Do nothing
             }
             else if(itemHit != -1 && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
             {
                clearSelection();
-               saveSelection();  // Basically, save the fact that nothing is selected
                mItems[itemHit].selected = true;
             }
             else if(vertexHit != -1 && (itemHit == -1 || !mItems[itemHit].selected))      // Hit a vertex of an unselected item
@@ -2863,22 +2904,20 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                if(!mItems[vertexHitPoly].vertSelected[vertexHit])
                {
                   clearSelection();
-                  saveSelection();     // Basically, save the fact that nothing is selected
                   mItems[vertexHitPoly].vertSelected[vertexHit] = true;
                }
             }
             else if(itemHit != -1)                                                        // Hit a non-point item, but not a vertex
             {
                clearSelection();
-               saveSelection();  // Basically, save the fact that nothing is selected
                mItems[itemHit].selected = true;
             }
             else     // Clicked off in space.  Starting to draw a bounding rectangle?
             {
                mDragSelecting = true;
                clearSelection();
-               saveSelection();
-           }
+            }
+      
          }
          else     // Shift key is down
          {
@@ -2892,7 +2931,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }  
      }     // end mouse not on dock block, doc
 
-     mMostRecentState = mItems;
      mUnmovedItems = mItems;
 
    }     // end if keyCode == MOUSE_LEFT
@@ -2915,38 +2953,23 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_Z)
    {
-      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))   // Ctrl-Shift Z - Redo
+      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))   // Ctrl-Shift-Z - Redo
       {
          if(mRedoItems.size())                     // If there's a redo state available...
          {
-            mUndoItems.push_back(mItems);          // Save state onto undo buffer
+            saveUndoState(mItems, true);
 
             mItems = mRedoItems.last();            // Restore state from redo buffer
             mRedoItems.pop_back();
-
-            if(mAllUndoneUndoLevel != mUndoItems.size())
-               mNeedToSave = true;
-            else if(mUndoItems.size() == mAllUndoneUndoLevel)
-               mNeedToSave = false;
          }
       }
 
-      else if(getKeyState(KEY_CTRL))      // Ctrl-Z - Undo
+      else if(getKeyState(KEY_CTRL))    // Ctrl-Z - Undo
       {
-         if(mUndoItems.size())                     // If there's an undo state available...
-         {
-            mRedoItems.push_back(mItems);          // Save state onto redo buffer
-
-            mItems = mUndoItems.last();            // Restore state from undo buffer
-            mUndoItems.pop_back();
-
-            if(mAllUndoneUndoLevel != mUndoItems.size())
-               mNeedToSave = true;
-            else if(mUndoItems.size() == mAllUndoneUndoLevel)
-               mNeedToSave = false;
-         }
+         if(undoAvailable())
+            undo(true);
       }
-      else                                // Z - Reset veiw
+      else                             // Z - Reset veiw
         centerView();
    }
    else if(keyCode == KEY_R)
@@ -3183,9 +3206,9 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             {
                mDraggingObjects = false;
 
-               if(mouseOnDock())             // This was really a delete (dragged to dock)
+               if(mouseOnDock())             // This was really a delete (item dragged to dock)
                {
-                  if(itemCameFromDock)
+                  if(mDraggingDockItem == -1)
                   {
                      for(S32 i = 0; i < mItems.size(); i++)
                         if(mItems[i].selected)
@@ -3194,37 +3217,44 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                            break;
                         }
                   }
-                  else
+                  else        // Dragged item off the dock, then back on  ==> nothing really changed
                   {
                      mItems = mMostRecentState; // Essential undoes the dragging, so if we undo delete, our object will be back where it was before the delete
-                     deleteSelection(true);
-                     mNeedToSave = true;
-                     validateLevel();
+                     //deleteSelection(true);
+                     //mNeedToSave = true;
+                     //validateLevel();
                   }
                }
-               else                          // We were moving something... need to save an undo state if anything changed
+               else      // Mouse not on dock... we were either dragging from the dock or moving something, need to save an undo state if anything changed
                {
-                  restoreSelection();
+                  if(mDraggingDockItem != -1)      // Dragging from dock
+                  {
+                     // Do nothing
+                  }
+                  else                             // Moving around screen
+                  {
 
-                  TNLAssert(mItems.size() == mUnmovedItems.size(), "Selection size changed while dragging!");   // Happens if we somehow insert/paste/whatever while we're dragging
-                  if(mItems.size() != mUnmovedItems.size())
-                     return;     // it's this or crash... 
+                     TNLAssert(mItems.size() == mUnmovedItems.size(), "Selection size changed while dragging!");   // Happens if we somehow insert/paste/whatever while we're dragging
+                     if(mItems.size() != mUnmovedItems.size())
+                        return;     // it's this or crash... 
 
-                  // Check if anything changed... (i.e. did we move?)
-                  for(S32 i = 0; i < mItems.size(); i++)
-                     for(S32 j = 0; j < mItems[i].verts.size(); j++)
-                        if(mItems[i].verts[j] != mUnmovedItems[i].verts[j])
-                        {
-                           saveUndoState(mMostRecentState);    // Something changed... save an undo state!
-                           mNeedToSave = true;
-                           return;
-                        }
+                     // Check if anything changed... (i.e. did we move?)
+                     for(S32 i = 0; i < mItems.size(); i++)
+                        for(S32 j = 0; j < mItems[i].verts.size(); j++)
+                           if(mItems[i].verts[j] != mUnmovedItems[i].verts[j])
+                           {
+                              saveUndoState(mMostRecentState);    // Something changed... save an undo state!
+                              mNeedToSave = true;
+                              return;
+                           }
+                  }
                }
             }
          }
          break;
    }     // case
 }
+
 
 bool EditorUserInterface::mouseOnDock()
 {
@@ -3233,6 +3263,32 @@ bool EditorUserInterface::mouseOnDock()
            mMousePos.y >= vertMargin &&
            mMousePos.y <= canvasHeight - vertMargin);
 }
+
+
+bool EditorUserInterface::anyItemsSelected()
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].selected || mItems[i].litUp )
+         return true;
+
+   return false;
+}
+
+
+bool EditorUserInterface::anyItemsOrVertsSelected()
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].selected || mItems[i].litUp )
+         return true;
+      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+         if(mItems[i].vertSelected[j])
+            return true;
+   }
+
+   return false;
+}
+
 
 void EditorUserInterface::idle(U32 timeDelta)
 {
@@ -3399,13 +3455,13 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    }
    catch (SaveException &e)
    {
-      if(showFailMessages)
+      if(showFailMessages) 
          gEditorUserInterface.setSaveMessage("Error Saving: " + string(e.what()), false);
       return false;
    }
 
    mNeedToSave = false;
-   mAllUndoneUndoLevel = mUndoItems.size();     // If we undo to this point, we won't need to save.
+   mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save.
    if(showSuccessMessages)
       gEditorUserInterface.setSaveMessage("Saved " + getLevelFileName(), true);
    return true;
@@ -3454,9 +3510,6 @@ void EditorUserInterface::testLevel()
 
       mgLevelList = gLevelList;
       gLevelList.clear();
-
-      //mgLevelDir = gLevelDir;
-      //gLevelDir = "levels";            // Temporarily override gLevelDir -- we want to write to levels folder regardless of the -leveldir param.  Why??
 
       mWasTesting = true;
 
@@ -3571,19 +3624,7 @@ void EditorMenuUserInterface::render()
 
 ///////////////////////////////////////////////////////////////////
 
-// Default constructor  --> can probably remove all code from in here
-WorldItem::WorldItem()
-{
-   repopDelay = -1;
-   speed = -1;
-   boolattr = false;
-   selected = false;
-   litUp = false;
-   team = -1;
-}
-
-
-// Alternate constructor
+// Primary constructor
 WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height)
 {
    index = itemType;
@@ -3657,6 +3698,39 @@ WorldItem::WorldItem(const WorldItem &worldItem)
       vertSelected.push_back(worldItem.vertSelected[i]);
 }
 
+
+///////////////////////////////////////////////////////////////////
+
+// Primary constructor
+ItemSelection::ItemSelection(WorldItem &item)
+{
+   selected = item.selected;
+   for(S32 i = 0; i < item.verts.size(); i++)
+      vertSelected.push_back(item.vertSelected[i]);
+}
+
+
+void ItemSelection::restore(WorldItem &item)
+{
+   item.selected = selected;
+   for(S32 i = 0; i < item.verts.size(); i++)
+      item.vertSelected[i] = vertSelected[i];
+}
+
+
+///////////////////////////////////////////////////////////////////
+
+Selection::Selection(Vector<WorldItem> &items)
+{
+   for(S32 i = 0; i < items.size(); i++)
+      selection.push_back(ItemSelection(items[i]));
+}
+
+void Selection::restore(Vector<WorldItem> &items)
+{
+   for(S32 i = 0; i < items.size(); i++)
+      selection[i].restore(items[i]);
+}
 
 ///////////////////////////////////////////////////////////////////
 //// Constructor

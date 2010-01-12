@@ -72,9 +72,9 @@ bool segmentsColinear(Point p1, Point p2, Point p3, Point p4);
 bool segsOverlap(Point p1, Point p2, Point p3, Point p4, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(Point c, Point a, Point b);
 
-Point centroid(Vector<Point> polyPoints);
-F32 area(const Vector<Point> polyPoints);
-F32 angleOfLongestSide(Vector<Point> polyPoints);
+Point centroid(Vector<Point> &polyPoints);
+F32 area(const Vector<Point> &polyPoints);
+F32 angleOfLongestSide(Vector<Point> &polyPoints);
 
 
 // Note that inlined functions seem to need to be defined in the header file, not just declared

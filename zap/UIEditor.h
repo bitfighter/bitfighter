@@ -122,8 +122,8 @@ class WorldItem
 {
 
 public:
-   WorldItem();                                                                // Default constructor
-   WorldItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height);  // Alternate constructor
+   WorldItem() { /* do nothing */ }                                            // Generic constructor
+   WorldItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height);  // Primary constructor
    WorldItem(const WorldItem &worldItem);                                      // Copy constructor
 
    GameItems index;
@@ -142,24 +142,52 @@ public:
 };
 
 
-class EditorCommand
+class ItemSelection
 {
 public:
-    virtual bool Execute();
-    virtual bool Undo();
-    virtual ~EditorCommand() { }
+   ItemSelection() { /* do nothing */ }      // Generic constructor
+   ItemSelection(WorldItem &item);           // Primary constructor
+
+private:
+   bool selected;
+   Vector<bool> vertSelected;
+
+public:
+   void restore(WorldItem &item);
 };
 
-class PlaceItemCommand : public EditorCommand
+
+class Selection
 {
-   PlaceItemCommand(WorldItem item, Point pos) : mItem(item), mPos(pos) { }
+public:
+   Selection() { /* do nothing */ }          // Generic constructor
+   Selection(Vector<WorldItem> &items);      // Primary constructor
 
-   WorldItem mItem;
-   Point mPos;
+private:
+   Vector<ItemSelection> selection;
 
-   bool Execute();
-   bool Undo();
+public:
+   void restore(Vector<WorldItem> &items);
 };
+
+//class EditorCommand
+//{
+//public:
+//    virtual bool Execute();
+//    virtual bool Undo();
+//    virtual ~EditorCommand() { }
+//};
+//
+//class PlaceItemCommand : public EditorCommand
+//{
+//   PlaceItemCommand(WorldItem item, Point pos) : mItem(item), mPos(pos) { }
+//
+//   WorldItem mItem;
+//   Point mPos;
+//
+//   bool Execute();
+//   bool Undo();
+//};
 
 
 
@@ -202,15 +230,20 @@ private:
 
    Vector<WorldItem> mLevelGenItems;         // Items added by a levelgen script
 
-   void saveUndoState(Vector<WorldItem> items);    // Save current state into undo history buffer
+   U32 mFirstUndoIndex;
+   U32 mLastUndoIndex;
+   static const U32 UNDO_STATES = 128;
+   void saveUndoState(Vector<WorldItem> items, bool cameFromRedo = false);    // Save current state into undo history buffer
+   bool undoAvailable();                           // Is an undo state available?
+   void undo(bool addToRedoStack);                 // Restore mItems to latest undo state
+   
 
-   //Vector<Vector<const char *> > mUnknownItems;    // Items from level file we can't parse
    Vector<WorldItem> mDockItems;                   // Items sitting in the dock
    Vector<WorldItem> mClipboard;                   // Items on clipboard
 
    void saveSelection();               // Save selection mask
    void restoreSelection();            // Restore selection mask
-   Vector<WorldItem> mSelectedSet;     // Place to store selection mask
+   Selection mSelectedSet;             // Place to store selection mask
 
    S32 itemToLightUp;
    S32 vertexToLightUp;
@@ -238,7 +271,6 @@ private:
    bool mDragSelecting;
    bool mShowingReferenceShip;
    S32 mDraggingDockItem;
-   bool itemCameFromDock;
    Vector<string> mLevelErrorMsgs;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
@@ -252,9 +284,12 @@ private:
 
    S32 countSelectedItems();
    S32 countSelectedVerts();
+   bool anyItemsSelected();           // Are any items selected?
+   bool anyItemsOrVertsSelected();    // Are any items/vertices selected?
+
    void findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex);
    void findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 &hitEdge);
-   void findHitItemOnDock(Point canvasPos, S32 &hitItem);
+   S32 findHitItemOnDock(Point canvasPos);
 
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();           // Return whether mouse is currently over the dock
@@ -275,7 +310,7 @@ public:
    string getLevelFileName();
    void loadLevel();
    bool mNeedToSave;          // Have we modified the level such that we need to save?
-   S32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
+   U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
    char mGameType[gameTypeLen];
    Vector<S32> mGameTypeArgs;

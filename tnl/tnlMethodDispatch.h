@@ -93,7 +93,7 @@ namespace Types
       val->value = s.readRangedU32(MinValue, MaxValue);
    }
    /// Writes a bit-compressed RangedU32 into a BitStream.
-   template <TNL::U32 MinValue, TNL::U32 MaxValue> inline void write(TNL::BitStream &s,TNL::RangedU32<MinValue,MaxValue> &val)
+   template <TNL::U32 MinValue, TNL::U32 MaxValue> inline void write(TNL::BitStream &s, TNL::RangedU32<MinValue,MaxValue> &val)
    {
       s.writeRangedU32(val.value, MinValue, MaxValue);
    }

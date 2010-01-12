@@ -1538,7 +1538,7 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 // This is the only constructor that's used.
 LuaShip::LuaShip(Ship *ship): thisShip(ship)
 {
-   thisShip = ship;
+   thisShip = ship;     // <-- needed?
    id++;
    mId = id;
    logprintf("Creating lauaship %d", mId);

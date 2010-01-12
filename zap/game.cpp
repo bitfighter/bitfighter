@@ -654,7 +654,10 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    processDeleteList(timeDelta);
+
    mNetInterface->processConnections();
+
+
 
    // Load a new level if the time is out on the current one
    if(mLevelSwitchTimer.update(timeDelta))
@@ -663,7 +666,6 @@ void ServerGame::idle(U32 timeDelta)
       getGameType()->updateRatings();
       cycleLevel();
    }
-
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
    {
@@ -672,6 +674,7 @@ void ServerGame::idle(U32 timeDelta)
          masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
       mMasterUpdateTimer.reset(UpdateServerStatusTime);
    }
+
 
    // Lastly, play any sounds server might have made...
    SFXObject::process();
