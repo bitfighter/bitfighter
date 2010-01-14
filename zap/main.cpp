@@ -26,8 +26,8 @@
 <ul>
 <li>Added Restart Level to game options menu if you have level change permissions</li>
 <li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
-<li>Added asteroids to help screen, enhanced colors</li>
-<li>Fixed several crashing issues</li>
+<li>Added asteroids to help screen, enhanced instruction colors</li>
+<li>Fixed several in-game crashing issues</li>
 <li>Added enhanced timer class to Lua scripting</li>
 <li>Minor efficiency improvements on rendering routines</li>
 

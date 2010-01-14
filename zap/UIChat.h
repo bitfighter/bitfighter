@@ -37,28 +37,93 @@
 namespace Zap
 {
 
-class ChatUserInterface : public UserInterface
+class ChatMessage
 {
 public:
+   ChatMessage() { /* do nothing */ }                             // Quickie constructor
+
+   ChatMessage(string frm, string msg, Color col, bool isPriv)    // "Real" constructor
+   {
+      color = col;
+      message = msg;
+      from = frm;
+      isPrivate = isPriv;
+   }
+
+   Color color;      // Chat message colors
+   string message;   // Hold chat messages
+   string from;      // Hold corresponding nicks
+   bool isPrivate;   // Holds public/private status of message
+};
+
+///////////////////////////////////////
+//////////////////////////////////////
+
+// For sorting our color-nick map, which we'll never do, so this is essentially a dummy
+struct strCmp {
+   bool operator()( string s1, string s2 ) const {
+      return s1 < s2;
+   }
+};
+
+// All our chat interfaces will inherit from this
+class AbstractChat
+{
+private:
+   static std::map<string, Color, strCmp> mFromColors;       // Map nicknames to colors
+   static U32 mColorPtr;
+   Color getNextColor();                                     // Get next available color for a new nick
+   static const S32 MessagesToRetain = 200;                  // Plenty for now
+
+   static U32 mMessageCount;
+
+protected:
+   // Message data
+   static ChatMessage mMessages[MessagesToRetain];
+
+   ChatMessage getMessage(U32 index);
+
+   U32 getMessageCount() { return mMessageCount; }
+   S32 getMessagesToRetain() { return MessagesToRetain; }
+
+public:
+   void newMessage(string from, string message, bool isPrivate);   // Handle incoming msg
+   void leaveGlobalChat();
+
+   // To be overridden:
+   virtual void deliverPrivateMessage(const char *sender, const char *message) = NULL;
+};
+
+
+///////////////////////////////////////
+//////////////////////////////////////
+
+class ChatUserInterface: public UserInterface, public AbstractChat
+{
+private:
+   static const S32 MessageDisplayCount = 23;
    const char *menuTitle;
    Color menuSubTitleColor;
 
    const char *menuFooter;
 
+public:
    ChatUserInterface();          // Constructor
 
    // UI related
    void render();
    void onKeyDown(KeyCode keyCode, char ascii);
+   
    void onActivate();
+   void onActivateLobbyMode();
+
+   void deliverPrivateMessage(const char *sender, const char *message);
+
    void onEscape();
 
    void idle(U32 timeDelta);
 
    // Mechanics related
-   enum {
-      MessageDisplayCount = 18,  // How many chat messages do we display?
-   };
 
    static const U32 GlobalChatFontSize = 16;   // Font size to display those messages
 
@@ -67,26 +132,8 @@ public:
 
    Vector<StringTableEntry> mPlayersInGlobalChat;
 
-   Color mDisplayMessageColor[MessageDisplayCount];               // Chat message colors
-   char mMessages[MessageDisplayCount][MAX_CHAT_MSG_LENGTH];      // Hold chat messages
-   char mNicks[MessageDisplayCount][MAX_SHORT_TEXT_LEN];          // Hold corresponding nicks
-   bool mIsPrivate[MessageDisplayCount];                          // Holds public/private status of message
-   void newMessage(const char *nick, bool isPrivate, const char *message, ...);   // Handle incoming msg
    void cancelChat();                                             // Get out of chat mode
    void issueChat();                                              // Send chat message
-
-   S32 mColorPtr;             // Keep track of which color will be used for next unknown nick
-
-   // For sorting our color-nick map, which we'll never do, so this is essentially a dummy
-   struct strCmp {
-      bool operator()( const char* s1, const char* s2 ) const {
-         return strcmp( s1, s2 ) < 0;
-      }
-   };
-
-   std::map<const char*, Color, strCmp> mNickColors;  // Map nicknames to colors
-   Color getNextColor();                              // Get next available color for a new nick
-   S32 mNumColors;
 };
 
 extern ChatUserInterface gChatInterface;

@@ -163,7 +163,6 @@ public:
    TNL_DECLARE_RPC(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick) );
    TNL_DECLARE_RPC(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick) );
    TNL_DECLARE_RPC(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
-
 };
 
 

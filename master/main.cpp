@@ -352,7 +352,8 @@ public:
 
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
             {
-               fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}", first ? "":", ", walk->mPlayerOrServerName.getString(), walk->mCSProtocolVersion, walk->mLevelName.getString(), walk->mLevelType.getString(), walk->mPlayerCount);
+               fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
+                          first ? "":", ", walk->mPlayerOrServerName.getString(), walk->mCSProtocolVersion, walk->mLevelName.getString(), walk->mLevelType.getString(), walk->mPlayerCount);
                first = false;
             }
 
@@ -794,7 +795,6 @@ public:
       else
          logprintf("Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
    }
-
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 

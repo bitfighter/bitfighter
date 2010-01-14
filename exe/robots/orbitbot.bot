@@ -6,16 +6,32 @@
 --
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
+
+
 -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-- Function main() is run once when the robot is initialized.  All variables
+-- defined here will be available as globals throughout the script.  
+-- This function is run first.
+-------------------------------------------------------------------------------
+
+function main()
+   orbitRadius = 300
+   orbitAng = 0
+   isInOrbit = false
+   targetItem = nil
+end   
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- This is called by the robot's idle routine each tick.
 -- This function must be present for the robot to work!
+-------------------------------------------------------------------------------
 
-function getMove()
+function onTick(deltaT)
 
     if(targetItem == nil) then
-        targetItem = findClosest(bot:findGlobalItems(TestItemType))
+        targetItem = findClosest(bot:findGlobalItems(ShipType))
     end
 
     if(targetItem == nil) then return end
@@ -56,29 +72,13 @@ function getMove()
     bot:setAngle( botLoc:angleTo( itemLoc ) )  -- Aim ship that way too
 end
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
+
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- This function is called once and should return the robot's name
+-------------------------------------------------------------------------------
 
 function getName()
     return( "OrbitBot" )
 end
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Setup code here: this is run once when the robot is initialized, and
--- any variables set here will persist throughout the robot's life.  These
--- variables can be accessed from various functions defined in this file.
--------------------------------------------------------------------------------
--- Global variables must be declared here before they can be used elsewhere
-orbitAng = 0
-orbitRadius = 300
-isInOrbit = false
-targetItem = nil

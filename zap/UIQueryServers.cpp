@@ -116,6 +116,8 @@ void QueryServersUserInterface::onActivate()
 }
 
 
+// Checks for connection to master, and sets up timer to keep running this until it finds one.  Once a connection is located,
+// it fires off a series of requests to the master asking for servers and chat names.
 void QueryServersUserInterface::contactEveryone()
 {
    Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
@@ -128,6 +130,7 @@ void QueryServersUserInterface::contactEveryone()
    {
       gClientGame->getConnectionToMaster()->startServerQuery();
       mWaitingForResponseFromMaster = true;
+
    }
    else
    {

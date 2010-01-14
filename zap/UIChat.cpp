@@ -38,74 +38,57 @@ namespace Zap
 
 const char *arrow = " -> ";
 
-// Constructor
-ChatUserInterface::ChatUserInterface()
-{
-   setMenuID(GlobalChatUI);
-   menuTitle = "Global Chat";
+// Initialize some static vars
+U32 AbstractChat::mColorPtr = 0;
+U32 AbstractChat::mMessageCount = 0;
 
-   //menuSubTitleColor = Color(1,1,1);
-   menuFooter = "Type your message | ENTER to send | ESC exits";
+// By declaring these here, we avoid link errors
+ChatMessage AbstractChat::mMessages[MessagesToRetain];
+std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nicknames to colors
 
-   mColorPtr = 0;
-
-   // Clear out any existing chat messages
-   for(U32 i = 0; i < MessageDisplayCount; i++)
-   {
-      mMessages[i][0] = 0;
-      mNicks[i][0] = 0;
-   }
-   memset(mChatBuffer, 0, sizeof(mChatBuffer));
-}
 
 
 // We received a new incoming chat message...  Add it to the list
-void ChatUserInterface::newMessage(const char *nick, bool isPrivate, const char *message, ...)
+void AbstractChat::newMessage(string from, string message, bool isPrivate)
 {
-   // Make room for the new message
-   for(S32 i = MessageDisplayCount - 1; i > 0; i--)
+   bool isFromUs = (from == string(gNameEntryUserInterface.getText()));  // Is this message from us?
+
+   // Choose a color
+   Color color;
+
+   if(isFromUs)
+      color = Color(1,1,1);                               // If so, use white
+   else                                                   // Otherwise...
    {
-      strcpy(mMessages[i], mMessages[i-1]);
-      strcpy(mNicks[i], mNicks[i-1]);
-      mDisplayMessageColor[i] = mDisplayMessageColor[i-1];
-      mIsPrivate[i] = mIsPrivate[i-1];
+      if (mFromColors.count(from) == 0)                   // ...see if we have a color for this nick.  If we don't, count will be 0
+         mFromColors[from] = getNextColor();              // If not, get a new one
+
+      color = mFromColors[from];
    }
-   // Add it to the list
-   va_list args;
-   va_start(args, message);
-   dVsprintf(mMessages[0], sizeof(mMessages[0]), message, args);
-   dVsprintf(mNicks[0], sizeof(mNicks[0]), nick, args);
-   mIsPrivate[0] = isPrivate;
 
-   // And choose a color
-   if (strcmp(nick, gNameEntryUserInterface.getText()) == 0)   // Is this message from us?
-      mDisplayMessageColor[0] = Color(1,1,1);                  // If so, use white
-   else                                                        // Otherwise...
-   {
-      if (!mNickColors.count(nick))                            // ...see if we have a color for this nick
-         mNickColors[nick] = getNextColor();                   // If not, get a new one
+   mMessages[mMessageCount % MessagesToRetain] = ChatMessage(from, message, color, isPrivate);
+   mMessageCount++;
+                                                                                                      logprintf("msgcoung %d", mMessageCount);
 
-      mDisplayMessageColor[0] = mNickColors[nick];
+   if(isFromUs && isPrivate)
+      deliverPrivateMessage(from.c_str(), message.c_str());
+}
 
-      // If player not in UIChat, then display message in-game if possible.  2 line message. 
-      if(isPrivate && UserInterface::current->getMenuID() != getMenuID())    
-      {
-         gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
-            "Private message from %s: Press [%s] to enter chat mode", nick, keyCodeToString(keyOUTGAMECHAT));
-         gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
-      }
-   }
+
+// We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
+// First message has index == 0, second has index == 1, etc.
+ChatMessage AbstractChat::getMessage(U32 index) 
+{ 
+   U32 first = (mMessageCount < MessagesToRetain) ? 0 : mMessageCount % MessagesToRetain;
+                                                                                                      logprintf("first = %d",first);
+   return mMessages[(first + index) % MessagesToRetain]; 
 }
 
 
 // Retrieve the next available chat text color
-Color ChatUserInterface::getNextColor()
+Color AbstractChat::getNextColor()
 {
-   enum {
-      NumColors = 19,
-   };
-
-   static Color colorList[NumColors] = {
+   static Color colorList[] = {
       Color(0.55,0.55,0),     Color(1,0.55,0.55),
       Color(0,0.6,0),         Color(0.68,1,0.25),
       Color(0,0.63,0.63),     Color(0.275,0.51,0.71),
@@ -115,13 +98,43 @@ Color ChatUserInterface::getNextColor()
       Color(0.86,0.078,1),    Color(0.78,0.08,0.52),
       Color(0.93,0.5,0),      Color(0.63,0.32,0.18),
       Color(0.5,1,1),         Color(1,0.73,1),
-      Color(0.48,0.41,0.93)
+      Color(0.48,0.41,0.93),  NULL
    };
 
    mColorPtr++;
-   if (mColorPtr == NumColors)
+   if(colorList[mColorPtr] == NULL)
       mColorPtr = 0;
+
    return colorList[mColorPtr];
+}
+
+
+// Announce we're ducking out for a spell...
+void AbstractChat::leaveGlobalChat()
+{
+   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   if(conn)
+      conn->c2mLeaveGlobalChat();
+}
+
+
+///////////////////////////////////////////
+
+// Constructor
+ChatUserInterface::ChatUserInterface()
+{
+   setMenuID(GlobalChatUI);
+
+   menuTitle = "GameLobby / Global Chat";
+   menuFooter = "Type your message | ENTER to send | ESC exits";
+
+   //// Clear out any existing chat messages
+   //for(U32 i = 0; i < MessageDisplayCount; i++)
+   //{
+   //   mMessages[i][0] = 0;
+   //   mNicks[i][0] = 0;
+   //}
+   //memset(mChatBuffer, 0, sizeof(mChatBuffer));
 }
 
 
@@ -174,7 +187,7 @@ void ChatUserInterface::render()
    glColor3f(1,1,0);
 
    if(mPlayersInGlobalChat.size() == 0)
-      drawString(xpos, ypos, 11, "No other players currently in chat room");
+      drawString(xpos, ypos, 11, "No other players currently in lobby/chat room");
    else
       for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
       {
@@ -182,30 +195,30 @@ void ChatUserInterface::render()
          xpos += getStringWidthf(11, "%s ;",mPlayersInGlobalChat[i].getString());
       }
 
-
    // Render incoming chat msgs
    glColor3f(1,1,1);
 
    U32 y = UserInterface::vertMargin + 60;
-   for(S32 i = MessageDisplayCount - 1; i >= 0; i--)
+
+   U32 firstMsg = max(0, getMessagesToRetain() - MessageDisplayCount);
+                                                                                                               logprintf("first msg disp: %d +++ count = %d", firstMsg, getMessageCount());
+   for(U32 i = firstMsg; i < min(firstMsg + MessageDisplayCount, getMessageCount()); i++)
    {
-      if(mMessages[i][0])
+      ChatMessage msg = getMessage(i); 
+      glColor(msg.color);
+
+      drawString(UserInterface::horizMargin, y, GlobalChatFontSize, msg.from.c_str());
+      S32 fromWidth = getStringWidth(GlobalChatFontSize, msg.from.c_str());
+      if(msg.isPrivate)
       {
-         glColor(mDisplayMessageColor[i]);
-
-         drawString(UserInterface::horizMargin, y, GlobalChatFontSize, mNicks[i]);
-         S32 nickWidth = getStringWidth(GlobalChatFontSize, mNicks[i]);
-         if (mIsPrivate[i])
-         {
-            drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, "*");
-            nickWidth += getStringWidth(GlobalChatFontSize, "*");
-         }
-         drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, arrow);
-         nickWidth += getStringWidth(GlobalChatFontSize, arrow);
-         drawString(UserInterface::horizMargin + nickWidth, y, GlobalChatFontSize, mMessages[i]);
-
-         y += GlobalChatFontSize + 4;
+         drawString(UserInterface::horizMargin + fromWidth, y, GlobalChatFontSize, "*");
+         fromWidth += getStringWidth(GlobalChatFontSize, "*");
       }
+      drawString(UserInterface::horizMargin + fromWidth, y, GlobalChatFontSize, arrow);
+      fromWidth += getStringWidth(GlobalChatFontSize, arrow);
+      drawString(UserInterface::horizMargin + fromWidth, y, GlobalChatFontSize, msg.message.c_str());
+
+      y += GlobalChatFontSize + 4;     // 4 = vert spacing between messages
    }
 
    // Render outgoing chat message composition line
@@ -265,12 +278,24 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       // Limit chat messages to the size that can be displayed on the screen
 
-      S32 nickWidth = getStringWidthf(GlobalChatFontSize, "%s%s", gNameEntryUserInterface.getText(), arrow);
-      if((mChatCursorPos < sizeof(mChatBuffer) - 2 )  && nickWidth + (S32) getStringWidthf(GlobalChatFontSize, "%s%c", mChatBuffer, ascii) < UserInterface::canvasWidth - 2 * horizMargin )
+      S32 fromWidth = getStringWidthf(GlobalChatFontSize, "%s%s", gNameEntryUserInterface.getText(), arrow);
+      if((mChatCursorPos < sizeof(mChatBuffer) - 2 )  && fromWidth + (S32) getStringWidthf(GlobalChatFontSize, "%s%c", mChatBuffer, ascii) < UserInterface::canvasWidth - 2 * horizMargin )
       {
          mChatBuffer[mChatCursorPos] = ascii;
          mChatCursorPos++;
       }
+   }
+}
+
+
+void ChatUserInterface::deliverPrivateMessage(const char *sender, const char *message)
+{
+   // If player not in UIChat, then display message in-game if possible.  2 line message. 
+   if(UserInterface::current->getMenuID() != getMenuID())    
+   {
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
+         "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
    }
 }
 
@@ -286,9 +311,9 @@ void ChatUserInterface::issueChat()
          conn->c2mSendChat(mChatBuffer);
 
       // And display it locally
-      newMessage(gNameEntryUserInterface.getText(), false, mChatBuffer);
+      newMessage(gNameEntryUserInterface.getText(), mChatBuffer, false);
    }
-   cancelChat();
+   cancelChat();     // Clear message
 }
 
 
@@ -302,6 +327,7 @@ void ChatUserInterface::cancelChat()
 
 extern bool gDisableShipKeyboardInput;
 
+// Run when UIChat is called in normal UI mode
 void ChatUserInterface::onActivate()
 {
    MasterServerConnection *conn = gClientGame->getConnectionToMaster();
@@ -315,11 +341,8 @@ void ChatUserInterface::onActivate()
 
 void ChatUserInterface::onEscape()
 {
-   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
-   if(conn)
-      conn->c2mLeaveGlobalChat();
-
-   UserInterface::reactivatePrevUI();   //gMainMenuUserInterface
+   leaveGlobalChat();
+   UserInterface::reactivatePrevUI();
 }
 
 ChatUserInterface gChatInterface;

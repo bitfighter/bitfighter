@@ -65,9 +65,13 @@ mt.__declared = {}
 
 mt.__newindex = function (t, n, v)
   if __STRICT and not mt.__declared[n] then
-    local w = debug.getinfo(2, "S").what
-    if w ~= "main" and w ~= "C" then
-      error("Attempted assign to undeclared variable '"..n.."'.  All vars must be declared 'local' or 'global'.", 2)
+    local w = debug.getinfo(2, "S").what     -- See PiL ch 23
+    if w == "Lua" then                       -- It's a Lua function!
+      local name = debug.getinfo(2, "n").name
+      if name ~= "main" then                    -- Allowed to declare globals in main function
+         error("Attempted assign to undeclared variable '"..n.."' in function '"..(name or "<<unknown function>>").."'.\n" ..
+               "All vars must be declared 'local' or 'global'; all globals must be defined in main().", 2)
+      end
     end
     mt.__declared[n] = true
   end

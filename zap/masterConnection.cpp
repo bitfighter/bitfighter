@@ -204,8 +204,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool 
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntry playerNick, bool isPrivate, StringPtr message))
 {
-   if(!mIsGameServer)
-      gChatInterface.newMessage(playerNick.getString(), isPrivate, message.getString());
+   //if(!mIsGameServer)
+      gChatInterface.newMessage(playerNick.getString(), message.getString(), isPrivate);
 }
 
 
