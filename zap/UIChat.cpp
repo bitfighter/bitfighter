@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "UIChat.h"
+#include "UIQueryServers.h"      // For menuID
 #include "input.h"
 #include "masterConnection.h"
 #include "UINameEntry.h"
@@ -68,19 +69,17 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate)
 
    mMessages[mMessageCount % MessagesToRetain] = ChatMessage(from, message, color, isPrivate);
    mMessageCount++;
-                                                                                                      logprintf("msgcoung %d", mMessageCount);
 
    if(isFromUs && isPrivate)
       deliverPrivateMessage(from.c_str(), message.c_str());
 }
 
-
+ 
 // We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
 // First message has index == 0, second has index == 1, etc.
 ChatMessage AbstractChat::getMessage(U32 index) 
 { 
    U32 first = (mMessageCount < MessagesToRetain) ? 0 : mMessageCount % MessagesToRetain;
-                                                                                                      logprintf("first = %d",first);
    return mMessages[(first + index) % MessagesToRetain]; 
 }
 
@@ -118,6 +117,46 @@ void AbstractChat::leaveGlobalChat()
 }
 
 
+void AbstractChat::renderMessage(U32 index, U32 fontsize, U32 yPos, U32 numberToDisplay)            // yPos is starting location of first message
+{
+   U32 firstMsg = (mMessageCount <= numberToDisplay) ? 0 : (mMessageCount - numberToDisplay);       // Don't use min/max because of U32/S32 issues!
+
+   if(index >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
+      return;
+
+   ChatMessage msg = getMessage(index + firstMsg); 
+   glColor(msg.color);
+
+   yPos += index * (fontsize + 4);   // 4 = vertical padding between messages
+   UserInterface::drawString(UserInterface::horizMargin, yPos, fontsize, msg.from.c_str());
+
+   S32 fromWidth = UserInterface::getStringWidth(fontsize, msg.from.c_str());
+
+   if(msg.isPrivate)
+   {
+      UserInterface::drawString(UserInterface::horizMargin + fromWidth, yPos, fontsize, "*");
+      fromWidth += UserInterface::getStringWidth(fontsize, "*");
+   }
+
+   UserInterface::drawString(UserInterface::horizMargin + fromWidth, yPos, fontsize, arrow);
+
+   fromWidth += UserInterface::getStringWidth(fontsize, arrow);
+   UserInterface::drawString(UserInterface::horizMargin + fromWidth, yPos, fontsize, msg.message.c_str());
+}
+
+
+void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
+{
+   // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message. 
+   if(UserInterface::current->getMenuID() != gChatInterface.getMenuID() &&
+      UserInterface::current->getMenuID() != gQueryServersUserInterface.getMenuID() )    
+   {
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
+         "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
+   }
+}
+
 ///////////////////////////////////////////
 
 // Constructor
@@ -127,14 +166,6 @@ ChatUserInterface::ChatUserInterface()
 
    menuTitle = "GameLobby / Global Chat";
    menuFooter = "Type your message | ENTER to send | ESC exits";
-
-   //// Clear out any existing chat messages
-   //for(U32 i = 0; i < MessageDisplayCount; i++)
-   //{
-   //   mMessages[i][0] = 0;
-   //   mNicks[i][0] = 0;
-   //}
-   //memset(mChatBuffer, 0, sizeof(mChatBuffer));
 }
 
 
@@ -200,26 +231,10 @@ void ChatUserInterface::render()
 
    U32 y = UserInterface::vertMargin + 60;
 
-   U32 firstMsg = max(0, getMessagesToRetain() - MessageDisplayCount);
-                                                                                                               logprintf("first msg disp: %d +++ count = %d", firstMsg, getMessageCount());
-   for(U32 i = firstMsg; i < min(firstMsg + MessageDisplayCount, getMessageCount()); i++)
-   {
-      ChatMessage msg = getMessage(i); 
-      glColor(msg.color);
+   static const U32 MessageDisplayCount = 22;
 
-      drawString(UserInterface::horizMargin, y, GlobalChatFontSize, msg.from.c_str());
-      S32 fromWidth = getStringWidth(GlobalChatFontSize, msg.from.c_str());
-      if(msg.isPrivate)
-      {
-         drawString(UserInterface::horizMargin + fromWidth, y, GlobalChatFontSize, "*");
-         fromWidth += getStringWidth(GlobalChatFontSize, "*");
-      }
-      drawString(UserInterface::horizMargin + fromWidth, y, GlobalChatFontSize, arrow);
-      fromWidth += getStringWidth(GlobalChatFontSize, arrow);
-      drawString(UserInterface::horizMargin + fromWidth, y, GlobalChatFontSize, msg.message.c_str());
-
-      y += GlobalChatFontSize + 4;     // 4 = vert spacing between messages
-   }
+   for(U32 i = 0; i < MessageDisplayCount; i++)
+      renderMessage(i, GlobalChatFontSize, y, MessageDisplayCount);
 
    // Render outgoing chat message composition line
    const char promptStr[] = "> ";
@@ -284,18 +299,6 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mChatBuffer[mChatCursorPos] = ascii;
          mChatCursorPos++;
       }
-   }
-}
-
-
-void ChatUserInterface::deliverPrivateMessage(const char *sender, const char *message)
-{
-   // If player not in UIChat, then display message in-game if possible.  2 line message. 
-   if(UserInterface::current->getMenuID() != getMenuID())    
-   {
-      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
-         "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
    }
 }
 

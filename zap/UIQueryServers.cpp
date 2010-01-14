@@ -813,6 +813,12 @@ void QueryServersUserInterface::render()
       glColor(white);
       drawCenteredString(canvasHeight / 2 - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
    }
+
+   // Show some chat messages
+   static const S32 MessageDisplayCount = 5;
+
+   for(U32 i = 0; i < MessageDisplayCount; i++)
+      renderMessage(i, 18, 450, MessageDisplayCount);
 }
 
 

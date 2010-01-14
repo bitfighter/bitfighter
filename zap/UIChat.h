@@ -66,7 +66,7 @@ struct strCmp {
    }
 };
 
-// All our chat interfaces will inherit from this
+// All our chat classes will inherit from this
 class AbstractChat
 {
 private:
@@ -84,14 +84,14 @@ protected:
    ChatMessage getMessage(U32 index);
 
    U32 getMessageCount() { return mMessageCount; }
-   S32 getMessagesToRetain() { return MessagesToRetain; }
 
 public:
    void newMessage(string from, string message, bool isPrivate);   // Handle incoming msg
    void leaveGlobalChat();
 
-   // To be overridden:
-   virtual void deliverPrivateMessage(const char *sender, const char *message) = NULL;
+   void renderMessage(U32 index, U32 fontsize, U32 yPos, U32 numberToDisplay);
+
+   void deliverPrivateMessage(const char *sender, const char *message);
 };
 
 
@@ -101,7 +101,6 @@ public:
 class ChatUserInterface: public UserInterface, public AbstractChat
 {
 private:
-   static const S32 MessageDisplayCount = 23;
    const char *menuTitle;
    Color menuSubTitleColor;
 
@@ -116,8 +115,6 @@ public:
    
    void onActivate();
    void onActivateLobbyMode();
-
-   void deliverPrivateMessage(const char *sender, const char *message);
 
    void onEscape();
 

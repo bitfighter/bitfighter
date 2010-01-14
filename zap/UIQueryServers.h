@@ -27,6 +27,7 @@
 #define _UIQUERYSERVERS_H_
 
 #include "UI.h"
+#include "UIChat.h"
 #include "point.h"
 
 #include "../tnl/tnlNonce.h"
@@ -37,7 +38,7 @@
 namespace Zap
 {
 
-class QueryServersUserInterface : public UserInterface
+class QueryServersUserInterface : public UserInterface, public AbstractChat
 {
 private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
