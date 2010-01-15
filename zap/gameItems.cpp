@@ -35,33 +35,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
-// Constructor
-RepairItem::RepairItem(Point p) : PickupItem(p, 20)
-{
-   mNetFlags.set(Ghostable);
-   mRepopDelay = defaultRespawnTime * 1000;
-}
-
-
-bool RepairItem::processArguments(S32 argc, const char **argv)
-{
-   if(argc < 2)
-      return false;
-   else if(!Parent::processArguments(argc, argv))
-      return false;
-
-   if(argc == 3)
-   {
-      S32 repopDelay = atoi(argv[2]) * 1000;    // 3rd param is time for this to regenerate in seconds
-      if(repopDelay > 0)
-         mRepopDelay = repopDelay;
-      else
-         mRepopDelay = -1;
-   }
-
-   return true;
-}
-
 
 bool RepairItem::pickup(Ship *theShip)
 {
@@ -77,15 +50,11 @@ bool RepairItem::pickup(Ship *theShip)
    return true;
 }
 
+
+// Runs on client when item's unpack method signifies the item has been picked up
 void RepairItem::onClientPickup()
 {
    SFXObject::play(SFXShipHeal, getRenderPos(), getRenderVel());
-}
-
-
-U32 RepairItem::getRepopDelay()
-{
-   return mRepopDelay;    
 }
 
 
@@ -93,6 +62,7 @@ void RepairItem::renderItem(Point pos)
 {
    if(!isVisible())
       return;
+
    renderRepairItem(pos);
 }
 
@@ -123,10 +93,75 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
 S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
 
 
-//////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+TNL_IMPLEMENT_NETOBJECT(EnergyItem);
+
+
+bool EnergyItem::pickup(Ship *theShip)
+{
+   if(theShip->getHealth() >= 1)
+      return false;
+
+   DamageInfo di;
+   di.damageAmount = -0.5f;      // Negative damage = repair!
+   di.damageType = DamageTypePoint;
+   di.damagingObject = this;
+
+   theShip->damageObject(&di);
+   return true;
+}
+
+
+// Runs on client when item's unpack method signifies the item has been picked up
+void EnergyItem::onClientPickup()
+{
+   SFXObject::play(SFXShipHeal, getRenderPos(), getRenderVel());
+}
+
+
+void EnergyItem::renderItem(Point pos)
+{
+   if(!isVisible())
+      return;
+
+   renderEnergyItem(pos);
+}
+
+
+const char EnergyItem::className[] = "EnergyItem";      // Class name as it appears to Lua scripts
+
+// Lua constructor
+EnergyItem::EnergyItem(lua_State *L)
+{
+   // Do nothing, for now...  should take params from stack and create RepairItem object
+}
+
+
+// Define the methods we will expose to Lua
+Lunar<EnergyItem>::RegType EnergyItem::methods[] =
+{
+   // Standard gameItem methods
+   method(EnergyItem, getClassID),
+   method(EnergyItem, getLoc),
+   method(EnergyItem, getRad),
+   method(EnergyItem, getVel),
+
+   // Class specific methods
+   method(EnergyItem, isVis),
+   {0,0}    // End method list
+};
+
+S32 EnergyItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is EnergyItem visible? (returns boolean)
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
-AsteroidSpawn::AsteroidSpawn(Point pos, S32 delay) 
+AsteroidSpawn::AsteroidSpawn(Point pos, S32 delay)
 {
    mPos = pos;
    timer = Timer(delay);
@@ -217,7 +252,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
    newItem->setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
- 
+
    F32 ang2;
    do
       ang2 = TNL::Random::readF() * Float2Pi;
@@ -303,7 +338,7 @@ const char Asteroid::className[] = "Asteroid";      // Class name as it appears 
 Asteroid::Asteroid(lua_State *L)
 {
    // Do we want to construct these from Lua?  If so, do that here!
-} 
+}
 
 
 // Define the methods we will expose to Lua

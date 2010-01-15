@@ -284,11 +284,19 @@ bool Item::collide(GameObject *otherObject)
    return mIsCollideable && !mIsMounted;
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 PickupItem::PickupItem(Point p, float radius) : Item(p, false, radius, 1)
 {
    mIsVisible = true;
    mIsMomentarilyVisible = false;
+
+   mNetFlags.set(Ghostable);
+   mRepopDelay = defaultRespawnTime * 1000;
+
 }
+
 
 void PickupItem::idle(GameObject::IdleCallPath path)
 {
@@ -326,6 +334,27 @@ void PickupItem::idle(GameObject::IdleCallPath path)
    updateExtent();
 }
 
+
+bool PickupItem::processArguments(S32 argc, const char **argv)
+{
+   if(argc < 2)
+      return false;
+   else if(!Parent::processArguments(argc, argv))
+      return false;
+
+   if(argc == 3)
+   {
+      S32 repopDelay = atoi(argv[2]) * 1000;    // 3rd param is time for this to regenerate in seconds
+      if(repopDelay > 0)
+         mRepopDelay = repopDelay;
+      else
+         mRepopDelay = -1;
+   }
+
+   return true;
+}
+
+
 U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = Parent::packUpdate(connection, updateMask, stream);
@@ -340,6 +369,7 @@ U32 PickupItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 
    return retMask;
 }
+
 
 void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {

@@ -187,7 +187,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
          glVertex2f(0, -15 - 20 * thrusts[0]);
          glVertex2f(8, -15);
       glEnd();
-      
+
       glColor4f(1, 0.5, 0, alpha);
       glBegin(GL_LINES);
          glVertex2f(-6, -15);
@@ -220,7 +220,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
          glVertex2f(-12.5, 10);
          glVertex2f(-10, 10 + thrusts[1] * 15);
       glEnd();
-      
+
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINES);
          glVertex2f(9, 10);
@@ -249,7 +249,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
          glVertex2f(xThrust, 0);
          glVertex2f(xThrust + thrusts[2] * xThrust * 1.5, 5);
       glEnd();
-      
+
       glColor4f(1,0.5,0, alpha);
       glBegin(GL_LINES);
          glVertex2f(xThrust, 8);
@@ -257,7 +257,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
          glVertex2f(xThrust, 2);
          glVertex2f(xThrust + thrusts[2] * xThrust, 5);
       glEnd();
-      
+
       glColor4f(1,1,0, alpha);
       glBegin(GL_LINES);
          glVertex2f(xThrust, 6);
@@ -404,7 +404,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 
    glEnable(GL_BLEND);
 
-   if(gClientGame->getCommanderZoomFraction() > 0 || showDestOverride) 
+   if(gClientGame->getCommanderZoomFraction() > 0 || showDestOverride)
    {
       const F32 wid = 6.0;
       const F32 alpha = showDestOverride ? 1.0 : gClientGame->getCommanderZoomFraction();
@@ -415,7 +415,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
       glEnable(GL_POLYGON_SMOOTH);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glHint(GL_POLYGON_SMOOTH_HINT, GL_FASTEST);
- 
+
       for(S32 i = 0; i < dests.size(); i++)
       {
          F32 ang = pos.angleTo(dests[i]);
@@ -942,8 +942,8 @@ void renderGrenade(Point pos, F32 lifeLeft)
       innerVis = true;
    else if(lifeLeft > .05)
       innerVis = false;
- 
-   if(gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 3) 
+
+   if(gIniSettings.burstGraphicsMode == 1 || gIniSettings.burstGraphicsMode == 3)
       glColor3f(1, min(1.25 - lifeLeft, 1), 0);
    else
       glColor3f(1, 0, 0);
@@ -1093,6 +1093,47 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
    glPopMatrix();
 }
 
+
+void renderEnergyItem(Point pos)
+{
+   renderEnergyItem(pos, false, NULL, 1);
+}
+
+
+void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
+{
+   F32 size;
+
+   if(forEditor)  // Rendering icon for editor
+   {
+      size = 8;
+   }
+   else           // Normal in-game rendering
+   {
+      size = 18;
+   }
+
+   glPushMatrix();
+   glTranslatef(pos.x, pos.y, 0);
+
+   // Lightning bolt
+   glColor(overrideColor == NULL ? Color(1,1,0) : overrideColor, alpha);
+   glBegin(GL_LINE_LOOP);
+      glVertex2f( 13, -13);
+      glVertex2f(  3,  -1);
+      glVertex2f(  8,   4);
+      glVertex2f(-12,  14);
+      glVertex2f(  1,   2);
+      glVertex2f(  6,  -3);
+   glEnd();
+
+   glColor3f(1, .67, 0);        // Orangey
+   drawCircle(Point(0,0), 10);
+
+   glPopMatrix();
+}
+
+
 void renderSpeedZone(Vector<Point> points, U32 time)
 {
          glColor3f(1, 0, 0);
@@ -1111,7 +1152,7 @@ void renderSpeedZone(Vector<Point> points, U32 time)
 void renderTestItem(Point pos, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0); 
+   glTranslatef(pos.x, pos.y, 0);
 
    glColor4f(1, 1, 0, alpha);
    drawPolygon(Point(0,0), 7, 60, 0);
@@ -1122,7 +1163,7 @@ void renderTestItem(Point pos, F32 alpha)
 void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0); 
+   glTranslatef(pos.x, pos.y, 0);
 
    glColor(color == NULL ? Color(.7, .7, .7) : color, alpha);
       // Design 1

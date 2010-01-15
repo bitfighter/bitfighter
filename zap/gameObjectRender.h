@@ -79,6 +79,10 @@ extern void renderSpyBug(Point pos, bool visible);
 
 extern void renderRepairItem(Point pos);
 extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
+
+extern void renderEnergyItem(Point pos);
+extern void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
+
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(Vector<Point>, U32 time);
 

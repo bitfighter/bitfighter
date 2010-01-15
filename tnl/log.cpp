@@ -9,8 +9,8 @@
 //   the Free Software Foundation; either version 2 of the License, or
 //   (at your option) any later version.
 //
-//   For use in products that are not compatible with the terms of the GNU 
-//   General Public License, alternative licensing options are available 
+//   For use in products that are not compatible with the terms of the GNU
+//   General Public License, alternative licensing options are available
 //   from GarageGames.com.
 //
 //   This program is distributed in the hope that it will be useful,
@@ -86,7 +86,7 @@ LogType *LogType::find(const char *name)
 
 void LogConsumer::logString(const char *string)
 {
-   // by default the LogConsumer will output to the platform debug 
+   // by default the LogConsumer will output to the platform debug
    // string printer, but only if we're in debug mode
    // this will be overridden by child classes
 #ifdef TNL_DEBUG
@@ -94,7 +94,7 @@ void LogConsumer::logString(const char *string)
 #endif
 }
 
-void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
+void logger(LogConsumer::FilterType filtertype, const char *format, ...)
 {
    char buffer[4096];
    U32 bufferStart = 0;
@@ -108,9 +108,15 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
       bufferStart += 2;
    }
 
+   va_list args;
+   va_start( args, format );
+
    // -1 below makes sure we have enough room for a "\n" if we need to append one
    dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
-   
+
+   va_end(args);
+
+
    // If last char is a "\", chop it off, otherwise append newline
    U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length, so appending newline should be ok
 
@@ -129,7 +135,7 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
 
 void logprintf(const char *format, ...)
 {
-   va_list s;    
+   va_list s;
    va_start( s, format );
 
    logger(LogConsumer::GeneralFilter, format, s);
@@ -139,7 +145,7 @@ void logprintf(const char *format, ...)
 // Log a message to the server log --> wraps logger
 void s_logprintf(const char *format, ...)
 {
-   va_list s;    
+   va_list s;
    va_start( s, format );
 
    logger(LogConsumer::ServerFilter, format, s);

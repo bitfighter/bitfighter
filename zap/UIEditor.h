@@ -51,33 +51,6 @@ enum VertexRenderStyles
 };
 
 
-enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
-{
-   ItemSpawn,
-   ItemSpeedZone,
-   ItemSoccerBall,
-   ItemFlag,
-   ItemFlagSpawn,
-   ItemBarrierMaker,
-   ItemTeleporter,
-   ItemRepair,
-   ItemBouncyBall,
-   ItemAsteroid,
-   ItemAsteroidSpawn,
-   ItemMine,
-   ItemSpyBug,
-   ItemResource,
-   ItemLoadoutZone,
-   ItemNexus,
-   ItemSlipZone,
-   ItemTurret,
-   ItemForceField,
-   ItemGoalZone,
-   ItemTextItem,
-   ItemNavMeshZone,
-};
-
-
 // From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
 struct SaveException : public std::exception
 {
@@ -239,7 +212,7 @@ private:
    bool undoAvailable();               // Is an undo state available?
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
-   
+
    void autoSave();                    // Hope for the best, prepare for the worst
 
    Vector<WorldItem> mDockItems;       // Items sitting in the dock

@@ -36,10 +36,11 @@ namespace Zap
 class Ship;
 class GoalZone;
 
-///////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 class LuaItem : public LuaObject
-{  
+{
 public:
    // "= 0" ==> make these methods "pure virtual" functions, and must be implemented in child classes!
    virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
@@ -48,12 +49,13 @@ public:
    virtual GameObject *getGameObject() = 0;  // Return the underlying GameObject
 
    virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }                 // Push item onto stack
-   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class    
+   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class
 
    static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
 };
 
-///////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 class Item : public MoveObject, public LuaItem
 {
@@ -109,15 +111,15 @@ public:
    bool collide(GameObject *otherObject);
 
    // LuaItem interface
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }    
-   S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }        
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
+   S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
 
    GameObject *getGameObject() { return this; }
 };
 
-///////////////////
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 class PickupItem : public Item
 {
@@ -126,6 +128,8 @@ private:
    bool mIsVisible;
    bool mIsMomentarilyVisible;      // Used if item briefly flashes on and off, like if a ship is sitting on a repair item when it reappears
    Timer mRepopTimer;
+   S32 mRepopDelay;
+
 
 protected:
    enum MaskBits {
@@ -134,9 +138,15 @@ protected:
    };
 
 public:
-   PickupItem(Point p = Point(), float radius = 1);
+   PickupItem(Point p = Point(), float radius = 1);      // Constructor
+
+   bool processArguments(S32 argc, const char **argv);
+
    void idle(GameObject::IdleCallPath path);
    bool isVisible() { return mIsVisible; }
+
+   U32 getRepopDelay() { return mRepopDelay };
+
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

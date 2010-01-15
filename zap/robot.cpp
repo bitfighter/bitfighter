@@ -93,6 +93,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnum(GoalZoneType);
    setEnum(AsteroidType);
    setEnum(RepairItemType);
+   setEnum(EnergyItemType);
    setEnum(SoccerBallItemType);
    setEnum(TurretType);
    setEnum(ForceFieldProjectorType);

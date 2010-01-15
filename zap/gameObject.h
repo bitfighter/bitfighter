@@ -60,16 +60,18 @@ enum GameObjectType
    BulletType          = BIT(13),      // All projectiles except grenades?
    MineType            = BIT(14),
    SpyBugType          = BIT(15),
-         // slot available
-   NexusType           = BIT(17),
-   BotNavMeshZoneType  = BIT(18),
-   RobotType           = BIT(19),
-   TeleportType        = BIT(20),
-   GoalZoneType        = BIT(21),
-   AsteroidType        = BIT(22),      // Only needed for Lua...
-   RepairItemType      = BIT(23),      // Only needed for Lua...
+   NexusType           = BIT(16),
+   BotNavMeshZoneType  = BIT(17),
+   RobotType           = BIT(18),
+   TeleportType        = BIT(19),
+   GoalZoneType        = BIT(20),
+
+   AsteroidType        = BIT(21),      // Only needed for Lua...
+   RepairItemType      = BIT(22),      // Only needed for Lua...
+   EnergyItemType      = BIT(23),      // Only needed for Lua...
    SoccerBallItemType  = BIT(24),      // Only needed for Lua...
    NexusFlagType       = BIT(25),      // Only needed for Lua...
+
    TurretType          = BIT(26),      // Formerly EngineeredType
    ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
 

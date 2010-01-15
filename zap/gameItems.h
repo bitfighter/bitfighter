@@ -29,7 +29,7 @@
 
 #include "item.h"
 #include "ship.h"
-#include "luaObject.h"			// For Lua interfaces
+#include "luaObject.h"        // For Lua interfaces
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 
@@ -42,16 +42,13 @@ class RepairItem : public PickupItem
 {
 private:
    typedef PickupItem Parent;
-   S32 mRepopDelay;
 
 public:
    static const S32 defaultRespawnTime = 20;
 
-   RepairItem(Point p = Point());   // Constructor
-   bool processArguments(S32 argc, const char **argv);
+   RepairItem(Point p = Point()) : PickupItem(p, defaultRespawnTime) { /* do nothing */ };   // Constructor
    bool pickup(Ship *theShip);
    void onClientPickup();
-   U32 getRepopDelay();
    void renderItem(Point pos);
 
    TNL_DECLARE_CLASS(RepairItem);
@@ -71,8 +68,41 @@ public:
 };
 
 
-////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
+class EnergyItem : public PickupItem
+{
+private:
+   typedef PickupItem Parent;
+
+public:
+   static const S32 defaultRespawnTime = 20;
+
+   EnergyItem(Point p = Point()) : PickupItem(p, defaultRespawnTime) { /* do nothing */ };   // Constructor
+   bool pickup(Ship *theShip);
+   void onClientPickup();
+   void renderItem(Point pos);
+
+   TNL_DECLARE_CLASS(EnergyItem);
+
+   ///// Lua Interface
+
+   EnergyItem(lua_State *L);             //  Lua constructor
+
+   static const char className[];
+
+   static Lunar<EnergyItem>::RegType methods[];
+
+   S32 getClassID(lua_State *L) { return returnInt(L, EnergyItemType); }
+
+   S32 isVis(lua_State *L); // Is EnergyItem visible? (returns boolean)
+   void push(lua_State *L) {  Lunar<EnergyItem>::push(L, this); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 static const U32 AsteroidDesigns = 4;
 static const U32 AsteroidPoints = 12;
@@ -140,8 +170,8 @@ public:
 };
 
 
-////////////////////////////////
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 class AsteroidSpawn     // Essentially the same as a FlagSpawn... merge classes?
 {
@@ -157,17 +187,14 @@ public:
 };
 
 
-////////////////////////////////
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 class TestItem : public Item
 {
 
 public:
    TestItem();     // Constructor
-   ~TestItem() { 
-      int x = 0;
-   };    // Destructor
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
@@ -188,8 +215,8 @@ public:
 };
 
 
-////////////////////////////////
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 class ResourceItem : public Item
 {

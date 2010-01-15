@@ -293,6 +293,8 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
          return Lunar<Asteroid>::check(L, index);
       case RepairItemType:
          return Lunar<RepairItem>::check(L, index);
+      case EnergyItemType:
+         return Lunar<EnergyItem>::check(L, index);
       case SoccerBallItemType:
          return Lunar<SoccerBallItem>::check(L, index);
       case NexusFlagType:

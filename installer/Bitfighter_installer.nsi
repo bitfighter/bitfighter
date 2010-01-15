@@ -48,7 +48,7 @@ BrandingText " "
 ; Uninstall page settings
 
 !define MUI_UNCONFIRMPAGE_TEXT_TOP "\
-   This will completely remove Bitfighter from your system.  Any custom levels you created will be deleted unless you have backed them up.$\n$\n\
+   This will completely remove Bitfighter from your system.  Any custom levels or robots you created will be deleted unless you have backed them up.$\n$\n\
    \
    Click Uninstall to continue."
 
@@ -104,8 +104,8 @@ Section "Install"
   
   ;Store installation folder
   WriteRegStr HKCU "Software\Bitfighter" "" $INSTDIR
-   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "DisplayName" "Bitfighter (remove only)"
-   WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "UninstallString" '"$INSTDIR\uninstall-bitfighter.exe"'
+  WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "DisplayName" "Bitfighter (remove only)"
+  WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter" "UninstallString" '"$INSTDIR\uninstall-bitfighter.exe"'
 
   ;Create uninstaller
   WriteUninstaller "$INSTDIR\uninstall-bitfighter.exe"
@@ -141,17 +141,17 @@ Section "Uninstall"
   RMDir /r $INSTDIR\screenshots
   RMDir /r $INSTDIR
   
-   ; Remove the links from the start menu and desktop
-   Delete $SMPROGRAMS\Bitfighter\*.*
-   RMDir $SMPROGRAMS\Bitfighter  # Delete folder on Start menu
-   Delete "$DESKTOP\Bitfighter.lnk"
+  ; Remove the links from the start menu and desktop
+  Delete $SMPROGRAMS\Bitfighter\*.*
+  RMDir $SMPROGRAMS\Bitfighter  # Delete folder on Start menu
+  Delete "$DESKTOP\Bitfighter.lnk"
    
   DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Bitfighter"
   DeleteRegKey HKCU "Software\Bitfighter"
    
       IfFileExists $INSTDIR 0 Removed 
       MessageBox MB_OK|MB_ICONEXCLAMATION "Note: I did my best, but I could not remove $INSTDIR."
-   Removed: 
+  Removed: 
 
 
 SectionEnd

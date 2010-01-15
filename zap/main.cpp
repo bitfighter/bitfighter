@@ -514,7 +514,7 @@ void initHostGame(Address bindAddress, bool testMode)
    gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
-   if(!testMode) 
+   if(!testMode)
       LevelListLoader::buildLevelList();
 
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
@@ -715,7 +715,7 @@ public:
    FileLogConsumer(const char* logFile="bitfighter.log")
    {
       f = fopen(logFile, "w");
-      logString("------ Bitfighter Log File ------");
+      logString("------ Bitfighter Log File ------\n");
    }
 
    ~FileLogConsumer()

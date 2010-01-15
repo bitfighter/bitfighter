@@ -398,31 +398,33 @@ void InstructionsUserInterface::renderPage2()
 }
 
 const char *gGameObjectInfo[] = {
- "Phaser", "The default weapon",
- "Bouncer", "Bounces off walls",
- "Triple", "Fires three diverging shots",
- "Burst", "Explosive projectile",
- "Friendly Mine", "Team's mines show trigger radius",
- "Enemy Mine", "These are much harder to see",
+   /* 00 */   "Phaser", "The default weapon",
+   /* 01 */   "Bouncer", "Bounces off walls",
+   /* 03 */   "Triple", "Fires three diverging shots",
+   /* 03 */   "Burst", "Explosive projectile",
+   /* 04 */   "Friendly Mine", "Team's mines show trigger radius",
+   /* 05 */   "Enemy Mine", "These are much harder to see",
 
- "Friendly Spy Bug", "Lets you surveil the area",
- "Enemy Spy Bug", "Destroy these when you find them",
- "", "",
- "", "",
- "", "",
- "", "",
+   /* 06 */   "Friendly Spy Bug", "Lets you surveil the area",
+   /* 07 */   "Enemy Spy Bug", "Destroy these when you find them",
+   /* 08 */   "", "",
+   /* 09 */   "", "",
+   /* 10 */   "", "",
+   /* 11 */   "", "",
 
- "Repair Item", "Repairs damage done to a ship",
- "Loadout Zone", "Updates ship configuration",
- "Neutral Turret", "Repair to take team ownership",
- "Active Turret", "Fires at enemy team",
- "Neutral Emitter", "Repair to take team ownership",
- "Force Field Emitter", "Allows only one team to pass",
- "Teleporter", "Warps ship to another location",
- "Flag", "Objective item in some game types",
- "GoFast", "Makes ship go fast",
- "Nexus", "Bring flags here in Nexus game",
- "Asteroid", "Silent but deadly",
+   /* 12 */   "Repair Item", "Repairs damage to ship",
+   /* 13 */   "Energy Item", "Restores ship's energy",
+   /* 14 */   "Neutral Turret", "Repair to take team ownership",
+   /* 15 */   "Active Turret", "Fires at enemy team",
+   /* 16 */   "Neutral Emitter", "Repair to take team ownership",
+   /* 17 */   "Force Field Emitter", "Allows only one team to pass",
+
+   /* 18 */   "Teleporter", "Warps ship to another location",
+   /* 19 */   "Flag", "Objective item in some game types",
+   /* 20 */   "Loadout Zone", "Updates ship configuration",
+   /* 21 */   "Nexus", "Bring flags here in Nexus game",
+   /* 22 */   "Asteroid", "Silent but deadly",
+   /* 23 */   "GoFast", "Makes ship go fast",
 };
 static U32 GameObjectCount = 23;      // <=== If you add something above, increment this!
 
@@ -490,19 +492,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderRepairItem(Point(0, 0));
             break;
          case 13:
-            {
-               Vector<Point> o;     // outline
-               o.push_back(Point(-150, -30));
-               o.push_back(Point(150, -30));
-               o.push_back(Point(150, 30));
-               o.push_back(Point(-150, 30));
-
-               Vector<Point> f;     // fill
-               Triangulate::Process(o, f);
-
-               Rect ext(o[0], o[2]);
-               renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
-            }
+            renderRepairItem(Point(0, 0));
             break;
          case 14:
             renderTurret(Color(1,1,1), Point(0, 15), Point(0, -1), false, 0, 0, Turret::TurretAimOffset);
@@ -524,13 +514,26 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 19:
             renderFlag(Point(0, 0), Color(1, 0, 0));
             break;
-         case 20:
-            renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
+         case 20:    // Loadout zone
+            {
+               Vector<Point> o;     // outline
+               o.push_back(Point(-150, -30));
+               o.push_back(Point(150, -30));
+               o.push_back(Point(150, 30));
+               o.push_back(Point(-150, 30));
+
+               Vector<Point> f;     // fill
+               Triangulate::Process(o, f);
+
+               Rect ext(o[0], o[2]);
+               renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
+            }
             break;
+
          case 22:    // Up here because it wouldn't compile down there
             renderAsteroid(Point(0,-10), (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    // Using goofball factor to keep out of sync with Nexus graphic
             break;
-         case 21:
+         case 21:    // Nexus
             Vector<Point> o;     // outline
             o.push_back(Point(-150, -30));
             o.push_back(Point(150, -30));
@@ -543,7 +546,9 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             Rect ext(o[0], o[2]);
             renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
             break;
-
+         case 23:
+            renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
+            break;
       }
       glPopMatrix();
       objStart.y += 75;
@@ -575,7 +580,7 @@ static ControlStringsEditor commands[] = {
    { "/vvol <0-10>", "Set voice chat volume" },
    { "-", NULL },
    { "/dcoords", "Show ship coordinates" },
-   
+
    { NULL, NULL },      // End of list
 };
 
@@ -585,7 +590,7 @@ void InstructionsUserInterface::renderPageCommands()
    S32 starty = 120;
    S32 y;
    S32 col1 = horizMargin;
-   S32 col2 = horizMargin + S32(canvasWidth * 0.25) + 55;     
+   S32 col2 = horizMargin + S32(canvasWidth * 0.25) + 55;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
    bool firstCol = true;

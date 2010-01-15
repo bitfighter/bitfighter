@@ -124,7 +124,9 @@ void EditorUserInterface::populateDock()
    const S32 spacer = 35;
    mDockItems.clear();
 
-   mDockItems.push_back(WorldItem(ItemRepair, Point(xPos, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), -1, 0, 0));
+
    yPos += spacer;
    mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
@@ -181,8 +183,6 @@ void EditorUserInterface::populateDock()
    }
 }
 
-
-
 enum geomType {
    geomPoint,           // Single point feature (like a flag)
    geomSimpleLine,      // Two point line (like a teleport)
@@ -200,7 +200,7 @@ struct GameItemRec
    bool hasText;        // Item has a text string attached to it
    bool hasRepop;       // Item has a repop delay that can be set
    geomType geom;
-   char letter;         // How item is represented by editor
+   char letter;         // How item is represented by editor.  Some items are drawn with a letter others have custom symbols.
    bool specialTabKeyRendering;  // true if item is rendered in a special way when tab is down
    const char *prettyNamePlural;
    const char *onDockName;       // Briefer, pretty looking label to label things on dock
@@ -209,7 +209,35 @@ struct GameItemRec
 };
 
 
-// Remember to keep these properly aligned with GameItems enum
+enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
+{
+   ItemSpawn,
+   ItemSpeedZone,
+   ItemSoccerBall,
+   ItemFlag,
+   ItemFlagSpawn,
+   ItemBarrierMaker,
+   ItemTeleporter,
+   ItemRepair,
+   ItemEnergy,
+   ItemBouncyBall,
+   ItemAsteroid,
+   ItemAsteroidSpawn,
+   ItemMine,
+   ItemSpyBug,
+   ItemResource,
+   ItemLoadoutZone,
+   ItemNexus,
+   ItemSlipZone,
+   ItemTurret,
+   ItemForceField,
+   ItemGoalZone,
+   ItemTextItem,
+   ItemNavMeshZone,
+};
+
+
+// Remember to keep these properly aligned with GameItems enum                                 display
 //   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural        onDockName   onScreenName      description
 GameItemRec gGameItemRecs[] = {
    { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
@@ -220,6 +248,7 @@ GameItemRec gGameItemRecs[] = {
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",   "Repair",       "Repairs damage to ships. [B]" },
+   { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Energy",   "Energy",       "Restores energy to ships" },
    { "TestItem",            false,    false,     false,       false,   false,   geomPoint,      'x',    true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
    { "Asteroid",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
    { "AsteroidSpawn",       false,    false,     false,       false,   true,    geomPoint,       0,     true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
@@ -239,7 +268,6 @@ GameItemRec gGameItemRecs[] = {
 };
 
 
-
 // Save the current state of the editor objects for later undoing
 void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRedo)
 {
@@ -254,7 +282,7 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
    mLastUndoIndex++;
    mLastRedoIndex++;
 
-   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full... 
+   if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
    {
       mFirstUndoIndex++;
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
@@ -262,20 +290,18 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    mRedoingAnUndo = false;
-
-   //logprintf("save undo firstundo: %d, lastundo: %d, redo: %d, redoing:%s", mFirstUndoIndex, mLastUndoIndex, mLastRedoIndex, mRedoingAnUndo ? "T" : "F");
 }
- 
+
 
 void EditorUserInterface::autoSave()
 {
-   gEditorUserInterface.saveLevel(false, false, true); 
+   gEditorUserInterface.saveLevel(false, false, true);
 }
 
 
 void EditorUserInterface::undo(bool addToRedoStack)
 {
-   if(!undoAvailable()) 
+   if(!undoAvailable())
       return;
 
    if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
@@ -288,13 +314,10 @@ void EditorUserInterface::undo(bool addToRedoStack)
 
    mLastUndoIndex--;
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
-   //logprintf("Undoing: %d", mLastUndoIndex);
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    itemToLightUp = -1;
    autoSave();
-
-   //logprintf("undo firstundo: %d, lastundo: %d, redo: %d, redoing:%s", mFirstUndoIndex, mLastUndoIndex, mLastRedoIndex, mRedoingAnUndo ? "T" : "F");
 }
 
 
@@ -302,15 +325,13 @@ void EditorUserInterface::redo()
 {
    if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
    {
-      mLastUndoIndex++; 
+      mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
-      //logprintf("Redoing: %d", mLastUndoIndex);
 
       mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
       itemToLightUp = -1;
       autoSave();
    }
-   //logprintf("redo firstundo: %d, lastundo: %d, redo: %d, redoing:%s", mFirstUndoIndex, mLastUndoIndex, mLastRedoIndex, mRedoingAnUndo ? "T" : "F");
 }
 
 
@@ -354,8 +375,6 @@ bool EditorUserInterface::isTeamFlagGame(char *mGameType)
 }
 
 
-
-
 extern TeamPreset gTeamPresets[];
 
 void EditorUserInterface::setLevelFileName(string name)
@@ -386,6 +405,8 @@ S32 EditorUserInterface::getDefaultRepopDelay(GameItems itemType)    // static
       return ForceFieldProjector::defaultRespawnTime;
    else if(itemType == ItemRepair)
       return RepairItem::defaultRespawnTime;
+   else if(itemType == ItemEnergy)
+      return EnergyItem::defaultRespawnTime;
    else
       return -1;
 }
@@ -404,7 +425,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 
 
 // This sort will put points on top of lines on top of polygons...  as they should be
-S32 QSORT_CALLBACK sortItems(WorldItem *a, WorldItem *b)
+S32 QSORT_CALLBACK geometricSort(WorldItem *a, WorldItem *b)
 {
    return (gGameItemRecs[a->index].geom < gGameItemRecs[b->index].geom);
 }
@@ -437,7 +458,7 @@ void EditorUserInterface::loadLevel()
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
-      mItems.sort(sortItems);
+      mItems.sort(geometricSort);
       gGameParamUserInterface.ignoreGameParams = false;
    }
    else
@@ -448,7 +469,7 @@ void EditorUserInterface::loadLevel()
       gGameParamUserInterface.ignoreGameParams = true;               // Don't rely on the above for populating GameParameters menus... only to make sure something is there if we save
    }
    clearUndoHistory();                 // Clean out undo/redo buffers
-   clearSelection();                   // Nothing starts selected 
+   clearSelection();                   // Nothing starts selected
    showAllObjects = true;              // Turn everything on
    mNeedToSave = false;                // Why save when we just loaded?
    mAllUndoneUndoLevel = mLastUndoIndex;
@@ -570,8 +591,8 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       // Add a default spawn time, which may well be overridden below
       i.repopDelay = getDefaultRepopDelay(i.index);
 
-      // Repair, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
-      if((index == ItemRepair || index == ItemAsteroidSpawn) && argc == 4)
+      // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
+      if((index == ItemRepair || index == EnergyItem || index == ItemAsteroidSpawn) && argc == 4)
          i.repopDelay = atoi(argv[3]);
 
       if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 5)
@@ -893,7 +914,7 @@ void EditorUserInterface::onReactivate()
    if(mWasTesting)
    {
       gLevelList = mgLevelList;        // Restore level list
-      mWasTesting = false; 
+      mWasTesting = false;
       mSaveMsgTimer.clear();
    }
 
@@ -1708,6 +1729,9 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
       else if(item.index == ItemRepair)
          renderRepairItem(pos, true, hideit ? grayedOutColorDim : NULL, alpha);
 
+      else if(item.index == ItemEnergy)
+         renderEnergyItem(pos, true, hideit ? grayedOutColorDim : NULL, alpha);
+
       else                             // Draw anything else
          renderGenericItem(pos, c, alpha);
 
@@ -1881,7 +1905,7 @@ void EditorUserInterface::pasteSelection()
 
    saveUndoState(mItems);     // So we can undo the paste
 
-   clearSelection();          // Only the pasted items should be selected         
+   clearSelection();          // Only the pasted items should be selected
 
    for(S32 i = 0; i < mItems.size(); i++)    // Unselect everything, so pasted items will be the new selection
       mItems[i].selected = false;
@@ -1897,7 +1921,7 @@ void EditorUserInterface::pasteSelection()
          newItem.verts[j] += offset;
       mItems.push_back(newItem);
    }
-   mItems.sort(sortItems);
+   mItems.sort(geometricSort);
    validateLevel();
    mNeedToSave = true;
    autoSave();
@@ -2253,9 +2277,9 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 
    if(itemToLightUp != -1)
    {
-      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");   
+      TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");
       if(itemToLightUp >= mItems.size())     // Just in case...
-         return;     
+         return;
 
       mItems[itemToLightUp].litUp = false;
    }
@@ -2298,20 +2322,20 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
       // Gross lionstruct avoids extra construction
-      WorldItem item = 
+      WorldItem item =
          (gGameItemRecs[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
          // For polygon items, try to match proportions of the dock rendering.  Size will vary by map scale.
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .68, .35) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, 1, 0);
 
-      clearSelection();          // No items are selected...
-      item.selected = true;      // ...except for the new one
-      mItems.push_back(item);    // Add our new item to the master item list
-      mItems.sort(sortItems);    // So things will render in the proper order
-      mDraggingDockItem = -1;    // Because now we're dragging a real item
-      mUnmovedItems = mItems;    // So we know where things were so we know where to render them while being dragged
-      validateLevel();           // Check level for errors
+      clearSelection();            // No items are selected...
+      item.selected = true;        // ...except for the new one
+      mItems.push_back(item);      // Add our new item to the master item list
+      mItems.sort(geometricSort);  // So things will render in the proper order
+      mDraggingDockItem = -1;      // Because now we're dragging a real item
+      mUnmovedItems = mItems;      // So we know where things were so we know where to render them while being dragged
+      validateLevel();             // Check level for errors
    }
 
    mDraggingObjects = true;
@@ -2348,7 +2372,7 @@ done:
 void EditorUserInterface::deleteSelection(bool objectsOnly)
 {
    if(mDraggingObjects)          // No deleting while we're dragging, please...
-      return;     
+      return;
 
    if(!anyItemsOrVertsSelected())  // Nothing to delete
       return;
@@ -2356,7 +2380,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    Vector<WorldItem> items = mItems;
    bool deleted = false;
 
-   //mSelectedSet.clear();         
+   //mSelectedSet.clear();
    for(S32 i = 0; i < mItems.size(); ) // no i++
    {
       if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
@@ -2473,7 +2497,7 @@ void EditorUserInterface::splitBarrier()
                      k++;
                }
                mItems.push_back(newItem);
-               mItems.sort(sortItems);
+               mItems.sort(geometricSort);
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
 done2:
@@ -2591,7 +2615,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
       }
 
    mItems.push_back(WorldItem(itemType, pos, team, 1, 1));
-   mItems.sort(sortItems);
+   mItems.sort(geometricSort);
    validateLevel();
    mNeedToSave = true;
    autoSave();
@@ -2896,7 +2920,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mItems.push_back(mNewItem);
          mNewItem.verts.clear();
          mCreatingPoly = false;
-         mItems.sort(sortItems);
+         mItems.sort(geometricSort);
       }
 
       mMouseDownPos = convertCanvasToLevelCoord(mMousePos);
@@ -2910,7 +2934,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                 // Mouse is not on dock
       {
          mDraggingDockItem = -1;
-        
+
          // rules for mouse down:
          // if the click has no shift- modifier, then
          //   if the click was on something that was selected
@@ -2963,7 +2987,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                mDragSelecting = true;
                clearSelection();
             }
-      
+
          }
          else     // Shift key is down
          {
@@ -2974,7 +2998,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                mItems[itemHit].selected = !mItems[itemHit].selected;    // Toggle selection of hit item
             else
                mDragSelecting = true;
-         }  
+         }
      }     // end mouse not on dock block, doc
 
      mUnmovedItems = mItems;
@@ -3267,7 +3291,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
 
                      TNLAssert(mItems.size() == mUnmovedItems.size(), "Selection size changed while dragging!");   // Happens if we somehow insert/paste/whatever while we're dragging
                      if(mItems.size() != mUnmovedItems.size())
-                        return;     // it's this or crash... 
+                        return;     // it's this or crash...
 
                      // Check if anything changed... (i.e. did we move?)
                      for(S32 i = 0; i < mItems.size(); i++)
@@ -3430,7 +3454,7 @@ static void s_fprintf(FILE *stream, const char *format, ...)
 bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessages, bool autosave)
 {
    string saveName = autosave ? "auto.save" : mEditFileName;
-   
+
    try
    {
       // Check if we have a valid (i.e. non-null) filename
@@ -3489,7 +3513,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    }
    catch (SaveException &e)
    {
-      if(showFailMessages) 
+      if(showFailMessages)
          gEditorUserInterface.setSaveMessage("Error Saving: " + string(e.what()), false);
       return false;
    }
@@ -3502,7 +3526,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
    if(showSuccessMessages)
       gEditorUserInterface.setSaveMessage("Saved " + getLevelFileName(), true);
-   
+
    return true;
 }
 
@@ -3715,7 +3739,7 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
 
 
 // Copy constructor
-WorldItem::WorldItem(const WorldItem &worldItem)          
+WorldItem::WorldItem(const WorldItem &worldItem)
 {
    // First the simple stuff
    index = worldItem.index;
@@ -3732,7 +3756,7 @@ WorldItem::WorldItem(const WorldItem &worldItem)
    S32 size = worldItem.verts.size();
    for(S32 i = 0; i < size; i++)
       verts.push_back(Point(worldItem.verts[i]));
-   
+
    size = worldItem.vertSelected.size();
    for(S32 i = 0; i < size; i++)
       vertSelected.push_back(worldItem.vertSelected[i]);
