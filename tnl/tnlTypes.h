@@ -41,6 +41,7 @@
 
 //------------------------------------------------------------------------------
 //-------------------------------------- Basic Types...
+namespace TNL {
 
 /// @defgroup BasicTypes Basic Compiler Independent Types
 /// These types are defined so that we know exactly what we have, sign and bit wise.
@@ -63,7 +64,6 @@ typedef double              F64;     ///< Compiler independent 64-bit float.
 
 /// @}
 
-namespace TNL {
 
 #ifndef NULL
 #  define NULL 0
