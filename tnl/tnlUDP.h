@@ -192,17 +192,17 @@ public:
    NetError send(const U8 *buffer, S32 bufferSize);
 };
 
-inline void read(BitStream &s, IPAddress *val)
-{
-   s.read(&val->netNum);
-   s.read(&val->port);
-}
-
-inline void write(BitStream &s, const IPAddress &val)
-{
-   s.write(val.netNum);
-   s.write(val.port);
-}
+//inline void read(BitStream &s, IPAddress *val)
+//{
+//   s.read(&val->netNum);
+//   s.read(&val->port);
+//}
+//
+//inline void write(BitStream &s, const IPAddress &val)
+//{
+//   s.write(val.netNum);
+//   s.write(val.port);
+//}
 
 };
 #endif

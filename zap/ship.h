@@ -195,6 +195,9 @@ public:
    ~Ship();           // Destructor
 
    F32 getHealth() { return mHealth; }
+   S32 getEnergy() { return mEnergy; }
+   S32 getMaxEnergy() { return EnergyMax; }
+   void changeEnergy(S32 deltaEnergy) { mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy)); }
 
    void onGhostRemove();
 

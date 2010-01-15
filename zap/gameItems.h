@@ -44,9 +44,9 @@ private:
    typedef PickupItem Parent;
 
 public:
-   static const S32 defaultRespawnTime = 20;
+   static const S32 defaultRespawnTime = 20;    // In seconds
 
-   RepairItem(Point p = Point()) : PickupItem(p, defaultRespawnTime) { /* do nothing */ };   // Constructor
+   RepairItem(Point p = Point()) : PickupItem(p, 20, defaultRespawnTime * 1000) { /* do nothing */ };   // Constructor
    bool pickup(Ship *theShip);
    void onClientPickup();
    void renderItem(Point pos);
@@ -77,9 +77,9 @@ private:
    typedef PickupItem Parent;
 
 public:
-   static const S32 defaultRespawnTime = 20;
+   static const S32 defaultRespawnTime = 20;    // In seconds
 
-   EnergyItem(Point p = Point()) : PickupItem(p, defaultRespawnTime) { /* do nothing */ };   // Constructor
+   EnergyItem(Point p = Point()) : PickupItem(p, 20, defaultRespawnTime * 1000) { /* do nothing */ };   // Constructor
    bool pickup(Ship *theShip);
    void onClientPickup();
    void renderItem(Point pos);

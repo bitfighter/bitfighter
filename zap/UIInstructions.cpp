@@ -426,7 +426,7 @@ const char *gGameObjectInfo[] = {
    /* 22 */   "Asteroid", "Silent but deadly",
    /* 23 */   "GoFast", "Makes ship go fast",
 };
-static U32 GameObjectCount = 23;      // <=== If you add something above, increment this!
+static U32 GameObjectCount = 24;      // <=== If you add something above, increment this!
 
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index)
@@ -492,7 +492,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderRepairItem(Point(0, 0));
             break;
          case 13:
-            renderRepairItem(Point(0, 0));
+            renderEnergyItem(Point(0, 0));
             break;
          case 14:
             renderTurret(Color(1,1,1), Point(0, 15), Point(0, -1), false, 0, 0, Turret::TurretAimOffset);
@@ -515,6 +515,22 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderFlag(Point(0, 0), Color(1, 0, 0));
             break;
          case 20:    // Loadout zone
+            {              // braces needed: see C2360
+               Vector<Point> o;     // outline
+               o.push_back(Point(-150, -30));
+               o.push_back(Point(150, -30));
+               o.push_back(Point(150, 30));
+               o.push_back(Point(-150, 30));
+
+               Vector<Point> f;     // fill
+               Triangulate::Process(o, f);
+
+               renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
+            }
+               
+            break;
+
+         case 21:    // Nexus
             {
                Vector<Point> o;     // outline
                o.push_back(Point(-150, -30));
@@ -525,27 +541,14 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               Rect ext(o[0], o[2]);
-               renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
+               renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
             }
             break;
 
-         case 22:    // Up here because it wouldn't compile down there
+         case 22:   
             renderAsteroid(Point(0,-10), (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    // Using goofball factor to keep out of sync with Nexus graphic
             break;
-         case 21:    // Nexus
-            Vector<Point> o;     // outline
-            o.push_back(Point(-150, -30));
-            o.push_back(Point(150, -30));
-            o.push_back(Point(150, 30));
-            o.push_back(Point(-150, 30));
 
-            Vector<Point> f;     // fill
-            Triangulate::Process(o, f);
-
-            Rect ext(o[0], o[2]);
-            renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
-            break;
          case 23:
             renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
             break;

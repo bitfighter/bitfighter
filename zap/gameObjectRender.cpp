@@ -1102,33 +1102,27 @@ void renderEnergyItem(Point pos)
 
 void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
 {
-   F32 size;
-
-   if(forEditor)  // Rendering icon for editor
-   {
-      size = 8;
-   }
-   else           // Normal in-game rendering
-   {
-      size = 18;
-   }
+   F32 scaleFactor = forEditor ? .45 : 1;    // Resize for editor
 
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
+   glScalef(scaleFactor, scaleFactor, 1);
 
-   // Lightning bolt
+   // Yellow lightning bolt
    glColor(overrideColor == NULL ? Color(1,1,0) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
-      glVertex2f( 13, -13);
-      glVertex2f(  3,  -1);
-      glVertex2f(  8,   4);
-      glVertex2f(-12,  14);
-      glVertex2f(  1,   2);
-      glVertex2f(  6,  -3);
+      glVertex2f( 20, -20);
+      glVertex2f(  3,  -2);
+      glVertex2f(  12,   5);
+      glVertex2f(-20,  20);
+      glVertex2f( -2,   3);
+      glVertex2f( -12,  -5); 
    glEnd();
 
-   glColor3f(1, .67, 0);        // Orangey
-   drawCircle(Point(0,0), 10);
+   glLineWidth(3);
+   glColor3f(1, .67, 0);        // Orangey circle
+   drawCircle(Point(0,0), 16);
+   glLineWidth(gDefaultLineWidth);
 
    glPopMatrix();
 }

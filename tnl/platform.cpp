@@ -452,7 +452,9 @@ S32 dVsprintf(char *buffer, U32 bufferSize, const char *format, void *arglist)
 #ifdef TNL_COMPILER_VISUALC
    S32 len = _vsnprintf(buffer, bufferSize, format, (va_list) arglist);
 #else
-   S32 len = vsnprintf(buffer, bufferSize, format, (char *) arglist);
+   // WAS ==> S32 len = vsnprintf(buffer, bufferSize, format, (char *) arglist);
+   // trying to fix a Intel64 compile bug... try this:
+   S32 len = vsnprintf(buffer, bufferSize, format, (va_list) arglist);
 #endif
    return len;
 }

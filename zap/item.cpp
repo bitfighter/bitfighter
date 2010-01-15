@@ -287,13 +287,13 @@ bool Item::collide(GameObject *otherObject)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-PickupItem::PickupItem(Point p, float radius) : Item(p, false, radius, 1)
+PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Item(p, false, radius, 1)
 {
+   mRepopDelay = repopDelay;
    mIsVisible = true;
    mIsMomentarilyVisible = false;
 
    mNetFlags.set(Ghostable);
-   mRepopDelay = defaultRespawnTime * 1000;
 
 }
 
@@ -382,7 +382,7 @@ void PickupItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mIsVisible = visible;
 }
 
-
+// Runs on both client and server, but does nothing on client
 bool PickupItem::collide(GameObject *otherObject)
 {
    if(mIsVisible && !isGhost() && otherObject->getObjectTypeMask() & (ShipType | RobotType))

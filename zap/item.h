@@ -138,14 +138,14 @@ protected:
    };
 
 public:
-   PickupItem(Point p = Point(), float radius = 1);      // Constructor
+   PickupItem(Point p = Point(), float radius = 1, S32 repopDelay = 20000);      // Constructor
 
    bool processArguments(S32 argc, const char **argv);
 
    void idle(GameObject::IdleCallPath path);
    bool isVisible() { return mIsVisible; }
 
-   U32 getRepopDelay() { return mRepopDelay };
+   U32 getRepopDelay() { return mRepopDelay; }
 
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
@@ -153,7 +153,6 @@ public:
 
    bool collide(GameObject *otherObject);
    virtual bool pickup(Ship *theShip) = 0;
-   virtual U32 getRepopDelay() = 0;
    virtual void onClientPickup() = 0;
 
 };

@@ -209,34 +209,6 @@ struct GameItemRec
 };
 
 
-enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
-{
-   ItemSpawn,
-   ItemSpeedZone,
-   ItemSoccerBall,
-   ItemFlag,
-   ItemFlagSpawn,
-   ItemBarrierMaker,
-   ItemTeleporter,
-   ItemRepair,
-   ItemEnergy,
-   ItemBouncyBall,
-   ItemAsteroid,
-   ItemAsteroidSpawn,
-   ItemMine,
-   ItemSpyBug,
-   ItemResource,
-   ItemLoadoutZone,
-   ItemNexus,
-   ItemSlipZone,
-   ItemTurret,
-   ItemForceField,
-   ItemGoalZone,
-   ItemTextItem,
-   ItemNavMeshZone,
-};
-
-
 // Remember to keep these properly aligned with GameItems enum                                 display
 //   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural        onDockName   onScreenName      description
 GameItemRec gGameItemRecs[] = {
@@ -592,7 +564,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       i.repopDelay = getDefaultRepopDelay(i.index);
 
       // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
-      if((index == ItemRepair || index == EnergyItem || index == ItemAsteroidSpawn) && argc == 4)
+      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 4)
          i.repopDelay = atoi(argv[3]);
 
       if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 5)

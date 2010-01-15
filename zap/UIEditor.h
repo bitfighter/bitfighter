@@ -89,6 +89,32 @@ struct SaveException : public std::exception
 //   bool checkWallCollision();
 //};
 
+enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
+{
+   ItemSpawn,
+   ItemSpeedZone,
+   ItemSoccerBall,
+   ItemFlag,
+   ItemFlagSpawn,
+   ItemBarrierMaker,
+   ItemTeleporter,
+   ItemRepair,
+   ItemEnergy,
+   ItemBouncyBall,
+   ItemAsteroid,
+   ItemAsteroidSpawn,
+   ItemMine,
+   ItemSpyBug,
+   ItemResource,
+   ItemLoadoutZone,
+   ItemNexus,
+   ItemSlipZone,
+   ItemTurret,
+   ItemForceField,
+   ItemGoalZone,
+   ItemTextItem,
+   ItemNavMeshZone,
+};
 
 
 class WorldItem

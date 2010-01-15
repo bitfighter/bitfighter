@@ -35,7 +35,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(RepairItem);
 
-
+// Runs on server, returns true if we're doing the pickup, false otherwise
 bool RepairItem::pickup(Ship *theShip)
 {
    if(theShip->getHealth() >= 1)
@@ -99,18 +99,17 @@ S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }      
 
 TNL_IMPLEMENT_NETOBJECT(EnergyItem);
 
-
+// Runs on server, returns true if we're doing the pickup, false otherwise
 bool EnergyItem::pickup(Ship *theShip)
 {
-   if(theShip->getHealth() >= 1)
+   S32 energy = theShip->getEnergy();
+   S32 maxEnergy = theShip->getMaxEnergy();
+
+   if(energy >= maxEnergy)      // Don't need no stinkin' energy!!
       return false;
 
-   DamageInfo di;
-   di.damageAmount = -0.5f;      // Negative damage = repair!
-   di.damageType = DamageTypePoint;
-   di.damagingObject = this;
+   theShip->changeEnergy(maxEnergy / 2);     // Bump up energy by 50%, changeEnergy() sets energy delta
 
-   theShip->damageObject(&di);
    return true;
 }
 

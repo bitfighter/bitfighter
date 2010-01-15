@@ -23,6 +23,7 @@
 
 
 /*
+XXX need to document timers, main function XXX
 <ul>
 <li>Added Restart Level to game options menu if you have level change permissions</li>
 <li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
