@@ -366,12 +366,12 @@ inline bool isPow2(const U32 number)
    return (number & (number - 1)) == 0;
 }
 
-/// Determines the binary logarithm of the input value rounded down to the nearest power of 2.
-inline U32 getBinLog2Bad(U32 value)
-{
-   F32 floatValue = (F32)(value);
-   return (*((U32 *) &floatValue) >> 23) - 127;
-}
+///// Determines the binary logarithm of the input value rounded down to the nearest power of 2.
+//inline U32 getBinLog2Bad(U32 value)
+//{
+//   F32 floatValue = (F32)(value);
+//   return (*((U32 *) &floatValue) >> 23) - 127;
+//}
 
 
 static const char LogTable256[256] = 
@@ -386,21 +386,12 @@ static const char LogTable256[256] =
 // Replaces original TNL function which caused warnings under higher optimizer settings
 inline U32 getBinLog2(U32 value)
 {
-   U32 r;     // r will be lg(v)
    register U32 t, tt; // temporaries
 
-   tt = value >> 16;
-   if(tt)
-     r = (t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
+   if(tt = value >> 16)
+     return (t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
    else 
-     r = (t = value >> 8) ? 8 + LogTable256[t] : LogTable256[value];
-
-   if(r != getBinLog2Bad(value))
-   {
-S32 x = 1;
-   }
-
-   return r;
+     return (t = value >> 8) ? 8 + LogTable256[t] : LogTable256[value];
 }
 
 
