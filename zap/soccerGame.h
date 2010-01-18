@@ -43,7 +43,9 @@ class SoccerGameType : public GameType
 
 public:
 
-   void scoreGoal(Ship *ship, S32 goalTeamIndex);
+   void scoreGoal(Ship *ship, StringTableEntry lastPlayerTouchName, S32 lastPlayerTouchTeam, S32 goalTeamIndex);
+   void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
+
    void addZone(GoalZone *theZone);
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(bool scoreboardVisible);
@@ -77,7 +79,9 @@ private:
    typedef Item Parent;
    Point initialPos;
    Timer mSendHomeTimer;
-   Ship *mLastPlayerTouch;
+   SafePtr<Ship> mLastPlayerTouch;
+   S32 mLastPlayerTouchTeam;
+   StringTableEntry mLastPlayerTouchName;
 
 public:
    SoccerBallItem(Point pos = Point());   // C++ constructor

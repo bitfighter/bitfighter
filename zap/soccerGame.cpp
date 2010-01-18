@@ -104,33 +104,42 @@ void SoccerGameType::setBall(SoccerBallItem *theBall)
 }
 
 
-void SoccerGameType::scoreGoal(Ship *ship, S32 goalTeamIndex)
+// Helper function to make sure the two-arg version of updateScore doesn't get a null ship
+void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent)
 {
-   if(!ship)
+   if(ship)
+      updateScore(ship, scoringEvent);
+   else
+      updateScore(NULL, scoringTeam, scoringEvent);
+}
+
+
+void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex)
+{
+   if(scoringTeam == GameType::NO_TEAM)
    {
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, StringTableEntry(NULL), (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));    
       return;
    }
 
-   S32 scoringTeam = ship->getTeam();
-
-   if(isTeamGame() && (scoringTeam == -1 || scoringTeam == goalTeamIndex))    // Own-goal
+   if(isTeamGame() && (scoringTeam == GameType::NEUTRAL_TEAM || scoringTeam == goalTeamIndex))    // Own-goal
    {
-      updateScore(ship, ScoreGoalOwnTeam);
+      updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam);
 
       // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
-      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));
+      s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
    }
    else     // Goal on someone else's goal
    {
-      if(goalTeamIndex == -2)
-         updateScore(ship, ScoreGoalHostileTeam);
+      if(goalTeamIndex == GameType::HOSTILE_TEAM)
+         updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam);
       else
-         updateScore(ship, ScoreGoalEnemyTeam);
+         updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam);
 
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, ship->getName(), (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
    }
 }
+
 
 // Runs on client
 void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
@@ -219,6 +228,8 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    mNetFlags.set(Ghostable);
    initialPos = pos;
    mLastPlayerTouch = NULL;
+   mLastPlayerTouchTeam = GameType::NO_TEAM;
+   mLastPlayerTouchName = StringTableEntry(NULL);
 }
 
 
@@ -299,13 +310,19 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
    if(theInfo->damagingObject)
    {
       if(theInfo->damagingObject->getObjectTypeMask() & (ShipType | RobotType))
+      {
          mLastPlayerTouch = dynamic_cast<Ship *>(theInfo->damagingObject);
+         mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();
+         mLastPlayerTouchName = mLastPlayerTouch->getName();
+      }
 
       else if(theInfo->damagingObject->getObjectTypeMask() & (BulletType | MineType | SpyBugType))
       {
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
          mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
+         mLastPlayerTouchTeam = ship ? ship->getTeam() : GameType::NO_TEAM;
+         mLastPlayerTouchName = ship ? ship->getName() : StringTableEntry(NULL);
       }
       else
          mLastPlayerTouch = NULL;
@@ -340,6 +357,8 @@ bool SoccerBallItem::collide(GameObject *hitObject)
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
       mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
+      mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
+      mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
    }
    else
    {
@@ -348,7 +367,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       if(goal && !mSendHomeTimer.getCurrent())
       {
          SoccerGameType *g = (SoccerGameType *) getGame()->getGameType();
-         g->scoreGoal(mLastPlayerTouch, goal->getTeam());
+         g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam());
          mSendHomeTimer.reset(1500);
       }
    }

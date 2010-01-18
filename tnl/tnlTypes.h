@@ -367,11 +367,44 @@ inline bool isPow2(const U32 number)
 }
 
 /// Determines the binary logarithm of the input value rounded down to the nearest power of 2.
-inline U32 getBinLog2(U32 value)
+inline U32 getBinLog2Bad(U32 value)
 {
-   S32 floatValue = (S32)(value);
+   F32 floatValue = (F32)(value);
    return (*((U32 *) &floatValue) >> 23) - 127;
 }
+
+
+static const char LogTable256[256] = 
+{
+#define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
+    -1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
+    LT(4), LT(5), LT(5), LT(6), LT(6), LT(6), LT(6),
+    LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)
+};
+
+// From http://www-graphics.stanford.edu/~seander/bithacks.html#IntegerLogLookup
+// Replaces original TNL function which caused warnings under higher optimizer settings
+inline U32 getBinLog2(U32 value)
+{
+   U32 r;     // r will be lg(v)
+   register U32 t, tt; // temporaries
+
+   tt = value >> 16;
+   if(tt)
+     r = (t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
+   else 
+     r = (t = value >> 8) ? 8 + LogTable256[t] : LogTable256[value];
+
+   if(r != getBinLog2Bad(value))
+   {
+S32 x = 1;
+   }
+
+   return r;
+}
+
+
+
 
 /// Determines the binary logarithm of the next greater power of two of the input number.
 inline U32 getNextBinLog2(U32 number)

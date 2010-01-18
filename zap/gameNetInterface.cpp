@@ -88,6 +88,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
       case Ping:
          if(mGame->isServer())
          {
+            logprintf("Got a ping!");
             Nonce clientNonce;
             clientNonce.read(stream);
 
@@ -126,8 +127,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(U8(QueryResponse));
 
                theNonce.write(&queryResponse);
-               queryResponse.writeString(gServerGame->getHostName(), QueryServersUserInterface::MaxServerNameLen);
-               queryResponse.writeString(gServerGame->getHostDescr(), QueryServersUserInterface::MaxServerDescrLen);
+               queryResponse.writeStringTableEntry(gServerGame->getHostName());
+               queryResponse.writeStringTableEntry(gServerGame->getHostDescr());
 
                queryResponse.write(gServerGame->getPlayerCount());
                queryResponse.write(gServerGame->getMaxPlayers());
@@ -143,14 +144,14 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
       case QueryResponse:
          {
             Nonce theNonce;
-            char nameString[256];
-            char descrString[256];
+            StringTableEntry name;
+            StringTableEntry descr;
             U32 playerCount, maxPlayers, botCount;
             bool dedicated, test, passwordRequired;
 
             theNonce.read(stream);
-            stream->readString(nameString);
-            stream->readString(descrString);
+            stream->readStringTableEntry(&name);
+            stream->readStringTableEntry(&descr);
 
             stream->read(&playerCount);
             stream->read(&maxPlayers);
@@ -159,7 +160,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
             test = stream->readFlag();
             passwordRequired = stream->readFlag();
 
-            gQueryServersUserInterface.gotQueryResponse(remoteAddress, theNonce, nameString, descrString, playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
+            gQueryServersUserInterface.gotQueryResponse(remoteAddress, theNonce, name.getString(), descr.getString(), playerCount, maxPlayers, botCount, dedicated, test, passwordRequired);
          }
          break;
    }

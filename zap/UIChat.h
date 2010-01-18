@@ -76,27 +76,44 @@ private:
    static const S32 MessagesToRetain = 200;                  // Plenty for now
 
    static U32 mMessageCount;
+   static const S32 CHAT_MESSAGE_LEN = 200;
+
 
 protected:
    // Message data
    static ChatMessage mMessages[MessagesToRetain];
+   char mChatBuffer[CHAT_MESSAGE_LEN];     // Outgoing chat msg
 
    ChatMessage getMessage(U32 index);
+   U32 mChatCursorPos;                     // Where is cursor?
 
    U32 getMessageCount() { return mMessageCount; }
 
-public:
-   void newMessage(string from, string message, bool isPrivate);   // Handle incoming msg
-   void leaveGlobalChat();
+   bool composingMessage() { return strlen(mChatBuffer); }
 
-   void renderMessage(U32 index, U32 fontsize, U32 yPos, U32 numberToDisplay);
+public:
+   AbstractChat();      // Constructor
+   void newMessage(string from, string message, bool isPrivate);   // Handle incoming msg
+
+   void addCharToMessage(char ascii);     // Append char to message being composed
+   void handleBackspace(KeyCode keyCode); // When user hits backspace or delete
+   void clearChat();                      // Clear message being composed
+   void issueChat();                      // Send chat message
+
+   void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
+
+   void renderMessage(U32 index, U32 yPos, U32 numberToDisplay);
+   void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
 
    void deliverPrivateMessage(const char *sender, const char *message);
+
+   static const U32 CHAT_FONT_SIZE = 16;      // Font size to display those messages
+   static const U32 CHAT_FONT_MARGIN = 4;     // Vertical margin
 };
 
 
 ///////////////////////////////////////
-//////////////////////////////////////
+///////////////////////////////////////
 
 class ChatUserInterface: public UserInterface, public AbstractChat
 {
@@ -122,15 +139,9 @@ public:
 
    // Mechanics related
 
-   static const U32 GlobalChatFontSize = 16;   // Font size to display those messages
-
-   char mChatBuffer[200];     // Outgoing chat msg
-   U32 mChatCursorPos;        // Where is cursor?
 
    Vector<StringTableEntry> mPlayersInGlobalChat;
 
-   void cancelChat();                                             // Get out of chat mode
-   void issueChat();                                              // Send chat message
 };
 
 extern ChatUserInterface gChatInterface;

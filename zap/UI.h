@@ -45,7 +45,6 @@ static const float gDefaultLineWidth = 2.0f;
 
 const S32 gScreenHeight = 600;
 const S32 gScreenWidth = 800;
-const U32 gCursorBlinkTime = 100;
 
 const U32 gMaxGameNameLength = 32;     // Any longer, and it won't fit on-screen
 const U32 gMaxGameDescrLength = 60;    // Any longer, and it won't fit on-screen
@@ -86,6 +85,24 @@ enum UIID {
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Extremely limited for the moment... future home of more comprehensive line editor
+class LineEditor
+{
+private:
+   static Timer mBlinkTimer;
+
+public:
+   LineEditor();               // Constructor
+   static void updateCursorBlink(U32 timeDelta);
+   static bool cursorBlink;
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class UserInterface
 {
 private:
@@ -94,12 +111,8 @@ private:
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fixed);
 
 public:
-   // Vars for tracking cursor blinks.  Yippee!!!
-   bool cursorBlink;
-   Timer mBlinkTimer;
-
+   
    static const S32 MenuItemHeight = 45;
-
 
    static UserInterface *current;            // Currently active menu
    static Vector<UserInterface *> prevUIs;   // Previously active menus
@@ -115,7 +128,6 @@ public:
    static bool cameFromEditor();             // Did we arrive at our current interface via the Editor?
 
    static void renderCurrent();
-   void updateCursorBlink(U32 timeDelta);
 
    virtual void render();
    virtual void idle(U32 timeDelta);

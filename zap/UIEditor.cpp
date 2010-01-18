@@ -1416,7 +1416,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);
 
             drawAngleStringf_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c",
-                  item.text.c_str(), cursorBlink && mSpecialAttribute == Text && isBeingEdited ? '_' : 0);
+               item.text.c_str(), LineEditor::cursorBlink && mSpecialAttribute == Text && isBeingEdited ? '_' : 0);
 
             if((item.selected || item.litUp) && mSpecialAttribute == None)
             {
@@ -3346,7 +3346,7 @@ void EditorUserInterface::idle(U32 timeDelta)
    mSaveMsgTimer.update(timeDelta);
    mWarnMsgTimer.update(timeDelta);
 
-   updateCursorBlink(timeDelta);
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 // Unused??

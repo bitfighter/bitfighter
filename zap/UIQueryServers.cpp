@@ -76,6 +76,8 @@ QueryServersUserInterface::QueryServersUserInterface()
 
    sort();
    mShouldSort = false;
+   mShowChat = true;
+
 }
 
 // Initialize: Runs when "connect to server" screen is shown
@@ -272,7 +274,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
 
          dSprintf(s.serverName, sizeof(s.serverName), "%s", serverName);
          dSprintf(s.serverDescr, sizeof(s.serverDescr), "%s", serverDescr);
-         s.msgColor = Color(1,1,0);   // yellow server details
+         s.msgColor = yellow;   // yellow server details
          s.state = ServerRef::ReceivedQuery;
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was recieved, so we'll know when to send again
@@ -285,6 +287,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
 
 void QueryServersUserInterface::idle(U32 timeDelta)
 {
+   LineEditor::updateCursorBlink(timeDelta);
    U32 elapsedTime = Platform::getRealMilliseconds() - time;
    time = Platform::getRealMilliseconds();
    mouseScrollTimer.update(timeDelta);
@@ -516,11 +519,39 @@ void QueryServersUserInterface::render()
       drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
    }
 
+   S32 mTotalRows = 14;
+
+   S32 chatHeight = 0;
+   // Show some chat messages
+   if(mShowChat)
+   {
+      static const S32 MessageDisplayCount = 10;
+
+      chatHeight = MessageDisplayCount * (AbstractChat::CHAT_FONT_SIZE + AbstractChat::CHAT_FONT_MARGIN) - horizMargin - 3;
+      S32 ypos = canvasHeight - chatHeight;
+
+      glColor(white);
+      glBegin(GL_LINES);
+         glVertex2f(horizMargin, ypos);
+         glVertex2f(canvasWidth - horizMargin, ypos);
+      glEnd();
+
+      ypos += 3;
+
+      for(U32 i = 0; i < MessageDisplayCount; i++)
+         renderMessage(i, ypos, MessageDisplayCount);
+
+      mTotalRows -= MessageDisplayCount;     // Approx
+
+      renderMessageComposition(canvasHeight - vertMargin - 20);
+   }
+
+
    // Instructions at bottom of screen
    glColor(white);
-   drawCenteredString(vertMargin + 7, 35, "CHOOSE A SERVER TO JOIN:");
-   drawCenteredString(canvasHeight - vertMargin - 40, 18, "UP, DOWN to select, ENTER to join.");
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, "LEFT, RIGHT select sort column, SPACE to sort.  ESC exits.");
+   drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
+   drawCenteredString(canvasHeight - vertMargin - 20 - chatHeight, 18, "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
+
 
    U32 bottom = canvasHeight - vertMargin - 60;
 
@@ -580,7 +611,7 @@ void QueryServersUserInterface::render()
 
       S32 bonusTopOffset = 0;
       // We can show a couple more if we don't need to scroll...
-      if(servers.size() <= totalRows + 2)
+      if(servers.size() <= mTotalRows + 2)
       {
          mFirstServer = 0;
          mLastServer = servers.size() - 1;
@@ -593,17 +624,17 @@ void QueryServersUserInterface::render()
 
          if(mScrollingUpMode)
          {
-            mFirstServer = servers.size() - totalRows - 1 + (mItemSelectedWithMouse ? 1 : 0);
+            mFirstServer = servers.size() - mTotalRows - 1 + (mItemSelectedWithMouse ? 1 : 0);
             if(getSelectedIndex() < mFirstServer + 1)
                mFirstServer = getSelectedIndex() - 1;
          }
          else  // scrollingDownMode
-            mFirstServer = getSelectedIndex() - totalRows + 1 - (mItemSelectedWithMouse ? 1 : 0);
+            mFirstServer = getSelectedIndex() - mTotalRows + 1 - (mItemSelectedWithMouse ? 1 : 0);
 
          if(mFirstServer < 0)
             mFirstServer = 0;
 
-         mLastServer = mFirstServer + totalRows;
+         mLastServer = mFirstServer + mTotalRows;
          if(mLastServer >= servers.size())
             mLastServer = servers.size() - 1;
 
@@ -632,22 +663,17 @@ void QueryServersUserInterface::render()
       U32 y = ITEMS_TOP + (selectedIndex - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
-      glColor3f(0,0,0.4);     // pale blue
-      glBegin(GL_POLYGON);
-         glVertex2f(0, y);
-         glVertex2f(799, y);
-         glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
-         glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
-      glEnd();
 
-      glColor(blue);       // blue
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(0, y);
-         glVertex2f(799, y);
-         glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
-         glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
-      glEnd();
-
+      for(S32 i = 0; i < 2; i++)
+      {
+         glColor(i ? blue : Color(0,0,0.4));     // pale blue : darker blue
+         glBegin(i ? GL_LINE_LOOP : GL_POLYGON);
+            glVertex2f(0, y);
+            glVertex2f(799, y);
+            glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
+            glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
+         glEnd();
+      }
 
       for(S32 i = mFirstServer; i <= mLastServer; i++)
       {
@@ -657,9 +683,9 @@ void QueryServersUserInterface::render()
 
          if(i == selectedIndex)
          {
-            // Render description of selected server at bottom
+            // Render server description at bottom
             glColor(s.msgColor);
-            drawString(horizMargin, canvasHeight - vertMargin - 62, 18, s.serverDescr);
+            drawString(horizMargin, canvasHeight - vertMargin - 62 - chatHeight, 18, s.serverDescr);
          }
 
 
@@ -745,51 +771,49 @@ void QueryServersUserInterface::render()
    else if(!connectedToMaster)     // Still waiting for a response...
       drawmsg2 = true;
 
-   // Draw lines
+   // Draw vertical dividing lines
    glColor3f(0.7, 0.7, 0.7);
    for(S32 i = 1; i < columns.size(); i++)
    {
       glBegin(GL_LINES);
-      glVertex2f(columns[i].xStart - 4, COLUMNS_TOP);
-      glVertex2f(columns[i].xStart - 4, ITEMS_TOP + (totalRows + 1) * MENU_ITEM_HEIGHT);
+         glVertex2f(columns[i].xStart - 4, COLUMNS_TOP);
+         glVertex2f(columns[i].xStart - 4, ITEMS_TOP + (mTotalRows + 1) * MENU_ITEM_HEIGHT );
       glEnd();
    }
+
+   // Horizontal lines under column headers
    glBegin(GL_LINES);
-   glVertex2f(0, COLUMNS_TOP + MENU_ITEM_HEIGHT + 7);
-   glVertex2f(800, COLUMNS_TOP + MENU_ITEM_HEIGHT + 7);
+      glVertex2f(0, COLUMNS_TOP + MENU_ITEM_HEIGHT + 7);
+      glVertex2f(800, COLUMNS_TOP + MENU_ITEM_HEIGHT + 7);
    glEnd();
 
-
+   // Big blue scrolling indicator arrows
    if(drawScrollUpArrow)
       MenuUserInterface::renderArrowAbove(ITEMS_TOP + 9);
    if(drawScrollDnArrow)
-      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (totalRows + 1) * MENU_ITEM_HEIGHT + 5);
+      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (mTotalRows + 1) * MENU_ITEM_HEIGHT + 5);
 
 
    if(drawmsg1)
    {
-      static const char *msg = "There are currently no games online.";
+      static const char *msg = "There are no games currently online.";
 
       S32 strwid = getStringWidth(fontsize, msg);
-      glColor(red);
       for(S32 i = 0; i < 2; i++)    // First fill, then outline
       {
-         if(!i)
-            glColor(red);
-         else
-            glColor3f(.4, 0, 0);
+         glColor(!i ? Color(.4, 0, 0) : red);
 
-         glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, canvasHeight / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
-            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, canvasHeight / 2 + msgboxMargin);
-            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, canvasHeight / 2 + msgboxMargin);
-            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, canvasHeight / 2  - 2 * (fontsize + fontgap) - msgboxMargin);
+         glBegin(!i ? GL_POLYGON : GL_LINE_LOOP);
+            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, (canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
+            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, (canvasHeight - chatHeight) / 2 + msgboxMargin);
+            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, (canvasHeight - chatHeight) / 2 + msgboxMargin);
+            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, (canvasHeight - chatHeight) / 2  - 2 * (fontsize + fontgap) - msgboxMargin);
          glEnd();
       }
 
       glColor(white);
-      drawCenteredString(canvasHeight / 2 - 2 * (fontsize + fontgap), fontsize, msg);
-      drawCenteredString(canvasHeight / 2 - (fontsize + fontgap), fontsize, "Why don't you host one?");
+      drawCenteredString((canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap), fontsize, msg);
+      drawCenteredString((canvasHeight - chatHeight) / 2 - (fontsize + fontgap), fontsize, "Why don't you host one?");
    }
    else if(drawmsg2)
    {
@@ -797,28 +821,19 @@ void QueryServersUserInterface::render()
 
       for(S32 i = 0; i < 2; i++)    // First fill, then outline
       {
-         if(!i)
-            glColor(red);
-         else
-            glColor3f(.4, 0, 0);
+         glColor(i ? Color(.4, 0, 0) : red);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, canvasHeight / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
-         glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, canvasHeight / 2 - 1 * (fontsize + fontgap) + msgboxMargin);
-         glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, canvasHeight / 2 - 1 * (fontsize + fontgap) + msgboxMargin);
-         glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, canvasHeight / 2  - 2 * (fontsize + fontgap) - msgboxMargin);
-      glEnd();
+            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, (canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
+            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, (canvasHeight - chatHeight) / 2 - 1 * (fontsize + fontgap) + msgboxMargin);
+            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, (canvasHeight - chatHeight) / 2 - 1 * (fontsize + fontgap) + msgboxMargin);
+            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, (canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
+         glEnd();
       }
 
       glColor(white);
-      drawCenteredString(canvasHeight / 2 - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
+      drawCenteredString((canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
    }
-
-   // Show some chat messages
-   static const S32 MessageDisplayCount = 5;
-
-   for(U32 i = 0; i < MessageDisplayCount; i++)
-      renderMessage(i, 18, 450, MessageDisplayCount);
 }
 
 
@@ -827,11 +842,7 @@ extern Point gMousePos;
 // All key handling now under one roof!
 void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(keyCode == KEY_SPACE)                  // Space - Sort by mSortColumn
-   {
-      sortSelected();
-   }
-   else if(keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)     // Return - select highlighted server & join game
+   if(keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)     // Return - select highlighted server & join game
    {
       Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
 
@@ -845,17 +856,23 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else
       {
-         S32 currentIndex = getSelectedIndex();
-         if(currentIndex == -1)
-            currentIndex = 0;
-
-         if(servers.size() > currentIndex)      // Index is valid
+         // If the user hits enter, it will either submit a message (if a message is being composed), or join a server (if not)
+         if(keyCode == KEY_ENTER && composingMessage())
+            issueChat();
+         else
          {
-            // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
-            joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster, false);
+            S32 currentIndex = getSelectedIndex();
+            if(currentIndex == -1)
+               currentIndex = 0;
 
-            // ...and clear out the server list so we don't do any more pinging
-            servers.clear();
+            if(servers.size() > currentIndex)      // Index is valid
+            {
+               // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
+               joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster, false);
+
+               // ...and clear out the server list so we don't do any more pinging
+               servers.clear();
+            }
          }
       }
    }
@@ -864,12 +881,15 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
       gMainMenuUserInterface.activate();
    }
-   else if(keyCode == keyOUTGAMECHAT)           // Turn on Global Chat overlay
-      gChatInterface.activate();
+   else if(keyCode == keyOUTGAMECHAT)           // Toggle half-height servers, full-height servers, and full chat overlay
+   {
+      mShowChat = !mShowChat;
+      if(mShowChat) 
+         gChatInterface.activate();
+   }
 
-
-  else if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)
-  {
+   else if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)
+   {
       mHighlightColumn--;
       if(mHighlightColumn < 0)
          mHighlightColumn = 0;
@@ -877,16 +897,20 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(keyCode == BUTTON_DPAD_LEFT)
          sortSelected();
 
-  }
-  else if(keyCode == KEY_RIGHT || keyCode == BUTTON_DPAD_RIGHT)
-  {
+   }
+   else if(keyCode == KEY_RIGHT || keyCode == BUTTON_DPAD_RIGHT)
+   {
       mHighlightColumn++;
       if(mHighlightColumn >= columns.size())
          mHighlightColumn = columns.size() - 1;
 
       if(keyCode == BUTTON_DPAD_RIGHT)
          sortSelected();
-  }
+   }
+   else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
+      handleBackspace(keyCode);   
+   else if(ascii)                               // Other keys - add key to message
+     addCharToMessage(ascii);
 
    // The following keys only make sense if there are some servers to browse through
    if(servers.size() == 0)
@@ -954,27 +978,27 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    {
       S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP ) / MENU_ITEM_HEIGHT) + mFirstServer + 1 - (mScrollingUpMode ? 1 : 0);
 
-      // See if this requires scrolling.  If so, limit speed.
-      if(indx <= mFirstServer - 1)
-      {
-         if(!mouseScrollTimer.getCurrent())
-         {
-            indx = mFirstServer - 1;
-            mouseScrollTimer.reset();
-         }
-         else
-            return;
-      }
-      else if(indx > mLastServer)
-      {
-         if(!mouseScrollTimer.getCurrent())
-         {
-            indx = mLastServer + 1;
-            mouseScrollTimer.reset();
-         }
-         else
-            return;
-      }
+      //// See if this requires scrolling.  If so, limit speed.
+      //if(indx <= mFirstServer - 1)
+      //{
+      //   if(!mouseScrollTimer.getCurrent())
+      //   {
+      //      indx = mFirstServer - 1;
+      //      mouseScrollTimer.reset();
+      //   }
+      //   else
+      //      return;
+      //}
+      //else if(indx > mLastServer)
+      //{
+      //   if(!mouseScrollTimer.getCurrent())
+      //   {
+      //      indx = mLastServer + 1;
+      //      mouseScrollTimer.reset();
+      //   }
+      //   else
+      //      return;
+      //}
 
       if(indx < 0)
          indx = 0;

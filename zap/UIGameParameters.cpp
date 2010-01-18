@@ -186,7 +186,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
 void GameParamUserInterface::idle(U32 timeDelta)
 {
-   updateCursorBlink(timeDelta);
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 
@@ -258,7 +258,7 @@ void GameParamUserInterface::render()
 
       if(selectedIndex == i)     // This is the currently selected item
          // Draw chat cursor
-         if((menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString || menuItems[i].mValType == TypeFileName) && cursorBlink)
+         if((menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString || menuItems[i].mValType == TypeFileName) && LineEditor::cursorBlink)
             drawString(xpos + getStringWidth(fontSize, menuItems[i].mText) + space + getStringWidth(fontSize, menuItems[i].mValS.c_str()), y, fontSize, "_");
    }
 

@@ -38,6 +38,7 @@ namespace Zap
 {
 
 const char *arrow = " -> ";
+const S32 lineWidth = UserInterface::canvasWidth - 2 * UserInterface::horizMargin;
 
 // Initialize some static vars
 U32 AbstractChat::mColorPtr = 0;
@@ -48,6 +49,10 @@ ChatMessage AbstractChat::mMessages[MessagesToRetain];
 std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nicknames to colors
 
 
+AbstractChat::AbstractChat()
+{
+   // Do nothing
+}
 
 // We received a new incoming chat message...  Add it to the list
 void AbstractChat::newMessage(string from, string message, bool isPrivate)
@@ -75,6 +80,34 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate)
 }
 
  
+void AbstractChat::addCharToMessage(char ascii)
+{
+   for(U32 i = sizeof(mChatBuffer) - 2; i > mChatCursorPos; i--)  // If inserting...
+         mChatBuffer[i] = mChatBuffer[i-1];                          // ...move chars forward
+
+      // Limit chat messages to the size that can be displayed on the screen
+
+      S32 fromWidth = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), arrow);
+      if((mChatCursorPos < sizeof(mChatBuffer) - 2 )  && fromWidth + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mChatBuffer, ascii) < lineWidth)
+      {
+         mChatBuffer[mChatCursorPos] = ascii;
+         mChatCursorPos++;
+      }
+}
+
+
+// keyCode will have either backspace or delete in it.  For the moment we don't care which.  Later we might.
+void AbstractChat::handleBackspace(KeyCode keyCode)
+{
+   if(mChatCursorPos > 0)
+   {
+      mChatCursorPos--;
+      for(U32 i = mChatCursorPos; mChatBuffer[i]; i++)
+         mChatBuffer[i] = mChatBuffer[i+1];
+   }
+}
+
+
 // We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
 // First message has index == 0, second has index == 1, etc.
 ChatMessage AbstractChat::getMessage(U32 index) 
@@ -117,9 +150,10 @@ void AbstractChat::leaveGlobalChat()
 }
 
 
-void AbstractChat::renderMessage(U32 index, U32 fontsize, U32 yPos, U32 numberToDisplay)            // yPos is starting location of first message
+void AbstractChat::renderMessage(U32 index, U32 yPos, U32 numberToDisplay)            // yPos is starting location of first message
 {
    U32 firstMsg = (mMessageCount <= numberToDisplay) ? 0 : (mMessageCount - numberToDisplay);       // Don't use min/max because of U32/S32 issues!
+   U32 fontsize = CHAT_FONT_SIZE;
 
    if(index >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
       return;
@@ -127,7 +161,7 @@ void AbstractChat::renderMessage(U32 index, U32 fontsize, U32 yPos, U32 numberTo
    ChatMessage msg = getMessage(index + firstMsg); 
    glColor(msg.color);
 
-   yPos += index * (fontsize + 4);   // 4 = vertical padding between messages
+   yPos += index * (fontsize + CHAT_FONT_MARGIN);   
    UserInterface::drawString(UserInterface::horizMargin, yPos, fontsize, msg.from.c_str());
 
    S32 fromWidth = UserInterface::getStringWidth(fontsize, msg.from.c_str());
@@ -145,6 +179,21 @@ void AbstractChat::renderMessage(U32 index, U32 fontsize, U32 yPos, U32 numberTo
 }
 
 
+static const char *PROMPT_STR = "> ";
+
+// Render outgoing chat message composition line
+void AbstractChat::renderMessageComposition(S32 ypos)
+{
+   S32 xpos = UserInterface::horizMargin + UserInterface::getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
+
+   glColor3f(0,1,1);
+   UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
+
+   glColor3f(1,1,1);
+   UserInterface::drawStringf(xpos, ypos, CHAT_FONT_SIZE, "%s%s", mChatBuffer, LineEditor::cursorBlink ? "_" : " ");
+}
+
+
 void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
 {
    // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message. 
@@ -156,6 +205,35 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
       gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
    }
 }
+
+
+// Send chat message
+void AbstractChat::issueChat()
+{
+   if(mChatBuffer[0])
+   {
+      // Send message
+      MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+      if(conn)
+         conn->c2mSendChat(mChatBuffer);
+
+      // And display it locally
+      newMessage(gNameEntryUserInterface.getText(), mChatBuffer, false);
+   }
+   clearChat();     // Clear message
+
+   UserInterface::playBoop();
+}
+
+
+// Clear current message
+void AbstractChat::clearChat()
+{
+   memset(mChatBuffer, 0, sizeof(mChatBuffer));
+   mChatCursorPos = 0;
+}
+
+
 
 ///////////////////////////////////////////
 
@@ -171,7 +249,7 @@ ChatUserInterface::ChatUserInterface()
 
 void ChatUserInterface::idle(U32 timeDelta)
 {
-   updateCursorBlink(timeDelta);
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 
@@ -234,19 +312,9 @@ void ChatUserInterface::render()
    static const U32 MessageDisplayCount = 22;
 
    for(U32 i = 0; i < MessageDisplayCount; i++)
-      renderMessage(i, GlobalChatFontSize, y, MessageDisplayCount);
+      renderMessage(i, y, MessageDisplayCount);
 
-   // Render outgoing chat message composition line
-   const char promptStr[] = "> ";
-
-   S32 horizChatPos = UserInterface::horizMargin + getStringWidth(GlobalChatFontSize, promptStr);
-   S32 vertChatPos = vertFooterPos - 45;
-
-   glColor3f(0,1,1);
-   drawString(UserInterface::horizMargin, vertChatPos, GlobalChatFontSize, promptStr);
-
-   glColor3f(1,1,1);
-   drawStringf(horizChatPos, vertChatPos, GlobalChatFontSize, "%s%s", mChatBuffer, cursorBlink ? "_" : " ");
+   renderMessageComposition(vertFooterPos - 45);
 
    // Give user notice that there is no connection to master, and thus chatting is ineffectual
    if(!(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->getConnectionState() == NetConnection::Connected))
@@ -262,69 +330,14 @@ void ChatUserInterface::render()
 
 void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if (keyCode == keyOUTGAMECHAT)
-   {
-      UserInterface::playBoop();
+   if(keyCode == keyOUTGAMECHAT || keyCode == KEY_ESCAPE)
       onEscape();
-   }
-   else if (keyCode == KEY_ENTER)                 // Submits message
-   {
-      UserInterface::playBoop();
+   else if (keyCode == KEY_ENTER)                // Submits message
       issueChat();
-   }
-   else if (keyCode == KEY_ESCAPE)               // Exits chat
-   {
-      UserInterface::playBoop();
-      onEscape();
-   }
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
-   {
-      if(mChatCursorPos > 0)
-      {
-         mChatCursorPos--;
-         for(U32 i = mChatCursorPos; mChatBuffer[i]; i++)
-            mChatBuffer[i] = mChatBuffer[i+1];
-      }
-   }
+      handleBackspace(keyCode);
    else if(ascii)                               // Other keys - add key to message
-   {
-      for(U32 i = sizeof(mChatBuffer) - 2; i > mChatCursorPos; i--)  // If inserting...
-         mChatBuffer[i] = mChatBuffer[i-1];                          // ...move chars forward
-
-      // Limit chat messages to the size that can be displayed on the screen
-
-      S32 fromWidth = getStringWidthf(GlobalChatFontSize, "%s%s", gNameEntryUserInterface.getText(), arrow);
-      if((mChatCursorPos < sizeof(mChatBuffer) - 2 )  && fromWidth + (S32) getStringWidthf(GlobalChatFontSize, "%s%c", mChatBuffer, ascii) < UserInterface::canvasWidth - 2 * horizMargin )
-      {
-         mChatBuffer[mChatCursorPos] = ascii;
-         mChatCursorPos++;
-      }
-   }
-}
-
-
-// Send chat message
-void ChatUserInterface::issueChat()
-{
-   if(mChatBuffer[0])
-   {
-      // Send message
-      MasterServerConnection *conn = gClientGame->getConnectionToMaster();
-      if(conn)
-         conn->c2mSendChat(mChatBuffer);
-
-      // And display it locally
-      newMessage(gNameEntryUserInterface.getText(), mChatBuffer, false);
-   }
-   cancelChat();     // Clear message
-}
-
-
-// Clear current message
-void ChatUserInterface::cancelChat()
-{
-   memset(mChatBuffer, 0, sizeof(mChatBuffer));
-   mChatCursorPos = 0;
+      addCharToMessage(ascii);
 }
 
 
@@ -346,6 +359,7 @@ void ChatUserInterface::onEscape()
 {
    leaveGlobalChat();
    UserInterface::reactivatePrevUI();
+   UserInterface::playBoop();
 }
 
 ChatUserInterface gChatInterface;

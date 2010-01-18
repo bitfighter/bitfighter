@@ -64,10 +64,10 @@ inline S16 endianSwap(const S16 in_swap)
  */
 inline U32 endianSwap(const U32 in_swap)
 {
-   return U32( ((in_swap >> 24)) |
+   return U32( ((in_swap >> 24) & 0x000000ff) |
                ((in_swap >>  8) & 0x0000ff00) |
                ((in_swap <<  8) & 0x00ff0000) |
-               ((in_swap << 24)) );
+               ((in_swap << 24) & 0xff000000) );
 }
 
 inline S32 endianSwap(const S32 in_swap)

@@ -223,7 +223,7 @@ void GameUserInterface::idle(U32 timeDelta)
    }
 
    if(mCurrentMode == ChatMode)
-      updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
+      LineEditor::updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
    else if(mCurrentMode == QuickChatMode)
       mQuickChat.idle(timeDelta);
    else if(mCurrentMode == LoadoutMode)
@@ -656,7 +656,7 @@ void GameUserInterface::renderCurrentChat()
 
    glColor3f(baseColor.r, baseColor.g, baseColor.b);
    drawString(xpos + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
-   drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, cursorBlink ? "_" : " ");
+   drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, LineEditor::cursorBlink ? "_" : " ");
    glDisable(GL_BLEND);
 }
 

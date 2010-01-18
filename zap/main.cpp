@@ -25,12 +25,20 @@
 /*
 XXX need to document timers, main function XXX
 <ul>
+<h4>Big changes</h4>
+<li>Added energy item</li>
+<li>Started trasnsition of Join menu into Game Lobby</li>
+
+<h4></h4>
 <li>Added Restart Level to game options menu if you have level change permissions</li>
 <li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
 <li>Added asteroids to help screen, enhanced instruction colors</li>
 <li>Fixed several in-game crashing issues</li>
-<li>Added enhanced timer class to Lua scripting</li>
 <li>Minor efficiency improvements on rendering routines</li>
+
+<h4>Bots</h4>
+<li>Added enhanced timer class to Lua scripting</li>
+<li>Moved some "unwrapped" functionality into main() function</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>
@@ -38,6 +46,9 @@ XXX need to document timers, main function XXX
 <li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
 <li>Undo/redo more efficient -- will perform better with large levels and deep undo states</li>
 <li>Added autosave -- will keep a current copy of the l
+
+<h4>Bugs</h4>
+<li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
 
 */
 

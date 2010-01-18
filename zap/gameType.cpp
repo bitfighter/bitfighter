@@ -1263,7 +1263,7 @@ S32 GameType::getTeam(const char *playerName)
       if(!strcmp(mClientList[i]->name.getString(), playerName))
          return(mClientList[i]->teamId);
 
-   return(-1);    // If we can't find the team, let's call it neutral
+   return(NEUTRAL_TEAM);    // If we can't find the team, let's call it neutral
 }
 
 
@@ -1453,7 +1453,10 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
 void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 {
    ClientRef *cl = NULL;
-   if(!ship->isRobot())
+   
+   TNLAssert(ship, "Ship is null in updateScore!!");
+
+   if(!ship->isRobot() && ship->getControllingClient())
       cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
 
    updateScore(cl, ship->getTeam(), scoringEvent, data);

@@ -47,9 +47,6 @@ private:
 
    Timer mouseScrollTimer;
    void sortSelected();
-   enum {
-      totalRows = 14,
-   };
 
    void contactEveryone();    // Try contacting master server, and local broadcast servers
    bool mWaitingForResponseFromMaster;
@@ -61,6 +58,7 @@ private:
    S32 mSortColumn;
    S32 mHighlightColumn;
    S32 mLastSortColumn;
+   bool mShowChat;
 
 public:
    QueryServersUserInterface();      // Constructor

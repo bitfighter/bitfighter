@@ -76,9 +76,38 @@ UserInterface *UserInterface::current = NULL;
 Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+LineEditor::LineEditor()
+{
+   //    Do nothing at the moment...
+}
+
+
+// Update our global cursor blinkenlicht
+// To implement a flashing cursor, call this routine from a UI's local idle routine,
+// then draw the cursor when cursorBlink is true
+void LineEditor::updateCursorBlink(U32 timeDelta)
+{
+   if(mBlinkTimer.update(timeDelta))
+   {
+      mBlinkTimer.reset();
+      cursorBlink = !cursorBlink;
+   }
+}
+
+// Needed for now, may be deleteable later.  See http://forums.devx.com/archive/index.php/t-97293.html
+Timer LineEditor::mBlinkTimer(100);
+bool LineEditor::cursorBlink = false;
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 void UserInterface::activate(bool save)
 {
-   mBlinkTimer.reset(gCursorBlinkTime);
 
    if (current && save)       // Current is not really current any more... it's actually the previously active UI
       prevUIs.push_back(current);
@@ -115,18 +144,6 @@ bool UserInterface::cameFromEditor()
          return true;
 
    return false;
-}
-
-// Update our global cursor blinkenlight
-// To implement a flashing cursor, call this routine from a UI's local idle routine,
-// then draw the cursor when cursorBlink is true
-void UserInterface::updateCursorBlink(U32 timeDelta)
-{
-   if(mBlinkTimer.update(timeDelta))
-   {
-      mBlinkTimer.reset(gCursorBlinkTime);
-      cursorBlink = !cursorBlink;
-   }
 }
 
 

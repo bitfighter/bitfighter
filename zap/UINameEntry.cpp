@@ -38,6 +38,8 @@
 namespace Zap
 {
 
+
+
 void TextEntryUserInterface::onActivate()
 {
    if(resetOnActivate)
@@ -82,13 +84,13 @@ void TextEntryUserInterface::render()
    U32 width = getStringWidth(fontSizeBig, renderBuffer);
    S32 x = (canvasWidth - width) / 2;
 
-   if(cursorBlink)
+   if(LineEditor::cursorBlink)
       drawString(x + getStringWidth(fontSizeBig, renderBuffer, cursorPos), y, fontSizeBig, "_");
 }
 
 void TextEntryUserInterface::idle(U32 timeDelta)
 {
-   updateCursorBlink(timeDelta);
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
