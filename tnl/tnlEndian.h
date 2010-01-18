@@ -60,13 +60,14 @@ inline S16 endianSwap(const S16 in_swap)
    Convert the byte ordering on the U32 to and from big/little endian format.
    @param in_swap Any U32
    @returns swapped U32.
+   Contains an ever-so-slight optimiazation suggested in site listed in U64 version
  */
 inline U32 endianSwap(const U32 in_swap)
 {
-   return U32(((in_swap >> 24) & 0x000000ff) |
-              ((in_swap >>  8) & 0x0000ff00) |
-              ((in_swap <<  8) & 0x00ff0000) |
-              ((in_swap << 24) & 0xff000000));
+   return U32( ((in_swap >> 24)) |
+               ((in_swap >>  8) & 0x0000ff00) |
+               ((in_swap <<  8) & 0x00ff0000) |
+               ((in_swap << 24)) );
 }
 
 inline S32 endianSwap(const S32 in_swap)
@@ -74,14 +75,18 @@ inline S32 endianSwap(const S32 in_swap)
    return S32(endianSwap(U32(in_swap)));
 }
 
+// This from http://www.codeguru.com/forum/showthread.php?t=292902
+// (replaces original TNL function that caused warnings at higher levels of optimization)
 inline U64 endianSwap(const U64 in_swap)
 {
-   U32 *inp = (U32 *) &in_swap;
-   U64 ret;
-   U32 *outp = (U32 *) &ret;
-   outp[0] = endianSwap(inp[1]);
-   outp[1] = endianSwap(inp[0]);
-   return ret;
+    return U64( ((in_swap>>56)) | 
+                ((in_swap<<40) & 0x00FF000000000000ULL) |    // ULL tells compiler to treat this huge number as an unsigned long long
+                ((in_swap<<24) & 0x0000FF0000000000ULL) |
+                ((in_swap<<8)  & 0x000000FF00000000ULL) |
+                ((in_swap>>8)  & 0x00000000FF000000ULL) |
+                ((in_swap>>24) & 0x0000000000FF0000ULL) |
+                ((in_swap>>40) & 0x000000000000FF00ULL) |
+                ((in_swap<<56)) );
 }
 
 inline S64 endianSwap(const S64 in_swap)
@@ -91,13 +96,13 @@ inline S64 endianSwap(const S64 in_swap)
 
 inline F32 endianSwap(const F32 in_swap)
 {
-   U32 result = endianSwap(* ((U32 *) &in_swap) );
+   F32 result = F32(endianSwap(* ((U32 *) &in_swap) ));
    return * ((F32 *) &result);
 }
 
 inline F64 endianSwap(const F64 in_swap)
 {
-   U64 result = endianSwap(* ((U64 *) &in_swap) );
+   F64 result = F64(endianSwap(* ((U64 *) &in_swap) ));
    return * ((F64 *) &result);
 }
 

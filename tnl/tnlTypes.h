@@ -369,7 +369,7 @@ inline bool isPow2(const U32 number)
 /// Determines the binary logarithm of the input value rounded down to the nearest power of 2.
 inline U32 getBinLog2(U32 value)
 {
-   F32 floatValue = F32(value);
+   S32 floatValue = (S32)(value);
    return (*((U32 *) &floatValue) >> 23) - 127;
 }
 
