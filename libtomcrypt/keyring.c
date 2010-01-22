@@ -1,5 +1,5 @@
 /* Provides keyring functionality for libtomcrypt, Tom St Denis */
-#include <mycrypt.h>
+#include "mycrypt.h"
 
 #ifdef KR
 

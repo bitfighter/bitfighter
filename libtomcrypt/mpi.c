@@ -13,7 +13,7 @@
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 static const struct {
      int code;
@@ -58,7 +58,7 @@ char *mp_error_to_string(int code)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes the modular inverse via binary extended euclidean algorithm, 
  * that is c = 1/a mod b 
@@ -205,7 +205,7 @@ __ERR:mp_clear_multi (&x, &y, &u, &v, &B, &D, NULL);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes xR**-1 == x (mod N) via Montgomery Reduction
  *
@@ -376,7 +376,7 @@ fast_mp_montgomery_reduce (mp_int * x, mp_int * n, mp_digit rho)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* Fast (comba) multiplier
  *
@@ -510,7 +510,7 @@ fast_s_mp_mul_digs (mp_int * a, mp_int * b, mp_int * c, int digs)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
- #include <tommath.h>
+#include "tommath.h"
 
 /* this is a modified version of fast_s_mp_mul_digs that only produces
  * output digits *above* digs.  See the comments for fast_s_mp_mul_digs
@@ -612,7 +612,7 @@ fast_s_mp_mul_high_digs (mp_int * a, mp_int * b, mp_int * c, int digs)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* fast squaring
  *
@@ -756,7 +756,7 @@ fast_s_mp_sqr (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes a = 2**b 
  *
@@ -802,7 +802,7 @@ mp_2expt (mp_int * a, int b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* b = |a| 
  *
@@ -843,7 +843,7 @@ mp_abs (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* high level addition (handles signs) */
 int mp_add (mp_int * a, mp_int * b, mp_int * c)
@@ -894,7 +894,7 @@ int mp_add (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* single digit addition */
 int
@@ -1001,7 +1001,7 @@ mp_add_d (mp_int * a, mp_digit b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* d = a + b (mod c) */
 int
@@ -1040,7 +1040,7 @@ mp_addmod (mp_int * a, mp_int * b, mp_int * c, mp_int * d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* AND two ints together */
 int
@@ -1095,7 +1095,7 @@ mp_and (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* trim unused digits 
  *
@@ -1137,7 +1137,7 @@ mp_clamp (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* clear one (frees)  */
 void
@@ -1175,7 +1175,7 @@ mp_clear (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 #include <stdarg.h>
 
 void mp_clear_multi(mp_int *mp, ...) 
@@ -1207,7 +1207,7 @@ void mp_clear_multi(mp_int *mp, ...)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* compare two ints (signed)*/
 int
@@ -1248,7 +1248,7 @@ mp_cmp (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* compare a digit */
 int mp_cmp_d(mp_int * a, mp_digit b)
@@ -1290,7 +1290,7 @@ int mp_cmp_d(mp_int * a, mp_digit b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* compare maginitude of two ints (unsigned) */
 int mp_cmp_mag (mp_int * a, mp_int * b)
@@ -1343,7 +1343,7 @@ int mp_cmp_mag (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* Counts the number of lsbs which are zero before the first zero bit */
 int mp_cnt_lsb(mp_int *a)
@@ -1388,7 +1388,7 @@ int mp_cnt_lsb(mp_int *a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* copy, b = a */
 int
@@ -1454,7 +1454,7 @@ mp_copy (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* returns the number of bits in an int */
 int
@@ -1497,7 +1497,7 @@ mp_count_bits (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* integer signed division. 
  * c*b + d == a [e.g. a/b, c=quotient, d=remainder]
@@ -1712,7 +1712,7 @@ __Q:mp_clear (&q);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* b = a/2 */
 int mp_div_2(mp_int * a, mp_int * b)
@@ -1778,7 +1778,7 @@ int mp_div_2(mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* shift right by a certain bit count (store quotient in c, optional remainder in d) */
 int mp_div_2d (mp_int * a, int b, mp_int * c, mp_int * d)
@@ -1873,7 +1873,7 @@ int mp_div_2d (mp_int * a, int b, mp_int * c, mp_int * d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* divide by three (based on routine from MPI and the GMP manual) */
 int
@@ -1950,7 +1950,7 @@ mp_div_3 (mp_int * a, mp_int *c, mp_digit * d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 static int s_is_power_of_two(mp_digit b, int *p)
 {
@@ -2057,7 +2057,7 @@ mp_div_d (mp_int * a, mp_digit b, mp_int * c, mp_digit * d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* determines if a number is a valid DR modulus */
 int mp_dr_is_modulus(mp_int *a)
@@ -2098,7 +2098,7 @@ int mp_dr_is_modulus(mp_int *a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* reduce "x" in place modulo "n" using the Diminished Radix algorithm.
  *
@@ -2190,7 +2190,7 @@ top:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* determines the setup value */
 void mp_dr_setup(mp_int *a, mp_digit *d)
@@ -2220,7 +2220,7 @@ void mp_dr_setup(mp_int *a, mp_digit *d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* swap the elements of two integers, for cases where you can't simply swap the 
  * mp_int pointers around
@@ -2252,7 +2252,7 @@ mp_exch (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* calculate c = a**b  using a square-multiply algorithm */
 int mp_expt_d (mp_int * a, mp_digit b, mp_int * c)
@@ -2307,7 +2307,7 @@ int mp_expt_d (mp_int * a, mp_digit b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 
 /* this is a shell function that calls either the normal or Montgomery
@@ -2389,7 +2389,7 @@ int mp_exptmod (mp_int * G, mp_int * X, mp_int * P, mp_int * Y)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes Y == G**X mod P, HAC pp.616, Algorithm 14.85
  *
@@ -2680,7 +2680,7 @@ __M:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* read a bigint from a file stream in ASCII */
 int mp_fread(mp_int *a, int radix, FILE *stream)
@@ -2745,7 +2745,7 @@ int mp_fread(mp_int *a, int radix, FILE *stream)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 int mp_fwrite(mp_int *a, int radix, FILE *stream)
 {
@@ -2796,7 +2796,7 @@ int mp_fwrite(mp_int *a, int radix, FILE *stream)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* Greatest Common Divisor using the binary method */
 int mp_gcd (mp_int * a, mp_int * b, mp_int * c)
@@ -2907,7 +2907,7 @@ __U:mp_clear (&v);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* grow as required */
 int mp_grow (mp_int * a, int size)
@@ -2962,7 +2962,7 @@ int mp_grow (mp_int * a, int size)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* init a new bigint */
 int mp_init (mp_int * a)
@@ -2999,7 +2999,7 @@ int mp_init (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* creates "a" then copies b into it */
 int mp_init_copy (mp_int * a, mp_int * b)
@@ -3029,7 +3029,7 @@ int mp_init_copy (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 #include <stdarg.h>
 
 int mp_init_multi(mp_int *mp, ...) 
@@ -3086,7 +3086,7 @@ int mp_init_multi(mp_int *mp, ...)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* init an mp_init for a given size */
 int mp_init_size (mp_int * a, int size)
@@ -3123,7 +3123,7 @@ int mp_init_size (mp_int * a, int size)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* hac 14.61, pp608 */
 int mp_invmod (mp_int * a, mp_int * b, mp_int * c)
@@ -3301,7 +3301,7 @@ __ERR:mp_clear_multi (&x, &y, &u, &v, &A, &B, &C, &D, NULL);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes the jacobi c = (a | n) (or Legendre if n is prime)
  * HAC pp. 73 Algorithm 2.149
@@ -3404,7 +3404,7 @@ __A1:mp_clear (&a1);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* c = |a| * |b| using Karatsuba Multiplication using 
  * three half size multiplications
@@ -3573,7 +3573,7 @@ ERR:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* Karatsuba squaring, computes b = a*a using three 
  * half size squarings
@@ -3693,7 +3693,7 @@ ERR:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes least common multiple as |a*b|/(a, b) */
 int mp_lcm (mp_int * a, mp_int * b, mp_int * c)
@@ -3751,7 +3751,7 @@ __T:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* shift left a certain amount of digits */
 int mp_lshd (mp_int * a, int b)
@@ -3816,7 +3816,7 @@ int mp_lshd (mp_int * a, int b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* c = a mod b, 0 <= c < b */
 int
@@ -3863,7 +3863,7 @@ mp_mod (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* calc a value mod 2**b */
 int
@@ -3916,7 +3916,7 @@ mp_mod_2d (mp_int * a, int b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 int
 mp_mod_d (mp_int * a, mp_digit b, mp_digit * c)
@@ -3941,7 +3941,7 @@ mp_mod_d (mp_int * a, mp_digit b, mp_digit * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* calculates a = B^n mod b for Montgomery reduction
  * Where B is the base [e.g. 2^DIGIT_BIT].
@@ -3998,7 +3998,7 @@ mp_montgomery_calc_normalization (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes xR**-1 == x (mod N) via Montgomery Reduction */
 int
@@ -4114,7 +4114,7 @@ mp_montgomery_reduce (mp_int * x, mp_int * n, mp_digit rho)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* setups the montgomery reduction stuff */
 int
@@ -4171,7 +4171,7 @@ mp_montgomery_setup (mp_int * n, mp_digit * rho)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* high level multiplication (handles sign) */
 int mp_mul (mp_int * a, mp_int * b, mp_int * c)
@@ -4224,7 +4224,7 @@ int mp_mul (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* b = a*2 */
 int mp_mul_2(mp_int * a, mp_int * b)
@@ -4304,7 +4304,7 @@ int mp_mul_2(mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* shift left by a certain bit count */
 int mp_mul_2d (mp_int * a, int b, mp_int * c)
@@ -4387,7 +4387,7 @@ int mp_mul_2d (mp_int * a, int b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* multiply by a digit */
 int
@@ -4463,7 +4463,7 @@ mp_mul_d (mp_int * a, mp_digit b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* d = a * b (mod c) */
 int
@@ -4502,7 +4502,7 @@ mp_mulmod (mp_int * a, mp_int * b, mp_int * c, mp_int * d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* find the n'th root of an integer 
  *
@@ -4632,7 +4632,7 @@ __T1:mp_clear (&t1);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* b = -a */
 int mp_neg (mp_int * a, mp_int * b)
@@ -4664,7 +4664,7 @@ int mp_neg (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* OR two ints together */
 int mp_or (mp_int * a, mp_int * b, mp_int * c)
@@ -4712,7 +4712,7 @@ int mp_or (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* performs one Fermat test.
  * 
@@ -4772,7 +4772,7 @@ __T:mp_clear (&t);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* determines if an integers is divisible by one 
  * of the first PRIME_SIZE primes or not
@@ -4820,7 +4820,7 @@ int mp_prime_is_divisible (mp_int * a, int *result)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* performs a variable number of rounds of Miller-Rabin
  *
@@ -4901,7 +4901,7 @@ __B:mp_clear (&b);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* Miller-Rabin test of "a" to the base of "b" as described in 
  * HAC pp. 139 Algorithm 4.24
@@ -5002,7 +5002,7 @@ __N1:mp_clear (&n1);
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* finds the next prime after the number "a" using "t" trials
  * of Miller-Rabin.
@@ -5170,7 +5170,7 @@ __ERR:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* makes a truly random prime of a given size (bytes),
  * call with bbs = 1 if you want it to be congruent to 3 mod 4 
@@ -5248,7 +5248,7 @@ error:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* returns size of ASCII reprensentation */
 int
@@ -5314,7 +5314,7 @@ mp_radix_size (mp_int * a, int radix)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* chars used in radix conversions */
 const char *mp_s_rmap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/";
@@ -5336,7 +5336,7 @@ const char *mp_s_rmap = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrs
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* makes a pseudo-random int of a given size */
 int
@@ -5389,7 +5389,7 @@ mp_rand (mp_int * a, int digits)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* read a string [ASCII] in a given radix */
 int
@@ -5470,7 +5470,7 @@ mp_read_radix (mp_int * a, char *str, int radix)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* read signed bin, big endian, first byte is 0==positive or 1==negative */
 int
@@ -5510,7 +5510,7 @@ mp_read_signed_bin (mp_int * a, unsigned char *b, int c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* reads a unsigned char array, assumes the msb is stored first [big endian] */
 int
@@ -5564,7 +5564,7 @@ mp_read_unsigned_bin (mp_int * a, unsigned char *b, int c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* reduces x mod m, assumes 0 < x < m**2, mu is 
  * precomputed via mp_reduce_setup.
@@ -5652,7 +5652,7 @@ CLEANUP:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* reduces a modulo n where n is of the form 2**p - k */
 int
@@ -5712,7 +5712,7 @@ ERR:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* determines the setup value */
 int 
@@ -5758,7 +5758,7 @@ mp_reduce_2k_setup(mp_int *a, mp_digit *d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* determines if mp_reduce_2k can be used */
 int mp_reduce_is_2k(mp_int *a)
@@ -5807,7 +5807,7 @@ int mp_reduce_is_2k(mp_int *a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* pre-calculate the value required for Barrett reduction
  * For a given modulus "b" it calulates the value required in "a"
@@ -5840,7 +5840,7 @@ mp_reduce_setup (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* shift right a certain amount of digits */
 void mp_rshd (mp_int * a, int b)
@@ -5910,7 +5910,7 @@ void mp_rshd (mp_int * a, int b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* set to a digit */
 void mp_set (mp_int * a, mp_digit b)
@@ -5937,7 +5937,7 @@ void mp_set (mp_int * a, mp_digit b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* set a 32-bit const */
 int mp_set_int (mp_int * a, unsigned long b)
@@ -5983,7 +5983,7 @@ int mp_set_int (mp_int * a, unsigned long b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* shrink a bignum */
 int mp_shrink (mp_int * a)
@@ -6016,7 +6016,7 @@ int mp_shrink (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* get the size for an signed equivalent */
 int
@@ -6042,7 +6042,7 @@ mp_signed_bin_size (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* computes b = a*a */
 int
@@ -6086,7 +6086,7 @@ mp_sqr (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* c = a * a (mod b) */
 int
@@ -6125,7 +6125,7 @@ mp_sqrmod (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* high level subtraction (handles signs) */
 int
@@ -6182,7 +6182,7 @@ mp_sub (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* single digit subtraction */
 int
@@ -6269,7 +6269,7 @@ mp_sub_d (mp_int * a, mp_digit b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* d = a - b (mod c) */
 int
@@ -6309,7 +6309,7 @@ mp_submod (mp_int * a, mp_int * b, mp_int * c, mp_int * d)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* store in signed [big endian] format */
 int
@@ -6341,7 +6341,7 @@ mp_to_signed_bin (mp_int * a, unsigned char *b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* store in unsigned [big endian] format */
 int
@@ -6388,7 +6388,7 @@ mp_to_unsigned_bin (mp_int * a, unsigned char *b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* multiplication using the Toom-Cook 3-way algorithm */
 int 
@@ -6665,7 +6665,7 @@ ERR:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* squaring using Toom-Cook 3-way algorithm */
 int
@@ -6889,7 +6889,7 @@ ERR:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* stores a bignum as a ASCII string in a given radix (2..64) */
 int
@@ -6963,7 +6963,7 @@ mp_toradix (mp_int * a, char *str, int radix)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* get the size for an unsigned equivalent */
 int
@@ -6990,7 +6990,7 @@ mp_unsigned_bin_size (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* XOR two ints together */
 int
@@ -7039,7 +7039,7 @@ mp_xor (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* set to zero */
 void
@@ -7067,7 +7067,7 @@ mp_zero (mp_int * a)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* this table gives the # of rabin miller trials for a prob of failure lower than 2^-96 */
 static const struct {
@@ -7140,7 +7140,7 @@ int mp_prime_rabin_miller_trials(int size)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 const mp_digit __prime_tab[] = {
   0x0002, 0x0003, 0x0005, 0x0007, 0x000B, 0x000D, 0x0011, 0x0013,
   0x0017, 0x001D, 0x001F, 0x0025, 0x0029, 0x002B, 0x002F, 0x0035,
@@ -7199,7 +7199,7 @@ const mp_digit __prime_tab[] = {
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* reverse an array, used for radix code */
 void
@@ -7236,7 +7236,7 @@ bn_reverse (unsigned char *s, int len)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* low level addition, based on HAC pp.594, Algorithm 14.7 */
 int
@@ -7343,7 +7343,7 @@ s_mp_add (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 #ifdef MP_LOW_MEM
    #define TAB_SIZE 32
@@ -7582,7 +7582,7 @@ __M:
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* multiplies |a| * |b| and only computes upto digs digits of result
  * HAC pp. 595, Algorithm 14.12  Modified so you can control how 
@@ -7671,7 +7671,7 @@ s_mp_mul_digs (mp_int * a, mp_int * b, mp_int * c, int digs)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* multiplies |a| * |b| and does not compute the lower digs digits
  * [meant to get the higher part of the product]
@@ -7748,7 +7748,7 @@ s_mp_mul_high_digs (mp_int * a, mp_int * b, mp_int * c, int digs)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* low level squaring, b = a*a, HAC pp.596-597, Algorithm 14.16 */
 int
@@ -7831,7 +7831,7 @@ s_mp_sqr (mp_int * a, mp_int * b)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* low level subtraction (assumes |a| > |b|), HAC pp.595 Algorithm 14.9 */
 int
@@ -7918,7 +7918,7 @@ s_mp_sub (mp_int * a, mp_int * b, mp_int * c)
  *
  * Tom St Denis, tomstdenis@iahu.ca, http://math.libtomcrypt.org
  */
-#include <tommath.h>
+#include "tommath.h"
 
 /* Known optimal configurations
 

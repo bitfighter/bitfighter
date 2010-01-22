@@ -9,7 +9,7 @@
 * the public.                                                          *
 \**********************************************************************/
 
-#include <mycrypt.h>
+#include "mycrypt.h"
 
 #ifdef RC2
 
