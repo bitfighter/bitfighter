@@ -219,8 +219,8 @@ GameItemRec gGameItemRecs[] = {
    { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
-   { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",   "Repair",       "Repairs damage to ships. [B]" },
-   { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Energy",   "Energy",       "Restores energy to ships" },
+   { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
+   { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
    { "TestItem",            false,    false,     false,       false,   false,   geomPoint,      'x',    true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
    { "Asteroid",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
    { "AsteroidSpawn",       false,    false,     false,       false,   true,    geomPoint,       0,     true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
@@ -2879,8 +2879,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mNewItem.vertSelected.push_back(false);
       }
    }
-
-   if(keyCode == MOUSE_LEFT)
+   else if(keyCode == MOUSE_LEFT)
    {
       mDraggingDockItem = -1;
       mMousePos = convertWindowToCanvasCoord(gMousePos);

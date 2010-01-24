@@ -23,16 +23,19 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#endif
 
 #include "../zap/SharedConstants.h"
 
 #include "../tnl/tnl.h"
 #include "../tnl/tnlLog.h"
 #include <stdio.h>
-
+#include <string>
 
 using namespace TNL;
+using namespace std;
 
 extern U32 gMasterPort;
 extern const char *gMasterName;
@@ -40,11 +43,11 @@ extern const char *gJasonOutFile;
 
 extern U32 gLatestReleasedCSProtocol;
 
-extern Vector<char *> MOTDTypeVecOld;
-extern Vector<char *> MOTDStringVecOld;
+extern Vector<string> MOTDTypeVecOld;
+extern Vector<string> MOTDStringVecOld;
 
 extern Vector<U32> MOTDVersionVec;
-extern Vector<char *> MOTDStringVec;
+extern Vector<string> MOTDStringVec;
 
 void processConfigLine(int argc, const char **argv)
 {
@@ -54,11 +57,8 @@ void processConfigLine(int argc, const char **argv)
    // The following chunk can go away when we retire CMProtocol version 0
    else if(!stricmp(argv[0], "motd") && argc > 2)        // motd --> set motd for version 0 clients
    {
-      char *type = strdup(argv[1]);       // version
-      char *message = strdup(argv[2]);    // message
-
-      MOTDTypeVecOld.push_back(type);
-      MOTDStringVecOld.push_back(message);
+      MOTDTypeVecOld.push_back(argv[1]);    // version
+      MOTDStringVecOld.push_back(argv[2]);  // message
    }
 
    // CMProtocol version 1 entries look a bit different, but serves the same basic function...
@@ -250,20 +250,8 @@ void readConfigFile()
       return;
    }
 
-   // Clean out our string structs
-   for(S32 i = 0; i < MOTDTypeVecOld.size(); i++)
-   {
-      free(MOTDTypeVecOld[i]);
-      free(MOTDStringVecOld[i]);
-   }
-   MOTDTypeVecOld.clear();
    MOTDStringVecOld.clear();
-
-
-   // And again, for our newer structs
-   for(S32 i = 0; i < MOTDStringVec.size(); i++)
-      free(MOTDStringVec[i]);
-
+   MOTDTypeVecOld.clear();
    MOTDStringVec.clear();
    MOTDVersionVec.clear();
 

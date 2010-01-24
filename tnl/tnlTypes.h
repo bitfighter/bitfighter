@@ -203,11 +203,13 @@ typedef unsigned _int64 U64;
 
 #define for if(false) {} else for   ///< Hack to work around Microsoft VC's non-C++ compliance on variable scoping
 
+#ifdef _MSC_VER
 // disable warning caused by memory layer
 // see msdn.microsoft.com "Compiler Warning (level 1) C4291" for more details
 #pragma warning(disable: 4291)
 // disable performance warning of integer to bool conversions
 #pragma warning(disable: 4800)
+#endif
 
 #elif defined(__MWERKS__) && defined(_WIN32)
 
@@ -284,7 +286,10 @@ typedef unsigned long long  U64;  ///< Compiler independent unsigned 64-bit inte
 // Identify the target CPU and assembly language options
 //----------------------------------------------------------------------------------
 
-#if defined(_M_IX86) || defined(i386)
+
+// Other values that might be needed here are: 
+// defined(_M_AMD64)|| defined(__amd64__) || defined(_M_IA64) || defined(__amd64) || defined(__ia64__) || defined(_IA64) || defined(__IA64__) || defined(__i686__)
+#if defined(_M_IX86) || defined(i386) || defined(__x86_64__) || defined(__x86_64__) || defined(__x86_64)
 #  define TNL_CPU_STRING "Intel x86"
 #  define TNL_CPU_X86
 #  define TNL_LITTLE_ENDIAN
@@ -387,8 +392,8 @@ static const char LogTable256[256] =
 inline U32 getBinLog2(U32 value)
 {
    register U32 t, tt; // temporaries
-
-   if(tt = value >> 16)
+   tt = value >> 16;
+   if(tt != 0)
      return (t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt];
    else 
      return (t = value >> 8) ? 8 + LogTable256[t] : LogTable256[value];

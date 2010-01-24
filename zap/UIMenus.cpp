@@ -333,7 +333,7 @@ void MenuUserInterface::processMouse()
 {
    if(menuItems.size() > gMaxMenuSize)    // We have a scrolling situation here...
    {
-      S32 yStart = getYStart();
+      //S32 yStart = getYStart();
 
       if(selectedIndex < currOffset)      // Scroll up
       {
@@ -1572,7 +1572,7 @@ void TeamMenuUserInterface::processSelection(U32 index)        // Handler for un
    if(!gc || !gt)
       return;
 
-   if (index != gt->getTeam(nameToChange))
+   if(index != (U32)gt->getTeam(nameToChange))
    {
       if(getPrevMenuID() == PlayerUI)     // Initiated by an admin (PlayerUI is the kick/change team player-pick admin menu)
       {

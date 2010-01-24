@@ -434,7 +434,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          columnCount = 2;
 
       U32 teamWidth = totalWidth / columnCount;
-      U32 maxTeamPlayers = 0;
+      S32 maxTeamPlayers = 0;
       countTeamPlayers();
 
       // Check to make sure at least one team has at least one player...
@@ -1111,7 +1111,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
    static Vector<GameObject *> fillVector;
 
    // What does the spy bug see?
-   S32 teamId = gc->getClientRef()->teamId;
+   //S32 teamId = gc->getClientRef()->teamId;
       mSpyBugs.clear();
       gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
 
@@ -1333,7 +1333,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    countTeamPlayers();     // Also calcs team ratings
 
    // Figure out how many players the team with the fewest players has
-   U32 minPlayers = mTeams[0].numPlayers;
+   S32 minPlayers = mTeams[0].numPlayers;
 
    for(S32 i = 1; i < mTeams.size(); i++)
    {

@@ -753,7 +753,6 @@ void renderSlipZone(Vector<Point> &bounds, Rect extent)
 {
    Color theColor (0, 128, 0);  // Go for a pale green, for now...
 
-   F32 alpha = 0.5;
    glColor(theColor * 0.5);
    glBegin(GL_POLYGON);
    for(S32 i = 0; i < bounds.size(); i++)

@@ -454,7 +454,7 @@ S32 dVsprintf(char *buffer, U32 bufferSize, const char *format, void *arglist)
 #else
    // WAS ==> S32 len = vsnprintf(buffer, bufferSize, format, (char *) arglist);
    // trying to fix a Intel64 compile bug... try this:
-   S32 len = vsnprintf(buffer, bufferSize, format, (va_list) arglist);
+   S32 len = vsnprintf(buffer, bufferSize, format, (char *) arglist);
 #endif
    return len;
 }

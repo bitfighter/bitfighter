@@ -70,7 +70,6 @@ void BotNavMeshZone::render()     // For now... in future will be invisible!
       return;
 
    glEnable(GL_BLEND);
-      F32 alpha = 0.5;
    glColor3f(.2, .2, 0);
 
    // Render loadout zone trinagle geometry

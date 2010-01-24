@@ -192,7 +192,9 @@ private:
     char buff[32];
     userdataType *ud = static_cast<userdataType*>(lua_touserdata(L, 1));
     T *obj = ud->pT;
+#ifdef _MSC_VER
 #pragma warning(disable : 4996)      // Disable warning about sprintf below -CE
+#endif
     sprintf(buff, "%p", (void*)obj);
     lua_pushfstring(L, "%s (%s)", T::className, buff);
 

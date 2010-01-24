@@ -983,7 +983,7 @@ void NetInterface::sendPunchPackets(NetConnection *conn)
 void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 {
    S32 i, j;
-   NetConnection *conn;
+   NetConnection *conn = NULL;
 
    Nonce firstNonce;
    firstNonce.read(stream);
@@ -1138,7 +1138,7 @@ void NetInterface::sendArrangedConnectRequest(NetConnection *conn)
 void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitStream *stream)
 {
    S32 i, j;
-   NetConnection *conn;
+   NetConnection *conn = NULL;
    Nonce nonce, serverNonce;
    nonce.read(stream);
 

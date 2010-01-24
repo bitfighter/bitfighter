@@ -630,7 +630,7 @@ F32 angleOfLongestSide(Vector<Point> &polyPoints)
    Point start;
    Point end;
    F32 maxlen = -1;
-   F32 ang;
+   F32 ang = 0;
 
    for(S32 i = 0; i < polyPoints.size(); i++)
    {

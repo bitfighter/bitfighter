@@ -420,7 +420,7 @@ extern IniSettings gIniSettings;
 S32 getControllerButtonRenderedSize(KeyCode keyCode)
 {
    S32 joy = gIniSettings.joystickType;
-   InputMode inputMode = gIniSettings.inputMode;
+   //InputMode inputMode = gIniSettings.inputMode;
 
    if(!isControllerButton(keyCode))    // Render keyboard keys
       return UserInterface::getStringWidthf(15, "[%s]", keyCodeToString(keyCode));
@@ -494,7 +494,7 @@ S32 getControllerButtonRenderedSize(KeyCode keyCode)
 void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset)
 {
    S32 joy = gIniSettings.joystickType;
-   InputMode inputMode = gIniSettings.inputMode;
+   //InputMode inputMode = gIniSettings.inputMode;
 
    if(!isControllerButton(keyCode))    // Render keyboard keys
    {

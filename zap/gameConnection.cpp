@@ -628,7 +628,7 @@ checkPlayerName:
       {
          dSprintf(name + len, 3, ".%d", index);
          index++;
-         if(index > 9 && len == 30 || index > 99 && len == 29)    // This little hack should cover us for more names than we can handle
+         if((index > 9 && len == 30) || (index > 99 && len == 29))    // This little hack should cover us for more names than we can handle
          {
             len--;
             name[len] = 0;

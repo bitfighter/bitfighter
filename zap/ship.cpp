@@ -53,7 +53,10 @@ static Vector<GameObject *> fillVector;
 //------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
+#ifdef _MSC_VER
 #pragma warning(disable:4355)
+#endif
+
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
 Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius)
@@ -813,7 +816,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    stream->writeFlag(hasExploded);
    stream->writeFlag(getControllingClient()->isBusy());
 
-   stream->writeFlag(updateMask & WarpPositionMask && updateMask != -1);
+   stream->writeFlag(updateMask & WarpPositionMask/* && updateMask != -1*/);   // Commented out caused U32/S32 comparison warning
    stream->writeFlag(mJustTeleported);      // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
 
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
@@ -1055,10 +1058,10 @@ void Ship::setLoadout(const Vector<U32> &loadout)
    bool theSame = true;
 
    for(S32 i = 0; i < ShipModuleCount; i++)
-      theSame = theSame && (loadout[i] == mModule[i]);
+      theSame = theSame && (loadout[i] == (U32)mModule[i]);
 
    for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-      theSame = theSame && (loadout[i] == mWeapon[i - ShipModuleCount]);
+      theSame = theSame && (loadout[i] == (U32)mWeapon[i - ShipModuleCount]);
 
    if(theSame)      // Don't bother if ship config hasn't changed
       return;
@@ -1166,7 +1169,7 @@ void Ship::emitShipExplosion(Point pos)
 
 void Ship::emitMovementSparks()
 {
-   U32 deltaT = mCurrentMove.time;
+   //U32 deltaT = mCurrentMove.time;
 
    // Do nothing if we're under 0.1 vel
    if(hasExploded || mMoveState[ActualState].vel.len() < 0.1)

@@ -284,7 +284,8 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
          S32 error = ioctlsocket(mPlatformSocket, FIONBIO, &notblock);
 #else
          U32 notblock = nonblockingIO;
-         S32 error = ioctl(mPlatformSocket, FIONBIO, &notblock);
+         S32 error;
+         error = ioctl(mPlatformSocket, FIONBIO, &notblock);
 #endif
       }
       else
@@ -545,9 +546,10 @@ void Socket::getInterfaceAddresses(Vector<Address> *addressVector)
       close(sfd);
       return;
    }
+   char *ret;  // Only used to suppress warnings on cpp
    char buf[1024];
-   fgets(buf, 1024, f);
-   fgets(buf, 1024, f);
+   ret = fgets(buf, 1024, f);
+   ret = fgets(buf, 1024, f);
 
    struct ifreq ifr;
    struct sockaddr_in *sin = (struct sockaddr_in *) &ifr.ifr_addr;

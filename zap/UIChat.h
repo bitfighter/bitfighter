@@ -47,12 +47,14 @@ public:
       color = col;
       message = msg;
       from = frm;
+      time = getShortTimeStamp();   // Record time message arrived
       isPrivate = isPriv;
    }
 
    Color color;      // Chat message colors
    string message;   // Hold chat messages
    string from;      // Hold corresponding nicks
+   string time;      // Time message arrived
    bool isPrivate;   // Holds public/private status of message
 };
 
@@ -78,7 +80,6 @@ private:
    static U32 mMessageCount;
    static const S32 CHAT_MESSAGE_LEN = 200;
 
-
 protected:
    // Message data
    static ChatMessage mMessages[MessagesToRetain];
@@ -102,13 +103,18 @@ public:
 
    void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
 
-   void renderMessage(U32 index, U32 yPos, U32 numberToDisplay);
+   void renderMessages(U32 yPos, U32 numberToDisplay);
    void renderMessageComposition(S32 ypos);   // Render outgoing chat message composition line
 
+   void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room
    void deliverPrivateMessage(const char *sender, const char *message);
 
-   static const U32 CHAT_FONT_SIZE = 16;      // Font size to display those messages
-   static const U32 CHAT_FONT_MARGIN = 4;     // Vertical margin
+   static const U32 CHAT_FONT_SIZE = 14;      // Font size to display those messages
+   static const U32 CHAT_TIME_FONT_SIZE = 9;  // Size of the timestamp
+   static const U32 CHAT_FONT_MARGIN = 3;     // Vertical margin
+   static const U32 CHAT_NAMELIST_SIZE = 11;  // Size of names of people in chatroom
+
+   Vector<StringTableEntry> mPlayersInGlobalChat;
 };
 
 
@@ -136,12 +142,6 @@ public:
    void onEscape();
 
    void idle(U32 timeDelta);
-
-   // Mechanics related
-
-
-   Vector<StringTableEntry> mPlayersInGlobalChat;
-
 };
 
 extern ChatUserInterface gChatInterface;

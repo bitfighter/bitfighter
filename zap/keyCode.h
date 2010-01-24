@@ -127,7 +127,6 @@ enum KeyCode {
    KEY_UNKNOWN
 };
 
-static bool keyIsDown[MAX_KEYS];
 const char *keyCodeToString(KeyCode keyCode);
 KeyCode stringToKeyCode(const char *keyname);
 

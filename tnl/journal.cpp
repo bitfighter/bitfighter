@@ -143,16 +143,18 @@ void Journal::syncWriteStream()
    // seek back to the beginning
    fseek(mJournalFile, 0, SEEK_SET);
 
+   // Use this variable to suppress warnings on gcc, value never used
+   size_t a;
    // write the new total bits
    U32 writeBits = convertHostToLEndian(totalBits);
-   fwrite(&writeBits, 1, sizeof(U32), mJournalFile);
+   a = fwrite(&writeBits, 1, sizeof(U32), mJournalFile);
 
    // seek to the writing position
    fseek(mJournalFile, mWritePosition, SEEK_SET);
 
    U32 bytesToWrite = mWriteStream.getBytePosition();
    // write the bytes to the file
-   fwrite(mWriteStream.getBuffer(), 1, bytesToWrite, mJournalFile);
+   a = fwrite(mWriteStream.getBuffer(), 1, bytesToWrite, mJournalFile);
    fflush(mJournalFile);
 
    // adjust the write stream
@@ -190,9 +192,12 @@ void Journal::load(const char *fileName)
    U32 fileSize = ftell(theJournal);
    fseek(theJournal, 0, SEEK_SET);
 
-   mReadStream.resize(fileSize);
+   bool a;   // a and b only here to suppress warnings on cpp, not used elsewhere
+   size_t b;
+
+   a = mReadStream.resize(fileSize);   
    U32 bitCount;
-   fread(mReadStream.getBuffer(), 1, fileSize, theJournal);
+   b = fread(mReadStream.getBuffer(), 1, fileSize, theJournal);
    mReadStream.read(&bitCount);
    mReadStream.setMaxBitSizes(bitCount);
 

@@ -245,7 +245,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
 
    F32 ang = TNL::Random::readF() * Float2Pi;
-   F32 vel = asteroidVel;
+   //F32 vel = asteroidVel;
 
    setPosAng(getActualPos(), ang);
 

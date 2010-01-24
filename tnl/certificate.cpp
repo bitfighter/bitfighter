@@ -48,6 +48,7 @@ void Certificate::parse()
       mIsValid = true;
 }
 
+
 bool Certificate::validate(RefPtr<AsymmetricKey> signatoryPublicKey)
 {
    if(!mIsValid)

@@ -50,7 +50,7 @@ static unsigned char const bitoff[ 256 ] = {
 
 static gsmword gsm_FAC[8]  = { 18431, 20479, 22527, 24575, 26623, 28671, 30719, 32767 };
 static gsmword gsm_NRFAC[8] = { 29128, 26215, 23832, 21846, 20165, 18725, 17476, 16384 };
-static gsmword gsm_H[11] = {-134, -374, 0, 2054, 5741, 8192, 5741, 2054, 0, -374, -134 };
+//static gsmword gsm_H[11] = {-134, -374, 0, 2054, 5741, 8192, 5741, 2054, 0, -374, -134 };
 static gsmword gsm_DLB[4] = {6554, 16384, 26214, 32767};
 
 static gsmword gsm_norm(longword a)

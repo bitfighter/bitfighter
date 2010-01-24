@@ -46,7 +46,7 @@ namespace TNL
 extern void logprintf(const char *format, ...);
 extern void s_logprintf(const char *format, ...);
 extern std::string getTimeStamp();
-
+extern std::string getShortTimeStamp();
 
 /// LogConsumer is the base class for the message logging system in TNL.
 ///

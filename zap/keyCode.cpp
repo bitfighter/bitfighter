@@ -51,6 +51,8 @@ using namespace TNL;
 namespace Zap
 {
 
+static bool keyIsDown[MAX_KEYS];
+
 // We have two sets of keys defined -- one for when we're playing
 // with a keyboard, and one for joystick play
 KeyCode keySELWEAP1[2];       // Select weapon 1
@@ -919,24 +921,30 @@ void checkModifierKeyState()
    getModifierState(sd, cd, ad);    // GLUT function to return state of mod keys
 
    if(sd != getKeyState(KEY_SHIFT))    // Shift state has changed
+   {
       if(sd)      // Shift down
          gZapJournal.modifierkeydown(0);
       else        // Shift not down
          gZapJournal.modifierkeyup(0);
+   }
 
 
    if(cd != getKeyState(KEY_CTRL))     // Ctrl state has changed
+   {
       if(cd)      // Ctrl down
          gZapJournal.modifierkeydown(1);
       else        // Ctrl not down
          gZapJournal.modifierkeyup(1);
+   }
 
 
    if(ad != getKeyState(KEY_ALT))      // Alt state has changed
+   {
       if(ad)   // Alt down
          gZapJournal.modifierkeydown(2);
       else     // Alt not down
          gZapJournal.modifierkeyup(2);
+   }
 }
 
 // We'll also treat controller buttons like simulated keystrokes

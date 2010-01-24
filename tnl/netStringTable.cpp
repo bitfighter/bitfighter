@@ -118,7 +118,7 @@ U32 hashString(const char* str)
       initToLowerTable();
 
    U32 ret = 0;
-   char c;
+   U8 c;
    while((c = *str++) != 0) {
       ret <<= 1;
       ret ^= sgToLowerTable[c];
@@ -132,7 +132,7 @@ U32 hashStringn(const char* str, S32 len)
       initToLowerTable();
 
    U32 ret = 0;
-   char c;
+   U8 c;
    while((c = *str++) != 0 && len--) {
       ret <<= 1;
       ret ^= sgToLowerTable[c];
@@ -179,6 +179,7 @@ void destroy()
 //--------------------------------------
 
 //--------------------------------------
+
 StringTableEntryId insert(const char* val, const bool caseSens)
 {
    if(!val)
@@ -193,7 +194,7 @@ void validate()
    U32 nodeCount = 0;
    for(U32 i = 0; i < mNodeListSize; i++)
    {
-      if(mNodeList[i] && !(U32(mNodeList[i]) & 1))
+      if(mNodeList[i] && !(StringTableEntryId(mNodeList[i]) & 1))        
         nodeCount++;
    }
    TNLAssert(nodeCount == mItemCount, "Error!!!");
@@ -201,7 +202,7 @@ void validate()
    StringTableEntryId walk = mNodeListFreeEntry;
    while(walk)
    {
-      walk = StringTableEntryId(mNodeList[walk >> 1]);
+      walk = StringTableEntryId(mNodeList[walk >> 1]);   
       if(!((walk >> 1) < mNodeListSize))
          TNLAssert((walk >> 1) < mNodeListSize, "Out of range node index!!!");
       freeListCount++;
@@ -217,12 +218,13 @@ void validate()
       {
         TNLAssert(walk < mNodeListSize, "Out of range node index!!!");
         Node *node = mNodeList[walk];
-        TNLAssert((U32(node) & 1) == 0, "Free list entry in node chain!!!");
+        TNLAssert((StringTableEntryId(node) & 1) == 0, "Free list entry in node chain!!!");
         TNLAssert(walk == node->masterIndex, "Master/node index mismatch.");
         walk = node->nextIndex;
       }
    }
 }
+
 
 StringTableEntryId insertn(const char* val, S32 len, const bool caseSens)
 {

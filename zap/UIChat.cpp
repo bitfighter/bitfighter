@@ -37,7 +37,8 @@
 namespace Zap
 {
 
-const char *arrow = " -> ";
+const char *arrow = ">";
+const S32 AFTER_ARROW_SPACE = 5;
 const S32 lineWidth = UserInterface::canvasWidth - 2 * UserInterface::horizMargin;
 
 // Initialize some static vars
@@ -53,6 +54,7 @@ AbstractChat::AbstractChat()
 {
    // Do nothing
 }
+
 
 // We received a new incoming chat message...  Add it to the list
 void AbstractChat::newMessage(string from, string message, bool isPrivate)
@@ -82,13 +84,14 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate)
  
 void AbstractChat::addCharToMessage(char ascii)
 {
+   // Limit chat messages to the size that can be displayed on receiver's screen
+   S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), arrow) + AFTER_ARROW_SPACE +
+                   UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
+
    for(U32 i = sizeof(mChatBuffer) - 2; i > mChatCursorPos; i--)  // If inserting...
          mChatBuffer[i] = mChatBuffer[i-1];                          // ...move chars forward
 
-      // Limit chat messages to the size that can be displayed on the screen
-
-      S32 fromWidth = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), arrow);
-      if((mChatCursorPos < sizeof(mChatBuffer) - 2 )  && fromWidth + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mChatBuffer, ascii) < lineWidth)
+      if((mChatCursorPos < sizeof(mChatBuffer) - 2)  && xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mChatBuffer, ascii) < lineWidth)
       {
          mChatBuffer[mChatCursorPos] = ascii;
          mChatCursorPos++;
@@ -150,47 +153,46 @@ void AbstractChat::leaveGlobalChat()
 }
 
 
-void AbstractChat::renderMessage(U32 index, U32 yPos, U32 numberToDisplay)            // yPos is starting location of first message
+void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // ypos is starting location of first message
 {
    U32 firstMsg = (mMessageCount <= numberToDisplay) ? 0 : (mMessageCount - numberToDisplay);       // Don't use min/max because of U32/S32 issues!
-   U32 fontsize = CHAT_FONT_SIZE;
 
-   if(index >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
-      return;
-
-   ChatMessage msg = getMessage(index + firstMsg); 
-   glColor(msg.color);
-
-   yPos += index * (fontsize + CHAT_FONT_MARGIN);   
-   UserInterface::drawString(UserInterface::horizMargin, yPos, fontsize, msg.from.c_str());
-
-   S32 fromWidth = UserInterface::getStringWidth(fontsize, msg.from.c_str());
-
-   if(msg.isPrivate)
+   for(U32 i = 0; i < numberToDisplay; i++)
    {
-      UserInterface::drawString(UserInterface::horizMargin + fromWidth, yPos, fontsize, "*");
-      fromWidth += UserInterface::getStringWidth(fontsize, "*");
+      if(i >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
+         return;
+
+      ChatMessage msg = getMessage(i + firstMsg); 
+      glColor(msg.color);
+
+      S32 xpos = UserInterface::horizMargin / 2;
+      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2, 8, "[%s] ", msg.time.c_str());
+      xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());
+
+      if(msg.isPrivate)
+         xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
+
+      xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, arrow) + AFTER_ARROW_SPACE;
+
+      UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
+
+      ypos += CHAT_FONT_SIZE + CHAT_FONT_MARGIN;    
    }
-
-   UserInterface::drawString(UserInterface::horizMargin + fromWidth, yPos, fontsize, arrow);
-
-   fromWidth += UserInterface::getStringWidth(fontsize, arrow);
-   UserInterface::drawString(UserInterface::horizMargin + fromWidth, yPos, fontsize, msg.message.c_str());
 }
 
 
-static const char *PROMPT_STR = "> ";
+static const char *PROMPT_STR = "> ";     // For composition only
+static const S32 xStartPos = UserInterface::horizMargin + UserInterface::getStringWidth(AbstractChat::CHAT_FONT_SIZE, PROMPT_STR);
+
 
 // Render outgoing chat message composition line
 void AbstractChat::renderMessageComposition(S32 ypos)
 {
-   S32 xpos = UserInterface::horizMargin + UserInterface::getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
-
    glColor3f(0,1,1);
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(1,1,1);
-   UserInterface::drawStringf(xpos, ypos, CHAT_FONT_SIZE, "%s%s", mChatBuffer, LineEditor::cursorBlink ? "_" : " ");
+   UserInterface::drawStringf(xStartPos, ypos, CHAT_FONT_SIZE, "%s%s", mChatBuffer, LineEditor::cursorBlink ? "_" : " ");
 }
 
 
@@ -202,7 +204,7 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
    {
       gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s%s", arrow, message);
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", arrow, message);
    }
 }
 
@@ -234,6 +236,16 @@ void AbstractChat::clearChat()
 }
 
 
+void AbstractChat::renderChatters(S32 xpos, S32 ypos)
+{
+   glColor3f(1,1,0);
+
+   if(mPlayersInGlobalChat.size() == 0)
+      UserInterface::drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
+   else
+      for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
+         xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_NAMELIST_SIZE, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+}
 
 ///////////////////////////////////////////
 
@@ -253,6 +265,11 @@ void ChatUserInterface::idle(U32 timeDelta)
 }
 
 
+static const S32 VERT_FOOTER_SIZE = 20;
+static const S32 MENU_TITLE_SIZE = 30;
+static const S32 TITLE_SUBTITLE_GAP = 5;
+static const S32 MENU_SUBTITLE_SIZE = 18;
+
 void ChatUserInterface::render()
 {
    if (prevUIs.size())           // If there is an underlying menu...
@@ -271,7 +288,7 @@ void ChatUserInterface::render()
 
    // Draw title, subtitle, and footer
    glColor3f(1, 1, 1);
-   drawCenteredString(vertMargin, 30, menuTitle);
+   drawCenteredString(vertMargin, MENU_TITLE_SIZE, menuTitle);
 
    string subtitle = "Not currently connected to any game server";
    
@@ -285,35 +302,28 @@ void ChatUserInterface::render()
    }
 
    glColor3f(0, 1, 0);
-   drawCenteredString(vertMargin + 35, 18, subtitle.c_str());
+   drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
 
-   S32 vertFooterPos = canvasHeight - vertMargin - 20;
-   drawCenteredString(vertFooterPos, 18, menuFooter);
+   S32 vertFooterPos = canvasHeight - vertMargin - VERT_FOOTER_SIZE;
+   drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, menuFooter);
 
-   S32 xpos = horizMargin;
-   S32 ypos = vertFooterPos - 16;
-
-   glColor3f(1,1,0);
-
-   if(mPlayersInGlobalChat.size() == 0)
-      drawString(xpos, ypos, 11, "No other players currently in lobby/chat room");
-   else
-      for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
-      {
-         drawStringf(xpos, ypos, 11, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
-         xpos += getStringWidthf(11, "%s ;",mPlayersInGlobalChat[i].getString());
-      }
+   renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
 
    // Render incoming chat msgs
    glColor3f(1,1,1);
 
    U32 y = UserInterface::vertMargin + 60;
 
-   static const U32 MessageDisplayCount = 22;
+   static const S32 chatAreaHeight = canvasHeight - 2 * vertMargin -                   // Screen area less margins
+                     VERT_FOOTER_SIZE -                                                // Instructions at the bottom
+                     CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2  -                      // Names of those in chatroom
+                     MENU_TITLE_SIZE - TITLE_SUBTITLE_GAP - MENU_SUBTITLE_SIZE -       // Title/subtitle display
+                     CHAT_FONT_SIZE - CHAT_FONT_MARGIN -                               // Chat composition
+                     CHAT_FONT_SIZE;                                                   // Not sure... just need a little more space??
 
-   for(U32 i = 0; i < MessageDisplayCount; i++)
-      renderMessage(i, y, MessageDisplayCount);
+   static const S32 MessageDisplayCount = chatAreaHeight / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN);
 
+   renderMessages(y, MessageDisplayCount);
    renderMessageComposition(vertFooterPos - 45);
 
    // Give user notice that there is no connection to master, and thus chatting is ineffectual

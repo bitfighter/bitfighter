@@ -109,7 +109,7 @@ void LoadoutHelper::render()
    LoadoutItem *list;
    list = getList(mCurrentIndex);
 
-   for(S32 i = 0; list[i].text; i++)
+   for(U32 i = 0; list[i].text; i++)
    {
       bool selected = false;
 
@@ -190,7 +190,7 @@ bool LoadoutHelper::isValidItem(S32 index)
    if (list[index].requires != ModuleNone)
    {
       for(S32 i = 0; i < min(mCurrentIndex, ShipModuleCount); i++)
-         if(gLoadoutModules[mModule[i]].index == list[index].requires)          // Found prerequisite
+         if(gLoadoutModules[mModule[i]].index == (U32)list[index].requires)          // Found prerequisite
             return true;
       return false;
    }
@@ -227,7 +227,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       return true;
    }
 
-   S32 index;
+   U32 index;
    LoadoutItem *list = getList(mCurrentIndex);
 
    for(index = 0; list[index].text; index++)
@@ -286,10 +286,10 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       bool theSame = true;
 
       for(S32 i = 0; i < ShipModuleCount; i++)
-         theSame = theSame && (gLoadoutModules[mModule[i]].index == ship->getModule(i));
+         theSame = theSame && (gLoadoutModules[mModule[i]].index == (U32)ship->getModule(i));
 
       for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
-         theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == ship->getWeapon(i - ShipModuleCount));
+         theSame = theSame && (gLoadoutWeapons[mWeapon[i - ShipModuleCount]].index == (U32)ship->getWeapon(i - ShipModuleCount));
 
       if(theSame)      // Don't bother if ship config hasn't changed
       {

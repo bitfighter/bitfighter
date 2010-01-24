@@ -30,8 +30,9 @@
 #include <time.h>
 #include <string.h>
 
-
+#ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#endif
 
 namespace TNL
 {
@@ -109,13 +110,13 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
    }
 
    // -1 below makes sure we have enough room for a "\n" if we need to append one
-   dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
+   dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, args);
    
    // If last char is a "\", chop it off, otherwise append newline
    U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length, so appending newline should be ok
 
    if(buffer[last] == '\\')
-      buffer[last] = '\0';
+      buffer[last] = NULL;
    else
       strcat(buffer, "\n");
 
@@ -130,7 +131,7 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
 void logprintf(const char *format, ...)
 {
    va_list s;    
-   va_start(s, format);
+   va_start( s, format );
 
    logger(LogConsumer::GeneralFilter, format, s);
    va_end(s);
@@ -146,10 +147,10 @@ void s_logprintf(const char *format, ...)
    va_end(s);
 }
 
-#define TIMESIZE 40
 // Return a nicely formatted date/time stamp
 std::string getTimeStamp()
 {
+  static const U32 TIMESIZE = 40;
   time_t rawtime;
   struct tm * timeinfo;
   char buffer[TIMESIZE];
@@ -161,6 +162,23 @@ std::string getTimeStamp()
 
   return(std::string(buffer));      // Does this not seem a ridiculous use of strings??
 }
-#undef TIMESIZE
+
+
+// Return a nicely formatted date/time stamp
+std::string getShortTimeStamp()
+{
+  static const U32 TIMESIZE = 40;
+  time_t rawtime;
+  struct tm * timeinfo;
+  char buffer[TIMESIZE];
+
+  time ( &rawtime );
+  timeinfo = localtime ( &rawtime );
+
+  strftime(buffer, TIMESIZE, "%H:%M", timeinfo);
+
+  return(std::string(buffer));      // Does this not seem a ridiculous use of strings??
+}
+
 
 };

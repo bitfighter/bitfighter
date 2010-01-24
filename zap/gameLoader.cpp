@@ -23,7 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#endif
 
 #include "gameLoader.h"
 #include "teleporter.h"
@@ -103,7 +105,7 @@ int LevelLoader::parseArgs(const char *string)
    argString = string;
    char c;
 
-   for(U32 i = 0; i < MaxArgc; i++)
+   for(S32 i = 0; i < MaxArgc; i++)
       argv[i] = argv_buffer[i];
 
 stateEatingWhitespace:

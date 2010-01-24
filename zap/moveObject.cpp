@@ -120,8 +120,8 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
    contactShip->getCollisionCircle(stateIndex, contactShipPos, contactShipRadius);
 
    // Find out if either of the colliding objects uses collisionPolys or not
-   Vector<Point> dummy;
-   F32 fixfact = (getCollisionPoly(dummy) || contactShip->getCollisionPoly(dummy)) ? 0 : 1;
+   //Vector<Point> dummy;
+   //F32 fixfact = (getCollisionPoly(dummy) || contactShip->getCollisionPoly(dummy)) ? 0 : 1;
 
    Point v = contactShip->mMoveState[stateIndex].vel;
    Point posDelta = contactShipPos - intendedPos;

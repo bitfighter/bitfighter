@@ -40,6 +40,7 @@ namespace Zap
 
 struct NeighboringZone
 {
+   NeighboringZone() { zoneID = 0; distTo = 0; }     // Quickie constructor
    U16 zoneID;
    Point borderStart;
    Point borderEnd;

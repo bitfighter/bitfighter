@@ -745,7 +745,7 @@ void SpyBug::renderItem(Point pos)
    // Can see bug if laid by teammate in team game || sensor is active ||
    //       you laid it yourself || spyBug is neutral
 
-   bool visible = ( (ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame() || ship->isModuleActive(ModuleSensor) ||
+   bool visible = ( ((ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame()) || ship->isModuleActive(ModuleSensor) ||
             (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy) || getTeam() == -1);
 
    renderSpyBug(pos, visible);

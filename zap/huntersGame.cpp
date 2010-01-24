@@ -723,7 +723,7 @@ void HuntersNexusObject::onAddedToGame(Game *theGame)
 
 void HuntersNexusObject::idle(GameObject::IdleCallPath path)
 {
-   U32 deltaT = mCurrentMove.time;
+   //U32 deltaT = mCurrentMove.time;
 }
 
 

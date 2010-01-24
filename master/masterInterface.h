@@ -39,8 +39,8 @@ using namespace TNL;
 
 
 // Useful string constants...
-static const char *MasterNoSuchHost = "No Such Host";
-static const char *MasterRequestTimedOut = "Timed Out";
+static const char USED_EXTERNAL *MasterNoSuchHost = "No Such Host";
+static const char USED_EXTERNAL *MasterRequestTimedOut = "Timed Out";
 
 enum MasterConstants {
    ConnectRequestTimeout = 30000,

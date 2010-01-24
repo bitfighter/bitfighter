@@ -596,8 +596,8 @@ void InstructionsUserInterface::renderPageCommands()
    S32 col2 = horizMargin + S32(canvasWidth * 0.25) + 55;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
-   bool firstCol = true;
-   bool done = false;
+   //bool firstCol = true;
+   //bool done = false;
 
    glBegin(GL_LINES);
       glVertex2f(col1, starty + 26);

@@ -49,6 +49,7 @@ XXX need to document timers, main function XXX
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
+<li>Ctrl-left click now starts a wall</li>
 
 */
 
@@ -77,7 +78,9 @@ XXX need to document timers, main function XXX
 //
 //------------------------------------------------------------------------------------
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#endif
 
 #include "IniFile.h"
 
@@ -1377,7 +1380,6 @@ int main(int argc, char **argv)
    // Move to the application bundle's path (RDW)
    moveToAppPath();
 #endif
-
 
    gCmdLineSettings.init();      // Init cmd line settings struct
    gIniSettings.init();          // Init struct that holds INI settings

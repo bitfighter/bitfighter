@@ -59,6 +59,7 @@ private:
    S32 mHighlightColumn;
    S32 mLastSortColumn;
    bool mShowChat;
+   bool mJustMovedMouse;      // Track whether user is in mouse or keyboard mode
 
 public:
    QueryServersUserInterface();      // Constructor

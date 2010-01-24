@@ -403,7 +403,7 @@ StringTableEntry ServerGame::getCurrentLevelType()
 
 
 // Should return a number between -1 and 1
-inline F32 getCurrentRating(GameConnection *conn)
+F32 getCurrentRating(GameConnection *conn)
 {
    if(conn->mTotalScore == 0 && conn->mGamesPlayed == 0)
       return .5;
@@ -1034,7 +1034,7 @@ void ClientGame::renderCommander()
 
             // Get team of this object
             S32 ourTeam = ship->getTeam();
-            if(ourTeam == playerTeam && getGameType()->isTeamGame() || ship == u)  // On our team (in team game) || the ship is us
+            if((ourTeam == playerTeam && getGameType()->isTeamGame()) || ship == u)  // On our team (in team game) || the ship is us
             {
                Point p = ship->getRenderPos();
                Point visExt = computePlayerVisArea(ship);
@@ -1115,8 +1115,6 @@ void ClientGame::renderOverlayMap()
    Ship *u = dynamic_cast<Ship *>(controlObject);
 
    Point position = u->getRenderPos();
-
-   F32 zoomFrac = getCommanderZoomFraction();
 
    S32 mapWidth = UserInterface::canvasWidth / 4;
    S32 mapHeight = UserInterface::canvasHeight / 4;

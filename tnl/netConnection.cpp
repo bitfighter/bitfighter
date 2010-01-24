@@ -335,7 +335,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
 
    U32 pkPacketType     = pstream->readInt(2);
    U32 pkSequenceNumber = pstream->readInt(5);
-   bool pkDataPacketFlg = pstream->readFlag();
+   bool USED_EXTERNAL pkDataPacketFlg = pstream->readFlag();
    pkSequenceNumber = pkSequenceNumber | (pstream->readInt(SequenceNumberBitSize - 5) << 5);
 
    U32 pkHighestAck     = pstream->readInt(AckSequenceNumberBitSize);
@@ -853,7 +853,7 @@ bool NetConnection::readConnectRequest(BitStream *stream, const char **errorStri
    stream->read(&classGroup);
    stream->read(&classCRC);
 
-   if(classGroup == getNetClassGroup() && classCRC == NetClassRep::getClassGroupCRC(getNetClassGroup()))
+   if((NetClassGroup)classGroup == getNetClassGroup() && classCRC == NetClassRep::getClassGroupCRC(getNetClassGroup()))
       return true;
 
    *errorString = "CHR_INVALID";
@@ -862,13 +862,13 @@ bool NetConnection::readConnectRequest(BitStream *stream, const char **errorStri
 
 void NetConnection::writeConnectAccept(BitStream *stream)
 {
-   stream;
+   //stream;
 }
 
 bool NetConnection::readConnectAccept(BitStream *stream, const char **errorString)
 {
-   stream;
-   errorString;
+   //stream;
+   //errorString;
    return true;
 }
 

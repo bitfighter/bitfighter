@@ -82,6 +82,14 @@ namespace Platform
 };
 
 
+// Suppress incorrect warnings about unused functions on gcc
+#ifdef __GNUC__
+#define USED_EXTERNAL __attribute__ ((unused))
+#else
+#define USED_EXTERNAL
+#endif
+
+
 #define TIME_BLOCK(name,block) { S64 st = Platform::getHighPrecisionTimerValue(); {block} S64 delta = Platform::getHighPrecisionTimerValue() - st; F64 ms = Platform::getHighPrecisionMilliseconds(delta); logprintf("Timer: %s Elapsed: %g ms", #name, ms); }
 
 #if defined (TNL_SUPPORTS_VC_INLINE_X86_ASM) || defined (TNL_SUPPORTS_MWERKS_INLINE_X86_ASM)

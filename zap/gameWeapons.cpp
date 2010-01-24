@@ -57,7 +57,7 @@ ProjectileInfo gProjInfo[ProjectileTypeCount] = {
 // Here we actually intantiate the various projectiles when fired
 void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, F32 shooterRadius, GameObject *shooter)
 {
-   GameObject *proj = NULL;
+   //GameObject *proj = NULL;
    WeaponInfo *wi = gWeapons + weapon;
    Point projVel = dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
    Point firePos = shooterPos + dir * shooterRadius;
@@ -84,6 +84,8 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
          break;
      case WeaponSpyBug:
          (new SpyBug(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
+         break;
+     default:
          break;
    }
 }

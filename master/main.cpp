@@ -29,18 +29,19 @@
 #include "../tnl/tnlAsymmetricKey.h"
 #include "../zap/SharedConstants.h"
 #include <stdio.h>
+#include <string>
 #include <time.h>
 
 using namespace TNL;
-
+using namespace std;
 
 NetInterface *gNetInterface = NULL;
 
-Vector<char *> MOTDTypeVecOld;
-Vector<char *> MOTDStringVecOld;
+Vector<string> MOTDTypeVecOld;
+Vector<string> MOTDStringVecOld;
 
 Vector<U32> MOTDVersionVec;
-Vector<char *> MOTDStringVec;
+Vector<string> MOTDStringVec;
 U32 gLatestReleasedCSProtocol = 0;
 
 const char *gMasterName;           // Name of the master server
@@ -621,7 +622,7 @@ public:
 
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
       //U32 matchLen = 0;
-      const char *motdString = "Welcome to Bitfighter!";  // Default msg
+      string motdString = "Welcome to Bitfighter!";  // Default msg
 
       if(mCMProtocolVersion == 0)
          for(S32 i = 0; i < MOTDTypeVecOld.size(); i++)
@@ -637,7 +638,7 @@ public:
             //   motdString = MOTDStringVecOld[i];
             //}
 
-            if(!strcmp(mVersionString.getString(), MOTDTypeVecOld[i]))
+            if(!strcmp(mVersionString.getString(), MOTDTypeVecOld[i].c_str()))
             {
                motdString = MOTDStringVecOld[i];
                break;
@@ -651,7 +652,7 @@ public:
                break;
             }
 
-      m2cSetMOTD(gMasterName, motdString);
+      m2cSetMOTD(gMasterName, motdString.c_str());
 
       if(mCMProtocolVersion >= 1)
          m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this

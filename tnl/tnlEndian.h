@@ -64,10 +64,10 @@ inline S16 endianSwap(const S16 in_swap)
  */
 inline U32 endianSwap(const U32 in_swap)
 {
-   return U32( ((in_swap >> 24) & 0x000000ff) |
+   return U32( ((in_swap >> 24)) |
                ((in_swap >>  8) & 0x0000ff00) |
                ((in_swap <<  8) & 0x00ff0000) |
-               ((in_swap << 24) & 0xff000000) );
+               ((in_swap << 24)) );
 }
 
 inline S32 endianSwap(const S32 in_swap)
@@ -94,16 +94,41 @@ inline S64 endianSwap(const S64 in_swap)
    return S64(endianSwap(U64(in_swap)));
 }
 
+// This from http://www.gamedev.net/reference/articles/article2091.asp
 inline F32 endianSwap(const F32 in_swap)
 {
-   F32 result = F32(endianSwap(* ((U32 *) &in_swap) ));
-   return * ((F32 *) &result);
+  union
+  {
+    F32 f;
+    U8 b[4];
+  } dat1, dat2;
+
+  dat1.f = in_swap;
+  dat2.b[0] = dat1.b[3];
+  dat2.b[1] = dat1.b[2];
+  dat2.b[2] = dat1.b[1];
+  dat2.b[3] = dat1.b[0];
+  return dat2.f;
 }
 
 inline F64 endianSwap(const F64 in_swap)
 {
-   F64 result = F64(endianSwap(* ((U64 *) &in_swap) ));
-   return * ((F64 *) &result);
+  union
+  {
+    F64 f;
+    U8 b[8];
+  } dat1, dat2;
+
+  dat1.f = in_swap;
+  dat2.b[0] = dat1.b[7];
+  dat2.b[1] = dat1.b[6];
+  dat2.b[2] = dat1.b[5];
+  dat2.b[3] = dat1.b[4];
+  dat2.b[4] = dat1.b[3];
+  dat2.b[5] = dat1.b[2];
+  dat2.b[6] = dat1.b[1];
+  dat2.b[7] = dat1.b[0];
+  return dat2.f;
 }
 
 //------------------------------------------------------------------------------

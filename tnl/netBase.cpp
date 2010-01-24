@@ -100,7 +100,7 @@ void NetClassRep::initialize()
       {
          for (walk = mClassLinkList; walk; walk = walk->mNextClass)
          {
-            if(walk->getClassType() == type && walk->mClassGroupMask & groupMask)
+            if(walk->getClassType() == (NetClassType)type && walk->mClassGroupMask & groupMask)
                dynamicTable.push_back(walk);
          }
          if(!dynamicTable.size())

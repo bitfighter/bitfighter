@@ -163,6 +163,7 @@ public:
    static void drawStringc(F32 x, F32 y, U32 size, const char *string);
 
    // Draw string and get it's width
+   static S32 drawStringAndGetWidth(F32 x, F32 y, U32 size, const char *string);
    static S32 drawStringAndGetWidthf(F32 x, F32 y, U32 size, const char *format, ...);
 
 

@@ -108,7 +108,7 @@ GameUserInterface::GameUserInterface()
    mRecalcFPSTimer = 0;
 
    mFiring = false;
-   for (U32 i = 0; i < ShipModuleCount; i++)
+   for (U32 i = 0; i < (U32)ShipModuleCount; i++)
       mModActivated[i] = false;
 
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
@@ -464,7 +464,7 @@ void GameUserInterface::renderLoadoutIndicators()
    glEnable(GL_BLEND);
 
    // First, the weapons
-   for(S32 i = 0; i < ShipWeaponCount; i++)
+   for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
    {
       U32 width = getStringWidth(fontSize, gWeapons[localShip->getWeapon(i)].name.getString());
 
@@ -494,7 +494,7 @@ void GameUserInterface::renderLoadoutIndicators()
    xPos += 20;    // Small horizontal gap
 
    // Next, loadout modules
-   for(S32 i = 0; i < ShipModuleCount; i++)
+   for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
       U32 width = getStringWidth(fontSize, gModuleShortName[localShip->getModule(i)]);
 
@@ -1063,7 +1063,7 @@ Move *GameUserInterface::getCurrentMove()
 
       mCurrentMove.fire = mFiring;
 
-      for(U32 i = 0; i < ShipModuleCount; i++)
+      for(U32 i = 0; i < (U32)ShipModuleCount; i++)
          mCurrentMove.module[i] = mModActivated[i];
    }
    else
@@ -1075,7 +1075,7 @@ Move *GameUserInterface::getCurrentMove()
 
       mCurrentMove.fire = mFiring;     // should be false?
 
-      for(U32 i = 0; i < ShipModuleCount; i++)
+      for(U32 i = 0; i < (U32)ShipModuleCount; i++)
          mCurrentMove.module[i] = false;
    }
 

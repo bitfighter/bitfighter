@@ -316,7 +316,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
 
       U32 updateStart = bstream->getBitPosition();
       U32 updateMask = walk->updateMask;
-      U32 retMask;
+      U32 retMask = 0;
 		   
       bstream->writeFlag(true);
       bstream->writeInt(walk->index, sendSize);
@@ -415,7 +415,7 @@ void GhostConnection::readPacket(BitStream *bstream)
 
    if(mConnectionParameters.mDebugObjectSizes)
    {
-      U32 sum = bstream->readInt(32);
+      U32 USED_EXTERNAL sum = bstream->readInt(32);
       TNLAssert(sum == DebugChecksum, "Invalid checksum.");
    }
 

@@ -34,7 +34,7 @@
 namespace TNL {
 
 
-typedef U32 StringTableEntryId;
+typedef size_t StringTableEntryId;     // size_t should be U32 on 32-bit systems, and U64 on 64 bit systems
 
 //--------------------------------------
 /// A global table for the hashing and tracking of network strings.
@@ -168,7 +168,7 @@ public:
          StringTable::incRef(mIndex);
    }
 
-   inline U32 getIndex() const 
+   inline U64 getIndex() const 
    { 
       return mIndex;
    }

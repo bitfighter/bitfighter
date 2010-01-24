@@ -348,7 +348,7 @@ void EventConnection::readPacket(BitStream *bstream)
 
    if(mConnectionParameters.mDebugObjectSizes)
    {
-      U32 sum = bstream->readInt(32);
+      U32 USED_EXTERNAL sum = bstream->readInt(32);
       TNLAssert(sum == DebugChecksum, "Invalid checksum.");
    }
    

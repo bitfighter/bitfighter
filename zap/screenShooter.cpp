@@ -8,7 +8,9 @@
 #include "UI.h"
 #include <stdio.h>
 
+#ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Kill warnings about fopen!
+#endif
 
 using namespace TNL;
 
@@ -211,11 +213,11 @@ LoadDIBitmap(const char *filename, /* I - File to load */
     {
     FILE             *fp;          /* Open file pointer */
     GLubyte          *bits;        /* Bitmap pixel bits */
-    GLubyte          *ptr;         /* Pointer into bitmap */
-    GLubyte          temp;         /* Temporary variable to swap red and blue */
-    int              x, y;         /* X and Y position in image */
-    int              length;       /* Line length */
-    int              bitsize;      /* Size of bitmap */
+    //GLubyte          *ptr;         /* Pointer into bitmap */
+    //GLubyte          temp;         /* Temporary variable to swap red and blue */
+    //int              x, y;         /* X and Y position in image */
+    //int              length;       /* Line length */
+    U32              bitsize;      /* Size of bitmap */
     int              infosize;     /* Size of header information */
     BITMAPFILEHEADER header;       /* File header */
 
@@ -322,10 +324,10 @@ SaveDIBitmap(const char *filename, /* I - File to load */
              BITMAPINFO *info,     /* I - Bitmap information */
 	     GLubyte    *bits)     /* I - Bitmap data */
     {
-    FILE *fp;                      /* Open file pointer */
-    int  size,                     /* Size of file */
-         infosize,                 /* Size of bitmap info */
-         bitsize;                  /* Size of bitmap pixels */
+    FILE   *fp;                      /* Open file pointer */
+    int    size,                     /* Size of file */
+           infosize;                 /* Size of bitmap info */
+    size_t bitsize;                  /* Size of bitmap pixels */
 
 
     /* Try opening the file; use "wb" mode to write this *binary* file. */

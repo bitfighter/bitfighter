@@ -265,17 +265,17 @@ void SplashUserInterface::render()
          renderBitfighterLogo((S32)canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, (mSplashTimer.getFraction()) * 20);
       else if(mType == 3)     // Single letters
       {
- 	  F32 ch = (F32) canvasHeight;
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, 0, 1 << 0);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 50.0f, 0, 1 << 1);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 10.0f, 0, 1 << 2);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 2.0f,  0, 1 << 3);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 14.0f, 0, 1 << 4);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 6.0f,  0, 1 << 5);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 33.0f, 0, 1 << 6);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 9.0f,  0, 1 << 7);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 25.0f, 0, 1 << 8);
-      renderBitfighterLogo(canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 15.0f, 0, 1 << 9);
+         F32 fr = pow(mSplashTimer.getFraction(), 2);
+         renderBitfighterLogo(canvasHeight / 2, fr * 20.0f + 1, 0, 1 << 0);
+         renderBitfighterLogo(canvasHeight / 2, fr * 50.0f + 1, 0, 1 << 1);
+         renderBitfighterLogo(canvasHeight / 2, fr * 10.0f + 1, 0, 1 << 2);
+         renderBitfighterLogo(canvasHeight / 2, fr *  2.0f + 1, 0, 1 << 3);
+         renderBitfighterLogo(canvasHeight / 2, fr * 14.0f + 1, 0, 1 << 4);
+         renderBitfighterLogo(canvasHeight / 2, fr *  6.0f + 1, 0, 1 << 5);
+         renderBitfighterLogo(canvasHeight / 2, fr * 33.0f + 1, 0, 1 << 6);
+         renderBitfighterLogo(canvasHeight / 2, fr *  9.0f + 1, 0, 1 << 7);
+         renderBitfighterLogo(canvasHeight / 2, fr * 25.0f + 1, 0, 1 << 8);
+         renderBitfighterLogo(canvasHeight / 2, fr * 15.0f + 1, 0, 1 << 9);
       }
    }
    else if(mPhase == 2)           // Resting phase

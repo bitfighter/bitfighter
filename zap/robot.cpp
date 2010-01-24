@@ -552,7 +552,7 @@ S32 LuaRobot::setWeapon(lua_State *L)
    U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(thisRobot->getWeapon(i) == weap)
+      if((U32)thisRobot->getWeapon(i) == weap)
       {
          thisRobot->selectWeapon(i);
          break;
@@ -572,7 +572,7 @@ S32 LuaRobot::hasWeapon(lua_State *L)
    U32 weap = getInt(L, 1, methodName, 0, WeaponCount - 1);
 
    for(S32 i = 0; i < ShipWeaponCount; i++)
-      if(thisRobot->getWeapon(i) == weap)
+      if((U32)thisRobot->getWeapon(i) == weap)
          return returnBool(L, true);      // We have it!
 
    return returnBool(L, false);           // We don't!
@@ -975,7 +975,6 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
 {
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;
 
-   S32 junk = this->mCurrentZone;
    mNetFlags.set(Ghostable);
 
    mTeam = team;

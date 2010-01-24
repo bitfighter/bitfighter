@@ -399,6 +399,13 @@ void UserInterface::drawStringfc(F32 x, F32 y, U32 size, const char *format, ...
    drawString((S32) x - len / 2, (S32) y, size, buffer);
 }
 
+   
+S32 UserInterface::drawStringAndGetWidth(F32 x, F32 y, U32 size, const char *string)
+{
+   drawString((S32) x, (S32) y, size, string);
+   return getStringWidth(size, string);
+}
+
 
 S32 UserInterface::drawStringAndGetWidthf(F32 x, F32 y, U32 size, const char *format, ...)
 {

@@ -39,7 +39,7 @@ namespace Zap
 {
 using TNL::StringPtr;
     
-static const char *gConnectStatesTable[] = {
+static const char USED_EXTERNAL *gConnectStatesTable[] = {
       "Not connected...",
       "Sending challenge request...",
       "Punching through firewalls...",

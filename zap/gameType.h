@@ -90,7 +90,7 @@ public:
    Vector<Point> spawnPoints;
    Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
 
-   U32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
+   S32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
    S32 score;
    F32 rating;
 

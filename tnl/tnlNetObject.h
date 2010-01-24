@@ -358,11 +358,19 @@ inline bool NetObject::isGhostable() const
     return mNetFlags.test(Ghostable);
 }
 
+// New method gives same results as old, but without the type-punning
 inline U32 NetObject::getHashId() const
 {
-   const NetObject *ret = this;
-   return *((U32 *) &ret);
+   union {
+      const NetObject *ptr;
+      U32 hash;
+   };
+
+   ptr = this;
+   return hash;
 }
+
+
 
 /// The TNL_IMPLEMENT_NETOBJECT macro should be used for all subclasses of NetObject that
 /// will be transmitted with the ghosting system.
