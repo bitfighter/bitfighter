@@ -481,12 +481,16 @@ void SFXObject::init()
 {
    ALint error;
 
-#ifdef TNL_OS_MAC_OSX
-   gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X
+#if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_LINUX)
+   gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X & Linux
 #else
-   gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows & Linux
+   gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows 
 #endif
 
+   if(!gDevice)
+   gDevice = alcOpenDevice(NULL);                           // Last ditch attempt to get a valid device
+
+   // alcOpenDevice: If the function returns NULL, then no sound driver/device has been found.
    if(!gDevice)
    {
       logprintf("Failed to intitialize OpenAL.");
@@ -535,23 +539,24 @@ void SFXObject::init()
       ALvoid   *data;
       ALboolean loop;
 
-      char fileBuffer[256];
+      char fileBuffer[1024];
       dSprintf(fileBuffer, sizeof(fileBuffer), "sfx/%s", gSFXProfiles[i].fileName);    // Sounds are in sfx folder
-#ifdef TNL_OS_MAC_OSX
-      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);
+#if defined(TNL_OS_MAC_OSX) 
+      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);		// OS X version has no loop param
 #else
       alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq, &loop);
 #endif
       if(alGetError() != AL_NO_ERROR)
       {
-         logprintf("Failure (1) loading sound file '%s'", gSFXProfiles[i].fileName);   // Log any errors...
+         logprintf("Failure (1) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName);   // Log any errors...
          return;                                                                       // ...and disable all sounds
       }
+
       alBufferData(gBuffers[i], format, data, size, freq);
       alutUnloadWAV(format, data, size, freq);
       if(alGetError() != AL_NO_ERROR)
       {
-         logprintf("Failure (2) loading sound file '%s'", gSFXProfiles[i].fileName);   // Log any errors
+         logprintf("Failure (2) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName);   // Log any errors
          return;
       }
    }

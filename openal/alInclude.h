@@ -27,13 +27,14 @@
 #ifndef _ALINCLUDE_H_
 #define _ALINCLUDE_H_
 
-#ifdef TNL_OS_MAC_OSX
+#if defined(TNL_OS_MAC_OSX)
 #include <OpenAL/alc.h>
-// Use RDW's FreeALUT framework
-#include "ALUT/alut.h"
-#else
+#   include "ALUT/alut.h"       // Use RDW's FreeALUT framework framework
+#elif defined(TNL_OS_LINUX)
+#include <alut.h>		   // <--- Note that this alut.h is the same as the one included above in the OSX block
+#else    // Windows
 #include <alc.h>
-#include <alut.h>
+#include <alut_win.h>
 #endif
 
 #endif

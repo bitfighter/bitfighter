@@ -435,6 +435,13 @@ S32 QueryServersUserInterface::getSelectedIndex()
    return -1;
 }
 
+static const U32 MENU_HEADER_TEXTSIZE = 24;
+static const U32 SERVER_DESCR_TEXTSIZE = 18;
+static const U32 SERVER_ENTRY_TEXTSIZE = 12;
+static const U32 SERVER_ENTRY_VERT_GAP = 4;
+static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_HEADER_TEXTSIZE;
+static const U32 COLUMNS_TOP = ITEMS_TOP - MENU_HEADER_TEXTSIZE - 10 - MENU_HEADER_TEXTSIZE;
+static const U32 COLUMN_HEADER_HEIGHT = MENU_HEADER_TEXTSIZE + 5;
 
 extern void drawString(S32 x, S32 y, U32 size, const char *string);
 
@@ -459,14 +466,14 @@ static void renderDedicatedIcon()
    //glEnd();
 
    // Add a "D"
-   UserInterface::drawString(0, 0, 4, "D");
+   UserInterface::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
 }
 
 
 static void renderTestIcon()
 {
    // Add a "T"
-   UserInterface::drawString(0, 0, 4, "T");
+   UserInterface::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "T");
 }
 
 
@@ -493,13 +500,7 @@ static void renderLockIcon()
 
 extern Color gMasterServerBlue;
 
-static const U32 MENU_ITEM_HEIGHT = 24;
-static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_ITEM_HEIGHT;
-static const U32 COLUMNS_TOP = ITEMS_TOP - MENU_ITEM_HEIGHT - 10 - MENU_ITEM_HEIGHT;
-static const U32 COLUMN_HEADER_HEIGHT = MENU_ITEM_HEIGHT + 5;
-
 #define MOUSE_IN_HEADER_ROW mousePos.y >= COLUMNS_TOP && mousePos.y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1
-
 
 void QueryServersUserInterface::render()
 {
@@ -563,7 +564,7 @@ void QueryServersUserInterface::render()
       renderChatters(horizMargin, canvasHeight - vertMargin / 2 - CHAT_NAMELIST_SIZE);
    }
 
-   S32 serversToShow = (canvasHeight - vertMargin - 20 - chatHeight - (COLUMNS_TOP + COLUMN_HEADER_HEIGHT)) / MENU_ITEM_HEIGHT - 1;  
+   S32 serversToShow = (canvasHeight - vertMargin - 20 - chatHeight - (COLUMNS_TOP + COLUMN_HEADER_HEIGHT)) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP);  
 
    // Instructions at bottom of server selection section
    glColor(white);
@@ -572,7 +573,7 @@ void QueryServersUserInterface::render()
    S32 x1 = columns[mSortColumn].xStart - 3;
    S32 x2;
    if(mSortColumn == columns.size() - 1)
-      x2 = 799;
+      x2 = canvasWidth - 1;
    else
       x2 = columns[mSortColumn+1].xStart - 5;
 
@@ -596,7 +597,7 @@ void QueryServersUserInterface::render()
    // And render a box around the column under the mouse, if different
    x1 = columns[mHighlightColumn].xStart - 3;
    if(mHighlightColumn == columns.size() - 1)
-      x2 = 799;
+      x2 = canvasWidth - 1;
    else
       x2 = columns[mHighlightColumn+1].xStart - 5;
 
@@ -611,7 +612,7 @@ void QueryServersUserInterface::render()
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++)
-      drawString(columns[i].xStart, COLUMNS_TOP - 20 + MENU_ITEM_HEIGHT, MENU_ITEM_HEIGHT, columns[i].name);
+      drawString(columns[i].xStart, COLUMNS_TOP - 20 + MENU_HEADER_TEXTSIZE, MENU_HEADER_TEXTSIZE, columns[i].name);
 
    bool drawScrollUpArrow = false;
    bool drawScrollDnArrow = false;
@@ -674,7 +675,7 @@ void QueryServersUserInterface::render()
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;
 
-      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
+      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - bonusTopOffset * MENU_HEADER_TEXTSIZE;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
 
@@ -687,57 +688,56 @@ void QueryServersUserInterface::render()
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
             glVertex2f(0, y);
-            glVertex2f(799, y);
-            glVertex2f(799, y + MENU_ITEM_HEIGHT - 1);
-            glVertex2f(0, y + MENU_ITEM_HEIGHT - 1);
+            glVertex2f(canvasWidth - 1, y);
+            glVertex2f(canvasWidth - 1, y + SERVER_ENTRY_TEXTSIZE + 1);
+            glVertex2f(0, y + SERVER_ENTRY_TEXTSIZE + 1);
          glEnd();
       }
 
       for(S32 i = mFirstServer; i <= mLastServer; i++)
       {
-         y = ITEMS_TOP + (i - mFirstServer) * MENU_ITEM_HEIGHT - bonusTopOffset * MENU_ITEM_HEIGHT;
-         const U32 fontSize = 21;
+         y = ITEMS_TOP + (i - mFirstServer) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - bonusTopOffset * MENU_HEADER_TEXTSIZE;
          ServerRef &s = servers[i];
 
          if(i == selectedIndex)
          {
             // Render server description at bottom
             glColor(s.msgColor);
-            drawString(horizMargin, canvasHeight - vertMargin - 62 - chatHeight, 18, s.serverDescr);
+            drawString(horizMargin, canvasHeight - vertMargin - 62 - chatHeight, SERVER_DESCR_TEXTSIZE, s.serverDescr);    // 62?
          }
 
          // Truncate server name to fit in the first column...
          string sname = "";
 
          // ...but first, see if the name will fit without truncation... if so, don't bother
-         if(getStringWidth(fontSize, s.serverName) < colwidth)
+         if(getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName) < colwidth)
             sname = s.serverName;
          else
             for(size_t j = 0; j < strlen(s.serverName); j++)
-               if(getStringWidth( fontSize, (sname + s.serverName[j]).c_str() ) < colwidth)
+               if(getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName[j]).c_str() ) < colwidth)
                   sname += s.serverName[j];
                else
                   break;
 
          glColor(white);
-         drawString(columns[0].xStart, y, fontSize, sname.c_str());
+         drawString(columns[0].xStart, y, SERVER_ENTRY_TEXTSIZE, sname.c_str());
 
          // Render icons
          glColor(green);
          if(s.dedicated || s.test || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslatef(columns[1].xStart+5, y+2, 0);
+               glTranslatef(columns[1].xStart + 5, y + 2, 0);
                if( s.pingTimedOut || !s.everGotQueryResponse )
-                  drawString(0, 0, 20, "?");
+                  drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)
                {
-                  glScalef(5, 5, 1);
+                  //glScalef(5, 5, 1);
                   renderTestIcon();
                }
                else
                {
-                  glScalef(5, 5, 1);
+                  //glScalef(5, 5, 1);
                   renderDedicatedIcon();
                }
             glPopMatrix();
@@ -745,9 +745,9 @@ void QueryServersUserInterface::render()
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
          {
             glPushMatrix();
-               glTranslatef(columns[1].xStart + 25, y+2, 0);
+               glTranslatef(columns[1].xStart + 25, y + 2, 0);
                if(s.pingTimedOut || !s.everGotQueryResponse)
-                  drawString(0, 0, 20, "?");
+                  drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
                   glScalef(5, 5, 1);
@@ -764,7 +764,7 @@ void QueryServersUserInterface::render()
          else
             glColor(red);
 
-         drawStringf(columns[2].xStart, y, fontSize, "%d", s.pingTime);
+         drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
          // Color by number of players
          if(s.playerCount == s.maxPlayers)
@@ -775,11 +775,11 @@ void QueryServersUserInterface::render()
             glColor(green);     // 1 or more players
 
          if(s.playerCount < 0)
-            drawString(columns[3].xStart, y, fontSize, "?? / ??");
+            drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? / ??");
          else
-            drawStringf(columns[3].xStart, y, fontSize, "%d / %d", s.playerCount, s.botCount);
+            drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d / %d", s.playerCount, s.botCount);
          glColor(white);
-         drawString(columns[4].xStart, y, fontSize, s.serverAddress.toString());
+         drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
    }
    // Show some special messages if there are no servers, or we're not connected to the master
@@ -794,21 +794,21 @@ void QueryServersUserInterface::render()
    {
       glBegin(GL_LINES);
          glVertex2f(columns[i].xStart - 4, COLUMNS_TOP);
-         glVertex2f(columns[i].xStart - 4, ITEMS_TOP + (serversToShow + 1) * MENU_ITEM_HEIGHT );
+         glVertex2f(columns[i].xStart - 4, ITEMS_TOP + (serversToShow + 1) * SERVER_ENTRY_TEXTSIZE );
       glEnd();
    }
 
    // Horizontal lines under column headers
    glBegin(GL_LINES);
-      glVertex2f(0, COLUMNS_TOP + MENU_ITEM_HEIGHT + 7);
-      glVertex2f(800, COLUMNS_TOP + MENU_ITEM_HEIGHT + 7);
+      glVertex2f(0, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
+      glVertex2f(800, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
    glEnd();
 
    // Big blue scrolling indicator arrows
    if(drawScrollUpArrow)
       MenuUserInterface::renderArrowAbove(ITEMS_TOP + 9);
    if(drawScrollDnArrow)
-      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (serversToShow + 1) * MENU_ITEM_HEIGHT + 5);
+      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (serversToShow + 1) * MENU_HEADER_TEXTSIZE + 5);
 
 
    if(drawmsg1)
@@ -1003,7 +1003,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    // It only makes sense to select a server if there are any servers to select... get it?
    if(servers.size() > 0)
    {
-      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP ) / MENU_ITEM_HEIGHT) + mFirstServer + 1 - (mScrollingUpMode ? 1 : 0);
+      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP ) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer + 1 - (mScrollingUpMode ? 1 : 0);
 
       //// See if this requires scrolling.  If so, limit speed.
       //if(indx <= mFirstServer - 1)

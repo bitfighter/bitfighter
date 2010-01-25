@@ -40,7 +40,7 @@
 # svn co https://zap.svn.sourceforge.net/svnroot/zap/trunk bitfighter
 #
 # Install g++
-# Install freeglut-dev and liblua5.1-0
+# Install freeglut-dev, liblua5.1-0, libopenal-dev, libalut-dev
 #
 # change to root bitfighter folder (where you downloaded the code from SVN)
 # build game ==> make

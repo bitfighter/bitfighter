@@ -166,7 +166,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
       glColor(msg.color);
 
       S32 xpos = UserInterface::horizMargin / 2;
-      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2, 8, "[%s] ", msg.time.c_str());
+      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2, CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());   // + 2 just looks better!
       xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());
 
       if(msg.isPrivate)

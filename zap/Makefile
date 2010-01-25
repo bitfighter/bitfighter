@@ -109,7 +109,7 @@ OBJECTS_ZAP=\
 CFLAGS=
 DFLAGS=
 EXEFILE=bitfighter
-OPENAL=../openal/linux/libopenal.a
+OPENAL=-lopenal -lalut
 LUALIB=-llua5.1
 WFLAGS=
 
