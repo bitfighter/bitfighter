@@ -450,17 +450,10 @@ S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 S32 dVsprintf(char *buffer, U32 bufferSize, const char *format, void *arglist)
 {
 #ifdef TNL_COMPILER_VISUALC
-   S32 len = _vsnprintf(buffer, bufferSize, format, (va_list) arglist);
+   return _vsnprintf(buffer, bufferSize, format, (va_list) arglist);
 #else
-   // As suggested by Noneus in the Bitfighter forums, and elsewhere:
-   union { 
-      va_list va; 
-      void *ptr; 
-   } uglyhack;
-   uglyhack.ptr = arglist;
-   S32 len = vsnprintf(buffer, bufferSize, format, uglyhack.va);
+   return vsnprintf(buffer, bufferSize, format, (char *) arglist);
 #endif
-   return len;
 }
 
 };

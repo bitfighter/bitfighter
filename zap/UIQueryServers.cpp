@@ -43,6 +43,16 @@
 namespace Zap
 {
 
+// Sizes and other things to help with positioning
+static const U32 MENU_HEADER_TEXTSIZE = 11;
+static const U32 SERVER_DESCR_TEXTSIZE = 18;
+static const U32 SERVER_ENTRY_TEXTSIZE = 16;
+static const U32 SERVER_ENTRY_VERT_GAP = 4;
+static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_HEADER_TEXTSIZE;
+static const U32 COLUMNS_TOP = ITEMS_TOP - MENU_HEADER_TEXTSIZE - 10 - MENU_HEADER_TEXTSIZE;
+static const U32 COLUMN_HEADER_HEIGHT = MENU_HEADER_TEXTSIZE + 6;
+
+
 // Some colors
 static const Color red = Color(1,0,0);
 static const Color green = Color(0,1,0);
@@ -67,10 +77,10 @@ QueryServersUserInterface::QueryServersUserInterface()
 
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
-   columns.push_back(ColumnInfo("STAT", 250));
-   columns.push_back(ColumnInfo("PING", 330));
-   columns.push_back(ColumnInfo("PLAYERS", 395));
-   columns.push_back(ColumnInfo("ADDRESS", 533));
+   columns.push_back(ColumnInfo("STAT", 280));
+   columns.push_back(ColumnInfo("PING", 380));
+   columns.push_back(ColumnInfo("PLAYERS", 445));
+   columns.push_back(ColumnInfo("ADDRESS", 583));
 
    selectedId = 0xFFFFFF;
 
@@ -435,14 +445,6 @@ S32 QueryServersUserInterface::getSelectedIndex()
    return -1;
 }
 
-static const U32 MENU_HEADER_TEXTSIZE = 24;
-static const U32 SERVER_DESCR_TEXTSIZE = 18;
-static const U32 SERVER_ENTRY_TEXTSIZE = 12;
-static const U32 SERVER_ENTRY_VERT_GAP = 4;
-static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_HEADER_TEXTSIZE;
-static const U32 COLUMNS_TOP = ITEMS_TOP - MENU_HEADER_TEXTSIZE - 10 - MENU_HEADER_TEXTSIZE;
-static const U32 COLUMN_HEADER_HEIGHT = MENU_HEADER_TEXTSIZE + 5;
-
 extern void drawString(S32 x, S32 y, U32 size, const char *string);
 
 static void renderDedicatedIcon()
@@ -570,50 +572,6 @@ void QueryServersUserInterface::render()
    glColor(white);
    drawCenteredString(canvasHeight - vertMargin - 18 - chatHeight, 18, "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
-   S32 x1 = columns[mSortColumn].xStart - 3;
-   S32 x2;
-   if(mSortColumn == columns.size() - 1)
-      x2 = canvasWidth - 1;
-   else
-      x2 = columns[mSortColumn+1].xStart - 5;
-
-   // Render box around selected column
-   glColor3f(.4, .4, 0);
-   glBegin(GL_POLYGON);
-      glVertex2f(x1, COLUMNS_TOP + 5);
-      glVertex2f(x2, COLUMNS_TOP + 5);
-      glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-      glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-   glEnd();
-
-   glColor(white);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(x1, COLUMNS_TOP + 5);
-      glVertex2f(x2, COLUMNS_TOP + 5);
-      glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-      glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-   glEnd();
-
-   // And render a box around the column under the mouse, if different
-   x1 = columns[mHighlightColumn].xStart - 3;
-   if(mHighlightColumn == columns.size() - 1)
-      x2 = canvasWidth - 1;
-   else
-      x2 = columns[mHighlightColumn+1].xStart - 5;
-
-   glColor(white);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(x1, COLUMNS_TOP + 5);
-      glVertex2f(x2, COLUMNS_TOP + 5);
-      glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-      glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-   glEnd();
-
-
-   // And now the column header text itself
-   for(S32 i = 0; i < columns.size(); i++)
-      drawString(columns[i].xStart, COLUMNS_TOP - 20 + MENU_HEADER_TEXTSIZE, MENU_HEADER_TEXTSIZE, columns[i].name);
-
    bool drawScrollUpArrow = false;
    bool drawScrollDnArrow = false;
 
@@ -689,8 +647,8 @@ void QueryServersUserInterface::render()
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
             glVertex2f(0, y);
             glVertex2f(canvasWidth - 1, y);
-            glVertex2f(canvasWidth - 1, y + SERVER_ENTRY_TEXTSIZE + 1);
-            glVertex2f(0, y + SERVER_ENTRY_TEXTSIZE + 1);
+            glVertex2f(canvasWidth - 1, y + SERVER_ENTRY_TEXTSIZE + 4);
+            glVertex2f(0, y + SERVER_ENTRY_TEXTSIZE + 4);
          glEnd();
       }
 
@@ -800,9 +758,60 @@ void QueryServersUserInterface::render()
 
    // Horizontal lines under column headers
    glBegin(GL_LINES);
-      glVertex2f(0, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
-      glVertex2f(800, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
+      glVertex2f(0, COLUMNS_TOP);
+      glVertex2f(canvasWidth, COLUMNS_TOP);
    glEnd();
+
+   glBegin(GL_LINES);
+      glVertex2f(0, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
+      glVertex2f(canvasWidth, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
+   glEnd();
+
+
+
+
+   // Column headers (will partially overwrite horizontal lines) 
+   S32 x1 = max(columns[mSortColumn].xStart - 3, 1);    // Going to 0 makes line look too thin...
+   S32 x2;
+   if(mSortColumn == columns.size() - 1)
+      x2 = canvasWidth - 1;
+   else
+      x2 = columns[mSortColumn+1].xStart - 5;
+
+   for(S32 i = 1; i >= 0; i--)
+   {
+      // Render box around selected column
+      glColor(i ? Color(.4, .4, 0) : white);
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f(x1, COLUMNS_TOP);
+         glVertex2f(x2, COLUMNS_TOP);
+         glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
+      glEnd();
+   }
+
+   // And now the column header text itself
+   for(S32 i = 0; i < columns.size(); i++) 
+      drawString(columns[i].xStart, COLUMNS_TOP + MENU_HEADER_TEXTSIZE - 8, MENU_HEADER_TEXTSIZE, columns[i].name);
+
+   // Highlight selected column
+   if(mHighlightColumn != mSortColumn) 
+   {
+      // And render a box around the column under the mouse, if different
+      x1 = max(columns[mHighlightColumn].xStart - 3, 1);
+      if(mHighlightColumn == columns.size() - 1)
+         x2 = canvasWidth - 1;
+      else
+         x2 = columns[mHighlightColumn+1].xStart - 5;
+
+      glColor(white);
+      glBegin(GL_LINE_LOOP);
+         glVertex2f(x1, COLUMNS_TOP);
+         glVertex2f(x2, COLUMNS_TOP);
+         glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
+      glEnd();
+   }
 
    // Big blue scrolling indicator arrows
    if(drawScrollUpArrow)
@@ -999,11 +1008,13 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
             break;
          }
    }
+   else
+      mHighlightColumn = mSortColumn;
 
    // It only makes sense to select a server if there are any servers to select... get it?
    if(servers.size() > 0)
    {
-      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP ) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer + 1 - (mScrollingUpMode ? 1 : 0);
+      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer - (mScrollingUpMode ? 1 : 0);
 
       //// See if this requires scrolling.  If so, limit speed.
       //if(indx <= mFirstServer - 1)
