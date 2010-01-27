@@ -52,13 +52,13 @@ private:
    SafePtr<Ship> thisShip;    // Reference to actual C++ ship object
 
 public:
-   
+
    LuaShip(Ship *ship);                        // C++ constructor
    LuaShip() { /* do nothing */ };             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
    LuaShip(lua_State *L) { /* do nothing */ }; // Lua constructor ==> not used.  Class only instantiated from C++.
 
    ~LuaShip(){
-       logprintf("Killing luaShip %d", mId);  
+       logprintf("Killing luaShip %d", mId);
    };                      // Destructor
 
    static S32 id;
@@ -69,7 +69,7 @@ public:
    static Lunar<LuaShip>::RegType methods[];
 
    virtual S32 getClassID(lua_State *L) { return returnInt(L, ShipType); }    // Robot will override this
-   
+
    S32 getAngle(lua_State *L);
    S32 getLoc(lua_State *L);
    S32 getRad(lua_State *L);
@@ -101,6 +101,7 @@ private:
    bool mIsRobot;
 
    S32 mJustTeleported;
+   Point mSpawnPoint;            // Where ship spawned.  Will only be valid on server, client doesn't currently get this.
 
 protected:
    StringTableEntry mPlayerName;

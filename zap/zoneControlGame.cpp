@@ -100,6 +100,11 @@ GAMETYPE_RPC_S2C(ZoneControlGameType, s2cSetFlagTeam, (S32 flagTeam), (flagTeam)
 void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 {
    static StringTableEntry takeString("%e0 of team %e1 has the flag!");
+
+   // A ship can only carry one flag in ZC.  If it already has one, there's nothing to do.
+   if(s->carryingFlag() != NO_FLAG)
+      return;
+
    Vector<StringTableEntry> e;
    e.push_back(theShip->getName());
    e.push_back(mTeams[theShip->getTeam()].name);
@@ -133,7 +138,7 @@ void ZoneControlGameType::addZone(GoalZone *z)
 // Ship enters a goal zone.  What happens?
 void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
 {
-   // Zone already belongs to team, or ship has no flag
+   // Zone already belongs to team, or ship has no flag.  In either case, do nothing.
    if(z->getTeam() == s->getTeam() || s->carryingFlag() == NO_FLAG)
       return;
 

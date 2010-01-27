@@ -61,7 +61,7 @@ namespace Zap
 
 EditorUserInterface gEditorUserInterface;
 
-const U32 dockWidth = 50;
+const U32 DOCK_WIDTH = 50;
 const S32 MIN_SCALE = 300;    // Most zoomed-in scale
 const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 
@@ -119,7 +119,7 @@ EditorUserInterface::EditorUserInterface()
 
 void EditorUserInterface::populateDock()
 {
-   S32 xPos = canvasWidth - horizMargin - dockWidth / 2;
+   S32 xPos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
    S32 yPos = 40;
    const S32 spacer = 35;
    mDockItems.clear();
@@ -168,17 +168,17 @@ void EditorUserInterface::populateDock()
    mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), -1, 0, 0));
 
    yPos += 25;
-   mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20));
+   mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 0, DOCK_WIDTH - 10, 20));
    yPos += 25;
 
    if(!strcmp(mGameType, "HuntersGameType"))
    {
-      mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20));
+      mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 0, DOCK_WIDTH - 10, 20));
       yPos += 25;
    }
    else
    {
-      mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - dockWidth + 5, yPos), 0, dockWidth - 10, 20));
+      mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 0, DOCK_WIDTH - 10, 20));
       yPos += spacer;
    }
 }
@@ -218,6 +218,7 @@ GameItemRec gGameItemRecs[] = {
    { "FlagItem",            false,    true,      true,        false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
+   { "LineArt",             true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineArt",  "LineArt",      "Decorative lines." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
@@ -857,6 +858,7 @@ void EditorUserInterface::onActivate()
    mDragSelecting = false;
    mUp = mDown = mLeft = mRight = mIn = mOut = false;
    mCreatingPoly = false;
+   mCreatingPolyline = false;
    mDraggingObjects = false;
    mDraggingDockItem = -1;
    mShowingReferenceShip = false;
@@ -998,12 +1000,17 @@ void EditorUserInterface::render()
 
    F32 width = -1;
 
-   if(mCreatingPoly)    // Draw polygon under construction
+   if(mCreatingPoly || mCreatingPolyline)    // Draw geomLine features under construction
    {
       Point mouseVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
       mNewItem.verts.push_back(mouseVertex);
       glLineWidth(3);
-      glColor3f(1, 1, 0);     // yellow
+
+      if(mCreatingPoly) // Wall
+         glColor(yellow);
+      else              // Artline
+         glColor3f(1, 0, 1);
+
       renderPoly(mNewItem.verts, false);
 
       glLineWidth(gDefaultLineWidth);
@@ -1020,11 +1027,11 @@ void EditorUserInterface::render()
       }
       mNewItem.verts.erase_fast(mNewItem.verts.size() - 1);
    }
-   else  // Since we're not constructing a barrier, if there are any barriers selected, get the width for display on dock
+   else  // Since we're not constructing a barrier, if there are any barriers or artlines selected, get the width for display at bottom of dock
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
-         if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected  || (mItems[i].litUp && vertexToLightUp == -1)))
+         if( mItems[i].hasWidth && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)) )
          {
             width =  mItems[i].width;
             break;
@@ -1065,10 +1072,10 @@ void EditorUserInterface::render()
     glColor3f(0, 0, 0);        // Black background
 
    glBegin(GL_POLYGON);
-      glVertex2f(canvasWidth - dockWidth - horizMargin, vertMargin);
+      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, vertMargin);
       glVertex2f(canvasWidth - horizMargin, vertMargin);
       glVertex2f(canvasWidth - horizMargin, canvasHeight - vertMargin);
-      glVertex2f(canvasWidth - dockWidth - horizMargin, canvasHeight - vertMargin);
+      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
    glEnd();
 
    // Bounding box around dock
@@ -1080,10 +1087,10 @@ void EditorUserInterface::render()
       glColor(white);
 
    glBegin(GL_LINE_LOOP);
-      glVertex2f(canvasWidth - dockWidth - horizMargin, vertMargin);
+      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, vertMargin);
       glVertex2f(canvasWidth - horizMargin, vertMargin);
       glVertex2f(canvasWidth - horizMargin, canvasHeight - vertMargin);
-      glVertex2f(canvasWidth - dockWidth - horizMargin, canvasHeight - vertMargin);
+      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
    glEnd();
 
    // Draw coordinates on dock
@@ -1092,17 +1099,17 @@ void EditorUserInterface::render()
    char text[50];
    glColor(white);
    dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
-   drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 15, 7, text);
+   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 15, 7, text);
 
    // And scale
    glColor(white);
    dSprintf(text, sizeof(text), "%2.2f", mCurrentScale);
-   drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 25, 7, text);
+   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 25, 7, text);
 
    // Show number of teams
    glColor(white);
    dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
-   drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 35, 7, text);
+   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 35, 7, text);
 
    // Show level name, and whether it needs to be saved or not
    if(mNeedToSave)
@@ -1111,14 +1118,14 @@ void EditorUserInterface::render()
       glColor(white);
 
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
-   drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 45, 7, text);
+   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 45, 7, text);
 
    // And wall width as needed
    if (width > 0)
    {
       glColor(white);
       dSprintf(text, sizeof(text), "Width: %2.0f", width);
-      drawString(canvasWidth - (dockWidth + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 55, 7, text);
+      drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 55, 7, text);
    }
 
 
@@ -1152,7 +1159,7 @@ void EditorUserInterface::render()
       {
          glColor3f(.1, 1, .1);
          // Center string between left side of screen and edge of dock
-         S32 x = (S32)((S32) canvasWidth - horizMargin - dockWidth - getStringWidth(15, gGameItemRecs[mDockItems[hoverItem].index].helpText)) / 2;
+         S32 x = (S32)((S32) canvasWidth - horizMargin - DOCK_WIDTH - getStringWidth(15, gGameItemRecs[mDockItems[hoverItem].index].helpText)) / 2;
          drawString(x, canvasHeight - vertMargin - 15, 15, gGameItemRecs[mDockItems[hoverItem].index].helpText);
       }
    }
@@ -1268,13 +1275,18 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 
 extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
-void EditorUserInterface::renderBarrier(Vector<Point> verts, bool selected, F32 width, F32 alpha)
+void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, F32 width, F32 alpha)
 {
    Vector<Point> barPoints;
 
    constructBarrierPoints(verts, width, barPoints);
 
-   glColor(Color(.5, .5, 1), alpha);    // pale blue
+   if(itemType == ItemBarrierMaker)
+      glColor(Color(.5, .5, 1), alpha);    // pale blue
+   else if(itemType == ItemLineArt)
+      glColor(Color(.7,.7,.7), alpha);    // whiteish... for now
+   else
+      TNLAssert(false, "Invalid game item type!");
 
    for(S32 j = 0; j < barPoints.size(); j += 2)
    {
@@ -1518,7 +1530,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
    }
    else if(gGameItemRecs[item.index].geom == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
    {
-      renderBarrier(item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.width / mGridSize, alpha);
+      renderPolyline(item.index, item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.width / mGridSize, alpha);
       renderLinePolyVertices(item, alpha);
    }
 
@@ -1575,7 +1587,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          renderPolygonLabel(cent, ang, labelSize, gGameItemRecs[item.index].onScreenName);
       }
 
-      if((item.index == ItemBarrierMaker || showAllObjects) && !isDockItem)  // No verts on dock!
+      if((item.geom == geomLine || showAllObjects) && !isDockItem)  // No verts on dock!
          renderLinePolyVertices(item, alpha);      // Draw vertices for this polygon
    }
 
@@ -2235,7 +2247,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 {
    mMousePos = convertWindowToCanvasCoord(gMousePos);
 
-   if(mCreatingPoly)
+   if(mCreatingPoly || mCreatingPolyline)
       return;
 
    S32 vertexHit, vertexHitPoly;
@@ -2285,7 +2297,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 {
    mMousePos = convertWindowToCanvasCoord(Point(x,y));
 
-   if(mCreatingPoly || mDragSelecting || mEditingSpecialAttrItem != -1)
+   if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem != -1)
       return;
 
    if(mDraggingDockItem != -1)      // We just started dragging an item off the dock
@@ -2418,7 +2430,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].hasWidth && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          mItems[i].width += amt - (S32) mItems[i].width % amt;
          mNeedToSave = true;
@@ -2430,7 +2442,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].hasWidth && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          mItems[i].width-= ((S32) mItems[i].width % amt) ? (S32) mItems[i].width % amt : amt;      // Dirty, ugly thing
          if(mItems[i].width < 1)
@@ -2447,15 +2459,15 @@ void EditorUserInterface::splitBarrier()
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemBarrierMaker)
+      if(mItems[i].geom == geomLine)
           for(S32 j = 1; j < mItems[i].verts.size()-1; j++)     // Can't split on end vertices!
             if(mItems[i].vertSelected[j] || (mItems[i].litUp && vertexToLightUp == j))
             {
                split = true;
                WorldItem newItem;
-               newItem.index = ItemBarrierMaker;
+               newItem.index = mItems[i].index;
                newItem.team = -1;
-               newItem.width = 50;
+               newItem.width = 50;     // <--- probably don't want this
                for(S32 k = j; k < mItems[i].verts.size(); )    // No k++!
                {
                   newItem.verts.push_back(mItems[i].verts[k]);
@@ -2489,11 +2501,11 @@ void EditorUserInterface::joinBarrier()
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size()-1; i++)
-      if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].geom == geomLine && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          for(S32 j = i + 1; j < mItems.size(); j++)
          {
-            if(mItems[j].index == ItemBarrierMaker && (mItems[j].selected || (mItems[j].litUp && vertexToLightUp == -1)))
+            if(mItems[j].index == mItems[i].index && (mItems[j].selected || (mItems[j].litUp && vertexToLightUp == -1)))
             {
                if(mItems[i].verts[0].distanceTo(mItems[j].verts[0]) < .01)    // First vertices are the same  1 2 3 | 1 4 5
                {
@@ -2807,6 +2819,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }
 
+   // Not editing special attributes...
+
    // Regular key handling from here on down
    if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
    {
@@ -2823,9 +2837,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && getKeyState(KEY_CTRL)))
    {
       mMousePos = convertWindowToCanvasCoord(gMousePos);
-      if(mCreatingPoly)
+
+      if(mCreatingPoly || mCreatingPolyline)
       {
-         if(mNewItem.verts.size() >= gMaxPolygonPoints)     // Limit number of points in a polygon
+         if(mNewItem.verts.size() >= gMaxPolygonPoints)     // Limit number of points in a polygon/polyline
             return;
          Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
          mNewItem.verts.push_back(newVertex);
@@ -2865,11 +2880,20 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          mMouseDownPos = newVertex;
       }
-      else     // Start creating a new poly
+      else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
       {
-         mCreatingPoly = true;
+         if(getKeyState(KEY_TILDA))
+         {
+            mCreatingPolyline = true;
+            mNewItem.index = ItemLineArt;
+         else
+         {
+            mCreatingPoly = true;
+            mNewItem.index = ItemBarrierMaker;
+         }
+
          mNewItem.verts.clear();
-         mNewItem.index = ItemBarrierMaker;
+
          mNewItem.width = Barrier::BarrierWidth;
          mNewItem.team = -1;
          mNewItem.selected = false;
@@ -2883,7 +2907,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       mDraggingDockItem = -1;
       mMousePos = convertWindowToCanvasCoord(gMousePos);
-      if(mCreatingPoly)          // Save any polygon we might be creating
+      if(mCreatingPoly || mCreatingPolyline)          // Save any polygon/polyline we might be creating
       {
          saveUndoState(mItems);
 
@@ -2891,6 +2915,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mItems.push_back(mNewItem);
          mNewItem.verts.clear();
          mCreatingPoly = false;
+         mCreatingPolyline = false;
          mItems.sort(geometricSort);
       }
 
@@ -3285,7 +3310,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
 
 bool EditorUserInterface::mouseOnDock()
 {
-   return (mMousePos.x >= canvasWidth - dockWidth - horizMargin &&
+   return (mMousePos.x >= canvasWidth - DOCK_WIDTH - horizMargin &&
            mMousePos.x <= canvasWidth - horizMargin &&
            mMousePos.y >= vertMargin &&
            mMousePos.y <= canvasHeight - vertMargin);

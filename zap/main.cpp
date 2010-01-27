@@ -16,9 +16,11 @@
 // Implement level selection based on MinPlayers & MaxPlayers
 
 //Test:
+// Do ships remember their spawn points?  How about robots?
+// Zone control should be able to only carry one flag.  Does it work?
+
 
 // TODO:
-// Turrets at end of wall can rotate through wall.  Why?
 // Create color global for reticle color
 
 

@@ -59,7 +59,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
-Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius)
+Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
 
@@ -72,9 +72,7 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
    }
 
    for(U32 i = 0; i < TrailCount; i++)
-   {
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
-   }
 
    mTeam = team;
    mHealth = 1.0;       // Start at full health
@@ -89,6 +87,7 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
       mTrail[i].reset();
 
    mEnergy = (S32)(EnergyMax * .80f);      // Start off with 80% energy
+
    for(S32 i = 0; i < ModuleCount; i++)    // All modules disabled
       mModuleActive[i] = false;
 
@@ -903,7 +902,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 //
 //}
 
-   if(stream->readFlag())        // Respawn
+   if(stream->readFlag())        // Respawn <--- will only occur on robots, will always be false with ships
    {
       hasExploded = false;
       playSpawnEffect = true;
@@ -1541,7 +1540,7 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 // This is the only constructor that's used.
 LuaShip::LuaShip(Ship *ship): thisShip(ship)
 {
-   thisShip = ship;     
+   thisShip = ship;
    id++;
    mId = id;
    logprintf("Creating lauaship %d", mId);

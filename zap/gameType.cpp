@@ -66,10 +66,10 @@ const char *gGameTypeNames[] = {
    "RetrieveGameType",
    "SoccerGameType",
    "ZoneControlGameType",
-   0  // Last item must be null
+   NULL  // Last item must be NULL
 };
 
-S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is invalid or missing
+S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
 
 ///////////////////////////////////////////////
 
@@ -349,7 +349,7 @@ void GameType::idle(GameObject::IdleCallPath path)
          asteroid->setPosAng(mAsteroidSpawnPoints[i].getPos(), ang);
 
          asteroid->addToGame(gServerGame);                                                 // And add it to the list of game objects
-   
+
          mAsteroidSpawnPoints[i].timer.reset();                                            // Reset the spawn timer
       }
    }
@@ -652,7 +652,7 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
 
 void GameType::renderTimeLeft()
 {
-   
+
    U32 timeLeft = mGameTimer.getCurrent();      // Time remaining in game
 
    const S32 size = 20;       // Size of time
@@ -666,7 +666,7 @@ void GameType::renderTimeLeft()
    UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65 - len - 5,
       UserInterface::canvasHeight - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, gtsize, "[%s/%d]", getShortName(), mWinningScore);
 
-   glColor3f(1,1,1); 
+   glColor3f(1,1,1);
    UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65,
       UserInterface::canvasHeight - UserInterface::vertMargin - 20, size, "%02d:%02d", minsRemaining, secsRemaining);
 
@@ -800,7 +800,7 @@ void GameType::onLevelLoaded()
 
    // Find all spybugs in the game
    gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
-  
+
    Vector<GameObject *> fillVector;
    getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, gServerWorldBounds);
 
@@ -896,7 +896,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       S32 time = (argc > 3) ? atoi(argv[3]) : AsteroidSpawn::defaultRespawnTime;
 
       AsteroidSpawn spawn = AsteroidSpawn(p, time * 1000);
-      mAsteroidSpawnPoints.push_back(spawn);   
+      mAsteroidSpawnPoints.push_back(spawn);
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {
@@ -999,7 +999,7 @@ void GameType::spawnShip(GameConnection *theClient)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
-   //                       Player's name, team, and spawning location
+   //                     Player's name, team, and spawning location
    Ship *newShip = new Ship(cl->name, teamIndex, spawnPoint);
 
    newShip->addToGame(getGame());
@@ -1007,7 +1007,7 @@ void GameType::spawnShip(GameConnection *theClient)
    newShip->setOwner(theClient);
 
    if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
-      setClientShipLoadout(cl, theClient->getLoadout());                  // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+      setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
 }
 
 
@@ -1170,7 +1170,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
 
          TNLAssert(mClientList[i]->clientConnection, "No client connection in PerformScopequery");     // Should never happen
 
-         Ship *ship = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());   
+         Ship *ship = dynamic_cast<Ship *>(mClientList[i]->clientConnection->getControlObject());
          if(!ship)       // Can happen!
             continue;
 
@@ -1318,7 +1318,7 @@ void GameType::countTeamPlayers()
 // Adds a new client to the game when a player joins, or when a level cycles.
 // Runs on the server, can be overridden.
 // Note that when a new game starts, players will be added in order from
-// strongest to weakest.  
+// strongest to weakest.
 // Note also that theClient should never be NULL.
 void GameType::serverAddClient(GameConnection *theClient)
 {
@@ -1453,7 +1453,7 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
 void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 {
    ClientRef *cl = NULL;
-   
+
    TNLAssert(ship, "Ship is null in updateScore!!");
 
    if(!ship->isRobot() && ship->getControllingClient())
@@ -2128,7 +2128,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
       mClientList[i]->ping = pingTimes[i];
       mClientList[i]->score = scores[i];
-      mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0; 
+      mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0;
    }
 }
 
