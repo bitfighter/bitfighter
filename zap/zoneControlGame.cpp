@@ -102,7 +102,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    static StringTableEntry takeString("%e0 of team %e1 has the flag!");
 
    // A ship can only carry one flag in ZC.  If it already has one, there's nothing to do.
-   if(s->carryingFlag() != NO_FLAG)
+   if(theShip->carryingFlag() != NO_FLAG)
       return;
 
    Vector<StringTableEntry> e;

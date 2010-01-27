@@ -117,6 +117,13 @@ enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[
    ItemNavMeshZone,
 };
 
+enum GeomType {
+   geomPoint,           // Single point feature (like a flag)
+   geomSimpleLine,      // Two point line (like a teleport)
+   geomLine,            // Many point line (like a wall)
+   geomPoly,            // Polygon feature (like a loadout zone)
+   geomNone,            // Other/unknown (not used, just here for completeness)
+};
 
 class WorldItem
 {
@@ -139,6 +146,8 @@ public:
    S32 speed;           // Speed for speedzone items
    bool boolattr;       // Additional optional boolean attribute for some items (only speedzone so far...)
 
+   bool hasWidth();
+   GeomType geomType();
 };
 
 
@@ -272,6 +281,7 @@ private:
    void setTranslationAndScale(Point pos);
 
    bool mCreatingPoly;
+   bool mCreatingPolyline;
    bool mDragSelecting;
    bool mShowingReferenceShip;
    S32 mDraggingDockItem;

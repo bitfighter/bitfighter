@@ -183,13 +183,6 @@ void EditorUserInterface::populateDock()
    }
 }
 
-enum geomType {
-   geomPoint,           // Single point feature (like a flag)
-   geomSimpleLine,      // Two point line (like a teleport)
-   geomLine,            // Many point line (like a wall)
-   geomPoly,            // Polygon feature (like a loadout zone)
-   geomNone,            // Other/unknown (not used, just here for completeness)
-};
 
 struct GameItemRec
 {
@@ -199,7 +192,7 @@ struct GameItemRec
    bool canHaveNoTeam;  // Item can be neutral or hostile
    bool hasText;        // Item has a text string attached to it
    bool hasRepop;       // Item has a repop delay that can be set
-   geomType geom;
+   GeomType geom;
    char letter;         // How item is represented by editor.  Some items are drawn with a letter others have custom symbols.
    bool specialTabKeyRendering;  // true if item is rendered in a special way when tab is down
    const char *prettyNamePlural;
@@ -211,7 +204,7 @@ struct GameItemRec
 
 // Remember to keep these properly aligned with GameItems enum                                 display
 //   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural        onDockName   onScreenName      description
-GameItemRec gGameItemRecs[] = {
+GameItemRec itemDef[] = {
    { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
    { "SpeedZone",           false,    false,     true,        false,   false,   geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",       "Makes ships go fast in direction of arrow. [P]" },
    { "SoccerBallItem",      false,    false,     false,       false,   false,   geomPoint,      'B',    true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
@@ -239,6 +232,18 @@ GameItemRec gGameItemRecs[] = {
 
    { NULL,                  false,    false,     false,       false,   false,   geomNone,        0,     false,  "",                       "",         "",             "" },
 };
+
+
+bool WorldItem::hasWidth() 
+{ 
+   return itemDef[index].hasWidth; 
+}
+
+
+GeomType WorldItem::geomType() 
+{ 
+   return itemDef[index].geom; 
+}
 
 
 // Save the current state of the editor objects for later undoing
@@ -400,7 +405,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 S32 QSORT_CALLBACK geometricSort(WorldItem *a, WorldItem *b)
 {
-   return (gGameItemRecs[a->index].geom < gGameItemRecs[b->index].geom);
+   return (itemDef[a->index].geom < itemDef[b->index].geom);
 }
 
 
@@ -457,17 +462,17 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
 {
    U32 index;
    U32 strlenCmd = (U32) strlen(argv[0]);
-   for(index = 0; gGameItemRecs[index].name != NULL; index++)
+   for(index = 0; itemDef[index].name != NULL; index++)
    {
       // Figure out how many arguments an item should have
-      if(!strcmp(argv[0], gGameItemRecs[index].name))
+      if(!strcmp(argv[0], itemDef[index].name))
       {
          S32 minArgs = 3;
-         if(gGameItemRecs[index].geom >= geomLine)
+         if(itemDef[index].geom >= geomLine)
             minArgs += 2;
-         if(gGameItemRecs[index].hasTeam)
+         if(itemDef[index].hasTeam)
             minArgs++;
-         if(gGameItemRecs[index].hasText)
+         if(itemDef[index].hasText)
             minArgs += 2;        // Size and message
          if(argc >= minArgs)     // We have enough args, please proceed.
             break;
@@ -475,7 +480,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
    }
 
    // Parse most game objects
-   if(gGameItemRecs[index].name)    // Item is listed in gGameItemRecs, near top of this file
+   if(itemDef[index].name)    // Item is listed in itemDef, near top of this file
    {
       WorldItem i;
       i.index = static_cast<GameItems>(index);
@@ -486,12 +491,12 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       i.selected = false;
       i.width = 0;
 
-      if(gGameItemRecs[index].hasWidth)
+      if(itemDef[index].hasWidth)
       {
          i.width = atof(argv[arg]);
          arg++;
       }
-      if(gGameItemRecs[index].hasTeam)
+      if(itemDef[index].hasTeam)
       {
          i.team = atoi(argv[arg]);
          arg++;
@@ -549,7 +554,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
          for(;arg < coords; arg += 2) // (no first arg)
          {
             // Put a cap on the number of vertices in a polygon
-            if(gGameItemRecs[index].geom == geomPoly && i.verts.size() >= gMaxPolygonPoints)
+            if(itemDef[index].geom == geomPoly && i.verts.size() >= gMaxPolygonPoints)
                break;
             Point p;
             if(arg != argc - 1)
@@ -760,13 +765,13 @@ void EditorUserInterface::validateTeams()
    {
       S32 team = mItems[i].team;
 
-      if(gGameItemRecs[mItems[i].index].hasTeam && team >= -2 && team < teams)      // -1 = neutral, -2 = hostile
+      if(itemDef[mItems[i].index].hasTeam && team >= -2 && team < teams)      // -1 = neutral, -2 = hostile
          continue;      // This one's OK
 
-      if(team < 0 && gGameItemRecs[mItems[i].index].canHaveNoTeam)
+      if(team < 0 && itemDef[mItems[i].index].canHaveNoTeam)
          continue;      // This one too
 
-      if(gGameItemRecs[mItems[i].index].hasTeam)
+      if(itemDef[mItems[i].index].hasTeam)
          mItems[i].team = 0;     // We know there's at least one team, so there will always be a team 0
       else
          mItems[i].team = -1;    // We won't consider the case where hasTeam == canHaveNoTeam == false
@@ -1031,7 +1036,7 @@ void EditorUserInterface::render()
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
-         if( mItems[i].hasWidth && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)) )
+         if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)) )
          {
             width =  mItems[i].width;
             break;
@@ -1159,8 +1164,8 @@ void EditorUserInterface::render()
       {
          glColor3f(.1, 1, .1);
          // Center string between left side of screen and edge of dock
-         S32 x = (S32)((S32) canvasWidth - horizMargin - DOCK_WIDTH - getStringWidth(15, gGameItemRecs[mDockItems[hoverItem].index].helpText)) / 2;
-         drawString(x, canvasHeight - vertMargin - 15, 15, gGameItemRecs[mDockItems[hoverItem].index].helpText);
+         S32 x = (S32)((S32) canvasWidth - horizMargin - DOCK_WIDTH - getStringWidth(15, itemDef[mDockItems[hoverItem].index].helpText)) / 2;
+         drawString(x, canvasHeight - vertMargin - 15, 15, itemDef[mDockItems[hoverItem].index].helpText);
       }
    }
 
@@ -1347,7 +1352,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
    glEnable(GL_BLEND);     // Enable transparency
 
-   if(gGameItemRecs[item.index].geom == geomSimpleLine && (showAllObjects || isDockItem || mShowingReferenceShip))    // Draw "two-point" items
+   if(itemDef[item.index].geom == geomSimpleLine && (showAllObjects || isDockItem || mShowingReferenceShip))    // Draw "two-point" items
    {
       if(isDockItem)
          dest = item.verts[1];
@@ -1412,7 +1417,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          glLineWidth(gDefaultLineWidth);        // Restore default value
 
          // If this is a textItem, and either the item or either vertex is selected, draw the text
-         if(!isDockItem && gGameItemRecs[item.index].hasText)
+         if(!isDockItem && itemDef[item.index].hasText)
          {
             // Recalc text size -- TODO:  this shouldn't be here...
             // this should only happen when text is created, not every time it's drawn
@@ -1528,13 +1533,13 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          }
       }
    }
-   else if(gGameItemRecs[item.index].geom == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
+   else if(itemDef[item.index].geom == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
    {
       renderPolyline(item.index, item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.width / mGridSize, alpha);
       renderLinePolyVertices(item, alpha);
    }
 
-   else if(gGameItemRecs[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
+   else if(itemDef[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
    {
       if(showAllObjects || isDockItem || mShowingReferenceShip)   // Anything that is not a wall
       {
@@ -1584,10 +1589,10 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          F32 ang = angleOfLongestSide(outline);
          Point cent = centroid(outline);
 
-         renderPolygonLabel(cent, ang, labelSize, gGameItemRecs[item.index].onScreenName);
+         renderPolygonLabel(cent, ang, labelSize, itemDef[item.index].onScreenName);
       }
 
-      if((item.geom == geomLine || showAllObjects) && !isDockItem)  // No verts on dock!
+      if((item.geomType() == geomLine || showAllObjects) && !isDockItem)  // No verts on dock!
          renderLinePolyVertices(item, alpha);      // Draw vertices for this polygon
    }
 
@@ -1721,7 +1726,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
 
       // If this is an item that has a repop attribute, and the item is selected, draw the text
-      if(!isDockItem && gGameItemRecs[item.index].hasRepop)
+      if(!isDockItem && itemDef[item.index].hasRepop)
       {
          if(showAllObjects && ((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
          {
@@ -1777,10 +1782,10 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          glEnd();
       }
 
-      char letter = gGameItemRecs[item.index].letter;    // Get letter to represent object
+      char letter = itemDef[item.index].letter;    // Get letter to represent object
 
       // Mark the item with a letter, unless we're showing the reference ship
-      if(letter && !(gGameItemRecs[item.index].specialTabKeyRendering && mShowingReferenceShip) || isDockItem)
+      if(letter && !(itemDef[item.index].specialTabKeyRendering && mShowingReferenceShip) || isDockItem)
       {
          S32 vertOffset = 8;
          if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
@@ -1790,14 +1795,14 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
       }
       // And label it if we're hovering over it (or not)
-      if(showAllObjects && (item.selected || item.litUp) && gGameItemRecs[item.index].onScreenName)
+      if(showAllObjects && (item.selected || item.litUp) && itemDef[item.index].onScreenName)
       {
          glColor(hideit ? grayedOutColorBright : labelColor);
-         drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, gGameItemRecs[item.index].onScreenName);     // Label on top
+         drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName);     // Label on top
       }
    }
    // Label our dock items
-   if(isDockItem && gGameItemRecs[item.index].geom != geomPoly)      // Polys are already labeled internally
+   if(isDockItem && itemDef[item.index].geom != geomPoly)      // Polys are already labeled internally
    {
       glColor(hideit ? grayedOutColorBright : labelColor);
       F32 maxy = -F32_MAX;
@@ -1806,11 +1811,11 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             maxy = item.verts[j].y;
 
       // Make some label position adjustments
-      if(gGameItemRecs[item.index].geom == geomSimpleLine)
+      if(itemDef[item.index].geom == geomSimpleLine)
          maxy -= 2;
       else if(item.index == ItemSoccerBall)
          maxy += 1;
-      drawString(pos.x - getStringWidth(labelSize, gGameItemRecs[item.index].onDockName)/2, maxy + 8, labelSize, gGameItemRecs[item.index].onDockName);
+      drawString(pos.x - getStringWidth(labelSize, itemDef[item.index].onDockName)/2, maxy + 8, labelSize, itemDef[item.index].onDockName);
    }
 
    glDisable(GL_BLEND);
@@ -2022,10 +2027,10 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    // Update all dock items to reflect new current team
    for(S32 i = 0; i < mDockItems.size(); i++)
    {
-      if(!gGameItemRecs[mDockItems[i].index].hasTeam)
+      if(!itemDef[mDockItems[i].index].hasTeam)
          continue;
 
-      if(currentTeam < 0 && !gGameItemRecs[mDockItems[i].index].canHaveNoTeam)
+      if(currentTeam < 0 && !itemDef[mDockItems[i].index].canHaveNoTeam)
          continue;
 
       mDockItems[i].team = currentTeam;
@@ -2116,7 +2121,7 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
       if(!showAllObjects && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
          continue;
       WorldItem &p = mItems[i];
-      if(gGameItemRecs[p.index].geom <= geomPoint)
+      if(itemDef[p.index].geom <= geomPoint)
          continue;
 
       for(S32 j = p.verts.size() - 1; j >= 0; j--)
@@ -2151,7 +2156,7 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 
    // Now check for polygon interior hits
    for(S32 i = 0; i < mDockItems.size(); i++)
-      if(gGameItemRecs[mDockItems[i].index].geom == geomPoly)
+      if(itemDef[mDockItems[i].index].geom == geomPoly)
       {
          Vector<Point> verts;
          for(S32 j = 0; j < mDockItems[i].verts.size(); j++)
@@ -2179,7 +2184,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
          continue;
 
       WorldItem &p = mItems[i];
-      if(gGameItemRecs[mItems[i].index].geom == geomPoint)
+      if(itemDef[mItems[i].index].geom == geomPoint)
       {
          Point pos = convertLevelToCanvasCoord(p.verts[0]);
          if(fabs(canvasPos.x - pos.x) < 8 && fabs(canvasPos.y - pos.y) < 8)
@@ -2191,7 +2196,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
 
       Vector<Point> verts;
       verts = p.verts;
-      if(gGameItemRecs[mItems[i].index].geom == geomPoly)   // Add first point to the end to create last side on poly
+      if(itemDef[mItems[i].index].geom == geomPoly)   // Add first point to the end to create last side on poly
          verts.push_back(verts.first());
 
       Point p1 = convertLevelToCanvasCoord(verts[0]);
@@ -2226,7 +2231,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
    // This time we'll loop forward, though I don't think it really matters.
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(gGameItemRecs[mItems[i].index].geom == geomPoly)
+      if(itemDef[mItems[i].index].geom == geomPoly)
       {
          Vector<Point> verts;
          for(S32 j = 0; j < mItems[i].verts.size(); j++)
@@ -2280,7 +2285,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       itemToLightUp = itemHit;
    }
 
-   if(itemHit != -1 && !mItems[itemHit].selected && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
+   if(itemHit != -1 && !mItems[itemHit].selected && itemDef[mItems[itemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
    {
       itemToLightUp = itemHit;
       vertexToLightUp = -1;
@@ -2307,7 +2312,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
       // Gross lionstruct avoids extra construction
       WorldItem item =
-         (gGameItemRecs[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
+         (itemDef[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
          // For polygon items, try to match proportions of the dock rendering.  Size will vary by map scale.
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .68, .35) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
@@ -2337,7 +2342,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
             firstVert = mUnmovedItems[i].verts[j];
             goto done;     // Is there a better way to exit two loops than a goto?
          }
-         else if(mItems[i].selected && gGameItemRecs[mItems[i].index].geom == geomPoint)
+         else if(mItems[i].selected && itemDef[mItems[i].index].geom == geomPoint)
          {
             firstVert = mUnmovedItems[i].verts[0];
             goto done;
@@ -2400,9 +2405,9 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          }
 
          // Deleted last vertex, or item can't lose a vertex... it must go!
-         if(mItems[i].verts.size() == 0 || (gGameItemRecs[mItems[i].index].geom == geomSimpleLine && mItems[i].verts.size() < 2)
-                                        || (gGameItemRecs[mItems[i].index].geom == geomLine && mItems[i].verts.size() < 2)
-                                        || (gGameItemRecs[mItems[i].index].geom == geomPoly && mItems[i].verts.size() < 2))
+         if(mItems[i].verts.size() == 0 || (itemDef[mItems[i].index].geom == geomSimpleLine && mItems[i].verts.size() < 2)
+                                        || (itemDef[mItems[i].index].geom == geomLine && mItems[i].verts.size() < 2)
+                                        || (itemDef[mItems[i].index].geom == geomPoly && mItems[i].verts.size() < 2))
          {
             mItems.erase(i);
             deleted = true;
@@ -2430,7 +2435,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].hasWidth && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          mItems[i].width += amt - (S32) mItems[i].width % amt;
          mNeedToSave = true;
@@ -2442,7 +2447,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].hasWidth && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          mItems[i].width-= ((S32) mItems[i].width % amt) ? (S32) mItems[i].width % amt : amt;      // Dirty, ugly thing
          if(mItems[i].width < 1)
@@ -2459,7 +2464,7 @@ void EditorUserInterface::splitBarrier()
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].geom == geomLine)
+      if(mItems[i].geomType() == geomLine)
           for(S32 j = 1; j < mItems[i].verts.size()-1; j++)     // Can't split on end vertices!
             if(mItems[i].vertSelected[j] || (mItems[i].litUp && vertexToLightUp == j))
             {
@@ -2501,7 +2506,7 @@ void EditorUserInterface::joinBarrier()
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size()-1; i++)
-      if(mItems[i].geom == geomLine && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].geomType() == geomLine && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          for(S32 j = i + 1; j < mItems.size(); j++)
          {
@@ -2686,9 +2691,9 @@ U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can
    // Find next attribute that applies to selected object
    for(U32 i = curr; i <= None; i++)
    {
-      if( ((i == Text) && gGameItemRecs[mItems[item].index].hasText) ||
-          ((i == RepopDelay) && gGameItemRecs[mItems[item].index].hasRepop) ||
-          ((i == GoFastSpeed || i == GoFastSnap) && !strcmp(gGameItemRecs[mItems[item].index].name, "SpeedZone")) ||   // strcmp ==> kind of janky
+      if( ((i == Text) && itemDef[mItems[item].index].hasText) ||
+          ((i == RepopDelay) && itemDef[mItems[item].index].hasRepop) ||
+          ((i == GoFastSpeed || i == GoFastSnap) && !strcmp(itemDef[mItems[item].index].name, "SpeedZone")) ||   // strcmp ==> kind of janky
           (i == None ) )
          return i;
    }
@@ -2851,8 +2856,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       S32 edgeHit, itemHit;
       findHitItemAndEdge(mMousePos, itemHit, edgeHit);
 
-      if(itemHit != -1 && (gGameItemRecs[mItems[itemHit].index].geom == geomLine ||
-                           gGameItemRecs[mItems[itemHit].index].geom >= geomPoly   ))
+      if(itemHit != -1 && (itemDef[mItems[itemHit].index].geom == geomLine ||
+                           itemDef[mItems[itemHit].index].geom >= geomPoly   ))
       {
 
          if(mItems[itemHit].verts.size() >= gMaxPolygonPoints)     // Polygon full -- can't add more
@@ -2882,10 +2887,11 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
       {
-         if(getKeyState(KEY_TILDA))
+         if(getKeyState(KEY_TILDE))
          {
             mCreatingPolyline = true;
             mNewItem.index = ItemLineArt;
+         }
          else
          {
             mCreatingPoly = true;
@@ -2960,7 +2966,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             {
                // Do nothing
             }
-            else if(itemHit != -1 && gGameItemRecs[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
+            else if(itemHit != -1 && itemDef[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
             {
                clearSelection();
                mItems[itemHit].selected = true;
@@ -3488,17 +3494,17 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       for(S32 i = 0; i < mItems.size(); i++)
       {
          WorldItem &p = mItems[i];
-         s_fprintf(f, "%s", gGameItemRecs[mItems[i].index].name);
+         s_fprintf(f, "%s", itemDef[mItems[i].index].name);
 
-         if(gGameItemRecs[mItems[i].index].hasWidth)
+         if(mItems[i].hasWidth())
             s_fprintf(f, " %g", mItems[i].width);
-         if(gGameItemRecs[mItems[i].index].hasTeam)
+         if(itemDef[mItems[i].index].hasTeam)
             s_fprintf(f, " %d", mItems[i].team);
          for(S32 j = 0; j < p.verts.size(); j++)
             s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
-         if(gGameItemRecs[mItems[i].index].hasText)
+         if(itemDef[mItems[i].index].hasText)
             s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
-         if(gGameItemRecs[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
+         if(itemDef[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
             s_fprintf(f, " %d", mItems[i].repopDelay);
          if(mItems[i].index == ItemSpeedZone)
             s_fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
@@ -3695,12 +3701,12 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
    vertSelected.push_back(false);
 
    // Handle multiple-point items
-   if(gGameItemRecs[itemType].geom == geomSimpleLine)       // Start with diagonal line
+   if(itemDef[itemType].geom == geomSimpleLine)       // Start with diagonal line
    {
       verts.push_back(verts[0] + Point(width, height));
       vertSelected.push_back(false);
    }
-   else if(gGameItemRecs[itemType].geom == geomPoly)        // Start with a size x size square
+   else if(itemDef[itemType].geom == geomPoly)        // Start with a size x size square
    {
       verts.push_back(verts[0] + Point(width, 0));
       verts.push_back(verts[0] + Point(width, height));
@@ -3710,7 +3716,7 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
       vertSelected.push_back(false);
    }
 
-   if(gGameItemRecs[itemType].hasText)
+   if(itemDef[itemType].hasText)
    {
       textSize = 30;
       text = "Your text here";

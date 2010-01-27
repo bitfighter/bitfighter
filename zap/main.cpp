@@ -17,7 +17,6 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// Zone control should be able to only carry one flag.  Does it work?
 
 
 // TODO:
@@ -37,6 +36,7 @@ XXX need to document timers, main function XXX
 <li>Added asteroids to help screen, enhanced instruction colors</li>
 <li>Fixed several in-game crashing issues</li>
 <li>Minor efficiency improvements on rendering routines</li>
+<li>Can only pickup one flag at a time in zone control games (making multi-flag ZC games feasible)</li>
 
 <h4>Bots</h4>
 <li>Added enhanced timer class to Lua scripting</li>

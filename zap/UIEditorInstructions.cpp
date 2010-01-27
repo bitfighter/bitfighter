@@ -271,7 +271,7 @@ void EditorInstructionsUserInterface::renderPage2()
       glLineWidth(gDefaultLineWidth);
    }
    else
-      gEditorUserInterface.renderBarrier(points, false, 25, true);
+      gEditorUserInterface.renderPolyline(ItemBarrierMaker, points, false, 25, true);
 
    for(S32 i = 0; i < points.size(); i++)
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
