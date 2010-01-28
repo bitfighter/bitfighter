@@ -31,6 +31,7 @@
 #include "game.h"
 #include "UI.h"
 #include "point.h"
+#include "lineEditor.h"
 
 #include <map>
 
@@ -61,38 +62,6 @@ public:
 
 ///////////////////////////////////////
 ///////////////////////////////////////
-//
-// Class to manage all sorts of single-line editing tasks
-//
-class LineEditor
-{
-private:
-   string mLine;
-   U32 mMaxLen;
-
-public:
-   LineEditor(U32 maxLength, string line = "")     // Constructor
-   {
-      mMaxLen = maxLength;
-      mLine = line;
-   }
-
-   U32 length() { return mLine.legnth(); }
-   void addChar(char c) { if(mLine.push_back(c); }
-   void backspace() { mLine.erase(mLine.size()); }                // Backspace key hit
-   void delete() { backspace(); }                                 // Delete key hit
-   void clear() { mLine.clear(); }
-   char at(U32 pos) { return mLine.at(pos); }
-   bool isEmpty() { return mLine.empty(); }
-
-   string getString() { return mLine; }
-
-   const char *c_str() { return mLine.c_str(); }                  // Return the string
-};
-
-
-///////////////////////////////////////
-///////////////////////////////////////
 
 // For sorting our color-nick map, which we'll never do, so this is essentially a dummy
 struct strCmp {
@@ -115,14 +84,14 @@ private:
 protected:
    // Message data
    static ChatMessage mMessages[MESSAGES_TO_RETAIN];
-   LineEditor mChatLine(200);
+   LineEditor mChatLine;
 
    ChatMessage getMessage(U32 index);
    U32 mChatCursorPos;                     // Where is cursor?
 
    U32 getMessageCount() { return mMessageCount; }
 
-   bool composingMessage() { return mLine.size() > 0; }
+   bool composingMessage() { return mChatLine.length() > 0; }
 
 public:
    AbstractChat();      // Constructor

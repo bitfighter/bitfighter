@@ -52,7 +52,7 @@ std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nickname
 
 AbstractChat::AbstractChat()
 {
-   // Do nothing
+   mChatLine = LineEditor(200);
 }
 
 
@@ -98,9 +98,9 @@ void AbstractChat::addCharToMessage(char ascii)
 void AbstractChat::handleBackspace(KeyCode keyCode)
 {
    if(keyCode == KEY_BACKSPACE)
-      mChatLine.backspace();
+      mChatLine.backspacePressed();
    else       // KEY_DELETE
-      mChatLine.delete();
+      mChatLine.deletePressed();
 }
 
 

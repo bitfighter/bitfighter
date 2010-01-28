@@ -443,18 +443,19 @@ S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...)
 #else
    S32 len = vsnprintf(buffer, bufferSize, format, args);
 #endif
+   va_end(args);
    return (len);
 }
 
 
-S32 dVsprintf(char *buffer, U32 bufferSize, const char *format, void *arglist)
-{
-#ifdef TNL_COMPILER_VISUALC
-   return _vsnprintf(buffer, bufferSize, format, (va_list) arglist);
-#else
-   return vsnprintf(buffer, bufferSize, format, (char *) arglist);
-#endif
-}
+//S32 dVsprintf(char *buffer, U32 bufferSize, const char *format, void *arglist)
+//{
+//#ifdef TNL_COMPILER_VISUALC
+//   return _vsnprintf(buffer, bufferSize, format, (va_list) arglist);
+//#else
+//   return vsnprintf(buffer, bufferSize, format, (char *) arglist);
+//#endif
+//}
 
 };
 

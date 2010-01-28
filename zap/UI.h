@@ -30,8 +30,9 @@
 #include "SharedConstants.h"
 #include "timer.h"
 #include "point.h"
+#include "lineEditor.h"
 
-#include "../tnl/tnl.h"
+#include "tnl.h"
 
 #include <string>
 
@@ -84,21 +85,6 @@ enum UIID {
    InvalidUI,        // Not a valid UI
 };
 
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-// Extremely limited for the moment... future home of more comprehensive line editor
-class LineEditor
-{
-private:
-   static Timer mBlinkTimer;
-
-public:
-   LineEditor();               // Constructor
-   static void updateCursorBlink(U32 timeDelta);
-   static bool cursorBlink;
-};
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -196,7 +196,7 @@ void NetConnection::setLastError(const char *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
-   dVsprintf(mErrorBuffer, sizeof(mErrorBuffer), fmt, argptr);
+   vsnprintf(mErrorBuffer, sizeof(mErrorBuffer), fmt, argptr);
    // setLastErrors assert in debug builds
    
    TNLAssert(0, mErrorBuffer);

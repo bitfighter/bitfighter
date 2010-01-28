@@ -27,25 +27,20 @@
 #define _POLYGON_H_
 
 #include "SweptEllipsoid.h"      // For polygon triangulation
-
+#include "point.h"
 
 namespace Zap
 {
 
 extern S32 gMaxPolygonPoints;
 
-class Polygon
+class Polyline
 {
 protected:
 
    Vector<Point> mPolyBounds;
-   Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
 
-   Point mCentroid;
-   F32 mLabelAngle;
-
-
-   void packPolygonUpdate(GhostConnection *connection, BitStream *stream)
+   void packUpdate(GhostConnection *connection, BitStream *stream)
    {
       stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
       for(S32 i = 0; i < mPolyBounds.size(); i++)
@@ -56,7 +51,7 @@ protected:
    }
 
 
-   U32 unpackPolygonUpdate(GhostConnection *connection, BitStream *stream)
+   U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       U32 size = stream->readEnum(gMaxPolygonPoints);
       for(U32 i = 0; i < size; i++)
@@ -65,12 +60,6 @@ protected:
          stream->read(&p.x);
          stream->read(&p.y);
          mPolyBounds.push_back(p);
-      }
-      if(size)
-      {
-         Triangulate::Process(mPolyBounds, mPolyFill);
-         mCentroid = centroid(mPolyBounds);
-         mLabelAngle = angleOfLongestSide(mPolyBounds);
       }
 
       return size;
@@ -83,7 +72,7 @@ protected:
       for(S32 i = firstCoord; i < argc; i += 2)
       {
          // Put a cap on the number of vertices in a polygon
-         if(polyBounds.size() >= gMaxPolygonPoints)
+         if(polyBounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
             break;
 
          Point p;
@@ -91,6 +80,43 @@ protected:
          p.y = (F32) atof(argv[i+1]) * gridSize;
          polyBounds.push_back(p);
       }
+   }
+
+
+   Rect static computePolyExtents(Vector<Point> &polyBounds)
+   {
+      Rect extent(polyBounds[0], polyBounds[0]);
+
+      for(S32 i = 1; i < polyBounds.size(); i++)
+         extent.unionPoint(polyBounds[i]);
+
+      return extent;
+   }
+};
+
+
+class Polygon : public Polyline
+{
+public:
+   typedef Polyline Parent;
+
+   Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
+
+   Point mCentroid;
+   F32 mLabelAngle;
+
+   U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
+   {
+      U32 size = Parent::unpackUpdate(connection, stream);
+
+      if(size)
+      {
+         Triangulate::Process(mPolyBounds, mPolyFill);
+         mCentroid = centroid(mPolyBounds);
+         mLabelAngle = angleOfLongestSide(mPolyBounds);
+      }
+
+      return size;
    }
 };
 

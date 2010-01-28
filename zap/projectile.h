@@ -79,6 +79,7 @@ public:
    ProjectileType mType;
    WeaponType mWeaponType;
    bool collided;
+   bool hitShip;
    bool alive;
    SafePtr<GameObject> mShooter;
 

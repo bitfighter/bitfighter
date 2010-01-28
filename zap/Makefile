@@ -70,6 +70,7 @@ OBJECTS_ZAP=\
    huntersGame.o\
    input.o\
    item.o\
+   lineEditor.o\
    $(INPUT)\
    loadoutSelect.o\
    luaGameInfo.o\

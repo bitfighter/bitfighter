@@ -30,6 +30,7 @@
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
+#include "polygon.h"    // For def of Polyline
 #include "UI.h"
 #include "gameObjectRender.h"
 #include "ship.h"
@@ -58,7 +59,7 @@ public:
    Point dir;            // Direction text is "facing"
    U32 mSize;            // Text size
    S32 mTeam;            // Team text is visible to (-1 for visible to all)
-   string mText;         // Text iteself
+   string mText;         // Text itself
    
    TextItem();   // Constructor
 
@@ -77,6 +78,38 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    TNL_DECLARE_CLASS(TextItem);
+};
+
+
+class LineItem : public GameObject, public Polyline
+{
+private:
+   typedef GameObject Parent;
+
+public:
+
+   U32 mWidth;           // Width of line
+   S32 mTeam;            // Team text is visible to (-1 for visible to all)
+   Vector<Point> mVerts;
+   
+   LineItem();   // Constructor
+
+   void render();
+   S32 getRenderSortValue();
+
+   bool processArguments(S32 argc, const char **argv);           // Create objects from parameters stored in level file
+   void onAddedToGame(Game *theGame);
+   void computeExtent();                                         // Bounding box for quick collision-possibility elimination
+
+   bool getCollisionPoly(Vector<Point> &polyPoints);             // More precise boundary for precise collision detection
+   bool collide(GameObject *hitObject);
+   void idle(GameObject::IdleCallPath path);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   static const U32 MAX_LINE_WIDTH = 255;
+
+   TNL_DECLARE_CLASS(LineItem);
 };
 
 

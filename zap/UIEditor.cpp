@@ -2437,7 +2437,11 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
-         mItems[i].width += amt - (S32) mItems[i].width % amt;
+         mItems[i].width += amt - (S32) mItems[i].width % amt;    // Handles rounding
+         
+         if(mItems[i].width > LineItem::MAX_LINE_WIDTH)
+            mItems[i].width = LineItem::MAX_LINE_WIDTH;
+
          mNeedToSave = true;
          mAllUndoneUndoLevel = -1;    // This change can't be undone
       }
@@ -3276,6 +3280,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                            mItems.erase(i);
                            break;
                         }
+                     itemToLightUp = -1;
                   }
                   else        // Dragged item off the dock, then back on  ==> nothing really changed
                   {
@@ -3442,7 +3447,7 @@ static void s_fprintf(FILE *stream, const char *format, ...)
     va_start(args, format);
 
     char buffer[2048];
-    dVsprintf(buffer, sizeof(buffer), format, args);
+    vsnprintf(buffer, sizeof(buffer), format, args);
 
     va_end(args);
 

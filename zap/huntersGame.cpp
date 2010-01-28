@@ -704,13 +704,12 @@ bool HuntersNexusObject::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+
 void HuntersNexusObject::computeExtent()
 {
-   Rect extent(mPolyBounds[0], mPolyBounds[0]);
-   for(S32 i = 1; i < mPolyBounds.size(); i++)
-      extent.unionPoint(mPolyBounds[i]);
-   setExtent(extent);
+   setExtent(computePolyExtents(mPolyBounds));
 }
+
 
 void HuntersNexusObject::onAddedToGame(Game *theGame)
 {
@@ -769,7 +768,7 @@ bool HuntersNexusObject::collide(GameObject *hitObject)
 
 U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   packPolygonUpdate(connection, stream);
+   Polygon::packUpdate(connection, stream);
 
    return 0;
 }
@@ -777,7 +776,7 @@ U32 HuntersNexusObject::packUpdate(GhostConnection *connection, U32 updateMask, 
 
 void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(unpackPolygonUpdate(connection, stream))
+   if(Polygon::unpackUpdate(connection, stream))
       computeExtent();
 }
 

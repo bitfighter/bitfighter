@@ -110,10 +110,16 @@ extern bool        atob(const char *str); ///< String to boolean conversion.
 /// This will print into the specified string until the buffer size is reached.
 extern int    dSprintf(char *buffer, U32 bufferSize, const char *format, ...);
 
+
 /// Vsprintf with buffer size argument.
 ///
 /// This will print into the specified string until the buffer size is reached.
-extern int    dVsprintf(char *buffer, U32 bufferSize, const char *format, void *arglist); ///< compiler independent
+//extern int    dVsprintf(char *buffer, U32 bufferSize, const char *format, ...); ///< compiler independent
+//#ifdef TNL_COMPILER_VISUALC
+//#   define dVsprintf(b, s, f, a) _vsnprintf(b, s, f, a)
+//#else
+//#   define dVsprintf(b, s, f, a) vsnprintf(b, s, f, a)
+//#endif
 
 inline char dToupper(const char c) { if (c >= char('a') && c <= char('z')) return char(c + 'A' - 'a'); else return c; } ///< Converts an ASCII character to upper case.
 inline char dTolower(const char c) { if (c >= char('A') && c <= char('Z')) return char(c - 'A' + 'a'); else return c; } ///< Converts an ASCII character to lower case.

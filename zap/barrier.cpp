@@ -24,13 +24,10 @@
 //------------------------------------------------------------------------------------
 
 #include "barrier.h"
-#include "gameLoader.h"
-#include "gameNetInterface.h"
 #include "gameObjectRender.h"
 #include "SweptEllipsoid.h"      // For polygon triangulation
-#include "UIMenus.h"
 
-#include "../glut/glutInclude.h"
+#include "glutInclude.h"
 #include <math.h>
 
 using namespace TNL;
@@ -47,7 +44,7 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
    if(vec.size() == 1)     // Protect against bad data
       return;
 
-   bool loop = vec[0] == vec[vec.size() - 1];      // Does our barrier form a closed loop?
+   bool loop = (vec[0] == vec[vec.size() - 1]);      // Does our barrier form a closed loop?
 
    Vector<Point> edgeVector;
    for(S32 i = 0; i < vec.size() - 1; i++)
@@ -56,7 +53,6 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
       e.normalize();
       edgeVector.push_back(e);
    }
-
 
    Point lastEdge = edgeVector[edgeVector.size() - 1];
    Vector<F32> extend;

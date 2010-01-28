@@ -708,7 +708,7 @@ void renderPolygon(Vector<Point> &fill, Vector<Point> &outline, Color fillColor,
 
 void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle)
 {
-   renderPolygon(fill, outline, theColor * 0.7, theColor);
+   renderPolygon(fill, outline, theColor * 0.5, theColor);
    renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE");
 }
 

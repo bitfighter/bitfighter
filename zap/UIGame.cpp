@@ -80,11 +80,13 @@ GameUserInterface::GameUserInterface()
    setMenuID(GameUI);
    setPlayMode();
    mInScoreboardMode = false;
+
 #if 0 //defined(TNL_OS_XBOX)
    mFPSVisible = true;
 #else
    mFPSVisible = false;
 #endif
+
    mFPSAvg = 0;
    mPingAvg = 0;
    mFrameIndex = 0;
@@ -93,6 +95,8 @@ GameUserInterface::GameUserInterface()
       mIdleTimeDelta[i] = 50;
       mPing[i] = 100;
    }
+
+   mChatLine = LineEditor(200);
 
    // Initialize message buffers
    for(S32 i = 0; i < MessageDisplayCount; i++)
@@ -174,10 +178,10 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
    va_list args;
    va_start(args, format);
 
-   dVsprintf(mDisplayMessage[0], sizeof(mDisplayMessage[0]), format, args);
+   vsnprintf(mDisplayMessage[0], sizeof(mDisplayMessage[0]), format, args);
    mDisplayMessageColor[0] = theColor;
 
-   dVsprintf(mStoreMessage[0], sizeof(mStoreMessage[0]), format, args);
+   vsnprintf(mStoreMessage[0], sizeof(mStoreMessage[0]), format, args);
    mStoreMessageColor[0] = theColor;
 
    mDisplayMessageTimer.reset();
@@ -943,9 +947,9 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(keyCode == KEY_ENTER)
          issueChat();
       else if(keyCode == KEY_BACKSPACE)
-         mChatLine.backspace();
+         mChatLine.backspacePressed();
       else if(keyCode == KEY_DELETE)
-         mChatLine.delete();
+         mChatLine.deletePressed();
       else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
          cancelChat();
       else if(keyCode == KEY_TAB)      // Auto complete any commands
@@ -957,7 +961,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
             size_t len = mChatLine.length();
             for(S32 i = 0; i < mChatCmds.size(); i++)
-               if( mChatCmds[i].substr(start, len) == mChatLine )
+               if(mChatCmds[i].substr(start, len) == mChatLine.getString())
                {
                   if(found != -1)   // We've already found another command that matches this one, so that means it's not yet unique enough to autocomplete.
                      return;
@@ -979,7 +983,6 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          // Protect against crashes while game is initializing (because we look at the ship for the player's name)
          if(gClientGame && gClientGame->getConnectionToServer())
          {
-            mChatLine.addChar(ascii);
             S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
             Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
@@ -1145,7 +1148,7 @@ void GameUserInterface::issueChat()
 }
 
 
-Vector<string> GameUserInterface::parseString(char *buffer)
+Vector<string> GameUserInterface::parseString(const char *str)
 {
    // Parse the string
    string word = "";
@@ -1153,10 +1156,10 @@ Vector<string> GameUserInterface::parseString(char *buffer)
 
    S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;              // Start at 1 to omit the leading '/'
 
-   for(size_t i = startIndex; i < strlen(buffer); i++)
+   for(size_t i = startIndex; i < strlen(str); i++)
    {
-      if(buffer[i] != ' ')
-         word += words.size() == 0 ? tolower(buffer[i]) : buffer[i];    // Make first word all lower case for case insensitivity
+      if(str[i] != ' ')
+         word += words.size() == 0 ? tolower(str[i]) : str[i];    // Make first word all lower case for case insensitivity
       else if(word != "")
       {
          words.push_back(word);

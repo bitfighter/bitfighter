@@ -105,7 +105,7 @@ enum {
 
 struct ProjectileInfo
 {
-   ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3, Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor, U32 _projectileSound, U32 _impactSound )
+   ProjectileInfo(Color _sparkColor1, Color _sparkColor2, Color _sparkColor3, Color _sparkColor4, Color _projColor1, Color _projColor2, F32 _scaleFactor, SFXProfiles _projectileSound, SFXProfiles _impactSound )
    {
       sparkColors[0] = _sparkColor1;
       sparkColors[1] = _sparkColor2;
@@ -118,11 +118,11 @@ struct ProjectileInfo
       impactSound = _impactSound;
    }
 
-   Color sparkColors[NumSparkColors];
-   Color projColors[2];
-   F32   scaleFactor;
-   U32   projectileSound;
-   U32   impactSound;
+   Color       sparkColors[NumSparkColors];
+   Color       projColors[2];
+   F32         scaleFactor;
+   SFXProfiles projectileSound;
+   SFXProfiles impactSound;
 };
 
 extern ProjectileInfo gProjInfo[ProjectileTypeCount];

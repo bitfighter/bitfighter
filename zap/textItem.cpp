@@ -24,13 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "textItem.h"
-#include "gameObject.h"
-#include "gameType.h"
 #include "gameNetInterface.h"
-#include "gameObjectRender.h"
-#include "ship.h"
-#include "UI.h"
-#include "../glut/glutInclude.h"
+#include "glutInclude.h"
 
 namespace Zap
 {
@@ -184,6 +179,107 @@ void TextItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
    mText = txt;
    computeExtent();
 }
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+TNL_IMPLEMENT_NETOBJECT(LineItem);
+
+// Constructor
+LineItem::LineItem()
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeMask |= CommandMapVisType; 
+}
+
+
+void LineItem::render()
+{
+   //renderLineItem(pos, dir, mSize, mTeam, mText);
+}
+
+// This object should be drawn below others
+S32 LineItem::getRenderSortValue()
+{
+   return 1;
+}
+
+
+// Create objects from parameters stored in level file
+// Entry looks like: LineItem 0 50 10 10 11 11 Message goes here
+bool LineItem::processArguments(S32 argc, const char **argv)
+{
+   if(argc < 6)
+      return false;
+
+   mTeam = atoi(argv[0]);
+   mWidth = min(atoi(argv[1]), MAX_LINE_WIDTH);
+
+   processPolyBounds(argc, argv, 1, mVerts, getGame()->getGridSize());
+
+   computeExtent();
+
+   return true;
+}
+
+
+void LineItem::onAddedToGame(Game *theGame)
+{
+   if(!isGhost())
+      setScopeAlways();
+
+   getGame()->mObjectsLoaded++;
+}
+
+
+// Bounding box for quick collision-possibility elimination, and display scoping purposes
+void LineItem::computeExtent()
+{
+   setExtent(computePolyExtents(mVerts));
+}
+
+
+bool LineItem::getCollisionPoly(Vector<Point> &polyPoints)
+{
+   return false;
+}
+
+
+// Handle collisions with a LineItem.  Easy, there are none.
+bool LineItem::collide(GameObject *hitObject)
+{
+   return false;
+}
+
+
+void LineItem::idle(GameObject::IdleCallPath path)
+{
+   // Do nothing
+}
+
+static const U32 BIT_COUNT = 8;
+
+U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
+   stream->write(mTeam);
+
+   Polyline::packUpdate(connection, stream);
+
+   return 0;
+}
+
+
+void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
+   stream->read(&mTeam);
+
+   if(Polyline::unpackUpdate(connection, stream))
+      computeExtent();
+}
+
+
 
 
 };

@@ -341,7 +341,7 @@ void ServerGame::loadNextLevel()
          //if(mLevelList.size() > 10)
          //   Platform::sleep(1);
 
-         TNL::logprintf ("Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
+         logprintf ("Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
       }
       else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list.
       {
@@ -571,7 +571,6 @@ void ServerGame::processLevelLoadLine(int argc, const char **argv)
 
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
-
 
 
       if(!object)    // Well... that was a bad idea!

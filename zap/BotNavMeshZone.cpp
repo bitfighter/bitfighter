@@ -173,7 +173,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
    stream->writeInt(mZoneID, 16);
 
-   packPolygonUpdate(connection, stream);
+   Polygon::packUpdate(connection, stream);
 
    stream->writeEnum(mNeighbors.size(), 15);
    for(S32 i = 0; i < mNeighbors.size(); i++)
@@ -193,7 +193,7 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 {
    mZoneID = stream->readInt(16);
 
-   if(unpackPolygonUpdate(connection, stream))
+   if(Polygon::unpackUpdate(connection, stream))
       computeExtent();
 
    U32 size = stream->readEnum(15);

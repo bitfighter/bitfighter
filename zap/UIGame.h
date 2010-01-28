@@ -87,7 +87,7 @@ private:
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
    ChatType mCurrentChatType; // Current in-game chat mode (global or local)
-   LineEditor mChatLine(128); // Message being composed
+   LineEditor mChatLine;      // Message being composed
 
    U32 mChatCursorPos;        // Position of composition cursor
 
@@ -178,7 +178,7 @@ public:
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
 
-   Vector<string> parseString(char buffer[]);      // Break a chat msg into parsable bits
+   Vector<string> parseString(const char *str);    // Break a chat msg into parsable bits
    void processCommand(Vector<string> words);      // Process a cmd entered into the chat interface
    void populateChatCmdList();                     // Add all our chat cmds to a list for autocompletion purposes
 

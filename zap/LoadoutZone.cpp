@@ -112,7 +112,7 @@ public:
    {
       stream->write(mTeam);
 
-      packPolygonUpdate(connection, stream);
+      Polygon::packUpdate(connection, stream);
 
       return 0;
    }
@@ -122,7 +122,7 @@ public:
    {
       stream->read(&mTeam);
 
-      if(unpackPolygonUpdate(connection, stream))
+      if(Polygon::unpackUpdate(connection, stream))
          computeExtent();
    }
 

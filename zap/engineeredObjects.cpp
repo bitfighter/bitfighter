@@ -120,14 +120,14 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    if(argc < 3)
       return false;
 
-   Point p;
    mTeam = atoi(argv[0]);
    mOriginalTeam = mTeam;
    if(mTeam == -1)      // Neutral object starts with no health, can be repaired by anyone
       mHealth = 0;
+   
+   Point p;
    p.read(argv + 1);
    p *= getGame()->getGridSize();
-
 
    if(argc >= 4)
    {

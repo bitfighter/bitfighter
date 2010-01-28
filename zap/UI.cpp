@@ -75,36 +75,9 @@ S32 UserInterface::windowHeight = gScreenHeight;
 UserInterface *UserInterface::current = NULL;
 Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-// Constructor
-LineEditor::LineEditor()
-{
-   //    Do nothing at the moment...
-}
-
-
-// Update our global cursor blinkenlicht
-// To implement a flashing cursor, call this routine from a UI's local idle routine,
-// then draw the cursor when cursorBlink is true
-void LineEditor::updateCursorBlink(U32 timeDelta)
-{
-   if(mBlinkTimer.update(timeDelta))
-   {
-      mBlinkTimer.reset();
-      cursorBlink = !cursorBlink;
-   }
-}
-
-// Needed for now, may be deleteable later.  See http://forums.devx.com/archive/index.php/t-97293.html
-Timer LineEditor::mBlinkTimer(100);
-bool LineEditor::cursorBlink = false;
-
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 void UserInterface::activate(bool save)
 {
@@ -266,7 +239,7 @@ string UserInterface::itos(S32 i)
 
 extern const F32 radiansToDegreesConversion;
 
-#define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; dVsprintf(buffer, sizeof(buffer), format, args); va_end(args);
+#define makeBuffer    va_list args; va_start(args, format); char buffer[2048]; vsnprintf(buffer, sizeof(buffer), format, args); va_end(args);
 
 
 // Center text between two points, adjust angle so it's always right-side-up
@@ -493,7 +466,7 @@ void UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, c
    va_list args;
    va_start(args, right);
    char buffer[2048];
-   dVsprintf(buffer, sizeof(buffer), right, args);
+   vsnprintf(buffer, sizeof(buffer), right, args);
    va_end(args);
 
    S32 offset = getStringWidth(size, left) + getStringWidth(size, " ");

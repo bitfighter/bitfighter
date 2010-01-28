@@ -17,8 +17,6 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// Retrieve should allow non-team flags
-// Sound when ship is struck with bullet
 
 
 // TODO:
@@ -38,6 +36,7 @@ XXX need to document timers, main function XXX
 <li>Added asteroids to help screen, enhanced instruction colors</li>
 <li>Fixed several in-game crashing issues</li>
 <li>Minor efficiency improvements on rendering routines</li>
+<li>Retrieve games now allow non-team flags</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -293,7 +292,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, 
 {
 
    // Glut sometimes fires spurious events.  Let's ignore those.
-   if(x == gMousePos.x && y == gMousePos.y)
+   if(x == gMousePos.x && y == gMousePos.y) 
       return;
 
    setMousePos(x, y);

@@ -131,7 +131,7 @@ bool GoalZone::collide(GameObject *hitObject)
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
-      packPolygonUpdate(connection, stream);
+      Polyline::packUpdate(connection, stream);
 
    if(stream->writeFlag(updateMask & TeamMask))
       stream->write(mTeam);
@@ -141,9 +141,9 @@ U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   if(stream->readFlag())
+   if(stream->readFlag()) 
    {
-      if(unpackPolygonUpdate(connection, stream))
+      if(Polygon::unpackUpdate(connection, stream))
          computeExtent();
    }
 

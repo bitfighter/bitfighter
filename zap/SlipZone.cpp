@@ -117,7 +117,7 @@ public:
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
    {
-      packPolygonUpdate(connection, stream);
+      Polygon::packUpdate(connection, stream);
 
       return 0;
    }
@@ -125,7 +125,7 @@ public:
 
    void unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
-      if(unpackPolygonUpdate(connection, stream))
+      if(Polygon::unpackUpdate(connection, stream))
          computeExtent();
    }
 

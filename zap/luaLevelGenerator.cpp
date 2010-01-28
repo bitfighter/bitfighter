@@ -86,7 +86,7 @@ void LuaLevelGenerator::logError(const char *format, ...)
    va_start(args, format);
    char buffer[2048];
 
-   dVsprintf(buffer, sizeof(buffer), format, args);
+   vsnprintf(buffer, sizeof(buffer), format, args);
    logprintf("***LEVELGEN ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
 
    va_end(args);

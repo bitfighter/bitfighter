@@ -109,8 +109,8 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
       bufferStart += 2;
    }
 
-   // -1 below makes sure we have enough room for a "\n" if we need to append one
-   dVsprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, args);
+  // -1 below makes sure we have enough room for a "\n" if we need to append one
+   vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
    
    // If last char is a "\", chop it off, otherwise append newline
    U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length, so appending newline should be ok

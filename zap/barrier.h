@@ -26,16 +26,15 @@
 #ifndef _BARRIER_H_
 #define _BARRIER_H_
 
-#include "gameConnection.h"
 #include "gameObject.h"
 #include "point.h"
-#include "../tnl/tnlNetObject.h"
+#include "tnlNetObject.h"
 
 namespace Zap
 {
 
 /// The Barrier class represents rectangular barriers that player controlled
-/// Ship instances cannot pass through.  Barrier objects, once created, never
+/// ships cannot pass through... i.e. walls  Barrier objects, once created, never
 /// change state, simplifying the pack/unpack update methods.  Barriers are
 /// constructed as an expanded line segment.
 class Barrier : public GameObject
@@ -49,12 +48,10 @@ public:
 
    F32 mWidth;
 
-   enum {
-      BarrierWidth = 50, ///< The width, in game units of the barrier.
-   };
+   static const S32 BarrierWidth = 50; ///< The width, in game units of the barrier.
 
    static U32 mBarrierChangeIndex; ///< Global counter that is incremented every time a new barrier is added on the client.
-   U32 mLastBarrierChangeIndex; ///< Index to check against the global counter - if it is different, then this barrier's polygon outline will be clipped against all adjacent barriers.
+   U32 mLastBarrierChangeIndex;    ///< Index to check against the global counter - if it is different, then this barrier's polygon outline will be clipped against all adjacent barriers.
 
    Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
 

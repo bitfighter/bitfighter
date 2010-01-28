@@ -67,6 +67,7 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 
    mTimeRemaining = gWeapons[type].projLiveTime;
    collided = false;
+   hitShip = false;
    alive = true;
    mShooter = shooter;
 
@@ -98,6 +99,8 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
          stream->writeInt(index, GhostConnection::GhostIdBitSize);
    }
    stream->writeFlag(collided);
+   if(collided)
+      stream->writeFlag(hitShip);
    stream->writeFlag(alive);
 
    return 0;
@@ -130,9 +133,13 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
    }
    bool preCollided = collided;
    collided = stream->readFlag();
+   
+   if(collided)
+      hitShip = stream->readFlag();
+
    alive = stream->readFlag();
 
-   if(!preCollided && collided)
+   if(!preCollided && collided)     // Projectile has "become" collided
       explode(NULL, pos);
 
    if(!collided && initial)
@@ -145,6 +152,8 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 {
    collided = true;
+   Ship *s = dynamic_cast<Ship *>(hitObject);
+   hitShip = (s != NULL);
 
    if(!isGhost())    // If we're on the server, that is
    {
@@ -246,7 +255,6 @@ void Projectile::idle(GameObject::IdleCallPath path)
       else        // Hit nothing, advance projectile to endPos
          pos = endPos;
 
-
       Rect newExtent(pos,pos);
       setExtent(newExtent);
    }
@@ -285,7 +293,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
       SFXProfiles sound;
       if(s && s->isModuleActive(ModuleShield))     // We hit a ship with shields up
          sound = SFXBounceShield;
-      else if(s)                                   // We hit a ship with shields down
+      else if(hitShip || s)                        // We hit a ship with shields down
          sound = SFXShipHit;
       else                                         // We hit something else
          sound = gProjInfo[mType].impactSound;
