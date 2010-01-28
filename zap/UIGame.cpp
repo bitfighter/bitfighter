@@ -94,9 +94,6 @@ GameUserInterface::GameUserInterface()
       mPing[i] = 100;
    }
 
-
-   memset(mChatBuffer, 0, sizeof(mChatBuffer));
-
    // Initialize message buffers
    for(S32 i = 0; i < MessageDisplayCount; i++)
       mDisplayMessage[i][0] = 0;
@@ -454,8 +451,8 @@ void GameUserInterface::renderLoadoutIndicators()
 
    U32 xPos = UserInterface::horizMargin;
 
-   if(!gClientGame->getConnectionToServer())		// Can happen when first joining a game.  This was XelloBlue's crash...
-	return;
+   if(!gClientGame->getConnectionToServer())    // Can happen when first joining a game.  This was XelloBlue's crash...
+   return;
 
    Ship *localShip = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    if (!localShip)
@@ -591,6 +588,12 @@ void GameUserInterface::renderMessageDisplay()
 }
 
 
+bool GameUserInterface::isCmdChat()
+{
+   return mChatLine.at(0) == '/' || mCurrentChatType == CmdChat;
+}
+
+
 // Render chat msg that user is composing
 void GameUserInterface::renderCurrentChat()
 {
@@ -603,7 +606,7 @@ void GameUserInterface::renderCurrentChat()
 
    Color baseColor;
 
-   if(mChatBuffer[0] == '/' || mCurrentChatType == CmdChat)      // Whatever the underlying chat mode, seems we're entering a command here
+   if(isCmdChat())      // Whatever the underlying chat mode, seems we're entering a command here
    {
       baseColor = gCmdChatColor;
       promptStr = mCurrentChatType ? "(Command): /" : "(Command): ";
@@ -656,7 +659,7 @@ void GameUserInterface::renderCurrentChat()
 
    glColor3f(baseColor.r, baseColor.g, baseColor.b);
    drawString(xpos + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
-   drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatBuffer, LineEditor::cursorBlink ? "_" : " ");
+   drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatLine.c_str(), LineEditor::cursorBlink ? "_" : " ");
    glDisable(GL_BLEND);
 }
 
@@ -736,7 +739,7 @@ void GameUserInterface::dropItem()
       displayMessage(Color(1.0, 0.5, 0.5), "You don't have any items to drop!");
       return;
    }
-   
+
    gt->c2sDropItem();
 }
 
@@ -939,50 +942,44 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       if(keyCode == KEY_ENTER)
          issueChat();
-      else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-      {     // (braces required)
-         if(mChatCursorPos > 0)
-         {
-            mChatCursorPos--;
-            for(U32 i = mChatCursorPos; mChatBuffer[i]; i++)
-               mChatBuffer[i] = mChatBuffer[i+1];
-         }
-      }
+      else if(keyCode == KEY_BACKSPACE)
+         mChatLine.backspace();
+      else if(keyCode == KEY_DELETE)
+         mChatLine.delete();
       else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
          cancelChat();
       else if(keyCode == KEY_TAB)      // Auto complete any commands
       {
-         if(mChatBuffer[0] == '/' || mCurrentChatType == CmdChat)     // It's a command!
+         if(isCmdChat())     // It's a command!
          {
             S32 found = -1;
-            S32 start = mCurrentChatType ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
+            S32 start = mCurrentChatType != CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
 
-            size_t len = strlen(mChatBuffer);
+            size_t len = mChatLine.length();
             for(S32 i = 0; i < mChatCmds.size(); i++)
-               if( mChatCmds[i].substr(start, len) == string(mChatBuffer) )
+               if( mChatCmds[i].substr(start, len) == mChatLine )
                {
                   if(found != -1)   // We've already found another command that matches this one, so that means it's not yet unique enough to autocomplete.
                      return;
                   found = i;
                }
 
-            if(found == -1)      // Found no match
+            if(found == -1)         // Found no match... no expansion possible
                return;
 
-            U32 clen = (U32) mChatCmds[found].copy(mChatBuffer, mChatCmds[found].length(), start);      // Complete command
-            mChatBuffer[clen] = ' ';        // append trailing space for ready entry of next param
-            mChatBuffer[clen + 1] = '\0';   // terminate the string
-            mChatCursorPos = clen + 1;
+            mChatLine.clear();
+//            if(mCurrentChatType != CmdChat)
+//               mChatLine.addChar('/');                         // Add leading "/" if we're not in a command chat
+            mChatLine.getString().append(mChatCmds[found]);    // Add the command
+            mChatLine.addChar(' ');                            // Add a space
          }
       }
       else if(ascii)     // Append any other keys to the chat message
       {
-         // Protect against crashes while game is initializing
+         // Protect against crashes while game is initializing (because we look at the ship for the player's name)
          if(gClientGame && gClientGame->getConnectionToServer())
          {
-            for(U32 i = sizeof(mChatBuffer) - 2; i > mChatCursorPos; i--)
-               mChatBuffer[i] = mChatBuffer[i-1];
-
+            mChatLine.addChar(ascii);
             S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
             Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
@@ -993,11 +990,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 nameWidth = max(nameSize, promptSize);
             // Above block repeated above
 
-            if(mChatCursorPos < sizeof(mChatBuffer) - 2 && nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mChatBuffer, ascii) < canvasWidth - 2 * horizMargin - 3)
-            {
-               mChatBuffer[mChatCursorPos] = ascii;
-               mChatCursorPos++;
-            }
+            if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mChatLine.c_str(), ascii) < canvasWidth - 2 * horizMargin - 3)
+               mChatLine.addChar(ascii);
          }
       }
    }     // End if in ChatMode
@@ -1132,18 +1126,18 @@ Move *GameUserInterface::getCurrentMove()
 // User has finished entering a chat message and pressed <enter>
 void GameUserInterface::issueChat()
 {
-   if(mChatBuffer[0])
+   if(!mChatLine.isEmpty())
    {
       // Check if chat buffer holds a message or a command
-      if(mChatBuffer[0] != '/' && mCurrentChatType != CmdChat)     // It's a normal chat message
+      if(mChatLine.at(0) != '/' && mCurrentChatType != CmdChat)     // It's a normal chat message
       {
          GameType *gt = gClientGame->getGameType();
          if(gt)
-            gt->c2sSendChat(mCurrentChatType == GlobalChat, mChatBuffer);   // Broadcast message
+            gt->c2sSendChat(mCurrentChatType == GlobalChat, mChatLine.c_str());   // Broadcast message
       }
       else                          // It's a command
       {
-         Vector<string> words = parseString(mChatBuffer);
+         Vector<string> words = parseString(mChatLine.c_str());
          processCommand(words);
       }
    }
@@ -1151,18 +1145,18 @@ void GameUserInterface::issueChat()
 }
 
 
-Vector<string> GameUserInterface::parseString(char buffer[])
+Vector<string> GameUserInterface::parseString(char *buffer)
 {
    // Parse the string
    string word = "";
    Vector<string> words;
 
-   S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;  // Start at 1 to omit the leading /
+   S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;              // Start at 1 to omit the leading '/'
 
-   for(size_t i = startIndex; i < strlen(mChatBuffer); i++)
+   for(size_t i = startIndex; i < strlen(buffer); i++)
    {
-      if(mChatBuffer[i] != ' ')
-         word += words.size() == 0 ? tolower(mChatBuffer[i]) : mChatBuffer[i];      // Make first word all lower case for case insensitivity
+      if(buffer[i] != ' ')
+         word += words.size() == 0 ? tolower(buffer[i]) : buffer[i];    // Make first word all lower case for case insensitivity
       else if(word != "")
       {
          words.push_back(word);
@@ -1396,8 +1390,7 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
 
 void GameUserInterface::cancelChat()
 {
-   memset(mChatBuffer, 0, sizeof(mChatBuffer));
-   mChatCursorPos = 0;
+   mChatLine.clear();
    setPlayMode();
 }
 

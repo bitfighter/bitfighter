@@ -78,13 +78,17 @@ private:
 
    Timer mDisplayMessageTimer;
 
-   enum ChatType {            // Types of in-game chat messages
-      GlobalChat,
-      TeamChat,
-      CmdChat,
+   enum ChatType {            // Types of in-game chat messages:
+      GlobalChat,             // Goes to everyone in game
+      TeamChat,               // Goes to teammates only
+      CmdChat,                // Entering a command
    };
+
+   bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
+
    ChatType mCurrentChatType; // Current in-game chat mode (global or local)
-   char mChatBuffer[128];     // Message being composed
+   LineEditor mChatLine(128); // Message being composed
+
    U32 mChatCursorPos;        // Position of composition cursor
 
    bool mInScoreboardMode;
@@ -199,6 +203,7 @@ public:
       QuickChatMode,          // In quick-chat menu
       LoadoutMode,            // In loadout menu
    };
+
    Mode mCurrentMode;              // Current game mode
    void setPlayMode();             // Set mode to PlayMode
 

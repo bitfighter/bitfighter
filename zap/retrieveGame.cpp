@@ -283,7 +283,7 @@ public:
                renderObjectiveArrow(mFlags[i], getTeamColor(-1));
          }
          else
-         { 
+         {
             Ship *mount = mFlags[i]->getMount();
             if(mount && mount != u)
                renderObjectiveArrow(mount, getTeamColor(mount->getTeam()));
@@ -348,6 +348,8 @@ public:
          }
       }
    }
+
+   bool isTeamFlagGame() { return true; }
 
    GameTypes getGameType() { return RetrieveGame; }
    const char *getGameTypeString() { return "Retrieve"; }

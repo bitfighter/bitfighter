@@ -17,6 +17,8 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
+// Retrieve should allow non-team flags
+// Sound when ship is struck with bullet
 
 
 // TODO:
@@ -30,13 +32,16 @@ XXX need to document timers, main function XXX
 <li>Added energy item</li>
 <li>Started trasnsition of Join menu into Game Lobby</li>
 
-<h4></h4>
+<h4>Smaller changes</h4>
 <li>Added Restart Level to game options menu if you have level change permissions</li>
 <li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
 <li>Added asteroids to help screen, enhanced instruction colors</li>
 <li>Fixed several in-game crashing issues</li>
 <li>Minor efficiency improvements on rendering routines</li>
-<li>Can only pickup one flag at a time in zone control games (making multi-flag ZC games feasible)</li>
+
+<h4>SFX</h4>
+<li>New sound when ship hit by projectile</li>
+<li>New sound when using GoFast</li>
 
 <h4>Bots</h4>
 <li>Added enhanced timer class to Lua scripting</li>
@@ -46,12 +51,14 @@ XXX need to document timers, main function XXX
 <li>Many small improvements to editor</li>
 <li>Fixed editor crashing issue caused by double-delete of item</li>
 <li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
-<li>Undo/redo more efficient -- will perform better with large levels and deep undo states</li>
-<li>Added autosave -- will keep a current copy of the l
+<li>Undo/redo more efficient -- will perform better with large levels and deep undo states (and will no longer crash!)</li>
+<li>Added autosave -- will keep a current copy of the level</li>
+<li>Ctrl-left click now starts a wall</li>
+<li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
-<li>Ctrl-left click now starts a wall</li>
+
 
 */
 

@@ -80,6 +80,7 @@ static SFXProfile sfxProfilesModern[] = {
  {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },
  {  "ship_heal.wav",       false, 1.0,   false, 300, 1000 },
  {  "ship_turbo.wav",      false, 0.15f, true,  150, 500 },
+ {  "ship_hit.wav",        false, 1.0,   false, 150, 600 },    // Ship is hit by a projectile
 
  {  "bounce_wall.wav",     false, 0.7f,  false, 150, 600 },
  {  "bounce_obj.wav",      false, 0.7f,  false, 150, 600 },
@@ -99,7 +100,7 @@ static SFXProfile sfxProfilesModern[] = {
  // Teleport noises
  {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
- {  "gofast.wav",          false, 1.0,   false, 200, 500 }, 
+ {  "gofast.wav",          false, 1.0,   false, 200, 500 },
 
  // Forcefield noises
  {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
@@ -151,6 +152,7 @@ static SFXProfile sfxProfilesClassic[] = {
  {  "ship_explode.wav",    false, 1.0,   false, 300, 1000 },
  {  "ship_heal.wav",       false, 1.0,   false, 300, 1000 },
  {  "ship_turbo.wav",      false, 0.15f, true,  150, 500 },
+ {  "ship_hit.wav",        false, 1.0,   false, 150, 600 },    // Ship is hit by a projectile
 
  {  "bounce_wall.wav",     false, 0.7f,  false, 150, 600 },
  {  "bounce_obj.wav",      false, 0.7f,  false, 150, 600 },
@@ -484,7 +486,7 @@ void SFXObject::init()
 #if defined(TNL_OS_MAC_OSX) || defined(TNL_OS_LINUX)
    gDevice = alcOpenDevice((ALCchar *) "DirectSound3D");    // Required for the different version of alut we're using on OS X & Linux
 #else
-   gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows 
+   gDevice = alcOpenDevice((ALubyte *) "DirectSound3D");    // Original, required for the version of alut we're using on Windows
 #endif
 
    if(!gDevice)
@@ -541,8 +543,8 @@ void SFXObject::init()
 
       char fileBuffer[1024];
       dSprintf(fileBuffer, sizeof(fileBuffer), "sfx/%s", gSFXProfiles[i].fileName);    // Sounds are in sfx folder
-#if defined(TNL_OS_MAC_OSX) 
-      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);		// OS X version has no loop param
+#if defined(TNL_OS_MAC_OSX)
+      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);      // OS X version has no loop param
 #else
       alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq, &loop);
 #endif
@@ -780,7 +782,7 @@ void SFXObject::shutdown()
 
 #ifdef TNL_OS_WIN32
 
-#include "../win_include_do_not_distribute/dsound.h"	 // See readme in win_include_do_not_distribute folder
+#include "../win_include_do_not_distribute/dsound.h"   // See readme in win_include_do_not_distribute folder
 #include <stdio.h>
 
 namespace Zap

@@ -273,18 +273,24 @@ void Projectile::damageObject(DamageInfo *info)
 }
 
 
-void Projectile::explode(GameObject *hitObject, Point thePos)
+void Projectile::explode(GameObject *hitObject, Point pos)
 {
    // Do some particle spew...
    if(isGhost())
    {
-      FXManager::emitExplosion(thePos, 0.3, gProjInfo[mType].sparkColors, NumSparkColors);
+      FXManager::emitExplosion(pos, 0.3, gProjInfo[mType].sparkColors, NumSparkColors);
 
       Ship *s = dynamic_cast<Ship *>(hitObject);
-      if(s && s->isModuleActive(ModuleShield))
-         SFXObject::play(SFXBounceShield, thePos, velocity);
-      else
-         SFXObject::play(gProjInfo[mType].impactSound, thePos, velocity);
+
+      SFXProfiles sound;
+      if(s && s->isModuleActive(ModuleShield))     // We hit a ship with shields up
+         sound = SFXBounceShield;
+      else if(s)                                   // We hit a ship with shields down
+         sound = SFXShipHit;
+      else                                         // We hit something else
+         sound = gProjInfo[mType].impactSound;
+
+      SFXObject::play(sound, pos, velocity);       // Play the sound
    }
 }
 

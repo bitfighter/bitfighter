@@ -70,6 +70,7 @@ enum SFXProfiles
    SFXShipExplode,
    SFXShipHeal,
    SFXShipBoost,
+   SFXShipHit,    // Ship is hit by a projectile
 
    SFXBounceWall,
    SFXBounceObject,

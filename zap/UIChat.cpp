@@ -46,7 +46,7 @@ U32 AbstractChat::mColorPtr = 0;
 U32 AbstractChat::mMessageCount = 0;
 
 // By declaring these here, we avoid link errors
-ChatMessage AbstractChat::mMessages[MessagesToRetain];
+ChatMessage AbstractChat::mMessages[MESSAGES_TO_RETAIN];
 std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nicknames to colors
 
 
@@ -74,49 +74,42 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate)
       color = mFromColors[from];
    }
 
-   mMessages[mMessageCount % MessagesToRetain] = ChatMessage(from, message, color, isPrivate);
+   mMessages[mMessageCount % MESSAGES_TO_RETAIN] = ChatMessage(from, message, color, isPrivate);
    mMessageCount++;
 
    if(isFromUs && isPrivate)
       deliverPrivateMessage(from.c_str(), message.c_str());
 }
 
- 
+
 void AbstractChat::addCharToMessage(char ascii)
 {
    // Limit chat messages to the size that can be displayed on receiver's screen
    S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), arrow) + AFTER_ARROW_SPACE +
                    UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
 
-   for(U32 i = sizeof(mChatBuffer) - 2; i > mChatCursorPos; i--)  // If inserting...
-         mChatBuffer[i] = mChatBuffer[i-1];                          // ...move chars forward
-
-      if((mChatCursorPos < sizeof(mChatBuffer) - 2)  && xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mChatBuffer, ascii) < lineWidth)
-      {
-         mChatBuffer[mChatCursorPos] = ascii;
-         mChatCursorPos++;
-      }
+   // Only add char if there's room
+   if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mChatLine.c_str(), ascii) < lineWidth)
+      mChatLine.addChar(ascii);
 }
 
 
-// keyCode will have either backspace or delete in it.  For the moment we don't care which.  Later we might.
+// keyCode will have either backspace or delete in it.
 void AbstractChat::handleBackspace(KeyCode keyCode)
 {
-   if(mChatCursorPos > 0)
-   {
-      mChatCursorPos--;
-      for(U32 i = mChatCursorPos; mChatBuffer[i]; i++)
-         mChatBuffer[i] = mChatBuffer[i+1];
-   }
+   if(keyCode == KEY_BACKSPACE)
+      mChatLine.backspace();
+   else       // KEY_DELETE
+      mChatLine.delete();
 }
 
 
 // We're using a rolling "wrap-around" array, and this figures out which array index we need to retrieve a message.
 // First message has index == 0, second has index == 1, etc.
-ChatMessage AbstractChat::getMessage(U32 index) 
-{ 
-   U32 first = (mMessageCount < MessagesToRetain) ? 0 : mMessageCount % MessagesToRetain;
-   return mMessages[(first + index) % MessagesToRetain]; 
+ChatMessage AbstractChat::getMessage(U32 index)
+{
+   U32 first = (mMessageCount < MESSAGES_TO_RETAIN) ? 0 : mMessageCount % MESSAGES_TO_RETAIN;
+   return mMessages[(first + index) % MESSAGES_TO_RETAIN];
 }
 
 
@@ -162,7 +155,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
       if(i >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
          return;
 
-      ChatMessage msg = getMessage(i + firstMsg); 
+      ChatMessage msg = getMessage(i + firstMsg);
       glColor(msg.color);
 
       S32 xpos = UserInterface::horizMargin / 2;
@@ -176,7 +169,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
 
       UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
 
-      ypos += CHAT_FONT_SIZE + CHAT_FONT_MARGIN;    
+      ypos += CHAT_FONT_SIZE + CHAT_FONT_MARGIN;
    }
 }
 
@@ -192,17 +185,17 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(1,1,1);
-   UserInterface::drawStringf(xStartPos, ypos, CHAT_FONT_SIZE, "%s%s", mChatBuffer, LineEditor::cursorBlink ? "_" : " ");
+   UserInterface::drawStringf(xStartPos, ypos, CHAT_FONT_SIZE, "%s%s", mChatLine.c_str(), LineEditor::cursorBlink ? "_" : " ");
 }
 
 
 void AbstractChat::deliverPrivateMessage(const char *sender, const char *message)
 {
-   // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message. 
+   // If player not in UIChat or UIQueryServers, then display message in-game if possible.  2 line message.
    if(UserInterface::current->getMenuID() != gChatInterface.getMenuID() &&
-      UserInterface::current->getMenuID() != gQueryServersUserInterface.getMenuID() )    
+      UserInterface::current->getMenuID() != gQueryServersUserInterface.getMenuID() )
    {
-      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, 
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
       gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", arrow, message);
    }
@@ -212,15 +205,15 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
 // Send chat message
 void AbstractChat::issueChat()
 {
-   if(mChatBuffer[0])
+   if(mChatLine.length() > 0)
    {
       // Send message
       MasterServerConnection *conn = gClientGame->getConnectionToMaster();
       if(conn)
-         conn->c2mSendChat(mChatBuffer);
+         conn->c2mSendChat(mChatLine.c_str());
 
       // And display it locally
-      newMessage(gNameEntryUserInterface.getText(), mChatBuffer, false);
+      newMessage(gNameEntryUserInterface.getText(), mChatLine.c_str(), false);
    }
    clearChat();     // Clear message
 
@@ -231,8 +224,7 @@ void AbstractChat::issueChat()
 // Clear current message
 void AbstractChat::clearChat()
 {
-   memset(mChatBuffer, 0, sizeof(mChatBuffer));
-   mChatCursorPos = 0;
+   mChatLine.clear();
 }
 
 
@@ -291,7 +283,7 @@ void ChatUserInterface::render()
    drawCenteredString(vertMargin, MENU_TITLE_SIZE, menuTitle);
 
    string subtitle = "Not currently connected to any game server";
-   
+
    if(gClientGame && gClientGame->getConnectionToServer())
    {
       string name = gClientGame->getConnectionToServer()->getServerName();

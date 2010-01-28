@@ -58,8 +58,41 @@ public:
    bool isPrivate;   // Holds public/private status of message
 };
 
+
 ///////////////////////////////////////
-//////////////////////////////////////
+///////////////////////////////////////
+//
+// Class to manage all sorts of single-line editing tasks
+//
+class LineEditor
+{
+private:
+   string mLine;
+   U32 mMaxLen;
+
+public:
+   LineEditor(U32 maxLength, string line = "")     // Constructor
+   {
+      mMaxLen = maxLength;
+      mLine = line;
+   }
+
+   U32 length() { return mLine.legnth(); }
+   void addChar(char c) { if(mLine.push_back(c); }
+   void backspace() { mLine.erase(mLine.size()); }                // Backspace key hit
+   void delete() { backspace(); }                                 // Delete key hit
+   void clear() { mLine.clear(); }
+   char at(U32 pos) { return mLine.at(pos); }
+   bool isEmpty() { return mLine.empty(); }
+
+   string getString() { return mLine; }
+
+   const char *c_str() { return mLine.c_str(); }                  // Return the string
+};
+
+
+///////////////////////////////////////
+///////////////////////////////////////
 
 // For sorting our color-nick map, which we'll never do, so this is essentially a dummy
 struct strCmp {
@@ -75,22 +108,21 @@ private:
    static std::map<string, Color, strCmp> mFromColors;       // Map nicknames to colors
    static U32 mColorPtr;
    Color getNextColor();                                     // Get next available color for a new nick
-   static const S32 MessagesToRetain = 200;                  // Plenty for now
+   static const S32 MESSAGES_TO_RETAIN = 80;                 // Plenty for now... far too many, really
 
    static U32 mMessageCount;
-   static const S32 CHAT_MESSAGE_LEN = 200;
 
 protected:
    // Message data
-   static ChatMessage mMessages[MessagesToRetain];
-   char mChatBuffer[CHAT_MESSAGE_LEN];     // Outgoing chat msg
+   static ChatMessage mMessages[MESSAGES_TO_RETAIN];
+   LineEditor mChatLine(200);
 
    ChatMessage getMessage(U32 index);
    U32 mChatCursorPos;                     // Where is cursor?
 
    U32 getMessageCount() { return mMessageCount; }
 
-   bool composingMessage() { return strlen(mChatBuffer); }
+   bool composingMessage() { return mLine.size() > 0; }
 
 public:
    AbstractChat();      // Constructor
@@ -135,7 +167,7 @@ public:
    // UI related
    void render();
    void onKeyDown(KeyCode keyCode, char ascii);
-   
+
    void onActivate();
    void onActivateLobbyMode();
 
