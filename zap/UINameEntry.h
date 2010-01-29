@@ -67,7 +67,7 @@ public:
    virtual void onAccept(const char *text) = 0;
    virtual void onEscape() = 0;
    const char *getText() { return lineEditor.c_str(); }
-   void setText(const char *text);
+   void setString(const char *text);
    virtual bool isValid(char ascii);      // Ensure only valid characters are entered
 };
 

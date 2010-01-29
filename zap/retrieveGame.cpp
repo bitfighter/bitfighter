@@ -194,11 +194,12 @@ public:
                mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagCapture, s->getTeam(), capAllString, e);
          }
 
-         // Return all the flags to their starting locations
+         // Return all the flags to their starting locations if need be
          for(S32 i = 0; i < mFlags.size(); i++)
          {
             mFlags[i]->setZone(NULL);
-            mFlags[i]->sendHome();
+            if(!mFlags[i]->isAtHome())
+               mFlags[i]->sendHome();
          }
       }
    }

@@ -1258,11 +1258,11 @@ void processStartupParams()
 
    // These options can come either from cmd line or INI file
    if(gCmdLineSettings.name != "")
-      gNameEntryUserInterface.setText(gCmdLineSettings.name.c_str());
+      gNameEntryUserInterface.setString(gCmdLineSettings.name.c_str());
    else if(gIniSettings.name != "")
-      gNameEntryUserInterface.setText(gIniSettings.name.c_str());
+      gNameEntryUserInterface.setString(gIniSettings.name.c_str());
    else
-      gNameEntryUserInterface.setText(gIniSettings.lastName.c_str());
+      gNameEntryUserInterface.setString(gIniSettings.lastName.c_str());
 
 
    if(gCmdLineSettings.password != "")

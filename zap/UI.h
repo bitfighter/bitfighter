@@ -169,14 +169,14 @@ public:
    // Center text between two points
    void drawStringf_2pt(Point p1, Point p2, F32 size, F32 vert_offset, const char *format, ...);
 
-   // Draw text centered on screen (normal and formatted versions)
-   static void drawCenteredString(S32 y, U32 size, const char *str);
-   static void drawCenteredStringf(S32 y, U32 size, const char *format, ...);
+   // Draw text centered on screen (normal and formatted versions)  --> now return starting location
+   static S32 drawCenteredString(S32 y, U32 size, const char *str);
+   static S32 drawCenteredStringf(S32 y, U32 size, const char *format, ...);
 
-   // Draw text centered in a left or right column (normal and formatted versions)
-   static void drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *str);
-   static void drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...);
-   static void drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, const char *left, const char *right, ...);
+   // Draw text centered in a left or right column (normal and formatted versions)  --> now return starting location
+   static S32 drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *str);
+   static S32 drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...);
+   static S32 drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, const char *left, const char *right, ...);
 
    // Get info about where text will be draw
    static S32 get2ColStartingPos(bool leftCol);

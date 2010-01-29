@@ -33,11 +33,14 @@
 #include "config.h"
 
 #include "md5wrapper.h"
-#include "../glut/glutInclude.h"
+#include "glutInclude.h"
+
+#include <string>
 
 namespace Zap
 {
 
+using namespace std;
 
 
 void TextEntryUserInterface::onActivate()
@@ -64,11 +67,10 @@ void TextEntryUserInterface::render()
    glColor3f(1,1,1);
 
    // Create a display version of the string that is all "*"s if string is secret
-   string dispString = secret ? string(lineEditor.length(), "*") : lineEditor.string();
+   string dispString = secret ? string(lineEditor.length(), '*') : lineEditor.getString();
 
-   drawCenteredString(y, fontSizeBig, dispString.c_str());
-   if(LineEditor::cursorBlink)
-      drawCursor(lineEditor.getCurosorPos(fontSizeBig));
+   S32 x = drawCenteredString(y, fontSizeBig, dispString.c_str());
+   lineEditor.drawCursor(x, y, fontSizeBig);
 }
 
 
@@ -83,7 +85,7 @@ void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    switch (keyCode)
    {
       case KEY_ENTER:
-         onAccept(lineEditor.c-str());
+         onAccept(lineEditor.c_str());
          break;
       case KEY_BACKSPACE:
          lineEditor.backspacePressed();
@@ -96,14 +98,14 @@ void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          break;
       default:
          if(isValid(ascii))      // Allows us to override isValid and create character filters
-            lineEditor.addChar(ascii)
+            lineEditor.addChar(ascii);
    }
 }
 
 
-void TextEntryUserInterface::setText(const char *text)
+void TextEntryUserInterface::setString(const char *text)
 {
-   lineEditor.setText(text);
+   lineEditor.setString(text);
 }
 
 
@@ -143,7 +145,7 @@ NameEntryUserInterface::NameEntryUserInterface()      // Constructor
 void NameEntryUserInterface::onAccept(const char *name)
 {
    if(!strcmp(name, ""))     // Non-blank entries required!
-      setText(gIniSettings.defaultName.c_str());
+      setString(gIniSettings.defaultName.c_str());
 
    gMainMenuUserInterface.activate();
    gReadyToConnectToMaster = true;

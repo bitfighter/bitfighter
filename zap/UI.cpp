@@ -395,17 +395,18 @@ void UserInterface::drawStringc(F32 x, F32 y, U32 size, const char *string)
 }
 
 
-void UserInterface::drawCenteredString(S32 y, U32 size, const char *string)
+S32 UserInterface::drawCenteredString(S32 y, U32 size, const char *string)
 {
    S32 x = (S32)((S32) canvasWidth - getStringWidth(size, string)) / 2;
    drawString(x, y, size, string);
+   return x;
 }
 
 
-void UserInterface::drawCenteredStringf(S32 y, U32 size, const char *format, ...)
+S32 UserInterface::drawCenteredStringf(S32 y, U32 size, const char *format, ...)
 {
    makeBuffer;
-   drawCenteredString(y, size, buffer);
+   return drawCenteredString(y, size, buffer);
 }
 
 
@@ -440,17 +441,18 @@ S32 UserInterface::getCenteredString2ColStartingPosf(U32 size, bool leftCol, con
 }
 
 
-void UserInterface::drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *string)
+S32 UserInterface::drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *string)
 {
    S32 x = getCenteredString2ColStartingPos(size, leftCol, string);
    drawString(x, y, size, string);
+   return x;
 }
 
 
-void UserInterface::drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...)
+S32 UserInterface::drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const char *format, ...)
 {
    makeBuffer;
-   drawCenteredString2Col(y, size, leftCol, buffer);
+   return drawCenteredString2Col(y, size, leftCol, buffer);
 }
 
 
@@ -461,7 +463,7 @@ S32 UserInterface::get2ColStartingPos(bool leftCol)      // Must be S32 to avoid
 
 
 // Draws a string centered in the left or right half of the screen, with different parts colored differently
-void UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, const char *left, const char *right, ...)
+S32 UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, const char *left, const char *right, ...)
 {
    va_list args;
    va_start(args, right);
@@ -477,6 +479,8 @@ void UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, c
    drawString(x, y, size, left);
    glColor3f(0,1,1);
    drawString(x + offset, y, size, buffer);
+
+   return x;
 }
 
 
@@ -504,7 +508,7 @@ S32 UserInterface::getStringWidth(U32 size, const char *string, U32 len)
       width += glutStrokeWidth(GLUT_STROKE_ROMAN, *string);
       string++;
    }
-   return U32((width * size) / 120.0f);
+   return S32((width * size) / 120.0f);
 }
 
 

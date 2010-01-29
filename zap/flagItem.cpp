@@ -99,7 +99,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
 U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
-      stream->writeInt(mTeam + 1, 4);
+      stream->writeInt(mTeam + 2, 4);
    return Parent::packUpdate(connection, updateMask, stream);
 }
 
@@ -107,7 +107,7 @@ U32 FlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 void FlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())
-      mTeam = stream->readInt(4) - 1;
+      mTeam = stream->readInt(4) - 2;
    Parent::unpackUpdate(connection, stream);
 }
 
@@ -181,7 +181,7 @@ void FlagItem::renderItem(Point pos)
    Color c;
    GameType *gt = getGame()->getGameType();
 
-   c = gt->getTeamColor(getTeam());
+   c = gt->getTeamColor(mTeam);
 
    renderFlag(pos + offset, c);
 }
