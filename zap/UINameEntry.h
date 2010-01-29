@@ -35,7 +35,6 @@ namespace Zap
 class TextEntryUserInterface : public UserInterface
 {
 private:
-   char buffer[MAX_SHORT_TEXT_LEN + 1];
    U32 cursorPos;
 
 protected:
@@ -44,6 +43,7 @@ protected:
    const char *instr2;
    bool secret;
    bool resetOnActivate;
+   LineEditor lineEditor;
 
 public:
    TextEntryUserInterface()   // Constructor
@@ -52,11 +52,10 @@ public:
       title = "ENTER TEXT:";
       instr1 = "";
       instr2 = "Enter some text above";
-      buffer[0] = 0;
-      memset(buffer, 0, sizeof(buffer));
       secret = false;
       cursorPos = 0;
       resetOnActivate = true;
+      lineEditor = LineEditor(MAX_SHORT_TEXT_LEN);
    }
 
    void onActivate();
@@ -67,7 +66,7 @@ public:
 
    virtual void onAccept(const char *text) = 0;
    virtual void onEscape() = 0;
-   const char *getText() { return buffer; }
+   const char *getText() { return lineEditor.c_str(); }
    void setText(const char *text);
    virtual bool isValid(char ascii);      // Ensure only valid characters are entered
 };

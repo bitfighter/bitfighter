@@ -43,10 +43,7 @@ namespace Zap
 void TextEntryUserInterface::onActivate()
 {
    if(resetOnActivate)
-   {
-      buffer[0] = 0;
-      cursorPos = 0;
-   }
+      lineEditor.clear();
 }
 
 void TextEntryUserInterface::render()
@@ -65,80 +62,50 @@ void TextEntryUserInterface::render()
    drawCenteredString(canvasHeight - vertMargin - fontSize, fontSize, instr2);
 
    glColor3f(1,1,1);
-   char astbuffer[MAX_SHORT_TEXT_LEN + 1];
-   const char *renderBuffer=buffer;
-   if(secret)
-   {
-      S32 i;
-      for(i = 0; i < MAX_SHORT_TEXT_LEN; i++)
-      {
-         if(!buffer[i])
-            break;
-         astbuffer[i] = '*';
-      }
-      astbuffer[i] = 0;
-      renderBuffer = astbuffer;
-   }
-   drawCenteredString(y, fontSizeBig, renderBuffer);
 
-   U32 width = getStringWidth(fontSizeBig, renderBuffer);
-   S32 x = (canvasWidth - width) / 2;
+   // Create a display version of the string that is all "*"s if string is secret
+   string dispString = secret ? string(lineEditor.length(), "*") : lineEditor.string();
 
+   drawCenteredString(y, fontSizeBig, dispString.c_str());
    if(LineEditor::cursorBlink)
-      drawString(x + getStringWidth(fontSizeBig, renderBuffer, cursorPos), y, fontSizeBig, "_");
+      drawCursor(lineEditor.getCurosorPos(fontSizeBig));
 }
+
 
 void TextEntryUserInterface::idle(U32 timeDelta)
 {
    LineEditor::updateCursorBlink(timeDelta);
 }
 
+
 void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    switch (keyCode)
    {
       case KEY_ENTER:
-         onAccept(buffer);
+         onAccept(lineEditor.c-str());
          break;
       case KEY_BACKSPACE:
+         lineEditor.backspacePressed();
+         break;
       case KEY_DELETE:
-         if(cursorPos > 0)
-         {
-            cursorPos--;
-            for(U32 i = cursorPos; buffer[i]; i++)
-               buffer[i] = buffer[i+1];
-         }
+         lineEditor.deletePressed();
          break;
       case KEY_ESCAPE:
          onEscape();
          break;
       default:
-         if (isValid(ascii))
-         {
-            for(U32 i = MAX_SHORT_TEXT_LEN - 1; i > cursorPos; i--)
-               buffer[i] = buffer[i-1];
-            if(cursorPos < MAX_SHORT_TEXT_LEN - 1)
-            {
-               buffer[cursorPos] = ascii;
-               cursorPos++;
-            }
-         }
+         if(isValid(ascii))      // Allows us to override isValid and create character filters
+            lineEditor.addChar(ascii)
    }
 }
 
 
 void TextEntryUserInterface::setText(const char *text)
 {
-   if(strlen(text) > MAX_SHORT_TEXT_LEN)
-   {
-      strncpy(buffer, text, MAX_SHORT_TEXT_LEN);
-      buffer[MAX_SHORT_TEXT_LEN] = 0;
-   }
-   else
-      strcpy(buffer, text);
-
-   cursorPos = (U32) strlen(text);
+   lineEditor.setText(text);
 }
+
 
 // By default, all chars are valid.  Override to be more restrictive
 bool TextEntryUserInterface::isValid(char ascii)
@@ -148,7 +115,9 @@ bool TextEntryUserInterface::isValid(char ascii)
    return false;
 }
 
-//////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 NameEntryUserInterface gNameEntryUserInterface;
 extern void exitGame();
@@ -183,7 +152,9 @@ void NameEntryUserInterface::onAccept(const char *name)
 
 }
 
-//////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 PasswordEntryUserInterface gPasswordEntryUserInterface;
 
@@ -197,7 +168,9 @@ void PasswordEntryUserInterface::onAccept(const char *text)
    joinGame(connectAddress, false, false);      // Not from master, not local
 }
 
-//////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 ReservedNamePasswordEntryUserInterface gReservedNamePasswordEntryUserInterface;
 
@@ -211,7 +184,9 @@ void ReservedNamePasswordEntryUserInterface::onAccept(const char *text)
    joinGame(connectAddress, false, false);      // Not from master, not local
 }
 
-//////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
@@ -242,7 +217,10 @@ void LevelNameEntryUserInterface::onAccept(const char *text)
    UserInterface::playBoop();
    gEditorUserInterface.activate(false);
 }
-//////
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 AdminPasswordEntryUserInterface gAdminPasswordEntryUserInterface;
 
@@ -286,7 +264,9 @@ void AdminPasswordEntryUserInterface::onAccept(const char *text)
       reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
 }
 
-//////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 LevelChangePasswordEntryUserInterface gLevelChangePasswordEntryUserInterface;
 
@@ -329,7 +309,6 @@ void LevelChangePasswordEntryUserInterface::onAccept(const char *text)
       reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
 }
 
-//////
 
 };
 
