@@ -185,7 +185,8 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(1,1,1);
-   UserInterface::drawStringf(xStartPos, ypos, CHAT_FONT_SIZE, "%s%s", mChatLine.c_str(), LineEditor::cursorBlink ? "_" : " ");
+   UserInterface::drawString(xStartPos, ypos, CHAT_FONT_SIZE, "%s", mChatLine.c_str());
+   mChatLine.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
 }
 
 

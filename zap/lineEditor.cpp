@@ -62,12 +62,12 @@ char LineEditor::at(U32 pos)
 
 
 // Draw our cursor, assuming string is drawn at x,y
-void LineEditor::drawCursor(S32 x, S32 y, S32 fontSizeBig)     
+void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)     
 {
    if(cursorBlink)
    {
-      S32 xpos = UserInterface::getStringWidth(fontSizeBig, mLine.c_str());
-      UserInterface::drawString(x + xpos, y, fontSizeBig, "_");
+      S32 xpos = UserInterface::getStringWidth(fontSize, mLine.c_str());
+      UserInterface::drawString(x + xpos, y, fontSize, "_");
    }
 }
 

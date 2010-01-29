@@ -113,10 +113,10 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
    vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
    
    // If last char is a "\", chop it off, otherwise append newline
-   U32 last = strlen(buffer) - 1;  // Should never be >= our buffer length, so appending newline should be ok
+   U32 len = strlen(buffer);  // Should never be >= our buffer length, so appending newline should be ok
 
-   if(buffer[last] == '\\')
-      buffer[last] = '\0';    // Don't use NULL here, will cause type problems
+   if(len > 0 && buffer[len - 1] == '\\')
+      buffer[len - 1] = '\0';    // Don't use NULL here, will cause type problems
    else
       strcat(buffer, "\n");
 

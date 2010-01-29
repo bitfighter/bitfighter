@@ -64,7 +64,7 @@ public:
    void setString(string str) { mLine = str; }               
    const char *c_str() { return mLine.c_str(); }                  // Return the string in c_str format
 
-   void drawCursor(S32 x, S32 y, S32 fontSizeBig);                // Draw our cursor, assuming string is drawn at x,y
+   void drawCursor(S32 x, S32 y, S32 fontSize);                   // Draw our cursor, assuming string is drawn at x,y
 };
 
 
