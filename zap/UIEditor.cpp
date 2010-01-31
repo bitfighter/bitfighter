@@ -3486,36 +3486,40 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
       // Write out our game parameters --> first one will be the gameType, along with all required parameters
       for(S32 i = 0; i < gGameParamUserInterface.gameParams.size(); i++)
-      {
          if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
             s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
-      }
 
-      for(S32 i = 0; i < mTeams.size(); i++)
+      for(S32 i = 0; i < mTeams.size(); i++) 
          s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
-      // Write out all maze items
-      for(S32 i = 0; i < mItems.size(); i++)
-      {
-         WorldItem &p = mItems[i];
-         s_fprintf(f, "%s", itemDef[mItems[i].index].name);
+      // Write out all maze items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
+      for(S32 j = 0; j < 2; j++)
+         for(S32 i = 0; i < mItems.size(); i++)
+         {
+            WorldItem &p = mItems[i];
 
-         if(mItems[i].hasWidth())
-            s_fprintf(f, " %g", mItems[i].width);
-         if(itemDef[mItems[i].index].hasTeam)
-            s_fprintf(f, " %d", mItems[i].team);
-         for(S32 j = 0; j < p.verts.size(); j++)
-            s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
-         if(itemDef[mItems[i].index].hasText)
-            s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
-         if(itemDef[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
-            s_fprintf(f, " %d", mItems[i].repopDelay);
-         if(mItems[i].index == ItemSpeedZone)
-            s_fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
+            // Make sure we are writing wall items on first pass, non-wall items next
+            if((p.index == ItemBarrierMaker) != (j == 0))
+               continue;
 
-         s_fprintf(f, "\n");
-      }
+            s_fprintf(f, "%s", itemDef[mItems[i].index].name);
+
+            if(mItems[i].hasWidth())
+               s_fprintf(f, " %g", mItems[i].width);
+            if(itemDef[mItems[i].index].hasTeam)
+               s_fprintf(f, " %d", mItems[i].team);
+            for(S32 j = 0; j < p.verts.size(); j++)
+               s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
+            if(itemDef[mItems[i].index].hasText)
+               s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
+            if(itemDef[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
+               s_fprintf(f, " %d", mItems[i].repopDelay);
+            if(mItems[i].index == ItemSpeedZone)
+               s_fprintf(f, " %d %s", mItems[i].speed, mItems[i].boolattr ? "SnapEnabled" : "");
+
+            s_fprintf(f, "\n");
+         }
       fclose(f);
    }
    catch (SaveException &e)
