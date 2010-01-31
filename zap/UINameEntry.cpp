@@ -103,9 +103,9 @@ void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 }
 
 
-void TextEntryUserInterface::setString(const char *text)
+void TextEntryUserInterface::setString(string str)
 {
-   lineEditor.setString(text);
+   lineEditor.setString(str);
 }
 
 
@@ -150,8 +150,8 @@ void NameEntryUserInterface::onAccept(const char *name)
    gMainMenuUserInterface.activate();
    gReadyToConnectToMaster = true;
    gIniSettings.lastName = name;
+   
    saveSettingsToINI();             // Get that baby into the INI file
-
 }
 
 
@@ -213,11 +213,16 @@ bool LevelNameEntryUserInterface::isValid(char ascii)
    else return false;
 }
 
-void LevelNameEntryUserInterface::onAccept(const char *text)
+void LevelNameEntryUserInterface::onAccept(const char *name)
 {
-   gEditorUserInterface.setLevelFileName(text);
+   gEditorUserInterface.setLevelFileName(name);
    UserInterface::playBoop();
    gEditorUserInterface.activate(false);
+   
+   // Get that baby into the INI file
+   gIniSettings.lastEditorName = name;
+   saveSettingsToINI();             
+
 }
 
 

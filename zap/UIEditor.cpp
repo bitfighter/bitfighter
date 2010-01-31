@@ -3609,6 +3609,7 @@ void EditorMenuUserInterface::onActivate()
    setupMenus();
 }
 
+
 extern IniSettings gIniSettings;
 
 void EditorMenuUserInterface::setupMenus()

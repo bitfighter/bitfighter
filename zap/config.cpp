@@ -576,6 +576,7 @@ void loadSettingsFromINI()
    gIniSettings.name = gINI.GetValue("Settings", "Nickname", gIniSettings.name);
    gIniSettings.defaultName = gINI.GetValue("Settings", "DefaultName", gIniSettings.defaultName);
    gIniSettings.lastName = gINI.GetValue("Settings", "LastName", gIniSettings.lastName);
+   gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
 
 
    gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
@@ -831,9 +832,10 @@ void saveSettingsToINI()
       gINI.KeyComment("Settings", " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
       gINI.KeyComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
       gINI.KeyComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       gINI.KeyComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
       gINI.KeyComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
+      gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
+      gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
       gINI.KeyComment("Settings", "----------------");
    }
    gINI.SetValue("Settings",  "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"), true);
@@ -851,6 +853,8 @@ void saveSettingsToINI()
    gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress, true);
    gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName, true);
    gINI.SetValue("Settings", "LastName", gIniSettings.lastName, true);
+   gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
+
    gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
 
    gINI.AddKeyName("Host");

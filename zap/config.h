@@ -62,6 +62,7 @@ struct CmdLineSettings
    string name;
    string defaultName;     // Name used if user hits <enter> on name entry screen
    string lastName;        // Name the user previously entered
+   string lastEditorName;  // Name of most recently edited level
 
    string hostname;
    string hostaddr;        // Address to listen on when we're host (e.g. IP:localhost:1234 or IP:Any:6666 or whatever)
@@ -94,6 +95,7 @@ struct CmdLineSettings
       masterAddress = "";
       defaultName = "";
       lastName = "";
+      lastEditorName = "";
       hostaddr = "";
       loss = 0;
       lag = 0;
@@ -149,6 +151,7 @@ struct IniSettings      // With defaults specified
    string name;                     // Player name (none by default)
    string defaultName;              // Name used if user hits <enter> on name entry screen
    string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
+   string lastEditorName;           // Name of file most recently edited by the user
 
    string hostname;                 // Server name when in host mode
    string hostaddr;                 // User-specified address/port of server
@@ -212,6 +215,7 @@ struct IniSettings      // With defaults specified
       name = "";                         // Player name (none by default)
       defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
       lastName = "ChumpChange";          // Name the user entered last time they ran the game
+      lastEditorName = "";               // No default editor level name
       hostname = "Bitfighter host";      // Default host name
       hostdescr = "";
       maxplayers = 128;                  // That's a lot of players!

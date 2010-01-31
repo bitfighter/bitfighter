@@ -54,6 +54,7 @@ XXX need to document timers, main function XXX
 <li>Added autosave -- will keep a current copy of the level</li>
 <li>Ctrl-left click now starts a wall</li>
 <li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
+<li>Editor remembers name of last edited file</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -1258,12 +1259,16 @@ void processStartupParams()
 
    // These options can come either from cmd line or INI file
    if(gCmdLineSettings.name != "")
-      gNameEntryUserInterface.setString(gCmdLineSettings.name.c_str());
+      gNameEntryUserInterface.setString(gCmdLineSettings.name);
    else if(gIniSettings.name != "")
-      gNameEntryUserInterface.setString(gIniSettings.name.c_str());
+      gNameEntryUserInterface.setString(gIniSettings.name);
    else
-      gNameEntryUserInterface.setString(gIniSettings.lastName.c_str());
+      gNameEntryUserInterface.setString(gIniSettings.lastName);
 
+   // Put any saved filename into the editor file entry thingy
+   gLevelNameEntryUserInterface.setString(gIniSettings.lastEditorName);
+
+   
 
    if(gCmdLineSettings.password != "")
       gServerPassword = gCmdLineSettings.password.c_str();

@@ -28,6 +28,7 @@
 
 #include "UI.h"
 #include "timer.h"
+#include "config.h"
 
 namespace Zap
 {
@@ -67,7 +68,7 @@ public:
    virtual void onAccept(const char *text) = 0;
    virtual void onEscape() = 0;
    const char *getText() { return lineEditor.c_str(); }
-   void setString(const char *text);
+   void setString(string str);
    virtual bool isValid(char ascii);      // Ensure only valid characters are entered
 };
 
@@ -83,9 +84,10 @@ public:
    virtual void onEscape();
 };
 
-extern NameEntryUserInterface gNameEntryUserInterface;
-
 ////////////////
+
+extern NameEntryUserInterface gNameEntryUserInterface;
+extern IniSettings gIniSettings;
 
 class LevelNameEntryUserInterface : public TextEntryUserInterface
 {
@@ -98,6 +100,7 @@ public:
       instr2 = "Enter an existing level, or create your own!";
       resetOnActivate = false;
    }
+
    virtual void onAccept(const char *text);
    virtual void onEscape();
    bool isValid(char ascii);
