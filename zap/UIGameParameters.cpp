@@ -100,10 +100,10 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          bool found = false;
          if(savedMenuItems.size())
             for(S32 j = 0; j < savedMenuItems.size(); j++)
-               if(!strcmp(savedMenuItems[j].mText, menuItems[i].mText)) // Found an already saved parameter with the same name... overwrite the saved values with a new ones
+               if(!strcmp(savedMenuItems[j].mTitle, menuItems[i].mTitle)) // Found an already saved parameter with the same name... overwrite the saved values with a new ones
                {
                   savedMenuItems[j].mValI = menuItems[i].mValI;
-                  savedMenuItems[j].mValS = menuItems[i].mValS;
+                  savedMenuItems[j].mLineEditor = menuItems[i].mLineEditor;
                   found = true;
                   break;
                }
@@ -149,13 +149,13 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          string val = str.substr(lastPos, str.size() - lastPos);
 
          if (token == "LevelName")
-            menuItems[2].mValS = val.substr(0, gMaxGameNameLength);
+            menuItems[2].mLineEditor.setString(val.substr(0, gMaxGameNameLength));
          else if (token == "LevelDescription")
-            menuItems[3].mValS = val.substr(0, gMaxGameDescrLength);
+            menuItems[3].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
          else if (token == "LevelCredits")
-            menuItems[4].mValS = val.substr(0, gMaxGameDescrLength);
+            menuItems[4].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
          else if (token == "Script")
-            menuItems[5].mValS = val.substr(0, gMaxGameDescrLength);
+            menuItems[5]mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
          else if (token == "GridSize")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), static_cast<int>(Game::maxGridSize)), static_cast<int>(Game::minGridSize));
          else if (token == "MinPlayers")
@@ -175,10 +175,10 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    if(savedMenuItems.size())
       for(S32 i = 1; i < menuItems.size(); i++)                         // Start with 1 because we don't want to overwrite our game type, which is #0!
          for(S32 j = 0; j < savedMenuItems.size(); j++)
-            if(!strcmp(savedMenuItems[j].mText, menuItems[i].mText))    // Found a match
+            if(!strcmp(savedMenuItems[j].mTitle, menuItems[i].mTitle))    // Found a match
             {
                menuItems[i].mValI = savedMenuItems[j].mValI;
-               menuItems[i].mValS = savedMenuItems[j].mValS;
+               menuItems[i].mLineEditor = savedMenuItems[j].mLineEditor;
                break;
             }
 }
@@ -187,6 +187,12 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 void GameParamUserInterface::idle(U32 timeDelta)
 {
    LineEditor::updateCursorBlink(timeDelta);
+}
+
+
+bool inline GameParamUserInterface::isEditableString(MenuItem2 item)
+{
+   return item.mValType == TypeShortString || item.mValType == TypeLongString || item.mValType == TypeFileName;
 }
 
 
@@ -212,54 +218,52 @@ void GameParamUserInterface::render()
 
       if(selectedIndex == i)           // Highlight selected item
       {
-         glColor3f(0, 0, 0.4);         // Fill
-         glBegin(GL_POLYGON);
-            glVertex2f(0, y - 2);
-            glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + fontSize + 8);
-            glVertex2f(0, y + fontSize + 8);
-         glEnd();
-
-         glColor3f(0, 0, 1);           // Outline
-         glBegin(GL_LINES);
-            glVertex2f(0, y - 2);
-            glVertex2f(canvasWidth - 1, y - 2);
-            glVertex2f(canvasWidth - 1, y + fontSize + 8);
-            glVertex2f(0, y + fontSize + 8);
-         glEnd();
+         for(S32 i = 1; i >= 0; i--)
+         {
+            glColor(i ? Color(0,0,0.4) : Color(0, 0, 1));      // Fill : outline
+            glBegin(i ? GL_POLYGON : GL_LINES);
+               glVertex2f(0, y - 2);
+               glVertex2f(canvasWidth, y - 2);
+               glVertex2f(canvasWidth, y + fontSize + 8);
+               glVertex2f(0, y + fontSize + 8);
+            glEnd();
+         }
       }
 
-      S32 xpos;
+
+      S32 titleWidth = getStringWidth(fontSize, menuItems[i].mTitle);
       S32 space = getStringWidth(fontSize, " ");
-      string dispString = menuItems[i].mValS != "" ? menuItems[i].mValS : "<none>";
 
-      if(menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString  ||
-            menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName)
-         xpos = (gScreenWidth - getStringWidth(fontSize, menuItems[i].mText) - getStringWidth(fontSize, dispString.c_str()) - space) / 2;
+      string dispString = menuItems[i].mLineEditor.isEmpty() ? menuItems[i].getString() : "<none>";
+
+      bool isStringLike = menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
+                          menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName;
+
+      bool needsCursor =  menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
+                                                                   menuItems[i].mValType == TypeFileName;
+      S32 xpos;
+
+      if(isStringLike)
+         xpos = (gScreenWidth - titleWidth - getStringWidth(fontSize, dispString.c_str()) - space) / 2;
       else if(menuItems[i].mValType == TypeInt)
-         xpos = (gScreenWidth - getStringWidthf(fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits) - getStringWidth(fontSize, menuItems[i].mText) - space) / 2;
+         xpos = (gScreenWidth - getStringWidthf(fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits) - titleWidth - space) / 2;
       else
-         xpos = (gScreenWidth - getStringWidth(fontSize, menuItems[i].mText)) / 2;
+         xpos = (gScreenWidth - titleWidth) / 2;
 
-      glColor3f(0, 1, 1);
-      drawString(xpos, y, fontSize, menuItems[i].mText);
+      glColor3f(0,1,1);
+      drawString(xpos, y, fontSize, menuItems[i].mTitle);
 
-      if(selectedIndex == i)
-         glColor3f(1, 0, 0);
-      else
-         glColor3f(1, 1, 1);
+      glColor(selectedIndex == i ? Color(1,0,0) : Color(1,1,1));
 
 
-      if(menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString || menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName)
-         drawString(xpos + getStringWidth(fontSize, menuItems[i].mText) + space, y, fontSize, dispString.c_str());
+      if(isStringLike)
+         drawString(xpos + titleWidth + space, y, fontSize, dispString.c_str());
       else if(menuItems[i].mValType == TypeInt)
-         drawStringf(xpos + getStringWidth(fontSize, menuItems[i].mText) + space, y, fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits);
+         drawStringf(xpos + titleWidth + space, y, fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits);
       // else draw nothing
 
-      if(selectedIndex == i)     // This is the currently selected item
-         // Draw chat cursor
-         if((menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString || menuItems[i].mValType == TypeFileName) && LineEditor::cursorBlink)
-            drawString(xpos + getStringWidth(fontSize, menuItems[i].mText) + space + getStringWidth(fontSize, menuItems[i].mValS.c_str()), y, fontSize, "_");
+      if(selectedIndex == i && isEditableString(menuItems[i]))     // This is the currently selected item, and it needs a cursor!  Stat!
+         menuItems[i].drawCursor(xpos + titleWidth + space, y, fontSize);
    }
 
    // Draw the help string
@@ -281,8 +285,8 @@ void GameParamUserInterface::onEscape()
    strcpy(gEditorUserInterface.mGameType, gGameTypeNames[menuItems[0].mValI]);   // Save current game type
 
    // Compose GameType string from GameType and level-specific params
-   gEditorUserInterface.setLevelFileName(menuItems[1].mValS);                    // Save level file name, if it changed.  Or hell, even if it didn't
-   gEditorUserInterface.setLevelGenScriptName(menuItems[5].mValS);                    
+   gEditorUserInterface.setLevelFileName(menuItems[1].mLineEditor.getString());  // Save level file name, if it changed.  Or hell, even if it didn't
+   gEditorUserInterface.setLevelGenScriptName(menuItems[5].mLineEditor.getString());
 
    gEditorUserInterface.mGridSize = menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI;    // Set mGridSize for proper scaling of walls on map
    buildGameParamList();
@@ -306,7 +310,7 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.clear();
 
    char str[gameTypeLen];
-   strcpy(str, gGameTypeNames[menuItems[0].mValI]);      // GameType string -- value stored in mValS is a "pretty name".  This looks up the "official" value.
+   strcpy(str, gGameTypeNames[menuItems[0].mValI]);      // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
 
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
    for(S32 i = 0; i < mGameSpecificParams; i++)
@@ -317,10 +321,10 @@ void GameParamUserInterface::buildGameParamList()
 
    // Compose other game description strings
    gameParams.push_back(str);
-   gameParams.push_back("LevelName " + menuItems[2].mValS);
-   gameParams.push_back("LevelDescription " + menuItems[3].mValS);
-   gameParams.push_back("LevelCredits " + menuItems[4].mValS);
-   gameParams.push_back("Script " + menuItems[5].mValS);
+   gameParams.push_back("LevelName " + menuItems[2].mLineEditor.getString());
+   gameParams.push_back("LevelDescription " + menuItems[3].mLineEditor.getString());
+   gameParams.push_back("LevelCredits " + menuItems[4].mLineEditor.getString());
+   gameParams.push_back("Script " + menuItems[5].mLineEditor.getString());
    dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI);
    gameParams.push_back(str);
    dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI);
@@ -346,12 +350,12 @@ bool GameParamUserInterface::didAnythingGetChanged()
 
 void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if ((selectedIndex != -1 && (menuItems[selectedIndex].mValType == TypeShortString ||  menuItems[selectedIndex].mValType == TypeLongString || 
-                                menuItems[selectedIndex].mValType == TypeFileName)) && 
-            (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))    // Do backspacey things
-   {     // (braces required)
-      if(menuItems[selectedIndex].mValS.size())
-         menuItems[selectedIndex].mValS.erase(menuItems[selectedIndex].mValS.size()-1);
+   if ((selectedIndex != -1 && isEditableString(menuItems[selectedIndex]) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))
+   {
+      if(keyCode == KEY_DELETE)
+         menuItems[selectedIndex].mLineEditor.deletePressed();
+      else
+         menuItems[selectedIndex].mLineEditor.backspacePressed();
    }
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK || (selectedIndex == mQuitItemIndex && (keyCode == KEY_ENTER || keyCode == MOUSE_LEFT)))   // Esc - Quit
    {
@@ -407,7 +411,6 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(!gGameTypeNames[menuItems[selectedIndex].mValI])
             menuItems[selectedIndex].mValI = 0;
 
-         //menuItems[selectedIndex].mValS = gGameTypeNames[menuItems[selectedIndex].mValI];
          updateMenuItems(menuItems[selectedIndex].mValI);
       }
       else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)     // Prev game type
@@ -442,18 +445,11 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
    else if((menuItems[selectedIndex].mValType == TypeShortString || menuItems[selectedIndex].mValType == TypeLongString) && ascii)
-   {
-      // gMaxGameDescrLength is about the max number of characters you can display on the screen.  It's not an inherent limit.
-      if(menuItems[selectedIndex].mValS.size() < (menuItems[selectedIndex].mValType == TypeShortString ? gMaxGameNameLength : gMaxGameDescrLength))
-         menuItems[selectedIndex].mValS += char(ascii);
-   }
+      menuItems[selectedIndex].mLineEditor.addChar(ascii);
 
    else if(menuItems[selectedIndex].mValType == TypeFileName && gLevelNameEntryUserInterface.isValid(ascii))
-   {
-      if(menuItems[selectedIndex].mValS.size() < MAX_SHORT_TEXT_LEN)  // MAX_SHORT_TEXT_LEN is the length we're restricting file names to, for somewhat arbitrary reasons.
-         menuItems[selectedIndex].mValS += char(ascii);
+      menuItems[selectedIndex].mLineEditor.addChar(ascii);
    }
-}
 
 
 void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
@@ -462,7 +458,7 @@ void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
 
    Point mousePos = convertWindowToCanvasCoord(Point(x, y));
 
-   selectedIndex = (S32)((mousePos.y - yStart + 6) / itemHeight); 
+   selectedIndex = (S32)((mousePos.y - yStart + 6) / itemHeight);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = menuItems.size() - 1;

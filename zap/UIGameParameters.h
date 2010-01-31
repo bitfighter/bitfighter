@@ -51,29 +51,40 @@ enum ParamType
 
 struct MenuItem2     // An extended menu item complete with values good for editing!
 {
-   const char *mText;  // Text displayed on menu
-   KeyCode key1;       // Allow two shortcut keys per menu item...
+   const char *mTitle;      // Text displayed on menu
+   KeyCode key1;            // Allow two shortcut keys per menu item...
    KeyCode key2;
 
-   // Note that menuItems can have both string and int values.  So we'll create a list of values of each type, and use menuValIsString to tell us which to use.
-   string mValS;       // List of the values we've entered for each game param (strings)
-   S32 mValI;          // List of the values we've entered for each game param (ints)
-   S32 mMinVal;        // Minimum value for this parameter
-   S32 mMaxVal;        // Maximum value for this parameter
-   const char *mUnits; // What units do numeric values represent?
-   const char *mHelp;  // A brief help string
+   // Note that menuItems can have either a string or an int value.  So we'll create a slot for each,
+   // and use menuValIsString to tell us which to use.
+   LineEditor mLineEditor;   // Value for this item (string)
+   S32 mValI;                // Value for this item (int)
+   S32 mMinVal;              // Minimum numeric value for this parameter, if applicable
+   S32 mMaxVal;              // Maximum numeric value for this parameter, if applicable
+   const char *mUnits;       // What units do numeric values represent?
+   const char *mHelp;        // Brief help string
 
    ParamType mValType; // What type of data to show for this item
 
    Color color;
 
+   // Default constructor, unused
+   MenuItem2() { TNLAssert(false, "Don't use this constructor!") }
+
    // Constructor
-   MenuItem2() { }      // Not used, but compiler is giving me grief, so let's add this and see if all is in order
-   // Constructor
-   MenuItem2(const char *text, string strVal, S32 intVal, S32 min, S32 max, const char *units, const char *help, ParamType valType, KeyCode k1, KeyCode k2, Color c = Color(1, 1, 1))
+   MenuItem2(const char *title, string strVal, S32 intVal, S32 min, S32 max, const char *units, const char *help, ParamType valType, KeyCode k1, KeyCode k2, Color c = Color(1, 1, 1))
    {
-      mText = text;
-      mValS = strVal;
+      // Set a limit on entry length.  Note that these are fairly aribitrary...
+      U32 len = 255;
+      if(valType == TypeShortString)
+         len = gMaxGameNameLength;
+      else if(valType == TypeLongString)
+         len = gMaxGameDescrLength;
+      else if(valType == TypeFileName)
+         len = MAX_SHORT_TEXT_LEN;
+
+      mTitle = title;
+      mLineEditor = LineEditor(len, strVal);
       mValI = intVal;
       mUnits = units;
       mHelp = help;
@@ -102,6 +113,8 @@ private:
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
 
+   bool isEditableString(ParamType type);    // True if type uses the LineEditor
+
 public:
    GameParamUserInterface();         // Constructor
    const char *menuTitle;
@@ -124,7 +137,7 @@ public:
    void onActivate();
    void onEscape();
 
-   bool ignoreGameParams; 
+   bool ignoreGameParams;
 };
 
 extern GameParamUserInterface gGameParamUserInterface;

@@ -55,16 +55,19 @@ public:
    void addChar(char c) { if(length() < mMaxLen) mLine.push_back(c); }
    void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); }     // Backspace key hit
    void deletePressed() { backspacePressed(); }                                    // Delete key hit
-   void clear() { mLine.clear(); }
-   char at(U32 pos);
-   bool isEmpty() { return mLine.empty(); }
+   void clear() { mLine.clear(); }                      // Clear the string
+   char at(U32 pos);                                    // Get char at pos
+   bool isEmpty() { return mLine.empty(); }             // Is string empty
 
-   string getString() { return mLine; }                           // Return the string in string format
-   void setString(const char *str) { mLine = str; }               // Set the string
-   void setString(string str) { mLine = str; }               
-   const char *c_str() { return mLine.c_str(); }                  // Return the string in c_str format
+   string getString() { return mLine; }                 // Return the string in string format
+   void setString(const char *str) { mLine = str; }     // Set the string
+   void setString(string str) { mLine = str; }
+   const char *c_str() { return mLine.c_str(); }        // Return the string in c_str format
 
-   void drawCursor(S32 x, S32 y, S32 fontSize);                   // Draw our cursor, assuming string is drawn at x,y
+   void drawCursor(S32 x, S32 y, S32 fontSize);         // Draw our cursor, assuming string is drawn at x,y
+
+   // LineEditors are equal if their values are equal
+   bool operator==(const LineEditor &lineEditor) const { return lineEditor.getString() == mLine; }
 };
 
 

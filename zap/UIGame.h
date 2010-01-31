@@ -87,7 +87,7 @@ private:
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
 
    ChatType mCurrentChatType; // Current in-game chat mode (global or local)
-   LineEditor mChatLine;      // Message being composed
+   LineEditor mLineEditor;    // Message being composed
 
    U32 mChatCursorPos;        // Position of composition cursor
 

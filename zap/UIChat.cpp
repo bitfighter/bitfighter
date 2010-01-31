@@ -52,7 +52,7 @@ std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nickname
 
 AbstractChat::AbstractChat()
 {
-   mChatLine = LineEditor(200);
+   mLineEditor = LineEditor(200);
 }
 
 
@@ -89,8 +89,8 @@ void AbstractChat::addCharToMessage(char ascii)
                    UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
 
    // Only add char if there's room
-   if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mChatLine.c_str(), ascii) < lineWidth)
-      mChatLine.addChar(ascii);
+   if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mLineEditor.c_str(), ascii) < lineWidth)
+      mLineEditor.addChar(ascii);
 }
 
 
@@ -98,9 +98,9 @@ void AbstractChat::addCharToMessage(char ascii)
 void AbstractChat::handleBackspace(KeyCode keyCode)
 {
    if(keyCode == KEY_BACKSPACE)
-      mChatLine.backspacePressed();
+      mLineEditor.backspacePressed();
    else       // KEY_DELETE
-      mChatLine.deletePressed();
+      mLineEditor.deletePressed();
 }
 
 
@@ -206,15 +206,15 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
 // Send chat message
 void AbstractChat::issueChat()
 {
-   if(mChatLine.length() > 0)
+   if(mLineEditor.length() > 0)
    {
       // Send message
       MasterServerConnection *conn = gClientGame->getConnectionToMaster();
       if(conn)
-         conn->c2mSendChat(mChatLine.c_str());
+         conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(gNameEntryUserInterface.getText(), mChatLine.c_str(), false);
+      newMessage(gNameEntryUserInterface.getText(), mLineEditor.c_str(), false);
    }
    clearChat();     // Clear message
 
@@ -225,7 +225,7 @@ void AbstractChat::issueChat()
 // Clear current message
 void AbstractChat::clearChat()
 {
-   mChatLine.clear();
+   mLineEditor.clear();
 }
 
 

@@ -17,7 +17,7 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-
+// Check game params menu for basic operation
 
 // TODO:
 // Create color global for reticle color
@@ -292,7 +292,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, 
 {
 
    // Glut sometimes fires spurious events.  Let's ignore those.
-   if(x == gMousePos.x && y == gMousePos.y) 
+   if(x == gMousePos.x && y == gMousePos.y)
       return;
 
    setMousePos(x, y);

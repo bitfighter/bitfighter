@@ -84,14 +84,14 @@ private:
 protected:
    // Message data
    static ChatMessage mMessages[MESSAGES_TO_RETAIN];
-   LineEditor mChatLine;
+   LineEditor mLineEditor;
 
    ChatMessage getMessage(U32 index);
    U32 mChatCursorPos;                     // Where is cursor?
 
    U32 getMessageCount() { return mMessageCount; }
 
-   bool composingMessage() { return mChatLine.length() > 0; }
+   bool composingMessage() { return mLineEditor.length() > 0; }
 
 public:
    AbstractChat();      // Constructor

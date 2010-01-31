@@ -96,7 +96,7 @@ GameUserInterface::GameUserInterface()
       mPing[i] = 100;
    }
 
-   mChatLine = LineEditor(200);
+   mLineEditor = LineEditor(200);
 
    // Initialize message buffers
    for(S32 i = 0; i < MessageDisplayCount; i++)
@@ -531,7 +531,7 @@ S32 gLoadoutIndicatorHeight = fontSize + gapSize * 2;
 #undef gapSize
 
 #define FONTSIZE 14
-#define fontGap 4
+#define FONT_GAP 4
 
 // Render any incoming chat msgs
 void GameUserInterface::renderMessageDisplay()
@@ -554,7 +554,7 @@ void GameUserInterface::renderMessageDisplay()
          {
             glColor(mDisplayMessageColor[i]);
             drawString(UserInterface::horizMargin, y, FONTSIZE, mDisplayMessage[i]);
-            y += FONTSIZE + fontGap;
+            y += FONTSIZE + FONT_GAP;
          }
       }
    else
@@ -564,37 +564,15 @@ void GameUserInterface::renderMessageDisplay()
          {
             glColor(mStoreMessageColor[i]);
             drawString(UserInterface::horizMargin, y, FONTSIZE, mStoreMessage[i]);
-            y += FONTSIZE + fontGap;
+            y += FONTSIZE + FONT_GAP;
          }
       }
-
-   // Render faint gray background box... probably better without this...
-   //S32 ypos1 = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin);
-   //S32 ypos2 = ypos1 + (FONTSIZE + fontGap) * MessageStoreCount;
-   //S32 width = canvasWidth - UserInterface::horizMargin;
-
-   //glEnable(GL_BLEND);
-   //   glColor4f(1,1,1,.2);
-   //   glBegin(GL_POLYGON);
-   //      glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + ypos1 - 3);
-   //      glVertex2f(width, UserInterface::vertMargin + ypos1 - 3);
-   //      glVertex2f(width, UserInterface::vertMargin + ypos2);
-   //      glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + ypos2);
-   //   glEnd();
-   //   glColor4f(1,1,1,.4);
-   //   glBegin(GL_LINE_LOOP);
-   //      glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + ypos1 - 3);
-   //      glVertex2f(width, UserInterface::vertMargin + ypos1 - 3);
-   //      glVertex2f(width, UserInterface::vertMargin + ypos2);
-   //      glVertex2f(UserInterface::horizMargin, UserInterface::vertMargin + ypos2);
-   //   glEnd();
-   //glDisable(GL_BLEND);
 }
 
 
 bool GameUserInterface::isCmdChat()
 {
-   return mChatLine.at(0) == '/' || mCurrentChatType == CmdChat;
+   return mLineEditor.at(0) == '/' || mCurrentChatType == CmdChat;
 }
 
 
@@ -604,8 +582,6 @@ void GameUserInterface::renderCurrentChat()
    if(mCurrentMode != ChatMode)
       return;
 
-   const S32 chatComposeYPos = (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) +
-                               (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + fontGap);
    const char *promptStr;
 
    Color baseColor;
@@ -640,34 +616,45 @@ void GameUserInterface::renderCurrentChat()
    // Above block repeated below...
 
    S32 xpos = UserInterface::horizMargin;
+
+   const S32 ypos = UserInterface::vertMargin +
+                    (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) +
+                    (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + FONT_GAP);
+
    S32 width = canvasWidth - 2 * UserInterface::horizMargin - (nameWidth - promptSize) + 6;
 
 
    // Render text entry box like thingy
    glEnable(GL_BLEND);
-      glColor4f(baseColor.r, baseColor.g, baseColor.b, .25);
-      glBegin(GL_POLYGON);
-         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
-         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
-         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-      glEnd();
 
-      glColor4f(baseColor.r, baseColor.g, baseColor.b, .4);
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos - 3);
-         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos - 3);
-         glVertex2f(xpos + width, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-         glVertex2f(xpos, UserInterface::vertMargin + chatComposeYPos + FONTSIZE + 7);
-      glEnd();
+   for(S32 i = 1; i >= 0; i--)
+   {
+      glColor(baseColor, i ? .25 : .4);
 
-   glColor3f(baseColor.r, baseColor.g, baseColor.b);
-   drawString(xpos + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, promptStr);
-   drawStringf(xpos + getStringWidth(FONTSIZE, promptStr) + 3, UserInterface::vertMargin + chatComposeYPos, FONTSIZE, "%s%s", mChatLine.c_str(), LineEditor::cursorBlink ? "_" : " ");
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f(xpos, ypos - 3);
+         glVertex2f(xpos + width, ypos - 3);
+         glVertex2f(xpos + width, ypos + FONTSIZE + 7);
+         glVertex2f(xpos, ypos + FONTSIZE + 7);
+      glEnd();
+   }
    glDisable(GL_BLEND);
+
+   glColor(baseColor);
+
+   xpos += 3;     // Left margin
+   xpos += drawStringAndGetWidth(xpos, ypos, FONTSIZE, promptStr);
+
+   drawString(xpos, ypos, FONTSIZE, mLineEditor.c_str());
+
+   mLineEditor.drawCursor(xpos, ypos, FONTSIZE);
 }
 
-#undef fontGap
+//   S32 x = drawCenteredString(y, fontSizeBig, dispString.c_str());
+//   lineEditor.drawCursor(x, y, fontSizeBig);
+
+
+#undef FONT_GAP
 
 
 void GameUserInterface::onMouseDragged(S32 x, S32 y)
@@ -947,9 +934,9 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(keyCode == KEY_ENTER)
          issueChat();
       else if(keyCode == KEY_BACKSPACE)
-         mChatLine.backspacePressed();
+         mLineEditor.backspacePressed();
       else if(keyCode == KEY_DELETE)
-         mChatLine.deletePressed();
+         mLineEditor.deletePressed();
       else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
          cancelChat();
       else if(keyCode == KEY_TAB)      // Auto complete any commands
@@ -959,11 +946,11 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 found = -1;
             S32 start = mCurrentChatType != CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
 
-            size_t len = mChatLine.length();
+            size_t len = mLineEditor.length();
             for(S32 i = 0; i < mChatCmds.size(); i++)
-               if(mChatCmds[i].substr(start, len) == mChatLine.getString())
+               if(mChatCmds[i].substr(start, len) == mLineEditor.getString())
                {
-                  if(found != -1)   // We've already found another command that matches this one, so that means it's not yet unique enough to autocomplete.
+                  if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete.
                      return;
                   found = i;
                }
@@ -971,11 +958,9 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             if(found == -1)         // Found no match... no expansion possible
                return;
 
-            mChatLine.clear();
-//            if(mCurrentChatType != CmdChat)
-//               mChatLine.addChar('/');                         // Add leading "/" if we're not in a command chat
-            mChatLine.getString().append(mChatCmds[found]);    // Add the command
-            mChatLine.addChar(' ');                            // Add a space
+            mLineEditor.clear();
+            mLineEditor.getString().append(mChatCmds[found]);    // Add the command
+            mLineEditor.addChar(' ');                            // Add a space
          }
       }
       else if(ascii)     // Append any other keys to the chat message
@@ -993,8 +978,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 nameWidth = max(nameSize, promptSize);
             // Above block repeated above
 
-            if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mChatLine.c_str(), ascii) < canvasWidth - 2 * horizMargin - 3)
-               mChatLine.addChar(ascii);
+            if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) < canvasWidth - 2 * horizMargin - 3)
+               mLineEditor.addChar(ascii);
          }
       }
    }     // End if in ChatMode
@@ -1112,14 +1097,12 @@ Move *GameUserInterface::getCurrentMove()
          mTransformedMove.down = 0;
          mTransformedMove.up = -newMoveDir.y;
       }
-      if(mTransformedMove.right > 1)
-         mTransformedMove.right = 1;
-      if(mTransformedMove.left > 1)
-         mTransformedMove.left = 1;
-      if(mTransformedMove.up > 1)
-         mTransformedMove.up = 1;
-      if(mTransformedMove.down > 1)
-         mTransformedMove.down = 1;
+
+      // Sanity checks
+      mTransformedMove.right = min(1, mTransformedMove.right);
+      mTransformedMove.left  = min(1, mTransformedMove.left);
+      mTransformedMove.up    = min(1, mTransformedMove.up);
+      mTransformedMove.down  = min(1, mTransformedMove.down);
 
       return &mTransformedMove;
    }
@@ -1129,18 +1112,18 @@ Move *GameUserInterface::getCurrentMove()
 // User has finished entering a chat message and pressed <enter>
 void GameUserInterface::issueChat()
 {
-   if(!mChatLine.isEmpty())
+   if(!mLineEditor.isEmpty())
    {
       // Check if chat buffer holds a message or a command
-      if(mChatLine.at(0) != '/' && mCurrentChatType != CmdChat)     // It's a normal chat message
+      if(mLineEditor.at(0) != '/' && mCurrentChatType != CmdChat)                   // It's a normal chat message
       {
          GameType *gt = gClientGame->getGameType();
          if(gt)
-            gt->c2sSendChat(mCurrentChatType == GlobalChat, mChatLine.c_str());   // Broadcast message
+            gt->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
       }
       else                          // It's a command
       {
-         Vector<string> words = parseString(mChatLine.c_str());
+         Vector<string> words = parseString(mLineEditor.c_str());
          processCommand(words);
       }
    }
@@ -1154,7 +1137,7 @@ Vector<string> GameUserInterface::parseString(const char *str)
    string word = "";
    Vector<string> words;
 
-   S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;              // Start at 1 to omit the leading '/'
+   S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;        // Start at 1 to omit the leading '/'
 
    for(size_t i = startIndex; i < strlen(str); i++)
    {
@@ -1227,8 +1210,7 @@ void GameUserInterface::processCommand(Vector<string> words)
          return;
       }
 
-      //if(words.size() < 2 || words[1] == "")
-         gc->c2sRequestLevelChange(1, true);
+      gc->c2sRequestLevelChange(1, true);
    }
 
    else if(words[0] == "prev")      // Go to previous level
@@ -1239,8 +1221,7 @@ void GameUserInterface::processCommand(Vector<string> words)
          return;
       }
 
-      //if(words.size() < 2 || words[1] == "")
-         gc->c2sRequestLevelChange(-1, true);
+      gc->c2sRequestLevelChange(-1, true);
    }
 
    else if(words[0] == "restart")      // Restart current level
@@ -1251,8 +1232,7 @@ void GameUserInterface::processCommand(Vector<string> words)
          return;
       }
 
-      //if(words.size() < 2 || words[1] == "")
-         gc->c2sRequestLevelChange(-2, false);
+      gc->c2sRequestLevelChange(-2, false);
    }
 
    else if(words[0] == "kick")      // Kick a player
@@ -1393,7 +1373,7 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
 
 void GameUserInterface::cancelChat()
 {
-   mChatLine.clear();
+   mLineEditor.clear();
    setPlayMode();
 }
 
