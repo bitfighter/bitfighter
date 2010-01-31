@@ -136,7 +136,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   processPolyBounds(argc, argv, 0, mPolyBounds, getGame()->getGridSize());
+   processPolyBounds(argc, argv, 0, getGame()->getGridSize());
    computeExtent();  // Not needed?
    return true;
 }

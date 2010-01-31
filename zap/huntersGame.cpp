@@ -697,7 +697,7 @@ bool HuntersNexusObject::processArguments(S32 argc, const char **argv)
       mPolyBounds.push_back(p);
    }
    else           // Bitfighter format
-      processPolyBounds(argc, argv, 0, mPolyBounds, getGame()->getGridSize());
+      processPolyBounds(argc, argv, 0, getGame()->getGridSize());
 
    computeExtent();
 
@@ -707,7 +707,7 @@ bool HuntersNexusObject::processArguments(S32 argc, const char **argv)
 
 void HuntersNexusObject::computeExtent()
 {
-   setExtent(computePolyExtents(mPolyBounds));
+   setExtent(computePolyExtents());
 }
 
 

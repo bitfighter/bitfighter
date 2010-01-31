@@ -395,8 +395,6 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
 }
 
 
-
-
 void GameObject::render()
 {
    // Do nothing

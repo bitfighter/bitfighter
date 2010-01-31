@@ -92,6 +92,8 @@ void renderAsteroid(Point pos, S32 design, F32 radius, Color c, F32 alpha = 1);
 void renderResourceItem(Point pos, F32 alpha = 1);
 void renderSoccerBall(Point pos, F32 alpha = 1);
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);
+void renderLineItem(Vector<Point> &verts, U32 width, S32 team);
+
 
 extern void renderForceFieldProjector(Point pos, Point normal);
 extern void renderForceFieldProjector(Point pos, Point normal, Color teamColor, bool enabled);

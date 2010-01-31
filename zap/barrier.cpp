@@ -293,7 +293,7 @@ void Barrier::render(S32 layerIndex)
          {
             glBegin(GL_POLYGON);
                for(S32 j = i; j < i+3; j++)
-                  glVertex2f(mRenderFillGeometry[j].x, mRenderFillGeometry[j].y);
+                  glVertex(mRenderFillGeometry[j]);
             glEnd();
          }
       }
@@ -301,7 +301,7 @@ void Barrier::render(S32 layerIndex)
       {
          glBegin(GL_POLYGON);
             for(S32 i = 0; i < mRenderFillGeometry.size(); i++)
-               glVertex2f(mRenderFillGeometry[i].x, mRenderFillGeometry[i].y);
+               glVertex(mRenderFillGeometry[i]);
          glEnd();
       }
 
@@ -337,7 +337,7 @@ void Barrier::render(S32 layerIndex)
       glColor(f);
       glBegin(GL_LINES);
       for(S32 i = 0; i < mRenderLineSegments.size(); i++)
-         glVertex2f(mRenderLineSegments[i].x, mRenderLineSegments[i].y);
+         glVertex(mRenderLineSegments[i]);
       glEnd();
    }
 }

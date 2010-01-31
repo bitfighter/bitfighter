@@ -80,6 +80,9 @@ public:
    TNL_DECLARE_CLASS(TextItem);
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 class LineItem : public GameObject, public Polyline
 {
@@ -90,7 +93,6 @@ public:
 
    U32 mWidth;           // Width of line
    S32 mTeam;            // Team text is visible to (-1 for visible to all)
-   Vector<Point> mVerts;
    
    LineItem();   // Constructor
 

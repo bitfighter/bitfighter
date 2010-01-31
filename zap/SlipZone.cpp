@@ -65,7 +65,7 @@ public:
       if(argc < 6)
          return false;
 
-      processPolyBounds(argc, argv, 0, mPolyBounds, getGame()->getGridSize());
+      processPolyBounds(argc, argv, 0, getGame()->getGridSize());
       computeExtent();
 
       /*for(S32 i = 1; i < argc; i += 2)

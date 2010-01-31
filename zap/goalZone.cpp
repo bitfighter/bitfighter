@@ -69,7 +69,7 @@ bool GoalZone::processArguments(S32 argc, const char **argv)
       return false;
 
    mTeam = atoi(argv[0]);     // Team is first arg
-   processPolyBounds(argc, argv, 1, mPolyBounds, getGame()->getGridSize());
+   processPolyBounds(argc, argv, 1, getGame()->getGridSize());
    computeExtent();
 
    /*for(S32 i = 2; i < argc; i += 2)

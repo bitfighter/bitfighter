@@ -8,16 +8,12 @@
 // Some time
 // Add mouse coords to diagnostics screen, raw key codes
 
-// Editor
-// list of levels you can edit
-
 // Long term
 // Admin select level w/ preview(?)
 // Implement level selection based on MinPlayers & MaxPlayers
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// Check game params menu for basic operation
 
 // TODO:
 // Create color global for reticle color
@@ -58,6 +54,7 @@ XXX need to document timers, main function XXX
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
+<li>Fixed turret/forcefield "in the middle of space" bug</li>
 
 
 */

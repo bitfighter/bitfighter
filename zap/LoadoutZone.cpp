@@ -67,7 +67,7 @@ public:
          return false;
 
       mTeam = atoi(argv[0]);     // Team is first arg
-      processPolyBounds(argc, argv, 1, mPolyBounds, getGame()->getGridSize());
+      processPolyBounds(argc, argv, 1, getGame()->getGridSize());
 
       computeExtent();
 

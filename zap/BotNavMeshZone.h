@@ -84,7 +84,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
-   Vector<Point> mPolyBounds;
+   //Vector<Point> mPolyBounds;
 
    Vector<NeighboringZone> mNeighbors;        // List of other zones this zone touches
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor

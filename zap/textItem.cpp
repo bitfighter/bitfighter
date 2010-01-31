@@ -195,7 +195,7 @@ LineItem::LineItem()
 
 void LineItem::render()
 {
-   //renderLineItem(pos, dir, mSize, mTeam, mText);
+   renderLineItem(mPolyBounds, mWidth, mTeam);
 }
 
 // This object should be drawn below others
@@ -215,7 +215,7 @@ bool LineItem::processArguments(S32 argc, const char **argv)
    mTeam = atoi(argv[0]);
    mWidth = min(atoi(argv[1]), MAX_LINE_WIDTH);
 
-   processPolyBounds(argc, argv, 1, mVerts, getGame()->getGridSize());
+   processPolyBounds(argc, argv, 2, getGame()->getGridSize());
 
    computeExtent();
 
@@ -235,7 +235,7 @@ void LineItem::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void LineItem::computeExtent()
 {
-   setExtent(computePolyExtents(mVerts));
+   setExtent(computePolyExtents());
 }
 
 

@@ -36,9 +36,11 @@ extern S32 gMaxPolygonPoints;
 
 class Polyline
 {
+public:
+   Vector<Point> mPolyBounds;
+
 protected:
 
-   Vector<Point> mPolyBounds;
 
    void packUpdate(GhostConnection *connection, BitStream *stream)
    {
@@ -67,28 +69,28 @@ protected:
 
 
    // Read a series of points from a command line, and add them to a Vector of points
-   void static processPolyBounds(S32 argc, const char **argv, S32 firstCoord, Vector<Point> &polyBounds, F32 gridSize)
+   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
    {
       for(S32 i = firstCoord; i < argc; i += 2)
       {
          // Put a cap on the number of vertices in a polygon
-         if(polyBounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
+         if(mPolyBounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
             break;
 
          Point p;
          p.x = (F32) atof(argv[i]) * gridSize;
          p.y = (F32) atof(argv[i+1]) * gridSize;
-         polyBounds.push_back(p);
+         mPolyBounds.push_back(p);
       }
    }
 
 
-   Rect static computePolyExtents(Vector<Point> &polyBounds)
+   Rect computePolyExtents()
    {
-      Rect extent(polyBounds[0], polyBounds[0]);
+      Rect extent(mPolyBounds[0], mPolyBounds[0]);
 
-      for(S32 i = 1; i < polyBounds.size(); i++)
-         extent.unionPoint(polyBounds[i]);
+      for(S32 i = 1; i < mPolyBounds.size(); i++)
+         extent.unionPoint(mPolyBounds[i]);
 
       return extent;
    }

@@ -211,7 +211,7 @@ GameItemRec itemDef[] = {
    { "FlagItem",            false,    true,      true,        false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
-   { "LineArt",             true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineArt",  "LineArt",      "Decorative lines." },
+   { "LineItem",            true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineArt",  "LineArt",      "Decorative lines." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
@@ -491,14 +491,14 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       i.selected = false;
       i.width = 0;
 
-      if(itemDef[index].hasWidth)
-      {
-         i.width = atof(argv[arg]);
-         arg++;
-      }
       if(itemDef[index].hasTeam)
       {
          i.team = atoi(argv[arg]);
+         arg++;
+      }
+      if(itemDef[index].hasWidth)
+      {
+         i.width = atof(argv[arg]);
          arg++;
       }
       if(index == ItemTextItem)
@@ -1013,7 +1013,7 @@ void EditorUserInterface::render()
 
       if(mCreatingPoly) // Wall
          glColor(yellow);
-      else              // Artline
+      else              // LineItem
          glColor3f(1, 0, 1);
 
       renderPoly(mNewItem.verts, false);
@@ -1032,7 +1032,7 @@ void EditorUserInterface::render()
       }
       mNewItem.verts.erase_fast(mNewItem.verts.size() - 1);
    }
-   else  // Since we're not constructing a barrier, if there are any barriers or artlines selected, get the width for display at bottom of dock
+   else  // Since we're not constructing a barrier, if there are any barriers or lineItems selected, get the width for display at bottom of dock
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
@@ -1288,7 +1288,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
 
    if(itemType == ItemBarrierMaker)
       glColor(Color(.5, .5, 1), alpha);    // pale blue
-   else if(itemType == ItemLineArt)
+   else if(itemType == ItemLineItem)
       glColor(Color(.7,.7,.7), alpha);    // whiteish... for now
    else
       TNLAssert(false, "Invalid game item type!");
@@ -2894,7 +2894,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(getKeyState(KEY_TILDE))
          {
             mCreatingPolyline = true;
-            mNewItem.index = ItemLineArt;
+            mNewItem.index = ItemLineItem;
          }
          else
          {
@@ -3505,10 +3505,10 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
             s_fprintf(f, "%s", itemDef[mItems[i].index].name);
 
-            if(mItems[i].hasWidth())
-               s_fprintf(f, " %g", mItems[i].width);
             if(itemDef[mItems[i].index].hasTeam)
                s_fprintf(f, " %d", mItems[i].team);
+            if(mItems[i].hasWidth())
+               s_fprintf(f, " %g", mItems[i].width);
             for(S32 j = 0; j < p.verts.size(); j++)
                s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
             if(itemDef[mItems[i].index].hasText)

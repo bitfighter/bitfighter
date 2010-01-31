@@ -1241,6 +1241,22 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 }
 
 
+void renderLineItem(Vector<Point> &verts, U32 width, S32 team)
+{
+   glLineWidth(width);
+   glBegin(GL_LINE_STRIP);
+   
+
+   for(S32 i = 0; i < verts.size(); i++)
+      glVertex(verts[i]);
+
+   glEnd();
+
+   glLineWidth(gDefaultLineWidth);
+}
+
+
+
 void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 {
    Point cross(normal.y, -normal.x);
