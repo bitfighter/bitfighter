@@ -144,35 +144,35 @@ void DiagnosticUserInterface::render()
    x = getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %d | CPU: %s | OS: %s | Cmplr: %s",
          MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
 
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "M/C Ver: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", MASTER_PROTOCOL_VERSION);
+   glColor3f(1,1,1);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "M/C Ver: ");
+   glColor3f(1,1,0);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "%d", MASTER_PROTOCOL_VERSION);
 
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | C/S Ver: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", CS_PROTOCOL_VERSION);
+   glColor3f(1,1,1);
+   x += drawStringAndGetWidthf(x, vpos, textsize, " | C/S Ver: ");
+   glColor3f(1,1,0);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "%d", CS_PROTOCOL_VERSION);
 
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | Build: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", BUILD_VERSION);
+   glColor3f(1,1,1);
+   x += drawStringAndGetWidthf(x, vpos, textsize, " | Build: ");
+   glColor3f(1,1,0);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "%d", BUILD_VERSION);
 
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | CPU: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_CPU_STRING);
+   glColor3f(1,1,1);
+   x += drawStringAndGetWidthf(x, vpos, textsize, " | CPU: ");
+   glColor3f(1,1,0);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_CPU_STRING);
 
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | OS: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_OS_STRING);
+   glColor3f(1,1,1);
+   x += drawStringAndGetWidthf(x, vpos, textsize, " | OS: ");
+   glColor3f(1,1,0);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_OS_STRING);
 
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | Cmplr: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_COMPILER_STRING);
+   glColor3f(1,1,1);
+   x += drawStringAndGetWidthf(x, vpos, textsize, " | Cmplr: ");
+   glColor3f(1,1,0);
+   x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_COMPILER_STRING);
 
    glColor3f(1,1,1);
 

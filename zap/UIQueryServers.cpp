@@ -944,7 +944,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          sortSelected();
    }
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
-      handleBackspace(keyCode);   
+      mLineEditor.handleBackspace(keyCode);   
    else if(ascii)                               // Other keys - add key to message
      addCharToMessage(ascii);
 

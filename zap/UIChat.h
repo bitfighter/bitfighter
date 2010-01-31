@@ -98,7 +98,6 @@ public:
    void newMessage(string from, string message, bool isPrivate);   // Handle incoming msg
 
    void addCharToMessage(char ascii);     // Append char to message being composed
-   void handleBackspace(KeyCode keyCode); // When user hits backspace or delete
    void clearChat();                      // Clear message being composed
    void issueChat();                      // Send chat message
 

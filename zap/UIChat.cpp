@@ -45,6 +45,7 @@ const S32 lineWidth = UserInterface::canvasWidth - 2 * UserInterface::horizMargi
 U32 AbstractChat::mColorPtr = 0;
 U32 AbstractChat::mMessageCount = 0;
 
+
 // By declaring these here, we avoid link errors
 ChatMessage AbstractChat::mMessages[MESSAGES_TO_RETAIN];
 std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nicknames to colors
@@ -91,16 +92,6 @@ void AbstractChat::addCharToMessage(char ascii)
    // Only add char if there's room
    if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mLineEditor.c_str(), ascii) < lineWidth)
       mLineEditor.addChar(ascii);
-}
-
-
-// keyCode will have either backspace or delete in it.
-void AbstractChat::handleBackspace(KeyCode keyCode)
-{
-   if(keyCode == KEY_BACKSPACE)
-      mLineEditor.backspacePressed();
-   else       // KEY_DELETE
-      mLineEditor.deletePressed();
 }
 
 
@@ -185,8 +176,8 @@ void AbstractChat::renderMessageComposition(S32 ypos)
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(1,1,1);
-   UserInterface::drawString(xStartPos, ypos, CHAT_FONT_SIZE, "%s", mChatLine.c_str());
-   mChatLine.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
+   UserInterface::drawString(xStartPos, ypos, CHAT_FONT_SIZE, mLineEditor.c_str());
+   mLineEditor.drawCursor(xStartPos, ypos, CHAT_FONT_SIZE);
 }
 
 
@@ -338,7 +329,7 @@ void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if (keyCode == KEY_ENTER)                // Submits message
       issueChat();
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
-      handleBackspace(keyCode);
+      mLineEditor.handleBackspace(keyCode);
    else if(ascii)                               // Other keys - add key to message
       addCharToMessage(ascii);
 }

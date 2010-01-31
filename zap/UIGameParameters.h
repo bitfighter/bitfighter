@@ -113,7 +113,7 @@ private:
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
 
-   bool isEditableString(ParamType type);    // True if type uses the LineEditor
+   bool isEditableString(MenuItem2 item);    // True if type uses the LineEditor
 
 public:
    GameParamUserInterface();         // Constructor
@@ -129,6 +129,7 @@ public:
    Vector<MenuItem2> savedMenuItems;
    Vector<MenuItem2> menuItems;
    void render();              // Draw the menu
+
    void idle(U32 timeDelta);
    void onKeyDown(KeyCode keyCode, char ascii);
    void onMouseMoved(S32 x, S32 y);

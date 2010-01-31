@@ -148,19 +148,19 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
          string val = str.substr(lastPos, str.size() - lastPos);
 
-         if (token == "LevelName")
+         if(token == "LevelName")
             menuItems[2].mLineEditor.setString(val.substr(0, gMaxGameNameLength));
-         else if (token == "LevelDescription")
+         else if(token == "LevelDescription")
             menuItems[3].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
-         else if (token == "LevelCredits")
+         else if(token == "LevelCredits")
             menuItems[4].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
-         else if (token == "Script")
-            menuItems[5]mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
-         else if (token == "GridSize")
+         else if(token == "Script")
+            menuItems[5].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
+         else if(token == "GridSize")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), static_cast<int>(Game::maxGridSize)), static_cast<int>(Game::minGridSize));
-         else if (token == "MinPlayers")
+         else if(token == "MinPlayers")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
-         else if (token == "MaxPlayers")
+         else if(token == "MaxPlayers")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 2].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
       }
 
@@ -234,13 +234,13 @@ void GameParamUserInterface::render()
       S32 titleWidth = getStringWidth(fontSize, menuItems[i].mTitle);
       S32 space = getStringWidth(fontSize, " ");
 
-      string dispString = menuItems[i].mLineEditor.isEmpty() ? menuItems[i].getString() : "<none>";
+      string dispString = menuItems[i].mLineEditor.isEmpty() ? "<none>" : menuItems[i].mLineEditor.getString();
 
       bool isStringLike = menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
-                          menuItems[i].mValType == TypeGameType || menuItems[i].mValType == TypeFileName;
+                          menuItems[i].mValType == TypeGameType    || menuItems[i].mValType == TypeFileName;
 
       bool needsCursor =  menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
-                                                                   menuItems[i].mValType == TypeFileName;
+                                                                      menuItems[i].mValType == TypeFileName;
       S32 xpos;
 
       if(isStringLike)
@@ -263,7 +263,7 @@ void GameParamUserInterface::render()
       // else draw nothing
 
       if(selectedIndex == i && isEditableString(menuItems[i]))     // This is the currently selected item, and it needs a cursor!  Stat!
-         menuItems[i].drawCursor(xpos + titleWidth + space, y, fontSize);
+         menuItems[i].mLineEditor.drawCursor(xpos + titleWidth + space, y, fontSize);
    }
 
    // Draw the help string
@@ -350,19 +350,15 @@ bool GameParamUserInterface::didAnythingGetChanged()
 
 void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if ((selectedIndex != -1 && isEditableString(menuItems[selectedIndex]) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))
-   {
-      if(keyCode == KEY_DELETE)
-         menuItems[selectedIndex].mLineEditor.deletePressed();
-      else
-         menuItems[selectedIndex].mLineEditor.backspacePressed();
-   }
+   if(selectedIndex != -1 && isEditableString(menuItems[selectedIndex]) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))
+      menuItems[selectedIndex].mLineEditor.handleBackspace(keyCode);
+
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK || (selectedIndex == mQuitItemIndex && (keyCode == KEY_ENTER || keyCode == MOUSE_LEFT)))   // Esc - Quit
    {
       UserInterface::playBoop();
       onEscape();
    }
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
+   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP || (keyCode == KEY_TAB && getKeyState(KEY_SHIFT)))        // Prev item
    {
       UserInterface::playBoop();
       selectedIndex--;
@@ -370,7 +366,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          selectedIndex = menuItems.size() - 1;
       glutSetCursor(GLUT_CURSOR_NONE);
    }
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER)    // Next item
+   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER || keyCode == KEY_TAB)    // Next item
    {
       UserInterface::playBoop();
       selectedIndex++;

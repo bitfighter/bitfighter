@@ -72,6 +72,16 @@ void LineEditor::drawCursor(S32 x, S32 y, S32 fontSize)
 }
 
 
+// keyCode will have either backspace or delete in it -- basically a convenience function
+void LineEditor::handleBackspace(KeyCode keyCode)
+{
+   if(keyCode == KEY_BACKSPACE)
+      backspacePressed();
+   else       // KEY_DELETE
+      deletePressed();
+}
+
+
 // Needed for now, may be deleteable later.  See http://forums.devx.com/archive/index.php/t-97293.html
 Timer LineEditor::mBlinkTimer(100);       // <-- 100 ms is blink rate
 bool  LineEditor::cursorBlink = false;
