@@ -129,13 +129,14 @@ class WorldItem
 {
 
 public:
-   WorldItem() { /* do nothing */ }                                            // Generic constructor
-   WorldItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height);  // Primary constructor
-   WorldItem(const WorldItem &worldItem);                                      // Copy constructor
+   WorldItem() { /* do nothing */ }                                                        // Generic constructor
+   WorldItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height, U32 id = 0);  // Primary constructor
+   WorldItem(const WorldItem &worldItem);                                                  // Copy constructor
 
    GameItems index;
    S32 team;
    F32 width;
+   U32 id;              // Item's unique id... 0 if there is none
    Vector<Point> verts;
    bool selected;
    bool litUp;
@@ -308,7 +309,7 @@ private:
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();           // Return whether mouse is currently over the dock
 
-   void processLevelLoadLine(int argc, const char **argv);
+   void processLevelLoadLine(int argc, int id, const char **argv);
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 

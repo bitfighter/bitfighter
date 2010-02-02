@@ -67,7 +67,7 @@ public:
    S32 getGridSize(lua_State *L);
 
    // Implement LevelLoader abstract method
-   void processLevelLoadLine(int argc, const char **argv);
+   void processLevelLoadLine(int argc, U32 id, const char **argv);
 };
 
 

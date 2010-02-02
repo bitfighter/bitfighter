@@ -58,9 +58,12 @@ const int LevelLoader::MaxArgLen;
 #define MaxArgLen LevelLoader::MaxArgLen
 
 static char *argv[MaxArgc];
+static char id[MaxIdLen];
+
 static char argv_buffer[MaxArgc][MaxArgLen];
 static int argc;
 static int argLen = 0;
+static int idLen = 0;
 static const char *argString;
 
 
@@ -82,13 +85,27 @@ inline void addCharToArg(char c)
       }
 }
 
+
+inline void addCharToID(char c)
+{
+   if(c >= '0' && c <= '9')         // Limit ourselves to numerics
+      if(idLen < MaxIdLen - 1)
+      {
+         id[idLen] = c;
+         idLen++;
+      }
+}
+
+
 inline void addArg()
 {
    if(argc < MaxArgc)
    {
-      argv[argc][argLen] = 0;
+      argv[argc][argLen] = 0;       // Null terminate the string
+      id[idLen] = 0;                // and this one too...
       argc++;
       argLen = 0;
+      idLen = 0;
    }
 }
 
@@ -102,6 +119,8 @@ int LevelLoader::parseArgs(const char *string)
 {
    argc = 0;
    argLen = 0;
+   idLen = 0;
+
    argString = string;
    char c;
 
@@ -118,6 +137,7 @@ stateEatingWhitespace:
       goto stateReadString;
    if(c == '#')
       goto stateEatingComment;
+
 stateAddCharToIdent:
    addCharToArg(c);
    c = getNextChar();
@@ -136,7 +156,30 @@ stateAddCharToIdent:
       addArg();
       goto stateReadString;
    }
+   if(c == '!' && argc == 0)     // ID's can only appear in first arg
+   {
+      goto stateAddCharToID;
+   }
    goto stateAddCharToIdent;
+
+stateAddCharToID:
+   c = getNextChar();           // First time here we know c == '!', so let's just move on to the next one
+
+   if(c == ' ' || c == '\t')
+   {
+      addArg();
+      goto stateEatingWhitespace;
+   }
+   if(c == '\n' || !c)
+   {
+      addArg();
+      goto stateLineParseDone;
+   }
+
+   addCharToID(c);
+   goto stateAddCharToID;
+
+
 stateReadString:
    c = getNextChar();
    if(c == '\"')
@@ -149,32 +192,7 @@ stateReadString:
       addArg();
       goto stateLineParseDone;
    }
-   /*    Handle newlines and tabs embedded in string itself...  probably better not to.
-   if(c == '\\')
-   {
-      c = getNextChar();
-      if(c == 'n')
-      {
-         addCharToArg('\n');
-         goto stateReadString;
-      }
-      if(c == 't')
-      {
-         addCharToArg('\');
-         goto stateReadString;
-      }
-      if(c == '\\')
-      {
-         addCharToArg('\\');
-         goto stateReadString;
-      }
-      if(c == '\n' || !c)
-      {
-         addArg();
-         goto stateLineParseDone;
-      }
-   }
-   */
+
    addCharToArg(c);
    goto stateReadString;
 stateEatingComment:
@@ -183,12 +201,16 @@ stateEatingComment:
       goto stateEatingComment;
 stateLineParseDone:
    if(argc)
-      processLevelLoadLine(argc, (const char **) argv);
+   {
+      processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv);
+   }
    argc = 0;
    argLen = 0;
+   idLen = 0;
+
    if(c)
       goto stateEatingWhitespace;
-   return 0;     
+   return 0;
 }  // parseArgs
 
 

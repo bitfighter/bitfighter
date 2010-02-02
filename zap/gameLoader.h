@@ -41,9 +41,10 @@ public:
    // Put these in here so we can access them from luaLevelGenerator
    const static int MaxArgc = 128;    // At most MaxArgc args on a single line,
    const static int MaxArgLen = 100;  // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
+   const static int MaxIdLen = 11;    // Max 32-bit int is 10 digits, plus room for a null
 
    bool initLevelFromFile(const char *file);
-   virtual void processLevelLoadLine(int argc, const char **argv) = 0;
+   virtual void processLevelLoadLine(int argc, U32 id, const char **argv) = NULL;
    int parseArgs(const char *string);
 };
 

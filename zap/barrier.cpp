@@ -39,6 +39,8 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 U32 Barrier::mBarrierChangeIndex = 1;
 
+
+// Given the points in vec, fill barrierEnds with... something
 void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)
 {
    if(vec.size() == 1)     // Protect against bad data
@@ -215,6 +217,7 @@ bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 
    return true;
 }
+
 
 // Clears out overlapping barrier lines for better rendering appearance
 // This is effectively called on every pair of intersecting barriers

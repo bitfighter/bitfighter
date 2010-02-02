@@ -234,7 +234,7 @@ public:
    StringTableEntry getCurrentLevelName();   // Return name of level currently in play
    StringTableEntry getCurrentLevelType();   // Return type of level currently in play
 
-   void processLevelLoadLine(int argc, const char **argv);
+   void processLevelLoadLine(int argc, U32 id, const char **argv);
    bool isServer() { return true; }
    void idle(U32 timeDelta);
    void gameEnded();
@@ -299,15 +299,15 @@ extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 // increased all but master 1/15/10
- 
+
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
 #define CS_PROTOCOL_VERSION 22     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 650          // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "013"    // Change this with every release -- for display purposes only, string, will also be used for name of installer on windows
- 
+
 };
 
- 
+
 #endif
 
 

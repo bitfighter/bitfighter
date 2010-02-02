@@ -189,13 +189,81 @@ TNL_IMPLEMENT_NETOBJECT(LineItem);
 LineItem::LineItem()
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask |= CommandMapVisType; 
+   mObjectTypeMask |= CommandMapVisType;
 }
 
+extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
 void LineItem::render()
 {
-   renderLineItem(mPolyBounds, mWidth, mTeam);
+   Vector<Point> barPoints;
+
+   constructBarrierPoints(verts, width, barPoints);      // TODO: Convert to methodology below
+
+   GameType *gt = gClientGame->getGameType();
+   TNLAssert(gt, "Invalid gameType in LineItem::render()!");
+
+   glColor(gt->getTeamColor(mTeam));
+
+   for(S32 i = 0; i < barPoints.size(); i += 2)
+   {
+      Point dir = barPoints[i+1] - barPoints[i];
+      Point crossVec(dir.y, -dir.x);
+      crossVec.normalize(width * 0.5);
+
+      glBegin(GL_POLYGON);
+         glVertex(barPoints[i] + crossVec);
+         glVertex(barPoints[i] - crossVec);
+         glVertex(barPoints[i+1] - crossVec);
+         glVertex(barPoints[i+1] + crossVec);
+      glEnd();
+   }
+
+   /*
+   at data received time...
+   Vector<Points> mRenderPoints;     // this will be stored
+
+   Vector<Point> barPoints;
+
+   constructBarrierPoints(verts, width, barPoints);      // TODO: Should be done once and stored!  Actually, we shuld be storing the coords to be fed to the GL_POLY rendering below
+
+   for(S32 i = 0; i < barPoints.size(); i += 2)
+   {
+      Point dir = barPoints[i+1] - barPoints[i];
+      Point crossVec(dir.y, -dir.x);
+      crossVec.normalize(width * 0.5);
+
+      mRenderPoints.pushBack(barPoints[i] + crossVec);
+      mRenderPoints.pushBack(barPoints[i] - crossVec);
+      mRenderPoints.pushBack(barPoints[i+1] - crossVec);
+      mRenderPoints.pushBack(barPoints[i+1] + crossVec);
+   }
+
+
+   at render time...
+
+   GameType *gt = gClientGame->getGameType();
+   TNLAssert(gt, "Invalid gameType in LineItem::render()!");
+
+   glColor(gt->getTeamColor(mTeam));
+
+
+   TNLAssert(mRenderPoints.size() % 4 == 0, "Invalid number of points in mRenderPoints vector!");
+   for(S32 i = 0; i < mRenderPoints.size(); i += 4)
+   {
+      glBegin(GL_POLYGON);
+         glVertex(mRenderPoints[i]);
+         glVertex(mRenderPoints[i+1]);
+         glVertex(mRenderPoints[i+2]);
+         glVertex(mRenderPoints[i+3]);
+      glEnd();
+   }
+
+
+   */
+
+
+   //renderLineItem(mPolyBounds, mWidth, mTeam);
 }
 
 // This object should be drawn below others

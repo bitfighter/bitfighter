@@ -52,6 +52,29 @@ void glColor(Color c, float alpha)
    glColor4f(c.r, c.g, c.b, alpha);
 }
 
+
+void void drawSquare(Point pos, U32 size, bool filled)
+{
+   glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
+      glVertex2f(pos.x - size, pos.y - size);
+      glVertex2f(pos.x + size, pos.y - size);
+      glVertex2f(pos.x + size, pos.y + size);
+      glVertex2f(pos.x - size, pos.y + size);
+   glEnd();
+}
+
+void drawSquare(Point pos, U32 size)
+{
+   drawSquare(pos, size, false);
+}
+
+
+void drawFilledSquare(Point pos, U32 size)
+{
+   drawSquare(pos, size, true);
+}
+
+
 void drawCircle(Point pos, F32 radius)
 {
    glBegin(GL_LINE_LOOP);
@@ -1115,7 +1138,7 @@ void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
       glVertex2f(  12,   5);
       glVertex2f(-20,  20);
       glVertex2f( -2,   3);
-      glVertex2f( -12,  -5); 
+      glVertex2f( -12,  -5);
    glEnd();
 
    glLineWidth(3);
@@ -1235,41 +1258,23 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
    if( (!ship && team != -1) || (ship && ship->getTeam() != team && team != -1) )
       return;
 
-   c = gt->getTeamColor(team);      // Handles case of team = -1 & -2 properly
-   glColor(c);
+   glColor(gt->getTeamColor(team));       // Handles teams -1  and -2 properly
    UserInterface::drawAngleString_fixed(pos.x, pos.y, size, pos.angleTo(dir), text.c_str());
 }
-
-
-void renderLineItem(Vector<Point> &verts, U32 width, S32 team)
-{
-   glLineWidth(width);
-   glBegin(GL_LINE_STRIP);
-   
-
-   for(S32 i = 0; i < verts.size(); i++)
-      glVertex(verts[i]);
-
-   glEnd();
-
-   glLineWidth(gDefaultLineWidth);
-}
-
 
 
 void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 {
    Point cross(normal.y, -normal.x);
+
    if(c.r < 0.7)
       c.r = 0.7;
    if(c.g < 0.7)
       c.g = 0.7;
    if(c.b < 0.7)
       c.b = 0.7;
-   if(enabled)
-      glColor(c);
-   else
-      glColor(c * 0.6);
+
+   glColor(c * enabled ? 1 : 0.6);
 
    glBegin(GL_LINE_LOOP);
       glVertex(pos + cross * 12);

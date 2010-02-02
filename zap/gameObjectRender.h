@@ -38,6 +38,9 @@ namespace Zap
 {
 extern void glVertex(Point p);
 extern void glColor(Color c, float alpha = 1);
+extern void drawSquare(Point pos, U32 size);
+extern void drawSquare(Point pos, U32 size, bool filled);
+extern void drawFilledSquare(Point pos, U32 size);
 extern void drawCircle(Point pos, F32 radius);
 extern void drawFilledCircle(Point pos, F32 radius);
 extern void drawFilledSector(Point pos, F32 radius, F32 start, F32 end);
@@ -92,7 +95,6 @@ void renderAsteroid(Point pos, S32 design, F32 radius, Color c, F32 alpha = 1);
 void renderResourceItem(Point pos, F32 alpha = 1);
 void renderSoccerBall(Point pos, F32 alpha = 1);
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);
-void renderLineItem(Vector<Point> &verts, U32 width, S32 team);
 
 
 extern void renderForceFieldProjector(Point pos, Point normal);

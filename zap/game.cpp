@@ -541,7 +541,7 @@ bool ServerGame::loadLevel(string filename)
 
 // Process a single line of a level file, loaded in gameLoader.cpp
 // argc is the number of parameters on the line, argv is the params themselves
-void ServerGame::processLevelLoadLine(int argc, const char **argv)
+void ServerGame::processLevelLoadLine(int argc, U32 id, const char **argv)
 {
    // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
    if(!stricmp(argv[0], "BotsPerTeam"))
@@ -927,7 +927,7 @@ S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 Point ClientGame::worldToScreenPoint(Point p)
 {
    GameObject *controlObject = mConnectionToServer->getControlObject();
-   
+
    Ship *ship = dynamic_cast<Ship *>(controlObject);
    if(!ship)
       return Point(0,0);

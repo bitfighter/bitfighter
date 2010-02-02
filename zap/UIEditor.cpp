@@ -211,7 +211,7 @@ GameItemRec itemDef[] = {
    { "FlagItem",            false,    true,      true,        false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
-   { "LineItem",            true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineArt",  "LineArt",      "Decorative lines." },
+   { "LineItem",            true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
@@ -227,22 +227,22 @@ GameItemRec itemDef[] = {
    { "Turret",              false,    true,      true,        false,   true,    geomPoint,      'T',    false,  "Turrets",                "Turret",   "Turret",       "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
    { "ForceFieldProjector", false,    true,      true,        false,   true ,   geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "ForceFld",     "Creates a force field that lets only team members pass. [H]" },
    { "GoalZone",            false,    true,      true,        false,   false,   geomPoly,        0,     false,  "Goal zones",             "Goal",     "Goal",         "Target area used in a variety of games." },
-   { "TextItem",            false,    true,      true,        true,    false,   geomSimpleLine,  0,     false,  "Text Items",             "Text",     "Text",         "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
+   { "TextItem",            false,    true,      true,        true,    false,   geomSimpleLine,  0,     false,  "Text Items",             "TextItem", "Text",         "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
    { "BotNavMeshZone",      false,    false,     true,        false,   false,   geomPoly,        0,     false,  "NavMesh Zones",          "NavMesh",  "NavMesh",      "Creates navigational mesh zone for robots." },
 
    { NULL,                  false,    false,     false,       false,   false,   geomNone,        0,     false,  "",                       "",         "",             "" },
 };
 
 
-bool WorldItem::hasWidth() 
-{ 
-   return itemDef[index].hasWidth; 
+bool WorldItem::hasWidth()
+{
+   return itemDef[index].hasWidth;
 }
 
 
-GeomType WorldItem::geomType() 
-{ 
-   return itemDef[index].geom; 
+GeomType WorldItem::geomType()
+{
+   return itemDef[index].geom;
 }
 
 
@@ -458,7 +458,7 @@ void EditorUserInterface::loadLevel()
 extern S32 gMaxPlayers;
 
 // Process a line read from level file
-void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
+void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **argv)
 {
    U32 index;
    U32 strlenCmd = (U32) strlen(argv[0]);
@@ -490,6 +490,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, const char **argv)
       i.team = -1;
       i.selected = false;
       i.width = 0;
+      i.id = id;
 
       if(itemDef[index].hasTeam)
       {
@@ -1209,22 +1210,6 @@ void EditorUserInterface::render()
       glColor3f(0,1,1);
       drawCenteredString(vertMargin, 14, "Non-wall objects hidden.  Hit Ctrl-A to restore display.");
    }
-
-   //// TODO: del following block
-   //glColor3f(1,0,0); // red for now
-
-   //for(S32 i = 0; i < gBoxesH; i++)
-   //   for(S32 j = 0; j < gBoxesV; j++)
-   //   {
-
-   //   glBegin(GL_LINE_LOOP);
-   //      glVertex(convertLevelToCanvasCoord(Point(testBox[i][j].bounds.min.x, testBox[i][j].bounds.min.y)));
-   //      glVertex(convertLevelToCanvasCoord(Point(testBox[i][j].bounds.max.x, testBox[i][j].bounds.min.y)));
-   //      glVertex(convertLevelToCanvasCoord(Point(testBox[i][j].bounds.max.x, testBox[i][j].bounds.max.y)));
-   //      glVertex(convertLevelToCanvasCoord(Point(testBox[i][j].bounds.min.x, testBox[i][j].bounds.max.y)));
-   //   glEnd();
-   //   }
-
 }
 
 // Draw the vertices for a polygon or line item (i.e. walls)
@@ -1262,12 +1247,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 
    bool hollow = style == HighlightedVertex || style == SelectedItemVertex;
 
-   glBegin(hollow ? GL_LINE_LOOP : GL_POLYGON);
-      glVertex2f(v.x - size, v.y - size);
-      glVertex2f(v.x + size, v.y - size);
-      glVertex2f(v.x + size, v.y + size);
-      glVertex2f(v.x - size, v.y + size);
-   glEnd();
+   drawSquare(v, size, !hollow);
 
 
    if(number != -1)     // Draw vertex numbers
@@ -1280,6 +1260,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 
 extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
+// Draw barriermMakers (walls) or lineItems
 void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, F32 width, F32 alpha)
 {
    Vector<Point> barPoints;
@@ -1289,7 +1270,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
    if(itemType == ItemBarrierMaker)
       glColor(Color(.5, .5, 1), alpha);    // pale blue
    else if(itemType == ItemLineItem)
-      glColor(Color(.7,.7,.7), alpha);    // whiteish... for now
+      glColor(Color(.7,.7,.7), alpha);     // whiteish... for now
    else
       TNLAssert(false, "Invalid game item type!");
 
@@ -1307,10 +1288,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
       glEnd();
    }
 
-   if(selected)
-      glColor(yellow, alpha);
-   else
-      glColor(blue, alpha);
+   glColor(selected ? yellow : blue, alpha);
 
    glLineWidth(3);
    renderPoly(verts, false);
@@ -1327,6 +1305,13 @@ void EditorUserInterface::renderPoly(Vector<Point> verts, bool isDockItem)
          glVertex2f(v.x, v.y);
       }
    glEnd();
+}
+
+
+static inline void labelSimpleLineItem(Point pos, U32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
+{
+   drawStringc(pos.x, pos.y + labelSize + 2, labelSize, itemLabelTop);
+   drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
 }
 
 
@@ -1390,12 +1375,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          if(item.selected || (item.litUp && vertexToLightUp == -1))     // ScriptItems are never selected
             glColor(yellow);
 
-         glBegin(GL_POLYGON);
-            glVertex2f(pos.x - 5, pos.y - 5);   // Draw origin of item (square box)
-            glVertex2f(pos.x + 5, pos.y - 5);
-            glVertex2f(pos.x + 5, pos.y + 5);
-            glVertex2f(pos.x - 5, pos.y + 5);
-         glEnd();
+         drawFilledSquare(pos, 5);                 // Draw origin of item (square box)
 
          if(!isDockItem)
          {
@@ -1482,53 +1462,32 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          }
 
          // If either end is selected, draw a little white box around it
-         glColor(labelColor, alpha);
          if(item.vertSelected[0] || (item.litUp && vertexToLightUp == 0))
          {
-            glBegin(GL_LINE_LOOP);
-               glVertex2f(pos.x - 7, pos.y - 7);
-               glVertex2f(pos.x + 7, pos.y - 7);
-               glVertex2f(pos.x + 7, pos.y + 7);
-               glVertex2f(pos.x - 7, pos.y + 7);
-            glEnd();
+            glColor(labelColor, alpha);
+            drawSquare(pos, 7);
 
             if(item.index == ItemTeleporter)
-            {
-               drawStringc(pos.x, pos.y + labelSize + 2, labelSize, "Teleport");
-               drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, "Intake Vortex");
-            }
+               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, "Intake Vortex");
+
             else if(item.index == ItemSpeedZone)
-            {
-               drawStringc(pos.x, pos.y + labelSize + 2, labelSize, "GoFast");
-               drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, "Location");
-            }
+               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, "Location");
+
             else if(item.index == ItemTextItem)
-            {
-               drawStringc(pos.x, pos.y + labelSize + 2, labelSize, "Text Item");
-               drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, "Start");
-            }
+               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, "Start");
          }
 
          // Outline selected vertex, and label it
          if(item.vertSelected[1] || (item.litUp && vertexToLightUp == 1))
          {
             glColor(labelColor);
-            glBegin(GL_LINE_LOOP);
-               glVertex2f(dest.x - 7, dest.y - 7);
-               glVertex2f(dest.x + 7, dest.y - 7);
-               glVertex2f(dest.x + 7, dest.y + 7);
-               glVertex2f(dest.x - 7, dest.y + 7);
-            glEnd();
+            drawSquare(dest, 7);
 
             if(item.index == ItemTeleporter)
-            {
-               drawStringc(dest.x, dest.y + labelSize + 2, labelSize, "Teleport");
-               drawStringc(dest.x, dest.y + 2 * labelSize + 5, labelSize, "Destination");
-            }
+               labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Destination");
+
             else if(item.index == ItemSpeedZone)
-            {
-               drawStringc(dest.x, dest.y + labelSize + 2, labelSize, "GoFast");
-               drawStringc(dest.x, dest.y + 2 * labelSize + 5, labelSize, "Direction");
+               labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Direction");
             }
          }
       }
@@ -1825,12 +1784,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 void EditorUserInterface::renderGenericItem(Point pos, Color c, F32 alpha)
 {
    glColor(c, alpha);
-   glBegin(GL_POLYGON);          // Draw box in which we'll put our letter
-      glVertex2f(pos.x - 8, pos.y - 8);
-      glVertex2f(pos.x + 8, pos.y - 8);
-      glVertex2f(pos.x + 8, pos.y + 8);
-      glVertex2f(pos.x - 8, pos.y + 8);
-   glEnd();
+   drawFilledSquare(pos, 8);  // Draw filled box in which we'll put our letter
 }
 
 
@@ -2310,7 +2264,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       // Instantiate object so we are in essence dragging a non-dock item
       Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
-      // Gross lionstruct avoids extra construction
+      // Gross struct avoids extra construction
       WorldItem item =
          (itemDef[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
          // For polygon items, try to match proportions of the dock rendering.  Size will vary by map scale.
@@ -2438,7 +2392,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
       if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          mItems[i].width += amt - (S32) mItems[i].width % amt;    // Handles rounding
-         
+
          if(mItems[i].width > LineItem::MAX_LINE_WIDTH)
             mItems[i].width = LineItem::MAX_LINE_WIDTH;
 
@@ -2837,11 +2791,17 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       return;
    }
 
+   else if(ascii == '#' || ascii == '!')
+   {
+      // Edit id... somehow...
+   }
+
    else if(ascii >= '0' && ascii <= '9')           // Change team affiliation of selection with 0-9 keys
    {
       setCurrentTeam(ascii - '1');
       return;
    }
+
    // Ctrl-left click is same as right click for Mac users
    else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && getKeyState(KEY_CTRL)))
    {
@@ -3489,7 +3449,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          if(gGameParamUserInterface.gameParams[i].substr(0, 5) != "Team ")  // Don't write out teams here... do it below!
             s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
 
-      for(S32 i = 0; i < mTeams.size(); i++) 
+      for(S32 i = 0; i < mTeams.size(); i++)
          s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
@@ -3504,6 +3464,10 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
                continue;
 
             s_fprintf(f, "%s", itemDef[mItems[i].index].name);
+
+            // Write id if it's not 0
+            if(mItems[i].id > 0)
+               s_fprintf(f, "!%d", itemDef[mItems[i].index].id);
 
             if(itemDef[mItems[i].index].hasTeam)
                s_fprintf(f, " %d", mItems[i].team);
@@ -3701,10 +3665,11 @@ void EditorMenuUserInterface::render()
 ///////////////////////////////////////////////////////////////////
 
 // Primary constructor
-WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height)
+WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height, U32 itemid)
 {
    index = itemType;
    team = xteam;
+   id = itemid;
 
    selected = false;
    verts.push_back(pos);
@@ -3756,6 +3721,7 @@ WorldItem::WorldItem(const WorldItem &worldItem)
    // First the simple stuff
    index = worldItem.index;
    team = worldItem.team;
+   id = worldItem.id;
    width = worldItem.width;
    selected = worldItem.selected;
    litUp = worldItem.litUp;

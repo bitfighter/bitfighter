@@ -14,6 +14,10 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
+// Editor: do simpleLineItems still dispaly properly when start/end points selected?
+// How do lineItems look? ==> if good, implement advanced logic, and test again
+// Add some sample IDs to levels... !1234
+// Do ids come through OK?  How about missing ones?  Invalid ones? Long ones? short ones? negative ones?  junk ones?  mutliple ones?  A series of ones? etc.
 
 // TODO:
 // Create color global for reticle color
@@ -1265,7 +1269,7 @@ void processStartupParams()
    // Put any saved filename into the editor file entry thingy
    gLevelNameEntryUserInterface.setString(gIniSettings.lastEditorName);
 
-   
+
 
    if(gCmdLineSettings.password != "")
       gServerPassword = gCmdLineSettings.password.c_str();
