@@ -15,7 +15,6 @@
 //Test:
 // Do ships remember their spawn points?  How about robots?
 // Editor: do simpleLineItems still dispaly properly when start/end points selected?
-// Add some sample IDs to levels... !1234
 // Do ids come through OK?  How about missing ones?  Invalid ones? Long ones? short ones? negative ones?  junk ones?  mutliple ones?  A series of ones? etc.
 
 // TODO:

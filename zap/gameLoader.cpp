@@ -103,10 +103,8 @@ inline void addArg()
    if(argc < MaxArgc)
    {
       argv[argc][argLen] = 0;       // Null terminate the string
-      id[idLen] = 0;                // and this one too...
       argc++;
       argLen = 0;
-      idLen = 0;
    }
 }
 
@@ -203,9 +201,10 @@ stateEatingComment:
 stateLineParseDone:
    if(argc)
    {
+      id[idLen] = 0;
       processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv);
    }
-   argc = 0;
+   argc = 0; 
    argLen = 0;
    idLen = 0;
 
