@@ -104,6 +104,7 @@ void TextItem::onAddedToGame(Game *theGame)
    getGame()->mObjectsLoaded++;
 }
 
+
 // Bounding box for quick collision-possibility elimination, and display scoping purposes
 void TextItem::computeExtent()
 {
@@ -114,10 +115,16 @@ void TextItem::computeExtent()
    F32 sinang = sin(angle);
    F32 cosang = cos(angle);
 
-   Point c1 = Point(pos.x - buf * sinang, (pos.y + mSize) + buf * cosang);
-   Point c2 = Point(pos.x + mSize * sinang, (pos.y + mSize) - mSize * cosang);
-   Point c3 = Point(pos.x + len * cosang + mSize * sinang, (pos.y + mSize) + len * sinang - mSize * cosang);
-   Point c4 = Point(pos.x + len * cosang - buf * sinang, (pos.y + mSize) + len * sinang + buf * cosang);
+   F32 descenderFactor = .35;    // To account for y, g, j, etc.
+   F32 h = mSize * (1 + descenderFactor);
+   F32 w = len * 1.05;           // 1.05 adds just a little horizontal padding for certain words with trailing ys or other letters that are just a tiny bit longer than calculated
+   F32 x = pos.x + mSize * descenderFactor * sinang;
+   F32 y = pos.y + mSize * descenderFactor * cosang;
+
+   Point c1 = Point(x - h * sinang * .5, y);
+   Point c2 = Point(x + w * cosang - h * sinang * .5, y + w * sinang);
+   Point c3 = Point(x + h * sinang * .5 + w * cosang, y - h * cosang + w * sinang);
+   Point c4 = Point(x + h * sinang * .5, y - h * cosang);
 
    F32 minx = min(c1.x, min(c2.x, min(c3.x, c4.x)));
    F32 miny = min(c1.y, min(c2.y, min(c3.y, c4.y)));
@@ -128,6 +135,7 @@ void TextItem::computeExtent()
 
    setExtent(extent);
 }
+
 
 bool TextItem::getCollisionPoly(Vector<Point> &polyPoints)
 {
@@ -187,7 +195,7 @@ TNL_IMPLEMENT_NETOBJECT(LineItem);
 
 // Constructor
 LineItem::LineItem()
-{
+{ 
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= CommandMapVisType;
 }
@@ -196,74 +204,40 @@ extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<P
 
 void LineItem::render()
 {
-   Vector<Point> barPoints;
+   // Don't render opposing team's text items
+   if(!gClientGame || !gClientGame->getConnectionToServer())      // Not sure if this is really needed...
+      return;
 
-   constructBarrierPoints(mPolyBounds, mWidth, barPoints);      // TODO: Convert to methodology below
-
-   GameType *gt = gClientGame->getGameType();
-   TNLAssert(gt, "Invalid gameType in LineItem::render()!");
-
-   glColor(gt->getTeamColor(mTeam));
-
-   for(S32 i = 0; i < barPoints.size(); i += 2)
-   {
-      Point dir = barPoints[i+1] - barPoints[i];
-      Point crossVec(dir.y, -dir.x);
-      crossVec.normalize(mWidth * 0.5);
-
-      glBegin(GL_POLYGON);
-         glVertex(barPoints[i] + crossVec);
-         glVertex(barPoints[i] - crossVec);
-         glVertex(barPoints[i+1] - crossVec);
-         glVertex(barPoints[i+1] + crossVec);
-      glEnd();
-   }
-
-   /*
-   at data received time...
-   Vector<Points> mRenderPoints;     // this will be stored
-
-   Vector<Point> barPoints;
-
-   constructBarrierPoints(verts, width, barPoints);      // TODO: Should be done once and stored!  Actually, we shuld be storing the coords to be fed to the GL_POLY rendering below
-
-   for(S32 i = 0; i < barPoints.size(); i += 2)
-   {
-      Point dir = barPoints[i+1] - barPoints[i];
-      Point crossVec(dir.y, -dir.x);
-      crossVec.normalize(width * 0.5);
-
-      mRenderPoints.pushBack(barPoints[i] + crossVec);
-      mRenderPoints.pushBack(barPoints[i] - crossVec);
-      mRenderPoints.pushBack(barPoints[i+1] - crossVec);
-      mRenderPoints.pushBack(barPoints[i+1] + crossVec);
-   }
-
-
-   at render time...
+   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+   if( (!ship && mTeam != -1) || (ship && ship->getTeam() != mTeam && mTeam != -1) )
+      return;
 
    GameType *gt = gClientGame->getGameType();
    TNLAssert(gt, "Invalid gameType in LineItem::render()!");
 
    glColor(gt->getTeamColor(mTeam));
 
+   //TNLAssert(mRenderPoints.size() % 4 == 0, "Invalid number of points in mRenderPoints vector!");
 
-   TNLAssert(mRenderPoints.size() % 4 == 0, "Invalid number of points in mRenderPoints vector!");
-   for(S32 i = 0; i < mRenderPoints.size(); i += 4)
-   {
-      glBegin(GL_POLYGON);
-         glVertex(mRenderPoints[i]);
-         glVertex(mRenderPoints[i+1]);
-         glVertex(mRenderPoints[i+2]);
-         glVertex(mRenderPoints[i+3]);
-      glEnd();
-   }
+   glBegin(GL_LINE_STRIP); 
+   for(S32 i = 0; i < mPolyBounds.size(); i++)
+      glVertex(mPolyBounds[i]);
+   glEnd();
 
+   //}
+   //else
+   //{
+   //   for(S32 i = 0; i < mRenderPoints.size(); i += 4)
+   //   { 
+   //      glBegin(GL_POLYGON);
+   //         glVertex(mRenderPoints[i]);
+   //         glVertex(mRenderPoints[i+1]);
+   //         glVertex(mRenderPoints[i+2]);
+   //         glVertex(mRenderPoints[i+3]);
+   //      glEnd();
+   //   }
+   //}
 
-   */
-
-
-   //renderLineItem(mPolyBounds, mWidth, mTeam);
 }
 
 // This object should be drawn below others
@@ -325,11 +299,10 @@ void LineItem::idle(GameObject::IdleCallPath path)
    // Do nothing
 }
 
-static const U32 BIT_COUNT = 8;
 
 U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
+   //stream->writeRangedU32(mWidth, 0, MAX_LINE_WIDTH);
    stream->write(mTeam);
 
    Polyline::packUpdate(connection, stream);
@@ -340,14 +313,37 @@ U32 LineItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
 void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
+   //mWidth = stream->readRangedU32(0, MAX_LINE_WIDTH);
    stream->read(&mTeam);
 
-   if(Polyline::unpackUpdate(connection, stream))
-      computeExtent();
+   if(!Polyline::unpackUpdate(connection, stream))
+      return;
+
+   //Vector<Point> points;
+
+   //constructBarrierPoints(mPolyBounds, mWidth, points); 
+
+   //for(S32 i = 0; i < points.size(); i += 2)
+   //{
+   //   Point dir = points[i+1] - points[i];
+   //   Point crossVec(dir.y, -dir.x);
+   //   crossVec.normalize(mWidth * 0.5);
+
+   //   mRenderPoints.push_back(points[i] + crossVec);
+   //   mRenderPoints.push_back(points[i] - crossVec);
+   //   mRenderPoints.push_back(points[i+1] - crossVec);
+   //   mRenderPoints.push_back(points[i+1] + crossVec);
+   //}
+
+   //Rect extent(mRenderPoints[0], mRenderPoints[0]);
+
+   //for(S32 i = 1; i < mRenderPoints.size(); i++)
+   //   extent.unionPoint(mRenderPoints[i]);
+
+   //setExtent(extent);
+
+   setExtent(computePolyExtents());
 }
-
-
 
 
 };

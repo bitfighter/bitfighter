@@ -88,7 +88,7 @@ class LineItem : public GameObject, public Polyline
 {
 private:
    typedef GameObject Parent;
-
+   Vector<Point> mRenderPoints;    // Precomputed points used for rendering linework
 public:
 
    U32 mWidth;           // Width of line

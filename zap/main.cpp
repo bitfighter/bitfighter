@@ -15,7 +15,6 @@
 //Test:
 // Do ships remember their spawn points?  How about robots?
 // Editor: do simpleLineItems still dispaly properly when start/end points selected?
-// How do lineItems look? ==> if good, implement advanced logic, and test again
 // Add some sample IDs to levels... !1234
 // Do ids come through OK?  How about missing ones?  Invalid ones? Long ones? short ones? negative ones?  junk ones?  mutliple ones?  A series of ones? etc.
 
@@ -28,6 +27,7 @@ XXX need to document timers, main function XXX
 <ul>
 <h4>Big changes</h4>
 <li>Added energy item</li>
+<li>Added ability to add arbitrary linework to levels, complementing existing text.  To add lines, hold ~ and right-click.</li>
 <li>Started trasnsition of Join menu into Game Lobby</li>
 
 <h4>Smaller changes</h4>
@@ -59,6 +59,7 @@ XXX need to document timers, main function XXX
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
 <li>Fixed turret/forcefield "in the middle of space" bug</li>
+<li>Fixed textItem bounds miscalculation that caused large text to "jump" onto screen</li>
 
 
 */

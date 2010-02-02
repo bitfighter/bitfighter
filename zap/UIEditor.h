@@ -344,7 +344,7 @@ public:
    void renderItem(WorldItem &i, bool isBeingEdited, bool isDockItem, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, F32 alpha);
 
-   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, F32 width, F32 alpha);   // Render walls & lineItems
+   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha);   // Render walls & lineItems
    void renderPoly(Vector<Point> verts, bool isDockItem);
    static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 

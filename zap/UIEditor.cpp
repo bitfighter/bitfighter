@@ -1015,7 +1015,7 @@ void EditorUserInterface::render()
       if(mCreatingPoly) // Wall
          glColor(yellow);
       else              // LineItem
-         glColor3f(1, 0, 1);
+         glColor(getTeamColor(mNewItem.team));
 
       renderPoly(mNewItem.verts, false);
 
@@ -1261,7 +1261,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
 // Draw barriermMakers (walls) or lineItems
-void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, F32 width, F32 alpha)
+void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha)
 {
    Vector<Point> barPoints;
 
@@ -1270,7 +1270,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
    if(itemType == ItemBarrierMaker)
       glColor(Color(.5, .5, 1), alpha);    // pale blue
    else if(itemType == ItemLineItem)
-      glColor(Color(.7,.7,.7), alpha);     // whiteish... for now
+      glColor(getTeamColor(team), alpha);     
    else
       TNLAssert(false, "Invalid game item type!");
 
@@ -1279,7 +1279,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
       Point dir = barPoints[j+1] - barPoints[j];
       Point crossVec(dir.y, -dir.x);
       crossVec.normalize(width * 0.5);
-
+ 
       glBegin(GL_POLYGON);
          glVertex(convertLevelToCanvasCoord(barPoints[j] + crossVec));
          glVertex(convertLevelToCanvasCoord(barPoints[j] - crossVec));
@@ -1288,7 +1288,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
       glEnd();
    }
 
-   glColor(selected ? yellow : blue, alpha);
+   glColor(selected ? yellow : getTeamColor(team), alpha);
 
    glLineWidth(3);
    renderPoly(verts, false);
@@ -1486,14 +1486,14 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             if(item.index == ItemTeleporter)
                labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Destination");
 
-            else if(item.index == ItemSpeedZone)
+            else if(item.index == ItemSpeedZone || item.index == ItemTextItem)
                labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Direction");
          }
       }
    }
    else if(itemDef[item.index].geom == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
    {
-      renderPolyline(item.index, item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.width / mGridSize, alpha);
+      renderPolyline(item.index, item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.team, item.width / mGridSize, alpha);
       renderLinePolyVertices(item, alpha);
    }
 
@@ -1993,19 +1993,28 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    {
       if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
       {
-         // Get team affiliation from dockItem of same type
-         for(S32 j = 0; j < mDockItems.size(); j++)
-         {
-            if(mDockItems[j].index == mItems[i].index)
-            {
-               if(mDockItems[j].team != mItems[i].team)
-               {
-                  mItems[i].team = mDockItems[j].team;
-                  anyChanged = true;
-               }
-               break;
-            }
-         }
+         if(!itemDef[mItems[i].index].hasTeam)
+         continue;
+
+         if(currentTeam < 0 && !itemDef[mItems[i].index].canHaveNoTeam)
+         continue; 
+
+         mItems[i].team = currentTeam;
+         anyChanged = true;
+
+         //// Get team affiliation from dockItem of same type
+         //for(S32 j = 0; j < mDockItems.size(); j++)
+         //{
+         //   if(mDockItems[j].index == mItems[i].index)
+         //   {
+         //      if(mDockItems[j].team != mItems[i].team)
+         //      {
+         //         mItems[i].team = mDockItems[j].team;
+         //         anyChanged = true;
+         //      }
+         //      break;
+         //   }
+         //}
       }
    }
 
@@ -2388,7 +2397,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
       {
          mItems[i].width += amt - (S32) mItems[i].width % amt;    // Handles rounding
 
@@ -2429,7 +2438,7 @@ void EditorUserInterface::splitBarrier()
                WorldItem newItem;
                newItem.index = mItems[i].index;
                newItem.team = -1;
-               newItem.width = 50;     // <--- probably don't want this
+               newItem.width = mItems[i].width;
                for(S32 k = j; k < mItems[i].verts.size(); )    // No k++!
                {
                   newItem.verts.push_back(mItems[i].verts[k]);
@@ -2863,7 +2872,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          mNewItem.verts.clear();
 
-         mNewItem.width = Barrier::BarrierWidth;
+         mNewItem.width = mNewItem.index == ItemBarrierMaker ? Barrier::BarrierWidth : 2;
          mNewItem.team = -1;
          mNewItem.selected = false;
          mNewItem.vertSelected.clear();
