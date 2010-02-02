@@ -56,6 +56,7 @@ const int LevelLoader::MaxArgLen;
 // For readability and laziness...
 #define MaxArgc LevelLoader::MaxArgc
 #define MaxArgLen LevelLoader::MaxArgLen
+#define MaxIdLen LevelLoader::MaxIdLen
 
 static char *argv[MaxArgc];
 static char id[MaxIdLen];

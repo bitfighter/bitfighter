@@ -47,13 +47,13 @@ void glVertex(Point p)
    glVertex2f(p.x, p.y);
 }
 
-void glColor(Color c, float alpha)
+inline void glColor(Color c, float alpha)
 {
    glColor4f(c.r, c.g, c.b, alpha);
 }
 
 
-void void drawSquare(Point pos, U32 size, bool filled)
+inline void drawSquare(Point pos, U32 size, bool filled)
 {
    glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
       glVertex2f(pos.x - size, pos.y - size);
@@ -63,19 +63,19 @@ void void drawSquare(Point pos, U32 size, bool filled)
    glEnd();
 }
 
-void drawSquare(Point pos, U32 size)
+inline void drawSquare(Point pos, U32 size)
 {
    drawSquare(pos, size, false);
 }
 
 
-void drawFilledSquare(Point pos, U32 size)
+inline void drawFilledSquare(Point pos, U32 size)
 {
    drawSquare(pos, size, true);
 }
 
 
-void drawCircle(Point pos, F32 radius)
+inline void drawCircle(Point pos, F32 radius)
 {
    glBegin(GL_LINE_LOOP);
 
@@ -1274,7 +1274,7 @@ void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
    if(c.b < 0.7)
       c.b = 0.7;
 
-   glColor(c * enabled ? 1 : 0.6);
+   glColor(c * (enabled ? 1 : 0.6));
 
    glBegin(GL_LINE_LOOP);
       glVertex(pos + cross * 12);

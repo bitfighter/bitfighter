@@ -198,7 +198,7 @@ void LineItem::render()
 {
    Vector<Point> barPoints;
 
-   constructBarrierPoints(verts, width, barPoints);      // TODO: Convert to methodology below
+   constructBarrierPoints(mPolyBounds, mWidth, barPoints);      // TODO: Convert to methodology below
 
    GameType *gt = gClientGame->getGameType();
    TNLAssert(gt, "Invalid gameType in LineItem::render()!");
@@ -209,7 +209,7 @@ void LineItem::render()
    {
       Point dir = barPoints[i+1] - barPoints[i];
       Point crossVec(dir.y, -dir.x);
-      crossVec.normalize(width * 0.5);
+      crossVec.normalize(mWidth * 0.5);
 
       glBegin(GL_POLYGON);
          glVertex(barPoints[i] + crossVec);

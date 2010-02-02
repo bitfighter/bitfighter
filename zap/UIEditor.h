@@ -309,7 +309,7 @@ private:
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();           // Return whether mouse is currently over the dock
 
-   void processLevelLoadLine(int argc, int id, const char **argv);
+   void processLevelLoadLine(U32 argc, U32 id, const char **argv);
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 

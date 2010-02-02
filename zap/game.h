@@ -234,7 +234,7 @@ public:
    StringTableEntry getCurrentLevelName();   // Return name of level currently in play
    StringTableEntry getCurrentLevelType();   // Return type of level currently in play
 
-   void processLevelLoadLine(int argc, U32 id, const char **argv);
+   void processLevelLoadLine(U32 argc, U32 id, const char **argv);
    bool isServer() { return true; }
    void idle(U32 timeDelta);
    void gameEnded();

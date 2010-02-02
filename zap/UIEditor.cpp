@@ -458,7 +458,7 @@ void EditorUserInterface::loadLevel()
 extern S32 gMaxPlayers;
 
 // Process a line read from level file
-void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **argv)
+void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)
 {
    U32 index;
    U32 strlenCmd = (U32) strlen(argv[0]);
@@ -467,7 +467,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **ar
       // Figure out how many arguments an item should have
       if(!strcmp(argv[0], itemDef[index].name))
       {
-         S32 minArgs = 3;
+         U32 minArgs = 3;
          if(itemDef[index].geom >= geomLine)
             minArgs += 2;
          if(itemDef[index].hasTeam)
@@ -484,7 +484,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **ar
    {
       WorldItem i;
       i.index = static_cast<GameItems>(index);
-      S32 arg = 1;
+      U32 arg = 1;
 
       // Should the following be moved to the constructor?  Probably...
       i.team = -1;
@@ -548,7 +548,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **ar
       }
       else        // Anything but a textItem or old-school NexusObject
       {
-         S32 coords = argc;
+         U32 coords = argc;
          if(index == ItemSpeedZone)
             coords = 4;    // 2 pairs of coords = 2 * 2 = 4
 
@@ -598,7 +598,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **ar
       // This will cover us if the user comes in, edits the level, saves, and exits without visiting the GameParameters menu
       // by simply echoing all the parameters back out to the level file without furter processing or review.
       string temp;
-      for (S32 i = 0; i < argc; i++)
+      for(U32 i = 0; i < argc; i++)
       {
          temp += argv[i];
          if(i < argc - 1)
@@ -615,7 +615,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **ar
             gEditorUserInterface.setWarnMessage("Invalid or missing GameType parameter", "Press [F3] to configure level");
 
          // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
-         for(S32 i = 1; i < argc; i++)
+         for(U32 i = 1; i < argc; i++)
             mGameTypeArgs.push_back(atoi(argv[i]));
       }
 
@@ -629,7 +629,7 @@ void EditorUserInterface::processLevelLoadLine(int argc, U32 id, const char **ar
       {
          mScriptLine = "";
          // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
-         for(S32 i = 1; i < argc; i++)
+         for(U32 i = 1; i < argc; i++)
          {
             if(i > 1)
                mScriptLine += " ";
@@ -1310,8 +1310,8 @@ void EditorUserInterface::renderPoly(Vector<Point> verts, bool isDockItem)
 
 static inline void labelSimpleLineItem(Point pos, U32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
 {
-   drawStringc(pos.x, pos.y + labelSize + 2, labelSize, itemLabelTop);
-   drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
+   UserInterface::drawStringc(pos.x, pos.y + labelSize + 2, labelSize, itemLabelTop);
+   UserInterface::drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
 }
 
 
@@ -1488,7 +1488,6 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
             else if(item.index == ItemSpeedZone)
                labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Direction");
-            }
          }
       }
    }
@@ -3467,7 +3466,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 
             // Write id if it's not 0
             if(mItems[i].id > 0)
-               s_fprintf(f, "!%d", itemDef[mItems[i].index].id);
+               s_fprintf(f, "!%d", mItems[i].id);
 
             if(itemDef[mItems[i].index].hasTeam)
                s_fprintf(f, " %d", mItems[i].team);
