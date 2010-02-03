@@ -14,7 +14,6 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// Textitem text editing.  how does it look at angles?
 
 // TODO:
 // Create color global for reticle color
