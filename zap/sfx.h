@@ -91,7 +91,8 @@ enum SFXProfiles
    SFXTeleportIn,
    SFXTeleportOut,
 
-   SFXGoFast,
+   SFXGoFastOutside,
+   SFXGoFastInside,
 
    // Forcefield noises
    SFXForceFieldUp,

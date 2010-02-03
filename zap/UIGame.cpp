@@ -161,6 +161,10 @@ void GameUserInterface::onReactivate()
 // just add it to the list, will be displayed in render()
 void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
 {
+   // Ignore empty message
+   if(strlen(format) == 0)
+      return;
+
    // Create a slot for our new message
    if(mDisplayMessage[0][0])
       for(S32 i = MessageDisplayCount - 1; i > 0; i--)

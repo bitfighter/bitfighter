@@ -100,7 +100,8 @@ static SFXProfile sfxProfilesModern[] = {
  // Teleport noises
  {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
- {  "gofast.wav",          false, 1.0,   false, 200, 500 },
+ {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
+ {  "gofast.wav",          true, 1.0,   false, 200, 500 },     // Heard inside the ship
 
  // Forcefield noises
  {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
@@ -173,7 +174,8 @@ static SFXProfile sfxProfilesClassic[] = {
  {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
 
- {  "gofast.wav",          false, 1.0,   false, 200, 500 },
+ {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
+ {  "gofast.wav",          true, 1.0,   false, 200, 500 },     // Heard inside the ship
 
  // Forcefield noises
  {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },

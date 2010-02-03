@@ -217,6 +217,9 @@ bool SpeedZone::collide(GameObject *hitObject)
       mExclusions.push_back(exclusion);
 
       setMaskBits(HitMask);
+
+      // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
+      s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "iiiii");
    }
 
    return false;
@@ -234,8 +237,8 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
 
 U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   //if(stream->writeFlag(updateMask & InitMask))    // Uncomment for 013
-   //{
+   if(stream->writeFlag(updateMask & InitMask))    
+   {
       stream->write(pos.x);
       stream->write(pos.y);
 
@@ -244,7 +247,7 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
 
       stream->writeInt(mSpeed, 16);
       stream->writeFlag(mSnapLocation);
-   //}                                            // Uncomment for 013
+   }      
 
    return 0;
 }
@@ -252,8 +255,8 @@ U32 SpeedZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream
 
 void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   //if(stream->readFlag())// Uncomment for 013
-   //{
+   if(stream->readFlag())
+   {
       stream->read(&pos.x);
       stream->read(&pos.y);
 
@@ -264,9 +267,9 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mSnapLocation = stream->readFlag();
 
       preparePoints();
-   //}// Uncomment for 013
-   //else // Uncomment for 013
-      //SFXObject::play(SFXGoFast, pos, pos);// Uncomment for 013
+   }
+   else 
+      SFXObject::play(SFXGoFastOutside, pos, pos);
 }
 
 };
