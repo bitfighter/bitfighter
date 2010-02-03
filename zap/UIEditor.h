@@ -218,6 +218,7 @@ public:
 private:
    string mSaveMsg;
    Color mSaveMsgColor;
+   S32 mCurrentTeam;
 
    string mWarnMsg1;
    string mWarnMsg2;
@@ -309,13 +310,13 @@ private:
    S32 findHitItemOnDock(Point canvasPos);
 
    void computeSelectionMinMax(Point &min, Point &max);
-   bool mouseOnDock();           // Return whether mouse is currently over the dock
+   bool mouseOnDock();                // Return whether mouse is currently over the dock
 
    void processLevelLoadLine(U32 argc, U32 id, const char **argv);
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 
-   Color getTeamColor(S32 team);    // Return a color based on team index
+   Color getTeamColor(S32 team);     // Return a color based on team index
 
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;

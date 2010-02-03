@@ -124,13 +124,14 @@ void EditorUserInterface::populateDock()
    const S32 spacer = 35;
    mDockItems.clear();
 
+
    mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), -1, 0, 0));
    mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), -1, 0, 0));
 
    yPos += spacer;
    mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), -1, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
    mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), 0, 0, 0));
    yPos += spacer;
@@ -258,7 +259,7 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
    mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
    //logprintf("Saving: %d", mLastUndoIndex);
    mLastUndoIndex++;
-   mLastRedoIndex++;
+   mLastRedoIndex++; 
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
    {
@@ -895,7 +896,9 @@ void EditorUserInterface::onReactivate()
    mSpecialAttribute = None;
 
 //   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
+
    populateDock();            // If game type changed, we'll need to update the dock
+   setCurrentTeam(mCurrentTeam);    // So the dock doesn't change "colors" when accessing the menus
 
    if(mWasTesting)
    {
@@ -2021,6 +2024,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 {
    bool anyOK = false;
    bool anyChanged = false;
+   mCurrentTeam = currentTeam;
 
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
