@@ -1221,7 +1221,7 @@ void EditorUserInterface::render()
    if(editingIDMode)
    {
       static const U32 fontsize = 16;
-      static const S32 boxwidth = 200;
+      static const S32 boxwidth = 205;
       static const S32 inset = 9;
       static const S32 boxheight = fontsize + 2 * inset;
       static const Color color(0.9, 0.9, 0.9);
@@ -1471,7 +1471,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
 
             if(isBeingEdited)
-               item.lineEditor.drawCursor(pos.x, pos.y, txtSize, pos.angleTo(dest));
+               item.lineEditor.drawCursorAngle(pos.x, pos.y, txtSize, pos.angleTo(dest));
 
             if((item.selected || item.litUp) && mSpecialAttribute == None)
             {
@@ -2826,7 +2826,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          return;
       else if(keyCode == KEY_ESCAPE)      // End editing, revert
       {
-         doneEditingSpecialItem(false);
+         doneEditingSpecialItem(false); 
          return;
       }
       else if(mSpecialAttribute == Text)

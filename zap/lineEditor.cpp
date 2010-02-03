@@ -61,8 +61,20 @@ char LineEditor::at(U32 pos)
 } 
 
 
-// Draw our cursor, assuming string is drawn at x,y at specified angle (which defaults to 0)
-void LineEditor::drawCursor(S32 x, S32 y, F32 fontSize, F32 angle)
+// Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
+void LineEditor::drawCursor(S32 x, S32 y, U32 fontSize)
+{
+   if(cursorBlink)
+   {
+      S32 w = UserInterface::getStringWidth((F32)fontSize, mLine.c_str());
+
+      UserInterface::drawString(x + w, y, fontSize, "_");
+   }
+}
+
+
+// Draw our cursor, assuming string is drawn at x,y at specified angle 
+void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, F32 angle)
 {
    if(cursorBlink)
    {
@@ -70,12 +82,13 @@ void LineEditor::drawCursor(S32 x, S32 y, F32 fontSize, F32 angle)
       F32 cosang = cos(angle); 
       F32 sinang = sin(angle);
 
-      S32 xpos = x + (S32)(w * cosang + fontSize * sinang);
-      S32 ypos = y + (S32)(w * sinang + fontSize * cosang);
+      F32 xpos = x + (w * cosang ); 
+      F32 ypos = y + (w * sinang ); 
 
       UserInterface::drawAngleString_fixed(xpos, ypos, (F32)fontSize, angle, "_");
    }
 }
+
 
 
 // keyCode will have either backspace or delete in it -- basically a convenience function
