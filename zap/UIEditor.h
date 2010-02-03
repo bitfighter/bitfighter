@@ -285,6 +285,8 @@ private:
    bool mCreatingPolyline;
    bool mDragSelecting;
    bool mShowingReferenceShip;
+   bool editingIDMode;
+
    S32 mDraggingDockItem;
    Vector<string> mLevelErrorMsgs;
 

@@ -155,7 +155,9 @@ public:
 
    // Draw text at an angle...
    static void drawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string);
+   static void drawAngleString(S32 x, S32 y, U32 size, F32 angle, const char *string);
    static void drawAngleStringf(S32 x, S32 y, F32 size, F32 angle, const char *format, ...);
+   
 
    // Original drawAngleString has a bug in positioning, but fixing it everywhere in the app would be a huge pain, so
    // we've created a new drawAngleString function without the bug, called xx_fixed.  Actual work now moved to doDrawAngleString,

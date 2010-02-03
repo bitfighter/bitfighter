@@ -303,6 +303,12 @@ void UserInterface::drawAngleString(S32 x, S32 y, F32 size, F32 angle, const cha
 }
 
 
+void UserInterface::drawAngleString(S32 x, S32 y, U32 size, F32 angle, const char *string)
+{
+   doDrawAngleString(x, y, (F32) size, angle, string, false);
+}
+
+
 void UserInterface::doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fix)
 {
    F32 scaleFactor = size / 120.0f;

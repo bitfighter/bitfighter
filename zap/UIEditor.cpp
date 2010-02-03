@@ -1224,8 +1224,8 @@ void EditorUserInterface::render()
       static const S32 boxwidth = 200;
       static const S32 inset = 5;
       static const S32 boxheight = fontsize + 2 * inset;
-      static const color = Color(0.9, 0.9, 0.9);
-      static const errorColor = Color(1, 0, 0);
+      static const Color color(0.9, 0.9, 0.9);
+      static const Color errorColor(1, 0, 0);
       static const char *prompt = "Item ID: ";
 
       bool dupfound = false;
@@ -1234,7 +1234,7 @@ void EditorUserInterface::render()
       if(id != 0)    // Check for duplicates
       {
          for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems.id == id)
+            if(mItems[i].id == id)
             {
                dupfound = true;
                break;
@@ -1261,7 +1261,7 @@ void EditorUserInterface::render()
 
       xpos += inset;
       ypos += inset + fontsize;
-      glColor(dupfound ? errorcolor : color);
+      glColor(dupfound ? errorColor : color);
       xpos += drawStringAndGetWidth(xpos, ypos, fontsize, prompt);
       drawString(xpos, ypos, fontsize, idLineEditor.c_str());
       idLineEditor.drawCursor(xpos, ypos, fontsize);
@@ -1471,7 +1471,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
 
             if(isBeingEdited)
-               lineEditor.drawCursor(pos.x, pos.y, txtSize, pos.angleTo(dest));
+               item.lineEditor.drawCursor(pos.x, pos.y, txtSize, pos.angleTo(dest));
 
             if((item.selected || item.litUp) && mSpecialAttribute == None)
             {
@@ -2760,10 +2760,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          for(S32 i = 0; i < mItems.size(); i++)
             if(mItems[i].selected)          // Should only be one
             {
-               S32 id = atoi(idLineEditor.c_str();
+               S32 id = atoi(idLineEditor.c_str());
                if(mItems[i].id != id)       // Did the id actually change?
                {
-                  mItems[i].id = id);
+                  mItems[i].id = id;
                   mAllUndoneUndoLevel = -1; // If so, it can't be undone
                }
                break;
@@ -2771,7 +2771,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          editingIDMode = false;
       }
-      else if(keyCode == KEY_ESC)
+      else if(keyCode == KEY_ESCAPE)
       {
          editingIDMode = false;
       }
@@ -2912,7 +2912,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       editingIDMode = true;
 
-      idLineEditor.setString(mItems[i].id <= 0 ? "" : itos(mItems[i].id));
+      idLineEditor.setString(mItems[selected].id <= 0 ? "" : itos(mItems[selected].id));
    }
 
    else if(ascii >= '0' && ascii <= '9')           // Change team affiliation of selection with 0-9 keys
