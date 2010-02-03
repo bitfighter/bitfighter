@@ -141,11 +141,11 @@ public:
    bool selected;
    bool litUp;
    Vector<bool> vertSelected;
-   string text;         // For items that have an aux text field
-   U32 textSize;        // For items that have an aux text field
-   S32 repopDelay;      // For repair items, also used for engineered objects heal rate
-   S32 speed;           // Speed for speedzone items
-   bool boolattr;       // Additional optional boolean attribute for some items (only speedzone so far...)
+   LineEditor lineEditor; // For items that have an aux text field
+   U32 textSize;          // For items that have an aux text field
+   S32 repopDelay;        // For repair items, also used for engineered objects heal rate
+   S32 speed;             // Speed for speedzone items
+   bool boolattr;         // Additional optional boolean attribute for some items (only speedzone so far...)
 
    bool hasWidth();
    GeomType geomType();

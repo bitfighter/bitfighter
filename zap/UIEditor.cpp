@@ -516,12 +516,15 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
          i.textSize = atoi(argv[arg]);    // ...and a textsize...
          arg++;
 
+         string str;
          for(;arg < argc; arg ++)         // (no first part of for)
          {
-            i.text += argv[arg];          // ...and glob the rest together as a string
+            str += argv[arg];             // ...and glob the rest together as a string
             if (arg < argc - 1)
-               i.text += " ";
+               str += " ";
          }
+
+         i.lineEditor.setString(str);
       }
       else if(index == ItemNexus && argc == 5)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
       {
@@ -835,6 +838,8 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
+static LineEditor idLineEditor(12);
+
 void EditorUserInterface::onActivate()
 {
    // Check if we have a level name:
@@ -868,6 +873,7 @@ void EditorUserInterface::onActivate()
    mDraggingObjects = false;
    mDraggingDockItem = -1;
    mShowingReferenceShip = false;
+   editingIDMode = false;
 
    itemToLightUp = -1;     // Index to keep track of which item is litUp
    vertexToLightUp = -1;
@@ -1210,6 +1216,56 @@ void EditorUserInterface::render()
       glColor3f(0,1,1);
       drawCenteredString(vertMargin, 14, "Non-wall objects hidden.  Hit Ctrl-A to restore display.");
    }
+
+   // Render id-editing overlay
+   if(editingIDMode)
+   {
+      static const U32 fontsize = 15;
+      static const S32 boxwidth = 200;
+      static const S32 inset = 5;
+      static const S32 boxheight = fontsize + 2 * inset;
+      static const color = Color(0.9, 0.9, 0.9);
+      static const errorColor = Color(1, 0, 0);
+      static const char *prompt = "Item ID: ";
+
+      bool dupfound = false;
+      S32 id = atoi(idLineEditor.c_str());
+
+      if(id != 0)    // Check for duplicates
+      {
+         for(S32 i = 0; i < mItems.size(); i++)
+            if(mItems.id == id)
+            {
+               dupfound = true;
+               break;
+            }
+      }
+
+      // Render id entry box
+      glEnable(GL_BLEND);
+      S32 xpos = (canvasWidth - boxwidth) / 2;
+      S32 ypos = (canvasHeight - boxheight) / 2;
+
+      for(S32 i = 1; i >= 0; i--)
+      {
+         glColor(color, i ? .25 : .4);
+
+         glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+            glVertex2f(xpos,            ypos);
+            glVertex2f(xpos + boxwidth, ypos);
+            glVertex2f(xpos + boxwidth, ypos + boxheight);
+            glVertex2f(xpos,            ypos + boxheight);
+         glEnd();
+      }
+      glDisable(GL_BLEND);
+
+      xpos += inset;
+      ypos += inset + fontsize;
+      glColor(dupfound ? errorcolor : color);
+      xpos += drawStringAndGetWidth(xpos, ypos, fontsize, prompt);
+      drawString(xpos, ypos, fontsize, idLineEditor.c_str());
+      idLineEditor.drawCursor(xpos, ypos, fontsize);
+   }
 }
 
 // Draw the vertices for a polygon or line item (i.e. walls)
@@ -1270,7 +1326,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
    if(itemType == ItemBarrierMaker)
       glColor(Color(.5, .5, 1), alpha);    // pale blue
    else if(itemType == ItemLineItem)
-      glColor(getTeamColor(team), alpha);     
+      glColor(getTeamColor(team), alpha);
    else
       TNLAssert(false, "Invalid game item type!");
 
@@ -1279,7 +1335,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
       Point dir = barPoints[j+1] - barPoints[j];
       Point crossVec(dir.y, -dir.x);
       crossVec.normalize(width * 0.5);
- 
+
       glBegin(GL_POLYGON);
          glVertex(convertLevelToCanvasCoord(barPoints[j] + crossVec));
          glVertex(convertLevelToCanvasCoord(barPoints[j] - crossVec));
@@ -1402,7 +1458,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             // Recalc text size -- TODO:  this shouldn't be here...
             // this should only happen when text is created, not every time it's drawn
 
-            F32 strWidth = getStringWidth(120, item.text.c_str());
+            F32 strWidth = getStringWidth(120, item.lineEditor.c_str());
             F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
 
             item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
@@ -1412,8 +1468,10 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             glColor(getTeamColor(item.team), alpha);
             F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);
 
-            drawAngleStringf_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), "%s%c",
-               item.text.c_str(), LineEditor::cursorBlink && mSpecialAttribute == Text && isBeingEdited ? '_' : 0);
+            drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
+
+            if(isBeingEdited)
+               lineEditor.drawCursor(pos.x, pos.y, txtSize, pos.angleTo(dest));
 
             if((item.selected || item.litUp) && mSpecialAttribute == None)
             {
@@ -1997,7 +2055,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
          continue;
 
          if(currentTeam < 0 && !itemDef[mItems[i].index].canHaveNoTeam)
-         continue; 
+         continue;
 
          mItems[i].team = currentTeam;
          anyChanged = true;
@@ -2695,6 +2753,37 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   if(editingIDMode)
+   {
+      if(keyCode == KEY_ENTER)
+      {
+         for(S32 i = 0; i < mItems.size(); i++)
+            if(mItems[i].selected)          // Should only be one
+            {
+               S32 id = atoi(idLineEditor.c_str();
+               if(mItems[i].id != id)       // Did the id actually change?
+               {
+                  mItems[i].id = id);
+                  mAllUndoneUndoLevel = -1; // If so, it can't be undone
+               }
+               break;
+            }
+
+         editingIDMode = false;
+      }
+      else if(keyCode == KEY_ESC)
+      {
+         editingIDMode = false;
+      }
+      else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+         idLineEditor.handleBackspace(keyCode);
+
+      else if(ascii >= '0' && ascii <= '9')
+         idLineEditor.addChar(ascii);
+
+      // else ignore keystroke
+   }
+
    if(keyCode == KEY_ENTER)       // Enter - Edit props
    {
       for(S32 i = 0; i < mItems.size(); i++)
@@ -2742,11 +2831,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else if(mSpecialAttribute == Text)
       {
          if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-            mItems[mEditingSpecialAttrItem].text = mItems[mEditingSpecialAttrItem].text.substr(0, mItems[mEditingSpecialAttrItem].text.length() - 1);
+            mItems[mEditingSpecialAttrItem].lineEditor.handleBackspace(keyCode);
 
          else if(ascii)       // User typed a character -- add it to the string
-            if(mItems[mEditingSpecialAttrItem].text.length() < MAX_TEXTITEM_LEN)
-               mItems[mEditingSpecialAttrItem].text += ascii;
+            mItems[mEditingSpecialAttrItem].lineEditor.addChar(ascii);
 
          return;
       }
@@ -2801,7 +2889,30 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    else if(ascii == '#' || ascii == '!')
    {
-      // Edit id... somehow...
+      S32 selected = -1;
+      // Find first selected item, and just work with that.  Unselect the rest.
+      for(S32 i = 0; i < mItems.size(); i++)
+      {
+         if(mItems[i].selected)
+         {
+            if(selected > -1)
+            {
+               selected = i;
+               continue;
+            }
+            else
+            {
+               mItems[i].selected = false;
+            }
+         }
+      }
+
+      if(selected == -1)      // Nothing selected, nothing to do!
+         return;
+
+      editingIDMode = true;
+
+      idLineEditor.setString(mItems[i].id <= 0 ? "" : itos(mItems[i].id));
    }
 
    else if(ascii >= '0' && ascii <= '9')           // Change team affiliation of selection with 0-9 keys
@@ -3484,7 +3595,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             for(S32 j = 0; j < p.verts.size(); j++)
                s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
             if(itemDef[mItems[i].index].hasText)
-               s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].text.c_str());
+               s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].lineEditor.c_str());
             if(itemDef[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
                s_fprintf(f, " %d", mItems[i].repopDelay);
             if(mItems[i].index == ItemSpeedZone)
@@ -3673,7 +3784,7 @@ void EditorMenuUserInterface::render()
 ///////////////////////////////////////////////////////////////////
 
 // Primary constructor
-WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height, U32 itemid)
+WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height, U32 itemid) : lineEditor(MAX_TEXTITEM_LEN)
 {
    index = itemType;
    team = xteam;
@@ -3702,7 +3813,7 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
    if(itemDef[itemType].hasText)
    {
       textSize = 30;
-      text = "Your text here";
+      lineEditor.setString("Your text here");
    }
 
    repopDelay = EditorUserInterface::getDefaultRepopDelay(itemType);
@@ -3733,7 +3844,7 @@ WorldItem::WorldItem(const WorldItem &worldItem)
    width = worldItem.width;
    selected = worldItem.selected;
    litUp = worldItem.litUp;
-   text = worldItem.text;
+   lineEditor.setString(worldItem.lineEditor.getString());
    textSize = worldItem.textSize;
    repopDelay = worldItem.repopDelay;
    speed = worldItem.speed;
