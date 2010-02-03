@@ -504,17 +504,9 @@ void UserInterface::drawString4Colf(S32 y, U32 size, U32 col, const char *format
 }
 
 
-S32 UserInterface::getStringWidth(U32 size, const char *string, U32 len)
+S32 UserInterface::getStringWidth(F32 size, const char *string)
 {
-   U32 width = 0;
-   if(!len)
-      len = (U32) strlen(string);
-   while(len--)
-   {
-      width += glutStrokeWidth(GLUT_STROKE_ROMAN, *string);
-      string++;
-   }
-   return S32((width * size) / 120.0f);
+   return (S32) glutStrokeLength(GLUT_STROKE_ROMAN, (const unsigned char *) string) * size / 120.0;
 }
 
 

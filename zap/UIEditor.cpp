@@ -838,7 +838,7 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
-static LineEditor idLineEditor(12);
+static LineEditor idLineEditor(10);
 
 void EditorUserInterface::onActivate()
 {
@@ -1220,9 +1220,9 @@ void EditorUserInterface::render()
    // Render id-editing overlay
    if(editingIDMode)
    {
-      static const U32 fontsize = 15;
+      static const U32 fontsize = 16;
       static const S32 boxwidth = 200;
-      static const S32 inset = 5;
+      static const S32 inset = 9;
       static const S32 boxheight = fontsize + 2 * inset;
       static const Color color(0.9, 0.9, 0.9);
       static const Color errorColor(1, 0, 0);
@@ -1234,7 +1234,7 @@ void EditorUserInterface::render()
       if(id != 0)    // Check for duplicates
       {
          for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems[i].id == id)
+            if(mItems[i].id == id && !mItems[i].selected)
             {
                dupfound = true;
                break;
@@ -1248,7 +1248,7 @@ void EditorUserInterface::render()
 
       for(S32 i = 1; i >= 0; i--)
       {
-         glColor(color, i ? .25 : .4);
+         glColor(Color(.3,.6,.3), i ? .85 : 1);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
             glVertex2f(xpos,            ypos);
@@ -1260,7 +1260,7 @@ void EditorUserInterface::render()
       glDisable(GL_BLEND);
 
       xpos += inset;
-      ypos += inset + fontsize;
+      ypos += inset;
       glColor(dupfound ? errorColor : color);
       xpos += drawStringAndGetWidth(xpos, ypos, fontsize, prompt);
       drawString(xpos, ypos, fontsize, idLineEditor.c_str());
@@ -2782,6 +2782,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          idLineEditor.addChar(ascii);
 
       // else ignore keystroke
+      return;
    }
 
    if(keyCode == KEY_ENTER)       // Enter - Edit props
@@ -2895,15 +2896,13 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          if(mItems[i].selected)
          {
-            if(selected > -1)
+            if(selected == -1)
             {
                selected = i;
                continue;
             }
             else
-            {
                mItems[i].selected = false;
-            }
          }
       }
 

@@ -67,7 +67,7 @@ public:
    void setString(string str)      { mLine = str; }
    const char *c_str() { return mLine.c_str(); }        // Return the string in c_str format
 
-   void drawCursor(S32 x, S32 y, U32 fontSize, F32 angle = 0);  // Draw our cursor, assuming string is drawn at x,y at specified angle
+   void drawCursor(S32 x, S32 y, F32 fontSize, F32 angle = 0);  // Draw our cursor, assuming string is drawn at x,y at specified angle
 
    // LineEditors are equal if their values are equal
    bool operator==(LineEditor &lineEditor) const { return mLine == lineEditor.getString(); }

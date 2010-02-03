@@ -192,7 +192,7 @@ public:
    static void drawString4Colf(S32 y, U32 size, U32 col, const char *format, ...);
 
    // Return string rendering width (normal and formatted versions)
-   static S32 getStringWidth(U32 size, const char *str, U32 len = 0);
+   static S32 getStringWidth(F32 size, const char *str);
    static S32 getStringWidthf(U32 size, const char *format, ...);
 
    Point convertWindowToCanvasCoord(Point p) { return Point(p.x * canvasWidth / windowWidth, p.y * canvasHeight / windowHeight); }
