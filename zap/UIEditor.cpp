@@ -890,19 +890,16 @@ extern Vector<StringTableEntry> gLevelList;
 
 void EditorUserInterface::onReactivate()
 {
-   mDraggingObjects = false;
+   mDraggingObjects = false;  
 
    mEditingSpecialAttrItem = -1;     // Probably not necessary
    mSpecialAttribute = None;
 
 //   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
 
-   populateDock();            // If game type changed, we'll need to update the dock
-   setCurrentTeam(mCurrentTeam);    // So the dock doesn't change "colors" when accessing the menus
-
    if(mWasTesting)
    {
-      gLevelList = mgLevelList;        // Restore level list
+      gLevelList = mgLevelList;        // Restore level list 
       mWasTesting = false;
       mSaveMsgTimer.clear();
    }
@@ -2024,7 +2021,6 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 {
    bool anyOK = false;
    bool anyChanged = false;
-   mCurrentTeam = currentTeam;
 
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 

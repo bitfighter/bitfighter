@@ -218,7 +218,6 @@ public:
 private:
    string mSaveMsg;
    Color mSaveMsgColor;
-   S32 mCurrentTeam;
 
    string mWarnMsg1;
    string mWarnMsg2;
