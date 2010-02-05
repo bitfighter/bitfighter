@@ -101,7 +101,8 @@ struct DamageInfo
 {
    Point collisionPoint;
    Point impulseVector;
-   float damageAmount;
+   F32 damageAmount;
+   F32 damageSelfMultiplier;
    DamageType damageType;       // see enum above!
    GameObject *damagingObject;  // see class below!
 };

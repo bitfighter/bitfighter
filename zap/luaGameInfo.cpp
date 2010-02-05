@@ -210,7 +210,7 @@ Lunar<LuaWeaponInfo>::RegType LuaWeaponInfo::methods[] =
    method(LuaWeaponInfo, getProjVel),
    method(LuaWeaponInfo, getProjLife),
    method(LuaWeaponInfo, getDamage),
-   method(LuaWeaponInfo, getCanDamageSelf),
+   method(LuaWeaponInfo, getDamageSelf),
    method(LuaWeaponInfo, getCanDamageTeammate),
 
    {0,0}    // End method list
@@ -227,7 +227,8 @@ S32 LuaWeaponInfo::getEnergyDrain(lua_State *L) { return returnInt(L, gWeapons[m
 S32 LuaWeaponInfo::getProjVel(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projVelocity); }                  // Speed of projectile (units/sec) (integer)
 S32 LuaWeaponInfo::getProjLife(lua_State *L) { return returnInt(L, gWeapons[mWeaponIndex].projLiveTime); }                 // Time projectile will live (ms) (integer, -1 == live forever)
 S32 LuaWeaponInfo::getDamage(lua_State *L) { return returnFloat(L, gWeapons[mWeaponIndex].damageAmount); }                 // Damage projectile does (0-1, where 1 = total destruction) (float)
-S32 LuaWeaponInfo::getCanDamageSelf(lua_State *L) { return returnBool(L, gWeapons[mWeaponIndex].canDamageSelf); }          // Will weapon damage self? (boolean)
+S32 LuaWeaponInfo::getDamageSelf(lua_State *L) { return returnFloat(L, gWeapons[mWeaponIndex].damageAmount * 
+                                                                       gWeapons[mWeaponIndex].damageSelfMultiplier); }     // How much damage if you shoot yourself? (float)
 S32 LuaWeaponInfo::getCanDamageTeammate(lua_State *L) { return returnBool(L, gWeapons[mWeaponIndex].canDamageTeammate); }  // Will weapon damage teammates? (boolean)
 
 

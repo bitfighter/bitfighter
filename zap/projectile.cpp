@@ -163,6 +163,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
       theInfo.damageType = DamageTypePoint;
       theInfo.damagingObject = this;
       theInfo.impulseVector = velocity;
+      theInfo.damageSelfMultiplier = gWeapons[mWeaponType].damageSelfMultiplier;
 
       hitObject->damageObject(&theInfo);
    }
@@ -293,7 +294,7 @@ void Projectile::explode(GameObject *hitObject, Point pos)
       SFXProfiles sound;
       if(s && s->isModuleActive(ModuleShield))     // We hit a ship with shields up
          sound = SFXBounceShield;
-      else if((&hitShip || s) && mShooter != s)    // We hit a ship with shields down, but not own shot, though this doesn't always work
+      else if((hitShip || s) && mShooter != s)     // We hit a ship with shields down, but not own shot, though this doesn't always work
          sound = SFXShipHit;
       else                                         // We hit something else
          sound = gProjInfo[mType].impactSound;
@@ -448,10 +449,11 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       deleteObject(100);
 
       DamageInfo info;
-      info.collisionPoint = pos;
-      info.damagingObject = this;
-      info.damageAmount   = gWeapons[weaponType].damageAmount;
-      info.damageType     = DamageTypeArea;
+      info.collisionPoint       = pos;
+      info.damagingObject       = this;
+      info.damageAmount         = gWeapons[weaponType].damageAmount;
+      info.damageType           = DamageTypeArea;
+      info.damageSelfMultiplier = gWeapons[weaponType].damageSelfMultiplier;
 
       radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
    }

@@ -176,7 +176,6 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
          if(!getGame()->getGameType()->objectCanDamageObject(info.damagingObject, fillVector[i]))
             continue;
 
-
       //// Check if damager is an area weapon, and damagee is a projectile... if so, kill it
       //if(Projectile *proj = dynamic_cast<Projectile*>(fillVector[i]))
       //{
@@ -200,7 +199,7 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
       localInfo.collisionPoint  = objPos;
       localInfo.collisionPoint -= info.impulseVector;
 
-      // Reuse t from above to represent interpolation based on distance.
+      // Reuse t from above to represent interpolation based on distance
       F32 dist = delta.len();
       if(dist < innerRad)           // Inner radius gets full force of blast
          t = 1.f;
@@ -210,6 +209,13 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
       // Attenuate impulseVector and damageAmount
       localInfo.impulseVector  *= force * t;
       localInfo.damageAmount   *= t;
+
+      // Adjust for self-damage
+      GameConnection *damagerOwner = info.damagingObject->getOwner();
+      GameConnection *victimOwner = fillVector[i]->getOwner();
+
+      if(victimOwner && damagerOwner == victimOwner)
+         localInfo.damageAmount *= localInfo.damageSelfMultiplier;
 
       fillVector[i]->damageObject(&localInfo);
    }

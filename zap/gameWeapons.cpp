@@ -33,16 +33,16 @@ namespace Zap
 // do not add a weapon with a fire delay > Ship::MaxFireDelay
 // or update the constant.
 
-WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Dam-   Can damage  Can damage Projectile
-{                          //    Name         Delay  Energy Energy Vel. Life  age       self      teammate   Type
-   WeaponInfo( StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   false,      false,   ProjectilePhaser ),
-   WeaponInfo( StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   true,       false,   ProjectileBounce ),
-   WeaponInfo( StringTableEntry("Triple"),      200,  2100,  2100,  550,  850, 0.14f,   true,       false,   ProjectileTriple ),
-   WeaponInfo( StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   true,       false,   NotAProjectile ),
-   WeaponInfo( StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   true,       false,   NotAProjectile ),
-   WeaponInfo( StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   true,       true,    NotAProjectile ),
-   WeaponInfo( StringTableEntry("Turret"),      150,     0,     0,  800,  800, 0.11f,   true,       true,    ProjectileTurret ),
-   WeaponInfo( StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       true,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
+WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Dam-   Damage to Can damage Projectile
+{                          //    Name         Delay  Energy Energy Vel. Life  age   self mult.   teammate  Type
+   WeaponInfo( StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   0,       false,   ProjectilePhaser ),
+   WeaponInfo( StringTableEntry("Bouncer"),     100,  1800,  1800,  540, 1500, 0.15f,   0.5f,    false,   ProjectileBounce ),
+   WeaponInfo( StringTableEntry("Triple"),      200,  2100,  2100,  550,  850, 0.14f,   0,       false,   ProjectileTriple ),
+   WeaponInfo( StringTableEntry("Burst"),       700,  5000,  5000,  500, 1000, 0.50f,   1.0f,    false,   NotAProjectile ),
+   WeaponInfo( StringTableEntry("Heat Seeker"), 700,  5000,  5000,  100, 6000, 0.12f,   1.0f,    false,   NotAProjectile ),
+   WeaponInfo( StringTableEntry("Mine"),        900, 55000, 55000,  500,   -1, 0.50f,   1.0f,    true,    NotAProjectile ),
+   WeaponInfo( StringTableEntry("Turret"),      150,     0,     0,  800,  800, 0.11f,   1.0f,    true,    ProjectileTurret ),
+   WeaponInfo( StringTableEntry("Spy Bug"),     800, 50000, 50000,  800,   -1, 0,       0,       true,    NotAProjectile ),      // Damage in this case is getting pushed around by the explosion
 };
 
 ProjectileInfo gProjInfo[ProjectileTypeCount] = {

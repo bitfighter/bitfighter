@@ -260,7 +260,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    newItem->setPosAng(getActualPos(), ang2);
 
    newItem->mSizeIndex = mSizeIndex;
-   newItem->addToGame(gServerGame);           // And add it to the list of game objects
+   newItem->addToGame(gServerGame);    // And add it to the list of game objects
 }
 
 

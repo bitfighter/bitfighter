@@ -117,7 +117,7 @@ public:
    S32 getProjVel(lua_State *L);
    S32 getProjLife(lua_State *L);
    S32 getDamage(lua_State *L);
-   S32 getCanDamageSelf(lua_State *L);
+   S32 getDamageSelf(lua_State *L);
    S32 getCanDamageTeammate(lua_State *L);
 };
 

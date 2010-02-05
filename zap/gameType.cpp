@@ -147,7 +147,7 @@ void GameType::printRules()
       printf("\tVelocity: %d\n", gWeapons[i].projVelocity);
       printf("\tLifespan (ms): %d\n", gWeapons[i].projLiveTime);
       printf("\tDamage: %2.2f\n", gWeapons[i].damageAmount);
-      printf("\tCan Damage Shooter: %s\n", gWeapons[i].canDamageSelf ? "Yes" : "No");
+      printf("\tDamage To Self Multiplier: %2.2f\n", gWeapons[i].damageSelfMultiplier);
       printf("\tCan Damage Teammate: %s\n", gWeapons[i].canDamageTeammate ? "Yes" : "No");
    }
 
@@ -1394,9 +1394,9 @@ bool GameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
    else
       return false;
 
-   // Check for self-inflicted damate
+   // Check for self-inflicted damage
    if(damagerOwner == victimOwner)
-      return gWeapons[weaponType].canDamageSelf;
+      return gWeapons[weaponType].damageSelfMultiplier != 0;
 
    // Check for friendly fire
    else if(damager->getTeam() == victim->getTeam())

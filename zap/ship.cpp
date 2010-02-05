@@ -256,7 +256,7 @@ extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const P
 // Returns the zone in question if this ship is in a zone of type zoneType
 GameObject *Ship::isInZone(GameObjectType zoneType)
  {
-   findObjectsUnderShip(objectType);
+   findObjectsUnderShip(zoneType);
 
    if (fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
@@ -699,9 +699,12 @@ void Ship::damageObject(DamageInfo *theInfo)
       }
    }
 
+   GameConnection *damagerOwner = theInfo->damagingObject->getOwner();
+   GameConnection *victimOwner = this->getOwner();
+
    // Remember that healing things will do negative damage
 
-   mHealth -= theInfo->damageAmount;
+   mHealth -= theInfo->damageAmount * ((victimOwner && damagerOwner == victimOwner) ? theInfo->damageSelfMultiplier : 1);
    setMaskBits(HealthMask);
 
    if(mHealth <= 0)

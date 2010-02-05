@@ -26,9 +26,10 @@
 #ifndef _MOVEOBJECT_H_
 #define _MOVEOBJECT_H_
 
-#include "../tnl/tnlTypes.h"
+#include "tnlTypes.h"
 
 #include "gameObject.h" 
+
 
 namespace Zap
 {

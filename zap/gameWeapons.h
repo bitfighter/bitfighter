@@ -68,7 +68,7 @@ enum ProjectileType
 
 struct WeaponInfo
 {
-   WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, F32 _damageAmount, bool _canDamageSelf, bool _canDamageTeammate, ProjectileType _projectileType)
+   WeaponInfo(StringTableEntry _name, U32 _fireDelay, U32 _minEnergy, U32 _drainEnergy, U32 _projVelocity, S32 _projLiveTime, F32 _damageAmount, F32 _damageSelfMultiplier, bool _canDamageTeammate, ProjectileType _projectileType)
    {
       name = _name;
       fireDelay = _fireDelay;
@@ -77,20 +77,20 @@ struct WeaponInfo
       projVelocity = _projVelocity;
       projLiveTime = _projLiveTime;
       damageAmount = _damageAmount;
-      canDamageSelf = _canDamageSelf;
+      damageSelfMultiplier = _damageSelfMultiplier;
       canDamageTeammate = _canDamageTeammate;
       projectileType = _projectileType;
    }
 
 
-   StringTableEntry name; // Display name of the weapon.
-   U32 fireDelay;         // Delay between shots.
-   S32 minEnergy;         // Minimum energy to fire.  (Use S32 to avoid compiler warnings when comparing with other S32s)
-   U32 drainEnergy;       // Amount of energy to drain per shot.
-   U32 projVelocity;      // How fast shot travels (pix/second?)
-   S32 projLiveTime;      // How long shot lives (millisecs)
-   F32 damageAmount;      // Damage shot does
-   bool canDamageSelf;
+   StringTableEntry name;     // Display name of the weapon.
+   U32 fireDelay;             // Delay between shots.
+   S32 minEnergy;             // Minimum energy to fire.  (Use S32 to avoid compiler warnings when comparing with other S32s)
+   U32 drainEnergy;           // Amount of energy to drain per shot.
+   U32 projVelocity;          // How fast shot travels (pix/second?)
+   S32 projLiveTime;          // How long shot lives (millisecs)
+   F32 damageAmount;          // Damage shot does
+   F32 damageSelfMultiplier;  // Adjust damage if you shoot yourself
    bool canDamageTeammate;
    ProjectileType projectileType;   // If this is a projectile item, which sort is it?  If not, use NotAProjectile
 };
