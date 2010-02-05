@@ -103,6 +103,9 @@ private:
    S32 mJustTeleported;
    Point mSpawnPoint;            // Where ship spawned.  Will only be valid on server, client doesn't currently get this.
 
+   void findObjectsUnderShip(GameObjectType type); // Find objects of specified type that may be under the ship, and put them in fillVector
+
+
 protected:
    StringTableEntry mPlayerName;
    bool mModuleActive[ModuleCount];       // Is that module active at this moment?
@@ -270,7 +273,9 @@ public:
    bool isRobot() { return mIsRobot; }
 
    GameObject *isInZone(GameObjectType zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
-   bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on an item
+   GameObject *isOnObject(GameObjectType objectType); // Returns the object in question if this ship is on an object of type objectType
+
+   bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item
 
    TNL_DECLARE_CLASS(Ship);
 };

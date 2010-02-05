@@ -239,19 +239,26 @@ void Ship::processMove(U32 stateIndex)
 }
 
 
+// Find objects of specified type that may be under the ship, and put them in fillVector
+void Ship::findObjectsUnderShip(GameObjectType type)
+{
+   Rect rect(getActualPos(), getActualPos());
+   rect.expand(Point(CollisionRadius, CollisionRadius));
+
+   fillVector.clear();           // This vector will hold any matching zones
+   findObjects(type, fillVector, rect);
+}
+
+
+
 extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
 // Returns the zone in question if this ship is in a zone of type zoneType
 GameObject *Ship::isInZone(GameObjectType zoneType)
  {
-   // Create a small rectagle centered on the ship that we can use for findObjects
-   Rect shipRect(getActualPos(), getActualPos());
-   shipRect.expand(Point(.1,.1));
+   findObjectsUnderShip(objectType);
 
-   fillVector.clear();           // This vector will hold any matching zones
-   findObjects(zoneType, fillVector, shipRect);
-
-   if (fillVector.size() == 0)  // Ship isn't in extent of any zoneType zones, can bail here
+   if (fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
 
    // Extents overlap...  now check for actual overlap
@@ -273,10 +280,25 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
  }
 
 
-// Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.b.)
+// Returns the object in question if this ship is on an object of type objectType
+GameObject *Ship::isOnObject(GameObjectType objectType)
+{
+   findObjectsUnderShip(objectType);
+
+   if (fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
+      return NULL;
+
+   // Return first actually overlapping object on our candidate list
+   for(S32 i = 0; i < fillVector.size(); i++)
+      if(isOnObject(fillVector[i]))
+         return fillVector[i];
+   return NULL;
+}
+
+
+// Given an object, see if the ship is sitting on it (useful for figuring out if ship is on top of a regenerated repair item, z.B.)
 bool Ship::isOnObject(GameObject *object)
 {
-
    Point center;
    float radius;
    Vector<Point> polyPoints;
