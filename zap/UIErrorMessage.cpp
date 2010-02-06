@@ -52,16 +52,14 @@ void ErrorMessageUserInterface::reset()
 {
    mTitle = "WE HAVE A PROBLEM";    // Default title
    mInstr = "Hit any key to continue";
-   for(S32 i = 0; i < mNumLines; i++)
+   for(S32 i = 0; i < MAX_LINES; i++)
       mMessage[i] = "";
 }
 
 // First line is 1
 void ErrorMessageUserInterface::setMessage(U32 id, const char *message)
 {
-   if (id < 1 || id > mNumLines)       // Protect devs from themselves...
-      return;
-
+   TNLAssert(id >= 1 && id <= MAX_LINES, "Invalid line id!");
    mMessage[id-1] = message;
 }
 
@@ -88,37 +86,13 @@ void ErrorMessageUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 void ErrorMessageUserInterface::render()
 {
-   const S32 inset = 100;
    if (prevUIs.size())            // If there is an underlying menu...
       prevUIs.last()->render();   // ...render it
-
-   glColor4f(.3, 0, 0, 1);        // Draw a box
-   glEnable(GL_BLEND);
-      glBegin(GL_POLYGON);
-         glVertex2f(inset, inset);
-         glVertex2f(canvasWidth - inset, inset);
-         glVertex2f(canvasWidth - inset, canvasHeight - inset);
-         glVertex2f(inset, canvasHeight-inset);
-      glEnd();
-   glDisable(GL_BLEND);
-
-   glColor3f(1, 1, 1);           // Add a border
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(inset, inset);
-      glVertex2f(canvasWidth - inset, inset);
-      glVertex2f(canvasWidth - inset, canvasHeight - inset);
-      glVertex2f(inset, canvasHeight - inset);
-   glEnd();
-
-   // Draw title, message, and footer
-   glColor3f(1,1,1);
-   drawCenteredString(vertMargin + inset, 30, mTitle);
-
-   for(S32 i = 0; i < mNumLines; i++)
-      drawCenteredString(vertMargin + 40 + inset + i * 24, 18, mMessage[i]);
-
-   drawCenteredString(canvasHeight - vertMargin - inset - 18, 18, mInstr);
+   
+   renderMessageBox(mTitle, mInstr, mMessage, MAX_LINES);
 }
+
+
 
 };
 

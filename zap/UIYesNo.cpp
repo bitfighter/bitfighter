@@ -56,7 +56,7 @@ void YesNoUserInterface::registerNoFunction(void(*ptr)())
 void YesNoUserInterface::reset()
 {
    mTitle = "YES OR NO";    // Default title
-   for(S32 i = 0; i < mNumLines; i++)
+   for(S32 i = 0; i < MAX_LINES; i++)
       mMessage[i] = "";
    mInstr = "Press [Y] or [N]";
    mYesFunction = NULL;
@@ -80,11 +80,8 @@ void YesNoUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          quit();
    }
    else if(keyCode == KEY_ESCAPE)
-   {
-      reactivatePrevUI();
-   }
+      quit();
 }
-
 
 
 };

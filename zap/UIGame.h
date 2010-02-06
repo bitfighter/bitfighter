@@ -62,7 +62,7 @@ private:
    enum MessageDisplayMode {
       ShortTimeout,            // Traditional message display mode (6 MessageDisplayCount lines, messages timeout after DisplayMessageTimeout)
       ShortFixed,              // Same length as ShortTimeout, but without timeout
-      LongFixed,               // Longform: Display MessageStoreCount messages, no timout
+      LongFixed,               // Long form: Display MessageStoreCount messages, no timout
       MessageDisplayModes
    };
 
@@ -77,11 +77,18 @@ private:
    char mStoreMessage[MessageStoreCount][MAX_CHAT_MSG_LENGTH];
 
    Timer mDisplayMessageTimer;
+   Timer mShutdownTimer;
 
    enum ChatType {            // Types of in-game chat messages:
       GlobalChat,             // Goes to everyone in game
       TeamChat,               // Goes to teammates only
-      CmdChat,                // Entering a command
+      CmdChat                 // Entering a command
+   };
+
+   enum ShutdownMode {
+      None,                   // Nothing happening
+      ShuttingDown,           // Shutting down, obviously
+      Canceled                // Was shutting down, but are no longer
    };
 
    bool isCmdChat();          // Returns true if we're composing a command in the chat bar, false otherwise
@@ -92,6 +99,11 @@ private:
    U32 mChatCursorPos;        // Position of composition cursor
 
    bool mInScoreboardMode;
+   ShutdownMode mShutdownMode;
+
+   StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
+   bool mShutdownInitiator;         // True if local client initiated shutdown (and can therefore cancel it)
+
    bool mGotControlUpdate;
 
    bool mFPSVisible;          // Are we displaying FPS info?
@@ -172,11 +184,15 @@ public:
    void renderMessageDisplay();     // Render incoming chat msgs
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
+   void renderShutdownMessage();    // Render an alert if server is shutting down
 
    void idle(U32 timeDelta);
 
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
+
+   void shutdownInitiated(U8 time, StringTableEntry who, bool initiator);
+   void shutdownCanceled();
 
    Vector<string> parseString(const char *str);    // Break a chat msg into parsable bits
    void processCommand(Vector<string> words);      // Process a cmd entered into the chat interface

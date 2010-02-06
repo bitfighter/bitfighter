@@ -449,23 +449,45 @@ void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry format
 }
 
 
+//class RPC_GameConnection_s2cDisplayMessage : public TNL::RPCEvent { \
+//public: \
+//   TNL::FunctorDecl<void (GameConnection::*) args > mFunctorDecl;\
+//   RPC_GameConnection_s2cDisplayMessage() : TNL::RPCEvent(guaranteeType, eventDirection), mFunctorDecl(&GameConnection::s2cDisplayMessage_remote) { mFunctor = &mFunctorDecl; } \
+//   TNL_DECLARE_CLASS( RPC_GameConnection_s2cDisplayMessage ); \
+//   bool checkClassType(TNL::Object *theObject) { return dynamic_cast<GameConnection *>(theObject) != NULL; } }; \
+//   TNL_IMPLEMENT_NETEVENT( RPC_GameConnection_s2cDisplayMessage, groupMask, rpcVersion ); \
+//   void GameConnection::name args { if(!canPostNetEvent()) return; RPC_GameConnection_s2cDisplayMessage *theEvent = new RPC_GameConnection_s2cDisplayMessage; theEvent->mFunctorDecl.set argNames ; postNetEvent(theEvent); } \
+//   TNL::NetEvent * GameConnection::s2cDisplayMessage_construct args { RPC_GameConnection_s2cDisplayMessage *theEvent = new RPC_GameConnection_s2cDisplayMessage; theEvent->mFunctorDecl.set argNames ; return theEvent; } \
+//   void GameConnection::s2cDisplayMessage_test args { RPC_GameConnection_s2cDisplayMessage *theEvent = new RPC_GameConnection_s2cDisplayMessage; theEvent->mFunctorDecl.set argNames ; TNL::PacketStream ps; theEvent->pack(this, &ps); ps.setBytePosition(0); theEvent->unpack(this, &ps); theEvent->process(this); } \
+//   void GameConnection::s2cDisplayMessage_remote args
+
+
 TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
                   (RangedU32<0, GameConnection::ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString),
                   (color, sfx, formatString),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   char outputBuffer[256];
-   S32 pos = 0;
-   const char *src = formatString.getString();
-   while(*src)
-   {
-      outputBuffer[pos++] = *src++;
+   static const S32 STRLEN = 256;
+   char outputBuffer[STRLEN];
+   
+   strncpy(outputBuffer, formatString.getString(), STRLEN - 1);
+   outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
 
-      if(pos >= 255)
-         break;
-   }
-   outputBuffer[pos] = 0;
    displayMessage(color, sfx, outputBuffer);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message), 
+                  (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+   gErrorMsgUserInterface.reset();
+   gErrorMsgUserInterface.setTitle(title.getString());
+   gErrorMsgUserInterface.setInstr(instr.getString());
+   
+   for(S32 i = 0; i < message.size(); i++)
+      gErrorMsgUserInterface.setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
+
+   gErrorMsgUserInterface.activate();
 }
 
 
@@ -480,31 +502,69 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTab
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(mIsLevelChanger)
+   if(!mIsLevelChanger)
+      return;
+
+   bool restart = false;
+
+   if(isRelative)
+      newLevelIndex = (gServerGame->getCurrentLevelIndex() + newLevelIndex ) % gServerGame->getLevelCount();
+   else if(newLevelIndex == -2)
    {
-      bool restart = false;
-
-      if(isRelative)
-         newLevelIndex = (gServerGame->getCurrentLevelIndex() + newLevelIndex ) % gServerGame->getLevelCount();
-      else if(newLevelIndex == -2)
-      {
-         restart = true;
-         newLevelIndex = gServerGame->getCurrentLevelIndex();
-      }
-         
-      while(newLevelIndex < 0)
-         newLevelIndex += gServerGame->getLevelCount();
-
-      static StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
-      Vector<StringTableEntry> e;
-      e.push_back(getClientName());
-      if(!restart)
-         e.push_back(gServerGame->getLevelNameFromIndex(newLevelIndex));
-
-      gServerGame->cycleLevel(newLevelIndex);
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cDisplayMessageE(ColorYellow, SFXNone, msg, e);
+      restart = true;
+      newLevelIndex = gServerGame->getCurrentLevelIndex();
    }
+      
+   while(newLevelIndex < 0)
+      newLevelIndex += gServerGame->getLevelCount();
+
+   static StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
+   Vector<StringTableEntry> e;
+   e.push_back(getClientName());
+   if(!restart)
+      e.push_back(gServerGame->getLevelNameFromIndex(newLevelIndex));
+
+   gServerGame->cycleLevel(newLevelIndex);
+   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+      walk->s2cDisplayMessageE(ColorYellow, SFXNone, msg, e);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U8 time), (time), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+{
+   if(!mIsAdmin)
+      return;
+
+   gServerGame->setShuttingDown(true, time, mClientRef->name.getString());
+
+   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+      walk->s2cInitiateShutdown(time, mClientRef->name, walk == this);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U8 time, StringTableEntry name, bool originator), 
+                  (time, name, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+   gGameUserInterface.shutdownInitiated(time, name, originator);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+{
+   if(!mIsAdmin)
+      return;
+
+   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+      if(walk != this)     // Don't send message to cancellor!
+         walk->s2cCancelShutdown();
+
+   gServerGame->setShuttingDown(false, 0, "");
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+   gGameUserInterface.shutdownCanceled();
 }
 
 
@@ -515,7 +575,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetIsBusy, (bool busy), (busy), NetClassGro
 }
 
 
-// Client tells server that they are busy chatting or futzing with menus or configuring ship... or not
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
 {
    //setServerAlertVolume(vol);

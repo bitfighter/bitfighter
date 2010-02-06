@@ -48,7 +48,7 @@ TNL_IMPLEMENT_NETOBJECT(SpeedZone);
 SpeedZone::SpeedZone()
 {
    mNetFlags.set(Ghostable);
-   mObjectTypeMask = CommandMapVisType;
+   mObjectTypeMask = SpeedZoneType | CommandMapVisType;
    mSpeed = defaultSpeed;
    mSnapLocation = false;     // Don't snap unless specified
 }

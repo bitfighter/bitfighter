@@ -250,6 +250,7 @@ public:
    void repairTargets();
 
    void controlMoveReplayComplete();
+   void onAddedToGame(Game *);
 
    void emitShipExplosion(Point pos);
    //void setActualPos(Point p);

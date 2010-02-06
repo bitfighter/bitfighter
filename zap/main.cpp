@@ -21,6 +21,8 @@
 
 /*
 XXX need to document timers, main function XXX
+XXXX Add /shutdown to help
+
 <ul>
 <h4>Big changes</h4>
 <li>Added energy item</li>
@@ -34,6 +36,9 @@ XXX need to document timers, main function XXX
 <li>Fixed several in-game crashing issues</li>
 <li>Minor efficiency improvements on rendering routines</li>
 <li>Retrieve games now allow non-team flags</li>
+<li>Bouncers now do half-damage to shooter</li>
+<li>Triples no longer damage shooter</li>
+<li>Added /shutdown command for more orderly terminating of servers</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -57,7 +62,6 @@ XXX need to document timers, main function XXX
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
 <li>Fixed turret/forcefield "in the middle of space" bug</li>
 <li>Fixed textItem bounds miscalculation that caused large text to "jump" onto screen</li>
-
 
 */
 
@@ -845,6 +849,9 @@ void endGame()
 
    delete gServerGame;
    gServerGame = NULL;
+
+   if(gDedicatedServer) 
+      exitGame();
 }
 
 

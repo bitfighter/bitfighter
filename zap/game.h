@@ -204,6 +204,9 @@ private:
    U32 mCurrentLevelIndex;                // Index of level currently being played
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
+   bool mShuttingDown;
+   Timer mShutdownTimer;
+
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
 public:
@@ -219,6 +222,8 @@ public:
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
+
+   void setShuttingDown(bool shuttingDown, U8 time, const char *who);        // Control whether we're in shut down mode or not  
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();

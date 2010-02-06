@@ -524,6 +524,47 @@ void UserInterface::playBoop()
    SFXObject::play(SFXUIBoop, 1);
 }
 
+
+extern void glColor(Color c, float alpha = 1);
+
+void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines)
+{
+   const S32 inset = 100;        // Inset for left and right edges of box
+   const S32 titleSize = 30;     // Size of title
+   const S32 titleGap = 10;      // Spacing between title and first line of text
+   const S32 textSize = 18;      // Size of text and instructions
+   const S32 textGap = 6;        // Spacing between text lines
+   const S32 instrGap = 15;      // Gap between last line of text and instruction line
+
+   S32 boxHeight = titleSize + titleGap + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
+   S32 boxTop = (canvasHeight - boxHeight) / 2;
+
+   //glEnable(GL_BLEND);
+   for(S32 i = 1; i >= 0; i--)
+   {
+      glColor(i ? Color(.3,0,0) : Color(1,1,1));        // Draw the box
+      
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f(inset, boxTop);
+         glVertex2f(canvasWidth - inset, boxTop);
+         glVertex2f(canvasWidth - inset, boxTop + boxHeight);
+         glVertex2f(inset, boxTop + boxHeight);
+      glEnd();
+   
+   }
+   //glDisable(GL_BLEND);
+
+   // Draw title, message, and footer
+   glColor3f(1,1,1);
+   drawCenteredString(boxTop + vertMargin, titleSize, title);
+
+   for(S32 i = 0; i < msgLines; i++)
+      drawCenteredString(boxTop + vertMargin + titleSize + titleGap + i * (textSize + textGap), textSize, message[i]);
+
+   drawCenteredString(boxTop + boxHeight - vertMargin - textSize, textSize, instr);
+}
+
+
 // These will be overridden in child classes if needed
 void UserInterface::render()                               { /* Do nothing */ }
 void UserInterface::idle(U32 timeDelta)                    { /* Do nothing */ }

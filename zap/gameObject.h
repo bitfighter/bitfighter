@@ -74,6 +74,7 @@ enum GameObjectType
 
    TurretType          = BIT(26),      // Formerly EngineeredType
    ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType
+   SpeedZoneType       = BIT(28),      // Only needed for finding speed zones that we may have spawned on top of
 
    DeletedType       = BIT(30),
    CommandMapVisType = BIT(31),     // These are objects that can be seen on the commander's map

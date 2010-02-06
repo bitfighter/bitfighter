@@ -1181,8 +1181,9 @@ bool Robot::initialize(Point p)
 }
 
 
-void Robot::onAddedToGame(Game *)
+void Robot::onAddedToGame(Game *game)
 {
+   Parent::onAddedToGame(game);
    // Make them always visible on cmdr map --> del
    if(!isGhost())
       setScopeAlways();

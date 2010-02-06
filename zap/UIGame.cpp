@@ -32,6 +32,7 @@
 #include "UIChat.h"
 #include "UIMessage.h"
 #include "UIDiagnostics.h"
+#include "UIErrorMessage.h"
 #include "gameType.h"
 #include "lpc10.h"
 
@@ -129,7 +130,7 @@ void GameUserInterface::onActivate()
    onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);    // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
-   for(S32 i = 0; i < MessageStoreCount; i++)
+   for(S32 i = 0; i < MessageStoreCount; i++) 
       mDisplayMessage[i][0] = 0;
 
    for(S32 i = 0; i < MessageDisplayCount; i++)
@@ -140,6 +141,8 @@ void GameUserInterface::onActivate()
 
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModActivated[i] = false;
+
+   mShutdownMode = None;
 }
 
 
@@ -194,6 +197,8 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
 
 void GameUserInterface::idle(U32 timeDelta)
 {
+   mShutdownTimer.update(timeDelta);
+      
    if(mDisplayMessageTimer.update(timeDelta))
    {
       for(S32 i = MessageDisplayCount - 1; i > 0; i--)
@@ -330,6 +335,55 @@ void GameUserInterface::render()
    if(mGotControlUpdate)
       drawString(710, 10, 30, "CU");
 #endif
+
+   renderShutdownMessage();
+}
+
+
+void GameUserInterface::renderShutdownMessage()
+{
+   if(mShutdownMode == None)
+      return;
+
+   else if(mShutdownMode == ShuttingDown)
+   {
+      char timemsg[255];
+      dSprintf(timemsg, sizeof(timemsg), "Shutting down in %d seconds.", (S32) (mShutdownTimer.getCurrent() / 1000));
+
+      if(mShutdownInitiator)     // Local client intitiated the shutdown
+      {
+         const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "" };
+         renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 5);
+      } 
+      else                       // Remote user intiated the shutdown
+      {
+         char whomsg[255];
+         dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
+
+         const char *msg[] = { "", timemsg, "", whomsg, "" };
+         renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to dismiss", msg, 5);
+      }
+   }
+   else if(mShutdownMode == Canceled)
+   {
+      const char *msg[] = { "", "Server shutdown sequence canceled.  Play on!", "", "", "" };     // Keep same number of messages as above, so if message changes, it will be a smooth transition
+      renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 5); 
+   }
+}
+
+
+void GameUserInterface::shutdownInitiated(U8 time, StringTableEntry who, bool initiator)
+{
+   mShutdownMode = ShuttingDown;
+   mShutdownName = who;
+   mShutdownInitiator = initiator;
+   mShutdownTimer.reset(time * 1000);
+}
+
+
+void GameUserInterface::shutdownCanceled()
+{
+   mShutdownMode = Canceled;
 }
 
 
@@ -790,6 +844,7 @@ void GameUserInterface::disableMovementKey(KeyCode keyCode)
       mRightDisabled = true;
 }
 
+
 // Key pressed --> take action!
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
@@ -868,6 +923,24 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          advanceWeapon();
       else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
       {
+         if(mShutdownMode == ShuttingDown)
+         {
+            if(mShutdownInitiator)
+            {
+               gClientGame->getConnectionToServer()->c2sRequestCancelShutdown();
+               mShutdownMode = Canceled;
+            }
+            else
+               mShutdownMode = None;
+
+            return;
+         }
+         else if(mShutdownMode == Canceled)
+         {
+            mShutdownMode = None;
+            return;
+         }
+
          UserInterface::playBoop();
 
          if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
@@ -948,7 +1021,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(isCmdChat())     // It's a command!
          {
             S32 found = -1;
-            S32 start = mCurrentChatType != CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
+            S32 start = mCurrentChatType == CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
 
             size_t len = mLineEditor.length();
             for(S32 i = 0; i < mChatCmds.size(); i++)
@@ -963,8 +1036,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                return;
 
             mLineEditor.clear();
-            mLineEditor.getString().append(mChatCmds[found]);    // Add the command
-            mLineEditor.addChar(' ');                            // Add a space
+            mLineEditor.setString(mChatCmds[found].substr(start));    // Add the command
+            mLineEditor.addChar(' ');                                 // Add a space
          }
       }
       else if(ascii)     // Append any other keys to the chat message
@@ -1238,7 +1311,16 @@ void GameUserInterface::processCommand(Vector<string> words)
 
       gc->c2sRequestLevelChange(-2, false);
    }
+   else if(words[0] == "shutdown")
+   {
+      if(!gc->isAdmin())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to shut the server down");
+         return;
+      }
 
+      gc->c2sRequestShutdown(10);
+   }
    else if(words[0] == "kick")      // Kick a player
    {
       if(!gc->isAdmin())
@@ -1328,6 +1410,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/svol");
    mChatCmds.push_back("/servvol");
    mChatCmds.push_back("/vvol");
+   mChatCmds.push_back("/shutdown");
 }
 
 // Set specified volume to the specefied level

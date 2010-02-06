@@ -237,6 +237,7 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
    mMaxPlayers = maxPlayers;
    mHostName = gHostName.c_str();
    mHostDescr = gHostDescr.c_str();
+   mShuttingDown = false;
 
    mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
    mCurrentLevelIndex = 0;
@@ -298,6 +299,21 @@ string ServerGame::getCurrentLevelLoadName()
       return "";
    else
       return mLevelNames.last().getString();
+}
+
+
+// Control whether we're in shut down mode or not
+void ServerGame::setShuttingDown(bool shuttingDown, U8 time, const char *who)
+{
+   mShuttingDown = shuttingDown;
+   if(shuttingDown)
+   {
+      s_logprintf("Server shutdown in %d seconds, initiated by %s.", time, who);
+      mShutdownTimer.reset(time * 1000);
+   }
+   else
+      s_logprintf("Server shutdown canceled.", time, who);
+
 }
 
 
@@ -567,7 +583,10 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       if(!stricmp(argv[0], "FlagItem") && !mGameType.isNull() && mGameType->getGameType() == GameType::NexusGame)
          strcpy(obj, "HuntersFlagItem");
       else
+      {
          strncpy(obj, argv[0], MAXOBJLEN);
+         obj[MAXOBJLEN] = '\0';
+      }
 
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
@@ -626,6 +645,12 @@ void ServerGame::removeClient(GameConnection *theConnection)
 // Top-level idle loop for server
 void ServerGame::idle(U32 timeDelta)
 {
+   if(mShuttingDown && mShutdownTimer.update(timeDelta))
+   {
+      endGame();
+      return;
+   }
+
    mCurrentTime += timeDelta;
    mNetInterface->checkBanlistTimeouts(timeDelta);
    mNetInterface->checkIncomingPackets();

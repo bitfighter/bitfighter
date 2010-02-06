@@ -36,6 +36,7 @@
 #include "gameType.h"
 #include "gameConnection.h"
 #include "shipItems.h"
+#include "speedZone.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "config.h"
@@ -50,7 +51,6 @@ namespace Zap
 
 static Vector<GameObject *> fillVector;
 
-//------------------------------------------------------------------------
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
 #ifdef _MSC_VER
@@ -333,7 +333,7 @@ extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 
 void Ship::selectWeapon(U32 weaponIdx)
-{
+{   
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
    // Display a message confirming new weapon choice if we're not showing the indicators
@@ -714,6 +714,19 @@ void Ship::damageObject(DamageInfo *theInfo)
    }
    else if(mHealth > 1)
       mHealth = 1;
+}
+
+
+void Ship::onAddedToGame(Game *game)
+{
+
+
+   Parent::onAddedToGame(game);
+
+   // Detect if we spawned on a GoFast
+   SpeedZone *speedZone = (SpeedZone *) isOnObject(SpeedZoneType);
+   if(speedZone)
+      speedZone->collide(this);
 }
 
 

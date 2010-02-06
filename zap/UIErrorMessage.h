@@ -36,10 +36,10 @@ class ErrorMessageUserInterface : public UserInterface
 {
 public:
    ErrorMessageUserInterface();      // Constructor
-   enum { mNumLines = 9 };
+   const static S32 MAX_LINES = 9;
    const char *mTitle;
    const char *mInstr;
-   const char *mMessage[mNumLines];
+   const char *mMessage[MAX_LINES];
    void onActivate();
    void setMessage (U32 id, const char *message);
    void setTitle(const char *message);

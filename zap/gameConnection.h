@@ -163,8 +163,13 @@ public:
    TNL_DECLARE_RPC(s2cTouchdownScored, (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e));
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
+   TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
+   TNL_DECLARE_RPC(c2sRequestShutdown, (U8 time));
+   TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
+   TNL_DECLARE_RPC(s2cInitiateShutdown, (U8 time, StringTableEntry name, bool originator));
+   TNL_DECLARE_RPC(s2cCancelShutdown, ());
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
 
