@@ -303,16 +303,28 @@ string ServerGame::getCurrentLevelLoadName()
 
 
 // Control whether we're in shut down mode or not
-void ServerGame::setShuttingDown(bool shuttingDown, U8 time, const char *who)
+void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who)
 {
    mShuttingDown = shuttingDown;
    if(shuttingDown)
    {
-      s_logprintf("Server shutdown in %d seconds, initiated by %s.", time, who);
-      mShutdownTimer.reset(time * 1000);
+      mShutdownOriginator = who->clientConnection;
+
+      // If there's no other clients, then just shutdown now
+      if(GameConnection::onlyClientIs(mShutdownOriginator))
+      {
+         s_logprintf("Server shutdown requested by %s.  No other players, so shutting down now.", mShutdownOriginator->getClientName().getString());
+         mShutdownTimer.reset(1);
+      } 
+      else
+      {
+         s_logprintf("Server shutdown in %d seconds, requested by %s.", time, mShutdownOriginator->getClientName().getString());
+         mShutdownTimer.reset(time * 1000);
+      }
+
    }
    else
-      s_logprintf("Server shutdown canceled.", time, who);
+      s_logprintf("Server shutdown canceled.", time, mShutdownOriginator->getClientName().getString());
 
 }
 
@@ -623,6 +635,10 @@ void ServerGame::addClient(GameConnection *theConnection)
    for(S32 i = 0; i < mLevelList.size();i++)
       theConnection->s2cAddLevel(mLevelNames[i], mLevelTypes[i]);
 
+   // If we're shutting down, display a notice to the user
+   if(mShuttingDown)
+      theConnection->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), false);
+
    if(mGameType.isValid())
       mGameType->serverAddClient(theConnection);
    mPlayerCount++;
@@ -645,7 +661,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
 // Top-level idle loop for server
 void ServerGame::idle(U32 timeDelta)
 {
-   if(mShuttingDown && mShutdownTimer.update(timeDelta))
+   if( mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)) )
    {
       endGame();
       return;

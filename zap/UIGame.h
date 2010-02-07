@@ -191,7 +191,7 @@ public:
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
 
-   void shutdownInitiated(U8 time, StringTableEntry who, bool initiator);
+   void shutdownInitiated(U16 time, StringTableEntry who, bool initiator);
    void shutdownCanceled();
 
    Vector<string> parseString(const char *str);    // Break a chat msg into parsable bits

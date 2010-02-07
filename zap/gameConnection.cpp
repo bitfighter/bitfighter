@@ -108,6 +108,27 @@ GameConnection *GameConnection::getClientList()
 }
 
 
+S32 GameConnection::getClientCount()
+{
+   S32 count = 0;
+
+   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+      count++;
+
+   return count;
+}
+
+
+bool GameConnection::onlyClientIs(GameConnection *client)
+{
+   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+      if(walk != client) 
+         return false;
+
+   return true;
+}
+
+
 GameConnection *GameConnection::getNextClient()
 {
    if(mNext == &gClientList)
@@ -530,19 +551,19 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U8 time), (time), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    if(!mIsAdmin)
       return;
 
-   gServerGame->setShuttingDown(true, time, mClientRef->name.getString());
+   gServerGame->setShuttingDown(true, time, mClientRef);
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
       walk->s2cInitiateShutdown(time, mClientRef->name, walk == this);
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U8 time, StringTableEntry name, bool originator), 
+TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, bool originator), 
                   (time, name, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    gGameUserInterface.shutdownInitiated(time, name, originator);
@@ -558,7 +579,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
       if(walk != this)     // Don't send message to cancellor!
          walk->s2cCancelShutdown();
 
-   gServerGame->setShuttingDown(false, 0, "");
+   gServerGame->setShuttingDown(false, 0, NULL);
 }
 
 

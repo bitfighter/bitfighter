@@ -23,6 +23,9 @@
 XXX need to document timers, main function XXX
 XXXX Add /shutdown to help
 
+/shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, if no clients, rapid shutdown, notice in join menu, shutdown after level, admin message, auto shutdown when quitting and players connected
+
+
 <ul>
 <h4>Big changes</h4>
 <li>Added energy item</li>

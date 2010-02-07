@@ -179,6 +179,9 @@ public:
    S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };
 
+
+class ClientRef;
+
 class ServerGame : public Game, public LevelLoader
 {
 private:
@@ -206,6 +209,7 @@ private:
    Timer mMasterUpdateTimer;              // Periodically let the master know how we're doing
    bool mShuttingDown;
    Timer mShutdownTimer;
+   GameConnection *mShutdownOriginator;   // Who started the shutdown?
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
@@ -223,7 +227,7 @@ public:
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
 
-   void setShuttingDown(bool shuttingDown, U8 time, const char *who);        // Control whether we're in shut down mode or not  
+   void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who);        // Control whether we're in shut down mode or not  
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();

@@ -348,12 +348,12 @@ void GameUserInterface::renderShutdownMessage()
    else if(mShutdownMode == ShuttingDown)
    {
       char timemsg[255];
-      dSprintf(timemsg, sizeof(timemsg), "Shutting down in %d seconds.", (S32) (mShutdownTimer.getCurrent() / 1000));
+      dSprintf(timemsg, sizeof(timemsg), "Server is shutting down in %d seconds.", (S32) (mShutdownTimer.getCurrent() / 1000));
 
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
          const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "" };
-         renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 5);
+         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 5);
       } 
       else                       // Remote user intiated the shutdown
       {
@@ -372,7 +372,7 @@ void GameUserInterface::renderShutdownMessage()
 }
 
 
-void GameUserInterface::shutdownInitiated(U8 time, StringTableEntry who, bool initiator)
+void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, bool initiator)
 {
    mShutdownMode = ShuttingDown;
    mShutdownName = who;
@@ -1319,7 +1319,12 @@ void GameUserInterface::processCommand(Vector<string> words)
          return;
       }
 
-      gc->c2sRequestShutdown(10);
+      U16 time = 0;
+      if(words.size() > 1)
+         time = (U16) atoi(words[1].c_str());
+      if(time <= 0)
+         time = 10;
+      gc->c2sRequestShutdown(time);
    }
    else if(words[0] == "kick")      // Kick a player
    {
