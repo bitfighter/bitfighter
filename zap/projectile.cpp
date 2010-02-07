@@ -291,10 +291,10 @@ void Projectile::explode(GameObject *hitObject, Point pos)
 
       Ship *s = dynamic_cast<Ship *>(hitObject);
 
-      SFXProfiles sound;
+      SFXProfiles sound; 
       if(s && s->isModuleActive(ModuleShield))     // We hit a ship with shields up
          sound = SFXBounceShield;
-      else if((hitShip || s) && mShooter != s)     // We hit a ship with shields down, but not own shot, though this doesn't always work
+      else if((hitShip || s))                      // We hit a ship with shields down
          sound = SFXShipHit;
       else                                         // We hit something else
          sound = gProjInfo[mType].impactSound;

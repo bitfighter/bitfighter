@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory="$(TargetDir)"
-				CommandArguments="-dedicated"
+				CommandArguments="-lag 800"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
