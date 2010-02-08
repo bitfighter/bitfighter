@@ -95,6 +95,8 @@ void LogConsumer::logString(const char *string)
 #endif
 }
 
+
+// Note: Pretty sure this is safe from buffer overflows, and all strings end up null terminated
 void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
 {
    char buffer[4096];
@@ -118,7 +120,7 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
    if(len > 0 && buffer[len - 1] == '\\')
       buffer[len - 1] = '\0';    // Don't use NULL here, will cause type problems
    else
-      strcat(buffer, "\n");
+      strcat(buffer, "\n");      // strcat should include terminal null
 
    for(LogConsumer *walk = LogConsumer::getLinkedList(); walk; walk = walk->getNext())
       if(walk->mFilterType == filtertype)     // Only log to the requested type of logfile

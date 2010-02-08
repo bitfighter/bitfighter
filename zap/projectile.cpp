@@ -179,8 +179,8 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
    if(!collided && alive)
    {
-   // Calculate where projectile will be at the end of the current interval
-   Point endPos = pos + velocity * (F32)deltaT * 0.001;
+      // Calculate where projectile will be at the end of the current interval
+      Point endPos = pos + velocity * (F32)deltaT * 0.001;
 
       // Check for collision along projected route of movement
       static Vector<GameObject *> disableVector;

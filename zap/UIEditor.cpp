@@ -1461,12 +1461,12 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             F32 strWidth = getStringWidth(120, item.lineEditor.c_str());
             F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
 
-            item.textSize = 120 * lineLen  * mGridSize / max(strWidth, 80.0f);
+            item.textSize = 120.0f * lineLen * mGridSize / max(strWidth, 80.0f); 
 
             // Use this more precise F32 calculation of size for smoother interactive rendering.
             // We'll use U32 approximation in game.
             glColor(getTeamColor(item.team), alpha);
-            F32 txtSize = 120 * lineLen * mCurrentScale / max(strWidth, 80.0f);
+            F32 txtSize = 120.0f * lineLen * mCurrentScale / max(strWidth, 80.0f);
 
             drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
 

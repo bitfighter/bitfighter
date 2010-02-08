@@ -26,7 +26,7 @@
 #include "UIQueryServers.h"
 #include "UIMenus.h"
 
-#include "../tnl/tnlRandom.h"
+#include "tnlRandom.h"
 
 #include "masterConnection.h"
 #include "gameNetInterface.h"
@@ -43,15 +43,15 @@
 namespace Zap
 {
 
-// Sizes and other things to help with positioning
 static const U32 MENU_HEADER_TEXTSIZE = 11;
-static const U32 SERVER_DESCR_TEXTSIZE = 18;
+static const U32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
 static const U32 SERVER_ENTRY_TEXTSIZE = 16;
 static const U32 SERVER_ENTRY_VERT_GAP = 4;
+static const U32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
+
 static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_HEADER_TEXTSIZE;
 static const U32 COLUMNS_TOP = ITEMS_TOP - MENU_HEADER_TEXTSIZE - 10 - MENU_HEADER_TEXTSIZE;
 static const U32 COLUMN_HEADER_HEIGHT = MENU_HEADER_TEXTSIZE + 6;
-
 
 // Some colors
 static const Color red = Color(1,0,0);
@@ -77,10 +77,10 @@ QueryServersUserInterface::QueryServersUserInterface()
 
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
-   columns.push_back(ColumnInfo("STAT", 280));
-   columns.push_back(ColumnInfo("PING", 380));
-   columns.push_back(ColumnInfo("PLAYERS", 445));
-   columns.push_back(ColumnInfo("ADDRESS", 583));
+   columns.push_back(ColumnInfo("STAT", 400));
+   columns.push_back(ColumnInfo("PING", 450));
+   columns.push_back(ColumnInfo("PLAYERS", 500));
+   columns.push_back(ColumnInfo("ADDRESS", 610));
 
    selectedId = 0xFFFFFF;
 
@@ -337,8 +337,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
             if(s.sendCount > PingQueryRetryCount)     // Ping has timed out, sadly
             {
                s.pingTime = 999;
-               strcpy(s.serverName, "PingTimedOut");
-               strcpy(s.serverDescr, "Server not responding to pings");
+               strcpy(s.serverName, "Ping Timed Out");
+               strcpy(s.serverDescr, "No information: Server not responding to pings");
                s.msgColor = red;   // red for errors
                s.playerCount = 0;
                s.maxPlayers = 0;
@@ -380,8 +380,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                   continue;
                }
                // Otherwise, we can deal with timeouts on remote servers
-               strcpy(s.serverName, "QueryTimedOut");
-               strcpy(s.serverDescr, "Server not responding to status query");
+               strcpy(s.serverName, "Query Timed Out");
+               strcpy(s.serverDescr, "No information: Server not responding to status query");
                s.msgColor = red;   // red for errors
                s.playerCount = s.maxPlayers = s.botCount = 0;
                s.state = ServerRef::ReceivedQuery;
@@ -566,11 +566,12 @@ void QueryServersUserInterface::render()
       renderChatters(horizMargin, canvasHeight - vertMargin / 2 - CHAT_NAMELIST_SIZE);
    }
 
-   S32 serversToShow = (canvasHeight - vertMargin - 20 - chatHeight - (COLUMNS_TOP + COLUMN_HEADER_HEIGHT)) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP);  
+   // This is the core number of servers to show... if not scrolling, we'll add two more later.  If scrolling, we'll show this many servers with room for the scroll arrows
+   S32 serversToShow = (canvasHeight - vertMargin - 20 - chatHeight - (COLUMNS_TOP + COLUMN_HEADER_HEIGHT)) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 3; 
 
    // Instructions at bottom of server selection section
    glColor(white);
-   drawCenteredString(canvasHeight - vertMargin - 18 - chatHeight, 18, "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
+   drawCenteredString(canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - chatHeight, SEL_SERVER_INSTR_SIZE, "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
    bool drawScrollUpArrow = false;
    bool drawScrollDnArrow = false;
@@ -584,7 +585,7 @@ void QueryServersUserInterface::render()
 
       S32 bonusTopOffset = 0;
       // We can show a couple more if we don't need to scroll...
-      if(servers.size() <= serversToShow + 2)
+      if(servers.size() <= serversToShow)
       {
          mFirstServer = 0;
          mLastServer = servers.size() - 1;
@@ -652,7 +653,7 @@ void QueryServersUserInterface::render()
          glEnd();
       }
 
-      for(S32 i = mFirstServer; i <= mLastServer; i++)
+      for(S32 i = mFirstServer; i <= mLastServer; i++) 
       {
          y = ITEMS_TOP + (i - mFirstServer) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - bonusTopOffset * MENU_HEADER_TEXTSIZE;
          ServerRef &s = servers[i];
@@ -661,7 +662,8 @@ void QueryServersUserInterface::render()
          {
             // Render server description at bottom
             glColor(s.msgColor);
-            drawString(horizMargin, canvasHeight - vertMargin - 62 - chatHeight, SERVER_DESCR_TEXTSIZE, s.serverDescr);    // 62?
+            U32 serverDescrLoc = canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - SERVER_DESCR_TEXTSIZE - SERVER_ENTRY_VERT_GAP - chatHeight;
+            drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr);    
          }
 
          // Truncate server name to fit in the first column...
@@ -752,7 +754,7 @@ void QueryServersUserInterface::render()
    {
       glBegin(GL_LINES);
          glVertex2f(columns[i].xStart - 4, COLUMNS_TOP);
-         glVertex2f(columns[i].xStart - 4, ITEMS_TOP + (serversToShow + 1) * SERVER_ENTRY_TEXTSIZE );
+         glVertex2f(columns[i].xStart - 4, canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - chatHeight - SERVER_DESCR_TEXTSIZE - SERVER_ENTRY_VERT_GAP);
       glEnd();
    }
 
@@ -766,7 +768,6 @@ void QueryServersUserInterface::render()
       glVertex2f(0, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
       glVertex2f(canvasWidth, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
    glEnd();
-
 
 
 
@@ -817,7 +818,7 @@ void QueryServersUserInterface::render()
    if(drawScrollUpArrow)
       MenuUserInterface::renderArrowAbove(ITEMS_TOP + 9);
    if(drawScrollDnArrow)
-      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (serversToShow + 1) * MENU_HEADER_TEXTSIZE + 5);
+      MenuUserInterface::renderArrowBelow(ITEMS_TOP + serversToShow * MENU_HEADER_TEXTSIZE + 5);
 
 
    if(drawmsg1)

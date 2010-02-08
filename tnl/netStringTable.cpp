@@ -280,10 +280,10 @@ StringTableEntryId insertn(const char* val, S32 len, const bool caseSens)
    mNodeList[stringNode->masterIndex] = stringNode;
    
    strncpy(stringNode->stringData, val, len);
-   stringNode->stringData[len] = 0;
+   stringNode->stringData[len] = 0;    // Null terminate
    mItemCount++;
 
-   // check for hash table resize
+   // Check for hash table resize
    if(mItemCount > 2 * mNumBuckets) {
       resizeHashTable(4 * mNumBuckets - 1);
    }

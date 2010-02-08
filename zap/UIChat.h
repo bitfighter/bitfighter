@@ -109,10 +109,12 @@ public:
    void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room
    void deliverPrivateMessage(const char *sender, const char *message);
 
+   // Sizes and other things to help with positioning
    static const U32 CHAT_FONT_SIZE = 14;      // Font size to display those messages
    static const U32 CHAT_TIME_FONT_SIZE = 8;  // Size of the timestamp
    static const U32 CHAT_FONT_MARGIN = 3;     // Vertical margin
    static const U32 CHAT_NAMELIST_SIZE = 11;  // Size of names of people in chatroom
+
 
    Vector<StringTableEntry> mPlayersInGlobalChat;
 };

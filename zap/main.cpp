@@ -99,11 +99,11 @@ XXXX Add /shutdown to help
 
 #include "IniFile.h"
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlRandom.h"
-#include "../tnl/tnlGhostConnection.h"
-#include "../tnl/tnlNetInterface.h"
-#include "../tnl/tnlJournal.h"
+#include "tnl.h"
+#include "tnlRandom.h"
+#include "tnlGhostConnection.h"
+#include "tnlNetInterface.h"
+#include "tnlJournal.h"
 
 #ifdef TNL_OS_MAC_OSX
 #include "Directory.h"
