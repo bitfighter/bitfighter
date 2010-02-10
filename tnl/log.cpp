@@ -95,9 +95,8 @@ void LogConsumer::logString(const char *string)
 #endif
 }
 
-
 // Note: Pretty sure this is safe from buffer overflows, and all strings end up null terminated
-void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
+void logger(LogConsumer::FilterType filtertype, const char *format, va_list args)
 {
    char buffer[4096];
    U32 bufferStart = 0;
@@ -112,7 +111,7 @@ void logger(LogConsumer::FilterType filtertype, const char *format, void *args)
    }
 
   // -1 below makes sure we have enough room for a "\n" if we need to append one
-   vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, (va_list) args);
+   vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, args);
    
    // If last char is a "\", chop it off, otherwise append newline
    U32 len = strlen(buffer);  // Should never be >= our buffer length, so appending newline should be ok

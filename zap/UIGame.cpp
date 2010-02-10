@@ -183,12 +183,16 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
    }
 
    va_list args;
-   va_start(args, format);
 
+   va_start(args, format);
    vsnprintf(mDisplayMessage[0], sizeof(mDisplayMessage[0]), format, args);
+   va_end(args);
    mDisplayMessageColor[0] = theColor;
 
+   va_start(args, format);
    vsnprintf(mStoreMessage[0], sizeof(mStoreMessage[0]), format, args);
+   va_end(args);
+
    mStoreMessageColor[0] = theColor;
 
    mDisplayMessageTimer.reset();

@@ -31,6 +31,9 @@
 #include "tnlNetBase.h"
 #endif
 
+#include "../libtomcrypt/mycrypt.h"
+#undef MD5 // mycrypt_custom.h defines this, clashing with the MD5 class
+
 namespace TNL
 {
 
@@ -46,15 +49,10 @@ public:
       KeySize = 16,
    };
 private:
-   struct Key
-   {
-      U32 eK[64], dK[64];
-      int Nr;
-   };
    U32 mCounter[BlockSize >> 2];
    U32 mInitVector[BlockSize];
    U8 mPad[BlockSize];
-   Key mSymmetricKey;
+   symmetric_key mSymmetricKey;
    U32 mPadLen;
 public:
    SymmetricCipher(const U8 symmetricKey[KeySize], const U8 initVector[BlockSize]);
