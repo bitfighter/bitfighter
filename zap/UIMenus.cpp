@@ -284,32 +284,43 @@ void MenuUserInterface::render()
 
 void MenuUserInterface::renderArrowAbove(S32 pos)
 {
-   // First create a black poly to blot out what's behind
-   glColor3f(0, 0, 0);
-   glBegin(GL_POLYGON);
-      glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-      glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-      glVertex2f(canvasWidth / 2, pos - (ARROW_HEIGHT + ARROW_MARGIN ) - 7);
-   glEnd();
-
-   // Then render the arrow itself
-   glColor3f(0, 0, 1);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-      glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-      glVertex2f(canvasWidth / 2, pos - (ARROW_HEIGHT + ARROW_MARGIN ) - 7);
-   glEnd();
+   renderArrowAbove(pos, ARROW_HEIGHT);
 }
 
 void MenuUserInterface::renderArrowBelow(S32 pos)
 {
-   glColor3f(0, 0, 1);
-   glBegin(GL_LINE_LOOP);
-      glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-      glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-      glVertex2f(canvasWidth / 2, pos + (ARROW_HEIGHT + ARROW_MARGIN) - 7);
-   glEnd();
+   renderArrowBelow(pos, ARROW_HEIGHT);
 }
+
+
+void MenuUserInterface::renderArrowAbove(S32 pos, S32 height)
+{
+   for(S32 i = 1; i >= 0; i--)
+   {
+      // First create a black poly to blot out what's behind, then the arrow itself
+      glColor(i ? Color(0, 0, 0) : Color(0, 0, 1));
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
+         glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
+         glVertex2f(canvasWidth / 2, pos - (height + ARROW_MARGIN ) - 7);
+      glEnd();
+   }
+}
+
+void MenuUserInterface::renderArrowBelow(S32 pos, S32 height)
+{
+   for(S32 i = 1; i >= 0; i--)
+   {
+      // First create a black poly to blot out what's behind, then the arrow itself
+      glColor(i ? Color(0, 0, 0) : Color(0, 0, 1));
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
+         glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
+         glVertex2f(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
+      glEnd();
+   }
+}
+
 
 #undef ARROW_WIDTH
 #undef ARROW_HEIGHT

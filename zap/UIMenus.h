@@ -161,7 +161,10 @@ public:
 
    // Helper rendering functions
    static void renderArrowAbove(S32 pos);
+   static void renderArrowAbove(S32 pos, S32 height);
+
    static void renderArrowBelow(S32 pos);
+   static void renderArrowBelow(S32 pos, S32 height);
 
    static void renderMenuInstructions(S32 variant);
 

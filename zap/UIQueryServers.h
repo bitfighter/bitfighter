@@ -42,6 +42,7 @@ class QueryServersUserInterface : public UserInterface, public AbstractChat
 {
 private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
+   bool mMouseAtBottomFixFactor;    // UGLY
    S32 mFirstServer;
    S32 mLastServer;
 
@@ -75,7 +76,7 @@ public:
    enum {
       MaxServerNameLen = 20,
       MaxServerDescrLen = 254,
-      ServersPerScreen = 21,
+      ServersPerScreen = 21,     // unused, delete
       ServersAbove = 9,
       ServersBelow = 9,
       MaxPendingPings = 15,

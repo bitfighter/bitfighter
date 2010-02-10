@@ -43,9 +43,9 @@
 namespace Zap
 {
 
-static const U32 MENU_HEADER_TEXTSIZE = 11;
+static const U32 MENU_HEADER_TEXTSIZE = 14;
 static const U32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
-static const U32 SERVER_ENTRY_TEXTSIZE = 16;
+static const U32 SERVER_ENTRY_TEXTSIZE = 14;
 static const U32 SERVER_ENTRY_VERT_GAP = 4;
 static const U32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
 
@@ -503,6 +503,9 @@ static void renderLockIcon()
 extern Color gMasterServerBlue;
 
 #define MOUSE_IN_HEADER_ROW mousePos.y >= COLUMNS_TOP && mousePos.y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1
+#define chatHeight (mShowChat ? 285 : 0)     // Height of chat block overall
+// This is the core number of servers to show... if not scrolling, we'll add two more later.  If scrolling, we'll show this many servers with room for the scroll arrows
+#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 3))
 
 void QueryServersUserInterface::render()
 {
@@ -543,12 +546,9 @@ void QueryServersUserInterface::render()
       drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
    }
 
-   S32 chatHeight = 0;     // Height of chat block overall
-
    // Show some chat messages
    if(mShowChat)
    {
-      chatHeight = 285;
       S32 MessageDisplayCount = (chatHeight - CHAT_FONT_SIZE - 2 * CHAT_FONT_MARGIN - CHAT_NAMELIST_SIZE) / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN);
       S32 ypos = canvasHeight - chatHeight;
 
@@ -566,9 +566,6 @@ void QueryServersUserInterface::render()
       renderChatters(horizMargin, canvasHeight - vertMargin / 2 - CHAT_NAMELIST_SIZE);
    }
 
-   // This is the core number of servers to show... if not scrolling, we'll add two more later.  If scrolling, we'll show this many servers with room for the scroll arrows
-   S32 serversToShow = (canvasHeight - vertMargin - 20 - chatHeight - (COLUMNS_TOP + COLUMN_HEADER_HEIGHT)) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 3; 
-
    // Instructions at bottom of server selection section
    glColor(white);
    drawCenteredString(canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - chatHeight, SEL_SERVER_INSTR_SIZE, "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
@@ -579,13 +576,11 @@ void QueryServersUserInterface::render()
    if(servers.size())      // There are servers to display...
    {
       // Find the selected server (it may have moved due to sort or new/removed servers)
-      S32 selectedIndex = getSelectedIndex();
-      if(selectedIndex == -1)
-         selectedIndex = 0;
+      S32 selectedIndex = max(getSelectedIndex(), 0);
 
       S32 bonusTopOffset = 0;
       // We can show a couple more if we don't need to scroll...
-      if(servers.size() <= serversToShow)
+      if(servers.size() <= serversToShow + 2)
       {
          mFirstServer = 0;
          mLastServer = servers.size() - 1;
@@ -603,14 +598,16 @@ void QueryServersUserInterface::render()
                mFirstServer = getSelectedIndex() - 1;
          }
          else  // scrollingDownMode
+         {
             mFirstServer = getSelectedIndex() - serversToShow + 1 - (mItemSelectedWithMouse ? 1 : 0);
+            if(mFirstServer - getSelectedIndex() <= serversToShow + 1)
+               mFirstServer++;
+         }
 
          if(mFirstServer < 0)
             mFirstServer = 0;
 
          mLastServer = mFirstServer + serversToShow;
-         if(mLastServer >= servers.size())
-            mLastServer = servers.size() - 1;
 
          if(mFirstServer == 0)    // First sever should replace arrow
          {
@@ -625,16 +622,36 @@ void QueryServersUserInterface::render()
          else     // Draw arrow
             drawScrollUpArrow = true;
 
-         // None of the fancy stuff on the bottom... draw the arrow when needed, not when not
          if(mLastServer < servers.size() - 1)
+         {
             drawScrollDnArrow = true;
-         else if(selectedIndex == mLastServer)     // Want to select last server without any scrolling action
+            mLastServer--;    // To make room for the arrow
+         }
+         else if(selectedIndex == mLastServer && servers.size() > serversToShow + 2)     // Want to select last server without any scrolling action
             mScrollingUpMode = true;
+
+         mMouseAtBottomFixFactor = false; 
+
+         if(mLastServer >= servers.size())
+         {
+            mLastServer = servers.size() - 1;
+
+            // In effect adds another item so that the bottom row will be full
+            if(mFirstServer > 0)
+               mFirstServer--; 
+
+            if(selectedIndex == servers.size() - 1 && mFirstServer > 0 && !mItemSelectedWithMouse)
+               mFirstServer--;
+
+            mMouseAtBottomFixFactor = true;
+            logprintf("A");
+         }
+         else logprintf("B");
       }
 
-      S32 colwidth = columns[1].xStart - columns[0].xStart;
+      S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
-      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - bonusTopOffset * MENU_HEADER_TEXTSIZE;
+      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer - bonusTopOffset) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + (SERVER_ENTRY_TEXTSIZE - 12);
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
 
@@ -646,16 +663,16 @@ void QueryServersUserInterface::render()
             glColor(i ? Color(0,0,0.4) : blue);     
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(0, y);
+            glVertex2f(1, y);
             glVertex2f(canvasWidth - 1, y);
             glVertex2f(canvasWidth - 1, y + SERVER_ENTRY_TEXTSIZE + 4);
-            glVertex2f(0, y + SERVER_ENTRY_TEXTSIZE + 4);
+            glVertex2f(1, y + SERVER_ENTRY_TEXTSIZE + 4);
          glEnd();
       }
 
       for(S32 i = mFirstServer; i <= mLastServer; i++) 
       {
-         y = ITEMS_TOP + (i - mFirstServer) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - bonusTopOffset * MENU_HEADER_TEXTSIZE;
+         y = ITEMS_TOP + (i - mFirstServer - bonusTopOffset) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + 2;
          ServerRef &s = servers[i];
 
          if(i == selectedIndex)
@@ -691,15 +708,9 @@ void QueryServersUserInterface::render()
                if( s.pingTimedOut || !s.everGotQueryResponse )
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else if(s.test)
-               {
-                  //glScalef(5, 5, 1);
                   renderTestIcon();
-               }
                else
-               {
-                  //glScalef(5, 5, 1);
                   renderDedicatedIcon();
-               }
             glPopMatrix();
          }
          if(s.passwordRequired || s.pingTimedOut || !s.everGotQueryResponse)
@@ -770,7 +781,6 @@ void QueryServersUserInterface::render()
    glEnd();
 
 
-
    // Column headers (will partially overwrite horizontal lines) 
    S32 x1 = max(columns[mSortColumn].xStart - 3, 1);    // Going to 0 makes line look too thin...
    S32 x2;
@@ -781,7 +791,7 @@ void QueryServersUserInterface::render()
 
    for(S32 i = 1; i >= 0; i--)
    {
-      // Render box around selected column
+      // Render box around (behind, really) selected column
       glColor(i ? Color(.4, .4, 0) : white);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
          glVertex2f(x1, COLUMNS_TOP);
@@ -793,7 +803,7 @@ void QueryServersUserInterface::render()
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++) 
-      drawString(columns[i].xStart, COLUMNS_TOP + MENU_HEADER_TEXTSIZE - 8, MENU_HEADER_TEXTSIZE, columns[i].name);
+      drawString(columns[i].xStart, COLUMNS_TOP + 3, MENU_HEADER_TEXTSIZE, columns[i].name);
 
    // Highlight selected column
    if(mHighlightColumn != mSortColumn) 
@@ -816,9 +826,9 @@ void QueryServersUserInterface::render()
 
    // Big blue scrolling indicator arrows
    if(drawScrollUpArrow)
-      MenuUserInterface::renderArrowAbove(ITEMS_TOP + 9);
+      MenuUserInterface::renderArrowAbove(ITEMS_TOP + SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE );
    if(drawScrollDnArrow)
-      MenuUserInterface::renderArrowBelow(ITEMS_TOP + serversToShow * MENU_HEADER_TEXTSIZE + 5);
+      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP + 1) * serversToShow, SERVER_ENTRY_TEXTSIZE);
 
 
    if(drawmsg1)
@@ -850,21 +860,22 @@ void QueryServersUserInterface::render()
    else if(drawmsg2)
    {
       S32 strwid = getStringWidth(fontsize, "Contacting master server...");
+      S32 boxPos = chatHeight ? COLUMNS_TOP + chatHeight / 2 : canvasHeight / 2;
 
       for(S32 i = 0; i < 2; i++)    // First fill, then outline
       {
          glColor(i ? Color(.4, 0, 0) : red);
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, (canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
-            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, (canvasHeight - chatHeight) / 2 - 1 * (fontsize + fontgap) + msgboxMargin);
-            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, (canvasHeight - chatHeight) / 2 - 1 * (fontsize + fontgap) + msgboxMargin);
-            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, (canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap) - msgboxMargin);
+            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, boxPos - 2 * (fontsize + fontgap) - msgboxMargin);
+            glVertex2f(((canvasWidth - strwid) / 2) - msgboxMargin, boxPos - 1 * (fontsize + fontgap) + msgboxMargin);
+            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, boxPos - 1 * (fontsize + fontgap) + msgboxMargin);
+            glVertex2f(((canvasWidth + strwid) / 2) + msgboxMargin, boxPos - 2 * (fontsize + fontgap) - msgboxMargin);
          glEnd();
       }
 
       glColor(white);
-      drawCenteredString((canvasHeight - chatHeight) / 2 - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
+      drawCenteredString(boxPos - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
    }
 }
 
@@ -888,6 +899,11 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          // Clicked too high... do nothing
       }
+      else if(keyCode == MOUSE_LEFT && mousePos.y > COLUMNS_TOP + (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) * min(servers.size(), serversToShow + 2))
+      {
+         // Clicked too low... also do nothing
+      }
+
       else
       {
          // If the user hits enter, it will either submit a message (if a message is being composed), or join a server (if not)
@@ -1015,7 +1031,9 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    // It only makes sense to select a server if there are any servers to select... get it?
    if(servers.size() > 0)
    {
-      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer - (mScrollingUpMode ? 1 : 0);
+      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
+
+      logprintf("%s",mMouseAtBottomFixFactor ? "Yes" : "No");
 
       //// See if this requires scrolling.  If so, limit speed.
       //if(indx <= mFirstServer - 1)
@@ -1071,6 +1089,7 @@ static S32 QSORT_CALLBACK compareFuncPing(const void *a, const void *b)
           ((QueryServersUserInterface::ServerRef *) b)->pingTime);
 }
 
+
 static S32 QSORT_CALLBACK compareFuncPlayers(const void *a, const void *b)
 {
    S32 pc = S32(((QueryServersUserInterface::ServerRef *) a)->playerCount -
@@ -1082,10 +1101,18 @@ static S32 QSORT_CALLBACK compareFuncPlayers(const void *a, const void *b)
           ((QueryServersUserInterface::ServerRef *) b)->maxPlayers);
 }
 
+
+// First compare IPs, then, if equal, port numbers
 static S32 QSORT_CALLBACK compareFuncAddress(const void *a, const void *b)
 {
-   return S32(((QueryServersUserInterface::ServerRef *) a)->serverAddress.netNum[0] -
-          ((QueryServersUserInterface::ServerRef *) b)->serverAddress.netNum[0]);
+   U32 netNumA = ((QueryServersUserInterface::ServerRef *) a)->serverAddress.netNum[0];
+   U32 netNumB = ((QueryServersUserInterface::ServerRef *) b)->serverAddress.netNum[0];
+
+   if(netNumA == netNumB)
+      return (S32)(((QueryServersUserInterface::ServerRef *) a)->serverAddress.port - 
+                   ((QueryServersUserInterface::ServerRef *) b)->serverAddress.port);
+   // else
+   return S32(netNumA - netNumB);
 }
 
 void QueryServersUserInterface::sort()
