@@ -715,7 +715,7 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-#define SIGN(x) (x) < 0 ? -1 : 1
+//#define SIGN(x) (x) < 0 ? -1 : 1
 
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 

@@ -97,8 +97,9 @@ void QueryServersUserInterface::onActivate()
    mRecievedListOfServersFromMaster = false;
    mItemSelectedWithMouse = false;
    mScrollingUpMode = false;
-   mFirstServer = 0;
    mJustMovedMouse = false;
+
+   mPage = 0;     // Start off showing the first page, as expected
 
    /*
    // Populate server list with dummy data to see how it looks
@@ -445,28 +446,11 @@ S32 QueryServersUserInterface::getSelectedIndex()
    return -1;
 }
 
+
 extern void drawString(S32 x, S32 y, U32 size, const char *string);
 
 static void renderDedicatedIcon()
 {
-   // Draw a little rectangle
-   //glBegin(GL_LINE_LOOP);
-   //   glVertex2f(0,0);
-   //   glVertex2f(0,4);
-   //   glVertex2f(3,4);
-   //   glVertex2f(3,0);
-   //glEnd();
-
-   // And some horizontal lines
-   //glBegin(GL_LINES);
-   //   glVertex2f(0.6, 1);
-   //   glVertex2f(2.4, 1);
-   //   glVertex2f(0.6, 2);
-   //   glVertex2f(2.4, 2);
-   //   glVertex2f(0.6, 3);
-   //   glVertex2f(2.4, 3);
-   //glEnd();
-
    // Add a "D"
    UserInterface::drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "D");
 }
@@ -504,8 +488,9 @@ extern Color gMasterServerBlue;
 
 #define MOUSE_IN_HEADER_ROW mousePos.y >= COLUMNS_TOP && mousePos.y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1
 #define chatHeight (mShowChat ? 285 : 0)     // Height of chat block overall
-// This is the core number of servers to show... if not scrolling, we'll add two more later.  If scrolling, we'll show this many servers with room for the scroll arrows
-#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 3))
+#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 1))
+#define mFirstServer (mPage * serversToShow)
+#define mLastServer (min(servers.size() - 1, (mPage + 1) * serversToShow - 1))
 
 void QueryServersUserInterface::render()
 {
@@ -570,91 +555,16 @@ void QueryServersUserInterface::render()
    glColor(white);
    drawCenteredString(canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - chatHeight, SEL_SERVER_INSTR_SIZE, "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
-   bool drawScrollUpArrow = false;
-   bool drawScrollDnArrow = false;
-
    if(servers.size())      // There are servers to display...
    {
       // Find the selected server (it may have moved due to sort or new/removed servers)
       S32 selectedIndex = max(getSelectedIndex(), 0);
 
-      S32 bonusTopOffset = 0;
-      // We can show a couple more if we don't need to scroll...
-      if(servers.size() <= serversToShow + 2)
-      {
-         mFirstServer = 0;
-         mLastServer = servers.size() - 1;
-         bonusTopOffset = 1;
-      }
-      else  // There will be scrolling... lots of oddball cases to be handled
-      {
-         if(getSelectedIndex() == 0)
-             mScrollingUpMode = false;
-
-         if(mScrollingUpMode)
-         {
-            mFirstServer = servers.size() - serversToShow - 1 + (mItemSelectedWithMouse ? 1 : 0);
-            if(getSelectedIndex() < mFirstServer + 1)
-               mFirstServer = getSelectedIndex() - 1;
-         }
-         else  // scrollingDownMode
-         {
-            mFirstServer = getSelectedIndex() - serversToShow + 1 - (mItemSelectedWithMouse ? 1 : 0);
-            if(mFirstServer - getSelectedIndex() <= serversToShow + 1)
-               mFirstServer++;
-         }
-
-         if(mFirstServer < 0)
-            mFirstServer = 0;
-
-         mLastServer = mFirstServer + serversToShow;
-
-         if(mFirstServer == 0)    // First sever should replace arrow
-         {
-            mLastServer++;        // (will need one more to fill in the list if we're shifting it up)
-            bonusTopOffset = 1;
-         }
-         else if(mFirstServer == 1)  // Server just prior to first server should replace arrow
-         {
-            mFirstServer = 0;
-            bonusTopOffset = 1;
-         }
-         else     // Draw arrow
-            drawScrollUpArrow = true;
-
-         if(mLastServer < servers.size() - 1)
-         {
-            drawScrollDnArrow = true;
-            mLastServer--;    // To make room for the arrow
-         }
-         else if(selectedIndex == mLastServer && servers.size() > serversToShow + 2)     // Want to select last server without any scrolling action
-            mScrollingUpMode = true;
-
-         mMouseAtBottomFixFactor = false; 
-
-         if(mLastServer >= servers.size())
-         {
-            mLastServer = servers.size() - 1;
-
-            // In effect adds another item so that the bottom row will be full
-            if(mFirstServer > 0)
-               mFirstServer--; 
-
-            if(selectedIndex == servers.size() - 1 && mFirstServer > 0 && !mItemSelectedWithMouse)
-               mFirstServer--;
-
-            mMouseAtBottomFixFactor = true;
-            logprintf("A");
-         }
-         else logprintf("B");
-      }
-
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
-      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer - bonusTopOffset) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + (SERVER_ENTRY_TEXTSIZE - 12);
+      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + (SERVER_ENTRY_TEXTSIZE - 12);
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
-
       for(S32 i = 1; i >= 0; i--)
       {
          if(composingMessage() && !mJustMovedMouse)   // Disable selection highlight if we're typing a message
@@ -670,9 +580,9 @@ void QueryServersUserInterface::render()
          glEnd();
       }
 
-      for(S32 i = mFirstServer; i <= mLastServer; i++) 
+      for(S32 i = mFirstServer; i <= mLastServer; i++)
       {
-         y = ITEMS_TOP + (i - mFirstServer - bonusTopOffset) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + 2;
+         y = ITEMS_TOP + (i - mFirstServer - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + 2;
          ServerRef &s = servers[i];
 
          if(i == selectedIndex)
@@ -824,13 +734,6 @@ void QueryServersUserInterface::render()
       glEnd();
    }
 
-   // Big blue scrolling indicator arrows
-   if(drawScrollUpArrow)
-      MenuUserInterface::renderArrowAbove(ITEMS_TOP + SERVER_ENTRY_TEXTSIZE, SERVER_ENTRY_TEXTSIZE );
-   if(drawScrollDnArrow)
-      MenuUserInterface::renderArrowBelow(ITEMS_TOP + (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP + 1) * serversToShow, SERVER_ENTRY_TEXTSIZE);
-
-
    if(drawmsg1)
    {
       static const char *msg = "There are currently no games online.";
@@ -878,6 +781,16 @@ void QueryServersUserInterface::render()
       drawCenteredString(boxPos - 2 * (fontsize + fontgap), fontsize, "Contacting master server...");
    }
 }
+ 
+
+void QueryServersUserInterface::recalcCurrentIndex()
+{
+   S32 indx = mPage * serversToShow + selectedId % serversToShow - 1;
+   if(indx >= servers.size())
+      indx = servers.size() - 1;
+
+   selectedId = servers[indx].id;
+}
 
 
 extern Point gMousePos;
@@ -886,6 +799,7 @@ extern Point gMousePos;
 void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    mJustMovedMouse = false;
+   S32 currentIndex = -1;
 
    if(keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)     // Return - select highlighted server & join game
    {
@@ -960,43 +874,70 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(keyCode == BUTTON_DPAD_RIGHT)
          sortSelected();
    }
+   else if(keyCode == KEY_PAGEUP)
+   {
+      mPage--;
+      if(mPage < 0)
+         mPage = (servers.size() - 1) / serversToShow;      // Last page
+
+      recalcCurrentIndex(); 
+
+      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      mItemSelectedWithMouse = false;
+   }
+   else if(keyCode == KEY_PAGEDOWN) 
+   {
+      mPage++;
+      if(mPage > (servers.size() - 1) / serversToShow)
+         mPage = 0;      // Last page
+
+      recalcCurrentIndex();
+
+      glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
+      mItemSelectedWithMouse = false;
+   }
    else if (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)       // Do backspacey things
       mLineEditor.handleBackspace(keyCode);   
    else if(ascii)                               // Other keys - add key to message
      addCharToMessage(ascii);
 
    // The following keys only make sense if there are some servers to browse through
-   if(servers.size() == 0)
+   else if(servers.size() == 0)
       return;
 
-   S32 currentIndex = getSelectedIndex();
-   if(currentIndex == -1)
-      currentIndex = 0;
-
-   if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)
+   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)
    {
-      currentIndex--;
+      currentIndex = getSelectedIndex() - 1;
+      if(currentIndex < 0)
+         currentIndex = servers.size() - 1;
+      mPage = currentIndex / serversToShow;
+
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
+      selectedId = servers[currentIndex].id;
+
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)
    {
-      currentIndex++;
+      currentIndex = getSelectedIndex() + 1;
+      if(currentIndex >= servers.size())
+         currentIndex = 0;
+
+      mPage = currentIndex / serversToShow;
+
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
+      selectedId = servers[currentIndex].id;
    }
-
-   // Bounds checking
-   currentIndex = max(currentIndex, 0);
-   currentIndex = min(currentIndex, servers.size() - 1);
-
-   selectedId = servers[currentIndex].id;
+   
 }
 
 
 // User is sorting by selected column
 void QueryServersUserInterface::sortSelected()
 {
+   S32 currentItem = getSelectedIndex();     // Preserve the position of selected item (so highlight doesn't move during sort)
+
    mSortColumn = mHighlightColumn;
 
    if(mLastSortColumn == mSortColumn)
@@ -1007,6 +948,8 @@ void QueryServersUserInterface::sortSelected()
       mSortAscending = true;
    }
    sort();
+
+    selectedId = servers[currentItem].id;
 }
 
 
@@ -1032,8 +975,6 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    if(servers.size() > 0)
    {
       S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
-
-      logprintf("%s",mMouseAtBottomFixFactor ? "Yes" : "No");
 
       //// See if this requires scrolling.  If so, limit speed.
       //if(indx <= mFirstServer - 1)

@@ -43,8 +43,8 @@ class QueryServersUserInterface : public UserInterface, public AbstractChat
 private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
    bool mMouseAtBottomFixFactor;    // UGLY
-   S32 mFirstServer;
-   S32 mLastServer;
+
+   S32 mPage;
 
    Timer mouseScrollTimer;
    void sortSelected();
@@ -55,12 +55,14 @@ private:
    bool mSortAscending;
    bool mShouldSort;
 
-   U32 selectedId;
+   S32 selectedId;
    S32 mSortColumn;
    S32 mHighlightColumn;
    S32 mLastSortColumn;
    bool mShowChat;
    bool mJustMovedMouse;      // Track whether user is in mouse or keyboard mode
+
+   void recalcCurrentIndex();
 
 public:
    QueryServersUserInterface();      // Constructor
