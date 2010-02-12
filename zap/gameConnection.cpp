@@ -341,10 +341,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
    static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
 
-   if(granted)
-      s_logprintf("User [%s] granted admin permissions", mClientRef->name.getString());
-   else
-      s_logprintf("User [%s] denied admin permissions", mClientRef->name.getString());
+   if(mClientRef)
+   {
+      if(granted)
+         s_logprintf("User [%s] granted admin permissions", mClientRef->name.getString());
+      else
+         s_logprintf("User [%s] denied admin permissions", mClientRef->name.getString());
+   }
 
    setIsAdmin(granted);
    if(granted)                      // Don't want to rescind level change permissions for entering a bad PW
@@ -377,10 +380,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
    static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
 
-   if(granted)
-      s_logprintf("User [%s] granted level change permissions", mClientRef->name.getString());
-   else
-      s_logprintf("User [%s] denied level change permissions", mClientRef->name.getString());
+   if(mClientRef)
+   {
+      if(granted)
+         s_logprintf("User [%s] granted level change permissions", mClientRef->name.getString());
+      else
+         s_logprintf("User [%s] denied level change permissions", mClientRef->name.getString());
+   }
 
    setIsLevelChanger(granted);
 
