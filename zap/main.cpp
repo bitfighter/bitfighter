@@ -14,9 +14,6 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// new help page
-// /setlvlpass, /setadminpass commands
-// test if blank level passwords really do grant access to all
 
 // TODO:
 // Create color global for reticle color
@@ -59,7 +56,6 @@ XXX need to document timers, main function XXX
 <li>Retrieve games now allow non-team flags</li>
 <li>Bouncers now do half-damage to shooter</li>
 <li>Triples no longer damage shooter</li>
-<li>Added /shutdown command for more orderly terminating of servers</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -80,9 +76,10 @@ XXX need to document timers, main function XXX
 <li>Editor remembers name of last edited file</li>
 
 <h4>Server management</h4>
-<li>Added /shutdown, /setlevpass, and /setadminpass chat commands (see ingame help)</li>
+<li>Added /shutdown, /setlevpass, and /setadminpass chat commands (see in-game help)</li>
 <li>New orderly shutdown process when using /shutdown command (i.e. players notified, dedicated servers can be terminated, etc.)</li>
 <li>If level change password is left blank, all players granted access (not so for admin password)</li>
+<li>If level change password is set to blank, all players currently connected are silently granted access to level change menu</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>

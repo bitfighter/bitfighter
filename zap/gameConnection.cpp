@@ -220,6 +220,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
    if(!isAdmin())
       return;              // Do nothing --> non-admins have no pull here
 
+   s_logprintf("User %s %s %s password", mClientRef->name, !strcmp(pass.getString(), "") ? "set" : "cleared", type == (U32)LevelChangePassword ? "level change" : "admin" );
+
+
    // Some messages we might show the user
    static StringTableEntry levelPassChanged("Level change password changed");
    static StringTableEntry levelPassCleared("Level change password cleared -- anyone can change levels");
@@ -237,12 +240,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
 
    // Notify user their bidding has been done
    s2cDisplayMessage(ColorRed, SFXNone, type == (U32)LevelChangePassword ?                                               // Is this a level change password?
-                                           (strcmp(pass.getString(), "") == 0 ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
+                                           (!strcmp(pass.getString(), "") ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
                                         adminPassChanged);                                                               // <== AdminPassword
 
 
    // Finally, if we're clearning the level change password, grant access to anyone who doesn't already have it
-   if(type == (U32)LevelChangePassword && strcmp(pass.getString(), "") == 0)
+   if(type == (U32)LevelChangePassword && !strcmp(pass.getString(), ""))
    {
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          if(!walk->isLevelChanger())
@@ -272,9 +275,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    if(!theClient)    // Hmmm... couldn't find him.  Maybe the dude disconnected?
       return;
 
-   StringTableEntry msg;
    static StringTableEntry kickMessage("%e0 was kicked from the game by %e1.");
    static StringTableEntry changeTeamMessage("%e0 had their team changed by %e1.");
+
+   StringTableEntry msg;
    Vector<StringTableEntry> e;
    e.push_back(theClient->getClientName());
    e.push_back(getClientName());
@@ -337,6 +341,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
    static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
 
+   if(granted)
+      s_logprintf("User [%s] granted admin permissions", mClientRef->name);
+   else
+      s_logprintf("User [%s] denied admin permissions", mClientRef->name);
+
    setIsAdmin(granted);
    if(granted)                      // Don't want to rescind level change permissions for entering a bad PW
          setIsLevelChanger(true);
@@ -367,6 +376,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 {
    static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
    static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
+
+   if(granted)
+      s_logprintf("User [%s] granted level change permissions", mClientRef->name);
+   else
+      s_logprintf("User [%s] denied level change permissions", mClientRef->name);
 
    setIsLevelChanger(granted);
 
@@ -622,6 +636,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetCla
    if(!mIsAdmin)
       return;
 
+   s_logprintf("User %s requested shutdown in %d seconds", mClientRef->name, time);
+
    gServerGame->setShuttingDown(true, time, mClientRef);
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
@@ -640,6 +656,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 {
    if(!mIsAdmin)
       return;
+
+   s_logprintf("User %s canceled shutdown", mClientRef->name);
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
       if(walk != this)     // Don't send message to cancellor!
