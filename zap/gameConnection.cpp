@@ -220,7 +220,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
    if(!isAdmin())
       return;              // Do nothing --> non-admins have no pull here
 
-   s_logprintf("User %s %s %s password", mClientRef->name, !strcmp(pass.getString(), "") ? "set" : "cleared", type == (U32)LevelChangePassword ? "level change" : "admin" );
+   s_logprintf("User [%s] %s %s password", mClientRef->name.getString(), !strcmp(pass.getString(), "") ? "set" : "cleared", type == (U32)LevelChangePassword ? "level change" : "admin" );
 
 
    // Some messages we might show the user
@@ -342,9 +342,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
 
    if(granted)
-      s_logprintf("User [%s] granted admin permissions", mClientRef->name);
+      s_logprintf("User [%s] granted admin permissions", mClientRef->name.getString());
    else
-      s_logprintf("User [%s] denied admin permissions", mClientRef->name);
+      s_logprintf("User [%s] denied admin permissions", mClientRef->name.getString());
 
    setIsAdmin(granted);
    if(granted)                      // Don't want to rescind level change permissions for entering a bad PW
@@ -378,9 +378,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
 
    if(granted)
-      s_logprintf("User [%s] granted level change permissions", mClientRef->name);
+      s_logprintf("User [%s] granted level change permissions", mClientRef->name.getString());
    else
-      s_logprintf("User [%s] denied level change permissions", mClientRef->name);
+      s_logprintf("User [%s] denied level change permissions", mClientRef->name.getString());
 
    setIsLevelChanger(granted);
 
@@ -636,7 +636,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetCla
    if(!mIsAdmin)
       return;
 
-   s_logprintf("User %s requested shutdown in %d seconds", mClientRef->name, time);
+   s_logprintf("User [%s] requested shutdown in %d seconds", mClientRef->name.getString(), time);
 
    gServerGame->setShuttingDown(true, time, mClientRef);
 
@@ -657,7 +657,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
    if(!mIsAdmin)
       return;
 
-   s_logprintf("User %s canceled shutdown", mClientRef->name);
+   s_logprintf("User %s canceled shutdown", mClientRef->name.getString());
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
       if(walk != this)     // Don't send message to cancellor!
