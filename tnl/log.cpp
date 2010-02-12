@@ -29,6 +29,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <string.h>
+#include <stdio.h>  // For newer versions of gcc?
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
