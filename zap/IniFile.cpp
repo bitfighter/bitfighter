@@ -283,7 +283,7 @@ bool CIniFile::SetValue( unsigned const keyID, unsigned const valueID, string co
   return false;
 }
 
-// Will create key if it does not exist
+// Will create key if it does not exist if create is set to true
 bool CIniFile::SetValue( string const keyname, string const valuename, string const value, bool const create)
 {
   long keyID = FindKey( keyname);

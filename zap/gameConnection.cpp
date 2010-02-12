@@ -44,9 +44,9 @@ namespace Zap
 // Global list of clients (if we're a server).
 GameConnection GameConnection::gClientList;
 
-extern const char *gServerPassword;
-extern const char *gAdminPassword;
-extern const char *gLevelChangePassword;
+extern char *gServerPassword;
+extern char *gAdminPassword;
+extern char *gLevelChangePassword;
 
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
@@ -81,7 +81,7 @@ GameConnection::~GameConnection()
    TNL::logprintf("%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
 
    if(isConnectionToClient() && mAcheivedConnection)    // isConnectionToClient only true if we're the server
-   {  
+   {
      // Compute time we were connected
      time_t quitTime;
      time(&quitTime);
@@ -122,7 +122,7 @@ S32 GameConnection::getClientCount()
 bool GameConnection::onlyClientIs(GameConnection *client)
 {
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-      if(walk != client) 
+      if(walk != client)
          return false;
 
    return true;
@@ -156,16 +156,28 @@ extern md5wrapper md5;
 void GameConnection::submitAdminPassword(const char *password)
 {
    c2sAdminPassword(md5.getSaltedHashFromString(password).c_str());
-   setGotPermissionsReply(false);           
-   setWaitingForPermissionsReply(true);     
+   setGotPermissionsReply(false);
+   setWaitingForPermissionsReply(true);
 }
 
 
 void GameConnection::submitLevelChangePassword(const char *password)
 {
    c2sLevelChangePassword(md5.getSaltedHashFromString(password).c_str());
-   setGotPermissionsReply(false);           
-   setWaitingForPermissionsReply(true); 
+   setGotPermissionsReply(false);
+   setWaitingForPermissionsReply(true);
+}
+
+
+void GameConnection::changeLevelChangePassword(const char *password)
+{
+   c2sSetPassword(password, LevelChangePassword);
+}
+
+
+void GameConnection::changeAdminPassword(const char *password)
+{
+   c2sSetPassword(password, AdminPassword);
 }
 
 
@@ -186,14 +198,45 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), Ne
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(gLevelChangePassword && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass))
+   // If password is blank, permissions always granted
+   if(!strcmp(gLevelChangePassword, "") || (gLevelChangePassword && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str()), pass))
    {
       setIsLevelChanger(true);
-      s2cSetIsLevelChanger(true);                                                 // Tell client they have been granted access
+      s2cSetIsLevelChanger(true, true);                                           // Tell client they have been granted access
       gServerGame->getGameType()->s2cClientBecameLevelChanger(mClientRef->name);  // Announce change to world
    }
    else
-      s2cSetIsLevelChanger(false);                                                // Tell client they have NOT been granted access
+      s2cSetIsLevelChanger(false, true);                                          // Tell client they have NOT been granted access
+}
+
+
+// Allow admins to change the passwords on their systems
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, PasswordTypeCount> type), (pass, type),
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+{
+   if(!isAdmin())
+      return;              // Do nothing --> non-admins have no pull here
+
+   // Some messages we might show the user
+   static StringTableEntry levelPassChanged("Level change password changed");
+   static StringTableEntry levelPassCleared("Level change password cleared");
+   static StringTableEntry adminPassChanged("Admin password changed");
+
+   // Update our in-memory copies of the password
+   if((PasswordType)type == LevelChangePassword)
+      gLevelChangePassword = pass;
+   else
+      gAdminPassword = pass;
+
+   // Update the INI file
+   gINI.SetValue("Host", (PasswordType)type == LevelChangePassword ? "LevelChangePassword" : "AdminPassword", pass, true);
+   gINI.WriteFile();
+
+   // Notify user their bidding has been done
+   s2cDisplayMessage(ColorAqua, SFXNone,
+                                 (PasswordType)type == LevelChangePassword ?                                      // Is this a level change password?
+                                    (strcmp(pass.getString(), "") == 0 ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
+                                 adminPassChanged);                                                               // <== AdminPassword
 }
 
 
@@ -202,7 +245,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
    (StringTableEntry playerName, U32 actionIndex, S32 team), (playerName, actionIndex, team),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(!isAdmin())    
+   if(!isAdmin())
       return;              // do nothing --> non-admins have no pull here
 
    // else...
@@ -293,13 +336,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    if(granted)
       // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
       if(UserInterface::current->getMenuID() == GameMenuUI)
-         gGameMenuUserInterface.menuSubTitle = adminPassSuccessMsg;    
+         gGameMenuUserInterface.menuSubTitle = adminPassSuccessMsg;
       else
          gGameUserInterface.displayMessage(gCmdChatColor, adminPassSuccessMsg);
 
    else
       if(UserInterface::current->getMenuID() == GameMenuUI)
-         gGameMenuUserInterface.menuSubTitle = adminPassFailureMsg;     
+         gGameMenuUserInterface.menuSubTitle = adminPassFailureMsg;
       else
          gGameUserInterface.displayMessage(gCmdChatColor, adminPassFailureMsg);
 }
@@ -308,7 +351,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
 static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
 static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted), (granted),
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool notify), (granted, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    setIsLevelChanger(granted);
@@ -319,18 +362,24 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted), (granted
    if(!waitingForPermissionsReply())
       return;
 
-   if(granted)      
-      // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-      if(UserInterface::current->getMenuID() == GameMenuUI)
-         gGameMenuUserInterface.menuSubTitle = levelPassSuccessMsg;    
+   if(notify)
+   {
+      if(granted)
+      {
+         // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+         if(UserInterface::current->getMenuID() == GameMenuUI)
+            gGameMenuUserInterface.menuSubTitle = levelPassSuccessMsg;
+         else
+            gGameUserInterface.displayMessage(gCmdChatColor, levelPassSuccessMsg);
+      }
       else
-         gGameUserInterface.displayMessage(gCmdChatColor, levelPassSuccessMsg);
-
-   else
-      if(UserInterface::current->getMenuID() == GameMenuUI)
-         gGameMenuUserInterface.menuSubTitle = levelPassFailureMsg;     
-      else
-         gGameUserInterface.displayMessage(gCmdChatColor, levelPassFailureMsg);
+      {
+         if(UserInterface::current->getMenuID() == GameMenuUI)
+            gGameMenuUserInterface.menuSubTitle = levelPassFailureMsg;
+         else
+            gGameUserInterface.displayMessage(gCmdChatColor, levelPassFailureMsg);
+      }
+   }
 }
 
 
@@ -366,13 +415,13 @@ static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
    static Color colors[] =
    {
-      Color(1,1,1),				// ColorWhite
-      Color(1,0,0),				// ColorRed
-      Color(0,1,0),				// ColorGreen
-      Color(0,0,1),				// ColorBlue
-      Color(0,1,1),				// ColorAqua
-      Color(1,1,0),				// ColorYellow
-      Color(0.6f, 1, 0.8f),	// ColorNuclearGreen
+      Color(1,1,1),           // ColorWhite
+      Color(1,0,0),           // ColorRed
+      Color(0,1,0),           // ColorGreen
+      Color(0,0,1),           // ColorBlue
+      Color(0,1,1),           // ColorAqua
+      Color(1,1,0),           // ColorYellow
+      Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
    };
    gGameUserInterface.displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
@@ -432,7 +481,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
-                  (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e), 
+                  (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e),
                   (sfx, team, formatString, e),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
@@ -490,7 +539,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 {
    static const S32 STRLEN = 256;
    char outputBuffer[STRLEN];
-   
+
    strncpy(outputBuffer, formatString.getString(), STRLEN - 1);
    outputBuffer[STRLEN - 1] = '\0';    // Make sure we're null-terminated
 
@@ -498,13 +547,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessage,
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message), 
+TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message),
                   (title, instr, message), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    gErrorMsgUserInterface.reset();
    gErrorMsgUserInterface.setTitle(title.getString());
    gErrorMsgUserInterface.setInstr(instr.getString());
-   
+
    for(S32 i = 0; i < message.size(); i++)
       gErrorMsgUserInterface.setMessage(i+1, message[i].getString());      // UIErrorMsgInterface ==> first line = 1
 
@@ -535,7 +584,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
       restart = true;
       newLevelIndex = gServerGame->getCurrentLevelIndex();
    }
-      
+
    while(newLevelIndex < 0)
       newLevelIndex += gServerGame->getLevelCount();
 
@@ -563,7 +612,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetCla
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, bool originator), 
+TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, bool originator),
                   (time, name, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    gGameUserInterface.shutdownInitiated(time, name, originator);
@@ -630,7 +679,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 }
 
 
-// On the server side of things, read the connection request, and return if everything looks legit.  If not, provide an error string 
+// On the server side of things, read the connection request, and return if everything looks legit.  If not, provide an error string
 // to help diagnose the problem, or prompt further data from client (such as a password).
 bool GameConnection::readConnectRequest(BitStream *stream, const char **errorString)
 {
@@ -643,7 +692,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
       return false;
    }
 
-   char buf[256];    
+   char buf[256];
    char pwbuf[256];
 
    stream->readString(buf);
@@ -745,7 +794,13 @@ void GameConnection::onConnectionEstablished()
 
       time(&joinTime);
       mAcheivedConnection = true;
-         
+
+      if(!strcmp(gLevelChangePassword, ""))              // Grant level change permissions if level change PW is blank
+      {
+         setIsLevelChanger(true);
+         s2cSetIsLevelChanger(true, false);              // Tell client, but don't display notification
+      }
+
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       if(isLocalConnection())
          TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
@@ -764,71 +819,71 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
          UserInterface::reactivateMenu(gMainMenuUserInterface);
 
       // Display a context-appropriate error message
-   	gErrorMsgUserInterface.reset();
-   	gErrorMsgUserInterface.setTitle("Connection Terminated");
+      gErrorMsgUserInterface.reset();
+      gErrorMsgUserInterface.setTitle("Connection Terminated");
 
       switch(reason)
       {
          case NetConnection::ReasonTimedOut:
-	         gErrorMsgUserInterface.setMessage(2, "Your connection timed out.  Please try again later.");
+            gErrorMsgUserInterface.setMessage(2, "Your connection timed out.  Please try again later.");
             gErrorMsgUserInterface.activate();
-	         break;
-         	
+            break;
+
          // We should never see this one...
          case NetConnection::ReasonNeedPassword:
-	         gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server."); 
-	         gErrorMsgUserInterface.setMessage(4, "You need to supply a password!");
+            gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server.");
+            gErrorMsgUserInterface.setMessage(4, "You need to supply a password!");
             gErrorMsgUserInterface.activate();
-	         break;
-         	
+            break;
+
          case NetConnection::ReasonPuzzle:
-	         gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:"); 
-	         gErrorMsgUserInterface.setMessage(3, "Invalid puzzle solution");
-	         gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
+            gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:");
+            gErrorMsgUserInterface.setMessage(3, "Invalid puzzle solution");
+            gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
             gErrorMsgUserInterface.activate();
-	         break;
+            break;
 
          case NetConnection::ReasonKickedByAdmin:
-	         gErrorMsgUserInterface.setMessage(2, "You were kicked off the server by an admin,");
+            gErrorMsgUserInterface.setMessage(2, "You were kicked off the server by an admin,");
             gErrorMsgUserInterface.setMessage(3, "and have been temporarily banned.");
             gErrorMsgUserInterface.setMessage(5, "You can try another server, host your own,");
-	         gErrorMsgUserInterface.setMessage(6, "or try the server that kicked you again later.");
+            gErrorMsgUserInterface.setMessage(6, "or try the server that kicked you again later.");
             gErrorMsgUserInterface.activate();
 
             // Add this server to our list of servers not to display for a spell...
             gQueryServersUserInterface.addHiddenServer(getNetAddress(), Platform::getRealMilliseconds() + BanDuration);
-	         break;
+            break;
 
          case NetConnection::ReasonFloodControl:
-	         gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server"); 
-	         gErrorMsgUserInterface.setMessage(3, "because you sent too many connection requests.");
-	         gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
-      	   gErrorMsgUserInterface.activate();
-	         break;
+            gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
+            gErrorMsgUserInterface.setMessage(3, "because you sent too many connection requests.");
+            gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
+            gErrorMsgUserInterface.activate();
+            break;
 
          case NetConnection::ReasonError:
-	         gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:"); 
-	         gErrorMsgUserInterface.setMessage(3, reasonStr);
-	         gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
-      	   gErrorMsgUserInterface.activate();
-	         break;
+            gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:");
+            gErrorMsgUserInterface.setMessage(3, reasonStr);
+            gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
+            gErrorMsgUserInterface.activate();
+            break;
 
          case NetConnection::ReasonShutdown:
-	         gErrorMsgUserInterface.setMessage(2, "Remote server shut down."); 
-	         gErrorMsgUserInterface.setMessage(4, "Please try a different server,");
-	         gErrorMsgUserInterface.setMessage(5, "or host a game of your own!");
-      	   gErrorMsgUserInterface.activate();
-	         break;
+            gErrorMsgUserInterface.setMessage(2, "Remote server shut down.");
+            gErrorMsgUserInterface.setMessage(4, "Please try a different server,");
+            gErrorMsgUserInterface.setMessage(5, "or host a game of your own!");
+            gErrorMsgUserInterface.activate();
+            break;
 
          case NetConnection::ReasonSelfDisconnect:
                // We get this when we terminate our own connection.  Since this is intentional behavior,
                // we don't want to display any message to the user.
             break;
- 
+
          default:
-	         gErrorMsgUserInterface.setMessage(1, "Unable to connect to the server for reasons unknown."); 
-	         gErrorMsgUserInterface.setMessage(3, "Please try a different game server, or try again later.");
-      	   gErrorMsgUserInterface.activate();
+            gErrorMsgUserInterface.setMessage(1, "Unable to connect to the server for reasons unknown.");
+            gErrorMsgUserInterface.setMessage(3, "Please try a different game server, or try again later.");
+            gErrorMsgUserInterface.activate();
       }
    }
    else

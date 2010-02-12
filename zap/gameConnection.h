@@ -38,7 +38,7 @@
 namespace Zap
 {
 using TNL::StringPtr;
-    
+
 static const char USED_EXTERNAL *gConnectStatesTable[] = {
       "Not connected...",
       "Sending challenge request...",
@@ -94,9 +94,17 @@ public:
       ColorAqua,
       ColorYellow,
       ColorNuclearGreen,
-      ColorCount,
+      ColorCount              // Must be last
    };
-   
+
+   enum PasswordTypes
+   {
+      LevelChangePassword,
+      AdminPassword,
+      PasswordTypeCount       // Must be last
+   }
+
+
    enum {
       BanDuration = 30000,     // Players are banned for 30secs after being kicked
    };
@@ -120,7 +128,7 @@ public:
    ClientRef *getClientRef();
 
    StringTableEntryRef getClientName() { return mClientName; }
- 
+
    void submitAdminPassword(const char *password);
    void submitLevelChangePassword(const char *password);
 
@@ -141,11 +149,19 @@ public:
    void setGotPermissionsReply(bool gotReply) { mGotPermissionsReply = gotReply; }
    bool gotPermissionsReply() { return mGotPermissionsReply; }
 
+   // Chage passwords on the server
+   void changeLevelChangePassword(const char *password);
+   void changeAdminPassword(const char *password);
+
+
    TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));
    TNL_DECLARE_RPC(c2sLevelChangePassword, (StringPtr pass));
 
+   TNL_DECLARE_RPC(c2sSetPassword, (StringPtr pass, RangedU32<0, PasswordTypeCount> type));
+
+
    TNL_DECLARE_RPC(s2cSetIsAdmin, (bool granted));
-   TNL_DECLARE_RPC(s2cSetIsLevelChanger, (bool granted));
+   TNL_DECLARE_RPC(s2cSetIsLevelChanger, (bool granted, bool notify));
 
    TNL_DECLARE_RPC(s2cSetServerName, (StringTableEntry name));
 

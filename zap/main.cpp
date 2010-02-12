@@ -14,14 +14,32 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
+// new help page
+// /setlvlpass, /setadminpass commands
+// test if blank level passwords really do grant access to all
 
 // TODO:
 // Create color global for reticle color
 
+/*
+Crashy level ==> shoot spybug exactly horizontally
+LevelName Test
+LevelDescription
+LevelCredits
+Script
+GridSize 255
+MinPlayers 0
+MaxPlayers 0
+Team Blue 0 0 1
+BarrierMaker 55 0.2 -1.8  0.2 -1
+BarrierMaker 50 -0.2 -1.8  -0.2 -1
+Spawn 0 5.75737e-008 -2
+SpyBug -1 8.90325e-008 -1.7
+*/
 
 /*
 XXX need to document timers, main function XXX
-XXXX Add /shutdown to help
+
 
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
 
@@ -60,6 +78,11 @@ XXXX Add /shutdown to help
 <li>Ctrl-left click now starts a wall</li>
 <li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
 <li>Editor remembers name of last edited file</li>
+
+<h4>Server management</h4>
+<li>Added /shutdown, /setlevpass, and /setadminpass chat commands (see ingame help)</li>
+<li>New orderly shutdown process when using /shutdown command (i.e. players notified, dedicated servers can be terminated, etc.)</li>
+<li>If level change password is left blank, all players granted access (not so for admin password)</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -195,9 +218,9 @@ S32 gMaxPolygonPoints = 32;                     // Max number of points we can h
 
 bool gReadyToConnectToMaster = false;           // When we're sure we have a nickname, we'll set this to true and proceed to connect to the master
 
-const char *gServerPassword = NULL;
-const char *gAdminPassword = NULL;
-const char *gLevelChangePassword = NULL;
+char *gServerPassword = NULL;
+char *gAdminPassword = NULL;
+char *gLevelChangePassword = NULL;
 
 Address gMasterAddress;
 Address gConnectAddress;
@@ -827,8 +850,8 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->setIsAdmin(true);            // Set isAdmin on server
             gc->setIsLevelChanger(true);     // Set isLevelChanger on server
 
-            gc->s2cSetIsAdmin(true);         // Set isAdmin on the client
-            gc->s2cSetIsLevelChanger(true);  // Set isLevelChanger on the client
+            gc->s2cSetIsAdmin(true);                // Set isAdmin on the client
+            gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
          }
       }
@@ -853,7 +876,7 @@ void endGame()
    delete gServerGame;
    gServerGame = NULL;
 
-   if(gDedicatedServer) 
+   if(gDedicatedServer)
       exitGame();
 }
 

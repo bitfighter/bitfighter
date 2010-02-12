@@ -43,6 +43,7 @@ const char *gGameCredits[] = {
    "-",
    "Linux support:",
    "Coding_Mike",
+   "Janis Rucis",
    "-",
    "Level contributions:",
    "Qui",

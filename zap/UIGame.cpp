@@ -130,7 +130,7 @@ void GameUserInterface::onActivate()
    onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);    // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
-   for(S32 i = 0; i < MessageStoreCount; i++) 
+   for(S32 i = 0; i < MessageStoreCount; i++)
       mDisplayMessage[i][0] = 0;
 
    for(S32 i = 0; i < MessageDisplayCount; i++)
@@ -202,7 +202,7 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
 void GameUserInterface::idle(U32 timeDelta)
 {
    mShutdownTimer.update(timeDelta);
-      
+
    if(mDisplayMessageTimer.update(timeDelta))
    {
       for(S32 i = MessageDisplayCount - 1; i > 0; i--)
@@ -358,7 +358,7 @@ void GameUserInterface::renderShutdownMessage()
       {
          const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "" };
          renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 5);
-      } 
+      }
       else                       // Remote user intiated the shutdown
       {
          char whomsg[255];
@@ -371,7 +371,7 @@ void GameUserInterface::renderShutdownMessage()
    else if(mShutdownMode == Canceled)
    {
       const char *msg[] = { "", "Server shutdown sequence canceled.  Play on!", "", "", "" };     // Keep same number of messages as above, so if message changes, it will be a smooth transition
-      renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 5); 
+      renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 5);
    }
 }
 
@@ -1397,7 +1397,35 @@ void GameUserInterface::processCommand(Vector<string> words)
       setVolume(VoiceVolumeType, words);
    else if(words[0] == "servvol")   // Server alerts volume
       setVolume(ServerAlertVolumeType, words);
+   else if(words[0] == "setadminpass")
+   {
+      if(!gc->isAdmin())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to change the admin password");
+         return;
+      }
 
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         return;
+      }
+
+      gc->changeAdminPassword(words[1].c_str());
+   }
+   else if(words[0] == "setlevpass")
+   {
+      if(!gc->isAdmin())
+      {
+         displayMessage(gCmdChatColor, "!!! You don't have permission to change the level change password");
+         return;
+      }
+
+      if(words.size() < 2)
+         gc->changeLevChangePassword("");
+      else
+         gc->changeLevChangePassword(words[1].c_str());
+   }
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
 }
@@ -1417,9 +1445,14 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/prev");
    mChatCmds.push_back("/restart");
    mChatCmds.push_back("/svol");
-   mChatCmds.push_back("/servvol");
    mChatCmds.push_back("/vvol");
+
+   // Administrative commands
    mChatCmds.push_back("/shutdown");
+   mChatCmds.push_back("/servvol");
+   mChatCmds.push_back("/setlevpass");
+   mChatCmds.push_back("/setadminpass");
+
 }
 
 // Set specified volume to the specefied level

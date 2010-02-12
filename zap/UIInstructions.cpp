@@ -56,7 +56,7 @@ void InstructionsUserInterface::onActivate()
 }
 
 enum {
-   NumPages = 7,
+   NumPages = 8,
 };
 
 const char *pageHeaders[] = {
@@ -67,6 +67,7 @@ const char *pageHeaders[] = {
    "GAME OBJECTS",
    "MORE GAME OBJECTS",
    "ADVANCED COMMANDS",
+   "ADMIN COMMANDS",
 };
 
 void InstructionsUserInterface::render()
@@ -103,8 +104,10 @@ void InstructionsUserInterface::render()
          renderPageObjectDesc(3);
          break;
       case 7:
-         renderPageCommands();
+         renderPageCommands(0);
          break;
+      case 8:
+         renderPageCommands(1);
    }
 }
 
@@ -527,7 +530,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
                renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
             }
-               
+
             break;
 
          case 21:    // Nexus
@@ -545,7 +548,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             }
             break;
 
-         case 22:   
+         case 22:
             renderAsteroid(Point(0,-10), (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    // Using goofball factor to keep out of sync with Nexus graphic
             break;
 
@@ -565,6 +568,7 @@ struct ControlStringsEditor
    const char *command;
    const char *descr;
 };
+
 
 // Note that the menu is now full.  Need to add new page or go to 2 cols if we need a new option.
 static ControlStringsEditor commands[] = {
@@ -587,9 +591,25 @@ static ControlStringsEditor commands[] = {
    { NULL, NULL },      // End of list
 };
 
+static ControlStringsEditor adminCommands[] = {
+   { "/shutdown [time in secs]", "Commence orderly shutdown of server (defaults to 10 secs)" },
+   { "/setlevpass [password]", "Set or clear level change password" },
+   { "/setadminpass <password>", "Set admin password" },
 
-void InstructionsUserInterface::renderPageCommands()
+   { NULL, NULL },      // End of list
+};
+
+
+void InstructionsUserInterface::renderPageCommands(U32 page)
 {
+   ControlStringsEditor *cmdList;
+
+   if(page == 0)
+      cmdList = commands;
+   else if(page == 1)
+      cmdList = adminCommands;
+
+
    S32 starty = 120;
    S32 y;
    S32 col1 = horizMargin;
@@ -618,9 +638,9 @@ void InstructionsUserInterface::renderPageCommands()
 
 
    y = starty + 28;
-   for(S32 i = 0; commands[i].command; i++)
+   for(S32 i = 0; cmdList[i].command; i++)
    {
-   if(commands[i].command[0] == '-')      // Horiz spacer
+   if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
          glColor3f(0.4, 0.4, 0.4);
          glBegin(GL_LINES);
@@ -631,9 +651,9 @@ void InstructionsUserInterface::renderPageCommands()
       else
       {
          glColor(cmdColor);
-         drawString(actCol, y, 18, commands[i].command);      // Textual description of function (1st arg in lists above)
+         drawString(actCol, y, 18, cmdList[i].command);      // Textual description of function (1st arg in lists above)
          glColor(descrColor);
-         drawString(contCol, y, 18, commands[i].descr);
+         drawString(contCol, y, 18, cmdList[i].descr);
       }
       y += 26;
    }
@@ -681,5 +701,3 @@ void InstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 }
 
 };
-
-
