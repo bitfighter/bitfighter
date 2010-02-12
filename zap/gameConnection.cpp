@@ -184,7 +184,7 @@ void GameConnection::changeAdminPassword(const char *password)
 
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-
+   // If gAdminPassword is blank, no one can get admin permissions except the local host, if there is one...
    if(gAdminPassword != "" && !strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), pass))
    {
       setIsAdmin(true);          // Enter admin PW and...
@@ -200,7 +200,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), Ne
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    // If password is blank, permissions always granted
-   if(gLevelChangePassword != "" || (gLevelChangePassword != "" && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass)))
+   if(gLevelChangePassword == "" || (gLevelChangePassword != "" && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass)))
    {
       setIsLevelChanger(true);
       s2cSetIsLevelChanger(true, true);                                           // Tell client they have been granted access
@@ -222,7 +222,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
 
    // Some messages we might show the user
    static StringTableEntry levelPassChanged("Level change password changed");
-   static StringTableEntry levelPassCleared("Level change password cleared");
+   static StringTableEntry levelPassCleared("Level change password cleared -- anyone can change levels");
    static StringTableEntry adminPassChanged("Admin password changed");
 
    // Update our in-memory copies of the password
@@ -236,10 +236,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
    gINI.WriteFile();
 
    // Notify user their bidding has been done
-   s2cDisplayMessage(ColorAqua, SFXNone,
-                                 type == (U32)LevelChangePassword ?                                               // Is this a level change password?
-                                    (strcmp(pass.getString(), "") == 0 ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
-                                 adminPassChanged);                                                               // <== AdminPassword
+   s2cDisplayMessage(ColorRed, SFXNone, type == (U32)LevelChangePassword ?                                               // Is this a level change password?
+                                           (strcmp(pass.getString(), "") == 0 ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
+                                        adminPassChanged);                                                               // <== AdminPassword
+
+
+   // Finally, if we're clearning the level change password, grant access to anyone who doesn't already have it
+   if(type == (U32)LevelChangePassword && strcmp(pass.getString(), "") == 0)
+   {
+      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+         if(!walk->isLevelChanger())
+         {
+            walk->setIsLevelChanger(true);
+            walk->s2cSetIsLevelChanger(true, false);     // Silently
+         }
+   }
 }
 
 
@@ -320,12 +331,12 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
 
 extern Color gCmdChatColor;
 
-static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
-static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
-
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
+   static const char *adminPassSuccessMsg = "You've been granted permission to manage players and change levels";
+   static const char *adminPassFailureMsg = "Incorrect password: Admin access denied";
+
    setIsAdmin(granted);
    if(granted)                      // Don't want to rescind level change permissions for entering a bad PW
          setIsLevelChanger(true);
@@ -351,12 +362,12 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
 }
 
 
-static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
-static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
-
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool notify), (granted, notify),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
+   static const char *levelPassSuccessMsg = "You've been granted permission to change levels";
+   static const char *levelPassFailureMsg = "Incorrect password: Level changing permissions denied";
+
    setIsLevelChanger(granted);
 
    setGotPermissionsReply(true);
@@ -413,19 +424,22 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U32> loadout), (loa
       ship->setLoadout(loadout);
 }
 
+static Color colors[] =
+{
+   Color(1,1,1),           // ColorWhite
+   Color(1,0,0),           // ColorRed    ==> also used for chat commands
+   Color(0,1,0),           // ColorGreen
+   Color(0,0,1),           // ColorBlue
+   Color(0,1,1),           // ColorAqua
+   Color(1,1,0),           // ColorYellow
+   Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
+};
+
+Color gCmdChatColor = colors[GameConnection::ColorRed];
 
 static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
-   static Color colors[] =
-   {
-      Color(1,1,1),           // ColorWhite
-      Color(1,0,0),           // ColorRed
-      Color(0,1,0),           // ColorGreen
-      Color(0,0,1),           // ColorBlue
-      Color(0,1,1),           // ColorAqua
-      Color(1,1,0),           // ColorYellow
-      Color(0.6f, 1, 0.8f),   // ColorNuclearGreen
-   };
+
    gGameUserInterface.displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SFXObject::play(sfxEnum);

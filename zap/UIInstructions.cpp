@@ -571,6 +571,7 @@ struct ControlStringsEditor
 
 
 // Note that the menu is now full.  Need to add new page or go to 2 cols if we need a new option.
+// Actually, room for 1 more
 static ControlStringsEditor commands[] = {
    { "/admin <password>", "Request admin permissions" },
    { "/levpass <password>", "Request level change permissions" },
@@ -592,9 +593,9 @@ static ControlStringsEditor commands[] = {
 };
 
 static ControlStringsEditor adminCommands[] = {
-   { "/shutdown [time in secs]", "Commence orderly shutdown of server (defaults to 10 secs)" },
-   { "/setlevpass [password]", "Set or clear level change password" },
-   { "/setadminpass <password>", "Set admin password" },
+   { "/shutdown [time in secs]", "Start orderly shutdown of server (def. = 10 secs)" },
+   { "/setlevpass [passwd]",     "Set or clear level change password" },
+   { "/setadminpass <passwd>",   "Set admin password" },
 
    { NULL, NULL },      // End of list
 };
@@ -609,53 +610,65 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
    else if(page == 1)
       cmdList = adminCommands;
 
+   S32 ypos = 50;
 
-   S32 starty = 120;
-   S32 y;
-   S32 col1 = horizMargin;
-   S32 col2 = horizMargin + S32(canvasWidth * 0.25) + 55;
-   S32 actCol = col1;      // Action column
-   S32 contCol = col2;     // Control column
-   //bool firstCol = true;
-   //bool done = false;
+   S32 cmdCol = horizMargin;                                    // Action column
+   S32 descrCol = horizMargin + S32(canvasWidth * 0.25) + 55;   // Control column
 
-   glBegin(GL_LINES);
-      glVertex2f(col1, starty + 26);
-      glVertex2f(750, starty + 26);
-   glEnd();
-
-   Color cmdColor = Color(0, 1, 1);
-   Color descrColor = Color (1, 1, 1);
-   Color secColor = Color(1, 1, 0);
-
-   glColor(secColor);
-   drawString(col1, starty, 20, "Command");
-   drawString(col2, starty, 20, "Description");
+   const S32 instrSize = 18;
 
    glColor3f(0,1,0);
-   drawStringf(col1, 50, 20, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", keyCodeToString(keyCMDCHAT[gIniSettings.inputMode]));
-   drawString(col1, 80, 20, "Use [TAB] to expand a partially typed command");
+   drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", keyCodeToString(keyCMDCHAT[gIniSettings.inputMode]));
+   ypos += 28;
+   drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
+   ypos += 28;
+   
+   if(page == 1)
+   {
+      drawString(cmdCol, ypos, instrSize, "Admin permissions required to use these commands");
+      ypos += 28;
+   }
+   
 
+   Color cmdColor =   Color(0, 1, 1);
+   Color descrColor = Color (1, 1, 1);
+   Color secColor =   Color(1, 1, 0);
 
-   y = starty + 28;
+   const S32 headerSize = 20;
+   const S32 cmdSize = 16;
+   const S32 cmdGap = 10;
+
+   glColor(secColor);
+   drawString(cmdCol, ypos, headerSize, "Command");
+   drawString(descrCol, ypos, headerSize, "Description");
+
+   //glColor3f(0,1,0);
+   ypos += cmdSize + cmdGap;
+   glBegin(GL_LINES);
+      glVertex2f(cmdCol, ypos);
+      glVertex2f(750, ypos);
+   glEnd();
+
+   ypos += 5;     // Small gap before cmds start
+
    for(S32 i = 0; cmdList[i].command; i++)
    {
-   if(cmdList[i].command[0] == '-')      // Horiz spacer
+      if(cmdList[i].command[0] == '-')      // Horiz spacer
       {
          glColor3f(0.4, 0.4, 0.4);
          glBegin(GL_LINES);
-            glVertex2f(actCol, y + 13);
-            glVertex2f(actCol + 335, y + 13);
+            glVertex2f(cmdCol, ypos + (cmdSize + cmdGap) / 4);
+            glVertex2f(cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
          glEnd();
       }
       else
       {
          glColor(cmdColor);
-         drawString(actCol, y, 18, cmdList[i].command);      // Textual description of function (1st arg in lists above)
+         drawString(cmdCol, ypos, cmdSize, cmdList[i].command);      // Textual description of function (1st arg in lists above)
          glColor(descrColor);
-         drawString(contCol, y, 18, cmdList[i].descr);
+         drawString(descrCol, ypos, cmdSize, cmdList[i].descr);
       }
-      y += 26;
+      ypos += cmdSize + cmdGap;
    }
 }
 

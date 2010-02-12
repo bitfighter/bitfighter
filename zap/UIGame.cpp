@@ -59,7 +59,8 @@ GameUserInterface gGameUserInterface;
 // TODO: Make these static like privateF5MessageDisplayedInGameColor!
 Color gGlobalChatColor(0.9, 0.9, 0.9);
 Color gTeamChatColor(0, 1, 0);
-Color gCmdChatColor(1, 0, 0);
+extern Color gCmdChatColor;
+
 
 Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 
