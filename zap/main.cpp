@@ -218,9 +218,9 @@ S32 gMaxPolygonPoints = 32;                     // Max number of points we can h
 
 bool gReadyToConnectToMaster = false;           // When we're sure we have a nickname, we'll set this to true and proceed to connect to the master
 
-char *gServerPassword = NULL;
-char *gAdminPassword = NULL;
-char *gLevelChangePassword = NULL;
+string gServerPassword = "";
+string gAdminPassword = "";
+string gLevelChangePassword = "";
 
 Address gMasterAddress;
 Address gConnectAddress;
@@ -1303,21 +1303,21 @@ void processStartupParams()
 
 
    if(gCmdLineSettings.password != "")
-      gServerPassword = gCmdLineSettings.password.c_str();
+      gServerPassword = gCmdLineSettings.password;
    else if(gIniSettings.password != "")
-      gServerPassword = gIniSettings.password.c_str();
+      gServerPassword = gIniSettings.password;
    // else rely on gServerPassword default of ""
 
    if(gCmdLineSettings.adminPassword != "")
-      gAdminPassword = gCmdLineSettings.adminPassword.c_str();
+      gAdminPassword = gCmdLineSettings.adminPassword;
    else if(gIniSettings.adminPassword != "")
-      gAdminPassword = gIniSettings.adminPassword.c_str();
+      gAdminPassword = gIniSettings.adminPassword;
    // else rely on gAdminPassword default of ""   i.e. no one can do admin tasks on the server
 
    if(gCmdLineSettings.levelChangePassword != "")
-      gLevelChangePassword = gCmdLineSettings.levelChangePassword.c_str();
+      gLevelChangePassword = gCmdLineSettings.levelChangePassword;
    else if(gIniSettings.levelChangePassword != "")
-      gLevelChangePassword = gIniSettings.levelChangePassword.c_str();
+      gLevelChangePassword = gIniSettings.levelChangePassword;
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
    if(gIniSettings.levelDir != "")

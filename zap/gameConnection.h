@@ -97,12 +97,12 @@ public:
       ColorCount              // Must be last
    };
 
-   enum PasswordTypes
+   enum PasswordType
    {
       LevelChangePassword,
       AdminPassword,
       PasswordTypeCount       // Must be last
-   }
+   };
 
 
    enum {

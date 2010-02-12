@@ -1422,9 +1422,9 @@ void GameUserInterface::processCommand(Vector<string> words)
       }
 
       if(words.size() < 2)
-         gc->changeLevChangePassword("");
+         gc->changeLevelChangePassword("");
       else
-         gc->changeLevChangePassword(words[1].c_str());
+         gc->changeLevelChangePassword(words[1].c_str());
    }
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());

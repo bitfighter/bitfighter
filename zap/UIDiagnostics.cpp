@@ -43,9 +43,9 @@ extern string gHostName;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern F32 gSimulatedPacketLoss;
-extern char *gServerPassword;
-extern char *gAdminPassword;
-extern char *gLevelChangePassword;
+extern string gServerPassword;
+extern string gAdminPassword;
+extern string gLevelChangePassword;
 extern U32 gSimulatedLag;
 extern S32 gMaxPlayers;
 extern U32 gRawJoystickButtonInputs;
@@ -206,14 +206,14 @@ void DiagnosticUserInterface::render()
    vpos += textsize + gap;
 
    glColor3f(1,1,1);
-   drawCenteredStringPair2Colf(vpos, textsize, false, "Admin/Level Ch. PW:", "%s/%s", gAdminPassword, gLevelChangePassword);
+   drawCenteredStringPair2Colf(vpos, textsize, false, "Admin/Level Ch. PW:", "%s/%s", gAdminPassword.c_str(), gLevelChangePassword.c_str());
    vpos += textsize + gap;
 
    glColor3f(0,1,1);
    drawCenteredStringPair2Colf(vpos, textsize, true, "Input Mode:", "%s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
 
 
-   x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d | Server PW: %s", gMaxPlayers, gServerPassword);
+   x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d | Server PW: %s", gMaxPlayers, gServerPassword.c_str());
 
       glColor3f(1,1,1);
       x += drawStringAndGetWidthf(x, vpos, textsize, "Max Players: ");
@@ -223,7 +223,7 @@ void DiagnosticUserInterface::render()
       glColor3f(1,1,1);
       x += drawStringAndGetWidthf(x, vpos, textsize, " | Server PW: ");
       glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", gServerPassword);
+      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", gServerPassword.c_str());
 
    glColor3f(1,1,1);
 

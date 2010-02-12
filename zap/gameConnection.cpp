@@ -28,6 +28,7 @@
 #include "gameType.h"
 #include "gameNetInterface.h"
 #include "config.h"        // For gIniSettings support
+#include "IniFile.h"       // For CIniFile def
 
 #include "UI.h"
 #include "UIEditor.h"
@@ -44,9 +45,9 @@ namespace Zap
 // Global list of clients (if we're a server).
 GameConnection GameConnection::gClientList;
 
-extern char *gServerPassword;
-extern char *gAdminPassword;
-extern char *gLevelChangePassword;
+extern string gServerPassword;
+extern string gAdminPassword;
+extern string gLevelChangePassword;
 
 
 TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
@@ -184,7 +185,7 @@ void GameConnection::changeAdminPassword(const char *password)
 TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
 
-   if(gAdminPassword && !strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), pass))
+   if(gAdminPassword != "" && !strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), pass))
    {
       setIsAdmin(true);          // Enter admin PW and...
       setIsLevelChanger(true);   // ...get these permissions too!
@@ -199,7 +200,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), Ne
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    // If password is blank, permissions always granted
-   if(!strcmp(gLevelChangePassword, "") || (gLevelChangePassword && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str()), pass))
+   if(gLevelChangePassword != "" || (gLevelChangePassword != "" && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass)))
    {
       setIsLevelChanger(true);
       s2cSetIsLevelChanger(true, true);                                           // Tell client they have been granted access
@@ -210,8 +211,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
 }
 
 
+extern CIniFile gINI;
+
 // Allow admins to change the passwords on their systems
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, PasswordTypeCount> type), (pass, type),
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, GameConnection::PasswordTypeCount> type), (pass, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    if(!isAdmin())
@@ -223,18 +226,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
    static StringTableEntry adminPassChanged("Admin password changed");
 
    // Update our in-memory copies of the password
-   if((PasswordType)type == LevelChangePassword)
-      gLevelChangePassword = pass;
+   if(type == (U32)LevelChangePassword)
+      gLevelChangePassword = pass.getString();
    else
-      gAdminPassword = pass;
+      gAdminPassword = pass.getString();
 
    // Update the INI file
-   gINI.SetValue("Host", (PasswordType)type == LevelChangePassword ? "LevelChangePassword" : "AdminPassword", pass, true);
+   gINI.SetValue("Host", type == (U32)LevelChangePassword ? "LevelChangePassword" : "AdminPassword", pass.getString(), true);
    gINI.WriteFile();
 
    // Notify user their bidding has been done
    s2cDisplayMessage(ColorAqua, SFXNone,
-                                 (PasswordType)type == LevelChangePassword ?                                      // Is this a level change password?
+                                 type == (U32)LevelChangePassword ?                                               // Is this a level change password?
                                     (strcmp(pass.getString(), "") == 0 ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
                                  adminPassChanged);                                                               // <== AdminPassword
 }
@@ -696,7 +699,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
    char pwbuf[256];
 
    stream->readString(buf);
-   if(gServerPassword && stricmp(buf, md5.getSaltedHashFromString(gServerPassword).c_str()))
+   if(gServerPassword != "" && stricmp(buf, md5.getSaltedHashFromString(gServerPassword).c_str()))
    {
       *errorString = "PASSWORD";
       return false;
@@ -795,10 +798,10 @@ void GameConnection::onConnectionEstablished()
       time(&joinTime);
       mAcheivedConnection = true;
 
-      if(!strcmp(gLevelChangePassword, ""))              // Grant level change permissions if level change PW is blank
+      if(gLevelChangePassword == "")                // Grant level change permissions if level change PW is blank
       {
          setIsLevelChanger(true);
-         s2cSetIsLevelChanger(true, false);              // Tell client, but don't display notification
+         s2cSetIsLevelChanger(true, false);         // Tell client, but don't display notification
       }
 
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());

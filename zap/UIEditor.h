@@ -212,7 +212,7 @@ public:
       RepopDelay,
       GoFastSpeed,
       GoFastSnap,
-      None,                // Must be last
+      None                 // Must be last
    };
 
 private:

@@ -30,7 +30,7 @@
 namespace Zap
 {
 
-extern const char *gServerPassword;
+extern string gServerPassword;
 extern bool gDedicatedServer;
 
 // Constructor
@@ -135,7 +135,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
                queryResponse.write(gServerGame->getRobotCount());
                queryResponse.writeFlag(gDedicatedServer);
                queryResponse.writeFlag(gServerGame->isTestServer());
-               queryResponse.writeFlag(gServerPassword != NULL);
+               queryResponse.writeFlag(gServerPassword != "");
 
                queryResponse.sendto(mSocket, remoteAddress);
             }
