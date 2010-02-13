@@ -1146,15 +1146,13 @@ bool Robot::initialize(Point p)
       return false;
    }
 
-
    try
    {
       lua_getglobal(L, "_main");
 
-      if (lua_pcall(L, 0, 0, 0) != 0)
+      if(lua_pcall(L, 0, 0, 0) != 0)
          throw LuaException(lua_tostring(L, -1));
    }
-
    catch(LuaException &e)
    {
       logError("Robot error running main(): %s.  Shutting robot down.", e.what());
@@ -1385,7 +1383,8 @@ void Robot::idle(GameObject::IdleCallPath path)
       {
          if(respawnTimer.update(mCurrentMove.time))
          {
-            try {
+            try 
+            {
                gServerGame->getGameType()->spawnRobot(this);
             }
             catch(LuaException &e)

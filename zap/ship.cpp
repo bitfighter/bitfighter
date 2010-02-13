@@ -1581,7 +1581,7 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
    thisShip = ship;
    id++;
    mId = id;
-   logprintf("Creating lauaship %d", mId);
+   logprintf("Creating luaship %d", mId);
 }
 
 

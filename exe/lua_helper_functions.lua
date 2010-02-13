@@ -90,6 +90,17 @@ function global(...)
 end
 
 
+function _declared(fname)
+   local mt = getmetatable(_G)
+
+   if mt.__declared[fname] then
+      return true
+   end
+
+   return false
+end
+
+
 --
 -- Convenience function, use in place of ipairs, from PiL book sec 19.3
 --     e.g.  for item in values(items) do...

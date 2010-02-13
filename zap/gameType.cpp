@@ -1014,12 +1014,14 @@ void GameType::spawnShip(GameConnection *theClient)
 // Note that we need to have spawn method here so we can override it for different game types, such as Nexus (hunters)
 void GameType::spawnRobot(Robot *robot)
 {
-   Point spawnPoint = getSpawnPoint(robot->getTeam());
+   SafePtr<Robot> robotPtr = robot;
+
+   Point spawnPoint = getSpawnPoint(robotPtr->getTeam());
 
    if(!robot->initialize(spawnPoint))
    {
-      if(robot)
-         robot->deleteObject();
+      if(robotPtr.isValid())
+         robotPtr->deleteObject();
       return;
    }
 

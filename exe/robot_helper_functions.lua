@@ -44,8 +44,11 @@ bot = LuaRobot(Robot)
 -- Main function run when robot starts, before getName().  By default does nothing.  Override in bot scripts.
 --
 function _main()
-   if(main) then main() end
+   if _declared("main") and type(main) == "function" then
+      main()
+   end
 end
+
 
 --
 -- Default robot name, can and should be overridden by user robots, but we need to have something...
@@ -110,7 +113,10 @@ end
 --
 function _onTick(deltaT)
    Timer:_tick(deltaT)
-   if onTick then onTick(deltaT) end
+
+   if _declared("onTick") and type(onTick) == "function" then
+      onTick(deltaT)
+   end
    --if getMove then getMove() end      -- TODO: Here for compatibility with older bots.  Remove this in a later release
 end
 
