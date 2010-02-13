@@ -153,7 +153,7 @@ public:
    bool gotPermissionsReply() { return mGotPermissionsReply; }
 
    // Chage passwords on the server
-   void changePassword(const char *password, ParamType type);
+   void changeParam(const char *param, ParamType type);
 
 
    TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));

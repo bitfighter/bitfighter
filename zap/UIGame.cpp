@@ -1242,10 +1242,47 @@ static bool hasAdmin(GameConnection *gc, const char *failureMessage)
 {
    if(!gc->isAdmin())
    {
-      displayMessage(gCmdChatColor, failureMessage);
+      gGameUserInterface.displayMessage(gCmdChatColor, failureMessage);
       return false;
    }
    return true;
+}
+
+
+static void changePassword(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words, bool required)
+{
+   if(required)
+   {
+      if(words.size() < 2 || words[1] == "")
+      {
+         gGameUserInterface.displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         return;
+      }
+
+      gc->changeParam(words[1].c_str(), type);
+   }
+   else if(words.size() < 2)
+      gc->changeParam("", type);
+   else
+      gc->changeParam(words[1].c_str(), type);
+}
+
+
+static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words)
+{
+   // Concatenate all params into a single string
+   string allWords = "";
+   for(S32 i = 1; i < words.size(); i++)
+      allWords += (i == 1 ? "" : " ") + words[i];
+
+   // Did the user provide a name/description?
+   if(allWords == "")
+   {
+      gGameUserInterface.displayMessage(gCmdChatColor, type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      return;
+   }
+
+   gc->changeParam(allWords.c_str(), type);
 }
 
 
@@ -1253,7 +1290,7 @@ extern md5wrapper md5;
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
-void GameUserInterface::processCommand(Vector<string> words)
+void GameUserInterface::processCommand(Vector<string> &words)
 {
    if(words.size() == 0)            // Just in case
       return;
@@ -1519,43 +1556,6 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> &words)
       displayMessage(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
   }
-}
-
-
-static void changePassword(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words, bool required)
-{
-   if(required)
-   {
-      if(words.size() < 2 || words[1] == "")
-      {
-         displayMessage(gCmdChatColor, "!!! Need to supply a password");
-         return;
-      }
-
-      gc->changeParam(words[1].c_str(), type);
-   }
-   else if(words.size() < 2)
-      gc->changeParam("", type);
-   else
-      gc->changeParam(words[1].c_str(), type);
-}
-
-
-static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words)
-{
-   // Concatenate all params into a single string
-   string allWords = "";
-   for(S32 i = 1; i < words.size(); i++)
-      allWords += (i == 1 ? "" : " ") + words[i];
-
-   // Did the user provide a name/description?
-   if(allWords == "")
-   {
-      displayMessage(gCmdChatColor, type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
-      return;
-   }
-
-   gc->changeParam(allWords.c_str(), type);
 }
 
 

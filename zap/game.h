@@ -220,7 +220,7 @@ public:
    U32 getPlayerCount() { return mPlayerCount; }
    U32 getMaxPlayers() { return mMaxPlayers; }
 
-   void setHostName(const char *name) { mHostname = name; }
+   void setHostName(const char *name) { mHostName = name; }
    const char *getHostName() { return mHostName.c_str(); }
 
    void setHostDescr(const char *descr) { mHostDescr = descr; }

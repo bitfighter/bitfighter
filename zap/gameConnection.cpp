@@ -169,10 +169,10 @@ void GameConnection::submitLevelChangePassword(const char *password)
    setWaitingForPermissionsReply(true);
 }
 
-
+
 void GameConnection::changeParam(const char *param, ParamType type)
 {
-   c2sSetchangeParam(param, type);
+   c2sSetParam(param, type);
 }
 
 
@@ -206,6 +206,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
 
 
 extern CIniFile gINI;
+extern string gHostName;
+extern string gHostDescr;
+extern ServerGame *gServerGame;
 
 // Allow admins to change the passwords on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
@@ -225,18 +228,18 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // Update our in-memory copies of the param
    if(type == (U32)LevelChangePassword)
       gLevelChangePassword = param.getString();
-   else if(type == (U32)AdminChangePassword)
+   else if(type == (U32)AdminPassword)
       gAdminPassword = param.getString();
    else if(type == (U32)ServerPassword)
       gServerPassword = param.getString();
    else if(type == (U32)ServerName)
    {
-      gServerGame->setServername(param.getString());
+      gServerGame->setHostName(param.getString());
       gHostName = param.getString();      // Needed on local host?
    }
    else if(type == (U32)ServerDescr)
    {
-      gServerGame->setServerDescr(param.getString());    // Do we also need to set gHost
+      gServerGame->setHostDescr(param.getString());    // Do we also need to set gHost
       gHostDescr = param.getString();     // Needed on local host?
    }
 
@@ -261,9 +264,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    if(type == (U32)LevelChangePassword)
       msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
-   else if(type == (U32)AdminChangePassword)
+   else if(type == (U32)AdminPassword)
       msg = adminPassChanged;
-   else if(type == (U32)ServerChangePassword)
+   else if(type == (U32)ServerPassword)
       msg = strcmp(param.getString(), "") ? serverPassChanged : serverPassCleared;
    else if(type == (U32)ServerName)
       msg = serverNameChanged;
@@ -286,7 +289,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // If we've changed the server name, notify all the clients
    else if(type == (U32)serverNameChanged)
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cSetServerName(getGame()->getHostName());
+         walk->s2cSetServerName(gServerGame->getHostName());
 }
 
 
@@ -864,7 +867,7 @@ void GameConnection::onConnectionEstablished()
       activateGhosting();
       setFixedRateParameters(50, 50, 2000, 2000);        // U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth
 
-      s2cSetServerName(getGame()->getHostName());        // Ideally, this would be part of the connection handshake, but this should work fine
+      s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
 
       time(&joinTime);
       mAcheivedConnection = true;

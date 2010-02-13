@@ -22,8 +22,6 @@
 // TODO:
 // Create color global for reticle color
 
-
-
 /*
 XXX need to document timers, main function XXX
 
