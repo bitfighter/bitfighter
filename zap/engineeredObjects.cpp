@@ -715,6 +715,7 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+extern ServerGame *gServerGame;
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 // Choose target, aim, and, if possible, fire
@@ -722,6 +723,8 @@ void Turret::idle(IdleCallPath path)
 {
    if(path != ServerIdleMainLoop)
       return;
+
+   // Server only!
 
    healObject(mCurrentMove.time);
 
@@ -753,8 +756,10 @@ void Turret::idle(IdleCallPath path)
       {
          Ship *potential = (Ship*)fillVector[i];
 
-         // Is it dead or cloaked?
-         if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
+         // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
+         TNLAssert(gServerGame->getGameType(), "Bad GameType!");
+         bool carryVis = gServerGame->getGameType()->getMountedObjectsMakesShipsVisible();
+         if((potential->isModuleActive(ModuleCloak) && !(carryVis && potential->areItemsMounted())) || potential->hasExploded)
             continue;
       }
       GameObject *potential = fillVector[i];

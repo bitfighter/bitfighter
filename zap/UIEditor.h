@@ -223,6 +223,8 @@ private:
    string mWarnMsg2;
    Color mWarnMsgColor;
 
+   S32 mCurrentTeam;
+
    bool snapDisabled;
    bool showAllObjects;
    enum {

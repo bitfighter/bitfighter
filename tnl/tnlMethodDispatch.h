@@ -229,7 +229,7 @@ struct FunctorDecl : public Functor {
    void write(BitStream &stream) {}
    void dispatch(void *t) { }
 };
-template <class T>
+template <class T> 
 struct FunctorDecl<void (T::*)()> : public Functor {
    typedef void (T::*FuncPtr)();
    FuncPtr ptr;

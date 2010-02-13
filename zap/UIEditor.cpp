@@ -125,61 +125,61 @@ void EditorUserInterface::populateDock()
    mDockItems.clear();
 
 
-   mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), -1, 0, 0));
-   mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
+   mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam , 0, 0));
 
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), 0, 0, 0));
+   mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), 0, 0, 0));
+   mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), -1, 0, 0));
+   mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), 0, 0, 0));
+   mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
 
    if(!strcmp(mGameType, "SoccerGameType"))
-      mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), -1, 0, 0));
+      mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), mCurrentTeam, 0, 0));
    else
-      mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), 0, 0, 0));
+      mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
 
-   mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), 0, 0, 0));
+   mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
 
 
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), 0, 0, 0));
+   mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), 0, 0, 0));
-   yPos += spacer;
-
-   // These two will share a line
-   mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), -1, 0, 0));
-   mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), -1, 0, 0));
-
+   mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), mCurrentTeam, 0, 0));
    yPos += spacer;
 
    // These two will share a line
+   mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
+   mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
 
-   mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), -1, 0, 0));
-   mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), -1, 0, 0));
+   yPos += spacer;
+
+   // These two will share a line
+
+   mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
+   mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
 
    yPos += 25;
-   mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 0, DOCK_WIDTH - 10, 20));
+   mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
    yPos += 25;
 
    if(!strcmp(mGameType, "HuntersGameType"))
    {
-      mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 0, DOCK_WIDTH - 10, 20));
+      mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
       yPos += 25;
    }
    else
    {
-      mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 0, DOCK_WIDTH - 10, 20));
+      mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
       yPos += spacer;
    }
 }
@@ -808,7 +808,7 @@ void EditorUserInterface::teamsHaveChanged()
 
    // And the dock items too...
    for (S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i].team >= mDockItems.size())
+      if(mDockItems[i].team >= mTeams.size())
          mDockItems[i].team = 0;
 
    validateLevel();          // Revalidate level -- if teams have changed, requirements for spawns have too
@@ -863,7 +863,6 @@ void EditorUserInterface::onActivate()
    mUnmovedItems = mItems;
 
    snapDisabled = false;      // Hold [space] to temporarily disable snapping
-   //mSelectedSet.clear();
 
    // Reset display parameters...
    centerView();
@@ -873,6 +872,7 @@ void EditorUserInterface::onActivate()
    mCreatingPolyline = false;
    mDraggingObjects = false;
    mDraggingDockItem = -1;
+   mCurrentTeam = 0;
    mShowingReferenceShip = false;
    editingIDMode = false;
 
@@ -905,6 +905,11 @@ void EditorUserInterface::onReactivate()
    }
 
    remove("editor.tmp");      // Delete temp file
+
+   if(mCurrentTeam >= mTeams.size())
+      mCurrentTeam = 0;
+
+   populateDock();            // If game type has changed, items on dock will change
 }
 
 Point EditorUserInterface::snapToLevelGrid(Point p)
@@ -2019,6 +2024,7 @@ void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
 // Set the team affiliation of any selected items
 void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 {
+   mCurrentTeam = currentTeam;
    bool anyOK = false;
    bool anyChanged = false;
 
