@@ -221,8 +221,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
                           !strcmp(param.getString(), ""))    // Some params can't be blank
       return;
 
-   const char *types[] = { "level change", "admin", "server", "server name", "server description" };
-   s_logprintf("User [%s] %s %s password", mClientRef->name.getString(), !strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
+   const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
+   s_logprintf("User [%s] %s %s", mClientRef->name.getString(), strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
 
 
    // Update our in-memory copies of the param
@@ -243,7 +243,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       gHostDescr = param.getString();     // Needed on local host?
    }
 
-   const char *keys[] = { "LevelChangePassword", "AdminPassword", "Password", "ServerName", "ServerDescription" };
+   const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
 
    // Update the INI file
    gINI.SetValue("Host", keys[type], param.getString(), true);
@@ -287,7 +287,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    }
 
    // If we've changed the server name, notify all the clients
-   else if(type == (U32)serverNameChanged)
+   else if(type == (U32)ServerName)
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          walk->s2cSetServerName(gServerGame->getHostName());
 }

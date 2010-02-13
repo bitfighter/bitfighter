@@ -14,10 +14,6 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// setting passwords, setting server password
-// Do new passwords survive server shut-down?
-// verify server password stuff still works
-// test setservername/descr commands
 
 // TODO:
 // Create color global for reticle color
