@@ -14,25 +14,15 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
+// setting passwords, setting server password
+// Do new passwords survive server shut-down?
+// verify server password stuff still works
+// test setservername/descr commands
 
 // TODO:
 // Create color global for reticle color
 
-/*
-Crashy level ==> shoot spybug exactly horizontally
-LevelName Test
-LevelDescription
-LevelCredits
-Script
-GridSize 255
-MinPlayers 0
-MaxPlayers 0
-Team Blue 0 0 1
-BarrierMaker 55 0.2 -1.8  0.2 -1
-BarrierMaker 50 -0.2 -1.8  -0.2 -1
-Spawn 0 5.75737e-008 -2
-SpyBug -1 8.90325e-008 -1.7
-*/
+
 
 /*
 XXX need to document timers, main function XXX
@@ -56,6 +46,7 @@ XXX need to document timers, main function XXX
 <li>Retrieve games now allow non-team flags</li>
 <li>Bouncers now do half-damage to shooter</li>
 <li>Triples no longer damage shooter</li>
+<li>Password entry in INI file now changed to ServerPassword -- if you use this, you'll need to manually update your INI file</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -76,10 +67,12 @@ XXX need to document timers, main function XXX
 <li>Editor remembers name of last edited file</li>
 
 <h4>Server management</h4>
-<li>Added /shutdown, /setlevpass, and /setadminpass chat commands (see in-game help)</li>
+<li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
+<li>Added /setservername and /setserverdescr commands</li>
 <li>New orderly shutdown process when using /shutdown command (i.e. players notified, dedicated servers can be terminated, etc.)</li>
 <li>If level change password is left blank, all players granted access (not so for admin password)</li>
 <li>If level change password is set to blank, all players currently connected are silently granted access to level change menu</li>
+<li>-password command line parameter changed to -serverpassword</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -1007,13 +1000,13 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          }
       }
       // Specify password for accessing locked ser vers
-      else if(!stricmp(argv[i], "-password"))      // additional arg required
+      else if(!stricmp(argv[i], "-serverpassword"))      // additional arg required
       {
          if(hasAdditionalArg)
-            gCmdLineSettings.password = argv[i+1];
+            gCmdLineSettings.serverPassword = argv[i+1];
          else
          {
-            logprintf("You must enter a password with the -password option");
+            logprintf("You must enter a password with the -serverpassword option");
             exitGame(1);
          }
       }
@@ -1299,10 +1292,10 @@ void processStartupParams()
 
 
 
-   if(gCmdLineSettings.password != "")
-      gServerPassword = gCmdLineSettings.password;
-   else if(gIniSettings.password != "")
-      gServerPassword = gIniSettings.password;
+   if(gCmdLineSettings.serverPassword != "")
+      gServerPassword = gCmdLineSettings.serverPassword;
+   else if(gIniSettings.serverPassword != "")
+      gServerPassword = gIniSettings.serverPassword;
    // else rely on gServerPassword default of ""
 
    if(gCmdLineSettings.adminPassword != "")

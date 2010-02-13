@@ -235,8 +235,8 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
 {
    mPlayerCount = 0;
    mMaxPlayers = maxPlayers;
-   mHostName = gHostName.c_str();
-   mHostDescr = gHostDescr.c_str();
+   mHostName = gHostName;
+   mHostDescr = gHostDescr;
    mShuttingDown = false;
 
    mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
@@ -315,7 +315,7 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who)
       {
          s_logprintf("Server shutdown requested by %s.  No other players, so shutting down now.", mShutdownOriginator->getClientName().getString());
          mShutdownTimer.reset(1);
-      } 
+      }
       else
       {
          s_logprintf("Server shutdown in %d seconds, requested by %s.", time, mShutdownOriginator->getClientName().getString());

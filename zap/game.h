@@ -194,8 +194,8 @@ private:
    U32 mMaxPlayers;
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    bool mTestMode;           // True if being tested from editor
-   const char *mHostName;
-   const char *mHostDescr;
+   string mHostName;
+   string mHostDescr;
 
    // Info about levels
    Vector<StringTableEntry> mLevelList;
@@ -219,15 +219,19 @@ public:
 
    U32 getPlayerCount() { return mPlayerCount; }
    U32 getMaxPlayers() { return mMaxPlayers; }
-   const char *getHostName() { return mHostName; }
-   const char *getHostDescr() { return mHostDescr; }
+
+   void setHostName(const char *name) { mHostname = name; }
+   const char *getHostName() { return mHostName.c_str(); }
+
+   void setHostDescr(const char *descr) { mHostDescr = descr; }
+   const char *getHostDescr() { return mHostDescr.c_str(); }
 
    bool isFull() { return mPlayerCount == mMaxPlayers; }    // Room for more players?
 
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
 
-   void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who);        // Control whether we're in shut down mode or not  
+   void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who);        // Control whether we're in shut down mode or not
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();

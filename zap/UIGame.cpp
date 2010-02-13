@@ -513,7 +513,7 @@ extern LoadoutItem gLoadoutModules[];
 // Draw weapon indicators at top of the screen, runs on client
 void GameUserInterface::renderLoadoutIndicators()
 {
-   if (!gIniSettings.showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
+   if(!gIniSettings.showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
       return;
 
    U32 xPos = UserInterface::horizMargin;
@@ -522,7 +522,7 @@ void GameUserInterface::renderLoadoutIndicators()
    return;
 
    Ship *localShip = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if (!localShip)
+   if(!localShip)
       return;
 
    glEnable(GL_BLEND);
@@ -1238,6 +1238,17 @@ Vector<string> GameUserInterface::parseString(const char *str)
 }
 
 
+static bool hasAdmin(GameConnection *gc, const char *failureMessage)
+{
+   if(!gc->isAdmin())
+   {
+      displayMessage(gCmdChatColor, failureMessage);
+      return false;
+   }
+   return true;
+}
+
+
 extern md5wrapper md5;
 
 // Process a command entered at the chat prompt
@@ -1318,11 +1329,8 @@ void GameUserInterface::processCommand(Vector<string> words)
    }
    else if(words[0] == "shutdown")
    {
-      if(!gc->isAdmin())
-      {
-         displayMessage(gCmdChatColor, "!!! You don't have permission to shut the server down");
+      if(!hasAdmin(gc, "!!! You don't have permission to shut the server down"))
          return;
-      }
 
       U16 time = 0;
       if(words.size() > 1)
@@ -1333,11 +1341,9 @@ void GameUserInterface::processCommand(Vector<string> words)
    }
    else if(words[0] == "kick")      // Kick a player
    {
-      if(!gc->isAdmin())
-      {
-         displayMessage(gCmdChatColor, "!!! You don't have permission to kick players");
+      if(!hasAdmin(gc, "!!! You don't have permission to kick players"))
          return;
-      }
+
       if(words.size() < 2 || words[1] == "")
       {
          displayMessage(gCmdChatColor, "!!! Need to specify who to kick");
@@ -1398,35 +1404,47 @@ void GameUserInterface::processCommand(Vector<string> words)
       setVolume(VoiceVolumeType, words);
    else if(words[0] == "servvol")   // Server alerts volume
       setVolume(ServerAlertVolumeType, words);
+
    else if(words[0] == "setadminpass")
    {
-      if(!gc->isAdmin())
-      {
-         displayMessage(gCmdChatColor, "!!! You don't have permission to change the admin password");
+      if(!hasAdmin(gc, "!!! You don't have permission to set the admin password"))
          return;
-      }
 
-      if(words.size() < 2 || words[1] == "")
-      {
-         displayMessage(gCmdChatColor, "!!! Need to supply a password");
-         return;
-      }
-
-      gc->changeAdminPassword(words[1].c_str());
+      changePassword(gc, GameConnection::AdminPassword, words, true);
    }
+
+   else if(words[0] == "setserverpass")
+   {
+      if(!hasAdmin(gc, "!!! You don't have permission to set the server password"))
+         return;
+
+      changePassword(gc, GameConnection::ServerPassword, words, false);
+   }
+
    else if(words[0] == "setlevpass")
    {
-      if(!gc->isAdmin())
-      {
-         displayMessage(gCmdChatColor, "!!! You don't have permission to change the level change password");
+      if(!hasAdmin(gc, "!!! You don't have permission to set the level change password"))
          return;
-      }
 
-      if(words.size() < 2)
-         gc->changeLevelChangePassword("");
-      else
-         gc->changeLevelChangePassword(words[1].c_str());
+      changePassword(gc, GameConnection::LevelChangePassword, words, false);
    }
+
+   else if(words[0] == "setservername")
+   {
+      if(!hasAdmin(gc, "!!! You don't have permission to set the server name"))
+         return;
+
+      changeServerNameDescr(gc, GameConnection::ServerName, words);
+   }
+
+   else if(words[0] == "setserverdescr")
+   {
+      if(!hasAdmin(gc, "!!! You don't have permission to set the server description"))
+         return;
+
+      changeServerNameDescr(gc, GameConnection::ServerDescr, words);
+   }
+
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
 }
@@ -1453,11 +1471,14 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/servvol");
    mChatCmds.push_back("/setlevpass");
    mChatCmds.push_back("/setadminpass");
-
+   mChatCmds.push_back("/setserverpass");
+   mChatCmds.push_back("/setservername");
+   mChatCmds.push_back("/setserverdescr");
 }
 
+
 // Set specified volume to the specefied level
-void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
+void GameUserInterface::setVolume(VolumeType volType, Vector<string> &words)
 {
    S32 vol;
 
@@ -1498,6 +1519,43 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> words)
       displayMessage(gCmdChatColor, "Server alerts chat volume changed to %d %s", vol, vol == 0 ? "[MUTE]" : "");
       return;
   }
+}
+
+
+static void changePassword(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words, bool required)
+{
+   if(required)
+   {
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         return;
+      }
+
+      gc->changeParam(words[1].c_str(), type);
+   }
+   else if(words.size() < 2)
+      gc->changeParam("", type);
+   else
+      gc->changeParam(words[1].c_str(), type);
+}
+
+
+static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words)
+{
+   // Concatenate all params into a single string
+   string allWords = "";
+   for(S32 i = 1; i < words.size(); i++)
+      allWords += (i == 1 ? "" : " ") + words[i];
+
+   // Did the user provide a name/description?
+   if(allWords == "")
+   {
+      displayMessage(gCmdChatColor, type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      return;
+   }
+
+   gc->changeParam(allWords.c_str(), type);
 }
 
 

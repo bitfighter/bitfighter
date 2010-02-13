@@ -32,8 +32,8 @@
 
 #include "config.h"     // For CmdLineSettings
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlLog.h"
+#include "tnl.h"
+#include "tnlLog.h"
 
 #include <stdio.h>
 
@@ -204,7 +204,7 @@ stateLineParseDone:
       id[idLen] = 0;
       processLevelLoadLine(argc, (U32)atoi(id), (const char **) argv);
    }
-   argc = 0; 
+   argc = 0;
    argLen = 0;
    idLen = 0;
 

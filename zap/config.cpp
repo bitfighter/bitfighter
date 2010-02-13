@@ -585,7 +585,7 @@ void loadSettingsFromINI()
    gIniSettings.hostaddr = gINI.GetValue("Host", "ServerAddress", gIniSettings.hostaddr);
    gIniSettings.hostdescr = gINI.GetValue("Host", "ServerDescription", gIniSettings.hostdescr);
 
-   gIniSettings.password = gINI.GetValue("Host", "Password", gIniSettings.password);
+   gIniSettings.serverPassword = gINI.GetValue("Host", "ServerPassword", gIniSettings.serverPassword);
    gIniSettings.adminPassword = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
    gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
    gIniSettings.levelDir = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
@@ -604,7 +604,7 @@ void loadSettingsFromINI()
    gIniSettings.logUDP                = (lcase(gINI.GetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"))) == "yes");
 
 
-   gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);  
+   gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
 
    // Load the ReservedNames section...
    if(gINI.FindKey("ReservedNames") != gINI.noID)
@@ -614,7 +614,7 @@ void loadSettingsFromINI()
       for(S32 i = 0; i < numNames; i++)
       {
          string candidate = gINI.ValueName("ReservedNames", i);
-         
+
          if(lcase(candidate.substr(0,4)) == "name")
          {
             string name = gINI.GetValue("ReservedNames", candidate, "");
@@ -667,7 +667,7 @@ void loadSettingsFromINI()
    MessageType=Team     -or-     MessageType=Global
 
    == or, a top tiered message might look like this ==
-   
+
    [QuickChat_Message1]
    Key=A
    Button=Button 1
@@ -865,28 +865,28 @@ void saveSettingsToINI()
       gINI.KeyComment("Host", " ServerName - The name others will see when they are browsing for servers (max 20 chars)");
       gINI.KeyComment("Host", " ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
       gINI.KeyComment("Host", " ServerDescription - A one line description of your server.  Please include nickname and physical location!");
-      gINI.KeyComment("Host", " Password - You can require players to use a password to play on your server.  Leave blank to disable.");
-      gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.  Leave blank to disable.");
-      gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to disable.");
+      gINI.KeyComment("Host", " ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
+      gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.");
+      gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
       gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
-      
+
 //      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
       gINI.KeyComment("Host", "----------------");
    }
    gINI.SetValue("Host", "ServerName", gIniSettings.hostname, true);
    gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr, true);
    gINI.SetValue("Host", "ServerDescription", gIniSettings.hostdescr, true);
-   gINI.SetValue("Host", "Password", gIniSettings.password, true);
+   gINI.SetValue("Host", "ServerPassword", gIniSettings.serverPassword, true);
    gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword, true);
    gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword, true);
-   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir, true);      
+   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir, true);
    gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers, true);
 //   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay, true);
    gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
 
-   
+
 
    gINI.AddKeyName("Diagnostics");
    if (gINI.NumKeyComments("Diagnostics") == 0)

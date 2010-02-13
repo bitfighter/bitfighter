@@ -170,30 +170,30 @@ or IP:www.foobar.com:24601
 -name [playerName] sets the client's name to the specified name 
         and skips the name entry screen.
 -levels ["level1 level2 level3 ... leveln"] sets the specified level 
-		rotation for games
+      rotation for games
 -hostname [hostname] sets the name that will appear in the server 
         browser when searching for servers.
 -maxplayers [number] sets the maximum number of players allowed 
         on the server
--password [password] sets the password for access to the server.
+-serverpassword [password] sets the password for access to the server.
 -adminpassword [password] sets the administrator password for the server.
 -joystick [joystickType] enables dual analog control pad.  The
         joystickType argument can be either 0, 1 or 2.  If the right
         stick doesn't aim shots properly with 0, try 1 or 2.
         
         Known controllers:
-		Logitech Wingman cordless - joystick 0
-		Logitech Dual Action - joystick 1
-		Saitek P880 Dual Analog - joystick 2
-		PS 2 Dual Shock w/USB - joystick 3
-		XBox controller - joystick 4
+      Logitech Wingman cordless - joystick 0
+      Logitech Dual Action - joystick 1
+      Saitek P880 Dual Analog - joystick 2
+      PS 2 Dual Shock w/USB - joystick 3
+      XBox controller - joystick 4
         
 -jsave [journalName] saves the log of the play session to the specified
         journal file.
 -jplay [journalName] replays a saved journal.
 -edit [levelName] starts Zap in level editing mode, loading and saving the
-		specified level.
-		
+      specified level.
+      
 Level editor instructions:
 
 Currently the level editor allows you to edit the barrier and level objects
@@ -202,17 +202,17 @@ within levels.
 Mouse functions:
 
 Left-click - select and move.  Clicking on vertices allows movement
-		of verts, clicking on edges allows movement of the entire barrier border.
-		To move a vertex or border, click and hold as you drag the object around.
-		Left click also completes a new barrier border.
-		If no object is under the mouse, left-clicking will create a 
-		drag selection box for selecting multiple objects.  Holding down
-		the shift key also allows multiple selection of objects.
+      of verts, clicking on edges allows movement of the entire barrier border.
+      To move a vertex or border, click and hold as you drag the object around.
+      Left click also completes a new barrier border.
+      If no object is under the mouse, left-clicking will create a 
+      drag selection box for selecting multiple objects.  Holding down
+      the shift key also allows multiple selection of objects.
 
 Right-click - add barrier vertex.  If right clicking on an existing barrier edge,
-		this will insert a new vertex along that edge at the click point.  Otherwise
-		this either begins a new barrier border or adds a new vertex to the current
-		new barrier border.
+      this will insert a new vertex along that edge at the click point.  Otherwise
+      this either begins a new barrier border or adds a new vertex to the current
+      new barrier border.
 
 Keyboard functions:
 
@@ -227,7 +227,7 @@ F - flip current selection horizontally
 V - flip current selection vertically
 
 0...9 - set the active team for item construction.  This will also set the team 
-	of any selected objects
+   of any selected objects
 T - construct a Teleporter at the mouse point
 G - construct a Spawn point at the mouse point
 B - construct a RepairItem at the mouse point

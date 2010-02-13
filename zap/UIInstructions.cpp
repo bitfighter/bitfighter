@@ -594,8 +594,11 @@ static ControlStringsEditor commands[] = {
 
 static ControlStringsEditor adminCommands[] = {
    { "/shutdown [time in secs]", "Start orderly shutdown of server (def. = 10 secs)" },
-   { "/setlevpass [passwd]",     "Set or clear level change password" },
+   { "/setlevpass [passwd]",     "Set level change password (use blank to clear)" },
    { "/setadminpass <passwd>",   "Set admin password" },
+   { "/setserverpass [passwd]",  "Set server password  (use blank to clear)" },
+   { "/setservername <name>",    "Set server name" },
+   { "/setserverdescr <descr>",  "Set server description" },
 
    { NULL, NULL },      // End of list
 };
@@ -622,13 +625,13 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
    ypos += 28;
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;
-   
+
    if(page == 1)
    {
       drawString(cmdCol, ypos, instrSize, "Admin permissions required to use these commands");
       ypos += 28;
    }
-   
+
 
    Color cmdColor =   Color(0, 1, 1);
    Color descrColor = Color (1, 1, 1);

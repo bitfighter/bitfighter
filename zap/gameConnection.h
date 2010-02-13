@@ -97,11 +97,14 @@ public:
       ColorCount              // Must be last
    };
 
-   enum PasswordType
+   enum ParamType             // Be careful changing the order of this list... c2sSetParam() expects this for message creation
    {
-      LevelChangePassword,
-      AdminPassword,
-      PasswordTypeCount       // Must be last
+      LevelChangePassword = 0,
+      AdminPassword = 1,
+      ServerPassword = 2,
+      ServerName = 3,
+      ServerDescr = 4,
+      ParamTypeCount       // Must be last
    };
 
 
@@ -150,14 +153,13 @@ public:
    bool gotPermissionsReply() { return mGotPermissionsReply; }
 
    // Chage passwords on the server
-   void changeLevelChangePassword(const char *password);
-   void changeAdminPassword(const char *password);
+   void changePassword(const char *password, ParamType type);
 
 
    TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));
    TNL_DECLARE_RPC(c2sLevelChangePassword, (StringPtr pass));
 
-   TNL_DECLARE_RPC(c2sSetPassword, (StringPtr pass, RangedU32<0, PasswordTypeCount> type));
+   TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> type));
 
 
    TNL_DECLARE_RPC(s2cSetIsAdmin, (bool granted));

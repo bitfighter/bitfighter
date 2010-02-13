@@ -35,7 +35,7 @@
 #include "../tnl/tnlTypes.h"
 #include "../tnl/tnlNetStringTable.h"
 
-#include "input.h"     
+#include "input.h"
 #include <string>
 
 using namespace std;
@@ -67,9 +67,9 @@ struct CmdLineSettings
    string hostname;
    string hostaddr;        // Address to listen on when we're host (e.g. IP:localhost:1234 or IP:Any:6666 or whatever)
    string hostdescr;       // One-line description of server
-   string password;
-   string adminPassword;
-   string levelChangePassword;
+   string serverPassword;  // Password required to connect to server
+   string adminPassword;   // Password required to perform certain admin functions
+   string levelChangePassword;   // Password required to change levels and such
    string levelDir;        // Subfolder under levels specified with -leveldir parameter
    bool alllevels;         // Did user specify -alllevels param?
 
@@ -101,7 +101,7 @@ struct CmdLineSettings
       lag = 0;
       dedicated = "";
       name = "";
-      password = "";
+      serverPassword = "";
       adminPassword = "";
       levelChangePassword = "";
       hostname = "";
@@ -156,7 +156,7 @@ struct IniSettings      // With defaults specified
    string hostname;                 // Server name when in host mode
    string hostaddr;                 // User-specified address/port of server
    string hostdescr;                // One-line description of server
-   string password;
+   string serverPassword;
    string adminPassword;
    string levelChangePassword;      // Password to allow access to level changing functionality on non-local server
    string levelDir;                 // Folder where levels are stored, by default
@@ -182,7 +182,7 @@ struct IniSettings      // With defaults specified
 
 
    Vector<StringTableEntry> levelList;
- 
+
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
 
@@ -219,7 +219,7 @@ struct IniSettings      // With defaults specified
       hostname = "Bitfighter host";      // Default host name
       hostdescr = "";
       maxplayers = 128;                  // That's a lot of players!
-      password = "";                     // Passwords empty by default
+      serverPassword = "";               // Passwords empty by default
       adminPassword = "";
       levelChangePassword = "";
       levelDir = "";

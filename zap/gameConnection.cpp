@@ -169,16 +169,10 @@ void GameConnection::submitLevelChangePassword(const char *password)
    setWaitingForPermissionsReply(true);
 }
 
-
-void GameConnection::changeLevelChangePassword(const char *password)
+
+void GameConnection::changeParam(const char *param, ParamType type)
 {
-   c2sSetPassword(password, LevelChangePassword);
-}
-
-
-void GameConnection::changeAdminPassword(const char *password)
-{
-   c2sSetPassword(password, AdminPassword);
+   c2sSetchangeParam(param, type);
 }
 
 
@@ -214,38 +208,72 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pas
 extern CIniFile gINI;
 
 // Allow admins to change the passwords on their systems
-TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, GameConnection::PasswordTypeCount> type), (pass, type),
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(!isAdmin())
-      return;              // Do nothing --> non-admins have no pull here
+   if(!isAdmin())    // Do nothing --> non-admins have no pull here
+      return;
 
-   s_logprintf("User [%s] %s %s password", mClientRef->name.getString(), !strcmp(pass.getString(), "") ? "set" : "cleared", type == (U32)LevelChangePassword ? "level change" : "admin" );
+   if(   (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
+                          !strcmp(param.getString(), ""))    // Some params can't be blank
+      return;
+
+   const char *types[] = { "level change", "admin", "server", "server name", "server description" };
+   s_logprintf("User [%s] %s %s password", mClientRef->name.getString(), !strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
+
+
+   // Update our in-memory copies of the param
+   if(type == (U32)LevelChangePassword)
+      gLevelChangePassword = param.getString();
+   else if(type == (U32)AdminChangePassword)
+      gAdminPassword = param.getString();
+   else if(type == (U32)ServerPassword)
+      gServerPassword = param.getString();
+   else if(type == (U32)ServerName)
+   {
+      gServerGame->setServername(param.getString());
+      gHostName = param.getString();      // Needed on local host?
+   }
+   else if(type == (U32)ServerDescr)
+   {
+      gServerGame->setServerDescr(param.getString());    // Do we also need to set gHost
+      gHostDescr = param.getString();     // Needed on local host?
+   }
+
+   const char *keys[] = { "LevelChangePassword", "AdminPassword", "Password", "ServerName", "ServerDescription" };
+
+   // Update the INI file
+   gINI.SetValue("Host", keys[type], param.getString(), true);
+   gINI.WriteFile();
 
 
    // Some messages we might show the user
    static StringTableEntry levelPassChanged("Level change password changed");
    static StringTableEntry levelPassCleared("Level change password cleared -- anyone can change levels");
    static StringTableEntry adminPassChanged("Admin password changed");
+   static StringTableEntry serverPassChanged("Server password changed -- only players with the password can connect");
+   static StringTableEntry serverPassCleared("Server password cleared -- anyone can connect");
+   static StringTableEntry serverNameChanged("Server name changed");
+   static StringTableEntry serverDescrChanged("Server description changed");
 
-   // Update our in-memory copies of the password
+   // Pick out just the right message
+   StringTableEntry msg;
+
    if(type == (U32)LevelChangePassword)
-      gLevelChangePassword = pass.getString();
-   else
-      gAdminPassword = pass.getString();
+      msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
+   else if(type == (U32)AdminChangePassword)
+      msg = adminPassChanged;
+   else if(type == (U32)ServerChangePassword)
+      msg = strcmp(param.getString(), "") ? serverPassChanged : serverPassCleared;
+   else if(type == (U32)ServerName)
+      msg = serverNameChanged;
+   else if(type == (U32)ServerDescr)
+      msg = serverDescrChanged;
 
-   // Update the INI file
-   gINI.SetValue("Host", type == (U32)LevelChangePassword ? "LevelChangePassword" : "AdminPassword", pass.getString(), true);
-   gINI.WriteFile();
+   s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
 
-   // Notify user their bidding has been done
-   s2cDisplayMessage(ColorRed, SFXNone, type == (U32)LevelChangePassword ?                                               // Is this a level change password?
-                                           (!strcmp(pass.getString(), "") ? levelPassCleared : levelPassChanged) :   // <== LevelChangePassword
-                                        adminPassChanged);                                                               // <== AdminPassword
-
-
-   // Finally, if we're clearning the level change password, grant access to anyone who doesn't already have it
-   if(type == (U32)LevelChangePassword && !strcmp(pass.getString(), ""))
+   // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
+   if(type == (U32)LevelChangePassword && !strcmp(param.getString(), ""))
    {
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          if(!walk->isLevelChanger())
@@ -254,6 +282,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetPassword, (StringPtr pass, RangedU32<0, 
             walk->s2cSetIsLevelChanger(true, false);     // Silently
          }
    }
+
+   // If we've changed the server name, notify all the clients
+   else if(type == (U32)serverNameChanged)
+      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+         walk->s2cSetServerName(getGame()->getHostName());
 }
 
 
@@ -831,7 +864,7 @@ void GameConnection::onConnectionEstablished()
       activateGhosting();
       setFixedRateParameters(50, 50, 2000, 2000);        // U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth
 
-      s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
+      s2cSetServerName(getGame()->getHostName());        // Ideally, this would be part of the connection handshake, but this should work fine
 
       time(&joinTime);
       mAcheivedConnection = true;
