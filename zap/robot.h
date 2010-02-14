@@ -88,14 +88,10 @@ public:
 
    void idle(IdleCallPath path);
 
-   void processMove(U32 stateIndex);
-
    Point mTarget;     // TODO: Get rid of this!!  why?
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);
-
-   void render(S32 layerIndex);
 
    S32 getCurrentZone();
    void setCurrentZone(S32 zone);

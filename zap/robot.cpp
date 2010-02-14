@@ -973,14 +973,10 @@ U32 Robot::mRobotCount = 0;
 // Constructor
 Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m, true)
 {
-   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;
+   mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
-   mNetFlags.set(Ghostable);
-
-   mTeam = team;
-   mass = m;            // Ship's mass
    L = NULL;
-   mCurrentZone = -1;
+   mCurrentZone = -1; 
    flightPlanTo = -1;
 
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
@@ -1178,7 +1174,7 @@ bool Robot::initialize(Point p)
    return true;
 }
 
-
+// On client, this only runs the very first time the robot is added to the level
 void Robot::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
@@ -1271,42 +1267,6 @@ void Robot::setCurrentZone(S32 zone)
 F32 Robot::getAnglePt(Point point)
 {
    return getActualPos().angleTo(point);
-}
-
-
-// Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
-void Robot::processMove(U32 stateIndex)
-{
-   mMoveState[LastProcessState] = mMoveState[stateIndex];
-
-   F32 maxVel = getMaxVelocity();
-
-   F32 time = mCurrentMove.time * 0.001;
-   Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
-
-   requestVel *= maxVel;
-   F32 len = requestVel.len();
-
-   // Remove this block to allow robots to exceed speed of 1
-   if(len > maxVel)
-      requestVel *= maxVel / len;
-
-   Point velDelta = requestVel - mMoveState[stateIndex].vel;
-   F32 accRequested = velDelta.len();
-
-
-   // Apply turbo-boost if active
-   F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time;
-   if(accRequested > maxAccel)
-   {
-      velDelta *= maxAccel / accRequested;
-      mMoveState[stateIndex].vel += velDelta;
-   }
-   else
-      mMoveState[stateIndex].vel = requestVel;
-
-   mMoveState[stateIndex].angle = mCurrentMove.angle;
-   move(time, stateIndex, false);
 }
 
 
@@ -1411,6 +1371,9 @@ void Robot::idle(GameObject::IdleCallPath path)
       mCurrentMove.right = 0;
       mCurrentMove.left = 0;
 
+      for(S32 i = 0; i < ShipModuleCount; i++)
+         mCurrentMove.module[i] = false;
+
       try
       {
          lua_getglobal(L, "_onTick");
@@ -1429,7 +1392,8 @@ void Robot::idle(GameObject::IdleCallPath path)
 
       // If we've changed the mCurrentMove, then we need to set
       // the MoveMask to ensure that it is sent to the clients
-      setMaskBits(MoveMask);
+      if(!mCurrentMove.isEqualMove(&mLastMove))
+         setMaskBits(MoveMask);
 
       processMove(ActualState);
 
@@ -1490,63 +1454,6 @@ void Robot::idle(GameObject::IdleCallPath path)
       updateModuleSounds();
    }
 }
-
-
-void Robot::render(S32 layerIndex)
-{
-   Parent::render(layerIndex);
-
-//      TNLAssert(gClientGame->getConnectionToServer(), "Invalid connection to server in Robot//projectile.cpp");
-
-//   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
-//   if(!u) return;
-//
-//   Point position = u->getRenderPos();
-//
-//   F32 zoomFrac = 1;
-//
-//glPopMatrix();
-//
-//      // Set up the view to show the whole level.
-//   Rect mWorldBounds = gClientGame->computeWorldObjectExtents(); // TODO: Cache this value!  ?  Or not?
-//
-//   Point worldCenter = mWorldBounds.getCenter();
-//   Point worldExtents = mWorldBounds.getExtents();
-//   worldExtents.x *= UserInterface::canvasWidth / F32(UserInterface::canvasWidth - (UserInterface::horizMargin * 2));
-//   worldExtents.y *= UserInterface::canvasHeight / F32(UserInterface::canvasHeight - (UserInterface::vertMargin * 2));
-//
-//   F32 aspectRatio = worldExtents.x / worldExtents.y;
-//   F32 screenAspectRatio = UserInterface::canvasWidth / F32(UserInterface::canvasHeight);
-//   if(aspectRatio > screenAspectRatio)
-//      worldExtents.y *= aspectRatio / screenAspectRatio;
-//   else
-//      worldExtents.x *= screenAspectRatio / aspectRatio;
-//
-   //Point offset = (worldCenter - position) * zoomFrac + position;
-//   Point visSize = gClientGame->computePlayerVisArea(u) * 2;
-//   Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
-//
-   //Point visScale(UserInterface::canvasWidth / modVisSize.x,
-                  //UserInterface::canvasHeight / modVisSize.y );
-
-   //glPushMatrix();
-   //glTranslatef(gScreenWidth / 2, gScreenHeight / 2, 0);    // Put (0,0) at the center of the screen
-
-   //glScalef(visScale.x, visScale.y, 1);
-   //glTranslatef(-offset.x, -offset.y, 0);
-
-//glColor3f(1,1,1);
-//   S32 xx = this->flightPlanTo;
-//   glBegin(GL_LINE_STRIP);
-//   for(S32 i = 0; i < flightPlan.size(); i++)
-//   {
-//      glVertex2f(flightPlan[i].x, flightPlan[i].y);
-//   }
-//   glEnd();
-
-   //glPopMatrix();
-}
-
 
 };
 

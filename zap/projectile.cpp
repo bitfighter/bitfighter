@@ -85,11 +85,14 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 
 U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   if(stream->writeFlag(updateMask & InitialMask))
+   if(stream->writeFlag(updateMask & (InitialMask | PosVelMask)))
    {
       ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
       writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
+   }
 
+   if(stream->writeFlag(updateMask & InitialMask))
+   {
       stream->writeEnum(mType, ProjectileTypeCount);
 
       S32 index = -1;
@@ -111,11 +114,14 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
 
-   if(stream->readFlag())     // Initial chunk of data, sent once for this object
+   if(stream->readFlag())        // Position & Velocity
    {
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
       readCompressedVelocity(velocity, CompressedVelocityMax, stream);
+   }
 
+   if(stream->readFlag())        // Initial chunk of data, sent once for this object
+   {
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
       TNLAssert(gClientGame->getConnectionToServer(), "Defunct connection to server in projectile.cpp!");
@@ -175,7 +181,7 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 
 void Projectile::idle(GameObject::IdleCallPath path)
 {
-   U32 deltaT = mCurrentMove.time;
+   U32 deltaT = mCurrentMove.time; 
 
    if(!collided && alive)
    {
@@ -207,6 +213,8 @@ void Projectile::idle(GameObject::IdleCallPath path)
       {
          hitObject = findObjectLOS(MoveableType | BarrierType | EngineeredType | ForceFieldType,
                                    MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);
+
+         logprintf("Hitobject? : %s",hitObject?"Yes":"no");
          if(!hitObject || hitObject->collide(this))
             break;
 
@@ -219,6 +227,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
       // Re-enable collison flag for ship and items in our path that don't want to be collided with
       // Note that if we hit an object that does want to be collided with, it won't be in disableVector
       // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
+      // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
 
       for(S32 i = 0; i < disableVector.size(); i++)
          disableVector[i]->enableCollision();
@@ -238,13 +247,17 @@ void Projectile::idle(GameObject::IdleCallPath path)
          }
 
          if(bounce)
-         {
+         { 
             // We hit something that we should bounce from, so bounce!
             velocity -= surfNormal * surfNormal.dot(velocity) * 2;
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
 
-            SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
+            if(isGhost())
+               SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
+         //   else
+        //       setMaskBits(PosVelMask);     // Resend  position and velocity to make sure everyone's on the same page
+
          }
          else
          {
@@ -252,6 +265,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             handleCollision(hitObject, collisionPoint);     // What we hit, and where we hit it
          }
+
       }
       else        // Hit nothing, advance projectile to endPos
          pos = endPos;
@@ -259,6 +273,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
       Rect newExtent(pos,pos);
       setExtent(newExtent);
    }
+
 
    // Kill old projectiles
    if(alive && path == GameObject::ServerIdleMainLoop)

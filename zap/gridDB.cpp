@@ -261,7 +261,7 @@ GameObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayS
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(!fillVector[i]->isCollisionEnabled())
+      if(!fillVector[i]->isCollisionEnabled())     // Skip collision-disabled objects
          continue;
 
       static Vector<Point> poly;

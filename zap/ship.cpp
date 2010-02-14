@@ -884,6 +884,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
    return 0;
 }
 
+
 // Any changes here need to be reflected in Ship::packUpdate
 void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -945,6 +946,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       hasExploded = false;
       playSpawnEffect = true;
       shipwarped = true;
+      enableCollision();
    }
 
    if(stream->readFlag())        // Health

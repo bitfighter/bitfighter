@@ -119,6 +119,7 @@ private:
    U32 mCreationTime;
    SafePtr<GameConnection> mControllingClient;
    SafePtr<GameConnection> mOwner;
+public:     // for now... TODO: delete after fixing bot collisions 
    U32 mDisableCollisionCount;      // No collisions with this object if true
    bool mInDatabase;
 
