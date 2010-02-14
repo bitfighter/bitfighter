@@ -85,14 +85,7 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 
 U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   if(stream->writeFlag(updateMask & (InitialMask | PosVelMask)))
-   {
-      ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
-      writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
-   }
-
    if(stream->writeFlag(updateMask & InitialMask))
-   {
       stream->writeEnum(mType, ProjectileTypeCount);
 
       S32 index = -1;
@@ -114,14 +107,11 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
 
-   if(stream->readFlag())        // Position & Velocity
+   if(stream->readFlag())         // Initial chunk of data, sent once for this object
    {
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
       readCompressedVelocity(velocity, CompressedVelocityMax, stream);
-   }
 
-   if(stream->readFlag())        // Initial chunk of data, sent once for this object
-   {
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
       TNLAssert(gClientGame->getConnectionToServer(), "Defunct connection to server in projectile.cpp!");
@@ -214,7 +204,6 @@ void Projectile::idle(GameObject::IdleCallPath path)
          hitObject = findObjectLOS(MoveableType | BarrierType | EngineeredType | ForceFieldType,
                                    MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);
 
-         logprintf("Hitobject? : %s",hitObject?"Yes":"no");
          if(!hitObject || hitObject->collide(this))
             break;
 
@@ -255,9 +244,6 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
             if(isGhost())
                SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
-         //   else
-        //       setMaskBits(PosVelMask);     // Resend  position and velocity to make sure everyone's on the same page
-
          }
          else
          {

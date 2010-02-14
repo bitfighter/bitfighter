@@ -27,9 +27,9 @@
 #define _GRIDDB_H_
 
 
-#include "../tnl/tnlTypes.h"
-#include "../tnl/tnlDataChunker.h"
-#include "../tnl/tnlVector.h"
+#include "tnlTypes.h"
+#include "tnlDataChunker.h"
+#include "tnlVector.h"
 
 #include "point.h"
 

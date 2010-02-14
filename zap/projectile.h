@@ -70,8 +70,7 @@ public:
    enum {
       CompressedVelocityMax = 2047,
       InitialMask = BIT(0),
-      PosVelMask = BIT(1),
-      ExplodedMask = BIT(2),
+      ExplodedMask = BIT(1),
    };
 
    Point pos;
