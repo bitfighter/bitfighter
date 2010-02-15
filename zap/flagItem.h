@@ -52,7 +52,7 @@ public:
    void onItemDropped(Ship *ship);
    bool collide(GameObject *hitObject);
    bool isAtHome();
-   Timer mTimer;
+   Timer mTimer;                       // Used for games like HTF where time a flag is held is important
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);

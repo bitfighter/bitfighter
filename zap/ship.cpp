@@ -1067,6 +1067,16 @@ S32 Ship::carryingFlag()
 }
 
 
+S32 Ship::getFlagCount()
+{
+   S32 count = 0;
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeMask() & FlagType))
+         count++;
+   return count;
+}
+
+
 bool Ship::carryingResource()
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)

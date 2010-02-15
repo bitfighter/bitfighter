@@ -30,6 +30,7 @@ XXX need to document timers, main function XXX
 <li>Added energy item</li>
 <li>Added ability to add arbitrary linework to levels, complementing existing text.  To add lines, hold ~ and right-click.</li>
 <li>Started trasnsition of Join menu into Game Lobby</li>
+<li>Started developing framework for remote server management</li>
 
 <h4>Smaller changes</h4>
 <li>Added Restart Level to game options menu if you have level change permissions</li>
@@ -49,6 +50,9 @@ XXX need to document timers, main function XXX
 <h4>Bots</h4>
 <li>Added enhanced timer class to Lua scripting</li>
 <li>Moved some "unwrapped" functionality into main() function</li>
+<li>Renamed getMove() function to onTick() ==> existing bots will need to be updated</li>
+<li>Fixed module "always on" bug</li>
+<li>Fixed "shoot through shielded robot" bug</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>
@@ -72,6 +76,7 @@ XXX need to document timers, main function XXX
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
 <li>Fixed turret/forcefield "in the middle of space" bug</li>
 <li>Fixed textItem bounds miscalculation that caused large text to "jump" onto screen</li>
+<li>Fixed /dcoord display bug</li>
 
 */
 

@@ -218,7 +218,7 @@ bool FlagItem::collide(GameObject *hitObject)
 }
 
 
-// Private helper function
+// Private helper function -- what happens when flag is dropped?
 void FlagItem::flagDropped()
 {
    GameType *gt = getGame()->getGameType();

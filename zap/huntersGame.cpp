@@ -155,9 +155,7 @@ HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 }
 
 
-static StringTableEntry dropOneString( "%e0 dropped a flag!");
-static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
-
+// the ship will come from flag->mount
 void HuntersGameType::flagDropped(Ship *theShip, FlagItem *flag)
 {
    HuntersFlagItem *theFlag = findFirstNexusFlag(theShip);
@@ -171,6 +169,10 @@ void HuntersGameType::flagDropped(Ship *theShip, FlagItem *flag)
    e.push_back(theShip->getName());
    if(flagCount > 1)
       e.push_back(UserInterface::itos(flagCount).c_str());
+
+
+   static StringTableEntry dropOneString( "%e0 dropped a flag!");
+   static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
@@ -272,6 +274,7 @@ void releaseFlag(Game *game, Point pos, Point startVel)
 
    newFlag->setActualVel(vel);
 
+   // flag->onItemDropped()
    newFlag->mDroppedTimer.reset(newFlag->dropDelay);
 }
 

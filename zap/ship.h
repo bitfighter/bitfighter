@@ -225,7 +225,10 @@ public:
 
    bool isDestroyed() { return hasExploded; }
    bool areItemsMounted() { return mMountedItems.size() != 0; }
-   S32 carryingFlag();
+   
+   S32 carryingFlag();     // Returns index of first flag, or NO_FLAG if ship has no flags
+   S32 getFlagCount();     // Returns the number of flags ship is carrying
+
    bool carryingResource();
    Item *unmountResource();
 

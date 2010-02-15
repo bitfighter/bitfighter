@@ -121,7 +121,7 @@ public:
 class HuntersFlagItem : public Item
 {
 private:
-   typedef Item Parent;
+   typedef Item Parent;    // FlagItem Parent;
    void dropFlags(U32 flags);
 
 protected:
@@ -149,20 +149,22 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
    void idle(IdleCallPath path);
 
+   /* X */ Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
+   /* X */ static const U32 dropDelay = 500;    // in ms
+
+
    TNL_DECLARE_CLASS(HuntersFlagItem);
 
    ///// Lua Interface
 
-   HuntersFlagItem(lua_State *L) { /* Do nothing */ };     //  Lua constructor
+   /* X */ HuntersFlagItem(lua_State *L) { /* Do nothing */ };     //  Lua constructor
 
-   static const char className[];
-   static Lunar<HuntersFlagItem>::RegType methods[];
+   /* X */ static const char className[];
+   /* X */ static Lunar<HuntersFlagItem>::RegType methods[];
 
-   S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
-   void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
+   /* X */ S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
+   /* X */ void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
 
-   Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
-   static const U32 dropDelay = 500;    // in ms
 
 };
 

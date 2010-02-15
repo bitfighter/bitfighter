@@ -155,6 +155,10 @@ public:
    S32 getZoneCount(lua_State *L);
    S32 getCurrentZone(lua_State *L);
 
+   S32 getFlagCount(lua_State *L);
+   S32 hasFlag(lua_State *L);
+
+
    //S32 getAngle(lua_State *L);
    //S32 getLoc(lua_State *L);
 
@@ -163,9 +167,6 @@ public:
    S32 setAnglePt(lua_State *L);
    S32 getAnglePt(lua_State *L);
    S32 hasLosPt(lua_State *L);
-
-   S32 hasFlag(lua_State *L);
-
 
    // Navigation
    S32 getWaypoint(lua_State *L);

@@ -180,12 +180,15 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getZoneCount),
    method(LuaRobot, getCurrentZone),
 
+   method(LuaRobot, hasFlag),
+   method(LuaRobot, getFlagCount),
+
+
    method(LuaRobot, setAngle),
    method(LuaRobot, setAnglePt),
    method(LuaRobot, getAnglePt),
    method(LuaRobot, hasLosPt),
 
-   method(LuaRobot, hasFlag),
    method(LuaRobot, getWaypoint),
 
    method(LuaRobot, setThrust),
@@ -496,10 +499,25 @@ S32 LuaRobot::getCurrentZone(lua_State *L)
    return (zone == -1) ? returnNil(L) : returnInt(L, zone);
 }
 
+
 // Get a count of how many nav zones we have
 S32 LuaRobot::getZoneCount(lua_State *L)
 {
    return returnInt(L, gBotNavMeshZones.size());
+}
+
+
+// Returns true if ship has at least one flag, false if not
+S32 LuaRobot::hasFlag(lua_State *L)
+{
+   return returnBool(L, thisRobot->carryingFlag() != GameType::NO_FLAG);
+}
+
+
+// Returns number of flags ship is carrying (most games will always be 0 or 1)
+S32 LuaRobot::getFlagCount(lua_State *L)
+{
+   return returnInt(L, thisRobot->getFlagCount());
 }
 
 
@@ -522,13 +540,6 @@ S32 LuaRobot::hasLosPt(lua_State *L)
    Point point = getPoint(L, 1, methodName);
 
    return returnBool(L, thisRobot->canSeePoint(point));
-}
-
-
-// Does robot have a flag?
-S32 LuaRobot::hasFlag(lua_State *L)
-{
-   return returnBool(L, (thisRobot->carryingFlag() != GameType::NO_FLAG));
 }
 
 
