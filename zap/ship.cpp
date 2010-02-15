@@ -1414,11 +1414,11 @@ void Ship::render(S32 layerIndex)
          string str = string("@") + UserInterface::itos((S32) getActualPos().x) + "," + UserInterface::itos((S32) getActualPos().y);
 
          glEnable(GL_BLEND);
-            U32 textSize = 14;
+            U32 textSize = 18;
             glLineWidth(1);
             glColor4f(1,1,1,0.5 * alpha);
 
-            UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize * 1.2), textSize, str.c_str() );
+            UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
          glDisable(GL_BLEND);
          glLineWidth(gDefaultLineWidth);
       }
