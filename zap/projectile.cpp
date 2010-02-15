@@ -86,6 +86,7 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
+   {
       stream->writeEnum(mType, ProjectileTypeCount);
 
       S32 index = -1;

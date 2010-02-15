@@ -652,11 +652,11 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
 
 void GameType::renderTimeLeft()
 {
-
    U32 timeLeft = mGameTimer.getCurrent();      // Time remaining in game
 
    const S32 size = 20;       // Size of time
    const S32 gtsize = 12;     // Size of game type/score indicator
+   const S32 dcoordSize = 12; // Size of coordinate display
 
    U32 minsRemaining = timeLeft / (60000);
    U32 secsRemaining = (timeLeft - (minsRemaining * 60000)) / 1000;
@@ -669,7 +669,6 @@ void GameType::renderTimeLeft()
    glColor3f(1,1,1);
    UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65,
       UserInterface::canvasHeight - UserInterface::vertMargin - 20, size, "%02d:%02d", minsRemaining, secsRemaining);
-
 }
 
 
