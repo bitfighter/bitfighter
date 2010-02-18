@@ -87,6 +87,9 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 {
    if(stream->writeFlag(updateMask & InitialMask))
    {
+      ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
+      writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
+
       stream->writeEnum(mType, ProjectileTypeCount);
 
       S32 index = -1;
