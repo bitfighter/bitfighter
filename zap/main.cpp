@@ -42,6 +42,7 @@ XXX need to document timers, main function XXX
 <li>Bouncers now do half-damage to shooter</li>
 <li>Triples no longer damage shooter</li>
 <li>Password entry in INI file now changed to ServerPassword -- if you use this, you'll need to manually update your INI file</li>
+<li>HuntersFlagItem <x> <y> can no longer be used in level files.  Please use FlagItem -1 <x> <y> instead!!  Note that this line is only present in hand-modified level files</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>

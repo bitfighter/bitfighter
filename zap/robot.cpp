@@ -1084,7 +1084,7 @@ bool Robot::initialize(Point p)
    Lunar<ForceFieldProjector>::Register(L);
    Lunar<FlagItem>::Register(L);
    Lunar<SoccerBallItem>::Register(L);
-   Lunar<HuntersFlagItem>::Register(L);
+   //Lunar<HuntersFlagItem>::Register(L);
    Lunar<ResourceItem>::Register(L);
 
    Lunar<LuaProjectile>::Register(L);

@@ -37,11 +37,25 @@ TNL_IMPLEMENT_NETOBJECT(FlagItem);
 // C++ constructor
 FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
 {
+   initialize();
+}
+
+// Alternate constructor, currently used by HuntersFlag
+FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Item(pos, collidable, radius, mass)
+{
+   initialize();
+}
+
+
+void FlagItem::initialize()
+{
    mTeam = 0;
+   mFlagCount = 1;
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= FlagType | CommandMapVisType;
    setZone(NULL);
 }
+
 
 const char FlagItem::className[] = "FlagItem";      // Class name as it appears to Lua scripts
 
@@ -67,14 +81,14 @@ Lunar<FlagItem>::RegType FlagItem::methods[] =
 
 void FlagItem::onAddedToGame(Game *theGame)
 {
-   theGame->getGameType()->addFlag(this);
+   theGame->getGameType()->addFlag(this);    // Does nothing for Nexus game
    getGame()->mObjectsLoaded++;
 }
 
 
 bool FlagItem::processArguments(S32 argc, const char **argv)
 {
-   if(argc < 3)         // FlagItem <team> <x> <y>
+   if(argc < 3)         // FlagItem <team> <x> <y> {time}
       return false;
 
    mTeam = atoi(argv[0]);
@@ -82,15 +96,15 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    if(!Parent::processArguments(argc-1, argv+1))
       return false;
 
-   S32 time = (argc >= 4) ? atoi(argv[4]) : 0;
+   S32 time = (argc >= 4) ? atoi(argv[4]) : 0;     // Flag spawn time is possible 4th argument.  This time only turns out to be important in Nexus games at the moment.
 
-   initialPos = mMoveState[ActualState].pos;
+   mInitialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
    if(!gServerGame->getGameType()->isTeamFlagGame() || mTeam < 0)
-      gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(initialPos, time));
+      gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
    else
-      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(initialPos, time));
+      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
 
    return true;
 }
@@ -119,6 +133,7 @@ void FlagItem::idle(GameObject::IdleCallPath path)
    if(isGhost()) 
       return;
    
+   // Server only...
    U32 deltaT = mCurrentMove.time;
    mDroppedTimer.update(deltaT);
 }
@@ -126,7 +141,7 @@ void FlagItem::idle(GameObject::IdleCallPath path)
 
 bool FlagItem::isAtHome()
 {
-   return mMoveState[ActualState].pos == initialPos;
+   return mMoveState[ActualState].pos == mInitialPos;
 }
 
 
@@ -153,7 +168,7 @@ void FlagItem::sendHome()
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
          for(S32 j = 0; j < spawnPoints.size(); j++)
-            if(spawnPoints[j].getPos() == flag->initialPos)
+            if(spawnPoints[j].getPos() == flag->mInitialPos)
             {
                spawnPoints.erase(j);
                break;
@@ -162,9 +177,9 @@ void FlagItem::sendHome()
    }
 
    S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-   initialPos = spawnPoints[spawnIndex].getPos();
+   mInitialPos = spawnPoints[spawnIndex].getPos();
 
-   mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
+   mMoveState[ActualState].pos = mMoveState[RenderState].pos = mInitialPos;
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
    setMaskBits(PositionMask);
    updateExtent();
@@ -189,17 +204,18 @@ void FlagItem::renderItem(Point pos)
 
 bool FlagItem::collide(GameObject *hitObject)
 {
-   if(mIsMounted)
+   if(mIsMounted || !mIsCollideable)
       return false;
+
    if(hitObject->getObjectTypeMask() & (BarrierType | ForceFieldType))
       return true;
 
-   if(!(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+   if(isGhost() || !(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return false;
 
    // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
    Ship *ship = dynamic_cast<Ship *>(hitObject);
-   if(isGhost() || !ship || (ship->hasExploded))
+   if(!ship || (ship->hasExploded))
       return false;
 
    // Server only from here on out...
@@ -242,7 +258,9 @@ void FlagItem::onItemDropped(Ship *ship)
    mDroppedTimer.reset(dropDelay);
 }
 
-//////////////////////////////////////////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 FlagSpawn::FlagSpawn(Point pos, S32 delay)

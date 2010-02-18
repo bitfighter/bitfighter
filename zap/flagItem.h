@@ -35,28 +35,36 @@ class FlagItem : public Item
 {
 private:
    typedef Item Parent;
-   Point initialPos;
+   Point mInitialPos;                   // Where flag was "born"
    void push(lua_State *L) {  Lunar<FlagItem>::push(L, this); }
    void flagDropped();
+
+protected:
+   U32 mFlagCount;                      // How many flags does this represet?
    Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
    static const U32 dropDelay = 500;    // in ms
 
 public:
-   FlagItem(Point pos = Point());      // C++ constructor
-   void onAddedToGame(Game *theGame);
-   bool processArguments(S32 argc, const char **argv);
-   void renderItem(Point pos);
-   void sendHome();
+   FlagItem(Point pos = Point());                                    // C++ constructor
+   FlagItem(Point pos, bool collidable, float radius, float mass);   // Alternate C++ constructor
 
-   void onMountDestroyed();
-   void onItemDropped(Ship *ship);
-   bool collide(GameObject *hitObject);
-   bool isAtHome();
+   void initialize();      // Set inital values of things
+
+   virtual bool processArguments(S32 argc, const char **argv);
+
+   virtual void onAddedToGame(Game *theGame);
+   virtual void renderItem(Point pos);
+   virtual void sendHome();
+
+   virtual void onMountDestroyed();
+   virtual void onItemDropped(Ship *ship);
+   virtual bool collide(GameObject *hitObject);
+   virtual bool isAtHome();
    Timer mTimer;                       // Used for games like HTF where time a flag is held is important
 
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
-   void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void idle(GameObject::IdleCallPath path);
+   virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   virtual void unpackUpdate(GhostConnection *connection, BitStream *stream);
+   virtual void idle(GameObject::IdleCallPath path);
 
 
    TNL_DECLARE_CLASS(FlagItem);

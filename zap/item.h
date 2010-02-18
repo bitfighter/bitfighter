@@ -99,6 +99,7 @@ public:
    void setZone(GoalZone *theZone);
    GoalZone *getZone() { return mZone; }
    bool isInZone() { return mZone == NULL; }
+   void setCollideable(bool isCollideable) { mIsCollideable = isCollideable; }
 
    Ship *getMount();
    void dismount();

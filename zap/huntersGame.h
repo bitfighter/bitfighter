@@ -70,7 +70,7 @@ public:
    bool isSpawnWithLoadoutGame() { return true; }
    bool getMountedObjectsMakesShipsVisible() { return false; }    // Can carry items stealthily in this game
 
-
+   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);       
 
    bool isCarryingItems(Ship *ship);
    void flagDropped(Ship *theShip, FlagItem *theFlag);
@@ -118,10 +118,11 @@ public:
 };
 
 
-class HuntersFlagItem : public Item
+class HuntersFlagItem : public FlagItem
 {
 private:
-   typedef Item Parent;    // FlagItem Parent;
+   typedef FlagItem Parent;
+
    void dropFlags(U32 flags);
 
 protected:
@@ -130,44 +131,38 @@ protected:
       FirstFreeMask = Parent::FirstFreeMask << 1,
    };
 
-   U32 mFlagCount;
-
 public:
-   HuntersFlagItem(Point pos = Point());     // Constructor
-   bool processArguments(S32 argc, const char **argv);
+   HuntersFlagItem(Point pos = Point(), Point vel = Point(0,0), bool useDropDelay = false);     // Constructor
 
    void renderItem(Point pos);
    void onMountDestroyed();
    void onItemDropped(Ship *ship);
-   void setActualVel(Point v);
-   bool collide(GameObject *hitObject);
 
    void changeFlagCount(U32 change) { mFlagCount = change; setMaskBits(FlagCountMask); }
    U32 getFlagCount() { return mFlagCount; }
 
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void idle(IdleCallPath path);
 
-   /* X */ Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
-   /* X */ static const U32 dropDelay = 500;    // in ms
+   bool isAtHome() { return false; }               // Nexus flags have no home, and are thus never there
+   void sendHome() { /* Do nothing */ }            // Nexus flags have no home, and can thus never be sent there
+
+   ///* X */ Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
+   ///* X */ static const U32 dropDelay = 500;    // in ms
 
 
    TNL_DECLARE_CLASS(HuntersFlagItem);
 
    ///// Lua Interface
 
-   /* X */ HuntersFlagItem(lua_State *L) { /* Do nothing */ };     //  Lua constructor
+   ///* X */ HuntersFlagItem(lua_State *L) { /* Do nothing */ };     //  Lua constructor
 
-   /* X */ static const char className[];
-   /* X */ static Lunar<HuntersFlagItem>::RegType methods[];
+   ///* X */ static const char className[];
+   ///* X */ static Lunar<HuntersFlagItem>::RegType methods[];
 
-   /* X */ S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
-   /* X */ void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
-
-
+   ///* X */ S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
+   ///* X */ void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
 };
-
 
 
 class HuntersNexusObject : public GameObject, public Polygon

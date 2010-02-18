@@ -264,18 +264,14 @@ void HuntersGameType::onGhostAvailable(GhostConnection *theConnection)
 // If a flag is released from a ship, it will have underlying startVel, to which a random vector will be added
 void releaseFlag(Game *game, Point pos, Point startVel)
 {
-   HuntersFlagItem *newFlag = new HuntersFlagItem(pos);
-   newFlag->addToGame(game);
 
    F32 th = TNL::Random::readF() * Float2Pi;
    F32 f = (TNL::Random::readF() * 2 - 1) * 100;
    Point vel(cos(th) * f, sin(th) * f);
    vel += startVel;
 
-   newFlag->setActualVel(vel);
-
-   // flag->onItemDropped()
-   newFlag->mDroppedTimer.reset(newFlag->dropDelay);
+   HuntersFlagItem *newFlag = new HuntersFlagItem(pos, vel, true);
+   newFlag->addToGame(game);
 }
 
 
@@ -453,6 +449,26 @@ void HuntersGameType::controlObjectForClientKilled(GameConnection *theClient, Ga
 }
 
 
+void HuntersGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
+{
+   // Don't mount to ship, instead increase current mounted HuntersFlag
+   //    flagCount, and remove collided flag from game
+   for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
+   {
+      HuntersFlagItem *theFlag = dynamic_cast<HuntersFlagItem *>(theShip->mMountedItems[i].getPointer());
+      if(theFlag)
+      {
+         theFlag->changeFlagCount(theFlag->getFlagCount() + 1);
+         break;
+      }
+   }
+
+   theFlag->setCollideable(false);
+   theFlag->removeFromDatabase();
+   theFlag->deleteObject();
+}
+
+
 // Special spawn function for Hunters games (runs only on server)
 void HuntersGameType::spawnShip(GameConnection *theClient)
 {
@@ -464,70 +480,44 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
    newFlag->changeFlagCount(0);
 }
 
-///////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(HuntersFlagItem);
 
 // C++ constructor
-HuntersFlagItem::HuntersFlagItem(Point pos) : Item(pos, true, 30, 4)
+HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, 30, 4)
 {
-   mObjectTypeMask |= CommandMapVisType;
-   mNetFlags.set(Ghostable);
    mFlagCount = 0;
+
+   setActualVel(vel);
+   if(useDropDelay)
+      mDroppedTimer.reset(dropDelay);
 }
 
 
-bool HuntersFlagItem::processArguments(S32 argc, const char **argv)
-{
-   if(argc < 2)
-      return false;
+//const char HuntersFlagItem::className[] = "HuntersFlagItem";      // Class name as it appears to Lua scripts
 
-   // If this is a regular FlagItem that was "recast" as a HuntersFlagItem at load time, it will have 3 args.  The first, team,
-   // does not apply to this object, so we'll ignore it.  If there's only 2 args, those will be the coords.
-   S32 offset = 0;
-   if(argc >= 3)
-      offset++;
+//// Define the methods we will expose to Lua
+//Lunar<HuntersFlagItem>::RegType HuntersFlagItem::methods[] =
+//{
+//   // Standard gameItem methods
+//   method(HuntersFlagItem, getClassID),
+//   method(HuntersFlagItem, getLoc),
+//   method(HuntersFlagItem, getRad),
+//   method(HuntersFlagItem, getVel),
+//
+//   {0,0}    // End method list
+//};
 
-   if(!Parent::processArguments(argc - 1, argv + offset))
-      return false;
-
-   return true;
-}
-
-
-const char HuntersFlagItem::className[] = "HuntersFlagItem";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<HuntersFlagItem>::RegType HuntersFlagItem::methods[] =
-{
-   // Standard gameItem methods
-   method(HuntersFlagItem, getClassID),
-   method(HuntersFlagItem, getLoc),
-   method(HuntersFlagItem, getRad),
-   method(HuntersFlagItem, getVel),
-
-   {0,0}    // End method list
-};
-
-
-extern Color gErrorMessageTextColor;
 
 void HuntersFlagItem::renderItem(Point pos)
 {
+   // Don't render flags on cloaked ships
    if(mMount.isValid() && mMount->isModuleActive(ModuleCloak))
       return;
 
-   Point offset = pos;
-
-   if(mIsMounted)
-      offset.set(pos.x + 15, pos.y - 15);
-
-   Color c;
-   GameType *gt = getGame()->getGameType();
-
-   c = gt->mTeams[0].color;   // Maybe should always be rendered in player's team color?  Or unused color?
-
-   renderFlag(offset, c);
+   Parent::renderItem(pos);
 
    if(mIsMounted)
    {
@@ -539,7 +529,8 @@ void HuntersFlagItem::renderItem(Point pos)
             glColor3f(1, 1, 0);
          else
             glColor3f(1, 1, 1);
-         UserInterface::drawStringf(offset.x - 5, offset.y - 30, 12, "%d", mFlagCount);
+
+         UserInterface::drawStringf(pos.x +10, pos.y - 15, 12, "%d", mFlagCount);
       }
    }
 }
@@ -576,82 +567,25 @@ void HuntersFlagItem::onItemDropped(Ship *ship)
 }
 
 
-void HuntersFlagItem::setActualVel(Point v)
-{
-   mMoveState[ActualState].vel = v;
-   setMaskBits(WarpPositionMask | PositionMask);
-}
-
-
-bool HuntersFlagItem::collide(GameObject *hitObject)
-{
-   if(mIsMounted || !mIsCollideable)
-      return false;
-
-   if(hitObject->getObjectTypeMask() & BarrierType)
-      return true;
-
-   if(isGhost() || ! (hitObject->getObjectTypeMask() & ShipType || hitObject->getObjectTypeMask() & RobotType))
-      return false;
-
-   if(mDroppedTimer.getCurrent())    // Dropped flag not ready to be picked up! 
-      return false;
-
-   Ship *theShip = static_cast<Ship *>(hitObject);
-   if(!theShip)
-      return false;
-
-   if(theShip->hasExploded)
-      return false;
-
-   // Don't mount to ship, instead increase current mounted HuntersFlag
-   //    flagCount, and remove collided flag from game
-   for(S32 i = theShip->mMountedItems.size() - 1; i >= 0; i--)
-   {
-      Item *theItem = theShip->mMountedItems[i];
-      HuntersFlagItem *theFlag = dynamic_cast<HuntersFlagItem *>(theItem);
-      if(theFlag)
-      {
-         theFlag->changeFlagCount(theFlag->getFlagCount() + 1);
-         break;
-      }
-   }
-
-   mIsCollideable = false;
-   removeFromDatabase();
-   deleteObject();
-   return true;
-}
-
 U32 HuntersFlagItem::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
    if(stream->writeFlag(updateMask & FlagCountMask))
       stream->write(mFlagCount);
 
-   return retMask;
+   return Parent::Parent::packUpdate(connection, updateMask, stream);
 }
 
 void HuntersFlagItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   Parent::unpackUpdate(connection, stream);
-
    if(stream->readFlag())
       stream->read(&mFlagCount);
+
+   Parent::Parent::unpackUpdate(connection, stream);
 }
 
 
-void HuntersFlagItem::idle(GameObject::IdleCallPath path)
-{
-   Parent::idle(path);
-
-   if(isGhost()) 
-      return;
-   
-   U32 deltaT = mCurrentMove.time;
-   mDroppedTimer.update(deltaT);
-}
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(HuntersNexusObject);
 
