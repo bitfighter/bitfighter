@@ -43,11 +43,10 @@ bot = LuaRobot(Robot)
 --
 -- Main function run when robot starts, before getName().  By default does nothing.  Override in bot scripts.
 --
-function _main(self)
-print("self ", self)
-   --if _declared("main") and type(main) == "function" then
-      main(self)
-   --end
+function _main()
+   if _declared("main") and type(main) == "function" then
+      main()
+   end
 end
 
 
@@ -114,12 +113,16 @@ end
 --
 function _onTick(self, deltaT)
    Timer:_tick(deltaT)     -- Really should only be called once for all bots
-   EventManager:_update()  -- Really should only be called once for all bots   not needed?
 
-   --if _declared("onTick") and type(onTick) == "function" then
+   if _declared("onTick") and type(onTick) == "function" then
       onTick(self, deltaT)
-   --end
-   --if getMove then getMove() end      -- TODO: Here for compatibility with older bots.  Remove this in a later release
+   end
+
+   -- TODO: Here for compatibility with older bots.  Remove this in a later release
+   if _declared("getMove") and type(getMove) == "function" then
+      getMove(self, deltaT)
+   end
+
 end
 
 

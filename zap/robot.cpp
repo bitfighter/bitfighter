@@ -1344,21 +1344,7 @@ bool Robot::initialize(Point p)
 
    try
    {
-      lua_settop(L, 0);
-      //lua_pushliteral(L, "_TRACEBACK");
-      //lua_gettable(L, LUA_GLOBALSINDEX);   // get traceback function
-      //int tb = lua_gettop(L);
-
-
-      //Lunar<LuaRobot>::push(L, this->mLuaRobot);
-      int A = Lunar<LuaRobot>::push(L, this->mLuaRobot);
-
-      lua_pushliteral(L, "AAA");
-      lua_pushvalue(L, A);
-      lua_settable(L, LUA_GLOBALSINDEX);
-
-
-      lua_getglobal(L, "main");
+      lua_getglobal(L, "_main");
       if(lua_pcall(L, 0, 0, 0) != 0)
          throw LuaException(lua_tostring(L, -1));
    }
