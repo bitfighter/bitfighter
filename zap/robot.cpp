@@ -56,7 +56,10 @@
 namespace Zap
 {
 
-static Vector<GameObject *> fillVector;
+static Vector<GameObject *> fillVector;          // Reusable workspace for writing lists of objects
+
+static EventManager eventManager;                // Singleton event manager, one copy is used by all bots
+
 
 // Constructor
 LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
@@ -64,6 +67,11 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    lua_atpanic(L, luaPanicked);                  // Register our panic function
    thisRobot = (Robot *)lua_touserdata(L, 1);    // Register our robot
    thisRobot->mLuaRobot = this;
+
+   // Initialize all subscriptions to unsubscribed
+   for(S32 i = 0; i < EventManager::EventTypes; i++)
+      subscriptions[i] = false;
+
 
    logprintf("ID = %d",this->mId);
 
@@ -154,6 +162,12 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
 // Destructor
 LuaRobot::~LuaRobot()
 {
+   // Make sure we're unsubscribed to all those events we subscribed to.  Don't want to 
+   // send an event to a dead bot, after all...
+   for(S32 i = 0; i < EventManager::EventTypes; i++)
+      if(subscriptions[i])
+         eventManager.unsubscribeImmediate(thisRobot->getL(), (EventManager::EventType)i);
+
    logprintf("deleted Lua Robot Object (%p)\n", this);
 }
 
@@ -205,6 +219,9 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, setReqLoadout),
    method(LuaRobot, getCurrLoadout),
    method(LuaRobot, getReqLoadout),
+
+   method(LuaRobot, subscribe),
+   method(LuaRobot, unsubscribe),
 
    method(LuaRobot, globalMsg),
    method(LuaRobot, teamMsg),
@@ -591,8 +608,6 @@ S32 LuaRobot::hasWeapon(lua_State *L)
 
 
 
-/////////////////////////////
-
 // Activate module this cycle --> takes module index
 S32 LuaRobot::activateModuleIndex(lua_State *L)
 {
@@ -971,10 +986,182 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, Point point)
 }
 
 
+S32 LuaRobot::subscribe(lua_State *L)
+{
+   // Get the event off the stack
+   static const char *methodName = "Robot:subscribe()";
+   checkArgCount(L, 1, methodName);
+
+   S32 eventType = getInt(L, 0, methodName);
+   if(eventType < 0 || eventType >= EventManager::EventTypes)
+      return 0;
+
+   eventManager.subscribe(L, (EventManager::EventType) eventType);
+   subscriptions[eventType] = true;
+   return 0;
+}
+
+
+S32 LuaRobot::unsubscribe(lua_State *L)
+{
+   // Get the event off the stack
+   static const char *methodName = "Robot:unsubscribe()";
+   checkArgCount(L, 1, methodName);
+
+   S32 eventType = getInt(L, 0, methodName);
+   if(eventType < 0 || eventType >= EventManager::EventTypes)
+      return 0;
+
+   eventManager.unsubscribe(L, (EventManager::EventType) eventType);
+   subscriptions[eventType] = false;
+   return 0;
+}
+
+
+
 const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
 
 
-//------------------------------------------------------------------------
+////////////////////////////////////////
+////////////////////////////////////////
+
+void EventManager::subscribe(lua_State *L, EventType eventType)
+{
+   // First, see if we're already subscribed
+   if(!isSubscribed(L, eventType) && !isPendingSubscribed(L, eventType))
+   {
+      removeFromPendingUnsubscribeList(L, eventType);
+      pendingSubscriptions[eventType].push_back(L);
+   }
+}
+
+
+void EventManager::unsubscribe(lua_State *L, EventType eventType)
+{
+   if(isSubscribed(L, eventType) && !isPendingUnsubscribed(L, eventType))
+   {
+      removeFromPendingSubscribeList(L, eventType);
+      pendingUnsubscriptions[eventType].push_back(L);
+   }
+}
+
+
+void EventManager::removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+      if(pendingSubscriptions[eventType][i] == subscriber)
+      {
+         pendingSubscriptions[eventType].erase_fast(i);
+         return;
+      }
+}
+
+
+void EventManager::removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+      if(pendingUnsubscriptions[eventType][i] == unsubscriber)
+      {
+         pendingUnsubscriptions[eventType].erase_fast(i);
+         return;
+      }
+}
+
+
+void EventManager::removeFromSubscribedList(lua_State *subscriber, EventType eventType)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+      if(subscriptions[eventType][i] == subscriber)
+      {
+         subscriptions[eventType].erase_fast(i);
+         return;
+      }
+}
+
+
+// Unsubscribe an event bypassing the pending unsubscribe queue, when we know it will be OK
+void EventManager::unsubscribeImmediate(lua_State *L, EventType eventType)
+{
+   removeFromSubscribedList(L, eventType);
+   removeFromPendingSubscribeList(L, eventType);  
+   removeFromPendingUnsubscribeList(L, eventType);    // Probably not really necessary...
+}
+
+
+// Check if we're subscribed to an event
+bool EventManager::isSubscribed(lua_State *L, EventType eventType)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+      if(subscriptions[eventType][i] == L)            
+         return true;
+
+   return false;
+}
+
+
+bool EventManager::isPendingSubscribed(lua_State *L, EventType eventType)
+{
+   for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
+      if(pendingSubscriptions[eventType][i] == L)            
+         return true;
+
+   return false;
+}
+
+
+bool EventManager::isPendingUnsubscribed(lua_State *L, EventType eventType)
+{
+   for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
+      if(pendingUnsubscriptions[eventType][i] == L)            
+         return true;
+
+   return false;
+}
+
+
+// Process all pending subscriptions and unsubscriptions
+void EventManager::update()
+{
+   for(S32 i = 0; i < EventTypes; i++)
+      for(S32 j = 0; j < pendingUnsubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
+         removeFromSubscribedList(pendingUnsubscriptions[i][j], (EventType) i);
+
+   for(S32 i = 0; i < EventTypes; i++)
+      for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
+         subscriptions[i].push_back(pendingSubscriptions[i][j]);
+
+   for(S32 i = 0; i < EventTypes; i++)
+   {
+      pendingSubscriptions[i].clear();
+      pendingUnsubscriptions[i].clear();
+   }
+}
+
+
+void EventManager::fireEvent(Robot *caller, EventType eventType)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      lua_State *L = subscriptions[eventType][i];
+      try
+      {
+         lua_getglobal(L, "onMsgSent");
+         //lua_pushnumber(L, eventType);    // Pass the event type
+
+         if (lua_pcall(L, 0, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
+      {
+         caller->logError("Robot error firing event %d: %s.", eventType, e.what());
+         return;
+      }
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
@@ -1063,7 +1250,9 @@ bool Robot::initialize(Point p)
 
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
-   Lunar<LuaTimer>::Register(L);
+   //Lunar<LuaTimer>::Register(L);
+
+   //Lunar<EventManager>::Register(L);
 
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
@@ -1100,7 +1289,7 @@ bool Robot::initialize(Point p)
 
    // Push a pointer to this Robot to the Lua stack,
    // then set the global name of this pointer.  This is the name that we'll use to refer
-   // to our robot from our Lua code.
+   // to this robot from our Lua code.
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
 
@@ -1112,16 +1301,16 @@ bool Robot::initialize(Point p)
 
    if(luaL_loadfile(L, luafname))
    {
-      logError("Error loading lua helper functions %s.  Shutting robot down.", luafname);
+      logError("Error loading lua helper functions %s: %s  Shutting robot down.", luafname, lua_tostring(L, -1));
       return false;
    }
 
    // Now run the loaded code
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
-      logError("Error during initializing lua helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
+      logError("Error during initializing lua helper functions %s: %s.  Shutting robot down.", luafname, lua_tostring(L, -1));
       return false;
-   }
+   }   
 
 
    static const char *robotfname = "robot_helper_functions.lua";
@@ -1155,8 +1344,21 @@ bool Robot::initialize(Point p)
 
    try
    {
-      lua_getglobal(L, "_main");
+      lua_settop(L, 0);
+      //lua_pushliteral(L, "_TRACEBACK");
+      //lua_gettable(L, LUA_GLOBALSINDEX);   // get traceback function
+      //int tb = lua_gettop(L);
 
+
+      //Lunar<LuaRobot>::push(L, this->mLuaRobot);
+      int A = Lunar<LuaRobot>::push(L, this->mLuaRobot);
+
+      lua_pushliteral(L, "AAA");
+      lua_pushvalue(L, A);
+      lua_settable(L, LUA_GLOBALSINDEX);
+
+
+      lua_getglobal(L, "main");
       if(lua_pcall(L, 0, 0, 0) != 0)
          throw LuaException(lua_tostring(L, -1));
    }
@@ -1182,8 +1384,13 @@ bool Robot::initialize(Point p)
       lua_pop(L, 1);
    }
 
+   eventManager.update();                      // Ensure registrations made during bot initialization are ready to go
+
+   eventManager.fireEvent(this, EventManager::MsgSent);     // FOr example...
+
    return true;
 }
+
 
 // On client, this only runs the very first time the robot is added to the level
 void Robot::onAddedToGame(Game *game)
@@ -1388,9 +1595,11 @@ void Robot::idle(GameObject::IdleCallPath path)
       try
       {
          lua_getglobal(L, "_onTick");
+         Lunar<LuaRobot>::push(L, this->mLuaRobot);
+
          lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
 
-         if (lua_pcall(L, 1, 0, 0) != 0)
+         if (lua_pcall(L, 2, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)

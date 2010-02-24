@@ -45,6 +45,10 @@ debug.getregistry = nil
 dofile = nil
 loadfile = nil
 
+-- Declare some global objects
+Timer = {}
+EventManager = {}
+
 --
 -- strict.lua
 -- Checks uses of undeclared global variables
@@ -53,6 +57,7 @@ loadfile = nil
 -- anywhere or assigned to inside a function.
 --
 
+--[[
 
 local mt = getmetatable(_G)
 if mt == nil then
@@ -99,7 +104,7 @@ function _declared(fname)
 
    return false
 end
-
+--]]
 
 --
 -- Convenience function, use in place of ipairs, from PiL book sec 19.3
@@ -378,3 +383,62 @@ end
 
 
 Timer:_initialize()     -- Actually intialize the timer
+
+
+
+-----------------------------------------------------------
+-----------------------------------------------------------
+-- Based on ideas and code from Lua Programming Gems
+--
+-- Event manager singleton
+-----------------------------------------------------------
+function EventManager:_initialize()
+   EventManager.Events = {}
+   EventManager.pendingSubscribe = {}
+   EventManager.pendingUnsubscribe = {}
+end
+
+function EventManager:_fireEvent( eventName, ... )
+   EventManager.Events[ eventName ] = EventManager.Events[ eventName ] or {}
+   for subscriber,_ in pairs( EventManager.Events[ eventName ] ) do
+      subscriber[ eventName ]( subscriber, ... )
+   end
+end
+
+function EventManager:_update()
+   for eventName, subscriberList in pairs( EventManager.pendingSubscribe ) do
+      for subscriber,_ in pairs( subscriberList ) do
+         EventManager:subscribe( subscriber, eventName, true )
+      end
+   end
+   EventManager.pendingSubscribe = {}
+
+   for eventName, unsubscriberList in pairs( EventManager.pendingUnsubscribe ) do
+      for unsubscriber,_ in pairs( unsubscriberList ) do
+         EventManager:unsubscribe( unsubscriber, eventName, true )
+      end
+   end
+   EventManager.pendingUnsubscribe = {}
+end
+
+function EventManager:subscribe( subscriber, eventName, bUpdating )
+   if ( bUpdating ) then
+      EventManager.Events[ eventName ] = EventManager.Events[ eventName ] or {}
+      EventManager.Events[ eventName ][ subscriber ] = true
+   else
+      EventManager.pendingSubscribe[ eventName ] = EventManager.pendingSubscribe[ eventName ] or {}
+      EventManager.pendingSubscribe[ eventName ][ subscriber ] = true
+   end
+end
+
+function EventManager:unsubscribe( unsubscriber, eventName, bUpdating )
+   if ( bUpdating ) then
+      EventManager.Events[ eventName ] = EventManager.Events[ eventName ] or {}
+      EventManager.Events[ eventName ][ unsubscriber ] = nil
+   else
+      EventManager.pendingUnsubscribe[ eventName ] = EventManager.pendingUnsubscribe[ eventName ] or {}
+      EventManager.pendingUnsubscribe[ eventName ][ unsubscriber ] = nil
+   end
+end
+
+EventManager:_initialize()

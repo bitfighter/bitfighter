@@ -218,8 +218,9 @@ bool SpeedZone::collide(GameObject *hitObject)
 
       setMaskBits(HitMask);
 
-      // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
-      s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
+      if(s->getControllingClient().isValid())
+         // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
+         s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
    }
 
    return false;

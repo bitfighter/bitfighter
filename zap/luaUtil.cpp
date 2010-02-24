@@ -61,5 +61,5 @@ S32 LuaUtil::logprint(lua_State *L)
 }
 
 
-};
 
+};

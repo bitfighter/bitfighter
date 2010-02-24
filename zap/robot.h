@@ -43,6 +43,48 @@
 namespace Zap
 {
 
+class Robot;
+
+class EventManager
+{
+public:
+   enum EventType {
+      MsgSent = 0,
+      EventTypes
+   };
+
+private:
+   // Some helper functions
+   bool isSubscribed(lua_State *L, EventType eventType);
+   bool isPendingSubscribed(lua_State *L, EventType eventType);
+   bool isPendingUnsubscribed(lua_State *L, EventType eventType);
+
+   void removeFromSubscribedList(lua_State *L, EventType eventType);
+   void removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType);
+   void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
+
+public:
+   EventManager()  { /* Do nothing */ }                  // C++ constructor
+   EventManager(lua_State *L) { /* Do nothing */ }       // Lua Constructor
+
+   Vector<lua_State *> subscriptions[EventTypes];
+   Vector<lua_State *> pendingSubscriptions[EventTypes];
+   Vector<lua_State *> pendingUnsubscriptions[EventTypes];
+
+   void subscribe(lua_State *L, EventType eventType);
+   void unsubscribe(lua_State *L, EventType eventType);
+   void unsubscribeImmediate(lua_State *L, EventType eventType);     // Used when bot dies, and we know there won't be subscription conflicts
+   void update();                                                    // Act on events sitting in the pending lists
+
+   // We'll have several different signatures for this one...
+   void fireEvent(Robot *caller, EventType eventType);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
 class Item;
 class LuaRobot;
 
@@ -58,10 +100,6 @@ class Robot : public Ship
    typedef Ship Parent;
 
 private:
-   // Scripting stuff
-   lua_State *L;                // Main Lua state variable
-
-   void logError(const char *format, ...);   // In case of error...
    string mFilename;                         // Name of file script was loaded from
 
    S32 mCurrentZone;            // Zone robot is currently in
@@ -74,6 +112,8 @@ private:
       RobotRespawnDelay = 1500,
    };
 
+   lua_State *L;                // Main Lua state variable
+
    //void push(lua_State *L) {  Lunar<LuaRobot>::push(L, mLuaRobot); }
 
 public:
@@ -85,6 +125,9 @@ public:
    void kill(DamageInfo *theInfo);
    void kill();
 
+   lua_State *getL() { return L; }
+
+   void logError(const char *format, ...);   // In case of error...
 
    void idle(IdleCallPath path);
 
@@ -113,13 +156,16 @@ public:
 
    LuaRobot *mLuaRobot;    // Could make private and make a public setter method...
 
-
 private:
   int attribute;
   std::string message;
 
    TNL_DECLARE_CLASS(Robot);
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 class LuaRobot : public LuaShip
@@ -132,7 +178,10 @@ private:
    S32 findAndReturnClosestZone(lua_State *L, Point point); // Wraps findClosestZone and handles returning the result to Lua
    S32 doFindItems(lua_State *L, Rect scope);        // Worker method for various find functions
 
-   Robot *thisRobot;              // Pointer to an actual C++ Robot object
+   Robot *thisRobot;                                 // Pointer to an actual C++ Robot object
+
+   bool subscriptions[EventManager::EventTypes];     // Keep track of which events we're subscribed to for rapid unsubscription upon death
+
 
 public:
   // Constants
@@ -142,7 +191,6 @@ public:
   ~LuaRobot();                 // Destructor
 
    static const char className[];
-
    static Lunar<LuaRobot>::RegType methods[];
 
    S32 getClassID(lua_State *L);
@@ -161,7 +209,6 @@ public:
 
    //S32 getAngle(lua_State *L);
    //S32 getLoc(lua_State *L);
-
 
    S32 setAngle(lua_State *L);
    S32 setAnglePt(lua_State *L);
@@ -197,6 +244,9 @@ public:
    S32 getCurrLoadout(lua_State *L);       // Returns current loadout (Loadout)
    S32 getReqLoadout(lua_State *L);        // Returns requested loadout (Loadout)
 
+   S32 subscribe(lua_State *L);
+   S32 unsubscribe(lua_State *L);
+
 
    //// Ship info
    //S32 getActiveWeapon(lua_State *L);
@@ -206,7 +256,8 @@ public:
 };
 
 
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Class to restore Lua stack to the state it was in when we found it.
 // Concept based on code from http://www.codeproject.com/KB/cpp/luaincpp.aspx
@@ -235,8 +286,6 @@ public:
 //   LuaRobot *mLuaRobot;
 //   S32 mTop;
 //};
-
-
 
 };
 

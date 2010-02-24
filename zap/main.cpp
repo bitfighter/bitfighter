@@ -54,6 +54,7 @@ XXX need to document timers, main function XXX
 <li>Renamed getMove() function to onTick() ==> existing bots will need to be updated</li>
 <li>Fixed module "always on" bug</li>
 <li>Fixed "shoot through shielded robot" bug</li>
+<li>Event manager now working.  Can now add game events easily.</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>

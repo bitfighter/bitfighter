@@ -1001,9 +1001,9 @@ void GameType::spawnShip(GameConnection *theClient)
    //                     Player's name, team, and spawning location
    Ship *newShip = new Ship(cl->name, teamIndex, spawnPoint);
 
-   newShip->addToGame(getGame());
    theClient->setControlObject(newShip);
    newShip->setOwner(theClient);
+   newShip->addToGame(getGame());
 
    if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
       setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone

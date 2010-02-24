@@ -170,25 +170,25 @@ public:
 
 
 ///////////////////////////////
-
-class LuaTimer : public LuaObject      // Basically wraps our Bitfighter timer class
-{
-private:
-   Timer mTimer;
-
-public:
-   LuaTimer(lua_State *L);          // Lua constructor
-   ~LuaTimer() { /* Do nohting */ }
-   static const char className[];
-
-   static Lunar<LuaTimer>::RegType methods[];
-
-   S32 reset(lua_State *L);
-   S32 update(lua_State *L);
-   S32 getTime(lua_State *L);
-   S32 getFraction(lua_State *L);
-   S32 setPeriod(lua_State *L);
-};
+//
+//class LuaTimer : public LuaObject      // Basically wraps our Bitfighter timer class
+//{
+//private:
+//   Timer mTimer;
+//
+//public:
+//   LuaTimer(lua_State *L);          // Lua constructor
+//   ~LuaTimer() { /* Do nohting */ }
+//   static const char className[];
+//
+//   static Lunar<LuaTimer>::RegType methods[];
+//
+//   S32 reset(lua_State *L);
+//   S32 update(lua_State *L);
+//   S32 getTime(lua_State *L);
+//   S32 getFraction(lua_State *L);
+//   S32 setPeriod(lua_State *L);
+//};
 
 
 };
