@@ -50,6 +50,7 @@ class EventManager
 public:
    enum EventType {
       MsgSent = 0,
+      ShipSpawnedEvent,      // (ship) --> Ship (or robot) spawns
       EventTypes
    };
 
@@ -77,7 +78,8 @@ public:
    void update();                                                    // Act on events sitting in the pending lists
 
    // We'll have several different signatures for this one...
-   void fireEvent(Robot *caller, EventType eventType);
+   void fireEvent(EventType eventType);
+   void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned
 };
 
 
@@ -155,6 +157,7 @@ public:
    static U32 getRobotCount() { return mRobotCount; }
 
    LuaRobot *mLuaRobot;    // Could make private and make a public setter method...
+   static EventManager getEventManager();
 
 private:
   int attribute;

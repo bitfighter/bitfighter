@@ -97,7 +97,6 @@ class Ship : public MoveObject
 private:
    typedef MoveObject Parent;
    bool isBusy;
-   void push(lua_State *L);      // Push a LuaShip proxy object onto the stack
    bool mIsRobot;
 
    S32 mJustTeleported;
@@ -275,6 +274,7 @@ public:
    virtual bool processArguments(S32 argc, const char **argv);
 
    bool isRobot() { return mIsRobot; }
+   void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 
    GameObject *isInZone(GameObjectType zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
    GameObject *isOnObject(GameObjectType objectType); // Returns the object in question if this ship is on an object of type objectType

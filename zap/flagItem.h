@@ -78,7 +78,7 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, FlagType); }
    
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, FlagType); }           // Index of owning team (-1 for neutral flag)
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam); }              // Index of owning team (-1 for neutral flag)
    S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
    S32 isInCaptureZone(lua_State *L) { return returnBool(L, isInZone()); }    // Is flag in a team's capture zone?
    S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
@@ -88,7 +88,8 @@ extern void renderFlag(Point pos, Color flagColor);
 extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);
 
 
-////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 class FlagSpawn

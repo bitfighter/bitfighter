@@ -49,7 +49,7 @@ FlagItem::FlagItem(Point pos, bool collidable, float radius, float mass) : Item(
 
 void FlagItem::initialize()
 {
-   mTeam = 0;
+   mTeam = -1;
    mFlagCount = 1;
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= FlagType | CommandMapVisType;

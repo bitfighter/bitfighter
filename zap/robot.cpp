@@ -157,6 +157,10 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setGTEnum(ScoreGoalEnemyTeam);
    setGTEnum(ScoreGoalHostileTeam);
    setGTEnum(ScoreGoalOwnTeam);
+
+   // A few misc constants
+   lua_pushinteger(L, -1); lua_setglobal(L, "NeutralTeamIndx");
+   lua_pushinteger(L, -2); lua_setglobal(L, "HostileTeamIndx");
 }
 
 // Destructor
@@ -1137,8 +1141,7 @@ void EventManager::update()
    }
 }
 
-
-void EventManager::fireEvent(Robot *caller, EventType eventType)
+void EventManager::fireEvent(EventType eventType)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
@@ -1153,7 +1156,30 @@ void EventManager::fireEvent(Robot *caller, EventType eventType)
       }
       catch(LuaException &e)
       {
-         caller->logError("Robot error firing event %d: %s.", eventType, e.what());
+         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         return;
+      }
+   }
+}
+
+
+void EventManager::fireEvent(EventType eventType, Ship *ship)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      lua_State *L = subscriptions[eventType][i];
+      try
+      {
+         lua_getglobal(L, "onShipSpawned");
+         //lua_pushnumber(L, eventType);    // Pass the event type
+         ship->push(L);
+
+         if (lua_pcall(L, 1, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
+      {
+         logprintf("Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1251,8 +1277,6 @@ bool Robot::initialize(Point p)
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
    //Lunar<LuaTimer>::Register(L);
-
-   //Lunar<EventManager>::Register(L);
 
    Lunar<LuaWeaponInfo>::Register(L);
    Lunar<LuaModuleInfo>::Register(L);
@@ -1372,9 +1396,13 @@ bool Robot::initialize(Point p)
 
    eventManager.update();                      // Ensure registrations made during bot initialization are ready to go
 
-   eventManager.fireEvent(this, EventManager::MsgSent);     // FOr example...
-
    return true;
+}
+
+
+EventManager Robot::getEventManager()
+{
+   return eventManager;
 }
 
 

@@ -78,7 +78,8 @@ XXX need to document timers, main function XXX
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
 <li>Fixed turret/forcefield "in the middle of space" bug</li>
 <li>Fixed textItem bounds miscalculation that caused large text to "jump" onto screen</li>
-<li>Fixed /dcoord display bug</li>
+<li>Fixed /dcoord display position bug</li>
+<li>Fixed robot bug reporting incorrect team for flags</li>
 
 */
 

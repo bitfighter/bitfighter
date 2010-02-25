@@ -139,6 +139,7 @@ void Ship::push(lua_State *L)
    Lunar<LuaShip>::push(L, luaship, true);       // Lua will delete this object when it's done with it
 }
 
+
 void Ship::onGhostRemove()
 {
    Parent::onGhostRemove();
@@ -717,16 +718,19 @@ void Ship::damageObject(DamageInfo *theInfo)
 }
 
 
+// Runs when ship spawns -- runs on client and server
 void Ship::onAddedToGame(Game *game)
 {
-
-
    Parent::onAddedToGame(game);
 
    // Detect if we spawned on a GoFast
    SpeedZone *speedZone = (SpeedZone *) isOnObject(SpeedZoneType);
    if(speedZone)
       speedZone->collide(this);
+
+   // From here on down, server only
+   if(!isGhost()) 
+      Robot::getEventManager().fireEvent(EventManager::ShipSpawnedEvent, this);
 }
 
 
