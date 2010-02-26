@@ -1579,6 +1579,8 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getVel),
    method(LuaShip, getTeamIndx),
    method(LuaShip, isModActive),
+   method(LuaShip, getEnergy),
+   method(LuaShip, getHealth),
 
    method(LuaShip, isValid),
 
@@ -1620,6 +1622,9 @@ S32 LuaShip::isModActive(lua_State *L) {
 S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
 S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSelectedWeapon()); }    // Get WeaponIndex for current weapon
 S32 LuaShip::isValid(lua_State *L) { return returnBool(L, thisShip.isValid()); }
+
+S32 LuaShip::getEnergy(lua_State *L) { return returnFloat(L, thisShip->getEnergyFraction()); }      // Return ship's energy as a fraction between 0 and 1
+S32 LuaShip::getHealth(lua_State *L) { return returnFloat(L, thisShip->getHealth()); }              // Return ship's health as a fraction between 0 and 1
 
 
 GameObject *LuaShip::getGameObject()

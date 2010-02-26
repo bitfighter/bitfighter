@@ -75,6 +75,10 @@ public:
    S32 getRad(lua_State *L);
    S32 getVel(lua_State *L);
 
+   S32 getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
+   S32 getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
+
+
    S32 getTeamIndx(lua_State *L);
    S32 isModActive(lua_State *L);
 
@@ -86,7 +90,7 @@ public:
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 
    virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
-   S32 isValid(lua_State *L);                       // Returns whether or not ship is still alive
+   S32 isValid(lua_State *L);                        // Returns whether or not ship is still alive
 };
 
 //////////////////////////////////////////////
@@ -199,6 +203,7 @@ public:
 
    F32 getHealth() { return mHealth; }
    S32 getEnergy() { return mEnergy; }
+   F32 getEnergyFraction() { return (F32)mEnergy / (F32)EnergyMax; }     // Only used by bots
    S32 getMaxEnergy() { return EnergyMax; }
    void changeEnergy(S32 deltaEnergy) { mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy)); }
 
