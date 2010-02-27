@@ -66,12 +66,12 @@ function getFiringSolution(item)
         return nil
     end
 
-    type = item:getClassID()
+    itemtype = item:getClassID()
     if(type == nil) then
         return nil
     end
 
-    return bot:getFiringSolution(type, item)
+    return bot:getFiringSolution(itemtype, item)
 end
 
 
