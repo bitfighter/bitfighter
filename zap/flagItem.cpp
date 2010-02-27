@@ -35,7 +35,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 // C++ constructor
-FlagItem::FlagItem(Point pos) : Item(pos, false, 20)
+FlagItem::FlagItem(Point pos) : Item(pos, true, 20)
 {
    initialize();
 }
@@ -202,32 +202,41 @@ void FlagItem::renderItem(Point pos)
 }
 
 
+// Runs on both client and server
 bool FlagItem::collide(GameObject *hitObject)
 {
+   // Flag never collides if it is mounted or is set to be not collideable for some reason
    if(mIsMounted || !mIsCollideable)
       return false;
 
+   // Flag always collides with walls and forcefields
    if(hitObject->getObjectTypeMask() & (BarrierType | ForceFieldType))
       return true;
 
-   if(isGhost() || !(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+   // No other collision detection happens on the client -- From here on out, it's server only!
+   if(isGhost())
+      return false;
+
+   // The only things we'll collide with (aside from walls and forcefields above) is ships and robots
+   if(!(hitObject->getObjectTypeMask() & (ShipType | RobotType)))
+      return false;
+
+   // Ignore collisions that occur to recently dropped flags.  Make sure flag is ready to be picked up! 
+   if(mDroppedTimer.getCurrent())    
       return false;
 
    // We've hit a ship or robot  (remember, robot is a subtype of ship, so this will work for both)
+   // We'll need to make sure the ship is a valid entity and that it hasn't exploded
    Ship *ship = dynamic_cast<Ship *>(hitObject);
    if(!ship || (ship->hasExploded))
       return false;
 
-   // Server only from here on out...
-
-   if(mDroppedTimer.getCurrent())    // Dropped flag not ready to be picked up! 
-      return false;
-
    GameType *gt = getGame()->getGameType();
 
-   if(!gt)
-      return false;
+   if(!gt)     // Something is wrong...
+      return false;     
    
+   // Finally!
    gt->shipTouchFlag(ship, this);
 
    return false;
