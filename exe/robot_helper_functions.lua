@@ -67,7 +67,7 @@ function getFiringSolution(item)
     end
 
     local itemtype = item:getClassID()
-    if(type == nil) then
+    if(itemtype == nil) then
         return nil
     end
 
