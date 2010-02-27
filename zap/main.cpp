@@ -14,12 +14,14 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
+// Does chat now work properly when ship is dead?
+// What happens when the game is suspended?
 
 // TODO:
 // Create color global for reticle color
 
 /*
-XXX need to document timers, main function XXX
+XXX need to document timers,sXXX
 
 
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
@@ -55,6 +57,7 @@ XXX need to document timers, main function XXX
 <li>Fixed module "always on" bug</li>
 <li>Fixed "shoot through shielded robot" bug</li>
 <li>Event manager now working.  Can now add game events easily.</li>
+<li>Added ShipSpawned events</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>
@@ -589,8 +592,8 @@ void hostGame()
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
       s_logprintf("\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
 
-   if(gServerGame->getLevelNameCount())   // Levels loaded --> start game!
-      gServerGame->cycleLevel(0);         // Start the first level
+   if(gServerGame->getLevelNameCount())             // Levels loaded --> start game!
+      gServerGame->cycleLevel(Game::FIRST_LEVEL);   // Start the first level
 
    else        // No levels loaded... we'll crash if we try to start a game
    {
@@ -673,9 +676,10 @@ void idle()
 
    if(gClientGame) sleepTime = 0;      // Live player at the console
 
+
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(gDedicatedServer && !(gServerGame && gServerGame->getGameType() && gServerGame->getGameType()->mClientList.size()))
+   if(gDedicatedServer && gServerGame.isSuspended())
       sleepTime = 40;
 
    Platform::sleep(sleepTime);

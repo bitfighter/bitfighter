@@ -334,7 +334,7 @@ extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 
 void Ship::selectWeapon(U32 weaponIdx)
-{   
+{
    mActiveWeaponIndx = weaponIdx % ShipWeaponCount;      // Advance index to next weapon
 
    // Display a message confirming new weapon choice if we're not showing the indicators
@@ -729,7 +729,7 @@ void Ship::onAddedToGame(Game *game)
       speedZone->collide(this);
 
    // From here on down, server only
-   if(!isGhost()) 
+   if(!isGhost())
       Robot::getEventManager().fireEvent(EventManager::ShipSpawnedEvent, this);
 }
 
@@ -1609,7 +1609,7 @@ S32 LuaShip::getRad(lua_State *L) { return thisShip ? returnFloat(L, thisShip->g
 S32 LuaShip::getLoc(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualPos()) : returnPoint(L, Point(0,0)); }
 S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualVel()) : returnPoint(L, Point(0,0)); }
 
-S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam()); }
+S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam() + 1); }
 
 
 S32 LuaShip::isModActive(lua_State *L) {

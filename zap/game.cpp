@@ -249,6 +249,8 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
 
    mNetInterface->setAllowsConnections(true);
    mMasterUpdateTimer.reset(UpdateServerStatusTime);
+
+   mGameSuspended = true;
 }
 
 
@@ -468,15 +470,16 @@ void ServerGame::cycleLevel(S32 nextLevel)
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
       walk->resetGhosting();
 
-   if(nextLevel >= 0)
+   if(nextLevel >= FIRST_LEVEL)          // Go to specified level
       mCurrentLevelIndex = nextLevel;
-   else if(nextLevel == -1)    // Next level
+   else if(nextLevel == NEXT_LEVEL)      // Next level
       mCurrentLevelIndex++;
-   //else if(nextLevel == -2)    // Replay level, do nothing
-   //   mCurrentLevelIndex += 0;
+   else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
+      mCurrentLevelIndex += 0;
+
 
    if(S32(mCurrentLevelIndex) >= mLevelList.size())
-      mCurrentLevelIndex = 0;
+      mCurrentLevelIndex = FIRST_LEVEL;
 
    gBotNavMeshZones.clear();
 
@@ -508,6 +511,24 @@ void ServerGame::cycleLevel(S32 nextLevel)
          mGameType->serverAddClient(gc);
       gc->activateGhosting();
    }
+}
+
+
+// Enter suspended animation mode
+void ServerGame::suspendGame()
+{
+   mGameSuspended = true;
+
+   // Advance to beginning of next level
+   cycleLevel(NEXT_LEVEL);
+}
+
+
+// Resume game after it is no longer suspended
+void ServerGame::unsuspendGame()
+{
+   mGameSuspended = false;
+   //cycleLevel(CURRENT_LEVEL);
 }
 
 
@@ -659,7 +680,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
 }
 
 
-// Top-level idle loop for server
+// Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
    if( mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)) )
@@ -667,6 +688,15 @@ void ServerGame::idle(U32 timeDelta)
       endGame();
       return;
    }
+
+   // If there are no players on the server, we can enter "suspended animation" mode
+   if(mPlayerCount == 0 && !mGameSuspended)
+      suspendGame();
+   else if(mPlayerCount > 0 && mGameSuspended)
+      unsuspendGame();
+
+   if(mGameSuspended)
+      return;
 
    mCurrentTime += timeDelta;
    mNetInterface->checkBanlistTimeouts(timeDelta);
@@ -699,7 +729,6 @@ void ServerGame::idle(U32 timeDelta)
    mNetInterface->processConnections();
 
 
-
    // Load a new level if the time is out on the current one
    if(mLevelSwitchTimer.update(timeDelta))
    {
@@ -715,7 +744,6 @@ void ServerGame::idle(U32 timeDelta)
          masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
       mMasterUpdateTimer.reset(UpdateServerStatusTime);
    }
-
 
    // Lastly, play any sounds server might have made...
    SFXObject::process();

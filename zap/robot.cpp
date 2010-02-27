@@ -158,15 +158,15 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setGTEnum(ScoreGoalHostileTeam);
    setGTEnum(ScoreGoalOwnTeam);
 
-   // A few misc constants
-   lua_pushinteger(L, -1); lua_setglobal(L, "NeutralTeamIndx");
-   lua_pushinteger(L, -2); lua_setglobal(L, "HostileTeamIndx");
+   // A few misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
+   lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
+   lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
 }
 
 // Destructor
 LuaRobot::~LuaRobot()
 {
-   // Make sure we're unsubscribed to all those events we subscribed to.  Don't want to 
+   // Make sure we're unsubscribed to all those events we subscribed to.  Don't want to
    // send an event to a dead bot, after all...
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       if(subscriptions[i])
@@ -1087,7 +1087,7 @@ void EventManager::removeFromSubscribedList(lua_State *subscriber, EventType eve
 void EventManager::unsubscribeImmediate(lua_State *L, EventType eventType)
 {
    removeFromSubscribedList(L, eventType);
-   removeFromPendingSubscribeList(L, eventType);  
+   removeFromPendingSubscribeList(L, eventType);
    removeFromPendingUnsubscribeList(L, eventType);    // Probably not really necessary...
 }
 
@@ -1096,7 +1096,7 @@ void EventManager::unsubscribeImmediate(lua_State *L, EventType eventType)
 bool EventManager::isSubscribed(lua_State *L, EventType eventType)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
-      if(subscriptions[eventType][i] == L)            
+      if(subscriptions[eventType][i] == L)
          return true;
 
    return false;
@@ -1106,7 +1106,7 @@ bool EventManager::isSubscribed(lua_State *L, EventType eventType)
 bool EventManager::isPendingSubscribed(lua_State *L, EventType eventType)
 {
    for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
-      if(pendingSubscriptions[eventType][i] == L)            
+      if(pendingSubscriptions[eventType][i] == L)
          return true;
 
    return false;
@@ -1116,7 +1116,7 @@ bool EventManager::isPendingSubscribed(lua_State *L, EventType eventType)
 bool EventManager::isPendingUnsubscribed(lua_State *L, EventType eventType)
 {
    for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
-      if(pendingUnsubscriptions[eventType][i] == L)            
+      if(pendingUnsubscriptions[eventType][i] == L)
          return true;
 
    return false;
@@ -1200,7 +1200,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
    L = NULL;
-   mCurrentZone = -1; 
+   mCurrentZone = -1;
    flightPlanTo = -1;
 
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
@@ -1334,7 +1334,7 @@ bool Robot::initialize(Point p)
    {
       logError("Error during initializing lua helper functions %s: %s.  Shutting robot down.", luafname, lua_tostring(L, -1));
       return false;
-   }   
+   }
 
 
    static const char *robotfname = "robot_helper_functions.lua";
@@ -1575,7 +1575,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       {
          if(respawnTimer.update(mCurrentMove.time))
          {
-            try 
+            try
             {
                gServerGame->getGameType()->spawnRobot(this);
             }

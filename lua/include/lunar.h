@@ -36,15 +36,15 @@ public:
 
   static void Register(lua_State *L) {
     lua_newtable(L);
-    int methods = lua_gettop(L);
+    int methods = lua_gettop(L);       // Returns number of elements in the stack == index of the top element
 
     luaL_newmetatable(L, T::className);
-    int metatable = lua_gettop(L);     // Index of metatable
+    int metatable = lua_gettop(L);     // Index of new metatable
 
     // store method table in globals so that
     // scripts can add functions written in Lua.
     lua_pushvalue(L, methods);
-    set(L, LUA_GLOBALSINDEX, T::className);
+    set(L, LUA_GLOBALSINDEX, T::className);    //  Globals live at pseudo-index LUA_GLOBALSINDEX
 
     // hide metatable from Lua getmetatable()
     lua_pushvalue(L, methods);
@@ -53,24 +53,24 @@ public:
     lua_pushvalue(L, methods);
     set(L, metatable, "__index");
 
-    lua_pushcfunction(L, tostring_T);
+    lua_pushcfunction(L, tostring_T);  // Set a custom tostring method
     set(L, metatable, "__tostring");
 
-    lua_pushcfunction(L, gc_T);
+    lua_pushcfunction(L, gc_T);        // and a custom gc method
     set(L, metatable, "__gc");
 
-    lua_newtable(L);                // mt for method table
-    lua_pushcfunction(L, new_T);
-    lua_pushvalue(L, -1);           // dup new_T function
-    set(L, methods, "new");         // add new_T to method table
-    set(L, -3, "__call");           // mt.__call = new_T
+    lua_newtable(L);                   // mt for method table
+    lua_pushcfunction(L, new_T);       // When lua runs "new" method, new_T will be called
+    lua_pushvalue(L, -1);              // dup new_T function
+    set(L, methods, "new");            // add new_T to method table
+    set(L, -3, "__call");              // mt.__call = new_T
     lua_setmetatable(L, methods);
 
     // fill method table with methods from class T
-    for (RegType *l = T::methods; l->name; l++) {
+    for (RegType *l = T::methods; l->name; l++) {     // example: method(LuaRobot, getZoneCenter)  ::: (name, function)
       lua_pushstring(L, l->name);
       lua_pushlightuserdata(L, (void*)l);
-      lua_pushcclosure(L, thunk, 1);
+      lua_pushcclosure(L, thunk, 1);                  // thunk casts an pointer l to type T
       lua_settable(L, methods);
     }
 
@@ -162,16 +162,16 @@ private:
   static int new_T(lua_State *L) {
      try
      {
-        lua_remove(L, 1);   // use classname:new(), instead of classname.new()
+        lua_remove(L, 1);   // use classname:new(), instead of classname.new()         <=== Why?
         T *obj = new T(L);  // call constructor for T objects
         push(L, obj, true); // gc_T will delete this object
         return 1;           // userdata containing pointer to T object
      }
      catch(LuaException &e)
-       {
+     {
         TNL::logprintf("LUA ERROR: Cannot instantiate object %s: %s", typeid(T).name(), e.what());
-	return 0;
-       }
+        return 0;
+     }
   }
 
   // garbage collection metamethod

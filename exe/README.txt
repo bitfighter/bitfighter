@@ -1,10 +1,15 @@
- ZAP 1.4.7
+ ______  _____ _______ _______ _____  ______ _     _ _______ _______  ______
+ |_____]   |      |    |______   |   |  ____ |_____|    |    |______ |_____/
+ |_____] __|__    |    |       __|__ |_____| |     |    |    |______ |    \_
+
+
+Welcome to Bitfighter
 
 Introduction
 ------------
 
-Welcome to ZAP, the retro multiplayer team action game!  Zap is a
-game of action and strategy.  In Zap, the goal of the game varies
+Welcome to Bitfighter, the retro multiplayer team action game!  Bitfighter is a
+game of action and strategy.  In Bitfighter, the goal of the game varies
 from level to level, from the following game types:
 
 Capture the Flag - Team game where the objective is to take the
@@ -59,7 +64,7 @@ player either flies over a resupply area (team-color-coded patch), or
 respawns (only if there are no resupply areas on the level).
 
 Modules are special powers that can be activated by pressing the appropriate
-module activation key.  The modules in Zap, and their function are:
+module activation key.  The modules in Bitfighter, and their function are:
 
 1. Boost - Gives the ship a boost of speed
 2. Shield - Creates a defensive barrier around the ship that reflects shots
@@ -86,7 +91,7 @@ SHIFT - activate secondary module (default = shield)
 TAB - show scores
 
 E - next weapon
-Q - select weapon and module loadout
+Z - select weapon and module loadout
 
 Mouse:
 
@@ -155,7 +160,7 @@ platform enabling dual analog controller support.
 
 Command Line Options:
 
-Note - zap addresses are of the form transport:address:port like:
+Note - Bitfighter addresses are of the form transport:address:port like:
 IP:127.0.0.1:28000
 or IP:Any:28000
 or IP:www.foobar.com:24601
@@ -175,7 +180,7 @@ or IP:www.foobar.com:24601
         browser when searching for servers.
 -maxplayers [number] sets the maximum number of players allowed 
         on the server
--serverpassword [password] sets the password for access to the server.
+-password [password] sets the password for access to the server.
 -adminpassword [password] sets the administrator password for the server.
 -levelchangepassword [password] sets the password that allows players to change levels on server.
 -joystick [joystickType] enables dual analog control pad.  The
@@ -192,7 +197,7 @@ or IP:www.foobar.com:24601
 -jsave [journalName] saves the log of the play session to the specified
         journal file.
 -jplay [journalName] replays a saved journal.
--edit [levelName] starts Zap in level editing mode, loading and saving the
+-edit [levelName] starts Bitfighter in level editing mode, loading and saving the
       specified level.
       
 Level editor instructions:
@@ -234,19 +239,12 @@ G - construct a Spawn point at the mouse point
 B - construct a RepairItem at the mouse point
 Y - construct a Turret at the mouse point
 H - construct a Force Field projector at the mouse point
+M - construct a Mine at mouse point
 
 CTRL-D - duplicate current selection
 CTRL-Z - undo last operation
 
 ESC - bring up editor menu
 
-Credits:
 
-ZAP is free software provided by GarageGames.com, Inc.
-Team members are:
- 
-    Mark Frohnmayer
-    Ben Garney
-    John Quigley
-    Robert Blanchett
-
+Bitfighter is free software based off of the ZAP source code.

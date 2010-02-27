@@ -41,34 +41,34 @@
 #include <string>
 
 ///
-/// Zap - a 2D space game demonstrating the full capabilities of the
+/// Bitfighter - a 2D space game demonstrating the full capabilities of the
 /// Torque Network Library.
 ///
-/// The Zap example game is a 2D vector-graphics game that utilizes
-/// some of the more advanced features of the TNL.  Zap also demonstrates
+/// The Bitfighter example game is a 2D vector-graphics game that utilizes
+/// some of the more advanced features of the TNL.  Bitfighter also demonstrates
 /// the use of client-side prediction, and interpolation to present
 /// a consistent simulation to clients over a connection with perceptible
 /// latency.
 ///
-/// Zap can run in 3 modes - as a client, a client and server, or a dedicated
+/// Bitfighter can run in 3 modes - as a client, a client and server, or a dedicated
 /// server.  The dedicated server option is available only as a launch
 /// parameter from the command line.
 ///
-/// If it is run as a client, Zap uses the GLUT library to perform
+/// If it is run as a client, Bitfighter uses the GLUT library to perform
 /// cross-platform window intialization, event processing and OpenGL setup.
 ///
-/// Zap implements a simple game framework.  The GameObject class is
-/// the root class for all of the various objects in the Zap world, including
+/// Bitfighter implements a simple game framework.  The GameObject class is
+/// the root class for all of the various objects in the Bitfighter world, including
 /// Ship, Barrier and Projectile instances.  The Game class, which is instanced
 /// once for the client and once for the server, manages the current
 /// list of GameObject instances.
 ///
-/// Zap clients can connect to servers directly that are on the same LAN
-/// or for which the IP address is known.  Zap is also capable of talking
+/// Bitfighter clients can connect to servers directly that are on the same LAN
+/// or for which the IP address is known.  Bitfighter is also capable of talking
 /// to the TNL master server and using its arranged connection functionality
 /// to talk to servers.
 ///
-/// The simplified user interface for Zap is managed entirely through
+/// The simplified user interface for Bitfighter is managed entirely through
 /// subclasses of the UserInterface class.  Each UserInterface subclass
 /// represents one "screen" in the UI.  The GameUserInterface is the most complicated,
 /// being responsible for the user interface while the client is actually
@@ -213,9 +213,18 @@ private:
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
+   bool mGameSuspended;                   // True if we're in "suspended animation" mode
+
+   void suspendGame();                    // Enter suspended animation mode
+   void unsuspendGame();                  // Resume game
+
 public:
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
-   ~ServerGame();                                                                                     // Destructor
+   ~ServerGame();   // Destructor
+
+   static const S32 NEXT_LEVEL = -1;
+   static const S32 REPLAY_LEVEL = -2;
+   static const S32 FIRST_LEVEL = 0;
 
    U32 getPlayerCount() { return mPlayerCount; }
    U32 getMaxPlayers() { return mMaxPlayers; }
@@ -240,7 +249,7 @@ public:
 
    bool loadLevel(string fileName);       // Load a level
 
-   void cycleLevel(S32 newLevelIndex = -1);
+   void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    string getLevelFileName(string base);     // Handles prepending subfolder, if needed
    StringTableEntry getLevelNameFromIndex(S32 indx);
    string getLevelFileNameFromIndex(S32 indx);
@@ -251,6 +260,8 @@ public:
    bool isServer() { return true; }
    void idle(U32 timeDelta);
    void gameEnded();
+
+   void isSuspended() { return mGameSuspended; }
 
    S32 getLevelNameCount();
    U32 getRobotCount();

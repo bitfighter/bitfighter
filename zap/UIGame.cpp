@@ -659,7 +659,7 @@ void GameUserInterface::renderCurrentChat()
       baseColor = gTeamChatColor;
       promptStr = "(Team): ";
    }
-   else                                // Global in-game chat (goes to all players in game)
+   else                                     // Global in-game chat (goes to all players in game)
    {
       baseColor = gGlobalChatColor;
       promptStr = "(Global): ";
@@ -669,12 +669,9 @@ void GameUserInterface::renderCurrentChat()
    if(! (gClientGame && gClientGame->getConnectionToServer()))
       return;
 
-   Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-   if(!ship)
-      return;
 
-   S32 promptSize = getStringWidthf(FONTSIZE, "%s", promptStr);
-   S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
+   S32 promptSize = getStringWidth(FONTSIZE, promptStr);
+   S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
    S32 nameWidth = max(nameSize, promptSize);
    // Above block repeated below...
 
@@ -712,10 +709,6 @@ void GameUserInterface::renderCurrentChat()
 
    mLineEditor.drawCursor(xpos, ypos, FONTSIZE);
 }
-
-//   S32 x = drawCenteredString(y, fontSizeBig, dispString.c_str());
-//   lineEditor.drawCursor(x, y, fontSizeBig);
-
 
 #undef FONT_GAP
 

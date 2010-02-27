@@ -15,10 +15,10 @@
 function getMove()
 
     loc = bot:getLoc()
-	items = bot:findGlobalItems( TestItemType ) 	-- Find an TestItem
+   items = bot:findGlobalItems( TestItemType )  -- Find an TestItem
 
-	minDist = 999999
-	closestItem = nil
+   minDist = 999999
+   closestItem = nil
     found = false
 
     for indx, item in ipairs( items ) do      -- Iterate over our list
@@ -32,34 +32,34 @@ function getMove()
         end
     end
  
-	
-	
-	botLoc = bot:getLoc()
-	itemLoc = closestItem:getLoc()
-	
-	dist = botLoc:distanceTo( itemLoc )
-	orbitRadius = 300
-	
-	-- Here we use the getTime() function to make the motion look smooth.
-	-- If we just advanced orbitAng by a fixed amount each frame, it would
-	-- appear jerky, as each frame is a slightly different length.
-	
-	-- .0015 determined experimentally
-	
-	orbitAng = orbitAng + .0015 * bot:getTime()  
-	
-	if( dist <= orbitRadius * 1.1 ) then 
-		dest = itemLoc
-		dest:setxy( itemLoc:x() + orbitRadius * math.cos (orbitAng),
-		            itemLoc:y() + orbitRadius * math.sin (orbitAng)  )
-	else
-		dest = itemLoc
-		orbitAng = botLoc:angleTo( dest )
-	end
-	
-	bot:setThrustToPt( dest ) 		-- travel towards calculated point
-	
-	bot:setAngle( botLoc:angleTo( itemLoc) )
+   
+   
+   botLoc = bot:getLoc()
+   itemLoc = closestItem:getLoc()
+   
+   dist = botLoc:distanceTo( itemLoc )
+   orbitRadius = 300
+   
+   -- Here we use the getTime() function to make the motion look smooth.
+   -- If we just advanced orbitAng by a fixed amount each frame, it would
+   -- appear jerky, as each frame is a slightly different length.
+   
+   -- .0015 determined experimentally
+   
+   orbitAng = orbitAng + .0015 * bot:getTime()  
+   
+   if( dist <= orbitRadius * 1.1 ) then 
+      dest = itemLoc
+      dest:setxy( itemLoc:x() + orbitRadius * math.cos (orbitAng),
+                  itemLoc:y() + orbitRadius * math.sin (orbitAng)  )
+   else
+      dest = itemLoc
+      orbitAng = botLoc:angleTo( dest )
+   end
+   
+   bot:setThrustToPt( dest )     -- travel towards calculated point
+   
+   bot:setAngle( botLoc:angleTo( itemLoc) )
 end
 
 -------------------------------------------------------------------------------
