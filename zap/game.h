@@ -261,7 +261,7 @@ public:
    void idle(U32 timeDelta);
    void gameEnded();
 
-   void isSuspended() { return mGameSuspended; }
+   bool isSuspended() { return mGameSuspended; }
 
    S32 getLevelNameCount();
    U32 getRobotCount();

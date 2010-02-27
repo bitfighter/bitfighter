@@ -76,6 +76,8 @@ XXX need to document timers,sXXX
 <li>If level change password is left blank, all players granted access (not so for admin password)</li>
 <li>If level change password is set to blank, all players currently connected are silently granted access to level change menu</li>
 <li>-password command line parameter changed to -serverpassword</li>
+<li>When all players leave game, game advances to next level, and suspends itself until a player joins.  That way, when players join, level is "fresh" and ready to go.  May also reduce processor load and power consumption</li>
+
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -593,7 +595,7 @@ void hostGame()
       s_logprintf("\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
 
    if(gServerGame->getLevelNameCount())             // Levels loaded --> start game!
-      gServerGame->cycleLevel(Game::FIRST_LEVEL);   // Start the first level
+      gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);   // Start the first level
 
    else        // No levels loaded... we'll crash if we try to start a game
    {
@@ -679,7 +681,7 @@ void idle()
 
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(gDedicatedServer && gServerGame.isSuspended())
+   if(gDedicatedServer && gServerGame->isSuspended())
       sleepTime = 40;
 
    Platform::sleep(sleepTime);
