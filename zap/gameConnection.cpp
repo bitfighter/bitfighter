@@ -81,6 +81,11 @@ GameConnection::~GameConnection()
    // Log the disconnect...
    TNL::logprintf("%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
 
+
+   if(isConnectionToClient() && gServerGame->getSuspendor() == this)     // isConnectionToClient only true if we're the server
+      gServerGame->suspenderLeftGame();
+
+
    if(isConnectionToClient() && mAcheivedConnection)    // isConnectionToClient only true if we're the server
    {
      // Compute time we were connected
@@ -170,6 +175,33 @@ void GameConnection::submitLevelChangePassword(const char *password)
 }
 
 
+void GameConnection::suspendGame()
+{
+   c2sSuspendGame(true);
+}
+
+
+void GameConnection::unsuspendGame()
+{
+   c2sSuspendGame(false);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+{
+   if(suspend)
+      gServerGame->suspendGame(this);
+   else
+      gServerGame->unsuspendGame(true);
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+   gGameUserInterface.unsuspendGame();
+}
+
+
 void GameConnection::changeParam(const char *param, ParamType type)
 {
    c2sSetParam(param, type);
@@ -217,13 +249,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    if(!isAdmin())    // Do nothing --> non-admins have no pull here
       return;
 
+   // Check for forbidden blank parameters
    if(   (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
                           !strcmp(param.getString(), ""))    // Some params can't be blank
       return;
 
    const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
    s_logprintf("User [%s] %s %s", mClientRef->name.getString(), strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
-
 
    // Update our in-memory copies of the param
    if(type == (U32)LevelChangePassword)
@@ -248,7 +280,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    // Update the INI file
    gINI.SetValue("Host", keys[type], param.getString(), true);
    gINI.WriteFile();
-
 
    // Some messages we might show the user
    static StringTableEntry levelPassChanged("Level change password changed");
@@ -894,6 +925,8 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
          UserInterface::reactivateMenu(gEditorUserInterface);
       else
          UserInterface::reactivateMenu(gMainMenuUserInterface);
+
+      gClientGame->unsuspendGame();
 
       // Display a context-appropriate error message
       gErrorMsgUserInterface.reset();

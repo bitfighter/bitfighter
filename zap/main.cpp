@@ -77,6 +77,7 @@ XXX need to document timers,sXXX
 <li>If level change password is set to blank, all players currently connected are silently granted access to level change menu</li>
 <li>-password command line parameter changed to -serverpassword</li>
 <li>When all players leave game, game advances to next level, and suspends itself until a player joins.  That way, when players join, level is "fresh" and ready to go.  May also reduce processor load and power consumption</li>
+<li>Added ability to put game into suspended animation, automatically restarting when other players join (/suspend command)</li>
 
 
 <h4>Bugs</h4>

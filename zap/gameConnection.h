@@ -135,6 +135,9 @@ public:
    void submitAdminPassword(const char *password);
    void submitLevelChangePassword(const char *password);
 
+   void suspendGame();
+   void unsuspendGame();
+
    bool isAdmin() { return mIsAdmin; }
    void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
@@ -155,6 +158,9 @@ public:
    // Chage passwords on the server
    void changeParam(const char *param, ParamType type);
 
+
+   TNL_DECLARE_RPC(c2sSuspendGame, (bool suspend));
+   TNL_DECLARE_RPC(s2cUnsuspend, ());
 
    TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));
    TNL_DECLARE_RPC(c2sLevelChangePassword, (StringPtr pass));

@@ -74,6 +74,7 @@ public:
    S32 getLoc(lua_State *L);
    S32 getRad(lua_State *L);
    S32 getVel(lua_State *L);
+   S32 hasFlag(lua_State *L);
 
    S32 getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
    S32 getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1

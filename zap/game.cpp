@@ -76,6 +76,7 @@ Game::Game(const Address &theBindAddress)
 {
    mNextMasterTryTime = 0;
    mCurrentTime = 0;
+   mGameSuspended = false;
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
 }
@@ -250,7 +251,7 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
    mNetInterface->setAllowsConnections(true);
    mMasterUpdateTimer.reset(UpdateServerStatusTime);
 
-   mGameSuspended = true;
+   mSuspendor = NULL;
 }
 
 
@@ -518,17 +519,31 @@ void ServerGame::cycleLevel(S32 nextLevel)
 void ServerGame::suspendGame()
 {
    mGameSuspended = true;
+   cycleLevel(NEXT_LEVEL);    // Advance to beginning of next level
+}
 
-   // Advance to beginning of next level
-   cycleLevel(NEXT_LEVEL);
+
+ // Suspend at player's request
+void ServerGame::suspendGame(GameConnection *requestor)
+{
+   if(getPlayerCount() > 1)        // Should never happen, but will protect against hacked clients
+      return;
+
+   mGameSuspended = true;    
+   mSuspendor = requestor;
+
+   cycleLevel(REPLAY_LEVEL);  // Restart current level to make setting traps more difficult
 }
 
 
 // Resume game after it is no longer suspended
-void ServerGame::unsuspendGame()
+void ServerGame::unsuspendGame(bool remoteRequest)
 {
    mGameSuspended = false;
-   //cycleLevel(CURRENT_LEVEL);
+   if(mSuspendor != NULL && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
+      mSuspendor->s2cUnsuspend();
+
+   mSuspendor = NULL;
 }
 
 
@@ -692,16 +707,19 @@ void ServerGame::idle(U32 timeDelta)
    // If there are no players on the server, we can enter "suspended animation" mode
    if(mPlayerCount == 0 && !mGameSuspended)
       suspendGame();
-   else if(mPlayerCount > 0 && mGameSuspended)
-      unsuspendGame();
-
-   if(mGameSuspended)
-      return;
+   else if( mGameSuspended && ((mPlayerCount > 0 && mSuspendor == NULL) || mPlayerCount > 1) )
+      unsuspendGame(false);
 
    mCurrentTime += timeDelta;
-   mNetInterface->checkBanlistTimeouts(timeDelta);
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected
+
+   if(mGameSuspended)     // If game is suspended, we need do nothing more
+      return;
+
+   mNetInterface->checkBanlistTimeouts(timeDelta);    // Unban players who's bans have expired
+
+
    for(GameConnection *walk = GameConnection::getClientList(); walk ; walk = walk->getNextClient())
       walk->addToTimeCredit(timeDelta);
 
@@ -918,6 +936,7 @@ void ClientGame::supressScreensaver()
 #endif
 }
 
+
 void ClientGame::zoomCommanderMap()
 {
    mInCommanderMap = !mInCommanderMap;
@@ -937,6 +956,13 @@ void ClientGame::zoomCommanderMap()
          conn->c2sReleaseCommanderMap();
    }
 }
+
+
+U32 ClientGame::getPlayerCount() 
+{ 
+   return mGameType ? mGameType->mClientList.size() : (U32)PLAYER_COUNT_UNAVAILABLE;       // + 1 to include local client
+}
+
 
 extern OptionsMenuUserInterface gOptionsMenuUserInterface;
 
@@ -1036,6 +1062,23 @@ Point ClientGame::worldToScreenPoint(Point p)
       Point ret = (p - position) * scaleFactor + Point((gScreenWidth / 2), (gScreenHeight / 2));
       return ret;
    }
+}
+
+
+void ClientGame::renderSuspended()
+{
+   glColor3f(1,1,0);
+   S32 textHeight = 20;
+   S32 textGap = 5;
+   S32 ypos = gScreenHeight / 2 - 3 * (textHeight + textGap);
+
+   UserInterface::drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
+   ypos += textHeight + textGap;
+   UserInterface::drawCenteredString(ypos, textHeight, "When another player joins, the game will start automatically.");
+   ypos += textHeight + textGap;
+   UserInterface::drawCenteredString(ypos, textHeight, "When the game restarts, the level will be reset.");
+   ypos += 2 * (textHeight + textGap);
+   UserInterface::drawCenteredString(ypos, textHeight, "Press <SPACE> to resume playing now");
 }
 
 
@@ -1323,7 +1366,9 @@ void ClientGame::render()
    if(!hasValidControlObject())
       return;
 
-   if(mCommanderZoomDelta)
+   if(mGameSuspended)
+      renderSuspended();
+   else if(mCommanderZoomDelta)
       renderCommander();
    else
       renderNormal();

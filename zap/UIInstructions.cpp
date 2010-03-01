@@ -580,6 +580,7 @@ static ControlStringsEditor commands[] = {
    { "/next", "Start next level" },
    { "/prev", "Replay previous level" },
    { "/restart", "Restart current level" },
+   { "/suspend", "Place game on hold while waiting for players" },
    { "-", NULL },       // Horiz. line
    { "/kick <player name>", "Kick a player from the game" },
    { "-", NULL },       // Horiz. line
@@ -628,7 +629,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
 
    if(page == 1)
    {
-      drawString(cmdCol, ypos, instrSize, "Admin permissions required to use these commands");
+      drawString(cmdCol, ypos, instrSize, "Admin permissions are required to use these commands");
       ypos += 28;
    }
 

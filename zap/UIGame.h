@@ -212,6 +212,9 @@ public:
    void advanceWeapon();         // Choose next weapon
    void selectWeapon(U32 index); // Choose weapon by its index
 
+   void suspendGame();
+   void unsuspendGame();
+
    // Modes we could be in during the game
    enum Mode {
       PlayMode,               // Playing

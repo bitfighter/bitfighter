@@ -177,10 +177,12 @@ Color RabbitGameType::getShipColor(Ship *s)
    return Color(1,0,0);
 }
 
+
 Color RabbitGameType::getTeamColor(S32 team)
 {
    return Color(1, 0.5, 0);      // Orange
 }
+
 
 bool RabbitGameType::shipHasFlag(Ship *ship)
 {

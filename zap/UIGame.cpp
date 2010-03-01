@@ -144,6 +144,8 @@ void GameUserInterface::onActivate()
       mModActivated[i] = false;
 
    mShutdownMode = None;
+
+   gClientGame->unsuspendGame();                          // Never suspended when we start
 }
 
 
@@ -291,55 +293,58 @@ void GameUserInterface::render()
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)
 
-   renderReticle();           // Draw crosshairs if using mouse
-   renderMessageDisplay();    // Render incoming chat msgs
-   renderCurrentChat();       // Render any chat msg user is composing
-   renderLoadoutIndicators(); // Draw indicators for the various loadout items
-
-   gMainMenuUserInterface.renderProgressListItems();  // This is the list of levels loaded while hosting
-
-   renderProgressBar();       // This is the status bar that shows progress of loading this level
-
-   mVoiceRecorder.render();   // This is the indicator that someone is sending a voice msg
-
-   // Display running average FPS
-   if(mFPSVisible)
+   if(!gClientGame->isSuspended())
    {
-      glColor3f(1, 1, 1);
-      drawStringf(canvasWidth - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
-   }
+      renderReticle();           // Draw crosshairs if using mouse
+      renderMessageDisplay();    // Render incoming chat msgs
+      renderCurrentChat();       // Render any chat msg user is composing
+      renderLoadoutIndicators(); // Draw indicators for the various loadout items
 
-   // Render QuickChat / Loadout menus
-   if(mCurrentMode == QuickChatMode)
-   {     // (braces required)
-      if(!mQuickChat.render())      // Render QuickChat msgs if there are any, otherwise switch back into PlayMode
-         setPlayMode();
-   }
-   else if(mCurrentMode == LoadoutMode)
-      mLoadout.render();
+      gMainMenuUserInterface.renderProgressListItems();  // This is the list of levels loaded while hosting
 
-   GameType *theGameType = gClientGame->getGameType();
+      renderProgressBar();       // This is the status bar that shows progress of loading this level
 
-   if(theGameType)
-      theGameType->renderInterfaceOverlay(mInScoreboardMode);
+      mVoiceRecorder.render();   // This is the indicator that someone is sending a voice msg
 
-#if 0
-   // Some code for outputting the position of the ship for finding good spawns
-   GameConnection *con = gClientGame->getConnectionToServer();
-
-   if(con)
-   {
-      GameObject *co = con->getControlObject();
-      if(co)
+      // Display running average FPS
+      if(mFPSVisible)
       {
-         Point pos = co->getActualPos() * F32(1 / 300.0f);
-         drawStringf(10, 550, 30, "%0.2g, %0.2g", pos.x, pos.y);
+         glColor3f(1, 1, 1);
+         drawStringf(canvasWidth - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
       }
-   }
 
-   if(mGotControlUpdate)
-      drawString(710, 10, 30, "CU");
+      // Render QuickChat / Loadout menus
+      if(mCurrentMode == QuickChatMode)
+      {     // (braces required)
+         if(!mQuickChat.render())      // Render QuickChat msgs if there are any, otherwise switch back into PlayMode
+            setPlayMode();
+      }
+      else if(mCurrentMode == LoadoutMode)
+         mLoadout.render();
+
+      GameType *theGameType = gClientGame->getGameType();
+
+      if(theGameType)
+         theGameType->renderInterfaceOverlay(mInScoreboardMode);
+   }
+#if 0
+// Some code for outputting the position of the ship for finding good spawns
+GameConnection *con = gClientGame->getConnectionToServer();
+
+if(con)
+{
+   GameObject *co = con->getControlObject();
+   if(co)
+   {
+      Point pos = co->getActualPos() * F32(1 / 300.0f);
+      drawStringf(10, 550, 30, "%0.2g, %0.2g", pos.x, pos.y);
+   }
+}
+
+if(mGotControlUpdate)
+   drawString(710, 10, 30, "CU");
 #endif
+
 
    renderShutdownMessage();
 }
@@ -847,6 +852,12 @@ void GameUserInterface::disableMovementKey(KeyCode keyCode)
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   if(gClientGame->isSuspended() && keyCode == KEY_SPACE)
+   {
+      unsuspendGame();
+      return;
+   }
+
    S32 inputMode = gIniSettings.inputMode;
 
    if(keyCode == keyHELP)          // Turn on help screen
@@ -1475,6 +1486,17 @@ void GameUserInterface::processCommand(Vector<string> &words)
       changeServerNameDescr(gc, GameConnection::ServerDescr, words);
    }
 
+   else if(words[0] == "suspend")
+   {
+      U32 players = gClientGame->getPlayerCount();
+      if(players == Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
+      {
+         displayMessage(gCmdChatColor, "!!! Can't suspend when others are playing");
+         return;
+      }
+      suspendGame();    // Do the deed
+   }
+
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
 }
@@ -1495,6 +1517,8 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/restart");
    mChatCmds.push_back("/svol");
    mChatCmds.push_back("/vvol");
+   mChatCmds.push_back("/suspend");
+
 
    // Administrative commands
    mChatCmds.push_back("/shutdown");
@@ -1645,6 +1669,7 @@ void GameUserInterface::VoiceRecorder::stop()
    }
 }
 
+
 void GameUserInterface::VoiceRecorder::process()
 {
    U32 preSampleCount = mUnusedAudio->getBufferSize() / 2;
@@ -1694,6 +1719,21 @@ void GameUserInterface::VoiceRecorder::process()
          gt->c2sVoiceChat(gIniSettings.echoVoice, sendBuffer);
    }
 }
+
+
+void GameUserInterface::suspendGame()
+{
+   gClientGame->getConnectionToServer()->suspendGame();     // Tell server we're suspending
+   gClientGame->suspendGame();                              // Suspend locally
+}
+
+
+void GameUserInterface::unsuspendGame()
+{
+   gClientGame->unsuspendGame();
+   gClientGame->getConnectionToServer()->unsuspendGame();
+}
+
 
 };
 

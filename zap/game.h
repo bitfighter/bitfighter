@@ -26,7 +26,7 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include "../tnl/tnlNetObject.h"
+#include "tnlNetObject.h"
 
 #include "gameConnection.h"
 #include "gridDB.h"
@@ -82,6 +82,7 @@ using namespace std;
 namespace Zap
 {
 
+// Some forward declarations
 class MasterServerConnection;
 class GameNetInterface;
 class GameType;
@@ -119,6 +120,8 @@ protected:
    SafePtr<MasterServerConnection> mConnectionToMaster;
    SafePtr<GameType> mGameType;
 
+   bool mGameSuspended;                   // True if we're in "suspended animation" mode
+
 public:
    enum
    {
@@ -135,8 +138,10 @@ public:
       PlayerSensorVertVisDistance = 795,     // ...and vertically
 
       MasterServerConnectAttemptDelay = 60000,
+      PLAYER_COUNT_UNAVAILABLE = -1,
    };
 
+   virtual U32 getPlayerCount() = NULL;      // Implemented differently on client and server
 
    Game(const Address &theBindAddress);
    virtual ~Game() { /* do nothing */ };
@@ -155,7 +160,6 @@ public:
                                                                                    PlayerSensorVertVisDistance  + PlayerScopeMargin)
                                                                            : Point(PlayerHorizVisDistance + PlayerScopeMargin,
                                                                                    PlayerVertVisDistance  + PlayerScopeMargin); }
-
    F32 getGridSize() { return mGridSize; }
    U32 getCurrentTime() { return mCurrentTime; }
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)
@@ -176,6 +180,8 @@ public:
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);
 
+   bool isSuspended() { return mGameSuspended; }
+
    S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };
 
@@ -190,7 +196,6 @@ private:
       UpdateServerStatusTime = 5000,      // Time to update our status on the master server (ms)
    };
 
-   U32 mPlayerCount;
    U32 mMaxPlayers;
    U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    bool mTestMode;           // True if being tested from editor
@@ -213,10 +218,9 @@ private:
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
-   bool mGameSuspended;                   // True if we're in "suspended animation" mode
+   GameConnection *mSuspendor;            // Player requesting suspension if game suspended by request
 
-   void suspendGame();                    // Enter suspended animation mode
-   void unsuspendGame();                  // Resume game
+   U32 mPlayerCount;             
 
 public:
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
@@ -261,13 +265,19 @@ public:
    void idle(U32 timeDelta);
    void gameEnded();
 
-   bool isSuspended() { return mGameSuspended; }
 
    S32 getLevelNameCount();
    U32 getRobotCount();
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
    S32 getLevelCount() { return mLevelList.size(); }
    bool isTestServer() { return mTestMode; }
+
+   void suspendGame();
+   void suspendGame(GameConnection *requestor);  // Suspend at player's request
+   void unsuspendGame(bool remoteRequest);
+
+   void suspenderLeftGame() { mSuspendor = NULL; }
+   GameConnection *getSuspendor() { return mSuspendor; }
 };
 
 class Ship;
@@ -296,6 +306,7 @@ public:
 
    bool hasValidControlObject();
    bool isConnectedToServer();
+   GameConnection *getConnectionToServer();
 
    bool getInCommanderMap() { return mInCommanderMap; }
 
@@ -303,16 +314,23 @@ public:
    Point worldToScreenPoint(Point p);
    void setConnectionToServer(GameConnection *connection);
    void drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent);
-   GameConnection *getConnectionToServer();
    void render();
+   
    void renderNormal();       // Render game in normal play mode
    void renderCommander();    // Render game in commander's map mode
+   void renderSuspended();    // Render suspended game
+
    void renderOverlayMap();   // Render the overlay map in normal play mode
    void resetZoomDelta() { mCommanderZoomDelta = CommanderMapZoomTime; }      // Used by teleporter
    bool isServer() { return false; }
    void idle(U32 timeDelta);
    void zoomCommanderMap();
+   U32 getPlayerCount();
+
+   void suspendGame()   { mGameSuspended = true; }
+   void unsuspendGame() { mGameSuspended = false; }
 };
+
 
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;

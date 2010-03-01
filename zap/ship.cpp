@@ -1581,6 +1581,7 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, isModActive),
    method(LuaShip, getEnergy),
    method(LuaShip, getHealth),
+   method(LuaShip, hasFlag),
 
    method(LuaShip, isValid),
 
@@ -1608,6 +1609,8 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
 S32 LuaShip::getRad(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getRadius()) : returnFloat(L, 0); }
 S32 LuaShip::getLoc(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualPos()) : returnPoint(L, Point(0,0)); }
 S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualVel()) : returnPoint(L, Point(0,0)); }
+S32 LuaShip::hasFlag(lua_State *L) { return  returnBool(L, thisShip ? thisShip->getFlagCount() > 0 : false); }
+
 
 S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam() + 1); }
 
