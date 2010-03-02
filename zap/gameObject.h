@@ -34,7 +34,8 @@
 #include "move.h"
 #include "point.h"
 
-#include "lua.h"  // For push prototype
+#include "luaObject.h"     // For returnInt method
+#include "lua.h"           // For push prototype
 
 namespace Zap
 {
@@ -91,6 +92,7 @@ const S32 gSpyBugRange = 300;     // How far can a spy bug see?
 class GameObject;
 class Game;
 class GameConnection;
+
 
 enum DamageType
 {
@@ -232,6 +234,7 @@ public:
    virtual bool processArguments(S32 argc, const char**argv);
    void setScopeAlways();
 
+   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, mTeam); }                 // Return item team to Lua
    virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented push function!"); }    // Lua-aware classes will implement this
 };
 

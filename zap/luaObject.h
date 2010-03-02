@@ -87,7 +87,28 @@ public:
 
 };
 
-///////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+
+class LuaItem : public LuaObject
+{
+public:
+   // "= 0" ==> make these methods "pure virtual" functions, and must be implemented in child classes!
+   virtual S32 getLoc(lua_State *L) = 0;       // Center of item (returns point)
+   virtual S32 getRad(lua_State *L) = 0;       // Radius of item (returns number)
+   virtual S32 getVel(lua_State *L) = 0;       // Speed of item (returns point)
+   virtual S32 getTeamIndx(lua_State *L) = 0;  // Team of item (returns team index)
+   virtual GameObject *getGameObject() = 0;    // Return the underlying GameObject
+
+   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }                 // Push item onto stack
+   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class
+
+   static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class LuaPoint : public LuaObject
 {

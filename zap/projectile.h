@@ -54,9 +54,10 @@ public:
 
    virtual S32 getClassID(lua_State *L) { return returnInt(L, BulletType); } // Object's class   
 
-   S32 getLoc(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Center of item (returns point)
-   S32 getRad(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Radius of item (returns number)
-   S32 getVel(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }     // Speed of item (returns point)
+   S32 getLoc(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }        // Center of item (returns point)
+   S32 getRad(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }        // Radius of item (returns number)
+   S32 getVel(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }        // Speed of item (returns point)
+   S32 getTeamIndx(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }   // Team of shooter
 
    virtual GameObject *getGameObject() { TNLAssert(false, "Unimplemented method!"); return NULL; }  // Return the underlying GameObject
    
@@ -108,6 +109,8 @@ public:
    S32 getLoc(lua_State *L);     // Center of item (returns point)
    S32 getRad(lua_State *L);     // Radius of item (returns number)
    S32 getVel(lua_State *L);     // Speed of item (returns point)
+   S32 getTeamIndx(lua_State *L);   // Return team of shooter     
+
    GameObject *getGameObject();  // Return the underlying GameObject
    S32 getWeapon(lua_State *L) { return returnInt(L, mWeaponType ); }       // Return which type of weapon this is
 
@@ -156,6 +159,8 @@ public:
    S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
    S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)
    S32 getVel(lua_State *L) { return Parent::getVel(L); }     // Speed of item (returns point)
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam); }   // Team of shooter
+
    GameObject *getGameObject() { return this; }               // Return the underlying GameObject
    S32 getWeapon(lua_State *L) { return returnInt(L, WeaponBurst ); }       // Return which type of weapon this is
 

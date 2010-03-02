@@ -40,8 +40,6 @@ public:
    Vector<Point> mPolyBounds;
 
 protected:
-
-
    void packUpdate(GhostConnection *connection, BitStream *stream)
    {
       stream->writeEnum(mPolyBounds.size(), gMaxPolygonPoints);
@@ -120,6 +118,12 @@ public:
 
       return size;
    }
+
+
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mCentroid); }     // Center of item (returns point)
+   S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }               // Radius of item (returns number)
+   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }    // Speed of item (returns point)
+
 };
 
 

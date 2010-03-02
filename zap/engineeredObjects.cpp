@@ -527,8 +527,8 @@ Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
    method(ForceFieldProjector, getLoc),
    method(ForceFieldProjector, getRad),
    method(ForceFieldProjector, getVel),
-
    method(ForceFieldProjector, getTeamIndx),
+
    method(ForceFieldProjector, getHealth),
    method(ForceFieldProjector, isActive),
 
@@ -874,8 +874,8 @@ Lunar<Turret>::RegType Turret::methods[] =
    method(Turret, getLoc),
    method(Turret, getRad),
    method(Turret, getVel),
-
    method(Turret, getTeamIndx),
+
    method(Turret, getHealth),
    method(Turret, isActive),
 

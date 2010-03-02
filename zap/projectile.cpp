@@ -323,6 +323,8 @@ void Projectile::renderItem(Point pos)
 S32 Projectile::getLoc(lua_State *L) { return returnPoint(L, getActualPos()); }     // Center of item (returns point)
 S32 Projectile::getRad(lua_State *L) { return returnInt(L, 10); }                   // TODO: Wrong!!  Radius of item (returns number)
 S32 Projectile::getVel(lua_State *L) { return returnPoint(L, getActualVel()); }     // Speed of item (returns point)
+S32 Projectile::getTeamIndx(lua_State *L) { return returnInt(L, mShooter->getTeam()); }   // Team of shooter
+
 GameObject *Projectile::getGameObject() { return this; }                            // Return the underlying GameObject
 
 

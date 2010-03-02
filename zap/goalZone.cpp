@@ -32,6 +32,8 @@ namespace Zap
 {
 
 TNL_IMPLEMENT_NETOBJECT(GoalZone);
+const char GoalZone::className[] = "GoalZone";      // Class name as it appears to Lua scripts
+
 
 GoalZone::GoalZone()
 {
@@ -71,17 +73,6 @@ bool GoalZone::processArguments(S32 argc, const char **argv)
    mTeam = atoi(argv[0]);     // Team is first arg
    processPolyBounds(argc, argv, 1, getGame()->getGridSize());
    computeExtent();
-
-   /*for(S32 i = 2; i < argc; i += 2)
-   {
-      // Put a cap on the number of vertices in a polygon
-      if(mPolyBounds.verts.size() >= gMaxPolygonPoints)
-         break;
-      Point p;
-      p.x = (F32) atof(argv[i-1]) * getGame()->getGridSize();
-      p.y = (F32) atof(argv[i]) * getGame()->getGridSize();
-      mPolyBounds.push_back(p);
-   } */
 
    return true;
 }

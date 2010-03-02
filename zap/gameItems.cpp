@@ -84,6 +84,7 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
    method(RepairItem, getLoc),
    method(RepairItem, getRad),
    method(RepairItem, getVel),
+   method(RepairItem, getTeamIndx),
 
    // Class specific methods
    method(RepairItem, isVis),
@@ -91,7 +92,6 @@ Lunar<RepairItem>::RegType RepairItem::methods[] =
 };
 
 S32 RepairItem::isVis(lua_State *L) { return returnBool(L, isVisible()); }        // Is RepairItem visible? (returns boolean)
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////

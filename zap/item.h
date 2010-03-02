@@ -35,24 +35,8 @@ namespace Zap
 
 class Ship;
 class GoalZone;
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LuaItem : public LuaObject
-{
-public:
-   // "= 0" ==> make these methods "pure virtual" functions, and must be implemented in child classes!
-   virtual S32 getLoc(lua_State *L) = 0;     // Center of item (returns point)
-   virtual S32 getRad(lua_State *L) = 0;     // Radius of item (returns number)
-   virtual S32 getVel(lua_State *L) = 0;     // Speed of item (returns point)
-   virtual GameObject *getGameObject() = 0;  // Return the underlying GameObject
-
-   virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }                 // Push item onto stack
-   virtual S32 getClassID(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return -1; } // Object's class
-
-   static LuaItem *getItem(lua_State *L, S32 index, U32 type, const char *functionName);
-};
+class GameType;
+extern S32 NEUTRAL_TEAM;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -115,6 +99,7 @@ public:
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
+   virtual S32 getTeamIndx(lua_State *L) { return NEUTRAL_TEAM; }     // Can be overridden for team items
 
    GameObject *getGameObject() { return this; }
 };

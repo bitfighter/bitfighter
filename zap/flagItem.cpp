@@ -67,9 +67,9 @@ Lunar<FlagItem>::RegType FlagItem::methods[] =
    method(FlagItem, getLoc),
    method(FlagItem, getRad),
    method(FlagItem, getVel),
+   method(FlagItem, getTeamIndx),
 
    // Flag specific methods
-   method(FlagItem, getTeamIndx),
    method(FlagItem, isInInitLoc),
    method(FlagItem, isInCaptureZone),
    method(FlagItem, isOnShip),

@@ -262,15 +262,28 @@ S32 LuaRobot::getCPUTime(lua_State *L)
 }
 
 
-// Turn to angle a (in radians)
+// Turn to angle a (in radians, or toward a point)
 S32 LuaRobot::setAngle(lua_State *L)
 {
    static const char *methodName = "Robot:setAngle()";
-   checkArgCount(L, 1, methodName);
 
-   Move move = thisRobot->getCurrentMove();
-   move.angle = getFloat(L, 1, methodName);
-   thisRobot->setCurrentMove(move);
+   if(lua_isnumber(L, 1))
+   {
+      checkArgCount(L, 1, methodName);
+
+      Move move = thisRobot->getCurrentMove();
+      move.angle = getFloat(L, 1, methodName);
+      thisRobot->setCurrentMove(move);
+   }
+   else  // Could be a point? 
+   {
+      checkArgCount(L, 1, methodName);
+      Point point = getPoint(L, 1, methodName);
+
+      Move move = thisRobot->getCurrentMove();
+      move.angle = thisRobot->getAnglePt(point);
+      thisRobot->setCurrentMove(move);
+   }
 
    return 0;
 }
@@ -421,12 +434,12 @@ S32 LuaRobot::getInterceptCourse(lua_State *L)
 
 
 // Thrust at velocity v toward point x,y
-S32 LuaRobot::setThrustPt(lua_State *L)
+S32 LuaRobot::setThrustPt(lua_State *L)      // (number, point)
 {
    static const char *methodName = "Robot:setThrustPt()";
    checkArgCount(L, 2, methodName);
    F32 vel = getFloat(L, 1, methodName);
-   Point point = getPoint(L, 1, methodName);
+   Point point = getPoint(L, 2, methodName);  
 
    F32 ang = thisRobot->getAnglePt(point) - 0 * FloatHalfPi;
 
@@ -798,11 +811,28 @@ extern S32 findZoneContaining(Point p);
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
-S32 LuaRobot::getWaypoint(lua_State *L)
+S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
 {
    static const char *methodName = "Robot:getWaypoint()";
-   checkArgCount(L, 1, methodName);
-   Point target = getPoint(L, 1, methodName);
+
+   Point target;
+
+   S32 args = lua_gettop(L);
+   if(args == 1)
+   {
+      target = getPoint(L, 1, methodName);
+   }
+   else if(args == 2)
+   {
+      F32 x = getFloat(L, 1, methodName);
+      F32 y = getFloat(L, 2, methodName);
+      target = Point(x, y); 
+   }
+   else
+   {
+      checkArgCount(L, 1, methodName);    // Will generate error message
+      return 0;
+   }
 
    S32 targetZone = findZoneContaining(target);       // Where we're going
 

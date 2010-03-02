@@ -28,7 +28,8 @@
 #include "goalZone.h"
 #include "gameType.h"
 #include "flagItem.h"
-#include "../glut/glutInclude.h"
+
+#include "glutInclude.h"
 
 namespace Zap
 {
