@@ -157,6 +157,10 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setGTEnum(ScoreGoalHostileTeam);
    setGTEnum(ScoreGoalOwnTeam);
 
+   // Event handler events
+   setEventEnum(ShipSpawnedEvent);
+   setEventEnum(ShipKilledEvent);
+
    // A few misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
    lua_pushinteger(L, -1); lua_setglobal(L, "HostileTeamIndx");
@@ -1131,7 +1135,7 @@ void EventManager::update()
 
 
 // This is a list of the function names to be called in the bot when a particular event is fired
-static char *eventFunctions = {
+static char *eventFunctions[] = {
    "OnMsgSent",
    "OnShipSpawned",
 };
@@ -1166,7 +1170,10 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       lua_State *L = subscriptions[eventType][i];
       try
       {
-         lua_getglobal(L, "onShipSpawned");
+         if(eventType == ShipSpawnedEvent)
+            lua_getglobal(L, "onShipSpawned");
+         else if(eventType == ShipKilledEvent)
+            lua_getglobal(L, "onShipKilled");
          //lua_pushnumber(L, eventType);    // Pass the event type
          ship->push(L);
 

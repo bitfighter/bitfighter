@@ -59,7 +59,7 @@ XXX need to document timers,sXXX
 <li>Fixed module "always on" bug</li>
 <li>Fixed "shoot through shielded robot" bug</li>
 <li>Event manager now working.  Can now add game events easily.</li>
-<li>Added ShipSpawned events</li>
+<li>Added ShipSpawned, ShipKilled events</li>
 <li>Added ship:isAlive() method</li>
 <li>Return nil rather than dummy value when method called on dead ship (e.g. in 012, ship:getLoc() returned 0,0 if ship was dead, now returns nil)</li>
 <li>Got rid of NexusFlagitem --> Now all flag are FlagItems, for all games</li>

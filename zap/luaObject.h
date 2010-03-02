@@ -40,6 +40,7 @@ using namespace TNL;
 // Set some enumeration helpers that we'll need to pass enumeration constants to programs
 #define setEnum(name) { lua_pushinteger(L, name); lua_setglobal(L, #name); }
 #define setGTEnum(name) { lua_pushinteger(L, GameType::name); lua_setglobal(L, #name); }
+#define setEventEnum(name) { lua_pushinteger(L, EventManager::name); lua_setglobal(L, #name); }
 
 #define method(class, name) {#name, &class::name}
 

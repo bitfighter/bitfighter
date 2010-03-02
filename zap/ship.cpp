@@ -1180,6 +1180,11 @@ void Ship::kill(DamageInfo *theInfo)
 
 void Ship::kill()
 {
+   if(!isGhost())
+      Robot::getEventManager().fireEvent(EventManager::ShipKilledEvent, this);
+   else
+      S32 x = 0;     // TODO: Delete this
+
    deleteObject(KillDeleteDelay);
    hasExploded = true;
    setMaskBits(ExplosionMask);
@@ -1606,7 +1611,7 @@ LuaShip::LuaShip(Ship *ship): thisShip(ship)
 }
 
 
-S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip->isValid()); }
+S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip.isValid()); }
 
 // Note: All of these methods will return nil if the ship in question has been deleted.
 S32 LuaShip::getRad(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getRadius()) : returnNil(L); }
@@ -1615,10 +1620,7 @@ S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->g
 S32 LuaShip::hasFlag(lua_State *L) { return thisShip ? returnBool(L, thisShip->getFlagCount()) : returnNil(L); }
 
 // Returns number of flags ship is carrying (most games will always be 0 or 1)
-S32 LuaShip::getFlagCount(lua_State *L)
-{
-   return thisShip ? returnInt(L, thisShip->getFlagCount()) : returnNil(L); }
-}
+S32 LuaShip::getFlagCount(lua_State *L) { return thisShip ? returnInt(L, thisShip->getFlagCount()) : returnNil(L); }
 
 
 S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam() + 1); }

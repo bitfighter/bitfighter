@@ -51,7 +51,8 @@ public:
    // Need to keep synced with eventFunctions!
    enum EventType {
       MsgSent = 0,
-      ShipSpawnedEvent,      // (ship) --> Ship (or robot) spawns
+      ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
+      ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
       EventTypes
    };
 
@@ -80,7 +81,7 @@ public:
 
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
-   void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned
+   void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
 };
 
 
