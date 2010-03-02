@@ -272,7 +272,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    else if(type == (U32)ServerDescr)
    {
       gServerGame->setHostDescr(param.getString());    // Do we also need to set gHost
-      gHostDescr = param.getString();     // Needed on local host?
+      gHostDescr = param.getString();                  // Needed on local host?
    }
 
    const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };

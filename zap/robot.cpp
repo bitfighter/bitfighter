@@ -91,7 +91,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnum(LoadoutZoneType);
    setEnum(TestItemType);
    setEnum(FlagType);
-   setEnum(NexusFlagType);
    setEnum(TurretTargetType);
    setEnum(SlipZoneType);
    setEnum(NexusType);
@@ -186,21 +185,25 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getTime),
 
    // These inherited from LuaShip
-   method(LuaRobot, getAngle),
+   method(LuaRobot, isAlive),
    method(LuaRobot, getLoc),
-   method(LuaRobot, getVel),
    method(LuaRobot, getRad),
+   method(LuaRobot, getVel),
    method(LuaRobot, getTeamIndx),
+   method(LuaRobot, isModActive),
+   method(LuaRobot, getEnergy),
+   method(LuaRobot, getHealth),
+   method(LuaRobot, hasFlag),
+   method(LuaRobot, getFlagCount),
 
+   method(LuaRobot, getAngle),
+   method(LuaRobot, getActiveWeapon),
+   // End inherited methods
 
    method(LuaRobot, getZoneCenter),
    method(LuaRobot, getGatewayFromZoneToZone),
    method(LuaRobot, getZoneCount),
    method(LuaRobot, getCurrentZone),
-
-   method(LuaRobot, hasFlag),
-   method(LuaRobot, getFlagCount),
-
 
    method(LuaRobot, setAngle),
    method(LuaRobot, setAnglePt),
@@ -528,20 +531,6 @@ S32 LuaRobot::getZoneCount(lua_State *L)
 }
 
 
-// Returns true if ship has at least one flag, false if not
-S32 LuaRobot::hasFlag(lua_State *L)
-{
-   return returnBool(L, thisRobot->carryingFlag() != GameType::NO_FLAG);
-}
-
-
-// Returns number of flags ship is carrying (most games will always be 0 or 1)
-S32 LuaRobot::getFlagCount(lua_State *L)
-{
-   return returnInt(L, thisRobot->getFlagCount());
-}
-
-
 // Fire current weapon if possible
 S32 LuaRobot::fire(lua_State *L)
 {
@@ -591,7 +580,6 @@ S32 LuaRobot::setWeapon(lua_State *L)
       }
 
    // If we get here without having found our weapon, then nothing happens.  Better luck next time!
-
    return 0;
 }
 
@@ -609,7 +597,6 @@ S32 LuaRobot::hasWeapon(lua_State *L)
 
    return returnBool(L, false);           // We don't!
 }
-
 
 
 // Activate module this cycle --> takes module index
@@ -1029,6 +1016,7 @@ const char LuaRobot::className[] = "LuaRobot";     // This is the class name as 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
 void EventManager::subscribe(lua_State *L, EventType eventType)
 {
    // First, see if we're already subscribed
@@ -1140,6 +1128,14 @@ void EventManager::update()
       pendingUnsubscriptions[i].clear();
    }
 }
+
+
+// This is a list of the function names to be called in the bot when a particular event is fired
+static char *eventFunctions = {
+   "OnMsgSent",
+   "OnShipSpawned",
+};
+
 
 void EventManager::fireEvent(EventType eventType)
 {

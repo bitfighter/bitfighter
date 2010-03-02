@@ -48,6 +48,7 @@ class Robot;
 class EventManager
 {
 public:
+   // Need to keep synced with eventFunctions!
    enum EventType {
       MsgSent = 0,
       ShipSpawnedEvent,      // (ship) --> Ship (or robot) spawns
@@ -115,8 +116,6 @@ private:
    };
 
    lua_State *L;                // Main Lua state variable
-
-   //void push(lua_State *L) {  Lunar<LuaRobot>::push(L, mLuaRobot); }
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
@@ -205,9 +204,6 @@ public:
    S32 getGatewayFromZoneToZone(lua_State *L);
    S32 getZoneCount(lua_State *L);
    S32 getCurrentZone(lua_State *L);
-
-   S32 getFlagCount(lua_State *L);
-   S32 hasFlag(lua_State *L);
 
 
    //S32 getAngle(lua_State *L);

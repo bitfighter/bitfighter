@@ -107,6 +107,9 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
    mJustTeleported = 0;
 
    mSparkElapsed = 0;
+
+   // Create our proxy object for Lua access
+   luaProxy = LuaShip(this);
 }
 
 // Destructor
@@ -119,7 +122,7 @@ Ship::~Ship()
 // Push a LuaShip proxy onto the stack
 void Ship::push(lua_State *L)
 {
-   LuaShip *luaship;
+   //LuaShip *luaship;
 
    //lua_getglobal(L, "_lookupShipInDirectory");
    //lua_pcall(L, 0, 1, 0)   // Passing 0 params, getting 1 back
@@ -128,7 +131,7 @@ void Ship::push(lua_State *L)
    //{
    //   lua_pop(L, 1);       // Get rid of the nil!
 
-      luaship = new LuaShip(this);
+      //luaship = new LuaShip(this);
    //   lua_pushlightuserdata(L, luaship);
    //   lua_pushlightuserdata(L, this);
    //   storeShipInWeakTable(L, this, luaship);   // Store luaship in Lua table, using "this" as key
@@ -136,7 +139,7 @@ void Ship::push(lua_State *L)
    //else
    //   luaship = lua_getref
 
-   Lunar<LuaShip>::push(L, luaship, true);       // Lua will delete this object when it's done with it
+   Lunar<LuaShip>::push(L, &luaProxy, true);       // true ==> Lua will delete it's reference to this object when it's done with it
 }
 
 
@@ -1572,8 +1575,10 @@ S32 LuaShip::id = 99;
 
 const char LuaShip::className[] = "Ship";      // Class name as it appears to Lua scripts
 
+// Note that when adding a method here, also add it to LuaRobot so that it can inherit these methods
 Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getClassID),
+   method(LuaShip, isAlive),
    method(LuaShip, getLoc),
    method(LuaShip, getRad),
    method(LuaShip, getVel),
@@ -1582,8 +1587,6 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getEnergy),
    method(LuaShip, getHealth),
    method(LuaShip, hasFlag),
-
-   method(LuaShip, isValid),
 
    method(LuaShip, getAngle),
    method(LuaShip, getActiveWeapon),
@@ -1596,20 +1599,26 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 // This is the only constructor that's used.
 LuaShip::LuaShip(Ship *ship): thisShip(ship)
 {
-   thisShip = ship;
+   //thisShip = ship;
    id++;
    mId = id;
    logprintf("Creating luaship %d", mId);
 }
 
 
-// Note: In methods that will be inherited by LuaRobot, which will be all of these, be sure to use getObj() instead of thisShip.
-// Otherwise, naughty crashy behavior will occur.
+S32 LuaShip::isAlive(lua_State *L) { return returnBool(L, thisShip->isValid()); }
 
-S32 LuaShip::getRad(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getRadius()) : returnFloat(L, 0); }
-S32 LuaShip::getLoc(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualPos()) : returnPoint(L, Point(0,0)); }
-S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualVel()) : returnPoint(L, Point(0,0)); }
-S32 LuaShip::hasFlag(lua_State *L) { return  returnBool(L, thisShip ? thisShip->getFlagCount() > 0 : false); }
+// Note: All of these methods will return nil if the ship in question has been deleted.
+S32 LuaShip::getRad(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getRadius()) : returnNil(L); }
+S32 LuaShip::getLoc(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualPos()) : returnNil(L); }
+S32 LuaShip::getVel(lua_State *L) { return thisShip ? returnPoint(L, thisShip->getActualVel()) : returnNil(L); }
+S32 LuaShip::hasFlag(lua_State *L) { return thisShip ? returnBool(L, thisShip->getFlagCount()) : returnNil(L); }
+
+// Returns number of flags ship is carrying (most games will always be 0 or 1)
+S32 LuaShip::getFlagCount(lua_State *L)
+{
+   return thisShip ? returnInt(L, thisShip->getFlagCount()) : returnNil(L); }
+}
 
 
 S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam() + 1); }
@@ -1619,15 +1628,14 @@ S32 LuaShip::isModActive(lua_State *L) {
    static const char *methodName = "Ship:isModActive()";
    checkArgCount(L, 1, methodName);
    ShipModule module = (ShipModule) getInt(L, 1, methodName, 0, ModuleCount - 1);
-   return returnBool(L, getObj()->isModuleActive(module));
+   return thisShip ? returnBool(L, getObj()->isModuleActive(module)) : returnNil(L);
 }
 
-S32 LuaShip::getAngle(lua_State *L) { return returnFloat(L, getObj()->getCurrentMove().angle); }      // Get angle ship is pointing at
-S32 LuaShip::getActiveWeapon(lua_State *L) { return returnInt(L, getObj()->getSelectedWeapon()); }    // Get WeaponIndex for current weapon
-S32 LuaShip::isValid(lua_State *L) { return returnBool(L, thisShip.isValid()); }
+S32 LuaShip::getAngle(lua_State *L) { return thisShip ? returnFloat(L, getObj()->getCurrentMove().angle) : returnNil(L); }      // Get angle ship is pointing at
+S32 LuaShip::getActiveWeapon(lua_State *L) { return thisShip ?  returnInt(L, getObj()->getSelectedWeapon()) : returnNil(L); }    // Get WeaponIndex for current weapon
 
-S32 LuaShip::getEnergy(lua_State *L) { return returnFloat(L, thisShip->getEnergyFraction()); }      // Return ship's energy as a fraction between 0 and 1
-S32 LuaShip::getHealth(lua_State *L) { return returnFloat(L, thisShip->getHealth()); }              // Return ship's health as a fraction between 0 and 1
+S32 LuaShip::getEnergy(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getEnergyFraction()) : returnNil(L); }        // Return ship's energy as a fraction between 0 and 1
+S32 LuaShip::getHealth(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getHealth()) : returnNil(L); }                // Return ship's health as a fraction between 0 and 1
 
 
 GameObject *LuaShip::getGameObject()

@@ -70,6 +70,7 @@ public:
 
    virtual S32 getClassID(lua_State *L) { return returnInt(L, ShipType); }    // Robot will override this
 
+   S32 isAlive(lua_State *L);
    S32 getAngle(lua_State *L);
    S32 getLoc(lua_State *L);
    S32 getRad(lua_State *L);
@@ -79,6 +80,7 @@ public:
    S32 getEnergy(lua_State *L);  // Return ship's energy as a fraction between 0 and 1
    S32 getHealth(lua_State *L);  // Return ship's health as a fraction between 0 and 1
 
+   S32 getFlagCount(lua_State *L);
 
    S32 getTeamIndx(lua_State *L);
    S32 isModActive(lua_State *L);
@@ -91,7 +93,6 @@ public:
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 
    virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
-   S32 isValid(lua_State *L);                        // Returns whether or not ship is still alive
 };
 
 //////////////////////////////////////////////
@@ -230,7 +231,7 @@ public:
 
    bool isDestroyed() { return hasExploded; }
    bool areItemsMounted() { return mMountedItems.size() != 0; }
-   
+
    S32 carryingFlag();     // Returns index of first flag, or NO_FLAG if ship has no flags
    S32 getFlagCount();     // Returns the number of flags ship is carrying
 
@@ -279,6 +280,7 @@ public:
 
    virtual bool processArguments(S32 argc, const char **argv);
 
+   LuaShip luaProxy;                                  // Our Lua proxy object
    bool isRobot() { return mIsRobot; }
    void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 

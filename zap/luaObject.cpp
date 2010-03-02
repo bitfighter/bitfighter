@@ -297,8 +297,6 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
          return Lunar<EnergyItem>::check(L, index);
       case SoccerBallItemType:
          return Lunar<SoccerBallItem>::check(L, index);
-      case NexusFlagType:
-         return Lunar<HuntersFlagItem>::check(L, index);
       case TurretType:
          return Lunar<Turret>::check(L, index);
       case ForceFieldProjectorType:

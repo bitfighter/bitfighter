@@ -45,7 +45,7 @@ private:
    S32 mNexusReturnDelay;
    S32 mNexusCapDelay;
    Timer mNexusReturnTimer;
-   Timer mNexusCapTimer;  
+   Timer mNexusCapTimer;
 
    struct YardSaleWaypoint
    {
@@ -59,7 +59,7 @@ private:
 public:
    HuntersGameType();      // Constructor
    bool processArguments(S32 argc, const char **argv);
-   
+
    bool mNexusIsOpen;      // Is the nexus open?
 
    // Info about this game type:
@@ -70,7 +70,7 @@ public:
    bool isSpawnWithLoadoutGame() { return true; }
    bool getMountedObjectsMakesShipsVisible() { return false; }    // Can carry items stealthily in this game
 
-   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);       
+   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
 
    bool isCarryingItems(Ship *ship);
    void flagDropped(Ship *theShip, FlagItem *theFlag);
@@ -147,21 +147,7 @@ public:
    bool isAtHome() { return false; }               // Nexus flags have no home, and are thus never there
    void sendHome() { /* Do nothing */ }            // Nexus flags have no home, and can thus never be sent there
 
-   ///* X */ Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
-   ///* X */ static const U32 dropDelay = 500;    // in ms
-
-
    TNL_DECLARE_CLASS(HuntersFlagItem);
-
-   ///// Lua Interface
-
-   ///* X */ HuntersFlagItem(lua_State *L) { /* Do nothing */ };     //  Lua constructor
-
-   ///* X */ static const char className[];
-   ///* X */ static Lunar<HuntersFlagItem>::RegType methods[];
-
-   ///* X */ S32 getClassID(lua_State *L) { return returnInt(L, NexusFlagType); }
-   ///* X */ void push(lua_State *L) {  Lunar<HuntersFlagItem>::push(L, this); }
 };
 
 
@@ -170,7 +156,7 @@ class HuntersNexusObject : public GameObject, public Polygon
 private:
    typedef GameObject Parent;
    void computeExtent();
-  
+
 public:
    HuntersNexusObject();      // Constructor
    bool processArguments(S32 argc, const char **argv);
