@@ -1584,10 +1584,12 @@ const char LuaShip::className[] = "Ship";      // Class name as it appears to Lu
 Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getClassID),
    method(LuaShip, isAlive),
+   
    method(LuaShip, getLoc),
    method(LuaShip, getRad),
    method(LuaShip, getVel),
    method(LuaShip, getTeamIndx),
+
    method(LuaShip, isModActive),
    method(LuaShip, getEnergy),
    method(LuaShip, getHealth),

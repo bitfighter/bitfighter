@@ -116,13 +116,13 @@ void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent
 
 void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex)
 {
-   if(scoringTeam == GameType::NO_TEAM)
+   if(scoringTeam == Item::NO_TEAM)
    {
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));    
       return;
    }
 
-   if(isTeamGame() && (scoringTeam == GameType::NEUTRAL_TEAM || scoringTeam == goalTeamIndex))    // Own-goal
+   if(isTeamGame() && (scoringTeam == Item::NEUTRAL_TEAM || scoringTeam == goalTeamIndex))    // Own-goal
    {
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam);
 
@@ -131,7 +131,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
    }
    else     // Goal on someone else's goal
    {
-      if(goalTeamIndex == GameType::HOSTILE_TEAM)
+      if(goalTeamIndex == Item::HOSTILE_TEAM)
          updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam);
       else
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam);
@@ -228,7 +228,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    mNetFlags.set(Ghostable);
    initialPos = pos;
    mLastPlayerTouch = NULL;
-   mLastPlayerTouchTeam = GameType::NO_TEAM;
+   mLastPlayerTouchTeam = Item::NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
 }
 
@@ -258,6 +258,7 @@ Lunar<SoccerBallItem>::RegType SoccerBallItem::methods[] =
    method(SoccerBallItem, getLoc),
    method(SoccerBallItem, getRad),
    method(SoccerBallItem, getVel),
+   method(SoccerBallItem, getTeamIndx),
 
    {0,0}    // End method list
 };
@@ -321,7 +322,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
          mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
-         mLastPlayerTouchTeam = ship ? ship->getTeam() : GameType::NO_TEAM;
+         mLastPlayerTouchTeam = ship ? ship->getTeam() : Item::NO_TEAM;
          mLastPlayerTouchName = ship ? ship->getName() : StringTableEntry(NULL);
       }
       else

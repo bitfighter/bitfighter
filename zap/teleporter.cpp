@@ -255,6 +255,7 @@ Lunar<Teleporter>::RegType Teleporter::methods[] =
    method(Teleporter, getLoc),
    method(Teleporter, getRad),
    method(Teleporter, getVel),
+   method(Teleporter, getTeamIndx),
 
    {0,0}    // End method list
 };

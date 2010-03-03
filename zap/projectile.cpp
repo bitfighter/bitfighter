@@ -45,6 +45,8 @@ Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
    method(LuaProjectile, getLoc),
    method(LuaProjectile, getRad),
    method(LuaProjectile, getVel),
+   method(LuaProjectile, getTeamIndx),
+
    method(LuaProjectile, getWeapon),
 
    {0,0}    // End method list
@@ -648,6 +650,8 @@ Lunar<Mine>::RegType Mine::methods[] =
    method(Mine, getLoc),
    method(Mine, getRad),
    method(Mine, getVel),
+   method(Mine, getTeamIndx),
+
    method(Mine, getWeapon),
 
    {0,0}    // End method list
@@ -795,6 +799,8 @@ Lunar<SpyBug>::RegType SpyBug::methods[] =
    method(SpyBug, getLoc),
    method(SpyBug, getRad),
    method(SpyBug, getVel),
+   method(SpyBug, getTeamIndx),
+
    method(SpyBug, getWeapon),
 
    {0,0}    // End method list

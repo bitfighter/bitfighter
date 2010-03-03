@@ -1264,7 +1264,7 @@ S32 GameType::getTeam(const char *playerName)
       if(!strcmp(mClientList[i]->name.getString(), playerName))
          return(mClientList[i]->teamId);
 
-   return(NEUTRAL_TEAM);    // If we can't find the team, let's call it neutral
+   return(Item::NEUTRAL_TEAM);    // If we can't find the team, let's call it neutral
 }
 
 

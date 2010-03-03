@@ -94,6 +94,9 @@ class Game;
 class GameConnection;
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 enum DamageType
 {
    DamageTypePoint,
@@ -109,6 +112,10 @@ struct DamageInfo
    DamageType damageType;       // see enum above!
    GameObject *damagingObject;  // see class below!
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class GameObject : public NetObject
 {
@@ -207,6 +214,9 @@ public:
 
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
+
+   F32 getRadius() { return mRadius; }
+   F32 getMass() { return mMass; }
 
    virtual Point getRenderPos();
    virtual Point getActualPos();

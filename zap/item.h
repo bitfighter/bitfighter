@@ -36,7 +36,6 @@ namespace Zap
 class Ship;
 class GoalZone;
 class GameType;
-extern S32 NEUTRAL_TEAM;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -94,6 +93,11 @@ public:
    virtual void onItemDropped(Ship *ship) { /* do nothing */ };
 
    bool collide(GameObject *otherObject);
+
+
+   static const S32 NEUTRAL_TEAM = -1;
+   static const S32 HOSTILE_TEAM = -2;
+   static const S32 NO_TEAM = -3;
 
    // LuaItem interface
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }

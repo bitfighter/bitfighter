@@ -34,6 +34,19 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(GoalZone);
 const char GoalZone::className[] = "GoalZone";      // Class name as it appears to Lua scripts
 
+// Define the methods we will expose to Lua
+Lunar<GoalZone>::RegType GoalZone::methods[] =
+{
+   // Standard gameItem methods
+   method(GoalZone, getClassID),
+   method(GoalZone, getLoc),
+   method(GoalZone, getRad),
+   method(GoalZone, getVel),
+   method(GoalZone, getTeamIndx),
+
+   {0,0}    // End method list
+};
+
 
 GoalZone::GoalZone()
 {

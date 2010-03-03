@@ -154,10 +154,6 @@ public:
       ScoringEventsCount
    };
 
-   static const S32 NEUTRAL_TEAM = -1;
-   static const S32 HOSTILE_TEAM = -2;
-   static const S32 NO_TEAM = -3;
-
    static const S32 gMaxTeams = 9;                                   // Max teams allowed
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = gMaxTeams - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All

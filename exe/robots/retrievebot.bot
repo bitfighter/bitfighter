@@ -12,40 +12,44 @@
 -- This is called by the robot's idle routine each tick.  
 -- This function must be present for the robot to work!
 
-function getMove()
-    -- Do we have the flag?
-    if( (not haveFlag) and bot:hasFlag()) then   -- Just got the flag
+function onTick()
+   -- Do we have the flag?
+   if( (not haveFlag) and bot:hasFlag()) then   -- Just got the flag
 
-        targetType = GoalZoneType                -- Set new destination
-        haveFlag = true
+      targetType = GoalZoneType                -- Set new destination
+      haveFlag = true
+      team = bot:getTeamIndx()
 
-    elseif(haveFlag and not bot:hasFlag()) then  -- Just lost flag
+   elseif(haveFlag and not bot:hasFlag()) then  -- Just lost flag
 
-        targetType = FlagType
-        haveFlag = false
+      targetType = FlagType
+      haveFlag = false
+      team = nil
 
-    end
+   end
 
-    dest = bot:findObjects(targetType)        -- Set new destination
-    if(dest == nil) then                      -- Check for bogus return value
-        return
-    end
-    
-    target = bot:getWaypoint(dest.x, dest.y)  -- The getWaypoint function will return a point that
-                                              -- we can fly straight towards that will get us closer
-                                              -- to dest
-                                                 
-    if(target == nil) then
-        bot:logprint("I'm stuck!");
-        return
-    end
+   local targets = bot:findGlobalItems(targetType)
+   --logprint("Targets ("..targetType..") found: "..#targets)
+   local target = findClosest(targets, bot:getTeamIndx())    
 
-    bot:setAngleXY(target.x, target.y)        -- Doesn't really matter, but it looks better when we aim
-                                              -- the ship towards our target
+   if(target == nil) then                   -- Check for nil
+      return
+   end
 
+   local dest = target:getLoc()             -- Set new destination
 
-    bot:setThrustXY(1, target.x, target.y)    -- Travel towards target at full speed (valid speeds range 
-                                              -- from 0 (stopped) to 1 (full bore)
+   local waypoint = bot:getWaypoint(dest)   -- The getWaypoint function will return a point that
+                                            -- we can fly straight towards that will get us closer
+                                            -- to dest
+
+   --logprint("Next waypoint: "..waypoint:x().." "..waypoint:y())                                             
+
+   bot:setAngle(waypoint)           -- Doesn't really matter, but it looks better when we aim
+                                    -- the ship towards our target
+
+   -- Note there is a bug in setThrustPt in 012a, so this may not work 
+   bot:setThrustPt(1, waypoint)     -- Travel towards target at full speed (valid speeds range 
+                                    -- from 0 (stopped) to 1 (full bore)
         
 end
 
@@ -99,6 +103,10 @@ end
 -- variables can be accessed from various functions defined in this file.
 
 -- Global variables
+function main()
+
+targetType = nil        -- Item we're currently searching for
+team = nil              -- Will only find items that match this team
 
 haveFlag = true         -- Well we don't really, but this will trigger the flag
                         -- seeking mechanism in the getMove() function to get us
@@ -107,9 +115,9 @@ haveFlag = true         -- Well we don't really, but this will trigger the flag
                         -- then our mission is to get the flag.  If we do, then
                         -- our mission is to return it to one of our capture zones.
                         
-bot:logprint("Hello, I'm "..getName() )        -- Print a message to the game log
 
-game = GameInfo()	    -- Create the GameInfo object so we can get information about
-					    -- the current game
-					    
-bot:logprint("Level ==> "..game:getLevelName())
+game = GameInfo()     -- Create the GameInfo object so we can get information about
+                      -- the current game
+                   
+logprint("Level name ==> "..game:getLevelName())
+end

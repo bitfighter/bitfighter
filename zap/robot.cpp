@@ -190,10 +190,12 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    // These inherited from LuaShip
    method(LuaRobot, isAlive),
+ 
    method(LuaRobot, getLoc),
    method(LuaRobot, getRad),
    method(LuaRobot, getVel),
    method(LuaRobot, getTeamIndx),
+
    method(LuaRobot, isModActive),
    method(LuaRobot, getEnergy),
    method(LuaRobot, getHealth),

@@ -32,7 +32,7 @@
 namespace Zap
 {
 
-class GoalZone : public GameObject, public Polygon, public LuaItem
+class GoalZone : public LuaPolygonalGameObject
 {
 private:
    typedef GameObject Parent;
@@ -70,13 +70,10 @@ public:
    void idle(GameObject::IdleCallPath path);
    void setFlashCount(S32 i) { mFlashCount = i; }
 
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mCentroid); }     // Center of item (returns point)
-   S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }               // Radius of item (returns number)
-   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }    // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, mTeam); }      // Return item team to Lua
-   GameObject *getGameObject() { return this; }                                  // Return the underlying GameObject
+   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
 
-   static const char className[];         // Class name as it appears to Lua scripts
+   static const char className[];                 // Class name as it appears to Lua scripts
+   static Lunar<GoalZone>::RegType methods[];
 
    TNL_DECLARE_CLASS(GoalZone);
 };

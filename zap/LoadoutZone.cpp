@@ -36,7 +36,7 @@ namespace Zap
 
 extern S32 gMaxPolygonPoints;
 
-class LoadoutZone : public GameObject, public Polygon
+class LoadoutZone : public LuaPolygonalGameObject
 {
 private:
    typedef GameObject Parent;
@@ -126,10 +126,33 @@ public:
          computeExtent();
    }
 
+   GameObject *getGameObject() { return this; }          // Return the underlying GameObject
+
+   static const char className[];                        // Class name as it appears to Lua scripts
+   static Lunar<LoadoutZone>::RegType methods[];
+
    TNL_DECLARE_CLASS(LoadoutZone);
 };
 
+
+
 TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
+
+const char LoadoutZone::className[] = "LoadoutZone";      // Class name as it appears to Lua scripts
+
+// Define the methods we will expose to Lua
+Lunar<LoadoutZone>::RegType LoadoutZone::methods[] =
+{
+   // Standard gameItem methods
+   method(LoadoutZone, getClassID),
+   method(LoadoutZone, getLoc),
+   method(LoadoutZone, getRad),
+   method(LoadoutZone, getVel),
+   method(LoadoutZone, getTeamIndx),
+
+   {0,0}    // End method list
+};
+
 
 };
 

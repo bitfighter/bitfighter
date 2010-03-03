@@ -147,6 +147,7 @@ Lunar<EnergyItem>::RegType EnergyItem::methods[] =
    method(EnergyItem, getLoc),
    method(EnergyItem, getRad),
    method(EnergyItem, getVel),
+   method(EnergyItem, getTeamIndx),
 
    // Class specific methods
    method(EnergyItem, isVis),
@@ -348,6 +349,7 @@ Lunar<Asteroid>::RegType Asteroid::methods[] =
    method(Asteroid, getLoc),
    method(Asteroid, getRad),
    method(Asteroid, getVel),
+   method(Asteroid, getTeamIndx),
 
    // Class specific methods
    method(Asteroid, getSize),
@@ -487,6 +489,7 @@ Lunar<ResourceItem>::RegType ResourceItem::methods[] =
    method(ResourceItem, getLoc),
    method(ResourceItem, getRad),
    method(ResourceItem, getVel),
+   method(ResourceItem, getTeamIndx),
 
    {0,0}    // End method list
 };
