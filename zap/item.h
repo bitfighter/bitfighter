@@ -103,7 +103,7 @@ public:
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
-   virtual S32 getTeamIndx(lua_State *L) { return NEUTRAL_TEAM; }     // Can be overridden for team items
+   virtual S32 getTeamIndx(lua_State *L) { return NEUTRAL_TEAM + 1; }     // Can be overridden for team items
 
    GameObject *getGameObject() { return this; }
 };

@@ -32,7 +32,7 @@ OBJECTS_ZAP=\
    CTFGame.o\
    HTFGame.o\
    IniFile.o\
-   LoadoutZone.o\
+   loadoutZone.o\
    SweptEllipsoid.o\
    UI.o\
    UIChat.o\
@@ -117,10 +117,10 @@ WFLAGS=
 
 
 .c.o:
-	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
+   $(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
 .cpp.o : 
-	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
+   $(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
 
 default: ../exe/bitfighter
@@ -139,14 +139,14 @@ dedicated: ../exe/bitfighter
 ../exe/bitfighter: $(OBJECTS_ZAP)
 # Avoid errors with mingw by removing gch files with mingw 
 #  rm -f *.gch    
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(OPENAL) $(GLUT) $(THREADLIB) $(LUALIB) -lstdc++  -lm
+   $(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a  $(OPENAL) $(GLUT) $(THREADLIB) $(LUALIB) -lstdc++  -lm
 
 ../master/masterInterface.o:
-	make -C ../master
+   make -C ../master
 
 clean:
-	rm -f $(OBJECTS_ZAP) ../exe/bitfighter ../exe/bitfightered
+   rm -f $(OBJECTS_ZAP) ../exe/bitfighter ../exe/bitfightered
 
 cleano:
-	rm -f $(OBJECTS_ZAP)
+   rm -f $(OBJECTS_ZAP)
 

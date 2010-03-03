@@ -36,7 +36,6 @@ class FlagItem : public Item
 private:
    typedef Item Parent;
    Point mInitialPos;                   // Where flag was "born"
-   void push(lua_State *L) {  Lunar<FlagItem>::push(L, this); }
    void flagDropped();
 
 protected:
@@ -78,10 +77,13 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, FlagType); }
    
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam); }              // Index of owning team (-1 for neutral flag)
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }           // Index of owning team
    S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
    S32 isInCaptureZone(lua_State *L) { return returnBool(L, isInZone()); }    // Is flag in a team's capture zone?
    S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
+private:
+   void push(lua_State *L) { Lunar<FlagItem>::push(L, this); }
+
 };
 
 extern void renderFlag(Point pos, Color flagColor);

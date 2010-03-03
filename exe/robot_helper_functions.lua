@@ -88,6 +88,7 @@ function findClosest(items, teamIndx)
 
    for indx, item in ipairs(items) do              -- Iterate over our list
 
+logprint(tostring(teamIndx)..","..item:getTeamIndx())
       if teamIndx == nil or item:getTeamIndx() == teamIndx then
 
          -- Use distSquared because it is less computationally expensive
@@ -103,32 +104,6 @@ function findClosest(items, teamIndx)
 
    return closest
 end
-
-
---
--- Convenience function: find closest item in a list of items that belong to specified team
--- Will return nil if items has 0 elements of specified team
---
-function findClosest(items, team)
-
-    local closest = nil
-    local minDist = 999999999
-    local loc = bot:getLoc()
-
-    for indx, item in ipairs(items) do              -- Iterate over our list
-        -- Use distSquared because it is less computationally expensive
-        -- and works great for comparing distances
-        local d = loc:distSquared(item:getLoc())    -- Dist btwn robot and TestItem
-
-        if(d < minDist) then                        -- Is it the closest yet?
-           closest = item
-           minDist = d
-        end
-    end
-
-    return closest
-end
-
 
 
 --

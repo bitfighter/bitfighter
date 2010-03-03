@@ -41,6 +41,7 @@
 #include "gameObjectRender.h"
 #include "flagItem.h"
 #include "goalZone.h"
+#include "loadoutZone.h"
 #include "soccerGame.h"          // For lua object defs
 #include "huntersGame.h"         // For lua object defs
 #include "engineeredObjects.h"   // For lua object defs
@@ -1338,6 +1339,10 @@ bool Robot::initialize(Point p)
    Lunar<LuaProjectile>::Register(L);
    Lunar<Mine>::Register(L);
    Lunar<SpyBug>::Register(L);
+
+   Lunar<GoalZone>::Register(L);
+   Lunar<LoadoutZone>::Register(L);
+
 
    // Load some libraries
    luaopen_base(L);

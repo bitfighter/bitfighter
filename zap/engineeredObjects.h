@@ -93,7 +93,7 @@ public:
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0, 0)); }   
 
    // More Lua methods that are inherited by turrets and forcefield projectors
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam()); }
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, getTeam() + 1); }
    S32 getHealth(lua_State *L) { return returnFloat(L, mHealth); }
    S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
 

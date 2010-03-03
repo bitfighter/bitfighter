@@ -244,7 +244,7 @@ public:
    virtual bool processArguments(S32 argc, const char**argv);
    void setScopeAlways();
 
-   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, mTeam); }                 // Return item team to Lua
+   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, mTeam + 1); }             // Return item team to Lua
    virtual void push(lua_State *L) { TNLAssert(false, "Unimplemented push function!"); }    // Lua-aware classes will implement this
 };
 

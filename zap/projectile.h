@@ -159,7 +159,7 @@ public:
    S32 getLoc(lua_State *L) { return Parent::getLoc(L); }     // Center of item (returns point)
    S32 getRad(lua_State *L) { return Parent::getRad(L); }     // Radius of item (returns number)
    S32 getVel(lua_State *L) { return Parent::getVel(L); }     // Speed of item (returns point)
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam); }   // Team of shooter
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }   // Team of shooter
 
    GameObject *getGameObject() { return this; }               // Return the underlying GameObject
    S32 getWeapon(lua_State *L) { return returnInt(L, WeaponBurst ); }       // Return which type of weapon this is

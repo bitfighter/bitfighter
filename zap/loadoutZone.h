@@ -23,70 +23,51 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _GOALZONE_H_
-#define _GOALZONE_H_
-
 #include "gameObject.h"
+#include "gameType.h"
+#include "gameNetInterface.h"
+#include "UI.h"
+#include "gameObjectRender.h"
+#include "glutInclude.h"
 #include "polygon.h"
 
 namespace Zap
 {
 
-class GoalZone : public LuaPolygonalGameObject
+extern S32 gMaxPolygonPoints;
+
+class LoadoutZone : public LuaPolygonalGameObject
 {
 private:
    typedef GameObject Parent;
 
-   enum {
-      FlashDelay = 500,
-      FlashCount = 5,
-
-      InitialMask = BIT(0),
-      TeamMask = BIT(1),
-   };
-   S32 mFlashCount;
-   Timer mFlashTimer;
-
 public:
-   GoalZone();
+   LoadoutZone();    // C++ constructor
+   
    void render();
-
-   bool mHasFlag;     // Is there a flag parked in this zone?
-
-   bool isFlashing() { return mFlashCount & 1; }
-   bool didRecentlyChangeTeam() { return mFlashCount != 0; }
    S32 getRenderSortValue();
    bool processArguments(S32 argc, const char **argv);
-
-   void setTeam(S32 team);
    void onAddedToGame(Game *theGame);
-   void computeExtent();
-   bool getCollisionPoly(Vector<Point> &polyPoints);
+
+   void computeExtent();                                 // Bounding box for quick collision-possibility elimination
+   bool getCollisionPoly(Vector<Point> &polyPoints);     // More precise boundary for precise collision detection
    bool collide(GameObject *hitObject);
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
-   void idle(GameObject::IdleCallPath path);
-   void setFlashCount(S32 i) { mFlashCount = i; }
 
-   TNL_DECLARE_CLASS(GoalZone);
+   //// Lua interface
 
-   ///// Lua Interface
-   GoalZone(lua_State *L) { /* Do nothing */ };   //  Lua constructor
+   LoadoutZone(lua_State *L) { /* Do nothing */ };    //  Lua constructor
+   GameObject *getGameObject() { return this; }          // Return the underlying GameObject
 
-   static const char className[];                 // Class name as it appears to Lua scripts
-   static Lunar<GoalZone>::RegType methods[];
+   static const char className[];                        // Class name as it appears to Lua scripts
+   static Lunar<LoadoutZone>::RegType methods[];
 
-   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
-   S32 getClassID(lua_State *L) { return returnInt(L, GoalZoneType); }
+   S32 getClassID(lua_State *L) { return returnInt(L, LoadoutZoneType); }
 
-private:
-  void push(lua_State *L) {  Lunar<GoalZone>::push(L, this); }
+   TNL_DECLARE_CLASS(LoadoutZone);
 };
 
-
 };
-
-#endif
-
 
 

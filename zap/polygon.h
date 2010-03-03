@@ -38,6 +38,7 @@ class Polyline
 {
 public:
    Vector<Point> mPolyBounds;
+   Point mCentroid;
 
 protected:
    void packUpdate(GhostConnection *connection, BitStream *stream)
@@ -62,6 +63,10 @@ protected:
          mPolyBounds.push_back(p);
       }
 
+      // We don't ever use this, but it seems like we should compute it anyway...
+      if(size)
+         mCentroid = centroid(mPolyBounds);
+
       return size;
    }
 
@@ -80,6 +85,8 @@ protected:
          p.y = (F32) atof(argv[i+1]) * gridSize;
          mPolyBounds.push_back(p);
       }
+
+      mCentroid = centroid(mPolyBounds);
    }
 
 
@@ -95,6 +102,9 @@ protected:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class Polygon : public Polyline
 {
 public:
@@ -102,7 +112,6 @@ public:
 
    Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
 
-   Point mCentroid;
    F32 mLabelAngle;
 
    U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
@@ -121,14 +130,17 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 // This class serves only to provide an implementation of the abstract methods in LuaItem that are common to the polygon classes
 class LuaPolygonalGameObject : public GameObject, public Polygon, public LuaItem
 {
 public:
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mCentroid); }     // Center of item (returns point)
-   S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }               // Radius of item (returns number)
-   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }    // Velocity of item (returns point)
-   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, getTeam()); }  // Team of item
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mCentroid); }         // Center of item (returns point)
+   S32 getRad(lua_State *L) { return LuaObject::returnInt(L, 0); }                   // Radius of item (returns number)
+   S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, Point(0,0)); }        // Velocity of item (returns point)
+   S32 getTeamIndx(lua_State *L) { return LuaObject::returnInt(L, getTeam() + 1); }  // Team of item (in bots, teams start with 1)
 };
 
 

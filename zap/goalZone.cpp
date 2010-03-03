@@ -32,6 +32,7 @@ namespace Zap
 {
 
 TNL_IMPLEMENT_NETOBJECT(GoalZone);
+
 const char GoalZone::className[] = "GoalZone";      // Class name as it appears to Lua scripts
 
 // Define the methods we will expose to Lua
@@ -76,6 +77,7 @@ S32 GoalZone::getRenderSortValue()
    return -1;     // Renders beneath everything else
 }
 
+
 extern S32 gMaxPolygonPoints;
 
 bool GoalZone::processArguments(S32 argc, const char **argv)
@@ -90,11 +92,13 @@ bool GoalZone::processArguments(S32 argc, const char **argv)
    return true;
 }
 
+
 void GoalZone::setTeam(S32 team)
 {
    mTeam = team;
    setMaskBits(TeamMask);
 }
+
 
 void GoalZone::onAddedToGame(Game *theGame)
 {
@@ -106,6 +110,7 @@ void GoalZone::onAddedToGame(Game *theGame)
   theGame->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client
 }
 
+
 void GoalZone::computeExtent()
 {
    Rect extent(mPolyBounds[0], mPolyBounds[0]);
@@ -113,6 +118,7 @@ void GoalZone::computeExtent()
       extent.unionPoint(mPolyBounds[i]);
    setExtent(extent);
 }
+
 
 bool GoalZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
@@ -132,6 +138,7 @@ bool GoalZone::collide(GameObject *hitObject)
    return false;
 }
 
+
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
@@ -142,6 +149,7 @@ U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream 
 
    return 0;
 }
+
 
 void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {

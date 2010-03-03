@@ -30,19 +30,26 @@ function onTick()
 
    local targets = bot:findGlobalItems(targetType)
    --logprint("Targets ("..targetType..") found: "..#targets)
-   local target = findClosest(targets, bot:getTeamIndx())    
+   local target = findClosest(targets, team)    
 
    if(target == nil) then                   -- Check for nil
       return
    end
 
    local dest = target:getLoc()             -- Set new destination
-
+   
+--logprint("dest: "..tostring(target))
    local waypoint = bot:getWaypoint(dest)   -- The getWaypoint function will return a point that
                                             -- we can fly straight towards that will get us closer
                                             -- to dest
+   if waypoint == nil then 
+      waypoint = lastwaypoint 
+   end
+   
+   lastwaypoint = waypoint
+   
 
-   --logprint("Next waypoint: "..waypoint:x().." "..waypoint:y())                                             
+   --logprint("Next waypoint: "..tostring(waypoint))                                             
 
    bot:setAngle(waypoint)           -- Doesn't really matter, but it looks better when we aim
                                     -- the ship towards our target
@@ -107,6 +114,7 @@ function main()
 
 targetType = nil        -- Item we're currently searching for
 team = nil              -- Will only find items that match this team
+lastwaypoint = nil
 
 haveFlag = true         -- Well we don't really, but this will trigger the flag
                         -- seeking mechanism in the getMove() function to get us
