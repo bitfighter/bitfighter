@@ -42,6 +42,11 @@ function onTick()
    local waypoint = bot:getWaypoint(dest)   -- The getWaypoint function will return a point that
                                             -- we can fly straight towards that will get us closer
                                             -- to dest
+   
+   -- If the flag drops off our nav grid, getWaypoint will return nil, 
+   -- and we won't be able to pathfind to it... so just
+   -- continue on the way we were going until we hear otherwise.
+   
    if waypoint == nil then 
       waypoint = lastwaypoint 
    end
@@ -60,39 +65,10 @@ function onTick()
         
 end
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Support functions follow (not all needed for this bot, can be deleted)
 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Are we at (or near) point dx, dy?
-
-function atDest()
-    delta = 50
-    pos = bot:getPosXY()
-    return (dist(pos.x, pos.y, dest.x, dest.y) < delta)
-end
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--- Return the distance between points x1,y1 and x2,y2
-
-function dist(x1, y1, x2, y2)
-    return( math.sqrt((x2 - x1)^2 + (y2 - y1)^2) )
-end
-
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- Other required functions
 
--------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- This function is called once and should return the robot's name
 
@@ -102,9 +78,6 @@ end
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 -- Setup code here: this is run once when the robot is initialized, and
 -- any variables set here will persist throughout the robot's life.  These
 -- variables can be accessed from various functions defined in this file.
@@ -112,20 +85,20 @@ end
 -- Global variables
 function main()
 
-targetType = nil        -- Item we're currently searching for
-team = nil              -- Will only find items that match this team
-lastwaypoint = nil
+   targetType = nil        -- Item we're currently searching for
+   team = nil              -- Will only find items that match this team
+   lastwaypoint = nil
 
-haveFlag = true         -- Well we don't really, but this will trigger the flag
-                        -- seeking mechanism in the getMove() function to get us
-                        -- started on the right track.  Later, this will be used to
-                        -- track whether we have the flag or not.  If we don't,
-                        -- then our mission is to get the flag.  If we do, then
-                        -- our mission is to return it to one of our capture zones.
-                        
+   haveFlag = true         -- Well we don't really, but this will trigger the flag
+                           -- seeking mechanism in the getMove() function to get us
+                           -- started on the right track.  Later, this will be used to
+                           -- track whether we have the flag or not.  If we don't,
+                           -- then our mission is to get the flag.  If we do, then
+                           -- our mission is to return it to one of our capture zones.
 
-game = GameInfo()     -- Create the GameInfo object so we can get information about
-                      -- the current game
-                   
-logprint("Level name ==> "..game:getLevelName())
+
+   game = GameInfo()     -- Create the GameInfo object so we can get information about
+                         -- the current game
+
+   logprint("Level name ==> "..game:getLevelName())
 end

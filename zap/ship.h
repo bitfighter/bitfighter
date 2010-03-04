@@ -120,7 +120,7 @@ protected:
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
 
-   void intialize();             // Some initialization code needed by both bots and ships
+   void initialize(Point pos);            // Some initialization code needed by both bots and ships
 
 public:
    enum {

@@ -1267,7 +1267,7 @@ bool Robot::initialize(Point p)
 
    mCurrentZone = -1;   // Correct value will be calculated upon first request
 
-   Parent::initialize();
+   Parent::initialize(p);
 
    enableCollision();
 
