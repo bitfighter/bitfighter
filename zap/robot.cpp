@@ -833,9 +833,18 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
    }
    else
    {
-      checkArgCount(L, 1, methodName);    // Will generate error message
+      checkArgCount(L, 1, methodName);                // Will generate error message
       return 0;
    }
+
+
+   // If we can see the target, go there directly
+   if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))
+      return returnPoint(L, target);
+
+   // TODO: cache destination point; if it hasn't moved, then skip ahead.  Remember we'll have different bots, so we need
+   // to store them in some sort of hash by L
+   // http://stackoverflow.com/questions/266206/simple-hashmap-implementation-in-c
 
    S32 targetZone = findZoneContaining(target);       // Where we're going
 
@@ -890,8 +899,12 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
       return returnNil(L);
 
    if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
-      //return findAndReturnClosestZone(L, target);
-      return returnNil(L);
+   {
+      targetZone = findClosestZone(target);
+
+      if(targetZone == -1)
+         return returnNil(L);
+   }
 
    // We're in, or on the cusp of, the zone containing our target.  We're close!!
    if(currentZone == targetZone)
