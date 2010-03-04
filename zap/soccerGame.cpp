@@ -118,11 +118,11 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
 {
    if(scoringTeam == Item::NO_TEAM)
    {
-      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));    
+      s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
       return;
    }
 
-   if(isTeamGame() && (scoringTeam == Item::NEUTRAL_TEAM || scoringTeam == goalTeamIndex))    // Own-goal
+   if(isTeamGame() && (scoringTeam == Item::TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
    {
       updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam);
 
@@ -131,7 +131,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
    }
    else     // Goal on someone else's goal
    {
-      if(goalTeamIndex == Item::HOSTILE_TEAM)
+      if(goalTeamIndex == Item::TEAM_HOSTILE)
          updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam);
       else
          updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam);

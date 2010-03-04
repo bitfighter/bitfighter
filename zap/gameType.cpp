@@ -1264,7 +1264,7 @@ S32 GameType::getTeam(const char *playerName)
       if(!strcmp(mClientList[i]->name.getString(), playerName))
          return(mClientList[i]->teamId);
 
-   return(Item::NEUTRAL_TEAM);    // If we can't find the team, let's call it neutral
+   return(Item::TEAM_NEUTRAL);    // If we can't find the team, let's call it neutral
 }
 
 
@@ -1780,7 +1780,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
 
    cref->decoder = new LPC10VoiceDecoder();
    cref->voiceSFX = new SFXObject(SFXVoice, NULL, 1, Point(), Point());
-   
+
    mClientList.push_back(cref);
    gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());
 

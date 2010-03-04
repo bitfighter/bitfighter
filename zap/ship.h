@@ -95,7 +95,9 @@ public:
    virtual Ship *getObj() { return thisShip; }       // Access to underlying object, robot will override
 };
 
-//////////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
@@ -117,6 +119,8 @@ protected:
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
+
+   void intialize();             // Some initialization code needed by both bots and ships
 
 public:
    enum {

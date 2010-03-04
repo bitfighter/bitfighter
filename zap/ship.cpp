@@ -59,49 +59,24 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
+// Also, the following is also run by robot's constructor
 Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
 
    mNetFlags.set(Ghostable);
 
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = p;
-      mMoveState[i].angle = 0;
-   }
-
    for(U32 i = 0; i < TrailCount; i++)
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
 
    mTeam = team;
-   mHealth = 1.0;       // Start at full health
    mass = m;            // Ship's mass
-   hasExploded = false; // Haven't exploded yet!
-   updateExtent();      // Set initial extent
 
    mPlayerName = playerName;     // This will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
    mIsRobot = isRobot;
 
-   for(S32 i=0; i<TrailCount; i++)         // Don't draw any vehicle trails
-      mTrail[i].reset();
+   intialize();
 
-   mEnergy = (S32)(EnergyMax * .80f);      // Start off with 80% energy
-
-   for(S32 i = 0; i < ModuleCount; i++)    // All modules disabled
-      mModuleActive[i] = false;
-
-   // Set initial module and weapon selections
-
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = (ShipModule) DefaultLoadout[i];
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
-
-   mActiveWeaponIndx = 0;
-
-   mCooldown = false;
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
    mJustTeleported = 0;
@@ -116,6 +91,41 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
 Ship::~Ship()
 {
    // Do nothing
+}
+
+
+// Initialize some things that both ships and bots care about... this will get run during the ship's constructor
+// and also after a bot respawns and needs to reset itself
+void Ship::intialize()
+{
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].pos = p;
+      mMoveState[i].angle = 0;
+      mMoveState[i].vel = Point(0,0);
+   }
+
+   updateExtent();
+
+   mHealth = 1.0;       // Start at full health
+   hasExploded = false; // Haven't exploded yet!
+
+   for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
+      mTrail[i].reset();
+
+   mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
+   for(S32 i = 0; i < ModuleCount; i++)         // and all modules disabled
+      mModuleActive[i] = false;
+
+   // Set initial module and weapon selections
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      mModule[i] = (ShipModule) DefaultLoadout[i];
+
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
+
+   mActiveWeaponIndx = 0;
+   mCooldown = false;
 }
 
 
@@ -1584,7 +1594,7 @@ const char LuaShip::className[] = "Ship";      // Class name as it appears to Lu
 Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getClassID),
    method(LuaShip, isAlive),
-   
+
    method(LuaShip, getLoc),
    method(LuaShip, getRad),
    method(LuaShip, getVel),

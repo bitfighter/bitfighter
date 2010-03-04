@@ -191,7 +191,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    // These inherited from LuaShip
    method(LuaRobot, isAlive),
- 
+
    method(LuaRobot, getLoc),
    method(LuaRobot, getRad),
    method(LuaRobot, getVel),
@@ -278,7 +278,7 @@ S32 LuaRobot::setAngle(lua_State *L)
       move.angle = getFloat(L, 1, methodName);
       thisRobot->setCurrentMove(move);
    }
-   else  // Could be a point? 
+   else  // Could be a point?
    {
       checkArgCount(L, 1, methodName);
       Point point = getPoint(L, 1, methodName);
@@ -442,7 +442,7 @@ S32 LuaRobot::setThrustPt(lua_State *L)      // (number, point)
    static const char *methodName = "Robot:setThrustPt()";
    checkArgCount(L, 2, methodName);
    F32 vel = getFloat(L, 1, methodName);
-   Point point = getPoint(L, 2, methodName);  
+   Point point = getPoint(L, 2, methodName);
 
    F32 ang = thisRobot->getAnglePt(point) - 0 * FloatHalfPi;
 
@@ -829,7 +829,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
    {
       F32 x = getFloat(L, 1, methodName);
       F32 y = getFloat(L, 2, methodName);
-      target = Point(x, y); 
+      target = Point(x, y);
    }
    else
    {
@@ -1263,40 +1263,14 @@ Robot::~Robot()
 // Reset everything on the robot back to the factory settings
 bool Robot::initialize(Point p)
 {
-   for(U32 i = 0; i < MoveStateCount; i++)
-   {
-      mMoveState[i].pos = p;
-      mMoveState[i].angle = 0;
-      mMoveState[i].vel = Point(0,0);
-   }
-   updateExtent();
-
    respawnTimer.clear();
-
-   mHealth = 1.0;       // Start at full health
-   hasExploded = false; // Haven't exploded yet!
 
    mCurrentZone = -1;   // Correct value will be calculated upon first request
 
-   for(S32 i = 0; i < TrailCount; i++)          // Clear any vehicle trails
-      mTrail[i].reset();
+   Parent::initialize();
 
-   mEnergy = (S32) ((F32) EnergyMax * .80);     // Start off with 80% energy
-   for(S32 i = 0; i < ModuleCount; i++)         // and all modules disabled
-      mModuleActive[i] = false;
-
-   // Set initial module and weapon selections
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      mModule[i] = (ShipModule) DefaultLoadout[i];
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      mWeapon[i] = (WeaponType) DefaultLoadout[i + ShipModuleCount];
-
-   hasExploded = false;
    enableCollision();
 
-   mActiveWeaponIndx = 0;
-   mCooldown = false;
 
    // WarpPositionMask triggers the spinny spawning visual effect
    setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client

@@ -42,9 +42,6 @@ class GameType;
 
 class Item : public MoveObject, public LuaItem
 {
-private:
-   void flagDropped();
-
 protected:
    enum MaskBits {
       InitialMask = BIT(0),
@@ -94,16 +91,15 @@ public:
 
    bool collide(GameObject *otherObject);
 
-
-   static const S32 NEUTRAL_TEAM = -1;
-   static const S32 HOSTILE_TEAM = -2;
-   static const S32 NO_TEAM = -3;
+   static const S32 TEAM_NEUTRAL = -1;
+   static const S32 TEAM_HOSTILE = -2;
+   static const S32 NO_TEAM = -3;      // Not exposed to lua, not used in level files, only used internally
 
    // LuaItem interface
    S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, getActualPos()); }
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
-   virtual S32 getTeamIndx(lua_State *L) { return NEUTRAL_TEAM + 1; }     // Can be overridden for team items
+   virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }     // Can be overridden for team items
 
    GameObject *getGameObject() { return this; }
 };
@@ -144,7 +140,6 @@ public:
    bool collide(GameObject *otherObject);
    virtual bool pickup(Ship *theShip) = 0;
    virtual void onClientPickup() = 0;
-
 };
 
 };
