@@ -16,7 +16,7 @@ function onTick()
    -- Do we have the flag?
    if( (not haveFlag) and bot:hasFlag()) then   -- Just got the flag
 
-      targetType = GoalZoneType                -- Set new destination
+      targetType = GoalZoneType                 -- Set new destination
       haveFlag = true
       team = bot:getTeamIndx()
 
@@ -64,10 +64,6 @@ function onTick()
                                     -- from 0 (stopped) to 1 (full bore)
         
 end
-
-
--------------------------------------------------------------------------------
--- Other required functions
 
 -------------------------------------------------------------------------------
 -- This function is called once and should return the robot's name

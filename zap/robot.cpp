@@ -161,6 +161,8 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    // Event handler events
    setEventEnum(ShipSpawnedEvent);
    setEventEnum(ShipKilledEvent);
+   setEventEnum(MsgReceivedEvent);
+
 
    // A few misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
@@ -1195,7 +1197,6 @@ void EventManager::fireEvent(EventType eventType)
       try
       {
          lua_getglobal(L, "onMsgSent");
-         //lua_pushnumber(L, eventType);    // Pass the event type
 
          if (lua_pcall(L, 0, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
@@ -1220,7 +1221,6 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
             lua_getglobal(L, "onShipSpawned");
          else if(eventType == ShipKilledEvent)
             lua_getglobal(L, "onShipKilled");
-         //lua_pushnumber(L, eventType);    // Pass the event type
          ship->push(L);
 
          if (lua_pcall(L, 1, 0, 0) != 0)
@@ -1233,7 +1233,31 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
    }
 }
+/*
+void EventManager::fireEvent(EventType eventType, const char *message, LuaPlayer player, bool global)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      lua_State *L = subscriptions[eventType][i];
+      try
+      {
+         if(eventType == MsgReceivedEvent)
+            lua_getglobal(L, "onMsgReceived");
+         LuaObject::lua_pushstring(L, message);
+         player->push(L);
+         LuaObject::lua_pushbool(L, global);
 
+         if (lua_pcall(L, 3, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
+      {
+         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         return;
+      }
+   }
+}
+*/
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -53,6 +53,7 @@ public:
       MsgSent = 0,
       ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
       ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
+      MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
       EventTypes
    };
 
@@ -82,6 +83,7 @@ public:
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
+   //void fireEvent(EventType eventType, const char *message, LuaPlayer player, bool global);
 };
 
 

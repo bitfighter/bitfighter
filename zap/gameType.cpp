@@ -1980,9 +1980,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
    ClientRef *cl = source->getClientRef();
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-      s2cDisplayChatMessage, (global, source->getClientName(), message));
+      s2cDisplayChatMessage, (global, source->getClientName()));
 
-   sendChatDisplayEvent(cl, global, theEvent);
+   sendChatDisplayEvent(cl, global, theEvent, message.get_string());
 }
 
 
@@ -1993,9 +1993,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry messag
    ClientRef *cl = source->getClientRef();
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-      s2cDisplayChatMessageSTE, (global, source->getClientName(), message));
+      s2cDisplayChatMessageSTE, (global, source->getClientName()));
 
-   sendChatDisplayEvent(cl, global, theEvent);
+   sendChatDisplayEvent(cl, global, theEvent, message.get_string());
 }
 
 
@@ -2014,6 +2014,9 @@ void GameType::sendChatDisplayEvent(ClientRef *cl, bool global, NetEvent *theEve
          if(mClientList[i]->clientConnection)
             mClientList[i]->clientConnection->postNetEvent(theEvent);
    }
+
+   // And fire an event handler...
+   // TODO: EventManager::fireEvent(EventManager::MsgReceivedEvent, message, player, global);
 }
 
 extern Color gGlobalChatColor;

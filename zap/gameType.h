@@ -109,7 +109,9 @@ private:
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
    Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
-   bool mLevelHasLoadoutZone;    
+   bool mLevelHasLoadoutZone;
+
+   void sendChatDisplayEvent(ClientRef *cl, bool global, NetEvent *theEvent);      // In-game chat
 
 public:
    enum GameTypes
@@ -405,8 +407,6 @@ public:
 
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat
    TNL_DECLARE_RPC(c2sSendChatSTE, (bool global, StringTableEntry ste));       // Quick-chat
-
-   void sendChatDisplayEvent(ClientRef *cl, bool global, NetEvent *theEvent);  // In-game chat
 
    TNL_DECLARE_RPC(s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message));
    TNL_DECLARE_RPC(s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message));

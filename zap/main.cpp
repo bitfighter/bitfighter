@@ -1417,7 +1417,11 @@ void processStartupParams()
 
 using namespace Zap;
 
-
+////////////////////////////////////////
+////////////////////////////////////////
+// main()
+////////////////////////////////////////
+////////////////////////////////////////
 
 #ifdef TNL_OS_XBOX
 int zapmain(int argc, char **argv)
@@ -1433,20 +1437,11 @@ int main(int argc, char **argv)
    gCmdLineSettings.init();      // Init cmd line settings struct
    gIniSettings.init();          // Init struct that holds INI settings
 
-   //setDefaultLevelList();        // Levels we'll play, unless we're told otherwise
-
    Vector<TNL::StringPtr> theArgv;
 
    // Process some command line args that need to be handled early, like journaling options
    for(S32 i = 1; i < argc; i++)
    {
-      //if(!stricmp(argv[i], "-createsampleini")) // Create sample INI file and exit
-      //{
-      //   gINI.Path("bitfighter.ini.sample");
-      //   saveSettingsToINI();
-      //   logprintf("Wrote bitfighter.ini.sample, for version %s/%d", ZAP_GAME_RELEASE, BUILD_VERSION);
-      //   exitGame(0);
-      //}
       if(!stricmp(argv[i], "-rules"))            // Print current rules and exit
       {
          GameType::printRules();
