@@ -50,7 +50,7 @@
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
 #include "luaUtil.h"
-#include "../glut/glutInclude.h"
+#include "glutInclude.h"
 
 #define hypot _hypot    // Kill some warnings
 
@@ -844,9 +844,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
    if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))
       return returnPoint(L, target);
 
-   // TODO: cache destination point; if it hasn't moved, then skip ahead.  Remember we'll have different bots, so we need
-   // to store them in some sort of hash by L
-   // http://stackoverflow.com/questions/266206/simple-hashmap-implementation-in-c
+   // TODO: cache destination point; if it hasn't moved, then skip ahead. 
 
    S32 targetZone = findZoneContaining(target);       // Where we're going
 
@@ -1183,9 +1181,10 @@ void EventManager::update()
 
 
 // This is a list of the function names to be called in the bot when a particular event is fired
-static char *eventFunctions[] = {
+static const char *eventFunctions[] = {
    "OnMsgSent",
    "OnShipSpawned",
+   "onMsgReceived",
 };
 
 
@@ -1217,10 +1216,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       lua_State *L = subscriptions[eventType][i];
       try
       {
-         if(eventType == ShipSpawnedEvent)
-            lua_getglobal(L, "onShipSpawned");
-         else if(eventType == ShipKilledEvent)
-            lua_getglobal(L, "onShipKilled");
+         lua_getglobal(L, eventFunctions[eventType]);
          ship->push(L);
 
          if (lua_pcall(L, 1, 0, 0) != 0)
@@ -1233,19 +1229,19 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
    }
 }
-/*
-void EventManager::fireEvent(EventType eventType, const char *message, LuaPlayer player, bool global)
+
+
+void EventManager::fireEvent(EventType eventType, const char *message, LuaPlayerInfo player, bool global)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
       try
       {
-         if(eventType == MsgReceivedEvent)
-            lua_getglobal(L, "onMsgReceived");
-         LuaObject::lua_pushstring(L, message);
-         player->push(L);
-         LuaObject::lua_pushbool(L, global);
+         lua_getglobal(L, "onMsgReceived");  //eventFunctions[eventType]
+         lua_pushstring(L, message);
+         player.push(L);
+         lua_pushboolean(L, global);
 
          if (lua_pcall(L, 3, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
@@ -1257,7 +1253,7 @@ void EventManager::fireEvent(EventType eventType, const char *message, LuaPlayer
       }
    }
 }
-*/
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

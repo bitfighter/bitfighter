@@ -1465,7 +1465,7 @@ void PlayerMenuUserInterface::render()
 
       PlayerType pt = gt->mClientList[i]->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer;    // Will be used to show admin/player/robot prefix on menu
 
-      Color col = gt->getTeamColor(gt->mClientList[i]->teamId);
+      Color col = gt->getTeamColor(gt->mClientList[i]->getTeam());
       menuItems.push_back(MenuItem(gt->mClientList[i]->name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, pt));
    }
 
@@ -1542,7 +1542,7 @@ void TeamMenuUserInterface::render()
 
       Color col = gt->mTeams[i].color;
       S32 players = gt->mTeams[i].numPlayers;
-      S32 score = gt->mTeams[i].score;
+      S32 score = gt->mTeams[i].getScore();
       bool isCurrent = (i == gt->getTeam(nameToChange));
       menuItems.push_back(MenuItem(gt->mTeams[i].name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, isCurrent, players, score));
    }

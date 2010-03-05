@@ -93,6 +93,7 @@ OBJECTS_ZAP=\
    soccerGame.o\
    sparkManager.o\
    speedZone.o\
+   teamInfo.o\
    teleporter.o\
    textItem.o\
    voiceCodec.o\

@@ -33,24 +33,43 @@
 #include "flagItem.h"
 #include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
+#include "luaGameInfo.h"   // For LuaPlayerInfo
+#include "teamInfo.h"
 #include <string>
 
 
 namespace Zap
 {
 
+// Some forward declarations
 class GoalZone;
 struct MenuItem;
 class Item;
+class LuaPlayerInfo;
 
 class ClientRef : public Object
 {
+private:
+   S32 mTeamId;
+   S32 mScore;                      // Individual score for current game
+   F32 mRating;                     // Skill rating from -1 to 1
+   LuaPlayerInfo mLuaPlayerInfo;    // Lua access to this class
+
 public:
    StringTableEntry name;  // Name of client - guaranteed to be unique of current clients
 
-   S32 teamId;
-   S32 score;              // Individual score for current game
-   F32 rating;             // Skill rating from -1 to 1
+   S32 getTeam() { return mTeamId; }
+   void setTeam(S32 teamId) { mTeamId = teamId; }
+
+   S32 getScore() { return mScore; }
+   void setScore(S32 score) { mScore = score; }
+   void addScore(S32 score) { mScore += score; }
+
+   S32 getRating() { return mRating; }
+   void setRating(F32 rating) { mRating = rating; }
+
+   LuaPlayerInfo getLuaPlayerInfo() { return mLuaPlayerInfo; }
+
 
    bool isAdmin;
    bool isLevelChanger;
@@ -70,34 +89,21 @@ public:
    {
       ping = 0;
 
-      score = 0;
-      rating = 0;
+      mScore = 0;
+      mRating = 0;
 
       readyForRegularGhosts = false;
       wantsScoreboardUpdates = false;
-      teamId = 0;
+      mTeamId = 0;
       isAdmin = false;
+
+      mLuaPlayerInfo = LuaPlayerInfo(this);
    }
 };
 
-//////////
 
-class Team
-{
-public:
-   StringTableEntry name;
-   Color color;
-   Vector<Point> spawnPoints;
-   Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
-
-   S32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
-   S32 score;
-   F32 rating;
-
-   Team() { numPlayers = 0; score = 0; rating = 0; }     // Constructor
-};
-
-//////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 class Robot;
 class AsteroidSpawn;
@@ -111,7 +117,7 @@ private:
    Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
    bool mLevelHasLoadoutZone;
 
-   void sendChatDisplayEvent(ClientRef *cl, bool global, NetEvent *theEvent);      // In-game chat
+   void sendChatDisplayEvent(ClientRef *cl, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
 public:
    enum GameTypes
@@ -288,7 +294,7 @@ public:
    {
       ClientRef *cl = findClientRef(clientName);
       if(cl)
-         return mTeams[cl->teamId].color;
+         return mTeams[cl->getTeam()].color;
       return Color();
    }
 

@@ -363,14 +363,14 @@ void GameType::idle(GameObject::IdleCallPath path)
 // Sorts players by score
 S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 {
-   return a->getPointer()->score < b->getPointer()->score;
+   return a->getPointer()->getScore() < b->getPointer()->getScore();
 }
 
 
 // Sorts teams by score
 S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 {
-   return a->score > b->score;
+   return a->getScore() > b->getScore();
 }
 
 
@@ -494,7 +494,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             glEnd();
 
             UserInterface::drawString(xl + 40, yt + 2, 30, getTeamName(i));
-            UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].score);
+            UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].getScore());
          }
 
          Vector<RefPtr<ClientRef> > playerScores;
@@ -504,7 +504,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          S32 fontSize = U32(maxHeight * 0.8f);
 
          for(S32 j = 0; j < mClientList.size(); j++)
-            if(mClientList[j]->teamId == i || !isTeamGame())
+            if(mClientList[j]->getTeam() == i || !isTeamGame())
                playerScores.push_back(mClientList[j]);
 
          playerScores.sort(scoreSort);
@@ -517,9 +517,9 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             static char buff[255] = "";
 
             if(isTeamGame())
-               dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->rating);
+               dSprintf(buff, sizeof(buff), "%2.2f", (F32)playerScores[j]->getRating());
             else
-               dSprintf(buff, sizeof(buff), "%d", playerScores[j]->score);
+               dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
             UserInterface::drawString(xr - (120 + UserInterface::getStringWidth(fontSize, buff)), curRowY, fontSize, buff);
             UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
@@ -544,7 +544,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          Point pos(UserInterface::canvasWidth - UserInterface::horizMargin - 35, UserInterface::canvasHeight - UserInterface::vertMargin - lroff - i * 38);
          renderFlag(pos + Point(-20, 18), teams[i].color);
          glColor3f(1,1,1);
-         UserInterface::drawStringf(pos.x, pos.y, 32, "%d", teams[i].score);
+         UserInterface::drawStringf(pos.x, pos.y, 32, "%d", teams[i].getScore());
       }
    }
    renderTimeLeft();
@@ -679,7 +679,7 @@ void GameType::renderTalkingClients()
    {
       if(mClientList[i]->voiceSFX->isPlaying())
       {
-         Color teamColor = mTeams[mClientList[i]->teamId].color;
+         Color teamColor = mTeams[mClientList[i]->getTeam()].color;
          glColor(teamColor);
          UserInterface::drawString(10, y, 20, mClientList[i]->name.getString());
          y += 25;
@@ -714,15 +714,15 @@ void GameType::onGameOver()
    if(isTeamGame())   // Team game -> find top team
    {
       S32 teamWinner = 0;
-      S32 winningScore = mTeams[0].score;
+      S32 winningScore = mTeams[0].getScore();
       for(S32 i = 1; i < mTeams.size(); i++)
       {
-         if(mTeams[i].score == winningScore)
+         if(mTeams[i].getScore() == winningScore)
             tied = true;
-         else if(mTeams[i].score > winningScore)
+         else if(mTeams[i].getScore() > winningScore)
          {
             teamWinner = i;
-            winningScore = mTeams[i].score;
+            winningScore = mTeams[i].getScore();
             tied = false;
          }
       }
@@ -739,9 +739,9 @@ void GameType::onGameOver()
          ClientRef *winningClient = mClientList[0];
          for(S32 i = 1; i < mClientList.size(); i++)
          {
-            if(mClientList[i]->score == winningClient->score)
+            if(mClientList[i]->getScore() == winningClient->getScore())
                tied = true;
-            else if(mClientList[i]->score > winningClient->score)
+            else if(mClientList[i]->getScore() > winningClient->getScore())
             {
                winningClient = mClientList[i];
                tied = false;
@@ -994,7 +994,7 @@ ClientRef *GameType::findClientRef(const StringTableEntry &name)
 void GameType::spawnShip(GameConnection *theClient)
 {
    ClientRef *cl = theClient->getClientRef();
-   U32 teamIndex = cl->teamId;
+   U32 teamIndex = cl->getTeam();
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
@@ -1113,13 +1113,13 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    // What does the spy bug see?
    //S32 teamId = gc->getClientRef()->teamId;
-      mSpyBugs.clear();
-      gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
+   mSpyBugs.clear();
+   gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
 
    for(S32 i = 0; i < mSpyBugs.size(); i++)
    {
       SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);
-      if(!sb->isVisibleToPlayer( cr->teamId, cr->name, isTeamGame() ))
+      if(!sb->isVisibleToPlayer( cr->getTeam(), cr->name, isTeamGame() ))
          break;
       fillVector.clear();
       Point pos = sb->getActualPos();
@@ -1162,11 +1162,11 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
    if(isTeamGame() && connection->isInCommanderMap())
    {
       TNLAssert(connection->getClientRef(), "ClientRef should never be NULL!");
-      S32 teamId = connection->getClientRef()->teamId;
+      S32 teamId = connection->getClientRef()->getTeam();
 
       for(S32 i = 0; i < mClientList.size(); i++)
       {
-         if(mClientList[i]->teamId != teamId)      // Wrong team
+         if(mClientList[i]->getTeam() != teamId)      // Wrong team
             continue;
 
          TNLAssert(mClientList[i]->clientConnection, "No client connection in PerformScopequery");     // Should never happen
@@ -1262,7 +1262,7 @@ S32 GameType::getTeam(const char *playerName)
 {
    for(S32 i = 0; i < mClientList.size(); i++)
       if(!strcmp(mClientList[i]->name.getString(), playerName))
-         return(mClientList[i]->teamId);
+         return(mClientList[i]->getTeam());
 
    return(Item::TEAM_NEUTRAL);    // If we can't find the team, let's call it neutral
 }
@@ -1286,6 +1286,7 @@ Color GameType::getTeamColor(GameObject *theObject)
    return getTeamColor(theObject->getTeam());
 }
 
+
 Color GameType::getShipColor(Ship *s)
 {
    return getTeamColor(s->getTeam());
@@ -1308,11 +1309,11 @@ void GameType::countTeamPlayers()
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      mTeams[mClientList[i]->teamId].numPlayers++;
+      mTeams[mClientList[i]->getTeam()].numPlayers++;
 
       GameConnection *cc = mClientList[i]->clientConnection;
       if(cc)
-         mTeams[mClientList[i]->teamId].rating += max(getCurrentRating(cc), .1);
+         mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1);
    }
 }
 
@@ -1356,12 +1357,12 @@ void GameType::serverAddClient(GameConnection *theClient)
    }
 
    // ...and add new player to that team
-   cref->teamId = minTeamIndex;
+   cref->setTeam(minTeamIndex);
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
 
    s2cAddClient(cref->name, false, cref->clientConnection->isAdmin());          // Tell other clients about the new guy, who is never us...
-   s2cClientJoinedTeam(cref->name, cref->teamId);
+   s2cClientJoinedTeam(cref->name, cref->getTeam());
 
    spawnShip(theClient);
 }
@@ -1422,7 +1423,7 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
          updateScore(killerRef, KillSelf);
 
       // Punish those who kill members of their own team.  Should do nothing with friendly fire disabled
-      else if(isTeamGame() && killerRef->teamId == clientRef->teamId)   // Same team in a team game
+      else if(isTeamGame() && killerRef->getTeam() == clientRef->getTeam())   // Same team in a team game
          updateScore(killerRef, KillTeammate);
 
       else                                                              // Different team, or not a team game
@@ -1476,7 +1477,7 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       S32 points = getEventScore(IndividualScore, scoringEvent, data);
       if(points != 0)
       {
-         player->score += points;
+         player->addScore(points);
          player->clientConnection->mScore += points;
          // (No need to broadcast score because individual scores are only displayed when Tab is held,
          // in which case scores, along with data like ping time, are streamed in)
@@ -1502,7 +1503,7 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       if(points == 0)
          return;
 
-      mTeams[team].score += points;
+      mTeams[team].addScore(points);
 
       // This is kind of a hack to emulate adding a point to every team *except* the scoring team.  The scoring team has its score
       // deducted, then the same amount is added to every team.  Assumes that points < 0.
@@ -1510,20 +1511,20 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       {
          for(S32 i = 0; i < mTeams.size(); i++)
          {
-            mTeams[i].score -= points;                // Add magnitiude of negative score to all teams
-            s2cSetTeamScore(i, mTeams[i].score);      // Broadcast result
+            mTeams[i].addScore(-points);                    // Add magnitiude of negative score to all teams
+            s2cSetTeamScore(i, mTeams[i].getScore());       // Broadcast result
          }
       }
       else  // All other scoring events
-         s2cSetTeamScore(team, mTeams[team].score);          // Broadcast new team score
+         s2cSetTeamScore(team, mTeams[team].getScore());    // Broadcast new team score
 
       mLeadingTeamScore = S32_MIN;
 
       // Find the leading team...
       for(S32 i = 0; i < mTeams.size(); i++)
-         if(mTeams[i].score > mLeadingTeamScore)
+         if(mTeams[i].getScore() > mLeadingTeamScore)
          {
-            mLeadingTeamScore = mTeams[i].score;
+            mLeadingTeamScore = mTeams[i].getScore();
             mLeadingTeam = i;
          }  // no break statement in above!
 
@@ -1538,7 +1539,7 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
 void GameType::updateScore(ClientRef *client, ScoringEvent event, S32 data)
 {
    if(client)
-      updateScore(client, client->teamId, event, data);
+      updateScore(client, client->getTeam(), event, data);
    // else, no one to score...    sometimes client really does come in as null
 }
 
@@ -1762,11 +1763,11 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    }
 
    if(team == -1)                                        // If no team provided...
-      cl->teamId = (cl->teamId + 1) % mTeams.size();     // ...find the next one...
+      cl->setTeam((cl->getTeam() + 1) % mTeams.size());  // ...find the next one...
    else                                                  // ...otherwise...
-      cl->teamId = team;                                 // ...use the one provided
+      cl->setTeam(team);                                 // ...use the one provided
 
-   s2cClientJoinedTeam(cl->name, cl->teamId);            // Announce the change
+   s2cClientJoinedTeam(cl->name, cl->getTeam());         // Announce the change
    spawnShip(source);                                    // Create a new ship
 }
 
@@ -1775,7 +1776,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
 {
    ClientRef *cref = allocClientRef();
    cref->name = name;
-   cref->teamId = 0;
+   cref->setTeam(0);
    cref->isAdmin = admin;
 
    cref->decoder = new LPC10VoiceDecoder();
@@ -1849,7 +1850,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
 
 GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::gMaxTeams> teamIndex, U32 score), (teamIndex, score))
 {
-   mTeams[teamIndex].score = score;
+   mTeams[teamIndex].setScore(score);
 }
 
 
@@ -1864,7 +1865,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
 GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, (StringTableEntry name, RangedU32<0, GameType::gMaxTeams> teamIndex), (name, teamIndex))
 {
    ClientRef *cl = findClientRef(name);
-   cl->teamId = (S32) teamIndex;
+   cl->setTeam((S32) teamIndex);
    gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex));
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
@@ -1917,14 +1918,14 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    for(S32 i = 0; i < mTeams.size(); i++)
    {
       s2cAddTeam(mTeams[i].name, mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
-      s2cSetTeamScore(i, mTeams[i].score);
+      s2cSetTeamScore(i, mTeams[i].getScore());
    }
 
    // Add all the client and team information
    for(S32 i = 0; i < mClientList.size(); i++)
    {
       s2cAddClient(mClientList[i]->name, mClientList[i]->clientConnection == theConnection, mClientList[i]->clientConnection->isAdmin());
-      s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->teamId);
+      s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
    }
 
    // An empty list clears the barriers
@@ -1980,9 +1981,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
    ClientRef *cl = source->getClientRef();
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-      s2cDisplayChatMessage, (global, source->getClientName()));
+      s2cDisplayChatMessage, (global, source->getClientName(), message));
 
-   sendChatDisplayEvent(cl, global, theEvent, message.get_string());
+   sendChatDisplayEvent(cl, global, message.getString(), theEvent);
 }
 
 
@@ -1993,31 +1994,32 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry messag
    ClientRef *cl = source->getClientRef();
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-      s2cDisplayChatMessageSTE, (global, source->getClientName()));
+      s2cDisplayChatMessageSTE, (global, source->getClientName(), message));
 
-   sendChatDisplayEvent(cl, global, theEvent, message.get_string());
+   sendChatDisplayEvent(cl, global, message.getString(), theEvent);
 }
 
 
 // Send a chat message that will be displayed in-game
 // If not global, send message only to other players on team
-void GameType::sendChatDisplayEvent(ClientRef *cl, bool global, NetEvent *theEvent)
+void GameType::sendChatDisplayEvent(ClientRef *cl, bool global, const char *message, NetEvent *theEvent)
 {
    S32 teamId = 0;
 
    if(!global)
-      teamId = cl->teamId;
+      teamId = cl->getTeam();
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      if(global || mClientList[i]->teamId == teamId)
+      if(global || mClientList[i]->getTeam() == teamId)
          if(mClientList[i]->clientConnection)
             mClientList[i]->clientConnection->postNetEvent(theEvent);
    }
 
    // And fire an event handler...
-   // TODO: EventManager::fireEvent(EventManager::MsgReceivedEvent, message, player, global);
+   Robot::getEventManager().fireEvent(EventManager::MsgReceivedEvent, message, cl->getLuaPlayerInfo(), global);
 }
+
 
 extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
@@ -2107,7 +2109,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
       else
          mPingTimes.push_back(MaxPing);
 
-      mScores.push_back(mClientList[i]->score);
+      mScores.push_back(mClientList[i]->getScore());
 
       GameConnection *conn = mClientList[i]->clientConnection;
 
@@ -2131,8 +2133,8 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
          break;
 
       mClientList[i]->ping = pingTimes[i];
-      mClientList[i]->score = scores[i];
-      mClientList[i]->rating = ((F32)ratings[i] - 100.0) / 100.0;
+      mClientList[i]->setScore(scores[i]);
+      mClientList[i]->setRating(((F32)ratings[i] - 100.0) / 100.0);
    }
 }
 
@@ -2174,7 +2176,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, c2sVoiceChat, (bool echo, ByteBufferPtr vo
       RefPtr<NetEvent> event = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cVoiceChat, (cl->name, voiceBuffer));
       for(S32 i = 0; i < mClientList.size(); i++)
       {
-         if(mClientList[i]->teamId == cl->teamId && (mClientList[i] != cl || echo) && mClientList[i]->clientConnection)
+         if(mClientList[i]->getTeam() == cl->getTeam() && (mClientList[i] != cl || echo) && mClientList[i]->clientConnection)
             mClientList[i]->clientConnection->postNetEvent(event);
       }
    }

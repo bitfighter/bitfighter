@@ -196,8 +196,9 @@ end
 -- setup
 ------------------------------------------------------------------------
 
-
-globalMsg("WELCOME TO ANOTHER SESSION WITH YOUR COMPUTER PSYCHIATRIST, ELIZA")
-globalMsg("IT SURE IS NEAT TO HAVE YOU DROP BY")
-globalMsg("WHAT IS YOUR PROBLEM?")
-bot:subscribe(MsgReceivedEvent)
+function main()
+   bot:globalMsg("WELCOME TO ANOTHER SESSION WITH YOUR COMPUTER PSYCHIATRIST, ELIZA")
+   bot:globalMsg("IT SURE IS NEAT TO HAVE YOU DROP BY")
+   bot:globalMsg("WHAT IS YOUR PROBLEM?")
+   bot:subscribe(MsgReceivedEvent)
+end

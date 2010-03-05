@@ -38,20 +38,21 @@
 #include "gameWeapons.h"
 
 #include "luaObject.h"
+#include "teamInfo.h"
 
 
 namespace Zap
 {
 
 class Robot;
+class LuaPlayerInfo;
 
 class EventManager
 {
 public:
    // Need to keep synced with eventFunctions!
    enum EventType {
-      MsgSent = 0,
-      ShipSpawnedEvent,       // (ship) --> Ship (or robot) spawns
+      ShipSpawnedEvent = 0,   // (ship) --> Ship (or robot) spawns
       ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
       MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
       EventTypes
@@ -83,7 +84,7 @@ public:
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
-   //void fireEvent(EventType eventType, const char *message, LuaPlayer player, bool global);
+   void fireEvent(EventType eventType, const char *message, LuaPlayerInfo player, bool global);     // MsgReceived
 };
 
 
@@ -106,7 +107,7 @@ class Robot : public Ship
    typedef Ship Parent;
 
 private:
-   string mFilename;                         // Name of file script was loaded from
+   string mFilename;            // Name of file script was loaded from
 
    S32 mCurrentZone;            // Zone robot is currently in
    U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed

@@ -106,72 +106,6 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 ////////////////////////////////////
 ////////////////////////////////////
 
-const char LuaTeamInfo::className[] = "TeamInfo";      // Class name as it appears to Lua scripts
-
-// Lua constructor
-LuaTeamInfo::LuaTeamInfo(lua_State *L)
-{
-   static const char *methodName = "TeamInfo constructor";
-   checkArgCount(L, 1, methodName);
-
-   // Lua thinks first team has index 1... we know better, but we need to play along...
-   U32 teamIndx = (U32) getInt(L, 1, methodName, 1, gServerGame->getGameType()->mTeams.size()) - 1;
-
-   mTeam = gServerGame->getGameType()->mTeams[teamIndx];
-   mTeamIndex = teamIndx;
-}
-
-
-// C++ constructor
-LuaTeamInfo::LuaTeamInfo(Team team)
-{
-   mTeam = team;
-
-   const char *teamName = team.name.getString();
-
-   Vector<Team> teams = gServerGame->getGameType()->mTeams;
-
-   for(S32 i = 0; i < teams.size(); i ++)
-      if(!strcmp(teams[i].name.getString(), teamName))
-      {
-         mTeamIndex = i;
-         break;
-      }
-}
-
-// Destructor
-LuaTeamInfo::~LuaTeamInfo()
-{
-   logprintf("deleted LuaTeamInfo (%p)\n", this);     // Never gets run...
-}
-
-
-// Define the methods we will expose to Lua
-Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] =
-{
-   method(LuaTeamInfo, getName),
-   method(LuaTeamInfo, getIndex),
-   method(LuaTeamInfo, getPlayerCount),
-   method(LuaTeamInfo, getScore),
-
-   {0,0}    // End method list
-};
-
-// We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
-S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }             // getTeamIndex() ==> return team's index (returns int)
-S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam.name.getString()); }  // getTeamName() ==> return team name (returns string)
-S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.score); }                // getScore() ==> return team score (returns int)
-
-S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
-{
-   gServerGame->getGameType()->countTeamPlayers();    // Make sure player counts are up-to-date
-   return returnInt(L, mTeam.numPlayers);
-}
-
-
-////////////////////////////////////
-////////////////////////////////////
-
 const char LuaWeaponInfo::className[] = "WeaponInfo";      // Class name as it appears to Lua scripts
 
 
@@ -249,7 +183,7 @@ LuaModuleInfo::LuaModuleInfo(lua_State *L)
 // Destructor
 LuaModuleInfo::~LuaModuleInfo()
 {
-   logprintf("deleted LuaModuleInfo object (%p)\n", this);     // Never gets run...
+   // Do nothing
 }
 
 
@@ -267,6 +201,29 @@ extern const char *gModuleShortName[] ;
 
 S32 LuaModuleInfo::getName(lua_State *L) { return returnString(L, gModuleShortName[mModuleIndex]); }              // Name of module ("Shield", "Turbo", etc.) (string)
 S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }                                     // ID of module (ModuleShield, ModuleBoost, etc.) (integer)
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+const char LuaPlayerInfo::className[] = "PlayerInfo";      // Class name as it appears to Lua scripts
+
+// Define the methods we will expose to Lua
+Lunar<LuaPlayerInfo>::RegType LuaPlayerInfo::methods[] =
+{
+   method(LuaPlayerInfo, getName),
+   method(LuaPlayerInfo, getTeamIndx),
+   method(LuaPlayerInfo, getScore),
+   method(LuaPlayerInfo, getRating),
+
+   {0,0}    // End method list
+};
+
+
+S32 LuaPlayerInfo::getName(lua_State *L) { return returnString(L, mClientRef->name.getString()); }
+S32 LuaPlayerInfo::getTeamIndx(lua_State *L) { return returnInt(L, mClientRef->getTeam() + 1); }
+S32 LuaPlayerInfo::getRating(lua_State *L) { return returnInt(L, mClientRef->getRating());  }
+S32 LuaPlayerInfo::getScore(lua_State *L) { return returnInt(L, mClientRef->getScore());  }
 
 
 ////////////////////////////////////

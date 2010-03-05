@@ -108,6 +108,7 @@ void GameConnection::linkToClientList()
    mPrev->mNext = this;
 }
 
+
 GameConnection *GameConnection::getClientList()
 {
    return gClientList.getNextClient();
