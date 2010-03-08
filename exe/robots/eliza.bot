@@ -6,6 +6,7 @@
 -- HOW TO USE
 -- * This program is for recreational purposes only. :-)
 -- * Add eliza.bot to any existing level file
+-- * It is probably best to only add one eliza.bot to a given level
 -- * Type away!
 -- * Eliza recognizes one line of input only (if you are typing very
 --   long lines, please consider seeing a real person.)
@@ -179,9 +180,9 @@ local function Eliza(text)
 end
 
 
-function onMsgReceived(message)
-   if message ~= "" then
-      globalMsg(Eliza(message))
+function onMsgReceived(message, player)
+   if message ~= "" and not player:isRobot() then
+      bot:globalMsg(Eliza(message))
    end
 end
 

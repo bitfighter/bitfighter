@@ -160,6 +160,8 @@ public:
    StringTableEntry getKillString() { return mKillString; }
    Rect getExtent() { return extent; }
    S32 getTeam() { return mTeam; }
+   F32 getRating() { return 0; }    // TODO: Fix this
+   S32 getScore() { return 0; }     // TODO: Fix this
    void findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &extents);
 
    GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);

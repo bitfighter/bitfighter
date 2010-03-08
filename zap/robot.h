@@ -84,7 +84,7 @@ public:
    // We'll have several different signatures for this one...
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
-   void fireEvent(EventType eventType, const char *message, LuaPlayerInfo player, bool global);     // MsgReceived
+   void fireEvent(lua_State *L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
 };
 
 
@@ -115,15 +115,15 @@ private:
 
    static U32 mRobotCount;
 
-   enum {
-      RobotRespawnDelay = 1500,
-   };
+   LuaPlayerInfo *mPlayerInfo;  // Player info object describing the robot
 
-   lua_State *L;                // Main Lua state variable
+   static const S32 RobotRespawnDelay = 1500;
+
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
    ~Robot();          // Destructor
+   lua_State *L;                // Main Lua state variable
 
    bool initialize(Point p);
 
@@ -162,6 +162,9 @@ public:
    LuaRobot *mLuaRobot;    // Could make private and make a public setter method...
    static EventManager getEventManager();
 
+   LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
+
+
 private:
   int attribute;
   std::string message;
@@ -193,7 +196,7 @@ public:
   // Constants
 
   // Initialize the pointer
-   LuaRobot(lua_State *L);     // Constructor
+   LuaRobot(lua_State *L);     // Lua constructor
   ~LuaRobot();                 // Destructor
 
    static const char className[];
@@ -249,7 +252,6 @@ public:
 
    S32 subscribe(lua_State *L);
    S32 unsubscribe(lua_State *L);
-
 
    //// Ship info
    //S32 getActiveWeapon(lua_State *L);

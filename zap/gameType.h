@@ -33,10 +33,8 @@
 #include "flagItem.h"
 #include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
-#include "luaGameInfo.h"   // For LuaPlayerInfo
 #include "teamInfo.h"
 #include <string>
-
 
 namespace Zap
 {
@@ -45,7 +43,6 @@ namespace Zap
 class GoalZone;
 struct MenuItem;
 class Item;
-class LuaPlayerInfo;
 
 class ClientRef : public Object
 {
@@ -53,10 +50,13 @@ private:
    S32 mTeamId;
    S32 mScore;                      // Individual score for current game
    F32 mRating;                     // Skill rating from -1 to 1
-   LuaPlayerInfo mLuaPlayerInfo;    // Lua access to this class
+   LuaPlayerInfo *mPlayerInfo;      // Lua access to this class
 
 public:
-   StringTableEntry name;  // Name of client - guaranteed to be unique of current clients
+   ClientRef();               // Constructor
+   ~ClientRef();              // Destructor
+
+   StringTableEntry name;     // Name of client - guaranteed to be unique of current clients
 
    S32 getTeam() { return mTeamId; }
    void setTeam(S32 teamId) { mTeamId = teamId; }
@@ -68,7 +68,7 @@ public:
    S32 getRating() { return mRating; }
    void setRating(F32 rating) { mRating = rating; }
 
-   LuaPlayerInfo getLuaPlayerInfo() { return mLuaPlayerInfo; }
+   LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
 
    bool isAdmin;
@@ -83,22 +83,6 @@ public:
    RefPtr<VoiceDecoder> decoder;
 
    U32 ping;
-
-   // Constructor
-   ClientRef()
-   {
-      ping = 0;
-
-      mScore = 0;
-      mRating = 0;
-
-      readyForRegularGhosts = false;
-      wantsScoreboardUpdates = false;
-      mTeamId = 0;
-      isAdmin = false;
-
-      mLuaPlayerInfo = LuaPlayerInfo(this);
-   }
 };
 
 
@@ -117,7 +101,7 @@ private:
    Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
    bool mLevelHasLoadoutZone;
 
-   void sendChatDisplayEvent(ClientRef *cl, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
+   void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
 public:
    enum GameTypes

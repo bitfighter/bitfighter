@@ -206,28 +206,6 @@ S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }   
 ////////////////////////////////////
 ////////////////////////////////////
 
-const char LuaPlayerInfo::className[] = "PlayerInfo";      // Class name as it appears to Lua scripts
-
-// Define the methods we will expose to Lua
-Lunar<LuaPlayerInfo>::RegType LuaPlayerInfo::methods[] =
-{
-   method(LuaPlayerInfo, getName),
-   method(LuaPlayerInfo, getTeamIndx),
-   method(LuaPlayerInfo, getScore),
-   method(LuaPlayerInfo, getRating),
-
-   {0,0}    // End method list
-};
-
-
-S32 LuaPlayerInfo::getName(lua_State *L) { return returnString(L, mClientRef->name.getString()); }
-S32 LuaPlayerInfo::getTeamIndx(lua_State *L) { return returnInt(L, mClientRef->getTeam() + 1); }
-S32 LuaPlayerInfo::getRating(lua_State *L) { return returnInt(L, mClientRef->getRating());  }
-S32 LuaPlayerInfo::getScore(lua_State *L) { return returnInt(L, mClientRef->getScore());  }
-
-
-////////////////////////////////////
-////////////////////////////////////
 
 const char LuaLoadout::className[] = "Loadout";      // Class name as it appears to Lua scripts
 

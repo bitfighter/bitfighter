@@ -36,6 +36,7 @@
 #include "UIGame.h"
 #include "gameConnection.h"
 #include "shipItems.h"
+#include "playerInfo.h"          // For RobotPlayerInfo constructor  
 #include "gameItems.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
@@ -717,9 +718,17 @@ S32 LuaRobot::globalMsg(lua_State *L)
    static const char *methodName = "Robot:globalMsg()";
    checkArgCount(L, 1, methodName);
 
+   const char *message = getString(L, 1, methodName);
+
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->s2cDisplayChatMessage(true, thisRobot->getName(), getString(L, 1, methodName));
+   {
+      gt->s2cDisplayChatMessage(true, thisRobot->getName(), message);
+      
+      // Fire our event handler
+      Robot::getEventManager().fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
+   }
+
    return 0;
 }
 
@@ -730,9 +739,17 @@ S32 LuaRobot::teamMsg(lua_State *L)
    static const char *methodName = "Robot:teamMsg()";
    checkArgCount(L, 1, methodName);
 
+   const char *message = getString(L, 1, methodName);
+
    GameType *gt = gServerGame->getGameType();
    if(gt)
-      gt->s2cDisplayChatMessage(false, thisRobot->getName(), getString(L, 1, methodName));
+   {
+      gt->s2cDisplayChatMessage(true, thisRobot->getName(), message);
+      
+      // Fire our event handler
+      Robot::getEventManager().fireEvent(thisRobot->L, EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);
+   }
+
    return 0;
 }
 
@@ -1090,7 +1107,7 @@ void EventManager::unsubscribe(lua_State *L, EventType eventType)
 
 void EventManager::removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType)
 {
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < pendingSubscriptions[eventType].size(); i++)
       if(pendingSubscriptions[eventType][i] == subscriber)
       {
          pendingSubscriptions[eventType].erase_fast(i);
@@ -1101,7 +1118,7 @@ void EventManager::removeFromPendingSubscribeList(lua_State *subscriber, EventTy
 
 void EventManager::removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType)
 {
-   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   for(S32 i = 0; i < pendingUnsubscriptions[eventType].size(); i++)
       if(pendingUnsubscriptions[eventType][i] == unsubscriber)
       {
          pendingUnsubscriptions[eventType].erase_fast(i);
@@ -1231,16 +1248,21 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
 }
 
 
-void EventManager::fireEvent(EventType eventType, const char *message, LuaPlayerInfo player, bool global)
+void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global)
 {
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
-      try
+      
+      if(L == caller_L)    // Don't alert bot about own message!
+         continue;
+
+      try   
       {
          lua_getglobal(L, "onMsgReceived");  //eventFunctions[eventType]
          lua_pushstring(L, message);
-         player.push(L);
+         player->push(L);
+         //Lunar<LuaPlayerInfo>::push(L, &player, false);
          lua_pushboolean(L, global);
 
          if (lua_pcall(L, 3, 0, 0) != 0)
@@ -1278,6 +1300,8 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
 
    disableCollision();
+
+   mPlayerInfo = new RobotPlayerInfo(this);
 }
 
 
@@ -1288,6 +1312,9 @@ Robot::~Robot()
 
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
+
+
+   delete mPlayerInfo;
 
    logprintf("Robot terminated [%s]", mFilename.c_str());
 }
@@ -1319,6 +1346,7 @@ bool Robot::initialize(Point p)
 
    Lunar<LuaGameInfo>::Register(L);
    Lunar<LuaTeamInfo>::Register(L);
+   Lunar<LuaPlayerInfo>::Register(L);
    //Lunar<LuaTimer>::Register(L);
 
    Lunar<LuaWeaponInfo>::Register(L);
@@ -1356,6 +1384,7 @@ bool Robot::initialize(Point p)
    luaopen_math(L);
    luaopen_table(L);    // Needed for custom iterators and "values" function included in robot_helper_functions.lua
    luaopen_debug(L);    // Needed for "strict" implementation
+   luaopen_string(L);   // Needed for elizabot, not much else
    //luaopen_package(L);  // Crashes
 
    // Push a pointer to this Robot to the Lua stack,

@@ -781,6 +781,14 @@
 			>
 		</File>
 		<File
+			RelativePath=".\playerInfo.cpp"
+			>
+		</File>
+		<File
+			RelativePath=".\playerInfo.h"
+			>
+		</File>
+		<File
 			RelativePath=".\point.h"
 			>
 		</File>

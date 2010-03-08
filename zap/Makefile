@@ -81,6 +81,7 @@ OBJECTS_ZAP=\
    masterConnection.o\
    move.o\
    moveObject.o\
+   playerInfo.o\
    projectile.o\
    quickChat.o\
    rabbitGame.o\

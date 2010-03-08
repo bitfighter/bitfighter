@@ -35,8 +35,10 @@
 #include "gameObjectRender.h"
 #include "config.h"
 #include "projectile.h"     // For s2cClientJoinedTeam()
+#include "playerInfo.h"     // For LuaPlayerInfo constructor  
 
-#include "../glut/glutInclude.h"
+
+#include "glutInclude.h"
 
 #ifndef min
 #define min(a,b) ((a) <= (b) ? (a) : (b))
@@ -71,8 +73,39 @@ const char *gGameTypeNames[] = {
 
 S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is invalid or missing... i.e. GameType ==> Bitmatch
 
-///////////////////////////////////////////////
+// mini   http://patorjk.com/software/taag/
+////////////////////////////////////////   _                 _       _ 
+////////////////////////////////////////  /  | o  _  ._ _|_ |_)  _ _|_ 
+////////////////////////////////////////  \_ | | (/_ | | |_ | \ (/_ |  
 
+class PlayerInfo;
+
+// Constructor
+ClientRef::ClientRef()    
+{
+   ping = 0;
+
+   mScore = 0;
+   mRating = 0;
+
+   readyForRegularGhosts = false;
+   wantsScoreboardUpdates = false;
+   mTeamId = 0;
+   isAdmin = false;
+
+   mPlayerInfo = new PlayerInfo(this);
+}
+
+
+// Destructor
+ClientRef::~ClientRef()   
+{
+   delete mPlayerInfo;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
@@ -1978,12 +2011,12 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientRef *cl = source->getClientRef();
+   ClientRef *clientRef = source->getClientRef();
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
       s2cDisplayChatMessage, (global, source->getClientName(), message));
 
-   sendChatDisplayEvent(cl, global, message.getString(), theEvent);
+   sendChatDisplayEvent(clientRef, global, message.getString(), theEvent);
 }
 
 
@@ -1991,23 +2024,23 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
 GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientRef *cl = source->getClientRef();
+   ClientRef *clientRef = source->getClientRef();
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
       s2cDisplayChatMessageSTE, (global, source->getClientName(), message));
 
-   sendChatDisplayEvent(cl, global, message.getString(), theEvent);
+   sendChatDisplayEvent(clientRef, global, message.getString(), theEvent);
 }
 
 
 // Send a chat message that will be displayed in-game
 // If not global, send message only to other players on team
-void GameType::sendChatDisplayEvent(ClientRef *cl, bool global, const char *message, NetEvent *theEvent)
+void GameType::sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent)
 {
    S32 teamId = 0;
 
    if(!global)
-      teamId = cl->getTeam();
+      teamId = clientRef->getTeam();
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
@@ -2017,7 +2050,7 @@ void GameType::sendChatDisplayEvent(ClientRef *cl, bool global, const char *mess
    }
 
    // And fire an event handler...
-   Robot::getEventManager().fireEvent(EventManager::MsgReceivedEvent, message, cl->getLuaPlayerInfo(), global);
+   Robot::getEventManager().fireEvent(NULL, EventManager::MsgReceivedEvent, message, clientRef->getPlayerInfo(), global);
 }
 
 

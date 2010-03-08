@@ -29,7 +29,6 @@
 
 #include "luaObject.h"
 #include "gameWeapons.h"
-//#include "teamInfo.h"      // For Team def
 #include "shipItems.h"     // For module defs
 #include "point.h"         // For LuaPoint
 
@@ -61,31 +60,6 @@ public:
    S32 getIsTeamGame(lua_State *L);
 
    S32 getEventScore(lua_State *L);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class LuaPlayerInfo : public LuaObject
-{
-
-private:
-   ClientRef *mClientRef;
-
-public:
-   static const char className[];
-   static Lunar<LuaPlayerInfo>::RegType methods[];
-
-   LuaPlayerInfo(ClientRef *clientRef = NULL) { mClientRef = clientRef; }
-   //LuaPlayerInfo(lua_State *L) { /* Do nothing */ }
-
-   S32 getName(lua_State *L);
-   S32 getTeamIndx(lua_State *L);
-   S32 getRating(lua_State *L);
-   S32 getScore(lua_State *L);
-
-   void push(lua_State *L) { Lunar<LuaPlayerInfo>::push(L, this, true); }      // true ==> Lua will delete it's reference to this object when it's done with it
 };
 
 
