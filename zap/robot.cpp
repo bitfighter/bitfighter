@@ -329,7 +329,7 @@ S32 LuaRobot::setThrust(lua_State *L)
    F32 vel = getFloat(L, 1, methodName);
    F32 ang = getFloat(L, 2, methodName);
 
-   Move move;
+   Move move = thisRobot->getCurrentMove();
 
    move.up = sin(ang) <= 0 ? -vel * sin(ang) : 0;
    move.down = sin(ang) > 0 ? vel * sin(ang) : 0;
