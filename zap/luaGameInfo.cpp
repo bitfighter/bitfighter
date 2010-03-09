@@ -25,6 +25,7 @@
 
 #include "luaObject.h"
 #include "luaGameInfo.h"
+#include "playerInfo.h"
 #include "gameType.h"
 
 
@@ -63,6 +64,7 @@ Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
    method(LuaGameInfo, getGridSize),
    method(LuaGameInfo, getIsTeamGame),
    method(LuaGameInfo, getEventScore),
+   method(LuaGameInfo, getPlayers),
 
    {0,0}    // End method list
 };
@@ -93,6 +95,7 @@ S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gSer
 S32 LuaGameInfo::getIsTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
 
 
+
 S32 LuaGameInfo::getEventScore(lua_State *L)
 {
    static const char *methodName = "GameInfo:getEventScore()";
@@ -101,6 +104,35 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 
    return returnInt(L, gServerGame->getGameType()->getEventScore(GameType::TeamScore, scoringEvent, 0));
 };
+
+
+// Return a table listing all players on this team
+S32 LuaGameInfo::getPlayers(lua_State *L) 
+{
+   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), "Mismatched player counts!");
+
+   S32 pushed = 0;
+
+   lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
+
+   for(S32 i = 0; i < gServerGame->getGameType()->mClientList.size(); i++)
+   {
+      ClientRef *clientRef = gServerGame->getGameType()->mClientList[i];
+
+      clientRef->getPlayerInfo()->push(L);
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
+   }
+
+   for(S32 i = 0; i < gServerGame->getRobotCount(); i ++)
+   {
+      Robot::robots[i]->getPlayerInfo()->push(L);
+      pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+      lua_rawseti(L, 1, pushed);
+   }
+
+   return 1;
+}
 
 
 ////////////////////////////////////

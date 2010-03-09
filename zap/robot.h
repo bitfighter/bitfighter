@@ -157,13 +157,14 @@ public:
    Timer respawnTimer;
 
    bool isRobot() { return true; }
-   static U32 getRobotCount() { return mRobotCount; }
+   static S32 getRobotCount() { return robots.size(); }
 
    LuaRobot *mLuaRobot;    // Could make private and make a public setter method...
    static EventManager getEventManager();
 
    LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
+   static Vector<Robot *> robots;      // Grand master list of all robots in the current game
 
 private:
   int attribute;

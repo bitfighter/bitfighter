@@ -77,6 +77,7 @@ public:
    S32 getIndex(lua_State *L);
    S32 getPlayerCount(lua_State *L);
    S32 getScore(lua_State *L);
+   S32 getPlayers(lua_State *L);
 };
 
 

@@ -267,7 +267,7 @@ public:
 
 
    S32 getLevelNameCount();
-   U32 getRobotCount();
+   S32 getRobotCount();
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
    S32 getLevelCount() { return mLevelList.size(); }
    bool isTestServer() { return mTestMode; }

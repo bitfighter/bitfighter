@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "teamInfo.h"
+#include "playerInfo.h"
 #include "gameType.h"
 
 namespace Zap
@@ -38,6 +39,7 @@ Lunar<LuaTeamInfo>::RegType LuaTeamInfo::methods[] =
    method(LuaTeamInfo, getIndex),
    method(LuaTeamInfo, getPlayerCount),
    method(LuaTeamInfo, getScore),
+   method(LuaTeamInfo, getPlayers),
 
    {0,0}    // End method list 
 };
@@ -86,10 +88,46 @@ S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }
 S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam.name.getString()); }  // getTeamName() ==> return team name (returns string)
 S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.getScore()); }           // getScore() ==> return team score (returns int)
 
+
 S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
 {
    gServerGame->getGameType()->countTeamPlayers();    // Make sure player counts are up-to-date
    return returnInt(L, mTeam.numPlayers);
+}
+
+
+// Return a table listing all players on this team
+S32 LuaTeamInfo::getPlayers(lua_State *L)
+{
+   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), "Mismatched player counts!");
+
+   S32 pushed = 0;
+
+   lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
+
+   for(S32 i = 0; i < gServerGame->getGameType()->mClientList.size(); i++)
+   {
+      ClientRef *clientRef = gServerGame->getGameType()->mClientList[i];
+
+      if(clientRef->getTeam() == mTeamIndex)
+      {
+         clientRef->getPlayerInfo()->push(L);
+         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         lua_rawseti(L, 1, pushed);
+      }
+   }
+
+   for(S32 i = 0; i < gServerGame->getRobotCount(); i ++)
+   {
+      if(Robot::robots[i]->getTeam() == mTeamIndex)
+      {
+         Robot::robots[i]->getPlayerInfo()->push(L);
+         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         lua_rawseti(L, 1, pushed);
+      }
+   }
+
+   return 1;
 }
 
 

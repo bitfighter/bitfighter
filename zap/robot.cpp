@@ -1283,7 +1283,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
 TNL_IMPLEMENT_NETOBJECT(Robot);
 
 
-U32 Robot::mRobotCount = 0;
+Vector<Robot *> Robot::robots;
 
 // Constructor
 Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m, true)
@@ -1302,19 +1302,26 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    disableCollision();
 
    mPlayerInfo = new RobotPlayerInfo(this);
+   
+   // Add this robot to the list of all robots
+   robots.push_back(this);
 }
 
 
 Robot::~Robot()
 {
-   if(getGame() && getGame()->isServer())
-      mRobotCount--;
-
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
 
-
    delete mPlayerInfo;
+
+   // Remove this robot from the list of all robots
+   for(S32 i = 0; i < robots.size(); i++)
+      if(robots[i] == this)
+      {
+         robots.erase_fast(i);
+         break;
+      }
 
    logprintf("Robot terminated [%s]", mFilename.c_str());
 }
@@ -1489,9 +1496,6 @@ void Robot::onAddedToGame(Game *game)
    // Make them always visible on cmdr map --> del
    if(!isGhost())
       setScopeAlways();
-
-   if(getGame() && getGame()->isServer())
-      mRobotCount++;
 }
 
 

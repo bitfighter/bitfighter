@@ -275,7 +275,7 @@ S32 ServerGame::getLevelNameCount()
 
 class Robot;
 
-U32 ServerGame::getRobotCount()
+S32 ServerGame::getRobotCount()
 {
    return Robot::getRobotCount();
 }
