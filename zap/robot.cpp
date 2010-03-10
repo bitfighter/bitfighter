@@ -163,6 +163,8 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEventEnum(ShipSpawnedEvent);
    setEventEnum(ShipKilledEvent);
    setEventEnum(MsgReceivedEvent);
+   setEventEnum(PlayerJoinedEvent);
+   setEventEnum(PlayerLeftEvent);
 
 
    // A few misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
@@ -1091,6 +1093,7 @@ void EventManager::subscribe(lua_State *L, EventType eventType)
    {
       removeFromPendingUnsubscribeList(L, eventType);
       pendingSubscriptions[eventType].push_back(L);
+      anyPending = true;
    }
 }
 
@@ -1101,6 +1104,7 @@ void EventManager::unsubscribe(lua_State *L, EventType eventType)
    {
       removeFromPendingSubscribeList(L, eventType);
       pendingUnsubscriptions[eventType].push_back(L);
+      anyPending = true;
    }
 }
 
@@ -1181,26 +1185,32 @@ bool EventManager::isPendingUnsubscribed(lua_State *L, EventType eventType)
 // Process all pending subscriptions and unsubscriptions
 void EventManager::update()
 {
-   for(S32 i = 0; i < EventTypes; i++)
-      for(S32 j = 0; j < pendingUnsubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
-         removeFromSubscribedList(pendingUnsubscriptions[i][j], (EventType) i);
-
-   for(S32 i = 0; i < EventTypes; i++)
-      for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
-         subscriptions[i].push_back(pendingSubscriptions[i][j]);
-
-   for(S32 i = 0; i < EventTypes; i++)
+   if(anyPending)
    {
-      pendingSubscriptions[i].clear();
-      pendingUnsubscriptions[i].clear();
+      for(S32 i = 0; i < EventTypes; i++)
+         for(S32 j = 0; j < pendingUnsubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
+            removeFromSubscribedList(pendingUnsubscriptions[i][j], (EventType) i);
+
+      for(S32 i = 0; i < EventTypes; i++)
+         for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
+            subscriptions[i].push_back(pendingSubscriptions[i][j]);
+
+      for(S32 i = 0; i < EventTypes; i++)
+      {
+         pendingSubscriptions[i].clear();
+         pendingUnsubscriptions[i].clear();
+      }
+      anyPending = false;
    }
 }
 
 
 // This is a list of the function names to be called in the bot when a particular event is fired
 static const char *eventFunctions[] = {
-   "OnMsgSent",
-   "OnShipSpawned",
+   "onShipSpawned",
+   "onShipKilled",
+   "onPlayerJoined",
+   "onPlayerLeft",
    "onMsgReceived",
 };
 
@@ -1259,13 +1269,39 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
 
       try   
       {
-         lua_getglobal(L, "onMsgReceived");  //eventFunctions[eventType]
+         lua_getglobal(L, eventFunctions[eventType]);  
          lua_pushstring(L, message);
          player->push(L);
-         //Lunar<LuaPlayerInfo>::push(L, &player, false);
          lua_pushboolean(L, global);
 
          if (lua_pcall(L, 3, 0, 0) != 0)
+            throw LuaException(lua_tostring(L, -1));
+      }
+      catch(LuaException &e)
+      {
+         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         return;
+      }
+   }
+}
+
+
+// PlayerJoined, PlayerLeft
+void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayerInfo *player)
+{
+   for(S32 i = 0; i < subscriptions[eventType].size(); i++)
+   {
+      lua_State *L = subscriptions[eventType][i];
+      
+      if(L == caller_L)    // Don't alert bot about own joinage or leavage!
+         continue;
+
+      try   
+      {
+         lua_getglobal(L, eventFunctions[eventType]);  
+         player->push(L);
+
+         if (lua_pcall(L, 1, 0, 0) != 0)
             throw LuaException(lua_tostring(L, -1));
       }
       catch(LuaException &e)
@@ -1285,7 +1321,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 
 Vector<Robot *> Robot::robots;
 
-// Constructor
+// Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m, true)
 {
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
@@ -1302,18 +1338,21 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    disableCollision();
 
    mPlayerInfo = new RobotPlayerInfo(this);
-   
-   // Add this robot to the list of all robots
-   robots.push_back(this);
 }
 
 
+// Destructor, runs on client and server
 Robot::~Robot()
 {
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
 
    delete mPlayerInfo;
+
+   if(isGhost())
+      return;
+
+   // Server only from here on down
 
    // Remove this robot from the list of all robots
    for(S32 i = 0; i < robots.size(); i++)
@@ -1323,26 +1362,48 @@ Robot::~Robot()
          break;
       }
 
-   logprintf("Robot terminated [%s]", mFilename.c_str());
+      eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
+
+   logprintf("Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }
 
 
 // Reset everything on the robot back to the factory settings
-bool Robot::initialize(Point p)
+// Only runs on server!
+bool Robot::initialize(Point &pos)
 {
    respawnTimer.clear();
 
    mCurrentZone = -1;   // Correct value will be calculated upon first request
 
-   Parent::initialize(p);
+   Parent::initialize(pos);
 
    enableCollision();
-
 
    // WarpPositionMask triggers the spinny spawning visual effect
    setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client
 
-   LuaObject::cleanupAndTerminate(L);
+   return startLua();
+} 
+
+
+// Loop through all our bots and run thier main() functions
+void Robot::startBots()
+{
+
+   for(S32 i = 0; i < robots.size(); i++)
+      robots[i]->startLua();     
+
+   for(S32 i = 0; i < robots.size(); i++)
+      robots[i]->runMain();
+
+   eventManager.update();                      // Ensure registrations made during bot initialization are ready to go
+}
+
+
+bool Robot::startLua()
+{
+      LuaObject::cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
 
@@ -1419,7 +1480,6 @@ bool Robot::initialize(Point p)
       return false;
    }
 
-
    static const char *robotfname = "robot_helper_functions.lua";
 
    if(luaL_loadfile(L, robotfname))
@@ -1434,7 +1494,7 @@ bool Robot::initialize(Point p)
       logError("Error during initializing robot helper functions: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
    }
-
+  
    // Load the bot
    if(luaL_loadfile(L, mFilename.c_str()))
    {
@@ -1446,19 +1506,6 @@ bool Robot::initialize(Point p)
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
       logError("Robot error during initialization: %s.  Shutting robot down.", lua_tostring(L, -1));
-      return false;
-   }
-
-   try
-   {
-      lua_getglobal(L, "_main");
-      if(lua_pcall(L, 0, 0, 0) != 0)
-         throw LuaException(lua_tostring(L, -1));
-   }
-   catch(LuaException &e)
-   {
-      logError("Robot error running main(): %s.  Shutting robot down.", e.what());
-      delete this;
       return false;
    }
 
@@ -1477,9 +1524,25 @@ bool Robot::initialize(Point p)
       lua_pop(L, 1);
    }
 
-   eventManager.update();                      // Ensure registrations made during bot initialization are ready to go
-
+   // Note main() will be run later, after all bots have been loaded
    return true;
+}
+
+
+// Don't forget to update the eventManager after running a robot's main function!
+void Robot::runMain()
+{
+   try
+   {
+      lua_getglobal(L, "_main");
+      if(lua_pcall(L, 0, 0, 0) != 0)
+         throw LuaException(lua_tostring(L, -1));
+   }
+   catch(LuaException &e)
+   {
+      logError("Robot error running main(): %s.  Shutting robot down.", e.what());
+      delete this;
+   }
 }
 
 
@@ -1489,13 +1552,20 @@ EventManager Robot::getEventManager()
 }
 
 
-// On client, this only runs the very first time the robot is added to the level
+// This only runs the very first time the robot is added to the level
+// Runs on client and server
 void Robot::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-   // Make them always visible on cmdr map --> del
-   if(!isGhost())
-      setScopeAlways();
+   
+   if(isGhost())
+      return;
+
+   // Server only from here on out
+
+   setScopeAlways();          // Make them always visible on cmdr map --> del
+   robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
+   eventManager.fireEvent(L, EventManager::PlayerJoinedEvent, getPlayerInfo());
 }
 
 

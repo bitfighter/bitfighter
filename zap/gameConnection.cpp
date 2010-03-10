@@ -910,6 +910,8 @@ void GameConnection::onConnectionEstablished()
          s2cSetIsLevelChanger(true, false);         // Tell client, but don't display notification
       }
 
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientRef()->getPlayerInfo());
+
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       if(isLocalConnection())
          TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
@@ -997,8 +999,12 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
             gErrorMsgUserInterface.activate();
       }
    }
-   else
+   else     // Server
+   {
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getClientRef()->getPlayerInfo());
       gServerGame->removeClient(this);
+   }
+
 }
 
 

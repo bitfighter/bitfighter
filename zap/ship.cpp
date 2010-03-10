@@ -75,7 +75,8 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
    mPlayerName = playerName;     // This will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
    mIsRobot = isRobot;
 
-   initialize(p);
+   if(!isRobot)         // Robots will run this during their own initialization; no need to run it twice!
+      initialize(p);
 
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
@@ -96,7 +97,7 @@ Ship::~Ship()
 
 // Initialize some things that both ships and bots care about... this will get run during the ship's constructor
 // and also after a bot respawns and needs to reset itself
-void Ship::initialize(Point pos)
+void Ship::initialize(Point &pos)
 {
    for(U32 i = 0; i < MoveStateCount; i++)
    {

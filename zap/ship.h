@@ -108,7 +108,6 @@ private:
    bool mIsRobot;
 
    S32 mJustTeleported;
-   Point mSpawnPoint;            // Where ship spawned.  Will only be valid on server, client doesn't currently get this.
 
    void findObjectsUnderShip(GameObjectType type); // Find objects of specified type that may be under the ship, and put them in fillVector
 
@@ -120,7 +119,8 @@ protected:
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
    WeaponType mWeapon[ShipWeaponCount];
 
-   void initialize(Point pos);            // Some initialization code needed by both bots and ships
+   void initialize(Point &pos);           // Some initialization code needed by both bots and ships
+   Point mSpawnPoint;                     // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
 public:
    enum {

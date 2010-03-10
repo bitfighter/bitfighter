@@ -387,6 +387,9 @@ void GameType::idle(GameObject::IdleCallPath path)
       }
    }
 
+   // Process any pending Robot events
+   Robot::getEventManager().update();
+
    // If game time has expired... game is over, man, it's over
    if(mGameTimer.update(deltaT))
       gameOverManGameOver();
@@ -825,7 +828,7 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 
 extern Rect gServerWorldBounds;
 
-// Runs on server, after level has been loaded from a file
+// Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
 void GameType::onLevelLoaded()
 {
    mSpyBugs.clear();
@@ -833,10 +836,13 @@ void GameType::onLevelLoaded()
    // Find all spybugs in the game
    gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
 
+   // Figure out if this level has any loadout zones
    Vector<GameObject *> fillVector;
    getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, gServerWorldBounds);
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
+
+   Robot::startBots();
 }
 
 
@@ -1057,7 +1063,9 @@ void GameType::spawnRobot(Robot *robot)
       return;
    }
 
-   //robot->addToGame(getGame());
+   robot->runMain();                      // Gentlemen, start your engines!
+   robot->getEventManager().update();     // Ensure registrations made during bot initialization are ready to go
+
 
    // Should probably do this, but... not now.
    //if(isSpawnWithLoadoutGame())

@@ -54,6 +54,8 @@ public:
    enum EventType {
       ShipSpawnedEvent = 0,   // (ship) --> Ship (or robot) spawns
       ShipKilledEvent,        // (ship) --> Ship (or robot) is killed
+      PlayerJoinedEvent,      // (playerInfo) -> Player joined game
+      PlayerLeftEvent,        // (playerInfo) -> Player left game
       MsgReceivedEvent,       // (message, sender-player, public-bool) --> Chat message sent
       EventTypes
    };
@@ -64,12 +66,13 @@ private:
    bool isPendingSubscribed(lua_State *L, EventType eventType);
    bool isPendingUnsubscribed(lua_State *L, EventType eventType);
 
+   bool anyPending;
    void removeFromSubscribedList(lua_State *L, EventType eventType);
    void removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
 
 public:
-   EventManager()  { /* Do nothing */ }                  // C++ constructor
+   EventManager()  { anyPending = false; }               // C++ constructor
    EventManager(lua_State *L) { /* Do nothing */ }       // Lua Constructor
 
    Vector<lua_State *> subscriptions[EventTypes];
@@ -85,6 +88,7 @@ public:
    void fireEvent(EventType eventType);
    void fireEvent(EventType eventType, Ship *ship);      // ShipSpawned, ShipKilled
    void fireEvent(lua_State *L, EventType eventType, const char *message, LuaPlayerInfo *player, bool global);     // MsgReceived
+   void fireEvent(lua_State *L, EventType eventType, LuaPlayerInfo *player);  // PlayerJoined, PlayerLeft
 };
 
 
@@ -125,7 +129,7 @@ public:
    ~Robot();          // Destructor
    lua_State *L;                // Main Lua state variable
 
-   bool initialize(Point p);
+   bool initialize(Point &pos);
 
    void kill(DamageInfo *theInfo);
    void kill();
@@ -165,6 +169,9 @@ public:
    LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
    static Vector<Robot *> robots;      // Grand master list of all robots in the current game
+   static void startBots();            // Loop through all our bots and run thier main() functions
+   bool startLua();                    // Fire up bot's Lua processor
+   void runMain();                     // Run a robot's main() function
 
 private:
   int attribute;

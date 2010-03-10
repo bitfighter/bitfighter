@@ -29,7 +29,7 @@
 
 #include "sfx.h"
 #include "controlObjectConnection.h"
-#include "../tnl/tnlNetConnection.h"
+#include "tnlNetConnection.h"
 #include "timer.h"
 #include <time.h>
 
