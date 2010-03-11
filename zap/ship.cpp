@@ -150,7 +150,7 @@ void Ship::push(lua_State *L)
    //else
    //   luaship = lua_getref
 
-   Lunar<LuaShip>::push(L, &luaProxy, true);       // true ==> Lua will delete it's reference to this object when it's done with it
+   Lunar<LuaShip>::push(L, &luaProxy, false);     // true ==> Lua will delete it's reference to this object when it's done with it
 }
 
 

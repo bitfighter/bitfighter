@@ -88,7 +88,7 @@ public:
    GameObject *getGameObject();
    static const char *getClassName() { return "LuaShip"; }
 
-   void push(lua_State *L) {  Lunar<LuaShip>::push(L, this, true); }      // Push item onto stack
+   void push(lua_State *L) {  Lunar<LuaShip>::push(L, this, false); }      // Push item onto stack
 
    S32 getActiveWeapon(lua_State *L);                // Get WeaponIndex for current weapon
 

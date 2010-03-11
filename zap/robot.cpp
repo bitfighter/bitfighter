@@ -839,25 +839,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
 {
    static const char *methodName = "Robot:getWaypoint()";
 
-   Point target;
-
-   S32 args = lua_gettop(L);
-   if(args == 1)
-   {
-      target = getPoint(L, 1, methodName);
-   }
-   else if(args == 2)
-   {
-      F32 x = getFloat(L, 1, methodName);
-      F32 y = getFloat(L, 2, methodName);
-      target = Point(x, y);
-   }
-   else
-   {
-      checkArgCount(L, 1, methodName);                // Will generate error message
-      return 0;
-   }
-
+   Point target = getPointOrXY(L, 1, methodName);
 
    // If we can see the target, go there directly
    if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))

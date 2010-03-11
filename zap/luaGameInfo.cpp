@@ -112,7 +112,8 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
    if(gServerGame->getGameType() == NULL)
       return returnNil(L);
 
-   TNLAssert(gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), "Mismatched player counts!");
+   TNLAssertV( gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), ("Mismatched player counts (%s v %s)!", 
+               gServerGame->getPlayerCount(),   gServerGame->getGameType()->mClientList.size()) );
 
    S32 pushed = 0;
 

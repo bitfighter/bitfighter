@@ -156,14 +156,14 @@ void LuaObject::setfield (lua_State *L, const char *key, F32 value)
 
 
 // Make sure we got the number of args we wanted
-void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *functionName)
+void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *methodName)
 {
    S32 args = lua_gettop(L);
 
    if(args != argsWanted)     // Problem!
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", functionName, args, argsWanted);
+      dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", methodName, args, argsWanted);
       logprintf(msg);
 
       throw LuaException(msg);
@@ -172,14 +172,14 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *function
 
 
 // Pop integer off stack, check its type, do bounds checking, and return it
-lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName, S32 minVal, S32 maxVal)
+lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S32 minVal, S32 maxVal)
 {
-   lua_Integer val = getInt(L, index, functionName);
+   lua_Integer val = getInt(L, index, methodName);
 
    if(val < minVal || val > maxVal)
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", functionName, index, val);
+      dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", methodName, index, val);
       logprintf(msg);
 
       throw LuaException(msg);
@@ -190,12 +190,12 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName,
 
 
 // Pop integer off stack, check its type, and return it (no bounds check)
-lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
+lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", functionName, index);
+      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
       logprintf(msg);
 
       throw LuaException(msg);
@@ -206,12 +206,12 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *functionName)
 
 
 // Pop a number off stack, convert to float, and return it (no bounds check)
-F32 LuaObject::getFloat(lua_State *L, S32 index, const char *functionName)
+F32 LuaObject::getFloat(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isnumber(L, index))
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", functionName, index);
+      dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
       logprintf(msg);
 
       throw LuaException(msg);
@@ -222,12 +222,12 @@ F32 LuaObject::getFloat(lua_State *L, S32 index, const char *functionName)
 
 
 // Pop a boolean off stack, and return it
-bool LuaObject::getBool(lua_State *L, S32 index, const char *functionName)
+bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isboolean(L, index))
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", functionName, index);
+      dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", methodName, index);
       logprintf(msg);
 
       throw LuaException(msg);
@@ -238,12 +238,12 @@ bool LuaObject::getBool(lua_State *L, S32 index, const char *functionName)
 
 
 // Pop a string or string-like object off stack, check its type, and return it
-const char *LuaObject::getString(lua_State *L, S32 index, const char *functionName)
+const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName)
 {
    if(!lua_isstring(L, index))
    {
       char msg[256];
-      dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", functionName, index);
+      dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", methodName, index);
       logprintf(msg);
 
       throw LuaException(msg);
@@ -254,9 +254,33 @@ const char *LuaObject::getString(lua_State *L, S32 index, const char *functionNa
 
 
 // Pop a point object off stack, check its type, and return it
-Point LuaObject::getPoint(lua_State *L, S32 index, const char *functionName)
+Point LuaObject::getPoint(lua_State *L, S32 index, const char *methodName)
 {
    return Lunar<LuaPoint>::check(L, index)->getPoint();
+}
+
+
+// Pop a point object off stack, or grab two numbers and create a point from that
+Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
+{
+   S32 args = lua_gettop(L);
+   if(args == 1)
+   {
+      return getPoint(L, index, methodName);
+   }
+   else if(args == 2)
+   {
+      F32 x = getFloat(L, index, methodName);
+      F32 y = getFloat(L, index + 1, methodName);
+      return Point(x, y);
+   }
+
+   // Uh oh...
+   char msg[256];
+   dSprintf(msg, sizeof(msg), "%s expected either a point or a pair of numbers at position %d", methodName, index);
+   logprintf(msg);
+
+   throw LuaException(msg);
 }
 
 
@@ -485,8 +509,7 @@ S32 LuaPoint::angleTo(lua_State *L)
 {
    static const char *methodName = "LuaPoint:angleTo()";
 
-   checkArgCount(L, 1, methodName);
-   Point point = LuaObject::getPoint(L, 1, methodName);
+   Point point = LuaObject::getPointOrXY(L, 1, methodName);
 
    return returnFloat(L, mPoint.angleTo(point));
 }
