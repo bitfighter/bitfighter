@@ -15,7 +15,6 @@
 //Test:
 // Do ships remember their spawn points?  How about robots?
 // Does chat now work properly when ship is dead?
-// What happens when the game is suspended?
 // Do LuaShip proxies remain constant over time (i.e. does 013 fix for Buvet.bot now work?)
 // Make sure things work when ship is deleted.  Do we get nils back (and not crashes)?
 
@@ -66,6 +65,7 @@ XXX need to document timers,sXXX
 <li>getName() function now run first, so game will have bot's name before any real game logic gets run </li>
 <li>Created Player object with info about individual players/bots which you can get from GameInfo and TeamInfo objects</li>
 <li>Restructured the way bots are initialized so that all bots are loaded and getName()s are run before any main() functions are run</li>
+<li>Can now pass arguments to bots from level file using arg struct, just like with levelgens</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>

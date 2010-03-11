@@ -115,13 +115,13 @@ private:
 
    S32 mCurrentZone;            // Zone robot is currently in
    U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed
-   Vector<string> mArgs;        // Arguments passed to the robot
 
    static U32 mRobotCount;
 
    LuaPlayerInfo *mPlayerInfo;  // Player info object describing the robot
 
    static const S32 RobotRespawnDelay = 1500;
+   Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
 
 
 public:

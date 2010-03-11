@@ -1390,8 +1390,8 @@ void Robot::startBots()
 
 
 bool Robot::startLua()
-{
-      LuaObject::cleanupAndTerminate(L);
+   {
+   LuaObject::cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
 
@@ -1445,9 +1445,13 @@ bool Robot::startLua()
 
    // Push a pointer to this Robot to the Lua stack,
    // then set the global name of this pointer.  This is the name that we'll use to refer
-   // to this robot from our Lua code.
+   // to this robot from our Lua code.  
+   // Note that all globals need to be set before running lua_helper_functions, which makes it more difficult to set globals
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
+
+   LuaObject::setLuaArgs(L, mArgs);    // Put our args in to the Lua table "args"
+
 
    //lua_settop(L, 0);
 
@@ -1595,7 +1599,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
    // We're using string here as a stupid way to get done what we need to do... perhaps there is a better way.
 
    for(S32 i = 1; i < argc; i++)
-      mArgs.push_back(string(argv[i]).c_str());
+      mArgs.push_back(string(argv[i]));
 
    return true;
 }

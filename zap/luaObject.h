@@ -69,7 +69,6 @@ protected:
 
    static void setfield (lua_State *L, const char *key, F32 value);
 
-   void setLuaArgs(lua_State *L, Vector<string> args);
 
 
 public:
@@ -85,6 +84,8 @@ public:
 
    static void stackdump(lua_State* L);
    static void cleanupAndTerminate(lua_State *L);
+
+   static void setLuaArgs(lua_State *L, Vector<string> args);     // Used by bots and levelgens
 
 };
 

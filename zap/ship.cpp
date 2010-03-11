@@ -40,7 +40,8 @@
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "config.h"
-#include "../glut/glutInclude.h"
+
+#include "glutInclude.h"
 
 #include <stdio.h>
 
