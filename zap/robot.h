@@ -66,18 +66,18 @@ private:
    bool isPendingSubscribed(lua_State *L, EventType eventType);
    bool isPendingUnsubscribed(lua_State *L, EventType eventType);
 
-   bool anyPending;
    void removeFromSubscribedList(lua_State *L, EventType eventType);
    void removeFromPendingSubscribeList(lua_State *subscriber, EventType eventType);
    void removeFromPendingUnsubscribeList(lua_State *unsubscriber, EventType eventType);
 
 public:
-   EventManager()  { anyPending = false; }               // C++ constructor
+   EventManager()  { /* Do nothing */ }                  // C++ constructor
    EventManager(lua_State *L) { /* Do nothing */ }       // Lua Constructor
 
-   Vector<lua_State *> subscriptions[EventTypes];
-   Vector<lua_State *> pendingSubscriptions[EventTypes];
-   Vector<lua_State *> pendingUnsubscriptions[EventTypes];
+   static Vector<lua_State *> subscriptions[EventTypes];
+   static Vector<lua_State *> pendingSubscriptions[EventTypes];
+   static Vector<lua_State *> pendingUnsubscriptions[EventTypes];
+   static bool anyPending;
 
    void subscribe(lua_State *L, EventType eventType);
    void unsubscribe(lua_State *L, EventType eventType);

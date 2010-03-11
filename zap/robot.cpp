@@ -1042,7 +1042,7 @@ S32 LuaRobot::findAndReturnClosestZone(lua_State *L, Point point)
    if(closest != -1)
       return returnPoint(L, gBotNavMeshZones[closest]->getCenter());
    else
-      return returnNil(L);    // Really stuck.
+      return returnNil(L);    // Really stuck
 }
 
 
@@ -1078,13 +1078,17 @@ S32 LuaRobot::unsubscribe(lua_State *L)
 }
 
 
-
 const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+bool EventManager::anyPending = false; 
+Vector<lua_State *> EventManager::subscriptions[EventTypes];
+Vector<lua_State *> EventManager::pendingSubscriptions[EventTypes];
+Vector<lua_State *> EventManager::pendingUnsubscriptions[EventTypes];
 
 void EventManager::subscribe(lua_State *L, EventType eventType)
 {
@@ -1192,7 +1196,7 @@ void EventManager::update()
             removeFromSubscribedList(pendingUnsubscriptions[i][j], (EventType) i);
 
       for(S32 i = 0; i < EventTypes; i++)
-         for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)     // Unsubscribing first means less searching!
+         for(S32 j = 0; j < pendingSubscriptions[i].size(); j++)     
             subscriptions[i].push_back(pendingSubscriptions[i][j]);
 
       for(S32 i = 0; i < EventTypes; i++)
@@ -1347,10 +1351,11 @@ Robot::~Robot()
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
 
-   delete mPlayerInfo;
-
    if(isGhost())
+   {
+      delete mPlayerInfo;     // If this is on the server, will be deleted below, after event is fired
       return;
+   }
 
    // Server only from here on down
 
@@ -1362,7 +1367,8 @@ Robot::~Robot()
          break;
       }
 
-      eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
+   eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
+   delete mPlayerInfo;
 
    logprintf("Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }

@@ -109,6 +109,9 @@ S32 LuaGameInfo::getEventScore(lua_State *L)
 // Return a table listing all players on this team
 S32 LuaGameInfo::getPlayers(lua_State *L) 
 {
+   if(gServerGame->getGameType() == NULL)
+      return returnNil(L);
+
    TNLAssert(gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), "Mismatched player counts!");
 
    S32 pushed = 0;

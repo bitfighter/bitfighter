@@ -1001,7 +1001,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    }
    else     // Server
    {
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getClientRef()->getPlayerInfo());
+      if(getClientRef() != NULL)    // ClientRef might be NULL if the server is quitting the game, in which case we don't need to fire these events anyway
+         Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getClientRef()->getPlayerInfo());
+
       gServerGame->removeClient(this);
    }
 

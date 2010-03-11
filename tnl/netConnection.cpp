@@ -832,13 +832,13 @@ void NetConnection::onConnectionEstablished()
 
 void NetConnection::onConnectionTerminated(TerminationReason, const char *)
 {
-      // Do nothing
+   // Do nothing
 }
 
 
 void NetConnection::onConnectTerminated(TerminationReason, const char *)
 {
-      // Do nothing
+   // Do nothing
 }
 
 void NetConnection::writeConnectRequest(BitStream *stream)
