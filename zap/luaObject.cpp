@@ -487,8 +487,7 @@ S32 LuaPoint::distanceTo(lua_State *L)
 {
    static const char *methodName = "LuaPoint:distanceTo()";
 
-   checkArgCount(L, 1, methodName);
-   Point point = LuaObject::getPoint(L, 1, methodName);
+   Point point = LuaObject::getPointOrXY(L, 1, methodName);
 
    return returnFloat(L, mPoint.distanceTo(point));
 }
