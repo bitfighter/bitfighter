@@ -1324,6 +1324,8 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    disableCollision();
 
    mPlayerInfo = new RobotPlayerInfo(this);
+   mScore = 0;
+   mTotalScore = 0;
 }
 
 

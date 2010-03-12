@@ -1463,7 +1463,8 @@ void PlayerMenuUserInterface::render()
    {
       strncpy(c, gt->mClientList[i]->name.getString(), 1);        // Grab first char of name for a shortcut key
 
-      PlayerType pt = gt->mClientList[i]->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer;    // Will be used to show admin/player/robot prefix on menu
+      // Will be used to show admin/player/robot prefix on menu
+      PlayerType pt = gt->mClientList[i]->isRobot ? PlayerTypeRobot : (gt->mClientList[i]->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
 
       Color col = gt->getTeamColor(gt->mClientList[i]->getTeam());
       menuItems.push_back(MenuItem(gt->mClientList[i]->name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, pt));

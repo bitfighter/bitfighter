@@ -92,6 +92,7 @@ ClientRef::ClientRef()
    wantsScoreboardUpdates = false;
    mTeamId = 0;
    isAdmin = false;
+   isRobot = false;
 
    mPlayerInfo = new PlayerInfo(this);
 }
@@ -533,22 +534,33 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].getScore());
          }
 
-         Vector<RefPtr<ClientRef> > playerScores;
 
          // Now for player scores.  First build a list, then sort it, then display it.
-         S32 curRowY = yt + teamAreaHeight + 1;
-         S32 fontSize = U32(maxHeight * 0.8f);
+
+         Vector<RefPtr<ClientRef> > playerScores;
 
          for(S32 j = 0; j < mClientList.size(); j++)
+         {
             if(mClientList[j]->getTeam() == i || !isTeamGame())
                playerScores.push_back(mClientList[j]);
+         }
 
          playerScores.sort(scoreSort);
 
+         S32 curRowY = yt + teamAreaHeight + 1;
+         S32 fontSize = U32(maxHeight * 0.8f);
 
          for(S32 j = 0; j < playerScores.size(); j++)
          {
-            UserInterface::drawString(xl + 40, curRowY, fontSize, playerScores[j]->name.getString());
+            static const char *bot = "B ";
+            S32 botsize = UserInterface::getStringWidth(fontSize / 2, bot);
+            S32 x = xl + 40;
+
+            // Add the mark of the bot
+            if(playerScores[j]->isRobot)
+               UserInterface::drawString(x - botsize, curRowY + fontSize / 4 + 2, fontSize / 2, bot); 
+
+            UserInterface::drawString(x, curRowY, fontSize, playerScores[j]->name.getString());
 
             static char buff[255] = "";
 
@@ -1402,7 +1414,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
 
-   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin());          // Tell other clients about the new guy, who is never us...
+   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), false);          // Tell other clients about the new guy, who is never us...
    s2cClientJoinedTeam(cref->name, cref->getTeam());
 
    spawnShip(theClient);
@@ -1813,12 +1825,13 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient, bool admin), (name, isMyClient, admin))
+GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient, bool admin, bool isRobot), (name, isMyClient, admin, isRobot))
 {
    ClientRef *cref = allocClientRef();
    cref->name = name;
    cref->setTeam(0);
    cref->isAdmin = admin;
+   cref->isRobot = isRobot;
 
    cref->decoder = new LPC10VoiceDecoder();
    cref->voiceSFX = new SFXObject(SFXVoice, NULL, 1, Point(), Point());
@@ -1952,9 +1965,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 // Runs on server, obviously
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
-   NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, mLevelHasLoadoutZone);
-
+   NetObject::setRPCDestConnection(theConnection);    // "B "
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
@@ -1965,8 +1976,14 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    // Add all the client and team information
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      s2cAddClient(mClientList[i]->name, mClientList[i]->clientConnection == theConnection, mClientList[i]->clientConnection->isAdmin());
+      s2cAddClient(mClientList[i]->name, mClientList[i]->clientConnection == theConnection, mClientList[i]->clientConnection->isAdmin(), false);
       s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
+   }
+
+   for(S32 i = 0; i < Robot::robots.size(); i++)
+   {
+      s2cAddClient(Robot::robots[i]->getName(), false, false, true);
+      s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
    }
 
    // An empty list clears the barriers
@@ -2143,6 +2160,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
    mScores.clear();
    mRatings.clear();
 
+   // First, list the players
    for(S32 i = 0; i < mClientList.size(); i++)
    {
       if(mClientList[i]->ping < MaxPing)
@@ -2156,6 +2174,14 @@ void GameType::updateClientScoreboard(ClientRef *cl)
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
       mRatings.push_back(max(min((U32)(getCurrentRating(conn) * 100.0) + 100, maxRating), minRating));
+   }
+
+   // Next come the robots
+   for(S32 i = 0; i < Robot::robots.size(); i++)
+   {
+      mPingTimes.push_back(0);
+      mScores.push_back(Robot::robots[i]->getScore());
+      mRatings.push_back(max(min((U32)(Robot::robots[i]->getRating() * 100.0) + 100, maxRating), minRating));
    }
 
    NetObject::setRPCDestConnection(cl->clientConnection);

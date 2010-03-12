@@ -66,6 +66,7 @@ XXX need to document timers,sXXX
 <li>Created Player object with info about individual players/bots which you can get from GameInfo and TeamInfo objects</li>
 <li>Restructured the way bots are initialized so that all bots are loaded and getName()s are run before any main() functions are run</li>
 <li>Can now pass arguments to bots from level file using arg struct, just like with levelgens</li>
+<li>Robots now shown on scoreboard and in various menus where players are listed</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>

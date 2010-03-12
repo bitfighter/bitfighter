@@ -116,6 +116,9 @@ private:
    S32 mCurrentZone;            // Zone robot is currently in
    U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed
 
+   S32 mScore;
+   S32 mTotalScore;
+
    static U32 mRobotCount;
 
    LuaPlayerInfo *mPlayerInfo;  // Player info object describing the robot
@@ -172,6 +175,9 @@ public:
    static void startBots();            // Loop through all our bots and run thier main() functions
    bool startLua();                    // Fire up bot's Lua processor
    void runMain();                     // Run a robot's main() function
+
+   S32 getScore() { return mScore; }   // Return robot's score
+   F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
 
 private:
   int attribute;
