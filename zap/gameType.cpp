@@ -1377,7 +1377,7 @@ void GameType::countTeamPlayers()
 // Note also that theClient should never be NULL.
 void GameType::serverAddClient(GameConnection *theClient)
 {
-   TNLAssert(theClient,"Attempting to add a NULL client to the server!");
+   TNLAssert(theClient, "Attempting to add a NULL client to the server!");
 
    theClient->setScopeObject(this);
 

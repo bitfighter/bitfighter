@@ -1135,14 +1135,16 @@ void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
    glBegin(GL_LINE_LOOP);
       glVertex2f( 20, -20);
       glVertex2f(  3,  -2);
-      glVertex2f(  12,   5);
+      glVertex2f( 12,   5);
       glVertex2f(-20,  20);
       glVertex2f( -2,   3);
-      glVertex2f( -12,  -5);
+      glVertex2f(-12,  -5); 
    glEnd();
 
+   // Orangey circle
    glLineWidth(3);
-   glColor3f(1, .67, 0);        // Orangey circle
+   glColor(overrideColor == NULL ? Color(1, .67 ,0) : overrideColor, alpha);
+
    drawCircle(Point(0,0), 16);
    glLineWidth(gDefaultLineWidth);
 

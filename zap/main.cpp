@@ -77,6 +77,7 @@ XXX need to document timers,sXXX
 <li>Ctrl-left click now starts a wall</li>
 <li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
 <li>Editor remembers name of last edited file</li>
+<li>Ctrl-A can now be used to hide navMeshZones</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

@@ -226,7 +226,18 @@ private:
    S32 mCurrentTeam;
 
    bool snapDisabled;
-   bool showAllObjects;
+
+   enum ShowMode
+   {
+      ShowAllObjects,
+      ShowWallsOnly,
+      ShowAllButNavZones,
+      ShowModesCount
+   };
+
+   ShowMode mShowMode;
+   bool mHasBotNavZones;
+
    enum {
       saveMsgDisplayTime = 4000,
       warnMsgDisplayTime = 4000,

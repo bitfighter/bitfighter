@@ -102,7 +102,7 @@ EditorUserInterface::EditorUserInterface()
    setMenuID(EditorUI);
 
    // Create some items for the dock...  One of each, please!
-   showAllObjects = true;
+   mShowMode = ShowAllObjects; 
    mWasTesting = false;
 
    mUndoItems.setSize(UNDO_STATES);
@@ -449,7 +449,7 @@ void EditorUserInterface::loadLevel()
    }
    clearUndoHistory();                 // Clean out undo/redo buffers
    clearSelection();                   // Nothing starts selected
-   showAllObjects = true;              // Turn everything on
+   mShowMode = ShowAllObjects;         // Turn everything on
    mNeedToSave = false;                // Why save when we just loaded?
    mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
@@ -480,8 +480,11 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       }
    }
 
+   if(index == ItemNavMeshZone)
+      mHasBotNavZones = true;
+
    // Parse most game objects
-   if(itemDef[index].name)    // Item is listed in itemDef, near top of this file
+   if(itemDef[index].name)       // Item is listed in itemDef, near top of this file
    {
       WorldItem i;
       i.index = static_cast<GameItems>(index);
@@ -857,6 +860,8 @@ void EditorUserInterface::onActivate()
 
    mGameTypeArgs.clear();
 
+   mHasBotNavZones = false;
+
    loadLevel();
    setCurrentTeam(0);
 
@@ -1028,8 +1033,6 @@ void EditorUserInterface::render()
       else              // LineItem
          glColor(getTeamColor(mNewItem.team));
 
-      renderPoly(mNewItem.verts, false);
-
       glLineWidth(gDefaultLineWidth);
 
       for(S32 j = mNewItem.verts.size() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
@@ -1095,8 +1098,8 @@ void EditorUserInterface::render()
       glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
    glEnd();
 
-   // Bounding box around dock
-   if(!showAllObjects)
+   // Bounding box around dock 
+   if(mShowMode == ShowWallsOnly)
       glColor(grayedOutColorBright);
    else if(mouseOnDock())
       glColor3f(1, 1, 0);
@@ -1216,11 +1219,13 @@ void EditorUserInterface::render()
          ypos += 25;
       }
    }
-   if(!showAllObjects)
-   {
-      glColor3f(0,1,1);
-      drawCenteredString(vertMargin, 14, "Non-wall objects hidden.  Hit Ctrl-A to restore display.");
-   }
+
+   glColor3f(0,1,1);
+   if(mShowMode == ShowWallsOnly)
+      drawCenteredString(vertMargin, 14, "Non-wall objects hidden.  Hit Ctrl-A to change display.");
+   else if(mShowMode == ShowAllButNavZones)
+      drawCenteredString(vertMargin, 14, "NavMesh objects hidden.  Hit Ctrl-A to change display.");
+
 
    // Render id-editing overlay
    if(editingIDMode)
@@ -1388,7 +1393,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
    const Color labelColor = white;
    const F32 alpha = isScriptItem ? .6 : 1;
 
-   bool hideit = !showAllObjects && !(mShowingReferenceShip && !isDockItem);
+   bool hideit = (mShowMode == ShowWallsOnly) && !(mShowingReferenceShip && !isDockItem);
 
    if(isDockItem)
       pos = item.verts[0];
@@ -1398,7 +1403,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
 
    glEnable(GL_BLEND);     // Enable transparency
 
-   if(itemDef[item.index].geom == geomSimpleLine && (showAllObjects || isDockItem || mShowingReferenceShip))    // Draw "two-point" items
+   if(itemDef[item.index].geom == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    // Draw "two-point" items
    {
       if(isDockItem)
          dest = item.verts[1];
@@ -1558,11 +1563,12 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
    {
       renderPolyline(item.index, item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.team, item.width / mGridSize, alpha);
       renderLinePolyVertices(item, alpha);
-   }
-
+   } 
    else if(itemDef[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
    {
-      if(showAllObjects || isDockItem || mShowingReferenceShip)   // Anything that is not a wall
+      // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, unless it's a dock item or we're showing the reference ship
+      if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) || 
+            isDockItem || mShowingReferenceShip)   
       {
          Vector<Point> outline;
          Vector<Point> fill;
@@ -1613,11 +1619,12 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          renderPolygonLabel(cent, ang, labelSize, itemDef[item.index].onScreenName);
       }
 
-      if((item.geomType() == geomLine || showAllObjects) && !isDockItem)  // No verts on dock!
-         renderLinePolyVertices(item, alpha);      // Draw vertices for this polygon
+      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !isDockItem)  // No verts on dock!
+         if(mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone)         // Unless it's a hidden NavMeshZone...
+            renderLinePolyVertices(item, alpha);                                      // ...draw vertices for this polygon
    }
-
-   else if(showAllObjects || isDockItem || mShowingReferenceShip)      // Draw remaining point objects
+ 
+   else if(mShowMode != ShowWallsOnly || isDockItem || mShowingReferenceShip)      // Draw remaining point objects
    {
       c = hideit ? grayedOutColorDim : getTeamColor(item.team);        // And a color (based on team affiliation)
 
@@ -1749,7 +1756,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
       // If this is an item that has a repop attribute, and the item is selected, draw the text
       if(!isDockItem && itemDef[item.index].hasRepop)
       {
-         if(showAllObjects && ((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
+         if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
          {
             glColor(white);
 
@@ -1790,9 +1797,9 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          }
       }
 
-      if(showAllObjects && (item.selected || item.litUp))         // Draw highlighted border around item if selected
+      if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  // Draw highlighted border around item if selected
       {
-         Point pos = convertLevelToCanvasCoord(item.verts[0]);    // Note that dockItems are never selected!
+         Point pos = convertLevelToCanvasCoord(item.verts[0]);                // Note that dockItems are never selected!
 
          glColor(labelColor);
          glBegin(GL_LINE_LOOP);
@@ -1816,7 +1823,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
       }
       // And label it if we're hovering over it (or not)
-      if(showAllObjects && (item.selected || item.litUp) && itemDef[item.index].onScreenName)
+      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName)
       {
          glColor(hideit ? grayedOutColorBright : labelColor);
          drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName);     // Label on top
@@ -2144,7 +2151,7 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
    {
-      if(!showAllObjects && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
+      if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
          continue;
       WorldItem &p = mItems[i];
       if(itemDef[p.index].geom <= geomPoint)
@@ -2166,7 +2173,7 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 
 S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 {
-   if(!showAllObjects)           // Only add dock items when objects are visible
+   if(mShowMode == ShowWallsOnly)           // Only add dock items when objects are visible
       return -1;
 
    if(mEditingSpecialAttrItem != -1)    // If we're editing a text item, disable this functionality
@@ -2206,7 +2213,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
    {
-      if(!showAllObjects && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
+      if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
          continue;
 
       WorldItem &p = mItems[i];
@@ -2250,13 +2257,17 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
       }
    }
 
-   if(!showAllObjects)
+   if(mShowMode == ShowWallsOnly) 
       return;
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
 
    for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mShowMode == ShowAllButNavZones && mItems[i].index == ItemNavMeshZone)     // Don't select NavMeshZones while they're hidden
+         continue;
+
       if(itemDef[mItems[i].index].geom == geomPoly)
       {
          Vector<Point> verts;
@@ -2269,6 +2280,7 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
             return;
          }
       }
+   }
 }
 
 
@@ -2616,7 +2628,7 @@ void EditorUserInterface::joinBarrier()
 
 void EditorUserInterface::insertNewItem(GameItems itemType)
 {
-   if(!showAllObjects || mDraggingObjects)     // No inserting when items are hidden or being dragged!
+   if(mShowMode == ShowWallsOnly || mDraggingObjects)     // No inserting when items are hidden or being dragged!
       return;
 
    clearSelection();
@@ -3151,8 +3163,14 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == KEY_A && getKeyState(KEY_CTRL))    // Ctrl-A - toggle see all objects
    {
-      showAllObjects = !showAllObjects;
-      if(!showAllObjects && !mDraggingObjects)
+      mShowMode = (ShowMode) ((U32)mShowMode + 1);
+      if(mShowMode == ShowAllButNavZones && !mHasBotNavZones)    // Skip hiding NavZones if we don't have any
+         mShowMode = (ShowMode) ((U32)mShowMode + 1);
+
+      if(mShowMode == ShowModesCount)
+         mShowMode = (ShowMode) 0;     // First mode
+
+      if(mShowMode == ShowWallsOnly && !mDraggingObjects)
          glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 
       onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);   // Reset mouse to spray if appropriate
