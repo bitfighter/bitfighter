@@ -854,7 +854,7 @@ void GameType::onLevelLoaded()
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
-   Robot::startBots();
+   //Robot::startBots();
 }
 
 

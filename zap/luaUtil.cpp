@@ -45,6 +45,7 @@ Lunar<LuaUtil>::RegType LuaUtil::methods[] =
 {
    method(LuaUtil, getMachineTime),
    method(LuaUtil, logprint),
+   method(LuaUtil, getRandomNumber),
 
    {0,0}    // End method list
 };
@@ -60,6 +61,38 @@ S32 LuaUtil::logprint(lua_State *L)
    return 0;
 }
 
+
+S32 LuaUtil::getRandomNumber(lua_State *L)
+{
+   S32 args = lua_gettop(L);
+
+   static const char *methodName = "LuaUtil:getRandomNumber()";
+   checkArgCount(L, 2, methodName);
+
+   if(lua_isnil(L, 1))
+   {
+      lua_pop(L, 1);
+      lua_pop(L, 2);
+
+      return returnFloat(L, TNL::Random::readF());
+   }
+
+   S32 min = 1;
+   S32 max = 0;
+
+   if(lua_isnil(L,2))
+      max = luaL_checkint(L, 1); 
+   else
+   {
+      min = luaL_checkint(L, 1);
+      max = luaL_checkint(L, 2);
+   }
+
+   lua_pop(L, 1);
+   lua_pop(L, 2);
+
+   return returnInt(L, TNL::Random::readI(min, max));
+}
 
 
 };

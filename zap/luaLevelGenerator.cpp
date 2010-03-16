@@ -139,7 +139,6 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
 }
 
 
-
 string ftos(F32 i) // convert float to string
 {
    char outString[100];
@@ -249,7 +248,8 @@ S32 LuaLevelGenerator::getGridSize(lua_State *L)
 }
 
 
-bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L)
+// TODO: This is almost identical to the same-named function in robot.cpp, but each call their own logError function.  How can we combine?
+bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
@@ -257,14 +257,14 @@ bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L)
 
    if(luaL_loadfile(L, fname))
    {
-      logError("Error loading lua helper functions %s.  Skipping levelgen script...", fname);
+      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
       return false;
    }
 
    // Now run the loaded code
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
-      logError("Error during initializing lua helper functions: %s.  Skipping...", lua_tostring(L, -1));
+      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
       return false;
    }
 
@@ -318,7 +318,7 @@ void LuaLevelGenerator::runScript(lua_State *L, Vector<string> scriptArgs, F32 g
    setLuaArgs(L, scriptArgs);    // Put our args in to the Lua table "args"
                                  // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
 
-   if(!loadLuaHelperFunctions(L)) return;
+   if(!loadLuaHelperFunctions(L, "levelgen script")) return;
    if(!loadLevelGenHelperFunctions(L)) return;
 
 

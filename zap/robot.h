@@ -126,7 +126,6 @@ private:
    static const S32 RobotRespawnDelay = 1500;
    Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
 
-
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
    ~Robot();          // Destructor
@@ -178,10 +177,13 @@ public:
 
    S32 getScore() { return mScore; }   // Return robot's score
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
+   string getFilename() { return mFilename; }
 
 private:
   int attribute;
   std::string message;
+  bool loadLuaHelperFunctions(lua_State *L, const char *caller);
+
 
    TNL_DECLARE_CLASS(Robot);
 };

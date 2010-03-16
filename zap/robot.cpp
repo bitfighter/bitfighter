@@ -252,7 +252,6 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getFiringSolution),
    method(LuaRobot, getInterceptCourse),     // Doesn't work well...
 
-
    {0,0}    // End method list
 };
 
@@ -1374,6 +1373,9 @@ bool Robot::initialize(Point &pos)
    // WarpPositionMask triggers the spinny spawning visual effect
    setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client
 
+   if(isGhost())
+      return true;
+
    return startLua();
 } 
 
@@ -1393,7 +1395,7 @@ void Robot::startBots()
 
 
 bool Robot::startLua()
-   {
+{
    LuaObject::cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
@@ -1456,24 +1458,8 @@ bool Robot::startLua()
    LuaObject::setLuaArgs(L, mArgs);    // Put our args in to the Lua table "args"
 
 
-   //lua_settop(L, 0);
-
-   // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
-   // every time a bot is created.
-   static const char *luafname = "lua_helper_functions.lua";
-
-   if(luaL_loadfile(L, luafname))
-   {
-      logError("Error loading lua helper functions %s: %s  Shutting robot down.", luafname, lua_tostring(L, -1));
+   if(!loadLuaHelperFunctions(L, "robot"))
       return false;
-   }
-
-   // Now run the loaded code
-   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
-   {
-      logError("Error during initializing lua helper functions %s: %s.  Shutting robot down.", luafname, lua_tostring(L, -1));
-      return false;
-   }
 
    static const char *robotfname = "robot_helper_functions.lua";
 
@@ -1526,6 +1512,30 @@ bool Robot::startLua()
 
 
    // Note main() will be run later, after all bots have been loaded
+   return true;
+}
+
+
+// TODO: This is almost identical to the same-named function in luaLevelGenerator.cpp, but each call their own logError function.  How can we combine?
+bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
+{
+   // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
+   // every time a bot is created.
+   static const char *fname = "lua_helper_functions.lua";
+
+   if(luaL_loadfile(L, fname))
+   {
+      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
+      return false;
+   }
+
+   // Now run the loaded code
+   if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
+   {
+      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
+      return false;
+   }
+
    return true;
 }
 

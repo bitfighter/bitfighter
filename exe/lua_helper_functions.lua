@@ -194,10 +194,12 @@ end
 -----------------------------------------------------------
 -----------------------------------------------------------
 -- Our utility object
-luaUtil = LuaUtil()
+luaUtil = LuaUtil()  -- Could put a call to C++ random function in here...
 
--- Ensure we have a good stream of random numbers
-math.randomseed( luaUtil:getMachineTime() )
+-- Ensure we have a good stream of random numbers until we figure out why lua's randoms suck so bad
+math.random = function (x, y)
+   return luaUtil:getRandomNumber(x, y)
+end
 
 
 -----------------------------------------------------------

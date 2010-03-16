@@ -856,7 +856,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
       return false;
    }
 
-   mClientName = makeUnique(name).c_str();
+   mClientName = name;
    return true;
 }
 
@@ -907,7 +907,6 @@ std::string GameConnection::makeUnique(string name)
             break;
          }
       }
-
    }
 
    return proposedName;

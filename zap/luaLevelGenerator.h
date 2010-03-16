@@ -42,7 +42,7 @@ class LuaLevelGenerator: public LuaObject
 {
 private:
    string mFilename;
-   bool loadLuaHelperFunctions(lua_State *L);
+   bool loadLuaHelperFunctions(lua_State *L, const char *caller);
    bool loadLevelGenHelperFunctions(lua_State *L);
 
 public:

@@ -28,6 +28,7 @@
 
 #include "luaObject.h"
 #include "tnlLog.h"     // for logprintf
+#include "tnlrandom.h"
 
 using namespace std;
 
@@ -51,6 +52,8 @@ public:
    // Lua methods
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
+   S32 getRandomNumber(lua_State *L);
+
 };
 
 };

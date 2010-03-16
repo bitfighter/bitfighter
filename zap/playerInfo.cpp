@@ -34,6 +34,7 @@ const char LuaPlayerInfo::className[] = "PlayerInfo";      // Class name as it a
 Lunar<LuaPlayerInfo>::RegType LuaPlayerInfo::methods[] =
 {
    method(LuaPlayerInfo, getName),
+   method(LuaPlayerInfo, getScriptName),     // Filename of script the bot is running
    method(LuaPlayerInfo, getTeamIndx),
    method(LuaPlayerInfo, getScore),
    method(LuaPlayerInfo, getRating),
