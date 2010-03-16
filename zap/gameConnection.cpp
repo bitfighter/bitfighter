@@ -815,8 +815,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
    stream->readString(buf);
    size_t len = strlen(buf);
 
-   if(len > 30)      // Make sure it isn't too long
-      len = 30;
+   if(len > MAX_SHORT_TEXT_LEN)      // Make sure it isn't too long
+      len = MAX_SHORT_TEXT_LEN;
 
    // Clean up name, render it safe
 
@@ -856,28 +856,63 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
       return false;
    }
 
-   // Now, back to our regularly scheduled program.
-   // Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.
-   U32 index = 0;
-checkPlayerName:
-   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-   {
-      if(!strcmp(walk->mClientName.getString(), name))
-      {
-         dSprintf(name + len, 3, ".%d", index);
-         index++;
-         if((index > 9 && len == 30) || (index > 99 && len == 29))    // This little hack should cover us for more names than we can handle
-         {
-            len--;
-            name[len] = 0;
-         }
-         goto checkPlayerName;
-      }
-   }
-
-   mClientName = name;
+   mClientName = makeUnique(name).c_str();
    return true;
 }
+
+
+// Make sure name is unique.  If it's not, make it so.  The problem is that then the client doesn't know their official name.
+// This makes the assumption that we'll find a unique name before numstr runs out of space (allowing us to try 999,999,999 or so combinations)
+std::string GameConnection::makeUnique(string name)
+{
+   U32 index = 0;
+   string proposedName = name;
+
+   bool unique = false;
+
+   while(!unique)
+   {
+      unique = true;
+      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+      {
+         // TODO:  How to combine these blocks?
+         if(proposedName == walk->mClientName.getString())          // Collision detected!
+         {
+            unique = false;
+
+            char numstr[10];
+            sprintf(numstr, ".%d", index);
+            S32 maxNamePos = MAX_SHORT_TEXT_LEN - strlen(numstr);   // Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
+            name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
+            proposedName = name + numstr;
+
+            index++;
+            break;
+         }
+      }
+
+      for(S32 i = 0; i < Robot::robots.size(); i++)
+      {
+         if(proposedName == Robot::robots[i]->getName().getString())
+         {
+            unique = false;
+
+            char numstr[10];
+            sprintf(numstr, ".%d", index);
+            S32 maxNamePos = MAX_SHORT_TEXT_LEN - strlen(numstr);   // Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
+            name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
+            proposedName = name + numstr;
+
+            index++;
+            break;
+         }
+      }
+
+   }
+
+   return proposedName;
+}
+
 
 void GameConnection::onConnectionEstablished()
 {

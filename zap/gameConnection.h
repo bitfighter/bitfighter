@@ -126,6 +126,7 @@ public:
    void setServerName(StringTableEntry name) { mServerName = name; }
 
    std::string getServerName() { return mServerName.getString(); }
+   static std::string makeUnique(std::string name);    // Make sure a given name is unique across all clients & bots
 
    void setClientRef(ClientRef *theRef);
    ClientRef *getClientRef();

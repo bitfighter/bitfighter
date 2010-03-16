@@ -39,7 +39,6 @@
 
 namespace Zap
 {
-
 using namespace std;
 
 
@@ -48,6 +47,7 @@ void TextEntryUserInterface::onActivate()
    if(resetOnActivate)
       lineEditor.clear();
 }
+
 
 void TextEntryUserInterface::render()
 {

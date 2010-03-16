@@ -851,7 +851,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
 
    // Make sure target is still in the same zone it was in when we created our flightplan.
    // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
-   if(targetZone == thisRobot->flightPlanTo)
+   if(thisRobot->flightPlan.size() > 0 && targetZone == thisRobot->flightPlanTo)
    {
 
       // In case our target has moved, replace final point of our flightplan with the current target location
@@ -1363,6 +1363,7 @@ Robot::~Robot()
 bool Robot::initialize(Point &pos)
 {
    respawnTimer.clear();
+   flightPlan.clear();
 
    mCurrentZone = -1;   // Correct value will be calculated upon first request
 
@@ -1504,19 +1505,25 @@ bool Robot::startLua()
    }
 
 
+   string name;
+
    // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
    lua_getglobal(L, "getName");
 
    if (!lua_isfunction(L, -1) || lua_pcall(L, 0, 1, 0))     // Passing 0 params, getting one back
    {
-      mPlayerName = "Nancy";
-      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), mPlayerName.getString());
+      name = "Nancy";
+      logError("Robot error retrieving name (%s).  Using \"%s\".", lua_tostring(L, -1), name.c_str());
    }
    else
    {
-      mPlayerName = lua_tostring(L, -1);
+      name = lua_tostring(L, -1);
       lua_pop(L, 1);
    }
+
+   // Make sure name is unique
+   mPlayerName = GameConnection::makeUnique(name).c_str();
+
 
    // Note main() will be run later, after all bots have been loaded
    return true;
