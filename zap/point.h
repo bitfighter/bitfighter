@@ -71,6 +71,9 @@ struct Point
    member_type distSquared(const Point &pt) { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
 
    member_type angleTo(const Point &pt) { return atan2(pt.y-y, pt.x-x); }
+   
+   void setAngle(const member_type ang) { setPolar(len(), ang); }
+   void setPolar(const member_type l, const member_type ang) { x = cos(ang) * l; y = sin(ang) * l; }
 
    void scaleFloorDiv(float scaleFactor, float divFactor)
    {

@@ -57,16 +57,20 @@ void LuaObject::setLuaArgs(lua_State *L, Vector<string> args)
 
 
 // Returns a point to calling Lua function
-S32 LuaObject::returnPoint(lua_State *L, Point point)
+S32 LuaObject::returnPoint(lua_State *L, Point &point)
 {
    //lua_createtable(L, 0, 2);         // creates a table with 2 fields
    //setfield(L, "x", point.x);        // table.x = x
    //setfield(L, "y", point.y);        // table.y = y
 
-   LuaPoint *pt = new LuaPoint(point);
-   Lunar<LuaPoint>::push(L, pt, true);     // true will allow Lua to delete this object when it goes out of scope
+   //LuaPoint *pt = new LuaPoint(point);
+   //Lunar<LuaPoint>::push(L, pt, true);     // true will allow Lua to delete this object when it goes out of scope
+   //
+   //return 1;
 
-   return 1;
+   lua_pushnumber(L, point.x);
+   lua_pushnumber(L, point.y);
+   return 2;
 }
 
 
@@ -404,6 +408,8 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
    method(LuaPoint, setx),
    method(LuaPoint, sety),
    method(LuaPoint, setxy),
+   method(LuaPoint, normalize),
+   method(LuaPoint, setAngle),
 
    method(LuaPoint, equals),
    method(LuaPoint, distanceTo),
@@ -411,8 +417,6 @@ Lunar<LuaPoint>::RegType LuaPoint::methods[] =
    method(LuaPoint, angleTo),
    method(LuaPoint, len),
    method(LuaPoint, lenSquared),
-   method(LuaPoint, normalize),
-
 
    {0,0}    // End method list
 };
@@ -454,6 +458,31 @@ S32 LuaPoint::sety(lua_State *L)
    mPoint.y = y;
    return 0;
 }
+
+
+S32 LuaPoint::setAngle(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:setAngle()";
+   checkArgCount(L, 1, methodName);
+   F32 ang =  getFloat(L, 1, methodName);
+
+   mPoint.setAngle(ang);
+   return 0;
+}
+
+
+S32 LuaPoint::setPolar(lua_State *L)
+{
+   static const char *methodName = "LuaPoint:setPolar()";
+   checkArgCount(L, 2, methodName);
+   F32 len =  getFloat(L, 1, methodName);
+   F32 ang =  getFloat(L, 2, methodName);
+
+   mPoint.setPolar(len, ang);
+   return 0;
+}
+
+
 
 #define abs(x) (x) > 0 ? (x) : -(x)
 

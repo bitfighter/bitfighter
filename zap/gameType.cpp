@@ -854,7 +854,7 @@ void GameType::onLevelLoaded()
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
-   //Robot::startBots();
+   Robot::startBots();
 }
 
 
@@ -1075,8 +1075,9 @@ void GameType::spawnRobot(Robot *robot)
       return;
    }
 
-   robot->runMain();                      // Gentlemen, start your engines!
-   robot->getEventManager().update();     // Ensure registrations made during bot initialization are ready to go
+   // Should be done in intialize
+   //robot->runMain();                      // Gentlemen, start your engines!
+   //robot->getEventManager().update();     // Ensure registrations made during bot initialization are ready to go
 
 
    // Should probably do this, but... not now.

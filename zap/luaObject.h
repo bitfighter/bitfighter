@@ -74,7 +74,7 @@ protected:
 public:
    // All of these return<T> functions work in the same way.  Include at the and of a child class method.
    // Usage: return returnInt(L, int);
-   static S32 returnPoint(lua_State *L, Point point);
+   static S32 returnPoint(lua_State *L, Point &point);
    static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
    static S32 returnInt(lua_State *L, S32 num);
    static S32 returnFloat(lua_State *L, F32 num);
@@ -135,6 +135,8 @@ public:
    S32 setxy(lua_State *L);
    S32 setx(lua_State *L);
    S32 sety(lua_State *L);
+   S32 setAngle(lua_State *L);
+   S32 setPolar(lua_State *L);
 
    S32 equals(lua_State *L);     // Does point equal another point?
 

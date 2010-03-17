@@ -567,11 +567,11 @@ S32 LuaRobot::fire(lua_State *L)
 
 
 // Can robot see point P?
-S32 LuaRobot::hasLosPt(lua_State *L)
+S32 LuaRobot::hasLosPt(lua_State *L)      // Now takes a point or an x,y
 {
    static const char *methodName = "Robot:hasLosPt()";
-   checkArgCount(L, 1, methodName);
-   Point point = getPoint(L, 1, methodName);
+   //checkArgCount(L, 1, methodName);
+   Point point = getPointOrXY(L, 1, methodName);
 
    return returnBool(L, thisRobot->canSeePoint(point));
 }
@@ -1373,24 +1373,25 @@ bool Robot::initialize(Point &pos)
    // WarpPositionMask triggers the spinny spawning visual effect
    setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client
 
-   if(isGhost())
-      return true;
+   TNLAssert(!isGhost(), "Didn't expect ghost here...");
 
-   return startLua();
+   runMain();
+   eventManager.update();       // Ensure registrations made during bot initialization are ready to go
+
+   return true;
 } 
 
 
-// Loop through all our bots and run thier main() functions
+// Loop through all our bots, start their interpreters, and run their main() functions
 void Robot::startBots()
 {
-
    for(S32 i = 0; i < robots.size(); i++)
       robots[i]->startLua();     
 
-   for(S32 i = 0; i < robots.size(); i++)
-      robots[i]->runMain();
+   //for(S32 i = 0; i < robots.size(); i++)
+   //   robots[i]->runMain();
 
-   eventManager.update();                      // Ensure registrations made during bot initialization are ready to go
+   //eventManager.update();       // Ensure registrations made during bot initialization are ready to go
 }
 
 
@@ -1490,7 +1491,6 @@ bool Robot::startLua()
       return false;
    }
 
-
    string name;
 
    // Run the getName() function in the bot (will default to the one in robot_helper_functions if it's not overwritten by the bot)
@@ -1509,7 +1509,6 @@ bool Robot::startLua()
 
    // Make sure name is unique
    mPlayerName = GameConnection::makeUnique(name).c_str();
-
 
    // Note main() will be run later, after all bots have been loaded
    return true;

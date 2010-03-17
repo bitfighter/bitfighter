@@ -69,6 +69,7 @@ XXX need to document timers,sXXX
 <li>Robots now shown on scoreboard and in various menus where players are listed</li>
 <li>Robot names are now "uniqued"</li>
 <li>Overrode Lua's random generator to use one that's a bit more... random</li>
+<li>Added setAngle() and setPolar() methods to point object</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>
