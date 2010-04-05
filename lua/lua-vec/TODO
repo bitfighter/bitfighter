@@ -1,0 +1,10 @@
+Cleanup:
+- 'const float*[4]' -> 'lua_Vec' ?
+
+Issues:
+- should luaO_rawequalObj() in lobject.c have a case for LUA_TVEC?
+- binary compatibility with standard lua? type indices have changed, so binaries compiled with
+  standard luac probably don't work with lua-vec interpreter
+- vec[idx] accessor operator calls luaG_typeerror(L, t, "index") when trying to access with an
+  invalid index (number out of bounds or bad string like "foo"); however "index" may not be the
+  proper error type for these incidents (see lvm.c function luaV_gettable)

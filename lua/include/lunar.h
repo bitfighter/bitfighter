@@ -1,5 +1,6 @@
 // From http://lua-users.org/wiki/CppBindingWithLunar
 // More explanation at http://www.lua.org/notes/ltn005.html
+// Note that this file has been modified for use with Bitfighter
 
 
 #ifndef _LUNAR_H_
@@ -9,8 +10,8 @@
 #include <string>
 
 extern "C" {
-#include "lua.h"
-#include "lauxlib.h"
+#include "../lua-vec/src/lua.h"
+#include "../lua-vec/src/lauxlib.h"
 }
 
 #include "tnlLog.h"     // for def of logprintf()

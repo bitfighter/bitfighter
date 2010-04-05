@@ -38,7 +38,7 @@
 #include "UIErrorMessage.h"
 #include "UIQueryServers.h"
 #include "md5wrapper.h"
-
+  
 
 namespace Zap
 {
@@ -257,7 +257,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
    s_logprintf("User [%s] %s %s", mClientRef->name.getString(), strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
-
+
+
    // Update our in-memory copies of the param
    if(type == (U32)LevelChangePassword)
       gLevelChangePassword = param.getString();
@@ -882,8 +883,9 @@ std::string GameConnection::makeUnique(string name)
 
             char numstr[10];
             sprintf(numstr, ".%d", index);
-            S32 maxNamePos = MAX_SHORT_TEXT_LEN - strlen(numstr);   // Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
-            name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
+			// Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
+            S32 maxNamePos = MAX_SHORT_TEXT_LEN - (S32)strlen(numstr); 
+            name = name.substr(0, maxNamePos);                         // Make sure name won't grow too long
             proposedName = name + numstr;
 
             index++;
@@ -899,7 +901,9 @@ std::string GameConnection::makeUnique(string name)
 
             char numstr[10];
             sprintf(numstr, ".%d", index);
-            S32 maxNamePos = MAX_SHORT_TEXT_LEN - strlen(numstr);   // Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
+
+			// Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
+            S32 maxNamePos = MAX_SHORT_TEXT_LEN - (S32)strlen(numstr);   
             name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
             proposedName = name + numstr;
 
@@ -938,13 +942,13 @@ void GameConnection::onConnectionEstablished()
       time(&joinTime);
       mAcheivedConnection = true;
 
+      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientRef()->getPlayerInfo());
+
       if(gLevelChangePassword == "")                // Grant level change permissions if level change PW is blank
       {
          setIsLevelChanger(true);
          s2cSetIsLevelChanger(true, false);         // Tell client, but don't display notification
       }
-
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientRef()->getPlayerInfo());
 
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       if(isLocalConnection())

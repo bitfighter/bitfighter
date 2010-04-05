@@ -66,6 +66,7 @@ protected:
    static const char *getString(lua_State *L, S32 index, const char *functionName);
    static Point getPoint(lua_State *L, S32 index, const char *functionName);
    static Point getPointOrXY(lua_State *L, S32 index, const char *functionName);
+   static Point getVec(lua_State *L, S32 index, const char *methodName);
 
    static void setfield (lua_State *L, const char *key, F32 value);
 
@@ -77,6 +78,7 @@ public:
    static S32 returnPoint(lua_State *L, Point &point);
    static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
    static S32 returnInt(lua_State *L, S32 num);
+   static S32 returnVec(lua_State *L, F32 x, F32 y);
    static S32 returnFloat(lua_State *L, F32 num);
    static S32 returnString(lua_State *L, const char *str);
    static S32 returnBool(lua_State *L, bool boolean);

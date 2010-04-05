@@ -53,7 +53,7 @@ public:
 
    LineEditor(U32 maxLength = 256, string value = "");     // Constructor
 
-   U32 length() { return mLine.length(); }
+   U32 length() { return (U32)mLine.length(); }
    void addChar(char c) { if(length() < mMaxLen) mLine.push_back(c); }
    void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); }     // Backspace key hit
    void deletePressed() { backspacePressed(); }                                    // Delete key hit

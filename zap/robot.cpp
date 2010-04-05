@@ -36,7 +36,7 @@
 #include "UIGame.h"
 #include "gameConnection.h"
 #include "shipItems.h"
-#include "playerInfo.h"          // For RobotPlayerInfo constructor  
+#include "playerInfo.h"          // For RobotPlayerInfo constructor
 #include "gameItems.h"
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
@@ -725,7 +725,7 @@ S32 LuaRobot::globalMsg(lua_State *L)
    if(gt)
    {
       gt->s2cDisplayChatMessage(true, thisRobot->getName(), message);
-      
+
       // Fire our event handler
       Robot::getEventManager().fireEvent(thisRobot->getL(), EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), true);
    }
@@ -746,7 +746,7 @@ S32 LuaRobot::teamMsg(lua_State *L)
    if(gt)
    {
       gt->s2cDisplayChatMessage(true, thisRobot->getName(), message);
-      
+
       // Fire our event handler
       Robot::getEventManager().fireEvent(thisRobot->L, EventManager::MsgReceivedEvent, message, thisRobot->getPlayerInfo(), false);
    }
@@ -834,7 +834,7 @@ extern S32 findZoneContaining(Point p);
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
-S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
+S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 {
    static const char *methodName = "Robot:getWaypoint()";
 
@@ -844,7 +844,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a point or an x,y
    if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))
       return returnPoint(L, target);
 
-   // TODO: cache destination point; if it hasn't moved, then skip ahead. 
+   // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
    S32 targetZone = findZoneContaining(target);       // Where we're going
 
@@ -1248,11 +1248,11 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
    for(S32 i = 0; i < subscriptions[eventType].size(); i++)
    {
       lua_State *L = subscriptions[eventType][i];
-      
+
       if(L == caller_L)    // Don't alert bot about own message!
          continue;
 
-      try   
+      try
       {
          lua_getglobal(L, eventFunctions[eventType]);  
          lua_pushstring(L, message);
@@ -1447,6 +1447,7 @@ bool Robot::startLua()
    luaopen_table(L);    // Needed for custom iterators and "values" function included in robot_helper_functions.lua
    luaopen_debug(L);    // Needed for "strict" implementation
    luaopen_string(L);   // Needed for elizabot, not much else
+   luaopen_vec(L);      // For vector math
    //luaopen_package(L);  // Crashes
 
    // Push a pointer to this Robot to the Lua stack,

@@ -54,7 +54,7 @@
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				WarnAsError="true"
-				Detect64BitPortabilityProblems="false"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -68,10 +68,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../win_include_do_not_distribute/dsound.lib ../win_include_do_not_distribute/dinput8.lib ../win_include_do_not_distribute/dxguid.lib ../openal/OpenAL32.lib ../openal/alut.lib wsock32.lib ../glut/glut32.lib ../lua/lua51.lib"
+				AdditionalDependencies="../win_include_do_not_distribute/dsound.lib ../win_include_do_not_distribute/dinput8.lib ../win_include_do_not_distribute/dxguid.lib ../openal/OpenAL32.lib ../openal/alut.lib wsock32.lib ../glut/glut32.lib"
 				OutputFile="../exe/zap_d.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="C:\Temp\tnl_Debug;C:\Temp\libtomcrypt_Debug"
+				AdditionalLibraryDirectories="&quot;c:\Temp\lua-vec_Debug&quot;;C:\Temp\tnl_Debug;C:\Temp\libtomcrypt_Debug"
 				IgnoreDefaultLibraryNames="MSVCRTD.lib;msvcprtd.lib;MSVCRT.lib"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/ZAP.pdb"

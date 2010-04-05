@@ -68,9 +68,11 @@ S32 LuaObject::returnPoint(lua_State *L, Point &point)
    //
    //return 1;
 
-   lua_pushnumber(L, point.x);
-   lua_pushnumber(L, point.y);
-   return 2;
+   //lua_pushnumber(L, point.x);
+   //lua_pushnumber(L, point.y);
+   //return 2;
+
+	return returnVec(L, point.x, point.y);
 }
 
 
@@ -89,6 +91,13 @@ S32 LuaObject::returnInt(lua_State *L, S32 num)
    return 1;
 }
 
+
+// Returns a vecot to a calling Lua function
+S32 LuaObject::returnVec(lua_State *L, F32 x, F32 y)
+{
+   lua_pushvec(L, x, y, 0, 0);
+   return 1;
+}
 
 // Returns a float to a calling Lua function
 S32 LuaObject::returnFloat(lua_State *L, F32 num)
@@ -264,13 +273,30 @@ Point LuaObject::getPoint(lua_State *L, S32 index, const char *methodName)
 }
 
 
+// Pop a vec object off stack, check its type, and return it
+Point LuaObject::getVec(lua_State *L, S32 index, const char *methodName)
+{
+   if(!lua_isvec(L, index))
+   {
+      char msg[256];
+      dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
+      logprintf(msg);
+
+      throw LuaException(msg);
+   }
+
+   const F32 *fff = lua_tovec(L, index);
+   return Point(fff[0], fff[1]);
+}
+
+
 // Pop a point object off stack, or grab two numbers and create a point from that
 Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
 {
    S32 args = lua_gettop(L);
    if(args == 1)
    {
-      return getPoint(L, index, methodName);
+      return getVec(L, index, methodName);
    }
    else if(args == 2)
    {
