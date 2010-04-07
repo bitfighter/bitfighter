@@ -1966,7 +1966,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 // Runs on server, obviously
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
-   NetObject::setRPCDestConnection(theConnection);    // "B "
+   NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, mLevelHasLoadoutZone);
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {

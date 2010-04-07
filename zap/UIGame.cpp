@@ -1280,8 +1280,8 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
       allWords += (i == 1 ? "" : " ") + words[i];
 
    // Did the user provide a name/description?
-   if(allWords == "")
-   {
+   if(type != GameConnection::DeleteLevel && allWords == "")
+   { 
       gGameUserInterface.displayMessage(gCmdChatColor, type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
       return;
    }
@@ -1486,6 +1486,15 @@ void GameUserInterface::processCommand(Vector<string> &words)
       changeServerNameDescr(gc, GameConnection::ServerDescr, words);
    }
 
+   else if(words[0] == "deletecurrentlevel")
+   {
+      if(!hasAdmin(gc, "!!! You don't have permission to delete the current level"))
+         return;
+
+      changeServerNameDescr(gc, GameConnection::DeleteLevel, words);
+   }
+
+
    else if(words[0] == "suspend")
    {
       U32 players = gClientGame->getPlayerCount();
@@ -1528,6 +1537,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/setserverpass");
    mChatCmds.push_back("/setservername");
    mChatCmds.push_back("/setserverdescr");
+   mChatCmds.push_back("/deletecurrentlevel");
 }
 
 

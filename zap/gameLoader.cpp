@@ -288,6 +288,7 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern Vector<StringTableEntry> gLevelList;
+extern Vector<StringTableEntry> gLevelSkipList;
 
 
 // Create the definititve list of levels for hosting a game
@@ -297,6 +298,7 @@ void LevelListLoader::buildLevelList()
    if(gCmdLineSettings.specifiedLevels.size() > 0)
    {
       gLevelList = gCmdLineSettings.specifiedLevels;
+      removeSkippedLevels();
       return;
    }
 
@@ -304,6 +306,7 @@ void LevelListLoader::buildLevelList()
    if(gCmdLineSettings.levelDir == "" && !gCmdLineSettings.alllevels && gIniSettings.levelList.size() > 0)
    {
       gLevelList = gIniSettings.levelList;
+      removeSkippedLevels();
       return;
    }
 
@@ -320,7 +323,25 @@ void LevelListLoader::buildLevelList()
 
    for (S32 i = 0; i < levelfiles.size(); i++)
       gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
+
+   removeSkippedLevels();
 }
+
+
+// Remove any levels listed in gLevelSkipList from gLevelList
+void LevelListLoader::removeSkippedLevels()
+{
+   for(S32 i = 0; i < gLevelList.size(); i++)
+      for(S32 j = 0; j < gLevelSkipList.size(); j++)
+         if(gLevelList[i] == gLevelSkipList[j])
+         {
+            s_logprintf("Loader skipping level %s listed in LevelSkipList (see INI file)", gLevelList[i].getString());
+            gLevelList.erase(i);
+            i--;
+            break;
+         }
+}
+
 
 };
 

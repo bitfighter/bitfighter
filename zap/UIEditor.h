@@ -292,6 +292,7 @@ private:
    Point mMouseDownPos;
 
    void renderGenericItem(Point pos, Color c, F32 alpha);
+   F32 renderTextItem(WorldItem &item, F32 alpha);          // Returns size of text
    void setTranslationAndScale(Point pos);
 
    bool mCreatingPoly;

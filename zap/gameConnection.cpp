@@ -94,7 +94,7 @@ GameConnection::~GameConnection()
 
      double elapsed = difftime (quitTime, joinTime);
 
-     TNL::s_logprintf("%s [%s] quit :: %s (%.2lf secs)", mClientName.getString(), isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str(), elapsed);
+     TNL::s_logprintf("%s [%s] quit [%s] (%.2lf secs)", mClientName.getString(), isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str(), elapsed);
    }
 }
 
@@ -242,6 +242,7 @@ extern CIniFile gINI;
 extern string gHostName;
 extern string gHostDescr;
 extern ServerGame *gServerGame;
+extern Vector<StringTableEntry> gLevelSkipList;
 
 // Allow admins to change the passwords on their systems
 TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, GameConnection::ParamTypeCount> type), (param, type),
@@ -251,12 +252,19 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       return;
 
    // Check for forbidden blank parameters
-   if(   (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
+   if((type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
                           !strcmp(param.getString(), ""))    // Some params can't be blank
       return;
 
-   const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
-   s_logprintf("User [%s] %s %s", mClientRef->name.getString(), strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
+   // Add a message to the server log
+   if(type == (U32)DeleteLevel)
+      s_logprintf("User [%s] added level [%s] to server skip list", mClientRef->name.getString(), 
+            gServerGame->getCurrentLevelFileName().getString());
+   else
+   {
+      const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
+      s_logprintf("User [%s] %s %s", mClientRef->name.getString(), strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
+   }
 
 
    // Update our in-memory copies of the param
@@ -276,14 +284,38 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       gServerGame->setHostDescr(param.getString());    // Do we also need to set gHost
       gHostDescr = param.getString();                  // Needed on local host?
    }
+   else if(type == (U32)DeleteLevel)
+   {
+      // Avoid duplicates on skip list
+      bool found = false;
+      for(S32 i = 0; i < gLevelSkipList.size(); i++)
+         if(gLevelSkipList[i] == gServerGame->getCurrentLevelFileName())
+         {
+            found = true;
+            break;
+         }
 
-   const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
+      if(!found)
+      {
+         // Add level to our skip list.  Deleting it from the active list of levels is more of a challenge...
+         gLevelSkipList.push_back(gServerGame->getCurrentLevelFileName());
+         writeSkipList();     // Write skipped levels to INI
+         gINI.WriteFile();    // Save new INI settings to disk
+      }
+   }
 
-   // Update the INI file
-   gINI.SetValue("Host", keys[type], param.getString(), true);
-   gINI.WriteFile();
+   if(type != (U32)DeleteLevel)
+   {
+      const char *keys[] = { "LevelChangePassword", "AdminPassword", "ServerPassword", "ServerName", "ServerDescription" };
 
-   // Some messages we might show the user
+      // Update the INI file
+      gINI.SetValue("Host", keys[type], param.getString(), true);
+      gINI.WriteFile();    // Save new INI settings to disk
+   }
+
+   
+
+   // Some messages we might show the user... should these just be inserted directly below?
    static StringTableEntry levelPassChanged("Level change password changed");
    static StringTableEntry levelPassCleared("Level change password cleared -- anyone can change levels");
    static StringTableEntry adminPassChanged("Admin password changed");
@@ -291,6 +323,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    static StringTableEntry serverPassCleared("Server password cleared -- anyone can connect");
    static StringTableEntry serverNameChanged("Server name changed");
    static StringTableEntry serverDescrChanged("Server description changed");
+   static StringTableEntry serverLevelDeleted("Level added to skip list; level will stay in rotation until server restarted");
 
    // Pick out just the right message
    StringTableEntry msg;
@@ -305,6 +338,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       msg = serverNameChanged;
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
+   else if(type == (U32)DeleteLevel)
+      msg = serverLevelDeleted;
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
 
@@ -694,7 +729,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    while(newLevelIndex < 0)
       newLevelIndex += gServerGame->getLevelCount();
 
-   static StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
+   StringTableEntry msg( restart ? "%e0 restarted the current level." : "%e0 changed the level to %e1." );
    Vector<StringTableEntry> e;
    e.push_back(getClientName());
    if(!restart)
@@ -952,9 +987,9 @@ void GameConnection::onConnectionEstablished()
 
       TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       if(isLocalConnection())
-         TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
+         TNL::s_logprintf("%s [%s] joined [%s]", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
       else
-         TNL::s_logprintf("%s [%s] joined :: %s", mClientName.getString(), getNetAddressString(), getTimeStamp().c_str());
+         TNL::s_logprintf("%s [%s] joined [%s]", mClientName.getString(), getNetAddressString(), getTimeStamp().c_str());
    }
 }
 

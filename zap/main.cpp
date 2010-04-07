@@ -81,6 +81,7 @@ XXX need to document timers,sXXX
 <li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
 <li>Editor remembers name of last edited file</li>
 <li>Ctrl-A can now be used to hide navMeshZones</li>
+<li>Improved preview mode (when holding Tab key)</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
@@ -239,7 +240,8 @@ Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may
       // Above is equivalent to ("IP:Any:28000")
 
 string gLevelDir = "levels";              // Where our levels are stored, can be overwritten by ini or cmd line param
-Vector<StringTableEntry> gLevelList;      // Holds a list of the levels we'll play when we're hosting
+Vector<StringTableEntry> gLevelList;      // Levels we'll play when we're hosting
+Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
 // Lower = more slippery!  Not used at the moment...
 F32 gNormalFriction = 1000;   // Friction between vehicle and ground, ordinary
@@ -544,8 +546,8 @@ void abortHosting()
 {
    if(gDedicatedServer)
    {
-      logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
-      s_logprintf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());
+      logprintf("No levels found in folder %s.  Cannot host a game.", gLevelDir.c_str());
+      s_logprintf("No levels found in folder %s.  Cannot host a game.", gLevelDir.c_str());
       //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
       exitGame(1);
    }
@@ -579,7 +581,14 @@ void initHostGame(Address bindAddress, bool testMode)
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
-      LevelListLoader::buildLevelList();
+   {
+      s_logprintf("----------\nbitfighter server started [%s]", getTimeStamp().c_str());
+      s_logprintf("hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
+
+      LevelListLoader::buildLevelList();     // Populates gLevelList
+
+      s_logprintf("Loaded %d levels:", gLevelList.size());
+   }
 
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(gLevelList.size())
@@ -601,9 +610,6 @@ void initHostGame(Address bindAddress, bool testMode)
 void hostGame()
 {
    gHostingModePhase = Hosting;
-   s_logprintf("----------\nbitfighter server started %s", getTimeStamp().c_str());
-   s_logprintf("hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
-   s_logprintf("hosting %d levels:", gServerGame->getLevelNameCount());
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
       s_logprintf("\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());

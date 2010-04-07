@@ -1281,6 +1281,8 @@ void EditorUserInterface::render()
 // Draw the vertices for a polygon or line item (i.e. walls)
 void EditorUserInterface::renderLinePolyVertices(WorldItem &item, F32 alpha)
 {
+   if(mShowingReferenceShip)
+      return;
    bool anyVertSelected = false;
    for(S32 j = 0; j < item.verts.size(); j++)
       if(item.vertSelected[j])
@@ -1303,7 +1305,7 @@ void EditorUserInterface::renderLinePolyVertices(WorldItem &item, F32 alpha)
    }
 }
 
-// Draw a vertex of a selected editor item,
+// Draw a vertex of a selected editor item
 void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha, S32 size)
 {
    if(style == HighlightedVertex)
@@ -1411,7 +1413,9 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          dest = convertLevelToCanvasCoord(item.verts[1]);
 
       // First check if we should show the schematic version or the real object rendering
-      if((mShowingReferenceShip && (item.index == ItemTeleporter || item.index == ItemSpeedZone)) && !isDockItem)
+      if((mShowingReferenceShip && 
+            (item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem)) && 
+         !isDockItem)
       {
          glPushMatrix();
             setTranslationAndScale(pos);
@@ -1424,7 +1428,11 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
             }
             else if(item.index == ItemSpeedZone)
                renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.verts[1])), gClientGame->getCurrentTime());
-         glPopMatrix();
+
+            glPopMatrix();
+  
+            if(item.index == ItemTextItem)
+               renderTextItem(item, 1);
       }
       else
       {
@@ -1465,20 +1473,7 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
          // If this is a textItem, and either the item or either vertex is selected, draw the text
          if(!isDockItem && itemDef[item.index].hasText)
          {
-            // Recalc text size -- TODO:  this shouldn't be here...
-            // this should only happen when text is created, not every time it's drawn
-
-            F32 strWidth = getStringWidth(120, item.lineEditor.c_str());
-            F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
-
-            item.textSize = 120.0f * lineLen * mGridSize / max(strWidth, 80.0f); 
-
-            // Use this more precise F32 calculation of size for smoother interactive rendering.
-            // We'll use U32 approximation in game.
-            glColor(getTeamColor(item.team), alpha);
-            F32 txtSize = 120.0f * lineLen * mCurrentScale / max(strWidth, 80.0f);
-
-            drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
+            F32 txtSize = renderTextItem(item, alpha);
 
             if(isBeingEdited)
                item.lineEditor.drawCursorAngle(pos.x, pos.y, txtSize, pos.angleTo(dest));
@@ -1566,9 +1561,13 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
    } 
    else if(itemDef[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
    {
-      // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, unless it's a dock item or we're showing the reference ship
-      if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) || 
-            isDockItem || mShowingReferenceShip)   
+      // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
+	  // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
+
+      if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) &&
+		  !(mShowingReferenceShip) || 
+          isDockItem ||  
+	      mShowingReferenceShip && item.index != ItemNavMeshZone)   
       {
          Vector<Point> outline;
          Vector<Point> fill;
@@ -1847,6 +1846,29 @@ void EditorUserInterface::renderItem(WorldItem &item, bool isBeingEdited, bool i
    }
 
    glDisable(GL_BLEND);
+}
+
+
+F32 EditorUserInterface::renderTextItem(WorldItem &item, F32 alpha)
+{
+   // Recalc text size -- TODO:  this shouldn't be here...
+   // this should only happen when text is created, not every time it's drawn
+   F32 strWidth = getStringWidth(120, item.lineEditor.c_str());
+   F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
+
+   item.textSize = 120.0f * lineLen * mGridSize / max(strWidth, 80.0f); 
+
+   // Use this more precise F32 calculation of size for smoother interactive rendering.
+   // We'll use U32 approximation in game.
+   glColor(getTeamColor(item.team), alpha);
+   F32 txtSize = 120.0f * lineLen * mCurrentScale / max(strWidth, 80.0f);
+
+   Point pos  = convertLevelToCanvasCoord(item.verts[0]);
+   Point dest = convertLevelToCanvasCoord(item.verts[1]);
+
+   drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
+
+   return txtSize;
 }
 
 

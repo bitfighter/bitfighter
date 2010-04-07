@@ -53,6 +53,7 @@ class LevelListLoader
 {
 public:
    static void buildLevelList();
+   static void removeSkippedLevels();
 };
 
 

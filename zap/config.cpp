@@ -526,6 +526,9 @@ inline sfxSets stringToSFXSet(string sfxSet)
       return sfxModernSet;
 }
 
+
+extern Vector<StringTableEntry> gLevelSkipList;
+
 // Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
 void loadSettingsFromINI()
@@ -635,12 +638,12 @@ void loadSettingsFromINI()
    if(gINI.FindKey("Levels") != gINI.noID)
    {
       S32 numLevels = gINI.NumValues("Levels");
-      Vector<string> levelValNames;
+      Vector<string> levelValNames(numLevels);
 
       for(S32 i = 0; i < numLevels; i++)
          levelValNames.push_back(gINI.ValueName("Levels", i));
 
-      levelValNames.sort(alphaSort);     // Will this really sort??  Apparently it will.
+      levelValNames.sort(alphaSort);
 
       string level;
       for(S32 i = 0; i < numLevels; i++)
@@ -648,6 +651,25 @@ void loadSettingsFromINI()
          level = gINI.GetValue("Levels", levelValNames[i], "");
          if (level != "")
             gIniSettings.levelList.push_back(StringTableEntry(level.c_str()));
+      }
+   }
+
+   // Read level deleteList, if there are any.  This could probably be made more efficient by not reading the
+   // valnames in first, but what the heck...
+   if(gINI.FindKey("LevelSkipList") != gINI.noID)
+   {
+      S32 numLevels = gINI.NumValues("LevelSkipList");
+      Vector<string> levelValNames(numLevels);
+
+      for(S32 i = 0; i < numLevels; i++)
+         levelValNames.push_back(gINI.ValueName("LevelSkipList", i));
+
+      string level;
+      for(S32 i = 0; i < numLevels; i++)
+      {
+         level = gINI.GetValue("LevelSkipList", levelValNames[i], "");
+         if (level != "")
+            gLevelSkipList.push_back(StringTableEntry(level.c_str()));
       }
    }
 
@@ -944,6 +966,8 @@ void saveSettingsToINI()
    }
 
 
+   writeSkipList();
+
    gINI.AddKeyName("ReservedNames");
    if (gINI.NumKeyComments("ReservedNames") == 0)
    {
@@ -958,7 +982,6 @@ void saveSettingsToINI()
       gINI.KeyComment("ReservedNames", "----------------");
    }
    // By default, this section is empty
-
 
 
    gINI.AddKeyName("Testing");
@@ -978,6 +1001,35 @@ void saveSettingsToINI()
    gINI.WriteFile();
 }
 
+
+void writeSkipList()
+{
+   // If there is no LevelSkipList key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
+   // We'll write our current skip list (which may have been specified via remote server management tools)
+   if(gINI.FindKey("LevelSkipList") == gINI.noID)    // Key doesn't exist... let's write one
+   {
+      gINI.AddKeyName("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
+      if (gINI.NumKeyComments("LevelSkipList") == 0)
+      {
+         gINI.KeyComment("LevelSkipList", "----------------");
+         gINI.KeyComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
+         gINI.KeyComment("LevelSkipList", " another section or on the command line.  You can edit this section, but it is really intended");
+         gINI.KeyComment("LevelSkipList", " for remote server management.");
+         gINI.KeyComment("LevelSkipList", " Example:");
+         gINI.KeyComment("LevelSkipList", " Level1=skip_me.level");
+         gINI.KeyComment("LevelSkipList", " Level2=dont_load_me_either.level");
+         gINI.KeyComment("LevelSkipList", " ... etc ...");
+         gINI.KeyComment("LevelSkipList", "----------------");
+      }
+   }
+
+   char levelName[256];
+   for(S32 i = 0; i < gLevelSkipList.size(); i++)
+   {
+      dSprintf(levelName, 255, "Level%d", i);
+      gINI.SetValue("LevelSkipList", string(levelName), gLevelSkipList[i].getString(), true);
+   }
+}
 
 
 };

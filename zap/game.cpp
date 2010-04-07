@@ -283,7 +283,7 @@ S32 ServerGame::getRobotCount()
 
 extern CmdLineSettings gCmdLineSettings;
 
-// This gets called when you first host a game.
+// This gets called when you first host a game
 void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
 {
    mLevelList = levelList;
@@ -296,7 +296,7 @@ void ServerGame::resetLevelLoadIndex()
 }
 
 
-string ServerGame::getCurrentLevelLoadName()
+string ServerGame::getLastLevelLoadName()
 {
    if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
       return "";
@@ -358,6 +358,7 @@ void ServerGame::loadNextLevel()
          // Save some key level parameters
          mLevelNames.push_back(name);
          mLevelTypes.push_back(type);
+
          mMinRecPlayers.push_back(getGameType()->minRecPlayers);
          mMaxRecPlayers.push_back(getGameType()->maxRecPlayers);
 
@@ -416,6 +417,13 @@ string ServerGame::getLevelFileName(string base)
 #endif
 
    return gLevelDir + (gLevelDir != "" ? "/" : "") + base;
+}
+
+
+// Return filename of level currently in play
+StringTableEntry ServerGame::getCurrentLevelFileName()
+{
+   return mLevelList[mCurrentLevelIndex];
 }
 
 
@@ -704,8 +712,9 @@ void ServerGame::idle(U32 timeDelta)
       return;
    }
 
-   // If there are no players on the server, we can enter "suspended animation" mode
-   if(mPlayerCount == 0 && !mGameSuspended)
+   // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
+   // This will prevent locally hosted game from immediately suspending for a frame.  A little hacky, but works!
+   if(mPlayerCount == 0 && !mGameSuspended && mCurrentTime != 0)
       suspendGame();
    else if( mGameSuspended && ((mPlayerCount > 0 && mSuspendor == NULL) || mPlayerCount > 1) )
       unsuspendGame(false);

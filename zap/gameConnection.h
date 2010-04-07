@@ -104,6 +104,7 @@ public:
       ServerPassword = 2,
       ServerName = 3,
       ServerDescr = 4,
+      DeleteLevel = 5,
       ParamTypeCount       // Must be last
    };
 

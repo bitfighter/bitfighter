@@ -58,7 +58,7 @@ static int gcvec_cross (lua_State *L) {
 
 static int gcvec_length (lua_State *L) {
   const vec_t* v = checkvec(L, 1);
-  lua_pushnumber(L, sqrt(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w));
+  lua_pushnumber(L, sqrtf(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w));
   return 1;
 }
 
@@ -70,7 +70,7 @@ static int gcvec_lengthsquared (lua_State *L) {
 
 static int gcvec_normalize (lua_State *L) {
   const vec_t* v = checkvec(L, 1);
-  float s = 1.0f / (float)sqrt(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w);
+  float s = 1.0f / sqrtf(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w);
   new_vec(L, v->x*s, v->y*s, v->z*s, v->w*s);
   return 1;
 }
@@ -184,7 +184,7 @@ static const luaL_Reg gcveclib_f[] = {
   {"cross",         gcvec_cross},
   {"length",        gcvec_length},
   {"lengthSquared", gcvec_lengthsquared},
-  {"normalize",     gcvec_normalize},
+  {"normalize",     gcvec_normalize}, 
   {"angleTo",       gcvec_angleto},
   {"distanceTo",    gcvec_distanceto},
   {"distSquared",   gcvec_distsquared},

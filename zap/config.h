@@ -246,6 +246,8 @@ struct IniSettings      // With defaults specified
 void saveSettingsToINI();
 void loadSettingsFromINI();
 
+void writeSkipList();
+
 };
 
 #endif

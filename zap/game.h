@@ -203,9 +203,9 @@ private:
    string mHostDescr;
 
    // Info about levels
-   Vector<StringTableEntry> mLevelList;
-   Vector<StringTableEntry> mLevelNames;
-   Vector<StringTableEntry> mLevelTypes;
+   Vector<StringTableEntry> mLevelList;   // Level file names
+   Vector<StringTableEntry> mLevelNames;  // Level "in-game" names
+   Vector<StringTableEntry> mLevelTypes;  
    Vector<S32> mMinRecPlayers;            // Recommended min number of players for this level
    Vector<S32> mMaxRecPlayers;            // Recommended max number of players for this level
 
@@ -249,7 +249,7 @@ public:
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();
    void loadNextLevel();
-   string getCurrentLevelLoadName();      // For updating the UI
+   string getLastLevelLoadName();      // For updating the UI
 
    bool loadLevel(string fileName);       // Load a level
 
@@ -257,8 +257,10 @@ public:
    string getLevelFileName(string base);     // Handles prepending subfolder, if needed
    StringTableEntry getLevelNameFromIndex(S32 indx);
    string getLevelFileNameFromIndex(S32 indx);
-   StringTableEntry getCurrentLevelName();   // Return name of level currently in play
-   StringTableEntry getCurrentLevelType();   // Return type of level currently in play
+
+   StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  
+   StringTableEntry getCurrentLevelName();      // Return name of level currently in play
+   StringTableEntry getCurrentLevelType();      // Return type of level currently in play
 
    void processLevelLoadLine(U32 argc, U32 id, const char **argv);
    bool isServer() { return true; }

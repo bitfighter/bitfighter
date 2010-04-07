@@ -40,7 +40,7 @@ static int vec_cross (lua_State *L) {
 
 static int vec_length (lua_State *L) {
   const float* v = luaL_checkvec(L, 1);
-  lua_pushnumber(L, sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]));
+  lua_pushnumber(L, sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]));
   return 1;
 }
 
@@ -52,7 +52,7 @@ static int vec_lengthsquared (lua_State *L) {
 
 static int vec_normalize (lua_State *L) {
   const float* v = luaL_checkvec(L, 1);
-  float s = 1.0f / (float)sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
+  float s = 1.0f / sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
   lua_pushvec(L, v[0]*s, v[1]*s, v[2]*s, v[3]*s);
   return 1;
 }

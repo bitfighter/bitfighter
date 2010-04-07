@@ -62,7 +62,7 @@ Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
    method(LuaGameInfo, getTeamCount),
    method(LuaGameInfo, getLevelName),
    method(LuaGameInfo, getGridSize),
-   method(LuaGameInfo, getIsTeamGame),
+   method(LuaGameInfo, isTeamGame),
    method(LuaGameInfo, getEventScore),
    method(LuaGameInfo, getPlayers),
 
@@ -92,7 +92,7 @@ S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServe
 
 S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
 S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
-S32 LuaGameInfo::getIsTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
+S32 LuaGameInfo::isTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
 
 
 

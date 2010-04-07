@@ -600,6 +600,7 @@ static ControlStringsEditor adminCommands[] = {
    { "/setserverpass [passwd]",  "Set server password  (use blank to clear)" },
    { "/setservername <name>",    "Set server name" },
    { "/setserverdescr <descr>",  "Set server description" },
+   { "/deletecurrentlevel",      "Remove current level from server" },
 
    { NULL, NULL },      // End of list
 };

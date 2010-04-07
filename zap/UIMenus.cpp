@@ -602,7 +602,7 @@ void MainMenuUserInterface::render()
    if(gHostingModePhase == LoadingLevels || gHostingModePhase == DoneLoadingLevels)
    {
       // There will be exactly one new entry every time we get here!
-      addProgressListItem("Loaded level " + gServerGame->getCurrentLevelLoadName() + "...");
+      addProgressListItem("Loaded level " + gServerGame->getLastLevelLoadName() + "...");
       return;
    }
 
