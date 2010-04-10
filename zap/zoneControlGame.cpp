@@ -107,7 +107,7 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
    Vector<StringTableEntry> e;
    e.push_back(theShip->getName());
-   e.push_back(mTeams[theShip->getTeam()].name);
+   e.push_back(mTeams[theShip->getTeam()].getName());
    for(S32 i = 0; i < mClientList.size(); i++)
       mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
    theFlag->mountToShip(theShip);
@@ -148,7 +148,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       static StringTableEntry takeString("%e0 captured a zone from team %e1!");
       Vector<StringTableEntry> e;
       e.push_back(s->getName());
-      e.push_back(mTeams[oldTeam].name);
+      e.push_back(mTeams[oldTeam].getName());
 
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
@@ -178,7 +178,7 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
    // Team DOES control all zones.  Broadcast a message, flash zones, and create hoopla!
    static StringTableEntry tdString("Team %e0 scored a touchdown!");
    Vector<StringTableEntry> e;
-   e.push_back(mTeams[s->getTeam()].name);
+   e.push_back(mTeams[s->getTeam()].getName());
    for(S32 i = 0; i < mClientList.size(); i++)
       mClientList[i]->clientConnection->s2cTouchdownScored(SFXFlagSnatch, s->getTeam(), tdString, e);
 

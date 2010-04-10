@@ -231,6 +231,7 @@ static const char *page2Strings[] =
    ""    // Last item must be ""
 };
 
+
 void EditorInstructionsUserInterface::renderPage2()
 {
    // Draw animated creation of walls
@@ -259,19 +260,20 @@ void EditorInstructionsUserInterface::renderPage2()
    else if(mAnimStage >= 6)
       points.push_back(Point(650, 170 + vertOffset));
 
-   if(mAnimStage <= 6)      // Constructing wall, use thin yellow line
-   {
-      glLineWidth(3);
-      glColor3f(1, 1, 0);    // yellow
+   if(mAnimStage > 6)
+      gEditorUserInterface.renderPolyline(ItemBarrierMaker, points, false, -1, 25, 1.0, false);
 
-      glBegin(GL_LINE_STRIP);
-         for(S32 i = 0; i < points.size(); i++)
-            glVertex2f(points[i].x, points[i].y);
-      glEnd();
-      glLineWidth(gDefaultLineWidth);
-   }
-   else
-      gEditorUserInterface.renderPolyline(ItemBarrierMaker, points, false, 0, 25, true);
+   glColor(mAnimStage <= 11 ? Color(1,1,0) : gEditorUserInterface.getTeamColor(-1));
+
+   glLineWidth(3);
+
+   glBegin(GL_LINE_STRIP);
+      for(S32 i = 0; i < points.size(); i++)
+         glVertex2f(points[i].x, points[i].y);
+   glEnd();
+   glLineWidth(gDefaultLineWidth);
+
+      
 
    for(S32 i = 0; i < points.size(); i++)
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
@@ -282,7 +284,6 @@ void EditorInstructionsUserInterface::renderPage2()
          gEditorUserInterface.renderVertex(HighlightedVertex, points[i], -1);
 
    // And now some written instructions
-
    S32 x = 50 + getStringWidth(18, "* ");
    S32 y = 300;
    bool done = false;

@@ -328,18 +328,27 @@ void LevelListLoader::buildLevelList()
 }
 
 
-// Remove any levels listed in gLevelSkipList from gLevelList
+extern string lcase(string strToConvert);
+
+// Remove any levels listed in gLevelSkipList from gLevelList.  Not foolproof!
 void LevelListLoader::removeSkippedLevels()
 {
    for(S32 i = 0; i < gLevelList.size(); i++)
+   {
+      // Make sure we have the right extension
+      string filename_i = lcase(gLevelList[i].getString());
+      if(filename_i.find(".level") == string::npos)
+         filename_i += ".level";
+
       for(S32 j = 0; j < gLevelSkipList.size(); j++)
-         if(gLevelList[i] == gLevelSkipList[j])
+         if(!strcmp(filename_i.c_str(), gLevelSkipList[j].getString()))
          {
             s_logprintf("Loader skipping level %s listed in LevelSkipList (see INI file)", gLevelList[i].getString());
             gLevelList.erase(i);
             i--;
             break;
          }
+   }
 }
 
 

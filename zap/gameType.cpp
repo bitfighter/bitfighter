@@ -777,7 +777,7 @@ void GameType::onGameOver()
       if(!tied)
       {
          e.push_back(teamString);
-         e.push_back(mTeams[teamWinner].name);
+         e.push_back(mTeams[teamWinner].getName());
       }
    }
    else                    // Individual game -> find player with highest score
@@ -867,21 +867,18 @@ void GameType::onAddedToGame(Game *theGame)
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
 extern S32 gMaxPlayers;
 
-Team GameType::readTeamFromLevelLine(S32 argc, const char **argv)
+void GameType::readTeamFromLevelLine(Team &team, S32 argc, const char **argv)
 {
-   Team t;
    if(argc < 5)                     // Enough arguments?
    {
-      t.numPlayers = -1;            // Signal that this is a bogus object
-      return t;
+      team.numPlayers = -1;            // Signal that this is a bogus object
+      return;
    }
 
-   t.numPlayers = 0;
+   team.numPlayers = 0;
 
-   t.name.set(argv[1]);
-   t.color.read(argv + 2);
-
-   return t;
+   team.setName(argv[1]);
+   team.color.read(argv + 2);
 }
 
 
@@ -893,7 +890,8 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       if(mTeams.size() >= gMaxTeams)   // Too many teams?
          return false;
 
-      Team team = readTeamFromLevelLine(argc, argv);
+      Team team;
+      readTeamFromLevelLine(team, argc, argv);
       if(team.numPlayers != -1)
          mTeams.push_back(team);
    }
@@ -1325,7 +1323,7 @@ S32 GameType::getTeam(const char *playerName)
 const char *GameType::getTeamName(S32 team)
 {
    if(team >= 0)
-      return mTeams[team].name.getString();
+      return mTeams[team].getName().getString();
    else if(team == -2)
       return "Hostile";
    else if(team == -1)
@@ -1896,7 +1894,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b), (teamName, r, g, b))
 {
    Team team;
-   team.name = teamName;
+   team.setName(teamName);
    team.color.r = r;
    team.color.g = g;
    team.color.b = b;
@@ -1971,7 +1969,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
-      s2cAddTeam(mTeams[i].name, mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
+      s2cAddTeam(mTeams[i].getName(), mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
       s2cSetTeamScore(i, mTeams[i].getScore());
    }
 

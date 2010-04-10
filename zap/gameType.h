@@ -346,7 +346,7 @@ public:
 
    // Functions related to loading levels
    virtual bool processLevelItem(S32 argc, const char **argv);
-   static Team readTeamFromLevelLine(S32 argc, const char **argv);
+   static void readTeamFromLevelLine(Team &team, S32 argc, const char **argv);
 
    void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone));

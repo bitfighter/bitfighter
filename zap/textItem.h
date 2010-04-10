@@ -39,8 +39,6 @@
 
 //TODO: Make these regular vars
 #define MAX_TEXTITEM_LEN 255
-#define MAX_TEXT_SIZE 255
-#define MIN_TEXT_SIZE 10
 
 using namespace std;
 
@@ -50,10 +48,11 @@ namespace Zap
 class TextItem : public GameObject
 {
 private:
-
    typedef GameObject Parent;
 
 public:
+   static const S32 MAX_TEXT_SIZE = 255;
+   static const S32 MIN_TEXT_SIZE = 10;
 
    Point pos;            // Location of text
    Point dir;            // Direction text is "facing"

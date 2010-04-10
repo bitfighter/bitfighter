@@ -1539,13 +1539,13 @@ void TeamMenuUserInterface::render()
    char c[] = "A";      // Dummy shortcut key, will change below
    for(S32 i = 0; i < gt->mTeams.size(); i++)
    {
-      strncpy(c, gt->mTeams[i].name.getString(), 1);     // Grab first char of name for a shortcut key
+      strncpy(c, gt->mTeams[i].getName().getString(), 1);     // Grab first char of name for a shortcut key
 
       Color col = gt->mTeams[i].color;
       S32 players = gt->mTeams[i].numPlayers;
       S32 score = gt->mTeams[i].getScore();
       bool isCurrent = (i == gt->getTeam(nameToChange));
-      menuItems.push_back(MenuItem(gt->mTeams[i].name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, isCurrent, players, score));
+      menuItems.push_back(MenuItem(gt->mTeams[i].getName().getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, isCurrent, players, score));
    }
 
    string name = "";

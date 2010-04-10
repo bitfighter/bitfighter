@@ -42,7 +42,7 @@ XXX need to document timers,sXXX
 <li>Fixed several in-game crashing issues</li>
 <li>Minor efficiency improvements on rendering routines</li>
 <li>Retrieve games now allow non-team flags</li>
-<li>Bouncers now do half-damage to shooter</li>
+<li>Bouncers now do half-damage to shooter, rather than full as in previous releases</li>
 <li>Triples no longer damage shooter</li>
 <li>Password entry in INI file now changed to ServerPassword -- if you use this, you'll need to manually update your INI file</li>
 <li>HuntersFlagItem <x> <y> can no longer be used in level files.  Please use FlagItem -1 <x> <y> instead!!  Note that this line is only present in hand-modified level files</li>
@@ -82,10 +82,12 @@ XXX need to document timers,sXXX
 <li>Editor remembers name of last edited file</li>
 <li>Ctrl-A can now be used to hide navMeshZones</li>
 <li>Improved preview mode (when holding Tab key)</li>
+<li>Text in editor now subject to same min/max size constraints as text in the game</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
 <li>Added /setservername and /setserverdescr commands</li>
+<li>Added /deletecurrentlevel command to remove level from remote server (file not deleted, but won't be loaded in future)</li>
 <li>New orderly shutdown process when using /shutdown command (i.e. players notified, dedicated servers can be terminated, etc.)</li>
 <li>If level change password is left blank, all players granted access (not so for admin password)</li>
 <li>If level change password is set to blank, all players currently connected are silently granted access to level change menu</li>

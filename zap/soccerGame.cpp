@@ -54,7 +54,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    if(clientName.isNull())    // Unknown player scored
    {
       if(teamIndexAdjusted >= 0)
-         msg = "A goal was scored on team " + string(mTeams[teamIndexAdjusted].name.getString());
+         msg = "A goal was scored on team " + string(mTeams[teamIndexAdjusted].getName().getString());
       else if(teamIndexAdjusted == -1)
          msg = "A goal was scored on a neutral goal!";
       else if(teamIndexAdjusted == -2)
@@ -67,7 +67,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
       if(isTeamGame())
       {
          if(teamIndexAdjusted >= 0)
-            msg = string(clientName.getString()) + " scored a goal on team " + string(mTeams[teamIndexAdjusted].name.getString());
+            msg = string(clientName.getString()) + " scored a goal on team " + string(mTeams[teamIndexAdjusted].getName().getString());
          else if(teamIndexAdjusted == -1)
             msg = string(clientName.getString()) + " scored a goal on a neutral goal!";
          else if(teamIndexAdjusted == -2)

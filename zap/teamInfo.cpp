@@ -64,12 +64,12 @@ LuaTeamInfo::LuaTeamInfo(Team team)
 {
    mTeam = team;
 
-   const char *teamName = team.name.getString();
+   const char *teamName = team.getName().getString();
 
    Vector<Team> teams = gServerGame->getGameType()->mTeams;
 
    for(S32 i = 0; i < teams.size(); i ++)
-      if(!strcmp(teams[i].name.getString(), teamName))
+      if(!strcmp(teams[i].getName().getString(), teamName))
       {
          mTeamIndex = i;
          break;
@@ -84,9 +84,9 @@ LuaTeamInfo::~LuaTeamInfo()
 
 
 // We'll add 1 to the index to allow the first team in Lua to have index of 1, and the first team in C++ to have an index of 0
-S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }             // getTeamIndex() ==> return team's index (returns int)
-S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam.name.getString()); }  // getTeamName() ==> return team name (returns string)
-S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.getScore()); }           // getScore() ==> return team score (returns int)
+S32 LuaTeamInfo::getIndex(lua_State *L) { return returnInt(L, mTeamIndex + 1); }                  // getTeamIndex() ==> return team's index (returns int)
+S32 LuaTeamInfo::getName(lua_State *L)  { return returnString(L, mTeam.getName().getString()); }  // getTeamName() ==> return team name (returns string)
+S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.getScore()); }                // getScore() ==> return team score (returns int)
 
 
 S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count

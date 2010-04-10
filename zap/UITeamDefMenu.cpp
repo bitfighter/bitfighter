@@ -146,39 +146,16 @@ void TeamDefUserInterface::render()
       U32 y = yStart + i * (fontsize + fontgap);
 
       if(selectedIndex == j)       // Highlight selected item
-      {
-         //glColor3f(0, 0, 0.4);     // Fill
-         //glBegin(GL_POLYGON);
-         //   glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2) , y - 5);
-         //   glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y - 5);
-         //   glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin: canvasWidth - horizMargin), y + 25 + 1);
-         //   glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2), y + 25 + 1);
-         //glEnd();
-
-         //glColor3f(0, 0, 1);       // Outline
-         //glBegin(GL_LINE_LOOP);
-         //   glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2), y - 5);
-         //   glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y - 5);
-         //   glVertex2f((i < itemsPerCol ? canvasWidth / 2 - horizMargin : canvasWidth - horizMargin), y + 25 + 1);
-         //   glVertex2f((i < itemsPerCol ? horizMargin : canvasWidth / 2 ), y + 25 + 1);
-         //glEnd();
-
-         glColor3f(0, 0, 0.4);         // Fill
-         glBegin(GL_POLYGON);
-            glVertex2f(0, y - 2);
-            glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + itemHeight);
-            glVertex2f(0, y + itemHeight);
-         glEnd();
-
-         glColor3f(0, 0, 1);           // Outline
-         glBegin(GL_LINES);
-            glVertex2f(0, y - 2);
-            glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + itemHeight);
-            glVertex2f(0, y + itemHeight);
-         glEnd();
-      }
+         for(S32 i = 1; i >= 0; i--)
+         {
+            glColor(i ? Color(0,0,0.4) : Color(0,0,1));     // Fill : Outline
+            glBegin(i ? GL_POLYGON : GL_LINES);
+               glVertex2f(0, y - 2);
+               glVertex2f(canvasWidth, y - 2);
+               glVertex2f(canvasWidth, y + itemHeight);
+               glVertex2f(0, y + itemHeight);
+            glEnd();
+         }
 
       if(j < gEditorUserInterface.mTeams.size())
       {
@@ -186,7 +163,7 @@ void TeamDefUserInterface::render()
          glColor(gEditorUserInterface.mTeams[j].color);
          drawCenteredStringf(y, fontsize,
                      "Team %d: %s   (%2.0f, %2.0f, %2.0f)",
-                      j+1, gEditorUserInterface.mTeams[j].name.getString(),
+                      j+1, gEditorUserInterface.mTeams[j].getName(),
                       gEditorUserInterface.mTeams[j].color.r * 100,
                       gEditorUserInterface.mTeams[j].color.g * 100,
                       gEditorUserInterface.mTeams[j].color.b * 100);
@@ -232,8 +209,8 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          gEditorUserInterface.mTeams.clear();
          for(U32 i = 0; i < count; i++)
          {
-            Team t;
-            t.name = gTeamPresets[i].name;
+            TeamEditor t;
+            t.setName(gTeamPresets[i].name);
             t.color.set(gTeamPresets[i].r, gTeamPresets[i].g, gTeamPresets[i].b);
             gEditorUserInterface.mTeams.push_back(t);
          }
@@ -241,7 +218,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                          // Replace selection with preset of number pressed
       {
          U32 indx = (ascii - '1');
-         gEditorUserInterface.mTeams[selectedIndex].name = gTeamPresets[indx].name;
+         gEditorUserInterface.mTeams[selectedIndex].setName(gTeamPresets[indx].name);
          gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[indx].r, gTeamPresets[indx].g, gTeamPresets[indx].b);
       }
    }
@@ -264,7 +241,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       gEditorUserInterface.mTeams.insert(selectedIndex);
 
-      gEditorUserInterface.mTeams[selectedIndex].name = gTeamPresets[0].name;
+      gEditorUserInterface.mTeams[selectedIndex].setName(gTeamPresets[0].name);
       gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
 
       if(selectedIndex < 0)      // It can happen with too many deletes

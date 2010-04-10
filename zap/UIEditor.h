@@ -41,7 +41,7 @@ namespace Zap
 #define nameLen 256
 #define gameTypeLen 256
 
-class Team;
+class TeamEditor;
 
 enum VertexRenderStyles
 {
@@ -329,8 +329,6 @@ private:
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 
-   Color getTeamColor(S32 team);     // Return a color based on team index
-
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 
@@ -346,13 +344,14 @@ public:
    char mGameType[gameTypeLen];
    Vector<S32> mGameTypeArgs;
 
+   Color getTeamColor(S32 team);     // Return a color based on team index (needed by editor instructions)
    bool isFlagGame(char *mGameType);
    bool isTeamFlagGame(char *mGameType);
 
    void clearUndoHistory();      // Wipe undo/redo history
 
-   Vector<Team> mTeams;          // Team list: needs to be public so we can edit from UITeamDefMenu
-   Vector<Team> mOldTeams;       // Team list from before we run team editor, so we can see if anything has changed
+   Vector<TeamEditor> mTeams;          // Team list: needs to be public so we can edit from UITeamDefMenu
+   Vector<TeamEditor> mOldTeams;       // Team list from before we run team editor, so we can see if anything has changed
 
    Vector<WorldItem> mItems;     // Item list: needs to be public so we can check team affiliation from UITeamDefMenu
 
@@ -360,7 +359,7 @@ public:
    void renderItem(WorldItem &i, bool isBeingEdited, bool isDockItem, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, F32 alpha);
 
-   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha);   // Render walls & lineItems
+   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha = 1.0, bool convert = true);   // Render walls & lineItems
    void renderPoly(Vector<Point> verts, bool isDockItem);
    static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 

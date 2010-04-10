@@ -106,7 +106,7 @@ public:
 
       Vector<StringTableEntry> e;
       e.push_back(theShip->getName());
-      e.push_back(mTeams[teamIndex].name);
+      e.push_back(mTeams[teamIndex].getName());
 
       if(mFlags.size() == 1)
          e.push_back(theString);
@@ -170,7 +170,7 @@ public:
          else
             e.push_back(aString);
 
-         e.push_back(mTeams[s->getTeam()].name);
+         e.push_back(mTeams[s->getTeam()].getName());
 
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, capString, e);

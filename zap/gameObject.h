@@ -111,6 +111,8 @@ struct DamageInfo
    F32 damageSelfMultiplier;
    DamageType damageType;       // see enum above!
    GameObject *damagingObject;  // see class below!
+
+   DamageInfo() { damageSelfMultiplier = 1; }      // Quickie constructor
 };
 
 

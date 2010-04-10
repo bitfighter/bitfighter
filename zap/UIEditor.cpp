@@ -395,8 +395,8 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 {
    if(mTeams.size() == 0)
    {
-      Team t;
-      t.name = gTeamPresets[0].name;
+      TeamEditor t;
+      t.setName(gTeamPresets[0].name);
       t.color.set(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
       mTeams.push_back(t);
    }
@@ -651,7 +651,8 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
          if(mTeams.size() >= GameType::gMaxTeams)
             return;
 
-         Team team = GameType::readTeamFromLevelLine(argc, argv);
+         TeamEditor team;
+         GameType::readTeamFromLevelLine(team, argc, argv);
 
          // If team was read and processed properly, numPlayers will be 0
          if(team.numPlayers != -1)
@@ -796,7 +797,7 @@ void EditorUserInterface::teamsHaveChanged()
       teamsChanged = true;
    else
       for(S32 i = 0; i < mTeams.size(); i++)
-         if(mTeams[i].color != mOldTeams[i].color || mTeams[i].name != mOldTeams[i].name)
+         if(mTeams[i].color != mOldTeams[i].color || strcmp(mTeams[i].getName(), mOldTeams[i].getName()))
          {
             teamsChanged = true;
             break;
@@ -1032,6 +1033,8 @@ void EditorUserInterface::render()
          glColor(yellow);
       else              // LineItem
          glColor(getTeamColor(mNewItem.team));
+
+      renderPoly(mNewItem.verts, false);
 
       glLineWidth(gDefaultLineWidth);
 
@@ -1329,7 +1332,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
 // Draw barriermMakers (walls) or lineItems
-void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha)
+void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha, bool convert)
 {
    Vector<Point> barPoints;
 
@@ -1348,12 +1351,24 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
       Point crossVec(dir.y, -dir.x);
       crossVec.normalize(width * 0.5);
 
-      glBegin(GL_POLYGON);
-         glVertex(convertLevelToCanvasCoord(barPoints[j] + crossVec));
-         glVertex(convertLevelToCanvasCoord(barPoints[j] - crossVec));
-         glVertex(convertLevelToCanvasCoord(barPoints[j+1] - crossVec));
-         glVertex(convertLevelToCanvasCoord(barPoints[j+1] + crossVec));
-      glEnd();
+      if(convert)
+      {
+         glBegin(GL_POLYGON);
+            glVertex(convertLevelToCanvasCoord(barPoints[j] + crossVec));
+            glVertex(convertLevelToCanvasCoord(barPoints[j] - crossVec));
+            glVertex(convertLevelToCanvasCoord(barPoints[j+1] - crossVec));
+            glVertex(convertLevelToCanvasCoord(barPoints[j+1] + crossVec));
+         glEnd();
+      }
+      else
+      {
+         glBegin(GL_POLYGON);
+            glVertex(barPoints[j] + crossVec);
+            glVertex(barPoints[j] - crossVec);
+            glVertex(barPoints[j+1] - crossVec);
+            glVertex(barPoints[j+1] + crossVec);
+         glEnd();
+      }
    }
 
    glColor(selected ? yellow : getTeamColor(team), alpha);
@@ -1856,12 +1871,13 @@ F32 EditorUserInterface::renderTextItem(WorldItem &item, F32 alpha)
    F32 strWidth = getStringWidth(120, item.lineEditor.c_str());
    F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
 
-   item.textSize = 120.0f * lineLen * mGridSize / max(strWidth, 80.0f); 
+   // Compute text size subject to min and max defined in TextItem
+   item.textSize = max(min(120.0f * lineLen * mGridSize / max(strWidth, 80.0f), TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
 
    // Use this more precise F32 calculation of size for smoother interactive rendering.
    // We'll use U32 approximation in game.
    glColor(getTeamColor(item.team), alpha);
-   F32 txtSize = 120.0f * lineLen * mCurrentScale / max(strWidth, 80.0f);
+   F32 txtSize = item.textSize / mGridSize * mCurrentScale;
 
    Point pos  = convertLevelToCanvasCoord(item.verts[0]);
    Point dest = convertLevelToCanvasCoord(item.verts[1]);
@@ -1914,6 +1930,7 @@ S32 EditorUserInterface::countSelectedItems()
          count++;
    return count;
 }
+
 
 S32 EditorUserInterface::countSelectedVerts()
 {
@@ -3614,7 +3631,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
 
       for(S32 i = 0; i < mTeams.size(); i++)
-         s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].name.getString(),
+         s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].getName(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
       // Write out all maze items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)

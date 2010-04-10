@@ -47,6 +47,8 @@
 
 #define hypot _hypot    // Kill some warnings
 
+static bool showCloakedTeammates = false;    // Set to true to allow players to see their cloaked teammates
+
 namespace Zap
 {
 
@@ -1410,6 +1412,7 @@ void Ship::render(S32 layerIndex)
 
    GameConnection *conn = gClientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
+   S32 localPlayerTeam = conn ? conn->getControlObject()->getTeam() : Item::NO_TEAM;      // Only used to show cloaked teammates
 
    F32 alpha = 1.0;
 
@@ -1517,18 +1520,18 @@ void Ship::render(S32 layerIndex)
       for(U32 i = 0; i < 4; i++)
          thrusts[i] *= 1.3;
 
-
-   if(!localShip)
+   // Don't completely hide local player or ships on same team
+   if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && g->isTeamGame()))
+   {
+      if(alpha < 0.25)
+         alpha = 0.25;
+   }
+   else
    {
       // If local ship has sensor, it can see cloaked non-local ships
       Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
       if(ship && ship->isModuleActive(ModuleSensor) && alpha < 0.5)
          alpha = 0.5;
-   }
-   else     // Ship belongs to a local player
-   {
-      if(alpha < 0.25)
-         alpha = 0.25;
    }
 
    renderShip(color, alpha, thrusts, mHealth, mRadius, isModuleActive(ModuleCloak), isModuleActive(ModuleShield));

@@ -989,7 +989,7 @@ void saveSettingsToINI()
    {
       gINI.KeyComment("Testing", "----------------");
       gINI.KeyComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
-      gINI.KeyComment("Testing", " short lived, and will likely be removed in the next version of Bitfighter");
+      gINI.KeyComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
       gINI.KeyComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
       gINI.KeyComment("Testing", "----------------");
    }
@@ -1006,31 +1006,35 @@ void writeSkipList()
 {
    // If there is no LevelSkipList key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write our current skip list (which may have been specified via remote server management tools)
-   if(gINI.FindKey("LevelSkipList") == gINI.noID)    // Key doesn't exist... let's write one
-   {
-      gINI.AddKeyName("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
-      if (gINI.NumKeyComments("LevelSkipList") == 0)
-      {
-         gINI.KeyComment("LevelSkipList", "----------------");
-         gINI.KeyComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
-         gINI.KeyComment("LevelSkipList", " another section or on the command line.  You can edit this section, but it is really intended");
-         gINI.KeyComment("LevelSkipList", " for remote server management.");
-         gINI.KeyComment("LevelSkipList", " Example:");
-         gINI.KeyComment("LevelSkipList", " Level1=skip_me.level");
-         gINI.KeyComment("LevelSkipList", " Level2=dont_load_me_either.level");
-         gINI.KeyComment("LevelSkipList", " ... etc ...");
-         gINI.KeyComment("LevelSkipList", "----------------");
-      }
-   }
 
-   char levelName[256];
+   gINI.DeleteKey("LevelSkipList");    // Delete all current entries to prevent user renumberings to be corrected from tripping us up
+
+   gINI.AddKeyName("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
+
+   gINI.KeyComment("LevelSkipList", "----------------");
+   gINI.KeyComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
+   gINI.KeyComment("LevelSkipList", " another section or on the command line.  You can edit this section, but it is really intended");
+   gINI.KeyComment("LevelSkipList", " for remote server management.  You will experience slightly better load times if you clean");
+   gINI.KeyComment("LevelSkipList", " this section out from time to time.  The names of the keys are not important, and may be changed.");
+   gINI.KeyComment("LevelSkipList", " Example:");
+   gINI.KeyComment("LevelSkipList", " Level1=skip_me.level");
+   gINI.KeyComment("LevelSkipList", " Level2=dont_load_me_either.level");
+   gINI.KeyComment("LevelSkipList", " ... etc ...");
+   gINI.KeyComment("LevelSkipList", "----------------");
+
+   char levelIndx[256];
    for(S32 i = 0; i < gLevelSkipList.size(); i++)
    {
-      dSprintf(levelName, 255, "Level%d", i);
-      gINI.SetValue("LevelSkipList", string(levelName), gLevelSkipList[i].getString(), true);
+      dSprintf(levelIndx, 255, "Level%d", i);
+
+      // Try to "normalize" the name a little before writing it
+      string filename = lcase(gLevelSkipList[i].getString());
+      if(filename.find(".level") == string::npos)
+         filename += ".level";
+
+      gINI.SetValue("LevelSkipList", levelIndx, filename, true);
    }
 }
-
 
 };
 

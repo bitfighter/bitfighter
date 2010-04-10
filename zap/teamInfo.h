@@ -29,17 +29,18 @@
 #include "luaGameInfo.h"
 #include "flagItem.h"
 #include "tnl.h"
+#include "UIEditor.h"   // For nameLen
 
 namespace Zap
 {
 
 class Team
 {  
-private:
+protected:
    S32 mScore;
 
 public:
-   StringTableEntry name;
+   StringTableEntry _name;
    Color color;
    Vector<Point> spawnPoints;
    Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
@@ -47,14 +48,38 @@ public:
    S32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
    F32 rating;
 
-   Team() { numPlayers = 0; mScore = 0; rating = 0; }     // Constructor
+   Team() {numPlayers = 0; mScore = 0; rating = 0; }     // Quickie constructor
+
+   void setName(const char *name) { _name = name; }
+   void setName(StringTableEntry name) { _name = name; }
+   StringTableEntry getName() { return _name.getString(); }
+
    S32 getScore() { return mScore; }
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
 };
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
+
+// Represents teams in the editor
+
+class TeamEditor : public Team
+{
+public:
+   LineEditor _name;   
+
+   TeamEditor() {  _name = LineEditor(nameLen); numPlayers = 0; mScore = 0; rating = 0; }     // Quickie constructor
+
+   void setName(const char *name) { _name.setString(name); }
+   const char *getName() { return _name.c_str(); }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 class LuaTeamInfo : public LuaObject
 {
