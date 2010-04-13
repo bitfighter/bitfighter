@@ -113,6 +113,13 @@ bool getKeyState(KeyCode keyCode)
    return keyIsDown[(int) keyCode];
 }
 
+
+bool isPrintable(char c)
+{
+   return c >= 32 && c <= 126;
+}
+
+
 // If there is a printable ASCII code for the pressed key, return it
 // Filter out some know spurious keystrokes
 char keyToAscii(int key, KeyCode keyCode)
@@ -120,8 +127,9 @@ char keyToAscii(int key, KeyCode keyCode)
    if(keyCode == KEY_UP || keyCode == KEY_DOWN || keyCode == KEY_LEFT || keyCode == KEY_RIGHT)
       return 0;
 
-   return (key >= 32 && key <= 126) ? key : 0;
+   return isPrintable(key) ? key : 0;
 }
+
 
 /*
 // Translate SDL standard keys to our KeyCodes

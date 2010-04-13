@@ -6,6 +6,7 @@
 
 #include "screenShooter.h"
 #include "UI.h"
+#include "config.h"     // For ConfigDirs struct
 #include <stdio.h>
 
 #ifdef _MSC_VER
@@ -504,6 +505,8 @@ write_long(FILE *fp, /* I - File to write to */
 ////////////////////////////////////////////
 ////////////////////////////////////////////
 
+extern ConfigDirectories gConfigDirs;
+extern string joindir(string path, string filename);
 
 void Screenshooter::saveScreenshot()
 { 
@@ -531,19 +534,21 @@ void Screenshooter::saveScreenshot()
       const char *folder;
       struct stat st;
 
-      if( stat( "./screenshots", &st ) == 0 )      // Put our screenshots in the screenshots folder
-         folder = "./screenshots";                 // it it exists... otherwise they go in the 
+      if( stat( gConfigDirs.screenshotDir.c_str(), &st ) == 0 )      // Put our screenshots in the screenshots folder
+         folder = gConfigDirs.screenshotDir.c_str();                 // it it exists... otherwise they go in the 
       else                                         // executable folder (".")
          folder = ".";
 
       char filename[64];
+      string fullfilename;
       FILE *filex;
       S32 ctr = 0;
 
       while(true)
       {
-         dSprintf(filename, 256, "%s/screenshot_%d.bmp", folder, ctr);
-         filex = fopen(filename,"rb");
+         dSprintf(filename, 256, "screenshot_%d.bmp", folder, ctr);
+         fullfilename = joindir(folder, filename);
+         filex = fopen(fullfilename.c_str(), "rb");
          if (filex == NULL) 
             break;
          else 
@@ -591,7 +596,7 @@ void Screenshooter::saveScreenshot()
       bmpInfo->bmiColors->rgbRed = 0;
       bmpInfo->bmiColors->rgbReserved = 0;
 
-      SaveDIBitmap(filename, bmpInfo, pixels);    
+      SaveDIBitmap(fullfilename.c_str(), bmpInfo, pixels);    
 
       glutReshapeWindow(mWidth, mHeight);      // Restore window 
 

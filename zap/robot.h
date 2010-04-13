@@ -111,7 +111,7 @@ class Robot : public Ship
    typedef Ship Parent;
 
 private:
-   string mFilename;            // Name of file script was loaded from
+   const char *mFilename;       // Name of file script was loaded from
 
    S32 mCurrentZone;            // Zone robot is currently in
    U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed

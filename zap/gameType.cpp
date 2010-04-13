@@ -867,21 +867,6 @@ void GameType::onAddedToGame(Game *theGame)
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
 extern S32 gMaxPlayers;
 
-void GameType::readTeamFromLevelLine(Team &team, S32 argc, const char **argv)
-{
-   if(argc < 5)                     // Enough arguments?
-   {
-      team.numPlayers = -1;            // Signal that this is a bogus object
-      return;
-   }
-
-   team.numPlayers = 0;
-
-   team.setName(argv[1]);
-   team.color.read(argv + 2);
-}
-
-
 // Returns true if we ceated an object here, false otherwise
 bool GameType::processLevelItem(S32 argc, const char **argv)
 {
@@ -891,7 +876,8 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          return false;
 
       Team team;
-      readTeamFromLevelLine(team, argc, argv);
+      team.readTeamFromLevelLine(argc, argv);
+
       if(team.numPlayers != -1)
          mTeams.push_back(team);
    }

@@ -50,6 +50,7 @@ extern string lcase(string strToConvert);
 // Sorts alphanumerically
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
+
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
 void loadKeyBindings()
 {                                // Whew!  This is quite the dense block of code!!
@@ -67,7 +68,6 @@ void loadKeyBindings()
    keyMOD2[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ActivateModule2", keyCodeToString(MOUSE_RIGHT)).c_str());
    keyFIRE[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "Fire", keyCodeToString(MOUSE_LEFT)).c_str());
    keyDROPITEM[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "DropItem", keyCodeToString(KEY_B)).c_str());
-
 
    keyTOGVOICE[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "VoiceChat", keyCodeToString(KEY_R)).c_str());
    keyUP[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "ShipUp", keyCodeToString(KEY_W)).c_str());

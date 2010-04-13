@@ -30,6 +30,25 @@
 namespace Zap
 {
 
+// Read team from level file params
+void TeamEditor::readTeamFromLevelLine(S32 argc, const char **argv)
+{
+   if(argc < 5)                        // Enough arguments?
+   {
+      numPlayers = -1;            // Signal that this is a bogus object
+      return;
+   }
+
+   numPlayers = 0;
+
+   setName(argv[1]);
+   color.read(argv + 2);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 const char LuaTeamInfo::className[] = "TeamInfo";      // Class name as it appears to Lua scripts
 
 // Define the methods we will expose to Lua

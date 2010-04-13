@@ -52,6 +52,11 @@ class TeamDefUserInterface : public UserInterface
 private:
    Timer errorMsgTimer;
    string errorMsg;
+   
+   S32 selectedIndex;          // Highlighted menu item
+   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
+
+   bool mEditing;               // true if editing selectedIndex, false if not
 
 public:
    TeamDefUserInterface();      // Constructor
@@ -59,9 +64,6 @@ public:
    const char *menuSubTitle;
    Color menuSubTitleColor;
    const char *menuFooter;
-
-   S32 selectedIndex;          // Highlighted menu item
-   S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
    void render();              // Draw the menu
    void idle(U32 timeDelta);

@@ -25,7 +25,7 @@
 
 #include "luaLevelGenerator.h"
 #include "gameType.h"
-
+#include "config.h"     // For definition of ConfigDirectories struct
 namespace Zap
 {
 
@@ -247,13 +247,15 @@ S32 LuaLevelGenerator::getGridSize(lua_State *L)
    return returnFloat(L, mGridSize);
 }
 
+extern ConfigDirectories gConfigDirs;
+extern string joindir(string path, string filename);
 
 // TODO: This is almost identical to the same-named function in robot.cpp, but each call their own logError function.  How can we combine?
 bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   static const char *fname = "lua_helper_functions.lua";
+   static const char *fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua").c_str();
 
    if(luaL_loadfile(L, fname))
    {
@@ -274,7 +276,7 @@ bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 
 bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
 {
-   static const char *fname = "levelgen_helper_functions.lua";
+   static const char *fname = joindir(gConfigDirs.luaDir, "levelgen_helper_functions.lua").c_str();
 
    if(luaL_loadfile(L, fname))
    {

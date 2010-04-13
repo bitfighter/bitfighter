@@ -14,7 +14,7 @@
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
-// Does chat now work properly when ship is dead?
+// Does chat now work properly when ship is dead?  no
 // Do LuaShip proxies remain constant over time (i.e. does 013 fix for Buvet.bot now work?)
 // Make sure things work when ship is deleted.  Do we get nils back (and not crashes)?
 
@@ -22,7 +22,7 @@
 // Create color global for reticle color
 
 /*
-XXX need to document timers,sXXX
+XXX need to document timers, new luavec stuff XXX
 
 
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
@@ -83,6 +83,7 @@ XXX need to document timers,sXXX
 <li>Ctrl-A can now be used to hide navMeshZones</li>
 <li>Improved preview mode (when holding Tab key)</li>
 <li>Text in editor now subject to same min/max size constraints as text in the game</li>
+<li>Team names can be changed in the editor</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
@@ -95,6 +96,8 @@ XXX need to document timers,sXXX
 <li>When all players leave game, game advances to next level, and suspends itself until a player joins.  That way, when players join, level is "fresh" and ready to go.  May also reduce processor load and power consumption</li>
 <li>Added ability to put game into suspended animation, automatically restarting when other players join (/suspend command)</li>
 
+<h4>Linux</h4>
+<li>Added ability to specify locations of various resouces on the cmd line.  See http://bitfighter.org/wiki/index.php?title=Command_line_parameters#Specifying_folders for details.</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -211,9 +214,12 @@ bool gDisableShipKeyboardInput;  // Disable ship movement while user is in menus
 U32 gUseStickNumber = 1;         // Which joystick do you want to use (1 = first, which is typical)
 U32 gSticksFound = 0;            // Which joystick we're actually using...
 
-CIniFile gINI("bitfighter.ini");    // This is our INI file
+CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 
 CmdLineSettings gCmdLineSettings;
+
+ConfigDirectories gConfigDirs;
+
 IniSettings gIniSettings;
 
 ControllerTypeType gAutoDetectedJoystickType;   // Remember what sort of joystick was found for diagnostic purposes
@@ -241,7 +247,6 @@ Address gConnectAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
       // Above is equivalent to ("IP:Any:28000")
 
-string gLevelDir = "levels";              // Where our levels are stored, can be overwritten by ini or cmd line param
 Vector<StringTableEntry> gLevelList;      // Levels we'll play when we're hosting
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
@@ -548,8 +553,8 @@ void abortHosting()
 {
    if(gDedicatedServer)
    {
-      logprintf("No levels found in folder %s.  Cannot host a game.", gLevelDir.c_str());
-      s_logprintf("No levels found in folder %s.  Cannot host a game.", gLevelDir.c_str());
+      logprintf("No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
+      s_logprintf("No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
       //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
       exitGame(1);
    }
@@ -563,7 +568,7 @@ void abortHosting()
       gErrorMsgUserInterface.setMessage(5, "you have correctly specified a folder containing");
       gErrorMsgUserInterface.setMessage(6, "valid level files.");
       gErrorMsgUserInterface.setMessage(8, "Trying to load levels from folder:");
-      gErrorMsgUserInterface.setMessage(9, gLevelDir.c_str());
+      gErrorMsgUserInterface.setMessage(9, gConfigDirs.levelDir.c_str());
       gErrorMsgUserInterface.activate();
    }
    delete gServerGame;
@@ -1068,7 +1073,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          i--;  // compentsate for +=2 in for loop with single param
          gCmdLineSettings.alllevels = true;
       }
-      // Read all levels in the specified subfolder
+
       else if(!stricmp(argv[i], "-leveldir"))      // additional arg required
       {
          if(!hasAdditionalArg)
@@ -1077,8 +1082,64 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             exitGame(1);
          }
 
-         gCmdLineSettings.levelDir = argv[i+1].getString();
+         gCmdLineSettings.dirs.levelDir = argv[i+1].getString();
       }
+
+      else if(!stricmp(argv[i], "-inidir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify a the folder where your INI file is stored with the -inidir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.iniDir = argv[i+1].getString();
+      }
+
+      else if(!stricmp(argv[i], "-luadir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify the folder where the Lua helper scripts are stored with the -luadir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.luaDir = argv[i+1].getString();
+      }
+
+      else if(!stricmp(argv[i], "-robotdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify the robots folder with the -robotdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.robotDir = argv[i+1].getString();
+      }
+
+      else if(!stricmp(argv[i], "-screenshotdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify your screenshots folder with the -screenshotdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.screenshotDir = argv[i+1].getString();
+      }
+
+      else if(!stricmp(argv[i], "-sfxdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify your sounds folder with the -sfxdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.sfxDir = argv[i+1].getString();
+      }
+
 
       // Specify list of levels...  all remaining params will be taken as level names
       else if(!stricmp(argv[i], "-levels"))     // additional arg(s) required
@@ -1275,9 +1336,9 @@ string getLevelsFolder(string base)
    // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
    struct stat st;
    if(stat(base.c_str(), &st) != 0 )
-      return gLevelDir + "/" + base;      // It doesn't
+      return gConfigDirs.levelDir + "/" + base;      // It doesn't
    else
-      return base;                        // It does
+      return base;                                   // It does
 }
 
 
@@ -1321,7 +1382,6 @@ void processStartupParams()
    gLevelNameEntryUserInterface.setString(gIniSettings.lastEditorName);
 
 
-
    if(gCmdLineSettings.serverPassword != "")
       gServerPassword = gCmdLineSettings.serverPassword;
    else if(gIniSettings.serverPassword != "")
@@ -1340,18 +1400,23 @@ void processStartupParams()
       gLevelChangePassword = gIniSettings.levelChangePassword;
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
+   
    if(gIniSettings.levelDir != "")
-      gLevelDir = gIniSettings.levelDir;
+      gConfigDirs.levelDir = gIniSettings.levelDir;
    else
-      gIniSettings.levelDir = gLevelDir;     // So a good default will be written to the INI
+      gIniSettings.levelDir = gConfigDirs.levelDir;     // So a good default will be written to the INI
 
    // This way, the main level dir can be specified in the INI, but it can either be overridden here,
    // or a subfolder can be specified, depending on what's in the leveldir param
-   if(gCmdLineSettings.levelDir != "")
-      gLevelDir = getLevelsFolder(gCmdLineSettings.levelDir);
-   else
-      gLevelDir = getLevelsFolder(gIniSettings.levelDir);
-   // else leave gLevelDir at it's default setting, "levels"
+   gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir != "" ? gCmdLineSettings.dirs.levelDir : gIniSettings.levelDir);
+   
+   // Other folders can't currently be specified in the INI file
+   if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gConfigDirs.iniDir;
+   if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gConfigDirs.luaDir;
+   if(gCmdLineSettings.dirs.robotDir != "") gConfigDirs.robotDir = gConfigDirs.robotDir;
+   if(gCmdLineSettings.dirs.screenshotDir != "") gConfigDirs.screenshotDir = gConfigDirs.screenshotDir;
+   if(gCmdLineSettings.dirs.sfxDir!= "") gConfigDirs.sfxDir = gConfigDirs.sfxDir;
+
 
    if(gCmdLineSettings.hostname != "")
       gHostName = gCmdLineSettings.hostname;
@@ -1427,32 +1492,24 @@ void processStartupParams()
 }
 
 
-
-};  // namespace Zap
-
-
-using namespace Zap;
-
-////////////////////////////////////////
-////////////////////////////////////////
-// main()
-////////////////////////////////////////
-////////////////////////////////////////
-
-#ifdef TNL_OS_XBOX
-int zapmain(int argc, char **argv)
-#else
-int main(int argc, char **argv)
-#endif
+string joindir(string path, string filename)
 {
-#ifdef TNL_OS_MAC_OSX
-   // Move to the application bundle's path (RDW)
-   moveToAppPath();
-#endif
+   return path == "" ? filename : path + "/" + filename;
+}
 
-   gCmdLineSettings.init();      // Init cmd line settings struct
-   gIniSettings.init();          // Init struct that holds INI settings
 
+// Any folders not set here default to current folder
+void setDefaultConfigDirs()
+{
+   gConfigDirs.levelDir = "levels";
+   gConfigDirs.robotDir = "robots";
+   gConfigDirs.screenshotDir = "screenshots";
+   gConfigDirs.sfxDir = "sfx";
+}
+
+
+void processCmdLineParams(int argc, char **argv)
+{
    Vector<TNL::StringPtr> theArgv;
 
    // Process some command line args that need to be handled early, like journaling options
@@ -1484,14 +1541,45 @@ int main(int argc, char **argv)
    }  // End processing command line args
 
    gZapJournal.readCmdLineParams(theArgv);   // Process normal command line params, read INI, and start up
+}
+
+
+};  // namespace Zap
+
+
+using namespace Zap;
+
+////////////////////////////////////////
+////////////////////////////////////////
+// main()
+////////////////////////////////////////
+////////////////////////////////////////
+
+#ifdef TNL_OS_XBOX
+int zapmain(int argc, char **argv)
+#else
+int main(int argc, char **argv)
+#endif
+{
+#ifdef TNL_OS_MAC_OSX
+   // Move to the application bundle's path (RDW)
+   moveToAppPath();
+#endif
+   setDefaultConfigDirs();
+   gCmdLineSettings.init();      // Init cmd line settings struct
+
+   processCmdLineParams(argc, argv);
+   CIniFile gINI(joindir(gCmdLineSettings.dirs.iniDir, "bitfighter.ini"));   
+   gIniSettings.init();                // Init struct that holds INI settings
+
+
    gZapJournal.processNextJournalEntry();    // If we're replaying a journal, this will cause the cmd line params to be read from the saved journal
 
    gHostingModePhase = NotHosting;
 
    loadSettingsFromINI();                    // Read INI
 
-   processStartupParams();                   // And process command lines and INI settings in a unified way
-
+   processStartupParams();                   // And merge command line params and INI settings
    SFXObject::init();
 
 #ifndef ZAP_DEDICATED

@@ -413,6 +413,7 @@ S32 QSORT_CALLBACK geometricSort(WorldItem *a, WorldItem *b)
 extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
 extern S32 gMaxPolygonPoints;
+extern ConfigDirectories gConfigDirs;
 
 // Loads a level
 void EditorUserInterface::loadLevel()
@@ -430,7 +431,7 @@ void EditorUserInterface::loadLevel()
 
    mGameType[0] = 0;                   // Clear mGameType
    char fileBuffer[1024];
-   dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gLevelDir.c_str(), mEditFileName.c_str());
+   dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
 
    if(initLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
@@ -652,7 +653,7 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
             return;
 
          TeamEditor team;
-         GameType::readTeamFromLevelLine(team, argc, argv);
+         team.readTeamFromLevelLine(argc, argv);
 
          // If team was read and processed properly, numPlayers will be 0
          if(team.numPlayers != -1)
@@ -686,7 +687,7 @@ void EditorUserInterface::runScript()
    // Set the load target to the levelgen list, as that's where we want our items stored
    mLoadTarget = &mLevelGenItems;
 
-   LuaLevelGenerator levelgen = LuaLevelGenerator(gLevelDir + "/", scriptArgs, mGridSize, this);
+   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.levelDir + "/", scriptArgs, mGridSize, this);
 
    // Reset the target
    mLoadTarget = &mItems;
@@ -3620,7 +3621,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
       }
 
       char fileNameBuffer[256];
-      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gLevelDir.c_str(), saveName.c_str());
+      dSprintf(fileNameBuffer, sizeof(fileNameBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), saveName.c_str());
       FILE *f = fopen(fileNameBuffer, "w");
       if(!f)
          throw(SaveException("Could not open file for writing"));

@@ -90,6 +90,7 @@ extern U32 gSticksFound;
 extern Color gMasterServerBlue;
 extern string gLevelDir;
 extern Vector<StringTableEntry> gLevelList;
+extern ConfigDirectories gConfigDirs;
 
 void DiagnosticUserInterface::render()
 {
@@ -238,7 +239,7 @@ void DiagnosticUserInterface::render()
 
    // Dump out names of loaded levels...
    glColor3f(1,1,1);
-   string allLevels = "Levels: [" + gLevelDir + "] ";
+   string allLevels = "Levels: [" + gConfigDirs.levelDir + "] ";
    for(S32 i = 0; i < gLevelList.size(); i++)
       allLevels += string(gLevelList[i].getString()) + "; ";
 

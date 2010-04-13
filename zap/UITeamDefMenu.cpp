@@ -41,14 +41,14 @@ namespace Zap
 {
 
 
-// Note: Do not make any of the following team names longer than nameLen, which is currently 256
+// Note: Do not make any of the following team names longer than MAX_TEAM_NAME_LENGTH, which is currently 32
 // Note: Make sure we have at least 9 presets below...  (instructions are wired for keys 1-9)
 TeamPreset gTeamPresets[] = {
    { "Blue",        0,     0,    1 },
    { "Red",         1,     0,    0 },
    { "Yellow",      1,     1,    0 },
    { "Green",       0,     1,    0 },
-   { "Pink ",       1,   .45, .875 },
+   { "Pink",        1,   .45, .875 },
    { "Orange",      1,   .67,    0 },
    { "Lilac",      .79,   .5,  .96 },
    { "LightBlue",  .45, .875,    1 },
@@ -86,7 +86,7 @@ TeamDefUserInterface::TeamDefUserInterface()
 }
 
 static const U32 errorMsgDisplayTime = 4000; // 4 seconds
-static const S32 fontsize = 21;
+static const S32 fontsize = 19;
 static const S32 fontgap = 12;
 static const U32 yStart = UserInterface::vertMargin + 90;
 static const U32 itemHeight = fontsize + 5;
@@ -94,6 +94,7 @@ static const U32 itemHeight = fontsize + 5;
 void TeamDefUserInterface::onActivate()
 {
    selectedIndex = 0;                     // First item selected when we begin
+   mEditing = false;                      // Not editing anything by default
    gEditorUserInterface.mOldTeams = gEditorUserInterface.mTeams;
 
    // Display an intitial message to users
@@ -106,6 +107,8 @@ void TeamDefUserInterface::idle(U32 timeDelta)
 {
    if(errorMsgTimer.update(timeDelta))
       errorMsg = "";
+
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 
@@ -120,12 +123,13 @@ void TeamDefUserInterface::render()
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
 
    glColor3f(0, 1, 0);
-   drawCenteredString(canvasHeight - vertMargin - 98, 18, "[1] - [9] selects a team preset for current slot");
-   drawCenteredString(canvasHeight - vertMargin - 72, 18, "[R] [G] [B] to change preset color (with or without [Shift])");
-   drawCenteredString(canvasHeight - vertMargin - 46, 18, "[Ins] or [+] to insert team | [Del] or [-] to remove selected team");
+   drawCenteredString(canvasHeight - vertMargin - 115, 16, "[1] - [9] selects a team preset for current slot");
+   drawCenteredString(canvasHeight - vertMargin - 92,  16, "[Enter] edits team name");
+   drawCenteredString(canvasHeight - vertMargin - 69,  16, "[R] [G] [B] to change preset color (with or without [Shift])");
+   drawCenteredString(canvasHeight - vertMargin - 46,  16, "[Ins] or [+] to insert team | [Del] or [-] to remove selected team");
 
    glColor3f(1, 1, 1);
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC exits menu");
+   drawCenteredString(canvasHeight - vertMargin - 20, 18, "Arrow Keys to choose | ESC to exit");
 
    S32 size = gEditorUserInterface.mTeams.size();
 
@@ -152,21 +156,35 @@ void TeamDefUserInterface::render()
             glBegin(i ? GL_POLYGON : GL_LINES);
                glVertex2f(0, y - 2);
                glVertex2f(canvasWidth, y - 2);
-               glVertex2f(canvasWidth, y + itemHeight);
-               glVertex2f(0, y + itemHeight);
+               glVertex2f(canvasWidth, y + itemHeight + 2);    // + 2 to allow room for cursor when editing team name
+               glVertex2f(0, y + itemHeight + 2);
             glEnd();
          }
 
       if(j < gEditorUserInterface.mTeams.size())
       {
+         char numstr[10];
+         dSprintf(numstr, sizeof(numstr), "Team %d: ", j+1);
+
+         char namestr[nameLen + 20];    // Added a little extra, just to cover any contingency...
+         dSprintf(namestr, sizeof(namestr), "%s%s", numstr, gEditorUserInterface.mTeams[j].getName());
+
+         char colorstr[16];            // "(100, 100, 100)" + 1 for null
+         dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(gEditorUserInterface.mTeams[j].color.r * 100),
+                                                              S32(gEditorUserInterface.mTeams[j].color.g * 100),
+                                                              S32(gEditorUserInterface.mTeams[j].color.b * 100));
+         static const char *nameColorStr = "%s  %s";
+
          // Draw item text
          glColor(gEditorUserInterface.mTeams[j].color);
-         drawCenteredStringf(y, fontsize,
-                     "Team %d: %s   (%2.0f, %2.0f, %2.0f)",
-                      j+1, gEditorUserInterface.mTeams[j].getName(),
-                      gEditorUserInterface.mTeams[j].color.r * 100,
-                      gEditorUserInterface.mTeams[j].color.g * 100,
-                      gEditorUserInterface.mTeams[j].color.b * 100);
+         drawCenteredStringf(y, fontsize, nameColorStr, namestr, colorstr);
+
+         // Draw cursor if we're editing
+         if(mEditing && j == selectedIndex)
+         {
+            S32 x = getCenteredStringStartingPosf(fontsize, nameColorStr, namestr, colorstr) + getStringWidth(fontsize, numstr);
+            gEditorUserInterface.mTeams[j].getLineEditor()->drawCursor(x, y, fontsize);
+         }
       }
    }
 
@@ -179,9 +197,9 @@ void TeamDefUserInterface::render()
       if (errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      glEnable(GL_BLEND);
+      glEnable(GL_BLEND); 
       glColor4f(1, 0, 0, alpha);
-      drawCenteredString(canvasHeight - vertMargin - 65, fontsize, errorMsg.c_str());
+      drawCenteredString(canvasHeight - vertMargin - 141, fontsize, errorMsg.c_str());
       glDisable(GL_BLEND);
    }
 }
@@ -198,10 +216,30 @@ void TeamDefUserInterface::onEscape()
 
 
 class Team;
+string origName;
+extern bool isPrintable(char c);
 
 void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
+   if(keyCode == KEY_ENTER)
+   {
+      mEditing = !mEditing;
+      if(mEditing)
+         origName = gEditorUserInterface.mTeams[selectedIndex].getName();
+   }
+   else if(mEditing)                // Editing, send keystroke to editor
+   {
+      if(keyCode == KEY_ESCAPE)     // Stop editing, and restore the original value
+      {
+         gEditorUserInterface.mTeams[selectedIndex].setName(origName.c_str());
+         mEditing = false;
+      }
+      else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+         gEditorUserInterface.mTeams[selectedIndex].getLineEditor()->handleBackspace(keyCode);
+      else if(isPrintable(ascii))
+         gEditorUserInterface.mTeams[selectedIndex].getLineEditor()->addChar(ascii);
+   }
+   else if(ascii >= '1' && ascii <= '9')        // Keys 1-9 --> use preset
    {
       if(getKeyState(KEY_ALT))      // Replace all teams with # of teams based on presets
       {
@@ -229,7 +267,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selectedIndex >= gEditorUserInterface.mTeams.size())
          selectedIndex = gEditorUserInterface.mTeams.size() - 1;
    }
-
+  
    else if(keyCode == KEY_INSERT || keyCode == KEY_EQUALS)           // Ins or Plus (equals) - Add new item
    {
       S32 maxTeams = GameType::gMaxTeams;    // A bit pedantic, perhaps, but using this fixes an odd link error in Linux
@@ -241,8 +279,8 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       gEditorUserInterface.mTeams.insert(selectedIndex);
 
-      gEditorUserInterface.mTeams[selectedIndex].setName(gTeamPresets[0].name);
-      gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[0].r, gTeamPresets[0].g, gTeamPresets[0].b);
+      gEditorUserInterface.mTeams[selectedIndex].setName(gTeamPresets[selectedIndex].name);
+      gEditorUserInterface.mTeams[selectedIndex].color.set(gTeamPresets[selectedIndex].r, gTeamPresets[selectedIndex].g, gTeamPresets[selectedIndex].b);
 
       if(selectedIndex < 0)      // It can happen with too many deletes
          selectedIndex = 0;

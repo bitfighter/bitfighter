@@ -32,8 +32,8 @@
 // especially for the INI settings...  if the INI is deleted, these defaults
 // will be used to rebuild it.
 
-#include "../tnl/tnlTypes.h"
-#include "../tnl/tnlNetStringTable.h"
+#include "tnlTypes.h"
+#include "tnlNetStringTable.h"
 
 #include "input.h"
 #include <string>
@@ -45,7 +45,17 @@ using namespace Zap;
 namespace Zap
 {
 
-extern string gLevelDir;
+struct ConfigDirectories {
+   string levelDir;
+   string robotDir;
+   string sfxDir;
+   string iniDir;
+   string screenshotDir;
+   string luaDir;
+
+   ConfigDirectories() { levelDir = ""; robotDir = ""; sfxDir = ""; iniDir = ""; screenshotDir = ""; luaDir = ""; }  // Constructor
+};
+
 
 struct CmdLineSettings
 {
@@ -70,8 +80,9 @@ struct CmdLineSettings
    string serverPassword;  // Password required to connect to server
    string adminPassword;   // Password required to perform certain admin functions
    string levelChangePassword;   // Password required to change levels and such
-   string levelDir;        // Subfolder under levels specified with -leveldir parameter
    bool alllevels;         // Did user specify -alllevels param?
+
+   ConfigDirectories dirs;
 
    S32 maxplayers;
 
@@ -106,7 +117,6 @@ struct CmdLineSettings
       levelChangePassword = "";
       hostname = "";
       hostdescr = "";
-      levelDir = "";
       maxplayers = -1;
       window = false;
       fullscreen = false;
@@ -116,6 +126,7 @@ struct CmdLineSettings
       alllevels = false;
    };
 };
+
 
 enum sfxSets {
    sfxClassicSet,
@@ -239,9 +250,9 @@ struct IniSettings      // With defaults specified
       logPlatform = false;
       logNetBase = false;
       logUDP = false;
-
    }
 };
+
 
 void saveSettingsToINI();
 void loadSettingsFromINI();

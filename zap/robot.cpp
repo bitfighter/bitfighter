@@ -1353,7 +1353,7 @@ Robot::~Robot()
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
    delete mPlayerInfo;
 
-   logprintf("Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
+   logprintf("Robot terminated [%s] (%d)", mFilename, robots.size());
 }
 
 
@@ -1394,6 +1394,9 @@ void Robot::startBots()
    //eventManager.update();       // Ensure registrations made during bot initialization are ready to go
 }
 
+
+extern ConfigDirectories gConfigDirs;
+extern string joindir(string path, string filename);
 
 bool Robot::startLua()
 {
@@ -1463,7 +1466,7 @@ bool Robot::startLua()
    if(!loadLuaHelperFunctions(L, "robot"))
       return false;
 
-   static const char *robotfname = "robot_helper_functions.lua";
+   const char *robotfname = joindir(gConfigDirs.luaDir, "robot_helper_functions.lua").c_str();
 
    if(luaL_loadfile(L, robotfname))
    {
@@ -1479,7 +1482,7 @@ bool Robot::startLua()
    }
   
    // Load the bot
-   if(luaL_loadfile(L, mFilename.c_str()))
+   if(luaL_loadfile(L, mFilename))
    {
       logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
@@ -1521,7 +1524,7 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   static const char *fname = "lua_helper_functions.lua";
+   const char *fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua").c_str();
 
    if(luaL_loadfile(L, fname))
    {
@@ -1608,8 +1611,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
    mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
 
-   mFilename = "robots/";
-   mFilename += argv[1];
+   mFilename = joindir(gConfigDirs.robotDir, argv[1]).c_str();
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
@@ -1633,7 +1635,7 @@ void Robot::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
+   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename, buffer);
 
    va_end(args);
 }

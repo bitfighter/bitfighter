@@ -409,6 +409,8 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
 }
 
 
+extern ConfigDirectories gConfigDirs;
+
 string ServerGame::getLevelFileName(string base)
 {
 
@@ -416,7 +418,7 @@ string ServerGame::getLevelFileName(string base)
       return = "d:\\media\\levels\\" + base;
 #endif
 
-   return gLevelDir + (gLevelDir != "" ? "/" : "") + base;
+   return gConfigDirs.levelDir + (gConfigDirs.levelDir != "" ? "/" : "") + base;
 }
 
 

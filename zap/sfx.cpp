@@ -26,9 +26,9 @@
 #include "sfx.h"
 #include "UIMenus.h"    // For access to volume settings
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlLog.h"
-#include "../tnl/tnlRandom.h"
+#include "tnl.h"
+#include "tnlLog.h"
+#include "tnlRandom.h"
 
 #include "config.h"
 
@@ -481,6 +481,10 @@ void SFXObject::stop()
    }
 }
 
+
+extern ConfigDirectories gConfigDirs;
+extern string joindir(string path, string filename);
+
 void SFXObject::init()
 {
    ALint error;
@@ -543,12 +547,12 @@ void SFXObject::init()
       ALvoid   *data;
       ALboolean loop;
 
-      char fileBuffer[1024];
-      dSprintf(fileBuffer, sizeof(fileBuffer), "sfx/%s", gSFXProfiles[i].fileName);    // Sounds are in sfx folder
+      string fileBuffer = joindir(gConfigDirs.sfxDir, gSFXProfiles[i].fileName);
+
 #if defined(TNL_OS_MAC_OSX)
-      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq);      // OS X version has no loop param
+      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq);      // OS X version has no loop param
 #else
-      alutLoadWAVFile((ALbyte *) fileBuffer, &format, &data, &size, &freq, &loop);
+      alutLoadWAVFile((ALbyte *) fileBuffer.c_str(), &format, &data, &size, &freq, &loop);
 #endif
       if(alGetError() != AL_NO_ERROR)
       {

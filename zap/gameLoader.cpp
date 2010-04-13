@@ -285,11 +285,11 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 }
 
 
+extern ConfigDirectories gConfigDirs;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern Vector<StringTableEntry> gLevelList;
 extern Vector<StringTableEntry> gLevelSkipList;
-
 
 // Create the definititve list of levels for hosting a game
 void LevelListLoader::buildLevelList()
@@ -303,7 +303,7 @@ void LevelListLoader::buildLevelList()
    }
 
    // If neither -leveldir nor -alllevels were not specified on the cmd line, and the INI file has some specified, use those
-   if(gCmdLineSettings.levelDir == "" && !gCmdLineSettings.alllevels && gIniSettings.levelList.size() > 0)
+   if(gCmdLineSettings.dirs.levelDir == "" && !gCmdLineSettings.alllevels && gIniSettings.levelList.size() > 0)
    {
       gLevelList = gIniSettings.levelList;
       removeSkippedLevels();
@@ -314,9 +314,9 @@ void LevelListLoader::buildLevelList()
    gLevelList.clear();
    Vector<string> levelfiles;
 
-   if(!getLevels(gLevelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
+   if(!getLevels(gConfigDirs.levelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
    {
-      logprintf("Could not read any levels from the levels folder \"%s\".", gLevelDir.c_str());
+      logprintf("Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
    }
 
    levelfiles.sort(alphaSort);   // Just to be sure...
