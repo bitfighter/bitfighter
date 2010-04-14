@@ -50,10 +50,12 @@ struct ConfigDirectories {
    string robotDir;
    string sfxDir;
    string iniDir;
+   string logDir;
    string screenshotDir;
    string luaDir;
 
-   ConfigDirectories() { levelDir = ""; robotDir = ""; sfxDir = ""; iniDir = ""; screenshotDir = ""; luaDir = ""; }  // Constructor
+   ConfigDirectories() { levelDir = ""; robotDir = ""; sfxDir = ""; iniDir = ""; logDir = ""; 
+                         screenshotDir = ""; luaDir = ""; }                                      // Quickie Constructor
 };
 
 

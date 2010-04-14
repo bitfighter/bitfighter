@@ -772,6 +772,13 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
    //SDL_GL_SwapBuffers();  // Use this if we convert to SDL
  }
 
+
+string joindir(string path, string filename)
+{
+   return path == "" ? filename : path + "/" + filename;
+}
+
+
 #include <stdio.h>
 // Each instnatiation of a LogConsumer subclass gets a copy of all log messages.  Here we'll log both
 // to the screen as well as to a file called bitfighter.log
@@ -787,13 +794,20 @@ public:
 
 class FileLogConsumer : public LogConsumer     // Dumps logs to bitfighter.log
 {
-private:
+protected:
    FILE *f;
+   const char *filename;
+   const char *mode;
+   const char *firstLine;
+   boolean isOpen;
+
 public:
    FileLogConsumer(const char* logFile="bitfighter.log")
    {
-      f = fopen(logFile, "w");
-      logString("------ Bitfighter Log File ------\n");
+      filename = logFile;
+      isOpen = false;
+      mode = "w";
+      firstLine = "------ Bitfighter Log File ------\n";
    }
 
    ~FileLogConsumer()
@@ -802,8 +816,20 @@ public:
          fclose(f);
    }
 
+   void open()
+   {
+      f = fopen(joindir(gConfigDirs.logDir, filename).c_str(), mode);
+      isOpen = true;    // Set this here to avoid endless loops when the next line is executed!
+      logString(firstLine);
+   }
+
    void logString(const char *string)
    {
+      // Do this whole lazy initialize thing to ensure that we've read our command line and know where to
+      // create the logfile by the time we get here.
+      if(!isOpen)
+         open();
+
       if(f)
       {
          fprintf(f, "%s", string);
@@ -813,32 +839,19 @@ public:
 } gFileLogConsumer;
 
 
-//
-class ServerFileLogConsumer : public LogConsumer    // Dumps logs to bitfighter.log
+class ServerFileLogConsumer : public FileLogConsumer    // Dumps logs to bitfighter_server.log
 {
-private:
-   FILE *f;
 public:
    ServerFileLogConsumer(const char* logFile="bitfighter_server.log")
    {
-      f = fopen(logFile, "a");
+      filename = logFile;
+      isOpen = false;
+      mode = "a";
+      firstLine = "";
+
       setFilterType(LogConsumer::ServerFilter);
    }
 
-   ~ServerFileLogConsumer()
-   {
-      if(f)
-         fclose(f);
-   }
-
-   void logString(const char *string)
-   {
-      if(f)
-      {
-         fprintf(f, "%s", string);
-         fflush(f);
-      }
-   }
 } gServerLogConsumer;
 
 
@@ -1094,6 +1107,17 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          }
 
          gCmdLineSettings.dirs.iniDir = argv[i+1].getString();
+      }
+
+      else if(!stricmp(argv[i], "-logdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify your log folder with the -logdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.logDir = argv[i+1].getString();
       }
 
       else if(!stricmp(argv[i], "-luadir"))      // additional arg required
@@ -1412,11 +1436,11 @@ void processStartupParams()
    
    // Other folders can't currently be specified in the INI file
    if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gCmdLineSettings.dirs.iniDir;
+   if(gCmdLineSettings.dirs.logDir != "") gConfigDirs.logDir = gCmdLineSettings.dirs.logDir;
    if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gCmdLineSettings.dirs.luaDir;
    if(gCmdLineSettings.dirs.robotDir != "") gConfigDirs.robotDir = gCmdLineSettings.dirs.robotDir;
    if(gCmdLineSettings.dirs.screenshotDir != "") gConfigDirs.screenshotDir = gCmdLineSettings.dirs.screenshotDir;
    if(gCmdLineSettings.dirs.sfxDir != "") gConfigDirs.sfxDir = gCmdLineSettings.dirs.sfxDir;
-
 
    if(gCmdLineSettings.hostname != "")
       gHostName = gCmdLineSettings.hostname;
@@ -1492,12 +1516,6 @@ void processStartupParams()
 }
 
 
-string joindir(string path, string filename)
-{
-   return path == "" ? filename : path + "/" + filename;
-}
-
-
 // Any folders not set here default to current folder
 void setDefaultConfigDirs()
 {
@@ -1569,7 +1587,7 @@ int main(int argc, char **argv)
    gCmdLineSettings.init();      // Init cmd line settings struct
 
    processCmdLineParams(argc, argv);
-   CIniFile gINI(joindir(gCmdLineSettings.dirs.iniDir, "bitfighter.ini"));   
+   CIniFile gINI(joindir(gCmdLineSettings.dirs.iniDir, "bitfighter.ini"));   // gConfigDirs hasn't been setup yet...
    gIniSettings.init();                // Init struct that holds INI settings
 
 
