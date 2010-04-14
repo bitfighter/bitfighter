@@ -1411,11 +1411,11 @@ void processStartupParams()
    gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir != "" ? gCmdLineSettings.dirs.levelDir : gIniSettings.levelDir);
    
    // Other folders can't currently be specified in the INI file
-   if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gConfigDirs.iniDir;
-   if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gConfigDirs.luaDir;
-   if(gCmdLineSettings.dirs.robotDir != "") gConfigDirs.robotDir = gConfigDirs.robotDir;
-   if(gCmdLineSettings.dirs.screenshotDir != "") gConfigDirs.screenshotDir = gConfigDirs.screenshotDir;
-   if(gCmdLineSettings.dirs.sfxDir!= "") gConfigDirs.sfxDir = gConfigDirs.sfxDir;
+   if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gCmdLineSettings.dirs.iniDir;
+   if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gCmdLineSettings.dirs.luaDir;
+   if(gCmdLineSettings.dirs.robotDir != "") gConfigDirs.robotDir = gCmdLineSettings.dirs.robotDir;
+   if(gCmdLineSettings.dirs.screenshotDir != "") gConfigDirs.screenshotDir = gCmdLineSettings.dirs.screenshotDir;
+   if(gCmdLineSettings.dirs.sfxDir != "") gConfigDirs.sfxDir = gCmdLineSettings.dirs.sfxDir;
 
 
    if(gCmdLineSettings.hostname != "")
