@@ -55,9 +55,7 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 1;
 }
 
-enum {
-   NumPages = 8,
-};
+const S32 NumPages = 9;
 
 const char *pageHeaders[] = {
    "CONTROLS",
@@ -65,6 +63,7 @@ const char *pageHeaders[] = {
    "WEAPON PROJECTILES",
    "SPY BUGS",
    "GAME OBJECTS",
+   "MORE GAME OBJECTS",
    "MORE GAME OBJECTS",
    "ADVANCED COMMANDS",
    "ADMIN COMMANDS",
@@ -78,11 +77,12 @@ void InstructionsUserInterface::render()
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
    glColor3f(0.7, 0.7, 0.7);
    glBegin(GL_LINES);
-   glVertex2f(0, 31);
-   glVertex2f(800, 31);
-   glVertex2f(0, 569);
-   glVertex2f(800, 569);
+      glVertex2f(0, 31);
+      glVertex2f(800, 31);
+      glVertex2f(0, 569);
+      glVertex2f(800, 569);
    glEnd();
+
    switch(mCurPage)
    {
       case 1:
@@ -104,10 +104,15 @@ void InstructionsUserInterface::render()
          renderPageObjectDesc(3);
          break;
       case 7:
-         renderPageCommands(0);
+         renderPageObjectDesc(4);
          break;
       case 8:
+         renderPageCommands(0);
+         break;
+      case 9:
          renderPageCommands(1);
+
+      // When adding page, be sure to increase NumPages, and add item to pageHeaders array
    }
 }
 
@@ -428,8 +433,12 @@ const char *gGameObjectInfo[] = {
    /* 21 */   "Nexus", "Bring flags here in Nexus game",
    /* 22 */   "Asteroid", "Silent but deadly",
    /* 23 */   "GoFast", "Makes ship go fast",
+
+   /* 24 */   "Test Item", "Bouncy ball",
+   /* 25 */   "Resource Item", "Smaller bouncy ball",
+   /* 26 */   "Soccer Ball", "Push into enemy goal in Soccer game",
 };
-static U32 GameObjectCount = 24;      // <=== If you add something above, increment this!
+static U32 GameObjectCount = 27;      // <=== If you add something above, increment this!
 
 
 void InstructionsUserInterface::renderPageObjectDesc(U32 index)
@@ -454,7 +463,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       renderCenteredString(start, 20, text);
 
       glColor3f(1,1,1);
-      renderCenteredString(start + Point(0, 25), 20, desc);
+      renderCenteredString(start + Point(0, 25), 17, desc);
 
       glPushMatrix();
       glTranslatef(objStart.x, objStart.y, 0);
@@ -486,7 +495,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
          case 7:
             renderSpyBug(Point(0, 0), false);
             break;
-         case 8:
+         case 8:     // Blank
          case 9:
          case 10:
          case 11:
@@ -548,12 +557,24 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             }
             break;
 
-         case 22:
+         case 22:    // Asteroid
             renderAsteroid(Point(0,-10), (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    // Using goofball factor to keep out of sync with Nexus graphic
             break;
 
-         case 23:
+         case 23:    // SpeedZone
             renderSpeedZone(SpeedZone::generatePoints(Point(-SpeedZone::height / 2, 0), Point(1, 0)), gClientGame->getCurrentTime());
+            break;
+
+         case 24:    // TestItem
+            renderTestItem(Point(0,0));
+            break;
+
+         case 25:    // ResourceItem
+            renderResourceItem(Point(0,0));
+            break;
+
+         case 26:    // SoccerBall
+            renderSoccerBall(Point(0,0));
             break;
       }
       glPopMatrix();

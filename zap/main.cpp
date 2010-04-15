@@ -775,7 +775,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
 
 string joindir(string path, string filename)
 {
-   return path == "" ? filename : path + "/" + filename;
+   return (path == "" ? filename : path + "/" + filename);
 }
 
 

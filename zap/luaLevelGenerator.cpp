@@ -255,18 +255,18 @@ bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   static const char *fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua").c_str();
+   string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
 
-   if(luaL_loadfile(L, fname))
+   if(luaL_loadfile(L, fname.c_str()))
    {
-      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
+      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname.c_str(), lua_tostring(L, -1), caller);
       return false;
    }
 
    // Now run the loaded code
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
-      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
+      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname.c_str(), lua_tostring(L, -1), caller);
       return false;
    }
 
@@ -276,11 +276,11 @@ bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 
 bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
 {
-   static const char *fname = joindir(gConfigDirs.luaDir, "levelgen_helper_functions.lua").c_str();
+   string fname = joindir(gConfigDirs.luaDir, "levelgen_helper_functions.lua");
 
-   if(luaL_loadfile(L, fname))
+   if(luaL_loadfile(L, fname.c_str()))
    {
-      logError("Error loading levelgen helper functions %s.  Skipping...", fname);
+      logError("Error loading levelgen helper functions %s.  Skipping...", fname.c_str());
       return false;
    }
 

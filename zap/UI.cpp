@@ -22,8 +22,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
+#include "tnl.h"
 
-#include "../tnl/tnl.h"
 using namespace TNL;
 
 #include "UI.h"
@@ -36,7 +36,7 @@ using namespace TNL;
 #include "config.h"
 #include "game.h"
 
-#include "../tnl/tnlLog.h"
+//#include "tnlLog.h"
 
 #include "../glut/glutInclude.h"
 

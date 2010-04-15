@@ -1353,7 +1353,7 @@ Robot::~Robot()
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
    delete mPlayerInfo;
 
-   logprintf("Robot terminated [%s] (%d)", mFilename, robots.size());
+   logprintf("Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }
 
 
@@ -1466,11 +1466,11 @@ bool Robot::startLua()
    if(!loadLuaHelperFunctions(L, "robot"))
       return false;
 
-   const char *robotfname = joindir(gConfigDirs.luaDir, "robot_helper_functions.lua").c_str();
+   string robotfname = joindir(gConfigDirs.luaDir, "robot_helper_functions.lua");
 
-   if(luaL_loadfile(L, robotfname))
+   if(luaL_loadfile(L, robotfname.c_str()))
    {
-      logError("Error loading robot helper functions %s.  Shutting robot down.", robotfname);
+      logError("Error loading robot helper functions %s.  Shutting robot down.", robotfname.c_str());
       return false;
    }
 
@@ -1482,7 +1482,7 @@ bool Robot::startLua()
    }
   
    // Load the bot
-   if(luaL_loadfile(L, mFilename))
+   if(luaL_loadfile(L, mFilename.c_str()))
    {
       logError("Error loading file: %s.  Shutting robot down.", lua_tostring(L, -1));
       return false;
@@ -1524,18 +1524,18 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
-   const char *fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua").c_str();
+   string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
 
-   if(luaL_loadfile(L, fname))
+   if(luaL_loadfile(L, fname.c_str()))
    {
-      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
+      logError("Error loading lua helper functions %s: %s.  Can't run %s...", fname.c_str(), lua_tostring(L, -1), caller);
       return false;
    }
 
    // Now run the loaded code
    if(lua_pcall(L, 0, 0, 0))     // Passing 0 params, getting none back
    {
-      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname, lua_tostring(L, -1), caller);
+      logError("Error during initializing lua helper functions %s: %s.  Can't run %s...", fname.c_str(), lua_tostring(L, -1), caller);
       return false;
    }
 
@@ -1611,7 +1611,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
    mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
 
-   mFilename = joindir(gConfigDirs.robotDir, argv[1]).c_str();
+   mFilename = joindir(gConfigDirs.robotDir, argv[1]);
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
@@ -1635,7 +1635,7 @@ void Robot::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename, buffer);
+   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
 
    va_end(args);
 }

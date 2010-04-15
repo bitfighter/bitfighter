@@ -53,7 +53,7 @@ public:
    enum errors{ noID = -1};
    int lineCount;
 
-   CIniFile( string const iniPath = "");
+   CIniFile( string const iniPath = "");     // Constructor
    ~CIniFile()  {
       //WriteFile();  --> Crashes with VC++ 2008
    }
