@@ -113,6 +113,14 @@ function logprint(msg)
     luaUtil:logprint("Robot", tostring(msg))
 end
 
+--
+-- And another
+--
+function subscribe(event)
+   bot:subscribe(event)
+end   
+
+
 
 --
 -- This will be called every tick... update timer, then call robot's onTick() method if it exists

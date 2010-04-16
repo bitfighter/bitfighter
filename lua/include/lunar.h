@@ -150,7 +150,7 @@ private:
 
   // member function dispatcher
   static int thunk(lua_State *L) {
-    // stack has userdata, followed by method args
+    // stack has userdata, followed b  y method args
     T *obj = check(L, 1);  // get 'self', or if you prefer, 'this'
     lua_remove(L, 1);  // remove self so member function args start at index 1
     // get member function from upvalue

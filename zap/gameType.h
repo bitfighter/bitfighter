@@ -70,7 +70,6 @@ public:
 
    LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
-
    bool isAdmin;
    bool isRobot;
    bool isLevelChanger;

@@ -167,7 +167,7 @@ void TeamDefUserInterface::render()
          dSprintf(numstr, sizeof(numstr), "Team %d: ", j+1);
 
          char namestr[nameLen + 20];    // Added a little extra, just to cover any contingency...
-         dSprintf(namestr, sizeof(namestr), "%s%s", numstr, gEditorUserInterface.mTeams[j].getName());
+         dSprintf(namestr, sizeof(namestr), "%s%s", numstr, gEditorUserInterface.mTeams[j].getName().getString());
 
          char colorstr[16];            // "(100, 100, 100)" + 1 for null
          dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(gEditorUserInterface.mTeams[j].color.r * 100),
@@ -225,7 +225,7 @@ void TeamDefUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       mEditing = !mEditing;
       if(mEditing)
-         origName = gEditorUserInterface.mTeams[selectedIndex].getName();
+         origName = gEditorUserInterface.mTeams[selectedIndex].getName().getString();
    }
    else if(mEditing)                // Editing, send keystroke to editor
    {

@@ -48,8 +48,8 @@ public:
 
    TeamEditor() { _name = LineEditor(MAX_TEAM_NAME_LENGTH); numPlayers = 0; }     // Quickie constructor
 
-   void setName(const char *name) { _name.setString(name); }
-   const char *getName() { return _name.c_str(); }
+   virtual void setName(const char *name) { _name.setString(name); }
+   virtual StringTableEntry getName() { return StringTableEntry(_name.c_str()); }  // Wrap in STE to make signatures match... lame.
    LineEditor *getLineEditor() { return &_name; }
 
    void readTeamFromLevelLine(S32 argc, const char **argv);          // Read team info from level line

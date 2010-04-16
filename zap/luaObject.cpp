@@ -36,7 +36,7 @@
 #include "projectile.h"    // For getItem()
 #include "teleporter.h"
 #include "engineeredObjects.h"    // For getItem()
-
+#include "playerInfo.h"           // For playerInfo def
 
 
 namespace Zap
@@ -88,6 +88,32 @@ S32 LuaObject::returnLuaPoint(lua_State *L, LuaPoint *point)
 S32 LuaObject::returnInt(lua_State *L, S32 num)
 {
    lua_pushinteger(L, num);
+   return 1;
+}
+
+
+// If we have a ship, return it, otherwise return nil
+S32 LuaObject::returnShip(lua_State *L, Ship *ship)
+{
+   if(ship)
+   {
+      ship->luaProxy.push(L);
+      return 1;
+   }
+
+   return returnNil(L);
+}
+
+
+S32 LuaObject::returnPlayerInfo(lua_State *L, Ship *ship)
+{
+   return returnPlayerInfo(L, ship->getControllingClient()->getClientRef()->getPlayerInfo());
+}
+
+
+S32 LuaObject::returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo)
+{
+   playerInfo->push(L);
    return 1;
 }
 

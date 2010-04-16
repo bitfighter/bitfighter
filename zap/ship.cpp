@@ -419,6 +419,7 @@ void Ship::controlMoveReplayComplete()
       mInterpolating = true;
 }
 
+
 void Ship::idle(GameObject::IdleCallPath path)
 {
    // don't process exploded ships
@@ -528,6 +529,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    if(mJustTeleported)
       mJustTeleported--;
 }
+
 
 // Returns true if we found a suitable target
 bool Ship::findRepairTargets()
@@ -1604,6 +1606,7 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
    method(LuaShip, getRad),
    method(LuaShip, getVel),
    method(LuaShip, getTeamIndx),
+   method(LuaShip, getPlayerInfo),
 
    method(LuaShip, isModActive),
    method(LuaShip, getEnergy),
@@ -1641,6 +1644,8 @@ S32 LuaShip::getFlagCount(lua_State *L) { return thisShip ? returnInt(L, thisShi
 
 
 S32 LuaShip::getTeamIndx(lua_State *L) { return returnInt(L, thisShip->getTeam() + 1); }
+
+S32 LuaShip::getPlayerInfo(lua_State *L) { return thisShip ? returnPlayerInfo(L, thisShip) : returnNil(L); }
 
 
 S32 LuaShip::isModActive(lua_State *L) {

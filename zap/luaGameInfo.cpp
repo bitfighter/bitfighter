@@ -115,7 +115,7 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
    TNLAssertV( gServerGame->getPlayerCount() == gServerGame->getGameType()->mClientList.size(), ("Mismatched player counts (%s v %s)!", 
                gServerGame->getPlayerCount(),   gServerGame->getGameType()->mClientList.size()) );
 
-   S32 pushed = 0;
+   S32 pushed = 0;     // Count of pushed objects
 
    lua_newtable(L);    // Create a table, with no slots pre-allocated for our data
 
@@ -123,6 +123,9 @@ S32 LuaGameInfo::getPlayers(lua_State *L)
    {
       ClientRef *clientRef = gServerGame->getGameType()->mClientList[i];
 
+      if(clientRef->getPlayerInfo()->isDefunct())     // Skip defunct players
+         continue;
+      
       clientRef->getPlayerInfo()->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);

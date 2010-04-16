@@ -63,7 +63,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Return nil rather than dummy value when method called on dead ship (e.g. in 012, ship:getLoc() returned 0,0 if ship was dead, now returns nil)</li>
 <li>Got rid of NexusFlagitem --> Now all flag are FlagItems, for all games</li>
 <li>getName() function now run first, so game will have bot's name before any real game logic gets run</li>
-<li>Created Player object with info about individual players/bots which you can get from GameInfo and TeamInfo objects</li>
+<li>Created Player object with info about individual players/bots which you can get from Ship, GameInfo, and TeamInfo objects</li>
 <li>Restructured the way bots are initialized so that all bots are loaded and getName()s are run before any main() functions are run</li>
 <li>Can now pass arguments to bots from level file using arg struct, just like with levelgens</li>
 <li>Robots now shown on scoreboard and in various menus where players are listed</li>

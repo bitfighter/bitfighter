@@ -1350,8 +1350,9 @@ Robot::~Robot()
          break;
       }
 
+   mPlayerInfo->setDefunct();
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
-   delete mPlayerInfo;
+   delete mPlayerInfo;     
 
    logprintf("Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }

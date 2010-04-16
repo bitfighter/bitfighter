@@ -50,6 +50,8 @@ namespace Zap
 
 class GameObject;
 class LuaPoint;
+class LuaPlayerInfo;
+class Ship;
 
 
 class LuaObject
@@ -83,6 +85,11 @@ public:
    static S32 returnString(lua_State *L, const char *str);
    static S32 returnBool(lua_State *L, bool boolean);
    static S32 returnNil(lua_State *L);
+
+   static S32 returnShip(lua_State *L, Ship *ship);                // Handles null references properly
+
+   static S32 returnPlayerInfo(lua_State *L, Ship *ship);
+   static S32 returnPlayerInfo(lua_State *L, LuaPlayerInfo *playerInfo);
 
    static void stackdump(lua_State* L);
    static void cleanupAndTerminate(lua_State *L);

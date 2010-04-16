@@ -29,6 +29,7 @@
 #include "gameNetInterface.h"
 #include "config.h"        // For gIniSettings support
 #include "IniFile.h"       // For CIniFile def
+#include "playerInfo.h"
 
 #include "UI.h"
 #include "UIEditor.h"
@@ -152,6 +153,7 @@ void GameConnection::setClientRef(ClientRef *theRef)
 }
 
 
+// See comment above about why mClientRef should never be NULL
 ClientRef *GameConnection::getClientRef()
 {
    return mClientRef;
@@ -1075,7 +1077,10 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    else     // Server
    {
       if(getClientRef() != NULL)    // ClientRef might be NULL if the server is quitting the game, in which case we don't need to fire these events anyway
+      {
+         getClientRef()->getPlayerInfo()->setDefunct();
          Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getClientRef()->getPlayerInfo());
+      }
 
       gServerGame->removeClient(this);
    }

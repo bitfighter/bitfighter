@@ -798,7 +798,7 @@ void EditorUserInterface::teamsHaveChanged()
       teamsChanged = true;
    else
       for(S32 i = 0; i < mTeams.size(); i++)
-         if(mTeams[i].color != mOldTeams[i].color || strcmp(mTeams[i].getName(), mOldTeams[i].getName()))
+         if(mTeams[i].color != mOldTeams[i].color || mTeams[i].getName() != mOldTeams[i].getName())
          {
             teamsChanged = true;
             break;
@@ -3632,7 +3632,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             s_fprintf(f, "%s\n", gGameParamUserInterface.gameParams[i].c_str());
 
       for(S32 i = 0; i < mTeams.size(); i++)
-         s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].getName(),
+         s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].getName().getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
       // Write out all maze items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)

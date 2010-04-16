@@ -690,7 +690,7 @@ void ServerGame::addClient(GameConnection *theConnection)
       mGameType->serverAddClient(theConnection);
    mPlayerCount++;
 
-   if(gDedicatedServer)
+   //if(
       SFXObject::play(SFXPlayerJoined, 1);
 }
 
@@ -700,7 +700,7 @@ void ServerGame::removeClient(GameConnection *theConnection)
    if(mGameType.isValid())
       mGameType->serverRemoveClient(theConnection);
    mPlayerCount--;
-   if(gDedicatedServer)
+   //if(gDedicatedServer)
       SFXObject::play(SFXPlayerLeft, 1);
 }
 
