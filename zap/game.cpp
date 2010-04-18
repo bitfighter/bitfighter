@@ -102,7 +102,7 @@ MasterServerConnection *Game::getConnectionToMaster()
 
 GameType *Game::getGameType()
 {
-   return mGameType;
+   return mGameType;    // This is a safePtr, so will never be NULL
 }
 
 
@@ -688,9 +688,10 @@ void ServerGame::addClient(GameConnection *theConnection)
 
    if(mGameType.isValid())
       mGameType->serverAddClient(theConnection);
+
    mPlayerCount++;
 
-   //if(
+   if(gDedicatedServer)
       SFXObject::play(SFXPlayerJoined, 1);
 }
 
@@ -700,7 +701,8 @@ void ServerGame::removeClient(GameConnection *theConnection)
    if(mGameType.isValid())
       mGameType->serverRemoveClient(theConnection);
    mPlayerCount--;
-   //if(gDedicatedServer)
+
+   if(gDedicatedServer)
       SFXObject::play(SFXPlayerLeft, 1);
 }
 

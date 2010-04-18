@@ -1399,7 +1399,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
 
-   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), false);          // Tell other clients about the new guy, who is never us...
+   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), false, true);          // Tell other clients about the new guy, who is never us...
    s2cClientJoinedTeam(cref->name, cref->getTeam());
 
    spawnShip(theClient);
@@ -1810,7 +1810,9 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
 }
 
 
-GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient, bool admin, bool isRobot), (name, isMyClient, admin, isRobot))
+GAMETYPE_RPC_S2C(GameType, s2cAddClient, 
+                (StringTableEntry name, bool isMyClient, bool admin, bool isRobot, bool playAlert), 
+                (name, isMyClient, admin, isRobot, playAlert))
 {
    ClientRef *cref = allocClientRef();
    cref->name = name;
@@ -1822,7 +1824,6 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
    cref->voiceSFX = new SFXObject(SFXVoice, NULL, 1, Point(), Point());
 
    mClientList.push_back(cref);
-   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());
 
    if(isMyClient)
    {
@@ -1836,8 +1837,16 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient, (StringTableEntry name, bool isMyClient
          if(g)
             g->c2sRequestScoreboardUpdates(true);
       }
+      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+   }
+   else
+   {
+      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
+      if(playAlert)
+         SFXObject::play(SFXPlayerJoined, 1);
    }
 }
+
 
 void GameType::serverRemoveClient(GameConnection *theClient)
 {
@@ -1875,6 +1884,7 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
       }
    }
    gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
+   SFXObject::play(SFXPlayerLeft, 1);
 }
 
 GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b), (teamName, r, g, b))
@@ -1901,11 +1911,19 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
 
 
 // Announce a new player has joined the team
-GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, (StringTableEntry name, RangedU32<0, GameType::gMaxTeams> teamIndex), (name, teamIndex))
+GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, 
+                (StringTableEntry name, RangedU32<0, GameType::gMaxTeams> teamIndex), 
+                (name, teamIndex))
 {
-   ClientRef *cl = findClientRef(name);
+   ClientRef *cl = findClientRef(name);      // Will be us, if we changed teams
    cl->setTeam((S32) teamIndex);
-   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex));
+
+   // The following works as long as everyone runs with a unique name.  Fails if two players have names that collide and have
+   // been corrected by the server.
+   if(gClientGame->getGameType()->mLocalClient && name == gClientGame->getGameType()->mLocalClient->name)      
+      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex));
+   else
+      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex));
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
@@ -1962,13 +1980,15 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    // Add all the client and team information
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      s2cAddClient(mClientList[i]->name, mClientList[i]->clientConnection == theConnection, mClientList[i]->clientConnection->isAdmin(), false);
+      bool localClient = mClientList[i]->clientConnection == theConnection;
+
+      s2cAddClient(mClientList[i]->name, localClient, mClientList[i]->clientConnection->isAdmin(), false, false);
       s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
    }
 
    for(S32 i = 0; i < Robot::robots.size(); i++)
    {
-      s2cAddClient(Robot::robots[i]->getName(), false, false, true);
+      s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
       s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
    }
 
@@ -1984,7 +2004,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    s2cSetGameOver(mGameOver);
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
 
-   NetObject::setRPCDestConnection(NULL);    // Set RPCs to go to all players
+   NetObject::setRPCDestConnection(NULL);             // Set RPCs to go to all players
 }
 
 

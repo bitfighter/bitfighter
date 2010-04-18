@@ -55,6 +55,10 @@ static SFXProfile sfxProfilesModern[] = {
  {  "phaser.wav",          true,  1.0f,  false, 0,   0 },      // SFXVoice -- "phaser.wav" is a dummy here
  {  "phaser.wav",          false, 0.45f, false, 150, 600 },    // SFXNone  -- as above
 
+ // Players joining/leaving noises -- aren't really relative, but true allows them to play properly...
+ {  "player_joined.wav",   true,  1.0f,  false, 150, 600 },
+ {  "player_left.wav",     true,  1.0f,  false, 150, 600 },
+
  // Weapon noises
  {  "phaser.wav",          false, 0.45f, false, 150, 600 },
  {  "tink.wav",            false, 0.9f,  false, 150, 600 },
@@ -101,15 +105,11 @@ static SFXProfile sfxProfilesModern[] = {
  {  "teleport_in.wav",     false, 1.0,   false, 200, 500 },
  {  "teleport_out.wav",    false, 1.0,   false, 200, 500 },
  {  "gofast.wav",          false, 1.0,   false, 200, 500 },    // Heard outside the ship
- {  "gofast.wav",          true, 1.0,   false, 200, 500 },     // Heard inside the ship
+ {  "gofast.wav",          true, 1.0,    false, 200, 500 },    // Heard inside the ship
 
  // Forcefield noises
  {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
  {  "forcefield_down.wav", false,  0.7f,  false, 150, 600 },
-
- // Players joining/leaving noises
- {  "player_joined.wav",   false,  1.0f,  false, 150, 600 },
- {  "player_left.wav",     false,  1.0f,  false, 150, 600 },
 
  // UI noises
  {  "boop.wav",            true,  0.4f,  false, 150, 600 },
@@ -127,6 +127,10 @@ static SFXProfile sfxProfilesClassic[] = {
  // Utility sounds
  {  "phaser.wav",          true,  1.0f,  false, 0,   0 },
  {  "phaser.wav",          false, 0.45f, false, 150, 600 },
+
+ // Players joining/leaving noises -- aren't really relative, but true allows them to play properly...
+ {  "player_joined.wav",   true,  1.0f,  false, 150, 600 },
+ {  "player_left.wav",     true,  1.0f,  false, 150, 600 },    
 
  // Weapon noises
  {  "phaser.wav",          false, 0.45f, false, 150, 600 },
@@ -180,10 +184,6 @@ static SFXProfile sfxProfilesClassic[] = {
  // Forcefield noises
  {  "forcefield_up.wav",   false,  0.7f,  false, 150, 600 },
  {  "forcefield_down.wav", false,  0.7f,  false, 150, 600 },
-
- // Players joining/leaving noises
- {  "player_joined.wav",   false,  1.0f,  false, 150, 600 },
- {  "player_left.wav",     false,  1.0f,  false, 150, 600 },
 
  // UI noises
  {  "boop.wav",            true,  0.4f,  false, 150, 600 },

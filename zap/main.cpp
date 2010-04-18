@@ -38,7 +38,7 @@ XXX need to document timers, new luavec stuff XXX
 <h4>Smaller changes</h4>
 <li>Added Restart Level to game options menu if you have level change permissions</li>
 <li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
-<li>Added asteroids to help screen, enhanced instruction colors</li>
+<li>Added asteroids, testItems, soccerball, and resourceItems to help screen, enhanced instruction colors</li>
 <li>Fixed several in-game crashing issues</li>
 <li>Minor efficiency improvements on rendering routines</li>
 <li>Retrieve games now allow non-team flags</li>
@@ -50,6 +50,7 @@ XXX need to document timers, new luavec stuff XXX
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
 <li>New sound when using GoFast</li>
+<li>New SFW when players join/quit game</li>
 
 <h4>Bots</h4>
 <li>Added enhanced timer class to Lua scripting</li>

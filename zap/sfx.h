@@ -26,9 +26,9 @@
 #ifndef _SFX_H_
 #define _SFX_H_
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlNetBase.h"
-#include "../tnl/tnlByteBuffer.h"
+#include "tnl.h"
+#include "tnlNetBase.h"
+#include "tnlByteBuffer.h"
 
 #include "point.h"
 
@@ -38,12 +38,15 @@ using namespace TNL;
 namespace Zap
 {
 
-   // Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
+// Must keep this aligned with sfxProfilesModern[] and sfxProfilesClassic[]
 enum SFXProfiles
 {
    // Utility sounds
    SFXVoice,
    SFXNone,
+
+   SFXPlayerJoined,
+   SFXPlayerLeft,
 
    // Weapon noises
    SFXPhaserProjectile,
@@ -98,9 +101,6 @@ enum SFXProfiles
    SFXForceFieldUp,
    SFXForceFieldDown,
 
-   SFXPlayerJoined,
-   SFXPlayerLeft,
-
    // UI noises
    SFXUIBoop,
    SFXUICommUp,
@@ -138,6 +138,7 @@ class SFXObject : public Object
    void playOnSource();
    void updateGain();
    void updateMovementParams();
+
 public:
    SFXObject(U32 profileIndex, ByteBufferPtr samples, F32 gain, Point position, Point velocity);
    ~SFXObject();
