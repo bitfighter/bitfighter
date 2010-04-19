@@ -189,7 +189,7 @@ void GameConnection::unsuspendGame()
    c2sSuspendGame(false);
 }
 
-
+// Client requests that the game be suspended while he waits for other players.  This runs on the server.
 TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    if(suspend)
@@ -198,10 +198,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
       gServerGame->unsuspendGame(true);
 }
 
-
+  
+// Here, the server has sent a message to a suspended client to wake up, action's coming in hot!
+// We'll also play the playerJoined sfx to alert local client that the game is on again.
 TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   gGameUserInterface.unsuspendGame();
+   gClientGame->unsuspendGame();       
+   SFXObject::play(SFXPlayerJoined, 1);
 }
 
 

@@ -1740,8 +1740,9 @@ void GameUserInterface::suspendGame()
 
 void GameUserInterface::unsuspendGame()
 {
-   gClientGame->unsuspendGame();
-   gClientGame->getConnectionToServer()->unsuspendGame();
+   gClientGame->unsuspendGame();                            // Unsuspend locally
+   gClientGame->getConnectionToServer()->unsuspendGame();   // Tell the client we're unsuspending
+   
 }
 
 

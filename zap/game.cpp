@@ -545,12 +545,12 @@ void ServerGame::suspendGame(GameConnection *requestor)
    cycleLevel(REPLAY_LEVEL);  // Restart current level to make setting traps more difficult
 }
 
-
+ 
 // Resume game after it is no longer suspended
 void ServerGame::unsuspendGame(bool remoteRequest)
 {
    mGameSuspended = false;
-   if(mSuspendor != NULL && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
+   if(mSuspendor && !remoteRequest)     // If the request is from remote server, don't need to alert that server!
       mSuspendor->s2cUnsuspend();
 
    mSuspendor = NULL;
@@ -720,7 +720,7 @@ void ServerGame::idle(U32 timeDelta)
    // This will prevent locally hosted game from immediately suspending for a frame.  A little hacky, but works!
    if(mPlayerCount == 0 && !mGameSuspended && mCurrentTime != 0)
       suspendGame();
-   else if( mGameSuspended && ((mPlayerCount > 0 && mSuspendor == NULL) || mPlayerCount > 1) )
+   else if( mGameSuspended && ((mPlayerCount > 0 && !mSuspendor) || mPlayerCount > 1) )
       unsuspendGame(false);
 
    mCurrentTime += timeDelta;

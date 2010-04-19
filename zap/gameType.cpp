@@ -1399,7 +1399,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
 
-   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), false, true);          // Tell other clients about the new guy, who is never us...
+   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), false, true);    // Tell other clients about the new guy, who is never us...
    s2cClientJoinedTeam(cref->name, cref->getTeam());
 
    spawnShip(theClient);
@@ -1919,6 +1919,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    cl->setTeam((S32) teamIndex);
 
    // The following works as long as everyone runs with a unique name.  Fails if two players have names that collide and have
+   // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
    // been corrected by the server.
    if(gClientGame->getGameType()->mLocalClient && name == gClientGame->getGameType()->mLocalClient->name)      
       gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex));
