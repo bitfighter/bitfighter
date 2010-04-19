@@ -1301,7 +1301,7 @@ void LevelMenuUserInterface::onActivate()
    dSprintf(menuTitle, sizeof(menuTitle), "CHOOSE LEVEL TYPE:");
 
    GameConnection *gc = gClientGame->getConnectionToServer();
-   if(!gc || !gc->mLevelTypes.size())
+   if(!gc || !gc->mLevelInfos.size())
       return;
 
    menuItems.clear();
@@ -1310,16 +1310,16 @@ void LevelMenuUserInterface::onActivate()
    menuItems.push_back( MenuItem(ALL_LEVELS, 9999, stringToKeyCode(c), KEY_UNKNOWN) );
 
    // Cycle through all levels, looking for unique type strings
-   for(S32 i = 0; i < gc->mLevelTypes.size(); i++)
+   for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
    {
       S32 j;
       for(j = 0; j < menuItems.size(); j++)
-         if( !strcmp(gc->mLevelNames[i].getString(), "") || !stricmp(gc->mLevelTypes[i].getString(), menuItems[j].mText) )      // Skip over levels with blank names
-            break;
+         if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), menuItems[j].mText) )     
+            break;                  // Skip over levels with blank names
       if(j == menuItems.size())     // Must be a new type
       {
-         strncpy(c, gc->mLevelTypes[i].getString(), 1);
-         menuItems.push_back(MenuItem(gc->mLevelTypes[i].getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
+         strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
+         menuItems.push_back(MenuItem(gc->mLevelInfos[i].levelType.getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
       }
    }
 
@@ -1335,7 +1335,7 @@ void LevelMenuUserInterface::processSelection(U32 index)        // Handler for u
    if(index == 9999)
       gLevelMenuSelectUserInterface.category  = ALL_LEVELS;
    else
-      gLevelMenuSelectUserInterface.category = gc->mLevelTypes[index].getString();
+      gLevelMenuSelectUserInterface.category = gc->mLevelInfos[index].levelType.getString();
 
    gLevelMenuSelectUserInterface.activate();
 }
@@ -1365,18 +1365,18 @@ void LevelMenuSelectUserInterface::onActivate()
    dSprintf(menuTitle, sizeof(menuTitle), "CHOOSE LEVEL: [%s]", category.c_str());
 
    GameConnection *gc = gClientGame->getConnectionToServer();
-   if(!gc || !gc->mLevelTypes.size())
+   if(!gc || !gc->mLevelInfos.size())
       return;
 
    menuItems.clear();
 
    char c[] = "A";
-   for(S32 i = 0; i < gc->mLevelTypes.size(); i++)
-      if(strcmp(gc->mLevelNames[i].getString(), ""))                       // Skip levels with blank names --> but all should have names now!
-         if(!strcmp( gc->mLevelTypes[i].getString(), category.c_str() ) || !strcmp(category.c_str(), ALL_LEVELS) )
+   for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
+      if(gc->mLevelInfos[i].levelName == "")             // Skip levels with blank names --> but all should have names now!
+         if(!strcmp( gc->mLevelInfos[i].levelType.getString(), category.c_str() ) || !strcmp(category.c_str(), ALL_LEVELS) )
          {
-            strncpy(c, gc->mLevelNames[i].getString(), 1);
-            menuItems.push_back(MenuItem(gc->mLevelNames[i].getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
+            strncpy(c, gc->mLevelInfos[i].levelName.getString(), 1);
+            menuItems.push_back(MenuItem(gc->mLevelInfos[i].levelName.getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
          }
 
    menuItems.sort(menuItemValueSort);

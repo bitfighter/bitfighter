@@ -53,7 +53,9 @@ static const char USED_EXTERNAL *gConnectStatesTable[] = {
       ""
 };
 
+
 class ClientRef;
+struct LevelInfo;
 
 class GameConnection: public ControlObjectConnection
 {
@@ -82,8 +84,7 @@ private:
    void linkToClientList();
 
 public:
-   Vector<StringTableEntry> mLevelNames;
-   Vector<StringTableEntry> mLevelTypes;
+   Vector<LevelInfo> mLevelInfos;
 
    enum MessageColors
    {

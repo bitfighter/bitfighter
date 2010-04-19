@@ -711,8 +711,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageBox, (StringTableEntry title,
 TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTableEntry type), (name, type),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   mLevelNames.push_back(name);
-   mLevelTypes.push_back(type);
+   mLevelInfos.push_back(LevelInfo(name, type));
 }
 
 

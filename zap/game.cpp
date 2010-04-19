@@ -269,7 +269,7 @@ ServerGame::~ServerGame()
 
 S32 ServerGame::getLevelNameCount()
 {
-   return mLevelNames.size();
+   return mLevelInfos.size();
 }
 
 
@@ -301,7 +301,7 @@ string ServerGame::getLastLevelLoadName()
    if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
       return "";
    else
-      return mLevelNames.last().getString();
+      return mLevelInfos.last().levelName.getString();
 }
 
 
@@ -356,11 +356,7 @@ void ServerGame::loadNextLevel()
          StringTableEntry type(getGameType()->getGameTypeString());
 
          // Save some key level parameters
-         mLevelNames.push_back(name);
-         mLevelTypes.push_back(type);
-
-         mMinRecPlayers.push_back(getGameType()->minRecPlayers);
-         mMaxRecPlayers.push_back(getGameType()->maxRecPlayers);
+         mLevelInfos.push_back(LevelInfo(name, type, getGameType()->minRecPlayers, getGameType()->maxRecPlayers));
 
          // We got what we need, so get rid of this level.  Delete any objects that may exist
          while(mGameObjects.size())    // Don't just to a .clear() because we want to make sure destructors run and memory gets cleared.
@@ -392,17 +388,17 @@ void ServerGame::loadNextLevel()
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
 {
-   if(indx < 0 || indx >= mLevelNames.size())
+   if(indx < 0 || indx >= mLevelInfos.size())
       return StringTableEntry();
    else
-      return StringTableEntry( mLevelNames[indx].getString() );
+      return StringTableEntry( mLevelInfos[indx].levelName.getString() );
 }
 
 
 // Get the filename the level is saved under
 string ServerGame::getLevelFileNameFromIndex(S32 indx)
 {
-   if(indx < 0 || indx >= mLevelList.size())
+   if(indx < 0 || indx >= mLevelInfos.size())
       return "";
    else
       return getLevelFileName(mLevelList[indx].getString());
@@ -432,14 +428,14 @@ StringTableEntry ServerGame::getCurrentLevelFileName()
 // Return name of level currently in play
 StringTableEntry ServerGame::getCurrentLevelName()
 {
-   return mLevelNames[mCurrentLevelIndex];
+   return mLevelInfos[mCurrentLevelIndex].levelName;
 }
 
 
 // Return type of level currently in play
 StringTableEntry ServerGame::getCurrentLevelType()
 {
-   return mLevelTypes[mCurrentLevelIndex];
+   return mLevelInfos[mCurrentLevelIndex].levelType;
 }
 
 
@@ -680,7 +676,7 @@ void ServerGame::addClient(GameConnection *theConnection)
 {
    // Send our list of levels and their types to the connecting client
    for(S32 i = 0; i < mLevelList.size();i++)
-      theConnection->s2cAddLevel(mLevelNames[i], mLevelTypes[i]);
+      theConnection->s2cAddLevel(mLevelInfos[i].levelName, mLevelInfos[i].levelType);
 
    // If we're shutting down, display a notice to the user
    if(mShuttingDown)
@@ -765,7 +761,7 @@ void ServerGame::idle(U32 timeDelta)
    {
       // Normalize ratings for this game
       getGameType()->updateRatings();
-      cycleLevel();
+      cycleLevel(NEXT_LEVEL);
    }
    // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))

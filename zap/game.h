@@ -185,6 +185,26 @@ public:
    S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+struct LevelInfo
+{
+public:
+   StringTableEntry levelName;      // Level "in-game" names
+   StringTableEntry levelType;
+   S32 minRecPlayers;               // Min recommended number of players for this level
+   S32 maxRecPlayers;               // Max recommended number of players for this level
+
+   // Quickie constructor
+   LevelInfo(StringTableEntry name = "", StringTableEntry type = "", S32 minPlayers = -1, S32 maxPlayers = -1)
+   {
+      levelName = name;  levelType = type;  minRecPlayers = minPlayers;  maxRecPlayers = maxPlayers; 
+   }
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class ClientRef;
 
@@ -204,10 +224,7 @@ private:
 
    // Info about levels
    Vector<StringTableEntry> mLevelList;   // Level file names
-   Vector<StringTableEntry> mLevelNames;  // Level "in-game" names
-   Vector<StringTableEntry> mLevelTypes;  
-   Vector<S32> mMinRecPlayers;            // Recommended min number of players for this level
-   Vector<S32> mMaxRecPlayers;            // Recommended max number of players for this level
+   Vector<LevelInfo> mLevelInfos;         // Info about the level
 
    U32 mCurrentLevelIndex;                // Index of level currently being played
    Timer mLevelSwitchTimer;               // Track how long after game has ended before we actually switch levels
@@ -282,6 +299,9 @@ public:
    GameConnection *getSuspendor() { return mSuspendor; }
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class Ship;
 
 class ClientGame : public Game
@@ -333,6 +353,8 @@ public:
    void unsuspendGame() { mGameSuspended = false; }
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
