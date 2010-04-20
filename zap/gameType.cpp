@@ -999,21 +999,17 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min players for this map
    {
       if (argc > 1)
-         minRecPlayers = max(min(atoi(argv[1]), gMaxPlayers), 0);
-      else
-         minRecPlayers = 0;
+         minRecPlayers = atoi(argv[1]);
    }
    else if(!stricmp(argv[0], "MaxPlayers"))     // Recommend a max players for this map
    {
       if (argc > 1)
-         maxRecPlayers = max(min(atoi(argv[1]), gMaxPlayers), 0);
-      else
-         maxRecPlayers = 0;
+         maxRecPlayers = atoi(argv[1]);
    }
    else
-      return false;
+      return false;     // Line not processed
 
-   return true;
+   return true;         // Line processed
 }
 
 

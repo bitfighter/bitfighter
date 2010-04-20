@@ -1344,7 +1344,7 @@ void GameUserInterface::processCommand(Vector<string> &words)
          return;
       }
 
-      gc->c2sRequestLevelChange(1, true);
+      gc->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
    }
 
    else if(words[0] == "prev")      // Go to previous level
@@ -1355,7 +1355,7 @@ void GameUserInterface::processCommand(Vector<string> &words)
          return;
       }
 
-      gc->c2sRequestLevelChange(-1, true);
+      gc->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
    }
 
    else if(words[0] == "restart")      // Restart current level
@@ -1366,7 +1366,7 @@ void GameUserInterface::processCommand(Vector<string> &words)
          return;
       }
 
-      gc->c2sRequestLevelChange(-2, false);
+      gc->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
    }
    else if(words[0] == "shutdown")
    {

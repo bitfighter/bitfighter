@@ -381,13 +381,30 @@ void ServerGame::loadNextLevel()
 }
 
 
+S32 ServerGame::getAbsoluteLevelIndex(S32 indx)
+{
+   if(indx == NEXT_LEVEL)
+      return (mCurrentLevelIndex + 1) % mLevelInfos.size();
+
+   else if(indx == PREVIOUS_LEVEL)
+   {
+      indx = mCurrentLevelIndex - 1;
+      return (indx >= 0) ? indx : mLevelInfos.size() - 1;
+   }
+
+   else if(indx == REPLAY_LEVEL)
+      return mCurrentLevelIndex;
+
+   else if(indx < 0 || indx >= mLevelInfos.size())    // Out of bounds index specified
+      return 0;
+
+   return indx;
+}
+
 // Get the level name, as defined in the level file
 StringTableEntry ServerGame::getLevelNameFromIndex(S32 indx)
 {
-   if(indx < 0 || indx >= mLevelInfos.size())
-      return StringTableEntry();
-   else
-      return StringTableEntry( mLevelInfos[indx].levelName.getString() );
+   return StringTableEntry( mLevelInfos[getAbsoluteLevelIndex(indx)].levelName.getString() );
 }
 
 
@@ -474,15 +491,57 @@ void ServerGame::cycleLevel(S32 nextLevel)
       walk->resetGhosting();
 
    if(nextLevel >= FIRST_LEVEL)          // Go to specified level
-      mCurrentLevelIndex = nextLevel;
+      mCurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
+
    else if(nextLevel == NEXT_LEVEL)      // Next level
-      mCurrentLevelIndex++;
-   else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
-      mCurrentLevelIndex += 0;
+   {
+      S32 players = mPlayerCount;
+      
+      // If game is supended, then we are waiting for another player to join.  That means that (probably)
+      // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
+      if(mGameSuspended)
+         players++;
 
+      bool first = true;
+      bool found = false;
 
-   if(S32(mCurrentLevelIndex) >= mLevelInfos.size())
-      mCurrentLevelIndex = FIRST_LEVEL;
+      mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();
+      S32 currLevel = mCurrentLevelIndex;
+
+      // Cycle through the levels looking for one that matches our player counts
+      while(mCurrentLevelIndex != currLevel && !first)
+      {
+         S32 minPlayers = mLevelInfos[mCurrentLevelIndex].minRecPlayers;
+         S32 maxPlayers = mLevelInfos[mCurrentLevelIndex].maxRecPlayers;
+
+         if(maxPlayers == 0)        // i.e. limit doesn't apply (note if limit doesn't apply on the minPlayers, then 
+            maxPlayers = S32_MAX;   // it works out because the smallest number of players is 1).
+
+         if(players >= minPlayers && players <= maxPlayers)
+         {
+            found = true;
+            break;
+         }
+
+         // else advance to the next candidate
+         mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();      
+         first = false;
+      }
+
+      // We didn't find a suitable level... just proceed to the next one
+      if(!found)
+      {
+         mCurrentLevelIndex++;
+         if(S32(mCurrentLevelIndex) >= mLevelInfos.size())
+            mCurrentLevelIndex = FIRST_LEVEL;
+      }
+   } 
+   else if(nextLevel == PREVIOUS_LEVEL)
+      mCurrentLevelIndex = mCurrentLevelIndex > 0 ? mCurrentLevelIndex - 1 : mLevelInfos.size() - 1;
+
+   //else if(nextLevel == REPLAY_LEVEL)    // Replay level, do nothing
+   //   mCurrentLevelIndex += 0;
+
 
    gBotNavMeshZones.clear();
 

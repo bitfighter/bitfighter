@@ -199,7 +199,7 @@ public:
 
    // Quickie constructor
    LevelInfo(StringTableEntry levelFile = "", StringTableEntry name = "", StringTableEntry type = "", 
-             S32 minPlayers = -1, S32 maxPlayers = -1)
+             S32 minPlayers = 0, S32 maxPlayers = 0)
    {
       levelFileName = levelFile; setInfo(name, type, minPlayers, maxPlayers);
    }
@@ -253,6 +253,7 @@ public:
 
    static const S32 NEXT_LEVEL = -1;
    static const S32 REPLAY_LEVEL = -2;
+   static const S32 PREVIOUS_LEVEL = -3;
    static const S32 FIRST_LEVEL = 0;
 
    U32 getPlayerCount() { return mPlayerCount; }
@@ -281,6 +282,7 @@ public:
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
    string getLevelFileName(string base);     // Handles prepending subfolder, if needed
    StringTableEntry getLevelNameFromIndex(S32 indx);
+   S32 getAbsoluteLevelIndex(S32 indx);      // Figures out the level index if the input is a relative index
    string getLevelFileNameFromIndex(S32 indx);
 
    StringTableEntry getCurrentLevelFileName();  // Return filename of level currently in play  

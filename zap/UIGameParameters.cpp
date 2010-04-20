@@ -68,6 +68,7 @@ extern S32 gMaxPlayers;
 
 static S32 NumberOfPreGameSpecificParams;
 
+#define MIN_PLAYERS_INDEX (mGameSpecificParams + NumberOfPreGameSpecificParams + 1)
 
 void GameParamUserInterface::updateMenuItems(const char *gt)
 {
@@ -128,8 +129,8 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       menuItems.push_back(MenuItem2(params[i].name,  "", params[i].value,  params[i].minval, params[i].maxval,   params[i].units,    params[i].help,   TypeInt,   KEY_UNKNOWN, KEY_UNKNOWN ));
 
    menuItems.push_back(MenuItem2("Grid Size:",       "", Game::DefaultGridSize, Game::minGridSize, Game::maxGridSize, "pixels",   "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255.",      TypeInt,   KEY_S, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Min Players:",     "", 0,                                      1,      gMaxPlayers, "players",  "Min. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Max Players:",     "", 0,                                      1,      gMaxPlayers, "players",  "Max. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Min Players:",     "", 0,                                      0,      gMaxPlayers, "players",  "Min. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
+   menuItems.push_back(MenuItem2("Max Players:",     "", 0,                                      0,      gMaxPlayers, "players",  "Max. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
    menuItems.push_back(MenuItem2("RETURN TO EDITOR", "", 0,                                      0,                0, "",         "",                                                                                     TypeNone,  KEY_Q, KEY_R       ));
    mQuitItemIndex = i + 9;
 
@@ -159,9 +160,9 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          else if(token == "GridSize")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), static_cast<int>(Game::maxGridSize)), static_cast<int>(Game::minGridSize));
          else if(token == "MinPlayers")
-            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            menuItems[MIN_PLAYERS_INDEX].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
          else if(token == "MaxPlayers")
-            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 2].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            menuItems[MIN_PLAYERS_INDEX + 1].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
       }
 
       // And apply our GameType arguments to the game specific parameter settings, if any were provided in a level file we loaded
@@ -207,10 +208,8 @@ void GameParamUserInterface::render()
    drawCenteredString(vertMargin, 30, menuTitle);
    drawCenteredString(vertMargin + 35, 18, menuSubTitle);
 
-
    glColor3f(1, 1, 1);
    drawCenteredString(canvasHeight - vertMargin - 20, 18, "UP, DOWN to choose | ESC exits menu");
-
 
    for(S32 i = 0; i < menuItems.size(); i++)
    {
@@ -218,10 +217,10 @@ void GameParamUserInterface::render()
 
       if(selectedIndex == i)           // Highlight selected item
       {
-         for(S32 i = 1; i >= 0; i--)
+         for(S32 j = 1; j >= 0; j--)
          {
-            glColor(i ? Color(0,0,0.4) : Color(0, 0, 1));      // Fill : outline
-            glBegin(i ? GL_POLYGON : GL_LINES);
+            glColor(j ? Color(0,0,0.4) : Color(0, 0, 1));      // Fill : outline
+            glBegin(j ? GL_POLYGON : GL_LINES);
                glVertex2f(0, y - 2);
                glVertex2f(canvasWidth, y - 2);
                glVertex2f(canvasWidth, y + fontSize + 8);
@@ -229,7 +228,6 @@ void GameParamUserInterface::render()
             glEnd();
          }
       }
-
 
       S32 titleWidth = getStringWidth(fontSize, menuItems[i].mTitle);
       S32 space = getStringWidth(fontSize, " ");
@@ -241,6 +239,14 @@ void GameParamUserInterface::render()
 
       bool needsCursor =  menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
                                                                       menuItems[i].mValType == TypeFileName;
+
+      // Hande special cases
+      if((i == MIN_PLAYERS_INDEX || i == MIN_PLAYERS_INDEX + 1) && menuItems[i].mValI == menuItems[i].mMinVal)
+      {
+         isStringLike = true;
+         dispString = "N/A";
+      }
+
       S32 xpos;
 
       if(isStringLike)
@@ -278,6 +284,7 @@ void GameParamUserInterface::render()
 
    drawCenteredString(ypos, fontSize, menuItems[selectedIndex].mHelp);
 }
+
 
 // Run this as we're exiting the menu
 void GameParamUserInterface::onEscape()
@@ -327,9 +334,9 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back("Script " + menuItems[5].mLineEditor.getString());
    dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI);
    gameParams.push_back(str);
-   dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 1].mValI);
+   dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[MIN_PLAYERS_INDEX].mValI);
    gameParams.push_back(str);
-   dSprintf(str, sizeof(str), "MaxPlayers %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams + 2].mValI);
+   dSprintf(str, sizeof(str), "MaxPlayers %d", menuItems[MIN_PLAYERS_INDEX + 1].mValI);
    gameParams.push_back(str);
 }
 
@@ -350,6 +357,7 @@ bool GameParamUserInterface::didAnythingGetChanged()
 
 void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   logprintf("Selected index: %d",selectedIndex);
    if(selectedIndex != -1 && isEditableString(menuItems[selectedIndex]) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))
       menuItems[selectedIndex].mLineEditor.handleBackspace(keyCode);
 
@@ -382,7 +390,12 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_RIGHT  || keyCode == MOUSE_LEFT))   // Inc. by mMinVal, use shift to go faster!
    {
-      S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
+      // Special case:
+      S32 min = menuItems[selectedIndex].mMinVal;
+      if(selectedIndex == MIN_PLAYERS_INDEX || selectedIndex == MIN_PLAYERS_INDEX + 1)
+         min = 1;
+
+      S32 inc = getKeyState(KEY_SHIFT) ? min * 10 : min;
 
       if(menuItems[selectedIndex].mValI + inc <= menuItems[selectedIndex].mMaxVal)
          menuItems[selectedIndex].mValI += inc;
@@ -391,7 +404,12 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT))    // Dec. by mMinVal, use shift to go faster!
    {
-      S32 inc = getKeyState(KEY_SHIFT) ? menuItems[selectedIndex].mMinVal * 10 : menuItems[selectedIndex].mMinVal;
+      // Special case:
+      S32 min = menuItems[selectedIndex].mMinVal;
+      if(selectedIndex == MIN_PLAYERS_INDEX || selectedIndex == MIN_PLAYERS_INDEX + 1)
+         min = 1;
+
+      S32 inc = getKeyState(KEY_SHIFT) ? min * 10 : min;
 
       if(menuItems[selectedIndex].mValI - inc >= menuItems[selectedIndex].mMinVal)
          menuItems[selectedIndex].mValI -= inc;
@@ -462,6 +480,8 @@ void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
    if(selectedIndex < 0)
       selectedIndex = 0;
 }
+
+#undef MIN_PLAYERS_INDEX
 
 };
 
