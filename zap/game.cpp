@@ -240,6 +240,8 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
    mHostDescr = gHostDescr;
    mShuttingDown = false;
 
+   hostingModePhase = ServerGame::NotHosting;
+
    mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
    mCurrentLevelIndex = 0;
 
@@ -286,7 +288,10 @@ extern CmdLineSettings gCmdLineSettings;
 // This gets called when you first host a game
 void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
 {
-   mLevelList = levelList;
+   mLevelInfos.clear();
+
+   for(S32 i = 0; i < levelList.size(); i++)
+      mLevelInfos.push_back(LevelInfo(levelList[i]));
 }
 
 
@@ -301,7 +306,7 @@ string ServerGame::getLastLevelLoadName()
    if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
       return "";
    else
-      return mLevelInfos.last().levelName.getString();
+      return mLevelInfos[mLevelLoadIndex - 1].levelName.getString();
 }
 
 
@@ -328,35 +333,31 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who)
    }
    else
       s_logprintf("Server shutdown canceled.", time, mShutdownOriginator->getClientName().getString());
-
 }
 
-
-enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      // TODO: Should NOT be duplicated!! (def appears elsewhere)
-extern HostingModePhases gHostingModePhase;
 
 void ServerGame::loadNextLevel()
 {
    // Here we cycle through all the levels, reading them in, and grabbing their names for the level list
    // Seems kind of wasteful...  could we quit after we found the name? (probably not easily, and we get the benefit of learning early on which levels are b0rked)
    // How about storing them in memory for rapid recall? People sometimes load hundreds of levels, so it's probably not feasible.
-   if(mLevelLoadIndex < mLevelList.size())
+   if(mLevelLoadIndex < mLevelInfos.size())
    {
-      string levelName = getLevelFileName(mLevelList[mLevelLoadIndex].getString());
+      string levelName = getLevelFileName(mLevelInfos[mLevelLoadIndex].levelFileName.getString());
 
       if(loadLevel(levelName))    // loadLevel returns true if the load was successful
       {
          string lname = trim(getGameType()->mLevelName.getString());
          StringTableEntry name;
          if(lname == "")
-            name = mLevelList[mLevelLoadIndex];      // Use filename if level name is blank
+            name = mLevelInfos[mLevelLoadIndex].levelFileName;      // Use filename if level name is blank
          else
             name = lname.c_str();
 
          StringTableEntry type(getGameType()->getGameTypeString());
 
          // Save some key level parameters
-         mLevelInfos.push_back(LevelInfo(name, type, getGameType()->minRecPlayers, getGameType()->maxRecPlayers));
+         mLevelInfos[mLevelLoadIndex].setInfo(name, type, getGameType()->minRecPlayers, getGameType()->maxRecPlayers);
 
          // We got what we need, so get rid of this level.  Delete any objects that may exist
          while(mGameObjects.size())    // Don't just to a .clear() because we want to make sure destructors run and memory gets cleared.
@@ -364,24 +365,19 @@ void ServerGame::loadNextLevel()
 
          mScopeAlwaysList.clear();
 
-         // If we're loading lots of levels, try not to kill the computer!
-         // Sleep now handled by idle loop
-         //if(mLevelList.size() > 10)
-         //   Platform::sleep(1);
-
          logprintf ("Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
       }
       else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list.
       {
          logprintf("Could not load level %s.  Skipping...", levelName.c_str());
-         mLevelList.erase(mLevelLoadIndex);
+         mLevelInfos.erase(mLevelLoadIndex);
          mLevelLoadIndex--;
       }
       mLevelLoadIndex++;
    }
 
-   if(mLevelLoadIndex == mLevelList.size())
-      gHostingModePhase = DoneLoadingLevels;
+   if(mLevelLoadIndex == mLevelInfos.size())
+      ServerGame::hostingModePhase = DoneLoadingLevels;
 }
 
 
@@ -401,7 +397,7 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
    if(indx < 0 || indx >= mLevelInfos.size())
       return "";
    else
-      return getLevelFileName(mLevelList[indx].getString());
+      return getLevelFileName(mLevelInfos[indx].levelFileName.getString());
 }
 
 
@@ -421,7 +417,7 @@ string ServerGame::getLevelFileName(string base)
 // Return filename of level currently in play
 StringTableEntry ServerGame::getCurrentLevelFileName()
 {
-   return mLevelList[mCurrentLevelIndex];
+   return mLevelInfos[mCurrentLevelIndex].levelFileName;
 }
 
 
@@ -485,7 +481,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       mCurrentLevelIndex += 0;
 
 
-   if(S32(mCurrentLevelIndex) >= mLevelList.size())
+   if(S32(mCurrentLevelIndex) >= mLevelInfos.size())
       mCurrentLevelIndex = FIRST_LEVEL;
 
    gBotNavMeshZones.clear();
@@ -675,7 +671,7 @@ extern bool gDedicatedServer;
 void ServerGame::addClient(GameConnection *theConnection)
 {
    // Send our list of levels and their types to the connecting client
-   for(S32 i = 0; i < mLevelList.size();i++)
+   for(S32 i = 0; i < mLevelInfos.size();i++)
       theConnection->s2cAddLevel(mLevelInfos[i].levelName, mLevelInfos[i].levelType);
 
    // If we're shutting down, display a notice to the user

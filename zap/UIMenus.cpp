@@ -380,9 +380,6 @@ void MenuUserInterface::processMouse()
    }
 }
 
-enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
-extern HostingModePhases gHostingModePhase;
-
 
 // All key handling now under one roof!
 void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
@@ -395,11 +392,12 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    mKeyDown = true;
 
    // Handle special case of keystrokes during hosting preparation phases
-   if(gHostingModePhase == LoadingLevels || gHostingModePhase == DoneLoadingLevels) 
+   if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
+                      gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
    {
       if(keyCode == KEY_ESCAPE)
       {
-         gHostingModePhase = NotHosting;
+         gServerGame->hostingModePhase = ServerGame::NotHosting;
          gMainMenuUserInterface.clearLevelLoadDisplay();
          endGame();
       }
@@ -599,7 +597,8 @@ void MainMenuUserInterface::render()
 {
    // If we're in LoadingLevels mode, show the progress panel...
    renderProgressListItems();
-   if(gHostingModePhase == LoadingLevels || gHostingModePhase == DoneLoadingLevels)
+   if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
+                      gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
    {
       // There will be exactly one new entry every time we get here!
       addProgressListItem("Loaded level " + gServerGame->getLastLevelLoadName() + "...");

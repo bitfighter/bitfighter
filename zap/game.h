@@ -191,13 +191,20 @@ public:
 struct LevelInfo
 {
 public:
+   StringTableEntry levelFileName;  // File level is stored in
    StringTableEntry levelName;      // Level "in-game" names
-   StringTableEntry levelType;
+   StringTableEntry levelType;      
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
 
    // Quickie constructor
-   LevelInfo(StringTableEntry name = "", StringTableEntry type = "", S32 minPlayers = -1, S32 maxPlayers = -1)
+   LevelInfo(StringTableEntry levelFile = "", StringTableEntry name = "", StringTableEntry type = "", 
+             S32 minPlayers = -1, S32 maxPlayers = -1)
+   {
+      levelFileName = levelFile; setInfo(name, type, minPlayers, maxPlayers);
+   }
+
+   void setInfo(StringTableEntry name, StringTableEntry type, S32 minPlayers, S32 maxPlayers)
    {
       levelName = name;  levelType = type;  minRecPlayers = minPlayers;  maxRecPlayers = maxPlayers; 
    }
@@ -223,7 +230,6 @@ private:
    string mHostDescr;
 
    // Info about levels
-   Vector<StringTableEntry> mLevelList;   // Level file names
    Vector<LevelInfo> mLevelInfos;         // Info about the level
 
    U32 mCurrentLevelIndex;                // Index of level currently being played
@@ -242,6 +248,8 @@ private:
 public:
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
    ~ServerGame();   // Destructor
+
+   enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      
 
    static const S32 NEXT_LEVEL = -1;
    static const S32 REPLAY_LEVEL = -2;
@@ -284,11 +292,10 @@ public:
    void idle(U32 timeDelta);
    void gameEnded();
 
-
    S32 getLevelNameCount();
    S32 getRobotCount();
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
-   S32 getLevelCount() { return mLevelList.size(); }
+   S32 getLevelCount() { return mLevelInfos.size(); }
    bool isTestServer() { return mTestMode; }
 
    void suspendGame();
@@ -297,6 +304,8 @@ public:
 
    void suspenderLeftGame() { mSuspendor = NULL; }
    GameConnection *getSuspendor() { return mSuspendor; }
+
+   HostingModePhases hostingModePhase;
 };
 
 ////////////////////////////////////////

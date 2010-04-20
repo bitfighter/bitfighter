@@ -268,9 +268,6 @@ void setMousePos(S32 x, S32 y)
    gMousePos.y = y;
 }
 
-enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };
-HostingModePhases gHostingModePhase;
-
 Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;    // Our main journaling object
@@ -611,13 +608,14 @@ void initHostGame(Address bindAddress, bool testMode)
       return;
    }
 
-  gHostingModePhase = LoadingLevels;      // Do this even if there are no levels, so hostGame error handling will be triggered
+  // Do this even if there are no levels, so hostGame error handling will be triggered
+  gServerGame->hostingModePhase = ServerGame::LoadingLevels;  
 }
 
 
 void hostGame()
 {
-   gHostingModePhase = Hosting;
+   gServerGame->hostingModePhase = ServerGame::Hosting;
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
       s_logprintf("\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
@@ -646,10 +644,13 @@ void hostGame()
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
 {
-   if(gHostingModePhase == LoadingLevels)
-      gServerGame->loadNextLevel();
-   else if(gHostingModePhase == DoneLoadingLevels)
-      hostGame();
+   if(gServerGame)
+   {
+      if(gServerGame->hostingModePhase == ServerGame::LoadingLevels)
+         gServerGame->loadNextLevel();
+      else if(gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels)
+         hostGame();
+   }
 
    checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
    static S64 lastTimer = Platform::getHighPrecisionTimerValue();
@@ -725,7 +726,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
    if(UserInterface::current)
       UserInterface::current->idle(integerTime);
 
-   if(gHostingModePhase != LoadingLevels)    // Don't idle games during level load
+   if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
    {
       if(gClientGame)
          gClientGame->idle(integerTime);
@@ -1593,8 +1594,6 @@ int main(int argc, char **argv)
 
 
    gZapJournal.processNextJournalEntry();    // If we're replaying a journal, this will cause the cmd line params to be read from the saved journal
-
-   gHostingModePhase = NotHosting;
 
    loadSettingsFromINI();                    // Read INI
 
