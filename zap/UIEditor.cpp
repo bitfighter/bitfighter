@@ -2392,8 +2392,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       // Gross struct avoids extra construction
       WorldItem item =
          (itemDef[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
-         // For polygon items, try to match proportions of the dock rendering.  Size will vary by map scale.
-         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .68, .35) :
+         // For polygon items, try to match proportions of the dock rendering while ensuring all corners snap.  
+         // Actual size will, of course, vary by map scale.
+         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .7, .4) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, 1, 0);
 
