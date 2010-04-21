@@ -82,6 +82,7 @@ private:
    SafePtr<Ship> mLastPlayerTouch;
    S32 mLastPlayerTouchTeam;
    StringTableEntry mLastPlayerTouchName;
+   F32 mDragFactor;
 
 public:
    SoccerBallItem(Point pos = Point());   // C++ constructor

@@ -438,12 +438,40 @@ void QueryServersUserInterface::addHiddenServer(Address addr, U32 time)
 }
 
 
+#define MOUSE_IN_HEADER_ROW mousePos.y >= COLUMNS_TOP && mousePos.y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1
+#define chatHeight (mShowChat ? 285 : 0)     // Height of chat block overall
+#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 1))
+#define FIRST_SERVER (mPage * serversToShow)
+#define mLastServer (min(servers.size() - 1, (mPage + 1) * serversToShow - 1))
+
+
+extern Point gMousePos;
+
 S32 QueryServersUserInterface::getSelectedIndex()
 {
-   for(S32 i = 0; i < servers.size(); i++)
-      if(servers[i].id == selectedId)
-         return i;
-   return -1;
+   if(servers.size() == 0)       // When no servers, return dummy value
+      return -1;
+
+   if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
+   {
+      Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
+      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + FIRST_SERVER - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
+
+      // Bounds checking
+      if(indx < 0)
+         indx = 0;
+      else if(indx >= servers.size())
+         indx = servers.size() - 1;
+      
+      return indx;
+   }
+   else
+   {
+      for(S32 i = 0; i < servers.size(); i++)
+         if(servers[i].id == selectedId)
+            return i;
+      return -1;                 // Can't find selected server; return dummy
+   }
 }
 
 
@@ -484,13 +512,8 @@ static void renderLockIcon()
    glEnd();
 }
 
-extern Color gMasterServerBlue;
 
-#define MOUSE_IN_HEADER_ROW mousePos.y >= COLUMNS_TOP && mousePos.y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1
-#define chatHeight (mShowChat ? 285 : 0)     // Height of chat block overall
-#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 1))
-#define mFirstServer (mPage * serversToShow)
-#define mLastServer (min(servers.size() - 1, (mPage + 1) * serversToShow - 1))
+extern Color gMasterServerBlue;
 
 void QueryServersUserInterface::render()
 {
@@ -558,11 +581,17 @@ void QueryServersUserInterface::render()
    if(servers.size())      // There are servers to display...
    {
       // Find the selected server (it may have moved due to sort or new/removed servers)
-      S32 selectedIndex = max(getSelectedIndex(), 0);
+      S32 selectedIndex = getSelectedIndex();
+      if(selectedIndex < 0 && servers.size() >= 0)
+      {
+         selectedId = servers[0].id;
+         selectedIndex = 0;
+      }
+
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
-      U32 y = ITEMS_TOP + (selectedIndex - mFirstServer - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + (SERVER_ENTRY_TEXTSIZE - 12);
+      U32 y = ITEMS_TOP + (selectedIndex - FIRST_SERVER - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + (SERVER_ENTRY_TEXTSIZE - 12);
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
       for(S32 i = 1; i >= 0; i--)
@@ -580,9 +609,9 @@ void QueryServersUserInterface::render()
          glEnd();
       }
 
-      for(S32 i = mFirstServer; i <= mLastServer; i++)
+      for(S32 i = FIRST_SERVER; i <= mLastServer; i++)
       {
-         y = ITEMS_TOP + (i - mFirstServer - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + 2;
+         y = ITEMS_TOP + (i - FIRST_SERVER - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + 2;
          ServerRef &s = servers[i];
 
          if(i == selectedIndex)
@@ -793,8 +822,6 @@ void QueryServersUserInterface::recalcCurrentIndex()
 }
 
 
-extern Point gMousePos;
-
 // All key handling now under one roof!
 void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
@@ -813,21 +840,20 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          // Clicked too high... do nothing
       }
-      else if(keyCode == MOUSE_LEFT && mousePos.y > COLUMNS_TOP + (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) * min(servers.size(), serversToShow + 2))
+      else if(keyCode == MOUSE_LEFT && mousePos.y > COLUMNS_TOP + (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) * min(servers.size() + 1, serversToShow + 2))
       {
          // Clicked too low... also do nothing
       }
-
       else
       {
-         // If the user hits enter, it will either submit a message (if a message is being composed), or join a server (if not)
+         // If the user is composing a message and hits enter, submit the message
          if(keyCode == KEY_ENTER && composingMessage())
             issueChat();
          else
          {
             S32 currentIndex = getSelectedIndex();
             if(currentIndex == -1)
-               currentIndex = 0;
+               return;
 
             if(servers.size() > currentIndex)      // Index is valid
             {
@@ -929,7 +955,6 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
-   
 }
 
 
@@ -970,43 +995,6 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
    }
    else
       mHighlightColumn = mSortColumn;
-
-   // It only makes sense to select a server if there are any servers to select... get it?
-   if(servers.size() > 0)
-   {
-      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + mFirstServer - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
-
-      //// See if this requires scrolling.  If so, limit speed.
-      //if(indx <= mFirstServer - 1)
-      //{
-      //   if(!mouseScrollTimer.getCurrent())
-      //   {
-      //      indx = mFirstServer - 1;
-      //      mouseScrollTimer.reset();
-      //   }
-      //   else
-      //      return;
-      //}
-      //else if(indx > mLastServer)
-      //{
-      //   if(!mouseScrollTimer.getCurrent())
-      //   {
-      //      indx = mLastServer + 1;
-      //      mouseScrollTimer.reset();
-      //   }
-      //   else
-      //      return;
-      //}
-
-      if(indx < 0)
-         indx = 0;
-      else if(indx >= servers.size())
-         indx = servers.size() - 1;
-
-      selectedId = servers[indx].id;
-
-      mItemSelectedWithMouse = true;
-   }
 
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
    mJustMovedMouse = true;

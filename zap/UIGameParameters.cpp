@@ -357,7 +357,6 @@ bool GameParamUserInterface::didAnythingGetChanged()
 
 void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   logprintf("Selected index: %d",selectedIndex);
    if(selectedIndex != -1 && isEditableString(menuItems[selectedIndex]) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))
       menuItems[selectedIndex].mLineEditor.handleBackspace(keyCode);
 

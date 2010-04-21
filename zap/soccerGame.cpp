@@ -218,6 +218,8 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
    }
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
@@ -230,6 +232,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    mLastPlayerTouch = NULL;
    mLastPlayerTouchTeam = Item::NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
+   mDragFactor = 0.95;     // 1.0 for no drag
 }
 
 
@@ -296,6 +299,14 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
       mMoveState[ActualState].vel *= accelFraction;
       mMoveState[RenderState].vel *= accelFraction;
    }
+   else
+   {
+      F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
+
+      mMoveState[ActualState].vel *= accelFraction;
+      mMoveState[RenderState].vel *= accelFraction;
+   }
+
    Parent::idle(path);
 }
 

@@ -406,7 +406,7 @@ public:
 
    Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
    Point convertLevelToCanvasCoord(Point p) { return p * mCurrentScale + mCurrentOffset; }
-   Point snapToLevelGrid(Point p);
+   Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
 
    void runScript();    // Run associated levelgen script
 

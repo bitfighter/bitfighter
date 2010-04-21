@@ -919,9 +919,9 @@ void EditorUserInterface::onReactivate()
    populateDock();            // If game type has changed, items on dock will change
 }
 
-Point EditorUserInterface::snapToLevelGrid(Point p)
+Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 {
-   if(snapDisabled || mouseOnDock())
+   if( snapDisabled || (mouseOnDock() && !snapWhileOnDock) )
       return p;
 
    F32 mulFactor, divFactor;
@@ -2386,7 +2386,8 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    if(mDraggingDockItem != -1)      // We just started dragging an item off the dock
    {
       // Instantiate object so we are in essence dragging a non-dock item
-      Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
+      Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos), true);
+
 
       // Gross struct avoids extra construction
       WorldItem item =

@@ -134,7 +134,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
          mConnectionToMaster->connect(mNetInterface, gMasterAddress);
          mNextMasterTryTime = MasterServerConnectAttemptDelay;
 
-         TNL::logprintf("%s connecting to master...", isServer() ? "Server" : "Client");
+         TNL::logprintf("%s connecting to master [%s]...", isServer() ? "Server" : "Client", gMasterAddress.toString());
       }
       else if (!gReadyToConnectToMaster)
          mNextMasterTryTime = 0;
