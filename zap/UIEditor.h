@@ -45,6 +45,7 @@ class TeamEditor;
 
 enum VertexRenderStyles
 {
+   SnappingVertex,                  // Vertex that indicates snapping point
    HighlightedVertex,               // Highlighted vertex
    SelectedItemVertex,              // Non-highlighted vertex of a selected item
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
@@ -332,6 +333,10 @@ private:
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 
+   bool mUnselectVertexAfterDrag;
+   S32 mUnselectVertexAfterDrag_i;
+   S32 mUnselectVertexAfterDrag_j;
+
 public:
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
@@ -356,8 +361,8 @@ public:
    Vector<WorldItem> mItems;     // Item list: needs to be public so we can check team affiliation from UITeamDefMenu
 
    void render();
-   void renderItem(WorldItem &i, bool isBeingEdited, bool isDockItem, bool isScriptItem);
-   void renderLinePolyVertices(WorldItem &item, F32 alpha);
+   void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
+   void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);
 
    void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha = 1.0, bool convert = true);   // Render walls & lineItems
    void renderPoly(Vector<Point> verts, bool isDockItem);

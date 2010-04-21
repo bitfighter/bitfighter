@@ -86,6 +86,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Improved preview mode (when holding Tab key)</li>
 <li>Text in editor now subject to same min/max size constraints as text in the game</li>
 <li>Team names can be changed in the editor</li>
+<li>When moving, items now snap to grid based on vertex closest to cursor</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
