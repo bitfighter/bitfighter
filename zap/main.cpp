@@ -51,7 +51,7 @@ XXX need to document timers, new luavec stuff XXX
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
 <li>New sound when using GoFast</li>
-<li>New SFW when players join/quit game</li>
+<li>New SFX when players join/quit game</li>
 
 <h4>Bots</h4>
 <li>Added enhanced timer class to Lua scripting</li>
@@ -86,7 +86,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Improved preview mode (when holding Tab key)</li>
 <li>Text in editor now subject to same min/max size constraints as text in the game</li>
 <li>Team names can be changed in the editor</li>
-<li>When moving, items now snap to grid based on vertex closest to cursor</li>
+<li>When moving, items now snap to grid based on vertex closest to cursor, giving much greater control over placement.  Snapping vertex rendered in magenta.</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

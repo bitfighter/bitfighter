@@ -320,8 +320,16 @@ private:
    bool anyItemsOrVertsSelected();    // Are any items/vertices selected?
 
    void findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex);
-   void findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 &hitEdge);
+   void findHitItemAndEdge();         // Sets mItemHit and mEdgeHit
    S32 findHitItemOnDock(Point canvasPos);
+
+   Point findClosestPointInSelection();   //<=====  TODO: Delete
+
+   void findSnapVertex();
+   S32 mSnapVertex_i;
+   S32 mSnapVertex_j;
+
+   S32 mEdgeHit, mItemHit;
 
    void computeSelectionMinMax(Point &min, Point &max);
    bool mouseOnDock();                // Return whether mouse is currently over the dock
@@ -333,9 +341,11 @@ private:
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 
-   bool mUnselectVertexAfterDrag;
+   bool mUnselectVertexAfterDrag;      // <===== TODO: Delete
    S32 mUnselectVertexAfterDrag_i;
    S32 mUnselectVertexAfterDrag_j;
+
+   bool anySelected();
 
 public:
    void setLevelFileName(string name);

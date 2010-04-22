@@ -73,8 +73,10 @@ static const Color white = Color(1,1,1);
 static const Color red = Color(1,0,0);
 static const Color yellow = Color(1,1,0);
 static const Color blue = Color(0,0,1);
+static const Color cyan = Color(0,1,1);
 static const Color green = Color(0,1,0);
 static const Color magenta = Color(1,0,1);
+static const Color black = Color(0,0,0);
 
 static Vector<WorldItem> *mLoadTarget;
 
@@ -106,6 +108,11 @@ EditorUserInterface::EditorUserInterface()
    mShowMode = ShowAllObjects; 
    mWasTesting = false;
    mUnselectVertexAfterDrag = false;
+
+   mSnapVertex_i = -1;
+   mSnapVertex_j = -1;
+   mItemHit = -1;
+   mEdgeHit = -1;
 
    mUndoItems.setSize(UNDO_STATES);
 
@@ -946,7 +953,7 @@ extern Color gErrorMessageTextColor;
 
 static const Color grayedOutColorBright = Color(.5, .5, .5);
 static const Color grayedOutColorDim = Color(.25, .25, .25);
-
+static const S32 NO_NUMBER = -1;
 
 void EditorUserInterface::render()
 {
@@ -1047,7 +1054,7 @@ void EditorUserInterface::render()
 
          // Draw vertices
          if(j == mNewItem.verts.size() - 1)           // This is our most current vertex
-            renderVertex(HighlightedVertex, v, -1);
+            renderVertex(HighlightedVertex, v, NO_NUMBER);
          else
             renderVertex(SelectedItemVertex, v, j);
       }
@@ -1303,22 +1310,26 @@ void EditorUserInterface::renderLinePolyVertices(WorldItem &item, S32 index, F32
       Point v = convertLevelToCanvasCoord(item.verts[j]);
 
       if(item.vertSelected[j] || (item.litUp && j == vertexToLightUp))
-      {
-         if(mUnselectVertexAfterDrag && index == mUnselectVertexAfterDrag_i && j == mUnselectVertexAfterDrag_j)
-            renderVertex(SnappingVertex, v, j, alpha);          // Hollow pink boxes with number
-         else
-            renderVertex(HighlightedVertex, v, j, alpha);       // Hollow yellow boxes with number
-      }
+         renderVertex(HighlightedVertex, v, j, alpha);       // Hollow yellow boxes with number
       else if(item.selected || item.litUp || anyVertSelected)
          renderVertex(SelectedItemVertex, v, j, alpha);         // Hollow red boxes with number
       else
-         renderVertex(UnselectedItemVertex, v, -1, alpha, mCurrentScale > 35 ? 2 : 1);   // Solid red boxes, no number
+         renderVertex(UnselectedItemVertex, v, NO_NUMBER, alpha, mCurrentScale > 35 ? 2 : 1);   // Solid red boxes, no number
    }
 }
 
 // Draw a vertex of a selected editor item
 void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha, S32 size)
 {
+   bool hollow = style == HighlightedVertex || style == SelectedItemVertex || style == SnappingVertex;
+
+   if(hollow && number != NO_NUMBER)
+   {
+      glColor3f(.2,.2,.2);
+      drawFilledSquare(v, size);
+   }
+      
+
    if(style == HighlightedVertex)
       glColor(yellow, alpha);
    else if(style == SnappingVertex)
@@ -1326,12 +1337,10 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
    else
       glColor(red, alpha);
 
-   bool hollow = style == HighlightedVertex || style == SelectedItemVertex || style == SnappingVertex;
-
    drawSquare(v, size, !hollow);
 
 
-   if(number != -1)     // Draw vertex numbers
+   if(number != NO_NUMBER)     // Draw vertex numbers
    {
       glColor(white, alpha);
       drawStringf(v.x - getStringWidthf(6, "%d", number) / 2, v.y - 3, 6, "%d", number);
@@ -1430,7 +1439,17 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
    glEnable(GL_BLEND);     // Enable transparency
 
-   if(itemDef[item.index].geom == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    // Draw "two-point" items
+   // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this.  Don't render
+   // snapping vertex for a point item because... well, it's just lame.  We know where it's going to snap, already!
+   // By ensuring the item is selected, we avoid coloring a lone vertex that we might be moving.
+   if(mSnapVertex_i != -1 && mSnapVertex_j != -1 && 
+      itemDef[mItems[mSnapVertex_i].index].geom != geomPoint &&
+      mItems[mSnapVertex_i].selected)
+
+      renderVertex(SnappingVertex, convertLevelToCanvasCoord(mItems[mSnapVertex_i].verts[mSnapVertex_j]), NO_NUMBER, alpha);   // Hollow magenta boxes 
+
+   // Draw "two-point" items
+   if(itemDef[item.index].geom == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    
    {
       if(isDockItem)
          dest = item.verts[1];
@@ -2121,20 +2140,6 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
          mItems[i].team = currentTeam;
          anyChanged = true;
-
-         //// Get team affiliation from dockItem of same type
-         //for(S32 j = 0; j < mDockItems.size(); j++)
-         //{
-         //   if(mDockItems[j].index == mItems[i].index)
-         //   {
-         //      if(mDockItems[j].team != mItems[i].team)
-         //      {
-         //         mItems[i].team = mDockItems[j].team;
-         //         anyChanged = true;
-         //      }
-         //      break;
-         //   }
-         //}
       }
    }
 
@@ -2188,6 +2193,7 @@ void EditorUserInterface::flipSelectionVertical()
    mNeedToSave = true;
    autoSave();
 }
+
 
 void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex)
 {
@@ -2252,26 +2258,29 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 }
 
 
-void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 &hitEdge)
+void EditorUserInterface::findHitItemAndEdge()
 {
-   hitItem = -1;
-   hitEdge = -1;
+   static const S32 POINT_HIT_RADIUS = 9;
+   static const S32 EDGE_HIT_RADIUS = 5;
 
-   if(mEditingSpecialAttrItem  != -1)    // If we're editing special attributes, disable this functionality
+   mItemHit = -1;
+   mEdgeHit = -1;
+
+   if(mEditingSpecialAttrItem  != -1)              // If we're editing special attributes, disable this functionality
       return;
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
    {
-      if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
-         continue;
+      if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode...
+         continue;                                                              // ...so if it's not a wall, proceed to next item
 
       WorldItem &p = mItems[i];
       if(itemDef[mItems[i].index].geom == geomPoint)
       {
          Point pos = convertLevelToCanvasCoord(p.verts[0]);
-         if(fabs(canvasPos.x - pos.x) < 8 && fabs(canvasPos.y - pos.y) < 8)
+         if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
          {
-            hitItem = i;
+            mItemHit = i;
             return;
          }
       }
@@ -2287,18 +2296,18 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
          Point p2 = convertLevelToCanvasCoord(verts[j+1]);
 
          Point edgeDelta = p2 - p1;
-         Point clickDelta = canvasPos - p1;
+         Point clickDelta = mMousePos - p1;
          float fraction = clickDelta.dot(edgeDelta);
          float lenSquared = edgeDelta.dot(edgeDelta);
          if(fraction > 0 && fraction < lenSquared)
          {
             // Compute the closest point:
             Point closest = p1 + edgeDelta * (fraction / lenSquared);
-            float distance = (canvasPos - closest).len();
-            if(distance < 5)
+            float distance = (mMousePos - closest).len();
+            if(distance < EDGE_HIT_RADIUS)
             {
-               hitEdge = j;
-               hitItem = i;
+               mEdgeHit = j;
+               mItemHit = i;
                return;
             }
          }
@@ -2317,17 +2326,17 @@ void EditorUserInterface::findHitItemAndEdge(Point canvasPos, S32 &hitItem, S32 
       if(mShowMode == ShowAllButNavZones && mItems[i].index == ItemNavMeshZone)     // Don't select NavMeshZones while they're hidden
          continue;
 
-      if(itemDef[mItems[i].index].geom == geomPoly)
-      {
-         Vector<Point> verts;
-         for(S32 j = 0; j < mItems[i].verts.size(); j++)
-            verts.push_back(convertLevelToCanvasCoord(mItems[i].verts[j]));
+      if(itemDef[mItems[i].index].geom != geomPoly)
+         continue;
 
-         if(PolygonContains2(verts.address(),verts.size(), canvasPos))
-         {
-            hitItem = i;
-            return;
-         }
+      Vector<Point> verts;
+      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+         verts.push_back(convertLevelToCanvasCoord(mItems[i].verts[j]));
+
+      if(PolygonContains2(verts.address(), verts.size(), mMousePos))
+      {
+         mItemHit = i;
+         return;
       }
    }
 }
@@ -2343,13 +2352,10 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       return;
 
    S32 vertexHit, vertexHitPoly;
-   S32 edgeHit, itemHit;
-   bool showMoveCursor;
+   //S32 edgeHit, itemHit;
 
    findHitVertex(mMousePos, vertexHitPoly, vertexHit);
-   findHitItemAndEdge(mMousePos, itemHit, edgeHit);
-
-   showMoveCursor = (vertexHitPoly != -1 || vertexHit != -1 || itemHit != -1 || edgeHit != -1);
+   findHitItemAndEdge();
 
    if(itemToLightUp != -1)
    {
@@ -2367,21 +2373,42 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       vertexToLightUp = vertexHit;
       itemToLightUp = vertexHitPoly;
    }
-   else if(itemHit != -1 && !mItems[itemHit].selected)                     // We hit an item that wasn't already selected
+   else if(mItemHit != -1 && !mItems[mItemHit].selected)                   // We hit an item that wasn't already selected
    {
-      itemToLightUp = itemHit;
+      itemToLightUp = mItemHit;
    }
 
-   if(itemHit != -1 && !mItems[itemHit].selected && itemDef[mItems[itemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
+   if(mItemHit != -1 && !mItems[mItemHit].selected && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
    {
-      itemToLightUp = itemHit;
+      itemToLightUp = mItemHit;
       vertexToLightUp = -1;
    }
 
    if(itemToLightUp != -1)
       mItems[itemToLightUp].litUp = true;
 
+   bool showMoveCursor = (vertexHitPoly != -1 || vertexHit != -1 || mItemHit != -1 || mEdgeHit != -1);
+
+   // If we need to show the moveCursor, then we should also be showing the snapVertex.  That means we need to find it.
+   if(showMoveCursor)
+      findSnapVertex();
+
    glutSetCursor(showMoveCursor ? GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW);
+}
+
+
+bool EditorUserInterface::anySelected()
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].selected)
+         return true;
+
+      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+         if(mItems[i].vertSelected[j])
+            return true;
+   }
+   return false;
 }
 
 
@@ -2396,7 +2423,6 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    {
       // Instantiate object so we are in essence dragging a non-dock item
       Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos), true);
-
 
       // Gross struct avoids extra construction
       WorldItem item =
@@ -2417,45 +2443,12 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    mDraggingObjects = true;
    Point delta = convertCanvasToLevelCoord(mMousePos);
+   
+   findSnapVertex();
+   if(mSnapVertex_i == -1 || mSnapVertex_j == -1)
+      return;
 
-   bool foundSelectedVert = false;
-   S32 closesti, closestj;
-   Point foundPoint;
-   F32 closestDist = F32_MAX;
-
-   // If an item is no longer aligned to the grid (either moved with snapping disabled, or at a smaller scale)
-   // try and get it realigned with the grid when it is moved.  We'll focus on the item for point items, or on the
-   // first selected vertex for a higher-order item.
-   for(S32 i = 0; i < mItems.size(); i++)
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
-      {
-         if(mItems[i].vertSelected[j])    // Vert  will only be selected here if we're only dragging a vertex
-         {
-            foundPoint = mUnmovedItems[i].verts[j];
-            foundSelectedVert = true;
-            goto done;     // Is there a better way to exit two loops than a goto?
-         }
-
-         // This bit here will find the vertex of the selected item(s) closest to our mouse, and that will become
-         // our snapping point.
-         F32 dist = mUnmovedItems[i].verts[j].distanceTo(mMouseDownPos);
-         if(dist < closestDist)
-         {
-            foundPoint = mUnmovedItems[i].verts[j];
-            closestDist = dist;
-            closesti = i;
-            closestj = j;
-         }
-      }
-
-done:
-   if(!foundSelectedVert)
-   {
-      mItems[closesti].vertSelected[closestj] = true;    // Highlight the vertex
-      mUnselectVertexAfterDrag = true;
-      mUnselectVertexAfterDrag_i = closesti;
-      mUnselectVertexAfterDrag_j = closestj;
-   }
+   Point foundPoint = mUnmovedItems[mSnapVertex_i].verts[mSnapVertex_j];
 
    delta = snapToLevelGrid(delta - mMouseDownPos + foundPoint) - foundPoint;
 
@@ -2464,6 +2457,59 @@ done:
       for(S32 j = 0; j < mItems[i].verts.size(); j++)
          if(mItems[i].selected || mItems[i].vertSelected[j])
             mItems[i].verts[j] = mUnmovedItems[i].verts[j] + delta;
+}
+
+
+// Sets mSnapVertex_i and mSnapVertex_j based on the vertex closest to the cursor that is part of the selected set
+// What we really want is the closest vertex in the closest feature
+void EditorUserInterface::findSnapVertex()
+{
+   F32 closestDist = F32_MAX;
+
+   mSnapVertex_i = -1;
+   mSnapVertex_j = -1;
+
+   Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
+
+   if(mItemHit != -1 && mItems[mItemHit].selected)   // If we have a hit item, and it's selected, find the closest vertex in that
+   {
+      for(S32 j = 0; j < mItems[mItemHit].verts.size(); j++)
+      {
+         F32 dist = mItems[mItemHit].verts[j].distSquared(mouseLevelCoord);
+
+         if(dist < closestDist)
+         {
+            closestDist = dist;
+            mSnapVertex_i = mItemHit;
+            mSnapVertex_j = j;
+         }
+      }
+      return;
+   } 
+
+   for(S32 i = 0; i < mItems.size(); i++)
+      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+      {
+         if(mItems[i].selected)
+         {
+            // This bit here will find the vertex of the selected item(s) closest to our mouse
+            F32 dist = mItems[i].verts[j].distSquared(mouseLevelCoord);
+
+            if(dist < closestDist)
+            {
+               closestDist = dist;
+               mSnapVertex_i = i;
+               mSnapVertex_j = j;
+            }
+         }
+         // If we find a selected vertex, there will be only one, and this is our snap point
+         else if(mItems[i].vertSelected[j])
+         {
+            mSnapVertex_i = i;
+            mSnapVertex_j = j;
+            return;     
+         }
+      }
 }
 
 
@@ -2663,8 +2709,7 @@ void EditorUserInterface::joinBarrier()
                      mItems[i].vertSelected.push_back(false);
                   }
                   mItems.erase(j);
-                  i--;
-                  j--;
+                  i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
 
@@ -2678,8 +2723,7 @@ void EditorUserInterface::joinBarrier()
                      mItems[i].vertSelected.push_back(false);
                   }
                   mItems.erase(j);
-                  i--;
-                  j--;
+                  i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
                }
@@ -3024,14 +3068,14 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          return;
       }
 
-      S32 edgeHit, itemHit;
-      findHitItemAndEdge(mMousePos, itemHit, edgeHit);
+      //S32 edgeHit, itemHit;
+      //findHitItemAndEdge(mMousePos, itemHit, edgeHit);
 
-      if(itemHit != -1 && (itemDef[mItems[itemHit].index].geom == geomLine ||
-                           itemDef[mItems[itemHit].index].geom >= geomPoly   ))
+      if(mItemHit != -1 && (itemDef[mItems[mItemHit].index].geom == geomLine ||
+                            itemDef[mItems[mItemHit].index].geom >= geomPoly   ))
       {
 
-         if(mItems[itemHit].verts.size() >= gMaxPolygonPoints)     // Polygon full -- can't add more
+         if(mItems[mItemHit].verts.size() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
 
          saveUndoState(mItems);
@@ -3040,19 +3084,19 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
-         mItems[itemHit].verts.insert(edgeHit + 1);
-         mItems[itemHit].verts[edgeHit + 1] = newVertex;
+         mItems[mItemHit].verts.insert(mEdgeHit + 1);
+         mItems[mItemHit].verts[mEdgeHit + 1] = newVertex;
 
-         mItems[itemHit].vertSelected.insert(edgeHit + 1);
-         mItems[itemHit].vertSelected[edgeHit + 1] = true;
+         mItems[mItemHit].vertSelected.insert(mEdgeHit + 1);
+         mItems[mItemHit].vertSelected[mEdgeHit + 1] = true;
 
          // Do the same for the mUnmovedItems list, to keep it in sync with mItems,
          // which allows us to drag our vertex around without wierd snapping action
-         mUnmovedItems[itemHit].verts.insert(edgeHit + 1);
-         mUnmovedItems[itemHit].verts[edgeHit + 1] = newVertex;
+         mUnmovedItems[mItemHit].verts.insert(mEdgeHit + 1);
+         mUnmovedItems[mItemHit].verts[mEdgeHit + 1] = newVertex;
 
-         mUnmovedItems[itemHit].vertSelected.insert(edgeHit + 1);
-         mUnmovedItems[itemHit].vertSelected[edgeHit + 1] = true;
+         mUnmovedItems[mItemHit].vertSelected.insert(mEdgeHit + 1);
+         mUnmovedItems[mItemHit].vertSelected[mEdgeHit + 1] = true;
 
          mMouseDownPos = newVertex;
       }
@@ -3090,6 +3134,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          if(mNewItem.verts.size() > 1)
             mItems.push_back(mNewItem);
+
          mNewItem.verts.clear();
          mCreatingPoly = false;
          mCreatingPolyline = false;
@@ -3119,10 +3164,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          //    toggle the selection of what was clicked
 
          S32 vertexHit, vertexHitPoly;
-         S32 edgeHit, itemHit;
+         //S32 edgeHit, itemHit;
 
          findHitVertex(mMousePos, vertexHitPoly, vertexHit);
-         findHitItemAndEdge(mMousePos, itemHit, edgeHit);
+         //findHitItemAndEdge(mMousePos, itemHit, edgeHit);
 
          if(!getKeyState(KEY_SHIFT))      // Shift key is not down
          {
@@ -3133,16 +3178,16 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                //vertexHit = -1;
                //itemHit = vertexHitPoly;
             }
-            if(itemHit != -1 && mItems[itemHit].selected)   // Hit an already selected item
+            if(mItemHit != -1 && mItems[mItemHit].selected)   // Hit an already selected item
             {
                // Do nothing
             }
-            else if(itemHit != -1 && itemDef[mItems[itemHit].index].geom == geomPoint)  // Hit a point item
+            else if(mItemHit != -1 && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Hit a point item
             {
                clearSelection();
-               mItems[itemHit].selected = true;
+               mItems[mItemHit].selected = true;
             }
-            else if(vertexHit != -1 && (itemHit == -1 || !mItems[itemHit].selected))      // Hit a vertex of an unselected item
+            else if(vertexHit != -1 && (mItemHit == -1 || !mItems[mItemHit].selected))      // Hit a vertex of an unselected item
             {        // (braces required)
                if(!mItems[vertexHitPoly].vertSelected[vertexHit])
                {
@@ -3150,31 +3195,31 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                   mItems[vertexHitPoly].vertSelected[vertexHit] = true;
                }
             }
-            else if(itemHit != -1)                                                        // Hit a non-point item, but not a vertex
+            else if(mItemHit != -1)                                                        // Hit a non-point item, but not a vertex
             {
                clearSelection();
-               mItems[itemHit].selected = true;
+               mItems[mItemHit].selected = true;
             }
             else     // Clicked off in space.  Starting to draw a bounding rectangle?
             {
                mDragSelecting = true;
                clearSelection();
             }
-
          }
          else     // Shift key is down
          {
             if(vertexHit != -1)
                mItems[vertexHitPoly].vertSelected[vertexHit] =
                   !mItems[vertexHitPoly].vertSelected[vertexHit];
-            else if(itemHit != -1)
-               mItems[itemHit].selected = !mItems[itemHit].selected;    // Toggle selection of hit item
+            else if(mItemHit != -1)
+               mItems[mItemHit].selected = !mItems[mItemHit].selected;    // Toggle selection of hit item
             else
                mDragSelecting = true;
          }
      }     // end mouse not on dock block, doc
 
      mUnmovedItems = mItems;
+     findSnapVertex();     // Update snap vertex in the event an item was selected
 
    }     // end if keyCode == MOUSE_LEFT
 
