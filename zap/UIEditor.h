@@ -47,6 +47,7 @@ enum VertexRenderStyles
 {
    SnappingVertex,                  // Vertex that indicates snapping point
    HighlightedVertex,               // Highlighted vertex
+   SelectedVertex,                  // Vertex itself is selected
    SelectedItemVertex,              // Non-highlighted vertex of a selected item
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
 };
@@ -213,7 +214,7 @@ public:
       RepopDelay,
       GoFastSpeed,
       GoFastSnap,
-      None                 // Must be last
+      NoAttribute                 // Must be last
    };
 
 private:
@@ -345,8 +346,6 @@ private:
    S32 mUnselectVertexAfterDrag_i;
    S32 mUnselectVertexAfterDrag_j;
 
-   bool anySelected();
-
 public:
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
@@ -374,7 +373,7 @@ public:
    void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);
 
-   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha = 1.0, bool convert = true);   // Render walls & lineItems
+   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, bool highlighted, S32 team, F32 width, F32 alpha = 1.0, bool convert = true);   // Render walls & lineItems
    void renderPoly(Vector<Point> verts, bool isDockItem);
    static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 

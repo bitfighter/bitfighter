@@ -1,6 +1,12 @@
 // Level Info:Game Type:
 /* Done
 
+// Select in entire body of asteroid, ball, testitem
+// Draw selection indicator around entire item
+// Rotate arbitrary amount
+// More consistent selection rendering (selection in white, selected in yellow, some other color to indicate hover)
+//
+
 */
 /* test
 Test various junk in level files and see how they load into the editor, and how they play
@@ -51,8 +57,8 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
-
 #include "../glut/glutInclude.h"
+
 #include <ctype.h>
 #include <exception>
 
@@ -78,6 +84,12 @@ static const Color green = Color(0,1,0);
 static const Color magenta = Color(1,0,1);
 static const Color black = Color(0,0,0);
 
+static const Color selectedColor = yellow;
+static const Color highlightedColor = white;
+
+static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
+static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
+
 static Vector<WorldItem> *mLoadTarget;
 
 
@@ -96,6 +108,8 @@ void backToMainMenuCallback()
 }
 
 
+const S32 NONE = -1;
+
 //S32 gBoxesH;
 //S32 gBoxesV;
 
@@ -109,10 +123,10 @@ EditorUserInterface::EditorUserInterface()
    mWasTesting = false;
    mUnselectVertexAfterDrag = false;
 
-   mSnapVertex_i = -1;
-   mSnapVertex_j = -1;
-   mItemHit = -1;
-   mEdgeHit = -1;
+   mSnapVertex_i = NONE;
+   mSnapVertex_j = NONE;
+   mItemHit = NONE;
+   mEdgeHit = NONE;
 
    mUndoItems.setSize(UNDO_STATES);
 
@@ -217,7 +231,7 @@ struct GameItemRec
 GameItemRec itemDef[] = {
    { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
    { "SpeedZone",           false,    false,     true,        false,   false,   geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",       "Makes ships go fast in direction of arrow. [P]" },
-   { "SoccerBallItem",      false,    false,     false,       false,   false,   geomPoint,      'B',    true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
+   { "SoccerBallItem",      false,    false,     false,       false,   false,   geomPoint,      0 /*'B'*/,    true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
    { "FlagItem",            false,    true,      true,        false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
@@ -225,12 +239,12 @@ GameItemRec itemDef[] = {
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
-   { "TestItem",            false,    false,     false,       false,   false,   geomPoint,      'x',    true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
+   { "TestItem",            false,    false,     false,       false,   false,   geomPoint,      0 /*'x'*/,    true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
    { "Asteroid",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
    { "AsteroidSpawn",       false,    false,     false,       false,   true,    geomPoint,       0,     true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
    { "Mine",                false,    false,     true,        false,   false,   geomPoint,      'M',    false,  "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
    { "SpyBug",              false,    true,      true,        false,   false,   geomPoint,      'S',    false,  "Spy bugs",               "Spy Bug",  "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
-   { "ResourceItem",        false,    false,     false,       false,   false,   geomPoint,      'r',    true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
+   { "ResourceItem",        false,    false,     false,       false,   false,   geomPoint,      0 /*'r'*/,    true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
    { "LoadoutZone",         false,    true,      true,        false,   false,   geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Loadout",      "Area to finalize ship modifications.  Each team should have at least one." },
    { "HuntersNexusObject",  false,    false,     true,        false,   false,   geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
    { "SlipZone",            false,    false,     true,        false,   false,   geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Slip Zone",    "Not yet implemented." },
@@ -304,7 +318,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
-   itemToLightUp = -1;
+   itemToLightUp = NONE;
    autoSave();
 }
 
@@ -317,7 +331,7 @@ void EditorUserInterface::redo()
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
       mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
-      itemToLightUp = -1;
+      itemToLightUp = NONE;
       autoSave();
    }
 }
@@ -430,6 +444,8 @@ void EditorUserInterface::loadLevel()
    // Initialize
    mItems.clear();
    mTeams.clear();
+   mSnapVertex_i = NONE;
+   mSnapVertex_j = NONE;
    mLevelGenItems.clear();
    mLoadTarget = &mItems;
    mGameTypeArgs.clear();
@@ -501,7 +517,7 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       U32 arg = 1;
 
       // Should the following be moved to the constructor?  Probably...
-      i.team = -1;
+      i.team = TEAM_NEUTRAL;
       i.selected = false;
       i.width = 0;
       i.id = id;
@@ -784,16 +800,16 @@ void EditorUserInterface::validateTeams()
    {
       S32 team = mItems[i].team;
 
-      if(itemDef[mItems[i].index].hasTeam && team >= -2 && team < teams)      // -1 = neutral, -2 = hostile
+      if(itemDef[mItems[i].index].hasTeam && ((team >= 0 && team < teams) || team == TEAM_NEUTRAL || team == TEAM_HOSTILE))  
          continue;      // This one's OK
 
       if(team < 0 && itemDef[mItems[i].index].canHaveNoTeam)
          continue;      // This one too
 
       if(itemDef[mItems[i].index].hasTeam)
-         mItems[i].team = 0;     // We know there's at least one team, so there will always be a team 0
+         mItems[i].team = 0;               // We know there's at least one team, so there will always be a team 0
       else
-         mItems[i].team = -1;    // We won't consider the case where hasTeam == canHaveNoTeam == false
+         mItems[i].team = TEAM_NEUTRAL;    // We won't consider the case where hasTeam == canHaveNoTeam == false
    }
 }
 
@@ -838,9 +854,9 @@ extern Color gHostileTeamColor;
 
 Color EditorUserInterface::getTeamColor(S32 team)
 {
-   if(team == -1)
+   if(team == TEAM_NEUTRAL)
       return gNeutralTeamColor;
-   else if(team == -2)
+   else if(team == TEAM_HOSTILE)
       return gHostileTeamColor;
    else
       return mTeams[team].color;
@@ -887,16 +903,16 @@ void EditorUserInterface::onActivate()
    mCreatingPoly = false;
    mCreatingPolyline = false;
    mDraggingObjects = false;
-   mDraggingDockItem = -1;
+   mDraggingDockItem = NONE;
    mCurrentTeam = 0;
    mShowingReferenceShip = false;
    editingIDMode = false;
 
-   itemToLightUp = -1;     // Index to keep track of which item is litUp
-   vertexToLightUp = -1;
+   itemToLightUp = NONE;     // Index to keep track of which item is litUp
+   vertexToLightUp = NONE;
 
-   mEditingSpecialAttrItem = -1;
-   mSpecialAttribute = None;
+   mEditingSpecialAttrItem = NONE;
+   mSpecialAttribute = NoAttribute;
 
    mSaveMsgTimer = 0;
 }
@@ -908,8 +924,8 @@ void EditorUserInterface::onReactivate()
 {
    mDraggingObjects = false;  
 
-   mEditingSpecialAttrItem = -1;     // Probably not necessary
-   mSpecialAttribute = None;
+   mEditingSpecialAttrItem = NONE;     // Probably not necessary
+   mSpecialAttribute = NoAttribute;
 
 //   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
 
@@ -933,6 +949,7 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    if( snapDisabled || (mouseOnDock() && !snapWhileOnDock) )
       return p;
 
+   // First, find a snap point based on our grid
    F32 mulFactor, divFactor;
    if(mCurrentScale >= 100)
    {
@@ -945,9 +962,33 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
       divFactor = 0.5;
    }
 
-   return Point(floor(p.x * mulFactor + 0.5) * divFactor,
-                floor(p.y * mulFactor + 0.5) * divFactor);
+   Point snapPoint(floor(p.x * mulFactor + 0.5) * divFactor, floor(p.y * mulFactor + 0.5) * divFactor);
+
+   F32 minDist = snapPoint.distSquared(p);
+
+   // Now look for other things we might want to snap to
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].selected)     // Don't snap to selected items
+         continue;
+
+      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+      {
+         if(mItems[i].vertSelected[j])      
+            continue;
+
+         F32 dist = mItems[i].verts[j].distSquared(p);
+         if(dist < minDist)
+         {
+            minDist = dist;
+            snapPoint = mItems[i].verts[j];
+         }
+      }
+   }
+
+   return snapPoint;
 }
+
 
 extern Color gErrorMessageTextColor;
 
@@ -1040,7 +1081,7 @@ void EditorUserInterface::render()
       glLineWidth(3);
 
       if(mCreatingPoly) // Wall
-         glColor(yellow);
+         glColor(selectedColor);
       else              // LineItem
          glColor(getTeamColor(mNewItem.team));
 
@@ -1064,7 +1105,7 @@ void EditorUserInterface::render()
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
-         if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)) )
+         if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == NONE)) )
          {
             width =  mItems[i].width;
             break;
@@ -1144,11 +1185,7 @@ void EditorUserInterface::render()
    dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
    drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 35, 7, text);
 
-   // Show level name, and whether it needs to be saved or not
-   if(mNeedToSave)
-      glColor(red);
-   else
-      glColor(white);
+   glColor(mNeedToSave ? red : green);     // Color level name by whether it needs to be saved or not
 
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
    drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 45, 7, text);
@@ -1309,8 +1346,10 @@ void EditorUserInterface::renderLinePolyVertices(WorldItem &item, S32 index, F32
    {
       Point v = convertLevelToCanvasCoord(item.verts[j]);
 
-      if(item.vertSelected[j] || (item.litUp && j == vertexToLightUp))
-         renderVertex(HighlightedVertex, v, j, alpha);       // Hollow yellow boxes with number
+      if(item.vertSelected[j])
+         renderVertex(SelectedVertex, v, j, alpha);             // Hollow yellow boxes with number
+      else if(item.litUp && j == vertexToLightUp)
+         renderVertex(HighlightedVertex, v, j, alpha);          // Hollow yellow boxes with number
       else if(item.selected || item.litUp || anyVertSelected)
          renderVertex(SelectedItemVertex, v, j, alpha);         // Hollow red boxes with number
       else
@@ -1321,17 +1360,19 @@ void EditorUserInterface::renderLinePolyVertices(WorldItem &item, S32 index, F32
 // Draw a vertex of a selected editor item
 void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha, S32 size)
 {
-   bool hollow = style == HighlightedVertex || style == SelectedItemVertex || style == SnappingVertex;
+   bool hollow = style == HighlightedVertex || style == SelectedVertex || style == SelectedItemVertex || style == SnappingVertex;
 
+   // Fill the box with a dark gray to make the number easier to read
    if(hollow && number != NO_NUMBER)
    {
-      glColor3f(.2,.2,.2);
+      glColor3f(.25, .25, .25);
       drawFilledSquare(v, size);
    }
       
-
    if(style == HighlightedVertex)
-      glColor(yellow, alpha);
+      glColor(highlightedColor, alpha);
+   else if(style == SelectedVertex)
+      glColor(selectedColor, alpha);
    else if(style == SnappingVertex)
       glColor(magenta, alpha);
    else
@@ -1351,7 +1392,7 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
 // Draw barriermMakers (walls) or lineItems
-void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, S32 team, F32 width, F32 alpha, bool convert)
+void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, bool highlighted, S32 team, F32 width, F32 alpha, bool convert)
 {
    Vector<Point> barPoints;
 
@@ -1390,7 +1431,12 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
       }
    }
 
-   glColor(selected ? yellow : getTeamColor(team), alpha);
+   if(selected)
+      glColor(selectedColor, alpha);
+   else if(highlighted)
+      glColor(highlightedColor, alpha);
+   else
+      glColor(getTeamColor(team), alpha);
 
    glLineWidth(3);
    renderPoly(verts, false);
@@ -1426,10 +1472,20 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    const S32 labelSize = 9;      // Size to label items we're hovering over
    const S32 instrSize = 9;      // Size of instructions for special items
    const S32 attrSize = 10;
-   const Color labelColor = white;
    const F32 alpha = isScriptItem ? .6 : 1;
 
    bool hideit = (mShowMode == ShowWallsOnly) && !(mShowingReferenceShip && !isDockItem);
+
+   Color drawColor;
+   if(hideit)
+         glColor(grayedOutColorBright, alpha);
+   else if(item.selected)
+      drawColor = selectedColor;
+   else if(item.litUp, alpha)
+      drawColor = highlightedColor;
+   else
+      drawColor = Color(.75, .75, .75);
+
 
    if(isDockItem)
       pos = item.verts[0];
@@ -1442,7 +1498,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this.  Don't render
    // snapping vertex for a point item because... well, it's just lame.  We know where it's going to snap, already!
    // By ensuring the item is selected, we avoid coloring a lone vertex that we might be moving.
-   if(mSnapVertex_i != -1 && mSnapVertex_j != -1 && 
+   if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && 
       itemDef[mItems[mSnapVertex_i].index].geom != geomPoint &&
       mItems[mSnapVertex_i].selected)
 
@@ -1456,11 +1512,65 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       else
          dest = convertLevelToCanvasCoord(item.verts[1]);
 
-      // First check if we should show the schematic version or the real object rendering
-      if((mShowingReferenceShip && 
-            (item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem)) && 
-         !isDockItem)
+      bool vertexSelected = item.vertSelected[0] || item.vertSelected[1];
+
+      Color itemColor;
+
+      // Draw the tail end of the object, which will also be visible on the dock
+      if(hideit)
+         itemColor = grayedOutColorDim;
+      else if(item.index == ItemTeleporter)
+         itemColor = green;
+      else if(item.index == ItemSpeedZone)
+         itemColor = red;
+      else if(item.index == ItemTextItem)
+         itemColor = blue;
+     
+      if(isDockItem)
       {
+         glColor(itemColor, alpha);
+         drawFilledSquare(pos, 5);                 // Draw origin of item to give user something to grab on the dock
+      }
+
+      // Override drawColor for this special case
+      if(vertexSelected)
+         drawColor = selectedColor;
+
+      // Hide line if we're drawing a text item and it's not selected
+      if((item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem) && !isDockItem)
+      {
+         if(!mShowingReferenceShip)
+         {
+            glColor(itemColor, ((item.selected || item.litUp || vertexSelected) && !isBeingEdited) ? alpha : .25 * alpha);
+            drawFilledSquare(pos, 5);            // Draw origin of item (square box)
+
+            for(S32 i = 1; i >= 0; i--)
+            {  
+               // Draw heavy colored line with colored core
+               glLineWidth(i ? 4 : 2);                
+
+               F32 ang = pos.angleTo(dest);
+               const F32 al = 15;                // Length of arrow-head
+               const F32 angoff = .5;            // Pitch of arrow-head prongs
+
+               glBegin(GL_LINES);
+                  glVertex2f(dest.x, dest.y);    // Draw arrow-head
+                  glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
+                  glVertex2f(dest.x, dest.y);
+                  glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
+
+                  // Draw highlight on 2nd pass if item is selected, but not while it's being edited
+                  if(!i && (item.selected || item.litUp) && !isBeingEdited)
+                     glColor(drawColor);
+
+                  glVertex2f(pos.x, pos.y);      // Draw connecting line
+                  glVertex2f(dest.x, dest.y);
+               glEnd();
+            }
+
+            glLineWidth(gDefaultLineWidth);         // Restore default value
+         }
+
          glPushMatrix();
             setTranslationAndScale(pos);
             if(item.index == ItemTeleporter)
@@ -1473,47 +1583,11 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             else if(item.index == ItemSpeedZone)
                renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.verts[1])), gClientGame->getCurrentTime());
 
-            glPopMatrix();
-  
-            if(item.index == ItemTextItem)
-               renderTextItem(item, 1);
-      }
-      else
-      {
-         glLineWidth(4);
-         if(hideit)
-            glColor(grayedOutColorDim);
-         else if(item.index == ItemTeleporter)
-            glColor(green, alpha);
-         else if(item.index == ItemSpeedZone)
-            glColor(red, alpha);
-         else if(item.index == ItemTextItem)
-            glColor(blue, alpha);
+         glPopMatrix();
 
-         if(item.selected || (item.litUp && vertexToLightUp == -1))     // ScriptItems are never selected
-            glColor(yellow);
-
-         drawFilledSquare(pos, 5);                 // Draw origin of item (square box)
-
-         if(!isDockItem)
-         {
-            glBegin(GL_LINES);
-               glVertex2f(pos.x, pos.y);           // Draw connecting line
-               glVertex2f(dest.x, dest.y);
-
-               F32 ang = pos.angleTo(dest);
-               const F32 al = 15;                  // Length of arrow-head
-               const F32 angoff = .5;              // Pitch of arrow-head prongs
-
-               glVertex2f(dest.x, dest.y);         // Draw arrow-head
-               glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
-               glVertex2f(dest.x, dest.y);
-               glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
-            glEnd();
-         }
-
-         glLineWidth(gDefaultLineWidth);        // Restore default value
-
+         if(item.index == ItemTextItem)
+            renderTextItem(item, 1);
+      
          // If this is a textItem, and either the item or either vertex is selected, draw the text
          if(!isDockItem && itemDef[item.index].hasText)
          {
@@ -1522,7 +1596,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             if(isBeingEdited)
                item.lineEditor.drawCursorAngle(pos.x, pos.y, txtSize, pos.angleTo(dest));
 
-            if((item.selected || item.litUp) && mSpecialAttribute == None)
+            if((item.selected /*|| item.litUp*/) && mSpecialAttribute == NoAttribute)
             {
                glColor(white);
                drawStringf_2pt(pos, dest, instrSize, -22, "[Enter] to edit text");
@@ -1530,7 +1604,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
          else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
          {
-            if(((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
+            if(((item.selected /*|| item.litUp*/) && mEditingSpecialAttrItem == NONE) || isBeingEdited)
             {
                glColor((mSpecialAttribute != GoFastSnap) ? white : inactiveSpecialAttributeColor);
                drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", item.speed);
@@ -1542,7 +1616,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
                const char *msg, *instr;
 
-               if(mSpecialAttribute == None)
+               if(mSpecialAttribute == NoAttribute)
                {
                   msg = "[Enter] to edit speed";
                   instr = "";
@@ -1571,7 +1645,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          // If either end is selected, draw a little white box around it
          if(item.vertSelected[0] || (item.litUp && vertexToLightUp == 0))
          {
-            glColor(labelColor, alpha);
+            glColor(drawColor, alpha);
             drawSquare(pos, 7);
 
             if(item.index == ItemTeleporter)
@@ -1587,7 +1661,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          // Outline selected vertex, and label it
          if(item.vertSelected[1] || (item.litUp && vertexToLightUp == 1))
          {
-            glColor(labelColor);
+            glColor(drawColor);
             drawSquare(dest, 7);
 
             if(item.index == ItemTeleporter)
@@ -1600,14 +1674,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    }
    else if(itemDef[item.index].geom == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
    {
-      renderPolyline(item.index, item.verts, item.selected || (item.litUp && vertexToLightUp == -1), item.team, item.width / mGridSize, alpha);
+      renderPolyline(item.index, item.verts, item.selected, (item.litUp && vertexToLightUp == NONE), item.team, item.width / mGridSize, alpha);
       renderLinePolyVertices(item, index, alpha);
    } 
    else if(itemDef[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
    {
       // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
-	  // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
-
+  	   // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
       if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) &&
 		  !(mShowingReferenceShip) || 
           isDockItem ||  
@@ -1636,13 +1709,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glEnd();
          }
 
-         // Now the polygon outline
-         if(hideit)
-            glColor(grayedOutColorBright, alpha);
-         else if(item.selected || (item.litUp && vertexToLightUp == -1))
-            glColor(yellow, alpha);
-         else
-            glColor(white, alpha);
+         // Let's add a label
+         glColor(hideit ? grayedOutColorBright : drawColor, alpha);
 
          glLineWidth(3);
 
@@ -1652,9 +1720,6 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          glEnd();
 
          glLineWidth(gDefaultLineWidth);        // Restore line width
-
-         // Let's add a label
-         glColor(hideit ? grayedOutColorBright : labelColor, alpha);
 
          F32 ang = angleOfLongestSide(outline);
          Point cent = centroid(outline);
@@ -1703,7 +1768,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemBouncyBall)   // Draw testitem
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(/*mShowingReferenceShip &&*/ !isDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -1718,7 +1783,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemAsteroid)   // Draw asteroid
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(/*mShowingReferenceShip &&*/ !isDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -1731,7 +1796,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       else if(item.index == ItemResource)   // Draw resourceItem
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(/*mShowingReferenceShip &&*/ !isDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -1743,7 +1808,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemSoccerBall)  // Soccer ball, obviously
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(/*mShowingReferenceShip && */!isDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -1799,7 +1864,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       // If this is an item that has a repop attribute, and the item is selected, draw the text
       if(!isDockItem && itemDef[item.index].hasRepop)
       {
-         if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == -1) || isBeingEdited)
+         if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == NONE) || isBeingEdited)
          {
             glColor(white);
 
@@ -1813,7 +1878,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
             const char *msg;
 
-            if(mSpecialAttribute == None)
+            if(mSpecialAttribute == NoAttribute)
                msg = "[Enter] to edit";
             else if(isBeingEdited && mSpecialAttribute == RepopDelay)
                msg = "Up/Dn to change";
@@ -1844,7 +1909,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       {
          Point pos = convertLevelToCanvasCoord(item.verts[0]);                // Note that dockItems are never selected!
 
-         glColor(labelColor);
+         glColor(drawColor);
+
          glBegin(GL_LINE_LOOP);
             glVertex2f(pos.x - 10, pos.y - 10);
             glVertex2f(pos.x + 10, pos.y - 10);
@@ -1862,20 +1928,20 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          if (letter >= 'a' && letter <= 'z')    // Better position lowercase letters
             vertOffset = 10;
 
-         glColor(hideit ? grayedOutColorBright : labelColor, alpha);
+         glColor(hideit ? grayedOutColorBright : drawColor, alpha);
          drawStringf(pos.x - getStringWidthf(15, "%c", letter) / 2, pos.y - vertOffset, 15, "%c", letter);
       }
       // And label it if we're hovering over it (or not)
       if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName)
       {
-         glColor(hideit ? grayedOutColorBright : labelColor);
+         glColor(drawColor);
          drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName);     // Label on top
       }
    }
    // Label our dock items
    if(isDockItem && itemDef[item.index].geom != geomPoly)      // Polys are already labeled internally
    {
-      glColor(hideit ? grayedOutColorBright : labelColor);
+      glColor(hideit ? grayedOutColorBright : drawColor);
       F32 maxy = -F32_MAX;
       for(S32 j = 0; j < item.verts.size(); j++)
          if (item.verts[j].y > maxy)
@@ -1987,9 +2053,6 @@ void EditorUserInterface::pasteSelection()
 
    clearSelection();          // Only the pasted items should be selected
 
-   for(S32 i = 0; i < mItems.size(); i++)    // Unselect everything, so pasted items will be the new selection
-      mItems[i].selected = false;
-
    Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
    Point offset = pos - mClipboard[0].verts[0];    // Diff between mouse pos and original object (item will be pasted such that the first vertex is at mouse pos)
 
@@ -2019,7 +2082,7 @@ void EditorUserInterface::copySelection()
    S32 itemCount = mItems.size();
    for(S32 i = 0; i < itemCount; i++)
    {
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          WorldItem newItem = mItems[i];
          newItem.selected = false;
@@ -2054,7 +2117,7 @@ void EditorUserInterface::rotateSelection(F32 angle)
    F32 cosTheta = cos(angle * Float2Pi / 360.0f);
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          WorldItem &item = mItems[i];
          for(S32 j = 0; j < item.verts.size(); j++)
@@ -2076,7 +2139,7 @@ void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected/* || (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          WorldItem &item = mItems[i];
          for(S32 j = 0; j < item.verts.size(); j++)
@@ -2130,7 +2193,7 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          if(!itemDef[mItems[i].index].hasTeam)
          continue;
@@ -2168,7 +2231,7 @@ void EditorUserInterface::flipSelectionHorizontal()
    Point min, max;
    computeSelectionMinMax(min, max);
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
          for(S32 j = 0; j < mItems[i].verts.size(); j++)
             mItems[i].verts[j].x = min.x + (max.x - mItems[i].verts[j].x);
 
@@ -2186,7 +2249,7 @@ void EditorUserInterface::flipSelectionVertical()
    Point min, max;
    computeSelectionMinMax(min, max);
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
          for(S32 j = 0; j < mItems[i].verts.size(); j++)
             mItems[i].verts[j].y = min.y + (max.y - mItems[i].verts[j].y);
 
@@ -2198,10 +2261,10 @@ void EditorUserInterface::flipSelectionVertical()
 void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex)
 {
    const S32 targetSize = 8;
-   hitItem = -1;
-   hitVertex = -1;
+   hitItem = NONE;
+   hitVertex = NONE;
 
-   if(mEditingSpecialAttrItem != -1)    // If we're editing a text special attribute, disable this functionality
+   if(mEditingSpecialAttrItem != NONE)    // If we're editing a text special attribute, disable this functionality
       return;
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
@@ -2229,10 +2292,10 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 {
    if(mShowMode == ShowWallsOnly)           // Only add dock items when objects are visible
-      return -1;
+      return NONE;
 
-   if(mEditingSpecialAttrItem != -1)    // If we're editing a text item, disable this functionality
-      return -1;
+   if(mEditingSpecialAttrItem != NONE)    // If we're editing a text item, disable this functionality
+      return NONE;
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
    {
@@ -2254,19 +2317,19 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
             return i;
       }
 
-   return -1;
+   return NONE;
 }
 
 
 void EditorUserInterface::findHitItemAndEdge()
 {
    static const S32 POINT_HIT_RADIUS = 9;
-   static const S32 EDGE_HIT_RADIUS = 5;
+   static const S32 EDGE_HIT_RADIUS = 6;
 
-   mItemHit = -1;
-   mEdgeHit = -1;
+   mItemHit = NONE;
+   mEdgeHit = NONE;
 
-   if(mEditingSpecialAttrItem  != -1)              // If we're editing special attributes, disable this functionality
+   if(mEditingSpecialAttrItem  != NONE)              // If we're editing special attributes, disable this functionality
       return;
 
    for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
@@ -2320,23 +2383,22 @@ void EditorUserInterface::findHitItemAndEdge()
 
    // If we're still here, it means we didn't find anything yet.  Make one more pass, and see if we're in any polys.
    // This time we'll loop forward, though I don't think it really matters.
-
    for(S32 i = 0; i < mItems.size(); i++)
    {
       if(mShowMode == ShowAllButNavZones && mItems[i].index == ItemNavMeshZone)     // Don't select NavMeshZones while they're hidden
          continue;
 
-      if(itemDef[mItems[i].index].geom != geomPoly)
-         continue;
-
-      Vector<Point> verts;
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
-         verts.push_back(convertLevelToCanvasCoord(mItems[i].verts[j]));
-
-      if(PolygonContains2(verts.address(), verts.size(), mMousePos))
+      if(itemDef[mItems[i].index].geom == geomPoly)
       {
-         mItemHit = i;
-         return;
+         Vector<Point> verts;
+         for(S32 j = 0; j < mItems[i].verts.size(); j++)
+            verts.push_back(convertLevelToCanvasCoord(mItems[i].verts[j]));
+
+         if(PolygonContains2(verts.address(), verts.size(), mMousePos))
+         {
+            mItemHit = i;
+            return;
+         }
       }
    }
 }
@@ -2357,7 +2419,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
    findHitVertex(mMousePos, vertexHitPoly, vertexHit);
    findHitItemAndEdge();
 
-   if(itemToLightUp != -1)
+   if(itemToLightUp != NONE)
    {
       TNLAssert(itemToLightUp < mItems.size(), "Index out of bounds!");
       if(itemToLightUp >= mItems.size())     // Just in case...
@@ -2365,50 +2427,34 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 
       mItems[itemToLightUp].litUp = false;
    }
-   vertexToLightUp = -1;
-   itemToLightUp = -1;
+   vertexToLightUp = NONE;
+   itemToLightUp = NONE;
 
-   if(vertexHit != -1 && !mItems[vertexHitPoly].vertSelected[vertexHit])   // Hit a vertex that wasn't already selected
+   if(vertexHit != NONE && !mItems[vertexHitPoly].vertSelected[vertexHit])   // Hit a vertex that wasn't already selected
    {
       vertexToLightUp = vertexHit;
       itemToLightUp = vertexHitPoly;
    }
-   else if(mItemHit != -1 && !mItems[mItemHit].selected)                   // We hit an item that wasn't already selected
+   else if(mItemHit != NONE && !mItems[mItemHit].selected)                   // We hit an item that wasn't already selected
    {
       itemToLightUp = mItemHit;
    }
 
-   if(mItemHit != -1 && !mItems[mItemHit].selected && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
+   if(mItemHit != NONE && !mItems[mItemHit].selected && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
    {
       itemToLightUp = mItemHit;
-      vertexToLightUp = -1;
+      vertexToLightUp = NONE;
    }
 
-   if(itemToLightUp != -1)
+   if(itemToLightUp != NONE)
       mItems[itemToLightUp].litUp = true;
 
-   bool showMoveCursor = (vertexHitPoly != -1 || vertexHit != -1 || mItemHit != -1 || mEdgeHit != -1);
+   bool showMoveCursor = (vertexHitPoly != NONE || vertexHit != NONE || mItemHit != NONE || mEdgeHit != NONE || 
+                         (mouseOnDock() && findHitItemOnDock(mMousePos) != NONE));
 
-   // If we need to show the moveCursor, then we should also be showing the snapVertex.  That means we need to find it.
-   if(showMoveCursor)
-      findSnapVertex();
+   findSnapVertex();
 
    glutSetCursor(showMoveCursor ? GLUT_CURSOR_SPRAY : GLUT_CURSOR_RIGHT_ARROW);
-}
-
-
-bool EditorUserInterface::anySelected()
-{
-   for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i].selected)
-         return true;
-
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
-         if(mItems[i].vertSelected[j])
-            return true;
-   }
-   return false;
 }
 
 
@@ -2416,13 +2462,24 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 {
    mMousePos = convertWindowToCanvasCoord(Point(x,y));
 
-   if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem != -1)
+   if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem != NONE)
       return;
 
-   if(mDraggingDockItem != -1)      // We just started dragging an item off the dock
+   if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
    {
+      // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement
+      // seem more natural.
+      Point offset;
+      if(itemDef[mDockItems[mDraggingDockItem].index].geom == geomPoly)
+         offset = Point(.25, .15);
+      else if(mDockItems[mDraggingDockItem].index == ItemSpeedZone)
+         offset = Point(.15, 0);
+      else if(mDockItems[mDraggingDockItem].index == ItemTextItem)     
+         offset = Point(.4, 0);
+
+
       // Instantiate object so we are in essence dragging a non-dock item
-      Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos), true);
+      Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) - offset, true);
 
       // Gross struct avoids extra construction
       WorldItem item =
@@ -2431,27 +2488,38 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .7, .4) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, 1, 0);
-
+  
       clearSelection();            // No items are selected...
       item.selected = true;        // ...except for the new one
       mItems.push_back(item);      // Add our new item to the master item list
       mItems.sort(geometricSort);  // So things will render in the proper order
-      mDraggingDockItem = -1;      // Because now we're dragging a real item
+      mDraggingDockItem = NONE;    // Because now we're dragging a real item
       mUnmovedItems = mItems;      // So we know where things were so we know where to render them while being dragged
       validateLevel();             // Check level for errors
+
+      // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
+      // we'll manually set mItemHit based on the selected item, which will always be the one we just added.
+      mEdgeHit = NONE;
+      for(S32 i = 0; i < mItems.size(); i++)
+         if(mItems[i].selected)
+         {
+            mItemHit = i;
+            break;
+         }
    }
 
-   mDraggingObjects = true;
    Point delta = convertCanvasToLevelCoord(mMousePos);
-   
+
    findSnapVertex();
-   if(mSnapVertex_i == -1 || mSnapVertex_j == -1)
+   if(mSnapVertex_i == NONE || mSnapVertex_j == NONE)
       return;
+
+   mDraggingObjects = true;
 
    Point foundPoint = mUnmovedItems[mSnapVertex_i].verts[mSnapVertex_j];
 
    delta = snapToLevelGrid(delta - mMouseDownPos + foundPoint) - foundPoint;
-
+   
    // Now update the locations of all items we're moving to show them being dragged
    for(S32 i = 0; i < mItems.size(); i++)
       for(S32 j = 0; j < mItems[i].verts.size(); j++)
@@ -2466,13 +2534,37 @@ void EditorUserInterface::findSnapVertex()
 {
    F32 closestDist = F32_MAX;
 
-   mSnapVertex_i = -1;
-   mSnapVertex_j = -1;
+   if(mDraggingObjects)    // Don't change snap vertex once we're dragging
+      return;
+
+   mSnapVertex_i = NONE;
+   mSnapVertex_j = NONE;
 
    Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
 
-   if(mItemHit != -1 && mItems[mItemHit].selected)   // If we have a hit item, and it's selected, find the closest vertex in that
+   // If we have a hit item, and it's selected, find the closest vertex in the item
+   if(mItemHit != NONE && mItems[mItemHit].selected)   
    {
+      // If we've hit an edge, restrict our search to the two verts that make up that edge
+      if(mEdgeHit != NONE)
+      {
+         mSnapVertex_i = mItemHit;     // Regardless of vertex, this is our hit item
+         S32 v1 = mEdgeHit;
+         S32 v2 = mEdgeHit + 1;
+
+         // Handle special case of looping item
+         if(mEdgeHit + 1 == mItems[mItemHit].verts.size())
+            v2 = 0;
+
+         if(mItems[mItemHit].verts[v1].distSquared(mouseLevelCoord) < mItems[mItemHit].verts[v2].distSquared(mouseLevelCoord))
+            mSnapVertex_j = v1;
+         else     // Second vertex is closer
+            mSnapVertex_j = v2;
+
+         return;
+      }
+
+      // Didn't hit an edge... find the closest vertex anywhere in the item
       for(S32 j = 0; j < mItems[mItemHit].verts.size(); j++)
       {
          F32 dist = mItems[mItemHit].verts[j].distSquared(mouseLevelCoord);
@@ -2487,23 +2579,12 @@ void EditorUserInterface::findSnapVertex()
       return;
    } 
 
+   // Otherwise, we don't have a selected hitItem -- look for a selected vertex
    for(S32 i = 0; i < mItems.size(); i++)
       for(S32 j = 0; j < mItems[i].verts.size(); j++)
       {
-         if(mItems[i].selected)
-         {
-            // This bit here will find the vertex of the selected item(s) closest to our mouse
-            F32 dist = mItems[i].verts[j].distSquared(mouseLevelCoord);
-
-            if(dist < closestDist)
-            {
-               closestDist = dist;
-               mSnapVertex_i = i;
-               mSnapVertex_j = j;
-            }
-         }
          // If we find a selected vertex, there will be only one, and this is our snap point
-         else if(mItems[i].vertSelected[j])
+         if(mItems[i].vertSelected[j])
          {
             mSnapVertex_i = i;
             mSnapVertex_j = j;
@@ -2527,10 +2608,10 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    //mSelectedSet.clear();
    for(S32 i = 0; i < mItems.size(); ) // no i++
    {
-      if(mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1))
+      if(mItems[i].selected/* || (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          //if(mItems[i].litUp)  // Since indices change as items are deleted, this will keep incorrect items from being deleted
-         //   itemToLightUp = -1;
+         //   itemToLightUp = NONE;
          //else
          //   itemToLightUp--;
 
@@ -2542,15 +2623,15 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {
          for(S32 j = 0; j < mItems[i].verts.size(); )  // no j++
          {
-            if(mItems[i].vertSelected[j] || (mItems[i].litUp && vertexToLightUp == j))
+            if(mItems[i].vertSelected[j] /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
             {
                mItems[i].verts.erase(j);
                mItems[i].vertSelected.erase(j);
                deleted = true;
                //if(vertexToLightUp == j)
                //{
-               //   vertexToLightUp = -1;
-               //   //itemToLightUp = -1;
+               //   vertexToLightUp = NONE;
+               //   //itemToLightUp = NONE;
                //}
                //else
                //   vertexToLightUp--;
@@ -2581,8 +2662,8 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       mNeedToSave = true;
       autoSave();
 
-      itemToLightUp = -1;     // In case we just deleted a lit item
-      vertexToLightUp = -1;
+      itemToLightUp = NONE;     // In case we just deleted a lit item
+      vertexToLightUp = NONE;
    }
 }
 
@@ -2590,7 +2671,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/))
       {
          mItems[i].width += amt - (S32) mItems[i].width % amt;    // Handles rounding
 
@@ -2598,7 +2679,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
             mItems[i].width = LineItem::MAX_LINE_WIDTH;
 
          mNeedToSave = true;
-         mAllUndoneUndoLevel = -1;    // This change can't be undone
+         mAllUndoneUndoLevel = NONE;    // This change can't be undone
       }
 }
 
@@ -2606,7 +2687,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].hasWidth() && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].hasWidth() && (mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/))
       {
          mItems[i].width-= ((S32) mItems[i].width % amt) ? (S32) mItems[i].width % amt : amt;      // Dirty, ugly thing
          if(mItems[i].width < 1)
@@ -2624,8 +2705,8 @@ void EditorUserInterface::splitBarrier()
 
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].geomType() == geomLine)
-          for(S32 j = 1; j < mItems[i].verts.size()-1; j++)     // Can't split on end vertices!
-            if(mItems[i].vertSelected[j] || (mItems[i].litUp && vertexToLightUp == j))
+          for(S32 j = 1; j < mItems[i].verts.size() - 1; j++)     // Can't split on end vertices!
+            if(mItems[i].vertSelected[j] /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
             {
                split = true;
                WorldItem newItem;
@@ -2665,11 +2746,11 @@ void EditorUserInterface::joinBarrier()
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size()-1; i++)
-      if(mItems[i].geomType() == geomLine && (mItems[i].selected || (mItems[i].litUp && vertexToLightUp == -1)))
+      if(mItems[i].geomType() == geomLine && (mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/))
       {
          for(S32 j = i + 1; j < mItems.size(); j++)
          {
-            if(mItems[j].index == mItems[i].index && (mItems[j].selected || (mItems[j].litUp && vertexToLightUp == -1)))
+            if(mItems[j].index == mItems[i].index && (mItems[j].selected /*|| (mItems[j].litUp && vertexToLightUp == NONE)*/))
             {
                if(mItems[i].verts[0].distanceTo(mItems[j].verts[0]) < .01)    // First vertices are the same  1 2 3 | 1 4 5
                {
@@ -2680,8 +2761,7 @@ void EditorUserInterface::joinBarrier()
                      mItems[i].vertSelected.push_back(false);
                   }
                   mItems.erase(j);
-                  i--;
-                  j--;
+                  i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
                }
@@ -2694,8 +2774,7 @@ void EditorUserInterface::joinBarrier()
                      mItems[i].vertSelected.push_back(false);
                   }
                   mItems.erase(j);
-                  i--;
-                  j--;
+                  i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
 
@@ -2842,19 +2921,19 @@ void EditorUserInterface::restoreSelection()
 
 U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can't return a SpecialAttribute...  hrm...
 {
-   // Advance to the next attribute. If we were at None, start with the first.
-   U32 curr = (mSpecialAttribute == None) ? 0 : mSpecialAttribute + 1;
+   // Advance to the next attribute. If we were at NoAttribute, start with the first.
+   U32 curr = (mSpecialAttribute == NoAttribute) ? 0 : mSpecialAttribute + 1;
 
    // Find next attribute that applies to selected object
-   for(U32 i = curr; i <= None; i++)
+   for(U32 i = curr; i <= NoAttribute; i++)
    {
       if( ((i == Text) && itemDef[mItems[item].index].hasText) ||
           ((i == RepopDelay) && itemDef[mItems[item].index].hasRepop) ||
           ((i == GoFastSpeed || i == GoFastSnap) && !strcmp(itemDef[mItems[item].index].name, "SpeedZone")) ||   // strcmp ==> kind of janky
-          (i == None ) )
+          (i == NoAttribute ) )
          return i;
    }
-   return None;      // Should never get here...
+   return NoAttribute;      // Should never get here...
 }
 
 
@@ -2879,8 +2958,8 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
          }
       }
 
-   mEditingSpecialAttrItem = -1;
-   mSpecialAttribute = None;
+   mEditingSpecialAttrItem = NONE;
+   mSpecialAttribute = NoAttribute;
 }
 
 // Handle key presses
@@ -2922,7 +3001,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       for(S32 i = 0; i < mItems.size(); i++)
       {
-         if(mItems[i].selected || mItems[i].litUp)
+         if(mItems[i].selected /*|| mItems[i].litUp*/)
          {
             // Force item i to be the one and only selected item type.  This will clear up some problems that
             // might otherwise occur.  If you have multiple items selected, all will end up with the same values
@@ -2935,7 +3014,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mEditingSpecialAttrItem = i;
             mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
 
-            if(mSpecialAttribute != None)
+            if(mSpecialAttribute != NoAttribute)
             {
                mEditingSpecialAttrItem = i;
                saveUndoState(mItems);
@@ -2951,13 +3030,11 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
    // key actions are handled below.
-   if(mEditingSpecialAttrItem != -1)
+   if(mEditingSpecialAttrItem != NONE)
    {  /* braces required */
       if( keyCode == KEY_J && getKeyState(KEY_CTRL) )
       { /* Do nothing */ }
-      else if(keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)    // Trap mouse clicks... do nothing
-         return;
-      else if(keyCode == KEY_ESCAPE)      // End editing, revert
+      else if(keyCode == KEY_ESCAPE || keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)      // End editing, revert
       {
          doneEditingSpecialItem(false); 
          return;
@@ -3023,13 +3100,13 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    else if(ascii == '#' || ascii == '!')
    {
-      S32 selected = -1;
+      S32 selected = NONE;
       // Find first selected item, and just work with that.  Unselect the rest.
       for(S32 i = 0; i < mItems.size(); i++)
       {
          if(mItems[i].selected)
          {
-            if(selected == -1)
+            if(selected == NONE)
             {
                selected = i;
                continue;
@@ -3039,7 +3116,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
       }
 
-      if(selected == -1)      // Nothing selected, nothing to do!
+      if(selected == NONE)      // Nothing selected, nothing to do!
          return;
 
       editingIDMode = true;
@@ -3068,18 +3145,15 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          return;
       }
 
-      //S32 edgeHit, itemHit;
-      //findHitItemAndEdge(mMousePos, itemHit, edgeHit);
+      saveUndoState(mItems);     // Save undo state before we clear the selection
+      clearSelection();          // Unselect anything currently selected
 
-      if(mItemHit != -1 && (itemDef[mItems[mItemHit].index].geom == geomLine ||
+      if(mItemHit != NONE && (itemDef[mItems[mItemHit].index].geom == geomLine ||
                             itemDef[mItems[mItemHit].index].geom >= geomPoly   ))
       {
 
          if(mItems[mItemHit].verts.size() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
-
-         saveUndoState(mItems);
-         clearSelection();
 
          Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
@@ -3126,7 +3200,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == MOUSE_LEFT)
    {
-      mDraggingDockItem = -1;
+      mDraggingDockItem = NONE;
       mMousePos = convertWindowToCanvasCoord(gMousePos);
       if(mCreatingPoly || mCreatingPolyline)          // Save any polygon/polyline we might be creating
       {
@@ -3151,7 +3225,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else                 // Mouse is not on dock
       {
-         mDraggingDockItem = -1;
+         mDraggingDockItem = NONE;
 
          // rules for mouse down:
          // if the click has no shift- modifier, then
@@ -3171,23 +3245,23 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          if(!getKeyState(KEY_SHIFT))      // Shift key is not down
          {
-            if(vertexHit != -1 && mItems[vertexHitPoly].selected)    // Hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection
+            if(vertexHit != NONE && mItems[vertexHitPoly].selected)    // Hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection
             {
                clearSelection();
                mItems[vertexHitPoly].vertSelected[vertexHit] = true;
-               //vertexHit = -1;
+               //vertexHit = NONE;
                //itemHit = vertexHitPoly;
             }
-            if(mItemHit != -1 && mItems[mItemHit].selected)   // Hit an already selected item
+            if(mItemHit != NONE && mItems[mItemHit].selected)   // Hit an already selected item
             {
                // Do nothing
             }
-            else if(mItemHit != -1 && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Hit a point item
+            else if(mItemHit != NONE && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Hit a point item
             {
                clearSelection();
                mItems[mItemHit].selected = true;
             }
-            else if(vertexHit != -1 && (mItemHit == -1 || !mItems[mItemHit].selected))      // Hit a vertex of an unselected item
+            else if(vertexHit != NONE && (mItemHit == NONE || !mItems[mItemHit].selected))      // Hit a vertex of an unselected item
             {        // (braces required)
                if(!mItems[vertexHitPoly].vertSelected[vertexHit])
                {
@@ -3195,7 +3269,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                   mItems[vertexHitPoly].vertSelected[vertexHit] = true;
                }
             }
-            else if(mItemHit != -1)                                                        // Hit a non-point item, but not a vertex
+            else if(mItemHit != NONE)                                                        // Hit a non-point item, but not a vertex
             {
                clearSelection();
                mItems[mItemHit].selected = true;
@@ -3208,10 +3282,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
          else     // Shift key is down
          {
-            if(vertexHit != -1)
+            if(vertexHit != NONE)
                mItems[vertexHitPoly].vertSelected[vertexHit] =
                   !mItems[vertexHitPoly].vertSelected[vertexHit];
-            else if(mItemHit != -1)
+            else if(mItemHit != NONE)
                mItems[mItemHit].selected = !mItems[mItemHit].selected;    // Toggle selection of hit item
             else
                mDragSelecting = true;
@@ -3277,7 +3351,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else                                // S - Pan down
          mDown = true;
    }
-   else if(keyCode == KEY_A && getKeyState(KEY_CTRL))    // Ctrl-A - toggle see all objects
+   else if(keyCode == KEY_A && getKeyState(KEY_CTRL))            // Ctrl-A - toggle see all objects
    {
       mShowMode = (ShowMode) ((U32)mShowMode + 1);
       if(mShowMode == ShowAllButNavZones && !mHasBotNavZones)    // Skip hiding NavZones if we don't have any
@@ -3490,7 +3564,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
 
                if(mouseOnDock())             // This was really a delete (item dragged to dock)
                {
-                  if(mDraggingDockItem == -1)
+                  if(mDraggingDockItem == NONE)
                   {
                      for(S32 i = 0; i < mItems.size(); i++)
                         if(mItems[i].selected)
@@ -3498,7 +3572,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                            mItems.erase(i);
                            break;
                         }
-                     itemToLightUp = -1;
+                     itemToLightUp = NONE;
                   }
                   else        // Dragged item off the dock, then back on  ==> nothing really changed
                   {
@@ -3507,7 +3581,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                }
                else      // Mouse not on dock... we were either dragging from the dock or moving something, need to save an undo state if anything changed
                {
-                  if(mDraggingDockItem != -1)      // Dragging from dock
+                  if(mDraggingDockItem != NONE)      // Dragging from dock
                   {
                      // Do nothing
                   }
@@ -3556,7 +3630,7 @@ bool EditorUserInterface::mouseOnDock()
 bool EditorUserInterface::anyItemsSelected()
 {
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].selected || mItems[i].litUp )
+      if(mItems[i].selected /*|| mItems[i].litUp*/ )
          return true;
 
    return false;
@@ -3567,7 +3641,7 @@ bool EditorUserInterface::anyItemsOrVertsSelected()
 {
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected || mItems[i].litUp )
+      if(mItems[i].selected /*|| mItems[i].litUp*/ )
          return true;
       for(S32 j = 0; j < mItems[i].verts.size(); j++)
          if(mItems[i].vertSelected[j])

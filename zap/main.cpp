@@ -78,7 +78,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Fixed editor crashing issue caused by double-delete of item</li>
 <li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
 <li>Undo/redo more efficient -- will perform better with large levels and deep undo states (and will no longer crash!)</li>
-<li>Added autosave -- will keep a current copy of the level</li>
+<li>Added autosave -- will keep a current copy of the level on disk in the event of a crash (though crashes are much rarer now)</li>
 <li>Ctrl-left click now starts a wall</li>
 <li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
 <li>Editor remembers name of last edited file</li>
@@ -86,7 +86,10 @@ XXX need to document timers, new luavec stuff XXX
 <li>Improved preview mode (when holding Tab key)</li>
 <li>Text in editor now subject to same min/max size constraints as text in the game</li>
 <li>Team names can be changed in the editor</li>
-<li>When moving, items now snap to grid based on vertex closest to cursor, giving much greater control over placement.  Snapping vertex rendered in magenta.</li>
+<li>When moving, items now snap to grid based on vertex closest to cursor, giving much greater control over placement.  Snapping vertex highlighted in magenta.</li>
+<li>Can now snap items to other items, not just to grid</li>
+<li>Hovering over an item no longer counts as selecting it</li>
+<li>Increased readibility of node numbers on selected lines/polygons</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

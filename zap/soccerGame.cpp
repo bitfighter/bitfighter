@@ -299,13 +299,15 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
       mMoveState[ActualState].vel *= accelFraction;
       mMoveState[RenderState].vel *= accelFraction;
    }
-   else
-   {
-      F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
 
-      mMoveState[ActualState].vel *= accelFraction;
-      mMoveState[RenderState].vel *= accelFraction;
-   }
+   // The following block will add some friction to the soccer ball
+   //else
+   //{
+   //   F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
+   //
+   //   mMoveState[ActualState].vel *= accelFraction;
+   //   mMoveState[RenderState].vel *= accelFraction;
+   //}
 
    Parent::idle(path);
 }
