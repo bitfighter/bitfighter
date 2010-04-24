@@ -36,6 +36,8 @@ LineEditor::LineEditor(U32 maxLength, string value)
 {
    mMaxLen = maxLength;
    mLine = value;
+   mFilter = allAsciiFilter;
+   mPrompt = "";
 }
 
 
@@ -90,6 +92,16 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, F32 angle)
 }
 
 
+void LineEditor::addChar(char c) 
+{ 
+   if((mFilter == digitsOnlyFilter) && (c < '0' || c > '9'))
+      return;
+      
+   if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
+      return;
+
+   if(length() < mMaxLen) mLine.push_back(c); 
+}
 
 // keyCode will have either backspace or delete in it -- basically a convenience function
 void LineEditor::handleBackspace(KeyCode keyCode)

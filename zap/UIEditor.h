@@ -301,7 +301,7 @@ private:
    bool mCreatingPolyline;
    bool mDragSelecting;
    bool mShowingReferenceShip;
-   bool editingIDMode;
+   LineEditor mEntryBox;
 
    S32 mDraggingDockItem;
    Vector<string> mLevelErrorMsgs;

@@ -1205,24 +1205,31 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact)
 }
 
 
-void renderResourceItem(Point pos, F32 alpha)
+void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha)
 {
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
 
-      glColor4f(1, 1, 1, alpha);
+      glColor(color == NULL ? Color(1, 1, 1) : color, alpha);
+
       glBegin(GL_LINE_LOOP);
-         glVertex2f(-8, 8);
-         glVertex2f(0, 20);
-         glVertex2f(8, 8);
-         glVertex2f(20, 0);
-         glVertex2f(8, -8);
-         glVertex2f(0, -20);
-         glVertex2f(-8, -8);
-         glVertex2f(-20, 0);
+         glVertex2f(-8 * scaleFactor, 8 * scaleFactor);
+         glVertex2f(0, 20 * scaleFactor);
+         glVertex2f(8 * scaleFactor, 8 * scaleFactor);
+         glVertex2f(20 * scaleFactor, 0);
+         glVertex2f(8 * scaleFactor, -8 * scaleFactor);
+         glVertex2f(0, -20 * scaleFactor);
+         glVertex2f(-8 * scaleFactor, -8 * scaleFactor);
+         glVertex2f(-20 * scaleFactor, 0);
       glEnd();
 
    glPopMatrix();
+}
+
+
+void renderResourceItem(Point pos, F32 alpha)
+{
+   renderResourceItem(pos, 1, NULL, alpha);
 }
 
 

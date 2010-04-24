@@ -90,9 +90,13 @@ extern void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32
 void renderSpeedZone(Vector<Point>, U32 time);
 
 void renderTestItem(Point pos, F32 alpha = 1);
+
 void renderAsteroid(Point pos, S32 design, F32 radius);
 void renderAsteroid(Point pos, S32 design, F32 radius, Color c, F32 alpha = 1);
+
 void renderResourceItem(Point pos, F32 alpha = 1);
+void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha);
+
 void renderSoccerBall(Point pos, F32 alpha = 1);
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);
 

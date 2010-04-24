@@ -4,7 +4,6 @@
 // Select in entire body of asteroid, ball, testitem
 // Draw selection indicator around entire item
 // Rotate arbitrary amount
-// More consistent selection rendering (selection in white, selected in yellow, some other color to indicate hover)
 //
 
 */
@@ -92,6 +91,14 @@ static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
 static Vector<WorldItem> *mLoadTarget;
 
+
+enum EntryMode {
+   EntryID,
+   EntryAngle,
+   EntryNone
+};
+
+static EntryMode entryMode;
 
 void saveLevelCallback()
 {
@@ -869,8 +876,6 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
-static LineEditor idLineEditor(10);
-
 void EditorUserInterface::onActivate()
 {
    // Check if we have a level name:
@@ -906,7 +911,7 @@ void EditorUserInterface::onActivate()
    mDraggingDockItem = NONE;
    mCurrentTeam = 0;
    mShowingReferenceShip = false;
-   editingIDMode = false;
+   entryMode = EntryNone;
 
    itemToLightUp = NONE;     // Index to keep track of which item is litUp
    vertexToLightUp = NONE;
@@ -1278,30 +1283,37 @@ void EditorUserInterface::render()
 
 
    // Render id-editing overlay
-   if(editingIDMode)
+   if(entryMode != EntryNone)
    {
       static const U32 fontsize = 16;
-      static const S32 boxwidth = 205;
       static const S32 inset = 9;
       static const S32 boxheight = fontsize + 2 * inset;
       static const Color color(0.9, 0.9, 0.9);
       static const Color errorColor(1, 0, 0);
-      static const char *prompt = "Item ID: ";
 
-      bool dupfound = false;
-      S32 id = atoi(idLineEditor.c_str());
+      bool errorFound = false;
 
-      if(id != 0)    // Check for duplicates
+      // Check for duplicate IDs if we're in ID entry mode
+      if(entryMode == EntryID)
       {
-         for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems[i].id == id && !mItems[i].selected)
-            {
-               dupfound = true;
-               break;
-            }
+         S32 id = atoi(mEntryBox.c_str());
+
+         if(id != 0)    // Check for duplicates
+         {
+            for(S32 i = 0; i < mItems.size(); i++)
+               if(mItems[i].id == id && !mItems[i].selected)
+               {
+                  errorFound = true;
+                  break;
+               }
+         }
       }
 
-      // Render id entry box
+      // Calculate box width
+      S32 boxwidth = 2 * inset + getStringWidth(fontsize, mEntryBox.getPrompt().c_str()) + 
+          mEntryBox.getMaxLen() * getStringWidth(fontsize, "-") + 25;
+
+      // Render entry box    
       glEnable(GL_BLEND);
       S32 xpos = (canvasWidth - boxwidth) / 2;
       S32 ypos = (canvasHeight - boxheight) / 2;
@@ -1321,10 +1333,10 @@ void EditorUserInterface::render()
 
       xpos += inset;
       ypos += inset;
-      glColor(dupfound ? errorColor : color);
-      xpos += drawStringAndGetWidth(xpos, ypos, fontsize, prompt);
-      drawString(xpos, ypos, fontsize, idLineEditor.c_str());
-      idLineEditor.drawCursor(xpos, ypos, fontsize);
+      glColor(errorFound ? errorColor : color);
+      xpos += drawStringAndGetWidthf(xpos, ypos, fontsize, "%s ", mEntryBox.getPrompt().c_str());
+      drawString(xpos, ypos, fontsize, mEntryBox.c_str());
+      mEntryBox.drawCursor(xpos, ypos, fontsize);
    }
 }
 
@@ -1804,7 +1816,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPopMatrix();
          }
          else
-            renderGenericItem(pos, c, alpha);
+             renderResourceItem(pos, .4, hideit ? grayedOutColorDim : NULL, alpha);
+            //renderGenericItem(pos, c, alpha);
       }
       else if(item.index == ItemSoccerBall)  // Soccer ball, obviously
       {
@@ -1838,9 +1851,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          drawCircle(pos, 5);
 
          // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
-         if(!isDockItem && mShowingReferenceShip)
+         if(!isDockItem && mShowingReferenceShip && (item.selected || item.litUp))
          {
-            glColor4f(getTeamColor(item.team).r, getTeamColor(item.team).g, getTeamColor(item.team).b, .25 * alpha);
+            glColor(getTeamColor(item.team), .25 * alpha);
 
           F32 size = mCurrentScale / mGridSize * gSpyBugRange;
             glBegin(GL_POLYGON);
@@ -1891,9 +1904,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       // If we have a turret, render it's range (if tab is depressed)
       if(item.index == ItemTurret)
       {
-         if(!isDockItem && mShowingReferenceShip)
+         if(!isDockItem && mShowingReferenceShip && (item.selected || item.litUp))
          {
-            glColor4f(getTeamColor(item.team).r, getTeamColor(item.team).g, getTeamColor(item.team).b, .25 * alpha);
+            glColor(getTeamColor(item.team), .25 * alpha);
 
             F32 size = mCurrentScale / mGridSize * (gWeapons[WeaponTurret].projLiveTime * gWeapons[WeaponTurret].projVelocity / 1000);
             glBegin(GL_POLYGON);
@@ -2209,11 +2222,10 @@ void EditorUserInterface::setCurrentTeam(S32 currentTeam)
    // Overwrite any warnings set above.  If we have a group of items selected, it makes no sense to show a
    // warning if one of those items has the team set improperly.  The warnings are more appropriate if only
    // one item is selected, or none of the items are given a valid team setting.
-   if(anyOK)
-      gEditorUserInterface.setWarnMessage("", "");
 
    if(anyChanged)
    {
+      gEditorUserInterface.setWarnMessage("", "");
       saveUndoState(undoItems);      // If anything changed, push our temp state onto the undo stack
       validateLevel();
       mNeedToSave = true;
@@ -2847,6 +2859,17 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
 }
 
 
+static LineEditor getNewEntryBox(string value, string prompt, S32 length, LineEditor::LineEditorFilter filter)
+{
+   LineEditor entryBox(length);
+   entryBox.setPrompt(prompt);
+   entryBox.setString(value);
+   entryBox.setFilter(filter);
+
+   return entryBox;
+}
+
+
 void EditorUserInterface::centerView()
 {
    if(mItems.size() || mLevelGenItems.size())
@@ -2965,33 +2988,41 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(editingIDMode)
+   if(entryMode != EntryNone)
    {
       if(keyCode == KEY_ENTER)
       {
-         for(S32 i = 0; i < mItems.size(); i++)
-            if(mItems[i].selected)          // Should only be one
-            {
-               S32 id = atoi(idLineEditor.c_str());
-               if(mItems[i].id != id)       // Did the id actually change?
+         if(entryMode == EntryID)
+         {
+            for(S32 i = 0; i < mItems.size(); i++)
+               if(mItems[i].selected)          // Should only be one
                {
-                  mItems[i].id = id;
-                  mAllUndoneUndoLevel = -1; // If so, it can't be undone
+                  S32 id = atoi(mEntryBox.c_str());
+                  if(mItems[i].id != id)       // Did the id actually change?
+                  {
+                     mItems[i].id = id;
+                     mAllUndoneUndoLevel = -1; // If so, it can't be undone
+                  }
+                  break;
                }
-               break;
-            }
+         }
+         else if(entryMode == EntryAngle)
+         {
+            F32 angle = (F32) atof(mEntryBox.c_str());
+            rotateSelection(-angle);      // Positive angle should rotate CW, negative makes that happen
+         }
 
-         editingIDMode = false;
+         entryMode = EntryNone;
       }
       else if(keyCode == KEY_ESCAPE)
       {
-         editingIDMode = false;
+         entryMode = EntryNone;
       }
       else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-         idLineEditor.handleBackspace(keyCode);
+         mEntryBox.handleBackspace(keyCode);
 
-      else if(ascii >= '0' && ascii <= '9')
-         idLineEditor.addChar(ascii);
+      else
+         mEntryBox.addChar(ascii);
 
       // else ignore keystroke
       return;
@@ -3101,6 +3132,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(ascii == '#' || ascii == '!')
    {
       S32 selected = NONE;
+
       // Find first selected item, and just work with that.  Unselect the rest.
       for(S32 i = 0; i < mItems.size(); i++)
       {
@@ -3119,9 +3151,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(selected == NONE)      // Nothing selected, nothing to do!
          return;
 
-      editingIDMode = true;
-
-      idLineEditor.setString(mItems[selected].id <= 0 ? "" : itos(mItems[selected].id));
+      mEntryBox = getNewEntryBox(mItems[selected].id <= 0 ? "" : itos(mItems[selected].id), 
+                                 "Item ID:", 10, LineEditor::digitsOnlyFilter);
+      entryMode = EntryID;
    }
 
    else if(ascii >= '0' && ascii <= '9')           // Change team affiliation of selection with 0-9 keys
@@ -3323,7 +3355,15 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
         centerView();
    }
    else if(keyCode == KEY_R)
-      if(getKeyState(KEY_CTRL))        // Ctrl-R - Run levelgen script, or clear last results
+      if(getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))      // Ctrl-Shift-R - Rotate by arbitrary amount
+      {
+         if(!anyItemsSelected())
+            return;
+
+         mEntryBox = getNewEntryBox("", "Rotation angle:", 10, LineEditor::numericFilter);
+         entryMode = EntryAngle;
+      }
+      else if(getKeyState(KEY_CTRL))        // Ctrl-R - Run levelgen script, or clear last results
       {
          if(mLevelGenItems.size() == 0)
             runScript();
@@ -3434,7 +3474,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       gChatInterface.activate();
 //   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay -- why not here??
 //      gDiagnosticInterface.activate();
-   else if(keyCode == KEY_ESCAPE)         // Activate the menu
+   else if(keyCode == KEY_ESCAPE)           // Activate the menu
    {
       UserInterface::playBoop();
       gEditorMenuUserInterface.activate();
@@ -3650,6 +3690,7 @@ bool EditorUserInterface::anyItemsOrVertsSelected()
 
    return false;
 }
+
 
 
 void EditorUserInterface::idle(U32 timeDelta)
