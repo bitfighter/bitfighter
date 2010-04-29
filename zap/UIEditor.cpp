@@ -98,6 +98,7 @@ enum EntryMode {
    EntryNone
 };
 
+
 static EntryMode entryMode;
 
 void saveLevelCallback()
@@ -402,7 +403,7 @@ void EditorUserInterface::setLevelGenScriptName(string line)
 }
 
 
-S32 EditorUserInterface::getDefaultRepopDelay(GameItems itemType)    // static
+S32 WorldItem::getDefaultRepopDelay(GameItems itemType)  
 {
    if(itemType == ItemFlagSpawn)
       return FlagSpawn::defaultRespawnTime;
@@ -436,7 +437,7 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 // This sort will put points on top of lines on top of polygons...  as they should be
 S32 QSORT_CALLBACK geometricSort(WorldItem *a, WorldItem *b)
 {
-   return (itemDef[a->index].geom < itemDef[b->index].geom);
+   return (a->geomType() < b->geomType());
 }
 
 
@@ -494,49 +495,129 @@ extern S32 gMaxPlayers;
 // Process a line read from level file
 void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)
 {
-   U32 index;
-   U32 strlenCmd = (U32) strlen(argv[0]);
-   for(index = 0; itemDef[index].name != NULL; index++)
+   S32 strlenCmd = (S32) strlen(argv[0]);
+
+   // Parse GameType line... All game types are of form XXXXGameType
+   if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
    {
-      // Figure out how many arguments an item should have
-      if(!strcmp(argv[0], itemDef[index].name))
+      strcpy(gEditorUserInterface.mGameType, GameType::validateGameType(argv[0]) );    // validateGameType will return a valid game type, regradless of what's put in
+
+      if(strcmp(gEditorUserInterface.mGameType, argv[0]))      // If these differ, then what we put in was invalid
+         gEditorUserInterface.setWarnMessage("Invalid or missing GameType parameter", "Press [F3] to configure level");
+
+      // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
+      for(U32 i = 1; i < argc; i++)
+         gEditorUserInterface.mGameTypeArgs.push_back(atoi(argv[i]));
+   }
+
+   else if(!strcmp(argv[0], "GridSize"))
+   {
+      if(argc >= 1)
+         gEditorUserInterface.setGridSize((F32) atof(argv[1]));
+   }
+
+   else if(!strcmp(argv[0], "Script"))
+   {
+      gEditorUserInterface.mScriptLine = "";
+      // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
+      for(U32 i = 1; i < argc; i++)
       {
-         U32 minArgs = 3;
-         if(itemDef[index].geom >= geomLine)
-            minArgs += 2;
-         if(itemDef[index].hasTeam)
-            minArgs++;
-         if(itemDef[index].hasText)
-            minArgs += 2;        // Size and message
-         if(argc >= minArgs)     // We have enough args, please proceed.
-            break;
+         if(i > 1)
+            gEditorUserInterface.mScriptLine += " ";
+
+         gEditorUserInterface.mScriptLine += argv[i];
       }
    }
 
+   // Parse Team definition line
+   else if(!strcmp(argv[0], "Team"))
+   {
+      if(mTeams.size() >= GameType::gMaxTeams)     // Ignore teams with numbers higher than 9
+         return;
+
+      TeamEditor team;
+      team.readTeamFromLevelLine(argc, argv);
+
+      // If team was read and processed properly, numPlayers will be 0
+      if(team.numPlayers != -1)
+         mTeams.push_back(team);
+   }
+
+   else
+   {
+      GameItems itemType = ItemInvalid;
+
+      for(S32 index = 0; itemDef[index].name != NULL; index++)
+         if(!strcmp(argv[0], itemDef[index].name))
+         {
+            itemType = static_cast<GameItems>(index);
+            break;
+         }
+
+      if(itemType != ItemInvalid)     // Item appears invalid
+      {
+         WorldItem newItem(itemType);
+
+         newItem.processArguments(argc - 1, argv + 1);
+   
+         mLoadTarget->push_back(newItem);
+
+         return;
+      }
+   }
+
+   // What remains are various game parameters...  Note that we will hit this block even if we already looked at gridSize and such...
+   // Before copying, we'll make a dumb copy, which will be overwritten if the user goes into the GameParameters menu
+   // This will cover us if the user comes in, edits the level, saves, and exits without visiting the GameParameters menu
+   // by simply echoing all the parameters back out to the level file without further processing or review.
+   string temp;
+   for(U32 i = 0; i < argc; i++)
+   {
+      temp += argv[i];
+      if(i < argc - 1)
+         temp += " ";
+   }
+   gGameParamUserInterface.gameParams.push_back(temp);
+}    
+
+
+// First argument has already been removed before we get this.  This is just the parameter list.
+bool WorldItem::processArguments(S32 argc, const char **argv)
+{
+   // Figure out how many arguments an item should have
+   S32 minArgs = 2;
+   if(itemDef[index].geom >= geomLine)
+      minArgs += 2;
+   if(itemDef[index].hasTeam)
+      minArgs++;
+   if(itemDef[index].hasText)
+      minArgs += 2;        // Size and message
+   if(argc < minArgs)      // Not enough args, time to bail
+      return false;
+
    if(index == ItemNavMeshZone)
-      mHasBotNavZones = true;
+      gEditorUserInterface.setHasNavMeshZones(true);
 
    // Parse most game objects
    if(itemDef[index].name)       // Item is listed in itemDef, near top of this file
    {
-      WorldItem i;
-      i.index = static_cast<GameItems>(index);
-      U32 arg = 1;
+      index = static_cast<GameItems>(index);
+      S32 arg = 0;
 
       // Should the following be moved to the constructor?  Probably...
-      i.team = TEAM_NEUTRAL;
-      i.selected = false;
-      i.width = 0;
-      i.id = id;
+      team = TEAM_NEUTRAL;
+      selected = false;
+      width = 0;
+      id = id;
 
       if(itemDef[index].hasTeam)
       {
-         i.team = atoi(argv[arg]);
+         team = atoi(argv[arg]);
          arg++;
       }
       if(itemDef[index].hasWidth)
       {
-         i.width = atof(argv[arg]);
+         width = atof(argv[arg]);
          arg++;
       }
       if(index == ItemTextItem)
@@ -545,12 +626,11 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
          {
             Point p;
             p.read(argv + arg);
-            i.verts.push_back(p);
-            i.vertSelected.push_back(false);
+            addVert(p);
             arg+=2;
          }
 
-         i.textSize = atoi(argv[arg]);    // ...and a textsize...
+         textSize = atoi(argv[arg]);    // ...and a textsize...
          arg++;
 
          string str;
@@ -561,139 +641,69 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
                str += " ";
          }
 
-         i.lineEditor.setString(str);
+         lineEditor.setString(str);
       }
-      else if(index == ItemNexus && argc == 5)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
+      else if(index == ItemNexus && argc == 4)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
       {
          // Arg 0 will be HuntersNexusObject
          Point pos;
          pos.read(argv + 1);
 
          Point ext(50, 50);
-         ext.set(atoi(argv[3]), atoi(argv[4]));
-         ext /= mGridSize;
+         ext.set(atoi(argv[2]), atoi(argv[3]));
+         ext /= gEditorUserInterface.getGridSize();
 
-         Point p;
-         p.set(pos.x - ext.x, pos.y - ext.y);   // UL corner
-         i.verts.push_back(p);
-         p.set(pos.x + ext.x, pos.y - ext.y);   // UR corner
-         i.verts.push_back(p);
-         p.set(pos.x + ext.x, pos.y + ext.y);   // LR corner
-         i.verts.push_back(p);
-         p.set(pos.x - ext.x, pos.y + ext.y);   // LL corner
-         i.verts.push_back(p);
-
-         for(S32 j = 0; j < 4; j++)
-            i.vertSelected.push_back(false);
+         addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
+         addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
+         addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
+         addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
       }
       else        // Anything but a textItem or old-school NexusObject
       {
-         U32 coords = argc;
+         S32 coords = argc;
          if(index == ItemSpeedZone)
             coords = 4;    // 2 pairs of coords = 2 * 2 = 4
 
          for(;arg < coords; arg += 2) // (no first arg)
          {
             // Put a cap on the number of vertices in a polygon
-            if(itemDef[index].geom == geomPoly && i.verts.size() >= gMaxPolygonPoints)
+            if(itemDef[index].geom == geomPoly && mVerts.size() >= gMaxPolygonPoints)
                break;
-            Point p;
+            
             if(arg != argc - 1)
             {
+               Point p;
                p.read(argv + arg);
-               i.verts.push_back(p);
-               i.vertSelected.push_back(false);
+               addVert(p);
             }
          }
       }
 
       // Add a default spawn time, which may well be overridden below
-      i.repopDelay = getDefaultRepopDelay(i.index);
+      repopDelay = getDefaultRepopDelay(index);
 
       // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
-      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 4)
-         i.repopDelay = atoi(argv[3]);
+      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 3)
+         repopDelay = atoi(argv[2]);
 
-      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 5)
-         i.repopDelay = atoi(argv[4]);
+      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 4)
+         repopDelay = atoi(argv[3]);
 
       // SpeedZones have 2 optional extra arguments
       if(index == ItemSpeedZone)
       {
-         if(argc >= 6)
-            i.speed = atoi(argv[5]);
+         if(argc >= 5)
+            speed = atoi(argv[4]);
          else
-            i.speed = SpeedZone::defaultSpeed;
+            speed = SpeedZone::defaultSpeed;
 
-         if(argc >= 7)
-            i.boolattr = true;
+         if(argc >= 6)
+            boolattr = true;
        }
-
-      mLoadTarget->push_back(i);    // Save item in the target item list
    }
 
-   else  // What remains are various game parameters
-   {
-      // Before copying, we'll make a dumb copy, which will be overwritten if the user goes into the GameParameters menu
-      // This will cover us if the user comes in, edits the level, saves, and exits without visiting the GameParameters menu
-      // by simply echoing all the parameters back out to the level file without furter processing or review.
-      string temp;
-      for(U32 i = 0; i < argc; i++)
-      {
-         temp += argv[i];
-         if(i < argc - 1)
-            temp += " ";
-      }
-      gGameParamUserInterface.gameParams.push_back(temp);
-
-      // Parse GameType line... All game types are of form XXXXGameType
-      if(strlenCmd >= 8 && !strcmp(argv[0] + strlenCmd - 8, "GameType"))
-      {
-         strcpy(mGameType, GameType::validateGameType(argv[0]) );    // validateGameType will return a valid game type, regradless of what's put in
-
-         if(strcmp(mGameType, argv[0]))      // If these differ, then what we put in was invalid
-            gEditorUserInterface.setWarnMessage("Invalid or missing GameType parameter", "Press [F3] to configure level");
-
-         // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
-         for(U32 i = 1; i < argc; i++)
-            mGameTypeArgs.push_back(atoi(argv[i]));
-      }
-
-      else if(!strcmp(argv[0], "GridSize"))
-      {
-         if(argc >= 1)
-            mGridSize = atof(argv[1]);
-      }
-
-      else if(!strcmp(argv[0], "Script"))
-      {
-         mScriptLine = "";
-         // Munge everything into a string.  We'll have to parse after editing in GameParamsMenu anyway.
-         for(U32 i = 1; i < argc; i++)
-         {
-            if(i > 1)
-               mScriptLine += " ";
-
-            mScriptLine += argv[i];
-         }
-      }
-
-      // Parse Team definition line
-      else if(!strcmp(argv[0], "Team"))
-      {
-         if(mTeams.size() >= GameType::gMaxTeams)
-            return;
-
-         TeamEditor team;
-         team.readTeamFromLevelLine(argc, argv);
-
-         // If team was read and processed properly, numPlayers will be 0
-         if(team.numPlayers != -1)
-            mTeams.push_back(team);
-      }
-   }
-}     // end processLevelLoadLine
-
+   return true;
+}
 
 
 void EditorUserInterface::runScript()
@@ -949,27 +959,35 @@ void EditorUserInterface::onReactivate()
    populateDock();            // If game type has changed, items on dock will change
 }
 
+
 Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 {
-   if( snapDisabled || (mouseOnDock() && !snapWhileOnDock) )
+   if(mouseOnDock() && !snapWhileOnDock) 
       return p;
 
-   // First, find a snap point based on our grid
-   F32 mulFactor, divFactor;
-   if(mCurrentScale >= 100)
+   F32 minDist = 100 / (mCurrentScale * mCurrentScale);
+   Point snapPoint = p;
+  
+   if(!snapDisabled)
    {
-      mulFactor = 10;
-      divFactor = 0.1;
-   }
-   else
-   {
-      mulFactor = 2;
-      divFactor = 0.5;
+      // First, find a snap point based on our grid
+      F32 mulFactor, divFactor;
+      if(mCurrentScale >= 100)
+      {
+         mulFactor = 10;
+         divFactor = 0.1;
+      }
+      else
+      {
+         mulFactor = 2;
+         divFactor = 0.5;
+      }
+
+      snapPoint = Point(floor(p.x * mulFactor + 0.5) * divFactor, floor(p.y * mulFactor + 0.5) * divFactor);
+
+      minDist = snapPoint.distSquared(p);
    }
 
-   Point snapPoint(floor(p.x * mulFactor + 0.5) * divFactor, floor(p.y * mulFactor + 0.5) * divFactor);
-
-   F32 minDist = snapPoint.distSquared(p);
 
    // Now look for other things we might want to snap to
    for(S32 i = 0; i < mItems.size(); i++)
@@ -977,16 +995,57 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
       if(mItems[i].selected)     // Don't snap to selected items
          continue;
 
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+      for(S32 j = 0; j < mItems[i].vertCount(); j++)
       {
-         if(mItems[i].vertSelected[j])      
+         if(mItems[i].vertSelected(j))      
             continue;
 
-         F32 dist = mItems[i].verts[j].distSquared(p);
+         F32 dist = mItems[i].vert(j).distSquared(p);
          if(dist < minDist)
          {
             minDist = dist;
-            snapPoint = mItems[i].verts[j];
+            snapPoint = mItems[i].vert(j);
+         }
+      }
+   }
+
+   
+   if(minDist >= 90 / (mCurrentScale * mCurrentScale))
+   {
+      // If we're editing a navMeshZone, we can snap to the edges of other navMeshZones
+      for(S32 i = 0; i < mItems.size(); i++)
+      {
+         if(mItems[i].geomType() != geomPoly && mItems[i].selected && mItems[i].anyVertsSelected())
+            continue;
+
+         Vector<Point> verts = mItems[i].getVerts();
+         if(mItems[i].geomType() == geomPoly)   // Add first point to the end to create last side on poly
+            verts.push_back(verts.first());
+
+         Point p1 = verts[0];
+
+         for(S32 j = 0; j < verts.size() - 1; j++)
+         {
+            Point p2 = verts[j+1];
+
+            Point edgeDelta = p2 - p1;
+            Point clickDelta = p - p1;
+            float fraction = clickDelta.dot(edgeDelta);
+            float lenSquared = edgeDelta.dot(edgeDelta);
+
+            if(fraction > 0 && fraction < lenSquared)
+            {
+               // Compute the closest point:
+               Point closest = p1 + edgeDelta * (fraction / lenSquared);
+               float distance = (p - closest).lenSquared();
+                 
+               if(distance < minDist)
+               {
+                  minDist = distance;
+                  snapPoint = closest;
+               }
+            }
+            p1 = p2;
          }
       }
    }
@@ -1081,8 +1140,7 @@ void EditorUserInterface::render()
 
    if(mCreatingPoly || mCreatingPolyline)    // Draw geomLine features under construction
    {
-      Point mouseVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
-      mNewItem.verts.push_back(mouseVertex);
+      mNewItem.addVert(snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)));
       glLineWidth(3);
 
       if(mCreatingPoly) // Wall
@@ -1090,21 +1148,21 @@ void EditorUserInterface::render()
       else              // LineItem
          glColor(getTeamColor(mNewItem.team));
 
-      renderPoly(mNewItem.verts, false);
+      renderPoly(mNewItem.getVerts(), false);
 
       glLineWidth(gDefaultLineWidth);
 
-      for(S32 j = mNewItem.verts.size() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
+      for(S32 j = mNewItem.vertCount() - 1; j >= 0; j--)      // Go in reverse order so that placed vertices are drawn atop unplaced ones
       {
-         Point v = convertLevelToCanvasCoord(mNewItem.verts[j]);
+         Point v = convertLevelToCanvasCoord(mNewItem.vert(j));
 
          // Draw vertices
-         if(j == mNewItem.verts.size() - 1)           // This is our most current vertex
+         if(j == mNewItem.vertCount() - 1)           // This is our most current vertex
             renderVertex(HighlightedVertex, v, NO_NUMBER);
          else
             renderVertex(SelectedItemVertex, v, j);
       }
-      mNewItem.verts.erase_fast(mNewItem.verts.size() - 1);
+      mNewItem.deleteVert(mNewItem.vertCount() - 1);
    }
    else  // Since we're not constructing a barrier, if there are any barriers or lineItems selected, get the width for display at bottom of dock
    {
@@ -1340,29 +1398,23 @@ void EditorUserInterface::render()
    }
 }
 
+
 // Draw the vertices for a polygon or line item (i.e. walls)
 void EditorUserInterface::renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha)
 {
    if(mShowingReferenceShip)
       return;
-   bool anyVertSelected = false;
-   for(S32 j = 0; j < item.verts.size(); j++)
-      if(item.vertSelected[j])
-      {
-         anyVertSelected = true;
-         break;
-      }
 
    // Draw the vertices of the wall or the polygon area
-   for(S32 j = 0; j < item.verts.size(); j++)
+   for(S32 j = 0; j < item.vertCount(); j++)
    {
-      Point v = convertLevelToCanvasCoord(item.verts[j]);
+      Point v = convertLevelToCanvasCoord(item.vert(j));
 
-      if(item.vertSelected[j])
+      if(item.vertSelected(j))
          renderVertex(SelectedVertex, v, j, alpha);             // Hollow yellow boxes with number
       else if(item.litUp && j == vertexToLightUp)
          renderVertex(HighlightedVertex, v, j, alpha);          // Hollow yellow boxes with number
-      else if(item.selected || item.litUp || anyVertSelected)
+      else if(item.selected || item.litUp || item.anyVertsSelected())
          renderVertex(SelectedItemVertex, v, j, alpha);         // Hollow red boxes with number
       else
          renderVertex(UnselectedItemVertex, v, NO_NUMBER, alpha, mCurrentScale > 35 ? 2 : 1);   // Solid red boxes, no number
@@ -1456,7 +1508,7 @@ void EditorUserInterface::renderPolyline(GameItems itemType, Vector<Point> verts
 }
 
 
-void EditorUserInterface::renderPoly(Vector<Point> verts, bool isDockItem)
+void EditorUserInterface::renderPoly(const Vector<Point> &verts, bool isDockItem)
 {
    glBegin(GL_LINE_STRIP);
       for(S32 j = 0; j < verts.size(); j++)
@@ -1500,9 +1552,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
 
    if(isDockItem)
-      pos = item.verts[0];
+      pos = item.vert(0);
    else
-      pos = convertLevelToCanvasCoord(item.verts[0]);
+      pos = convertLevelToCanvasCoord(item.vert(0));
    Color c;
 
    glEnable(GL_BLEND);     // Enable transparency
@@ -1511,20 +1563,18 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    // snapping vertex for a point item because... well, it's just lame.  We know where it's going to snap, already!
    // By ensuring the item is selected, we avoid coloring a lone vertex that we might be moving.
    if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && 
-      itemDef[mItems[mSnapVertex_i].index].geom != geomPoint &&
+      mItems[mSnapVertex_i].geomType() != geomPoint &&
       mItems[mSnapVertex_i].selected)
 
-      renderVertex(SnappingVertex, convertLevelToCanvasCoord(mItems[mSnapVertex_i].verts[mSnapVertex_j]), NO_NUMBER, alpha);   // Hollow magenta boxes 
+      renderVertex(SnappingVertex, convertLevelToCanvasCoord(mItems[mSnapVertex_i].vert(mSnapVertex_j)), NO_NUMBER, alpha);   // Hollow magenta boxes 
 
    // Draw "two-point" items
-   if(itemDef[item.index].geom == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    
+   if(item.geomType() == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    
    {
       if(isDockItem)
-         dest = item.verts[1];
+         dest = item.vert(1);
       else
-         dest = convertLevelToCanvasCoord(item.verts[1]);
-
-      bool vertexSelected = item.vertSelected[0] || item.vertSelected[1];
+         dest = convertLevelToCanvasCoord(item.vert(1));
 
       Color itemColor;
 
@@ -1545,7 +1595,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       // Override drawColor for this special case
-      if(vertexSelected)
+      if(item.anyVertsSelected())
          drawColor = selectedColor;
 
       // Hide line if we're drawing a text item and it's not selected
@@ -1553,7 +1603,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       {
          if(!mShowingReferenceShip)
          {
-            glColor(itemColor, ((item.selected || item.litUp || vertexSelected) && !isBeingEdited) ? alpha : .25 * alpha);
+            glColor(itemColor, ((item.selected || item.litUp || item.anyVertsSelected()) && !isBeingEdited) ? alpha : .25 * alpha);
             drawFilledSquare(pos, 5);            // Draw origin of item (square box)
 
             for(S32 i = 1; i >= 0; i--)
@@ -1588,12 +1638,12 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             if(item.index == ItemTeleporter)
             {
                Vector<Point> dest;
-               dest.push_back(convertLevelToCanvasCoord(item.verts[1]));
+               dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
 
                renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TeleporterRadius, 1, dest, false);
             }
             else if(item.index == ItemSpeedZone)
-               renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.verts[1])), gClientGame->getCurrentTime());
+               renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.vert(1))), gClientGame->getCurrentTime());
 
          glPopMatrix();
 
@@ -1655,7 +1705,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
 
          // If either end is selected, draw a little white box around it
-         if(item.vertSelected[0] || (item.litUp && vertexToLightUp == 0))
+         if(item.vertSelected(0) || (item.litUp && vertexToLightUp == 0))
          {
             glColor(drawColor, alpha);
             drawSquare(pos, 7);
@@ -1671,7 +1721,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
 
          // Outline selected vertex, and label it
-         if(item.vertSelected[1] || (item.litUp && vertexToLightUp == 1))
+         if(item.vertSelected(1) || (item.litUp && vertexToLightUp == 1))
          {
             glColor(drawColor);
             drawSquare(dest, 7);
@@ -1684,34 +1734,42 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
       }
    }
-   else if(itemDef[item.index].geom == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
+   else if(item.geomType() == geomLine )   // Can only be barrierMaker (wall) -- it's the only geomLine we have
    {
-      renderPolyline(item.index, item.verts, item.selected, (item.litUp && vertexToLightUp == NONE), item.team, item.width / mGridSize, alpha);
+      renderPolyline(item.index, item.getVerts(), item.selected, (item.litUp && vertexToLightUp == NONE), item.team, item.width / mGridSize, alpha);
       renderLinePolyVertices(item, index, alpha);
    } 
-   else if(itemDef[item.index].geom == geomPoly)    // Draw regular line objects and poly objects
+   else if(item.geomType() == geomPoly)    // Draw regular line objects and poly objects
    {
       // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
-  	   // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
+      // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
       if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) &&
-		  !(mShowingReferenceShip) || 
-          isDockItem ||  
-	      mShowingReferenceShip && item.index != ItemNavMeshZone)   
+        !(mShowingReferenceShip) ||  isDockItem || mShowingReferenceShip && item.index != ItemNavMeshZone)   
       {
          Vector<Point> outline;
          Vector<Point> fill;
 
          // First, draw the polygon fill
-         for(S32 i = 0; i < item.verts.size(); i++)
-            outline.push_back(isDockItem ? item.verts[i] : convertLevelToCanvasCoord(item.verts[i]));
+         for(S32 i = 0; i < item.vertCount(); i++)
+            outline.push_back(isDockItem ? item.vert(i) : convertLevelToCanvasCoord(item.vert(i)));
 
          Triangulate::Process(outline, fill);     // Horribly inefficient to do this every time we draw, but easy
 
-         Color theFillColor = !hideit ? getTeamColor(item.team) : grayedOutColorDim;
-         if(item.index == ItemNexus && !hideit)
-            theFillColor = gNexusOpenColor;      // Render Nexus items in pale green to match the actual thing
+         // A few items will get custom colors; most will get the team color
+         if(hideit)
+            glColor(grayedOutColorDim, alpha);
+         else if(item.index == ItemNavMeshZone)
+         {
+            if(!item.isConvex())
+               glColor4f(1,0,0,.5);
+            else
+               glColor(item.selected ? Color(0, 1, 0) : getTeamColor(item.team), alpha * .5);
+         }
+         else if(item.index == ItemNexus)
+            glColor(gNexusOpenColor, alpha);      // Render Nexus items in pale green to match the actual thing
+         else
+            glColor(getTeamColor(item.team), alpha);
 
-         glColor(hideit ? grayedOutColorDim : theFillColor, alpha);
 
          for(S32 i = 0; i < fill.size(); i+=3)
          {
@@ -1920,7 +1978,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  // Draw highlighted border around item if selected
       {
-         Point pos = convertLevelToCanvasCoord(item.verts[0]);                // Note that dockItems are never selected!
+         Point pos = convertLevelToCanvasCoord(item.vert(0));                // Note that dockItems are never selected!
 
          glColor(drawColor);
 
@@ -1952,16 +2010,16 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
    }
    // Label our dock items
-   if(isDockItem && itemDef[item.index].geom != geomPoly)      // Polys are already labeled internally
+   if(isDockItem && item.geomType() != geomPoly)      // Polys are already labeled internally
    {
       glColor(hideit ? grayedOutColorBright : drawColor);
       F32 maxy = -F32_MAX;
-      for(S32 j = 0; j < item.verts.size(); j++)
-         if (item.verts[j].y > maxy)
-            maxy = item.verts[j].y;
+      for(S32 j = 0; j < item.vertCount(); j++)
+         if (item.vert(j).y > maxy)
+            maxy = item.vert(j).y;
 
       // Make some label position adjustments
-      if(itemDef[item.index].geom == geomSimpleLine)
+      if(item.geomType() == geomSimpleLine)
          maxy -= 2;
       else if(item.index == ItemSoccerBall)
          maxy += 1;
@@ -1977,7 +2035,7 @@ F32 EditorUserInterface::renderTextItem(WorldItem &item, F32 alpha)
    // Recalc text size -- TODO:  this shouldn't be here...
    // this should only happen when text is created, not every time it's drawn
    F32 strWidth = getStringWidth(120, item.lineEditor.c_str());
-   F32 lineLen = item.verts[0].distanceTo(item.verts[1]);
+   F32 lineLen = item.vert(0).distanceTo(item.vert(1));
 
    // Compute text size subject to min and max defined in TextItem
    item.textSize = max(min(120.0f * lineLen * mGridSize / max(strWidth, 80.0f), TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
@@ -1987,8 +2045,8 @@ F32 EditorUserInterface::renderTextItem(WorldItem &item, F32 alpha)
    glColor(getTeamColor(item.team), alpha);
    F32 txtSize = item.textSize / mGridSize * mCurrentScale;
 
-   Point pos  = convertLevelToCanvasCoord(item.verts[0]);
-   Point dest = convertLevelToCanvasCoord(item.verts[1]);
+   Point pos  = convertLevelToCanvasCoord(item.vert(0));
+   Point dest = convertLevelToCanvasCoord(item.vert(1));
 
    drawAngleString_fixed(pos.x, pos.y, txtSize, pos.angleTo(dest), item.lineEditor.c_str());
 
@@ -2025,8 +2083,7 @@ void EditorUserInterface::unselectItem(S32 i)
    mItems[i].selected = false;
    mItems[i].litUp = false;
 
-   for(S32 j = 0; j < mItems[i].verts.size(); j++)
-      mItems[i].vertSelected[j] = false;
+   mItems[i].unselectVerts();
 }
 
 
@@ -2040,15 +2097,15 @@ S32 EditorUserInterface::countSelectedItems()
 }
 
 
-S32 EditorUserInterface::countSelectedVerts()
-{
-   S32 count = 0;
-   for(S32 i = 0; i < mItems.size(); i++)
-      for(S32 j = 0; j < mItems[i].vertSelected.size(); j++)
-         if(mItems[i].vertSelected[j])
-            count++;
-   return count;
-}
+//S32 EditorUserInterface::countSelectedVerts()
+//{
+//   S32 count = 0;
+//   for(S32 i = 0; i < mItems.size(); i++)
+//      for(S32 j = 0; j < mItems[i].vertSelected.size(); j++)
+//         if(mItems[i].vertSelected[j])
+//            count++;
+//   return count;
+//}
 
 
 // Paste items on the clipboard
@@ -2067,14 +2124,14 @@ void EditorUserInterface::pasteSelection()
    clearSelection();          // Only the pasted items should be selected
 
    Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
-   Point offset = pos - mClipboard[0].verts[0];    // Diff between mouse pos and original object (item will be pasted such that the first vertex is at mouse pos)
+   Point offset = pos - mClipboard[0].vert(0);    // Diff between mouse pos and original object (item will be pasted such that the first vertex is at mouse pos)
 
    for(S32 i = 0; i < itemCount; i++)
    {
       WorldItem newItem = mClipboard[i];
       newItem.selected = true;
-      for(S32 j = 0; j < newItem.verts.size(); j++)
-         newItem.verts[j] += offset;
+      for(S32 j = 0; j < newItem.vertCount(); j++)
+         newItem.vert(j) += offset;
       mItems.push_back(newItem);
    }
    mItems.sort(geometricSort);
@@ -2099,8 +2156,8 @@ void EditorUserInterface::copySelection()
       {
          WorldItem newItem = mItems[i];
          newItem.selected = false;
-         for(S32 j = 0; j < newItem.verts.size(); j++)
-            newItem.verts[j] += Point(0.5, 0.5);
+         for(S32 j = 0; j < newItem.vertCount(); j++)
+            newItem.vert(j) += Point(0.5, 0.5);
 
          if(!alreadyCleared)  // Make sure we only purge the existing clipboard if we'll be putting someting new there
          {
@@ -2133,11 +2190,11 @@ void EditorUserInterface::rotateSelection(F32 angle)
       if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          WorldItem &item = mItems[i];
-         for(S32 j = 0; j < item.verts.size(); j++)
+         for(S32 j = 0; j < item.vertCount(); j++)
          {
-            Point v = item.verts[j] - ctr;
+            Point v = item.vert(j) - ctr;
             Point n(v.x * cosTheta + v.y * sinTheta, v.y * cosTheta - v.x * sinTheta);
-            item.verts[j] = n + ctr;
+            item.vert(j) = n + ctr;
          }
       }
    }
@@ -2155,9 +2212,9 @@ void EditorUserInterface::computeSelectionMinMax(Point &min, Point &max)
       if(mItems[i].selected/* || (mItems[i].litUp && vertexToLightUp == NONE)*/)
       {
          WorldItem &item = mItems[i];
-         for(S32 j = 0; j < item.verts.size(); j++)
+         for(S32 j = 0; j < item.vertCount(); j++)
          {
-            Point v = item.verts[j];
+            Point v = item.vert(j);
 
             if(v.x < min.x)
                min.x = v.x;
@@ -2243,9 +2300,8 @@ void EditorUserInterface::flipSelectionHorizontal()
    Point min, max;
    computeSelectionMinMax(min, max);
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
-         for(S32 j = 0; j < mItems[i].verts.size(); j++)
-            mItems[i].verts[j].x = min.x + (max.x - mItems[i].verts[j].x);
+      if(mItems[i].selected)
+         mItems[i].flipHorizontal(min, max);
 
    mNeedToSave = true;
    autoSave();
@@ -2260,10 +2316,10 @@ void EditorUserInterface::flipSelectionVertical()
 
    Point min, max;
    computeSelectionMinMax(min, max);
+
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
-         for(S32 j = 0; j < mItems[i].verts.size(); j++)
-            mItems[i].verts[j].y = min.y + (max.y - mItems[i].verts[j].y);
+      if(mItems[i].selected)
+         mItems[i].flipVertical(min, max);
 
    mNeedToSave = true;
    autoSave();
@@ -2279,22 +2335,29 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
    if(mEditingSpecialAttrItem != NONE)    // If we're editing a text special attribute, disable this functionality
       return;
 
-   for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
+   for(S32 x = 1; x >= 0; x--)    // Two passes... first for selected item, second for all items
    {
-      if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
-         continue;
-      WorldItem &p = mItems[i];
-      if(itemDef[p.index].geom <= geomPoint)
-         continue;
+      for(S32 i = mItems.size() - 1; i >= 0; i--)     // Reverse order so we get items "from the top down"
+      { 
+         if(x && !mItems[i].selected && !mItems[i].anyVertsSelected())
+            continue;
 
-      for(S32 j = p.verts.size() - 1; j >= 0; j--)
-      {
-         Point v = convertLevelToCanvasCoord(p.verts[j]);
-         if(fabs(v.x - canvasPos.x) < targetSize && fabs(v.y - canvasPos.y) < targetSize)
+         if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
+            continue;
+
+         WorldItem &p = mItems[i];
+         if(p.geomType() <= geomPoint)
+            continue;
+
+         for(S32 j = p.vertCount() - 1; j >= 0; j--)
          {
-            hitItem = i;
-            hitVertex = j;
-            return;
+            Point v = convertLevelToCanvasCoord(p.vert(j));
+            if(fabs(v.x - canvasPos.x) < targetSize && fabs(v.y - canvasPos.y) < targetSize)
+            {
+               hitItem = i;
+               hitVertex = j;
+               return;
+            }
          }
       }
    }
@@ -2311,7 +2374,7 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 
    for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
    {
-      Point pos = mDockItems[i].verts[0];
+      Point pos = mDockItems[i].vert(0);
 
       if(fabs(canvasPos.x - pos.x) < 8 && fabs(canvasPos.y - pos.y) < 8)
          return i;
@@ -2319,11 +2382,11 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 
    // Now check for polygon interior hits
    for(S32 i = 0; i < mDockItems.size(); i++)
-      if(itemDef[mDockItems[i].index].geom == geomPoly)
+      if(mDockItems[i].geomType() == geomPoly)
       {
          Vector<Point> verts;
-         for(S32 j = 0; j < mDockItems[i].verts.size(); j++)
-            verts.push_back(mDockItems[i].verts[j]);
+         for(S32 j = 0; j < mDockItems[i].vertCount(); j++)
+            verts.push_back(mDockItems[i].vert(j));
 
          if(PolygonContains2(verts.address(),verts.size(), canvasPos))
             return i;
@@ -2344,49 +2407,57 @@ void EditorUserInterface::findHitItemAndEdge()
    if(mEditingSpecialAttrItem  != NONE)              // If we're editing special attributes, disable this functionality
       return;
 
-   for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
+   // Do this in two passes -- the first we only consider selected items, the second pass will consider all targets.
+   // This will give priority to moving vertices of selected items
+   for(S32 x = 1; x >= 0; x--)      // x will be true the first time through, false the second time
    {
-      if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode...
-         continue;                                                              // ...so if it's not a wall, proceed to next item
-
-      WorldItem &p = mItems[i];
-      if(itemDef[mItems[i].index].geom == geomPoint)
+      for(S32 i = mItems.size() - 1; i >= 0; i--)     // Go in reverse order to prioritize items drawn on top
       {
-         Point pos = convertLevelToCanvasCoord(p.verts[0]);
-         if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
+         if(x && !mItems[i].selected && !mItems[i].anyVertsSelected())     // First pass is for selected items only
+            continue;
+
+         if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode...
+            continue;                                                              // ...so if it's not a wall, proceed to next item
+
+         WorldItem &p = mItems[i];
+         if(mItems[i].geomType() == geomPoint)
          {
-            mItemHit = i;
-            return;
-         }
-      }
-
-      Vector<Point> verts;
-      verts = p.verts;
-      if(itemDef[mItems[i].index].geom == geomPoly)   // Add first point to the end to create last side on poly
-         verts.push_back(verts.first());
-
-      Point p1 = convertLevelToCanvasCoord(verts[0]);
-      for(S32 j = 0; j < verts.size() - 1; j++)
-      {
-         Point p2 = convertLevelToCanvasCoord(verts[j+1]);
-
-         Point edgeDelta = p2 - p1;
-         Point clickDelta = mMousePos - p1;
-         float fraction = clickDelta.dot(edgeDelta);
-         float lenSquared = edgeDelta.dot(edgeDelta);
-         if(fraction > 0 && fraction < lenSquared)
-         {
-            // Compute the closest point:
-            Point closest = p1 + edgeDelta * (fraction / lenSquared);
-            float distance = (mMousePos - closest).len();
-            if(distance < EDGE_HIT_RADIUS)
+            Point pos = convertLevelToCanvasCoord(p.vert(0));
+            if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
             {
-               mEdgeHit = j;
                mItemHit = i;
                return;
             }
          }
-         p1 = p2;
+
+         Vector<Point> verts = p.getVerts();    // Make a copy of the items vertices that we can add to in the case of a loop
+
+         if(mItems[i].geomType() == geomPoly)   // Add first point to the end to create last side on poly
+            verts.push_back(verts.first());
+
+         Point p1 = convertLevelToCanvasCoord(verts[0]);
+         for(S32 j = 0; j < verts.size() - 1; j++)
+         {
+            Point p2 = convertLevelToCanvasCoord(verts[j+1]);
+
+            Point edgeDelta = p2 - p1;
+            Point clickDelta = mMousePos - p1;
+            float fraction = clickDelta.dot(edgeDelta);
+            float lenSquared = edgeDelta.dot(edgeDelta);
+            if(fraction > 0 && fraction < lenSquared)
+            {
+               // Compute the closest point:
+               Point closest = p1 + edgeDelta * (fraction / lenSquared);
+               float distance = (mMousePos - closest).len();
+               if(distance < EDGE_HIT_RADIUS)
+               {
+                  mEdgeHit = j;
+                  mItemHit = i;
+                  return;
+               }
+            }
+            p1 = p2;
+         }
       }
    }
 
@@ -2400,11 +2471,11 @@ void EditorUserInterface::findHitItemAndEdge()
       if(mShowMode == ShowAllButNavZones && mItems[i].index == ItemNavMeshZone)     // Don't select NavMeshZones while they're hidden
          continue;
 
-      if(itemDef[mItems[i].index].geom == geomPoly)
+      if(mItems[i].geomType() == geomPoly)
       {
          Vector<Point> verts;
-         for(S32 j = 0; j < mItems[i].verts.size(); j++)
-            verts.push_back(convertLevelToCanvasCoord(mItems[i].verts[j]));
+         for(S32 j = 0; j < mItems[i].vertCount(); j++)
+            verts.push_back(convertLevelToCanvasCoord(mItems[i].vert(j)));
 
          if(PolygonContains2(verts.address(), verts.size(), mMousePos))
          {
@@ -2442,7 +2513,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
    vertexToLightUp = NONE;
    itemToLightUp = NONE;
 
-   if(vertexHit != NONE && !mItems[vertexHitPoly].vertSelected[vertexHit])   // Hit a vertex that wasn't already selected
+   if(vertexHit != NONE && !mItems[vertexHitPoly].vertSelected(vertexHit))   // Hit a vertex that wasn't already selected
    {
       vertexToLightUp = vertexHit;
       itemToLightUp = vertexHitPoly;
@@ -2452,7 +2523,7 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       itemToLightUp = mItemHit;
    }
 
-   if(mItemHit != NONE && !mItems[mItemHit].selected && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Check again, and take a point object in preference to a vertex
+   if(mItemHit != NONE && !mItems[mItemHit].selected && mItems[mItemHit].geomType() == geomPoint)  // Check again, and take a point object in preference to a vertex
    {
       itemToLightUp = mItemHit;
       vertexToLightUp = NONE;
@@ -2482,7 +2553,8 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement
       // seem more natural.
       Point offset;
-      if(itemDef[mDockItems[mDraggingDockItem].index].geom == geomPoly)
+
+      if(mDockItems[mDraggingDockItem].geomType() == geomPoly)
          offset = Point(.25, .15);
       else if(mDockItems[mDraggingDockItem].index == ItemSpeedZone)
          offset = Point(.15, 0);
@@ -2495,7 +2567,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
       // Gross struct avoids extra construction
       WorldItem item =
-         (itemDef[mDockItems[mDraggingDockItem].index].geom == geomPoly) ?
+         (mDockItems[mDraggingDockItem].geomType() == geomPoly) ?
          // For polygon items, try to match proportions of the dock rendering while ensuring all corners snap.  
          WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .7, .4) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
@@ -2520,7 +2592,6 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
          }
    }
 
-   Point delta = convertCanvasToLevelCoord(mMousePos);
 
    findSnapVertex();
    if(mSnapVertex_i == NONE || mSnapVertex_j == NONE)
@@ -2528,15 +2599,15 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    mDraggingObjects = true;
 
-   Point foundPoint = mUnmovedItems[mSnapVertex_i].verts[mSnapVertex_j];
+   Point foundPoint = mUnmovedItems[mSnapVertex_i].vert(mSnapVertex_j);
 
-   delta = snapToLevelGrid(delta - mMouseDownPos + foundPoint) - foundPoint;
-   
+   Point delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) - mMouseDownPos + foundPoint) - foundPoint;
+
    // Now update the locations of all items we're moving to show them being dragged
    for(S32 i = 0; i < mItems.size(); i++)
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
-         if(mItems[i].selected || mItems[i].vertSelected[j])
-            mItems[i].verts[j] = mUnmovedItems[i].verts[j] + delta;
+      for(S32 j = 0; j < mItems[i].vertCount(); j++)
+         if(mItems[i].selected || mItems[i].vertSelected(j))
+            mItems[i].setVert(mUnmovedItems[i].vert(j) + delta, j);
 }
 
 
@@ -2565,10 +2636,10 @@ void EditorUserInterface::findSnapVertex()
          S32 v2 = mEdgeHit + 1;
 
          // Handle special case of looping item
-         if(mEdgeHit + 1 == mItems[mItemHit].verts.size())
+         if(mEdgeHit + 1 == mItems[mItemHit].vertCount())
             v2 = 0;
 
-         if(mItems[mItemHit].verts[v1].distSquared(mouseLevelCoord) < mItems[mItemHit].verts[v2].distSquared(mouseLevelCoord))
+         if(mItems[mItemHit].vert(v1).distSquared(mouseLevelCoord) < mItems[mItemHit].vert(v2).distSquared(mouseLevelCoord))
             mSnapVertex_j = v1;
          else     // Second vertex is closer
             mSnapVertex_j = v2;
@@ -2577,9 +2648,9 @@ void EditorUserInterface::findSnapVertex()
       }
 
       // Didn't hit an edge... find the closest vertex anywhere in the item
-      for(S32 j = 0; j < mItems[mItemHit].verts.size(); j++)
+      for(S32 j = 0; j < mItems[mItemHit].vertCount(); j++)
       {
-         F32 dist = mItems[mItemHit].verts[j].distSquared(mouseLevelCoord);
+         F32 dist = mItems[mItemHit].vert(j).distSquared(mouseLevelCoord);
 
          if(dist < closestDist)
          {
@@ -2593,10 +2664,10 @@ void EditorUserInterface::findSnapVertex()
 
    // Otherwise, we don't have a selected hitItem -- look for a selected vertex
    for(S32 i = 0; i < mItems.size(); i++)
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
+      for(S32 j = 0; j < mItems[i].vertCount(); j++)
       {
          // If we find a selected vertex, there will be only one, and this is our snap point
-         if(mItems[i].vertSelected[j])
+         if(mItems[i].vertSelected(j))
          {
             mSnapVertex_i = i;
             mSnapVertex_j = j;
@@ -2611,7 +2682,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    if(mDraggingObjects)          // No deleting while we're dragging, please...
       return;
 
-   if(!anyItemsOrVertsSelected())  // Nothing to delete
+   if(!anythingSelected())  // Nothing to delete
       return;
 
    Vector<WorldItem> items = mItems;
@@ -2633,12 +2704,11 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       }
       else if(!objectsOnly)      // Deleted any selected vertices
       {
-         for(S32 j = 0; j < mItems[i].verts.size(); )  // no j++
+         for(S32 j = 0; j < mItems[i].vertCount(); )  // no j++
          {
-            if(mItems[i].vertSelected[j] /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
+            if(mItems[i].vertSelected(j) /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
             {
-               mItems[i].verts.erase(j);
-               mItems[i].vertSelected.erase(j);
+               mItems[i].deleteVert(j);
                deleted = true;
                //if(vertexToLightUp == j)
                //{
@@ -2653,9 +2723,9 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          }
 
          // Deleted last vertex, or item can't lose a vertex... it must go!
-         if(mItems[i].verts.size() == 0 || (itemDef[mItems[i].index].geom == geomSimpleLine && mItems[i].verts.size() < 2)
-                                        || (itemDef[mItems[i].index].geom == geomLine && mItems[i].verts.size() < 2)
-                                        || (itemDef[mItems[i].index].geom == geomPoly && mItems[i].verts.size() < 2))
+         if(mItems[i].vertCount() == 0 || (mItems[i].geomType() == geomSimpleLine && mItems[i].vertCount() < 2)
+                                        || (mItems[i].geomType() == geomLine && mItems[i].vertCount() < 2)
+                                        || (mItems[i].geomType() == geomPoly && mItems[i].vertCount() < 2))
          {
             mItems.erase(i);
             deleted = true;
@@ -2717,23 +2787,19 @@ void EditorUserInterface::splitBarrier()
 
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].geomType() == geomLine)
-          for(S32 j = 1; j < mItems[i].verts.size() - 1; j++)     // Can't split on end vertices!
-            if(mItems[i].vertSelected[j] /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
+          for(S32 j = 1; j < mItems[i].vertCount() - 1; j++)     // Can't split on end vertices!
+            if(mItems[i].vertSelected(j) /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
             {
                split = true;
                WorldItem newItem;
                newItem.index = mItems[i].index;
                newItem.team = -1;
                newItem.width = mItems[i].width;
-               for(S32 k = j; k < mItems[i].verts.size(); )    // No k++!
+               for(S32 k = j; k < mItems[i].vertCount(); )    // No k++!
                {
-                  newItem.verts.push_back(mItems[i].verts[k]);
-                  newItem.vertSelected.push_back(false);
+                  newItem.addVert(mItems[i].vert(k));
                   if (k > j)
-                  {
-                     mItems[i].verts.erase(k);     // Don't delete j == k vertex -- it needs to remain as the final vertex of the old wall
-                     mItems[i].vertSelected.erase(k);
-                  }
+                     mItems[i].deleteVert(k);     // Don't delete j == k vertex -- it needs to remain as the final vertex of the old wall
                   else
                      k++;
                }
@@ -2764,55 +2830,47 @@ void EditorUserInterface::joinBarrier()
          {
             if(mItems[j].index == mItems[i].index && (mItems[j].selected /*|| (mItems[j].litUp && vertexToLightUp == NONE)*/))
             {
-               if(mItems[i].verts[0].distanceTo(mItems[j].verts[0]) < .01)    // First vertices are the same  1 2 3 | 1 4 5
+               if(mItems[i].vert(0).distanceTo(mItems[j].vert(0)) < .01)    // First vertices are the same  1 2 3 | 1 4 5
                {
                   joined = true;
-                  for(S32 a = 1; a < mItems[j].verts.size(); a++)             // Skip first vertex, because it would be a dupe
-                  {
-                     mItems[i].verts.push_front(mItems[j].verts[a]);
-                     mItems[i].vertSelected.push_back(false);
-                  }
+                  for(S32 a = 1; a < mItems[j].vertCount(); a++)             // Skip first vertex, because it would be a dupe
+                     mItems[i].addVertFront(mItems[j].vert(a));
+
                   mItems.erase(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
                }
-               else if(mItems[i].verts[0].distanceTo(mItems[j].verts[mItems[j].verts.size()-1]) < .01)     // First vertex conincides with final vertex 3 2 1 | 5 4 3
+               else if(mItems[i].vert(0).distanceTo(mItems[j].vert(mItems[j].vertCount()-1)) < .01)     // First vertex conincides with final vertex 3 2 1 | 5 4 3
                {
                   joined = true;
-                  for(S32 a = mItems[j].verts.size()-2; a >= 0; a--)
-                  {
-                     mItems[i].verts.push_front(mItems[j].verts[a]);
-                     mItems[i].vertSelected.push_back(false);
-                  }
+                  for(S32 a = mItems[j].vertCount()-2; a >= 0; a--)
+                     mItems[i].addVertFront(mItems[j].vert(a));
+
                   mItems.erase(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
 
                }
-               else if(mItems[i].verts[mItems[i].verts.size()-1].distanceTo(mItems[j].verts[0]) < .01)     // Last vertex conincides with first 1 2 3 | 3 4 5
+               else if(mItems[i].vert(mItems[i].vertCount()-1).distanceTo(mItems[j].vert(0)) < .01)     // Last vertex conincides with first 1 2 3 | 3 4 5
                {
                   joined = true;
-                  for(S32 a = 1; a < mItems[j].verts.size(); a++)           // Skip first vertex, because it would be a dupe
-                  {
-                     mItems[i].verts.push_back(mItems[j].verts[a]);
-                     mItems[i].vertSelected.push_back(false);
-                  }
+                  for(S32 a = 1; a < mItems[j].vertCount(); a++)           // Skip first vertex, because it would be a dupe
+                     mItems[i].addVert(mItems[j].vert(a));
+
                   mItems.erase(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
 
                }
-               else if(mItems[i].verts[mItems[i].verts.size()-1].distanceTo(mItems[j].verts[mItems[j].verts.size()-1]) < .01)     // Last vertices coincide  1 2 3 | 5 4 3
+               else if(mItems[i].vert(mItems[i].vertCount()-1).distanceTo(mItems[j].vert(mItems[j].vertCount()-1)) < .01)     // Last vertices coincide  1 2 3 | 5 4 3
                {
                   joined = true;
-                  for(S32 a = mItems[j].verts.size()-2; a >= 0; a--)
-                  {
-                     mItems[i].verts.push_back(mItems[j].verts[a]);
-                     mItems[i].vertSelected.push_back(false);
-                  }
+                  for(S32 a = mItems[j].vertCount()-2; a >= 0; a--)
+                     mItems[i].addVert(mItems[j].vert(a));
+
                   mItems.erase(j);
                   i--;  j--;
                   if(itemToLightUp > j)
@@ -2878,29 +2936,29 @@ void EditorUserInterface::centerView()
       F32 maxx = -F32_MAX,   maxy = -F32_MAX;
 
       for(S32 i = 0; i < mItems.size(); i++)
-         for(S32 j = 0; j < mItems[i].verts.size(); j++)
+         for(S32 j = 0; j < mItems[i].vertCount(); j++)
          {
-            if(mItems[i].verts[j].x < minx)
-               minx = mItems[i].verts[j].x;
-            if(mItems[i].verts[j].x > maxx)
-               maxx = mItems[i].verts[j].x;
-            if(mItems[i].verts[j].y < miny)
-               miny = mItems[i].verts[j].y;
-            if(mItems[i].verts[j].y > maxy)
-               maxy = mItems[i].verts[j].y;
+            if(mItems[i].vert(j).x < minx)
+               minx = mItems[i].vert(j).x;
+            if(mItems[i].vert(j).x > maxx)
+               maxx = mItems[i].vert(j).x;
+            if(mItems[i].vert(j).y < miny)
+               miny = mItems[i].vert(j).y;
+            if(mItems[i].vert(j).y > maxy)
+               maxy = mItems[i].vert(j).y;
          }
 
       for(S32 i = 0; i < mLevelGenItems.size(); i++)
-         for(S32 j = 0; j < mLevelGenItems[i].verts.size(); j++)
+         for(S32 j = 0; j < mLevelGenItems[i].vertCount(); j++)
          {
-            if(mLevelGenItems[i].verts[j].x < minx)
-               minx = mLevelGenItems[i].verts[j].x;
-            if(mLevelGenItems[i].verts[j].x > maxx)
-               maxx = mLevelGenItems[i].verts[j].x;
-            if(mLevelGenItems[i].verts[j].y < miny)
-               miny = mLevelGenItems[i].verts[j].y;
-            if(mLevelGenItems[i].verts[j].y > maxy)
-               maxy = mLevelGenItems[i].verts[j].y;
+            if(mLevelGenItems[i].vert(j).x < minx)
+               minx = mLevelGenItems[i].vert(j).x;
+            if(mLevelGenItems[i].vert(j).x > maxx)
+               maxx = mLevelGenItems[i].vert(j).x;
+            if(mLevelGenItems[i].vert(j).y < miny)
+               miny = mLevelGenItems[i].vert(j).y;
+            if(mLevelGenItems[i].vert(j).y > maxy)
+               maxy = mLevelGenItems[i].vert(j).y;
          }
 
       // If we have only one point object in our level, the following will correct
@@ -3169,40 +3227,33 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       if(mCreatingPoly || mCreatingPolyline)
       {
-         if(mNewItem.verts.size() >= gMaxPolygonPoints)     // Limit number of points in a polygon/polyline
+         if(mNewItem.vertCount() >= gMaxPolygonPoints)     // Limit number of points in a polygon/polyline
             return;
-         Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
-         mNewItem.verts.push_back(newVertex);
-         mNewItem.vertSelected.push_back(false);
+         //else
+         mNewItem.addVert(snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)));
          return;
       }
 
       saveUndoState(mItems);     // Save undo state before we clear the selection
       clearSelection();          // Unselect anything currently selected
 
-      if(mItemHit != NONE && (itemDef[mItems[mItemHit].index].geom == geomLine ||
-                            itemDef[mItems[mItemHit].index].geom >= geomPoly   ))
+      if(mItemHit != NONE && (mItems[mItemHit].geomType() == geomLine ||
+                              mItems[mItemHit].geomType() >= geomPoly   ))
       {
 
-         if(mItems[mItemHit].verts.size() >= gMaxPolygonPoints)     // Polygon full -- can't add more
+         if(mItems[mItemHit].vertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
 
          Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
-         mItems[mItemHit].verts.insert(mEdgeHit + 1);
-         mItems[mItemHit].verts[mEdgeHit + 1] = newVertex;
-
-         mItems[mItemHit].vertSelected.insert(mEdgeHit + 1);
-         mItems[mItemHit].vertSelected[mEdgeHit + 1] = true;
+         mItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
+         mItems[mItemHit].selectVert(mEdgeHit + 1);
 
          // Do the same for the mUnmovedItems list, to keep it in sync with mItems,
          // which allows us to drag our vertex around without wierd snapping action
-         mUnmovedItems[mItemHit].verts.insert(mEdgeHit + 1);
-         mUnmovedItems[mItemHit].verts[mEdgeHit + 1] = newVertex;
-
-         mUnmovedItems[mItemHit].vertSelected.insert(mEdgeHit + 1);
-         mUnmovedItems[mItemHit].vertSelected[mEdgeHit + 1] = true;
+         mUnmovedItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
+         mUnmovedItems[mItemHit].selectVert(mEdgeHit + 1);
 
          mMouseDownPos = newVertex;
       }
@@ -3219,15 +3270,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             mNewItem.index = ItemBarrierMaker;
          }
 
-         mNewItem.verts.clear();
-
-         mNewItem.width = mNewItem.index == ItemBarrierMaker ? Barrier::BarrierWidth : 2;
-         mNewItem.team = -1;
-         mNewItem.selected = false;
-         mNewItem.vertSelected.clear();
-         Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
-         mNewItem.verts.push_back(newVertex);
-         mNewItem.vertSelected.push_back(false);
+         mNewItem = WorldItem(mNewItem.index, snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)), -1,
+                              mNewItem.index == ItemBarrierMaker ? Barrier::BarrierWidth : 2);
       }
    }
    else if(keyCode == MOUSE_LEFT)
@@ -3238,10 +3282,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          saveUndoState(mItems);
 
-         if(mNewItem.verts.size() > 1)
+         if(mNewItem.vertCount() > 1)
             mItems.push_back(mNewItem);
 
-         mNewItem.verts.clear();
+         mNewItem.invalidate();
          mCreatingPoly = false;
          mCreatingPolyline = false;
          mItems.sort(geometricSort);
@@ -3277,28 +3321,27 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
          if(!getKeyState(KEY_SHIFT))      // Shift key is not down
          {
-            if(vertexHit != NONE && mItems[vertexHitPoly].selected)    // Hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection
+            // If we hit a vertex of an already selected item --> now we can move that vertex w/o losing our selection
+            if(vertexHit != NONE && mItems[vertexHitPoly].selected)    
             {
                clearSelection();
-               mItems[vertexHitPoly].vertSelected[vertexHit] = true;
-               //vertexHit = NONE;
-               //itemHit = vertexHitPoly;
+               mItems[vertexHitPoly].selectVert(vertexHit);
             }
             if(mItemHit != NONE && mItems[mItemHit].selected)   // Hit an already selected item
             {
                // Do nothing
             }
-            else if(mItemHit != NONE && itemDef[mItems[mItemHit].index].geom == geomPoint)  // Hit a point item
+            else if(mItemHit != NONE && mItems[mItemHit].geomType() == geomPoint)  // Hit a point item
             {
                clearSelection();
                mItems[mItemHit].selected = true;
             }
             else if(vertexHit != NONE && (mItemHit == NONE || !mItems[mItemHit].selected))      // Hit a vertex of an unselected item
             {        // (braces required)
-               if(!mItems[vertexHitPoly].vertSelected[vertexHit])
+               if(!mItems[vertexHitPoly].vertSelected(vertexHit))
                {
                   clearSelection();
-                  mItems[vertexHitPoly].vertSelected[vertexHit] = true;
+                  mItems[vertexHitPoly].selectVert(vertexHit);
                }
             }
             else if(mItemHit != NONE)                                                        // Hit a non-point item, but not a vertex
@@ -3315,8 +3358,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          else     // Shift key is down
          {
             if(vertexHit != NONE)
-               mItems[vertexHitPoly].vertSelected[vertexHit] =
-                  !mItems[vertexHitPoly].vertSelected[vertexHit];
+            {
+               if(mItems[vertexHitPoly].vertSelected(vertexHit))
+                  mItems[vertexHitPoly].unselectVert(vertexHit);
+               else
+                  mItems[vertexHitPoly].aselectVert(vertexHit);
+            }
             else if(mItemHit != NONE)
                mItems[mItemHit].selected = !mItems[mItemHit].selected;    // Toggle selection of hit item
             else
@@ -3588,10 +3635,10 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
             for(S32 i = 0; i < mItems.size(); i++)
             {
                S32 j;
-               for(j = 0; j < mItems[i].verts.size(); j++)
-                  if(!r.contains(mItems[i].verts[j]))
+               for(j = 0; j < mItems[i].vertCount(); j++)
+                  if(!r.contains(mItems[i].vert(j)))
                      break;
-               if(j == mItems[i].verts.size())
+               if(j == mItems[i].vertCount())
                   mItems[i].selected = true;
             }
             mDragSelecting = false;
@@ -3635,14 +3682,14 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
                      // Unselect our highlighted vertex
                      if(mUnselectVertexAfterDrag)
                      {
-                        mItems[mUnselectVertexAfterDrag_i].vertSelected[mUnselectVertexAfterDrag_j] = false;
+                        mItems[mUnselectVertexAfterDrag_i].unselectVerts();
                         mUnselectVertexAfterDrag = false;
                      }
 
                      // Check if anything changed... (i.e. did we move?)
                      for(S32 i = 0; i < mItems.size(); i++)
-                        for(S32 j = 0; j < mItems[i].verts.size(); j++)
-                           if(mItems[i].verts[j] != mUnmovedItems[i].verts[j])
+                        for(S32 j = 0; j < mItems[i].vertCount(); j++)
+                           if(mItems[i].vert(j) != mUnmovedItems[i].vert(j))
                            {
                               saveUndoState(mMostRecentState);    // Something changed... save an undo state!
                               mNeedToSave = true;
@@ -3677,15 +3724,12 @@ bool EditorUserInterface::anyItemsSelected()
 }
 
 
-bool EditorUserInterface::anyItemsOrVertsSelected()
+bool EditorUserInterface::anythingSelected()
 {
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected /*|| mItems[i].litUp*/ )
+      if(mItems[i].selected || mItems[i].anyVertsSelected() )
          return true;
-      for(S32 j = 0; j < mItems[i].verts.size(); j++)
-         if(mItems[i].vertSelected[j])
-            return true;
    }
 
    return false;
@@ -3853,8 +3897,8 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
                s_fprintf(f, " %d", mItems[i].team);
             if(mItems[i].hasWidth())
                s_fprintf(f, " %g", mItems[i].width);
-            for(S32 j = 0; j < p.verts.size(); j++)
-               s_fprintf(f, " %g %g ", p.verts[j].x, p.verts[j].y);
+            for(S32 j = 0; j < p.vertCount(); j++)
+               s_fprintf(f, " %g %g ", p.vert(j).x, p.vert(j).y);
             if(itemDef[mItems[i].index].hasText)
                s_fprintf(f, " %d %s", mItems[i].textSize, mItems[i].lineEditor.c_str());
             if(itemDef[mItems[i].index].hasRepop && mItems[i].repopDelay != -1)
@@ -4044,32 +4088,42 @@ void EditorMenuUserInterface::render()
 
 ///////////////////////////////////////////////////////////////////
 
-// Primary constructor
+
+WorldItem::WorldItem(GameItems itemType) : lineEditor(MAX_TEXTITEM_LEN)
+{
+   init(itemType, 0, 0);
+}
+
+
+// Primary constructor 
 WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height, U32 itemid) : lineEditor(MAX_TEXTITEM_LEN)
+{
+   init(itemType, xteam, itemid);
+
+   addVert(pos);
+
+   // Handle multiple-point items
+   if(itemDef[itemType].geom == geomSimpleLine)       // Start with diagonal line
+      addVert(pos + Point(width, height));
+
+   else if(itemDef[itemType].geom == geomPoly)        // Start with a size x size square
+   {
+      addVert(pos + Point(width, 0));
+      addVert(pos + Point(width, height));
+      addVert(pos + Point(0, height));
+   }
+}
+
+
+void WorldItem::init(GameItems itemType, S32 xteam, U32 itemid)
 {
    index = itemType;
    team = xteam;
    id = itemid;
-
    selected = false;
-   verts.push_back(pos);
-   vertSelected.push_back(false);
+   mAnyVertsSelected = false;
+   litUp = false;
 
-   // Handle multiple-point items
-   if(itemDef[itemType].geom == geomSimpleLine)       // Start with diagonal line
-   {
-      verts.push_back(verts[0] + Point(width, height));
-      vertSelected.push_back(false);
-   }
-   else if(itemDef[itemType].geom == geomPoly)        // Start with a size x size square
-   {
-      verts.push_back(verts[0] + Point(width, 0));
-      verts.push_back(verts[0] + Point(width, height));
-      verts.push_back(verts[0] + Point(0, height));
-      vertSelected.push_back(false);
-      vertSelected.push_back(false);
-      vertSelected.push_back(false);
-   }
 
    if(itemDef[itemType].hasText)
    {
@@ -4077,7 +4131,7 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
       lineEditor.setString("Your text here");
    }
 
-   repopDelay = EditorUserInterface::getDefaultRepopDelay(itemType);
+   repopDelay = getDefaultRepopDelay(itemType);
 
    if(itemType == ItemSpeedZone)
    {
@@ -4089,169 +4143,151 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
       speed = -1;
       boolattr = false;
    }
-
-   selected = false;
-   litUp = false;
 }
 
 
-// Copy constructor
-WorldItem::WorldItem(const WorldItem &worldItem)
+// Select a single vertex.  This is the default selection we use most of the time
+void WorldItem::selectVert(S32 vertIndex) 
+{ 
+   unselectVerts();
+   aselectVert(vertIndex);
+}
+
+
+// Select an additional vertex (remember command line ArcInfo?)
+void WorldItem::aselectVert(S32 vertIndex)
 {
-   // First the simple stuff
-   index = worldItem.index;
-   team = worldItem.team;
-   id = worldItem.id;
-   width = worldItem.width;
-   selected = worldItem.selected;
-   litUp = worldItem.litUp;
-   lineEditor.setString(worldItem.lineEditor.getString());
-   textSize = worldItem.textSize;
-   repopDelay = worldItem.repopDelay;
-   speed = worldItem.speed;
-   boolattr = worldItem.boolattr;
-
-   S32 size = worldItem.verts.size();
-   for(S32 i = 0; i < size; i++)
-      verts.push_back(Point(worldItem.verts[i]));
-
-   size = worldItem.vertSelected.size();
-   for(S32 i = 0; i < size; i++)
-      vertSelected.push_back(worldItem.vertSelected[i]);
+   mVertSelected[vertIndex] = true;
+   mAnyVertsSelected = true;
 }
 
 
-///////////////////////////////////////////////////////////////////
+// Unselect a single vertex, considering the possibility that there may be other selected vertices as well
+void WorldItem::unselectVert(S32 vertIndex) 
+{ 
+   mVertSelected[vertIndex] = false;
 
+   bool anySelected = false;
+   for(S32 j = 0; j < mVertSelected.size(); j++)
+      if(mVertSelected[j])
+      {
+         anySelected = true;
+         break;
+      }
+   mAnyVertsSelected = anySelected;
+}
+
+
+// Unselect all vertices
+void WorldItem::unselectVerts() 
+{ 
+   for(S32 j = 0; j < mVerts.size(); j++) 
+      mVertSelected[j] = false; 
+   mAnyVertsSelected = false;
+}
+
+
+bool WorldItem::vertSelected(S32 vertIndex) 
+{ 
+   return mVertSelected[vertIndex]; 
+}
+
+
+void WorldItem::addVert(Point vert)
+{
+   mVerts.push_back(vert);
+   mVertSelected.push_back(false);
+}
+
+
+void WorldItem::addVertFront(Point vert)
+{
+   mVerts.push_front(vert);
+   mVertSelected.push_front(false);
+}
+
+
+void WorldItem::insertVert(Point vert, S32 vertIndex)
+{
+   mVerts.insert(vertIndex);
+   mVerts[vertIndex] = vert;
+
+   mVertSelected.insert(vertIndex);
+   mVertSelected[vertIndex] = false;
+}
+
+
+void WorldItem::setVert(Point vert, S32 vertIndex)
+{
+   mVerts[vertIndex] = vert;
+}
+
+
+
+void WorldItem::deleteVert(S32 vertIndex)
+{
+   mVerts.erase(vertIndex);
+   mVertSelected.erase(vertIndex);
+}
+
+
+void WorldItem::flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   for(S32 j = 0; j < mVerts.size(); j++)
+      mVerts[j].x = boundingBoxMin.x + (boundingBoxMax.x - mVerts[j].x);
+}
+
+
+void WorldItem::flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax)
+{
+   for(S32 j = 0; j < mVerts.size(); j++)
+      mVerts[j].y = boundingBoxMax.y + (boundingBoxMax.y - mVerts[j].y);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Stores the selection state of a particular WorldItem
 // Primary constructor
-ItemSelection::ItemSelection(WorldItem &item)
+SelectionItem::SelectionItem(WorldItem &item)
 {
-   selected = item.selected;
-   for(S32 i = 0; i < item.verts.size(); i++)
-      vertSelected.push_back(item.vertSelected[i]);
+   mSelected = item.selected;
+
+   for(S32 i = 0; i < item.vertCount(); i++)
+      mVertSelected.push_back(item.vertSelected(i));
 }
 
 
-void ItemSelection::restore(WorldItem &item)
+void SelectionItem::restore(WorldItem &item)
 {
-   item.selected = selected;
-   for(S32 i = 0; i < item.verts.size(); i++)
-      item.vertSelected[i] = vertSelected[i];
+   item.selected = mSelected;
+   item.unselectVerts();
+
+   for(S32 i = 0; i < item.vertCount(); i++)
+      item.aselectVert(mVertSelected[i]);
 }
 
 
-///////////////////////////////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
+// Selection stores the selection state of group of WorldItems
+// Constructor
 Selection::Selection(Vector<WorldItem> &items)
 {
    for(S32 i = 0; i < items.size(); i++)
-      selection.push_back(ItemSelection(items[i]));
+      mSelection.push_back(SelectionItem(items[i]));
 }
 
 void Selection::restore(Vector<WorldItem> &items)
 {
    for(S32 i = 0; i < items.size(); i++)
-      selection[i].restore(items[i]);
+      mSelection[i].restore(items[i]);
 }
 
-///////////////////////////////////////////////////////////////////
-//// Constructor
-//MeshBox::MeshBox(Point center, F32 size)
-//{
-//   bounds = Rect(center, size);
-//   done[all] = done[up] = done[down] = done[left] = done[right] = false;
-// //  boxCount++;
-//}
-//
-//
-//void MeshBox::grow(Direction d)
-//{
-//   F32 amt = .01;
-//   switch(d)
-//   {
-//       case up:
-//          if(!done[up])
-//            bounds.min.y -= amt;
-//         break;
-//      case down:
-//         if(!done[down])
-//            bounds.max.y += amt;
-//         break;
-//      case left:
-//         if(!done[left])
-//            bounds.min.x -= amt;
-//         break;
-//      case right:
-//         if(!done[right])
-//            bounds.max.x += amt;
-//         break;
-//   }
-//}
-//
-//void MeshBox::revert(Direction d)
-//{
-//   F32 amt = .01;
-//   switch(d)
-//   {
-//      case up:
-//         bounds.min.y += amt;
-//         done[up] = true;
-//         checkAllDone();
-//         break;
-//      case down:
-//         bounds.max.y -= amt;
-//         done[down] = true;
-//         checkAllDone();
-//         break;
-//      case left:
-//         bounds.min.x += amt;
-//         done[left] = true;
-//         checkAllDone();
-//         break;
-//      case right:
-//         bounds.max.x -= amt;
-//         done[right] = true;
-//         checkAllDone();
-//         break;
-//   }
-//}
-//
-//void MeshBox::init()
-//{
-//   //boxCount = 0;
-//   //doneCount = 0;
-//}
-//
-//// See if the given box hits a wall
-//bool MeshBox::checkWallCollision()
-//{
-//   for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-//   {
-//      if(gEditorUserInterface.mItems[i].index == EditorUserInterface::ItemBarrierMaker)      // It's a wall
-//      {
-//         for(S32 j = 0; j < gEditorUserInterface.mItems[i].verts.size(); j++)
-//         {
-//            // Contains a vertex
-//            Point v = gEditorUserInterface.mItems[i].verts[j];
-//            if(bounds.contains(v))
-//               return true;
-//            // Contains an edge
-//            if(j < gEditorUserInterface.mItems[i].verts.size() - 1 && bounds.intersects(gEditorUserInterface.mItems[i].verts[j], gEditorUserInterface.mItems[i].verts[j+1]))
-//               return true;
-//         }
-//      }
-//   }
-//   return false;
-//}
-//
-//void MeshBox::checkAllDone()
-//{
-//   if(done[up] && done[down] && done[left] && done[right] && !done[all])
-//   {
-//      done[all] = true;
-//      //doneCount++;
-//   }
-//}
+////////////////////////////////////////
+////////////////////////////////////////
 
 };
 

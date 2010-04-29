@@ -70,10 +70,12 @@ struct Point
    member_type distanceTo(const Point &pt) { return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) ); }
    member_type distSquared(const Point &pt) { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
 
-   member_type angleTo(const Point &pt) { return atan2(pt.y-y, pt.x-x); }
+   member_type angleTo(const Point &p) { return atan2(p.y-y, p.x-x); }
    
    void setAngle(const member_type ang) { setPolar(len(), ang); }
    void setPolar(const member_type l, const member_type ang) { x = cos(ang) * l; y = sin(ang) * l; }
+
+   member_type determinant(const Point &p) { return (x * p.y - y * p.x); }
 
    void scaleFloorDiv(float scaleFactor, float divFactor)
    {

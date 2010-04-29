@@ -31,7 +31,7 @@ namespace Zap
 {
 
 // Read team from level file params
-void TeamEditor::readTeamFromLevelLine(S32 argc, const char **argv)
+void AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
 {
    if(argc < 5)                        // Enough arguments?
    {
@@ -87,7 +87,7 @@ LuaTeamInfo::LuaTeamInfo(Team team)
 
    Vector<Team> teams = gServerGame->getGameType()->mTeams;
 
-   for(S32 i = 0; i < teams.size(); i ++)
+   for(S32 i = 0; i < teams.size(); i++)
       if(!strcmp(teams[i].getName().getString(), teamName))
       {
          mTeamIndex = i;

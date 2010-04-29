@@ -180,7 +180,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
    if(!mIsGameServer && requestId == mCurrentQueryId)
    {
       TNL::logprintf("Remote host rejected arranged connection...");       // Perhaps because the player was kicked/banned?
-      onConnectionTerminated(ReasonTimedOut,"LLL");
+      onConnectionTerminated(ReasonTimedOut, "Connection timed out");
       endGame();
       gMainMenuUserInterface.activate();
    } 

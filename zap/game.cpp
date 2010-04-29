@@ -301,6 +301,7 @@ void ServerGame::resetLevelLoadIndex()
 }
 
 
+// This is only used while we're building a list of levels to display on the host during loading.
 string ServerGame::getLastLevelLoadName()
 {
    if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
@@ -496,7 +497,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    else if(nextLevel == NEXT_LEVEL)      // Next level
    {
       S32 players = mPlayerCount;
-      
+       
       // If game is supended, then we are waiting for another player to join.  That means that (probably)
       // there are either 0 or 1 players, so the next game will need to be good for 1 or 2 players.
       if(mGameSuspended)
@@ -509,7 +510,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       S32 currLevel = mCurrentLevelIndex;
 
       // Cycle through the levels looking for one that matches our player counts
-      while(mCurrentLevelIndex != currLevel && !first)
+      while(first || mCurrentLevelIndex != currLevel)
       {
          S32 minPlayers = mLevelInfos[mCurrentLevelIndex].minRecPlayers;
          S32 maxPlayers = mLevelInfos[mCurrentLevelIndex].maxRecPlayers;
@@ -523,8 +524,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
             break;
          }
 
-         // else advance to the next candidate
-         mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();      
+         // else do nothing to play the next level, which we found above
          first = false;
       }
 

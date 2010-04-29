@@ -295,7 +295,7 @@ void GameParamUserInterface::onEscape()
    gEditorUserInterface.setLevelFileName(menuItems[1].mLineEditor.getString());  // Save level file name, if it changed.  Or hell, even if it didn't
    gEditorUserInterface.setLevelGenScriptName(menuItems[5].mLineEditor.getString());
 
-   gEditorUserInterface.mGridSize = menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI;    // Set mGridSize for proper scaling of walls on map
+   gEditorUserInterface.setGridSize(menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI); 
    buildGameParamList();
 
    if(didAnythingGetChanged())

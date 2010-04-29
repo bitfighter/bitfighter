@@ -304,7 +304,7 @@ string GameType::getScoringEventDescr(ScoringEvent event)
 
 const char *GameType::validateGameType(const char *gtype)
 {
-   for(S32 i = 0; gGameTypeNames[i]; i++)
+   for(S32 i = 0; gGameTypeNames[i]; i++)    // Repeat until we hit NULL
       if(!strcmp(gGameTypeNames[i], gtype))
          return gGameTypeNames[i];
 
@@ -1020,6 +1020,16 @@ ClientRef *GameType::findClientRef(const StringTableEntry &name)
          return mClientList[clientIndex];
    return NULL;
 }
+
+ 
+Color GameType::getClientColor(const StringTableEntry &clientName)
+{
+   ClientRef *cl = findClientRef(clientName);
+   if(cl)
+      return mTeams[cl->getTeam()].color;
+   return Color();
+}
+
 
 // Only gets run on the server!
 void GameType::spawnShip(GameConnection *theClient)
@@ -2025,6 +2035,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
    cl->readyForRegularGhosts = true;
 }
+
 
 GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid), (barrier, width, solid))
 {

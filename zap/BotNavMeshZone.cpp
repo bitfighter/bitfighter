@@ -65,10 +65,6 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render()     // For now... in future will be invisible!
 {
-   // Disable for 011
-   if(true)
-      return;
-
    glEnable(GL_BLEND);
    glColor3f(.2, .2, 0);
 
@@ -81,7 +77,7 @@ void BotNavMeshZone::render()     // For now... in future will be invisible!
       glEnd();
    }
 
-      glColor3f(.7, .7, 0);
+   glColor3f(.7, .7, 0);
    glBegin(GL_LINE_LOOP);
       for(S32 i = 0; i < mPolyBounds.size(); i++)
          glVertex2f(mPolyBounds[i].x, mPolyBounds[i].y);
@@ -94,7 +90,7 @@ void BotNavMeshZone::render()     // For now... in future will be invisible!
    glTranslatef(center.x, center.y, 0);
       glColor3f(1,1,0);
       char buf[24];
-      dSprintf(buf, 24, "ZONE %d (tchs %d)", mZoneID, mNeighbors.size() );
+      dSprintf(buf, 24, "ZONE %d", mZoneID );
       renderCenteredString(Point(0,0), 25, buf);
    glPopMatrix();
 
@@ -150,6 +146,7 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
    // Don't need to increment our objectloaded counter, as this object resides only on the server
 }
 
+
 // Bounding box for quick collision-possibility elimination
 void BotNavMeshZone::computeExtent()
 {
@@ -158,6 +155,7 @@ void BotNavMeshZone::computeExtent()
       extent.unionPoint(mPolyBounds[i]);
    setExtent(extent);
 }
+
 
 // More precise boundary for precise collision detection
 bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
@@ -200,17 +198,21 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
    for(U32 i = 0; i < size; i++)
    {
       NeighboringZone n;
+
       Point p1;
       stream->read(&p1.x);
       stream->read(&p1.y);
+   
       Point p2;
       stream->read(&p2.x);
       stream->read(&p2.y);
+
       n.borderStart = p1;
       n.borderEnd = p2;
       mNeighbors.push_back(n);
    }
 }
+
 
 extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
@@ -273,7 +275,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          // Check for unlikely but fatal situation: Not enough vertices
           if(gBotNavMeshZones[i]->mPolyBounds.size() < 3 || gBotNavMeshZones[j]->mPolyBounds.size() < 3)
           {
-             logprintf("ERROR!! Too few pts!");
+             logprintf("Found malformed botNavMeshZone!");
             continue;
           }
 
@@ -338,7 +340,8 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
    return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() );
 }
 
-const S32 gMaxNavMeshZones = 2000;     // Don't make this go above S16 max
+
+static const S32 MAX_ZONES = 2000;     // Don't make this go above S16 max - 1 (32,766)
 
 // Returns a path, including the startZone and targetZone 
 Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
@@ -348,14 +351,14 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
    static U16 onOpenList;
 
    // ...these arrays can be reused without further initialization
-   static U16 whichList[gMaxNavMeshZones];  // Record whether a zone is on the open or closed list
-   static S16 openList[gMaxNavMeshZones + 1]; 
-   static S16 openZone[gMaxNavMeshZones]; 
-   static S16 parentZones[gMaxNavMeshZones]; 
+   static U16 whichList[MAX_ZONES];  // Record whether a zone is on the open or closed list
+   static S16 openList[MAX_ZONES + 1]; 
+   static S16 openZone[MAX_ZONES]; 
+   static S16 parentZones[MAX_ZONES]; 
 
-   static F32 Fcost[gMaxNavMeshZones];	
-   static F32 Gcost[gMaxNavMeshZones]; 	
-   static F32 Hcost[gMaxNavMeshZones];	
+   static F32 Fcost[MAX_ZONES];	
+   static F32 Gcost[MAX_ZONES]; 	
+   static F32 Hcost[MAX_ZONES];	
 
 	S16 numberOfOpenListItems = 0;
 	bool foundPath;
@@ -370,7 +373,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
 
    if(onClosedList > U16_MAX - 3 ) // Reset whichList when we've run out of headroom
 	{
-		for(S32 i = 0; i < gMaxNavMeshZones; i++) 
+		for(S32 i = 0; i < MAX_ZONES; i++) 
 		   whichList[i] = 0;
 		onClosedList = 0;	
 	}

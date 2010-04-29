@@ -31,11 +31,10 @@ using namespace TNL;
 #include "move.h"
 #include "keyCode.h"
 #include "UIMenus.h"
-#include "UIEditor.h"
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
 #include "game.h"
-
+#include "UIEditor.h"
 //#include "tnlLog.h"
 
 #include "../glut/glutInclude.h"

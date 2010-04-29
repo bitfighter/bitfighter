@@ -29,24 +29,21 @@
 #include "luaGameInfo.h"
 #include "flagItem.h"
 #include "UIEditor.h"   // For nameLen
+#include "lineEditor.h"
 #include "tnl.h"
 
 namespace Zap
 {
 
-   
-// Represents teams in the editor.  Object hierarchy kind of makes sense, but also seems backwards...
-
-class TeamEditor
+class AbstractTeam
 {
+protected:
+   LineEditor _name;
 public:
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
-   LineEditor _name;   
    Color color;
    S32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
-
-   TeamEditor() { _name = LineEditor(MAX_TEAM_NAME_LENGTH); numPlayers = 0; }     // Quickie constructor
 
    virtual void setName(const char *name) { _name.setString(name); }
    virtual StringTableEntry getName() { return StringTableEntry(_name.c_str()); }  // Wrap in STE to make signatures match... lame.
@@ -55,11 +52,11 @@ public:
    void readTeamFromLevelLine(S32 argc, const char **argv);          // Read team info from level line
 };
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Team : public TeamEditor
+// Class for managing teams in the game
+class Team : public AbstractTeam
 {  
 protected:
    S32 mScore;
@@ -69,7 +66,7 @@ public:
    Vector<Point> spawnPoints;
    Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
 
-   F32 rating;
+   F32 rating; 
 
    Team() {numPlayers = 0; mScore = 0; rating = 0; }     // Quickie constructor
 
@@ -80,6 +77,17 @@ public:
    S32 getScore() { return mScore; }
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Class for managing teams in the editor
+class TeamEditor : public AbstractTeam
+{
+public:
+   TeamEditor() { _name = LineEditor(MAX_TEAM_NAME_LENGTH); numPlayers = 0; }     // Quickie constructor
 };
 
 

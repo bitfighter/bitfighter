@@ -32,7 +32,7 @@ TNL_IMPLEMENT_NETOBJECT(LoadoutZone);
 
 const char LoadoutZone::className[] = "LoadoutZone";      // Class name as it appears to Lua scripts
 
-// Define the methods we will expose to LuaLLLLL
+// Define the methods we will expose to Lua
 Lunar<LoadoutZone>::RegType LoadoutZone::methods[] =
 {
    // Standard gameItem methods

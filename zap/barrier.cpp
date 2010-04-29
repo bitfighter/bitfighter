@@ -101,6 +101,7 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
    }
 }
 
+
 void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid)
 {
    Vector<Point> tmp;
@@ -154,6 +155,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
       }
    }
 }
+
 
 // Constructor --> gets called from constructBarriers above
 Barrier::Barrier(Vector<Point> points, F32 width, bool solid)
@@ -282,6 +284,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &polyPoints)
    }
    mRenderLineSegments = clippedSegments;
 }
+
 
 void Barrier::render(S32 layerIndex)
 {

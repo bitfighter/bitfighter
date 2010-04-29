@@ -10,7 +10,6 @@
 
 // Long term
 // Admin select level w/ preview(?)
-// Implement level selection based on MinPlayers & MaxPlayers
 
 //Test:
 // Do ships remember their spawn points?  How about robots?
@@ -20,6 +19,10 @@
 
 // TODO:
 // Create color global for reticle color
+
+
+// Random point in zone, random zone, isInCaptureZone should return actual capture zone
+// backport player count stuff
 
 /*
 XXX need to document timers, new luavec stuff XXX
@@ -91,6 +94,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Hovering over an item no longer counts as selecting it</li>
 <li>Increased readibility of node numbers on selected lines/polygons</li>
 <li>Holding tab now only shows range of selected turrets/spybugs</li>
+<li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

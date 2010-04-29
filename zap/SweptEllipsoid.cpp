@@ -44,8 +44,8 @@
 // if you are using a swept ellipsoid against a large number of polygons.
 
 #include "point.h" 
-#include "../tnl/tnlVector.h"
-#include "SweptEllipsoid.h"
+#include "tnlVector.h"
+#include "SweptEllipsoid.h"      // Must be last
 
 using namespace TNL;
 
@@ -137,6 +137,39 @@ bool pointInTriangle(Point p, Point a, Point b, Point c)
 }
 
 
+// Based on http://www.opengl.org/discussion_boards/ubbthreads.php?ubb=showflat&Number=248453
+// No idea if this is optimal or not, but it is only used in the editor, and works fine for our purposes.
+bool isConvex(const Vector<Point> &verts)
+{
+  Point v1, v2;
+  double det_value, cur_det_value;
+  int num_vertices = verts.size();
+  
+  if(num_vertices < 3)
+     return true;
+  
+  v1 = verts[0] - verts[num_vertices-1];
+  v2 = verts[1] - verts[0];
+  det_value = v1.determinant(v2);
+  
+  for(S32 i = 1 ; i < num_vertices-1 ; i++)
+  {
+    v1 = v2;
+    v2 = verts[i+1] - verts[i];
+    cur_det_value = v1.determinant(v2);
+    
+    if( (cur_det_value * det_value) < 0.0 )
+      return false;
+  }
+  
+  v1 = v2;
+  v2 = verts[0] - verts[num_vertices-1];
+  cur_det_value = v1.determinant(v2);
+  
+  return  (cur_det_value * det_value) >= 0.0;
+}
+
+
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
 // Function returns true when it does and the intersection point is in outPoint
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
@@ -191,7 +224,7 @@ bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 
 
 // Do segments sit on same virtual line?
-bool segmentsColinear(Point p1, Point p2, Point p3, Point p4)
+bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4)
 {
    const float smallNumber = (float) 0.0000001;
 
@@ -211,7 +244,7 @@ bool segmentsColinear(Point p1, Point p2, Point p3, Point p4)
 // Does point c sit on segment a-b?
 // Optimized for speed, as we can do what we need with fewer computations -CE
 
-bool pointOnSegment(Point c, Point a, Point b)
+bool pointOnSegment(const Point &c, const Point &a, const Point &b)
 {
 /*
 Subject 1.02: How do I find the distance from a point to a line?
@@ -295,7 +328,7 @@ Subject 1.02: How do I find the distance from a point to a line?
 // See if segment p1-p2 overlaps p3-p4
 // Coincident endpoints alone do not count!
 // Pass back the overpping extent in two points
-bool segsOverlap(Point p1, Point p2, Point p3, Point p4, Point &overlapStart, Point &overlapEnd)
+bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd)
 {
    Point pInt;
    bool found = false;
@@ -446,7 +479,7 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
    return true;
 }
 
-// I believe this will work only for convex hulls
+// I believe this will work only for convex polygons
 bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, Point::member_type inRadius, Point &outPoint, Point::member_type &outFraction)
 {
    // Test if circle intersects at t = 0
@@ -536,6 +569,7 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
   return true;
 }
 
+
 bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 {
   /* allocate and initialize list of Vertices in polygon */
@@ -600,7 +634,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
-Point centroid(Vector<Point> &polyPoints)
+Point centroid(const Vector<Point> &polyPoints)
 {
    F32 area6 = area(polyPoints) * 6;
    F32 x = 0;

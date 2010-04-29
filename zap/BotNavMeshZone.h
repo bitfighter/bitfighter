@@ -31,9 +31,11 @@
 #include "gameNetInterface.h"
 #include "UI.h"
 #include "gameObjectRender.h"
+#include "polygon.h"
+
 #include "tnlNetBase.h"
 #include "../glut/glutInclude.h"
-#include "polygon.h"
+
 
 namespace Zap
 {
@@ -48,6 +50,9 @@ struct NeighboringZone
    Point center;           // Center of zone
    F32 distTo;
 };
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class BotNavMeshZone : public GameObject, public Polygon
 {
@@ -97,6 +102,8 @@ public:
 extern Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 class AStar
 {

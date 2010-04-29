@@ -27,13 +27,11 @@
 #define _GAMETYPE_H_
 
 #include "timer.h"
-#include "sfx.h"
-#include "voiceCodec.h"
 #include "gameObject.h"
 #include "flagItem.h"
+#include "teamInfo.h"
 #include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
-#include "teamInfo.h"
 #include <string>
 
 namespace Zap
@@ -43,6 +41,8 @@ namespace Zap
 class GoalZone;
 struct MenuItem;
 class Item;
+class SFXObject;
+class VoiceDecoder;
 
 class ClientRef : public Object
 {
@@ -274,14 +274,7 @@ public:
    GameType();    // Constructor
    void countTeamPlayers();
 
-   Color getClientColor(const StringTableEntry &clientName)
-   {
-      ClientRef *cl = findClientRef(clientName);
-      if(cl)
-         return mTeams[cl->getTeam()].color;
-      return Color();
-   }
-
+   Color getClientColor(const StringTableEntry &clientName);
    ClientRef *findClientRef(const StringTableEntry &name);
 
    bool processArguments(S32 argc, const char **argv);

@@ -117,6 +117,7 @@ enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[
    ItemGoalZone,
    ItemTextItem,
    ItemNavMeshZone,
+   ItemInvalid
 };
 
 enum GeomType {
@@ -127,22 +128,35 @@ enum GeomType {
    geomNone,            // Other/unknown (not used, just here for completeness)
 };
 
+
+extern bool isConvex(const Vector<Point> &verts);
+
 class WorldItem
 {
+private:
+   Vector<Point> mVerts;
+   Vector<bool> mVertSelected;
+   bool mAnyVertsSelected;
+
+   void init(GameItems itemType, S32 xteam, U32 itemid);
 
 public:
-   WorldItem() { /* do nothing */ }                                                        // Generic constructor
-   WorldItem(GameItems itemType, Point pos, S32 team, F32 width, F32 height, U32 id = 0);  // Primary constructor
-   WorldItem(const WorldItem &worldItem);                                                  // Copy constructor
+   WorldItem(GameItems itemType = ItemInvalid);
+   WorldItem(GameItems itemType, Point pos, S32 team, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
+
+   //WorldItem(const WorldItem &worldItem);                                                  // Copy constructor
+
+   bool processArguments(S32 argc, const char **argv);
+   S32 getDefaultRepopDelay(GameItems itemType);
 
    GameItems index;
    S32 team;
    F32 width;
    U32 id;              // Item's unique id... 0 if there is none
-   Vector<Point> verts;
+   
    bool selected;
    bool litUp;
-   Vector<bool> vertSelected;
+   
    LineEditor lineEditor; // For items that have an aux text field
    U32 textSize;          // For items that have an aux text field
    S32 repopDelay;        // For repair items, also used for engineered objects heal rate
@@ -150,19 +164,47 @@ public:
    bool boolattr;         // Additional optional boolean attribute for some items (only speedzone so far...)
 
    bool hasWidth();
+   bool anyVertsSelected() { return mAnyVertsSelected; }
+
+   void selectVert(S32 vertIndex);
+   void aselectVert(S32 vertIndex);
+   void unselectVert(S32 vertIndex);
+   void unselectVerts();
+   bool vertSelected(S32 vertIndex);
+   void addVert(Point vert);
+   void addVertFront(Point vert);
+   void deleteVert(S32 vertIndex);
+   void insertVert(Point vertex, S32 vertIndex);
+   void setVert(Point vertex, S32 vertIndex);
+   void invalidate() { mVerts.clear(); index = ItemInvalid; }
+
+   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
+
+
+   virtual bool isConvex() { return Zap::isConvex(mVerts); }
+
+   Vector<Point> getVerts() { return mVerts; }
+
+   S32 vertCount() { return mVerts.size(); }
+   Point vert(S32 vertIndex) { return mVerts[vertIndex]; }
+
    GeomType geomType();
 };
 
 
-class ItemSelection
+////////////////////////////////////////
+////////////////////////////////////////
+
+class SelectionItem
 {
 public:
-   ItemSelection() { /* do nothing */ }      // Generic constructor
-   ItemSelection(WorldItem &item);           // Primary constructor
+   SelectionItem() { /* do nothing */ }      // Generic constructor
+   SelectionItem(WorldItem &item);           // Primary constructor
 
 private:
-   bool selected;
-   Vector<bool> vertSelected;
+   bool mSelected;
+   Vector<bool> mVertSelected;
 
 public:
    void restore(WorldItem &item);
@@ -176,31 +218,11 @@ public:
    Selection(Vector<WorldItem> &items);      // Primary constructor
 
 private:
-   Vector<ItemSelection> selection;
+   Vector<SelectionItem> mSelection;
 
 public:
    void restore(Vector<WorldItem> &items);
 };
-
-//class EditorCommand
-//{
-//public:
-//    virtual bool Execute();
-//    virtual bool Undo();
-//    virtual ~EditorCommand() { }
-//};
-//
-//class PlaceItemCommand : public EditorCommand
-//{
-//   PlaceItemCommand(WorldItem item, Point pos) : mItem(item), mPos(pos) { }
-//
-//   WorldItem mItem;
-//   Point mPos;
-//
-//   bool Execute();
-//   bool Undo();
-//};
-
 
 
 class EditorUserInterface : public UserInterface, public LevelLoader
@@ -316,9 +338,9 @@ private:
    void joinBarrier();           // Join barrier bits together into one (if ends are coincident)
 
    S32 countSelectedItems();
-   S32 countSelectedVerts();
+   //S32 countSelectedVerts();
    bool anyItemsSelected();           // Are any items selected?
-   bool anyItemsOrVertsSelected();    // Are any items/vertices selected?
+   bool anythingSelected();           // Are any items/vertices selected?
 
    void findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex);
    void findHitItemAndEdge();         // Sets mItemHit and mEdgeHit
@@ -374,7 +396,7 @@ public:
    void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);
 
    void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, bool highlighted, S32 team, F32 width, F32 alpha = 1.0, bool convert = true);   // Render walls & lineItems
-   void renderPoly(Vector<Point> verts, bool isDockItem);
+   void renderPoly(const Vector<Point> &verts, bool isDockItem);
    static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 
 
@@ -389,10 +411,12 @@ public:
 
    void populateDock();                         // Load up dock with game-specific items to drag and drop
 
-   F32 mGridSize;
+   F32 mGridSize;    // Should be private
+   F32 getGridSize() { return mGridSize; }
+   void setGridSize(F32 gridSize) { mGridSize = gridSize; }
 
    string mScriptLine;                          // Script and args, if any
-
+   void setHasNavMeshZones(bool hasZones) { mHasBotNavZones = hasZones; }
 
    void idle(U32 timeDelta);
    void deleteSelection(bool objectsOnly);      // Delete selected items (true = items only, false = items & vertices)
@@ -411,8 +435,6 @@ public:
    void incBarrierWidth(S32 amt);      // Increase selected wall thickness by amt
    void decBarrierWidth(S32 amt);      // Decrease selected wall thickness by amt
 
-   static S32 getDefaultRepopDelay(GameItems itemType);
-
    bool saveLevel(bool showFailMessages, bool showSuccessMessages, bool autosave = false);
    void testLevel();
    void setSaveMessage(string msg, bool savedOK);
@@ -423,10 +445,6 @@ public:
    Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
 
    void runScript();    // Run associated levelgen script
-
-
-   //MeshBox testBox[5][5];  //TODO: del
-
 };
 
 

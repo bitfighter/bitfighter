@@ -23,6 +23,9 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef _GO_FAST_H_
+#define _GO_FAST_H_
+
 #include "gameObject.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
@@ -94,3 +97,4 @@ public:
 
 };
 
+#endif
