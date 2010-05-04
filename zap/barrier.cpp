@@ -40,9 +40,13 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 U32 Barrier::mBarrierChangeIndex = 1;
 
 
-// Given the points in vec, fill barrierEnds with... something
-void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)
+// Given the points in vec, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
+// for better rendering).  Set extendAmt to 0 to see why it's needed.
+// Populates barrierEnds with the results.
+void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)
 {
+   barrierEnds.clear();
+
    if(vec.size() == 1)     // Protect against bad data
       return;
 
@@ -67,18 +71,16 @@ void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &
       // Do some bounds checking.  Crazy, I know, but trust me, it's worth it!
       if (cosTheta > 1.0)
          cosTheta = 1.0;
-      else if(cosTheta < -1.0)
+      else if(cosTheta < -1.0)  
          cosTheta = -1.0;
 
-      if(cosTheta >= -0.01)
-      {
-         F32 extendAmt = width * 0.5 * tan( acos(cosTheta) / 2 );
-         if(extendAmt > 0.01)
-            extendAmt -= 0.01;
-         extend.push_back(extendAmt);
-      }
-      else
-         extend.push_back(0);
+      cosTheta = abs(cosTheta);     // Seems to reduce "end gap" on acute junction angles
+      
+      F32 extendAmt = width * 0.5 * tan( acos(cosTheta) / 2 );
+      if(extendAmt > 0.01)
+         extendAmt -= 0.01;
+      extend.push_back(extendAmt);
+   
       lastEdge = curEdge;
    }
 
@@ -138,10 +140,9 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
    }
    else        // This is a standard series of segments
    {
-
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
-      constructBarrierPoints(vec, width, barrierEnds);
+      constructBarrierEndPoints(vec, width, barrierEnds);
 
       // Then add individual segments to the game
       for(S32 i = 0; i < barrierEnds.size(); i += 2)
@@ -157,81 +158,74 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
 }
 
 
-// Constructor --> gets called from constructBarriers above
-Barrier::Barrier(Vector<Point> points, F32 width, bool solid)
+// Simply takes a segment and "puffs it out" to a rectangle of a specified width.  Does not modify endpoints.
+void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &outline)
 {
-   mObjectTypeMask = BarrierType | CommandMapVisType;
-   mPoints = points;
+   Point dir = end - start;
+   Point crossVec(dir.y, -dir.x);
+   crossVec.normalize(width * 0.5);
 
-   if(points.size() < 2)      // Invalid barrier!
+   outline.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
+   outline.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
+   outline.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
+   outline.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+}
+
+// Test
+void expandCenterlineToOutlines(const Point &start, const Point &end, F32 width, Vector<Point> &points, Vector<Point> &lines)
+{
+   Point dir = end - start;
+   Point crossVec(dir.y, -dir.x);
+   crossVec.normalize(width * 0.5);
+
+   lines.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
+   lines.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
+
+   lines.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
+   lines.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
+   
+   lines.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
+   lines.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+
+   lines.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+   lines.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
+
+
+   points.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
+   points.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
+   points.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
+   points.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+}
+
+
+// Takes a list of vertices and converts them into a list of lines representing the edges of an object
+void populateEdgeLines(const Vector<Point> &mRenderOutlineGeometry, Vector<Point> &mRenderLineSegments)
+{
+   mRenderLineSegments.clear();
+
+   S32 last = mRenderOutlineGeometry.size() - 1;      // Remember: mRenderOutlineGeometry is a vector of points representing lines
+   for(S32 i = 0; i < mRenderOutlineGeometry.size(); i++)
    {
-      delete this;
-      return;
+      mRenderLineSegments.push_back(mRenderOutlineGeometry[last]);
+      mRenderLineSegments.push_back(mRenderOutlineGeometry[i]);
+      last = i;
    }
-
-   Rect r(points[0], points[1]);
-
-   for(S32 i = 2; i < points.size(); i++)
-      r.expand(points[i]);
-   mWidth = width;
-
-   if(points.size() == 2)    // It's a regular segment, so apply width
-      r.expand(Point(width, width));
-
-   setExtent(r);
-   mLastBarrierChangeIndex = 0;
-
-    mSolid = solid;
-
-   if(mSolid)
-       Triangulate::Process(mPoints, mRenderFillGeometry);
-   else
-       getCollisionPoly(mRenderFillGeometry);
-
-   getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
 }
 
 
-void Barrier::onAddedToGame(Game *theGame)
-{
-  getGame()->mObjectsLoaded++;
-}
 
-
-bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
-{
-   if(mPoints.size() == 2)    // It's a regular segment, so apply width
-   {
-      Point start = mPoints[0];
-      Point end = mPoints[1];
-
-      Point vec = end - start;
-      Point crossVec(vec.y, -vec.x);
-      crossVec.normalize(mWidth * 0.5);
-
-      polyPoints.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
-      polyPoints.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
-      polyPoints.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
-      polyPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
-   }
-   else                       // Otherwise, our collisionPoly is just our points!
-      polyPoints = mPoints;
-
-   return true;
-}
-
-
-// Clears out overlapping barrier lines for better rendering appearance
-// This is effectively called on every pair of intersecting barriers
-void Barrier::clipRenderLinesToPoly(Vector<Point> &polyPoints)
+// Clears out overlapping barrier lines for better rendering appearance, modifies lineSegmentPoints.
+// This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets 
+// refined as each additional intersecting barrier gets processed.
+void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints)
 {
    Vector<Point> clippedSegments;
 
    // Loop through all the segments
-   for(S32 i = 0; i < mRenderLineSegments.size(); i+= 2)
+   for(S32 i = 0; i < lineSegmentPoints.size(); i+= 2)
    {
-      Point rp1 = mRenderLineSegments[i];
-      Point rp2 = mRenderLineSegments[i + 1];
+      Point rp1 = lineSegmentPoints[i];
+      Point rp2 = lineSegmentPoints[i + 1];
 
       Point cp1 = polyPoints[polyPoints.size() - 1];
       for(S32 j = 0; j < polyPoints.size(); j++)
@@ -282,7 +276,69 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &polyPoints)
          cp1 = cp2;
       }
    }
-   mRenderLineSegments = clippedSegments;
+
+   lineSegmentPoints = clippedSegments;
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor --> gets called from constructBarriers above
+Barrier::Barrier(Vector<Point> points, F32 width, bool solid)
+{
+   mObjectTypeMask = BarrierType | CommandMapVisType;
+   mPoints = points;
+
+   if(points.size() < 2)      // Invalid barrier!
+   {
+      delete this;
+      return;
+   }
+
+   Rect r(points[0], points[1]);
+
+   for(S32 i = 2; i < points.size(); i++)
+      r.expand(points[i]);
+   mWidth = width;
+
+   if(points.size() == 2)    // It's a regular segment, so apply width
+      r.expand(Point(width, width));
+
+   setExtent(r);
+   mLastBarrierChangeIndex = 0;
+
+    mSolid = solid;
+
+   if(mSolid)
+       Triangulate::Process(mPoints, mRenderFillGeometry);
+   else
+       getCollisionPoly(mRenderFillGeometry);
+
+   getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
+}
+
+
+void Barrier::onAddedToGame(Game *theGame)
+{
+  getGame()->mObjectsLoaded++;
+}
+
+
+// Processes mPoints and fills polyPoints.  
+bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
+{
+   if(mPoints.size() == 2)    // It's a regular segment, so apply width
+   {
+      Point start = mPoints[0];
+      Point end = mPoints[1];
+
+      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, polyPoints);
+   }
+   else                       // Otherwise, our collisionPoly is just our points!
+      polyPoints = mPoints;
+
+   return true;
 }
 
 
@@ -303,7 +359,7 @@ void Barrier::render(S32 layerIndex)
             glEnd();
          }
       }
-      else
+      else                       // Normal wall
       {
          glBegin(GL_POLYGON);
             for(S32 i = 0; i < mRenderFillGeometry.size(); i++)
@@ -312,42 +368,35 @@ void Barrier::render(S32 layerIndex)
       }
 
    }
-   else if(layerIndex == 1)      // Now draw the outlines
+   else if(layerIndex == 1)      // Second, draw the outlines
    {
-      if(mLastBarrierChangeIndex != mBarrierChangeIndex)
+      // This needs to be run on all walls every time a new segment is added, but it need not run every time a wall is drawn
+      if(mLastBarrierChangeIndex != mBarrierChangeIndex)    
       {
          mLastBarrierChangeIndex = mBarrierChangeIndex;
-         mRenderLineSegments.clear();
 
-         S32 last = mRenderOutlineGeometry.size() - 1;
-         for(S32 i = 0; i < mRenderOutlineGeometry.size(); i++)
-         {
-            mRenderLineSegments.push_back(mRenderOutlineGeometry[last]);
-            mRenderLineSegments.push_back(mRenderOutlineGeometry[i]);
-            last = i;
-         }
+         populateEdgeLines(mRenderOutlineGeometry, mRenderLineSegments);
+
          static Vector<GameObject *> fillObjects;
          fillObjects.clear();
 
-         findObjects(BarrierType, fillObjects, getExtent());
+         findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
 
          for(S32 i = 0; i < fillObjects.size(); i++)
          {
             mRenderOutlineGeometry.clear();
             if(fillObjects[i] != this && fillObjects[i]->getCollisionPoly(mRenderOutlineGeometry))
-               clipRenderLinesToPoly(mRenderOutlineGeometry);
+               clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);
          }
       }
 
       // Actual outline rendering code here:
       glColor(f);
       glBegin(GL_LINES);
-      for(S32 i = 0; i < mRenderLineSegments.size(); i++)
-         glVertex(mRenderLineSegments[i]);
+         for(S32 i = 0; i < mRenderLineSegments.size(); i++)
+            glVertex(mRenderLineSegments[i]);
       glEnd();
    }
 }
 
 };
-
-

@@ -222,7 +222,6 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
    // Get that baby into the INI file
    gIniSettings.lastEditorName = name;
    saveSettingsToINI();             
-
 }
 
 

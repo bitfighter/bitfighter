@@ -140,7 +140,6 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
    // mark: it's called "winJoystick"
    // mark: it's supposed to be gross.
 
-   DIJOYSTATE2 js;       // DInput joystick state
 
    if(!gJoystick)
       return false;
@@ -155,9 +154,13 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
       return false;
    }
 
+   DIJOYSTATE2 js;       // DInput joystick state
+
    // Get the input's device state
    if(FAILED(gJoystick->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
       return false; // The device should have been acquired during the Poll()
+
+   //logprintf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",js.lX,js.lY,js.lZ,js.lRx,js.lRy,js.lRz,js.rglSlider[0],js.rglSlider[1],js.rgdwPOV[0],js.rgdwPOV[1],js.rgdwPOV[2],js.rgdwPOV[3],js./*rgbButtonsButtons[128];//128buttons*/lVX,js.lVY,js.lVZ,js.lVRx,js.lVRy,js.lVRz,js.rglVSlider[0],js.rglVSlider[1],js.lAX,js.lAY,js.lAZ,js.lARx,js.lARy,js.lARz,js.rglASlider[0],js.rglASlider[1],js.lFX,js.lFY,js.lFZ,js.lFRx,js.lFRy,js.lFRz,js.rglFSlider[0],js.rglFSlider[1]);
 
    F32 scale = 1 / 32768.0f;
    axes[0] = (F32(js.lX) - 32768.0f) * scale;
@@ -172,6 +175,8 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
    axes[9] = 0;
    axes[10] = 0;
    axes[11] = 0;
+
+   //logprintf("%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f,%2.2f", axes[0],axes[1], axes[2], axes[3], axes[4], axes[5], axes[6], axes[7], axes[8], axes[9], axes[10], axes[11]);
 
    // check the state of the buttons:
    buttonMask = 0;

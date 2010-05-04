@@ -524,7 +524,7 @@ void UserInterface::playBoop()
 }
 
 
-extern void glColor(Color c, float alpha = 1);
+extern void glColor(const Color &c, float alpha = 1);
 
 void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines)
 {

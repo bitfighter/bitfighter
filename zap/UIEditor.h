@@ -135,10 +135,11 @@ class WorldItem
 {
 private:
    Vector<Point> mVerts;
+
    Vector<bool> mVertSelected;
    bool mAnyVertsSelected;
 
-   void init(GameItems itemType, S32 xteam, U32 itemid);
+   void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid);
 
 public:
    WorldItem(GameItems itemType = ItemInvalid);
@@ -148,6 +149,8 @@ public:
 
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
+
+   Vector<Point> mRenderLineSegments; // Same here
 
    GameItems index;
    S32 team;
@@ -166,6 +169,9 @@ public:
    bool hasWidth();
    bool anyVertsSelected() { return mAnyVertsSelected; }
 
+   void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point
+
+
    void selectVert(S32 vertIndex);
    void aselectVert(S32 vertIndex);
    void unselectVert(S32 vertIndex);
@@ -177,6 +183,11 @@ public:
    void insertVert(Point vertex, S32 vertIndex);
    void setVert(Point vertex, S32 vertIndex);
    void invalidate() { mVerts.clear(); index = ItemInvalid; }
+
+   void geomChanging();   // Item geom is interactively changing
+   void geomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
+   void attrsChanging();
+   void attrsChanged();   // Attrs changed
 
    void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
    void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
@@ -364,9 +375,7 @@ private:
    Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 
-   bool mUnselectVertexAfterDrag;      // <===== TODO: Delete
-   S32 mUnselectVertexAfterDrag_i;
-   S32 mUnselectVertexAfterDrag_j;
+   void finishedDragging();
 
 public:
    void setLevelFileName(string name);
@@ -395,9 +404,20 @@ public:
    void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);
 
-   void renderPolyline(GameItems itemType, Vector<Point> verts, bool selected, bool highlighted, S32 team, F32 width, F32 alpha = 1.0, bool convert = true);   // Render walls & lineItems
+   // Render walls & lineItems
+   void renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines,
+                           bool selected, bool highlighted, S32 team, F32 alpha = 1.0, bool convert = true);   
+
+   void renderPolylineCenterline(const Vector<Point> &verts, bool selected, bool highlighted,  S32 team, F32 alpha);
+
    void renderPoly(const Vector<Point> &verts, bool isDockItem);
-   static void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
+
+   //Vector<Vector<Point>> wallSegmentCollection;         // A collection of all wall segments in editor
+   Vector<Vector<Point>> wallSegmentEdges, wallSegmentPoints;
+
+   void buildWallSegmentEdgesAndPoints();           // Populate that collection
+   
+   void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 
 
    // Handle input

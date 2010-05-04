@@ -28,7 +28,7 @@
 #include "UIMenus.h"
 #include "point.h" 
 
-#include "../tnl/tnlJournal.h"
+#include "tnlJournal.h"
 
 #include "gameObjectRender.h"
 #include "config.h"
@@ -64,7 +64,7 @@ F32 gJoystickInput[JOYSTICK_COUNT][AXIS_COUNT];
 U32 gRawJoystickButtonInputs;
 
 
-extern void drawCircle(Point pos, F32 radius);
+extern void drawCircle(const Point &pos, F32 radius);
 
 inline void setButtonColor(bool activated)
 {
@@ -113,10 +113,10 @@ static S32 keyCodeToButtonIndex(KeyCode keyCode)
 
 // From ControllerTypeType enum ---> LogitechWingman, LogitechDualAction, SaitekDualAnalogP880, SaitekDualAnalogRumblePad, PS2DualShock, PS2DualShockConversionCable, XBoxController, XBoxControllerOnXBox
 //                                                                Wingmn    DualAct   P880     RumbPad     PS2  PS2 w/Cnvrtr  XBox    XBoxOnXBox
-static U32 gControllerButtonCounts[ControllerTypeCount] =          { 9,       10,       9,        10,       10,       10,      10,       14 };     // How many buttons?
-static U32 gShootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
+static U32 controllerButtonCounts[ControllerTypeCount] =          { 9,       10,       9,        10,       10,       10,      10,       14 };     // How many buttons?
+static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
 
-static U32 gControllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
+static U32 controllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
 {
    { // LogitechWingman   9
       ControllerButton1,
@@ -215,18 +215,18 @@ static U32 gControllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
       0,
    },
    { // XBoxController     10
-      ControllerButton1,
-      ControllerButton2,
-      ControllerButton3,
-      ControllerButton4,
-      ControllerButton6,
-      ControllerButton5,
-      ControllerButtonStart,
-      ControllerButtonBack,
+      ControllerButton1,      // A
+      ControllerButton2,      // B
+      ControllerButton3,      // X
+      ControllerButton4,      // Y
+      ControllerButton6,      // RB
+      ControllerButton5,      // LB
+      ControllerButtonBack,   // <
+      ControllerButtonStart,  // >
       0,
       0,
-      ControllerButton7,
-      ControllerButton8,
+      ControllerButton7,      
+      ControllerButton8,      
       0,
       0,
    },
@@ -248,10 +248,13 @@ static U32 gControllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
    }
 };
 
+
+
 ///////// Rendering functions
 
 S32 roundButtonRadius = 9;
 S32 rectButtonWidth = 24;
+S32 rectButtonHeight = 17;
 S32 smallRectButtonWidth = 19;
 
 // Render some specific, common button types
@@ -281,11 +284,12 @@ void renderRoundButton(Point loc, const char *label, AlignType align, bool activ
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
+
 void renderRectButton(Point loc, const char *label, AlignType align, bool activated)
 {
    const S32 width = rectButtonWidth;
    const S32 halfWidth = 12;
-   const S32 height = 17;
+   const S32 height = rectButtonHeight;
    const S32 halfHeight = 9;
    const S32 labelSize = 12;
 
@@ -310,6 +314,7 @@ void renderRectButton(Point loc, const char *label, AlignType align, bool activa
 
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
+
 
 void renderSmallRectButton(Point loc, const char *label, AlignType align, bool activated)
 {
@@ -341,9 +346,10 @@ void renderSmallRectButton(Point loc, const char *label, AlignType align, bool a
    UserInterface::drawString(loc.x + offset.x - UserInterface::getStringWidth(labelSize, label) / 2, loc.y + 2, labelSize, label);
 }
 
+
 // Render dpad graphic
 void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, bool leftActivated,
-              bool rightActivated, const char *msg1, const char *msg2)
+                bool rightActivated, const char *msg1, const char *msg2)
 {
    radius = radius * 0.143;   // = 1/7  Correct for the fact that when radius = 1, graphic has 7 px radius
 
@@ -479,7 +485,10 @@ S32 getControllerButtonRenderedSize(KeyCode keyCode)
    }
    else if(joy == XBoxController || joy == XBoxControllerOnXBox)
    {
-      return 18;
+      if(buttonIndex < 4)
+         return 18;
+      else
+         return rectButtonWidth;
    }
    else  // Something generic
    {
@@ -578,7 +587,7 @@ void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 o
    // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
    else if(joy == PS2DualShock || joy == PS2DualShockConversionCable)
    {
-      if(buttonIndex >= gControllerButtonCounts[joy])
+      if(buttonIndex >= controllerButtonCounts[joy])
          return;
 
       static F32 color[6][3] = {
@@ -645,24 +654,47 @@ void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 o
    }
    else if(joy == XBoxController || joy == XBoxControllerOnXBox)
    {
-      if(buttonIndex >= gControllerButtonCounts[joy])
+      if(buttonIndex >= controllerButtonCounts[joy])
          return;
 
-      static F32 color[6][3] = { { 0, 1, 0 },
+      static F32 color[4][3] = { { 0, 1, 0 },
                                  { 1, 0, 0 },
                                  { 0, 0, 1 },
-                                 { 1, 1, 0 },
-                                 { 1, 1, 1 },
-                                 { 0, 0, 0 } };
-      Color c(color[buttonIndex][0], color[buttonIndex][1], color[buttonIndex][2]);
+                                 { 1, 1, 0 } };
 
-      glColor(c * 0.4f);
-      drawFilledCircle(Point(x, y + 8), 9);
-      const char buttons[] = "ABXY";
-      setButtonColor(activated);
-      drawCircle(Point(x, y + 8), 9);
-      glColor(c);
-      UserInterface::drawStringf(x - 4, y + 2, 12, "%c", buttons[buttonIndex]);
+      if(buttonIndex <= 3)
+      {
+         Color c(color[buttonIndex][0], color[buttonIndex][1], color[buttonIndex][2]);
+         glColor(c * 0.4f);
+         drawFilledCircle(Point(x, y + 8), 9);
+         setButtonColor(activated);
+         drawCircle(Point(x, y + 8), 9);
+
+         const char buttons[] = "ABXY";
+         glColor(c);
+         UserInterface::drawStringf(x - 4, y + 2, 12, "%c", buttons[buttonIndex]);
+      }
+
+      if(buttonIndex == 4 || buttonIndex == 5)     // RB, LB
+      {
+         setButtonColor(activated);
+         drawRoundedRect(Point(x, y + 8), rectButtonWidth, rectButtonHeight, 3);
+         glColor3f(1,1,1);
+         UserInterface::drawString(x - 7, y + 1, 12, buttonIndex == 5 ? "LB" : "RB");
+      }
+
+      else if(buttonIndex == 8 || buttonIndex == 9)      // Render right/left-pointing triangle in an ovally-square button
+      {
+         setButtonColor(activated);
+         drawRoundedRect(Point(x, y + 8), 20, 15, 5);
+         glColor3f(1,1,1);
+         S32 dir = (buttonIndex == 9) ? -1 : 1;
+         glBegin(GL_LINE_LOOP);
+            glVertex(Point(x + dir * 4, y + 8));
+            glVertex(Point(x - dir * 3, y + 13));
+            glVertex(Point(x - dir * 3, y + 3));
+         glEnd();
+      }
    }
 
    else  // Something generic
@@ -689,7 +721,9 @@ ControllerTypeType autodetectJoystickType()
       ret = LogitechWingman;
    else if(!strcmp(joystickName, "XBoxOnXBox"))
       ret = XBoxControllerOnXBox;
-   else if(strstr(joystickName, "XBox"))
+   // Note that on the only XBox controller I've used on windows, the autodetect string was simply:
+   // "Controller (XBOX 360 For Windows)".  I don't know if there are other variations out there.
+   else if(strstr(joystickName, "XBOX") || strstr(joystickName, "XBox"))
       ret = XBoxController;
    else if(!strcmp(joystickName, "4 axis 16 button joystick"))
       ret = PS2DualShock;                                         // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
@@ -806,7 +840,8 @@ void extern simulateKeyUp(KeyCode keyCode);
 bool extern getKeyState(KeyCode keyCode);
 
 // Populates theMove with input from joystick, and also creates some
-// simulated keyboard events for menu navigation
+// simulated keyboard events for menu navigation.
+// Runs through this every game tick, regardless of whether or not joystick button was pressed.
 // There is kind of a mishmash of stuff thrown in here...
 static bool processJoystickInputs( U32 &buttonMask )
 {
@@ -867,13 +902,14 @@ static bool processJoystickInputs( U32 &buttonMask )
    }
 
    // Firing input --> controls[2] is left-right, controls[3] is up-down
-   controls[2] = axes[gShootAxisRemaps[gIniSettings.joystickType][0]];
-   controls[3] = axes[gShootAxisRemaps[gIniSettings.joystickType][1]];
+   controls[2] = axes[shootAxisRemaps[gIniSettings.joystickType][0]];
+   controls[3] = axes[shootAxisRemaps[gIniSettings.joystickType][1]];
+
 
    // Create dead zones, so minimal stick movement or miscalibration will have no effect
    for(U32 i = 0; i < 4; i++)
    {           //              Move      Fire
-      F32 deadZone = (i < 2) ? 0.25f : 0.03125f;  // Different deadZones for moving and firing.  Why?
+      F32 deadZone = (i < 2) ? 0.25f : 0.075f;  // Different deadZones for moving and firing.  Why?
 
       // Recalibrate control entry to compensate for dead zone
       if(controls[i] < -deadZone)
@@ -934,6 +970,7 @@ static bool processJoystickInputs( U32 &buttonMask )
    else if (controls[3] <= 0 && getKeyState(STICK_2_DOWN))
       simulateKeyUp(STICK_2_DOWN);
 
+   //logprintf("ButtonMask: %d", buttonMask);
 
    // Remap button inputs
    U32 retMask = 0;
@@ -942,9 +979,22 @@ static bool processJoystickInputs( U32 &buttonMask )
       if(buttonMask & (1 << i))
       {
          gRawJoystickButtonInputs |= (1 << i);
-         retMask |= gControllerButtonRemaps[gIniSettings.joystickType][i];
+         retMask |= controllerButtonRemaps[gIniSettings.joystickType][i];
       }
    buttonMask = retMask | hatMask;
+
+
+   //if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox)
+   //{
+   //   // XBox also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
+   //   // Note that if both triggers are depressed equally, they'll cancel each other out, and if one is pressed more than the other,
+   //   // only that one will be detected.
+   //   F32 deadZone = 0.075f;
+   //   if(axes[2] < -deadZone)
+   //      buttonMask |= ControllerButton7;
+   //   else if(axes[2] > deadZone)
+   //      buttonMask |= ControllerButton8;
+   //}
 
    return true;      // true = processed joystick input
 }

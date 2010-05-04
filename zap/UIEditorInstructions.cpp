@@ -39,7 +39,9 @@ namespace Zap
 {
 
 EditorInstructionsUserInterface gEditorInstructionsUserInterface;
-extern void glColor(Color c, float alpha = 1);
+
+
+extern void glColor(const Color &c, float alpha = 1);
 
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface()
@@ -232,6 +234,8 @@ static const char *page2Strings[] =
 };
 
 
+extern void constructBarrierOutlinePoints(const Vector<Point> &verts, F32 width, Vector<Point> &barrierPoints);
+
 void EditorInstructionsUserInterface::renderPage2()
 {
    // Draw animated creation of walls
@@ -261,7 +265,13 @@ void EditorInstructionsUserInterface::renderPage2()
       points.push_back(Point(650, 170 + vertOffset));
 
    if(mAnimStage > 6)
-      gEditorUserInterface.renderPolyline(ItemBarrierMaker, points, false, -1, 25, 1.0, false);
+   {
+      Vector<Point> barPoints;
+      F32 width = 25;
+      //constructBarrierOutlinePoints(points, width, barPoints);  // Populates barPoints with points representing barrier
+
+      gEditorUserInterface.renderPolylineFill(ItemBarrierMaker, points, barPoints, false, -1, 1.0, false);
+   }
 
    glColor(mAnimStage <= 11 ? Color(1,1,0) : gEditorUserInterface.getTeamColor(-1));
 

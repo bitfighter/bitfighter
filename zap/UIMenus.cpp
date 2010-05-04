@@ -157,6 +157,7 @@ void MenuUserInterface::renderMenuInstructions(S32 variant)
 	  renderControllerButton(x, y, BUTTON_DPAD_DOWN, false);
 	  x += getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) + getStringWidth(size, " ");
 
+     glColor3f(1,1,1);
 	  static const char *msg1 = "to choose | ";
 	  drawString(x, y, size, msg1);
 	  x += getStringWidth(size, msg1);
@@ -164,6 +165,7 @@ void MenuUserInterface::renderMenuInstructions(S32 variant)
 	  renderControllerButton(x, y + 4, BUTTON_START, false);
 	  x += getControllerButtonRenderedSize(BUTTON_START);
 
+     glColor3f(1,1,1);
 	  static const char *msg2 = "to select | ";
 	  drawString(x, y, size, msg2);
 	  x += getStringWidth(size, msg2);
@@ -171,6 +173,7 @@ void MenuUserInterface::renderMenuInstructions(S32 variant)
 	  renderControllerButton(x, y + 4, BUTTON_BACK, false);
 	  x += getControllerButtonRenderedSize(BUTTON_BACK);
 
+     glColor3f(1,1,1);
 	  drawString(x, y, size, "exits menu");
    }
 }

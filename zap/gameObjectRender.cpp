@@ -42,18 +42,18 @@ namespace Zap
 
 const float gShapeLineWidth = 2.0f;
 
-void glVertex(Point p)
+void glVertex(const Point &p)
 {
    glVertex2f(p.x, p.y);
 }
 
-inline void glColor(Color c, float alpha)
+inline void glColor(const Color &c, float alpha)
 {
    glColor4f(c.r, c.g, c.b, alpha);
 }
 
 
-inline void drawSquare(Point pos, U32 size, bool filled)
+inline void drawSquare(const Point &pos, U32 size, bool filled)
 {
    glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
       glVertex2f(pos.x - size, pos.y - size);
@@ -63,19 +63,19 @@ inline void drawSquare(Point pos, U32 size, bool filled)
    glEnd();
 }
 
-inline void drawSquare(Point pos, U32 size)
+inline void drawSquare(const Point &pos, U32 size)
 {
    drawSquare(pos, size, false);
 }
 
 
-inline void drawFilledSquare(Point pos, U32 size)
+inline void drawFilledSquare(const Point &pos, U32 size)
 {
    drawSquare(pos, size, true);
 }
 
 
-inline void drawCircle(Point pos, F32 radius)
+inline void drawCircle(const Point &pos, F32 radius)
 {
    glBegin(GL_LINE_LOOP);
 
@@ -85,8 +85,9 @@ inline void drawCircle(Point pos, F32 radius)
    glEnd();
 }
 
+
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
-void drawArc(Point pos, F32 radius, F32 startAngle, F32 endAngle)
+void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
    glBegin(GL_LINE_STRIP);
 
@@ -99,8 +100,9 @@ void drawArc(Point pos, F32 radius, F32 startAngle, F32 endAngle)
    glEnd();
 }
 
+
 // Draw rounded rectangle centered on pos
-void drawRoundedRect(Point pos, F32 width, F32 height, F32 rad)
+void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 rad)
 {
    Point p;
 
@@ -133,8 +135,9 @@ void drawRoundedRect(Point pos, F32 width, F32 height, F32 rad)
    drawArc(p, rad, FloatHalfPi, FloatPi);
 }
 
+
 // Actually draw the ellipse
-void drawFilledEllipseUtil(Point pos, F32 width, F32 height, F32 angle, U32 glStyle)
+void drawFilledEllipseUtil(const Point &pos, F32 width, F32 height, F32 angle, U32 glStyle)
 {
    F32 sinbeta = sin(angle);
    F32 cosbeta = cos(angle);
@@ -156,7 +159,7 @@ void drawFilledEllipseUtil(Point pos, F32 width, F32 height, F32 angle, U32 glSt
 
 
 // Draw an n-sided polygon
-void drawPolygon(Point pos, S32 sides, F32 radius, F32 angle)
+void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle)
 {
    glBegin(GL_LINE_LOOP);
       for(F32 theta = 0; theta < Float2Pi; theta += Float2Pi / sides)
@@ -166,25 +169,26 @@ void drawPolygon(Point pos, S32 sides, F32 radius, F32 angle)
 
 
 // Draw an ellipse at pos, with axes width and height, canted at angle
-void drawEllipse(Point pos, F32 width, F32 height, F32 angle)
+void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 {
    drawFilledEllipseUtil(pos, width, height, angle, GL_LINE_LOOP);
 }
 
+
 // Well...  draws a filled ellipse, much as you'd expect
-void drawFilledEllipse(Point pos, F32 width, F32 height, F32 angle)
+void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle)
 {
    drawFilledEllipseUtil(pos, width, height, angle, GL_POLYGON);
 }
 
 
-void drawFilledCircle(Point pos, F32 radius)
+void drawFilledCircle(const Point &pos, F32 radius)
 {
    drawFilledSector(pos, radius, 0, Float2Pi);
 }
 
 
-void drawFilledSector(Point pos, F32 radius, F32 start, F32 end)
+void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 {
    glBegin(GL_POLYGON);
 

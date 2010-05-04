@@ -48,7 +48,7 @@ public:
 
    F32 mWidth;
 
-   static const S32 BarrierWidth = 50; ///< The width, in game units of the barrier.
+   static const S32 BarrierWidth = 50; ///< The default width of the barrier in game units
 
    static U32 mBarrierChangeIndex; ///< Global counter that is incremented every time a new barrier is added on the client.
    U32 mLastBarrierChangeIndex;    ///< Index to check against the global counter - if it is different, then this barrier's polygon outline will be clipped against all adjacent barriers.
@@ -73,8 +73,8 @@ public:
    /// collide always returns true for Barrier objects.
    bool collide(GameObject *otherObject) { return true; }
 
-   /// clips the current set of render lines against the polygon passed as polyPoints.
-   void clipRenderLinesToPoly(Vector<Point> &polyPoints);
+   /// clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
+   //void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints);
 
    TNL_DECLARE_CLASS(Barrier);
 };

@@ -200,7 +200,7 @@ LineItem::LineItem()
    mObjectTypeMask |= CommandMapVisType;
 }
 
-extern void constructBarrierPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
+extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
 void LineItem::render()
 {
@@ -318,29 +318,6 @@ void LineItem::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(!Polyline::unpackUpdate(connection, stream))
       return;
-
-   //Vector<Point> points;
-
-   //constructBarrierPoints(mPolyBounds, mWidth, points); 
-
-   //for(S32 i = 0; i < points.size(); i += 2)
-   //{
-   //   Point dir = points[i+1] - points[i];
-   //   Point crossVec(dir.y, -dir.x);
-   //   crossVec.normalize(mWidth * 0.5);
-
-   //   mRenderPoints.push_back(points[i] + crossVec);
-   //   mRenderPoints.push_back(points[i] - crossVec);
-   //   mRenderPoints.push_back(points[i+1] - crossVec);
-   //   mRenderPoints.push_back(points[i+1] + crossVec);
-   //}
-
-   //Rect extent(mRenderPoints[0], mRenderPoints[0]);
-
-   //for(S32 i = 1; i < mRenderPoints.size(); i++)
-   //   extent.unionPoint(mRenderPoints[i]);
-
-   //setExtent(extent);
 
    setExtent(computePolyExtents());
 }

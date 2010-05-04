@@ -26,7 +26,7 @@
 #ifndef _GAMEOBJECTRENDER_H_
 #define _GAMEOBJECTRENDER_H_
 
-#include "../tnl/tnl.h"
+#include "tnl.h"
 
 #include "point.h"
 #include <string>
@@ -36,20 +36,20 @@ using namespace std;
 
 namespace Zap
 {
-extern void glVertex(Point p);
-extern void glColor(Color c, float alpha = 1);
-extern void drawSquare(Point pos, U32 size);
-extern void drawSquare(Point pos, U32 size, bool filled);
-extern void drawFilledSquare(Point pos, U32 size);
-extern void drawCircle(Point pos, F32 radius);
-extern void drawFilledCircle(Point pos, F32 radius);
-extern void drawFilledSector(Point pos, F32 radius, F32 start, F32 end);
+extern void glVertex(const Point &p);
+extern void glColor(const Color &c, float alpha = 1);
+extern void drawSquare(const Point &pos, U32 size);
+extern void drawSquare(const Point &pos, U32 size, bool filled);
+extern void drawFilledSquare(const Point &pos, U32 size);
+extern void drawCircle(const Point &pos, F32 radius);
+extern void drawFilledCircle(const Point &pos, F32 radius);
+extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
 
-extern void drawRoundedRect(Point pos, F32 width, F32 height, F32 radius);
-extern void drawArc(Point pos, F32 radius, F32 startAngle, F32 endAngle);
-extern void drawEllipse(Point pos, F32 width, F32 height, F32 angle);
-extern void drawFilledEllipse(Point pos, F32 width, F32 height, F32 angle);
-extern void drawPolygon(Point pos, S32 sides, F32 radius, F32 angle);
+extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius);
+extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
+extern void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle);
+extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle);
+extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
 
 extern void renderCenteredString(Point pos, U32 size, const char *string);
