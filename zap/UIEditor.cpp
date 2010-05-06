@@ -83,13 +83,17 @@ static const Color green = Color(0,1,0);
 static const Color magenta = Color(1,0,1);
 static const Color black = Color(0,0,0);
 
-static const Color selectedColor = yellow;
-static const Color highlightedColor = white;
+static const Color SELECT_COLOR = yellow;
+static const Color HIGHLIGHT_COLOR = white;
 
 static const S32 TEAM_NEUTRAL = Item::TEAM_NEUTRAL;
 static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
 static Vector<WorldItem> *mLoadTarget;
+
+extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
+extern void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &points);
+extern void clipRenderLinesToPoly(const Vector<Point> &polyVerts, Vector<Point> &lineSegments);
 
 
 enum EntryMode {
@@ -434,9 +438,10 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 
 
 // This sort will put points on top of lines on top of polygons...  as they should be
+// NavMeshZones are now drawn on top, to make them easier to see.  Disable with Ctrl-A!
 S32 QSORT_CALLBACK geometricSort(WorldItem *a, WorldItem *b)
 {
-   return (a->geomType() < b->geomType());
+   return( a->index == ItemNavMeshZone ? true : (b->index == ItemNavMeshZone ? false : (a->geomType() < b->geomType())) );
 }
 
 
@@ -487,7 +492,21 @@ void EditorUserInterface::loadLevel()
    mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
 
-   buildWallSegmentEdgesAndPoints();
+   for(S32 i = 0; i < mItems.size(); i++)
+      constructBarrierEndPoints(mItems[i].getVerts(), mItems[i].width / mGridSize, mItems[i].extendedEndPoints);
+
+   buildAllWallSegmentEdgesAndPoints();
+
+
+   for(S32 i = 0; i < wallSegments.size() - 1; i++)
+      for(S32 j = i + 1; j < wallSegments.size(); j++)
+      {
+         if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
+         {
+            clipRenderLinesToPoly(wallSegments[i].corners, wallSegments[j].edges);
+            clipRenderLinesToPoly(wallSegments[j].corners, wallSegments[i].edges);
+         }
+      }
 }
 
 
@@ -1007,7 +1026,20 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
             snapPoint = mItems[i].vert(j);
          }
       }
+
    }
+
+   // Try wall corners - we'll actually use segment ends so we can get to intersection points etc.
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      for(S32 j = 0; j < wallSegments[i].edges.size(); j++)
+      {
+         F32 dist = wallSegments[i].edges[j].distSquared(p);
+         if(dist < minDist)
+         {
+            minDist = dist;
+            snapPoint = wallSegments[i].edges[j];
+         }
+      }
 
    // If we're editing a vertex of a navMeshZone, and if we're outside of some threshold distance, see if we can snap to the edge of
    // a another zone or wall.  Increasing value in minDist test will favor snapping to walls, decreasing it will require being closer
@@ -1027,46 +1059,58 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
          for(S32 i = 0; i < mItems.size(); i++) 
          {
             // Only snap to navMeshZones or walls, and ignore anything that might be selected to avoid snapping to self
-            if((mItems[i].index != ItemNavMeshZone && mItems[i].index != ItemBarrierMaker) || 
-               mItems[i].selected || mItems[i].anyVertsSelected())
+            if(mItems[i].index != ItemNavMeshZone || mItems[i].selected || mItems[i].anyVertsSelected())
                continue;
 
-//fffff
             Vector<Point> verts = mItems[i].getVerts();
             if(mItems[i].geomType() == geomPoly)   // Add first point to the end to create last side on poly
                verts.push_back(verts.first());
 
-            Point p1 = verts[0];
 
-            for(S32 j = 0; j < verts.size() - 1; j++)
-            {
-               Point p2 = verts[j+1];
+            minDist = checkEdgesForSnap(p, verts, minDist, snapPoint);
 
-               Point edgeDelta = p2 - p1;
-               Point clickDelta = p - p1;
-               float fraction = clickDelta.dot(edgeDelta);
-               float lenSquared = edgeDelta.dot(edgeDelta);
-
-               if(fraction > 0 && fraction < lenSquared)
-               {
-                  // Compute the closest point:
-                  Point closest = p1 + edgeDelta * (fraction / lenSquared);
-                  float distance = (p - closest).lenSquared();
-                    
-                  if(distance < minDist)
-                  {
-                     minDist = distance;
-                     snapPoint = closest;
-                  }
-               }
-               p1 = p2;
-            }
+            for(S32 i = 0; i < wallSegments.size(); i++)
+               minDist = checkEdgesForSnap(p, wallSegments[i].edges, minDist, snapPoint);
          }
       }
    }
 
    return snapPoint;
 }
+
+
+// Checks for snapping against a series of edges defined by verts in A-B-C-D format
+F32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 minDist, Point &snapPoint)
+{
+   const Point *p1 = &verts[0];
+
+   for(S32 j = 0; j < verts.size() - 1; j++)
+   {
+      const Point *p2 = &verts[j+1];
+
+      Point edgeDelta = *p2 - *p1;
+      Point clickDelta = clickPoint - *p1;
+      float fraction = clickDelta.dot(edgeDelta);
+      float lenSquared = edgeDelta.dot(edgeDelta);
+
+      if(fraction > 0 && fraction < lenSquared)
+      {
+         // Compute the closest point:
+         Point closest = *p1 + edgeDelta * (fraction / lenSquared);
+         float distance = (clickPoint - closest).lenSquared();
+           
+         if(distance < minDist)
+         {
+            minDist = distance;
+            snapPoint = closest;
+         }
+      }
+      p1 = p2;
+   }
+
+   return minDist;
+}
+
 
 
 extern Color gErrorMessageTextColor;
@@ -1078,27 +1122,27 @@ static bool fillRendered = false;
 
 void EditorUserInterface::render()
 {
-   glColor3f(0,0,0);
+   F32 colorFact = snapDisabled ? .5 : 1;
    if(mCurrentScale >= 100)
    {
       F32 gridScale = mCurrentScale * 0.1;      // Draw tenths
       F32 xStart = fmod(mCurrentOffset.x, gridScale);
       F32 yStart = fmod(mCurrentOffset.y, gridScale);
 
-      glColor3f(.2,.2,.2);
+      glColor3f(.2 * colorFact, .2 * colorFact, .2 * colorFact);
       glBegin(GL_LINES);
-      while(yStart < canvasHeight)
-      {
-         glVertex2f(0, yStart);
-         glVertex2f(canvasWidth, yStart);
-         yStart += gridScale;
-      }
-      while(xStart < canvasWidth)
-      {
-         glVertex2f(xStart, 0);
-         glVertex2f(xStart, canvasHeight);
-         xStart += gridScale;
-      }
+         while(yStart < canvasHeight)
+         {
+            glVertex2f(0, yStart);
+            glVertex2f(canvasWidth, yStart);
+            yStart += gridScale;
+         }
+         while(xStart < canvasWidth)
+         {
+            glVertex2f(xStart, 0);
+            glVertex2f(xStart, canvasHeight);
+            xStart += gridScale;
+         }
       glEnd();
    }
 
@@ -1107,24 +1151,24 @@ void EditorUserInterface::render()
       F32 xStart = fmod(mCurrentOffset.x, mCurrentScale);
       F32 yStart = fmod(mCurrentOffset.y, mCurrentScale);
 
-      glColor3f(0.4, 0.4, 0.4);
+      glColor3f(0.4 * colorFact, 0.4 * colorFact, 0.4 * colorFact);
       glBegin(GL_LINES);
-      while(yStart < canvasHeight)
-      {
-         glVertex2f(0, yStart);
-         glVertex2f(canvasWidth, yStart);
-         yStart += mCurrentScale;
-      }
-      while(xStart < canvasWidth)
-      {
-         glVertex2f(xStart, 0);
-         glVertex2f(xStart, canvasHeight);
-         xStart += mCurrentScale;
-      }
+         while(yStart < canvasHeight)
+         {
+            glVertex2f(0, yStart);
+            glVertex2f(canvasWidth, yStart);
+            yStart += mCurrentScale;
+         }
+         while(xStart < canvasWidth)
+         {
+            glVertex2f(xStart, 0);
+            glVertex2f(xStart, canvasHeight);
+            xStart += mCurrentScale;
+         }
       glEnd();
    }
 
-   glColor3f(0.7, 0.7, 0.7);
+   glColor3f(0.7 * colorFact, 0.7 * colorFact, 0.7 * colorFact);
    glLineWidth(3);
    Point origin = convertLevelToCanvasCoord(Point(0,0));
    glBegin(GL_LINES );
@@ -1164,11 +1208,11 @@ void EditorUserInterface::render()
       glLineWidth(3);
 
       if(mCreatingPoly) // Wall
-         glColor(selectedColor);
+         glColor(SELECT_COLOR);
       else              // LineItem
          glColor(getTeamColor(mNewItem.team));
 
-      renderPoly(mNewItem.getVerts(), false);
+      mNewItem.renderPolyline();
 
       glLineWidth(gDefaultLineWidth);
 
@@ -1454,9 +1498,9 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
    }
       
    if(style == HighlightedVertex)
-      glColor(highlightedColor, alpha);
+      glColor(HIGHLIGHT_COLOR, alpha);
    else if(style == SelectedVertex)
-      glColor(selectedColor, alpha);
+      glColor(SELECT_COLOR, alpha);
    else if(style == SnappingVertex)
       glColor(magenta, alpha);
    else
@@ -1473,11 +1517,6 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 }
 
 
-extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
-extern void expandCenterlineToOutlines(const Point &start, const Point &end, F32 width, Vector<Point> &points, Vector<Point> &outline);
-extern void clipRenderLinesToPoly(const Vector<Point> &polyVerts, Vector<Point> &lineSegments);
-extern void populateEdgeLines(const Vector<Point> &mRenderOutlineGeometry, Vector<Point> &mRenderLineSegments);
-
 // Draw barriermMakers (walls) or lineItems
 void EditorUserInterface::renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines, bool selected, bool highlighted, S32 team, F32 alpha, bool convert)
 {
@@ -1489,48 +1528,56 @@ void EditorUserInterface::renderPolylineFill(GameItems itemType, const Vector<Po
       TNLAssert(false, "Invalid game item type!");
 
    // Render wall fill
-   for(S32 i = 0; i < wallSegmentPoints.size(); i++)
+   for(S32 i = 0; i < wallSegments.size(); i++)
    {
       glBegin(GL_POLYGON);
-         for(S32 j = 0; j < wallSegmentPoints[i].size(); j++)
-            glVertex(convert ? convertLevelToCanvasCoord(wallSegmentPoints[i][j]) : wallSegmentPoints[i][j]);
+         for(S32 j = 0; j < wallSegments[i].corners.size(); j++)
+            glVertex(convertLevelToCanvasCoord(wallSegments[i].corners[j], convert));
       glEnd();
    }
  
    // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
    glColor4f(0, 0, 1, alpha);
    glBegin(GL_LINES);
-      for(S32 i = 0; i < wallSegmentEdges.size(); i++)
-         for(S32 j = 0; j < wallSegmentEdges[i].size(); j++)
-            glVertex(convertLevelToCanvasCoord(wallSegmentEdges[i][j]));
+      for(S32 i = 0; i < wallSegments.size(); i++)
+         for(S32 j = 0; j < wallSegments[i].edges.size(); j++)
+            glVertex(convertLevelToCanvasCoord(wallSegments[i].edges[j], convert));
    glEnd();
 }
 
 
-// Draw barrier centerlines
-void EditorUserInterface::renderPolylineCenterline(const Vector<Point> &verts, bool selected, bool highlighted, S32 team, F32 alpha)
+// Draw barrier centerlines; wraps renderPolyline()
+void WorldItem::renderPolylineCenterline(F32 alpha)
 {
    // Render wall centerlines
    if(selected)
-      glColor(selectedColor, alpha);
-   else if(highlighted)
-      glColor(highlightedColor, alpha);
+      glColor(SELECT_COLOR, alpha);
+   else if(litUp && !mAnyVertsSelected)
+      glColor(HIGHLIGHT_COLOR, alpha);
    else
-      glColor(getTeamColor(team), alpha);
+      glColor(gEditorUserInterface.getTeamColor(team), alpha);
 
    glLineWidth(3);
-   renderPoly(verts, false);
+   renderPolyline();
    glLineWidth(gDefaultLineWidth);
 }
 
 
-void EditorUserInterface::renderPoly(const Vector<Point> &verts, bool isDockItem)
+// Draws a line connecting points in mVerts
+void WorldItem::renderPolyline()
 {
    glBegin(GL_LINE_STRIP);
-      for(S32 j = 0; j < verts.size(); j++)
-         glVertex(isDockItem ? verts[j] : convertLevelToCanvasCoord(verts[j]));
+      for(S32 j = 0; j < mVerts.size(); j++)
+         glVertex(convertLevelToCanvasCoord(mVerts[j]));
    glEnd();
 }
+
+
+Point WorldItem::convertLevelToCanvasCoord(const Point &point, bool convert) 
+{ 
+   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
+}
+
 
 
 static inline void labelSimpleLineItem(Point pos, U32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
@@ -1557,9 +1604,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    if(hideit)
          glColor(grayedOutColorBright, alpha);
    else if(item.selected)
-      drawColor = selectedColor;
+      drawColor = SELECT_COLOR;
    else if(item.litUp, alpha)
-      drawColor = highlightedColor;
+      drawColor = HIGHLIGHT_COLOR;
    else
       drawColor = Color(.75, .75, .75);
 
@@ -1609,7 +1656,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       // Override drawColor for this special case
       if(item.anyVertsSelected())
-         drawColor = selectedColor;
+         drawColor = SELECT_COLOR;
 
       // Hide line if we're drawing a text item and it's not selected
       if((item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem) && !isDockItem)
@@ -1756,7 +1803,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          fillRendered = true;
       }
 
-      renderPolylineCenterline(item.getVerts(), item.selected, (item.litUp && vertexToLightUp == NONE), item.team, alpha);
+      if(!mShowingReferenceShip)
+         item.renderPolylineCenterline(alpha);
 
       renderLinePolyVertices(item, index, alpha);
    } 
@@ -2697,7 +2745,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          else
             itemToLightUp--;
 
-         mItems.erase(i);
+         deleteItem(i);
          deleted = true;
 
       }
@@ -2705,17 +2753,10 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
       {
          for(S32 j = 0; j < mItems[i].vertCount(); )  // no j++
          {
-            if(mItems[i].vertSelected(j) /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
+            if(mItems[i].vertSelected(j))
             {
                mItems[i].deleteVert(j);
                deleted = true;
-               //if(vertexToLightUp == j)
-               //{
-               //   vertexToLightUp = NONE;
-               //   //itemToLightUp = NONE;
-               //}
-               //else
-               //   vertexToLightUp--;
             }
             else
                j++;
@@ -2723,10 +2764,11 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 
          // Deleted last vertex, or item can't lose a vertex... it must go!
          if(mItems[i].vertCount() == 0 || (mItems[i].geomType() == geomSimpleLine && mItems[i].vertCount() < 2)
-                                        || (mItems[i].geomType() == geomLine && mItems[i].vertCount() < 2)
-                                        || (mItems[i].geomType() == geomPoly && mItems[i].vertCount() < 2))
+                                       || (mItems[i].geomType() == geomLine && mItems[i].vertCount() < 2)
+                                       || (mItems[i].geomType() == geomPoly && mItems[i].vertCount() < 2))
          {
-            mItems.erase(i);
+            gEditorUserInterface.deleteWallSegments(mItems[i].mId);
+            deleteItem(i);
             deleted = true;
          }
          else
@@ -2784,6 +2826,7 @@ void EditorUserInterface::decBarrierWidth(S32 amt)
 void EditorUserInterface::splitBarrier()
 {
    bool split = false;
+
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size(); i++)
@@ -2792,10 +2835,13 @@ void EditorUserInterface::splitBarrier()
             if(mItems[i].vertSelected(j) /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
             {
                split = true;
+
+               // Create a poor man's copy
                WorldItem newItem;
                newItem.index = mItems[i].index;
                newItem.team = -1;
                newItem.width = mItems[i].width;
+
                for(S32 k = j; k < mItems[i].vertCount(); )    // No k++!
                {
                   newItem.addVert(mItems[i].vert(k));
@@ -2804,8 +2850,15 @@ void EditorUserInterface::splitBarrier()
                   else
                      k++;
                }
+
                mItems.push_back(newItem);
-               mItems.sort(geometricSort);
+
+               // Tell the new segments that they have new geometry
+               mItems[i].geomChanged();
+               mItems.last().geomChanged();
+
+               // And get them in the right order
+               mItems.sort(geometricSort);         
                goto done2;                         // Yes, gotos are naughty, but they just work so well sometimes...
             }
 done2:
@@ -2821,7 +2874,8 @@ done2:
 // Join two or more sections of wall that have coincident end points.  Will ignore invalid join attempts.
 void EditorUserInterface::joinBarrier()
 {
-   bool joined = false;
+   S32 joinedItem = NONE;
+
    Vector<WorldItem> undoItems = mItems;      // Create a snapshot so we can later undo if we do anything here
 
    for(S32 i = 0; i < mItems.size()-1; i++)
@@ -2833,22 +2887,23 @@ void EditorUserInterface::joinBarrier()
             {
                if(mItems[i].vert(0).distanceTo(mItems[j].vert(0)) < .01)    // First vertices are the same  1 2 3 | 1 4 5
                {
-                  joined = true;
+                  joinedItem = i;
+
                   for(S32 a = 1; a < mItems[j].vertCount(); a++)             // Skip first vertex, because it would be a dupe
                      mItems[i].addVertFront(mItems[j].vert(a));
 
-                  mItems.erase(j);
+                  deleteItem(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
                }
                else if(mItems[i].vert(0).distanceTo(mItems[j].vert(mItems[j].vertCount()-1)) < .01)     // First vertex conincides with final vertex 3 2 1 | 5 4 3
                {
-                  joined = true;
+                  joinedItem = i;
                   for(S32 a = mItems[j].vertCount()-2; a >= 0; a--)
                      mItems[i].addVertFront(mItems[j].vert(a));
 
-                  mItems.erase(j);
+                  deleteItem(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
@@ -2856,11 +2911,11 @@ void EditorUserInterface::joinBarrier()
                }
                else if(mItems[i].vert(mItems[i].vertCount()-1).distanceTo(mItems[j].vert(0)) < .01)     // Last vertex conincides with first 1 2 3 | 3 4 5
                {
-                  joined = true;
+                  joinedItem = i;
                   for(S32 a = 1; a < mItems[j].vertCount(); a++)           // Skip first vertex, because it would be a dupe
                      mItems[i].addVert(mItems[j].vert(a));
 
-                  mItems.erase(j);
+                  deleteItem(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
@@ -2868,11 +2923,11 @@ void EditorUserInterface::joinBarrier()
                }
                else if(mItems[i].vert(mItems[i].vertCount()-1).distanceTo(mItems[j].vert(mItems[j].vertCount()-1)) < .01)     // Last vertices coincide  1 2 3 | 5 4 3
                {
-                  joined = true;
+                  joinedItem = i;
                   for(S32 a = mItems[j].vertCount()-2; a >= 0; a--)
                      mItems[i].addVert(mItems[j].vert(a));
 
-                  mItems.erase(j);
+                  deleteItem(j);
                   i--;  j--;
                   if(itemToLightUp > j)
                      itemToLightUp--;
@@ -2881,13 +2936,21 @@ void EditorUserInterface::joinBarrier()
          }
       }
 
-   if(joined)
+   if(joinedItem != NONE)
    {
       clearSelection();
       saveUndoState(undoItems);
       mNeedToSave = true;
       autoSave();
+      mItems[joinedItem].geomChanged();
    }
+}
+
+
+void EditorUserInterface::deleteItem(S32 itemIndex)
+{
+   gEditorUserInterface.deleteWallSegments(mItems[itemIndex].mId);
+   mItems.erase(itemIndex);
 }
 
 
@@ -3668,7 +3731,7 @@ void EditorUserInterface::finishedDragging()
          for(S32 i = 0; i < mItems.size(); i++)
             if(mItems[i].selected)
             {
-               mItems.erase(i);
+               deleteItem(i);
                break;
             }
          itemToLightUp = NONE;
@@ -4132,6 +4195,8 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
 }
 
 
+static S32 nextWorldItemId = 0;
+
 void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
 {
    index = itemType;
@@ -4141,6 +4206,8 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
    mAnyVertsSelected = false;
    litUp = false;
    width = xwidth;
+   mId = nextWorldItemId;
+   nextWorldItemId++;
 
 
    if(itemDef[itemType].hasText)
@@ -4268,34 +4335,56 @@ void WorldItem::geomChanging()
       geomChanged();
 }
 
+
 static Vector<Point> outline;
 
-
-
-
-void EditorUserInterface::buildWallSegmentEdgesAndPoints()
+void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
 {
-   wallSegmentEdges.clear();
-   wallSegmentPoints.clear();
-
-   S32 segment = 0;
+   wallSegments.clear();
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
       if(mItems[i].index != ItemBarrierMaker)
          continue;
 
-      for(S32 j = 0; j < mItems[i].vertCount() - 1; j++)
-      {
-         // Create a new slot for a set of segment corner points
-         wallSegmentEdges.push_back(Vector<Point>());  
-         wallSegmentPoints.push_back(Vector<Point>());  
-
-         // And fill it by expanding the wall segment into a rectangle
-         expandCenterlineToOutlines(mItems[i].vert(j), mItems[i].vert(j+1), mItems[i].width / mGridSize, wallSegmentPoints[segment], wallSegmentEdges[segment]);
-         segment++;
-      }
+      mItems[i].buildWallSegmentEdgesAndPoints();
    }
+}
+
+
+void WorldItem::buildWallSegmentEdgesAndPoints()
+{
+   // Get rid of any segments that correspond to our item
+   gEditorUserInterface.deleteWallSegments(mId);
+
+   for(S32 i = 0; i < extendedEndPoints.size() - 1; i += 2)
+   {
+      // Create a new segment on the world wall segment list
+      gEditorUserInterface.wallSegments.push_back(WallSegment(mId));  
+
+      // Calculate setment corners by expanding the extended end points into a rectangle
+      expandCenterlineToOutline(extendedEndPoints[i], extendedEndPoints[i+1], width / gEditorUserInterface.getGridSize(), 
+                                gEditorUserInterface.wallSegments.last().corners);
+      
+      // Recompute the edges based on our new corner points
+      gEditorUserInterface.wallSegments.last().resetEdges();
+
+      for(S32 j = 0; j < gEditorUserInterface.wallSegments.size(); j++)
+         gEditorUserInterface.wallSegments[j].computeBoundingBox();
+   }
+}
+
+
+void EditorUserInterface::deleteWallSegments(S32 owner)
+{
+   S32 count = wallSegments.size();
+   for(S32 i = 0; i < count; i++)
+      if(wallSegments[i].mOwner == owner)
+      {
+         wallSegments.erase_fast(i);
+         i--;
+         count--;
+      }
 }
 
 
@@ -4313,20 +4402,94 @@ void WorldItem::geomChanged()
    }
    else if(index == ItemBarrierMaker)
    {  
-      F32 gridSize = gEditorUserInterface.getGridSize();
-      gEditorUserInterface.buildWallSegmentEdgesAndPoints();
-
-      for(S32 i = 0; i < gEditorUserInterface.wallSegmentEdges.size(); i++)
-         for(S32 j = 0; j < gEditorUserInterface.wallSegmentEdges.size(); j++)
-         {
-            if(i == j)  // Don't intersect with self!
-               continue;
-
-            clipRenderLinesToPoly(gEditorUserInterface.wallSegmentPoints[i], gEditorUserInterface.wallSegmentEdges[j]);
-            clipRenderLinesToPoly(gEditorUserInterface.wallSegmentPoints[j], gEditorUserInterface.wallSegmentEdges[i]);
-         }
+      // Fill extendedEndPoints from the vertices of our wall's centerline
+      constructBarrierEndPoints(mVerts, width / gEditorUserInterface.getGridSize(), extendedEndPoints);
+      gEditorUserInterface.computeWallSegmentIntersections(this);
    }
 }
+
+
+void EditorUserInterface::computeWallSegmentIntersections(WorldItem *worldItem)
+{
+   // Before we update our edges, we need to invalidate all intersecting segments prior to change
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      if(wallSegments[i].mOwner == worldItem->mId)      // Segment belongs to our item, compare to all others
+         for(S32 j = 0; j < wallSegments.size(); j++)
+            if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
+               wallSegments[j].invalid = true;
+
+
+   // Reset the edges of all marked segments
+   for(S32 i = 0; i < wallSegments.size() - 1; i++)
+      if(wallSegments[i].invalid)
+         wallSegments[i].resetEdges();
+
+  
+    worldItem->buildWallSegmentEdgesAndPoints();
+
+   // Invalidate all segments that potentially intersect the changed segment in its new location
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      if(wallSegments[i].mOwner == worldItem->mId)      // Segment belongs to our item, compare to all others
+         for(S32 j = 0; j < wallSegments.size(); j++)
+            if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
+               wallSegments[j].invalid = true;
+
+
+   for(S32 i = 0; i < wallSegments.size(); i++)
+   {
+      if(wallSegments[i].invalid)
+      {
+         for(S32 j = 1; j < wallSegments.size(); j++)
+         {
+            if(i == j)     // Don't process against self
+               continue;
+
+            if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
+            {
+               clipRenderLinesToPoly(wallSegments[i].corners, wallSegments[j].edges);
+               clipRenderLinesToPoly(wallSegments[j].corners, wallSegments[i].edges);
+            }
+         }
+         wallSegments[i].invalid = false;
+      }
+   }
+}
+
+
+void WallSegment::resetEdges()
+{
+   edges.clear();
+
+   edges.push_back(corners[0]);
+   edges.push_back(corners[1]);
+
+   edges.push_back(corners[1]);
+   edges.push_back(corners[2]);
+
+   edges.push_back(corners[2]);
+   edges.push_back(corners[3]);
+
+   edges.push_back(corners[3]);
+   edges.push_back(corners[0]);
+}
+
+
+void WallSegment::computeBoundingBox()
+{
+   Point _min(corners[0].x, corners[0].y);
+   Point _max(corners[0].x, corners[0].y);
+
+   for(S32 i = 1; i < corners.size(); i++)
+   {
+      if(corners[i].x < _min.x)   _min.x = corners[i].x;
+      if(corners[i].x > _max.x)   _max.x = corners[i].x;
+      if(corners[i].y < _min.y)   _min.y = corners[i].y;
+      if(corners[i].y > _max.y)   _max.y = corners[i].y;
+   }
+
+   mBounds = Rect(_min, _max);
+}
+
 
 void WorldItem::attrsChanging()
 {

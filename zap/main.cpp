@@ -96,6 +96,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Increased readibility of node numbers on selected lines/polygons</li>
 <li>Holding tab now only shows range of selected turrets/spybugs</li>
 <li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
+<li>Grid fades when snapping disabled</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

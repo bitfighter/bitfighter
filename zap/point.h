@@ -118,14 +118,15 @@ struct Color
 
 };
 
+
 struct Rect
 {
    typedef float member_type;
    Point min, max;
 
-   Rect() { set(Point(), Point()); }            // Constuctor
-   Rect(Point p1, Point p2) { set(p1, p2); }    // Constuctor
-   Rect(Point p, member_type size) {            // Constuctor
+   Rect() { set(Point(), Point()); }                          // Constuctor
+   Rect(const Point &p1, const Point &p2) { set(p1, p2); }    // Constuctor
+   Rect(const Point &p, member_type size) {                   // Constuctor
       min.x = p.x - size/2;
       max.x = p.x + size/2;
       min.y = p.y - size/2;

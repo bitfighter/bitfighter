@@ -145,8 +145,6 @@ public:
    WorldItem(GameItems itemType = ItemInvalid);
    WorldItem(GameItems itemType, Point pos, S32 team, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
 
-   //WorldItem(const WorldItem &worldItem);                                                  // Copy constructor
-
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
 
@@ -156,9 +154,12 @@ public:
    S32 team;
    F32 width;
    U32 id;              // Item's unique id... 0 if there is none
+   U32 mId;             // TODO: rename... an autoincremented serial number
    
    bool selected;
    bool litUp;
+
+   Point convertLevelToCanvasCoord(const Point &point, bool convert = true);
    
    LineEditor lineEditor; // For items that have an aux text field
    U32 textSize;          // For items that have an aux text field
@@ -196,11 +197,18 @@ public:
    virtual bool isConvex() { return Zap::isConvex(mVerts); }
 
    Vector<Point> getVerts() { return mVerts; }
+   Vector<Point> extendedEndPoints;
 
    S32 vertCount() { return mVerts.size(); }
    Point vert(S32 vertIndex) { return mVerts[vertIndex]; }
-
+   void buildWallSegmentEdgesAndPoints();
    GeomType geomType();
+
+   ////////////////////
+   // Rendering methods
+   void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
+   void renderPolyline();                       // Draws a line connecting points in mVerts
+
 };
 
 
@@ -219,6 +227,21 @@ private:
 
 public:
    void restore(WorldItem &item);
+};
+
+
+struct WallSegment
+{
+   WallSegment(S32 owner = -1) { mOwner = owner; invalid = false; }
+   Vector<Point> edges;    
+   Vector<Point> corners;
+   S32 mOwner;
+   Rect mBounds;
+
+   bool invalid;           // A flag for marking segments in need of processing
+
+   void resetEdges();      // Compute edges from corner points
+   void computeBoundingBox();
 };
 
 
@@ -357,8 +380,6 @@ private:
    void findHitItemAndEdge();         // Sets mItemHit and mEdgeHit
    S32 findHitItemOnDock(Point canvasPos);
 
-   Point findClosestPointInSelection();   //<=====  TODO: Delete
-
    void findSnapVertex();
    S32 mSnapVertex_i;
    S32 mSnapVertex_j;
@@ -407,17 +428,14 @@ public:
    // Render walls & lineItems
    void renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines,
                            bool selected, bool highlighted, S32 team, F32 alpha = 1.0, bool convert = true);   
-
-   void renderPolylineCenterline(const Vector<Point> &verts, bool selected, bool highlighted,  S32 team, F32 alpha);
-
-   void renderPoly(const Vector<Point> &verts, bool isDockItem);
-
-   //Vector<Vector<Point>> wallSegmentCollection;         // A collection of all wall segments in editor
-   Vector<Vector<Point>> wallSegmentEdges, wallSegmentPoints;
-
-   void buildWallSegmentEdgesAndPoints();           // Populate that collection
-   
    void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
+
+   Vector<WallSegment> wallSegments;
+
+   void buildAllWallSegmentEdgesAndPoints();        // Populate wallSegments from our collection of worldItems
+   void deleteWallSegments(S32 owner);              // Delete all segments owned by specified WorldItem
+
+   void computeWallSegmentIntersections(WorldItem *worldItem); // Recalucate edge geometry for all walls when worldItem has changed
 
 
    // Handle input
@@ -461,8 +479,13 @@ public:
    void setWarnMessage(string msg1, string msg2);
 
    Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
-   Point convertLevelToCanvasCoord(Point p) { return p * mCurrentScale + mCurrentOffset; }
+   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return p * mCurrentScale + mCurrentOffset; }
+
+   // Snapping related functions:
    Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
+   F32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 minDist, Point &snapPoint);
+
+   void deleteItem(S32 itemIndex);
 
    void runScript();    // Run associated levelgen script
 };

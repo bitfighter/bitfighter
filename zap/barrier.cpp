@@ -50,7 +50,7 @@ void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point
    if(vec.size() == 1)     // Protect against bad data
       return;
 
-   bool loop = (vec[0] == vec[vec.size() - 1]);      // Does our barrier form a closed loop?
+   bool loop = (vec.first() == vec.last());      // Does our barrier form a closed loop?
 
    Vector<Point> edgeVector;
    for(S32 i = 0; i < vec.size() - 1; i++)
@@ -111,11 +111,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
 
    // Convert the list of floats into a list of points
    for(S32 i = 1; i < barrier.size(); i += 2)
-   {
-      float x = barrier[i-1];
-      float y = barrier[i];
-      tmp.push_back(Point(x,y));
-   }
+      tmp.push_back( Point(barrier[i-1], barrier[i]) );
 
    // Remove collinear points to make rendering nicer and datasets smaller
    for(S32 i = 0; i < tmp.size(); i++)
@@ -132,7 +128,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
 
    if(solid)   // This is a solid polygon
    {
-      if(vec[0] == vec[vec.size() - 1])      // Does our barrier form a closed loop?
+      if(vec.first() == vec.last())      // Does our barrier form a closed loop?
          vec.erase(vec.size() - 1);          // If so, remove last vertex
 
       Barrier *b = new Barrier(vec, width, true);
@@ -144,10 +140,11 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
       Vector<Point> barrierEnds;
       constructBarrierEndPoints(vec, width, barrierEnds);
 
+      Vector<Point> pts;
       // Then add individual segments to the game
       for(S32 i = 0; i < barrierEnds.size(); i += 2)
       {
-         Vector<Point> pts;
+         pts.clear();
          pts.push_back(barrierEnds[i]);
          pts.push_back(barrierEnds[i+1]);
 
@@ -169,32 +166,6 @@ void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, 
    outline.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
    outline.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
    outline.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
-}
-
-// Test
-void expandCenterlineToOutlines(const Point &start, const Point &end, F32 width, Vector<Point> &points, Vector<Point> &lines)
-{
-   Point dir = end - start;
-   Point crossVec(dir.y, -dir.x);
-   crossVec.normalize(width * 0.5);
-
-   lines.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
-   lines.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
-
-   lines.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
-   lines.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
-   
-   lines.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
-   lines.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
-
-   lines.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
-   lines.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
-
-
-   points.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
-   points.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
-   points.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
-   points.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
 }
 
 
@@ -241,7 +212,7 @@ void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineS
          F32 d2 = n.dot(rp2);
 
          // Setting the following comparisons to >= will cause collinear end segments to go away, but will
-         // cause overlapping walls to disappear.
+         // cause overlapping walls to disappear
          bool d1in = (d1 > distToZero);
          bool d2in = (d2 > distToZero);
 
@@ -272,7 +243,7 @@ void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineS
             }
          }
 
-         // If both are in, just go to the next edge.
+         // If both are in, go to the next edge
          cp1 = cp2;
       }
    }
@@ -285,7 +256,7 @@ void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineS
 ////////////////////////////////////////
 
 // Constructor --> gets called from constructBarriers above
-Barrier::Barrier(Vector<Point> points, F32 width, bool solid)
+Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 {
    mObjectTypeMask = BarrierType | CommandMapVisType;
    mPoints = points;

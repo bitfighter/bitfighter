@@ -56,7 +56,7 @@ public:
    Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
 
    /// Barrier constructor
-   Barrier(Vector<Point> points = Vector<Point>(), F32 width = BarrierWidth, bool solid = false);
+   Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = BarrierWidth, bool solid = false);
 
    /// Adds the server object to the net interface's scope always list
    void onAddedToGame(Game *theGame);
