@@ -683,6 +683,15 @@ void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 o
          UserInterface::drawString(x - 7, y + 1, 12, buttonIndex == 5 ? "LB" : "RB");
       }
 
+      if(buttonIndex == 6 || buttonIndex == 7)     // RT, LT
+      {
+         setButtonColor(activated);
+         drawRoundedRect(Point(x, y + 8), rectButtonWidth, rectButtonHeight, 3);
+         glColor3f(1,1,1);
+         UserInterface::drawString(x - 7, y + 1, 12, buttonIndex == 7 ? "LT" : "RT");
+      }
+
+
       else if(buttonIndex == 8 || buttonIndex == 9)      // Render right/left-pointing triangle in an ovally-square button
       {
          setButtonColor(activated);
@@ -880,8 +889,7 @@ static bool processJoystickInputs( U32 &buttonMask )
 
    // XBox control inputs are in a circle, not a square, which makes
    // diagonal movement inputs "slower"
-   if(gIniSettings.joystickType == XBoxController ||
-      gIniSettings.joystickType == XBoxControllerOnXBox)
+   if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox)
    {
       Point dir(controls[0], controls[1]);
       F32 absX = fabs(dir.x);
@@ -984,17 +992,17 @@ static bool processJoystickInputs( U32 &buttonMask )
    buttonMask = retMask | hatMask;
 
 
-   //if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox)
-   //{
-   //   // XBox also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
-   //   // Note that if both triggers are depressed equally, they'll cancel each other out, and if one is pressed more than the other,
-   //   // only that one will be detected.
-   //   F32 deadZone = 0.075f;
-   //   if(axes[2] < -deadZone)
-   //      buttonMask |= ControllerButton7;
-   //   else if(axes[2] > deadZone)
-   //      buttonMask |= ControllerButton8;
-   //}
+   if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox)
+   {
+      // XBox also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
+      // Note that if both triggers are depressed equally, they'll cancel each other out, and if one is pressed more than the other,
+      // only that one will be detected.
+      F32 deadZone = 0.075f;
+      if(axes[2] < -deadZone)
+         buttonMask |= ControllerButton7;
+      else if(axes[2] > deadZone)
+         buttonMask |= ControllerButton8;
+   }
 
    return true;      // true = processed joystick input
 }

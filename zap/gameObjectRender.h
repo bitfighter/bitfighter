@@ -56,7 +56,7 @@ extern void renderCenteredString(Point pos, U32 size, const char *string);
 extern void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive);
 extern void renderAimVector();
 extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests, bool showDestOverride);
-extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset);
+extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 
 extern void renderFlag(Point pos, Color flagColor);
 extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);

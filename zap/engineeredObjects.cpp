@@ -686,14 +686,14 @@ void Turret::onAddedToGame(Game *theGame)
 
 void Turret::render()
 {
-   Color c, lightColor;
+   Color c;
 
    if(gClientGame->getGameType())
       c = gClientGame->getGameType()->getTeamColor(mTeam);
    else
       c = Color(1,1,1);
 
-   renderTurret(c, mAnchorPoint, mAnchorNormal, isEnabled(), mHealth, mCurrentAngle, TurretAimOffset);
+   renderTurret(c, mAnchorPoint, mAnchorNormal, isEnabled(), mHealth, mCurrentAngle);
 }
 
 
@@ -734,7 +734,7 @@ void Turret::idle(IdleCallPath path)
    mFireTimer.update(mCurrentMove.time);
 
    // Choose best target:
-   Point aimPos = mAnchorPoint + mAnchorNormal * TurretAimOffset;
+   Point aimPos = mAnchorPoint + mAnchorNormal * TURRET_OFFSET;
    Point cross(mAnchorNormal.y, -mAnchorNormal.x);
 
    Rect queryRect(aimPos, aimPos);

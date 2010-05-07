@@ -26,13 +26,14 @@
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 
-#include "../tnl/tnlRandom.h"
+#include "tnlRandom.h"
 
 #include "UI.h"
 #include "projectile.h"
 #include "speedZone.h"
 #include "soccerGame.h"
 #include "gameItems.h"
+#include "engineeredObjects.h"      // For TURRET_OFFSET
 
 #include "config.h"     // Only for testing burst graphics below
 
@@ -544,29 +545,28 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 }
 
 
-// Renders maze turret!
-void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle, F32 aimOffset)
+// Renders turret!
+void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle)
 {
    glColor(c);
 
    Point cross(normal.y, -normal.x);
-   Point aimCenter = anchor + normal * aimOffset;
+   Point aimCenter = anchor + normal * Turret::TURRET_OFFSET;
 
    glBegin(GL_LINE_STRIP);
-
-   for(S32 x = -10; x <= 10; x++)
-   {
-      F32 theta = x * FloatHalfPi * 0.1;
-      Point pos = normal * cos(theta) + cross * sin(theta);
-      glVertex(aimCenter + pos * 15);
-   }
+      for(S32 x = -10; x <= 10; x++)
+      {
+         F32 theta = x * FloatHalfPi * 0.1;
+         Point pos = normal * cos(theta) + cross * sin(theta);
+         glVertex(aimCenter + pos * 15);
+      }
    glEnd();
 
    glLineWidth(3);
    glBegin(GL_LINES);
-   Point aimDelta(cos(barrelAngle), sin(barrelAngle));
-   glVertex(aimCenter + aimDelta * 15);
-   glVertex(aimCenter + aimDelta * 30);
+      Point aimDelta(cos(barrelAngle), sin(barrelAngle));
+      glVertex(aimCenter + aimDelta * 15);
+      glVertex(aimCenter + aimDelta * 30);
    glEnd();
    glLineWidth(gDefaultLineWidth);
 
@@ -576,10 +576,10 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
       glColor3f(0.6, 0.6, 0.6);
 
    glBegin(GL_LINE_LOOP);
-   glVertex(anchor + cross * 18);
-   glVertex(anchor + cross * 18 + normal * aimOffset);
-   glVertex(anchor - cross * 18 + normal * aimOffset);
-   glVertex(anchor - cross * 18);
+      glVertex(anchor + cross * 18);
+      glVertex(anchor + cross * 18 + normal * Turret::TURRET_OFFSET);
+      glVertex(anchor - cross * 18 + normal * Turret::TURRET_OFFSET);
+      glVertex(anchor - cross * 18);
    glEnd();
 
    // Render health bar
@@ -590,14 +590,14 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
       for(S32 i = 0; i < lineHeight; i += 2)
       {
          Point lsegStart = anchor - cross * (14 - i) + normal * 5;
-         Point lsegEnd = lsegStart + normal * (aimOffset - 10);
+         Point lsegEnd = lsegStart + normal * (Turret::TURRET_OFFSET - 10);
          glVertex(lsegStart);
          glVertex(lsegEnd);
       }
 
       Point lsegStart = anchor - cross * 14 + normal * 3;
       Point lsegEnd = anchor + cross * 14 + normal * 3;
-      Point n = normal * (aimOffset - 6);
+      Point n = normal * (Turret::TURRET_OFFSET - 6);
 
       glVertex(lsegStart);
       glVertex(lsegEnd);

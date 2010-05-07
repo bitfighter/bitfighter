@@ -51,6 +51,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>HuntersFlagItem <x> <y> can no longer be used in level files.  Please use FlagItem -1 <x> <y> instead!!  Note that this line is only present in hand-modified level files</li>
 <li>Min/max player level params now used when selecting levels</li>
 <li>Slight improvement when rendering walls joining at acute angles</li>
+<li>XBOX controller on windows now much better supported</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>

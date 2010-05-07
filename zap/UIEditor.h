@@ -148,7 +148,7 @@ public:
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
 
-   Vector<Point> mRenderLineSegments; // Same here
+   Vector<Point> mRenderLineSegments;  // Used only by barriers
 
    GameItems index;
    S32 team;
@@ -170,9 +170,9 @@ public:
    bool hasWidth();
    bool anyVertsSelected() { return mAnyVertsSelected; }
 
-   void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point
+   void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point, used by all items
 
-
+   // These methods are mostly for lines and polygons
    void selectVert(S32 vertIndex);
    void aselectVert(S32 vertIndex);
    void unselectVert(S32 vertIndex);
@@ -190,11 +190,13 @@ public:
    void attrsChanging();
    void attrsChanged();   // Attrs changed
 
-   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);
-   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);
+   void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);      // All items use this
+   void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);        // All items use this
 
+   Point normal;          // Point perpendicular to snap point, only for turrets and forcefields
+   bool snapped;          // Is item sufficiently snapped?  only for turrets and forcefields
 
-   virtual bool isConvex() { return Zap::isConvex(mVerts); }
+   virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
 
    Vector<Point> getVerts() { return mVerts; }
    Vector<Point> extendedEndPoints;
@@ -350,6 +352,10 @@ private:
    Point mMouseDownPos;
 
    void renderGenericItem(Point pos, Color c, F32 alpha);
+   void renderGrid();                                       // Draw background snap grid
+   void renderDock(F32 width);
+   void renderTextEntryOverlay();
+   void renderReferenceShip();
    F32 renderTextItem(WorldItem &item, F32 alpha);          // Returns size of text
    void setTranslationAndScale(Point pos);
 
@@ -479,11 +485,12 @@ public:
    void setWarnMessage(string msg1, string msg2);
 
    Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
-   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return p * mCurrentScale + mCurrentOffset; }
+   Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
 
    // Snapping related functions:
    Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
-   F32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 minDist, Point &snapPoint);
+   S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat, F32 &minDist, 
+                         Point &snapPoint);
 
    void deleteItem(S32 itemIndex);
 

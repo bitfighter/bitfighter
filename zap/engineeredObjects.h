@@ -188,9 +188,10 @@ private:
 public:
    static const S32 defaultRespawnTime = 0;
 
-   enum {
-      TurretAimOffset = 15,               // I think this is some factor to account for the fact that turrets do not shoot from their center
+   static const S32 TURRET_OFFSET = 15;   // Distance of the turret's render location from it's attachment location
                                           // Also serves as radius of circle of turret's body, where the turret starts
+
+   enum {
       TurretPerceptionDistance = 800,     // Area to search for potential targets...
       TurretTurnRate = 4,                 // How fast can turrets turn to aim?
       // Turret projectile characteristics (including bullet range) set in gameWeapons.cpp
@@ -221,8 +222,8 @@ public:
    void push(lua_State *L) { Lunar<Turret>::push(L, this); }
 
    // LuaItem methods
-   S32 getRad(lua_State *L) { return returnInt(L, TurretAimOffset); }
-   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TurretAimOffset)); } 
+   S32 getRad(lua_State *L) { return returnInt(L, TURRET_OFFSET); }
+   S32 getLoc(lua_State *L) { return LuaObject::returnPoint(L, mAnchorPoint + mAnchorNormal * (TURRET_OFFSET)); } 
 };
 
 

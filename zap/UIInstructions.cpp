@@ -507,10 +507,10 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderEnergyItem(Point(0, 0));
             break;
          case 14:
-            renderTurret(Color(1,1,1), Point(0, 15), Point(0, -1), false, 0, 0, Turret::TurretAimOffset);
+            renderTurret(Color(1,1,1), Point(0, 15), Point(0, -1), false, 0, 0);
             break;
          case 15:
-            renderTurret(Color(0, 0, 1), Point(0, 15), Point(0, -1), true, 1, 0, Turret::TurretAimOffset);
+            renderTurret(Color(0, 0, 1), Point(0, 15), Point(0, -1), true, 1, 0);
             break;
 
          case 16:
