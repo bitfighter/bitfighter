@@ -76,6 +76,11 @@ Point centroid(const Vector<Point> &polyPoints);
 F32 area(const Vector<Point> &polyPoints);
 F32 angleOfLongestSide(Vector<Point> &polyPoints);
 
+// These functions returns true if it found an appropriate point, false if not
+bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
+bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4);
+bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
+
 
 // Note that inlined functions seem to need to be defined in the header file, not just declared
 inline std::string trim_right(const std::string &source, const std::string &t = " ")

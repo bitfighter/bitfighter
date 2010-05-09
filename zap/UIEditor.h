@@ -193,8 +193,11 @@ public:
    void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);      // All items use this
    void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);        // All items use this
 
-   Point normal;          // Point perpendicular to snap point, only for turrets and forcefields
-   bool snapped;          // Is item sufficiently snapped?  only for turrets and forcefields
+   Point normal;             // Point perpendicular to snap point, only for turrets and forcefields
+   bool snapped;             // Is item sufficiently snapped?  only for turrets and forcefields
+
+   Point forceFieldEnd;      // Point where forcefield terminates.  Only used for turrets.
+   void findForceFieldEnd();
 
    virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
 

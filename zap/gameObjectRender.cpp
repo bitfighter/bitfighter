@@ -1158,7 +1158,7 @@ void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
 
 void renderSpeedZone(Vector<Point> points, U32 time)
 {
-         glColor3f(1, 0, 0);
+   glColor3f(1, 0, 0);     // Red
    for(S32 j = 0; j < 2; j++)
    {
       S32 start = j * points.size() / 2;    // GoFast comes in two equal shapes
@@ -1198,8 +1198,6 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha
          }
       glEnd();
    glPopMatrix();
-
-   //drawCircle(pos, 89 * scaleFact);
 }
 
 
@@ -1278,46 +1276,36 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 
 void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 {
-   Point cross(normal.y, -normal.x);
+   // Make sure colors are dark enough to be visible
+   if(c.r < 0.7)   c.r = 0.7;
+   if(c.g < 0.7)   c.g = 0.7;
+   if(c.b < 0.7)   c.b = 0.7;
 
-   if(c.r < 0.7)
-      c.r = 0.7;
-   if(c.g < 0.7)
-      c.g = 0.7;
-   if(c.b < 0.7)
-      c.b = 0.7;
+   glColor(enabled ? c : (c * 0.6));
 
-   glColor(c * (enabled ? 1 : 0.6));
+   Vector<Point> geom;
+   ForceFieldProjector::getGeom(pos, normal, geom);
 
-   glBegin(GL_LINE_LOOP);
-      glVertex(pos + cross * 12);
-      glVertex(pos + normal * 15);
-      glVertex(pos - cross * 12);
+  glBegin(GL_LINE_LOOP);
+   for(S32 i = 0; i < geom.size(); i++)
+      glVertex(geom[i]);
    glEnd();
 }
 
-void renderForceField(Point start, Point end, Color c, bool fieldUp)
+
+void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFact)
 {
-   if(c.r < 0.5)
-      c.r = 0.5;
-   if(c.g < 0.5)
-      c.g = 0.5;
-   if(c.b < 0.5)
-      c.b = 0.5;
+   // Make sure colors are dark enough to be visible
+   if(c.r < 0.5)   c.r = 0.5;
+   if(c.g < 0.5)   c.g = 0.5;
+   if(c.b < 0.5)   c.b = 0.5;
+   
+   Vector<Point> geom;
+   ForceField::getGeom(start, end, geom, scaleFact);
 
-   Point normal(end.y - start.y, start.x - end.x);
-   normal.normalize(2.5);
-
-   if(fieldUp)
-      glColor(c);
-   else
-      glColor(c * 0.5);
-
-   glBegin(GL_LINE_LOOP);
-      glVertex(start + normal);
-      glVertex(end + normal);
-      glVertex(end - normal);
-      glVertex(start - normal);
+  glBegin(GL_LINE_LOOP);
+   for(S32 i = 0; i < geom.size(); i++)
+      glVertex(geom[i]);
    glEnd();
 }
 

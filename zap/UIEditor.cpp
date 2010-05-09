@@ -986,12 +986,13 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 
    Point snapPoint = p;
 
-   // Turrets: Snap to a wall edge as first choice
+   // Turrets & forcefields: Snap to a wall edge as first (and only) choice
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mDraggingObjects && mItems[i].selected && (mItems[i].index == ItemTurret))
+      if(mDraggingObjects && mItems[i].selected && 
+               (mItems[i].index == ItemTurret || mItems[i].index == ItemForceField))
       {
-         F32 minDist = 400 / (mCurrentScale * mCurrentScale);
+         F32 minDist = 400 / (mCurrentScale * mCurrentScale);     // Higher numbers mean stronger snap effect
    
          S32 closestEdge = NONE;
          S32 closestWall = NONE;
@@ -1117,6 +1118,8 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 }
 
 
+extern bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);
+
 // Checks for snapping against a series of edges defined by verts in A-B-C-D format if abcFormat is true, or A-B B-C C-D if false
 // Sets snapPoint and minDist.  Returns index of closest segment found if closer than minDist.
 S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat,
@@ -1124,31 +1127,20 @@ S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector
 {
    S32 inc = abcFormat ? 1 : 2;
    S32 segFound = NONE;
+   F32 dist;
+   Point closest;
 
    for(S32 i = 0; i < verts.size() - 1; i += inc)
-   {
-      const Point *p1 = &verts[i];
-      const Point *p2 = &verts[i+1];
-
-      Point edgeDelta = *p2 - *p1;
-      Point clickDelta = clickPoint - *p1;
-      float fraction = clickDelta.dot(edgeDelta);
-      float lenSquared = edgeDelta.dot(edgeDelta);
-
-      if(fraction > 0 && fraction < lenSquared)
+      if(findNormalPoint(clickPoint, verts[i], verts[i+1], closest))
       {
-         // Compute the closest point:
-         Point closest = *p1 + edgeDelta * (fraction / lenSquared);
-         float distance = (clickPoint - closest).lenSquared();
-           
-         if(distance < minDist)
+         dist = (clickPoint - closest).lenSquared();
+         if(dist < minDist)
          {
-            minDist = distance;
+            minDist = dist;
             snapPoint.set(closest);   
             segFound = i;
          }
       }
-   }
 
    return segFound;
 }
@@ -2060,19 +2052,33 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       else if(item.index == ItemEnergy)
          renderEnergyItem(pos, true, hideit ? grayedOutColorDim : NULL, alpha);
 
-      else if(item.index == ItemTurret)
+      else if(item.index == ItemTurret || item.index == ItemForceField)
       { 
          if(!isDockItem && item.snapped && mCurrentScale > 80)      // Generic rendering when we're too far out
          {
-            glPushMatrix();
-               setTranslationAndScale(pos);
-               renderTurret(c, pos, item.normal, true, 1.0, item.normal.ATAN2());
-            glPopMatrix();
+            if(item.index == ItemTurret)
+            {
+               glPushMatrix();
+                  setTranslationAndScale(pos);
+                  renderTurret(c, pos, item.normal, true, 1.0, item.normal.ATAN2());
+               glPopMatrix();
+            }
+            else   
+            {
+               F32 scaleFact = mCurrentScale / mGridSize; 
+               glPushMatrix();
+                  setTranslationAndScale(pos);
+                  renderForceFieldProjector(pos, item.normal, c, true);
+               glPopMatrix();
+               
+               renderForceField(convertLevelToCanvasCoord(ForceFieldProjector::getForceFieldStartPoint(item.vert(0), item.normal, 1 / mGridSize)), 
+                                convertLevelToCanvasCoord(item.forceFieldEnd), c, true, scaleFact);
+            }
 
             showLetter = false;
          }
 
-         else renderGenericItem(pos, c, alpha);    // For now
+         else renderGenericItem(pos, c, alpha);  
       }
 
       else                             // Draw anything else
@@ -2622,7 +2628,6 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
       return;
 
    S32 vertexHit, vertexHitPoly;
-   //S32 edgeHit, itemHit;
 
    findHitVertex(mMousePos, vertexHitPoly, vertexHit);
    findHitItemAndEdge();
@@ -2715,7 +2720,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
             mItemHit = i;
             break;
          }
-   }
+   } // if(draggingDockItem)
 
 
    findSnapVertex();
@@ -2739,6 +2744,10 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    // Update the locations of all items we're moving to show them being dragged
    for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].selected)
+         mItems[i].geomChanging();
+
       for(S32 j = 0; j < mItems[i].vertCount(); j++)
          if(mItems[i].selected || mItems[i].vertSelected(j))
          {
@@ -2748,6 +2757,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
             if(mItems[i].vertSelected(j))
                mItems[i].geomChanging();     
          }
+   }
 }
 
 
@@ -4424,7 +4434,7 @@ void WorldItem::flipVertical(const Point &boundingBoxMin, const Point &boundingB
 
 void WorldItem::geomChanging()
 {
-   if(index == ItemTextItem)
+   if(index == ItemTextItem || index == ItemForceField)
       geomChanged();
 }
 
@@ -4491,13 +4501,19 @@ void WorldItem::geomChanged()
 
       // Compute text size subject to min and max defined in TextItem
       textSize = max(min(size, TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
-
    }
+   
    else if(index == ItemBarrierMaker)
    {  
       // Fill extendedEndPoints from the vertices of our wall's centerline
       constructBarrierEndPoints(mVerts, width / gEditorUserInterface.getGridSize(), extendedEndPoints);
       gEditorUserInterface.computeWallSegmentIntersections(this);
+   }
+
+   else if(index == ItemForceField)
+   {
+      // Find the end-point of the projected forcefield
+      findForceFieldEnd();
    }
 }
 
@@ -4517,7 +4533,6 @@ void EditorUserInterface::computeWallSegmentIntersections(WorldItem *worldItem)
       if(wallSegments[i].invalid)
          wallSegments[i].resetEdges();
 
-  
     worldItem->buildWallSegmentEdgesAndPoints();
 
    // Invalidate all segments that potentially intersect the changed segment in its new location
@@ -4549,38 +4564,48 @@ void EditorUserInterface::computeWallSegmentIntersections(WorldItem *worldItem)
 }
 
 
-void WallSegment::resetEdges()
+extern bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
+
+  
+void WorldItem::findForceFieldEnd()
 {
-   edges.clear();
+   // Load the corner points of a maximum-length forcefield into geom
+   Vector<Point> geom;
+   
+   F32 scale = 1 / gEditorUserInterface.getGridSize();
 
-   edges.push_back(corners[0]);
-   edges.push_back(corners[1]);
+   Point start = ForceFieldProjector::getForceFieldStartPoint(mVerts[0], normal, scale);
+   Point end = ForceFieldProjector::getForceFieldEndPoint(mVerts[0], normal, 
+                                        ForceFieldProjector::MAX_FORCEFIELD_LENGTH, scale);
 
-   edges.push_back(corners[1]);
-   edges.push_back(corners[2]);
+   Point nrml;
 
-   edges.push_back(corners[2]);
-   edges.push_back(corners[3]);
+   ForceField::getGeom(start, end, geom, scale);    
+   Rect boundingBox(geom);
 
-   edges.push_back(corners[3]);
-   edges.push_back(corners[0]);
-}
+   F32 dist;
+   F32 minDist = F32_MAX;
 
+   for(S32 i = 0; i < gEditorUserInterface.wallSegments.size(); i++)
+   { 
+      if(!boundingBox.intersects(gEditorUserInterface.wallSegments[i].mBounds))
+         continue;
+      for(S32 j = 0; j < gEditorUserInterface.wallSegments[i].edges.size() - 1; j++)
+      { 
+         Point *p1 = &gEditorUserInterface.wallSegments[i].edges[j];
+         Point *p2 = &gEditorUserInterface.wallSegments[i].edges[j+1];
 
-void WallSegment::computeBoundingBox()
-{
-   Point _min(corners[0].x, corners[0].y);
-   Point _max(corners[0].x, corners[0].y);
-
-   for(S32 i = 1; i < corners.size(); i++)
-   {
-      if(corners[i].x < _min.x)   _min.x = corners[i].x;
-      if(corners[i].x > _max.x)   _max.x = corners[i].x;
-      if(corners[i].y < _min.y)   _min.y = corners[i].y;
-      if(corners[i].y > _max.y)   _max.y = corners[i].y;
+         if(findIntersection(*p1, *p2, start, end, nrml))
+         {
+            dist = (start - nrml).lenSquared();
+            if(dist < minDist)
+            {
+               minDist = dist;
+               forceFieldEnd.set(nrml);
+            }
+         }
+      }
    }
-
-   mBounds = Rect(_min, _max);
 }
 
 
@@ -4613,6 +4638,31 @@ void WorldItem::rotateAboutPoint(const Point &center, F32 angle)
    geomChanged();
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+void WallSegment::resetEdges()
+{
+   edges.clear();
+
+   edges.push_back(corners[0]);
+   edges.push_back(corners[1]);
+
+   edges.push_back(corners[1]);
+   edges.push_back(corners[2]);
+
+   edges.push_back(corners[2]);
+   edges.push_back(corners[3]);
+
+   edges.push_back(corners[3]);
+   edges.push_back(corners[0]);
+}
+
+
+void WallSegment::computeBoundingBox()
+{
+   mBounds = Rect(corners);
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

@@ -472,11 +472,40 @@ void ForceFieldProjector::idle(GameObject::IdleCallPath path)
    healObject(mCurrentMove.time);
 }
 
+static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
+static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
+
+void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom)
+{
+   Point cross(normal.y, -normal.x);
+   cross.normalize(PROJECTOR_HALF_WIDTH);
+
+   geom.push_back(anchor + cross);
+   geom.push_back(getForceFieldStartPoint(anchor, normal));
+   geom.push_back(anchor - cross);
+}
+
+
+// Get the point where the forcefield actually starts, as it leaves the projector; the tip of the projector
+Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact)
+{
+   return Point(anchor.x + normal.x * PROJECTOR_OFFSET * scaleFact, 
+                anchor.y + normal.y * PROJECTOR_OFFSET * scaleFact);
+}
+
+
+Point ForceFieldProjector::getForceFieldEndPoint(const Point &anchor, const Point &normal, F32 length, F32 scaleFact)
+{
+   return Point(anchor.x + normal.x * (length + PROJECTOR_OFFSET) * scaleFact, 
+                anchor.y + normal.y * (length + PROJECTOR_OFFSET) * scaleFact );
+}
+
 
 void ForceFieldProjector::onEnabled()
 {
-   Point start = mAnchorPoint + mAnchorNormal * 15;
-   Point end = mAnchorPoint + mAnchorNormal * 2500;      // 2500 is max length of forcefield
+   Point start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
+   Point end(mAnchorPoint.x + mAnchorNormal.x * MAX_FORCEFIELD_LENGTH, 
+             mAnchorPoint.y + mAnchorNormal.y * MAX_FORCEFIELD_LENGTH);
 
    F32 t;
    Point n;
@@ -488,12 +517,10 @@ void ForceFieldProjector::onEnabled()
    mField->addToGame(getGame());
 }
 
+
 bool ForceFieldProjector::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   Point cross(mAnchorNormal.y, -mAnchorNormal.x);
-   polyPoints.push_back(mAnchorPoint + cross * 12);
-   polyPoints.push_back(mAnchorPoint + mAnchorNormal * 15);
-   polyPoints.push_back(mAnchorPoint - cross * 12);
+   getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
    return true;
 }
 
@@ -635,15 +662,23 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-bool ForceField::getCollisionPoly(Vector<Point> &p)
-{
-   Point normal(mEnd.y - mStart.y, mStart.x - mEnd.x);
-   normal.normalize(2.5);
+static const F32 FORCEFIELD_HALF_WIDTH = 2.5;
 
-   p.push_back(mStart + normal);
-   p.push_back(mEnd + normal);
-   p.push_back(mEnd - normal);
-   p.push_back(mStart - normal);
+void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &geom, F32 scaleFact)
+{
+   Point normal(end.y - start.y, start.x - end.x);
+   normal.normalize(FORCEFIELD_HALF_WIDTH * scaleFact);    
+
+   geom.push_back(start + normal);
+   geom.push_back(end + normal);
+   geom.push_back(end - normal);
+   geom.push_back(start - normal);
+}
+
+
+bool ForceField::getCollisionPoly(Vector<Point> &points)
+{
+   getGeom(mStart, mEnd, points);
    return true;
 }
 

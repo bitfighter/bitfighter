@@ -205,7 +205,6 @@ bool PolygonLineIntersect(Point *poly, U32 vertexCount, Point p1, Point p2, floa
             {
                normal.set(dv.y, -dv.x);
                currentCollisionTime = s;
-
             }
          }
       }

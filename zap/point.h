@@ -25,8 +25,10 @@
 
 #ifndef _POINT_H_
 #define _POINT_H_
+
 #include <math.h>
 #include <stdlib.h>
+#include "tnlVector.h"
 
 namespace Zap
 {
@@ -119,6 +121,8 @@ struct Color
 };
 
 
+extern bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4);
+
 struct Rect
 {
    typedef float member_type;
@@ -131,6 +135,14 @@ struct Rect
       max.x = p.x + size/2;
       min.y = p.y - size/2;
       max.y = p.y + size/2;
+   }
+
+   Rect(const TNL::Vector<Point> &p) {                        // Construct as a bounding box
+      min = p[0];
+      max = p[0];
+
+      for(int i = 1; i < p.size(); i++)
+         unionPoint(p[i]);
    }
 
    Point getCenter() { return (max + min) * 0.5; }
@@ -164,26 +176,18 @@ struct Rect
 
    void unionPoint(const Point &p)
    {
-      if(p.x < min.x)
-         min.x = p.x;
-      else if(p.x > max.x)
-         max.x = p.x;
-      if(p.y < min.y)
-         min.y = p.y;
-      else if(p.y > max.y)
-         max.y = p.y;
+      if(p.x < min.x)        min.x = p.x;
+      else if(p.x > max.x)   max.x = p.x;
+      if(p.y < min.y)        min.y = p.y;
+      else if(p.y > max.y)   max.y = p.y;
    }
 
    void unionRect(const Rect &r)
    {
-      if(r.min.x < min.x)
-         min.x = r.min.x;
-      if(r.max.x > max.x)
-         max.x = r.max.x;
-      if(r.min.y < min.y)
-         min.y = r.min.y;
-      if(r.max.y > max.y)
-         max.y = r.max.y;
+      if(r.min.x < min.x)    min.x = r.min.x;
+      if(r.max.x > max.x)    max.x = r.max.x;
+      if(r.min.y < min.y)    min.y = r.min.y;
+      if(r.max.y > max.y)    max.y = r.max.y;
    }
 
    // Does rect interset rect r?
@@ -200,28 +204,9 @@ struct Rect
              max.x >= r.min.x && max.y >= r.min.y;
    }
 
-   // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=440350
-   bool segmentsIntersect(Point p1, Point p2, Point p3, Point p4)
-   {
-
-       member_type denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
-       member_type numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
-
-       member_type numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
-
-       if ( denom == 0.0 )
-          //if ( numerator == 0.0 && numerator2 == 0.0 )
-          //   return false;  //COINCIDENT;
-       return false;  // PARALLEL;
-
-       member_type ua = numerator / denom;
-       member_type ub = numerator2/ denom;
-
-       return (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0);
-   }
 
    // Does rect intersect line defined by p1 and p2?
-   bool intersects(const Point p1, Point p2)
+   bool intersects(const Point &p1, const Point &p2)
    {
       return ( segmentsIntersect(p1, p2, Point(min.x, min.y), Point(min.x, max.y)) ||
                segmentsIntersect(p1, p2, Point(min.x, max.y), Point(max.x, max.y)) ||

@@ -103,7 +103,7 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);
 
 extern void renderForceFieldProjector(Point pos, Point normal);
 extern void renderForceFieldProjector(Point pos, Point normal, Color teamColor, bool enabled);
-extern void renderForceField(Point start, Point end, Color c, bool fieldUp);
+extern void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scale = 1);
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask = 1023);
 extern void renderStaticBitfighterLogo();

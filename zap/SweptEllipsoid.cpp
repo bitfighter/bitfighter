@@ -698,6 +698,72 @@ F32 angleOfLongestSide(Vector<Point> &polyPoints)
 }
 
 
+// Find closest point from p on segment s1-s2 that is perpendicular to s1-s2
+bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest)
+{
+   Point edgeDelta = s2 - s1;    // Vector defining extent of segment
+   Point pointDelta = p - s1;    // Distance from p to start of segment
+
+   float fraction = pointDelta.dot(edgeDelta);  // "Perpendicularize" pointDelta towards edgeDelta
+   float lenSquared = edgeDelta.lenSquared();
+
+   if(fraction > 0 && fraction < lenSquared)                // Intersection!
+   {
+      closest = s1 + edgeDelta * (fraction / lenSquared);   // Closest point
+      return true;
+   }
+   else   // Didn't find a good match
+      return false;
+}
+
+
+// Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=440350
+bool segmentsIntersect(const Point &p1, const Point &p2, const Point &p3, const Point &p4)
+{
+    F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
+    F32 numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
+
+    F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
+
+    if ( denom == 0.0 )
+       //if ( numerator == 0.0 && numerator2 == 0.0 )
+       //   return false;  //COINCIDENT;
+    return false;  // PARALLEL;
+
+    F32 ua = numerator / denom;
+    F32 ub = numerator2/ denom;
+
+    return (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0);
+    // Point intersection(p1.x + ua * (p2.x - p1.x), p1.y + ua * (p2.y - p1.y));
+}
+
+
+bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection)
+{
+    F32 denom = ((p4.y - p3.y) * (p2.x - p1.x)) - ((p4.x - p3.x) * (p2.y - p1.y));
+    F32 numerator = ((p4.x - p3.x) * (p1.y - p3.y)) - ((p4.y - p3.y) * (p1.x - p3.x));
+
+    F32 numerator2 = ((p2.x - p1.x) * (p1.y - p3.y)) - ((p2.y - p1.y) * (p1.x - p3.x));
+
+    if ( denom == 0.0 )
+       //if ( numerator == 0.0 && numerator2 == 0.0 )
+       //   return false;  //COINCIDENT;
+    return false;  // PARALLEL;
+
+    F32 ua = numerator / denom;
+    F32 ub = numerator2/ denom;
+
+    if (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0)
+    {
+      intersection.set(p1.x + ua * (p2.x - p1.x), p1.y + ua * (p2.y - p1.y));
+      return true;
+    }
+    else
+       return false;
+}
+
+
+
 };
 
 

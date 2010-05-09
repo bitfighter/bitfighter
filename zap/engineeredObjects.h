@@ -126,6 +126,8 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
+   static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
+
    void render();
    S32 getRenderSortValue() { return 0; }
 
@@ -142,10 +144,15 @@ private:
 
 public:
    static const S32 defaultRespawnTime = 0;
+   static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
+   static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
+   static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
+   static Point getForceFieldEndPoint(const Point &anchor, const Point &normal, F32 length, F32 scaleFact = 1);
+
    void onAddedToGame(Game *theGame);
    void idle(GameObject::IdleCallPath path);
 
