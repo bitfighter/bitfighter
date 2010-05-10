@@ -146,6 +146,7 @@ struct Rect
    }
 
    Point getCenter() { return (max + min) * 0.5; }
+
    void set(Point p1, Point p2)
    {
       if(p1.x < p2.x)
@@ -168,7 +169,22 @@ struct Rect
          min.y = p2.y;
          max.y = p1.y;
       }
+      // The above might be replaceable with:
+      //       min = p1;
+      //       max = p1;
+      //       unionPoint(p2);
+
    }
+
+   void set(const TNL::Vector<Point> &p)     // Set to bounding box
+   {
+      min = p[0];
+      max = p[0];
+
+      for(int i = 1; i < p.size(); i++)
+         unionPoint(p[i]);
+   }
+
    bool contains(const Point &p)    // Rect contains the point
    {
       return p.x >= min.x && p.x <= max.x && p.y >= min.y && p.y <= max.y;

@@ -185,10 +185,11 @@ public:
    void setVert(Point vertex, S32 vertIndex);
    void invalidate() { mVerts.clear(); index = ItemInvalid; }
 
-   void geomChanging();   // Item geom is interactively changing
-   void geomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
-   void attrsChanging();
-   void attrsChanged();   // Attrs changed
+   void onGeomChanging();   // Item geom is interactively changing
+   void onItemDragging();   // Item is being dragged around the screen
+   void onGeomChanged();    // Item changed geometry (or moved), do any internal updating that might be required
+   void onAttrsChanging();
+   void onAttrsChanged();   // Attrs changed
 
    void flipHorizontal(const Point &boundingBoxMin, const Point &boundingBoxMax);      // All items use this
    void flipVertical(const Point &boundingBoxMin, const Point &boundingBoxMax);        // All items use this
@@ -445,6 +446,7 @@ public:
    void deleteWallSegments(S32 owner);              // Delete all segments owned by specified WorldItem
 
    void computeWallSegmentIntersections(WorldItem *worldItem); // Recalucate edge geometry for all walls when worldItem has changed
+   void recomputeAllWallGeometry();
 
 
    // Handle input

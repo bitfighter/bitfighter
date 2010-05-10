@@ -287,18 +287,19 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
    if(!cameFromRedo)
       mLastRedoIndex = mLastUndoIndex;
 
-   if(mAllUndoneUndoLevel > mLastRedoIndex)     // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  Our "no need to save" undo point is lost forever.
-      mAllUndoneUndoLevel = -1;
+   // Use case: We do 5 actions, save, undo 2, redo 1, then do some new action.  
+   // Our "no need to save" undo point is lost forever.
+   if(mAllUndoneUndoLevel > mLastRedoIndex)     
+      mAllUndoneUndoLevel = NONE;
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
-   //logprintf("Saving: %d", mLastUndoIndex);
    mLastUndoIndex++;
    mLastRedoIndex++; 
 
    if(mLastUndoIndex % UNDO_STATES == mFirstUndoIndex % UNDO_STATES)           // Undo buffer now full...
    {
       mFirstUndoIndex++;
-      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save.
+      mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
    }
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
@@ -328,6 +329,8 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mLastUndoIndex--;
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
+   recomputeAllWallGeometry();
+
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    itemToLightUp = NONE;
    autoSave();
@@ -340,6 +343,8 @@ void EditorUserInterface::redo()
    {
       mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
+
+      recomputeAllWallGeometry();
 
       mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
       itemToLightUp = NONE;
@@ -495,18 +500,7 @@ void EditorUserInterface::loadLevel()
    for(S32 i = 0; i < mItems.size(); i++)
       constructBarrierEndPoints(mItems[i].getVerts(), mItems[i].width / mGridSize, mItems[i].extendedEndPoints);
 
-   buildAllWallSegmentEdgesAndPoints();
-
-
-   for(S32 i = 0; i < wallSegments.size() - 1; i++)
-      for(S32 j = i + 1; j < wallSegments.size(); j++)
-      {
-         if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
-         {
-            clipRenderLinesToPoly(wallSegments[i].corners, wallSegments[j].edges);
-            clipRenderLinesToPoly(wallSegments[j].corners, wallSegments[i].edges);
-         }
-      }
+   recomputeAllWallGeometry();
 }
 
 
@@ -2273,7 +2267,7 @@ void EditorUserInterface::pasteSelection()
       for(S32 j = 0; j < newItem.vertCount(); j++)
          newItem.vert(j) += offset;
       mItems.push_back(newItem);
-      newItem.geomChanged();
+      newItem.onGeomChanged();
    }
    mItems.sort(geometricSort);
    validateLevel();
@@ -2742,11 +2736,12 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    else
       delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + *origPoint - mMouseDownPos) - *origPoint;
 
-   // Update the locations of all items we're moving to show them being dragged
+   // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
+   // selected if one of its vertices are.
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected)
-         mItems[i].geomChanging();
+      if(mItems[i].selected)     
+         mItems[i].onItemDragging();
 
       for(S32 j = 0; j < mItems[i].vertCount(); j++)
          if(mItems[i].selected || mItems[i].vertSelected(j))
@@ -2755,7 +2750,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
             // If we are dragging a vertex, and not the entire item, we are likely changing the geometry, so notify the item
             if(mItems[i].vertSelected(j))
-               mItems[i].geomChanging();     
+               mItems[i].onGeomChanging();     
          }
    }
 }
@@ -2904,7 +2899,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
          if(mItems[i].width > LineItem::MAX_LINE_WIDTH)
             mItems[i].width = LineItem::MAX_LINE_WIDTH;
 
-         mItems[i].geomChanged();
+         mItems[i].onGeomChanged();
          mNeedToSave = true;
          mAllUndoneUndoLevel = NONE;    // This change can't be undone
       }
@@ -2919,7 +2914,7 @@ void EditorUserInterface::decBarrierWidth(S32 amt)
          mItems[i].width -= ((S32) mItems[i].width % amt) ? (S32) mItems[i].width % amt : amt;      // Dirty, ugly thing
          if(mItems[i].width < 1)
              mItems[i].width = 1;
-         mItems[i].geomChanged();
+         mItems[i].onGeomChanged();
          mNeedToSave = true;
          mAllUndoneUndoLevel = -1;    // This change can't be undone
       }
@@ -2957,8 +2952,8 @@ void EditorUserInterface::splitBarrier()
                mItems.push_back(newItem);
 
                // Tell the new segments that they have new geometry
-               mItems[i].geomChanged();
-               mItems.last().geomChanged();
+               mItems[i].onGeomChanged();
+               mItems.last().onGeomChanged();
 
                // And get them in the right order
                mItems.sort(geometricSort);         
@@ -3045,7 +3040,7 @@ void EditorUserInterface::joinBarrier()
       saveUndoState(undoItems);
       mNeedToSave = true;
       autoSave();
-      mItems[joinedItem].geomChanged();
+      mItems[joinedItem].onGeomChanged();
    }
 }
 
@@ -3203,7 +3198,7 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
             mItems[i].repopDelay = mItems[mEditingSpecialAttrItem].repopDelay;
             mItems[i].speed = mItems[mEditingSpecialAttrItem].speed;
             mItems[i].boolattr = mItems[mEditingSpecialAttrItem].boolattr;
-            mItems[i].attrsChanged();
+            mItems[i].onAttrsChanged();
          }
       }
 
@@ -3338,7 +3333,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
       }
 
-      mItems[mEditingSpecialAttrItem].attrsChanging();
+      mItems[mEditingSpecialAttrItem].onAttrsChanging();
       return;
    }
 
@@ -3395,7 +3390,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             return;
          //else
          mNewItem.addVert(snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)));
-         mNewItem.geomChanging();
+         mNewItem.onGeomChanging();
          return;
       }
 
@@ -3420,7 +3415,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mUnmovedItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
          mUnmovedItems[mItemHit].selectVert(mEdgeHit + 1);
 
+         // Alert the item that its geometry is changing
+         mItems[mItemHit].onGeomChanging();
+
          mMouseDownPos = newVertex;
+
+         mItems[mItemHit].onGeomChanged();
       }
       else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
       {
@@ -3452,7 +3452,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(mNewItem.vertCount() > 1)
          {
             mItems.push_back(mNewItem);
-            mNewItem.geomChanged();    // For walls, needs to be added to item list BEFORE geomChanged() is run!
+            mNewItem.onGeomChanged();    // For walls, needs to be added to item list BEFORE geomChanged() is run!
             mItems.sort(geometricSort);
          }
          mNewItem.invalidate();
@@ -3871,7 +3871,7 @@ void EditorUserInterface::finishedDragging()
                }
 
             if(itemChanged)
-               mItems[i].geomChanged();
+               mItems[i].onGeomChanged();
          }
 
 
@@ -4432,15 +4432,6 @@ void WorldItem::flipVertical(const Point &boundingBoxMin, const Point &boundingB
 }
 
 
-void WorldItem::geomChanging()
-{
-   if(index == ItemTextItem || index == ItemForceField)
-      geomChanged();
-}
-
-
-static Vector<Point> outline;
-
 void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
 {
    wallSegments.clear();
@@ -4490,8 +4481,21 @@ void EditorUserInterface::deleteWallSegments(S32 owner)
       }
 }
 
+void WorldItem::onGeomChanging()
+{
+   if(index == ItemTextItem)
+      onGeomChanged();
+}
 
-void WorldItem::geomChanged()
+
+void WorldItem::onItemDragging()
+{
+   if(index == ItemForceField)
+      onGeomChanged();
+}
+
+
+void WorldItem::onGeomChanged()
 {
    if(index == ItemTextItem)
    {
@@ -4508,6 +4512,8 @@ void WorldItem::geomChanged()
       // Fill extendedEndPoints from the vertices of our wall's centerline
       constructBarrierEndPoints(mVerts, width / gEditorUserInterface.getGridSize(), extendedEndPoints);
       gEditorUserInterface.computeWallSegmentIntersections(this);
+
+
    }
 
    else if(index == ItemForceField)
@@ -4515,6 +4521,35 @@ void WorldItem::geomChanged()
       // Find the end-point of the projected forcefield
       findForceFieldEnd();
    }
+}
+
+
+void WorldItem::onAttrsChanging()
+{
+   if(index == ItemTextItem)
+      onGeomChanged();
+}
+
+
+void WorldItem::onAttrsChanged()
+{
+   // Do nothing for the moment
+}
+
+
+void EditorUserInterface::recomputeAllWallGeometry()
+{
+   buildAllWallSegmentEdgesAndPoints();
+
+   for(S32 i = 0; i < wallSegments.size() - 1; i++)
+      for(S32 j = i + 1; j < wallSegments.size(); j++)
+      {
+         if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
+         {
+            clipRenderLinesToPoly(wallSegments[i].corners, wallSegments[j].edges);
+            clipRenderLinesToPoly(wallSegments[j].corners, wallSegments[i].edges);
+         }
+      }
 }
 
 
@@ -4575,50 +4610,52 @@ void WorldItem::findForceFieldEnd()
    F32 scale = 1 / gEditorUserInterface.getGridSize();
 
    Point start = ForceFieldProjector::getForceFieldStartPoint(mVerts[0], normal, scale);
-   Point end = ForceFieldProjector::getForceFieldEndPoint(mVerts[0], normal, 
-                                        ForceFieldProjector::MAX_FORCEFIELD_LENGTH, scale);
+   F32 minDist = ForceFieldProjector::MAX_FORCEFIELD_LENGTH;
+   forceFieldEnd.set(ForceFieldProjector::getForceFieldEndPoint(mVerts[0], normal, minDist, scale));
 
    Point nrml;
+   Rect boundingBox;
 
-   ForceField::getGeom(start, end, geom, scale);    
-   Rect boundingBox(geom);
 
    F32 dist;
-   F32 minDist = F32_MAX;
+   bool recomputeBoundingBox = true;
 
    for(S32 i = 0; i < gEditorUserInterface.wallSegments.size(); i++)
    { 
+      if(recomputeBoundingBox)
+      {
+         // We can recompute a smaller bounding box now... I hope this is more efficient because it may
+         // allow us to rule out many segments that would otherwise be tested with the more expensive, 
+         // more exhausting test.  Of course, this will vary by the particular geometry of a given level.
+         ForceField::getGeom(start, forceFieldEnd, geom, scale);    
+         boundingBox.set(geom);
+         recomputeBoundingBox = false;
+      }
+
+      // If forcefield's bounding box doesn't intersect that of the wall segment, there's no point in testing this
+      // one further.
       if(!boundingBox.intersects(gEditorUserInterface.wallSegments[i].mBounds))
          continue;
+
       for(S32 j = 0; j < gEditorUserInterface.wallSegments[i].edges.size() - 1; j++)
       { 
          Point *p1 = &gEditorUserInterface.wallSegments[i].edges[j];
          Point *p2 = &gEditorUserInterface.wallSegments[i].edges[j+1];
 
-         if(findIntersection(*p1, *p2, start, end, nrml))
+         if(findIntersection(*p1, *p2, start, forceFieldEnd, nrml))
          {
             dist = (start - nrml).lenSquared();
+
             if(dist < minDist)
             {
                minDist = dist;
                forceFieldEnd.set(nrml);
+
+               recomputeBoundingBox = true;
             }
          }
       }
    }
-}
-
-
-void WorldItem::attrsChanging()
-{
-   if(index == ItemTextItem)
-      geomChanged();
-}
-
-
-void WorldItem::attrsChanged()
-{
-   // Do nothing for the moment
 }
 
 
@@ -4635,7 +4672,7 @@ void WorldItem::rotateAboutPoint(const Point &center, F32 angle)
       mVerts[j] = n + center;
    }
 
-   geomChanged();
+   onGeomChanged();
 }
 
 ////////////////////////////////////////
