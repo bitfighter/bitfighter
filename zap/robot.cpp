@@ -58,7 +58,7 @@
 namespace Zap
 {
 
-static Vector<GameObject *> fillVector;          // Reusable workspace for writing lists of objects
+static Vector<DatabaseObject *> fillVector;      // Reusable workspace for writing lists of objects
 
 static EventManager eventManager;                // Singleton event manager, one copy is used by all bots
 
@@ -802,16 +802,16 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 
    thisRobot->findObjects(objectType, fillVector, scope);    // Get other objects on screen-visible area only
 
+
    lua_createtable(L, fillVector.size(), 0);    // Create a table, with enough slots pre-allocated for our data
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-
       if(fillVector[i]->getObjectTypeMask() & (ShipType | RobotType))      // Skip cloaked ships & robots!
       {
-         Ship *ship = (Ship*)fillVector[i];
+         Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
 
-         if(dynamic_cast<Robot *>(fillVector[i]) == thisRobot)     // Do not find self
+         if(dynamic_cast<Robot *>(fillVector[i]) == thisRobot)             // Do not find self
             continue;
 
          // Ignore ship/robot if it's dead or cloaked
@@ -819,7 +819,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
             continue;
       }
 
-      GameObject *obj = fillVector[i];
+      GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
       obj->push(L);
       pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
       lua_rawseti(L, 1, pushed);
@@ -1671,7 +1671,7 @@ extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const P
 // Return coords of nearest ship... and experimental robot routine
 bool Robot::findNearestShip(Point &loc)
 {
-   Vector<GameObject *> foundObjects;
+   Vector<DatabaseObject *> foundObjects;
    Point closest;
 
    Point pos = getActualPos();
@@ -1688,11 +1688,12 @@ bool Robot::findNearestShip(Point &loc)
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      F32 d = foundObjects[i]->getActualPos().distanceTo(pos);
-      if(d < dist && d > 0)      // d == 0 for self
+      GameObject *foundObject = dynamic_cast<GameObject *>(foundObjects[i]);
+      F32 d = foundObject->getActualPos().distanceTo(pos);
+      if(d < dist && d > 0)      // d == 0 means we're comparing to ourselves
       {
          dist = d;
-         loc = foundObjects[i]->getActualPos();
+         loc = foundObject->getActualPos();     // use set here?
          found = true;
       }
    }

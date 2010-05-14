@@ -35,7 +35,7 @@
 namespace Zap
 {
 
-static Vector<GameObject *> fillVector;
+static Vector<DatabaseObject *> fillVector;
 
 // Not used at the moment...
 void engClientCreateObject(GameConnection *connection, U32 object)
@@ -53,8 +53,8 @@ void engClientCreateObject(GameConnection *connection, U32 object)
    F32 collisionTime;
    Point collisionNormal;
 
-   GameObject *hitObject = ship->findObjectLOS(BarrierType,
-      MoveObject::ActualState, startPoint, endPoint, collisionTime, collisionNormal);
+   GameObject *hitObject = ship->findObjectLOS(BarrierType,MoveObject::ActualState, startPoint, endPoint, 
+                                               collisionTime, collisionNormal);
 
    if(!hitObject)
       return;
@@ -125,9 +125,9 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    if(mTeam == -1)      // Neutral object starts with no health, can be repaired by anyone
       mHealth = 0;
    
-   Point p;
-   p.read(argv + 1);
-   p *= getGame()->getGridSize();
+   Point pos;
+   pos.read(argv + 1);
+   pos *= getGame()->getGridSize();
 
    if(argc >= 4)
    {
@@ -136,39 +136,55 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    }
 
    // Find the mount point:
-   F32 minDist = F32_MAX;
    Point normal;
    Point anchor;
 
-   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125)
-   {
-      Point dir(cos(theta), sin(theta));
-      dir *= 100;
+   bool found = findAnchorPointAndNormal(getGridDatabase(), pos, 1, anchor, normal);
 
-      F32 t;
-      Point n;
-      if(findObjectLOS(BarrierType, MoveObject::ActualState, p, p + dir, t, n))
-      {
-         if(t < minDist)
-         {
-            anchor = p + dir * t;
-            normal = n;
-            minDist = t;
-         }
-      }
-   }
+   if(!found)
+      return false;      // Invalid object
 
-   if(minDist > 1)
-      return true;      // I think?
-
-   mAnchorPoint = anchor + normal;
-   mAnchorNormal = normal;
+   mAnchorPoint.set(anchor + normal);
+   mAnchorNormal.set(normal);
    computeExtent();
 
    if(mHealth != 0)
       onEnabled();
 
    return true;
+}
+
+
+// This is used for both positioning items in-game and for snapping them to walls in the editor
+bool EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scaleFact, 
+                                                Point &anchor, Point &normal)
+{
+   F32 minDist = F32_MAX;
+   bool found = false;
+
+   // Start with a sweep of the area
+   for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125)    // Reducing to 0.0125 seems to have no effect
+   {
+      Point dir(cos(theta), sin(theta));
+      dir *= MAX_SNAP_DISTANCE * scaleFact;
+
+      F32 t;
+      Point n;
+
+      // Look for walls
+      if(db->findObjectLOS(BarrierType, MoveObject::ActualState, pos, pos + dir, t, n))
+      {
+         if(t < minDist)
+         {
+            anchor.set(pos + dir * t);
+            normal.set(n);
+            minDist = t;
+            found = true;
+         }
+      }
+   }
+
+   return found;
 }
 
 
@@ -366,16 +382,16 @@ bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2)
 
 bool EngineeredObject::checkDeploymentPosition()
 {
-   Vector<GameObject *> go;
+   Vector<DatabaseObject *> foundObjects;
    Vector<Point> polyBounds;
    getCollisionPoly(polyBounds);
 
    Rect queryRect = getExtent();
-   gServerGame->getGridDatabase()->findObjects(BarrierType | EngineeredType, go, queryRect);
-   for(S32 i = 0; i < go.size(); i++)
+   gServerGame->getGridDatabase()->findObjects(BarrierType | EngineeredType, foundObjects, queryRect);
+   for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Vector<Point> compareBounds;
-      go[i]->getCollisionPoly(compareBounds);
+      dynamic_cast<GameObject *>(foundObjects[i])->getCollisionPoly(compareBounds);
       if(PolygonsIntersect(polyBounds, compareBounds))
          return false;
    }
@@ -504,14 +520,7 @@ Point ForceFieldProjector::getForceFieldEndPoint(const Point &anchor, const Poin
 void ForceFieldProjector::onEnabled()
 {
    Point start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
-   Point end(mAnchorPoint.x + mAnchorNormal.x * MAX_FORCEFIELD_LENGTH, 
-             mAnchorPoint.y + mAnchorNormal.y * MAX_FORCEFIELD_LENGTH);
-
-   F32 t;
-   Point n;
-
-   if(findObjectLOS(BarrierType, MoveObject::ActualState, start, end, t, n))
-      end = start + (end - start) * t;
+   Point end = ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, 1.0);
 
    mField = new ForceField(mTeam, start, end);
    mField->addToGame(getGame());
@@ -562,8 +571,8 @@ Lunar<ForceFieldProjector>::RegType ForceFieldProjector::methods[] =
    {0,0}    // End method list
 };
 
-
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(ForceField);
 
@@ -589,7 +598,6 @@ bool ForceField::collide(GameObject *hitObject)
 
    if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return true;
-
 
    if(hitObject->getTeam() == mTeam)
    {
@@ -638,6 +646,7 @@ U32 ForceField::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
    return 0;
 }
 
+
 void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
@@ -662,10 +671,10 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
-static const F32 FORCEFIELD_HALF_WIDTH = 2.5;
-
 void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &geom, F32 scaleFact)
 {
+   static const F32 FORCEFIELD_HALF_WIDTH = 2.5;
+
    Point normal(end.y - start.y, start.x - end.x);
    normal.normalize(FORCEFIELD_HALF_WIDTH * scaleFact);    
 
@@ -673,6 +682,23 @@ void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &ge
    geom.push_back(end + normal);
    geom.push_back(end - normal);
    geom.push_back(start - normal);
+}
+
+
+Point ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact)
+{
+   F32 time;
+   Point n;
+
+   static const S32 MAX_FORCEFIELD_LENGTH = 2500;
+
+   Point end(start.x + normal.x * MAX_FORCEFIELD_LENGTH * scaleFact, 
+             start.y + normal.y * MAX_FORCEFIELD_LENGTH * scaleFact);
+
+   if(db->findObjectLOS(BarrierType, MoveObject::ActualState, start, end, time, n))
+      end.set(start + (end - start) * time); 
+
+   return end;
 }
 
 
@@ -797,7 +823,7 @@ void Turret::idle(IdleCallPath path)
          if((potential->isModuleActive(ModuleCloak) && !(carryVis && potential->areItemsMounted())) || potential->hasExploded)
             continue;
       }
-      GameObject *potential = fillVector[i];
+      GameObject *potential = dynamic_cast<GameObject *>(fillVector[i]);
 
       if(potential->getTeam() == mTeam)      // Is target on our team?
          continue;                           // ...if so, skip it!

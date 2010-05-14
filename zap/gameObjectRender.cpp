@@ -1299,10 +1299,11 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFa
    if(c.r < 0.5)   c.r = 0.5;
    if(c.g < 0.5)   c.g = 0.5;
    if(c.b < 0.5)   c.b = 0.5;
-   
+
    Vector<Point> geom;
    ForceField::getGeom(start, end, geom, scaleFact);
 
+  glColor(fieldUp ? c : c * 0.5);
   glBegin(GL_LINE_LOOP);
    for(S32 i = 0; i < geom.size(); i++)
       glVertex(geom[i]);

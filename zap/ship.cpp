@@ -52,7 +52,7 @@ static bool showCloakedTeammates = false;    // Set to true to allow players to 
 namespace Zap
 {
 
-static Vector<GameObject *> fillVector;
+static Vector<DatabaseObject *> fillVector;
 
 TNL_IMPLEMENT_NETOBJECT(Ship);
 
@@ -285,7 +285,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      GameObject *zone = fillVector[i];
+      GameObject *zone = dynamic_cast<GameObject *>(fillVector[i]);
 
       // Get points that define the zone boundaries
       polyPoints.clear();
@@ -299,7 +299,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 
 
 // Returns the object in question if this ship is on an object of type objectType
-GameObject *Ship::isOnObject(GameObjectType objectType)
+DatabaseObject *Ship::isOnObject(GameObjectType objectType)
 {
    findObjectsUnderShip(objectType);
 
@@ -308,7 +308,7 @@ GameObject *Ship::isOnObject(GameObjectType objectType)
 
    // Return first actually overlapping object on our candidate list
    for(S32 i = 0; i < fillVector.size(); i++)
-      if(isOnObject(fillVector[i]))
+      if(isOnObject(dynamic_cast<GameObject *>(fillVector[i])))
          return fillVector[i];
    return NULL;
 }
@@ -320,7 +320,6 @@ bool Ship::isOnObject(GameObject *object)
    Point center;
    float radius;
    Vector<Point> polyPoints;
-
 
    // Ships don't have collisionPolys, so this first check is utterly unneeded unless we change that
    if(getCollisionPoly(polyPoints))
@@ -530,6 +529,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       mJustTeleported--;
 }
 
+static Vector<DatabaseObject *> foundObjects;
 
 // Returns true if we found a suitable target
 bool Ship::findRepairTargets()
@@ -539,16 +539,17 @@ bool Ship::findRepairTargets()
    // so that ships don't render funny repair lines to interpolating
    // ships (client)
 
-   Vector<GameObject *> hitObjects;
    Point pos = getRenderPos();
    Point extend(RepairRadius, RepairRadius);
    Rect r(pos - extend, pos + extend);
-   findObjects(ShipType | RobotType | EngineeredType, hitObjects, r);
+   
+   foundObjects.clear();
+   findObjects(ShipType | RobotType | EngineeredType, foundObjects, r);
 
    mRepairTargets.clear();
-   for(S32 i = 0; i < hitObjects.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      GameObject *s = hitObjects[i];
+      GameObject *s = dynamic_cast<GameObject *>(foundObjects[i]);
       if(s->isDestroyed() || s->getHealth() >= 1)                             // Don't repair dead or fully healed objects...
          continue;
       if((s->getRenderPos() - pos).len() > (RepairRadius + CollisionRadius))  // ...or ones too far away...
@@ -743,7 +744,7 @@ void Ship::onAddedToGame(Game *game)
    Parent::onAddedToGame(game);
 
    // Detect if we spawned on a GoFast
-   SpeedZone *speedZone = (SpeedZone *) isOnObject(SpeedZoneType);
+   SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneType));
    if(speedZone)
       speedZone->collide(this);
 

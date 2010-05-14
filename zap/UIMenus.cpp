@@ -1317,7 +1317,9 @@ void LevelMenuUserInterface::onActivate()
       S32 j;
       for(j = 0; j < menuItems.size(); j++)
          if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), menuItems[j].mText) )     
-            break;                  // Skip over levels with blank names
+         {
+            break;                  // Skip over levels with blank names or duplicate entries
+         }
       if(j == menuItems.size())     // Must be a new type
       {
          strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
@@ -1371,15 +1373,19 @@ void LevelMenuSelectUserInterface::onActivate()
       return;
 
    menuItems.clear();
-
-   char c[] = "A";
+ 
+   char c[] = "A";  
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
-      if(gc->mLevelInfos[i].levelName == "")             // Skip levels with blank names --> but all should have names now!
-         if(!strcmp( gc->mLevelInfos[i].levelType.getString(), category.c_str() ) || !strcmp(category.c_str(), ALL_LEVELS) )
-         {
-            strncpy(c, gc->mLevelInfos[i].levelName.getString(), 1);
-            menuItems.push_back(MenuItem(gc->mLevelInfos[i].levelName.getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
-         }
+   {
+      if(gc->mLevelInfos[i].levelName == "")   // Skip levels with blank names --> but all should have names now!
+         continue;
+      if(!strcmp( gc->mLevelInfos[i].levelType.getString(), category.c_str() ) || 
+         !strcmp(category.c_str(), ALL_LEVELS) )
+      {
+         strncpy(c, gc->mLevelInfos[i].levelName.getString(), 1);
+         menuItems.push_back(MenuItem(gc->mLevelInfos[i].levelName.getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
+      }
+   }
 
    menuItems.sort(menuItemValueSort);
    currOffset = 0;

@@ -38,7 +38,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(Teleporter);
 
-static Vector<GameObject *> fillVector2;
+static Vector<DatabaseObject *> foundObjects;
 
 // Constructor --> need to set the pos and dest via methods like processArguments to make sure
 // that we get the multiple destination aspect of teleporters right
@@ -75,12 +75,12 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    // See if we already have any teleports with this pos... if so, this is a "multi-dest" teleporter
    bool found = false;
 
-   fillVector2.clear();
-   findObjects(TeleportType, fillVector2, gServerGame->computeWorldObjectExtents());
+   foundObjects.clear();
+   findObjects(TeleportType, foundObjects, gServerGame->computeWorldObjectExtents());
 
-   for(S32 i = 0; i < fillVector2.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Teleporter *tel = dynamic_cast<Teleporter *>(fillVector2[i]);
+      Teleporter *tel = dynamic_cast<Teleporter *>(foundObjects[i]);
       if(tel->mPos.distanceTo(pos) < 1)     // i.e these are really close!  Must be the same!
       {
          tel->mDest.push_back(dest);
@@ -184,15 +184,15 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    Rect queryRect(mPos, mPos);
    queryRect.expand(Point(TeleporterRadius, TeleporterRadius));
 
-   fillVector2.clear();
-   findObjects(ShipType | RobotType, fillVector2, queryRect);
+   foundObjects.clear();
+   findObjects(ShipType | RobotType, foundObjects, queryRect);
 
    // First see if we're triggered...
    bool isTriggered = false;
 
-   for(S32 i = 0; i < fillVector2.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Ship *s = (Ship*)fillVector2[i];
+      Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
       if((mPos - s->getActualPos()).len() < TeleporterTriggerRadius)
       {
          isTriggered = true;
@@ -205,9 +205,9 @@ void Teleporter::idle(GameObject::IdleCallPath path)
       return;
 
    // We've triggered the teleporter.  Relocate ship.
-   for(S32 i = 0; i < fillVector2.size(); i++)
+   for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Ship *s = (Ship*)fillVector2[i];
+      Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
       if((mPos - s->getRenderPos()).len() < TeleporterRadius + s->getRadius())
       {
          mLastDest = TNL::Random::readI(0, mDest.size() - 1);

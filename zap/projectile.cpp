@@ -54,7 +54,7 @@ Lunar<LuaProjectile>::RegType LuaProjectile::methods[] =
 
 //===========================================
 
-static Vector<GameObject*> fillVector;
+static Vector<DatabaseObject*> fillVector;
 
 TNL_IMPLEMENT_NETOBJECT(Projectile);
 
@@ -532,19 +532,21 @@ void Mine::idle(IdleCallPath path)
    bool foundItem = false;
    for(S32 i = 0; i < fillVector.size(); i++)
    {
+      GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
+
       F32 radius;
       Point ipos;
-      if(fillVector[i]->getCollisionCircle(MoveObject::RenderState, ipos, radius))
+      if(foundObject->getCollisionCircle(MoveObject::RenderState, ipos, radius))
       {
          if((ipos - pos).len() < (radius + SensorRadius))
          {
-            bool isMine = fillVector[i]->getObjectTypeMask() & MineType;
+            bool isMine = foundObject->getObjectTypeMask() & MineType;
             if(!isMine)
             {
                foundItem = true;
                break;
             }
-            else if(mArmed && fillVector[i] != this)
+            else if(mArmed && foundObject != this)
             {
                foundItem = true;
                break;

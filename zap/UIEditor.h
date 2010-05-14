@@ -28,6 +28,7 @@
 
 #include "UIMenus.h"
 #include "gameLoader.h"
+#include "gridDB.h"    // For DatabaseObject definition
 #include "timer.h"
 #include "point.h"
 #include "tnlNetStringTable.h"
@@ -64,33 +65,6 @@ struct SaveException : public std::exception
 };
 
 
-//class MeshBox
-//{
-//public:
-//
-//   enum Direction {
-//      all,
-//      up,
-//      down,
-//      left,
-//      right,
-//      directions
-//   };
-//
-//   MeshBox() { };
-//   MeshBox(Point center, F32 size);    // Constructor
-//   Rect bounds;
-//   void grow(Direction dir);
-//   void revert(Direction dir);
-//   bool done[directions];
-//   void checkAllDone();
-//   static S32 doneCount;
-//   static S32 boxCount;
-//   static void init();
-//   void render();
-//   bool checkWallCollision();
-//};
-
 enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
 {
    ItemSpawn,
@@ -120,6 +94,7 @@ enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[
    ItemInvalid
 };
 
+
 enum GeomType {
    geomPoint,           // Single point feature (like a flag)
    geomSimpleLine,      // Two point line (like a teleport)
@@ -131,8 +106,8 @@ enum GeomType {
 
 extern bool isConvex(const Vector<Point> &verts);
 
-class WorldItem
-{
+class WorldItem : public DatabaseObject
+{  
 private:
    Vector<Point> mVerts;
 
@@ -159,7 +134,7 @@ public:
    bool selected;
    bool litUp;
 
-   Point convertLevelToCanvasCoord(const Point &point, bool convert = true);
+   //Point convertLevelToCanvasCoord(const Point &point, bool convert = true);
    
    LineEditor lineEditor; // For items that have an aux text field
    U32 textSize;          // For items that have an aux text field
@@ -204,10 +179,11 @@ public:
 
    Vector<Point> getVerts() { return mVerts; }
    Vector<Point> extendedEndPoints;
+   Rect getExtent();
 
    S32 vertCount() { return mVerts.size(); }
    Point vert(S32 vertIndex) { return mVerts[vertIndex]; }
-   void buildWallSegmentEdgesAndPoints();
+
    GeomType geomType();
 
    ////////////////////
@@ -215,8 +191,67 @@ public:
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
    void renderPolyline();                       // Draws a line connecting points in mVerts
 
+   ////////////////////
+   //  DatabaseObject methods
+   GridDatabase *getGridDatabase();
+   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius);
+   bool isCollisionEnabled() { return true; }
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+struct WallSegment : public DatabaseObject
+{
+   WallSegment(S32 owner = -1) { mOwner = owner; invalid = false; }
+   ~WallSegment() { getGridDatabase()->removeFromDatabase(this, this->getExtent()); }
+
+   Vector<Point> edges;    
+   Vector<Point> corners;
+   S32 mOwner;
+
+   bool invalid;              // A flag for marking segments in need of processing
+
+   void resetEdges();         // Compute basic edges from corner points
+   void computeBoundingBox(); // Computes bounding box based on the corners, updates database
+
+   ////////////////////
+   //  DatabaseObject methods
+   GridDatabase *getGridDatabase();
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = corners; return true; }
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+   bool isCollisionEnabled() { return true; }
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class WallSegmentManager
+{
+public:
+   WallSegmentManager()  { /* Do nothing */ }
+   ~WallSegmentManager() { deleteAllSegments(); }
+
+   Vector<WallSegment *> wallSegments;
+
+   void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
+   void deleteAllSegments();
+
+   // Recalucate edge geometry for all walls when item has changed
+   void computeWallSegmentIntersections(WorldItem *item); 
+
+   void buildWallSegmentEdgesAndPoints(WorldItem *item);
+   void recomputeAllWallGeometry();
+ 
+
+   GridDatabase *getGridDatabase();
+
+   ////////////////
+   // Render functions
+   void renderWalls(bool convert, F32 alpha);
+};
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -233,21 +268,6 @@ private:
 
 public:
    void restore(WorldItem &item);
-};
-
-
-struct WallSegment
-{
-   WallSegment(S32 owner = -1) { mOwner = owner; invalid = false; }
-   Vector<Point> edges;    
-   Vector<Point> corners;
-   S32 mOwner;
-   Rect mBounds;
-
-   bool invalid;           // A flag for marking segments in need of processing
-
-   void resetEdges();      // Compute edges from corner points
-   void computeBoundingBox();
 };
 
 
@@ -291,6 +311,7 @@ private:
 
    bool snapDisabled;
 
+
    enum ShowMode
    {
       ShowAllObjects,
@@ -301,6 +322,8 @@ private:
 
    ShowMode mShowMode;
    bool mHasBotNavZones;
+
+   GridDatabase mGridDatabase;
 
    enum {
       saveMsgDisplayTime = 4000,
@@ -320,6 +343,8 @@ private:
    U32 mLastUndoIndex;
    U32 mLastRedoIndex;
    bool mRedoingAnUndo;
+
+   WallSegmentManager wallSegmentManager;
 
    static const U32 UNDO_STATES = 128;
    void saveUndoState(Vector<WorldItem> items, bool cameFromRedo = false);    // Save current state into undo history buffer
@@ -424,13 +449,14 @@ public:
    bool isFlagGame(char *mGameType);
    bool isTeamFlagGame(char *mGameType);
 
-   void clearUndoHistory();      // Wipe undo/redo history
+   void clearUndoHistory();         // Wipe undo/redo history
 
-   Vector<TeamEditor> mTeams;          // Team list: needs to be public so we can edit from UITeamDefMenu
-   Vector<TeamEditor> mOldTeams;       // Team list from before we run team editor, so we can see if anything has changed
+   Vector<TeamEditor> mTeams;       // Team list: needs to be public so we can edit from UITeamDefMenu
+   Vector<TeamEditor> mOldTeams;    // Team list from before we run team editor, so we can see what changed
 
-   Vector<WorldItem> mItems;     // Item list: needs to be public so we can check team affiliation from UITeamDefMenu
+   Vector<WorldItem> mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
 
+   GridDatabase *getGridDatabase() { return &mGridDatabase; }
    void render();
    void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);
@@ -440,14 +466,8 @@ public:
                            bool selected, bool highlighted, S32 team, F32 alpha = 1.0, bool convert = true);   
    void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 
-   Vector<WallSegment> wallSegments;
 
-   void buildAllWallSegmentEdgesAndPoints();        // Populate wallSegments from our collection of worldItems
-   void deleteWallSegments(S32 owner);              // Delete all segments owned by specified WorldItem
-
-   void computeWallSegmentIntersections(WorldItem *worldItem); // Recalucate edge geometry for all walls when worldItem has changed
-   void recomputeAllWallGeometry();
-
+   WallSegmentManager *getWallSegmentManager() { return &wallSegmentManager; }
 
    // Handle input
    void onKeyDown(KeyCode keyCode, char ascii);    // Handles all keyboard inputs, mouse clicks, and button presses
@@ -475,6 +495,8 @@ public:
    void flipSelectionVertical();                // Flip selection along vertical axis
    void flipSelectionHorizontal();              // Flip selection along horizontal axis
    void rotateSelection(F32 angle);             // Rotate selecton by angle
+
+   void buildAllWallSegmentEdgesAndPoints();    // Populate wallSegments from our collection of worldItems
 
    void validateLevel();               // Check level for things that will make the game crash!
    void validateTeams();               // Check that each item has a valid team (and fix any errors found)

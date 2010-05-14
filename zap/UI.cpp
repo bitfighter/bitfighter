@@ -34,8 +34,7 @@ using namespace TNL;
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
 #include "game.h"
-#include "UIEditor.h"
-//#include "tnlLog.h"
+#include "UIEditor.h"      // <--- we need to get rid of this one!
 
 #include "../glut/glutInclude.h"
 

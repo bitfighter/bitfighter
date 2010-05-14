@@ -137,7 +137,14 @@ struct Rect
       max.y = p.y + size/2;
    }
 
-   Rect(const TNL::Vector<Point> &p) {                        // Construct as a bounding box
+   Rect(const TNL::Vector<Point> &p)                          // Construct as a bounding box
+   {
+      if(p.size() == 0) 
+      {
+         set(Point(), Point());
+         return;
+      }
+
       min = p[0];
       max = p[0];
 
@@ -147,7 +154,7 @@ struct Rect
 
    Point getCenter() { return (max + min) * 0.5; }
 
-   void set(Point p1, Point p2)
+   void set(const Point &p1, const Point &p2)
    {
       if(p1.x < p2.x)
       {
@@ -183,6 +190,15 @@ struct Rect
 
       for(int i = 1; i < p.size(); i++)
          unionPoint(p[i]);
+   }
+
+   void set(const Rect &r)
+   {
+      min.x = r.min.x;
+      min.y = r.min.y;
+
+      max.x = r.max.x;
+      max.y = r.max.y;
    }
 
    bool contains(const Point &p)    // Rect contains the point

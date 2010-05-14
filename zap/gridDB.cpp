@@ -30,16 +30,18 @@
 namespace Zap
 {
 
-GridDatabase::GridDatabase()
+GridDatabase::GridDatabase(S32 bucketWidth)
 {
    mQueryId = 0;
+   BucketWidth = bucketWidth;
 
    for(U32 i = 0; i < BucketRowCount; i++)
       for(U32 j = 0; j < BucketRowCount; j++)
          mBuckets[i][j] = 0;
 }
 
-void GridDatabase::addToExtents(GameObject *theObject, Rect &extents)
+
+void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
    F32 widthDiv = 1 / F32(BucketWidth);
@@ -49,7 +51,6 @@ void GridDatabase::addToExtents(GameObject *theObject, Rect &extents)
    maxy = S32(extents.max.y * widthDiv);
 
    for(S32 x = minx; x <= maxx; x++)
-   {
       for(S32 y = miny; y <= maxy; y++)
       {
          BucketEntry *be = mChunker.alloc();
@@ -57,10 +58,10 @@ void GridDatabase::addToExtents(GameObject *theObject, Rect &extents)
          be->nextInBucket = mBuckets[x & BucketMask][y & BucketMask];
          mBuckets[x & BucketMask][y & BucketMask] = be;
       }
-   }
 }
 
-void GridDatabase::removeFromExtents(GameObject *theObject, Rect &extents)
+
+void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
    F32 widthDiv = 1 / F32(BucketWidth);
@@ -87,8 +88,9 @@ void GridDatabase::removeFromExtents(GameObject *theObject, Rect &extents)
    }
 }
 
+
 // Find all objects in &extents that are of type typeMask
-void GridDatabase::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &extents)
+void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
    F32 widthDiv = 1 / F32(BucketWidth);
@@ -97,7 +99,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, c
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   mQueryId++;
+   mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
    for(S32 x = minx; x <= maxx; x++)
    {
@@ -105,13 +107,12 @@ void GridDatabase::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, c
       {
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
-            GameObject *theObject = walk->theObject;
-
+            DatabaseObject *theObject = walk->theObject;
             if(theObject->mLastQueryId != mQueryId &&
-               theObject->extent.intersects(extents) &&
-               (theObject->getObjectTypeMask() & typeMask) )
+               (theObject->getObjectTypeMask() & typeMask) &&
+               theObject->extent.intersects(extents) )
             {
-               walk->theObject->mLastQueryId = mQueryId;
+               walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
                fillVector.push_back(walk->theObject);
             }
          }
@@ -120,41 +121,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, c
 }
 
 
-//// Find all objects overlapping point that are of type typeMask
-//void GridDatabase::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, Point &point)
-//{
-//   S32 minx, miny, maxx, maxy;
-//   F32 widthDiv = 1 / F32(BucketWidth);   // = 1/256
-//   minx = S32((point.x - 1) * widthDiv);  // Create some small window through which to iterate
-//   miny = S32((point.y - 1) * widthDiv);
-//   maxx = S32((point.x + 1) * widthDiv);
-//   maxy = S32((point.y + 1) * widthDiv);
-//
-//   mQueryId++;
-//
-//   for(S32 x = minx; x <= maxx; x++)
-//   {
-//      for(S32 y = miny; y <= maxy; y++)
-//      {
-//         for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
-//         {
-//            GameObject *theObject = walk->theObject;
-//
-//            if(theObject->mLastQueryId != mQueryId &&          // Check if we already queried this one
-//               theObject->extent.contains(point) &&            // Check for extent overlap
-//               (theObject->getObjectTypeMask() & typeMask) &&  // Check for correct type
-//               theObject->collisionPolyPointIntersect(point) ) // Check for actual overlap
-//            {
-//               walk->theObject->mLastQueryId = mQueryId;
-//               fillVector.push_back(walk->theObject);
-//            }
-//         }
-//      }
-//   }
-//}
-
-
-
+// Assumes a polygon in format A-B-C-D
 bool PolygonLineIntersect(Point *poly, U32 vertexCount, Point p1, Point p2, float &collisionTime, Point &normal)
 {
    Point v1 = poly[vertexCount - 1];
@@ -218,6 +185,7 @@ bool PolygonLineIntersect(Point *poly, U32 vertexCount, Point p1, Point p2, floa
    return false;
 }
 
+
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
 
 bool CircleLineIntersect(Point center, float radius, Point rayStart, Point rayEnd, float &collisionTime)
@@ -242,21 +210,24 @@ bool CircleLineIntersect(Point center, float radius, Point rayStart, Point rayEn
    return FindLowestRootInInterval(a, b, c, 100, collisionTime);
 }
 
+
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
-GameObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &surfaceNormal)
+DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
+                                            float &collisionTime, Point &surfaceNormal)
 {
    Rect queryRect(rayStart, rayEnd);
 
-   static Vector<GameObject *> fillVector;
+   static Vector<DatabaseObject *> fillVector;
 
    fillVector.clear();
    findObjects(typeMask, fillVector, queryRect);
+
    Point collisionPoint;
 
    collisionTime = 100;
-   GameObject *retObject = NULL;
+   DatabaseObject *retObject = NULL;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -297,11 +268,12 @@ GameObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayS
    }
    if(retObject)
       surfaceNormal.normalize();
+
    return retObject;
 }
 
 
-bool GridDatabase::pointCanSeePoint(Point point1, Point point2)
+bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
 {
    F32 time;
    Point coll;
@@ -309,6 +281,44 @@ bool GridDatabase::pointCanSeePoint(Point point1, Point point2)
    return( findObjectLOS(BarrierType, MoveObject::ActualState, point1, point2, time, coll) == NULL );
 }
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+void DatabaseObject::addToDatabase()
+{
+   if(!mInDatabase)
+   {
+      mInDatabase = true;
+      getGridDatabase()->addToDatabase(this, extent);
+   }
+}
+
+
+void DatabaseObject::removeFromDatabase()
+{
+   if(mInDatabase)
+   {
+      mInDatabase = false;
+      getGridDatabase()->removeFromDatabase(this, extent);
+   }
+}
+
+
+// Update object's extents in the database -- will not add object to database if it's not already in it
+void DatabaseObject::setExtent(const Rect &extents)
+{
+   GridDatabase *gridDB = getGridDatabase();
+
+   if(mInDatabase && gridDB != NULL)
+   {
+      // Remove from the extents database for current extents...
+      gridDB->removeFromDatabase(this, extent);
+      // ...and re-add for the new extent
+      gridDB->addToDatabase(this, extents);
+   }
+
+   extent.set(extents);
+}
 
 };
 

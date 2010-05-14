@@ -126,7 +126,7 @@ const S32 NONE = -1;
 //S32 gBoxesV;
 
 // Constructor
-EditorUserInterface::EditorUserInterface()
+EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
 {
    setMenuID(EditorUI);
 
@@ -140,15 +140,6 @@ EditorUserInterface::EditorUserInterface()
    mEdgeHit = NONE;
 
    mUndoItems.setSize(UNDO_STATES);
-
-   //MeshBox::init();
-
-   //gBoxesH = 20;
-   //gBoxesV = 20;
-
-   //for(S32 i = 0; i < gBoxesH; i++)
-   //   for(S32 j = 0; j < gBoxesV; j++)
-   //      testBox[i][j] = MeshBox(Point(5 + i * .7, 4+ j * .7), .1);   // TODO: del
 }
 
 void EditorUserInterface::populateDock()
@@ -269,18 +260,6 @@ GameItemRec itemDef[] = {
 };
 
 
-bool WorldItem::hasWidth()
-{
-   return itemDef[index].hasWidth;
-}
-
-
-GeomType WorldItem::geomType()
-{
-   return itemDef[index].geom;
-}
-
-
 // Save the current state of the editor objects for later undoing
 void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRedo)
 {
@@ -329,7 +308,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mLastUndoIndex--;
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
-   recomputeAllWallGeometry();
+   wallSegmentManager.recomputeAllWallGeometry();
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    itemToLightUp = NONE;
@@ -344,7 +323,7 @@ void EditorUserInterface::redo()
       mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
-      recomputeAllWallGeometry();
+      wallSegmentManager.recomputeAllWallGeometry();
 
       mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
       itemToLightUp = NONE;
@@ -408,25 +387,6 @@ void EditorUserInterface::setLevelFileName(string name)
 void EditorUserInterface::setLevelGenScriptName(string line)
 {
    mScriptLine = trim(line);
-}
-
-
-S32 WorldItem::getDefaultRepopDelay(GameItems itemType)  
-{
-   if(itemType == ItemFlagSpawn)
-      return FlagSpawn::defaultRespawnTime;
-   else if(itemType == ItemAsteroidSpawn)
-      return AsteroidSpawn::defaultRespawnTime;
-   else if(itemType == ItemTurret)
-      return Turret::defaultRespawnTime;
-   else if(itemType == ItemForceField)
-      return ForceFieldProjector::defaultRespawnTime;
-   else if(itemType == ItemRepair)
-      return RepairItem::defaultRespawnTime;
-   else if(itemType == ItemEnergy)
-      return EnergyItem::defaultRespawnTime;
-   else
-      return -1;
 }
 
 
@@ -497,10 +457,25 @@ void EditorUserInterface::loadLevel()
    mAllUndoneUndoLevel = mLastUndoIndex;
    populateDock();                     // Add game-specific items to the dock
 
+   // Bulk-process new items
    for(S32 i = 0; i < mItems.size(); i++)
       constructBarrierEndPoints(mItems[i].getVerts(), mItems[i].width / mGridSize, mItems[i].extendedEndPoints);
 
-   recomputeAllWallGeometry();
+   wallSegmentManager.recomputeAllWallGeometry();
+
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index != ItemBarrierMaker)
+      {
+         Point anchor, normal;
+         bool found = EngineeredObject::findAnchorPointAndNormal(getGridDatabase(),mItems[i].vert(0), 1 / mGridSize, 
+                                                                 anchor, normal);
+         if(found)
+         {
+            mItems[i].setVert(anchor, 0);       // Snap to wall
+            mItems[i].normal.set(normal);
+            mItems[i].findForceFieldEnd();
+         }
+      }
 }
 
 
@@ -592,131 +567,6 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
    }
    gGameParamUserInterface.gameParams.push_back(temp);
 }    
-
-
-// First argument has already been removed before we get this.  This is just the parameter list.
-bool WorldItem::processArguments(S32 argc, const char **argv)
-{
-   // Figure out how many arguments an item should have
-   S32 minArgs = 2;
-   if(itemDef[index].geom >= geomLine)
-      minArgs += 2;
-   if(itemDef[index].hasTeam)
-      minArgs++;
-   if(itemDef[index].hasText)
-      minArgs += 2;        // Size and message
-   if(argc < minArgs)      // Not enough args, time to bail
-      return false;
-
-   if(index == ItemNavMeshZone)
-      gEditorUserInterface.setHasNavMeshZones(true);
-
-   // Parse most game objects
-   if(itemDef[index].name)       // Item is listed in itemDef, near top of this file
-   {
-      index = static_cast<GameItems>(index);
-      S32 arg = 0;
-
-      // Should the following be moved to the constructor?  Probably...
-      team = TEAM_NEUTRAL;
-      selected = false;
-      width = 0;
-      id = id;
-
-      if(itemDef[index].hasTeam)
-      {
-         team = atoi(argv[arg]);
-         arg++;
-      }
-      if(itemDef[index].hasWidth)
-      {
-         width = atof(argv[arg]);
-         arg++;
-      }
-      if(index == ItemTextItem)
-      {
-         for(S32 j = 0; j < 2; j++)       // Read two points...
-         {
-            Point p;
-            p.read(argv + arg);
-            addVert(p);
-            arg+=2;
-         }
-
-         textSize = atoi(argv[arg]);    // ...and a textsize...
-         arg++;
-
-         string str;
-         for(;arg < argc; arg ++)         // (no first part of for)
-         {
-            str += argv[arg];             // ...and glob the rest together as a string
-            if (arg < argc - 1)
-               str += " ";
-         }
-
-         lineEditor.setString(str);
-      }
-      else if(index == ItemNexus && argc == 4)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
-      {
-         // Arg 0 will be HuntersNexusObject
-         Point pos;
-         pos.read(argv + 1);
-
-         Point ext(50, 50);
-         ext.set(atoi(argv[2]), atoi(argv[3]));
-         ext /= gEditorUserInterface.getGridSize();
-
-         addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
-         addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
-         addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
-         addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
-      }
-      else        // Anything but a textItem or old-school NexusObject
-      {
-         S32 coords = argc;
-         if(index == ItemSpeedZone)
-            coords = 4;    // 2 pairs of coords = 2 * 2 = 4
-
-         for(;arg < coords; arg += 2) // (no first arg)
-         {
-            // Put a cap on the number of vertices in a polygon
-            if(itemDef[index].geom == geomPoly && mVerts.size() >= gMaxPolygonPoints)
-               break;
-            
-            if(arg != argc - 1)
-            {
-               Point p;
-               p.read(argv + arg);
-               addVert(p);
-            }
-         }
-      }
-
-      // Add a default spawn time, which may well be overridden below
-      repopDelay = getDefaultRepopDelay(index);
-
-      // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
-      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 3)
-         repopDelay = atoi(argv[2]);
-
-      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 4)
-         repopDelay = atoi(argv[3]);
-
-      // SpeedZones have 2 optional extra arguments
-      if(index == ItemSpeedZone)
-      {
-         if(argc >= 5)
-            speed = atoi(argv[4]);
-         else
-            speed = SpeedZone::defaultSpeed;
-
-         if(argc >= 6)
-            boolattr = true;
-       }
-   }
-
-   return true;
-}
 
 
 void EditorUserInterface::runScript()
@@ -980,42 +830,36 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 
    Point snapPoint = p;
 
-   // Turrets & forcefields: Snap to a wall edge as first (and only) choice
-   for(S32 i = 0; i < mItems.size(); i++)
+   if(mDraggingObjects)
    {
-      if(mDraggingObjects && mItems[i].selected && 
-               (mItems[i].index == ItemTurret || mItems[i].index == ItemForceField))
-      {
-         F32 minDist = 400 / (mCurrentScale * mCurrentScale);     // Higher numbers mean stronger snap effect
-   
-         S32 closestEdge = NONE;
-         S32 closestWall = NONE;
-
-         for(S32 j = 0; j < wallSegments.size(); j++)
-         {
-            S32 edge = checkEdgesForSnap(p, wallSegments[j].edges, false, minDist, snapPoint);
-            if(edge != NONE)      // Found a new snap point!
-            {
-               closestWall = j;  
-               closestEdge = edge;
-            }
-         }
-
-         if(closestEdge != NONE)
-         {
-            Point edgeDelta = wallSegments[closestWall].edges[closestEdge + 1] - wallSegments[closestWall].edges[closestEdge];
-            mItems[i].normal.set(edgeDelta.y, -edgeDelta.x);
-            mItems[i].normal.normalize();
-            mItems[i].snapped = true;
-         }
-         else
-         {
-            mItems[i].normal.set(1,0);
+      // Mark all items being dragged as no longer being snapped -- only our primary "focus" item will be snapped
+      for(S32 i = 0; i < mItems.size(); i++)
+         if(mItems[i].selected)
             mItems[i].snapped = false;
-         }
+   }
+   
 
-         return snapPoint;
+   // Turrets & forcefields: Snap to a wall edge as first (and only) choice
+   if(mDraggingObjects &&
+            (mItems[mSnapVertex_i].index == ItemTurret || mItems[mSnapVertex_i].index == ItemForceField))
+   {
+      const S32 SNAP_FACT = 400;    // Higher number means stronger snap effect
+      F32 scaleFact = SNAP_FACT / EngineeredObject::MAX_SNAP_DISTANCE / (mCurrentScale * mCurrentScale);     
+
+      Point anchor, normal;
+      bool found = EngineeredObject::findAnchorPointAndNormal(getGridDatabase(), p, 1 / mGridSize, 
+                                                              anchor, normal);
+
+      if(found && anchor.distSquared(p) < SNAP_FACT / (mCurrentScale * mCurrentScale) )
+      {
+         mItems[mSnapVertex_i].normal.set(normal);
+         mItems[mSnapVertex_i].findForceFieldEnd();
+         mItems[mSnapVertex_i].snapped = true;
+         return anchor;
       }
+          
+      mItems[mSnapVertex_i].snapped = false;
+      return p;
    }
 
    F32 minDist = 100 / (mCurrentScale * mCurrentScale);
@@ -1056,22 +900,30 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
          if(dist < minDist)
          {
             minDist = dist;
-            snapPoint = mItems[i].vert(j);
+            snapPoint.set(mItems[i].vert(j));
          }
       }
    }
 
-   // Try wall corners - we'll actually use segment ends so we can get to intersection points etc.
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      for(S32 j = 0; j < wallSegments[i].edges.size(); j++)
+   static Vector<DatabaseObject *> foundObjects;
+
+   // Search for a corner to snap to - by using segment ends, we can also look for intersections between segments
+   foundObjects.clear();
+   mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
+
+   for(S32 i = 0; i < foundObjects.size(); i++)
+   {
+      WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
+      for(S32 j = 0; j < seg->edges.size(); j++)
       {
-         F32 dist = wallSegments[i].edges[j].distSquared(p);
+         F32 dist = seg->edges[j].distSquared(p);
          if(dist < minDist)
          {
             minDist = dist;
-            snapPoint = wallSegments[i].edges[j];
+            snapPoint.set(seg->edges[j]);
          }
       }
+   }
 
    // If we're editing a vertex of a navMeshZone, and if we're outside of some threshold distance, see if we can snap to the edge of
    // a another zone or wall.  Increasing value in minDist test will favor snapping to walls, decreasing it will require being closer
@@ -1086,24 +938,30 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
             break;
          }
 
-      if(movingNavMeshZoneVertex)      // Edge snapping only for navMeshZones
+      if(movingNavMeshZoneVertex)      // Wall, navMeshZone edge snapping only for navMeshZones
       {
-         for(S32 i = 0; i < mItems.size(); i++) 
+         // Check the edges of walls -- we'll reuse the list of walls we found earlier
+         for(S32 i = 0; i < foundObjects.size(); i++)
          {
-            // Only snap to navMeshZones or walls, and ignore anything that might be selected to avoid snapping to self
-            if(mItems[i].index != ItemNavMeshZone || mItems[i].selected || mItems[i].anyVertsSelected())
+            WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
+            checkEdgesForSnap(p, seg->edges, false, minDist, snapPoint);
+         }
+
+         foundObjects.clear();
+         mGridDatabase.findObjects(BotNavMeshZoneType, foundObjects, Rect(p, sqrt(minDist) * 2)); 
+        
+         for(S32 i = 0; i < foundObjects.size(); i++)
+         {
+            WorldItem *navZone = dynamic_cast<WorldItem *>(foundObjects[i]);
+            // If it's selected, it's what we're dragging, so don't look at it
+            if(navZone->selected || navZone->anyVertsSelected())
                continue;
+         
+            // To close the polygon, we need to repeat our first point at the end
+            Vector<Point> verts = mItems[i].getVerts();     // Makes copy
+            verts.push_back(verts.first());
 
-            Vector<Point> verts = mItems[i].getVerts();
-            if(mItems[i].geomType() == geomPoly)   // Add first point to the end to create last side on poly
-               verts.push_back(verts.first());
-
-            // Check the edges of other zones
-            checkEdgesForSnap(p, verts, true, minDist, snapPoint);
-
-            // Check the edges of walls
-            for(S32 i = 0; i < wallSegments.size(); i++)
-               checkEdgesForSnap(p, wallSegments[i].edges, false, minDist, snapPoint);
+            checkEdgesForSnap(p, verts, false, minDist, snapPoint);
          }
       }
    }
@@ -1574,21 +1432,189 @@ void EditorUserInterface::renderPolylineFill(GameItems itemType, const Vector<Po
       TNLAssert(false, "Invalid game item type!");
 
    // Render wall fill
-   for(S32 i = 0; i < wallSegments.size(); i++)
+   wallSegmentManager.renderWalls(convert, alpha);
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+/*
+1. User creates wall by drawing line
+2. Each line segment is converted to a series of endpoints, who's location is adjusted to improve rendering (extended)
+3. Those endpoints are used to generate a series of WallSegment objects, each with 4 corners
+4. Those corners are used to generate a series of edges on each WallSegment.  Initially, each segment has 4 corners
+   and 4 edges.
+5. Segments are intsersected with one another, punching "holes", and creating a series of shorter edges that represent
+   the dark blue outlines seen in the game and in the editor.
+
+If wall shape or location is changed steps 1-5 need to be repeated
+If intersecting wall is changed, only steps 4 and 5 need to be repeated
+If wall thickness is changed, steps 3-5 need to be repeated
+*/
+
+inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true) 
+{ 
+   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
+}
+
+inline F32 getGridSize()
+{
+   return gEditorUserInterface.getGridSize();
+}
+
+
+bool WorldItem::hasWidth()
+{
+   return itemDef[index].hasWidth;
+}
+
+
+GeomType WorldItem::geomType()
+{
+   return itemDef[index].geom;
+}
+
+
+S32 WorldItem::getDefaultRepopDelay(GameItems itemType)  
+{
+   if(itemType == ItemFlagSpawn)
+      return FlagSpawn::defaultRespawnTime;
+   else if(itemType == ItemAsteroidSpawn)
+      return AsteroidSpawn::defaultRespawnTime;
+   else if(itemType == ItemTurret)
+      return Turret::defaultRespawnTime;
+   else if(itemType == ItemForceField)
+      return ForceFieldProjector::defaultRespawnTime;
+   else if(itemType == ItemRepair)
+      return RepairItem::defaultRespawnTime;
+   else if(itemType == ItemEnergy)
+      return EnergyItem::defaultRespawnTime;
+   else
+      return -1;
+}
+
+
+// First argument has already been removed before we get this.  This is just the parameter list.
+bool WorldItem::processArguments(S32 argc, const char **argv)
+{
+   // Figure out how many arguments an item should have
+   S32 minArgs = 2;
+   if(itemDef[index].geom >= geomLine)
+      minArgs += 2;
+   if(itemDef[index].hasTeam)
+      minArgs++;
+   if(itemDef[index].hasText)
+      minArgs += 2;        // Size and message
+   if(argc < minArgs)      // Not enough args, time to bail
+      return false;
+
+   if(index == ItemNavMeshZone)
+      gEditorUserInterface.setHasNavMeshZones(true);
+
+   // Parse most game objects
+   if(itemDef[index].name)       // Item is listed in itemDef, near top of this file
    {
-      glBegin(GL_POLYGON);
-         for(S32 j = 0; j < wallSegments[i].corners.size(); j++)
-            glVertex(convertLevelToCanvasCoord(wallSegments[i].corners[j], convert));
-      glEnd();
+      index = static_cast<GameItems>(index);
+      S32 arg = 0;
+
+      // Should the following be moved to the constructor?  Probably...
+      team = TEAM_NEUTRAL;
+      selected = false;
+      width = 0;
+      id = id;
+
+      if(itemDef[index].hasTeam)
+      {
+         team = atoi(argv[arg]);
+         arg++;
+      }
+      if(itemDef[index].hasWidth)
+      {
+         width = atof(argv[arg]);
+         arg++;
+      }
+      if(index == ItemTextItem)
+      {
+         for(S32 j = 0; j < 2; j++)       // Read two points...
+         {
+            Point p;
+            p.read(argv + arg);
+            addVert(p);
+            arg+=2;
+         }
+
+         textSize = atoi(argv[arg]);    // ...and a textsize...
+         arg++;
+
+         string str;
+         for(;arg < argc; arg ++)         // (no first part of for)
+         {
+            str += argv[arg];             // ...and glob the rest together as a string
+            if (arg < argc - 1)
+               str += " ";
+         }
+
+         lineEditor.setString(str);
+      }
+      else if(index == ItemNexus && argc == 4)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
+      {
+         // Arg 0 will be HuntersNexusObject
+         Point pos;
+         pos.read(argv + 1);
+
+         Point ext(50, 50);
+         ext.set(atoi(argv[2]), atoi(argv[3]));
+         ext /= gEditorUserInterface.getGridSize();
+
+         addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
+         addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
+         addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
+         addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
+      }
+      else        // Anything but a textItem or old-school NexusObject
+      {
+         S32 coords = argc;
+         if(index == ItemSpeedZone)
+            coords = 4;    // 2 pairs of coords = 2 * 2 = 4
+
+         for(;arg < coords; arg += 2) // (no first arg)
+         {
+            // Put a cap on the number of vertices in a polygon
+            if(itemDef[index].geom == geomPoly && mVerts.size() >= gMaxPolygonPoints)
+               break;
+            
+            if(arg != argc - 1)
+            {
+               Point p;
+               p.read(argv + arg);
+               addVert(p);
+            }
+         }
+      }
+
+      // Add a default spawn time, which may well be overridden below
+      repopDelay = getDefaultRepopDelay(index);
+
+      // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
+      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 3)
+         repopDelay = atoi(argv[2]);
+
+      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 4)
+         repopDelay = atoi(argv[3]);
+
+      // SpeedZones have 2 optional extra arguments
+      if(index == ItemSpeedZone)
+      {
+         if(argc >= 5)
+            speed = atoi(argv[4]);
+         else
+            speed = SpeedZone::defaultSpeed;
+
+         if(argc >= 6)
+            boolattr = true;
+       }
    }
- 
-   // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
-   glColor4f(0, 0, 1, alpha);
-   glBegin(GL_LINES);
-      for(S32 i = 0; i < wallSegments.size(); i++)
-         for(S32 j = 0; j < wallSegments[i].edges.size(); j++)
-            glVertex(convertLevelToCanvasCoord(wallSegments[i].edges[j], convert));
-   glEnd();
+
+   return true;
 }
 
 
@@ -1617,13 +1643,6 @@ void WorldItem::renderPolyline()
          glVertex(convertLevelToCanvasCoord(mVerts[j]));
    glEnd();
 }
-
-
-Point WorldItem::convertLevelToCanvasCoord(const Point &point, bool convert) 
-{ 
-   return gEditorUserInterface.convertLevelToCanvasCoord(point, convert); 
-}
-
 
 
 static inline void labelSimpleLineItem(Point pos, U32 labelSize, const char *itemLabelTop, const char *itemLabelBottom)
@@ -2731,7 +2750,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    // (*origPoint - mMouseDownPos) represents distance from item's snap vertex where we "grabbed" it
-   if(mItems[mSnapVertex_i].geomType() == geomPoint || mItems[mItemHit].anyVertsSelected())
+   if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
       delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)) - *origPoint;
    else
       delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + *origPoint - mMouseDownPos) - *origPoint;
@@ -2740,9 +2759,6 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // selected if one of its vertices are.
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected)     
-         mItems[i].onItemDragging();
-
       for(S32 j = 0; j < mItems[i].vertCount(); j++)
          if(mItems[i].selected || mItems[i].vertSelected(j))
          {
@@ -2752,6 +2768,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
             if(mItems[i].vertSelected(j))
                mItems[i].onGeomChanging();     
          }
+
+      if(mItems[i].selected)     
+         mItems[i].onItemDragging();      // Make sure this gets run after we've updated the item's location
    }
 }
 
@@ -2865,7 +2884,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
                                        || (mItems[i].geomType() == geomLine && mItems[i].vertCount() < 2)
                                        || (mItems[i].geomType() == geomPoly && mItems[i].vertCount() < 2))
          {
-            gEditorUserInterface.deleteWallSegments(mItems[i].mId);
             deleteItem(i);
             deleted = true;
          }
@@ -2969,6 +2987,7 @@ done2:
    }
 }
 
+
 // Join two or more sections of wall that have coincident end points.  Will ignore invalid join attempts.
 void EditorUserInterface::joinBarrier()
 {
@@ -3047,7 +3066,11 @@ void EditorUserInterface::joinBarrier()
 
 void EditorUserInterface::deleteItem(S32 itemIndex)
 {
-   gEditorUserInterface.deleteWallSegments(mItems[itemIndex].mId);
+   if(mItems[itemIndex].index == ItemBarrierMaker)
+      wallSegmentManager.deleteSegments(mItems[itemIndex].mId);
+   else
+      mItems[itemIndex].removeFromDatabase();
+
    mItems.erase(itemIndex);
 }
 
@@ -3072,6 +3095,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
       }
 
    mItems.push_back(WorldItem(itemType, pos, team, 1, 1));
+
    mItems.sort(geometricSort);
    validateLevel();
    mNeedToSave = true;
@@ -3699,64 +3723,6 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       snapDisabled = true;
    else if(keyCode == KEY_TAB)
       mShowingReferenceShip = true;
-
-   //else if(keyCode = KEY_CLOSEBRACKET)
-   //{
-   //   //for( S32 x = 0; x < 10; x++)
-   //   for(S32 i = 0; i < gBoxesH; i++)
-   //      for(S32 j = 0; j < gBoxesV; j++)
-   //      {
-   //         if(testBox[i][j].done[MeshBox::all])
-   //            continue;
-
-   //         if(!testBox[i][j].done[MeshBox::up])
-   //         {
-   //            testBox[i][j].grow(MeshBox::up);
-   //            if( ( (j > 0) && testBox[i][j].bounds.intersects(testBox[i][j-1].bounds) ||
-   //                          ((i > 0) && testBox[i][j].bounds.intersects(testBox[i-1][j-1].bounds)) ||
-   //                          ((i < gBoxesH-1) && testBox[i][j].bounds.intersects(testBox[i+1][j-1].bounds)) )
-   //                || testBox[i][j].checkWallCollision() )
-
-   //               testBox[i][j].revert(MeshBox::up);
-   //         }
-
-   //         if(!testBox[i][j].done[MeshBox::down])
-   //         {
-   //            testBox[i][j].grow(MeshBox::down);
-   //            if( ( (j < gBoxesV-1) && testBox[i][j].bounds.intersects(testBox[i][j+1].bounds) ||
-   //                          ((i > 0) && testBox[i][j].bounds.intersects(testBox[i-1][j+1].bounds)) ||
-   //                          ((i < gBoxesH-1) && testBox[i][j].bounds.intersects(testBox[i+1][j+1].bounds))  )
-   //
-   //
-   //               || testBox[i][j].checkWallCollision() )
-   //               testBox[i][j].revert(MeshBox::down);
-   //         }
-
-   //         if(!testBox[i][j].done[MeshBox::left])
-   //         {
-   //            testBox[i][j].grow(MeshBox::left);
-   //            if( ((i > 0) && testBox[i][j].bounds.intersects(testBox[i-1][j].bounds) ||
-   //                          ((j > 0) && testBox[i][j].bounds.intersects(testBox[i-1][j-1].bounds)) ||
-   //                          ((j < gBoxesV-1) && testBox[i][j].bounds.intersects(testBox[i-1][j+1].bounds)))
-
-   //
-   //               || testBox[i][j].checkWallCollision() )
-   //               testBox[i][j].revert(MeshBox::left);
-   //         }
-
-   //         if(!testBox[i][j].done[MeshBox::right])
-   //         {
-   //            testBox[i][j].grow(MeshBox::right);
-   //            if( ((i < gBoxesH-1) && testBox[i][j].bounds.intersects(testBox[i+1][j].bounds) ||
-   //                           ((j > 0) && testBox[i][j].bounds.intersects(testBox[i+1][j-1].bounds)) ||
-   //                           ((j < gBoxesV-1) && testBox[i][j].bounds.intersects(testBox[i+1][j+1].bounds)))
-
-   //
-   //               || testBox[i][j].checkWallCollision() )
-   //               testBox[i][j].revert(MeshBox::right);
-   //         }
-   //      }
-//   }
 }
 
 void EditorUserInterface::onKeyUp(KeyCode keyCode)
@@ -3874,13 +3840,12 @@ void EditorUserInterface::finishedDragging()
                mItems[i].onGeomChanged();
          }
 
-
          if(anyItemsChanged)
          {
             saveUndoState(mMostRecentState);    // Something changed... save an undo state!
             mNeedToSave = true;
             autoSave();
-         return;
+            return;
          }
 
       }
@@ -3917,7 +3882,6 @@ bool EditorUserInterface::anythingSelected()
 
    return false;
 }
-
 
 
 void EditorUserInterface::idle(U32 timeDelta)
@@ -4103,7 +4067,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
    if(!autosave)     // Doesn't count as a save!
    {
       mNeedToSave = false;
-      mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save.
+      mAllUndoneUndoLevel = mLastUndoIndex;     // If we undo to this point, we won't need to save
    }
 
    if(showSuccessMessages)
@@ -4167,7 +4131,22 @@ void EditorUserInterface::testLevel()
    mAllUndoneUndoLevel = auul;
 }
 
-//////////////////// EditorMenuUserInterface ////////////////////
+
+void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
+{
+   wallSegmentManager.deleteAllSegments();
+
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].index != ItemBarrierMaker)
+         continue;
+
+      wallSegmentManager.buildWallSegmentEdgesAndPoints(&mItems[i]);
+   }
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 EditorMenuUserInterface gEditorMenuUserInterface;
 
@@ -4203,6 +4182,7 @@ void EditorMenuUserInterface::setupMenus()
    menuItems.push_back(MenuItem("MANAGE TEAMS", 5, KEY_M, KEY_F2));
    menuItems.push_back(MenuItem("QUIT",         6, KEY_Q, KEY_UNKNOWN));
 }
+
 
 void EditorMenuUserInterface::processSelection(U32 index)
 {
@@ -4253,6 +4233,7 @@ void EditorMenuUserInterface::processSelection(U32 index)
    }
 }
 
+
 void EditorMenuUserInterface::processShiftSelection(U32 index)
 {
    processSelection(index);
@@ -4269,8 +4250,159 @@ void EditorMenuUserInterface::render()
    Parent::render();
 }
 
-///////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+GridDatabase *WallSegmentManager::getGridDatabase() 
+{ 
+   return gEditorUserInterface.getGridDatabase(); 
+}
+
+
+void WallSegmentManager::recomputeAllWallGeometry()
+{
+   gEditorUserInterface.buildAllWallSegmentEdgesAndPoints();
+
+   for(S32 i = 0; i < wallSegments.size() - 1; i++)
+      for(S32 j = i + 1; j < wallSegments.size(); j++)
+      {
+         if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
+         {
+            clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
+            clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
+         }
+      }
+}
+
+
+void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
+{
+   // Get rid of any existing segments that correspond to our item; we'll be building new ones
+   deleteSegments(item->mId);
+
+   // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
+   for(S32 i = 0; i < item->extendedEndPoints.size() - 1; i += 2)
+   {
+      WallSegment *newSegment = new WallSegment(item->mId);    // Create the segment
+      wallSegments.push_back(newSegment);                      // Add it to our master segment list
+
+      // Calculate segment corners by expanding the extended end points into a rectangle
+      expandCenterlineToOutline(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
+                                item->width / getGridSize(), newSegment->corners); 
+
+      newSegment->resetEdges();                 // Recompute the edges based on our new corner points
+
+      newSegment->setExtent(Rect(newSegment->corners));  // Calculate a bounding box around the segment
+      newSegment->addToDatabase();                       // Add it to our spatial database
+   }
+}
+
+
+// Called when a wall segment has somehow changed.  All current and previously intersecting segments 
+// need to be recomputed.
+void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
+{
+   static Vector<DatabaseObject *> intersectingSegments;
+
+   intersectingSegments.clear();
+
+   // Before we update our edges, we need to mark all intersecting segments using the invalid flag.
+   // These will need new walls after we've moved our segment.
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      if(wallSegments[i]->mOwner == item->mId)      // Segment belongs to our item; look it up in the database
+         getGridDatabase()->findObjects(BarrierType, intersectingSegments, wallSegments[i]->getExtent());
+
+
+   for(S32 i = 0; i < intersectingSegments.size(); i++)
+   {
+      WallSegment *intersectingSegment = dynamic_cast<WallSegment *>(intersectingSegments[i]);
+
+      // Reset the edges of all invalidated segments to their factory settings
+      intersectingSegment->resetEdges();   
+      intersectingSegment->invalid = true;
+   }
+
+   buildWallSegmentEdgesAndPoints(item);
+
+   // Invalidate all segments that potentially intersect the changed segment in its new location
+   intersectingSegments.clear();
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      if(wallSegments[i]->mOwner == item->mId)      // Segment belongs to our item, compare to all others
+         getGridDatabase()->findObjects(BarrierType, intersectingSegments, wallSegments[i]->getExtent());
+
+   for(S32 i = 0; i < intersectingSegments.size(); i++)
+      dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
+
+
+   for(S32 i = 0; i < wallSegments.size(); i++)
+   {
+      if(!wallSegments[i]->invalid)
+         continue;
+
+      for(S32 j = 0; j < wallSegments.size(); j++)
+      {
+         if(i == j)     // Don't process against self
+            continue;
+
+         if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
+         {
+            clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
+            clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
+         }
+      }
+      
+      wallSegments[i]->invalid = false;
+   }
+}
+
+
+void WallSegmentManager::deleteAllSegments()
+{
+   for(S32 i = 0; i < wallSegments.size(); i++)
+      delete wallSegments[i];
+
+   wallSegments.clear();
+}
+
+
+// Delete all wall segments owned by specified owner.
+void WallSegmentManager::deleteSegments(S32 owner)
+{
+   S32 count = wallSegments.size();
+   for(S32 i = 0; i < count; i++)
+      if(wallSegments[i]->mOwner == owner)
+      {
+         delete wallSegments[i];    // Destructor will remove segment from database
+         wallSegments.erase_fast(i);
+         i--;
+         count--;
+      }
+}
+
+
+void WallSegmentManager::renderWalls(bool convert, F32 alpha)
+{
+   for(S32 i = 0; i < wallSegments.size(); i++)
+   {
+      glBegin(GL_POLYGON);
+         for(S32 j = 0; j < wallSegments[i]->corners.size(); j++)
+            glVertex(convertLevelToCanvasCoord(wallSegments[i]->corners[j], convert));
+      glEnd();
+   }
+ 
+   // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
+   glColor4f(0, 0, 1, alpha);
+   glBegin(GL_LINES);
+      for(S32 i = 0; i < wallSegments.size(); i++)
+         for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
+            glVertex(convertLevelToCanvasCoord(wallSegments[i]->edges[j], convert));
+   glEnd();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 WorldItem::WorldItem(GameItems itemType) : lineEditor(MAX_TEXTITEM_LEN)
 {
@@ -4278,7 +4410,7 @@ WorldItem::WorldItem(GameItems itemType) : lineEditor(MAX_TEXTITEM_LEN)
 }
 
 
-// Primary constructor 
+// Primary constructor -- used when constructing dock items
 WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height, U32 itemid) : lineEditor(MAX_TEXTITEM_LEN)
 {
    init(itemType, xteam, width, itemid);
@@ -4311,7 +4443,6 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
    width = xwidth;
    mId = nextWorldItemId;
    nextWorldItemId++;
-
 
    if(itemDef[itemType].hasText)
    {
@@ -4363,6 +4494,27 @@ void WorldItem::unselectVert(S32 vertIndex)
          break;
       }
    mAnyVertsSelected = anySelected;
+}
+
+
+GridDatabase *WorldItem::getGridDatabase() 
+{ 
+   return gEditorUserInterface.getGridDatabase(); 
+}
+
+
+bool WorldItem::getCollisionPoly(Vector<Point> &polyPoints)
+{
+   if(index == ItemBarrierMaker)    // Barrier items will be represented in by their segments in the database
+      return false;
+
+   return false;
+}
+
+
+bool WorldItem::getCollisionCircle(U32 stateIndex, Point &point, float &radius)
+{
+   return false;     // For now...
 }
 
 
@@ -4432,55 +4584,6 @@ void WorldItem::flipVertical(const Point &boundingBoxMin, const Point &boundingB
 }
 
 
-void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
-{
-   wallSegments.clear();
-
-   for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i].index != ItemBarrierMaker)
-         continue;
-
-      mItems[i].buildWallSegmentEdgesAndPoints();
-   }
-}
-
-
-void WorldItem::buildWallSegmentEdgesAndPoints()
-{
-   // Get rid of any segments that correspond to our item
-   gEditorUserInterface.deleteWallSegments(mId);
-
-   for(S32 i = 0; i < extendedEndPoints.size() - 1; i += 2)
-   {
-      // Create a new segment on the world wall segment list
-      gEditorUserInterface.wallSegments.push_back(WallSegment(mId));  
-
-      // Calculate setment corners by expanding the extended end points into a rectangle
-      expandCenterlineToOutline(extendedEndPoints[i], extendedEndPoints[i+1], width / gEditorUserInterface.getGridSize(), 
-                                gEditorUserInterface.wallSegments.last().corners);
-      
-      // Recompute the edges based on our new corner points
-      gEditorUserInterface.wallSegments.last().resetEdges();
-
-      for(S32 j = 0; j < gEditorUserInterface.wallSegments.size(); j++)
-         gEditorUserInterface.wallSegments[j].computeBoundingBox();
-   }
-}
-
-
-void EditorUserInterface::deleteWallSegments(S32 owner)
-{
-   S32 count = wallSegments.size();
-   for(S32 i = 0; i < count; i++)
-      if(wallSegments[i].mOwner == owner)
-      {
-         wallSegments.erase_fast(i);
-         i--;
-         count--;
-      }
-}
-
 void WorldItem::onGeomChanging()
 {
    if(index == ItemTextItem)
@@ -4495,9 +4598,15 @@ void WorldItem::onItemDragging()
 }
 
 
+WallSegmentManager *getWallSegmentManager()
+{
+   return gEditorUserInterface.getWallSegmentManager();
+}
+
+
 void WorldItem::onGeomChanged()
 {
-   if(index == ItemTextItem)
+  if(index == ItemTextItem)
    {
       F32 strWidth = (F32)UserInterface::getStringWidth(120, lineEditor.c_str());
       F32 lineLen = mVerts[0].distanceTo(mVerts[1]);
@@ -4511,9 +4620,7 @@ void WorldItem::onGeomChanged()
    {  
       // Fill extendedEndPoints from the vertices of our wall's centerline
       constructBarrierEndPoints(mVerts, width / gEditorUserInterface.getGridSize(), extendedEndPoints);
-      gEditorUserInterface.computeWallSegmentIntersections(this);
-
-
+      getWallSegmentManager()->computeWallSegmentIntersections(this);
    }
 
    else if(index == ItemForceField)
@@ -4521,6 +4628,15 @@ void WorldItem::onGeomChanged()
       // Find the end-point of the projected forcefield
       findForceFieldEnd();
    }
+}
+
+  
+Rect WorldItem::getExtent()
+{
+   if(index == ItemBarrierMaker)
+      return Rect();    // ???
+   else
+      return Rect();
 }
 
 
@@ -4537,70 +4653,7 @@ void WorldItem::onAttrsChanged()
 }
 
 
-void EditorUserInterface::recomputeAllWallGeometry()
-{
-   buildAllWallSegmentEdgesAndPoints();
-
-   for(S32 i = 0; i < wallSegments.size() - 1; i++)
-      for(S32 j = i + 1; j < wallSegments.size(); j++)
-      {
-         if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
-         {
-            clipRenderLinesToPoly(wallSegments[i].corners, wallSegments[j].edges);
-            clipRenderLinesToPoly(wallSegments[j].corners, wallSegments[i].edges);
-         }
-      }
-}
-
-
-void EditorUserInterface::computeWallSegmentIntersections(WorldItem *worldItem)
-{
-   // Before we update our edges, we need to invalidate all intersecting segments prior to change
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      if(wallSegments[i].mOwner == worldItem->mId)      // Segment belongs to our item, compare to all others
-         for(S32 j = 0; j < wallSegments.size(); j++)
-            if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
-               wallSegments[j].invalid = true;
-
-
-   // Reset the edges of all marked segments
-   for(S32 i = 0; i < wallSegments.size() - 1; i++)
-      if(wallSegments[i].invalid)
-         wallSegments[i].resetEdges();
-
-    worldItem->buildWallSegmentEdgesAndPoints();
-
-   // Invalidate all segments that potentially intersect the changed segment in its new location
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      if(wallSegments[i].mOwner == worldItem->mId)      // Segment belongs to our item, compare to all others
-         for(S32 j = 0; j < wallSegments.size(); j++)
-            if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
-               wallSegments[j].invalid = true;
-
-
-   for(S32 i = 0; i < wallSegments.size(); i++)
-   {
-      if(wallSegments[i].invalid)
-      {
-         for(S32 j = 1; j < wallSegments.size(); j++)
-         {
-            if(i == j)     // Don't process against self
-               continue;
-
-            if(wallSegments[i].mBounds.intersects(wallSegments[j].mBounds))
-            {
-               clipRenderLinesToPoly(wallSegments[i].corners, wallSegments[j].edges);
-               clipRenderLinesToPoly(wallSegments[j].corners, wallSegments[i].edges);
-            }
-         }
-         wallSegments[i].invalid = false;
-      }
-   }
-}
-
-
 extern bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
-
   
 void WorldItem::findForceFieldEnd()
 {
@@ -4610,52 +4663,14 @@ void WorldItem::findForceFieldEnd()
    F32 scale = 1 / gEditorUserInterface.getGridSize();
 
    Point start = ForceFieldProjector::getForceFieldStartPoint(mVerts[0], normal, scale);
-   F32 minDist = ForceFieldProjector::MAX_FORCEFIELD_LENGTH;
-   forceFieldEnd.set(ForceFieldProjector::getForceFieldEndPoint(mVerts[0], normal, minDist, scale));
+   //F32 minDist = F32_MAX;
+   //forceFieldEnd.set(ForceFieldProjector::getForceFieldEndPoint(mVerts[0], normal, 
+   //                  ForceFieldProjector::MAX_FORCEFIELD_LENGTH, scale));
 
-   Point nrml;
-   Rect boundingBox;
+   forceFieldEnd.set(ForceField::findForceFieldEnd(getGridDatabase(), start, normal, scale));
 
-
-   F32 dist;
-   bool recomputeBoundingBox = true;
-
-   for(S32 i = 0; i < gEditorUserInterface.wallSegments.size(); i++)
-   { 
-      if(recomputeBoundingBox)
-      {
-         // We can recompute a smaller bounding box now... I hope this is more efficient because it may
-         // allow us to rule out many segments that would otherwise be tested with the more expensive, 
-         // more exhausting test.  Of course, this will vary by the particular geometry of a given level.
-         ForceField::getGeom(start, forceFieldEnd, geom, scale);    
-         boundingBox.set(geom);
-         recomputeBoundingBox = false;
-      }
-
-      // If forcefield's bounding box doesn't intersect that of the wall segment, there's no point in testing this
-      // one further.
-      if(!boundingBox.intersects(gEditorUserInterface.wallSegments[i].mBounds))
-         continue;
-
-      for(S32 j = 0; j < gEditorUserInterface.wallSegments[i].edges.size() - 1; j++)
-      { 
-         Point *p1 = &gEditorUserInterface.wallSegments[i].edges[j];
-         Point *p2 = &gEditorUserInterface.wallSegments[i].edges[j+1];
-
-         if(findIntersection(*p1, *p2, start, forceFieldEnd, nrml))
-         {
-            dist = (start - nrml).lenSquared();
-
-            if(dist < minDist)
-            {
-               minDist = dist;
-               forceFieldEnd.set(nrml);
-
-               recomputeBoundingBox = true;
-            }
-         }
-      }
-   }
+   ForceField::getGeom(start, forceFieldEnd, geom, scale);    
+   Rect boundingBox(geom);
 }
 
 
@@ -4678,32 +4693,26 @@ void WorldItem::rotateAboutPoint(const Point &center, F32 angle)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+GridDatabase *WallSegment::getGridDatabase()
+{ 
+   return gEditorUserInterface.getGridDatabase(); 
+}
+
+
+// Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
 void WallSegment::resetEdges()
 {
    edges.clear();
 
-   edges.push_back(corners[0]);
-   edges.push_back(corners[1]);
-
-   edges.push_back(corners[1]);
-   edges.push_back(corners[2]);
-
-   edges.push_back(corners[2]);
-   edges.push_back(corners[3]);
-
-   edges.push_back(corners[3]);
-   edges.push_back(corners[0]);
+   edges.push_back(corners[0]);    edges.push_back(corners[1]);      // Edge 1
+   edges.push_back(corners[1]);    edges.push_back(corners[2]);      // Edge 2
+   edges.push_back(corners[2]);    edges.push_back(corners[3]);      // Edge 3
+   edges.push_back(corners[3]);    edges.push_back(corners[0]);      // Edge 4
 }
 
 
-void WallSegment::computeBoundingBox()
-{
-   mBounds = Rect(corners);
-}
-
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 // Stores the selection state of a particular WorldItem
 // Primary constructor
 SelectionItem::SelectionItem(WorldItem &item)
@@ -4727,7 +4736,6 @@ void SelectionItem::restore(WorldItem &item)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
 // Selection stores the selection state of group of WorldItems
 // Constructor
 Selection::Selection(Vector<WorldItem> &items)

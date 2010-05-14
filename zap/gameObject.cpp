@@ -44,12 +44,10 @@ GameObject::GameObject()
 {
    mGame = NULL;
    mTeam = -1;
-   mLastQueryId = 0;
+   /*mLastQueryId = 0;*/
    mObjectTypeMask = UnknownType;
    mDisableCollisionCount = 0;
-   mInDatabase = false;
    mCreationTime = 0;
-   extent = Rect();
 }
 
 
@@ -76,13 +74,13 @@ void GameObject::deleteObject(U32 deleteTimeInterval)
 
 Point GameObject::getRenderPos()
 {
-   return extent.getCenter();
+   return getExtent().getCenter();
 }
 
 
 Point GameObject::getActualPos()
 {
-   return extent.getCenter();
+   return getExtent().getCenter();
 }
 
 
@@ -98,24 +96,32 @@ void GameObject::setActualPos(Point p)
 }
 
 
+GridDatabase *GameObject::getGridDatabase() 
+{ 
+      return mGame ? mGame->getGridDatabase() : NULL; 
+}
+
+
 F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips)
 {
    GameObject *so = (GameObject *) scopeObject;
 
-   Point center = so->extent.getCenter();
+   Point center = so->getExtent().getCenter();
 
    Point nearest;
-   if(center.x < extent.min.x)
-      nearest.x = extent.min.x;
-   else if(center.x > extent.max.x)
-      nearest.x = extent.max.x;
+   Rect *extent = &getExtent();
+
+   if(center.x < extent->min.x)
+      nearest.x = extent->min.x;
+   else if(center.x > extent->max.x)
+      nearest.x = extent->max.x;
    else
       nearest.x = center.x;
 
-   if(center.y < extent.min.y)
-      nearest.y = extent.min.y;
-   else if(center.y > extent.max.y)
-      nearest.y = extent.max.y;
+   if(center.y < extent->min.y)
+      nearest.y = extent->min.y;
+   else if(center.y > extent->max.y)
+      nearest.y = extent->max.y;
    else
       nearest.y = center.y;
 
@@ -145,7 +151,7 @@ void GameObject::damageObject(DamageInfo *theInfo)
 
 }
 
-static Vector<GameObject*> fillVector;
+static Vector<DatabaseObject *> fillVector;
 
 void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask, DamageInfo &info, F32 force)
 {
@@ -163,9 +169,10 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
+      GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
       // Check the actual distance against our outer radius.  Recall that we got a list of potential
       // collision objects based on a square area, but actual collisions will be based on true distance
-      Point objPos = fillVector[i]->getActualPos();
+      Point objPos = foundObject->getActualPos();
       Point delta = objPos - pos;
 
       if(delta.len() > outerRad)
@@ -173,11 +180,11 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
 
       // Can one damage another?
       if(getGame()->getGameType())
-         if(!getGame()->getGameType()->objectCanDamageObject(info.damagingObject, fillVector[i]))
+         if(!getGame()->getGameType()->objectCanDamageObject(info.damagingObject, foundObject))
             continue;
 
       //// Check if damager is an area weapon, and damagee is a projectile... if so, kill it
-      //if(Projectile *proj = dynamic_cast<Projectile*>(fillVector[i]))
+      //if(Projectile *proj = dynamic_cast<Projectile*>(foundObject))
       //{
       //   proj->explode(proj, proj->getActualPos());
       //}
@@ -212,63 +219,33 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
 
       // Adjust for self-damage
       GameConnection *damagerOwner = info.damagingObject->getOwner();
-      GameConnection *victimOwner = fillVector[i]->getOwner();
+      GameConnection *victimOwner = foundObject->getOwner();
 
       if(victimOwner && damagerOwner == victimOwner)
          localInfo.damageAmount *= localInfo.damageSelfMultiplier;
 
-      fillVector[i]->damageObject(&localInfo);
+      foundObject->damageObject(&localInfo);
    }
 }
 
-
-// Update object's extents in the database
-void GameObject::setExtent(Rect &extents)
+void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext)
 {
-   if(mGame && mInDatabase)
-   {
-      // Remove from the extents database for current extents...
-      mGame->getGridDatabase()->removeFromExtents(this, extent);
-      // ...and re-add for the new extent
-      mGame->getGridDatabase()->addToExtents(this, extents);
-   }
-   extent = extents;
-}
-
-
-void GameObject::findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &ext)
-{
-   if(!mGame)
+   GridDatabase *gridDB = getGridDatabase();
+   if(!gridDB)
       return;
-   mGame->getGridDatabase()->findObjects(typeMask, fillVector, ext);
+   gridDB->findObjects(typeMask, fillVector, ext);
 }
 
 
-GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal)
+GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, 
+                                      float &collisionTime, Point &collisionNormal)
 {
-   if(!mGame)
+   GridDatabase *gridDB = getGridDatabase();
+   if(!gridDB)
       return NULL;
-   return mGame->getGridDatabase()->findObjectLOS(typeMask, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal);
-}
 
-
-void GameObject::addToDatabase()
-{
-   if(!mInDatabase)
-   {
-      mInDatabase = true;
-      mGame->getGridDatabase()->addToExtents(this, extent);
-   }
-}
-
-
-void GameObject::removeFromDatabase()
-{
-   if(mInDatabase)
-   {
-      mInDatabase = false;
-      mGame->getGridDatabase()->removeFromExtents(this, extent);
-   }
+   return dynamic_cast<GameObject *>(gridDB->
+                        findObjectLOS(typeMask, stateIndex, rayStart, rayEnd, collisionTime, collisionNormal));
 }
 
 

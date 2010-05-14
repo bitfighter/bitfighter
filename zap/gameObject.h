@@ -30,6 +30,7 @@
 #include "tnlNetObject.h"
 
 #include "gameConnection.h"
+#include "gridDB.h"        // For DatabaseObject
 #include "game.h"
 #include "move.h"
 #include "point.h"
@@ -84,7 +85,7 @@ enum GameObjectType
    EngineeredType     = TurretType | ForceFieldProjectorType,
    DamagableTypes     = ShipType | RobotType | MoveableType | BulletType | ItemType | ResourceItemType | EngineeredType | MineType | AsteroidType,
    MotionTriggerTypes = ShipType | RobotType | ResourceItemType | TestItemType | AsteroidType,
-   AllObjectTypes     = 0xFFFFFFFF,
+   AllObjectTypes     = 0xFFFFFFFF
 };
 
 const S32 gSpyBugRange = 300;     // How far can a spy bug see?
@@ -115,31 +116,23 @@ struct DamageInfo
    DamageInfo() { damageSelfMultiplier = 1; }      // Quickie constructor
 };
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class GameObject : public NetObject
+class GameObject : public NetObject, public DatabaseObject
 {
-   friend class GridDatabase;
-
 private:
    typedef NetObject Parent;
    Game *mGame;
-   U32 mLastQueryId;
    U32 mCreationTime;
    SafePtr<GameConnection> mControllingClient;
    SafePtr<GameConnection> mOwner;
    U32 mDisableCollisionCount;      // No collisions with this object if true
-   bool mInDatabase;
 
    F32 mRadius;
    F32 mMass;
 
-   Rect extent;
-
 protected:
-   U32 mObjectTypeMask;
    Move mLastMove;      // The move for the previous update
    Move mCurrentMove;   // The move for the current update
    S32 mTeam;
@@ -157,14 +150,13 @@ public:
 
    void deleteObject(U32 deleteTimeInterval = 0);
    U32 getCreationTime() { return mCreationTime; }
-   bool isInDatabase() { return mInDatabase; }
-   void setExtent(Rect &extentRect);
+   
+   
    StringTableEntry getKillString() { return mKillString; }
-   Rect getExtent() { return extent; }
    S32 getTeam() { return mTeam; }
    F32 getRating() { return 0; }    // TODO: Fix this
    S32 getScore() { return 0; }     // TODO: Fix this
-   void findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &extents);
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
 
    GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &collisionNormal);
 
@@ -176,9 +168,7 @@ public:
    void setControllingClient(GameConnection *c) { mControllingClient = c; }
 
    GameConnection *getOwner();
-
-   U32 getObjectTypeMask() { return mObjectTypeMask; }
-   void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
+   GridDatabase *getGridDatabase();
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
@@ -237,8 +227,6 @@ public:
    bool onGhostAdd(GhostConnection *theConnection);
    void disableCollision() { mDisableCollisionCount++; }
    void enableCollision() { mDisableCollisionCount--; }
-   void addToDatabase();
-   void removeFromDatabase();
    bool isCollisionEnabled() { return mDisableCollisionCount == 0; }
 
    bool collisionPolyPointIntersect(Point point);

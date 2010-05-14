@@ -39,35 +39,73 @@ using namespace TNL;
 namespace Zap
 {
 
-class GameObject;
+// Interface for dealing with objects that can be in our spatial database.  Can be either GameObjects or
+// items in te
+class DatabaseObject
+{
+friend class GridDatabase;
+
+private:
+   U32 mLastQueryId;    
+   Rect extent;     
+   bool mInDatabase;
+
+protected:
+   U32 mObjectTypeMask;
+
+public:
+   DatabaseObject() { mLastQueryId = 0; extent = Rect(); mInDatabase = false; }    // Quickie constructor
+
+   U32 getObjectTypeMask() { return mObjectTypeMask; }   
+   void setObjectTypeMask(U32 objectTypeMask) { mObjectTypeMask = objectTypeMask; }
+
+   Rect getExtent() { return extent; }
+   void setExtent(const Rect &extentRect);
+
+   virtual GridDatabase *getGridDatabase() = NULL;
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) = NULL;
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) = NULL;
+   virtual bool isCollisionEnabled() = NULL;
+
+   bool isInDatabase() { return mInDatabase; }
+
+   void addToDatabase();
+   void removeFromDatabase();
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class GridDatabase
 {
 public:
    enum {
-      BucketWidth = 256,      // Width/height of each bucket in pixels
-      BucketRowCount = 16,    // Number of buckets per grid row, and number of rows
+      BucketRowCount = 16,    // Number of buckets per grid row, and number of rows; should be power of 2
       BucketMask = BucketRowCount - 1,
    };
+
    struct BucketEntry
    {
-      GameObject *theObject;
+      DatabaseObject *theObject;
       BucketEntry *nextInBucket;
    };
    U32 mQueryId;
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
    ClassChunker<BucketEntry> mChunker;
 
-   GridDatabase();
+   GridDatabase(S32 bucketWidth = 256);      // Constructor
 
-   GameObject *findObjectLOS(U32 typeMask, U32 stateIndex, Point rayStart, Point rayEnd, float &collisionTime, Point &surfaceNormal);
-   bool pointCanSeePoint(Point point1, Point point2);
+   S32 BucketWidth;     // Width/height of each bucket in pixels
 
-   void findObjects(U32 typeMask, Vector<GameObject *> &fillVector, const Rect &extents);
+   DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
+                                 float &collisionTime, Point &surfaceNormal);
+   bool pointCanSeePoint(const Point &point1, const Point &point2);
 
-   void addToExtents(GameObject *theObject, Rect &extents);
-   void removeFromExtents(GameObject *theObject, Rect &extents);
+   void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
+   void findAllObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector);
 
+   void addToDatabase(DatabaseObject *theObject, const Rect &extents);
+   void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
 };
 
 };

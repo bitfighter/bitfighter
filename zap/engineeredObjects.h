@@ -67,6 +67,8 @@ public:
    EngineeredObject(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());
    bool processArguments(S32 argc, const char **argv);
 
+   static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
+
    void setResource(Item *resource);
    bool checkDeploymentPosition();
    void computeExtent();
@@ -86,6 +88,10 @@ public:
    bool collide(GameObject *hitObject) { return true; }
    F32 getHealth() { return mHealth; }
    void healObject(S32 time);
+
+   // Figure out where to put our turrets and forcefield projectors
+   static bool findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scale, Point &anchor, Point &normal);
+
 
    // LuaItem interface
    // S32 getLoc(lua_State *L) { }   ==> Will be implemented by derived objects
@@ -122,11 +128,14 @@ public:
    bool collide(GameObject *hitObject);
    void idle(GameObject::IdleCallPath path);
 
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
+
    static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
+   static Point findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact);
 
    void render();
    S32 getRenderSortValue() { return 0; }
@@ -144,7 +153,6 @@ private:
 
 public:
    static const S32 defaultRespawnTime = 0;
-   static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
    ForceFieldProjector(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point());  // Constructor
 

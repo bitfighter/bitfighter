@@ -98,7 +98,7 @@ private:
    Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
-   Vector<GameObject *> mSpyBugs;  // List of all spybugs in the game
+   Vector<DatabaseObject *> mSpyBugs;    // List of all spybugs in the game
    bool mLevelHasLoadoutZone;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message

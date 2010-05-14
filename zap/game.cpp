@@ -72,7 +72,7 @@ extern const S32 gScreenWidth;
 //-----------------------------------------------------------------------------------
 
 // Constructor
-Game::Game(const Address &theBindAddress)
+Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(256))
 {
    mNextMasterTryTime = 0;
    mCurrentTime = 0;
@@ -1146,6 +1146,9 @@ void ClientGame::renderSuspended()
 }
 
 
+static Vector<DatabaseObject *> rawRenderObjects;
+static Vector<GameObject *> renderObjects;
+
 void ClientGame::renderCommander()
 {
    GameObject *controlObject = mConnectionToServer->getControlObject();
@@ -1189,8 +1192,12 @@ void ClientGame::renderCommander()
       drawStars(1 - zoomFrac, offset, modVisSize);
 
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects
-   Vector<GameObject *> renderObjects;
-   mDatabase.findObjects(CommandMapVisType, renderObjects, mWorldBounds);
+   rawRenderObjects.clear();
+   mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
+   
+   renderObjects.clear();
+   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+      renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
    // Get info about the current player
    GameType *gt = gClientGame->getGameType();
@@ -1206,7 +1213,7 @@ void ClientGame::renderCommander()
          // Render ship visibility range, and that of our teammates
          if(renderObjects[i]->getObjectTypeMask() & (ShipType | RobotType))
          {
-            Ship *ship = (Ship*)(renderObjects[i]);
+            Ship *ship = dynamic_cast<Ship *>(renderObjects[i]);
 
             // Get team of this object
             S32 ourTeam = ship->getTeam();
@@ -1227,7 +1234,7 @@ void ClientGame::renderCommander()
          }
       }
 
-      Vector<GameObject *> spyBugObjects;
+      Vector<DatabaseObject *> spyBugObjects;
       mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldBounds);
 
       // Render spy bug visibility range second, so ranges appear above ship scanner range
@@ -1241,15 +1248,15 @@ void ClientGame::renderCommander()
             // if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : StringTableEntry(""), getGameType()->isTeamGame());
             if(sb->isVisibleToPlayer( playerTeam, getGameType()->mLocalClient->name, getGameType()->isTeamGame() ))
             {
-               Point p = spyBugObjects[i]->getRenderPos();
+               Point *p = &sb->getRenderPos();
                Point visExt(gSpyBugRange, gSpyBugRange);
                glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
 
                glBegin(GL_POLYGON);
-                  glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y + visExt.y);
-                  glVertex2f(p.x - visExt.x, p.y + visExt.y);
+                  glVertex2f(p->x - visExt.x, p->y - visExt.y);
+                  glVertex2f(p->x + visExt.x, p->y - visExt.y);
+                  glVertex2f(p->x + visExt.x, p->y + visExt.y);
+                  glVertex2f(p->x - visExt.x, p->y + visExt.y);
                glEnd();
 
                glColor(teamColor * 0.8);     // Draw a marker in the middle
@@ -1317,8 +1324,14 @@ void ClientGame::renderOverlayMap()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects
    Rect mapBounds(position, position);
    mapBounds.expand(Point(mapWidth * 2, mapHeight * 2));      //TODO: Fix
-   Vector<GameObject *> renderObjects;
-   mDatabase.findObjects(CommandMapVisType, renderObjects, mapBounds);
+
+   rawRenderObjects.clear();
+   mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mapBounds);
+
+   renderObjects.clear();
+   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+      renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
+
 
    renderObjects.sort(renderSortCompare);
 
@@ -1365,11 +1378,15 @@ void ClientGame::renderNormal()
    drawStars(1.0, position, visExt * 2);
 
    // Render all the objects the player can see
-   Vector<GameObject *> renderObjects;
-
    Point screenSize = visExt;
    Rect extentRect(position - screenSize, position + screenSize);
-   mDatabase.findObjects(AllObjectTypes, renderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+
+   rawRenderObjects.clear();
+   mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+
+   renderObjects.clear();
+   for(S32 i = 0; i < rawRenderObjects.size(); i++)
+      renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
    renderObjects.sort(renderSortCompare);
 

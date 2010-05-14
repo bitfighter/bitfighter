@@ -45,7 +45,7 @@ U32 Barrier::mBarrierChangeIndex = 1;
 // Populates barrierEnds with the results.
 void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)
 {
-   barrierEnds.clear();
+   barrierEnds.clear();    // local static vector
 
    if(vec.size() == 1)     // Protect against bad data
       return;
@@ -156,16 +156,16 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
 
 
 // Simply takes a segment and "puffs it out" to a rectangle of a specified width.  Does not modify endpoints.
-void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &outline)
+void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints)
 {
    Point dir = end - start;
    Point crossVec(dir.y, -dir.x);
    crossVec.normalize(width * 0.5);
 
-   outline.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
-   outline.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
-   outline.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
-   outline.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+   cornerPoints.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
+   cornerPoints.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
+   cornerPoints.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
+   cornerPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
 }
 
 
@@ -348,7 +348,7 @@ void Barrier::render(S32 layerIndex)
 
          populateEdgeLines(mRenderOutlineGeometry, mRenderLineSegments);
 
-         static Vector<GameObject *> fillObjects;
+         static Vector<DatabaseObject *> fillObjects;
          fillObjects.clear();
 
          findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
@@ -356,7 +356,8 @@ void Barrier::render(S32 layerIndex)
          for(S32 i = 0; i < fillObjects.size(); i++)
          {
             mRenderOutlineGeometry.clear();
-            if(fillObjects[i] != this && fillObjects[i]->getCollisionPoly(mRenderOutlineGeometry))
+            if(fillObjects[i] != this && 
+                     dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mRenderOutlineGeometry))
                clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);
          }
       }

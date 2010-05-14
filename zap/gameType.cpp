@@ -129,6 +129,8 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
 }
 
 
+static Vector<DatabaseObject *> fillVector;
+
 bool GameType::processArguments(S32 argc, const char **argv)
 {
    if(argc > 0)      // First arg is game length, in minutes
@@ -849,7 +851,7 @@ void GameType::onLevelLoaded()
    gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
 
    // Figure out if this level has any loadout zones
-   Vector<GameObject *> fillVector;
+   fillVector.clear();
    getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, gServerWorldBounds);
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
@@ -1153,8 +1155,6 @@ void GameType::performScopeQuery(GhostConnection *connection)
       }
    }
 
-   static Vector<GameObject *> fillVector;
-
    // What does the spy bug see?
    //S32 teamId = gc->getClientRef()->teamId;
    mSpyBugs.clear();
@@ -1165,15 +1165,16 @@ void GameType::performScopeQuery(GhostConnection *connection)
       SpyBug *sb = dynamic_cast<SpyBug *>(mSpyBugs[i]);
       if(!sb->isVisibleToPlayer( cr->getTeam(), cr->name, isTeamGame() ))
          break;
-      fillVector.clear();
       Point pos = sb->getActualPos();
       Point scopeRange(gSpyBugRange, gSpyBugRange);
       Rect queryRect(pos, pos);
       queryRect.expand(scopeRange);
+
+      fillVector.clear();
       findObjects(AllObjectTypes, fillVector, queryRect);
 
       for(S32 j = 0; j < fillVector.size(); j++)
-         connection->objectInScope(fillVector[j]);
+         connection->objectInScope(dynamic_cast<GameObject *>(fillVector[j]));
    }
 }
 
@@ -1181,9 +1182,6 @@ void GameType::performScopeQuery(GhostConnection *connection)
 // Here is where we determine which objects are visible from player's ships.  Only runs on server.
 void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
 {
-   static Vector<GameObject *> fillVector;
-   fillVector.clear();
-
    // If this block proves unnecessary, then we can remove the whole itemsOfInterest thing, I think...
    //if(isTeamGame())
    //{
@@ -1223,6 +1221,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
          Rect queryRect(pos, pos);
          queryRect.expand( Game::getScopeRange(ship->isModuleActive(ModuleSensor)) );
 
+         fillVector.clear();
          findObjects(( (scopeObject == ship) ? AllObjectTypes : CommandMapVisType), fillVector, queryRect);
       }
    }
@@ -1236,12 +1235,13 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
       Rect queryRect(pos, pos);
       queryRect.expand( Game::getScopeRange(co->isModuleActive(ModuleSensor)) );
 
+      fillVector.clear();
       findObjects(AllObjectTypes, fillVector, queryRect);
    }
 
    // Set object-in-scope for all objects found above
    for(S32 i = 0; i < fillVector.size(); i++)
-      connection->objectInScope(fillVector[i]);
+      connection->objectInScope(dynamic_cast<GameObject *>(fillVector[i]));
 }
 
 
@@ -1258,8 +1258,6 @@ void GameType::addItemOfInterest(Item *theItem)
 // to those teams with ships close enough to see it, if any.  Called from idle()
 void GameType::queryItemsOfInterest()
 {
-   static Vector<GameObject *> fillVector;
-
    for(S32 i = 0; i < mItemsOfInterest.size(); i++)
    {
       ItemOfInterest &ioi = mItemsOfInterest[i];
@@ -1269,7 +1267,9 @@ void GameType::queryItemsOfInterest()
       Rect queryRect(pos, pos);
 
       queryRect.expand(scopeRange);
+      fillVector.clear();
       findObjects(ShipType | RobotType, fillVector, queryRect);
+
       for(S32 j = 0; j < fillVector.size(); j++)
       {
          Ship *theShip = dynamic_cast<Ship *>(fillVector[j]);     // Safe because we only looked for ships and robots
@@ -1281,7 +1281,6 @@ void GameType::queryItemsOfInterest()
                (delta.x < Game::PlayerHorizVisDistance && delta.y < Game::PlayerVertVisDistance) )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
-      fillVector.clear();
    }
 }
 
@@ -1793,13 +1792,18 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    if(ship)
    {
       // Find all spybugs and mines that this player owned, and reset ownership
-      Vector<GameObject *> fillVector;
       Rect worldBounds = gServerGame->computeWorldObjectExtents();
+
+      fillVector.clear();
       gServerGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, gServerWorldBounds);
 
       for(S32 i = 0; i < fillVector.size(); i++)
-         if((fillVector[i]->getOwner()) == ship->getOwner())
-            fillVector[i]->setOwner(NULL);
+      {
+         GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);
+
+         if((obj->getOwner()) == ship->getOwner())
+            obj->setOwner(NULL);
+      }
 
       ship->kill();                 // Destroy the old ship
 
@@ -1935,8 +1939,9 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
-   Vector<GameObject *> fillVector;
    Rect worldBounds = gClientGame->computeWorldObjectExtents();
+
+   fillVector.clear();
    gClientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, worldBounds);
 
    for(S32 i = 0; i < fillVector.size(); i++)

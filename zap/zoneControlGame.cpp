@@ -268,12 +268,13 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
+static Vector<DatabaseObject *> fillVector;
+
 // A major scoring event has ocurred -- in this case, it's a touchdown
 void ZoneControlGameType::majorScoringEventOcurred(S32 team)
 {
-   Vector<GameObject *> fillVector;
-
    // Find all zones...
+   fillVector.clear();
    getGame()->getGridDatabase()->findObjects(GoalZoneType, fillVector, getGame()->computeWorldObjectExtents());
 
    // ...and make sure they're not flashing...

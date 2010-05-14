@@ -143,7 +143,7 @@ public:
 
    virtual U32 getPlayerCount() = NULL;      // Implemented differently on client and server
 
-   Game(const Address &theBindAddress);
+   Game(const Address &theBindAddress);      // Constructor
    virtual ~Game() { /* do nothing */ };
    Rect computeWorldObjectExtents();
    Point computePlayerVisArea(Ship *ship);
@@ -197,13 +197,22 @@ public:
    S32 minRecPlayers;               // Min recommended number of players for this level
    S32 maxRecPlayers;               // Max recommended number of players for this level
 
-   // Quickie constructor
-   LevelInfo(StringTableEntry levelFile = "", StringTableEntry name = "", StringTableEntry type = "", 
-             S32 minPlayers = 0, S32 maxPlayers = 0)
+   
+   LevelInfo() { /* Do nothing */ }    // Default constructor
+
+   // Used on client side where we don't care about min/max players
+   LevelInfo(StringTableEntry name, StringTableEntry type)     
    {
-      levelFileName = levelFile; setInfo(name, type, minPlayers, maxPlayers);
+      levelName = name;  levelType = type; 
    }
 
+   // Used on server side, augmented with setInfo method below
+   LevelInfo(StringTableEntry levelFile)
+   {
+      levelFileName = levelFile;
+   }
+
+   // Used on server side
    void setInfo(StringTableEntry name, StringTableEntry type, S32 minPlayers, S32 maxPlayers)
    {
       levelName = name;  levelType = type;  minRecPlayers = minPlayers;  maxRecPlayers = maxPlayers; 

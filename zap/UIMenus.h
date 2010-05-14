@@ -31,12 +31,10 @@
 #include "keyCode.h"
 #include "point.h"
 
-#include "../tnl/tnlNetBase.h"
-#include "../tnl/tnlTypes.h"
+#include "tnlNetBase.h"
+#include "tnlTypes.h"
 
 #include <string>
-
-
 
 
 namespace Zap

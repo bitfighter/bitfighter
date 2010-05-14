@@ -105,7 +105,7 @@ void MoveObject::updateExtent()
 // }
 
 extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
-static Vector<GameObject *> fillVector;
+static Vector<DatabaseObject *> fillVector;
 
 // See http://flipcode.com/archives/Theory_Practice-Issue_01_Collision_Detection.shtml --> Example 1  May or may not be relevant
 F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip, Point intendedPos)
@@ -235,12 +235,14 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
-      if(!fillVector[i]->isCollisionEnabled())
+      GameObject *foundObject = dynamic_cast<GameObject *>(fillVector[i]);
+
+      if(!foundObject->isCollisionEnabled())
          continue;
 
       Vector<Point> poly;
       poly.clear();
-      if(fillVector[i]->getCollisionPoly(poly))
+      if(foundObject->getCollisionPoly(poly))
       {
          Point cp;
          if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,
@@ -248,23 +250,23 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
          {
             if((cp - mMoveState[stateIndex].pos).dot(mMoveState[stateIndex].vel) > velocityEpsilon)
             {
-               bool collide1 = collide(fillVector[i]);
-               bool collide2 = fillVector[i]->collide(this);
+               bool collide1 = collide(foundObject);
+               bool collide2 = foundObject->collide(this);
 
                if(!(collide1 && collide2))
                   continue;
                collisionPoint = cp;
                delta *= collisionFraction;
                collisionTime *= collisionFraction;
-               collisionObject = fillVector[i];
+               collisionObject = foundObject;
                if(!collisionTime)
                   break;
             }
          }
       }
-      else if(fillVector[i]->getObjectTypeMask() & MoveableType)
+      else if(foundObject->getObjectTypeMask() & MoveableType)
       {
-         MoveObject *otherShip = (MoveObject *) fillVector[i];
+         MoveObject *otherShip = (MoveObject *) foundObject;
 
          F32 myRadius;
          F32 otherRadius;
@@ -289,7 +291,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
                   continue;
 
                collisionTime = 0;
-               collisionObject = fillVector[i];
+               collisionObject = foundObject;
                delta.set(0,0);
             }
             else
@@ -307,7 +309,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
                      continue;
 
                   collisionTime = t;
-                  collisionObject = fillVector[i];
+                  collisionObject = foundObject;
                   delta = mMoveState[stateIndex].vel * collisionTime;
                }
             }

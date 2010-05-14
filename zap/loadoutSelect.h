@@ -26,7 +26,7 @@
 #ifndef _LOADOUTSELECT_H_
 #define _LOADOUTSELECT_H_
 
-#include "../tnl/tnlTypes.h"
+#include "tnlTypes.h"
 
 using namespace TNL;
 #include "timer.h"
