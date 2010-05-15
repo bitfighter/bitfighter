@@ -312,13 +312,14 @@ void DatabaseObject::setExtent(const Rect &extents)
    if(mInDatabase && gridDB != NULL)
    {
       // Remove from the extents database for current extents...
-      gridDB->removeFromDatabase(this, extent);
+      gridDB->removeFromDatabase(this, extent);    // old extent
       // ...and re-add for the new extent
       gridDB->addToDatabase(this, extents);
    }
 
    extent.set(extents);
 }
+
 
 };
 

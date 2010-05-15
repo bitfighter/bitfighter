@@ -260,6 +260,20 @@ GameItemRec itemDef[] = {
 };
 
 
+// Destructor -- unwind things in an orderly fashion
+EditorUserInterface::~EditorUserInterface()
+{
+   // Delete all forcefields first so app doesn't get wrapped up in recalculating their end points when
+   // the segment they're terminating at gets deleted.
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index == ItemForceField)
+      {
+         mItems.erase_fast(i);
+         i--;
+      }
+}
+
+
 // Save the current state of the editor objects for later undoing
 void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRedo)
 {
@@ -464,18 +478,8 @@ void EditorUserInterface::loadLevel()
    wallSegmentManager.recomputeAllWallGeometry();
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index != ItemBarrierMaker)
-      {
-         Point anchor, normal;
-         bool found = EngineeredObject::findAnchorPointAndNormal(getGridDatabase(),mItems[i].vert(0), 1 / mGridSize, 
-                                                                 anchor, normal);
-         if(found)
-         {
-            mItems[i].setVert(anchor, 0);       // Snap to wall
-            mItems[i].normal.set(normal);
-            mItems[i].findForceFieldEnd();
-         }
-      }
+      if(mItems[i].index == ItemTurret || mItems[i].index == ItemForceField)
+         mItems[i].snapEngineeredObject(NONE, mItems[i].vert(0));
 }
 
 
@@ -838,29 +842,17 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
             mItems[i].snapped = false;
    }
    
-
    // Turrets & forcefields: Snap to a wall edge as first (and only) choice
    if(mDraggingObjects &&
             (mItems[mSnapVertex_i].index == ItemTurret || mItems[mSnapVertex_i].index == ItemForceField))
    {
-      const S32 SNAP_FACT = 400;    // Higher number means stronger snap effect
-      F32 scaleFact = SNAP_FACT / EngineeredObject::MAX_SNAP_DISTANCE / (mCurrentScale * mCurrentScale);     
-
-      Point anchor, normal;
-      bool found = EngineeredObject::findAnchorPointAndNormal(getGridDatabase(), p, 1 / mGridSize, 
-                                                              anchor, normal);
-
-      if(found && anchor.distSquared(p) < SNAP_FACT / (mCurrentScale * mCurrentScale) )
-      {
-         mItems[mSnapVertex_i].normal.set(normal);
-         mItems[mSnapVertex_i].findForceFieldEnd();
-         mItems[mSnapVertex_i].snapped = true;
-         return anchor;
-      }
-          
-      mItems[mSnapVertex_i].snapped = false;
-      return p;
+      const F32 SNAP_FACT = 400;       // Higher number means stronger snap effect
+      if(mItems[mSnapVertex_i].snapEngineeredObject(SNAP_FACT / (mCurrentScale * mCurrentScale), p))
+         return mItems[mSnapVertex_i].vert(0);
+      else
+         return p;
    }
+
 
    F32 minDist = 100 / (mCurrentScale * mCurrentScale);
 
@@ -888,14 +880,12 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    // Now look for other things we might want to snap to
    for(S32 i = 0; i < mItems.size(); i++)
    {
-      if(mItems[i].selected)     // Don't snap to selected items
+       // Don't snap to selected items or items with selected verts
+      if(mItems[i].selected || mItems[i].anyVertsSelected())    
          continue;
 
       for(S32 j = 0; j < mItems[i].vertCount(); j++)
       {
-         if(mItems[i].vertSelected(j))      
-            continue;
-
          F32 dist = mItems[i].vert(j).distSquared(p);
          if(dist < minDist)
          {
@@ -1459,189 +1449,6 @@ inline Point convertLevelToCanvasCoord(const Point &point, bool convert = true)
 inline F32 getGridSize()
 {
    return gEditorUserInterface.getGridSize();
-}
-
-
-bool WorldItem::hasWidth()
-{
-   return itemDef[index].hasWidth;
-}
-
-
-GeomType WorldItem::geomType()
-{
-   return itemDef[index].geom;
-}
-
-
-S32 WorldItem::getDefaultRepopDelay(GameItems itemType)  
-{
-   if(itemType == ItemFlagSpawn)
-      return FlagSpawn::defaultRespawnTime;
-   else if(itemType == ItemAsteroidSpawn)
-      return AsteroidSpawn::defaultRespawnTime;
-   else if(itemType == ItemTurret)
-      return Turret::defaultRespawnTime;
-   else if(itemType == ItemForceField)
-      return ForceFieldProjector::defaultRespawnTime;
-   else if(itemType == ItemRepair)
-      return RepairItem::defaultRespawnTime;
-   else if(itemType == ItemEnergy)
-      return EnergyItem::defaultRespawnTime;
-   else
-      return -1;
-}
-
-
-// First argument has already been removed before we get this.  This is just the parameter list.
-bool WorldItem::processArguments(S32 argc, const char **argv)
-{
-   // Figure out how many arguments an item should have
-   S32 minArgs = 2;
-   if(itemDef[index].geom >= geomLine)
-      minArgs += 2;
-   if(itemDef[index].hasTeam)
-      minArgs++;
-   if(itemDef[index].hasText)
-      minArgs += 2;        // Size and message
-   if(argc < minArgs)      // Not enough args, time to bail
-      return false;
-
-   if(index == ItemNavMeshZone)
-      gEditorUserInterface.setHasNavMeshZones(true);
-
-   // Parse most game objects
-   if(itemDef[index].name)       // Item is listed in itemDef, near top of this file
-   {
-      index = static_cast<GameItems>(index);
-      S32 arg = 0;
-
-      // Should the following be moved to the constructor?  Probably...
-      team = TEAM_NEUTRAL;
-      selected = false;
-      width = 0;
-      id = id;
-
-      if(itemDef[index].hasTeam)
-      {
-         team = atoi(argv[arg]);
-         arg++;
-      }
-      if(itemDef[index].hasWidth)
-      {
-         width = atof(argv[arg]);
-         arg++;
-      }
-      if(index == ItemTextItem)
-      {
-         for(S32 j = 0; j < 2; j++)       // Read two points...
-         {
-            Point p;
-            p.read(argv + arg);
-            addVert(p);
-            arg+=2;
-         }
-
-         textSize = atoi(argv[arg]);    // ...and a textsize...
-         arg++;
-
-         string str;
-         for(;arg < argc; arg ++)         // (no first part of for)
-         {
-            str += argv[arg];             // ...and glob the rest together as a string
-            if (arg < argc - 1)
-               str += " ";
-         }
-
-         lineEditor.setString(str);
-      }
-      else if(index == ItemNexus && argc == 4)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
-      {
-         // Arg 0 will be HuntersNexusObject
-         Point pos;
-         pos.read(argv + 1);
-
-         Point ext(50, 50);
-         ext.set(atoi(argv[2]), atoi(argv[3]));
-         ext /= gEditorUserInterface.getGridSize();
-
-         addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
-         addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
-         addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
-         addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
-      }
-      else        // Anything but a textItem or old-school NexusObject
-      {
-         S32 coords = argc;
-         if(index == ItemSpeedZone)
-            coords = 4;    // 2 pairs of coords = 2 * 2 = 4
-
-         for(;arg < coords; arg += 2) // (no first arg)
-         {
-            // Put a cap on the number of vertices in a polygon
-            if(itemDef[index].geom == geomPoly && mVerts.size() >= gMaxPolygonPoints)
-               break;
-            
-            if(arg != argc - 1)
-            {
-               Point p;
-               p.read(argv + arg);
-               addVert(p);
-            }
-         }
-      }
-
-      // Add a default spawn time, which may well be overridden below
-      repopDelay = getDefaultRepopDelay(index);
-
-      // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
-      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 3)
-         repopDelay = atoi(argv[2]);
-
-      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 4)
-         repopDelay = atoi(argv[3]);
-
-      // SpeedZones have 2 optional extra arguments
-      if(index == ItemSpeedZone)
-      {
-         if(argc >= 5)
-            speed = atoi(argv[4]);
-         else
-            speed = SpeedZone::defaultSpeed;
-
-         if(argc >= 6)
-            boolattr = true;
-       }
-   }
-
-   return true;
-}
-
-
-// Draw barrier centerlines; wraps renderPolyline()
-void WorldItem::renderPolylineCenterline(F32 alpha)
-{
-   // Render wall centerlines
-   if(selected)
-      glColor(SELECT_COLOR, alpha);
-   else if(litUp && !mAnyVertsSelected)
-      glColor(HIGHLIGHT_COLOR, alpha);
-   else
-      glColor(gEditorUserInterface.getTeamColor(team), alpha);
-
-   glLineWidth(3);
-   renderPolyline();
-   glLineWidth(gDefaultLineWidth);
-}
-
-
-// Draws a line connecting points in mVerts
-void WorldItem::renderPolyline()
-{
-   glBegin(GL_LINE_STRIP);
-      for(S32 j = 0; j < mVerts.size(); j++)
-         glVertex(convertLevelToCanvasCoord(mVerts[j]));
-   glEnd();
 }
 
 
@@ -4254,7 +4061,7 @@ void EditorMenuUserInterface::render()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-GridDatabase *WallSegmentManager::getGridDatabase() 
+GridDatabase *getGridDatabase() 
 { 
    return gEditorUserInterface.getGridDatabase(); 
 }
@@ -4278,8 +4085,22 @@ void WallSegmentManager::recomputeAllWallGeometry()
 
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 {
+   // Find any forcefields that terminate on this wall, and mark them for recalculation later
+   Vector<WorldItem *> items;    // A list of forcefields terminating on the wall segment that we'll be deleting
+
+   S32 count = wallSegments.size();                
+   for(S32 i = 0; i < count; i++)
+      if(wallSegments[i]->mOwner == item->mId)     // Segment belongs to item
+         for(S32 j = 0; j < gEditorUserInterface.mItems.size(); j++)
+            if(gEditorUserInterface.mItems[j].index == ItemForceField && 
+               ( gEditorUserInterface.mItems[j].forceFieldEndSegment == wallSegments[i] ||
+                 gEditorUserInterface.mItems[j].forceFieldMountSegment == wallSegments[i] ) )
+               items.push_back(&gEditorUserInterface.mItems[j]);
+
    // Get rid of any existing segments that correspond to our item; we'll be building new ones
    deleteSegments(item->mId);
+
+   Rect allSegExtent;
 
    // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
    for(S32 i = 0; i < item->extendedEndPoints.size() - 1; i += 2)
@@ -4293,9 +4114,21 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 
       newSegment->resetEdges();                 // Recompute the edges based on our new corner points
 
-      newSegment->setExtent(Rect(newSegment->corners));  // Calculate a bounding box around the segment
-      newSegment->addToDatabase();                       // Add it to our spatial database
+      Rect segExtent(newSegment->corners);
+      newSegment->setExtent(segExtent);         // Calculate a bounding box around the segment
+      newSegment->addToDatabase();              // Add it to our spatial database
+
+      if(i == 0)
+         allSegExtent.set(segExtent);
+      else
+         allSegExtent.unionRect(segExtent);
    }
+
+   item->setExtent(allSegExtent);
+
+   // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
+   for(S32 i = 0; i < items.size(); i++)
+      items[i]->onGeomChanged();
 }
 
 
@@ -4312,7 +4145,6 @@ void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
    for(S32 i = 0; i < wallSegments.size(); i++)
       if(wallSegments[i]->mOwner == item->mId)      // Segment belongs to our item; look it up in the database
          getGridDatabase()->findObjects(BarrierType, intersectingSegments, wallSegments[i]->getExtent());
-
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
    {
@@ -4333,7 +4165,6 @@ void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
       dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
-
 
    for(S32 i = 0; i < wallSegments.size(); i++)
    {
@@ -4443,6 +4274,7 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
    width = xwidth;
    mId = nextWorldItemId;
    nextWorldItemId++;
+   snapped = false;
 
    if(itemDef[itemType].hasText)
    {
@@ -4462,6 +4294,211 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
       speed = -1;
       boolattr = false;
    }
+}
+
+
+bool WorldItem::hasWidth()
+{
+   return itemDef[index].hasWidth;
+}
+
+
+GeomType WorldItem::geomType()
+{
+   return itemDef[index].geom;
+}
+
+
+S32 WorldItem::getDefaultRepopDelay(GameItems itemType)  
+{
+   if(itemType == ItemFlagSpawn)
+      return FlagSpawn::defaultRespawnTime;
+   else if(itemType == ItemAsteroidSpawn)
+      return AsteroidSpawn::defaultRespawnTime;
+   else if(itemType == ItemTurret)
+      return Turret::defaultRespawnTime;
+   else if(itemType == ItemForceField)
+      return ForceFieldProjector::defaultRespawnTime;
+   else if(itemType == ItemRepair)
+      return RepairItem::defaultRespawnTime;
+   else if(itemType == ItemEnergy)
+      return EnergyItem::defaultRespawnTime;
+   else
+      return -1;
+}
+
+
+// First argument has already been removed before we get this.  This is just the parameter list.
+bool WorldItem::processArguments(S32 argc, const char **argv)
+{
+   // Figure out how many arguments an item should have
+   S32 minArgs = 2;
+   if(itemDef[index].geom >= geomLine)
+      minArgs += 2;
+   if(itemDef[index].hasTeam)
+      minArgs++;
+   if(itemDef[index].hasText)
+      minArgs += 2;        // Size and message
+   if(argc < minArgs)      // Not enough args, time to bail
+      return false;
+
+   if(index == ItemNavMeshZone)
+      gEditorUserInterface.setHasNavMeshZones(true);
+
+   // Parse most game objects
+   if(itemDef[index].name)       // Item is listed in itemDef, near top of this file
+   {
+      index = static_cast<GameItems>(index);
+      S32 arg = 0;
+
+      // Should the following be moved to the constructor?  Probably...
+      team = TEAM_NEUTRAL;
+      selected = false;
+      width = 0;
+      id = id;
+
+      if(itemDef[index].hasTeam)
+      {
+         team = atoi(argv[arg]);
+         arg++;
+      }
+      if(itemDef[index].hasWidth)
+      {
+         width = atof(argv[arg]);
+         arg++;
+      }
+      if(index == ItemTextItem)
+      {
+         for(S32 j = 0; j < 2; j++)       // Read two points...
+         {
+            Point p;
+            p.read(argv + arg);
+            addVert(p);
+            arg+=2;
+         }
+
+         textSize = atoi(argv[arg]);    // ...and a textsize...
+         arg++;
+
+         string str;
+         for(;arg < argc; arg ++)         // (no first part of for)
+         {
+            str += argv[arg];             // ...and glob the rest together as a string
+            if (arg < argc - 1)
+               str += " ";
+         }
+
+         lineEditor.setString(str);
+      }
+      else if(index == ItemNexus && argc == 4)     // Old-school Zap! style Nexus definition --> note parallel code in HuntersNexusObject::processArguments
+      {
+         // Arg 0 will be HuntersNexusObject
+         Point pos;
+         pos.read(argv + 1);
+
+         Point ext(50, 50);
+         ext.set(atoi(argv[2]), atoi(argv[3]));
+         ext /= gEditorUserInterface.getGridSize();
+
+         addVert(Point(pos.x - ext.x, pos.y - ext.y));   // UL corner
+         addVert(Point(pos.x + ext.x, pos.y - ext.y));   // UR corner
+         addVert(Point(pos.x + ext.x, pos.y + ext.y));   // LR corner
+         addVert(Point(pos.x - ext.x, pos.y + ext.y));   // LL corner
+      }
+      else        // Anything but a textItem or old-school NexusObject
+      {
+         S32 coords = argc;
+         if(index == ItemSpeedZone)
+            coords = 4;    // 2 pairs of coords = 2 * 2 = 4
+
+         for(;arg < coords; arg += 2) // (no first arg)
+         {
+            // Put a cap on the number of vertices in a polygon
+            if(itemDef[index].geom == geomPoly && mVerts.size() >= gMaxPolygonPoints)
+               break;
+            
+            if(arg != argc - 1)
+            {
+               Point p;
+               p.read(argv + arg);
+               addVert(p);
+            }
+         }
+      }
+
+      // Add a default spawn time, which may well be overridden below
+      repopDelay = getDefaultRepopDelay(index);
+
+      // Repair, Energy, Turrets, Forcefields, FlagSpawns, AsteroidSpawns all have optional additional argument dealing with repair or repopulation
+      if((index == ItemRepair || index == ItemEnergy || index == ItemAsteroidSpawn) && argc == 3)
+         repopDelay = atoi(argv[2]);
+
+      if( (index == ItemTurret || index == ItemForceField || index == ItemFlagSpawn) && argc == 4)
+         repopDelay = atoi(argv[3]);
+
+      // SpeedZones have 2 optional extra arguments
+      if(index == ItemSpeedZone)
+      {
+         if(argc >= 5)
+            speed = atoi(argv[4]);
+         else
+            speed = SpeedZone::defaultSpeed;
+
+         if(argc >= 6)
+            boolattr = true;
+       }
+   }
+
+   return true;
+}
+
+
+// Disable snap distance override by passing -1
+bool WorldItem::snapEngineeredObject(F32 overridingSnapDistance, const Point &pos)
+{  
+   Point anchor, nrml;
+   DatabaseObject *mountSeg = EngineeredObject::
+               findAnchorPointAndNormal(getGridDatabase(), pos, 1 / getGridSize(), anchor, nrml);
+
+   if( mountSeg && (overridingSnapDistance < 0 || anchor.distSquared(pos) < overridingSnapDistance) )
+   {
+      mVerts[0].set(anchor);
+      normal.set(nrml);
+      findForceFieldEnd();
+      forceFieldMountSegment = dynamic_cast<WallSegment *>(mountSeg);
+      snapped = true;
+   }
+   else
+      snapped = false;
+
+   return snapped;
+}
+
+
+// Draw barrier centerlines; wraps renderPolyline()
+void WorldItem::renderPolylineCenterline(F32 alpha)
+{
+   // Render wall centerlines
+   if(selected)
+      glColor(SELECT_COLOR, alpha);
+   else if(litUp && !mAnyVertsSelected)
+      glColor(HIGHLIGHT_COLOR, alpha);
+   else
+      glColor(gEditorUserInterface.getTeamColor(team), alpha);
+
+   glLineWidth(3);
+   renderPolyline();
+   glLineWidth(gDefaultLineWidth);
+}
+
+
+// Draws a line connecting points in mVerts
+void WorldItem::renderPolyline()
+{
+   glBegin(GL_LINE_STRIP);
+      for(S32 j = 0; j < mVerts.size(); j++)
+         glVertex(convertLevelToCanvasCoord(mVerts[j]));
+   glEnd();
 }
 
 
@@ -4591,6 +4628,7 @@ void WorldItem::onGeomChanging()
 }
 
 
+// Item is being activel dragged
 void WorldItem::onItemDragging()
 {
    if(index == ItemForceField)
@@ -4621,6 +4659,24 @@ void WorldItem::onGeomChanged()
       // Fill extendedEndPoints from the vertices of our wall's centerline
       constructBarrierEndPoints(mVerts, width / gEditorUserInterface.getGridSize(), extendedEndPoints);
       getWallSegmentManager()->computeWallSegmentIntersections(this);
+
+
+      // Find any forcefields or turrets that might be mounted on our wall -- perhaps they can be resnapped
+      for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
+         if( gEditorUserInterface.mItems[i].index == ItemForceField || 
+                                 gEditorUserInterface.mItems[i].index == ItemTurret )
+         {
+            gEditorUserInterface.mItems[i].snapEngineeredObject(NONE, gEditorUserInterface.mItems[i].vert(0));
+         }
+
+
+      // Find any forcefields that might intersect our new wall segment and recalc them
+      for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
+         if(gEditorUserInterface.mItems[i].index == ItemForceField &&
+                                 gEditorUserInterface.mItems[i].getExtent().intersects(getExtent()))
+         {
+            gEditorUserInterface.mItems[i].findForceFieldEnd();
+         }
    }
 
    else if(index == ItemForceField)
@@ -4628,15 +4684,6 @@ void WorldItem::onGeomChanged()
       // Find the end-point of the projected forcefield
       findForceFieldEnd();
    }
-}
-
-  
-Rect WorldItem::getExtent()
-{
-   if(index == ItemBarrierMaker)
-      return Rect();    // ???
-   else
-      return Rect();
 }
 
 
@@ -4653,24 +4700,23 @@ void WorldItem::onAttrsChanged()
 }
 
 
-extern bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &intersection);
-  
 void WorldItem::findForceFieldEnd()
 {
    // Load the corner points of a maximum-length forcefield into geom
    Vector<Point> geom;
-   
+   DatabaseObject *collObj;
+
    F32 scale = 1 / gEditorUserInterface.getGridSize();
-
+   
    Point start = ForceFieldProjector::getForceFieldStartPoint(mVerts[0], normal, scale);
-   //F32 minDist = F32_MAX;
-   //forceFieldEnd.set(ForceFieldProjector::getForceFieldEndPoint(mVerts[0], normal, 
-   //                  ForceFieldProjector::MAX_FORCEFIELD_LENGTH, scale));
 
-   forceFieldEnd.set(ForceField::findForceFieldEnd(getGridDatabase(), start, normal, scale));
+   if(ForceField::findForceFieldEnd(getGridDatabase(), start, normal, scale, forceFieldEnd, &collObj))
+      forceFieldEndSegment = dynamic_cast<WallSegment *>(collObj);
+   else
+      forceFieldEndSegment = NULL;
 
    ForceField::getGeom(start, forceFieldEnd, geom, scale);    
-   Rect boundingBox(geom);
+   setExtent(Rect(geom));
 }
 
 
@@ -4699,6 +4745,23 @@ GridDatabase *WallSegment::getGridDatabase()
 }
 
 
+// Destructor
+WallSegment::~WallSegment()
+{ 
+   // Make sure object is out of the database
+   getGridDatabase()->removeFromDatabase(this, this->getExtent()); 
+
+   // Find any forcefields that were using this as an end point and let them know the segment is gone.  Since 
+   // segment is no longer in database, when we recalculate the forcefield, our endSegmentPointer will be reset.
+   // This is a last-ditch effort to ensure that the pointers point at something real.
+   for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
+      if(gEditorUserInterface.mItems[i].index == ItemForceField && 
+               (gEditorUserInterface.mItems[i].forceFieldEndSegment == this || 
+                gEditorUserInterface.mItems[i].forceFieldMountSegment == this) )
+         gEditorUserInterface.mItems[i].onGeomChanged();       // Will force recalculation of mount and endpoint
+   }
+
+ 
 // Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
 void WallSegment::resetEdges()
 {

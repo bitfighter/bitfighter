@@ -89,9 +89,9 @@ public:
    F32 getHealth() { return mHealth; }
    void healObject(S32 time);
 
-   // Figure out where to put our turrets and forcefield projectors
-   static bool findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scale, Point &anchor, Point &normal);
-
+   // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
+   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scale, 
+                                                   Point &anchor, Point &normal);
 
    // LuaItem interface
    // S32 getLoc(lua_State *L) { }   ==> Will be implemented by derived objects
@@ -135,7 +135,8 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints);
 
    static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
-   static Point findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact);
+   static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact,
+                                 Point &end, DatabaseObject **collObj);
 
    void render();
    S32 getRenderSortValue() { return 0; }

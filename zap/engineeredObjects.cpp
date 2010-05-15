@@ -139,10 +139,8 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    Point normal;
    Point anchor;
 
-   bool found = findAnchorPointAndNormal(getGridDatabase(), pos, 1, anchor, normal);
-
-   if(!found)
-      return false;      // Invalid object
+   if(!findAnchorPointAndNormal(getGridDatabase(), pos, 1, anchor, normal))
+      return false;      // Found no mount point
 
    mAnchorPoint.set(anchor + normal);
    mAnchorNormal.set(normal);
@@ -156,11 +154,11 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor
-bool EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scaleFact, 
-                                                Point &anchor, Point &normal)
+DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scaleFact, 
+                                                           Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
-   bool found = false;
+   DatabaseObject *closestWall = NULL;
 
    // Start with a sweep of the area
    for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125)    // Reducing to 0.0125 seems to have no effect
@@ -172,19 +170,21 @@ bool EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &p
       Point n;
 
       // Look for walls
-      if(db->findObjectLOS(BarrierType, MoveObject::ActualState, pos, pos + dir, t, n))
+      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, pos, pos + dir, t, n);
+
+      if(wall != NULL)     // Found one!
       {
          if(t < minDist)
          {
             anchor.set(pos + dir * t);
             normal.set(n);
             minDist = t;
-            found = true;
+            closestWall = wall;
          }
       }
    }
 
-   return found;
+   return closestWall;
 }
 
 
@@ -520,7 +520,10 @@ Point ForceFieldProjector::getForceFieldEndPoint(const Point &anchor, const Poin
 void ForceFieldProjector::onEnabled()
 {
    Point start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
-   Point end = ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, 1.0);
+   Point end;
+   DatabaseObject *collObj;
+   
+   ForceField::findForceFieldEnd(getGridDatabase(), start, mAnchorNormal, 1.0, end, &collObj);
 
    mField = new ForceField(mTeam, start, end);
    mField->addToGame(getGame());
@@ -685,20 +688,26 @@ void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &ge
 }
 
 
-Point ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact)
+bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact, 
+                                   Point &end, DatabaseObject **collObj)
 {
    F32 time;
    Point n;
 
    static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
-   Point end(start.x + normal.x * MAX_FORCEFIELD_LENGTH * scaleFact, 
-             start.y + normal.y * MAX_FORCEFIELD_LENGTH * scaleFact);
+   end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH * scaleFact, 
+           start.y + normal.y * MAX_FORCEFIELD_LENGTH * scaleFact);
 
-   if(db->findObjectLOS(BarrierType, MoveObject::ActualState, start, end, time, n))
+   *collObj = db->findObjectLOS(BarrierType, MoveObject::ActualState, start, end, time, n);
+
+   if(*collObj)
+   {
       end.set(start + (end - start) * time); 
+      return true;
+   }
 
-   return end;
+   return false;
 }
 
 

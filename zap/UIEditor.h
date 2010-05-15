@@ -53,6 +53,33 @@ enum VertexRenderStyles
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+struct WallSegment : public DatabaseObject
+{
+   WallSegment(S32 owner = -1) { mOwner = owner; invalid = false; }
+   ~WallSegment();
+
+   Vector<Point> edges;    
+   Vector<Point> corners;
+   S32 mOwner;
+
+   bool invalid;              // A flag for marking segments in need of processing
+
+   void resetEdges();         // Compute basic edges from corner points
+   void computeBoundingBox(); // Computes bounding box based on the corners, updates database
+
+   ////////////////////
+   //  DatabaseObject methods
+   GridDatabase *getGridDatabase();
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = corners; return true; }
+   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
+   bool isCollisionEnabled() { return true; }
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 // From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
 struct SaveException : public std::exception
@@ -173,13 +200,17 @@ public:
    bool snapped;             // Is item sufficiently snapped?  only for turrets and forcefields
 
    Point forceFieldEnd;      // Point where forcefield terminates.  Only used for turrets.
-   void findForceFieldEnd();
+   WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted
+   WallSegment *forceFieldEndSegment;     // Segment where forcefield ends
+
+   // Find mount point or turret or forcefield closest to pos
+   bool snapEngineeredObject(F32 overridingSnapDistance, const Point &pos);  
+   void findForceFieldEnd();                                // Find end of forcefield
 
    virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
 
    Vector<Point> getVerts() { return mVerts; }
    Vector<Point> extendedEndPoints;
-   Rect getExtent();
 
    S32 vertCount() { return mVerts.size(); }
    Point vert(S32 vertIndex) { return mVerts[vertIndex]; }
@@ -202,37 +233,11 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-
-struct WallSegment : public DatabaseObject
-{
-   WallSegment(S32 owner = -1) { mOwner = owner; invalid = false; }
-   ~WallSegment() { getGridDatabase()->removeFromDatabase(this, this->getExtent()); }
-
-   Vector<Point> edges;    
-   Vector<Point> corners;
-   S32 mOwner;
-
-   bool invalid;              // A flag for marking segments in need of processing
-
-   void resetEdges();         // Compute basic edges from corner points
-   void computeBoundingBox(); // Computes bounding box based on the corners, updates database
-
-   ////////////////////
-   //  DatabaseObject methods
-   GridDatabase *getGridDatabase();
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = corners; return true; }
-   bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
-   bool isCollisionEnabled() { return true; }
-};
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class WallSegmentManager
 {
 public:
    WallSegmentManager()  { /* Do nothing */ }
-   ~WallSegmentManager() { deleteAllSegments(); }
+   ~WallSegmentManager() { /* Do nothing */ }
 
    Vector<WallSegment *> wallSegments;
 
@@ -245,9 +250,6 @@ public:
    void buildWallSegmentEdgesAndPoints(WorldItem *item);
    void recomputeAllWallGeometry();
  
-
-   GridDatabase *getGridDatabase();
-
    ////////////////
    // Render functions
    void renderWalls(bool convert, F32 alpha);
@@ -434,6 +436,7 @@ private:
    void finishedDragging();
 
 public:
+   ~EditorUserInterface();    // Destructor
    void setLevelFileName(string name);
    void setLevelGenScriptName(string name);
 
