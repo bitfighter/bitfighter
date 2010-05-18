@@ -205,7 +205,7 @@ public:
 
    // Find mount point or turret or forcefield closest to pos
    bool snapEngineeredObject(F32 overridingSnapDistance, const Point &pos);  
-   void findForceFieldEnd();                                // Find end of forcefield
+   void findForceFieldEnd();                                      // Find end of forcefield
 
    virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
 
@@ -349,7 +349,7 @@ private:
    WallSegmentManager wallSegmentManager;
 
    static const U32 UNDO_STATES = 128;
-   void saveUndoState(Vector<WorldItem> items, bool cameFromRedo = false);    // Save current state into undo history buffer
+   void saveUndoState(const Vector<WorldItem> &items, bool cameFromRedo = false);    // Save current state into undo history buffer
    bool undoAvailable();               // Is an undo state available?
    void undo(bool addToRedoStack);     // Restore mItems to latest undo state
    void redo();                        // Redo latest undo
@@ -358,6 +358,8 @@ private:
 
    Vector<WorldItem> mDockItems;       // Items sitting in the dock
    Vector<WorldItem> mClipboard;       // Items on clipboard
+
+   S32 mLastUndoStateWasBarrierWidthChange;
 
    void saveSelection();               // Save selection mask
    void restoreSelection();            // Restore selection mask
@@ -460,6 +462,8 @@ public:
    Vector<WorldItem> mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
+   void recomputeAllEngineeredItems();
+
    void render();
    void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);

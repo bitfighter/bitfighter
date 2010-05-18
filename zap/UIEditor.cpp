@@ -139,8 +139,11 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
    mItemHit = NONE;
    mEdgeHit = NONE;
 
+   mLastUndoStateWasBarrierWidthChange = 0;
+
    mUndoItems.setSize(UNDO_STATES);
 }
+
 
 void EditorUserInterface::populateDock()
 {
@@ -275,7 +278,7 @@ EditorUserInterface::~EditorUserInterface()
 
 
 // Save the current state of the editor objects for later undoing
-void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRedo)
+void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cameFromRedo)
 {
    if(!cameFromRedo)
       mLastRedoIndex = mLastUndoIndex;
@@ -286,6 +289,7 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
       mAllUndoneUndoLevel = NONE;
 
    mUndoItems[mLastUndoIndex % UNDO_STATES] = items;
+
    mLastUndoIndex++;
    mLastRedoIndex++; 
 
@@ -294,9 +298,10 @@ void EditorUserInterface::saveUndoState(Vector<WorldItem> items, bool cameFromRe
       mFirstUndoIndex++;
       mAllUndoneUndoLevel -= 1;     // If this falls below 0, then we can't undo our way out of needing to save
    }
-
+   
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    mRedoingAnUndo = false;
+   mLastUndoStateWasBarrierWidthChange = max(mLastUndoStateWasBarrierWidthChange - 1, 0);
 }
 
 
@@ -323,12 +328,15 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
    wallSegmentManager.recomputeAllWallGeometry();
+   recomputeAllEngineeredItems();
 
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    itemToLightUp = NONE;
    autoSave();
-}
 
+   mLastUndoStateWasBarrierWidthChange = 0;
+}
+   
 
 void EditorUserInterface::redo()
 {
@@ -336,13 +344,22 @@ void EditorUserInterface::redo()
    {
       mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
-
+   
       wallSegmentManager.recomputeAllWallGeometry();
+      recomputeAllEngineeredItems();
 
       mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
       itemToLightUp = NONE;
       autoSave();
    }
+}
+
+
+void EditorUserInterface::recomputeAllEngineeredItems()
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index == ItemTurret || mItems[i].index == ItemForceField)
+         mItems[i].snapEngineeredObject(NONE, mItems[i].vert(0));
 }
 
 
@@ -476,10 +493,7 @@ void EditorUserInterface::loadLevel()
       constructBarrierEndPoints(mItems[i].getVerts(), mItems[i].width / mGridSize, mItems[i].extendedEndPoints);
 
    wallSegmentManager.recomputeAllWallGeometry();
-
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemTurret || mItems[i].index == ItemForceField)
-         mItems[i].snapEngineeredObject(NONE, mItems[i].vert(0));
+   recomputeAllEngineeredItems();
 }
 
 
@@ -897,20 +911,25 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 
    static Vector<DatabaseObject *> foundObjects;
 
-   // Search for a corner to snap to - by using segment ends, we can also look for intersections between segments
-   foundObjects.clear();
-   mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
-
-   for(S32 i = 0; i < foundObjects.size(); i++)
+   // Search for a corner to snap to - by using segment ends, we'll also look for intersections between segments
+   if(mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker)
    {
-      WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
-      for(S32 j = 0; j < seg->edges.size(); j++)
+
+      foundObjects.clear();
+      mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
+
+      for(S32 i = 0; i < foundObjects.size(); i++)
       {
-         F32 dist = seg->edges[j].distSquared(p);
-         if(dist < minDist)
+         WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
+         for(S32 j = 0; j < seg->edges.size(); j++)
          {
-            minDist = dist;
-            snapPoint.set(seg->edges[j]);
+                 
+            F32 dist = seg->edges[j].distSquared(p);
+            if(dist < minDist)
+            {
+               minDist = dist;
+               snapPoint.set(seg->edges[j]);
+            }
          }
       }
    }
@@ -1488,13 +1507,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
    glEnable(GL_BLEND);        // Enable transparency
 
-   // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this.  Don't render
-   // snapping vertex for a point item because... well, it's just lame.  We know where it's going to snap, already!
-   // By ensuring the item is selected, we avoid coloring a lone vertex that we might be moving.
-   if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && 
-      //mItems[mSnapVertex_i].geomType() != geomPoint &&
-      mItems[mSnapVertex_i].selected)
-
+   // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this
+   if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && mItems[mSnapVertex_i].selected)
       // Render snapping vertex as hollow magenta box
       renderVertex(SnappingVertex, convertLevelToCanvasCoord(mItems[mSnapVertex_i].vert(mSnapVertex_j)), NO_NUMBER, alpha);   
 
@@ -2511,7 +2525,6 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       else if(mDockItems[mDraggingDockItem].index == ItemTextItem)     
          offset.set(.4, 0);
 
-
       // Instantiate object so we are in essence dragging a non-dock item
       Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) - offset, true);
 
@@ -2716,6 +2729,9 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 // Increase selected wall thickness by amt
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
+   if(mLastUndoStateWasBarrierWidthChange < 2)
+      saveUndoState(mItems); 
+
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index == ItemBarrierMaker && (mItems[i].selected))
       {
@@ -2725,14 +2741,17 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
             mItems[i].width = LineItem::MAX_LINE_WIDTH;
 
          mItems[i].onGeomChanged();
-         mNeedToSave = true;
-         mAllUndoneUndoLevel = NONE;    // This change can't be undone
-      }
+      } 
+
+      mLastUndoStateWasBarrierWidthChange += (mLastUndoStateWasBarrierWidthChange ? 1 : 2);
 }
 
 // Decrease selected wall thickness by amt
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
+   if(mLastUndoStateWasBarrierWidthChange < 2)
+      saveUndoState(mItems); 
+
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].hasWidth() && (mItems[i].selected))
       {
@@ -2740,10 +2759,11 @@ void EditorUserInterface::decBarrierWidth(S32 amt)
          if(mItems[i].width < 1)
              mItems[i].width = 1;
          mItems[i].onGeomChanged();
-         mNeedToSave = true;
-         mAllUndoneUndoLevel = -1;    // This change can't be undone
       }
+
+      mLastUndoStateWasBarrierWidthChange += (mLastUndoStateWasBarrierWidthChange ? 1 : 2);
 }
+
 
 // Split wall/barrier on currently selected vertex/vertices
 void EditorUserInterface::splitBarrier()
@@ -3225,13 +3245,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          return;
       }
 
-      saveUndoState(mItems);     // Save undo state before we clear the selection
+      //saveUndoState(mItems);     // Save undo state before we clear the selection
       clearSelection();          // Unselect anything currently selected
 
       if(mItemHit != NONE && (mItems[mItemHit].geomType() == geomLine ||
                               mItems[mItemHit].geomType() >= geomPoly   ))
       {
-
          if(mItems[mItemHit].vertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
 
@@ -3278,12 +3297,12 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mMousePos = convertWindowToCanvasCoord(gMousePos);
       if(mCreatingPoly || mCreatingPolyline)          // Save any polygon/polyline we might be creating
       {
-         saveUndoState(mItems);
+         saveUndoState(mItems);             // Save state prior to addition of new polygon
 
          if(mNewItem.vertCount() > 1)
          {
             mItems.push_back(mNewItem);
-            mNewItem.onGeomChanged();    // For walls, needs to be added to item list BEFORE geomChanged() is run!
+            mItems.last().onGeomChanged();  // Walls need to be added to mItems BEFORE onGeomChanged() is run!
             mItems.sort(geometricSort);
          }
          mNewItem.invalidate();
@@ -3613,9 +3632,7 @@ void EditorUserInterface::finishedDragging()
          itemToLightUp = NONE;
       }
       else        // Dragged item off the dock, then back on  ==> nothing really changed
-      {
          mItems = mMostRecentState; // Essential undoes the dragging, so if we undo delete, our object will be back where it was before the delete
-      }
    }
 
    // Mouse not on dock... we were either dragging from the dock or moving something, need to save an undo state if anything changed
@@ -3944,12 +3961,8 @@ void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
    wallSegmentManager.deleteAllSegments();
 
    for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i].index != ItemBarrierMaker)
-         continue;
-
-      wallSegmentManager.buildWallSegmentEdgesAndPoints(&mItems[i]);
-   }
+      if(mItems[i].index == ItemBarrierMaker)
+         wallSegmentManager.buildWallSegmentEdgesAndPoints(&mItems[i]);
 }
 
 ////////////////////////////////////////
@@ -4127,8 +4140,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
    item->setExtent(allSegExtent);
 
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
-   for(S32 i = 0; i < items.size(); i++)
-      items[i]->onGeomChanged();
+   for(S32 j = 0; j < items.size(); j++)  
+      items[j]->onGeomChanged();
 }
 
 
@@ -4660,15 +4673,7 @@ void WorldItem::onGeomChanged()
       constructBarrierEndPoints(mVerts, width / gEditorUserInterface.getGridSize(), extendedEndPoints);
       getWallSegmentManager()->computeWallSegmentIntersections(this);
 
-
-      // Find any forcefields or turrets that might be mounted on our wall -- perhaps they can be resnapped
-      for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-         if( gEditorUserInterface.mItems[i].index == ItemForceField || 
-                                 gEditorUserInterface.mItems[i].index == ItemTurret )
-         {
-            gEditorUserInterface.mItems[i].snapEngineeredObject(NONE, gEditorUserInterface.mItems[i].vert(0));
-         }
-
+      gEditorUserInterface.recomputeAllEngineeredItems();
 
       // Find any forcefields that might intersect our new wall segment and recalc them
       for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
