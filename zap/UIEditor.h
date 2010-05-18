@@ -359,7 +359,7 @@ private:
    Vector<WorldItem> mDockItems;       // Items sitting in the dock
    Vector<WorldItem> mClipboard;       // Items on clipboard
 
-   S32 mLastUndoStateWasBarrierWidthChange;
+   bool mLastUndoStateWasBarrierWidthChange;
 
    void saveSelection();               // Save selection mask
    void restoreSelection();            // Restore selection mask

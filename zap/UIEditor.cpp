@@ -139,7 +139,7 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
    mItemHit = NONE;
    mEdgeHit = NONE;
 
-   mLastUndoStateWasBarrierWidthChange = 0;
+   mLastUndoStateWasBarrierWidthChange = false;
 
    mUndoItems.setSize(UNDO_STATES);
 }
@@ -301,7 +301,7 @@ void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cam
    
    mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
    mRedoingAnUndo = false;
-   mLastUndoStateWasBarrierWidthChange = max(mLastUndoStateWasBarrierWidthChange - 1, 0);
+   mLastUndoStateWasBarrierWidthChange = false;
 }
 
 
@@ -334,7 +334,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    itemToLightUp = NONE;
    autoSave();
 
-   mLastUndoStateWasBarrierWidthChange = 0;
+   mLastUndoStateWasBarrierWidthChange = false;
 }
    
 
@@ -2082,32 +2082,41 @@ S32 EditorUserInterface::countSelectedItems()
 }
 
 
+static S32 getNextItemId()
+{
+   static S32 nextItemId = 0;
+   return nextItemId++;
+}
+
+
 // Paste items on the clipboard
 void EditorUserInterface::pasteSelection()
 {
-   if(mDraggingObjects)    // Pasting while dragging can cause crashes!!
+   if(mDraggingObjects)     // Pasting while dragging can cause crashes!!
       return;
 
    S32 itemCount = mClipboard.size();
 
-    if(!itemCount)            // Nothing on clipboard, nothing to do
+    if(!itemCount)         // Nothing on clipboard, nothing to do
       return;
 
-   saveUndoState(mItems);     // So we can undo the paste
+   saveUndoState(mItems);  // So we can undo the paste
 
-   clearSelection();          // Only the pasted items should be selected
+   clearSelection();       // Only the pasted items should be selected
 
    Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
-   Point offset = pos - mClipboard[0].vert(0);    // Diff between mouse pos and original object (item will be pasted such that the first vertex is at mouse pos)
+
+   // Diff between mouse pos and original object (item will be pasted such that the first vertex is at mouse pos)
+   Point offset = pos - mClipboard[0].vert(0);    
 
    for(S32 i = 0; i < itemCount; i++)
    {
-      WorldItem newItem = mClipboard[i];
-      newItem.selected = true;
-      for(S32 j = 0; j < newItem.vertCount(); j++)
-         newItem.vert(j) += offset;
-      mItems.push_back(newItem);
-      newItem.onGeomChanged();
+      mItems.push_back(mClipboard[i]);
+      mItems.last().mId = getNextItemId();
+      mItems.last().selected = true;
+      for(S32 j = 0; j < mItems.last().vertCount(); j++)
+         mItems.last().setVert(mItems.last().vert(j) += offset, j);
+      mItems.last().onGeomChanged();
    }
    mItems.sort(geometricSort);
    validateLevel();
@@ -2127,7 +2136,7 @@ void EditorUserInterface::copySelection()
    S32 itemCount = mItems.size();
    for(S32 i = 0; i < itemCount; i++)
    {
-      if(mItems[i].selected /*|| (mItems[i].litUp && vertexToLightUp == NONE)*/)
+      if(mItems[i].selected)
       {
          WorldItem newItem = mItems[i];
          newItem.selected = false;
@@ -2584,7 +2593,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
          {
             mItems[i].setVert(mUnmovedItems[i].vert(j) + delta, j);
 
-            // If we are dragging a vertex, and not the entire item, we are likely changing the geometry, so notify the item
+            // If we are dragging a vertex, and not the entire item, we are changing the geom, so notify the item
             if(mItems[i].vertSelected(j))
                mItems[i].onGeomChanging();     
          }
@@ -2729,7 +2738,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
 // Increase selected wall thickness by amt
 void EditorUserInterface::incBarrierWidth(S32 amt)
 {
-   if(mLastUndoStateWasBarrierWidthChange < 2)
+   if(!mLastUndoStateWasBarrierWidthChange)
       saveUndoState(mItems); 
 
    for(S32 i = 0; i < mItems.size(); i++)
@@ -2743,13 +2752,13 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
          mItems[i].onGeomChanged();
       } 
 
-      mLastUndoStateWasBarrierWidthChange += (mLastUndoStateWasBarrierWidthChange ? 1 : 2);
+      mLastUndoStateWasBarrierWidthChange = true;
 }
 
 // Decrease selected wall thickness by amt
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
-   if(mLastUndoStateWasBarrierWidthChange < 2)
+   if(!mLastUndoStateWasBarrierWidthChange)
       saveUndoState(mItems); 
 
    for(S32 i = 0; i < mItems.size(); i++)
@@ -2761,7 +2770,7 @@ void EditorUserInterface::decBarrierWidth(S32 amt)
          mItems[i].onGeomChanged();
       }
 
-      mLastUndoStateWasBarrierWidthChange += (mLastUndoStateWasBarrierWidthChange ? 1 : 2);
+      mLastUndoStateWasBarrierWidthChange = true;
 }
 
 
@@ -3233,6 +3242,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // Ctrl-left click is same as right click for Mac users
    else if(keyCode == MOUSE_RIGHT || (keyCode == MOUSE_LEFT && getKeyState(KEY_CTRL)))
    {
+      if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))         // Prevent weirdness
+         return;  
+
       mMousePos = convertWindowToCanvasCoord(gMousePos);
 
       if(mCreatingPoly || mCreatingPolyline)
@@ -3254,6 +3266,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(mItems[mItemHit].vertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
 
+         mMostRecentState = mItems;
          Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
@@ -3269,8 +3282,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          mItems[mItemHit].onGeomChanging();
 
          mMouseDownPos = newVertex;
-
-         mItems[mItemHit].onGeomChanged();
+         
       }
       else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
       {
@@ -3293,6 +3305,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
    else if(keyCode == MOUSE_LEFT)
    {
+      if(getKeyState(MOUSE_RIGHT))         // Prevent weirdness
+         return;
+
       mDraggingDockItem = NONE;
       mMousePos = convertWindowToCanvasCoord(gMousePos);
       if(mCreatingPoly || mCreatingPolyline)          // Save any polygon/polyline we might be creating
@@ -3551,6 +3566,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mShowingReferenceShip = true;
 }
 
+
 void EditorUserInterface::onKeyUp(KeyCode keyCode)
 {
    switch(keyCode)
@@ -3588,6 +3604,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
          mShowingReferenceShip = false;
          break;
       case MOUSE_LEFT:
+      case MOUSE_RIGHT:    // test
          mMousePos = convertWindowToCanvasCoord(gMousePos);
 
          if(mDragSelecting)      // We were drawing a selection box
@@ -3632,15 +3649,17 @@ void EditorUserInterface::finishedDragging()
          itemToLightUp = NONE;
       }
       else        // Dragged item off the dock, then back on  ==> nothing really changed
-         mItems = mMostRecentState; // Essential undoes the dragging, so if we undo delete, our object will be back where it was before the delete
+         mItems = mMostRecentState; // Essential undoes the dragging, so if we undo delete, 
+                                    // our object will be back where it was before the delete
    }
 
-   // Mouse not on dock... we were either dragging from the dock or moving something, need to save an undo state if anything changed
+   // Mouse not on dock... we were either dragging from the dock or moving something, 
+   // need to save an undo state if anything changed
    else      
    {
       if(mDraggingDockItem == NONE)    // Not dragging from dock - user is moving object around screen
       {
-         // Size can change if we somehow insert/paste/whatever while we're dragging.  Shouldn't happen, but used to...
+         // Size can change if we somehow insert/paste/whatever while dragging.  Shouldn't happen, but used to...
          TNLAssert(mItems.size() == mUnmovedItems.size(), "Selection size changed while dragging!");   
          if(mItems.size() != mUnmovedItems.size())
             return;     // It's this or crash...
@@ -3671,7 +3690,6 @@ void EditorUserInterface::finishedDragging()
             autoSave();
             return;
          }
-
       }
    }
 }
@@ -4274,8 +4292,6 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
 }
 
 
-static S32 nextWorldItemId = 0;
-
 void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
 {
    index = itemType;
@@ -4285,8 +4301,7 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
    mAnyVertsSelected = false;
    litUp = false;
    width = xwidth;
-   mId = nextWorldItemId;
-   nextWorldItemId++;
+   mId = getNextItemId();
    snapped = false;
 
    if(itemDef[itemType].hasText)
@@ -4684,10 +4699,12 @@ void WorldItem::onGeomChanged()
          }
    }
 
-   else if(index == ItemForceField)
+   else if(index == ItemForceField || index == ItemTurret)
    {
-      // Find the end-point of the projected forcefield
-      findForceFieldEnd();
+      snapEngineeredObject(NONE, mVerts[0]);
+
+      if(index == ItemForceField)
+         findForceFieldEnd();    // Find the end-point of the projected forcefield
    }
 }
 
