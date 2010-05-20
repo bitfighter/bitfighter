@@ -97,6 +97,8 @@ public:
 
    S32 BucketWidth;     // Width/height of each bucket in pixels
 
+   DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, bool format, const Point &rayStart, const Point &rayEnd, 
+                                 float &collisionTime, Point &surfaceNormal);
    DatabaseObject *findObjectLOS(U32 typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
                                  float &collisionTime, Point &surfaceNormal);
    bool pointCanSeePoint(const Point &point1, const Point &point2);

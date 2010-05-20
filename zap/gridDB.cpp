@@ -121,22 +121,32 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
 }
 
 
-// Assumes a polygon in format A-B-C-D
-bool PolygonLineIntersect(Point *poly, U32 vertexCount, Point p1, Point p2, float &collisionTime, Point &normal)
+// Assumes a polygon in format A-B-C-D if format is true, A-B, C-D, E-F if format is false
+bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, Point p2, 
+                          float &collisionTime, Point &normal)
 {
    Point v1 = poly[vertexCount - 1];
+   Point v2, dv;
    Point dp = p2 - p1;
+
+   S32 inc = format ? 1 : 2;
 
    F32 currentCollisionTime = 100;
 
-   for(U32 i = 0; i < vertexCount; i++)
+   for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
    {
-      Point v2 = poly[i];
+      if(format)     // A-B C-D format ==> don't examine segment B-C
+         v2.set(poly[i]);
+      else           // A-B-C-D format ==> examine every contiguous pair of vertices
+      {
+         v1.set(poly[i]);
+         v2.set(poly[i + 1]);
+      }
 
       // edge from v1 -> v2
       // ray from p1 -> p2
 
-      Point dv = v2 - v1;
+      dv.set(v2 - v1);
 
       // p1.x + s * dp.x = v1.x + t * dv.x
       // p1.y + s * dp.y = v1.y + t * dv.y
@@ -174,8 +184,8 @@ bool PolygonLineIntersect(Point *poly, U32 vertexCount, Point p1, Point p2, floa
                currentCollisionTime = s;
             }
          }
-      }
-      v1 = v2;
+      } 
+      v1.set(v2);    // No real effect if format == false
    }
    if(currentCollisionTime <= 1)
    {
@@ -214,7 +224,17 @@ bool CircleLineIntersect(Point center, float radius, Point rayStart, Point rayEn
 // Find objects along a ray, returning first discovered object, along with time of
 // that collision and a Point representing the normal angle at intersection point
 //             (at least I think that's what's going on here - CE)
-DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, const Point &rayStart, const Point &rayEnd, 
+DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, 
+                                            const Point &rayStart, const Point &rayEnd, 
+                                            float &collisionTime, Point &surfaceNormal)
+{
+   return findObjectLOS(typeMask, stateIndex, false, rayStart, rayEnd, collisionTime, surfaceNormal);
+}
+
+
+// Format is a passthrough to PolygonLineIntersect().  Will be true for most items, false for walls in editor.
+DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool format,
+                                            const Point &rayStart, const Point &rayEnd, 
                                             float &collisionTime, Point &surfaceNormal)
 {
    Rect queryRect(rayStart, rayEnd);
@@ -243,7 +263,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, const 
       if(fillVector[i]->getCollisionPoly(poly))
       {
          Point normal;
-         if(PolygonLineIntersect(&poly[0], poly.size(), rayStart, rayEnd, ct, normal))
+         if(PolygonLineIntersect(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
          {
             if(ct < collisionTime)
             {
@@ -278,7 +298,7 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
    F32 time;
    Point coll;
 
-   return( findObjectLOS(BarrierType, MoveObject::ActualState, point1, point2, time, coll) == NULL );
+   return( findObjectLOS(BarrierType, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
 }
 
 ////////////////////////////////////////

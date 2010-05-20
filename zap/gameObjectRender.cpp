@@ -714,22 +714,36 @@ void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text)
 }
 
 
-void renderPolygon(Vector<Point> &fill, Vector<Point> &outline, Color fillColor, Color outlineColor)
+// Renders fill in the form of a series of points representing triangles
+void renderTriangulatedPolygonFill(const Vector<Point> &fill)
 {
-   glColor(fillColor);
    for(S32 i = 0; i < fill.size(); i+=3)
    {
       glBegin(GL_POLYGON);
-      for(S32 j = i; j < i + 3; j++)
-         glVertex2f(fill[j].x, fill[j].y);
+         for(S32 j = i; j < i + 3; j++)
+            glVertex2f(fill[j].x, fill[j].y);
       glEnd();
    }
+}
 
-   glColor(outlineColor);
+
+void renderPolygonOutline(const Vector<Point> &outline)
+{
    glBegin(GL_LINE_LOOP);
       for(S32 i = 0; i < outline.size(); i++)
          glVertex2f(outline[i].x, outline[i].y);
    glEnd();
+}
+
+
+void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, 
+                   const Color &fillColor, const Color &outlineColor)
+{
+   glColor(fillColor);
+   renderTriangulatedPolygonFill(fillPoints);
+
+   glColor(outlineColor);
+   renderPolygonOutline(outlinePoints);
 }
 
 

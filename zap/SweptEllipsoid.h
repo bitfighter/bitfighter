@@ -72,9 +72,9 @@ bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const P
 bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b);
 
-Point centroid(const Vector<Point> &polyPoints);
+Point findCentroid(const Vector<Point> &polyPoints);
 F32 area(const Vector<Point> &polyPoints);
-F32 angleOfLongestSide(Vector<Point> &polyPoints);
+F32 angleOfLongestSide(const Vector<Point> &polyPoints);
 
 // These functions returns true if it found an appropriate point, false if not
 bool findNormalPoint(const Point &p, const Point &s1, const Point &s2, Point &closest);

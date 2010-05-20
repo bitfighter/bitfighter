@@ -108,6 +108,7 @@ public:
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
+   static const U32 MIN_LINE_WIDTH = 1;
    static const U32 MAX_LINE_WIDTH = 255;
 
    TNL_DECLARE_CLASS(LineItem);

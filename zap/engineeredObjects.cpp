@@ -139,7 +139,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    Point normal;
    Point anchor;
 
-   if(!findAnchorPointAndNormal(getGridDatabase(), pos, 1, anchor, normal))
+   if(!findAnchorPointAndNormal(getGridDatabase(), pos, 1, true, anchor, normal))
       return false;      // Found no mount point
 
    mAnchorPoint.set(anchor + normal);
@@ -155,7 +155,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 
 // This is used for both positioning items in-game and for snapping them to walls in the editor
 DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scaleFact, 
-                                                           Point &anchor, Point &normal)
+                                                           bool format, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
    DatabaseObject *closestWall = NULL;
@@ -170,7 +170,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
       Point n;
 
       // Look for walls
-      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, pos, pos + dir, t, n);
+      DatabaseObject *wall = db->findObjectLOS(BarrierType, MoveObject::ActualState, format, pos, pos + dir, t, n);
 
       if(wall != NULL)     // Found one!
       {

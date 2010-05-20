@@ -73,7 +73,11 @@ struct WallSegment : public DatabaseObject
    ////////////////////
    //  DatabaseObject methods
    GridDatabase *getGridDatabase();
-   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = corners; return true; }
+
+   // Note that the poly returned here is different than what you might expect -- it is composed of the edges,
+   // not the corners, and is thus in A-B, C-D, E-F format rather than the more typical A-B-C-D format returned
+   // by getCollisionPoly() elsewhere in the game.  Therefore, it needs to be handled differently.
+   bool getCollisionPoly(Vector<Point> &polyPoints) { polyPoints = edges; return true; }  
    bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) { return false; }
    bool isCollisionEnabled() { return true; }
 };
@@ -172,7 +176,10 @@ public:
    bool hasWidth();
    bool anyVertsSelected() { return mAnyVertsSelected; }
 
-   void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point, used by all items
+   // Following are used by all items; scale has wall specific code
+   void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point
+   void scale(const Point &center, F32 scale);                 // Scale item centered on center
+
 
    // These methods are mostly for lines and polygons
    void selectVert(S32 vertIndex);
@@ -202,6 +209,16 @@ public:
    Point forceFieldEnd;      // Point where forcefield terminates.  Only used for turrets.
    WallSegment *forceFieldMountSegment;   // Segment where forcefield is mounted
    WallSegment *forceFieldEndSegment;     // Segment where forcefield ends
+
+   // The following are for polygonal items only
+   Vector<Point> fillPoints;
+   Point centroid;
+
+   void processEndPoints();      // Wall only
+
+   void decreaseWidth(S32 amt);  // Wall only
+   void increaseWidth(S32 amt);  // Wall only
+
 
    // Find mount point or turret or forcefield closest to pos
    bool snapEngineeredObject(F32 overridingSnapDistance, const Point &pos);  
@@ -390,7 +407,7 @@ private:
    void renderTextEntryOverlay();
    void renderReferenceShip();
    F32 renderTextItem(WorldItem &item, F32 alpha);          // Returns size of text
-   void setTranslationAndScale(Point pos);
+   void setTranslationAndScale(const Point &pos);
 
    bool mCreatingPoly;
    bool mCreatingPolyline;
@@ -473,6 +490,7 @@ public:
                            bool selected, bool highlighted, S32 team, F32 alpha = 1.0, bool convert = true);   
    void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 
+   void setLevelToCanvasCoordConversion(bool convert = true);
 
    WallSegmentManager *getWallSegmentManager() { return &wallSegmentManager; }
 
@@ -501,6 +519,7 @@ public:
    void setCurrentTeam(S32 currentTeam);        // Set current team for selected items, also sets team for all dock items
    void flipSelectionVertical();                // Flip selection along vertical axis
    void flipSelectionHorizontal();              // Flip selection along horizontal axis
+   void scaleSelection(F32 scale);              // Scale selection by scale
    void rotateSelection(F32 angle);             // Rotate selecton by angle
 
    void buildAllWallSegmentEdgesAndPoints();    // Populate wallSegments from our collection of worldItems

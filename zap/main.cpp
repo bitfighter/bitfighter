@@ -99,6 +99,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
 <li>Grid fades when snapping disabled</li>
 <li>Changing wall widths is now undoable</li>
+<li>Arbitrary scaling of selected items now works with ctrl-shift-x</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
@@ -248,6 +249,8 @@ Color gNeutralTeamColor(0.8, 0.8, 0.8);         // Objects that are neutral (on 
 Color gHostileTeamColor(0.5, 0.5, 0.5);         // Objects that are "hostile-to-all" (on team -2)
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(0, 1, 0);
+Color gWallOutlineColor(0, 0, 1);
+Color gWallFillColor(0, 0, 0.15);
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 

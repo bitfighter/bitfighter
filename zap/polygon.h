@@ -65,7 +65,7 @@ protected:
 
       // We don't ever use this, but it seems like we should compute it anyway...
       if(size)
-         mCentroid = centroid(mPolyBounds);
+         mCentroid = findCentroid(mPolyBounds);
 
       return size;
    }
@@ -86,7 +86,7 @@ protected:
          mPolyBounds.push_back(p);
       }
 
-      mCentroid = centroid(mPolyBounds);
+      mCentroid = findCentroid(mPolyBounds);
    }
 
 
@@ -121,7 +121,7 @@ public:
       if(size)
       {
          Triangulate::Process(mPolyBounds, mPolyFill);
-         mCentroid = centroid(mPolyBounds);
+         mCentroid = findCentroid(mPolyBounds);
          mLabelAngle = angleOfLongestSide(mPolyBounds);
       }
 

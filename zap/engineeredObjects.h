@@ -90,7 +90,7 @@ public:
    void healObject(S32 time);
 
    // Figure out where to put our turrets and forcefield projectors.  Will return NULL if no mount points found.
-   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scale, 
+   static DatabaseObject *findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scale, bool format, 
                                                    Point &anchor, Point &normal);
 
    // LuaItem interface

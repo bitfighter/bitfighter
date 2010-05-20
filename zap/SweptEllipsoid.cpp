@@ -570,8 +570,10 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
 }
 
 
+// Takes points in contour, triangulates and put the results in result
 bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 {
+   result.clear();
   /* allocate and initialize list of Vertices in polygon */
 
   int n = contour.size();
@@ -634,7 +636,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
-Point centroid(const Vector<Point> &polyPoints)
+Point findCentroid(const Vector<Point> &polyPoints)
 {
    F32 area6 = area(polyPoints) * 6;
    F32 x = 0;
@@ -659,7 +661,7 @@ Point centroid(const Vector<Point> &polyPoints)
 
 
 // Find longest edge, so we can align text with it...
-F32 angleOfLongestSide(Vector<Point> &polyPoints)
+F32 angleOfLongestSide(const Vector<Point> &polyPoints)
 {
    Point start;
    Point end;

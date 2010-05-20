@@ -537,7 +537,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderLoadoutZone(Color(0, 0, 1), o, f, centroid(o), angleOfLongestSide(o));
+               renderLoadoutZone(Color(0, 0, 1), o, f, findCentroid(o), angleOfLongestSide(o));
             }
 
             break;
@@ -553,12 +553,14 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
                Vector<Point> f;     // fill
                Triangulate::Process(o, f);
 
-               renderNexus(o, f, centroid(o), angleOfLongestSide(o), gClientGame->getCurrentTime() % 5000 > 2500, 0);
+               renderNexus(o, f, findCentroid(o), angleOfLongestSide(o), 
+                                       gClientGame->getCurrentTime() % 5000 > 2500, 0);
             }
             break;
 
-         case 22:    // Asteroid
-            renderAsteroid(Point(0,-10), (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    // Using goofball factor to keep out of sync with Nexus graphic
+         case 22:    // Asteroid... using goofball factor to keep out of sync with Nexus graphic
+            renderAsteroid(Point(0,-10), 
+                     (S32)(gClientGame->getCurrentTime() / 2891) % Asteroid::getDesignCount(), .7);    
             break;
 
          case 23:    // SpeedZone
