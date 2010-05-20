@@ -111,7 +111,6 @@ static const F32 asteroidRenderSize[] = { .8, .4, .2, -1 };      // Must end in 
 static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
 
 static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(S32) - 1;
-static const F32 AsteroidRadius = 89;
 
 static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wow!  A 3D array!
 {
@@ -133,7 +132,9 @@ private:
    S32 mDesign;
 
 public:
-   Asteroid();     // Constructor
+   Asteroid();     // Constructor  
+
+   static const S32 ASTEROID_RADIUS = 89;
 
    void renderItem(Point pos);
    bool getCollisionPoly(Vector<Point> &polyPoints);
@@ -192,9 +193,10 @@ public:
 
 class TestItem : public Item
 {
-
 public:
    TestItem();     // Constructor
+
+   static const S32 TEST_ITEM_RADIUS = 60;
 
    void renderItem(Point pos);
    void damageObject(DamageInfo *theInfo);
@@ -222,6 +224,8 @@ class ResourceItem : public Item
 {
 public:
    ResourceItem();      // Constructor
+
+   static const S32 RESOURCE_ITEM_RADIUS = 20;
 
    void renderItem(Point pos);
    bool collide(GameObject *hitObject);

@@ -94,7 +94,7 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
       mPos = pos;
       mDest.push_back(dest);
       Rect r(pos, pos);
-      r.expand(Point(TeleporterRadius, TeleporterRadius));
+      r.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
       setExtent(r);
    }
    else  
@@ -147,7 +147,7 @@ void Teleporter::unpackUpdate(GhostConnection *connection, BitStream *stream)
          mDest.push_back(dest);
       }
       Rect r(mPos, mPos);
-      r.expand(Point(TeleporterRadius, TeleporterRadius));
+      r.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
       setExtent(r);
    }
    if(stream->readFlag() && isGhost())
@@ -182,7 +182,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
 
    // Check for players within range. If so, send them to dest
    Rect queryRect(mPos, mPos);
-   queryRect.expand(Point(TeleporterRadius, TeleporterRadius));
+   queryRect.expand(Point(TELEPORTER_RADIUS, TELEPORTER_RADIUS));
 
    foundObjects.clear();
    findObjects(ShipType | RobotType, foundObjects, queryRect);
@@ -208,7 +208,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
       Ship *s = dynamic_cast<Ship *>(foundObjects[i]);
-      if((mPos - s->getRenderPos()).len() < TeleporterRadius + s->getRadius())
+      if((mPos - s->getRenderPos()).len() < TELEPORTER_RADIUS + s->getRadius())
       {
          mLastDest = TNL::Random::readI(0, mDest.size() - 1);
          Point newPos = s->getActualPos() - mPos + mDest[mLastDest];    
@@ -233,7 +233,7 @@ void Teleporter::render()
    else
       r = F32(TeleporterExpandTime - timeout) / F32(TeleporterExpandTime);
 
-   renderTeleporter(mPos, 0, true, mTime, r, TeleporterRadius, 1.0, mDest, false);
+   renderTeleporter(mPos, 0, true, mTime, r, TELEPORTER_RADIUS, 1.0, mDest, false);
 }
 
 // Lua methods

@@ -153,6 +153,7 @@ public:
 
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
+   S32 getRadius();
 
    Vector<Point> mRenderLineSegments;  // Used only by barriers
 

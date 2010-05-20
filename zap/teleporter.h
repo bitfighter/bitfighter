@@ -28,7 +28,7 @@
 #include "projectile.h"   // For LuaItem
 #include "point.h"
 
-#include "../tnl/tnlNetObject.h"
+#include "tnlNetObject.h"
 
 namespace Zap
 {
@@ -45,7 +45,7 @@ public:
    U32 timeout;
    U32 mTime;
 
-   static const S32 TeleporterRadius = 75;       // Overall size of the teleporter
+   static const S32 TELEPORTER_RADIUS = 75;  // Overall size of the teleporter
 
 
    enum {
@@ -53,7 +53,7 @@ public:
       TeleportMask = BIT(1),
 
       TeleporterTriggerRadius = 50,
-      TeleporterDelay = 1500,             // Time teleporter remains idle after it has been used
+      TeleporterDelay = 1500,                // Time teleporter remains idle after it has been used
       TeleporterExpandTime = 1350,
       TeleportInExpandTime = 750,
       TeleportInRadius = 120,

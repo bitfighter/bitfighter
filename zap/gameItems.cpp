@@ -177,7 +177,7 @@ static F32 asteroidVel = 250;
 
 
 // Constructor
-Asteroid::Asteroid() : Item(Point(0,0), true, AsteroidRadius, 4)
+Asteroid::Asteroid() : Item(Point(0,0), true, ASTEROID_RADIUS, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= AsteroidType;
@@ -209,7 +209,7 @@ void Asteroid::renderItem(Point pos)
 bool Asteroid::getCollisionCircle(U32 state, Point &center, F32 &radius)
 {
    center = mMoveState[state].pos;
-   radius = AsteroidRadius * asteroidRenderSize[mSizeIndex];
+   radius = F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex];
    return true;
 }
 
@@ -243,7 +243,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    }
 
    setMaskBits(ItemChangedMask);    // So our clients will get new size
-   setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
+   setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
 
    F32 ang = TNL::Random::readF() * Float2Pi;
    //F32 vel = asteroidVel;
@@ -251,7 +251,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    setPosAng(getActualPos(), ang);
 
    Asteroid *newItem = dynamic_cast<Asteroid *>(TNL::Object::create("Asteroid"));
-   newItem->setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
+   newItem->setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
 
    F32 ang2;
    do
@@ -300,7 +300,7 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())
    {
       mSizeIndex = stream->readEnum(mSizeIndexLength);
-      setRadius(AsteroidRadius * asteroidRenderSize[mSizeIndex]);
+      setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
       mDesign = stream->readEnum(AsteroidDesigns);
 
       if(!mInitial)
@@ -367,7 +367,7 @@ S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); 
 TNL_IMPLEMENT_NETOBJECT(TestItem);
 
 // Constructor
-TestItem::TestItem() : Item(Point(0,0), true, 60, 4)
+TestItem::TestItem() : Item(Point(0,0), true, TEST_ITEM_RADIUS, 4)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= TestItemType | TurretTargetType;
@@ -427,7 +427,7 @@ Lunar<TestItem>::RegType TestItem::methods[] =
 TNL_IMPLEMENT_NETOBJECT(ResourceItem);
 
 // Constructor
-ResourceItem::ResourceItem() : Item(Point(0,0), true, 20, 1)
+ResourceItem::ResourceItem() : Item(Point(0,0), true, RESOURCE_ITEM_RADIUS, 1)
 {
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= ResourceItemType | TurretTargetType;

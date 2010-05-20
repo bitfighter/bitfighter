@@ -238,22 +238,22 @@ struct GameItemRec
 // Remember to keep these properly aligned with GameItems enum                                 display
 //   Name,                 hasWidth, hasTeam, canHaveNoTeam, hasText, hasRepop,   geom,        letter, special, prettyNamePlural        onDockName   onScreenName      description
 GameItemRec itemDef[] = {
-   { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    false,  "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
+   { "Spawn",               false,    true,      false,       false,   false,   geomPoint,      'S',    true,   "Spawn points",           "Spawn",    "Spawn",        "Location where ships start.  At least one per team is required. [G]" },
    { "SpeedZone",           false,    false,     true,        false,   false,   geomSimpleLine,  0,     false,  "GoFasts",                "GoFast",   "GoFast",       "Makes ships go fast in direction of arrow. [P]" },
-   { "SoccerBallItem",      false,    false,     false,       false,   false,   geomPoint,      0 /*'B'*/,    true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
+   { "SoccerBallItem",      false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Soccer balls",           "Ball",     "Ball",         "Soccer ball, can only be used in Soccer games." },
    { "FlagItem",            false,    true,      true,        false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
-   { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     false,  "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
+   { "FlagSpawn",           false,    true,      true,        false,   true,    geomPoint,       0,     true,   "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
    { "LineItem",            true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
-   { "TestItem",            false,    false,     false,       false,   false,   geomPoint,      0 /*'x'*/,    true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
+   { "TestItem",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
    { "Asteroid",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
    { "AsteroidSpawn",       false,    false,     false,       false,   true,    geomPoint,       0,     true,   "Asteroid spawn points",  "ASP",      "AsteroidSpawn","Periodically spawns a new asteroid." },
-   { "Mine",                false,    false,     true,        false,   false,   geomPoint,      'M',    false,  "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
+   { "Mine",                false,    false,     true,        false,   false,   geomPoint,      'M',    true,   "Mines",                  "Mine",     "Mine",         "Mines can be prepositioned, and are are \"hostile to all\". [M]" },
    { "SpyBug",              false,    true,      true,        false,   false,   geomPoint,      'S',    false,  "Spy bugs",               "Spy Bug",  "Spy Bug",      "Remote monitoring device that shows enemy ships on the commander's map. [Ctrl-B]" },
-   { "ResourceItem",        false,    false,     false,       false,   false,   geomPoint,      0 /*'r'*/,    true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
+   { "ResourceItem",        false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Resource items",         "Res.",     "Resource",     "Small bouncy object that floats around and gets in the way." },
    { "LoadoutZone",         false,    true,      true,        false,   false,   geomPoly,        0,     false,  "Loadout zones",          "Loadout",  "Loadout",      "Area to finalize ship modifications.  Each team should have at least one." },
    { "HuntersNexusObject",  false,    false,     true,        false,   false,   geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
    { "SlipZone",            false,    false,     true,        false,   false,   geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Slip Zone",    "Not yet implemented." },
@@ -1603,12 +1603,12 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                   if(!i && (item.selected || item.litUp) && !isBeingEdited)
                      glColor(drawColor);
 
-                  glVertex(pos);      // Draw connecting line
+                  glVertex(pos);                 // Draw connecting line
                   glVertex(dest);
                glEnd();
             }
 
-            glLineWidth(gDefaultLineWidth);         // Restore default value
+            glLineWidth(gDefaultLineWidth);      // Restore default value
          }
 
          glPushMatrix();
@@ -1618,7 +1618,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                Vector<Point> dest;
                dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
 
-               renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TeleporterRadius, 1, dest, false);
+               renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
             }
             else if(item.index == ItemSpeedZone)
                renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.vert(1))), gClientGame->getCurrentTime());
@@ -1789,25 +1789,39 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemFlagSpawn)    // Draw flag spawn point
       {
-         glPushMatrix();
-            glTranslatef(pos.x+1, pos.y, 0);
-            glScalef(0.4, 0.4, 1);
-            renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : NULL, alpha);
+         if(mShowingReferenceShip && !isDockItem)
+         {
+            // Do nothing
+         }
+         else
+         {
+            glPushMatrix();
+               glTranslatef(pos.x+1, pos.y, 0);
+               glScalef(0.4, 0.4, 1);
+               renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : NULL, alpha);
 
-            glColor(hideit ? grayedOutColorDim : white, alpha);
-            drawCircle(Point(-4,0), 26);
-         glPopMatrix();
+               glColor(hideit ? grayedOutColorDim : white, alpha);
+               drawCircle(Point(-4,0), 26);
+            glPopMatrix();
+         }
       }
       else if(item.index == ItemAsteroidSpawn)    // Draw asteroid spawn point
       {
-         glPushMatrix();
-            glTranslatef(pos.x, pos.y, 0);
-            glScalef(0.8, 0.8, 1);
-            renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? grayedOutColorDim : NULL, alpha);
+         if(mShowingReferenceShip && !isDockItem)
+         {
+            // Do nothing
+         }
+         else
+         {
+            glPushMatrix();
+               glTranslatef(pos.x, pos.y, 0);
+               glScalef(0.8, 0.8, 1);
+               renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? grayedOutColorDim : NULL, alpha);
 
-            glColor(hideit ? grayedOutColorDim : white, alpha);
-            drawCircle(Point(0, 0), 13);
-         glPopMatrix();
+               glColor(hideit ? grayedOutColorDim : white, alpha);
+               drawCircle(Point(0, 0), 13);
+            glPopMatrix();
+         }
       }
       else if(item.index == ItemBouncyBall)   // Draw testitem
       {
@@ -1866,11 +1880,21 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemMine)  // And a mine
       {
-         glColor(hideit ? grayedOutColorDim : Color(.7,.7,.7), alpha);
-         drawCircle(pos, 9);
+         if(mShowingReferenceShip && !isDockItem) 
+         {
+             glPushMatrix();
+               setTranslationAndScale(pos);
+               renderMine(pos, true, true);
+            glPopMatrix();
+         }
+         else
+         {
+            glColor(hideit ? grayedOutColorDim : Color(.7,.7,.7), alpha);
+            drawCircle(pos, 9);
 
-         glColor(hideit ? grayedOutColorDim : Color(.1,.3,.3), alpha);
-         drawCircle(pos, 5);
+            glColor(hideit ? grayedOutColorDim : Color(.1,.3,.3), alpha);
+            drawCircle(pos, 5);
+         }
       }
       else if(item.index == ItemSpyBug)  // And a spy bug
       {
@@ -1904,7 +1928,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       else if(item.index == ItemTurret || item.index == ItemForceField)
       { 
-         if(!isDockItem && item.snapped && mCurrentScale > 80)      // Generic rendering when we're too far out
+         if(!isDockItem && item.snapped && mCurrentScale > 70)      // Generic rendering when we're too far out
          {
             if(item.index == ItemTurret)
             {
@@ -1937,7 +1961,14 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       else                             // Draw anything else
-         renderGenericItem(pos, c, alpha);
+      {
+         if(mShowingReferenceShip && !isDockItem)
+         {
+            // Do nothing
+         }
+         else
+            renderGenericItem(pos, c, alpha);
+      }
 
 
       // If this is an item that has a repop attribute, and the item is selected, draw the text
@@ -1984,17 +2015,22 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
       }
 
-      if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  // Draw highlighted border around item if selected
+      // Draw highlighted border around item if selected
+      if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  
       {
-         Point pos = convertLevelToCanvasCoord(item.vert(0));            // Note that dockItems are never selected!
+         Point pos = convertLevelToCanvasCoord(item.vert(0));   // Dock items are never selected!
 
          glColor(drawColor);
 
+         S32 radius = item.getRadius();
+         S32 highlightRadius = (radius == NONE) ? 10 : (radius * mCurrentScale / mGridSize);
+
+
          glBegin(GL_LINE_LOOP);
-            glVertex2f(pos.x - 10, pos.y - 10);
-            glVertex2f(pos.x + 10, pos.y - 10);
-            glVertex2f(pos.x + 10, pos.y + 10);
-            glVertex2f(pos.x - 10, pos.y + 10);
+            glVertex2f(pos.x - highlightRadius, pos.y - highlightRadius);
+            glVertex2f(pos.x + highlightRadius, pos.y - highlightRadius);
+            glVertex2f(pos.x + highlightRadius, pos.y + highlightRadius);
+            glVertex2f(pos.x - highlightRadius, pos.y + highlightRadius);
          glEnd();
       }
 
@@ -2359,7 +2395,7 @@ void EditorUserInterface::flipSelectionVertical()
 
 void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitVertex)
 {
-   const S32 targetSize = 8;
+   const S32 VERTEX_HIT_RADIUS = 8;
    hitItem = NONE;
    hitVertex = NONE;
 
@@ -2373,17 +2409,16 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
          if(x && !mItems[i].selected && !mItems[i].anyVertsSelected())
             continue;
 
-         if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode
+         if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)  // Only select walls in CTRL-A mode
             continue;
 
-         WorldItem &p = mItems[i];
-         if(p.geomType() <= geomPoint)
+         if(mItems[i].geomType() <= geomPoint)
             continue;
 
-         for(S32 j = p.vertCount() - 1; j >= 0; j--)
+         for(S32 j = mItems[i].vertCount() - 1; j >= 0; j--)
          {
-            Point v = convertLevelToCanvasCoord(p.vert(j));
-            if(fabs(v.x - canvasPos.x) < targetSize && fabs(v.y - canvasPos.y) < targetSize)
+            Point v = convertLevelToCanvasCoord(mItems[i].vert(j));
+            if(fabs(v.x - canvasPos.x) < VERTEX_HIT_RADIUS && fabs(v.y - canvasPos.y) < VERTEX_HIT_RADIUS)
             {
                hitItem = i;
                hitVertex = j;
@@ -2450,18 +2485,22 @@ void EditorUserInterface::findHitItemAndEdge()
          if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode...
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
-         WorldItem &p = mItems[i];
+
          if(mItems[i].geomType() == geomPoint)
          {
-            Point pos = convertLevelToCanvasCoord(p.vert(0));
-            if(fabs(mMousePos.x - pos.x) < POINT_HIT_RADIUS && fabs(mMousePos.y - pos.y) < POINT_HIT_RADIUS)
+            S32 radius = mItems[i].getRadius();
+            S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : (radius * mCurrentScale / mGridSize);
+
+            Point pos = convertLevelToCanvasCoord(mItems[i].vert(0));
+            if(fabs(mMousePos.x - pos.x) < targetRadius && fabs(mMousePos.y - pos.y) < targetRadius)
             {
                mItemHit = i;
                return;
             }
          }
 
-         Vector<Point> verts = p.getVerts();    // Make a copy of the items vertices that we can add to in the case of a loop
+         // Make a copy of the items vertices that we can add to in the case of a loop
+         Vector<Point> verts = mItems[i].getVerts();    
 
          if(mItems[i].geomType() == geomPoly)   // Add first point to the end to create last side on poly
             verts.push_back(verts.first());
@@ -2539,17 +2578,21 @@ void EditorUserInterface::onMouseMoved(S32 x, S32 y)
    vertexToLightUp = NONE;
    itemToLightUp = NONE;
 
-   if(vertexHit != NONE && !mItems[vertexHitPoly].vertSelected(vertexHit))   // Hit a vertex that wasn't already selected
+   // Hit a vertex that wasn't already selected
+   if(vertexHit != NONE && !mItems[vertexHitPoly].vertSelected(vertexHit))   
    {
       vertexToLightUp = vertexHit;
       itemToLightUp = vertexHitPoly;
    }
-   else if(mItemHit != NONE && !mItems[mItemHit].selected)                   // We hit an item that wasn't already selected
+
+   // We hit an item that wasn't already selected
+   else if(mItemHit != NONE && !mItems[mItemHit].selected)                   
    {
       itemToLightUp = mItemHit;
    }
 
-   if(mItemHit != NONE && !mItems[mItemHit].selected && mItems[mItemHit].geomType() == geomPoint)  // Check again, and take a point object in preference to a vertex
+   // Check again, and take a point object in preference to a vertex
+   if(mItemHit != NONE && !mItems[mItemHit].selected && mItems[mItemHit].geomType() == geomPoint)  
    {
       itemToLightUp = mItemHit;
       vertexToLightUp = NONE;
@@ -2632,9 +2675,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    // (*origPoint - mMouseDownPos) represents distance from item's snap vertex where we "grabbed" it
-   if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
-      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)) - *origPoint;
-   else
+//if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
+//   delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)) - *origPoint;
+//else
       delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + *origPoint - mMouseDownPos) - *origPoint;
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
@@ -2685,7 +2728,8 @@ void EditorUserInterface::findSnapVertex()
          if(mEdgeHit + 1 == mItems[mItemHit].vertCount())
             v2 = 0;
 
-         if(mItems[mItemHit].vert(v1).distSquared(mouseLevelCoord) < mItems[mItemHit].vert(v2).distSquared(mouseLevelCoord))
+         if( mItems[mItemHit].vert(v1).distSquared(mouseLevelCoord) < 
+             mItems[mItemHit].vert(v2).distSquared(mouseLevelCoord) )
             mSnapVertex_j = v1;
          else     // Second vertex is closer
             mSnapVertex_j = v2;
@@ -3401,10 +3445,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          //    toggle the selection of what was clicked
 
          S32 vertexHit, vertexHitPoly;
-         //S32 edgeHit, itemHit;
 
          findHitVertex(mMousePos, vertexHitPoly, vertexHit);
-         //findHitItemAndEdge(mMousePos, itemHit, edgeHit);
 
          if(!getKeyState(KEY_SHIFT))      // Shift key is not down
          {
@@ -4429,6 +4471,20 @@ void WorldItem::decreaseWidth(S32 amt)
 GeomType WorldItem::geomType()
 {
    return itemDef[index].geom;
+}
+
+
+S32 WorldItem::getRadius()
+{
+   if(index == ItemBouncyBall)
+      return TestItem::TEST_ITEM_RADIUS;
+   else if(index == ItemResource)
+      return ResourceItem::RESOURCE_ITEM_RADIUS;
+   else if(index == ItemAsteroid)
+      return Asteroid::ASTEROID_RADIUS * .75;
+   //else if(index == ItemTeleporter)
+   //   return Teleporter::TELEPORTER_RADIUS;
+   else return NONE;
 }
 
 
