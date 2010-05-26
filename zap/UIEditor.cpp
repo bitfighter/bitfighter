@@ -108,6 +108,7 @@ enum EntryMode {
 
 
 static EntryMode entryMode;
+static Vector<Point> borderSegs;
 
 void saveLevelCallback()
 {
@@ -125,9 +126,6 @@ void backToMainMenuCallback()
 
 
 const S32 NONE = -1;
-
-//S32 gBoxesH;
-//S32 gBoxesV;
 
 // Constructor
 EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
@@ -151,68 +149,73 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
 
 void EditorUserInterface::populateDock()
 {
-   S32 xPos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
-   S32 yPos = 40;
-   const S32 spacer = 35;
    mDockItems.clear();
-
-
-   mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
-   mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam , 0, 0));
-
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-
-   if(!strcmp(mGameType, "SoccerGameType"))
-      mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   else
-      mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-
-   mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
-
-
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-   mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), mCurrentTeam, 0, 0));
-   yPos += spacer;
-
-   // These two will share a line
-   mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
-   mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
-
-   yPos += spacer;
-
-   // These two will share a line
-
-   mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
-   mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
-
-   yPos += 25;
-   mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
-   yPos += 25;
-
-   if(!strcmp(mGameType, "HuntersGameType"))
+   if(mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones)
    {
-      mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
-      yPos += 25;
-   }
-   else
-   {
-      mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+      S32 xPos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
+      S32 yPos = 35;
+      const S32 spacer = 35;
+
+      mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam , 0, 0));
+
       yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+
+      if(!strcmp(mGameType, "SoccerGameType"))
+         mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      else
+         mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+
+      mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
+
+
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+      mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      yPos += spacer;
+
+      // These two will share a line
+      mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
+
+      yPos += spacer;
+
+      // These two will share a line
+      mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
+
+      yPos += 25;
+      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+      yPos += 25;
+
+      if(!strcmp(mGameType, "HuntersGameType"))
+      {
+         mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+         yPos += 25;
+      }
+      else
+      {
+         mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+         yPos += spacer;
+      }
+   }
+   else if(mShowMode == NavZoneMode)
+   {
+      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, canvasHeight - vertMargin - 100), TEAM_NEUTRAL, DOCK_WIDTH - 10, 20));
    }
 }
 
@@ -866,7 +869,7 @@ void EditorUserInterface::onReactivate()
    if(mCurrentTeam >= mTeams.size())
       mCurrentTeam = 0;
 
-   populateDock();            // If game type has changed, items on dock will change
+   populateDock();           // If game type has changed, items on dock will change
 }
 
 
@@ -937,14 +940,23 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
       }
    }
 
+
+   bool snapToCorners = mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker;
+   bool snapToEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].geomType() == geomPoly;
+   bool snapToNavZoneEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].index == ItemNavMeshZone;
+   
    static Vector<DatabaseObject *> foundObjects;
 
-   // Search for a corner to snap to - by using segment ends, we'll also look for intersections between segments
-   if(mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker)
+   if(snapToCorners || snapToEdges)
    {
       foundObjects.clear();
       mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
+   }
 
+
+   // Search for a corner to snap to - by using segment ends, we'll also look for intersections between segments
+   if(snapToCorners)
+   {
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
@@ -966,15 +978,7 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    // decreasing it will require being closer to a wall to snap to it.
    if(minDist >= 90 / (mCurrentScale * mCurrentScale))
    {
-      bool movingPolygonVertex = false;
-      for(S32 i = 0; i < mItems.size(); i++)
-         if(mItems[i].geomType() == geomPoly && mItems[i].anyVertsSelected())
-         {
-            movingPolygonVertex = true;
-            break;
-         }
-
-      if(movingPolygonVertex)   // Wall snapping only for polygons, navMeshZone edge snapping for navMeshZones only
+      if(snapToEdges)
       {   
          // Check the edges of walls -- we'll reuse the list of walls we found earlier when looking for corners
          for(S32 i = 0; i < foundObjects.size(); i++)
@@ -982,19 +986,23 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
             WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
             checkEdgesForSnap(p, seg->edges, false, minDist, snapPoint);
          }
+      }
 
-         foundObjects.clear();
-         mGridDatabase.findObjects(BotNavMeshZoneType, foundObjects, Rect(p, sqrt(minDist) * 2)); 
-        
-         for(S32 i = 0; i < foundObjects.size(); i++)
+      if(snapToNavZoneEdges)
+      {
+         Rect vertexRect(snapPoint, .25); 
+
+         for(S32 i = 0; i < mItems.size(); i++)
          {
-            WorldItem *navZone = dynamic_cast<WorldItem *>(foundObjects[i]);
-            // If it's selected, it's what we're dragging, so don't look at it
-            if(navZone->selected || navZone->anyVertsSelected())
+            if(mItems[i].index != ItemNavMeshZone || mItems[i].selected || mItems[i].anyVertsSelected())
+               continue;
+
+            if(!mItems[i].getExtent().intersectsOrBorders(vertexRect))
                continue;
          
             // To close the polygon, we need to repeat our first point at the end
-            Vector<Point> verts = mItems[i].getVerts();     // Makes copy
+            Vector<Point> verts = mItems[i].getVerts();     // Makes copy -- TODO: alter checkEdgesforsnap to make
+                                                            // copy unnecessary
             verts.push_back(verts.first());
 
             checkEdgesForSnap(p, verts, true, minDist, snapPoint);
@@ -1109,62 +1117,63 @@ void EditorUserInterface::renderGrid()
 }
 
 
+S32 getDockHeight(ShowMode mode)
+{
+   if(mode == ShowWallsOnly)
+      return 62;
+   else if(mode == NavZoneMode)
+      return 300;
+   else  // mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones
+      return EditorUserInterface::canvasHeight - 2 * EditorUserInterface::vertMargin;
+}
+
+
 void EditorUserInterface::renderDock(F32 width)    // width is current wall width, used for displaying info on dock
 {
-      // Now, render item dock down RHS of screen
-    glColor3f(0, 0, 0);        // Black background
+   // Render item dock down RHS of screen
 
-   glBegin(GL_POLYGON);
-      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, vertMargin);
-      glVertex2f(canvasWidth - horizMargin, vertMargin);
-      glVertex2f(canvasWidth - horizMargin, canvasHeight - vertMargin);
-      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
-   glEnd();
+   S32 dockHeight = getDockHeight(mShowMode);
 
-   // Bounding box around dock 
-   if(mShowMode == ShowWallsOnly)
-      glColor(grayedOutColorBright);
-   else if(mouseOnDock())
-      glColor3f(1, 1, 0);
-   else
-      glColor(white);
+   for(S32 i = 1; i >= 0; i--)
+   {
+      glColor(i ? black : (mouseOnDock() ? yellow : white));       
 
-   glBegin(GL_LINE_LOOP);
-      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, vertMargin);
-      glVertex2f(canvasWidth - horizMargin, vertMargin);
-      glVertex2f(canvasWidth - horizMargin, canvasHeight - vertMargin);
-      glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
-   glEnd();
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin);
+         glVertex2f(canvasWidth - horizMargin,              canvasHeight - vertMargin);
+         glVertex2f(canvasWidth - horizMargin,              canvasHeight - vertMargin - dockHeight);
+         glVertex2f(canvasWidth - DOCK_WIDTH - horizMargin, canvasHeight - vertMargin - dockHeight);
+      glEnd();
+   }
 
    // Draw coordinates on dock
    Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
+   F32 xpos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
+
    char text[50];
    glColor(white);
    dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
-   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 15, 7, text);
+   drawStringc(xpos, canvasHeight - vertMargin - 15, 8, text);
 
    // And scale
-   glColor(white);
    dSprintf(text, sizeof(text), "%2.2f", mCurrentScale);
-   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 25, 7, text);
+   drawStringc(xpos, canvasHeight - vertMargin - 25, 8, text);
 
    // Show number of teams
-   glColor(white);
    dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
-   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 35, 7, text);
+   drawStringc(xpos, canvasHeight - vertMargin - 35, 8, text);
 
    glColor(mNeedToSave ? red : green);     // Color level name by whether it needs to be saved or not
-
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
-   drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 45, 7, text);
+   drawStringc(xpos, canvasHeight - vertMargin - 45, 8, text);
 
    // And wall width as needed
-   if(width > 0)
+   if(width != NONE)
    {
       glColor(white);
       dSprintf(text, sizeof(text), "Width: %2.0f", width);
-      drawString(canvasWidth - (DOCK_WIDTH + getStringWidth(7, text)) / 2 - horizMargin, canvasHeight - vertMargin - 55, 7, text);
+      drawStringc(xpos, canvasHeight - vertMargin - 55, 8, text);
    }
 }
 
@@ -1259,6 +1268,20 @@ void EditorUserInterface::renderReferenceShip()
    glPopMatrix();
 }
 
+
+const char *getModeMessage(ShowMode mode)
+{
+   if(mode == ShowWallsOnly)
+      return "Wall editing mode.  Hit Ctrl-A to change.";
+   else if(mode == ShowAllButNavZones)
+      return "NavMesh zones hidden.  Hit Ctrl-A to change.";
+   else if(mode == NavZoneMode)
+      return "NavMesh editing mode.  Hit Ctrl-A to change.";
+   else     // Normal mode
+      return "";
+}
+
+
 void EditorUserInterface::render()
 {
    renderGrid();
@@ -1280,7 +1303,7 @@ void EditorUserInterface::render()
 
 
    fillRendered = false;
-   F32 width = -1;
+   F32 width = NONE;
 
    if(mCreatingPoly || mCreatingPolyline)    // Draw geomLine features under construction
    {
@@ -1322,8 +1345,8 @@ void EditorUserInterface::render()
 
    if(mShowingReferenceShip)
       renderReferenceShip();
-
-   renderDock(width);
+   else
+      renderDock(width);
 
    // Draw map items (teleporters, etc.) that are being dragged  (above the dock).  But don't draw walls here, or
    // we'll lose our wall centernlines.
@@ -1343,23 +1366,32 @@ void EditorUserInterface::render()
       glEnd();
    }
 
-   // Render dock items
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      renderItem(mDockItems[i], -1, false, true, false);
-
-   // Render messages
-   if(mouseOnDock())    // On the dock?  Then render help string if hovering over item
+   // Render messages at bottom of screen
+   if(mouseOnDock())    // On the dock?  If so, render help string if hovering over item
    {
       S32 hoverItem = findHitItemOnDock(mMousePos);
 
-      if(hoverItem != -1)
+      if(hoverItem != NONE)
       {
+         mDockItems[hoverItem].litUp = true;    // Will trigger a selection highlight to appear around dock item
+         //mDockItems[hoverItem].selectVert(0);   // Ensures simpleLineItems get lit up on dock
+
          glColor3f(.1, 1, .1);
          // Center string between left side of screen and edge of dock
-         S32 x = (S32)((S32) canvasWidth - horizMargin - DOCK_WIDTH - getStringWidth(15, itemDef[mDockItems[hoverItem].index].helpText)) / 2;
+         S32 x = (S32)((S32) canvasWidth - horizMargin - DOCK_WIDTH - 
+                       getStringWidth(15, itemDef[mDockItems[hoverItem].index].helpText)) / 2;
          drawString(x, canvasHeight - vertMargin - 15, 15, itemDef[mDockItems[hoverItem].index].helpText);
       }
    }
+
+   // Render dock items
+   if(!mShowingReferenceShip)
+      for(S32 i = 0; i < mDockItems.size(); i++)
+      {
+         renderItem(mDockItems[i], -1, false, true, false);
+         mDockItems[i].litUp = false;
+         //mDockItems[i].unselectVert(0);
+      }
 
    if(mSaveMsgTimer.getCurrent())
    {
@@ -1386,6 +1418,27 @@ void EditorUserInterface::render()
       glDisable(GL_BLEND);
    }
 
+   glLineWidth(70);
+   glColor(red);
+   glPushMatrix();  
+      setLevelToCanvasCoordConversion();
+
+      for(S32 i = 0; i < borderSegs.size(); i+=2)
+      {
+         glBegin(GL_LINES);
+            glVertex(borderSegs[i]);
+            glVertex(borderSegs[i+1]);
+         glEnd();
+      }
+   
+   glPopMatrix();
+
+        
+   glLineWidth(gDefaultLineWidth); 
+
+
+
+
    if(mLevelErrorMsgs.size())
    {
       glColor(gErrorMessageTextColor);
@@ -1398,10 +1451,7 @@ void EditorUserInterface::render()
    }
 
    glColor3f(0,1,1);
-   if(mShowMode == ShowWallsOnly)
-      drawCenteredString(vertMargin, 14, "Non-wall objects hidden.  Hit Ctrl-A to change display.");
-   else if(mShowMode == ShowAllButNavZones)
-      drawCenteredString(vertMargin, 14, "NavMesh objects hidden.  Hit Ctrl-A to change display.");
+   drawCenteredString(vertMargin, 14, getModeMessage(mShowMode));
 
    renderTextEntryOverlay();
 }
@@ -1515,7 +1565,8 @@ extern void renderPolygonOutline(const Vector<Point> &outline);
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem)
+void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdited, 
+                                     bool isDockItem, bool isScriptItem)
 {
    Point pos, dest;
    const S32 labelSize = 9;      // Size to label items we're hovering over
@@ -1542,9 +1593,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    glEnable(GL_BLEND);        // Enable transparency
 
    // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this
-   if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && mItems[mSnapVertex_i].selected)
+   if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && mItems[mSnapVertex_i].selected && !mShowingReferenceShip)
       // Render snapping vertex as hollow magenta box
-      renderVertex(SnappingVertex, convertLevelToCanvasCoord(mItems[mSnapVertex_i].vert(mSnapVertex_j)), NO_NUMBER, alpha);   
+      renderVertex(SnappingVertex, convertLevelToCanvasCoord(mItems[mSnapVertex_i].vert(mSnapVertex_j)), 
+                   NO_NUMBER, alpha);   
 
    // Draw "two-point" items
    if(item.geomType() == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    
@@ -1569,147 +1621,143 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       if(isDockItem)
       {
          glColor(itemColor, alpha);
-         drawFilledSquare(pos, 5);                 // Draw origin of item to give user something to grab on the dock
+         drawFilledSquare(pos, 5);    // Draw origin of item to give user something to grab on the dock
       }
 
       // Override drawColor for this special case
       if(item.anyVertsSelected())
          drawColor = SELECT_COLOR;
 
-      // Hide line if we're drawing a text item and it's not selected
-      if((item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem) && !isDockItem)
+      if(item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem)
       {
-         if(!mShowingReferenceShip)
+         if(!isDockItem)
          {
-            glColor(itemColor, ((item.selected || item.litUp || item.anyVertsSelected()) && !isBeingEdited) ? alpha : .25 * alpha);
-            drawFilledSquare(pos, 5);            // Draw origin of item (square box)
+            if(!mShowingReferenceShip)
+            {
+               glColor(itemColor, ((item.selected || item.litUp || item.anyVertsSelected()) && !isBeingEdited) ? alpha : .25 * alpha);
+               drawFilledSquare(pos, 5);            // Draw origin of item (square box)
 
-            for(S32 i = 1; i >= 0; i--)
-            {  
-               // Draw heavy colored line with colored core
-               glLineWidth(i ? 4 : 2);                
+               for(S32 i = 1; i >= 0; i--)
+               {  
+                  // Draw heavy colored line with colored core
+                  glLineWidth(i ? 4 : 2);                
 
-               F32 ang = pos.angleTo(dest);
-               const F32 al = 15;                // Length of arrow-head
-               const F32 angoff = .5;            // Pitch of arrow-head prongs
+                  F32 ang = pos.angleTo(dest);
+                  const F32 al = 15;                // Length of arrow-head
+                  const F32 angoff = .5;            // Pitch of arrow-head prongs
 
-               glBegin(GL_LINES);
-                  glVertex2f(dest.x, dest.y);    // Draw arrow-head
-                  glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
-                  glVertex2f(dest.x, dest.y);
-                  glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
+                  glBegin(GL_LINES);
+                     glVertex2f(dest.x, dest.y);    // Draw arrow-head
+                     glVertex2f(dest.x - cos(ang + angoff) * al, dest.y - sin(ang + angoff) * al);
+                     glVertex2f(dest.x, dest.y);
+                     glVertex2f(dest.x - cos(ang - angoff) * al, dest.y - sin(ang - angoff) * al);
 
-                  // Draw highlight on 2nd pass if item is selected, but not while it's being edited
-                  if(!i && (item.selected || item.litUp) && !isBeingEdited)
-                     glColor(drawColor);
+                     // Draw highlight on 2nd pass if item is selected, but not while it's being edited
+                     if(!i && (item.selected || item.litUp) && !isBeingEdited)
+                        glColor(drawColor);
 
-                  glVertex(pos);                 // Draw connecting line
-                  glVertex(dest);
-               glEnd();
+                     glVertex(pos);                 // Draw connecting line
+                     glVertex(dest);
+                  glEnd();
+               }
+
+               glLineWidth(gDefaultLineWidth);      // Restore default value
             }
 
-            glLineWidth(gDefaultLineWidth);      // Restore default value
+            glPushMatrix();
+               setTranslationAndScale(pos);
+               if(item.index == ItemTeleporter)
+               {
+                  Vector<Point> dest;
+                  dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
+
+                  renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
+               }
+               else if(item.index == ItemSpeedZone)
+                  renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.vert(1))), gClientGame->getCurrentTime());
+
+            glPopMatrix();
+
+            if(item.index == ItemTextItem)
+               renderTextItem(item, 1);
+         
+            // If this is a textItem, and either the item or either vertex is selected, draw the text
+            if(!isDockItem && itemDef[item.index].hasText)
+            {
+               F32 txtSize = renderTextItem(item, alpha);
+
+               if(isBeingEdited)
+                  item.lineEditor.drawCursorAngle(pos.x, pos.y, txtSize, pos.angleTo(dest));
+
+               if(item.selected && mSpecialAttribute == NoAttribute)
+               {
+                  glColor(white);
+                  drawStringf_2pt(pos, dest, instrSize, -22, "[Enter] to edit text");
+               }
+            }
+            else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
+            {
+               if((item.selected && mEditingSpecialAttrItem == NONE) || isBeingEdited)
+               {
+                  glColor((mSpecialAttribute != GoFastSnap) ? white : inactiveSpecialAttributeColor);
+                  drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", item.speed);
+
+                  glColor((mSpecialAttribute != GoFastSpeed) ? white : inactiveSpecialAttributeColor);
+                  drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", item.boolattr ? "On" : "Off");
+
+                  glColor(white);
+
+                  // TODO: This block should be moved to WorldItem
+                  const char *msg, *instr;
+
+                  if(mSpecialAttribute == NoAttribute)
+                  {
+                     msg = "[Enter] to edit speed";
+                     instr = "";
+                  }
+                  else if(mSpecialAttribute == GoFastSpeed)
+                  {
+                     msg = "[Enter] to edit snapping";
+                     instr = "Up/Dn to change speed";
+                  }
+                  else if(mSpecialAttribute == GoFastSnap)
+                  {
+                     msg = "[Enter] to stop editing";
+                     instr = "Up/Dn to toggle snapping";
+                  }
+                  else
+                  {
+                     msg = "???";
+                     instr = "???";
+                  }
+
+                  drawStringf_2pt(pos, dest, instrSize, -22, msg);
+                  drawStringf_2pt(pos, dest, instrSize, -22 - instrSize - 2, instr);
+               }
+            }
          }
 
-         glPushMatrix();
-            setTranslationAndScale(pos);
-            if(item.index == ItemTeleporter)
-            {
-               Vector<Point> dest;
-               dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
-
-               renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
-            }
-            else if(item.index == ItemSpeedZone)
-               renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.vert(1))), gClientGame->getCurrentTime());
-
-         glPopMatrix();
-
-         if(item.index == ItemTextItem)
-            renderTextItem(item, 1);
-      
-         // If this is a textItem, and either the item or either vertex is selected, draw the text
-         if(!isDockItem && itemDef[item.index].hasText)
-         {
-            F32 txtSize = renderTextItem(item, alpha);
-
-            if(isBeingEdited)
-               item.lineEditor.drawCursorAngle(pos.x, pos.y, txtSize, pos.angleTo(dest));
-
-            if(item.selected && mSpecialAttribute == NoAttribute)
-            {
-               glColor(white);
-               drawStringf_2pt(pos, dest, instrSize, -22, "[Enter] to edit text");
-            }
-         }
-         else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
-         {
-            if((item.selected && mEditingSpecialAttrItem == NONE) || isBeingEdited)
-            {
-               glColor((mSpecialAttribute != GoFastSnap) ? white : inactiveSpecialAttributeColor);
-               drawStringf_2pt(pos, dest, attrSize, 10, "Speed: %d", item.speed);
-
-               glColor((mSpecialAttribute != GoFastSpeed) ? white : inactiveSpecialAttributeColor);
-               drawStringf_2pt(pos, dest, attrSize, -2, "Snapping: %s", item.boolattr ? "On" : "Off");
-
-               glColor(white);
-
-               // TODO: This block should be moved to WorldItem
-               const char *msg, *instr;
-
-               if(mSpecialAttribute == NoAttribute)
-               {
-                  msg = "[Enter] to edit speed";
-                  instr = "";
-               }
-               else if(mSpecialAttribute == GoFastSpeed)
-               {
-                  msg = "[Enter] to edit snapping";
-                  instr = "Up/Dn to change speed";
-               }
-               else if(mSpecialAttribute == GoFastSnap)
-               {
-                  msg = "[Enter] to stop editing";
-                  instr = "Up/Dn to toggle snapping";
-               }
-               else
-               {
-                  msg = "???";
-                  instr = "???";
-               }
-
-               drawStringf_2pt(pos, dest, instrSize, -22, msg);
-               drawStringf_2pt(pos, dest, instrSize, -22 - instrSize - 2, instr);
-            }
-         }
-
-         // If either end is selected, draw a little white box around it
+         // If either end is selected, draw a little white box around it.  Will do this on and off dock.
          if(item.vertSelected(0) || (item.litUp && vertexToLightUp == 0))
          {
             glColor(drawColor, alpha);
             drawSquare(pos, 7);
 
-            if(item.index == ItemTeleporter)
-               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, "Intake Vortex");
-
-            else if(item.index == ItemSpeedZone)
-               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, "Location");
-
-            else if(item.index == ItemTextItem)
-               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, "Start");
+            if(!isDockItem)
+               labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, item.getOriginBottomLabel());
          }
-
-         // Outline selected vertex, and label it
-         if(item.vertSelected(1) || (item.litUp && vertexToLightUp == 1))
+         else if(item.vertSelected(1) || (item.litUp && vertexToLightUp == 1))
          {
-            glColor(drawColor);
+            glColor(drawColor, alpha);
             drawSquare(dest, 7);
 
-            if(item.index == ItemTeleporter)
-               labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Destination");
+            labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, item.getDestinationBottomLabel());
+         }
 
-            else if(item.index == ItemSpeedZone || item.index == ItemTextItem)
-               labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, "Direction");
+         if(isDockItem && item.litUp)     // Highlight handle on dock when hovering over it
+         {
+            glColor(HIGHLIGHT_COLOR);
+            drawSquare(pos, 8);
          }
       }
    }
@@ -1720,9 +1768,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          renderPolylineFill(item.index, item.getVerts(), item.mRenderLineSegments, item.selected, 
                             (item.litUp && vertexToLightUp == NONE), item.team, alpha);
          fillRendered = true;  
-      }
+      }  
 
-      if(!mShowingReferenceShip)
+      if(!(mShowingReferenceShip && item.index == ItemBarrierMaker))
          item.renderPolylineCenterline(alpha);
 
       renderLinePolyVertices(item, index, alpha);
@@ -1734,39 +1782,66 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) &&
         !(mShowingReferenceShip) ||  isDockItem || mShowingReferenceShip && item.index != ItemNavMeshZone)   
       {
-         // A few items will get custom colors; most will get the team color
+         // A few items will get custom colors; most will get their team color
          if(hideit)
             glColor(grayedOutColorDim, alpha);
          else if(item.index == ItemNavMeshZone)
-         {
-            if(item.isConvex())
-               glColor(item.selected ? Color(0, 1, 0) : getTeamColor(item.team), alpha * .5);
-            else
-               glColor4f(1,0,0,.5);
-         }
+            glColor(item.isConvex() ? green : red, alpha * .5);
          else if(item.index == ItemNexus)
             glColor(gNexusOpenColor, alpha);      // Render Nexus items in pale green to match the actual thing
          else
             glColor(getTeamColor(item.team), alpha);
 
-         glPushMatrix();
-         setLevelToCanvasCoordConversion(!isDockItem);
 
-         // Render the fill triangles
-         renderTriangulatedPolygonFill(item.fillPoints);
-
-         glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-         glLineWidth(3);  
-         renderPolygonOutline(item.getVerts());
-         glLineWidth(gDefaultLineWidth);        // Restore line width
-
-         glPopMatrix();
-     
-         // Let's add a label
          F32 ang = angleOfLongestSide(item.getVerts());
-         
-         glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-         renderPolygonLabel(convertLevelToCanvasCoord(item.centroid, !isDockItem), ang, labelSize, itemDef[item.index].onScreenName);
+
+         if(isDockItem || item.index == ItemNavMeshZone)    // Old school rendering for on the dock & mesh zones
+         {
+            glPushMatrix();
+               setLevelToCanvasCoordConversion(!isDockItem);
+
+               // Render the fill triangles
+               renderTriangulatedPolygonFill(item.fillPoints);
+
+               glColor(hideit ? grayedOutColorBright : drawColor, alpha);
+               glLineWidth(3);  
+               renderPolygonOutline(item.getVerts());
+               glLineWidth(gDefaultLineWidth);        // Restore line width
+            glPopMatrix();
+
+            // Let's add a label
+            glColor(hideit ? grayedOutColorBright : drawColor, alpha);
+            renderPolygonLabel(convertLevelToCanvasCoord(item.centroid, !isDockItem), ang, labelSize, 
+                               itemDef[item.index].onScreenName);
+         }
+         else
+         {
+            glPushMatrix();  
+               setLevelToCanvasCoordConversion();
+
+               if(item.index == ItemLoadoutZone)
+                  renderLoadoutZone(getTeamColor(item.team), item.getVerts(), item.fillPoints, 
+                                    item.centroid * mGridSize, ang, 1 / mGridSize);
+
+               else if(item.index == ItemGoalZone)
+                   renderGoalZone(getTeamColor(item.team), item.getVerts(), item.fillPoints,  
+                                    item.centroid * mGridSize, ang, false, 0, 1 / mGridSize);
+
+               else if(item.index == ItemNexus)
+                    renderNexus(item.getVerts(), item.fillPoints, 
+                                    item.centroid * mGridSize, ang, true, 0, 1 / mGridSize);
+
+               // If item is selected, and we're not in preview mode, draw a border highlight
+               if(!mShowingReferenceShip && (item.selected || item.litUp))
+               {        
+                  glColor(hideit ? grayedOutColorBright : drawColor, alpha);
+                  glLineWidth(3);  
+                  renderPolygonOutline(item.getVerts());
+                  glLineWidth(gDefaultLineWidth);        // Restore line width
+               }
+
+            glPopMatrix();
+         }
       }
 
       if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !isDockItem)  // No verts on dock!
@@ -1791,7 +1866,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       {
          if(mShowingReferenceShip && !isDockItem)
          {
-            // Do nothing
+            // Do nothing -- hidden in preview mode
          }
          else
          {
@@ -1809,7 +1884,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       {
          if(mShowingReferenceShip && !isDockItem)
          {
-            // Do nothing
+            // Do nothing -- hidden in preview mode
          }
          else
          {
@@ -2018,12 +2093,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       // Draw highlighted border around item if selected
       if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  
       {
-         Point pos = convertLevelToCanvasCoord(item.vert(0));   // Dock items are never selected!
+         // Dock items are never selected, but they can be highlighted
+         Point pos = isDockItem ? item.vert(0) : convertLevelToCanvasCoord(item.vert(0));   
 
          glColor(drawColor);
 
          S32 radius = item.getRadius();
-         S32 highlightRadius = (radius == NONE) ? 10 : (radius * mCurrentScale / mGridSize);
+         S32 highlightRadius = (radius == NONE || isDockItem) ? 10 : (radius * mCurrentScale / mGridSize);
 
 
          glBegin(GL_LINE_LOOP);
@@ -2050,11 +2126,12 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
       }
 
-      // Add a label if we're hovering over it (or not)
-      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName)
+      // Add a label if we're hovering over it (or not, unless it's on the dock, where we've already label our items
+      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName && 
+         !isDockItem)
       {
          glColor(drawColor);
-         drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName);     // Label on top
+         drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName); // Label on top
       }
    }
 
@@ -2430,42 +2507,11 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
 }
 
 
-S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
-{
-   if(mShowMode == ShowWallsOnly)           // Only add dock items when objects are visible
-      return NONE;
-
-   if(mEditingSpecialAttrItem != NONE)    // If we're editing a text item, disable this functionality
-      return NONE;
-
-   for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
-   {
-      Point pos = mDockItems[i].vert(0);
-
-      if(fabs(canvasPos.x - pos.x) < 8 && fabs(canvasPos.y - pos.y) < 8)
-         return i;
-   }
-
-   // Now check for polygon interior hits
-   for(S32 i = 0; i < mDockItems.size(); i++)
-      if(mDockItems[i].geomType() == geomPoly)
-      {
-         Vector<Point> verts;
-         for(S32 j = 0; j < mDockItems[i].vertCount(); j++)
-            verts.push_back(mDockItems[i].vert(j));
-
-         if(PolygonContains2(verts.address(),verts.size(), canvasPos))
-            return i;
-      }
-
-   return NONE;
-}
-
+static const S32 POINT_HIT_RADIUS = 9;
+static const S32 EDGE_HIT_RADIUS = 6;
 
 void EditorUserInterface::findHitItemAndEdge()
 {
-   static const S32 POINT_HIT_RADIUS = 9;
-   static const S32 EDGE_HIT_RADIUS = 6;
 
    mItemHit = NONE;
    mEdgeHit = NONE;
@@ -2550,6 +2596,38 @@ void EditorUserInterface::findHitItemAndEdge()
          }
       }
    }
+}
+
+
+S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
+{
+   if(mShowMode == ShowWallsOnly)           // Only add dock items when objects are visible
+      return NONE;
+
+   if(mEditingSpecialAttrItem != NONE)    // If we're editing a text item, disable this functionality
+      return NONE;
+
+   for(S32 i = mDockItems.size() - 1; i >= 0; i--)     // Go in reverse order because the code we copied did ;-)
+   {
+      Point pos = mDockItems[i].vert(0);
+
+      if(fabs(canvasPos.x - pos.x) < POINT_HIT_RADIUS && fabs(canvasPos.y - pos.y) < POINT_HIT_RADIUS)
+         return i;
+   }
+
+   // Now check for polygon interior hits
+   for(S32 i = 0; i < mDockItems.size(); i++)
+      if(mDockItems[i].geomType() == geomPoly)
+      {
+         Vector<Point> verts;
+         for(S32 j = 0; j < mDockItems[i].vertCount(); j++)
+            verts.push_back(mDockItems[i].vert(j));
+
+         if(PolygonContains2(verts.address(),verts.size(), canvasPos))
+            return i;
+      }
+
+   return NONE;
 }
 
 
@@ -2996,10 +3074,17 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
 {
    if(mItems[itemIndex].index == ItemBarrierMaker)
       wallSegmentManager.deleteSegments(mItems[itemIndex].mId);
-   else
-      mItems[itemIndex].removeFromDatabase();
+   //else
+   //   mItems[itemIndex].removeFromDatabase();
 
    mItems.erase(itemIndex);
+
+   // Reset a bunch of things
+   mSnapVertex_i = NONE;
+   mSnapVertex_j = NONE;
+   itemToLightUp = NONE;
+   mUnmovedItems.erase(itemIndex);
+   onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);   // Reset cursor  
 }
 
 
@@ -3144,7 +3229,7 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
       {
          if(i == mEditingSpecialAttrItem)
             continue;
-         else if(mItems[i].selected && mItems[i].index == mItems[mEditingSpecialAttrItem].index)     // || mItems[i].litUp
+         else if(mItems[i].selected && mItems[i].index == mItems[mEditingSpecialAttrItem].index)
          {
             // We'll ignore text here, because that really makes less sense
             mItems[i].repopDelay = mItems[mEditingSpecialAttrItem].repopDelay;
@@ -3357,8 +3442,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       //saveUndoState(mItems);     // Save undo state before we clear the selection
       clearSelection();          // Unselect anything currently selected
 
-      if(mItemHit != NONE && (mItems[mItemHit].geomType() == geomLine ||
-                              mItems[mItemHit].geomType() >= geomPoly   ))
+      // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
+      if(mEdgeHit != NONE && mItemHit != NONE && (mItems[mItemHit].geomType() == geomLine ||
+                                                  mItems[mItemHit].geomType() >= geomPoly   ))
       {
          if(mItems[mItemHit].vertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
@@ -3570,14 +3656,16 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == KEY_A && getKeyState(KEY_CTRL))            // Ctrl-A - toggle see all objects
    {
       mShowMode = (ShowMode) ((U32)mShowMode + 1);
-      if(mShowMode == ShowAllButNavZones && !mHasBotNavZones)    // Skip hiding NavZones if we don't have any
-         mShowMode = (ShowMode) ((U32)mShowMode + 1);
+      //if(mShowMode == ShowAllButNavZones && !mHasBotNavZones)    // Skip hiding NavZones if we don't have any
+      //   mShowMode = (ShowMode) ((U32)mShowMode + 1);
 
       if(mShowMode == ShowModesCount)
          mShowMode = (ShowMode) 0;     // First mode
 
       if(mShowMode == ShowWallsOnly && !mDraggingObjects)
          glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
+
+      populateDock();      // Different modes have different items
 
       onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);   // Reset mouse to spray if appropriate
    }
@@ -4370,6 +4458,60 @@ void WallSegmentManager::renderWalls(bool convert, F32 alpha)
 }
 
 
+void EditorUserInterface::rebuildBorderSegs()
+{
+   borderSegs.clear();
+
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].index != ItemNavMeshZone)
+         continue;
+
+      for(S32 j = i; j < mItems.size(); j++)
+      {
+         if(i == j || mItems[j].index != ItemNavMeshZone)
+            continue;      // Don't check self...
+
+         // Do zones i and j touch?  First a quick and dirty bounds check:
+         if(!mItems[i].getExtent().intersectsOrBorders(mItems[j].getExtent()))
+            continue;
+
+         // Check for unlikely but fatal situation: Not enough vertices
+          if(mItems[i].vertCount() < 3 || mItems[j].vertCount() < 3)
+            continue;
+
+         Point pi1, pi2, pj1, pj2;
+
+         // Now, do we actually touch?  Let's look, segment by segment
+         for(S32 ii = 0; ii < mItems[i].vertCount(); ii++)
+         {
+            pi1 = mItems[i].vert(ii);
+            if(ii == mItems[i].vertCount() - 1)
+               pi2 = mItems[i].vert(0);
+            else
+               pi2 = mItems[i].vert(ii + 1);
+
+            for(S32 jj = 0; jj < mItems[j].vertCount(); jj++)
+            {
+               pj1 = mItems[j].vert(jj);
+               if(jj == mItems[j].vertCount() - 1)
+                  pj2 = mItems[j].vert(0);
+               else
+                  pj2 = mItems[j].vert(jj + 1);
+
+               Point bordStart, bordEnd;
+
+               if(segsOverlap(pi1, pi2, pj1, pj2, bordStart, bordEnd))
+               {
+                  borderSegs.push_back(bordStart);
+                  borderSegs.push_back(bordEnd);
+               }
+            }
+         }
+      }
+   }
+}
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -4474,6 +4616,33 @@ GeomType WorldItem::geomType()
 }
 
 
+// Following two methods are for labeling simpleLineItems only
+const char *WorldItem::getOriginBottomLabel()
+{
+   if(index == ItemTeleporter)
+      return "Intake Vortex";
+   else if(index == ItemSpeedZone)
+      return "Location";
+   else if(index == ItemTextItem)
+      return "Start";
+   else
+      return "";
+}
+
+
+const char *WorldItem::getDestinationBottomLabel()
+{
+   if(index == ItemTeleporter)
+      return "Destination";
+   else if(index == ItemSpeedZone || index == ItemTextItem)
+      return "Direction";
+   else
+      return "";
+}
+
+
+
+// Radius of item in editor
 S32 WorldItem::getRadius()
 {
    if(index == ItemBouncyBall)
@@ -4482,9 +4651,7 @@ S32 WorldItem::getRadius()
       return ResourceItem::RESOURCE_ITEM_RADIUS;
    else if(index == ItemAsteroid)
       return Asteroid::ASTEROID_RADIUS * .75;
-   //else if(index == ItemTeleporter)
-   //   return Teleporter::TELEPORTER_RADIUS;
-   else return NONE;
+   else return NONE;    // Use default
 }
 
 
@@ -4882,7 +5049,11 @@ void WorldItem::onGeomChanged()
    {
       Triangulate::Process(mVerts, fillPoints);   // Populates fillPoints from polygon outline
       centroid = findCentroid(mVerts);
+      setExtent(Rect(mVerts));
    }
+
+   if(index == ItemNavMeshZone)
+      gEditorUserInterface.rebuildBorderSegs();
 }
 
 

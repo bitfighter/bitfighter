@@ -65,13 +65,18 @@ extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);
 extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 
 
-extern void renderLoadoutZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle);
-extern void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, F32 glowFraction);
+extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, 
+                                       const Point &centroid, F32 labelAngle, F32 scaleFact = 1);
+extern void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
+                           bool isFlashing, F32 glowFraction, F32 scaleFact = 1);
 
-extern void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Point centroid, Color c, F32 labelAngle, bool isFlashing, F32 glowFraction);
+extern void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
+                        bool open, F32 glowFraction, F32 scaleFact = 1);
+
+
 extern void renderSlipZone(Vector<Point> &bounds, Rect extent);
 
-extern void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text);
+extern void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 
 
 extern void renderProjectile(Point pos, U32 type, U32 time);

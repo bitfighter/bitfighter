@@ -40,7 +40,7 @@ BrandingText " "
 
 ;--------------------------------
 Function LaunchLink
-  ExecShell "" "$INSTDIR\Bitfighter.lnk"
+  ExecShell "" "$INSTDIR\Play Bitfighter.lnk"
 FunctionEnd
 
 ;--------------------------------
@@ -67,7 +67,7 @@ FunctionEnd
    !insertmacro MUI_PAGE_LICENSE "End-User License.txt"
    !insertmacro MUI_PAGE_DIRECTORY
    !insertmacro MUI_PAGE_INSTFILES
-   !insertmacro MUI_PAGE_FINISH
+   !insertmacro MUI_PAGE_FINISH		
 
    !insertmacro MUI_UNPAGE_CONFIRM
    !insertmacro MUI_UNPAGE_INSTFILES
@@ -88,7 +88,7 @@ Section "Install"
   File ..\exe\levelgen_helper_functions.lua
   File ..\exe\lua_helper_functions.lua
   
-  CreateShortCut "$INSTDIR\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%LOCALAPPDATA%\Bitfighter$\""
+  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%LOCALAPPDATA%\Bitfighter$\""
 
   File ".\Windows specific\OpenAL32.dll"     
   File ".\Windows specific\glut32.dll"

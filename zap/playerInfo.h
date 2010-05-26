@@ -46,13 +46,13 @@ public:
    LuaPlayerInfo(lua_State *L) { /* Do nothing */ }     // Lua constructor
 
    // These would be declared asbstract, except that Lunar strenusously objects...
-   virtual S32 getName(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); }
-   virtual S32 getShip(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); }
-   virtual S32 getTeamIndx(lua_State *L)   { TNLAssert(false, "Unimplemented method!"); }
-   virtual S32 getRating(lua_State *L)     { TNLAssert(false, "Unimplemented method!"); }
-   virtual S32 getScore(lua_State *L)      { TNLAssert(false, "Unimplemented method!"); }
-   virtual S32 isRobot(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); }
-   virtual S32 getScriptName(lua_State *L) { TNLAssert(false, "Unimplemented method!"); }
+   virtual S32 getName(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 getShip(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 getTeamIndx(lua_State *L)   { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 getRating(lua_State *L)     { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 getScore(lua_State *L)      { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 isRobot(lua_State *L)       { TNLAssert(false, "Unimplemented method!"); return 0; }
+   virtual S32 getScriptName(lua_State *L) { TNLAssert(false, "Unimplemented method!"); return 0; }
 
    void setDefunct() { defunct = true; }
    bool isDefunct() { return defunct; }

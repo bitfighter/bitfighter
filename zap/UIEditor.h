@@ -53,6 +53,15 @@ enum VertexRenderStyles
    UnselectedItemVertex,            // Non-highlighted vertex of a non-selected item
 };
 
+enum ShowMode
+{
+   ShowAllButNavZones,
+   ShowAllObjects,
+   ShowWallsOnly,
+   NavZoneMode,
+   ShowModesCount
+};
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -240,6 +249,9 @@ public:
    void renderPolylineCenterline(F32 alpha);    // Draw barrier centerlines; wraps renderPolyline()
    void renderPolyline();                       // Draws a line connecting points in mVerts
 
+   const char *getOriginBottomLabel();          // SimpleLine items only
+   const char *getDestinationBottomLabel();
+
    ////////////////////
    //  DatabaseObject methods
    GridDatabase *getGridDatabase();
@@ -330,15 +342,6 @@ private:
    S32 mCurrentTeam;
 
    bool snapDisabled;
-
-
-   enum ShowMode
-   {
-      ShowAllObjects,
-      ShowWallsOnly,
-      ShowAllButNavZones,
-      ShowModesCount
-   };
 
    ShowMode mShowMode;
    bool mHasBotNavZones;
@@ -545,6 +548,8 @@ public:
    Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
    S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat, F32 &minDist, 
                          Point &snapPoint);
+
+   void rebuildBorderSegs();
 
    void deleteItem(S32 itemIndex);
 

@@ -32,6 +32,13 @@ XXX need to document timers, new luavec stuff XXX
 
 
 <ul>
+<h4>UPGRADE INSTRUCTIONS</h4>
+In Windows, Bitfighter will now attempt to put the level folders, the INI file, the screenshots folder, etc. in the folder pointed to by
+"%LOCALAPPDATA%/Bitfighter", which, on Windows 7, typically maps to something like "C:\Users\Chris\AppData\Local\Bitfighter".  After installing 013 
+for the first time, you should copy any levels, INI files, etc. to that folder, and overwriting any data that is there.
+
+This change will resolve many installation and permissions issues.
+
 <h4>Big changes</h4>
 <li>Added energy item</li>
 <li>Added ability to add arbitrary lin_ework to levels, complementing existing text.  To add lines, hold ~ and right-click.</li>
@@ -1106,6 +1113,18 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          gCmdLineSettings.alllevels = true;
       }
 
+      else if(!stricmp(argv[i], "-rootdatadir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf("You must specify the robots folder with the -rootdatadir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.rootDataDir = argv[i+1].getString();
+      }
+
+
       else if(!stricmp(argv[i], "-leveldir"))      // additional arg required
       {
          if(!hasAdditionalArg)
@@ -1443,17 +1462,27 @@ void processStartupParams()
       gLevelChangePassword = gIniSettings.levelChangePassword;
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
-   
-   if(gIniSettings.levelDir != "")
-      gConfigDirs.levelDir = gIniSettings.levelDir;
-   else
-      gIniSettings.levelDir = gConfigDirs.levelDir;     // So a good default will be written to the INI
-
+  
    // This way, the main level dir can be specified in the INI, but it can either be overridden here,
    // or a subfolder can be specified, depending on what's in the leveldir param
    gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir != "" ? gCmdLineSettings.dirs.levelDir : gIniSettings.levelDir);
    
    // Other folders can't currently be specified in the INI file
+   if(gCmdLineSettings.dirs.rootDataDir != "") 
+   {
+       gConfigDirs.iniDir = gCmdLineSettings.dirs.rootDataDir;
+       gConfigDirs.logDir = gCmdLineSettings.dirs.rootDataDir;
+       gConfigDirs.robotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "robots");
+       gConfigDirs.screenshotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "screenshots");
+       gConfigDirs.levelDir = joindir(gCmdLineSettings.dirs.rootDataDir, "levels");
+   }
+
+   if(gIniSettings.levelDir != "")
+      gConfigDirs.levelDir = gIniSettings.levelDir;
+   else
+      gIniSettings.levelDir = gConfigDirs.levelDir;     // So a good default will be written to the INI
+
+
    if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gCmdLineSettings.dirs.iniDir;
    if(gCmdLineSettings.dirs.logDir != "") gConfigDirs.logDir = gCmdLineSettings.dirs.logDir;
    if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gCmdLineSettings.dirs.luaDir;
@@ -1606,8 +1635,17 @@ int main(int argc, char **argv)
    gCmdLineSettings.init();      // Init cmd line settings struct
 
    processCmdLineParams(argc, argv);
-   CIniFile gINI(joindir(gCmdLineSettings.dirs.iniDir, "bitfighter.ini"));   // gConfigDirs hasn't been setup yet...
-   gIniSettings.init();                // Init struct that holds INI settings
+
+   string dir = "";
+   
+   // Go through the following rigamarole because gConfigDirs hasn't been setup yet...
+   if(gCmdLineSettings.dirs.iniDir != "")               // Direct specification of ini path takes precedence
+       dir = gCmdLineSettings.dirs.iniDir;
+   else if(gCmdLineSettings.dirs.rootDataDir != "")     // over specification via rootdatadir param
+       dir = gCmdLineSettings.dirs.rootDataDir;
+
+   gINI.SetPath(joindir(dir, "bitfighter.ini"));   
+   gIniSettings.init();                      // Init struct that holds INI settings
 
 
    gZapJournal.processNextJournalEntry();    // If we're replaying a journal, this will cause the cmd line params to be read from the saved journal

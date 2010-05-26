@@ -704,9 +704,10 @@ void renderCenteredString(Point pos, U32 size, const char *string)
 }
 
 
-void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text)
+void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text, F32 scaleFact)
 {
    glPushMatrix();
+      glScalef(scaleFact, scaleFact, 0);
       glTranslatef(centroid.x, centroid.y, 0);
       glRotatef(angle * 360 / Float2Pi, 0, 0, 1);
       renderCenteredString(Point(0,0), size,  text);
@@ -747,15 +748,17 @@ void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outline
 }
 
 
-void renderLoadoutZone(Color theColor, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle)
+void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<Point> &fill, 
+                                    const Point &centroid, F32 labelAngle, F32 scaleFact)
 {
-   renderPolygon(fill, outline, theColor * 0.5, theColor);
-   renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE");
+   renderPolygon(fill, outline, color * 0.5, color);
+   renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE", scaleFact);
 }
 
 
 // Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Point centroid, Color c, F32 labelAngle, bool isFlashing, F32 glowFraction)
+void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
+                    bool isFlashing, F32 glowFraction, F32 scaleFact)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 
@@ -765,14 +768,16 @@ void renderGoalZone(Vector<Point> &outline, Vector<Point> &fill, Point centroid,
    Color outlineColor = Color(h * (glowFraction * glowFraction) + c * (1 - glowFraction * glowFraction));
 
    renderPolygon(fill, outline, fillColor, outlineColor);
-   renderPolygonLabel(centroid, labelAngle, 25, "GOAL");
+
+   renderPolygonLabel(centroid, labelAngle, 25, "GOAL", scaleFact);
 }
 
 
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, F32 glowFraction)
+void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, 
+                 F32 glowFraction, F32 scaleFact)
 {
    Color c;
 
@@ -786,7 +791,7 @@ void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F3
    renderPolygon(fill, outline, fillColor, c * 0.7);
 
    glColor(c);
-   renderPolygonLabel(centroid, labelAngle, 25, "NEXUS");
+   renderPolygonLabel(centroid, labelAngle, 25, "NEXUS", scaleFact);
 }
 
 

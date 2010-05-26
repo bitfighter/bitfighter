@@ -65,8 +65,6 @@ CIniFile::CIniFile( string const iniPath)
 }
 
 
-
-
 extern Zap::ZapJournal gZapJournal;
 extern CIniFile gINI;
 

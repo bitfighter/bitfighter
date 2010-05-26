@@ -1,23 +1,14 @@
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C++ Express 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZAP", "zap\ZAP.vcproj", "{F1A0916C-3232-4C2E-B52B-368955AA4C62}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
-		{9D7B0AAD-B135-449D-8E12-1ED548AC1048} = {9D7B0AAD-B135-449D-8E12-1ED548AC1048}
-		{5AAE89B5-1F53-4539-9899-071E68FD9A29} = {5AAE89B5-1F53-4539-9899-071E68FD9A29}
-	EndProjectSection
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZAP", "zap\ZAP.vcxproj", "{F1A0916C-3232-4C2E-B52B-368955AA4C62}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtomcrypt", "libtomcrypt\libtomcrypt.vcproj", "{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtomcrypt", "libtomcrypt\libtomcrypt.vcxproj", "{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Master Server", "master\Master Server.vcproj", "{F26E9053-B4DE-4E20-B86C-E1E3325484D7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A} = {3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}
-		{5AAE89B5-1F53-4539-9899-071E68FD9A29} = {5AAE89B5-1F53-4539-9899-071E68FD9A29}
-	EndProjectSection
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Master Server", "master\Master Server.vcxproj", "{F26E9053-B4DE-4E20-B86C-E1E3325484D7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tnl", "tnl\tnl.vcproj", "{5AAE89B5-1F53-4539-9899-071E68FD9A29}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tnl", "tnl\tnl.vcxproj", "{5AAE89B5-1F53-4539-9899-071E68FD9A29}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-vec.vcproj", "{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-vec.vcxproj", "{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

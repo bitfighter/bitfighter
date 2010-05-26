@@ -53,6 +53,7 @@ struct ConfigDirectories {
    string logDir;
    string screenshotDir;
    string luaDir;
+   string rootDataDir;
 
    ConfigDirectories() { levelDir = ""; robotDir = ""; sfxDir = ""; iniDir = ""; logDir = ""; 
                          screenshotDir = ""; luaDir = ""; }                                      // Quickie Constructor

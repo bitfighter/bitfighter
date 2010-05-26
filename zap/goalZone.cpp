@@ -68,7 +68,7 @@ void GoalZone::render()
       if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(mPolyBounds, mPolyFill, mCentroid, gt->getTeamColor(getTeam()), mLabelAngle, isFlashing(), glow);
+   renderGoalZone(gt->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle, isFlashing(), glow);
 }
 
 
