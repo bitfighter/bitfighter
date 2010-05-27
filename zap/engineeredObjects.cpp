@@ -786,7 +786,7 @@ void Turret::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 
 extern ServerGame *gServerGame;
-extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
+extern bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 // Choose target, aim, and, if possible, fire
 void Turret::idle(IdleCallPath path)

@@ -173,7 +173,7 @@ bool isConvex(const Vector<Point> &verts)
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
 // Function returns true when it does and the intersection point is in outPoint
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
-bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, Point::member_type inRadiusSq, Point &outPoint)
+bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint)
 {
    // Check if the center is inside the polygon  ==> now works for all polys
    if(PolygonContains2(inVertices, inNumVertices, inCenter))
@@ -189,11 +189,11 @@ bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
       // Get fraction where the closest point to this edge occurs
       Point v1_v2 = *v2 - *v1;
       Point v1_center = inCenter - *v1;
-      Point::member_type fraction = v1_center.dot(v1_v2);
+      F32 fraction = v1_center.dot(v1_v2);
       if (fraction < 0.0f)
       {
          // Closest point is v1
-         Point::member_type dist_sq = v1_center.lenSquared();
+         F32 dist_sq = v1_center.lenSquared();
          if (dist_sq <= inRadiusSq)
          {
             collision = true;
@@ -203,12 +203,12 @@ bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
       }
       else
       {
-         Point::member_type v1_v2_len_sq = v1_v2.lenSquared();
+         F32 v1_v2_len_sq = v1_v2.lenSquared();
          if (fraction <= v1_v2_len_sq)
          {
             // Closest point is on line segment
             Point point = *v1 + v1_v2 * (fraction / v1_v2_len_sq);
-            Point::member_type dist_sq = (point - inCenter).lenSquared();
+            F32 dist_sq = (point - inCenter).lenSquared();
             if (dist_sq <= inRadiusSq)
             {
                collision = true;
@@ -309,16 +309,15 @@ Subject 1.02: How do I find the distance from a point to a line?
 
     Then the distance from C to P = |s|*L.
 */
-	float r_numerator = (c.x - a.x)*(b.x - a.x) + (c.y - a.y)*(b.y - a.y);
-	float r_denomenator = (b.x - a.x)*(b.x - a.x) + (b.y - a.y)*(b.y - a.y);
-   float r = r_numerator / r_denomenator;
+	F32 r_numerator   = F32((c.x - a.x)  *(b.x - a.x) + (c.y - a.y) * (b.y - a.y));
+	F32 r_denomenator = F32((b.x - a.x) * (b.x - a.x) + (b.y - a.y )* (b.y - a.y));
+   F32 r = r_numerator / r_denomenator;
 
-
-   float s = (a.y-c.y)*(b.x-a.x) - (a.x-c.x)*(b.y-a.y);
+   F32 s = F32((a.y - c.y) * (b.x - a.x) - (a.x - c.x) * (b.y - a.y));
 
 	if ((r >= 0) && (r <= 1))
 	{
-		return(ABS(s) < .00000001);
+		return(ABS(s) < .000001);
 	}
 	else
       return false;
@@ -379,9 +378,9 @@ bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point 
 }
 
 
-void Swap(Point::member_type &f1, Point::member_type &f2)
+void Swap(F32 &f1, F32 &f2)
 {
-   Point::member_type temp = f1;
+   F32 temp = f1;
    f1 = f2;
    f2 = temp;
 }
@@ -389,21 +388,21 @@ void Swap(Point::member_type &f1, Point::member_type &f2)
 
 // Solve the equation inA * x^2 + inB * x + inC == 0 for the lowest x in [0, inUpperBound].
 // Returns true if there is such a solution and returns the solution in outX
-bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX)
+bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX)
 {
    // Check if a solution exists
-   Point::member_type determinant = inB * inB - 4.0f * inA * inC;
+   F32 determinant = inB * inB - 4.0f * inA * inC;
    if (determinant < 0.0f)
       return false;
 
    // The standard way of doing this is by computing: x = (-b +/- Sqrt(b^2 - 4 a c)) / 2 a
    // is not numerically stable when a is close to zero.
    // Solve the equation according to "Numerical Recipies in C" paragraph 5.6
-   Point::member_type q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
+   F32 q = -0.5f * (inB + (inB < 0.0f? -1.0f : 1.0f) * sqrt(determinant));
 
    // Both of these can return +INF, -INF or NAN that's why we test both solutions to be in the specified range below
-   Point::member_type x1 = q / inA;
-   Point::member_type x2 = inC / q;
+   F32 x1 = q / inA;
+   F32 x2 = inC / q;
 
    // Order the results
    if (x2 < x1)
@@ -428,20 +427,20 @@ bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Po
 
 // Checks intersection between a polygon an moving circle at inBegin + t * inDelta with radius^2 = inA * t^2 + inB * t + inC, t in [0, 1]
 // Returns true when it does and returns the intersection position in outPoint and the intersection fraction (value for t) in outFraction
-bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, Point::member_type inA, Point::member_type inB, Point::member_type inC, Point &outPoint, Point::member_type &outFraction)
+bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inA, F32 inB, F32 inC, Point &outPoint, F32 &outFraction)
 {
    // Loop through edges
-   Point::member_type upper_bound = 1.0f;
+   F32 upper_bound = 1.0f;
    bool collision = false;
    for (const Point *v1 = inVertices, *v2 = inVertices + inNumVertices - 1; v1 < inVertices + inNumVertices; v2 = v1, ++v1)
    {
-      Point::member_type t;
+      F32 t;
 
       // Check if circle hits the vertex
       Point bv1 = *v1 - inBegin;
-      Point::member_type a1 = inA - inDelta.lenSquared();
-      Point::member_type b1 = inB + 2.0f * inDelta.dot(bv1);
-      Point::member_type c1 = inC - bv1.lenSquared();
+      F32 a1 = inA - inDelta.lenSquared();
+      F32 b1 = inB + 2.0f * inDelta.dot(bv1);
+      F32 c1 = inC - bv1.lenSquared();
       if (FindLowestRootInInterval(a1, b1, c1, upper_bound, t))
       {
          // We have a collision
@@ -452,16 +451,16 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
 
       // Check if circle hits the edge
       Point v1v2 = *v2 - *v1;
-      Point::member_type v1v2_dot_delta = v1v2.dot(inDelta);
-      Point::member_type v1v2_dot_bv1 = v1v2.dot(bv1);
-      Point::member_type v1v2_len_sq = v1v2.lenSquared();
-      Point::member_type a2 = v1v2_len_sq * a1 + v1v2_dot_delta * v1v2_dot_delta;
-      Point::member_type b2 = v1v2_len_sq * b1 - 2.0f * v1v2_dot_bv1 * v1v2_dot_delta;
-      Point::member_type c2 = v1v2_len_sq * c1 + v1v2_dot_bv1 * v1v2_dot_bv1;
+      F32 v1v2_dot_delta = v1v2.dot(inDelta);
+      F32 v1v2_dot_bv1 = v1v2.dot(bv1);
+      F32 v1v2_len_sq = v1v2.lenSquared();
+      F32 a2 = v1v2_len_sq * a1 + v1v2_dot_delta * v1v2_dot_delta;
+      F32 b2 = v1v2_len_sq * b1 - 2.0f * v1v2_dot_bv1 * v1v2_dot_delta;
+      F32 c2 = v1v2_len_sq * c1 + v1v2_dot_bv1 * v1v2_dot_bv1;
       if (FindLowestRootInInterval(a2, b2, c2, upper_bound, t))
       {
          // Check if the intersection point is on the edge
-         Point::member_type f = t * v1v2_dot_delta - v1v2_dot_bv1;
+         F32 f = t * v1v2_dot_delta - v1v2_dot_bv1;
          if (f >= 0.0f && f <= v1v2_len_sq)
          {
             // We have a collision
@@ -480,7 +479,7 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
 }
 
 // I believe this will work only for convex polygons
-bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, Point::member_type inRadius, Point &outPoint, Point::member_type &outFraction)
+bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inRadius, Point &outPoint, F32 &outFraction)
 {
    // Test if circle intersects at t = 0
    if (PolygonCircleIntersect(inVertices, inNumVertices, inBegin, inRadius * inRadius, outPoint))

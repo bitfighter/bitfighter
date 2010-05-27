@@ -332,7 +332,7 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 
 
 extern bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2);
-extern bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, Point::member_type inRadiusSq, Point &outPoint);
+extern bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint);
 
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle

@@ -4501,6 +4501,8 @@ void EditorUserInterface::rebuildBorderSegs()
 
                Point bordStart, bordEnd;
 
+               //logprintf("%d==%d  %d,%d || %d,%d",ii,jj,(pi1).getIntX(), (pi1).getIntY(),(pj1).getIntX(), (pj1).getIntY());
+
                if(segsOverlap(pi1, pi2, pj1, pj2, bordStart, bordEnd))
                {
                   borderSegs.push_back(bordStart);

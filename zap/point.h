@@ -26,26 +26,28 @@
 #ifndef _POINT_H_
 #define _POINT_H_
 
+#include "tnlTypes.h"
+#include "tnlVector.h"
+
 #include <math.h>
 #include <stdlib.h>
-#include "tnlVector.h"
+
+using namespace TNL;
 
 namespace Zap
 {
 
 struct Point
 {
-   typedef float member_type;
-   member_type x;
-   member_type y;
+   F32 x;
+   F32 y;
 
    // Constructors...
    Point() { x = 0; y = 0; }
    Point(const Point& pt) { x = pt.x; y = pt.y; }
-   Point(member_type in_x, member_type in_y) { x = in_x; y = in_y; }
+   Point(F32 in_x, F32 in_y) { x = in_x; y = in_y; }
 
-
-   void set(member_type ix, member_type iy) { x = ix; y = iy; }
+   void set(F32 ix, F32 iy) { x = ix; y = iy; }
    void set(const Point &pt) { x = pt.x; y = pt.y; }
 
    Point operator+(const Point &pt) const { return Point (x + pt.x, y + pt.y); }
@@ -54,9 +56,9 @@ struct Point
    Point &operator+=(const Point &pt) { x += pt.x; y += pt.y; return *this; }
    Point &operator-=(const Point &pt) { x -= pt.x; y -= pt.y; return *this; }
 
-   Point operator*(const member_type f) { return Point (x * f, y * f); }
-   Point &operator*=(const member_type f) { x *= f; y *= f; return *this; }
-   Point &operator/=(const member_type f) { x /= f; y /= f; return *this; }
+   Point operator*(const F32 f) { return Point (x * f, y * f); }
+   Point &operator*=(const F32 f) { x *= f; y *= f; return *this; }
+   Point &operator/=(const F32 f) { x /= f; y /= f; return *this; }
 
    Point operator*(const Point &pt) { return Point(x * pt.x, y * pt.y); }
 
@@ -64,29 +66,30 @@ struct Point
    bool operator==(const Point &pt) const { return x == pt.x && y == pt.y; }
    bool operator!=(const Point &pt) const { return x != pt.x || y != pt.y; }
 
-   member_type len() const { return (member_type) sqrt(x * x + y * y); }		// Distance from (0,0)
-   member_type lenSquared() const { return x * x + y * y; }
-   void normalize() { member_type l = len(); if(l == 0) { x = 1; y = 0; } else { l = 1 / l; x *= l; y *= l; } }
-   void normalize(float newLen) { member_type l = len(); if(l == 0) { x = newLen; y = 0; } else { l = newLen / l; x *= l; y *= l; } }
-   member_type ATAN2() const { return atan2(y, x); }
-   member_type distanceTo(const Point &pt) { return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) ); }
-   member_type distSquared(const Point &pt) { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
+   F32 len() const { return (F32) sqrt(x * x + y * y); }		// Distance from (0,0)
+   F32 lenSquared() const { return x * x + y * y; }
+   void normalize() { F32 l = len(); if(l == 0) { x = 1; y = 0; } else { l = 1 / l; x *= l; y *= l; } }
+   void normalize(float newLen) { F32 l = len(); if(l == 0) { x = newLen; y = 0; } else { l = newLen / l; x *= l; y *= l; } }
+   F32 ATAN2() const { return atan2(y, x); }
+   F32 distanceTo(const Point &pt) { return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) ); }
+   F32 distSquared(const Point &pt) { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
 
-   member_type angleTo(const Point &p) { return atan2(p.y-y, p.x-x); }
+   F32 angleTo(const Point &p) { return atan2(p.y-y, p.x-x); }
    
-   void setAngle(const member_type ang) { setPolar(len(), ang); }
-   void setPolar(const member_type l, const member_type ang) { x = cos(ang) * l; y = sin(ang) * l; }
+   void setAngle(const F32 ang) { setPolar(len(), ang); }
+   void setPolar(const F32 l, const F32 ang) { x = cos(ang) * l; y = sin(ang) * l; }
 
-   member_type determinant(const Point &p) { return (x * p.y - y * p.x); }
+   F32 determinant(const Point &p) { return (x * p.y - y * p.x); }
 
    void scaleFloorDiv(float scaleFactor, float divFactor)
    {
-      x = (member_type) floor(x * scaleFactor + 0.5) * divFactor;
-      y = (member_type) floor(y * scaleFactor + 0.5) * divFactor;
+      x = (F32) floor(x * scaleFactor + 0.5) * divFactor;
+      y = (F32) floor(y * scaleFactor + 0.5) * divFactor;
    }
-   member_type dot(const Point &p) const { return x * p.x + y * p.y; }
-   void read(const char **argv) { x = (member_type) atof(argv[0]); y = (member_type) atof(argv[1]); }
+   F32 dot(const Point &p) const { return x * p.x + y * p.y; }
+   void read(const char **argv) { x = (F32) atof(argv[0]); y = (F32) atof(argv[1]); }
 };
+
 
 struct Color
 {
@@ -232,8 +235,9 @@ struct Rect
    // Does rect interset or border on rect r?
    bool intersectsOrBorders(const Rect &r)
    {
-      return min.x <= r.max.x && min.y <= r.max.y &&
-             max.x >= r.min.x && max.y >= r.min.y;
+      F32 littleBit = 0.001f;
+      return min.x <= r.max.x + littleBit && min.y <= r.max.y + littleBit &&
+             max.x >= r.min.x - littleBit && max.y >= r.min.y - littleBit;
    }
 
 

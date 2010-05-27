@@ -196,7 +196,7 @@ bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, P
 }
 
 
-extern bool FindLowestRootInInterval(Point::member_type inA, Point::member_type inB, Point::member_type inC, Point::member_type inUpperBound, Point::member_type &outX);
+extern bool FindLowestRootInInterval(F32 inA, F32 inB, F32 inC, F32 inUpperBound, F32 &outX);
 
 bool CircleLineIntersect(Point center, float radius, Point rayStart, Point rayEnd, float &collisionTime)
 {
