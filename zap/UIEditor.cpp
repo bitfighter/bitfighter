@@ -147,6 +147,9 @@ EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
 }
 
 
+static const S32 DOCK_POLY_HEIGHT = 20;
+static const S32 DOCK_POLY_WIDTH = DOCK_WIDTH - 10;
+
 void EditorUserInterface::populateDock()
 {
    mDockItems.clear();
@@ -199,23 +202,23 @@ void EditorUserInterface::populateDock()
       mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
 
       yPos += 25;
-      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
       yPos += 25;
 
       if(!strcmp(mGameType, "HuntersGameType"))
       {
-         mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+         mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += 25;
       }
       else
       {
-         mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_WIDTH - 10, 20));
+         mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += spacer;
       }
    }
    else if(mShowMode == NavZoneMode)
    {
-      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, canvasHeight - vertMargin - 100), TEAM_NEUTRAL, DOCK_WIDTH - 10, 20));
+      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, canvasHeight - vertMargin - 82), TEAM_NEUTRAL, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
    }
 }
 
@@ -506,6 +509,7 @@ void EditorUserInterface::loadLevel()
       mItems[i].processEndPoints();
 
    wallSegmentManager.recomputeAllWallGeometry();
+   borderSegs.clear();
 
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index != ItemBarrierMaker)
@@ -1122,7 +1126,7 @@ S32 getDockHeight(ShowMode mode)
    if(mode == ShowWallsOnly)
       return 62;
    else if(mode == NavZoneMode)
-      return 300;
+      return 92;
    else  // mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones
       return EditorUserInterface::canvasHeight - 2 * EditorUserInterface::vertMargin;
 }
@@ -1418,25 +1422,54 @@ void EditorUserInterface::render()
       glDisable(GL_BLEND);
    }
 
-   glLineWidth(70);
-   glColor(red);
-   glPushMatrix();  
-      setLevelToCanvasCoordConversion();
+   if(mShowMode == NavZoneMode)
+   {
+      F32 const WIDTH = .05;
+      // Render entry box    
+      glEnable(GL_BLEND);
+      glPushMatrix();  
+         setLevelToCanvasCoordConversion();
+         for(S32 i = 1; i >= 0; i--)
+         {
+            glColor(yellow, i ? .5 : 1);
 
-      for(S32 i = 0; i < borderSegs.size(); i+=2)
-      {
-         glBegin(GL_LINES);
-            glVertex(borderSegs[i]);
-            glVertex(borderSegs[i+1]);
-         glEnd();
-      }
+            for(S32 j = 0; j < borderSegs.size(); j+=2)
+            {  
+               F32 ang = borderSegs[j].angleTo(borderSegs[j+1]);
+               F32 cosa = cos(ang) * WIDTH;
+               F32 sina = sin(ang) * WIDTH;
+
+               glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+                  glVertex2f(borderSegs[j].x + sina, borderSegs[j].y - cosa);
+                  glVertex2f(borderSegs[j+1].x + sina, borderSegs[j+1].y - cosa);
+                  glVertex2f(borderSegs[j+1].x - sina, borderSegs[j+1].y + cosa);
+                  glVertex2f(borderSegs[j].x - sina, borderSegs[j].y + cosa);
+               glEnd();
+            }
+         }
+
+      glPopMatrix();
+      glDisable(GL_BLEND);
+      
+/*
+      glLineWidth(70);
+      glColor(yellow);
+      glPushMatrix();  
+         setLevelToCanvasCoordConversion();
+
+         for(S32 i = 0; i < borderSegs.size(); i+=2)
+         {
+            glBegin(GL_LINES);
+               glVertex(borderSegs[i]);
+               glVertex(borderSegs[i+1]);
+            glEnd();
+         }
    
-   glPopMatrix();
+      glPopMatrix();
 
         
-   glLineWidth(gDefaultLineWidth); 
-
-
+      glLineWidth(gDefaultLineWidth); */
+   }
 
 
    if(mLevelErrorMsgs.size())
@@ -4641,7 +4674,6 @@ const char *WorldItem::getDestinationBottomLabel()
    else
       return "";
 }
-
 
 
 // Radius of item in editor

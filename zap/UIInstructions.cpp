@@ -55,7 +55,7 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 1;
 }
 
-const S32 NumPages = 9;
+const S32 NumPages = 10;
 
 const char *pageHeaders[] = {
    "CONTROLS",
@@ -67,13 +67,14 @@ const char *pageHeaders[] = {
    "MORE GAME OBJECTS",
    "ADVANCED COMMANDS",
    "ADMIN COMMANDS",
+   "DEBUG COMMANDS",
 };
 
 void InstructionsUserInterface::render()
 {
    glColor3f(1,0,0);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage - 1]);
-   drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NumPages);
+   drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage, NumPages);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
    glColor3f(0.7, 0.7, 0.7);
    glBegin(GL_LINES);
@@ -110,7 +111,12 @@ void InstructionsUserInterface::render()
          renderPageCommands(0);
          break;
       case 9:
-         renderPageCommands(1);
+         renderPageCommands(1);     // Admin commands
+         break;
+      case 10:
+         renderPageCommands(2);     // Debug commands
+         break;
+
 
       // When adding page, be sure to increase NumPages, and add item to pageHeaders array
    }
@@ -610,9 +616,6 @@ static ControlStringsEditor commands[] = {
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
    { "/vvol <0-10>", "Set voice chat volume" },
-   { "-", NULL },
-   { "/dcoords", "Show ship coordinates" },
-
    { NULL, NULL },      // End of list
 };
 
@@ -629,6 +632,13 @@ static ControlStringsEditor adminCommands[] = {
 };
 
 
+static ControlStringsEditor debugCommands[] = {
+   { "/dcoords", "Show ship coordinates" },
+   { "/dzones", "Show bot nav mesh zones" },
+   { NULL, NULL },      // End of list
+};
+
+
 void InstructionsUserInterface::renderPageCommands(U32 page)
 {
    ControlStringsEditor *cmdList;
@@ -637,6 +647,8 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
       cmdList = commands;
    else if(page == 1)
       cmdList = adminCommands;
+   else if(page == 2)
+      cmdList = debugCommands;
 
    S32 ypos = 50;
 

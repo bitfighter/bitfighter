@@ -59,6 +59,7 @@ This change will resolve many installation and permissions issues.
 <li>Min/max player level params now used when selecting levels</li>
 <li>Slight improvement when rendering walls joining at acute angles</li>
 <li>XBOX controller on windows now much better supported</li>
+<li>Bot nav mesh zones can be displayed in-game by using /dzones command
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -106,7 +107,8 @@ This change will resolve many installation and permissions issues.
 <li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
 <li>Grid fades when snapping disabled</li>
 <li>Changing wall widths is now undoable</li>
-<li>Arbitrary scaling of selected items now works with ctrl-shift-x</li>
+<li>Arbitrary scaling of selected items now works with Ctrl-Shift-X</li>
+<li>There are now multiple edit modes (normal, bot nav mesh zone mode, etc.) customized for different purposes -- use Ctrl-A to toggle
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

@@ -1437,6 +1437,8 @@ void GameUserInterface::processCommand(Vector<string> &words)
    }
    else if(words[0] == "dcoords")
       mDebugShowShipCoords = !mDebugShowShipCoords;
+   else if(words[0] == "dzones")
+       mDebugShowMeshZones = !mDebugShowMeshZones;
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);
    else if(words[0] == "mvol")      // Music volume
@@ -1518,6 +1520,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/add");
    mChatCmds.push_back("/admin");
    mChatCmds.push_back("/dcoords");
+   mChatCmds.push_back("/dzones");
    mChatCmds.push_back("/kick");
    mChatCmds.push_back("/levpass");
    mChatCmds.push_back("/mvol");

@@ -173,6 +173,7 @@ public:
    bool displayInputModeChangeAlert;
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
    bool mDebugShowShipCoords;       // Show coords on ship?
+   bool mDebugShowMeshZones;        // Show bot nav mesh zones?
 
    GameUserInterface();
 

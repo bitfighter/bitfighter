@@ -27,6 +27,7 @@
 #include "SweptEllipsoid.h"
 #include "robot.h"
 #include "UIMenus.h"
+#include "UIGame.h"           // for access to gGameUserInterface.mDebugShowMeshZones
 
 namespace Zap
 {
@@ -36,7 +37,6 @@ TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 
-
 // Constructor
 BotNavMeshZone::BotNavMeshZone()
 {
@@ -45,6 +45,7 @@ BotNavMeshZone::BotNavMeshZone()
    mZoneID = gBotNavMeshZones.size();
    gBotNavMeshZones.push_back(this);
 }
+
 
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
@@ -57,14 +58,19 @@ BotNavMeshZone::~BotNavMeshZone()
    }
 }
 
+
 // Return the center of this zone
 Point BotNavMeshZone::getCenter()
 {
    return getExtent().getCenter();     // Good enough for government work
 }
 
-void BotNavMeshZone::render()     // For now... in future will be invisible!
+
+void BotNavMeshZone::render()    
 {
+   if(!gGameUserInterface.mDebugShowMeshZones)
+      return;
+
    glEnable(GL_BLEND);
    glColor3f(.2, .2, 0);
 
