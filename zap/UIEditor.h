@@ -28,9 +28,10 @@
 
 #include "UIMenus.h"
 #include "gameLoader.h"
-#include "gridDB.h"    // For DatabaseObject definition
+#include "gridDB.h"              // For DatabaseObject definition
 #include "timer.h"
 #include "point.h"
+#include "BotNavMeshZone.h"      // For Border def
 #include "tnlNetStringTable.h"
 #include <string>
 
@@ -61,6 +62,7 @@ enum ShowMode
    NavZoneMode,
    ShowModesCount
 };
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -159,6 +161,9 @@ private:
 public:
    WorldItem(GameItems itemType = ItemInvalid);
    WorldItem(GameItems itemType, Point pos, S32 team, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
+
+   void initializeGeom();     // Once we have our points, do some geom preprocessing
+
 
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
@@ -288,17 +293,21 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class SelectionItem
 {
-public:
-   SelectionItem() { /* do nothing */ }      // Generic constructor
-   SelectionItem(WorldItem &item);           // Primary constructor
-
 private:
    bool mSelected;
    Vector<bool> mVertSelected;
 
 public:
+   SelectionItem() { /* do nothing */ }      // Generic constructor
+   SelectionItem(WorldItem &item);           // Primary constructor
+
    void restore(WorldItem &item);
 };
 
@@ -457,6 +466,7 @@ private:
    bool mWasTesting;
 
    void finishedDragging();
+   bool showingNavZones();
 
 public:
    ~EditorUserInterface();    // Destructor
@@ -487,7 +497,8 @@ public:
 
    void render();
    void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
-   void renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha);
+   void renderLinePolyVertices(WorldItem &item, F32 alpha = 1.0);
+
 
    // Render walls & lineItems
    void renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines,
@@ -546,10 +557,12 @@ public:
 
    // Snapping related functions:
    Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
-   S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat, F32 &minDist, 
-                         Point &snapPoint);
+   static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat, F32 &minDist, 
+                                Point &snapPoint);
+   S32 checkCornersForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 &minDist, Point &snapPoint);
 
-   void rebuildBorderSegs();
+
+   void rebuildBorderSegs(WorldItem *zone);
 
    void deleteItem(S32 itemIndex);
 

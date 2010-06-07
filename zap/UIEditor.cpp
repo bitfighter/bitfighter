@@ -108,7 +108,7 @@ enum EntryMode {
 
 
 static EntryMode entryMode;
-static Vector<Point> borderSegs;
+static Vector<ZoneBorder> zoneBorders;
 
 void saveLevelCallback()
 {
@@ -509,10 +509,20 @@ void EditorUserInterface::loadLevel()
       mItems[i].processEndPoints();
 
    wallSegmentManager.recomputeAllWallGeometry();
-   borderSegs.clear();
-
+   
+   // Bulk-process bot nav mesh zone boundaries
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index != ItemBarrierMaker)
+      if(mItems[i].index == ItemNavMeshZone)
+      {
+          mItems[i].initializeGeom();
+      }
+
+   gEditorUserInterface.rebuildBorderSegs(NULL);
+
+
+   // And hand-process all other items
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index != ItemBarrierMaker && mItems[i].index != ItemNavMeshZone)
          mItems[i].onGeomChanged();
 }
 
@@ -903,7 +913,8 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
          return p;
    }
 
-   F32 minDist = 100 / (mCurrentScale * mCurrentScale);
+   F32 maxSnapDist = 100 / (mCurrentScale * mCurrentScale);
+   F32 minDist = maxSnapDist;
 
    if(!snapDisabled)
    {
@@ -964,22 +975,25 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
-         for(S32 j = 0; j < seg->edges.size(); j++)
-         {
+
+         checkCornersForSnap(p, seg->edges, minDist, snapPoint);
+
+         //for(S32 j = 0; j < seg->edges.size(); j++)
+         //{
                  
-            F32 dist = seg->edges[j].distSquared(p);
-            if(dist < minDist)
-            {
-               minDist = dist;
-               snapPoint.set(seg->edges[j]);
-            }
-         }
+         //   F32 dist = seg->edges[j].distSquared(p);
+         //   if(dist < minDist)
+         //   {
+         //      minDist = dist;
+         //      snapPoint.set(seg->edges[j]);
+         //   }
+         //}
       }
    }
 
    // If we're editing a vertex of a polygon, and if we're outside of some threshold distance, see if we can 
-   // snap to the edge of a another zone or wall.  Increasing value in minDist test will favor snapping to walls, 
-   // decreasing it will require being closer to a wall to snap to it.
+   // snap to the edge of a another zone or wall.  Decreasing value in minDist test will favor snapping to walls, 
+   // decreasing(increasing??) it will require being closer to a wall to snap to it.
    if(minDist >= 90 / (mCurrentScale * mCurrentScale))
    {
       if(snapToEdges)
@@ -991,26 +1005,37 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
             checkEdgesForSnap(p, seg->edges, false, minDist, snapPoint);
          }
       }
+   }
 
-      if(snapToNavZoneEdges)
+   // Will overwrite snapPoint if a zone corner or edge is found, thus prioritizing zone edges to other things when 
+   // snapToNavZoneEdges is true
+   if(snapToNavZoneEdges)
+   {
+      Rect vertexRect(snapPoint, .25); 
+      Vector<WorldItem> candidates;
+      Point edgeSnapPoint;
+      F32 minCornerDist = maxSnapDist;
+      F32 minEdgeDist = maxSnapDist;
+
+      for(S32 i = 0; i < mItems.size(); i++)
       {
-         Rect vertexRect(snapPoint, .25); 
+         if(mItems[i].index != ItemNavMeshZone || mItems[i].selected || mItems[i].anyVertsSelected())
+            continue;
 
-         for(S32 i = 0; i < mItems.size(); i++)
-         {
-            if(mItems[i].index != ItemNavMeshZone || mItems[i].selected || mItems[i].anyVertsSelected())
-               continue;
-
-            if(!mItems[i].getExtent().intersectsOrBorders(vertexRect))
-               continue;
+         if(!mItems[i].getExtent().intersectsOrBorders(vertexRect))
+            continue;
          
-            // To close the polygon, we need to repeat our first point at the end
-            Vector<Point> verts = mItems[i].getVerts();     // Makes copy -- TODO: alter checkEdgesforsnap to make
-                                                            // copy unnecessary
-            verts.push_back(verts.first());
+         // To close the polygon, we need to repeat our first point at the end
+         Vector<Point> verts = mItems[i].getVerts();     // Makes copy -- TODO: alter checkEdgesforsnap to make
+                                                         // copy unnecessary, only needed when 3rd param is true
+         verts.push_back(verts.first());
 
-            checkEdgesForSnap(p, verts, true, minDist, snapPoint);
-         }
+         // Combine these two checks in an awkward manner to reduce cost of checks above
+         checkEdgesForSnap(p, verts, true, minEdgeDist, edgeSnapPoint);
+         checkCornersForSnap(p, mItems[i].getVerts(), minCornerDist, snapPoint);
+
+         if(minCornerDist == maxSnapDist && minEdgeDist < maxSnapDist)     // i.e. found edge, but not corner
+            snapPoint.set(edgeSnapPoint);
       }
    }
 
@@ -1027,13 +1052,12 @@ S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector
 {
    S32 inc = abcFormat ? 1 : 2;   
    S32 segFound = NONE;
-   F32 dist;
    Point closest;
 
    for(S32 i = 0; i < verts.size() - 1; i += inc)
-      if(findNormalPoint(clickPoint, verts[i], verts[i+1], closest))
+      if(findNormalPoint(clickPoint, verts[i], verts[i+1], closest))    // closest is point on line where clickPoint normal intersects
       {
-         dist = (clickPoint - closest).lenSquared();
+         F32 dist = closest.distSquared(clickPoint);
          if(dist < minDist)
          {
             minDist = dist;
@@ -1044,6 +1068,26 @@ S32 EditorUserInterface::checkEdgesForSnap(const Point &clickPoint, const Vector
 
    return segFound;
 }
+
+
+S32 EditorUserInterface::checkCornersForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 &minDist, Point &snapPoint)
+{
+   S32 vertFound = NONE;
+
+   for(S32 i = 0; i < verts.size(); i++)
+   {
+      F32 dist = verts[i].distSquared(clickPoint);
+      if(dist < minDist)
+      {
+         minDist = dist;
+         snapPoint.set(verts[i]);
+         vertFound = i;
+      }
+   }
+
+   return vertFound;
+}
+
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -1306,6 +1350,24 @@ void EditorUserInterface::render()
          renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false, false);
 
 
+   // Go through and render any borders between navMeshZones -- these need to be rendered after the zones themselves so they
+   // don't get covered up.
+   if(showingNavZones())
+   {
+      glPushMatrix();  
+         setLevelToCanvasCoordConversion();
+
+         for(S32 i = 0; i < mItems.size(); i++)
+            if(mItems[i].index == ItemNavMeshZone)
+               renderNavMeshBorders(zoneBorders, 1 / mGridSize);
+      glPopMatrix();
+
+      for(S32 i = 0; i < mItems.size(); i++)
+         if(mItems[i].index == ItemNavMeshZone)
+            renderLinePolyVertices(mItems[i], i); 
+   }
+
+
    fillRendered = false;
    F32 width = NONE;
 
@@ -1433,42 +1495,23 @@ void EditorUserInterface::render()
          {
             glColor(yellow, i ? .5 : 1);
 
-            for(S32 j = 0; j < borderSegs.size(); j+=2)
+            for(S32 j = 0; j < zoneBorders.size(); j++)
             {  
-               F32 ang = borderSegs[j].angleTo(borderSegs[j+1]);
+               F32 ang = zoneBorders[j].borderStart.angleTo(zoneBorders[j].borderEnd);
                F32 cosa = cos(ang) * WIDTH;
                F32 sina = sin(ang) * WIDTH;
 
                glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-                  glVertex2f(borderSegs[j].x + sina, borderSegs[j].y - cosa);
-                  glVertex2f(borderSegs[j+1].x + sina, borderSegs[j+1].y - cosa);
-                  glVertex2f(borderSegs[j+1].x - sina, borderSegs[j+1].y + cosa);
-                  glVertex2f(borderSegs[j].x - sina, borderSegs[j].y + cosa);
+                  glVertex2f(zoneBorders[j].borderStart.x + sina, zoneBorders[j].borderStart.y - cosa);
+                  glVertex2f(zoneBorders[j].borderEnd.x + sina, zoneBorders[j].borderEnd.y - cosa);
+                  glVertex2f(zoneBorders[j].borderEnd.x - sina, zoneBorders[j].borderEnd.y + cosa);
+                  glVertex2f(zoneBorders[j].borderStart.x - sina, zoneBorders[j].borderStart.y + cosa);
                glEnd();
             }
          }
 
       glPopMatrix();
       glDisable(GL_BLEND);
-      
-/*
-      glLineWidth(70);
-      glColor(yellow);
-      glPushMatrix();  
-         setLevelToCanvasCoordConversion();
-
-         for(S32 i = 0; i < borderSegs.size(); i+=2)
-         {
-            glBegin(GL_LINES);
-               glVertex(borderSegs[i]);
-               glVertex(borderSegs[i+1]);
-            glEnd();
-         }
-   
-      glPopMatrix();
-
-        
-      glLineWidth(gDefaultLineWidth); */
    }
 
 
@@ -1491,7 +1534,7 @@ void EditorUserInterface::render()
 
 
 // Draw the vertices for a polygon or line item (i.e. walls)
-void EditorUserInterface::renderLinePolyVertices(WorldItem &item, S32 index, F32 alpha)
+void EditorUserInterface::renderLinePolyVertices(WorldItem &item, F32 alpha)
 {
    if(mShowingReferenceShip)
       return;
@@ -1589,6 +1632,12 @@ static inline void labelSimpleLineItem(Point pos, U32 labelSize, const char *ite
 {
    UserInterface::drawStringc(pos.x, pos.y + labelSize + 2, labelSize, itemLabelTop);
    UserInterface::drawStringc(pos.x, pos.y + 2 * labelSize + 5, labelSize, itemLabelBottom);
+}
+
+
+bool EditorUserInterface::showingNavZones()
+{
+   return (mShowMode == ShowAllObjects || mShowMode == NavZoneMode) && !mShowingReferenceShip;
 }
 
 
@@ -1806,14 +1855,14 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       if(!(mShowingReferenceShip && item.index == ItemBarrierMaker))
          item.renderPolylineCenterline(alpha);
 
-      renderLinePolyVertices(item, index, alpha);
+      renderLinePolyVertices(item, alpha);
    } 
    else if(item.geomType() == geomPoly)    // Draw regular line objects and poly objects
    {
       // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
       // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
-      if((mShowMode != ShowWallsOnly && (mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone) ) &&
-        !(mShowingReferenceShip) ||  isDockItem || mShowingReferenceShip && item.index != ItemNavMeshZone)   
+      if((mShowMode != ShowWallsOnly && (showingNavZones() && item.index == ItemNavMeshZone)) &&
+            !mShowingReferenceShip || isDockItem || mShowingReferenceShip && item.index != ItemNavMeshZone)   
       {
          // A few items will get custom colors; most will get their team color
          if(hideit)
@@ -1828,7 +1877,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
          F32 ang = angleOfLongestSide(item.getVerts());
 
-         if(isDockItem || item.index == ItemNavMeshZone)    // Old school rendering for on the dock & mesh zones
+         if(isDockItem)    // Old school rendering on the dock
          {
             glPushMatrix();
                setLevelToCanvasCoordConversion(!isDockItem);
@@ -1857,12 +1906,15 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                                     item.centroid * mGridSize, ang, 1 / mGridSize);
 
                else if(item.index == ItemGoalZone)
-                   renderGoalZone(getTeamColor(item.team), item.getVerts(), item.fillPoints,  
+                  renderGoalZone(getTeamColor(item.team), item.getVerts(), item.fillPoints,  
                                     item.centroid * mGridSize, ang, false, 0, 1 / mGridSize);
 
                else if(item.index == ItemNexus)
-                    renderNexus(item.getVerts(), item.fillPoints, 
+                  renderNexus(item.getVerts(), item.fillPoints, 
                                     item.centroid * mGridSize, ang, true, 0, 1 / mGridSize);
+
+               else if(item.index == ItemNavMeshZone)
+                  renderNavMeshZone(item.getVerts(), item.fillPoints, item.centroid * mGridSize, -1, item.isConvex());
 
                // If item is selected, and we're not in preview mode, draw a border highlight
                if(!mShowingReferenceShip && (item.selected || item.litUp))
@@ -1877,9 +1929,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
       }
 
-      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !isDockItem)  // No verts on dock!
-         if(mShowMode != ShowAllButNavZones || item.index != ItemNavMeshZone)         // Unless it's a hidden NavMeshZone...
-            renderLinePolyVertices(item, index, alpha);                               // ...draw vertices for this polygon
+      // NavMeshZone verts will be drawn elsewhere
+      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !isDockItem && item.index != ItemNavMeshZone)  
+         renderLinePolyVertices(item, alpha);                               
    }
  
    else if(mShowMode != ShowWallsOnly || isDockItem || mShowingReferenceShip)   // Draw the various point items
@@ -3629,7 +3681,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mRight = true;
    else if(keyCode == KEY_RIGHT)          // Right - Pan right
       mRight = true;
-   else if(keyCode == KEY_F)              // F - Flip horizontal
+   else if(keyCode == KEY_H)              // H - Flip horizontal
       flipSelectionHorizontal();
    else if(keyCode == KEY_V && getKeyState(KEY_CTRL))    // Ctrl-V - Paste selection
       pasteSelection();
@@ -3766,7 +3818,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       insertNewItem(ItemTurret);
    else if(keyCode == KEY_M)              // M - Mine
       insertNewItem(ItemMine);
-   else if(keyCode == KEY_H)              // H - Force Field
+   else if(keyCode == KEY_F)              // F - Force Field
       insertNewItem(ItemForceField);
    else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
          deleteSelection(false);
@@ -3923,7 +3975,7 @@ bool EditorUserInterface::mouseOnDock()
 {
    return (mMousePos.x >= canvasWidth - DOCK_WIDTH - horizMargin &&
            mMousePos.x <= canvasWidth - horizMargin &&
-           mMousePos.y >= vertMargin &&
+           mMousePos.y >= canvasHeight - vertMargin - getDockHeight(mShowMode) &&
            mMousePos.y <= canvasHeight - vertMargin);
 }
 
@@ -4491,9 +4543,12 @@ void WallSegmentManager::renderWalls(bool convert, F32 alpha)
 }
 
 
-void EditorUserInterface::rebuildBorderSegs()
+void EditorUserInterface::rebuildBorderSegs(WorldItem *zone)
 {
-   borderSegs.clear();
+   zoneBorders.clear();
+   ZoneBorder zoneBorder;
+
+   F32 scaleFact = 1 / mGridSize;
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
@@ -4504,44 +4559,17 @@ void EditorUserInterface::rebuildBorderSegs()
       {
          if(i == j || mItems[j].index != ItemNavMeshZone)
             continue;      // Don't check self...
-
+         
          // Do zones i and j touch?  First a quick and dirty bounds check:
          if(!mItems[i].getExtent().intersectsOrBorders(mItems[j].getExtent()))
             continue;
 
-         // Check for unlikely but fatal situation: Not enough vertices
-          if(mItems[i].vertCount() < 3 || mItems[j].vertCount() < 3)
-            continue;
-
-         Point pi1, pi2, pj1, pj2;
-
-         // Now, do we actually touch?  Let's look, segment by segment
-         for(S32 ii = 0; ii < mItems[i].vertCount(); ii++)
+         if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), zoneBorder.borderStart, zoneBorder.borderEnd, scaleFact))
          {
-            pi1 = mItems[i].vert(ii);
-            if(ii == mItems[i].vertCount() - 1)
-               pi2 = mItems[i].vert(0);
-            else
-               pi2 = mItems[i].vert(ii + 1);
+            zoneBorder.mOwner1 = mItems[i].mId;
+            zoneBorder.mOwner2 = mItems[j].mId;
 
-            for(S32 jj = 0; jj < mItems[j].vertCount(); jj++)
-            {
-               pj1 = mItems[j].vert(jj);
-               if(jj == mItems[j].vertCount() - 1)
-                  pj2 = mItems[j].vert(0);
-               else
-                  pj2 = mItems[j].vert(jj + 1);
-
-               Point bordStart, bordEnd;
-
-               //logprintf("%d==%d  %d,%d || %d,%d",ii,jj,(pi1).getIntX(), (pi1).getIntY(),(pj1).getIntX(), (pj1).getIntY());
-
-               if(segsOverlap(pi1, pi2, pj1, pj2, bordStart, bordEnd))
-               {
-                  borderSegs.push_back(bordStart);
-                  borderSegs.push_back(bordEnd);
-               }
-            }
+            zoneBorders.push_back(zoneBorder);
          }
       }
    }
@@ -4607,6 +4635,17 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
    {
       speed = -1;
       boolattr = false;
+   }
+}
+
+
+void WorldItem::initializeGeom()
+{
+   if(geomType() == geomPoly)
+   {
+      Triangulate::Process(mVerts, fillPoints);   // Populates fillPoints from polygon outline
+      centroid = findCentroid(mVerts);
+      setExtent(Rect(mVerts));
    }
 }
 
@@ -5080,14 +5119,10 @@ void WorldItem::onGeomChanged()
    }
 
    else if(geomType() == geomPoly)
-   {
-      Triangulate::Process(mVerts, fillPoints);   // Populates fillPoints from polygon outline
-      centroid = findCentroid(mVerts);
-      setExtent(Rect(mVerts));
-   }
+      initializeGeom();
 
    if(index == ItemNavMeshZone)
-      gEditorUserInterface.rebuildBorderSegs();
+      gEditorUserInterface.rebuildBorderSegs(this);
 }
 
 

@@ -71,10 +71,10 @@ struct Point
    void normalize() { F32 l = len(); if(l == 0) { x = 1; y = 0; } else { l = 1 / l; x *= l; y *= l; } }
    void normalize(float newLen) { F32 l = len(); if(l == 0) { x = newLen; y = 0; } else { l = newLen / l; x *= l; y *= l; } }
    F32 ATAN2() const { return atan2(y, x); }
-   F32 distanceTo(const Point &pt) { return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) ); }
-   F32 distSquared(const Point &pt) { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
+   F32 distanceTo(const Point &pt) const { return sqrt( (x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y) ); }
+   F32 distSquared(const Point &pt) const { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
 
-   F32 angleTo(const Point &p) { return atan2(p.y-y, p.x-x); }
+   F32 angleTo(const Point &p) const { return atan2(p.y-y, p.x-x); }
    
    void setAngle(const F32 ang) { setPolar(len(), ang); }
    void setPolar(const F32 l, const F32 ang) { x = cos(ang) * l; y = sin(ang) * l; }

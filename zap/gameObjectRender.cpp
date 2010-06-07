@@ -34,6 +34,7 @@
 #include "soccerGame.h"
 #include "gameItems.h"
 #include "engineeredObjects.h"      // For TURRET_OFFSET
+#include "BotNavMeshZone.h"         // For Border def
 
 #include "config.h"     // Only for testing burst graphics below
 
@@ -737,14 +738,17 @@ void renderPolygonOutline(const Vector<Point> &outline)
 }
 
 
+// Only used locally
 void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, 
-                   const Color &fillColor, const Color &outlineColor)
+                   const Color &fillColor, const Color &outlineColor, F32 alpha = 1)
 {
-   glColor(fillColor);
+   glEnable(GL_BLEND);
+   glColor(fillColor, alpha);
    renderTriangulatedPolygonFill(fillPoints);
 
-   glColor(outlineColor);
+   glColor(outlineColor, alpha);
    renderPolygonOutline(outlinePoints);
+   glDisable(GL_BLEND);
 }
 
 
@@ -753,6 +757,62 @@ void renderLoadoutZone(Color color, const Vector<Point> &outline, const Vector<P
 {
    renderPolygon(fill, outline, color * 0.5, color);
    renderPolygonLabel(centroid, labelAngle, 25, "LOADOUT ZONE", scaleFact);
+}
+
+
+static Color green(0,1,0);
+static Color red(1,0,0);
+static Color yellow(1,1,0);
+static Color blue(0,0,1);
+
+void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, const Point &centroid, S32 zoneId, bool isConvex)
+{
+   Color color = isConvex ? green : red;
+
+   renderPolygon(fill, outline, color * .5, color, .5);
+
+   if(zoneId != -1)
+   {
+      char buf[24];
+      dSprintf(buf, 24, "%d", zoneId );
+
+      renderPolygonLabel(centroid, 0, 25, buf);
+   }
+}
+
+
+void renderNavMeshBorder(const Border &border, F32 scaleFact)
+{
+   const F32 width = 3 * scaleFact;
+
+   F32 ang = border.borderStart.angleTo(border.borderEnd);
+   F32 cosa = cos(ang) * width;
+   F32 sina = sin(ang) * width;
+
+   for(S32 j = 1; j >= 0; j--)
+   {
+      glColor(j ? blue * .25 : blue);
+      glBegin(j ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f(border.borderStart.x + sina, border.borderStart.y - cosa);
+         glVertex2f(border.borderEnd.x + sina, border.borderEnd.y - cosa);
+         glVertex2f(border.borderEnd.x - sina, border.borderEnd.y + cosa);
+         glVertex2f(border.borderStart.x - sina, border.borderStart.y + cosa);
+      glEnd();
+   }
+}
+
+
+void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact)
+{
+   for(S32 i = 0; i < borders.size(); i++)
+      renderNavMeshBorder(borders[i], scaleFact);
+}
+
+
+void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
+{
+   for(S32 i = 0; i < borders.size(); i++)
+      renderNavMeshBorder(borders[i], scaleFact);
 }
 
 

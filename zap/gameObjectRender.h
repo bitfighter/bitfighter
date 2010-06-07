@@ -28,6 +28,8 @@
 
 #include "tnl.h"
 
+//#include "BotNavMeshZone.h"      // For Border def
+
 #include "point.h"
 #include <string>
 
@@ -67,6 +69,17 @@ extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
 
 extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, 
                                        const Point &centroid, F32 labelAngle, F32 scaleFact = 1);
+
+extern void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill,
+                              const Point &centroid, S32 zoneId, bool isConvex);
+
+class ZoneBorder;
+extern void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact = 1);
+
+class NeighboringZone;
+extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact = 1);
+
+
 extern void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
                            bool isFlashing, F32 glowFraction, F32 scaleFact = 1);
 

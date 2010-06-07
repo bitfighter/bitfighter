@@ -108,7 +108,8 @@ This change will resolve many installation and permissions issues.
 <li>Grid fades when snapping disabled</li>
 <li>Changing wall widths is now undoable</li>
 <li>Arbitrary scaling of selected items now works with Ctrl-Shift-X</li>
-<li>There are now multiple edit modes (normal, bot nav mesh zone mode, etc.) customized for different purposes -- use Ctrl-A to toggle
+<li>There are now multiple edit modes (normal, bot nav mesh zone mode, etc.) customized for different purposes -- use Ctrl-A to toggle</li>
+<li>Switched H and F key assignments</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

@@ -28,6 +28,7 @@
 #include "robot.h"
 #include "UIMenus.h"
 #include "UIGame.h"           // for access to gGameUserInterface.mDebugShowMeshZones
+#include "gameObjectRender.h"
 
 namespace Zap
 {
@@ -66,52 +67,16 @@ Point BotNavMeshZone::getCenter()
 }
 
 
-void BotNavMeshZone::render()    
+void BotNavMeshZone::render(S32 layerIndex)    
 {
    if(!gGameUserInterface.mDebugShowMeshZones)
       return;
 
-   glEnable(GL_BLEND);
-   glColor3f(.2, .2, 0);
-
-   // Render loadout zone trinagle geometry
-   for(S32 i = 0; i < mPolyFill.size(); i+=3)
-   {
-      glBegin(GL_POLYGON);
-      for(S32 j = i; j < i + 3; j++)
-         glVertex2f(mPolyFill[j].x, mPolyFill[j].y);
-      glEnd();
-   }
-
-   glColor3f(.7, .7, 0);
-   glBegin(GL_LINE_LOOP);
-      for(S32 i = 0; i < mPolyBounds.size(); i++)
-         glVertex2f(mPolyBounds[i].x, mPolyBounds[i].y);
-   glEnd();
-
-   Rect extents = this->getExtent();
-   Point center = extents.getCenter();
-
-   glPushMatrix();
-   glTranslatef(center.x, center.y, 0);
-      glColor3f(1,1,0);
-      char buf[24];
-      dSprintf(buf, 24, "ZONE %d", mZoneID );
-      renderCenteredString(Point(0,0), 25, buf);
-   glPopMatrix();
-
-   glColor3f(1,0,0);
-   for(S32 i = 0; i < mNeighbors.size(); i++)
-   {
-      glBegin(GL_LINES);
-      glVertex2f(mNeighbors[i].borderStart.x, mNeighbors[i].borderStart.y);
-      glVertex2f(mNeighbors[i].borderEnd.x, mNeighbors[i].borderEnd.y);
-      glEnd();
-   }
-
-   glDisable(GL_BLEND);
+   if(layerIndex == 0)
+      renderNavMeshZone(mPolyBounds, mPolyFill, mCentroid, mZoneID, mConvex);
+   else if(layerIndex == 1)
+      renderNavMeshBorders(mNeighbors);
 }
-
 
 
 // Use this to help keep track of which robots are where
@@ -132,6 +97,7 @@ S32 BotNavMeshZone::getRenderSortValue()
    return -2;
 }
 
+
 // Create objects from parameters stored in level file
 bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 {
@@ -140,6 +106,8 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 
    processPolyBounds(argc, argv, 0, getGame()->getGridSize());
    computeExtent();  // Not needed?
+   mConvex = isConvex(mPolyBounds);
+
    return true;
 }
 
@@ -179,7 +147,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 
    Polygon::packUpdate(connection, stream);
 
-   stream->writeEnum(mNeighbors.size(), 15);
+   stream->writeInt(mNeighbors.size(), 8);
    for(S32 i = 0; i < mNeighbors.size(); i++)
    {
       stream->write(mNeighbors[i].borderStart.x);
@@ -198,9 +166,12 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
    mZoneID = stream->readInt(16);
 
    if(Polygon::unpackUpdate(connection, stream))
+   {
       computeExtent();
+      mConvex = isConvex(mPolyBounds);
+   }
 
-   U32 size = stream->readEnum(15);
+   U32 size = stream->readInt(8);
    for(U32 i = 0; i < size; i++)
    {
       NeighboringZone n;
@@ -216,6 +187,8 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       n.borderStart = p1;
       n.borderEnd = p2;
       mNeighbors.push_back(n);
+     // mNeighborRenderPoints.push_back(Border(p1, p2));
+
    }
 }
 
@@ -265,8 +238,13 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 }
 
 
-void BotNavMeshZone::buildBotNavMeshZoneConnections()
+// Only runs on server
+void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
+   if(gBotNavMeshZones.size() == 0)
+      return;
+
+   // Figure out which zones are adjacent to which, and find the "gateway" between them
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    {
       for(S32 j = i; j < gBotNavMeshZones.size(); j++)
@@ -278,62 +256,31 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          if(!gBotNavMeshZones[i]->getExtent().intersectsOrBorders(gBotNavMeshZones[j]->getExtent()))
             continue;
 
-         // Check for unlikely but fatal situation: Not enough vertices
-          if(gBotNavMeshZones[i]->mPolyBounds.size() < 3 || gBotNavMeshZones[j]->mPolyBounds.size() < 3)
-          {
-             logprintf("Found malformed botNavMeshZone!");
-            continue;
-          }
+         Point bordStart, bordEnd;
 
-         Point pi1, pi2, pj1, pj2;
-         bool found = false;
-
-         // Now, do we actually touch?  Let's look, segment by segment
-         for(S32 ii = 0; !found && ii < gBotNavMeshZones[i]->mPolyBounds.size(); ii++)
+         if(zonesTouch(gBotNavMeshZones[i]->mPolyBounds, gBotNavMeshZones[j]->mPolyBounds, bordStart, bordEnd))
          {
-            pi1 = gBotNavMeshZones[i]->mPolyBounds[ii];
-            if(ii == gBotNavMeshZones[i]->mPolyBounds.size() - 1)
-               pi2 = gBotNavMeshZones[i]->mPolyBounds[0];
-            else
-               pi2 = gBotNavMeshZones[i]->mPolyBounds[ii + 1];
+            Point bordCen = Rect(bordStart, bordEnd).getCenter();
 
-            for(S32 jj = 0; !found && jj < gBotNavMeshZones[j]->mPolyBounds.size(); jj++)
-            {
-               pj1 = gBotNavMeshZones[j]->mPolyBounds[jj];
-               if(jj == gBotNavMeshZones[j]->mPolyBounds.size() - 1)
-                  pj2 = gBotNavMeshZones[j]->mPolyBounds[0];
-               else
-                  pj2 = gBotNavMeshZones[j]->mPolyBounds[jj + 1];
+            NeighboringZone n1;
+            n1.zoneID = j;
+            n1.borderStart.set(bordStart);
+            n1.borderEnd.set(bordEnd);
+            n1.borderCenter.set(bordCen);
 
-               Point bordStart, bordEnd;
+            n1.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
+            n1.center.set(gBotNavMeshZones[j]->getCenter());
+            gBotNavMeshZones[i]->mNeighbors.push_back(n1);
 
-               if(segsOverlap(pi1, pi2, pj1, pj2, bordStart, bordEnd))
-               {
-                  Point bordCen = Rect(bordStart, bordEnd).getCenter();
+            NeighboringZone n2;
+            n2.zoneID = i;
+            n2.borderStart.set(bordStart);
+            n2.borderEnd.set(bordEnd);
+            n2.borderCenter.set(bordCen);
 
-                  NeighboringZone n1;
-                  n1.zoneID = j;
-                  n1.borderStart = bordStart;
-                  n1.borderEnd = bordEnd;
-                  n1.borderCenter = bordCen;
-
-                  n1.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-                  n1.center = gBotNavMeshZones[j]->getCenter();
-                  gBotNavMeshZones[i]->mNeighbors.push_back(n1);
-
-                  NeighboringZone n2;
-                  n2.zoneID = i;
-                  n2.borderStart = bordStart;
-                  n2.borderEnd = bordEnd;
-                  n2.borderCenter = bordCen;
-
-                  n2.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
-                  n2.center = gBotNavMeshZones[i]->getCenter();
-                  gBotNavMeshZones[j]->mNeighbors.push_back(n2);
-
-                  found = true;
-               }
-            }
+            n2.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
+            n2.center.set(gBotNavMeshZones[i]->getCenter());
+            gBotNavMeshZones[j]->mNeighbors.push_back(n2);
          }
       }
    }

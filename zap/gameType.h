@@ -65,7 +65,7 @@ public:
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
 
-   S32 getRating() { return mRating; }
+   F32 getRating() { return mRating; }
    void setRating(F32 rating) { mRating = rating; }
 
    LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
@@ -91,6 +91,7 @@ public:
 
 class Robot;
 class AsteroidSpawn;
+class Team;
 
 class GameType : public GameObject
 {

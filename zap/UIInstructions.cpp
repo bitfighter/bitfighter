@@ -37,6 +37,7 @@
 #include "speedZone.h"           // For SpeedZone::height
 #include "SweptEllipsoid.h"      // For polygon triangulation
 #include "config.h"
+
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -210,15 +211,11 @@ void InstructionsUserInterface::renderPage1()
       glVertex2f(750, starty + 26);
    glEnd();
 
-   ControlString *controls;
-   Color txtColor = Color(0, 1, 1);
-   Color keyColor = Color (1, 1, 1);
-   Color secColor = Color(1, 1, 0);
+   static const Color txtColor = Color(0, 1, 1);
+   static const Color keyColor = Color(1, 1, 1);      // white
+   static const Color secColor = Color(1, 1, 0);
 
-   if(gIniSettings.inputMode == Keyboard)
-      controls = controlsKeyboard;
-   else
-      controls = controlsGamepad;
+   ControlString *controls = (gIniSettings.inputMode == Keyboard) ? controlsKeyboard : controlsGamepad;
 
    glColor(secColor);
    drawString(col1, starty, 20, "Action");
@@ -354,6 +351,7 @@ void InstructionsUserInterface::renderPage2()
       glTranslatef(60, y + 10, 0);
       glScalef(0.7, 0.7, 1);
       glRotatef(-90, 0, 0, 1);
+
       static F32 thrusts[4] =  { 1, 0, 0, 0 };
       static F32 thrustsBoost[4] =  { 1.3, 0, 0, 0 };
 

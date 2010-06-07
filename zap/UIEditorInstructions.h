@@ -41,8 +41,9 @@ private:
 public:
    EditorInstructionsUserInterface();      // Constructor
    void render();
-   void renderPage1();
-   void renderPage2();
+   void renderPageCommands(S32 page);
+   void renderPageWalls();
+   void renderPageZones();
 
    void onKeyDown(KeyCode keyCode, char ascii);
 

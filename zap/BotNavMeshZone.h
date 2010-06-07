@@ -40,15 +40,32 @@
 namespace Zap
 {
 
-struct NeighboringZone
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Border
 {
-   NeighboringZone() { zoneID = 0; distTo = 0; }     // Quickie constructor
-   U16 zoneID;
+public:
    Point borderStart;
    Point borderEnd;
+};
+
+class NeighboringZone : public Border
+{
+public:
+   NeighboringZone() { zoneID = 0; distTo = 0; }     // Quickie constructor
+   U16 zoneID;
+
    Point borderCenter;     // Simply a point half way between borderStart and borderEnd
    Point center;           // Center of zone
    F32 distTo;
+};
+
+
+class ZoneBorder : public Border
+{
+public:
+   S32 mOwner1, mOwner2;      // IDs of border zones
 };
 
 ////////////////////////////////////////
@@ -59,6 +76,7 @@ class BotNavMeshZone : public GameObject, public Polygon
 
 private:   
    typedef GameObject Parent;
+   bool mConvex;                 // Stores wheter zone is convex or not
 
 public:
    U16 mZoneID;
@@ -66,7 +84,7 @@ public:
    BotNavMeshZone();       // Constructor
    ~BotNavMeshZone();      // Destructor
 
-   void render();
+   void render(S32 layerIndex);
 
    S32 getRenderSortValue();
 
@@ -91,7 +109,8 @@ public:
 
    //Vector<Point> mPolyBounds;
 
-   Vector<NeighboringZone> mNeighbors;        // List of other zones this zone touches
+   Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
+   Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
    static void buildBotNavMeshZoneConnections();

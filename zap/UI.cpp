@@ -371,9 +371,7 @@ void UserInterface::drawStringf(F32 x, F32 y, U32 size, const char *format, ...)
 void UserInterface::drawStringfc(F32 x, F32 y, U32 size, const char *format, ...)
 {
    makeBuffer;
-
-   S32 len = getStringWidth(size, buffer);
-   drawString((S32) x - len / 2, (S32) y, size, buffer);
+   drawStringc(x, y, size, buffer);
 }
 
    
@@ -523,7 +521,7 @@ void UserInterface::playBoop()
 }
 
 
-extern void glColor(const Color &c, float alpha = 1);
+//extern void glColor(const Color &c, float alpha = 1);
 
 void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines)
 {

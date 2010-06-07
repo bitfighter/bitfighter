@@ -33,6 +33,10 @@
 #include "UIChat.h"
 #include "UIDiagnostics.h"
 #include "UIEditor.h"
+#include "gameObjectRender.h"
+
+#include "SweptEllipsoid.h"      // For polygon triangulation
+
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -41,7 +45,8 @@ namespace Zap
 EditorInstructionsUserInterface gEditorInstructionsUserInterface;
 
 
-extern void glColor(const Color &c, float alpha = 1);
+static Vector<Point> sample1o, sample2o, sample3o, sample4o;     // outline
+static Vector<Point> sample1f, sample2f, sample3f, sample4f;     // fill
 
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface()
@@ -49,19 +54,41 @@ EditorInstructionsUserInterface::EditorInstructionsUserInterface()
    setMenuID(EditorInstructionsUI);
 }
 
+
 void EditorInstructionsUserInterface::onActivate()
 {
    mCurPage = 1;
+
+   // We really should be setting this up in the constructor, but... it doesn't seem to "stick".
+   // Do it here instead, but it will get run every time we load the instructions.  Better than every 
+   // cycle, for sure, but not really right.
+   sample1o.clear();
+   sample2o.clear();
+
+   sample1o.push_back(Point(-70, -50));
+   sample1o.push_back(Point(70, -50));
+   sample1o.push_back(Point(70, 50));
+   sample1o.push_back(Point(-70, 50));
+
+   sample2o.push_back(Point(-70, -50));
+   sample2o.push_back(Point(0, -10));   
+   sample2o.push_back(Point(70, -50));
+   sample2o.push_back(Point(70, 50));
+   sample2o.push_back(Point(-70, 50));
+
+   Triangulate::Process(sample1o, sample1f);
+   Triangulate::Process(sample2o, sample2f);
+
 }
 
-enum {
-   NumPages = 2,
-};
+static const S32 NUM_PAGES = 4;
 
 
 const char *pageHeadersEditor[] = {
-   "EDITOR KEYS",
-   "MAKING WALLS",
+   "BASIC COMMANDS",
+   "ADVANCED COMMANDS",
+   "WALLS AND LINES",
+   "BOT NAV ZONES",
 };
 
 extern EditorUserInterface gEditorUserInterface;
@@ -70,7 +97,7 @@ void EditorInstructionsUserInterface::render()
 {
    glColor3f(1,1,1);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeadersEditor[mCurPage - 1]);
-   drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NumPages);
+   drawStringf(650, 3, 25, "PAGE %d/%d", mCurPage, NUM_PAGES);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
    glColor3f(0.7, 0.7, 0.7);
 
@@ -84,10 +111,16 @@ void EditorInstructionsUserInterface::render()
    switch(mCurPage)
    {
       case 1:
-         renderPage1();
+         renderPageCommands(1);
          break;
       case 2:
-         renderPage2();
+         renderPageCommands(2);
+         break;
+      case 3:
+         renderPageWalls();
+         break;
+      case 4:
+         renderPageZones();
          break;
    }
 }
@@ -98,42 +131,64 @@ struct ControlStringsEditor
    const char *keyString;
 };
 
-static ControlStringsEditor gControls[] = {
+
+// For page 1 of general instructions
+static ControlStringsEditor gControls1[] = {
+   { "Navigation", "HEADER" },
          { "Pan Map", "W/A/S/D or"},
          { " ", "Arrow Keys"},
          { "Zoom In", "E or Ctrl-Up" },
          { "Zoom Out", "C or Ctrl-Dwn" },
          { "Center Display", "Z" },
          { "Toggle script results", "Ctrl-R" },
-         { "-", NULL },       // Horiz. line
+      { "-", NULL },       // Horiz. line
          { "Cut/Copy/Paste", "Ctrl-X/C/V"},
-         { "Flip Horiz/Vertical", "F/V" },
-         { "Rotate Sel. about (0,0)", "R, Shift-R" },
          { "Delete Selection", "Del" },
-         { "-", NULL },       // Horiz. line
-         { "Hold [Space] to suspend snapping", "" },
-         { "Hold [Tab] to view a reference ship", "" },
+      { "-", NULL },       // Horiz. line
+         { "Undo", "Ctrl-Z" },
+         { "Redo", "Ctrl-Shift-Z" },
          { NULL, NULL },      // End of col1
+   { "Object Shortcuts", "HEADER" },
          { "Insert Teleport", "T" },
          { "Insert Spawn Point", "G" },
          { "Insert Repair", "B" },
          { "Insert Turret", "Y" },
-         { "Insert Force Field", "H" },
+         { "Insert Force Field", "F" },
          { "Insert Mine", "M" },
+      { "-", NULL },       // Horiz. line
+   { "Assigning Teams", "HEADER" },
          { "Set object's team", "1-9" },
          { "Set object to neutral", "0" },
          { "Set object to hostile", "Shift-0" },
-         { "-", NULL },       // Horiz. line
+      { "-", NULL },       // Horiz. line
          { "Save", "Ctrl-S" },
          { "Reload from file", "Ctrl-Shift-L" },
-         { "Undo", "Ctrl-Z" },
-         { "Redo", "Ctrl-Shift-Z" },
          { NULL, NULL },      // End of col2
       };
 
+
+// For page 2 of basic instructions
+static ControlStringsEditor gControls2[] = {
+         { "Flip Horiz/Vertical", "H, V" },
+         { "Rotate about (0,0)", "R, Shift-R" },
+         { "Arbitrary rotate", "Ctrl-Shift-R" },
+         { "Scale selection", "Ctrl-Shift-X" },
+
+         { "-", NULL },       // Horiz. line
+         { "Hold [Space] to suspend snapping", "" },
+         { "Hold [Tab] to view a reference ship", "" },
+         { NULL, NULL },      // End of col1
+
+         { "Cycle edit mode", "Ctrl-A" },
+         { NULL, NULL },      // End of col2
+   };
+
+
 // This has become rather ugly and inelegant.  But you shuold see UIInstructions.cpp!!!
-void EditorInstructionsUserInterface::renderPage1()
+void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 {
+   ControlStringsEditor *controls = (page == 1) ? gControls1 : gControls2;
+
    S32 starty = 50;
    S32 y;
    S32 col1 = horizMargin;
@@ -150,9 +205,10 @@ void EditorInstructionsUserInterface::renderPage1()
       glVertex2f(750, starty + 26);
    glEnd();
 
-   Color txtColor = Color(0, 1, 1);
-   Color keyColor = Color (1, 1, 1);
-   Color secColor = Color(1, 1, 0);
+   static const Color txtColor = Color(0, 1, 1);
+   static const Color keyColor = Color (1, 1, 1);           // White
+   static const Color secColor = Color(1, 1, 0);
+   static const Color groupHeaderColor = Color(1, 0, 0);    // Red
 
    glColor(secColor);
    drawString(col1, starty, 20, "Action");
@@ -163,7 +219,7 @@ void EditorInstructionsUserInterface::renderPage1()
    y = starty + 28;
    for(S32 i = 0; !done; i++)
    {
-      if(!gControls[i].actionString)
+      if(!controls[i].actionString)
       {
          if(!firstCol)
             done = true;
@@ -177,7 +233,7 @@ void EditorInstructionsUserInterface::renderPage1()
             glColor(secColor);
          }
       }
-      else if(!strcmp(gControls[i].actionString, "-"))      // Horiz spacer
+      else if(!strcmp(controls[i].actionString, "-"))      // Horiz spacer
       {
          glColor3f(0.4, 0.4, 0.4);
          glBegin(GL_LINES);
@@ -185,16 +241,22 @@ void EditorInstructionsUserInterface::renderPage1()
             glVertex2f(actCol + 335, y + 13);
          glEnd();
       }
+      else if(!strcmp(controls[i].keyString, "HEADER"))
+      {
+         glColor(groupHeaderColor);
+         drawString(actCol, y, 18, controls[i].actionString);
+      }
       else
       {
          glColor(txtColor);
-         drawString(actCol, y, 18, gControls[i].actionString);      // Textual description of function (1st arg in lists above)
+         drawString(actCol, y, 18, controls[i].actionString);      // Textual description of function (1st arg in lists above)
          glColor(keyColor);
-         drawString(contCol, y, 18, gControls[i].keyString);
+         drawString(contCol, y, 18, controls[i].keyString);
       }
       y += 26;
    }
 
+   y = 470;
    glColor(secColor);
    drawCenteredString(y, 20, "These special keys are also usually active:");
    y+=40;
@@ -221,7 +283,7 @@ void EditorInstructionsUserInterface::renderPage1()
 }
 
 
-static const char *page2Strings[] =
+static const char *wallInstructions[] =
 {
    "Create walls with right mouse button",
    "Finish wall by left-clicking",
@@ -236,13 +298,14 @@ static const char *page2Strings[] =
 
 extern void constructBarrierOutlinePoints(const Vector<Point> &verts, F32 width, Vector<Point> &barrierPoints);
 
-void EditorInstructionsUserInterface::renderPage2()
+void EditorInstructionsUserInterface::renderPageWalls()
 {
    // Draw animated creation of walls
 
    //drawStringf(400, 100, 25, "%d", mAnimStage);
 
    S32 vertOffset = 20;
+   S32 textSize = 18;
 
    Vector<Point> points;
    points.push_back(Point(150, 100 + vertOffset));
@@ -283,8 +346,6 @@ void EditorInstructionsUserInterface::renderPage2()
    glEnd();
    glLineWidth(gDefaultLineWidth);
 
-      
-
    for(S32 i = 0; i < points.size(); i++)
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
          gEditorUserInterface.renderVertex(SelectedItemVertex, points[i], i);
@@ -294,30 +355,75 @@ void EditorInstructionsUserInterface::renderPage2()
          gEditorUserInterface.renderVertex(HighlightedVertex, points[i], -1);
 
    // And now some written instructions
-   S32 x = 50 + getStringWidth(18, "* ");
+   S32 x = 50 + getStringWidth(textSize, "* ");
    S32 y = 300;
    bool done = false;
 
    for(S32 i = 0; !done; i++)
    {
-      if(!strcmp(page2Strings[i], ""))
+      if(!strcmp(wallInstructions[i], ""))
          done = true;
       else
       {
          glColor3f(1, 0, 0);     // red
-         drawString(50, y, 18, "*");
+         drawString(50, y, textSize, "*");
 
          glColor3f(1, 1, 1);     // white
-         drawString(x, y, 18, page2Strings[i]);
+         drawString(x, y, textSize, wallInstructions[i]);
          y += 26;
       }
    }
 }
 
+
+void EditorInstructionsUserInterface::renderPageZones()
+{
+   // 4 static images, followed by some text
+   S32 col1x = 200;
+   S32 col2x = 600;
+
+   S32 ypos = 100;
+   S32 textSize = 18;
+   F32 scale = .7;
+
+   //////////
+
+   glPushMatrix();
+      glTranslatef(col1x, ypos, 0);
+      glScalef(scale, scale, 1);
+      renderNavMeshZone(sample1o, sample1f, findCentroid(sample1o), -1, true);
+   glPopMatrix();
+
+   glColor3f(0,1,0);      // Green
+   drawStringc(col1x, ypos + 50, textSize, "Convex - Good!");
+
+   //////////
+
+   glPushMatrix();
+      glTranslatef(col2x, ypos, 0);
+      glScalef(scale, scale, 1);
+      renderNavMeshZone(sample2o, sample2f, findCentroid(sample2o), -1, false);
+   glPopMatrix();
+
+   glColor3f(1,0,0);      // Red
+   drawStringc(col2x, ypos + 50, textSize, "Not Convex - Bad!");
+   
+   //////////
+
+   ypos += 200;
+
+   glColor3f(0,1,0);      // Green
+   drawStringc(col1x, ypos + 50, textSize, "Snapped - Good!");
+
+   glColor3f(1,0,0);      // Red
+   drawStringc(col2x, ypos + 50, textSize, "Not Snapped - Bad!");
+}
+
+
 void EditorInstructionsUserInterface::nextPage()
 {
    mCurPage++;
-   if(mCurPage > NumPages)
+   if(mCurPage > NUM_PAGES)
       mCurPage = 1;
 
    mAnimTimer.reset(1000);
@@ -330,7 +436,7 @@ void EditorInstructionsUserInterface::prevPage()
    if(mCurPage > 1)
       mCurPage--;
    else
-      mCurPage = NumPages;
+      mCurPage = NUM_PAGES;
 
    mAnimTimer.reset(1000);
    mAnimStage = 0;

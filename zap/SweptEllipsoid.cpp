@@ -244,133 +244,197 @@ bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const P
 // Does point c sit on segment a-b?
 // Optimized for speed, as we can do what we need with fewer computations -CE
 
-bool pointOnSegment(const Point &c, const Point &a, const Point &b)
+bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough)
 {
-/*
-Subject 1.02: How do I find the distance from a point to a line?
+   static Point closest;
 
-    Let the point be C (Cx,Cy) and the line be AB (Ax,Ay) to (Bx,By).
-    Let P be the point of perpendicular projection of C on AB.  The parameter
-    r, which indicates P's position along AB, is computed by the dot product 
-    of AC and AB divided by the square of the length of AB:
-    
-    (1)     AC dot AB
-        r = ---------  
-            ||AB||^2
-    
-    r has the following meaning:
-    
-        r=0      P = A
-        r=1      P = B
-        r<0      P is on the backward extension of AB
-        r>1      P is on the forward extension of AB
-        0<r<1    P is interior to AB
-    
-    The length of a line segment in d dimensions, AB is computed by:
-    
-        L = sqrt( (Bx-Ax)^2 + (By-Ay)^2 + ... + (Bd-Ad)^2)
-
-    so in 2D:   
-    
-        L = sqrt( (Bx-Ax)^2 + (By-Ay)^2 )
-    
-    and the dot product of two vectors in d dimensions, U dot V is computed:
-    
-        D = (Ux * Vx) + (Uy * Vy) + ... + (Ud * Vd)
-    
-    so in 2D:   
-    
-        D = (Ux * Vx) + (Uy * Vy) 
-    
-    So (1) expands to:
-    
-            (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
-        r = -------------------------------
-                          L^2
-
-    The point P can then be found:
-
-        Px = Ax + r(Bx-Ax)
-        Py = Ay + r(By-Ay)
-
-    And the distance from A to P = r*L.
-
-    Use another parameter s to indicate the location along PC, with the 
-    following meaning:
-           s<0      C is left of AB
-           s>0      C is right of AB
-           s=0      C is on AB
-
-    Compute s as follows:
-
-            (Ay-Cy)(Bx-Ax)-(Ax-Cx)(By-Ay)
-        s = -----------------------------
-                        L^2
-
-    Then the distance from C to P = |s|*L.
-*/
-	F32 r_numerator   = F32((c.x - a.x)  *(b.x - a.x) + (c.y - a.y) * (b.y - a.y));
-	F32 r_denomenator = F32((b.x - a.x) * (b.x - a.x) + (b.y - a.y )* (b.y - a.y));
-   F32 r = r_numerator / r_denomenator;
-
-   F32 s = F32((a.y - c.y) * (b.x - a.x) - (a.x - c.x) * (b.y - a.y));
-
-	if ((r >= 0) && (r <= 1))
-	{
-		return(ABS(s) < .000001);
-	}
-	else
-      return false;
+   return c.distSquared(a) < closeEnough || c.distSquared(b) < closeEnough || 
+         (findNormalPoint(c, a, b, closest) && c.distSquared(closest) < closeEnough);
 }
+
+//
+///*
+//Subject 1.02: How do I find the distance from a point to a line?
+//
+//    Let the point be C (Cx,Cy) and the line be AB (Ax,Ay) to (Bx,By).
+//    Let P be the point of perpendicular projection of C on AB.  The parameter
+//    r, which indicates P's position along AB, is computed by the dot product 
+//    of AC and AB divided by the square of the length of AB:
+//    
+//    (1)     AC dot AB
+//        r = ---------  
+//            ||AB||^2
+//    
+//    r has the following meaning:
+//    
+//        r=0      P = A
+//        r=1      P = B
+//        r<0      P is on the backward extension of AB
+//        r>1      P is on the forward extension of AB
+//        0<r<1    P is interior to AB
+//    
+//    The length of a line segment in d dimensions, AB is computed by:
+//    
+//        L = sqrt( (Bx-Ax)^2 + (By-Ay)^2 + ... + (Bd-Ad)^2)
+//
+//    so in 2D:   
+//    
+//        L = sqrt( (Bx-Ax)^2 + (By-Ay)^2 )
+//    
+//    and the dot product of two vectors in d dimensions, U dot V is computed:
+//    
+//        D = (Ux * Vx) + (Uy * Vy) + ... + (Ud * Vd)
+//    
+//    so in 2D:   
+//    
+//        D = (Ux * Vx) + (Uy * Vy) 
+//    
+//    So (1) expands to:
+//    
+//            (Cx-Ax)(Bx-Ax) + (Cy-Ay)(By-Ay)
+//        r = -------------------------------
+//                          L^2
+//
+//    The point P can then be found:
+//
+//        Px = Ax + r(Bx-Ax)
+//        Py = Ay + r(By-Ay)
+//
+//    And the distance from A to P = r*L.
+//
+//    Use another parameter s to indicate the location along PC, with the 
+//    following meaning:
+//           s<0      C is left of AB
+//           s>0      C is right of AB
+//           s=0      C is on AB
+//
+//    Compute s as follows:
+//
+//            (Ay-Cy)(Bx-Ax)-(Ax-Cx)(By-Ay)
+//        s = -----------------------------
+//                        L^2
+//
+//    Then the distance from C to P = |s|*L.
+//*/
+//	F32 r_numerator   = (c.x - a.x) * (b.x - a.x) + (c.y - a.y) * (b.y - a.y);
+//	F32 r_denomenator = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+//   F32 r = r_numerator / r_denomenator;
+//
+//   F32 s = F32((a.y - c.y) * (b.x - a.x) - (a.x - c.x) * (b.y - a.y));
+//
+//	if ((r >= 0) && (r <= 1)) 
+//	{
+//		return(ABS(s) < .0001);      
+//	}
+//	else
+//      return false;
+//}
 
 
 // See if segment p1-p2 overlaps p3-p4
 // Coincident endpoints alone do not count!
 // Pass back the overpping extent in two points
-bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd)
+bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd, F32 scaleFact)
 {
-   Point pInt;
+   const Point *pInt;
    bool found = false;
 
-   if(pointOnSegment(p1, p3, p4))
+   const F32 closeEnough = 1.0f * 1.0f * scaleFact * scaleFact;
+
+   if(pointOnSegment(p1, p3, p4, closeEnough))
    {
-      pInt = p1;
+      pInt = &p1;
       found = true;
    }
 
-   if(pointOnSegment(p2, p3, p4))
+   if(pointOnSegment(p2, p3, p4, closeEnough))
    {
-      if(found && pInt != p2)
+      if(found && *pInt != p2)
       {
-         overlapStart = pInt;
-         overlapEnd = p2;
+         overlapStart.set(*pInt);
+         overlapEnd.set(p2);
          return true;
       }
 
-      pInt = p2;
+      pInt = &p2;
       found = true;
    }
 
-   if(pointOnSegment(p3, p1, p2))
+   if(p1.distSquared(p3) > closeEnough && p2.distSquared(p3) > closeEnough && pointOnSegment(p3, p1, p2, closeEnough))
    {
-      if(found && pInt != p3)
+      if(found && *pInt != p3)
       {
-         overlapStart = pInt;
-         overlapEnd = p3;
+         overlapStart.set(*pInt);
+         overlapEnd.set(p3);
          return true;
       }
 
-      pInt = p3;
+      pInt = &p3;
       found = true;
    }
 
-   if(pointOnSegment(p4, p1, p2))
+   if(p1.distSquared(p4) > closeEnough && p2.distSquared(p4) > closeEnough && pointOnSegment(p4, p1, p2, closeEnough))
    {
-      if(found && pInt != p4)
+      if(found && *pInt != p4)
       {
-         overlapStart = pInt;
-         overlapEnd = p4;
+         overlapStart.set(*pInt);
+         overlapEnd.set(p4);
          return true;
+      }
+   }
+
+   return false;
+}
+
+
+// Returns index of points vector closest to point
+S32 findClosestPoint(const Point &point, const Vector<Point> &points)
+{
+   F32 dist = F32_MAX;
+   S32 closest = -1;
+
+   for(S32 i = 0; i < points.size(); i++)
+   {
+      F32 d = points[i].distSquared(point);
+
+      if(d < dist)
+      {
+         dist = d;
+         closest = i;
+      }
+   }
+
+   return closest;
+}
+
+
+bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, Point &overlapStart, Point &overlapEnd, F32 scaleFact)
+{
+   // Check for unlikely but fatal situation: Not enough vertices
+   if(zone1.size() < 3 || zone2.size() < 3)
+      return false;
+
+   const Point *pi1, *pi2, *pj1, *pj2;
+
+   // Now, do we actually touch?  Let's look, segment by segment
+   for(S32 i = 0; i < zone1.size(); i++)
+   {
+      pi1 = &zone1[i];
+      if(i == zone1.size() - 1)
+         pi2 = &zone1[0];
+      else
+         pi2 = &zone1[i + 1];
+
+      for(S32 j = 0; j < zone2.size(); j++)
+      {
+         pj1 = &zone2[j];
+         if(j == zone2.size() - 1)
+            pj2 = &zone2[0];
+         else
+            pj2 = &zone2[j + 1];
+
+         if(segsOverlap(*pi1, *pi2, *pj1, *pj2, overlapStart, overlapEnd, scaleFact))
+            return true;
       }
    }
 
