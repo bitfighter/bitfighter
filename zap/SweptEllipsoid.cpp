@@ -408,7 +408,7 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points)
 }
 
 
-bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, Point &overlapStart, Point &overlapEnd, F32 scaleFact)
+bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd)
 {
    // Check for unlikely but fatal situation: Not enough vertices
    if(zone1.size() < 3 || zone2.size() < 3)

@@ -70,7 +70,7 @@ bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, con
 bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
 bool segmentsColinear(const Point &p1, const Point &p2, const Point &p3, const Point &p4, F32 scaleFact);
 bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd);
-bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, Point &overlapStart, Point &overlapEnd, F32 scaleFact = 1.0);
+bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough);
 
 Point findCentroid(const Vector<Point> &polyPoints);

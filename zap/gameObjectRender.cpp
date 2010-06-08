@@ -201,6 +201,12 @@ void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end)
 }
 
 
+void drawCentroidMark(const Point &pos, F32 radius)
+{  
+   drawPolygon(pos, 6, radius,0);
+}
+
+
 void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive)
 {
    if(alpha != 1.0)
@@ -765,54 +771,68 @@ static Color red(1,0,0);
 static Color yellow(1,1,0);
 static Color blue(0,0,1);
 
-void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, const Point &centroid, S32 zoneId, bool isConvex)
+void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, const Point &centroid, S32 zoneId, bool isConvex, bool isSelected)
 {
    Color color = isConvex ? green : red;
 
-   renderPolygon(fill, outline, color * .5, color, .5);
+   renderPolygon(fill, outline, color * .5, color, isSelected ? .65 : .4);
 
-   if(zoneId != -1)
+   if(zoneId > 0)
    {
       char buf[24];
       dSprintf(buf, 24, "%d", zoneId );
 
       renderPolygonLabel(centroid, 0, 25, buf);
    }
+   else if(zoneId == -2)
+      drawCentroidMark(centroid, .05);
 }
 
 
-void renderNavMeshBorder(const Border &border, F32 scaleFact)
+void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width)
 {
-   const F32 width = 3 * scaleFact;
-
-   F32 ang = border.borderStart.angleTo(border.borderEnd);
-   F32 cosa = cos(ang) * width;
-   F32 sina = sin(ang) * width;
+   glEnable(GL_BLEND);
 
    for(S32 j = 1; j >= 0; j--)
    {
-      glColor(j ? blue * .25 : blue);
-      glBegin(j ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(border.borderStart.x + sina, border.borderStart.y - cosa);
-         glVertex2f(border.borderEnd.x + sina, border.borderEnd.y - cosa);
-         glVertex2f(border.borderEnd.x - sina, border.borderEnd.y + cosa);
-         glVertex2f(border.borderStart.x - sina, border.borderStart.y + cosa);
-      glEnd();
+      glColor(color, j ? fillAlpha : 1); 
+      renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_POLYGON : GL_LINE_LOOP);
    }
+
+   glDisable(GL_BLEND);
 }
 
 
+void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode)
+{
+   F32 ang = p1.angleTo(p2);
+   F32 cosa = cos(ang) * width;
+   F32 sina = sin(ang) * width;
+
+   glBegin(mode);
+      glVertex2f(p1.x + sina, p1.y - cosa);
+      glVertex2f(p2.x + sina, p2.y - cosa);
+      glVertex2f(p2.x - sina, p2.y + cosa);
+      glVertex2f(p1.x - sina, p1.y + cosa);
+   glEnd();
+}
+
+
+static const Color borderFillColor(0,1,1);
+
+// Only used in editor
 void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact)
 {
    for(S32 i = 0; i < borders.size(); i++)
-      renderNavMeshBorder(borders[i], scaleFact);
+      renderNavMeshBorder(borders[i], scaleFact, borderFillColor, .25, 3);
 }
 
 
+// Only used in-game
 void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
 {
    for(S32 i = 0; i < borders.size(); i++)
-      renderNavMeshBorder(borders[i], scaleFact);
+      renderNavMeshBorder(borders[i], scaleFact, borderFillColor, .25, 3);
 }
 
 

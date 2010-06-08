@@ -105,11 +105,13 @@ This change will resolve many installation and permissions issues.
 <li>Increased readibility of node numbers on selected lines/polygons</li>
 <li>Holding tab now only shows range of selected turrets/spybugs</li>
 <li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
+<li>Improved snapping of nav mesh zones, including rendering of connections between zones</li>
 <li>Grid fades when snapping disabled</li>
 <li>Changing wall widths is now undoable</li>
 <li>Arbitrary scaling of selected items now works with Ctrl-Shift-X</li>
 <li>There are now multiple edit modes (normal, bot nav mesh zone mode, etc.) customized for different purposes -- use Ctrl-A to toggle</li>
 <li>Switched H and F key assignments</li>
+<li>Holding <shift> while panning causes pan speed to increase -- good for larger levels at higher zoom scales</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>

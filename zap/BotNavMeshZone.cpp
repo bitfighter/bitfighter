@@ -258,7 +258,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 
          Point bordStart, bordEnd;
 
-         if(zonesTouch(gBotNavMeshZones[i]->mPolyBounds, gBotNavMeshZones[j]->mPolyBounds, bordStart, bordEnd))
+         if(zonesTouch(gBotNavMeshZones[i]->mPolyBounds, gBotNavMeshZones[j]->mPolyBounds, 1.0, bordStart, bordEnd))
          {
             Point bordCen = Rect(bordStart, bordEnd).getCenter();
 

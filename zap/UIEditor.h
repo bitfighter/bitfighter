@@ -562,7 +562,11 @@ public:
    S32 checkCornersForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 &minDist, Point &snapPoint);
 
 
-   void rebuildBorderSegs(WorldItem *zone);
+   
+   void deleteBorderSegs(S32 zoneId);     // Clear any borders associated with the specified zone
+   void rebuildBorderSegs(S32 zoneId);
+   void rebuildAllBorderSegs();
+   void checkZones(S32 i, S32 j);
 
    void deleteItem(S32 itemIndex);
 

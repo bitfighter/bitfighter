@@ -46,6 +46,8 @@ extern void drawFilledSquare(const Point &pos, U32 size);
 extern void drawCircle(const Point &pos, F32 radius);
 extern void drawFilledCircle(const Point &pos, F32 radius);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
+extern void drawCentroidMark(const Point &pos, F32 radius);
+extern void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode);
 
 extern void drawRoundedRect(const Point &pos, F32 width, F32 height, F32 radius);
 extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
@@ -71,7 +73,10 @@ extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vecto
                                        const Point &centroid, F32 labelAngle, F32 scaleFact = 1);
 
 extern void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill,
-                              const Point &centroid, S32 zoneId, bool isConvex);
+                              const Point &centroid, S32 zoneId, bool isConvex, bool isSelected = false);
+
+class Border;
+extern void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width);
 
 class ZoneBorder;
 extern void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact = 1);
