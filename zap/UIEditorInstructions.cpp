@@ -45,8 +45,9 @@ namespace Zap
 EditorInstructionsUserInterface gEditorInstructionsUserInterface;
 
 
-static Vector<Point> sample1o, sample2o, sample3o, sample4o;     // outline
-static Vector<Point> sample1f, sample2f, sample3f, sample4f;     // fill
+static Vector<Point> sample1o, sample2o, sample3o, sample4o, sample5o;     // outline
+static Vector<Point> sample1f, sample2f, sample3f, sample4f, sample5f;     // fill
+static Border border34;
 
 // Constructor
 EditorInstructionsUserInterface::EditorInstructionsUserInterface()
@@ -61,24 +62,47 @@ void EditorInstructionsUserInterface::onActivate()
 
    // We really should be setting this up in the constructor, but... it doesn't seem to "stick".
    // Do it here instead, but it will get run every time we load the instructions.  Better than every 
-   // cycle, for sure, but not really right.
+   // draw cycle, for sure, but not really right.
    sample1o.clear();
-   sample2o.clear();
-
    sample1o.push_back(Point(-70, -50));
    sample1o.push_back(Point(70, -50));
    sample1o.push_back(Point(70, 50));
    sample1o.push_back(Point(-70, 50));
 
+   sample2o.clear();
    sample2o.push_back(Point(-70, -50));
    sample2o.push_back(Point(0, -10));   
    sample2o.push_back(Point(70, -50));
    sample2o.push_back(Point(70, 50));
    sample2o.push_back(Point(-70, 50));
 
+   sample3o.clear();
+   sample3o.push_back(Point(-100, -50));
+   sample3o.push_back(Point(0, -50));
+   sample3o.push_back(Point(0, 50));
+   sample3o.push_back(Point(-100, 50));
+
+   sample4o.clear();
+   sample4o.push_back(Point(0, -50));
+   sample4o.push_back(Point(100, -50));
+   sample4o.push_back(Point(100, 50));
+   sample4o.push_back(Point(0, 50));
+
+   sample5o.clear();
+   sample5o.push_back(Point(-5, -50));
+   sample5o.push_back(Point(100, -50));
+   sample5o.push_back(Point(100, 50));
+   sample5o.push_back(Point(5, 50));
+
+   // Border between 3 and 4
+   border34.borderStart.set(0,-50);
+   border34.borderEnd.set(0,50);
+
    Triangulate::Process(sample1o, sample1f);
    Triangulate::Process(sample2o, sample2f);
-
+   Triangulate::Process(sample3o, sample3f);
+   Triangulate::Process(sample4o, sample4f);
+   Triangulate::Process(sample5o, sample5f);
 }
 
 static const S32 NUM_PAGES = 4;
@@ -375,6 +399,13 @@ void EditorInstructionsUserInterface::renderPageWalls()
    }
 }
 
+extern const Color BORDER_FILL_COLOR;
+extern const F32 BORDER_FILL_ALPHA;
+extern const F32 BORDER_WIDTH;
+
+static const Color cyan = Color(0,1,1);
+static const Color yellow = Color(1,1,0);
+
 
 void EditorInstructionsUserInterface::renderPageZones()
 {
@@ -382,9 +413,23 @@ void EditorInstructionsUserInterface::renderPageZones()
    S32 col1x = 200;
    S32 col2x = 600;
 
-   S32 ypos = 100;
+   S32 ypos = 45;
    S32 textSize = 18;
    F32 scale = .7;
+ 
+   glColor(yellow);
+   drawCenteredString(ypos, textSize, "Bot NavZones help bots navigate a level.  If the level does");
+   ypos += 25;
+   drawCenteredString(ypos, textSize, "not use bots, you don't need NavZones.");
+   ypos += 25;
+   drawCenteredString(ypos, textSize, "See the Wiki for more details (bitfighter.org)");
+   ypos += 40;
+
+   glColor(cyan);
+   drawCenteredString(ypos, textSize, "Use Ctrl-A to enter/exit NavZone Editing Mode");
+   ypos += 25;
+   drawCenteredString(ypos, textSize, "See NavZones in-game using /dzones command");
+   ypos += 80;
 
    //////////
 
@@ -410,10 +455,26 @@ void EditorInstructionsUserInterface::renderPageZones()
    
    //////////
 
-   ypos += 200;
+   ypos += 160;
+
+    glPushMatrix();
+      glTranslatef(col1x, ypos, 0);
+      glScalef(scale, scale, 1);
+      renderNavMeshZone(sample3o, sample3f, findCentroid(sample3o), -1, true);
+      renderNavMeshZone(sample4o, sample4f, findCentroid(sample4o), -1, true);
+      renderNavMeshBorder(border34, 1, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
+   glPopMatrix();
 
    glColor3f(0,1,0);      // Green
    drawStringc(col1x, ypos + 50, textSize, "Snapped - Good!");
+
+
+   glPushMatrix();
+      glTranslatef(col2x, ypos, 0);
+      glScalef(scale, scale, 1);
+      renderNavMeshZone(sample3o, sample3f, findCentroid(sample3o), -1, true);
+      renderNavMeshZone(sample5o, sample5f, findCentroid(sample5o), -1, true);
+   glPopMatrix();
 
    glColor3f(1,0,0);      // Red
    drawStringc(col2x, ypos + 50, textSize, "Not Snapped - Bad!");

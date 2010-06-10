@@ -59,7 +59,8 @@ This change will resolve many installation and permissions issues.
 <li>Min/max player level params now used when selecting levels</li>
 <li>Slight improvement when rendering walls joining at acute angles</li>
 <li>XBOX controller on windows now much better supported</li>
-<li>Bot nav mesh zones can be displayed in-game by using /dzones command
+<li>Bot nav mesh zones can be displayed in-game by using /dzones command</li>
+<li>Soccer ball now warps back to starting point rather than "drifting" back</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -126,6 +127,9 @@ This change will resolve many installation and permissions issues.
 
 <h4>Linux</h4>
 <li>Added ability to specify locations of various resouces on the cmd line.  See http://bitfighter.org/wiki/index.php?title=Command_line_parameters#Specifying_folders for details.</li>
+
+<h4>Windows</h4>
+<li>Windows installer now does a better job of installing files in their "proper" location</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>

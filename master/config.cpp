@@ -27,6 +27,7 @@
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
 
+
 #include "../zap/SharedConstants.h"
 
 #include "../tnl/tnl.h"
@@ -49,33 +50,31 @@ extern Vector<string> MOTDStringVecOld;
 extern Vector<U32> MOTDVersionVec;
 extern Vector<string> MOTDStringVec;
 
-void processConfigLine(int argc, const char **argv)
+void processConfigLine(int argc, string argv[])
 {
-   if(!stricmp(argv[0], "port") && argc > 1)             // port --> set port
-      gMasterPort = atoi(argv[1]);
+   if(!stricmp(argv[0].c_str(), "port") && argc > 1)             // port --> set port
+      gMasterPort = atoi(argv[1].c_str());
 
    // The following chunk can go away when we retire CMProtocol version 0
-   else if(!stricmp(argv[0], "motd") && argc > 2)        // motd --> set motd for version 0 clients
+   else if(!stricmp(argv[0].c_str(), "motd") && argc > 2)        // motd --> set motd for version 0 clients
    {
       MOTDTypeVecOld.push_back(argv[1]);    // version
       MOTDStringVecOld.push_back(argv[2]);  // message
    }
 
    // CMProtocol version 1 entries look a bit different, but serves the same basic function...
-   else if(!stricmp(argv[0], "setmotd") && argc > 2)        // setmotd --> set motd for version 1+ clients
+   else if(!stricmp(argv[0].c_str(), "setmotd") && argc > 2)      // setmotd --> set motd for version 1+ clients
    {
-      U32 version = atoi(argv[1]);        // Build version this message corresponds to, allows us to set different messages for different clients
-      char *message = strdup(argv[2]);    // Message
-
+      U32 version = atoi(argv[1].c_str());        // Build version this message corresponds to, allows us to set different messages for different clients
       MOTDVersionVec.push_back(version);
-      MOTDStringVec.push_back(message);
+      MOTDStringVec.push_back(argv[2]);
    }
 
    // New usemotd directive tells server to use the message stored in the file motd
-   else if(!stricmp(argv[0], "usemotd") && argc > 2)        // usemotd --> read motd file from local folder
+   else if(!stricmp(argv[0].c_str(), "usemotd") && argc > 2)        // usemotd --> read motd file from local folder
    {
-      U32 version = atoi(argv[1]);        // Build version this message corresponds to, allows us to set different messages for different clients
-      char *file = strdup(argv[2]);       // Message stored in this file
+      U32 version = atoi(argv[1].c_str());        // Build version this message corresponds to, allows us to set different messages for different clients
+      char *file = strdup(argv[2].c_str());       // Message stored in this file
 
       FILE *f = fopen(file, "r");
       if(!f)
@@ -101,14 +100,14 @@ void processConfigLine(int argc, const char **argv)
    }
 
 
-   else if(!stricmp(argv[0], "name") && argc > 1)        // name --> set server's name
-      gMasterName = strdup(argv[1]);
+   else if(!stricmp(argv[0].c_str(), "name") && argc > 1)        // name --> set server's name
+      gMasterName = argv[1].c_str();
 
-   else if(!stricmp(argv[0], "protocol") && argc > 1)    // protocol --> latest and greatest version of c-s protocol
-      gLatestReleasedCSProtocol = atoi(argv[1]);
+   else if(!stricmp(argv[0].c_str(), "protocol") && argc > 1)    // protocol --> latest and greatest version of c-s protocol
+      gLatestReleasedCSProtocol = atoi(argv[1].c_str());
 
-   else if(!stricmp(argv[0], "json_file") && argc > 1)   // json file
-      gJasonOutFile = strdup(argv[1]);
+   else if(!stricmp(argv[0].c_str(), "json_file") && argc > 1)   // json file
+      gJasonOutFile = argv[1].c_str();
 }
 
 enum {
@@ -116,7 +115,7 @@ enum {
    MaxArgLen = 100,
 };
 
-static char *argv[MaxArgc];
+static string argv[MaxArgc];   // *argv[MaxArgc]
 static char argv_buffer[MaxArgc][MaxArgLen];
 static int argc;
 static int argLen = 0;
@@ -133,7 +132,7 @@ inline void addCharToArg(char c)
 {
    if(argc < MaxArgc && argLen < MaxArgLen-1)
    {
-      argv[argc][argLen] = c;
+      argv[argc] += c;
       argLen++;
    }
 }
@@ -142,7 +141,7 @@ inline void addArg()
 {
    if(argc < MaxArgc)
    {
-      argv[argc][argLen] = 0;
+      //argv[argc][argLen] = 0;
       argc++;
       argLen = 0;
    }
@@ -233,7 +232,7 @@ stateEatingComment:
       goto stateEatingComment;
 stateLineParseDone:
    if(argc)
-      processConfigLine(argc, (const char **) argv);
+      processConfigLine(argc, argv);
    argc = 0;
    argLen = 0;
    if(c)

@@ -25,12 +25,12 @@
 
 #include "soccerGame.h"
 #include "UIGame.h"
-#include "sfx.h"
 #include "gameNetInterface.h"
 #include "ship.h"
 #include "projectile.h"
 #include "gameObjectRender.h"
 #include "goalZone.h"
+#include "sfx.h"
 #include "../glut/glutInclude.h"
 
 namespace Zap
@@ -356,7 +356,7 @@ void SoccerBallItem::sendHome()
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = initialPos;
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
-   setMaskBits(PositionMask);
+   setMaskBits(WarpPositionMask);      // By warping, we eliminate the "drifting" effect we got when we used PositionMask
    updateExtent();
 }
 

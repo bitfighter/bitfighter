@@ -84,6 +84,10 @@ extern void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFac
 class NeighboringZone;
 extern void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact = 1);
 
+// Some things we use internally, but also need from UIEditorInstructions for consistency
+extern const Color BORDER_FILL_COLOR;
+extern const F32 BORDER_FILL_ALPHA;
+extern const F32 BORDER_WIDTH;
 
 extern void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
                            bool isFlashing, F32 glowFraction, F32 scaleFact = 1);

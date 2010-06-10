@@ -33,11 +33,11 @@ LUALIB_API int (luaopen_string) (lua_State *L);
 #define LUA_MATHLIBNAME	"math"
 LUALIB_API int (luaopen_math) (lua_State *L);
 
-// LUA-VEC
+/* LUA-VEC */
 #define LUA_VECLIBNAME	"vec"
 LUALIB_API int (luaopen_vec) (lua_State *L);
 
-// LUA-VEC
+/* LUA-VEC */
 #define LUA_GCVECLIBNAME "gcvec"
 LUALIB_API int (luaopen_gcvec) (lua_State *L);
 

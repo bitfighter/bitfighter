@@ -44,6 +44,7 @@ static int vec_length (lua_State *L) {
   return 1;
 }
 
+// Bitfighter method
 static int vec_lengthsquared (lua_State *L) {
   const float* v = luaL_checkvec(L, 1);
   lua_pushnumber(L, v[0]*v[0] + v[1]*v[1] + v[2]*v[2] + v[3]*v[3]);
@@ -57,6 +58,7 @@ static int vec_normalize (lua_State *L) {
   return 1;
 }
 
+// Bitfighter method
 static int vec_angleto (lua_State *L) {
   const float* v1 = luaL_checkvec(L, 1);
   const float* v2 = luaL_checkvec(L, 2);
@@ -64,6 +66,7 @@ static int vec_angleto (lua_State *L) {
   return 1;
 }
 
+// Bitfighter method
 static int vec_distanceto (lua_State *L) {
   const float* v1 = luaL_checkvec(L, 1);
   const float* v2 = luaL_checkvec(L, 2);
@@ -82,6 +85,7 @@ static int vec_distsquared (lua_State *L) {
   return 1;
 }
 
+// Added Bitfighter methods
 static const luaL_Reg veclib[] = {
   {"new",           vec_new},
   {"dot",           vec_dot},

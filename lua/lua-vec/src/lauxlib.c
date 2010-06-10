@@ -186,7 +186,7 @@ LUALIB_API lua_Number luaL_optnumber (lua_State *L, int narg, lua_Number def) {
 }
 
 
-// LUA-VEC
+/* LUA-VEC */
 LUALIB_API const float* luaL_checkvec (lua_State *L, int narg) {
   const float* v = lua_tovec(L, narg);
   if (v == 0 && !lua_isvec(L, narg))  /* avoid extra test when d is not 0 */
@@ -194,7 +194,7 @@ LUALIB_API const float* luaL_checkvec (lua_State *L, int narg) {
   return v;
 }
 
-// LUA-VEC
+/* LUA-VEC */
 LUALIB_API const float* luaL_optvec (lua_State *L, int narg,
 																				const float* def) {
   return luaL_opt(L, luaL_checkvec, narg, def);

@@ -21,13 +21,8 @@
 
 
 const char *const luaT_typenames[] = {
-/*
   "nil", "boolean", "userdata", "number",
-  "string", "table", "function", "userdata", "thread",
-	"vec", // LUA-VEC
-*/
-  "nil", "boolean", "userdata", "number",
-  "vec",  // LUA-VEC
+  "vec",  /* LUA-VEC */
   "string", "table", "function", "userdata", "thread",
   "proto", "upval"
 };

@@ -410,7 +410,7 @@ static int luaB_tostring (lua_State *L) {
     case LUA_TNIL:
       lua_pushliteral(L, "nil");
       break;
-      // LUA-VEC
+      /* LUA-VEC */
     case LUA_TVEC:
       {
         const float* v = lua_tovec(L, 1);

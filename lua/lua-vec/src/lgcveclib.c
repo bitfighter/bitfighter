@@ -24,13 +24,13 @@ typedef struct
 
 static void new_vec( lua_State* L, float x, float y, float z, float w )
 {
-	vec_t* v = (vec_t*)lua_newuserdata( L, sizeof(vec_t) );
-	v->x = x;
-	v->y = y;
-	v->z = z;
-	v->w = w;
-	luaL_getmetatable(L, "gcvec.vec");
-	lua_setmetatable(L, -2);
+  vec_t* v = (vec_t*)lua_newuserdata( L, sizeof(vec_t) );
+  v->x = x;
+  v->y = y;
+  v->z = z;
+  v->w = w;
+  luaL_getmetatable(L, "gcvec.vec");
+  lua_setmetatable(L, -2);
 }
 
 static int gcvec_new (lua_State *L) {
@@ -62,6 +62,7 @@ static int gcvec_length (lua_State *L) {
   return 1;
 }
 
+// Bitfighter method
 static int gcvec_lengthsquared (lua_State *L) {
   const vec_t* v = checkvec(L, 1);
   lua_pushnumber(L, v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w);
@@ -75,6 +76,7 @@ static int gcvec_normalize (lua_State *L) {
   return 1;
 }
 
+// Bitfighter method
 static int gcvec_angleto (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
   const vec_t* v2 = checkvec(L, 2);
@@ -83,6 +85,7 @@ static int gcvec_angleto (lua_State *L) {
   return 1;
 }
 
+// Bitfighter method
 static int gcvec_distanceto (lua_State *L) {
   const vec_t* v1 = checkvec(L, 1);
   const vec_t* v2 = checkvec(L, 2);
@@ -178,6 +181,7 @@ static int gcvec_tostring( lua_State* L )
   return 1;
 }
 
+// Added new Bitfighter methods
 static const luaL_Reg gcveclib_f[] = {
   {"new",           gcvec_new},
   {"dot",           gcvec_dot},

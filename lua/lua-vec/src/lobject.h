@@ -18,7 +18,6 @@
 
 /* tags for values visible from Lua */
 #define LAST_TAG	LUA_TTHREAD
-//#define LAST_TAG	LUA_TVEC		// LUA-VEC
 
 #define NUM_TAGS	(LAST_TAG+1)
 
@@ -61,7 +60,7 @@ typedef union {
   void *p;
   lua_Number n;
   int b;
-  float vec[LUA_VEC_SIZE]; // LUA-VEC
+  float vec[LUA_VEC_SIZE]; /* LUA-VEC */
 } Value;
 
 
@@ -86,7 +85,7 @@ typedef struct lua_TValue {
 #define ttisuserdata(o)	(ttype(o) == LUA_TUSERDATA)
 #define ttisthread(o)	(ttype(o) == LUA_TTHREAD)
 #define ttislightuserdata(o)	(ttype(o) == LUA_TLIGHTUSERDATA)
-#define ttisvec(o)      (ttype(o) == LUA_TVEC) // LUA-VEC
+#define ttisvec(o)      (ttype(o) == LUA_TVEC) /* LUA-VEC */
 
 /* Macros to access values */
 #define ttype(o)	((o)->tt)
@@ -101,7 +100,7 @@ typedef struct lua_TValue {
 #define hvalue(o)	check_exp(ttistable(o), &(o)->value.gc->h)
 #define bvalue(o)	check_exp(ttisboolean(o), (o)->value.b)
 #define thvalue(o)	check_exp(ttisthread(o), &(o)->value.gc->th)
-#define vecvalue(o)     check_exp(ttisvec(o), (o)->value.vec)  // LUA-VEC
+#define vecvalue(o)     check_exp(ttisvec(o), (o)->value.vec)  /* LUA-VEC */
 
 #define l_isfalse(o)	(ttisnil(o) || (ttisboolean(o) && bvalue(o) == 0))
 
@@ -158,7 +157,7 @@ typedef struct lua_TValue {
     i_o->value.gc=cast(GCObject *, (x)); i_o->tt=LUA_TPROTO; \
     checkliveness(G(L),i_o); }
 
-// LUA-VEC
+/* LUA-VEC */
 #define setvecvalue(obj,x,y,z,w) \
   { TValue *i_o=(obj); i_o->value.vec[0]=(x); i_o->value.vec[1]=(y); i_o->value.vec[2]=(z); i_o->value.vec[3]=(w); i_o->tt=LUA_TVEC; }
 

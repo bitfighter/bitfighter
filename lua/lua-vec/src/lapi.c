@@ -412,7 +412,7 @@ LUA_API const void *lua_topointer (lua_State *L, int idx) {
 }
 
 
-// LUA-VEC
+/* LUA-VEC */
 LUA_API const float *lua_tovec (lua_State *L, int idx) {
   StkId o = index2adr(L, idx);
   return (!ttisvec(o)) ? NULL : vecvalue(o);
@@ -530,12 +530,12 @@ LUA_API int lua_pushthread (lua_State *L) {
   return (G(L)->mainthread == L);
 }
 
-// LUA-VEC
+/* LUA-VEC */
 LUA_API void lua_pushvec (lua_State *L, float x, float y, float z, float w) {
-	lua_lock(L);
-	setvecvalue(L->top, x, y, z, w);
-	api_incr_top(L);
-	lua_unlock(L);
+  lua_lock(L);
+  setvecvalue(L->top, x, y, z, w);
+  api_incr_top(L);
+  lua_unlock(L);
 }
 
 

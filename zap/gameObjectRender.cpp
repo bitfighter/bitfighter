@@ -818,13 +818,15 @@ void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode
 }
 
 
-static const Color borderFillColor(0,1,1);
+static const Color BORDER_FILL_COLOR(0,1,1);
+static const F32 BORDER_FILL_ALPHA = .25;
+static const F32 BORDER_WIDTH = 3;
 
 // Only used in editor
 void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact)
 {
    for(S32 i = 0; i < borders.size(); i++)
-      renderNavMeshBorder(borders[i], scaleFact, borderFillColor, .25, 3);
+      renderNavMeshBorder(borders[i], scaleFact, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
 }
 
 
@@ -832,7 +834,7 @@ void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact)
 void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
 {
    for(S32 i = 0; i < borders.size(); i++)
-      renderNavMeshBorder(borders[i], scaleFact, borderFillColor, .25, 3);
+      renderNavMeshBorder(borders[i], scaleFact, BORDER_FILL_COLOR, BORDER_FILL_ALPHA, BORDER_WIDTH);
 }
 
 
