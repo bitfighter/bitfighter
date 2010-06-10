@@ -61,6 +61,7 @@ This change will resolve many installation and permissions issues.
 <li>XBOX controller on windows now much better supported</li>
 <li>Bot nav mesh zones can be displayed in-game by using /dzones command</li>
 <li>Soccer ball now warps back to starting point rather than "drifting" back</li>
+<li>Loadout/weapon indicators now more "vector graphicy", colors no longer botched on Vista/Win7</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>

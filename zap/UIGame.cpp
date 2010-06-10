@@ -512,8 +512,29 @@ void GameUserInterface::renderReticle()
 
 extern LoadoutItem gLoadoutModules[];
 
-#define fontSize 15
-#define gapSize 3       // Gap between text and box
+static const S32 fontSize = 15;
+static const S32 gapSize = 3;       // Gap between text and box
+
+S32 gLoadoutIndicatorHeight = fontSize + gapSize * 2;
+
+
+S32 renderIndicator(S32 xPos, const char *name)
+{
+   S32 width = UserInterface::getStringWidth(fontSize, name);
+
+   glBegin(GL_LINE_LOOP);
+      glVertex2f(xPos, UserInterface::vertMargin);
+      glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin);
+      glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
+      glVertex2f(xPos, UserInterface::vertMargin + fontSize + 2 * gapSize + 1);
+   glEnd();
+
+   // Add the weapon name
+   UserInterface::drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, name);
+
+   return width;
+}
+
 
 // Draw weapon indicators at top of the screen, runs on client
 void GameUserInterface::renderLoadoutIndicators()
@@ -521,85 +542,44 @@ void GameUserInterface::renderLoadoutIndicators()
    if(!gIniSettings.showWeaponIndicators)      // If we're not drawing them, we've got nothing to do
       return;
 
-   U32 xPos = UserInterface::horizMargin;
-
    if(!gClientGame->getConnectionToServer())    // Can happen when first joining a game.  This was XelloBlue's crash...
-   return;
+      return;
 
    Ship *localShip = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    if(!localShip)
       return;
 
-   glEnable(GL_BLEND);
+   const Color INDICATOR_INACTIVE_COLOR(0,1,0);    // green
+   const Color INDICATOR_ACTIVE_COLOR(1,0,0);      // red
+
+   U32 xPos = UserInterface::horizMargin;
 
    // First, the weapons
    for(U32 i = 0; i < (U32)ShipWeaponCount; i++)
    {
-      U32 width = getStringWidth(fontSize, gWeapons[localShip->getWeapon(i)].name.getString());
+      glColor(i == localShip->mActiveWeaponIndx ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
-      if(i == localShip->mActiveWeaponIndx)
-         glColor4f(1, 1, 0, 1);
-      else
-         glColor4f(1, 1, 0, 0.5);
-
-      glBegin(GL_POLYGON);
-         glVertex2f(xPos, UserInterface::vertMargin);
-         glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin);
-         glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize);
-         glVertex2f(xPos, UserInterface::vertMargin + fontSize + 2 * gapSize);
-      glEnd();
-
-      if(i == localShip->mActiveWeaponIndx)
-         glColor3f(0,0,0);
-      else
-         glColor3f(.2,.2,.2);
-
-      // Add the weapon name
-      drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, gWeapons[localShip->getWeapon(i)].name.getString());
+      S32 width = renderIndicator(xPos, gWeapons[localShip->getWeapon(i)].name.getString());
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }
 
-   xPos += 20;    // Small horizontal gap
+   xPos += 20;    // Small horizontal gap to seperate the weapon indicators from the module indicators
 
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      U32 width = getStringWidth(fontSize, gModuleShortName[localShip->getModule(i)]);
+      glColor(localShip->isModuleActive(localShip->getModule(i)) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
 
-      if(localShip->isModuleActive(localShip->getModule(i)))
-         glColor4f(0, 1, 0, 1);
-      else
-         glColor4f(0, 1, 0, 0.5);
-
-      glBegin(GL_POLYGON);
-         glVertex2f(xPos, UserInterface::vertMargin);
-         glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin);
-         glVertex2f(xPos + width + 2 * gapSize, UserInterface::vertMargin + fontSize + 2 * gapSize);
-         glVertex2f(xPos, UserInterface::vertMargin + fontSize + 2 * gapSize);
-      glEnd();
-
-      if(i == localShip->mActiveWeaponIndx)
-         glColor3f(0,0,0);
-      else
-         glColor3f(.2,.2,.2);
-
-      // Add the weapon name
-      drawString(xPos + gapSize, UserInterface::vertMargin + gapSize, fontSize, gModuleShortName[localShip->getModule(i)]);
+      S32 width = renderIndicator(xPos, gModuleShortName[localShip->getModule(i)]);
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }
-
-   glDisable(GL_BLEND);
 }
 
-S32 gLoadoutIndicatorHeight = fontSize + gapSize * 2;
 
-#undef fontSize
-#undef gapSize
-
-#define FONTSIZE 14
-#define FONT_GAP 4
+static const S32 FONTSIZE = 14;
+static const S32 FONT_GAP = 4;
 
 // Render any incoming chat msgs
 void GameUserInterface::renderMessageDisplay()
@@ -715,7 +695,6 @@ void GameUserInterface::renderCurrentChat()
    mLineEditor.drawCursor(xpos, ypos, FONTSIZE);
 }
 
-#undef FONT_GAP
 
 
 void GameUserInterface::onMouseDragged(S32 x, S32 y)
