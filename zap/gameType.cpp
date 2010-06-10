@@ -842,13 +842,20 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 
 extern Rect gServerWorldBounds;
 
-// Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
-void GameType::onLevelLoaded()
+// Find all spubugs in the game, and store them for future reference
+void GameType::catalogSpybugs()
 {
    mSpyBugs.clear();
 
    // Find all spybugs in the game
    gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
+}
+
+
+// Runs on server, after level has been loaded from a file.  Can be overridden, but isn't.
+void GameType::onLevelLoaded()
+{
+   catalogSpybugs();
 
    // Figure out if this level has any loadout zones
    fillVector.clear();
@@ -1157,8 +1164,6 @@ void GameType::performScopeQuery(GhostConnection *connection)
 
    // What does the spy bug see?
    //S32 teamId = gc->getClientRef()->teamId;
-   mSpyBugs.clear();
-   gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
 
    for(S32 i = 0; i < mSpyBugs.size(); i++)
    {

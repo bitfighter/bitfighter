@@ -424,7 +424,7 @@ void GrenadeProjectile::damageObject(DamageInfo *theInfo)
       return;
    }
 
-   // Bounce off of stuff.
+   // Bounce off stuff
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
@@ -659,7 +659,9 @@ Lunar<Mine>::RegType Mine::methods[] =
    {0,0}    // End method list
 };
 
-//-----------------------------------------------------------------------------
+//////////////////////////////////
+//////////////////////////////////
+
 TNL_IMPLEMENT_NETOBJECT(SpyBug);
 
 // Constructor
@@ -680,6 +682,13 @@ SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
       mTeam = -1;
 }
 
+
+// Destructor
+SpyBug::~SpyBug()
+{
+   if(getGame()->getGameType())
+      getGame()->getGameType()->catalogSpybugs();
+}
 
 bool SpyBug::processArguments(S32 argc, const char **argv)
 {
@@ -760,6 +769,7 @@ void SpyBug::unpackUpdate(GhostConnection *connection, BitStream *stream)
       SFXObject::play(SFXSpyBugDeploy, getActualPos(), Point());
 }
 
+
 void SpyBug::renderItem(Point pos)
 {
    if(exploded)
@@ -770,10 +780,8 @@ void SpyBug::renderItem(Point pos)
    if(!ship)
       return;
 
-
    // Can see bug if laid by teammate in team game || sensor is active ||
    //       you laid it yourself || spyBug is neutral
-
    bool visible = ( ((ship->getTeam() == getTeam()) && getGame()->getGameType()->isTeamGame()) || ship->isModuleActive(ModuleSensor) ||
             (getGame()->getGameType()->mLocalClient && getGame()->getGameType()->mLocalClient->name == mSetBy) || getTeam() == -1);
 

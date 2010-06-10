@@ -549,8 +549,8 @@ void GameUserInterface::renderLoadoutIndicators()
    if(!localShip)
       return;
 
-   const Color INDICATOR_INACTIVE_COLOR(0,1,0);    // green
-   const Color INDICATOR_ACTIVE_COLOR(1,0,0);      // red
+   const Color INDICATOR_INACTIVE_COLOR(0,.8,0);    // green
+   const Color INDICATOR_ACTIVE_COLOR(.8,0,0);      // red
 
    U32 xPos = UserInterface::horizMargin;
 

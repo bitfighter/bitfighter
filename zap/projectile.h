@@ -222,6 +222,7 @@ class SpyBug : public GrenadeProjectile
 
 public:
    SpyBug(Point pos = Point(), Ship *owner = NULL);      // Constructor
+   ~SpyBug();                                            // Destructor
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *theGame);
 

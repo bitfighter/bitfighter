@@ -166,6 +166,8 @@ public:
    S32 getLeadingScore() { return mLeadingTeamScore; }
    S32 getLeadingTeam() { return mLeadingTeam; }
 
+   void catalogSpybugs();     // Rebuild a list of spybugs in the game
+
    virtual bool isFlagGame() { return false; }              // Does game use flags?
    virtual bool isTeamFlagGame() { return false; }          // Does flag-team orientation matter?  Only true in CTF, really.
    virtual S32 getFlagCount() { return mFlags.size(); }     // Return the number of game-significant flags
