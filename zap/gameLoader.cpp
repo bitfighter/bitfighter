@@ -126,6 +126,7 @@ int LevelLoader::parseArgs(const char *string)
    for(S32 i = 0; i < MaxArgc; i++)
       argv[i] = argv_buffer[i];
 
+
 stateEatingWhitespace:
    c = getNextChar();
    if(c == ' ' || c == '\t')
@@ -136,6 +137,7 @@ stateEatingWhitespace:
       goto stateReadString;
    if(c == '#')
       goto stateEatingComment;
+
 
 stateAddCharToIdent:
    addCharToArg(c);
@@ -160,6 +162,7 @@ stateAddCharToIdent:
       goto stateAddCharToID;
    }
    goto stateAddCharToIdent;
+
 
 stateAddCharToID:
    c = getNextChar();           // First time here we know c == '!', so let's just move on to the next one
@@ -194,10 +197,14 @@ stateReadString:
 
    addCharToArg(c);
    goto stateReadString;
+
+
 stateEatingComment:
    c = getNextChar();
    if(c != '\n' && c)
       goto stateEatingComment;
+
+
 stateLineParseDone:
    if(argc)
    {

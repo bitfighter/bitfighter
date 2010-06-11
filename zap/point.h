@@ -75,7 +75,9 @@ struct Point
    F32 distSquared(const Point &pt) const { return((x-pt.x) * (x-pt.x) + (y-pt.y) * (y-pt.y)); }
 
    F32 angleTo(const Point &p) const { return atan2(p.y-y, p.x-x); }
-   
+
+   Point rotate(F32 ang) { F32 sina = sin(ang); F32 cosa = cos(ang); return Point(x * sina + y * cosa, y * sina - x * cosa); }
+
    void setAngle(const F32 ang) { setPolar(len(), ang); }
    void setPolar(const F32 l, const F32 ang) { x = cos(ang) * l; y = sin(ang) * l; }
 

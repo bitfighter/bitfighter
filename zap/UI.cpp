@@ -60,7 +60,7 @@ namespace Zap
 
 extern S32 gLoadoutIndicatorHeight;
 
-S32 UserInterface::chatMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 3;
+S32 UserInterface::chatMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
 
 extern const S32 gScreenHeight;
 extern const S32 gScreenWidth;

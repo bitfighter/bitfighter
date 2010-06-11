@@ -156,32 +156,32 @@ private:
    Vector<bool> mVertSelected;
    bool mAnyVertsSelected;
 
-   void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid);
+   void init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem);
 
 public:
-   WorldItem(GameItems itemType = ItemInvalid);
-   WorldItem(GameItems itemType, Point pos, S32 team, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
+   WorldItem(GameItems itemType = ItemInvalid, S32 itemId = 0);    // Only used when creating an item from a loaded level
+   WorldItem(GameItems itemType, Point pos, S32 team, bool isDockItem, F32 width = 1, F32 height = 1, U32 id = 0);  // Primary constructor
 
    void initializeGeom();     // Once we have our points, do some geom preprocessing
 
 
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
-   S32 getRadius();
+   S32 getRadius(F32 scale);
+   Point getSelectionOffset(F32 scale);      // For turrets, apparent selection center is not the same as the item's actual location
 
    Vector<Point> mRenderLineSegments;  // Used only by barriers
 
    GameItems index;
    S32 team;
    F32 width;
-   U32 id;              // Item's unique id... 0 if there is none
-   U32 mId;             // TODO: rename... an autoincremented serial number
+   U32 id;                // Item's unique id... 0 if there is none
+   U32 mId;               // TODO: rename... an autoincremented serial number
    
    bool selected;
    bool litUp;
+   bool mDockItem;        // True if this item lives on the dock
 
-   //Point convertLevelToCanvasCoord(const Point &point, bool convert = true);
-   
    LineEditor lineEditor; // For items that have an aux text field
    U32 textSize;          // For items that have an aux text field
    S32 repopDelay;        // For repair items, also used for engineered objects heal rate
@@ -190,6 +190,7 @@ public:
 
    bool hasWidth();
    bool anyVertsSelected() { return mAnyVertsSelected; }
+   bool renderFull(F32 scale);    // Should item be rendered it full glory?  Not fully used at the moment...
 
    // Following are used by all items; scale has wall specific code
    void rotateAboutPoint(const Point &center, F32 angle);      // Rotate item around specified point
@@ -236,7 +237,7 @@ public:
 
 
    // Find mount point or turret or forcefield closest to pos
-   bool snapEngineeredObject(F32 overridingSnapDistance, const Point &pos);  
+   Point snapEngineeredObject(const Point &pos);  
    void findForceFieldEnd();                                      // Find end of forcefield
 
    virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
@@ -400,8 +401,6 @@ private:
 
    string mEditFileName;               // Manipulate with get/setLevelFileName
 
-   bool mDraggingObjects;
-
    S32 mEditingSpecialAttrItem;        // Index of item we're editing special attributes on
    SpecialAttribute mSpecialAttribute; // Type of special attribute we're editing
 
@@ -496,9 +495,10 @@ public:
    void recomputeAllEngineeredItems();
 
    void render();
-   void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isDockItem, bool isScriptItem);
+   void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, F32 alpha = 1.0);
 
+   bool mDraggingObjects;     // Should be private
 
    // Render walls & lineItems
    void renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines,

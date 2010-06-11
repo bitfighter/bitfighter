@@ -284,7 +284,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    if(mSolid)
        Triangulate::Process(mPoints, mRenderFillGeometry);
    else
-       getCollisionPoly(mRenderFillGeometry);
+       getCollisionPoly(mRenderFillGeometry);   // Fill mRenderFillGeometry
 
    getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
 }
@@ -296,16 +296,11 @@ void Barrier::onAddedToGame(Game *theGame)
 }
 
 
-// Processes mPoints and fills polyPoints.  
+// Processes mPoints and fills polyPoints 
 bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 {
    if(mPoints.size() == 2)    // It's a regular segment, so apply width
-   {
-      Point start = mPoints[0];
-      Point end = mPoints[1];
-
-      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, polyPoints);
-   }
+      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, polyPoints);     // Fills polyPoints with 4 points
    else                       // Otherwise, our collisionPoly is just our points!
       polyPoints = mPoints;
 

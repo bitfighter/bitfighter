@@ -228,7 +228,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex,
                                             const Point &rayStart, const Point &rayEnd, 
                                             float &collisionTime, Point &surfaceNormal)
 {
-   return findObjectLOS(typeMask, stateIndex, false, rayStart, rayEnd, collisionTime, surfaceNormal);
+   return findObjectLOS(typeMask, stateIndex, true, rayStart, rayEnd, collisionTime, surfaceNormal);
 }
 
 

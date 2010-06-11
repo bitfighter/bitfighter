@@ -159,66 +159,70 @@ void EditorUserInterface::populateDock()
       S32 yPos = 35;
       const S32 spacer = 35;
 
-      mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
-      mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam , 0, 0));
+      mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
+      mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
 
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemTurret, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemTeleporter, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemSpeedZone, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemTextItem, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
 
       if(!strcmp(mGameType, "SoccerGameType"))
-         mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), mCurrentTeam, 0, 0));
+         mDockItems.push_back(WorldItem(ItemSoccerBall, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       else
-         mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), mCurrentTeam, 0, 0));
+         mDockItems.push_back(WorldItem(ItemFlag, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
 
-      mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemFlagSpawn, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
 
 
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemMine, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
-      mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), mCurrentTeam, 0, 0));
-      yPos += spacer;
-
-      // These two will share a line
-      mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
-      mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
-
+      mDockItems.push_back(WorldItem(ItemSpyBug, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
       yPos += spacer;
 
       // These two will share a line
-      mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), mCurrentTeam, 0, 0));
-      mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, 0, 0));
+      mDockItems.push_back(WorldItem(ItemAsteroid, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
+      mDockItems.push_back(WorldItem(ItemAsteroidSpawn, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
+
+      yPos += spacer;
+
+      // These two will share a line
+      mDockItems.push_back(WorldItem(ItemBouncyBall, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
+      mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
 
       yPos += 25;
-      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 
+                                     mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
       yPos += 25;
 
       if(!strcmp(mGameType, "HuntersGameType"))
       {
-         mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+         mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 
+                                        mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += 25;
       }
       else
       {
-         mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), mCurrentTeam, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+         mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 
+                                        mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += spacer;
       }
    }
    else if(mShowMode == NavZoneMode)
    {
-      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, canvasHeight - vertMargin - 82), TEAM_NEUTRAL, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, canvasHeight - vertMargin - 82), 
+                                     TEAM_NEUTRAL, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
    }
 }
 
@@ -317,7 +321,7 @@ void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cam
 
 void EditorUserInterface::autoSave()
 {
-   gEditorUserInterface.saveLevel(false, false, true);
+   saveLevel(false, false, true);
 }
 
 
@@ -371,7 +375,7 @@ void EditorUserInterface::recomputeAllEngineeredItems()
 {
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index == ItemTurret || mItems[i].index == ItemForceField)
-         mItems[i].snapEngineeredObject(NONE, mItems[i].vert(0));
+         mItems[i].snapEngineeredObject(mItems[i].vert(0));
 }
 
 
@@ -591,10 +595,9 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
             break;
          }
 
-      if(itemType != ItemInvalid)     // Item appears invalid
+      if(itemType != ItemInvalid)     
       {
-         WorldItem newItem(itemType);
-
+         WorldItem newItem(itemType, id);
          newItem.processArguments(argc - 1, argv + 1);
    
          mLoadTarget->push_back(newItem);
@@ -921,13 +924,9 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    // Turrets & forcefields: Snap to a wall edge as first (and only) choice
    if(mDraggingObjects &&
             (mItems[mSnapVertex_i].index == ItemTurret || mItems[mSnapVertex_i].index == ItemForceField))
-   {
-      const F32 SNAP_FACT = 400;       // Higher number means stronger snap effect
-      if(mItems[mSnapVertex_i].snapEngineeredObject(SNAP_FACT / (mCurrentScale * mCurrentScale), p))
-         return mItems[mSnapVertex_i].vert(0);
-      else
-         return p;
-   }
+      return mItems[mSnapVertex_i].snapEngineeredObject(p);
+
+
 
    F32 maxSnapDist = 100 / (mCurrentScale * mCurrentScale);
    F32 minDist = maxSnapDist;
@@ -1213,8 +1212,13 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
       glEnd();
    }
 
-   // Draw coordinates on dock
-   Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
+   // Draw coordinates on dock -- if we're moving an item, show the coords of the snap vertex, otherwise show the coords of the
+   // snapped mouse position
+   Point pos;
+   if(mSnapVertex_i != NONE)
+      pos = mItems[mSnapVertex_i].vert(mSnapVertex_j);
+   else
+      pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
 
    F32 xpos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
 
@@ -1366,18 +1370,18 @@ void EditorUserInterface::render()
    glPopMatrix();
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      renderItem(mLevelGenItems[i], -1, false, false, true);
+      renderItem(mLevelGenItems[i], -1, false, true);
 
    // Draw map items (teleporters, etc.) that are not being dragged, and won't have any text labels  (below the dock)
    for(S32 i = 0; i < mItems.size(); i++)
       if(!(mDraggingObjects && mItems[i].selected))
-         renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false, false);
+         renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false);
 
    // Draw map items (teleporters, etc.) that are are selected and/or lit up, so label is readable (still below the dock)
    // Do this as a separate operation to ensure that these are drawn on top of those drawn above.
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].selected || mItems[i].litUp)
-         renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false, false);
+         renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false);
 
 
    // Go through and render any borders between navMeshZones -- these need to be rendered after the zones themselves so they
@@ -1456,7 +1460,7 @@ void EditorUserInterface::render()
    // we'll lose our wall centernlines.
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index != ItemBarrierMaker && mDraggingObjects && mItems[i].selected)
-         renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false, false);
+         renderItem(mItems[i], i, mEditingSpecialAttrItem == i, false);
 
    if(mDragSelecting)      // Draw box for selecting items
    {
@@ -1492,7 +1496,7 @@ void EditorUserInterface::render()
    if(!mShowingReferenceShip)
       for(S32 i = 0; i < mDockItems.size(); i++)
       {
-         renderItem(mDockItems[i], -1, false, true, false);
+         renderItem(mDockItems[i], -1, false, false);
          mDockItems[i].litUp = false;
          //mDockItems[i].unselectVert(0);
       }
@@ -1655,8 +1659,7 @@ extern void renderPolygonOutline(const Vector<Point> &outline);
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
 // Items are rendered in index order, so those with a higher index get drawn later, and hence, on top
-void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdited, 
-                                     bool isDockItem, bool isScriptItem)
+void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isScriptItem)
 {
    Point pos, dest;
    const S32 labelSize = 9;      // Size to label items we're hovering over
@@ -1664,7 +1667,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    const S32 attrSize = 10;
    const F32 alpha = isScriptItem ? .6 : 1;     // Script items will appear somewhat translucent
 
-   bool hideit = (mShowMode == ShowWallsOnly) && !(mShowingReferenceShip && !isDockItem);
+   bool hideit = (mShowMode == ShowWallsOnly) && !(mShowingReferenceShip && !item.mDockItem);
 
    Color drawColor;
    if(hideit)
@@ -1676,7 +1679,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    else  // Normal
       drawColor = Color(.75, .75, .75);
 
-   pos = convertLevelToCanvasCoord(item.vert(0), !isDockItem);
+   pos = convertLevelToCanvasCoord(item.vert(0), !item.mDockItem);
 
    bool showLetter = true;    // In a few cases, we want to disable rendering of letters on objects
 
@@ -1689,9 +1692,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                    NO_NUMBER, alpha);   
 
    // Draw "two-point" items
-   if(item.geomType() == geomSimpleLine && ((mShowMode != ShowWallsOnly) || isDockItem || mShowingReferenceShip))    
+   if(item.geomType() == geomSimpleLine && ((mShowMode != ShowWallsOnly) || item.mDockItem || mShowingReferenceShip))    
    {
-      if(isDockItem)
+      if(item.mDockItem)
          dest = item.vert(1);
       else
          dest = convertLevelToCanvasCoord(item.vert(1));
@@ -1708,7 +1711,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       else if(item.index == ItemTextItem)
          itemColor = blue;
      
-      if(isDockItem)
+      if(item.mDockItem)
       {
          glColor(itemColor, alpha);
          drawFilledSquare(pos, 5);    // Draw origin of item to give user something to grab on the dock
@@ -1720,7 +1723,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       if(item.index == ItemTeleporter || item.index == ItemSpeedZone || item.index == ItemTextItem)
       {
-         if(!isDockItem)
+         if(!item.mDockItem)
          {
             if(!mShowingReferenceShip)
             {
@@ -1772,7 +1775,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                renderTextItem(item, 1);
          
             // If this is a textItem, and either the item or either vertex is selected, draw the text
-            if(!isDockItem && itemDef[item.index].hasText)
+            if(!item.mDockItem && itemDef[item.index].hasText)
             {
                F32 txtSize = renderTextItem(item, alpha);
 
@@ -1785,7 +1788,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                   drawStringf_2pt(pos, dest, instrSize, -22, "[Enter] to edit text");
                }
             }
-            else if(!isDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
+            else if(!item.mDockItem && item.index == ItemSpeedZone)      // Special labeling for speedzones
             {
                if((item.selected && mEditingSpecialAttrItem == NONE) || isBeingEdited)
                {
@@ -1833,7 +1836,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glColor(drawColor, alpha);
             drawSquare(pos, 7);
 
-            if(!isDockItem)
+            if(!item.mDockItem)
                labelSimpleLineItem(pos, labelSize, itemDef[item.index].onScreenName, item.getOriginBottomLabel());
          }
          else if(item.vertSelected(1) || (item.litUp && vertexToLightUp == 1))
@@ -1844,7 +1847,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             labelSimpleLineItem(dest, labelSize, itemDef[item.index].onScreenName, item.getDestinationBottomLabel());
          }
 
-         if(isDockItem && item.litUp)     // Highlight handle on dock when hovering over it
+         if(item.mDockItem && item.litUp)     // Highlight handle on dock when hovering over it
          {
             glColor(HIGHLIGHT_COLOR);
             drawSquare(pos, 8);
@@ -1870,7 +1873,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
       // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
       if((mShowMode != ShowWallsOnly && (showingNavZones() && item.index == ItemNavMeshZone || item.index != ItemNavMeshZone)) &&
-            !mShowingReferenceShip || isDockItem || mShowingReferenceShip && item.index != ItemNavMeshZone)   
+            !mShowingReferenceShip || item.mDockItem || mShowingReferenceShip && item.index != ItemNavMeshZone)   
       {
          // A few items will get custom colors; most will get their team color
          if(hideit)
@@ -1885,10 +1888,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
          F32 ang = angleOfLongestSide(item.getVerts());
 
-         if(isDockItem)    // Old school rendering on the dock
+         if(item.mDockItem)    // Old school rendering on the dock
          {
             glPushMatrix();
-               setLevelToCanvasCoordConversion(!isDockItem);
+               setLevelToCanvasCoordConversion(!item.mDockItem);
 
                // Render the fill triangles
                renderTriangulatedPolygonFill(item.fillPoints);
@@ -1901,7 +1904,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
             // Let's add a label
             glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-            renderPolygonLabel(convertLevelToCanvasCoord(item.centroid, !isDockItem), ang, labelSize, 
+            renderPolygonLabel(convertLevelToCanvasCoord(item.centroid, !item.mDockItem), ang, labelSize, 
                                itemDef[item.index].onScreenName);
          }
          else
@@ -1939,11 +1942,11 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       // NavMeshZone verts will be drawn elsewhere
-      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !isDockItem && item.index != ItemNavMeshZone)  
+      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !item.mDockItem && item.index != ItemNavMeshZone)  
          renderLinePolyVertices(item, alpha);                               
    }
  
-   else if(mShowMode != ShowWallsOnly || isDockItem || mShowingReferenceShip)   // Draw the various point items
+   else if(mShowMode != ShowWallsOnly || item.mDockItem || mShowingReferenceShip)   // Draw the various point items
    {
       Color c = hideit ? grayedOutColorDim : getTeamColor(item.team);           // And a color (based on team affiliation)
 
@@ -1958,7 +1961,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemFlagSpawn)    // Draw flag spawn point
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(mShowingReferenceShip && !item.mDockItem)
          {
             // Do nothing -- hidden in preview mode
          }
@@ -1976,7 +1979,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemAsteroidSpawn)    // Draw asteroid spawn point
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(mShowingReferenceShip && !item.mDockItem)
          {
             // Do nothing -- hidden in preview mode
          }
@@ -1994,7 +1997,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemBouncyBall)   // Draw testitem
       {
-         if(!isDockItem)
+         if(!item.mDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -2009,7 +2012,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemAsteroid)   // Draw asteroid
       {
-         if(!isDockItem)
+         if(!item.mDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -2022,7 +2025,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       else if(item.index == ItemResource)   // Draw resourceItem
       {
-         if(!isDockItem)
+         if(!item.mDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -2034,7 +2037,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemSoccerBall)  // Soccer ball, obviously
       {
-         if(!isDockItem)
+         if(!item.mDockItem)
          {
             glPushMatrix();
                setTranslationAndScale(pos);
@@ -2049,7 +2052,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
       else if(item.index == ItemMine)  // And a mine
       {
-         if(mShowingReferenceShip && !isDockItem) 
+         if(mShowingReferenceShip && !item.mDockItem) 
          {
              glPushMatrix();
                setTranslationAndScale(pos);
@@ -2074,18 +2077,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          drawCircle(pos, 5);
 
          // And show how far it can see... unless, of course, it's on the dock, and assuming the tab key has been pressed
-         if(!isDockItem && mShowingReferenceShip && (item.selected || item.litUp))
+         if(!item.mDockItem && mShowingReferenceShip && (item.selected || item.litUp))
          {
             glColor(getTeamColor(item.team), .25 * alpha);
 
-            F32 size = mCurrentScale / mGridSize * gSpyBugRange;
+            U32 size = U32(mCurrentScale / mGridSize * F32(gSpyBugRange));
 
-            glBegin(GL_POLYGON);
-               glVertex2f(pos.x - size, pos.y - size);
-               glVertex2f(pos.x + size, pos.y - size);
-               glVertex2f(pos.x + size, pos.y + size);
-               glVertex2f(pos.x - size, pos.y + size);
-            glEnd();
+            drawFilledSquare(pos, size);
          }
       }
 
@@ -2097,7 +2095,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       else if(item.index == ItemTurret || item.index == ItemForceField)
       { 
-         if(!isDockItem && item.snapped && mCurrentScale > 70)      // Generic rendering when we're too far out
+         if(item.renderFull(mCurrentScale))      
          {
             if(item.index == ItemTurret)
             {
@@ -2131,7 +2129,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       else                             // Draw anything else
       {
-         if(mShowingReferenceShip && !isDockItem)
+         if(mShowingReferenceShip && !item.mDockItem)
          {
             // Do nothing
          }
@@ -2141,7 +2139,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
 
       // If this is an item that has a repop attribute, and the item is selected, draw the text
-      if(!isDockItem && itemDef[item.index].hasRepop)
+      if(!item.mDockItem && itemDef[item.index].hasRepop)
       {
          if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == NONE) || isBeingEdited)
          {
@@ -2149,10 +2147,15 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
             const char *healword = (item.index == ItemTurret || item.index == ItemForceField) ? "10% Heal" : "Regen";
 
+            Point offset = item.getSelectionOffset(mCurrentScale).rotate(item.normal.ATAN2()) * mCurrentScale;
+
+            S32 radius = item.getRadius(mCurrentScale);
+            offset.y += ((radius == NONE || item.mDockItem) ? 10 : (radius * mCurrentScale / mGridSize)) - 6;
+
             if(item.repopDelay == 0)
-               drawStringfc(pos.x, pos.y + attrSize, attrSize, "%s: Disabled", healword);
+               drawStringfc(pos.x + offset.x, pos.y + offset.y + attrSize, attrSize, "%s: Disabled", healword);
             else
-               drawStringfc(pos.x, pos.y + 10, attrSize, "%s: %d sec%c", healword, item.repopDelay, item.repopDelay != 1 ? 's' : 0);
+               drawStringfc(pos.x + offset.x, pos.y + offset.y + 10, attrSize, "%s: %d sec%c", healword, item.repopDelay, item.repopDelay != 1 ? 's' : 0);
 
 
             const char *msg;
@@ -2163,24 +2166,19 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                msg = "Up/Dn to change";
             else
                msg = "???";
-            drawStringc(pos.x, pos.y + instrSize + 13, instrSize, msg);
+            drawStringc(pos.x + offset.x, pos.y + offset.y + instrSize + 13, instrSize, msg);
          }
       }
 
       // If we have a turret, render it's range (if tab is depressed)
       if(item.index == ItemTurret)
       {
-         if(!isDockItem && mShowingReferenceShip && (item.selected || item.litUp))
+         if(!item.mDockItem && mShowingReferenceShip && (item.selected || item.litUp))
          {
             glColor(getTeamColor(item.team), .25 * alpha);
 
             F32 size = mCurrentScale / mGridSize * (gWeapons[WeaponTurret].projLiveTime * gWeapons[WeaponTurret].projVelocity / 1000);
-            glBegin(GL_POLYGON);
-               glVertex2f(pos.x - size, pos.y - size);
-               glVertex2f(pos.x + size, pos.y - size);
-               glVertex2f(pos.x + size, pos.y + size);
-               glVertex2f(pos.x - size, pos.y + size);
-            glEnd();
+            drawFilledSquare(pos, size);
          }
       }
 
@@ -2188,23 +2186,19 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  
       {
          // Dock items are never selected, but they can be highlighted
-         Point pos = isDockItem ? item.vert(0) : convertLevelToCanvasCoord(item.vert(0));   
+         Point pos = item.mDockItem ? item.vert(0) : convertLevelToCanvasCoord(item.vert(0));   
 
          glColor(drawColor);
 
-         S32 radius = item.getRadius();
-         S32 highlightRadius = (radius == NONE || isDockItem) ? 10 : (radius * mCurrentScale / mGridSize);
+         S32 radius = item.getRadius(mCurrentScale);
+         S32 highlightRadius = (radius == NONE || item.mDockItem) ? 10 : (radius * mCurrentScale / mGridSize);
 
+         Point ctr = pos + item.getSelectionOffset(mCurrentScale).rotate(item.normal.ATAN2()) * mCurrentScale;   
 
-         glBegin(GL_LINE_LOOP);
-            glVertex2f(pos.x - highlightRadius, pos.y - highlightRadius);
-            glVertex2f(pos.x + highlightRadius, pos.y - highlightRadius);
-            glVertex2f(pos.x + highlightRadius, pos.y + highlightRadius);
-            glVertex2f(pos.x - highlightRadius, pos.y + highlightRadius);
-         glEnd();
+         drawSquare(ctr, highlightRadius);
       }
 
-      if(isDockItem || showLetter && !(itemDef[item.index].specialTabKeyRendering && mShowingReferenceShip)) 
+      if(item.mDockItem || showLetter && !(itemDef[item.index].specialTabKeyRendering && mShowingReferenceShip)) 
       {
          char letter = itemDef[item.index].letter;    // Get letter to represent object
 
@@ -2220,9 +2214,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
       }
 
-      // Add a label if we're hovering over it (or not, unless it's on the dock, where we've already label our items
-      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName && 
-         !isDockItem)
+      // Add a label if we're hovering over it (or not, unless it's on the dock, where we've already labeled our items)
+      // For the moment, we need special handling for turrets & forcefields :-(
+      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName && !item.mDockItem 
+            && !((item.index == ItemTurret || item.index == ItemForceField) && item.renderFull(mCurrentScale)))
       {
          glColor(drawColor);
          drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName); // Label on top
@@ -2230,7 +2225,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
    }
 
    // Label our dock items
-   if(isDockItem && item.geomType() != geomPoly)      // Polys are already labeled internally
+   if(item.mDockItem && item.geomType() != geomPoly)      // Polys are already labeled internally
    {
       glColor(hideit ? grayedOutColorBright : drawColor);
       F32 maxy = -F32_MAX;
@@ -2425,12 +2420,6 @@ void EditorUserInterface::rotateSelection(F32 angle)
       return;
 
    saveUndoState(mItems);
-
-   //Point min, max;                        // This block will rotate selection around its center
-   //computeSelectionMinMax(min, max);
-   //Point ctr = (min + max)*0.5;
-   //ctr.x = floor(ctr.x * 10) * 0.1f;      
-   //ctr.y = floor(ctr.y * 10) * 0.1f;
 
    for(S32 i = 0; i < mItems.size(); i++)
    {
@@ -2628,10 +2617,12 @@ void EditorUserInterface::findHitItemAndEdge()
 
          if(mItems[i].geomType() == geomPoint)
          {
-            S32 radius = mItems[i].getRadius();
+            S32 radius = mItems[i].getRadius(mCurrentScale);
             S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : (radius * mCurrentScale / mGridSize);
 
-            Point pos = convertLevelToCanvasCoord(mItems[i].vert(0));
+            F32 ang = mItems[i].normal.ATAN2();
+            Point pos = convertLevelToCanvasCoord(mItems[i].vert(0) + mItems[i].getSelectionOffset(mCurrentScale).rotate(ang));
+
             if(fabs(mMousePos.x - pos.x) < targetRadius && fabs(mMousePos.y - pos.y) < targetRadius)
             {
                mItemHit = i;
@@ -2789,7 +2780,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem != NONE)
       return;
 
-   if(mDraggingDockItem != NONE)      // We just started cdragging an item off the dock
+   if(mDraggingDockItem != NONE)      // We just started dragging an item off the dock
    {
       // Offset lets us drag an item out from the dock by an amount offset from the 0th vertex.  This makes placement
       // seem more natural.
@@ -2809,9 +2800,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       WorldItem item =
          (mDockItems[mDraggingDockItem].geomType() == geomPoly) ?
          // For polygon items, try to match proportions of the dock rendering while ensuring all corners snap.  
-         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, .7, .4) :
+         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, false, .7, .4) :
          // Non polygon item --> size only used for geomSimpleLine items (teleport et al), ignored for geomPoints
-         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, 1, 0);
+         WorldItem(mDockItems[mDraggingDockItem].index, pos, mDockItems[mDraggingDockItem].team, false, 1, 0);
   
       clearSelection();            // No items are selected...
       item.selected = true;        // ...except for the new one
@@ -2847,15 +2838,19 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // want to factor that offset into our calculations.  For point items (and vertices), we don't really care about any slop
    // in the selection, and we just want the damn thing where we put it.
    // (*origPoint - mMouseDownPos) represents distance from item's snap vertex where we "grabbed" it
-//if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
-//   delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)) - *origPoint;
-//else
+   if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
+      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos))  - *origPoint;
+   else
       delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + *origPoint - mMouseDownPos) - *origPoint;
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
    // selected if one of its vertices are.
    for(S32 i = 0; i < mItems.size(); i++)
    {
+      // Skip selected item if it's a turret or forcefield -- snapping will have already been applied
+      if(i == mSnapVertex_i && (mItems[i].index == ItemForceField || mItems[i].index == ItemTurret) && mItems[i].snapped)
+         continue;
+
       for(S32 j = 0; j < mItems[i].vertCount(); j++)
          if(mItems[i].selected || mItems[i].vertSelected(j))
          {
@@ -2992,7 +2987,7 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
          else if(geomChanged)
             mItems[i].onGeomChanged();
 
-      }  //else if
+      }  // else if(!objectsOnly) 
    }  // for
 
    if(deleted)
@@ -3020,6 +3015,7 @@ void EditorUserInterface::incBarrierWidth(S32 amt)
    mLastUndoStateWasBarrierWidthChange = true;
 }
 
+
 // Decrease selected wall thickness by amt
 void EditorUserInterface::decBarrierWidth(S32 amt)
 {
@@ -3044,7 +3040,7 @@ void EditorUserInterface::splitBarrier()
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].geomType() == geomLine)
           for(S32 j = 1; j < mItems[i].vertCount() - 1; j++)     // Can't split on end vertices!
-            if(mItems[i].vertSelected(j) /*|| (mItems[i].litUp && vertexToLightUp == j)*/)
+            if(mItems[i].vertSelected(j))
             {
                split = true;
 
@@ -3204,7 +3200,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
          break;
       }
 
-   mItems.push_back(WorldItem(itemType, pos, team, 1, 1));
+   mItems.push_back(WorldItem(itemType, pos, team, false, 1, 1));
 
    mItems.sort(geometricSort);
    validateLevel();
@@ -3271,13 +3267,13 @@ void EditorUserInterface::centerView()
 
          mCurrentScale = min(canvasWidth / (maxx - minx), canvasHeight / (maxy - miny));
          mCurrentScale /= 1.3;      // Zoom out a bit
-         mCurrentOffset.set(canvasWidth/2 - mCurrentScale * midx, canvasHeight/2 - mCurrentScale * midy);
+         mCurrentOffset.set(canvasWidth / 2 - mCurrentScale * midx, canvasHeight/2 - mCurrentScale * midy);
       }
    }
-   else
+   else     // Put (0,0) at center of screen
    {
       mCurrentScale = 100;
-      mCurrentOffset.set(0,0);
+      mCurrentOffset.set(canvasWidth / 2, canvasHeight / 2);
    }
 }
 
@@ -3547,7 +3543,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             return;
 
          mMostRecentState = mItems;
-         Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
+         Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));      // adding vertex w/ right-mouse
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
          mItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
@@ -3579,7 +3575,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             type = ItemBarrierMaker;
          }
 
-         mNewItem = WorldItem(type, snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)), -1,
+         mNewItem = WorldItem(type, snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)), TEAM_NEUTRAL, false,
                               type == ItemBarrierMaker ? Barrier::BarrierWidth : 2);
       }
    }
@@ -4154,7 +4150,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
          s_fprintf(f, "Team %s %g %g %g\n", mTeams[i].getName().getString(),
             mTeams[i].color.r, mTeams[i].color.g, mTeams[i].color.b);
 
-      // Write out all maze items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
+      // Write out all level items (do two passes; walls first, non-walls next, so turrets & forcefields have something to grab onto)
       for(S32 j = 0; j < 2; j++)
          for(S32 i = 0; i < mItems.size(); i++)
          {
@@ -4625,16 +4621,17 @@ void EditorUserInterface::checkZones(S32 i, S32 j)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-WorldItem::WorldItem(GameItems itemType) : lineEditor(MAX_TEXTITEM_LEN)
+// Default constructor -- only used when loading a file
+WorldItem::WorldItem(GameItems itemType, S32 itemId) : lineEditor(MAX_TEXTITEM_LEN)
 {
-   init(itemType, 0, 1, 0);
+   init(itemType, TEAM_NEUTRAL, 1, itemId, false);
 }
 
 
 // Primary constructor -- used when constructing dock items
-WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 height, U32 itemid) : lineEditor(MAX_TEXTITEM_LEN)
+WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, bool isDockItem, F32 width, F32 height, U32 itemId) : lineEditor(MAX_TEXTITEM_LEN)
 {
-   init(itemType, xteam, width, itemid);
+   init(itemType, xteam, width, itemId, isDockItem);
 
    addVert(pos);
 
@@ -4653,7 +4650,7 @@ WorldItem::WorldItem(GameItems itemType, Point pos, S32 xteam, F32 width, F32 he
 }
 
 
-void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
+void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool isDockItem)
 {
    index = itemType;
    team = xteam;
@@ -4664,6 +4661,7 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid)
    width = xwidth;
    mId = getNextItemId();
    snapped = false;
+   mDockItem = isDockItem;
 
    if(itemDef[itemType].hasText)
    {
@@ -4700,6 +4698,19 @@ void WorldItem::initializeGeom()
 bool WorldItem::hasWidth()
 {
    return itemDef[index].hasWidth;
+}
+
+
+// True if we should use the in-game rendering, false if we should use iconified editor rendering
+bool WorldItem::renderFull(F32 scale)
+{
+   if(mDockItem)
+      return false;
+
+   if(index == ItemTurret || index == ItemForceField)
+      return(snapped && scale > 70);
+   else
+      return true;
 }
 
 
@@ -4763,7 +4774,7 @@ const char *WorldItem::getDestinationBottomLabel()
 
 
 // Radius of item in editor
-S32 WorldItem::getRadius()
+S32 WorldItem::getRadius(F32 scale)
 {
    if(index == ItemBouncyBall)
       return TestItem::TEST_ITEM_RADIUS;
@@ -4771,9 +4782,22 @@ S32 WorldItem::getRadius()
       return ResourceItem::RESOURCE_ITEM_RADIUS;
    else if(index == ItemAsteroid)
       return Asteroid::ASTEROID_RADIUS * .75;
+   else if(index == ItemTurret && renderFull(scale))
+      return 25;
    else return NONE;    // Use default
 }
 
+
+// Account for the fact that the apparent selection center and actual object center are not quite aligned
+Point WorldItem::getSelectionOffset(F32 scale)
+{
+   if(index == ItemTurret && renderFull(scale))
+      return Point(0, .075);
+   else if(index == ItemForceField && renderFull(scale))
+      return Point(0, .035);     
+   else
+      return Point(0, 0);     // No offset for most items
+}
 
 S32 WorldItem::getDefaultRepopDelay(GameItems itemType)  
 {
@@ -4820,8 +4844,6 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
       // Should the following be moved to the constructor?  Probably...
       team = TEAM_NEUTRAL;
       selected = false;
-      width = 0;
-      id = id;
 
       if(itemDef[index].hasTeam)
       {
@@ -4833,6 +4855,7 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
          width = atof(argv[arg]);
          arg++;
       }
+
       if(index == ItemTextItem)
       {
          for(S32 j = 0; j < 2; j++)       // Read two points...
@@ -4915,6 +4938,8 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
        }
    }
 
+   init(index, team, width, id, false);      // Mostly repeats stuff already done here, but does a few new things too...
+
    return true;
 }
 
@@ -4930,25 +4955,26 @@ void WorldItem::processEndPoints()
 }
 
 
-// Disable snap distance override by passing -1
-bool WorldItem::snapEngineeredObject(F32 overridingSnapDistance, const Point &pos)
+Point WorldItem::snapEngineeredObject(const Point &pos)
 {  
    Point anchor, nrml;
    DatabaseObject *mountSeg = EngineeredObject::
                findAnchorPointAndNormal(getGridDatabase(), pos, 1 / getGridSize(), false, anchor, nrml);
 
-   if( mountSeg && (overridingSnapDistance < 0 || anchor.distSquared(pos) < overridingSnapDistance) )
+   if(mountSeg)
    {
       mVerts[0].set(anchor);
       normal.set(nrml);
       findForceFieldEnd();
       forceFieldMountSegment = dynamic_cast<WallSegment *>(mountSeg);
       snapped = true;
+      return anchor;
    }
    else
+   {
       snapped = false;
-
-   return snapped;
+      return pos;
+   }
 }
 
 
@@ -5118,7 +5144,8 @@ void WorldItem::onGeomChanging()
 void WorldItem::onItemDragging()
 {
    if(index == ItemForceField)
-      onGeomChanged();
+     onGeomChanged();
+
    else if(geomType() == geomPoly)
       onGeomChanged();     // Allows poly fill to get dragged around with outline
 }
@@ -5154,17 +5181,12 @@ void WorldItem::onGeomChanged()
       for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
          if(gEditorUserInterface.mItems[i].index == ItemForceField &&
                                  gEditorUserInterface.mItems[i].getExtent().intersects(getExtent()))
-         {
             gEditorUserInterface.mItems[i].findForceFieldEnd();
-         }
    }
 
-   else if(index == ItemForceField || index == ItemTurret)
+   else if(index == ItemForceField)
    {
-      snapEngineeredObject(NONE, mVerts[0]);
-
-      if(index == ItemForceField)
-         findForceFieldEnd();    // Find the end-point of the projected forcefield
+      findForceFieldEnd();    // Find the end-point of the projected forcefield
    }
 
    else if(geomType() == geomPoly)

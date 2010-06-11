@@ -108,12 +108,14 @@ This change will resolve many installation and permissions issues.
 <li>Holding tab now only shows range of selected turrets/spybugs</li>
 <li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
 <li>Improved snapping of nav mesh zones, including rendering of connections between zones</li>
-<li>Grid fades when snapping disabled</li>
+<li>Grid fades when grid-snapping disabled</li>
 <li>Changing wall widths is now undoable</li>
 <li>Arbitrary scaling of selected items now works with Ctrl-Shift-X</li>
 <li>There are now multiple edit modes (normal, bot nav mesh zone mode, etc.) customized for different purposes -- use Ctrl-A to toggle</li>
-<li>Switched H and F key assignments</li>
+<li>Switched H and F key assignments -- F now inserts forcefield, H flips selection around horizontal axis</li>
 <li>Holding <shift> while panning causes pan speed to increase -- good for larger levels at higher zoom scales</li>
+<li>Improved coordinate display on dock -- now shows coords of snapping vertex when dragging an item</li>
+<li>Editor now starts with (0,0) centered on the middle of the screen</li>
 
 <h4>Server management</h4>
 <li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
