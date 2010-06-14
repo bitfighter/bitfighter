@@ -840,7 +840,7 @@ void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
 
 // Goal zone flashes after capture, but glows after touchdown...
 void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
-                    bool isFlashing, F32 glowFraction, F32 scaleFact)
+                    bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
 

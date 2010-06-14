@@ -56,6 +56,7 @@ GoalZone::GoalZone()
    mObjectTypeMask = CommandMapVisType | GoalZoneType;
    mFlashCount = 0;
    mHasFlag = false;
+   mScore = 1;    // For now...
 }
 
 
@@ -68,7 +69,7 @@ void GoalZone::render()
       if(gt->mGlowingZoneTeam >= 0 && gt->mGlowingZoneTeam != mTeam)
       glow = 0;
 
-   renderGoalZone(gt->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle, isFlashing(), glow);
+   renderGoalZone(gt->getTeamColor(getTeam()), mPolyBounds, mPolyFill, mCentroid, mLabelAngle, isFlashing(), glow, mScore);
 }
 
 
@@ -142,7 +143,10 @@ bool GoalZone::collide(GameObject *hitObject)
 U32 GoalZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    if(stream->writeFlag(updateMask & InitialMask))
+   {
       Polyline::packUpdate(connection, stream);
+      stream->write(mScore);
+   }
 
    if(stream->writeFlag(updateMask & TeamMask))
       stream->write(mTeam);
@@ -157,6 +161,7 @@ void GoalZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       if(Polygon::unpackUpdate(connection, stream))
          computeExtent();
+      stream->read(&mScore);
    }
 
    if(stream->readFlag())

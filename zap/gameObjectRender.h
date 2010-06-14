@@ -90,7 +90,7 @@ extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
 
 extern void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
-                           bool isFlashing, F32 glowFraction, F32 scaleFact = 1);
+                           bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact = 1);
 
 extern void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);

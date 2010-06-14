@@ -105,16 +105,16 @@ void SoccerGameType::setBall(SoccerBallItem *theBall)
 
 
 // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
-void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent)
+void SoccerGameType::updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score)
 {
    if(ship)
-      updateScore(ship, scoringEvent);
+      updateScore(ship, scoringEvent, score);
    else
-      updateScore(NULL, scoringTeam, scoringEvent);
+      updateScore(NULL, scoringTeam, scoringEvent, score);
 }
 
 
-void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex)
+void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scoringTeam, S32 goalTeamIndex, S32 score)
 {
    if(scoringTeam == Item::NO_TEAM)
    {
@@ -124,7 +124,7 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
 
    if(isTeamGame() && (scoringTeam == Item::TEAM_NEUTRAL || scoringTeam == goalTeamIndex))    // Own-goal
    {
-      updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam);
+      updateSoccerScore(ship, scoringTeam, ScoreGoalOwnTeam, score);
 
       // Subtract gFirstTeamNumber to fit goalTeamIndex into a neat RangedU32 container
       s2cSoccerScoreMessage(SoccerMsgScoreOwnGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));
@@ -132,9 +132,9 @@ void SoccerGameType::scoreGoal(Ship *ship, StringTableEntry scorerName, S32 scor
    else     // Goal on someone else's goal
    {
       if(goalTeamIndex == Item::TEAM_HOSTILE)
-         updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam);
+         updateSoccerScore(ship, scoringTeam, ScoreGoalHostileTeam, score);
       else
-         updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam);
+         updateSoccerScore(ship, scoringTeam, ScoreGoalEnemyTeam, score);
 
       s2cSoccerScoreMessage(SoccerMsgScoreGoal, scorerName, (U32) (goalTeamIndex - gFirstTeamNumber));      // See comment above
    }
@@ -181,11 +181,11 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case KillOwnTurret:
             return 0;
          case ScoreGoalEnemyTeam:
-            return 1;
+            return data;
          case ScoreGoalOwnTeam:
-            return -1;
+            return -data;
          case ScoreGoalHostileTeam:
-            return -1;
+            return -data;
          default:
             return naScore;
       }
@@ -207,11 +207,11 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
          case KillOwnTurret:
             return -1;
          case ScoreGoalEnemyTeam:
-            return 5;
+            return 5 * data;
          case ScoreGoalOwnTeam:
-            return -5;
+            return -5 * data;
          case ScoreGoalHostileTeam:
-            return -5;
+            return -5 * data;
          default:
             return naScore;
       }
@@ -381,7 +381,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       if(goal && !mSendHomeTimer.getCurrent())
       {
          SoccerGameType *g = (SoccerGameType *) getGame()->getGameType();
-         g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam());
+         g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->mScore);
          mSendHomeTimer.reset(1500);
       }
    }

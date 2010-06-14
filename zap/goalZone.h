@@ -52,6 +52,7 @@ public:
    void render();
 
    bool mHasFlag;     // Is there a flag parked in this zone?
+   S32 mScore;        // How much is this zone worth?
 
    bool isFlashing() { return mFlashCount & 1; }
    bool didRecentlyChangeTeam() { return mFlashCount != 0; }

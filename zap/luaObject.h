@@ -77,7 +77,7 @@ protected:
 public:
    // All of these return<T> functions work in the same way.  Include at the and of a child class method.
    // Usage: return returnInt(L, int);
-   static S32 returnPoint(lua_State *L, Point &point);
+   static S32 returnPoint(lua_State *L, const Point &point);
    static S32 returnLuaPoint(lua_State *L, LuaPoint *point);
    static S32 returnInt(lua_State *L, S32 num);
    static S32 returnVec(lua_State *L, F32 x, F32 y);

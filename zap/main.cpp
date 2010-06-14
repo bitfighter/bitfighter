@@ -62,6 +62,7 @@ This change will resolve many installation and permissions issues.
 <li>Bot nav mesh zones can be displayed in-game by using /dzones command</li>
 <li>Soccer ball now warps back to starting point rather than "drifting" back</li>
 <li>Loadout/weapon indicators now more "vector graphicy", colors no longer botched on Vista/Win7</li>
+<li>Infrastructure in place for goals with different values -- only need editor UI and level file syntax</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -1666,6 +1667,7 @@ int main(int argc, char **argv)
 
    processStartupParams();                   // And merge command line params and INI settings
    SFXObject::init();
+
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server

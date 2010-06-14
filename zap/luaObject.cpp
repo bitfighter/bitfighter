@@ -57,7 +57,7 @@ void LuaObject::setLuaArgs(lua_State *L, Vector<string> args)
 
 
 // Returns a point to calling Lua function
-S32 LuaObject::returnPoint(lua_State *L, Point &point)
+S32 LuaObject::returnPoint(lua_State *L, const Point &point)
 {
    //lua_createtable(L, 0, 2);         // creates a table with 2 fields
    //setfield(L, "x", point.x);        // table.x = x

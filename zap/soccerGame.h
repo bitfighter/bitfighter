@@ -43,8 +43,8 @@ class SoccerGameType : public GameType
 
 public:
 
-   void scoreGoal(Ship *ship, StringTableEntry lastPlayerTouchName, S32 lastPlayerTouchTeam, S32 goalTeamIndex);
-   void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
+   void scoreGoal(Ship *ship, StringTableEntry lastPlayerTouchName, S32 lastPlayerTouchTeam, S32 goalTeamIndex, S32 score);
+   void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
 
    void addZone(GoalZone *theZone);
    void setBall(SoccerBallItem *theBall);

@@ -177,6 +177,8 @@ public:
    F32 width;
    U32 id;                // Item's unique id... 0 if there is none
    U32 mId;               // TODO: rename... an autoincremented serial number
+
+   S32 mScore;            // Score awarded for this item
    
    bool selected;
    bool litUp;

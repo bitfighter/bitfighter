@@ -1918,7 +1918,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
                else if(item.index == ItemGoalZone)
                   renderGoalZone(getTeamColor(item.team), item.getVerts(), item.fillPoints,  
-                                    item.centroid * mGridSize, ang, false, 0, 1 / mGridSize);
+                                    item.centroid * mGridSize, ang, false, 0, item.mScore, 1 / mGridSize);
 
                else if(item.index == ItemNexus)
                   renderNexus(item.getVerts(), item.fillPoints, 
@@ -4662,6 +4662,7 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool
    mId = getNextItemId();
    snapped = false;
    mDockItem = isDockItem;
+   mScore = 1;
 
    if(itemDef[itemType].hasText)
    {
