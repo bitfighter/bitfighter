@@ -268,7 +268,7 @@ GameItemRec itemDef[] = {
    { "HuntersNexusObject",  false,    false,     true,        false,   false,   geomPoly,        0,     false,  "Nexus zones",            "Nexus",    "Nexus",        "Area to bring flags in Hunter game.  Cannot be used in other games." },
    { "SlipZone",            false,    false,     true,        false,   false,   geomPoly,       'z',    false,  "Slip zones",             "Slip Zone","Slip Zone",    "Not yet implemented." },
    { "Turret",              false,    true,      true,        false,   true,    geomPoint,      'T',    false,  "Turrets",                "Turret",   "Turret",       "Creates shooting turret.  Can be on a team, neutral, or \"hostile to all\". [Y]" },
-   { "ForceFieldProjector", false,    true,      true,        false,   true ,   geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "ForceFld",     "Creates a force field that lets only team members pass. [H]" },
+   { "ForceFieldProjector", false,    true,      true,        false,   true ,   geomPoint,      '>',    false,  "Force field projectors", "ForceFld", "ForceFld",     "Creates a force field that lets only team members pass. [F]" },
    { "GoalZone",            false,    true,      true,        false,   false,   geomPoly,        0,     false,  "Goal zones",             "Goal",     "Goal",         "Target area used in a variety of games." },
    { "TextItem",            false,    true,      true,        true,    false,   geomSimpleLine,  0,     false,  "Text Items",             "TextItem", "Text",         "Draws a bit of text on the map.  Visible only to team, or to all if neutral." },
    { "BotNavMeshZone",      false,    false,     true,        false,   false,   geomPoly,        0,     false,  "NavMesh Zones",          "NavMesh",  "NavMesh",      "Creates navigational mesh zone for robots." },
@@ -523,6 +523,10 @@ void EditorUserInterface::loadLevel()
 
    gEditorUserInterface.rebuildAllBorderSegs();
 
+
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index == ItemTurret || mItems[i].index == ItemForceField)
+		  mItems[i].snapEngineeredObject(mItems[i].vert(0));
 
    // And hand-process all other items
    for(S32 i = 0; i < mItems.size(); i++)
@@ -1764,7 +1768,15 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                   Vector<Point> dest;
                   dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
 
-                  renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
+				  if(mShowingReferenceShip)
+				     renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
+				  else
+				  {
+					 glColor(green);
+					 glLineWidth(3);
+					 drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
+				     glLineWidth(gDefaultLineWidth);
+				  }
                }
                else if(item.index == ItemSpeedZone)
                   renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.vert(1))), gClientGame->getCurrentTime());
@@ -4938,8 +4950,6 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
             boolattr = true;
        }
    }
-
-   init(index, team, width, id, false);      // Mostly repeats stuff already done here, but does a few new things too...
 
    return true;
 }
