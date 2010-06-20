@@ -27,7 +27,7 @@
 #define _GAMEOBJECTRENDER_H_
 
 #include "tnl.h"
-
+#include "../glut/glutInclude.h"
 //#include "BotNavMeshZone.h"      // For Border def
 
 #include "point.h"
@@ -39,11 +39,6 @@ using namespace std;
 namespace Zap
 {
 extern void glVertex(const Point &p);
-extern void glColor(const Color &c, float alpha = 1);
-extern void drawSquare(const Point &pos, U32 size);
-extern void drawSquare(const Point &pos, U32 size, bool filled);
-extern void drawFilledSquare(const Point &pos, U32 size);
-extern void drawCircle(const Point &pos, F32 radius);
 extern void drawFilledCircle(const Point &pos, F32 radius);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
 extern void drawCentroidMark(const Point &pos, F32 radius);
@@ -56,17 +51,19 @@ extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
 
 
-extern void renderCenteredString(Point pos, U32 size, const char *string);
+extern void renderCenteredString(const Point &pos, S32 size, const char *string);
+extern void renderCenteredString(const Point &pos, F32 size, const char *string);
+
 extern void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive);
 extern void renderAimVector();
 extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests, bool showDestOverride);
 extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 
-extern void renderFlag(Point pos, Color flagColor);
-extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);
+extern void renderFlag(const Point &pos, const Color &flagColor);
+extern void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha);
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
-extern void renderSmallFlag(Point pos, Color c, F32 parentAlpha);
+extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);
 
 
 extern void renderLoadoutZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, 
@@ -89,10 +86,10 @@ extern const Color BORDER_FILL_COLOR;
 extern const F32 BORDER_FILL_ALPHA;
 extern const F32 BORDER_WIDTH;
 
-extern void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
+extern void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
                            bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact = 1);
 
-extern void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
+extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
                         bool open, F32 glowFraction, F32 scaleFact = 1);
 
 
@@ -134,6 +131,15 @@ extern void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask = 1023);
 extern void renderStaticBitfighterLogo();
+
+extern void glColor(const Color &c, float alpha = 1.0);
+extern void drawSquare(const Point &pos, S32 size, bool filled);
+extern void drawSquare(const Point &pos, S32 size);
+extern void drawSquare(const Point &pos, F32 size);
+extern void drawFilledSquare(const Point &pos, U32 size);
+extern void drawFilledSquare(const Point &pos, S32 size);
+extern void drawFilledSquare(const Point &pos, F32 size);
+extern void drawCircle(const Point &pos, F32 radius);
 
 };
 

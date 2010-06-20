@@ -25,10 +25,10 @@
 
 #include "barrier.h"
 #include "gameObjectRender.h"
-#include "SweptEllipsoid.h"      // For polygon triangulation
+#include "SweptEllipsoid.h"    // For polygon triangulation
 
 #include "glutInclude.h"
-#include <math.h>
+#include <cmath>               // C++ version of this headers includes float overloads
 
 using namespace TNL;
 

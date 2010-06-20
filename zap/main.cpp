@@ -838,7 +838,7 @@ protected:
    const char *filename;
    const char *mode;
    const char *firstLine;
-   boolean isOpen;
+   bool isOpen;  // RDW - This was "boolean" (CE - Too much Java!)
 
 public:
    FileLogConsumer(const char* logFile="bitfighter.log")

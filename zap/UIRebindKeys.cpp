@@ -36,6 +36,10 @@
 namespace Zap
 {
 
+//
+//    Is this actually used???
+//
+
 void RebindKeysUserInterface::onActivate()
 {
    if(resetOnActivate)
@@ -61,7 +65,6 @@ void RebindKeysUserInterface::render()
    const char *renderBuffer=buffer;
    if(secret)
    {
-
       S32 i;
       for(i = 0; i < MAX_SHORT_TEXT_LEN; i++)
       {
@@ -77,13 +80,13 @@ void RebindKeysUserInterface::render()
    U32 width = getStringWidth(fontSizeBig, renderBuffer);
    S32 x = (canvasWidth - width) / 2;
 
-   if(cursorBlink)
-      drawString(x + getStringWidth(fontSizeBig, renderBuffer, cursorPos), y, fontSizeBig, "_");
+   if(LineEditor::cursorBlink)  
+      drawString(x + getStringWidthf(fontSizeBig, renderBuffer, cursorPos), y, fontSizeBig, "_");
 }
 
 void RebindKeysUserInterface::idle(U32 timeDelta)
 {
-   updateCursorBlink(timeDelta);
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 void RebindKeysUserInterface::onKeyDown(KeyCode keyCode, char ascii)

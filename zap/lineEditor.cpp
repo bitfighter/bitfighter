@@ -76,6 +76,12 @@ void LineEditor::drawCursor(S32 x, S32 y, U32 fontSize)
 
 
 // Draw our cursor, assuming string is drawn at x,y at specified angle 
+void LineEditor::drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle)
+{
+   drawCursorAngle(S32(x + 0.5), S32(y + 0.5), fontSize, angle);
+}
+
+
 void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, F32 angle)
 {
    if(cursorBlink)
@@ -117,5 +123,5 @@ void LineEditor::handleBackspace(KeyCode keyCode)
 Timer LineEditor::mBlinkTimer(100);       // <-- 100 ms is blink rate
 bool  LineEditor::cursorBlink = false;
 
-
 };
+

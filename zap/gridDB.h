@@ -41,6 +41,8 @@ namespace Zap
 
 // Interface for dealing with objects that can be in our spatial database.  Can be either GameObjects or
 // items in te
+class  GridDatabase;
+
 class DatabaseObject
 {
 friend class GridDatabase;
@@ -62,10 +64,10 @@ public:
    Rect getExtent() { return extent; }
    void setExtent(const Rect &extentRect);
 
-   virtual GridDatabase *getGridDatabase() = NULL;
-   virtual bool getCollisionPoly(Vector<Point> &polyPoints) = NULL;
-   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) = NULL;
-   virtual bool isCollisionEnabled() = NULL;
+   virtual GridDatabase *getGridDatabase() = 0;
+   virtual bool getCollisionPoly(Vector<Point> &polyPoints) = 0;
+   virtual bool getCollisionCircle(U32 stateIndex, Point &point, float &radius) = 0;
+   virtual bool isCollisionEnabled() = 0;
 
    bool isInDatabase() { return mInDatabase; }
 

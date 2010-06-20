@@ -112,8 +112,8 @@ public:
       bool pingTimedOut;
       bool everGotQueryResponse;
       Nonce sendNonce;
-      char serverName[MaxServerNameLen+1];
-      char serverDescr[MaxServerDescrLen+1];
+      string serverName;
+      string serverDescr;
       Color msgColor;
       Address serverAddress;
       U32 playerCount, maxPlayers, botCount;     // U32 because that's what we use on the master

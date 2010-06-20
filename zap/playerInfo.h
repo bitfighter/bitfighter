@@ -99,7 +99,7 @@ public:
    S32 getShip(lua_State *L)       { return isDefunct() ? returnNil(L) : returnShip(L, mRobot); }
    S32 getScriptName(lua_State *L) { return returnString(L, mRobot->getFilename().c_str()); }
    S32 getTeamIndx(lua_State *L)   { return returnInt(L, mRobot->getTeam() + 1); }
-   S32 getRating(lua_State *L)     { return returnInt(L, mRobot->getRating()); }
+   S32 getRating(lua_State *L)     { return returnFloat(L, mRobot->getRating()); }
    S32 getScore(lua_State *L)      { return returnInt(L, mRobot->getScore()); }
    S32 isRobot(lua_State *L)       { return returnBool(L, true); }
 };

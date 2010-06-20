@@ -464,10 +464,10 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       Point start = objStart + Point(0, 55);
 
       glColor3f(1,1,0);
-      renderCenteredString(start, 20, text);
+      renderCenteredString(start, (S32)20, text);
 
       glColor3f(1,1,1);
-      renderCenteredString(start + Point(0, 25), 17, desc);
+      renderCenteredString(start + Point(0, 25), (S32)17, desc);
 
       glPushMatrix();
       glTranslatef(objStart.x, objStart.y, 0);

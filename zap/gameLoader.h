@@ -44,7 +44,7 @@ public:
    const static int MaxIdLen = 11;    // Max 32-bit int is 10 digits, plus room for a null
 
    bool initLevelFromFile(const char *file);
-   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv) = NULL;
+   virtual void processLevelLoadLine(U32 argc, U32 id, const char **argv) = 0;
    int parseArgs(const char *string);
 };
 

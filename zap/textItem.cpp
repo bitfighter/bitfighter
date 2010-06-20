@@ -32,6 +32,13 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(TextItem);
 
+// RDW - These need storage, I believe VC++ pukes on this,
+// so I'm #ifdeffing them.
+#ifndef TNL_OS_WIN32
+const S32 TextItem::MAX_TEXT_SIZE;
+const S32 TextItem::MIN_TEXT_SIZE;
+#endif
+
 // Constructor
 TextItem::TextItem()
 {
@@ -255,8 +262,8 @@ bool LineItem::processArguments(S32 argc, const char **argv)
       return false;
 
    mTeam = atoi(argv[0]);
-   mWidth = min(atoi(argv[1]), MAX_LINE_WIDTH);
-
+   mWidth = max(min(atoi(argv[1]), static_cast<int>(MAX_LINE_WIDTH)), static_cast<int>(MIN_LINE_WIDTH));
+   //mWidth = min(atoi(argv[1]), static_cast<int>(MAX_LINE_WIDTH));
    processPolyBounds(argc, argv, 2, getGame()->getGridSize());
 
    computeExtent();

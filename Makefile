@@ -3,13 +3,6 @@
 #
 # Configuration
 #
-#
-# Some installs of Lua call the lua library by different names, and you may need
-# to override the default lua library path.  For the ServerHitch CENTOS installs,
-# for example, you will need to specify the lua library on the make command line:
-#     LUALIB=/usr/lib/liblua.a
-#
-#
 # To compile Bitfighter with debugging enabled, specify
 #     DFLAGS=-DTNL_DEBUG
 # on the make command line
@@ -40,7 +33,7 @@
 # svn co https://zap.svn.sourceforge.net/svnroot/zap/trunk bitfighter
 #
 # Install g++
-# Install freeglut-dev, liblua5.1-0, libopenal-dev, libalut-dev
+# Install freeglut-dev, libopenal-dev, libalut-dev
 #
 # change to root bitfighter folder (where you downloaded the code from SVN)
 # build game ==> make
@@ -58,12 +51,14 @@ default:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
 	@$(MAKE) -C master
+	@$(MAKE) -C lua/lua-vec/src
 	@$(MAKE) -C zap	
 
 dedicated:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
 	@$(MAKE) -C master
+	@$(MAKE) -C lua/lua-vec/src 
 	@$(MAKE) -C zap	dedicated
 
 bitfighter:
@@ -75,12 +70,14 @@ clean:
 	@$(MAKE) -C tnl clean
 	@$(MAKE) -C libtomcrypt clean
 	@$(MAKE) -C master clean
+	@$(MAKE) -C lua/lua-vec/src clean
 	@$(MAKE) -C zap	clean
 
 cleano:
 	@$(MAKE) -C tnl cleano
 	@$(MAKE) -C libtomcrypt cleano
 	@$(MAKE) -C master cleano
+	@$(MAKE) -C lua/lua-vec/src cleano
 	@$(MAKE) -C zap	cleano
 
 docs:

@@ -47,6 +47,8 @@ public:
    Vector<Point> mRenderOutlineGeometry; ///< Actual geometry used for rendering outline.
 
    F32 mWidth;
+   static const S32 MIN_BARRIER_WIDTH = 1;
+   static const S32 MAX_BARRIER_WIDTH = 255;
 
    static const S32 BarrierWidth = 50; ///< The default width of the barrier in game units
 

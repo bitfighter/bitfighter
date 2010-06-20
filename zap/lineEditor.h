@@ -28,6 +28,7 @@
 
 #include "tnlTypes.h"
 #include "timer.h"
+#include "keyCode.h"
 #include <string>
 
 using namespace std;
@@ -82,6 +83,7 @@ public:
 
    void drawCursor(S32 x, S32 y, U32 fontSize);                  // Draw our cursor, assuming string is drawn at x,y 
    void drawCursorAngle(S32 x, S32 y, F32 fontSize, F32 angle);  // Draw our cursor, assuming string is drawn at x,y at specified angle
+   void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);
 
    S32 getMaxLen() { return mMaxLen; }
 

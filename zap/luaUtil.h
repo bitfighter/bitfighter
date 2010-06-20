@@ -28,7 +28,7 @@
 
 #include "luaObject.h"
 #include "tnlLog.h"     // for logprintf
-#include "tnlrandom.h"
+#include "tnlRandom.h"
 
 using namespace std;
 

@@ -1968,7 +1968,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          glPushMatrix();
             glTranslatef(pos.x, pos.y, 0);
             glScalef(0.6, 0.6, 1);
-            renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : NULL, alpha);
+            renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : 0, alpha);
          glPopMatrix();
       }
       else if(item.index == ItemFlagSpawn)    // Draw flag spawn point
@@ -1982,7 +1982,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPushMatrix();
                glTranslatef(pos.x+1, pos.y, 0);
                glScalef(0.4, 0.4, 1);
-               renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : NULL, alpha);
+               renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : 0, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
                drawCircle(Point(-4,0), 26);
@@ -2000,7 +2000,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPushMatrix();
                glTranslatef(pos.x, pos.y, 0);
                glScalef(0.8, 0.8, 1);
-               renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? grayedOutColorDim : NULL, alpha);
+               renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? grayedOutColorDim : 0, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
                drawCircle(Point(0, 0), 13);
@@ -2032,7 +2032,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPopMatrix();
          }
          else     // Dock item rendering
-            renderAsteroid(pos, asteroidDesign, .1, hideit ? grayedOutColorDim : NULL, alpha);
+            renderAsteroid(pos, asteroidDesign, .1, hideit ? grayedOutColorDim : 0, alpha);
       }
 
       else if(item.index == ItemResource)   // Draw resourceItem
@@ -2045,7 +2045,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPopMatrix();
          }
          else     // Dock item rendering
-             renderResourceItem(pos, .4, hideit ? grayedOutColorDim : NULL, alpha);
+             renderResourceItem(pos, .4, hideit ? grayedOutColorDim : 0, alpha);
       }
       else if(item.index == ItemSoccerBall)  // Soccer ball, obviously
       {
@@ -2100,10 +2100,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       else if(item.index == ItemRepair)
-         renderRepairItem(pos, true, hideit ? grayedOutColorDim : NULL, alpha);
+         renderRepairItem(pos, true, hideit ? grayedOutColorDim : 0, alpha);
 
       else if(item.index == ItemEnergy)
-         renderEnergyItem(pos, true, hideit ? grayedOutColorDim : NULL, alpha);
+         renderEnergyItem(pos, true, hideit ? grayedOutColorDim : 0, alpha);
 
       else if(item.index == ItemTurret || item.index == ItemForceField)
       { 
@@ -2203,7 +2203,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          glColor(drawColor);
 
          S32 radius = item.getRadius(mCurrentScale);
-         S32 highlightRadius = (radius == NONE || item.mDockItem) ? 10 : (radius * mCurrentScale / mGridSize);
+         S32 highlightRadius = (radius == NONE || item.mDockItem) ? 10 : S32(radius * mCurrentScale / mGridSize + 0.5f);
 
          Point ctr = pos + item.getSelectionOffset(mCurrentScale).rotate(item.normal.ATAN2()) * mCurrentScale;   
 
@@ -2630,7 +2630,7 @@ void EditorUserInterface::findHitItemAndEdge()
          if(mItems[i].geomType() == geomPoint)
          {
             S32 radius = mItems[i].getRadius(mCurrentScale);
-            S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : (radius * mCurrentScale / mGridSize);
+            S32 targetRadius = (radius == NONE) ? POINT_HIT_RADIUS : S32(radius * mCurrentScale / mGridSize + 0.5f);
 
             F32 ang = mItems[i].normal.ATAN2();
             Point pos = convertLevelToCanvasCoord(mItems[i].vert(0) + mItems[i].getSelectionOffset(mCurrentScale).rotate(ang));
@@ -2842,7 +2842,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 
    mDraggingObjects = true;
 
-   Point *origPoint = &mUnmovedItems[mSnapVertex_i].vert(mSnapVertex_j);
+   const Point &origPoint = mUnmovedItems[mSnapVertex_i].vert(mSnapVertex_j);
 
    Point delta;
 
@@ -2851,9 +2851,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // in the selection, and we just want the damn thing where we put it.
    // (*origPoint - mMouseDownPos) represents distance from item's snap vertex where we "grabbed" it
    if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
-      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos))  - *origPoint;
+      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos))  - origPoint;
    else
-      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + *origPoint - mMouseDownPos) - *origPoint;
+      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + origPoint - mMouseDownPos) - origPoint;
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
    // selected if one of its vertices are.
@@ -4740,8 +4740,8 @@ void WorldItem::increaseWidth(S32 amt)
 
    width += amt - (S32) width % amt;    // Handles rounding
 
-   if(width > LineItem::MAX_LINE_WIDTH)
-      width = LineItem::MAX_LINE_WIDTH;
+   if(width > Barrier::MAX_BARRIER_WIDTH)
+      width = Barrier::MAX_BARRIER_WIDTH;
 
    onGeomChanged();
 }
@@ -4754,8 +4754,8 @@ void WorldItem::decreaseWidth(S32 amt)
    
    width -= ((S32) width % amt) ? (S32) width % amt : amt;      // Dirty, ugly thing
 
-   if(width < LineItem::MIN_LINE_WIDTH)
-      width = LineItem::MIN_LINE_WIDTH;
+   if(width < Barrier::MAX_BARRIER_WIDTH)
+      width = Barrier::MAX_BARRIER_WIDTH;
 
    onGeomChanged();
 }
@@ -4794,7 +4794,7 @@ S32 WorldItem::getRadius(F32 scale)
    else if(index == ItemResource)
       return ResourceItem::RESOURCE_ITEM_RADIUS;
    else if(index == ItemAsteroid)
-      return Asteroid::ASTEROID_RADIUS * .75;
+      return Asteroid::ASTEROID_RADIUS * .75f;
    else if(index == ItemTurret && renderFull(scale))
       return 25;
    else return NONE;    // Use default
@@ -5177,7 +5177,7 @@ void WorldItem::onGeomChanged()
       F32 size = 120.0f * lineLen * gEditorUserInterface.getGridSize() / max(strWidth, 80.0f);
 
       // Compute text size subject to min and max defined in TextItem
-      textSize = max(min(size, TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
+      textSize = max(min(static_cast<int>(size), TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
    }
    
    else if(index == ItemBarrierMaker)
@@ -5265,7 +5265,7 @@ void WorldItem::scale(const Point &center, F32 scale)
 
    // Scale the wall width, within limits
    if(index == ItemBarrierMaker)
-      width = min(max(width * scale, LineItem::MIN_LINE_WIDTH), LineItem::MAX_LINE_WIDTH);
+      width = min(max(width * scale, static_cast<float>(LineItem::MIN_LINE_WIDTH)), static_cast<float>(LineItem::MAX_LINE_WIDTH));
 
    onGeomChanged();
 }

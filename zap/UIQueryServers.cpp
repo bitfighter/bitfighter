@@ -216,8 +216,8 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          s.isFromMaster = true;
          s.serverAddress.set(ipList[i]);
 
-         strcpy(s.serverName, "Internet Server");
-         strcpy(s.serverDescr, "Internet Server -- attempting to connect");
+         s.serverName = "Internet Server";
+         s.serverDescr = "Internet Server -- attempting to connect";
          s.msgColor = white;   // white messages
          servers.push_back(s);
          mShouldSort = true;
@@ -247,8 +247,8 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       s.identityToken = clientIdentityToken;
       s.serverAddress = theAddress;
       s.isFromMaster = false;
-      strcpy(s.serverName, "LAN Server");
-      strcpy(s.serverDescr, "LAN Server -- attempting to connect");
+      s.serverName = "LAN Server";
+      s.serverDescr = "LAN Server -- attempting to connect";
       s.msgColor = white;   // white messages
       servers.push_back(s);
       return;
@@ -288,8 +288,8 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
             s.pingTimedOut = false;    // I think this makes sense... cures problem with local servers incorrectly displaying ?s for first 15 seconds
          s.everGotQueryResponse = true;
 
-         dSprintf(s.serverName, sizeof(s.serverName), "%s", serverName);
-         dSprintf(s.serverDescr, sizeof(s.serverDescr), "%s", serverDescr);
+         s.serverName = string(serverName).substr(0, MaxServerNameLen);
+         s.serverDescr = string(serverDescr).substr(0, MaxServerDescrLen);
          s.msgColor = yellow;   // yellow server details
          s.state = ServerRef::ReceivedQuery;
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
@@ -338,8 +338,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
             if(s.sendCount > PingQueryRetryCount)     // Ping has timed out, sadly
             {
                s.pingTime = 999;
-               strcpy(s.serverName, "Ping Timed Out");
-               strcpy(s.serverDescr, "No information: Server not responding to pings");
+               s.serverName = "Ping Timed Out";
+               s.serverDescr = "No information: Server not responding to pings";
                s.msgColor = red;   // red for errors
                s.playerCount = 0;
                s.maxPlayers = 0;
@@ -381,8 +381,8 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                   continue;
                }
                // Otherwise, we can deal with timeouts on remote servers
-               strcpy(s.serverName, "Query Timed Out");
-               strcpy(s.serverDescr, "No information: Server not responding to status query");
+               s.serverName = "Query Timed Out";
+               s.serverDescr = "No information: Server not responding to status query";
                s.msgColor = red;   // red for errors
                s.playerCount = s.maxPlayers = s.botCount = 0;
                s.state = ServerRef::ReceivedQuery;
@@ -546,7 +546,7 @@ void QueryServersUserInterface::render()
    if(connectedToMaster)
    {
       glColor(gMasterServerBlue);
-      drawCenteredStringf(vertMargin - 8, 12, "Connected to Master Server %s", gClientGame->getConnectionToMaster()->getMasterName().c_str() );
+      drawCenteredStringf(vertMargin - 8, 12, "Connected to %s", gClientGame->getConnectionToMaster()->getMasterName().c_str() );
    }
    else
    {
@@ -619,18 +619,18 @@ void QueryServersUserInterface::render()
             // Render server description at bottom
             glColor(s.msgColor);
             U32 serverDescrLoc = canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - SERVER_DESCR_TEXTSIZE - SERVER_ENTRY_VERT_GAP - chatHeight;
-            drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr);    
+            drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
          }
 
          // Truncate server name to fit in the first column...
          string sname = "";
 
          // ...but first, see if the name will fit without truncation... if so, don't bother
-         if(getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName) < colwidth)
+         if(getStringWidth(SERVER_ENTRY_TEXTSIZE, s.serverName.c_str()) < colwidth)
             sname = s.serverName;
          else
-            for(size_t j = 0; j < strlen(s.serverName); j++)
-               if(getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName[j]).c_str() ) < colwidth)
+            for(size_t j = 0; j < s.serverName.length(); j++)
+               if(getStringWidth(SERVER_ENTRY_TEXTSIZE, (sname + s.serverName.substr(j, 1)).c_str() ) < colwidth)
                   sname += s.serverName[j];
                else
                   break;
@@ -1008,8 +1008,8 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 // Sort server list by various columns
 static S32 QSORT_CALLBACK compareFuncName(const void *a, const void *b)
 {
-   return stricmp(((QueryServersUserInterface::ServerRef *) a)->serverName,
-                  ((QueryServersUserInterface::ServerRef *) b)->serverName);
+   return stricmp(((QueryServersUserInterface::ServerRef *) a)->serverName.c_str(),
+                  ((QueryServersUserInterface::ServerRef *) b)->serverName.c_str());
 }
 
 static S32 QSORT_CALLBACK compareFuncPing(const void *a, const void *b)

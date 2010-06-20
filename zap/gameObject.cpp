@@ -109,19 +109,19 @@ F32 GameObject::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 up
    Point center = so->getExtent().getCenter();
 
    Point nearest;
-   Rect *extent = &getExtent();
+   const Rect &extent = getExtent();
 
-   if(center.x < extent->min.x)
-      nearest.x = extent->min.x;
-   else if(center.x > extent->max.x)
-      nearest.x = extent->max.x;
+   if(center.x < extent.min.x)
+      nearest.x = extent.min.x;
+   else if(center.x > extent.max.x)
+      nearest.x = extent.max.x;
    else
       nearest.x = center.x;
 
-   if(center.y < extent->min.y)
-      nearest.y = extent->min.y;
-   else if(center.y > extent->max.y)
-      nearest.y = extent->max.y;
+   if(center.y < extent.min.y)
+      nearest.y = extent.min.y;
+   else if(center.y > extent.max.y)
+      nearest.y = extent.max.y;
    else
       nearest.y = center.y;
 

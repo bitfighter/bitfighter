@@ -212,7 +212,7 @@ public:
    S32 getEnergy() { return mEnergy; }
    F32 getEnergyFraction() { return (F32)mEnergy / (F32)EnergyMax; }     // Only used by bots
    S32 getMaxEnergy() { return EnergyMax; }
-   void changeEnergy(S32 deltaEnergy) { mEnergy = max(0, min(EnergyMax, mEnergy + deltaEnergy)); }
+   void changeEnergy(S32 deltaEnergy) { mEnergy = max(0, min(static_cast<int>(EnergyMax), mEnergy + deltaEnergy)); }
 
    void onGhostRemove();
 

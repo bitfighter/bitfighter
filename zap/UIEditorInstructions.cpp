@@ -357,7 +357,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       F32 width = 25;
       //constructBarrierOutlinePoints(points, width, barPoints);  // Populates barPoints with points representing barrier
 
-      gEditorUserInterface.renderPolylineFill(ItemBarrierMaker, points, barPoints, false, -1, 1.0, false);
+      gEditorUserInterface.renderPolylineFill(ItemBarrierMaker, points, barPoints, false, -1, 1, false);
    }
 
    glColor(mAnimStage <= 11 ? Color(1,1,0) : gEditorUserInterface.getTeamColor(-1));

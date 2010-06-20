@@ -1248,15 +1248,15 @@ void ClientGame::renderCommander()
             // if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : StringTableEntry(""), getGameType()->isTeamGame());
             if(sb->isVisibleToPlayer( playerTeam, getGameType()->mLocalClient->name, getGameType()->isTeamGame() ))
             {
-               Point *p = &sb->getRenderPos();
+               const Point &p = sb->getRenderPos();
                Point visExt(gSpyBugRange, gSpyBugRange);
                glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
 
                glBegin(GL_POLYGON);
-                  glVertex2f(p->x - visExt.x, p->y - visExt.y);
-                  glVertex2f(p->x + visExt.x, p->y - visExt.y);
-                  glVertex2f(p->x + visExt.x, p->y + visExt.y);
-                  glVertex2f(p->x - visExt.x, p->y + visExt.y);
+                  glVertex2f(p.x - visExt.x, p.y - visExt.y);
+                  glVertex2f(p.x + visExt.x, p.y - visExt.y);
+                  glVertex2f(p.x + visExt.x, p.y + visExt.y);
+                  glVertex2f(p.x - visExt.x, p.y + visExt.y);
                glEnd();
 
                glColor(teamColor * 0.8);     // Draw a marker in the middle

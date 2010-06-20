@@ -49,45 +49,6 @@ void glVertex(const Point &p)
    glVertex2f(p.x, p.y);
 }
 
-inline void glColor(const Color &c, float alpha)
-{
-   glColor4f(c.r, c.g, c.b, alpha);
-}
-
-
-inline void drawSquare(const Point &pos, U32 size, bool filled)
-{
-   glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
-      glVertex2f(pos.x - size, pos.y - size);
-      glVertex2f(pos.x + size, pos.y - size);
-      glVertex2f(pos.x + size, pos.y + size);
-      glVertex2f(pos.x - size, pos.y + size);
-   glEnd();
-}
-
-inline void drawSquare(const Point &pos, U32 size)
-{
-   drawSquare(pos, size, false);
-}
-
-
-inline void drawFilledSquare(const Point &pos, U32 size)
-{
-   drawSquare(pos, size, true);
-}
-
-
-inline void drawCircle(const Point &pos, F32 radius)
-{
-   glBegin(GL_LINE_LOOP);
-
-   for(F32 theta = 0; theta < Float2Pi; theta += 0.2)
-      glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
-
-   glEnd();
-}
-
-
 // Draw arc centered on pos, with given radius, from startAngle to endAngle.  0 is East, increasing CW
 void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle)
 {
@@ -614,7 +575,7 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
 }
 
 
-void drawFlag(Color flagColor, Color mastColor, F32 alpha)
+void drawFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
 {
    glColor(flagColor, alpha);
    glBegin(GL_LINES);
@@ -633,7 +594,7 @@ void drawFlag(Color flagColor, Color mastColor, F32 alpha)
       glVertex2f(-15, 0);
 
       // Now the flag's mast
-      glColor((mastColor == NULL) ? Color(1,1,1) : mastColor, alpha);
+      glColor((mastColor == 0) ? Color(1,1,1) : mastColor, alpha);
 
       glVertex2f(-15, -15);
       glVertex2f(-15, 15);
@@ -641,7 +602,7 @@ void drawFlag(Color flagColor, Color mastColor, F32 alpha)
 }
 
 
-void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha)
+void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
@@ -653,9 +614,9 @@ void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha)
 
 // Could be eliminated with by using an optional param for mastColor, but
 // this seems to cause problems with our extern statements...
-void renderFlag(Point pos, Color flagColor)
+void renderFlag(const Point &pos, const Color &flagColor)
 {
-   renderFlag(pos, flagColor, NULL, 1);
+   renderFlag(pos, flagColor, 0, 1);
 }
 
 
@@ -674,7 +635,7 @@ void renderFlag(Point pos, Color flagColor)
 //   glPopMatrix();
 //}
 
-void renderSmallFlag(Point pos, Color c, F32 parentAlpha)
+void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
    F32 alpha = 0.75;
    glEnable(GL_BLEND);
@@ -704,10 +665,16 @@ void renderSmallFlag(Point pos, Color c, F32 parentAlpha)
 }
 
 
-void renderCenteredString(Point pos, U32 size, const char *string)
+void renderCenteredString(const Point &pos, S32 size, const char *string)
 {
    F32 width = UserInterface::getStringWidth(size, string);
    UserInterface::drawString((S32)floor(pos.x - width * 0.5), (S32)floor(pos.y - size * 0.5), size, string);
+}
+
+
+void renderCenteredString(const Point &pos, F32 size, const char *string)
+{
+   renderCenteredString(pos, S32(size + 0.5f), string);
 }
 
 
@@ -817,10 +784,9 @@ void renderTwoPointPolygon(const Point &p1, const Point &p2, F32 width, S32 mode
    glEnd();
 }
 
-
-static const Color BORDER_FILL_COLOR(0,1,1);
-static const F32 BORDER_FILL_ALPHA = .25;
-static const F32 BORDER_WIDTH = 3;
+const Color BORDER_FILL_COLOR(0,1,1);
+const F32 BORDER_FILL_ALPHA = .25;
+const F32 BORDER_WIDTH = 3;
 
 // Only used in editor
 void renderNavMeshBorders(const Vector<ZoneBorder> &borders, F32 scaleFact)
@@ -839,7 +805,7 @@ void renderNavMeshBorders(const Vector<NeighboringZone> &borders, F32 scaleFact)
 
 
 // Goal zone flashes after capture, but glows after touchdown...
-void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, 
+void renderGoalZone(Color c, const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, 
                     bool isFlashing, F32 glowFraction, S32 score, F32 scaleFact)
 {
    F32 alpha = isFlashing ? 0.75 : 0.5;
@@ -858,7 +824,7 @@ void renderGoalZone(Color c, Vector<Point> &outline, Vector<Point> &fill, Point 
 extern Color gNexusOpenColor;
 extern Color gNexusClosedColor;
 
-void renderNexus(Vector<Point> &outline, Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, 
+void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point centroid, F32 labelAngle, bool open, 
                  F32 glowFraction, F32 scaleFact)
 {
    Color c;
@@ -1167,7 +1133,7 @@ void renderSpyBug(Point pos, bool visible)
 
 void renderRepairItem(Point pos)
 {
-   renderRepairItem(pos, false, NULL, 1);
+   renderRepairItem(pos, false, 0, 1);
 }
 
 
@@ -1193,7 +1159,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   glColor(overrideColor == NULL ? Color(1,1,1) : overrideColor, alpha);
+   glColor(overrideColor == 0 ? Color(1,1,1) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-size , -size );
       glVertex2f(size , -size );
@@ -1201,7 +1167,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
       glVertex2f(-size , size );
    glEnd();
 
-   glColor(overrideColor == NULL ? Color(1,0,0) : overrideColor, alpha);
+   glColor(overrideColor == 0 ? Color(1,0,0) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(crossWidth, crossWidth);
       glVertex2f(crossLen, crossWidth);
@@ -1236,7 +1202,7 @@ void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
    glScalef(scaleFactor, scaleFactor, 1);
 
    // Yellow lightning bolt
-   glColor(overrideColor == NULL ? Color(1,1,0) : overrideColor, alpha);
+   glColor(overrideColor == 0 ? Color(1,1,0) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f( 20, -20);
       glVertex2f(  3,  -2);
@@ -1248,7 +1214,7 @@ void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
 
    // Orangey circle
    glLineWidth(3);
-   glColor(overrideColor == NULL ? Color(1, .67 ,0) : overrideColor, alpha);
+   glColor(overrideColor == 0 ? Color(1, .67 ,0) : overrideColor, alpha);
 
    drawCircle(Point(0,0), 16);
    glLineWidth(gDefaultLineWidth);
@@ -1288,7 +1254,7 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   glColor(color == NULL ? Color(.7, .7, .7) : color, alpha);
+   glColor(color == 0 ? Color(.7, .7, .7) : color, alpha);
       // Design 1
       glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < AsteroidPoints; i++)
@@ -1304,7 +1270,7 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha
 
 void renderAsteroid(Point pos, S32 design, F32 scaleFact)
 {
-   renderAsteroid(pos, design, scaleFact, NULL);
+   renderAsteroid(pos, design, scaleFact, 0);
 }
 
 
@@ -1313,7 +1279,7 @@ void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha)
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
 
-      glColor(color == NULL ? Color(1, 1, 1) : color, alpha);
+      glColor(color == 0 ? Color(1, 1, 1) : color, alpha);
 
       glBegin(GL_LINE_LOOP);
          glVertex2f(-8 * scaleFactor, 8 * scaleFactor);
@@ -1332,7 +1298,7 @@ void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha)
 
 void renderResourceItem(Point pos, F32 alpha)
 {
-   renderResourceItem(pos, 1, NULL, alpha);
+   renderResourceItem(pos, 1, 0, alpha);
 }
 
 
@@ -1579,6 +1545,62 @@ void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask)
    glPopMatrix();
    glDisableClientState(GL_VERTEX_ARRAY);
 }
+
+
+void glColor(const Color &c, float alpha)
+{
+    glColor4f(c.r, c.g, c.b, alpha);
+}
+
+void drawSquare(const Point &pos, S32 size, bool filled)
+{
+    glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
+    glVertex2f(pos.x - size, pos.y - size);
+    glVertex2f(pos.x + size, pos.y - size);
+    glVertex2f(pos.x + size, pos.y + size);
+    glVertex2f(pos.x - size, pos.y + size);
+    glEnd();
+}
+
+void drawSquare(const Point &pos, S32 size)
+{
+    drawSquare(pos, size, false);
+}
+
+void drawSquare(const Point &pos, F32 size)
+{
+    drawSquare(pos, S32(size + .5));
+}
+
+
+void drawFilledSquare(const Point &pos, U32 size)
+{
+    drawSquare(pos, size, true);
+}
+
+
+void drawFilledSquare(const Point &pos, S32 size)
+{
+    drawSquare(pos, U32(size), true);
+}
+
+
+void drawFilledSquare(const Point &pos, F32 size)
+{
+    drawSquare(pos, U32(size + 0.5f), true);
+}
+
+
+void drawCircle(const Point &pos, F32 radius)
+{
+    glBegin(GL_LINE_LOOP);
+    
+    for(F32 theta = 0; theta < Float2Pi; theta += 0.2)
+        glVertex2f(pos.x + cos(theta) * radius, pos.y + sin(theta) * radius);
+    
+    glEnd();
+}
+
 
 };
 

@@ -34,11 +34,11 @@ namespace Zap
 class FlagItem : public Item
 {
 private:
-   typedef Item Parent;
    Point mInitialPos;                   // Where flag was "born"
    void flagDropped();
 
 protected:
+   typedef Item Parent;                 // RDW - This need to be protected, or child classes can't access it.
    U32 mFlagCount;                      // How many flags does this represet?
    Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
    static const U32 dropDelay = 500;    // in ms
@@ -85,9 +85,6 @@ private:
    void push(lua_State *L) { Lunar<FlagItem>::push(L, this); }
 
 };
-
-extern void renderFlag(Point pos, Color flagColor);
-extern void renderFlag(Point pos, Color flagColor, Color mastColor, F32 alpha);
 
 
 ////////////////////////////////////////

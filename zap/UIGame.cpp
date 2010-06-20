@@ -1164,10 +1164,10 @@ Move *GameUserInterface::getCurrentMove()
       }
 
       // Sanity checks
-      mTransformedMove.right = min(1, mTransformedMove.right);
-      mTransformedMove.left  = min(1, mTransformedMove.left);
-      mTransformedMove.up    = min(1, mTransformedMove.up);
-      mTransformedMove.down  = min(1, mTransformedMove.down);
+      mTransformedMove.right = min(1.0f, mTransformedMove.right);
+      mTransformedMove.left  = min(1.0f, mTransformedMove.left);
+      mTransformedMove.up    = min(1.0f, mTransformedMove.up);
+      mTransformedMove.down  = min(1.0f, mTransformedMove.down);
 
       return &mTransformedMove;
    }

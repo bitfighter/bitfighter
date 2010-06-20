@@ -499,10 +499,15 @@ void UserInterface::drawString4Colf(S32 y, U32 size, U32 col, const char *format
    drawString4Col(y, size, col, buffer);
 }
 
+   
 
 S32 UserInterface::getStringWidth(F32 size, const char *string)
 {
+#ifndef ZAP_DEDICATED
    return (S32) glutStrokeLength(GLUT_STROKE_ROMAN, (const unsigned char *) string) * size / 120.0;
+#else
+   return 1;
+#endif
 }
 
 
