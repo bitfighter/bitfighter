@@ -255,6 +255,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
                if(!(collide1 && collide2))
                   continue;
+
                collisionPoint = cp;
                delta *= collisionFraction;
                collisionTime *= collisionFraction;
@@ -329,7 +330,7 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 
    mMoveState[stateIndex].vel -= normal * MoveObjectCollisionElasticity * normal.dot(mMoveState[stateIndex].vel);
 
-   // Emit some bump particles (try not to if we're running server side)
+   // Emit some bump particles on client
    if(isGhost())     // i.e. on client side
    {
       F32 scale = normal.dot(mMoveState[stateIndex].vel) * 0.01f;

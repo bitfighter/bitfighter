@@ -129,7 +129,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
    if(solid)   // This is a solid polygon
    {
       if(vec.first() == vec.last())      // Does our barrier form a closed loop?
-         vec.erase(vec.size() - 1);          // If so, remove last vertex
+         vec.erase(vec.size() - 1);      // If so, remove last vertex
 
       Barrier *b = new Barrier(vec, width, true);
       b->addToGame(theGame);
@@ -267,16 +267,14 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
       return;
    }
 
-   Rect r(points[0], points[1]);
+   Rect extent(points);
 
-   for(S32 i = 2; i < points.size(); i++)
-      r.expand(points[i]);
    mWidth = width;
 
-   if(points.size() == 2)    // It's a regular segment, so apply width
-      r.expand(Point(width, width));
+   if(points.size() == 2)    // It's a regular segment, need to make a little larger to accodate width
+      extent.expand(Point(width, width));
 
-   setExtent(r);
+   setExtent(extent);
    mLastBarrierChangeIndex = 0;
 
     mSolid = solid;

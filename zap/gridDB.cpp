@@ -45,6 +45,7 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
    F32 widthDiv = 1 / F32(BucketWidth);
+
    minx = S32(extents.min.x * widthDiv);
    miny = S32(extents.min.y * widthDiv);
    maxx = S32(extents.max.x * widthDiv);

@@ -1426,7 +1426,7 @@ void ClientGame::renderNormal()
 
    glPopMatrix();
 
-   // Render current ship's energy, too.
+   // Render current ship's energy
    if(mConnectionToServer.isValid())
    {
       Ship *s = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());

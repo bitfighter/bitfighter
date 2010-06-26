@@ -98,7 +98,7 @@ void GameObject::setActualPos(Point p)
 
 GridDatabase *GameObject::getGridDatabase() 
 { 
-      return mGame ? mGame->getGridDatabase() : NULL; 
+   return mGame ? mGame->getGridDatabase() : NULL; 
 }
 
 
