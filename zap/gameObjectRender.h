@@ -38,6 +38,8 @@ using namespace std;
 
 namespace Zap
 {
+//////////
+// Primitives
 extern void glVertex(const Point &p);
 extern void drawFilledCircle(const Point &pos, F32 radius);
 extern void drawFilledSector(const Point &pos, F32 radius, F32 start, F32 end);
@@ -49,6 +51,21 @@ extern void drawArc(const Point &pos, F32 radius, F32 startAngle, F32 endAngle);
 extern void drawEllipse(const Point &pos, F32 width, F32 height, F32 angle);
 extern void drawFilledEllipse(const Point &pos, F32 width, F32 height, F32 angle);
 extern void drawPolygon(const Point &pos, S32 sides, F32 radius, F32 angle);
+
+extern void glColor(const Color &c, float alpha = 1.0);
+extern void drawSquare(const Point &pos, S32 size, bool filled);
+extern void drawSquare(const Point &pos, S32 size);
+extern void drawSquare(const Point &pos, F32 size);
+extern void drawFilledSquare(const Point &pos, U32 size);
+extern void drawFilledSquare(const Point &pos, S32 size);
+extern void drawFilledSquare(const Point &pos, F32 size);
+extern void drawCircle(const Point &pos, F32 radius);
+
+
+//////////
+// Some things for rendering on screen display
+void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
+
 
 
 extern void renderCenteredString(const Point &pos, S32 size, const char *string);
@@ -107,8 +124,10 @@ extern void renderSpyBug(Point pos, bool visible);
 extern void renderRepairItem(Point pos);
 extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
 
-extern void renderEnergyItem(Point pos);
-extern void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
+extern void renderEnergyItem(const Point &pos);
+extern void renderEnergyItem(const Point &pos, bool forEditor, Color overrideColor, F32 alpha);
+extern void renderEnergySymbol(Color overrideColor, F32 alpha);      // Render lightning bolt symbol
+extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(Vector<Point>, U32 time);
@@ -131,15 +150,6 @@ extern void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 
 
 extern void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask = 1023);
 extern void renderStaticBitfighterLogo();
-
-extern void glColor(const Color &c, float alpha = 1.0);
-extern void drawSquare(const Point &pos, S32 size, bool filled);
-extern void drawSquare(const Point &pos, S32 size);
-extern void drawSquare(const Point &pos, F32 size);
-extern void drawFilledSquare(const Point &pos, U32 size);
-extern void drawFilledSquare(const Point &pos, S32 size);
-extern void drawFilledSquare(const Point &pos, F32 size);
-extern void drawCircle(const Point &pos, F32 radius);
 
 };
 

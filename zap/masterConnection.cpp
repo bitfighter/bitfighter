@@ -137,8 +137,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedCon
    Nonce serverNonce(data + Nonce::NonceSize);
    theSharedData->takeOwnership();
 
-   conn->connectArranged(getInterface(), fullPossibleAddresses,
-      nonce, serverNonce, theSharedData,false);
+   conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
 }
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))

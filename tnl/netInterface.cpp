@@ -929,7 +929,6 @@ void NetInterface::handleConnectReject(const Address &address, BitStream *stream
 
 void NetInterface::startArrangedConnection(NetConnection *conn)
 {
-
    conn->setConnectionState(NetConnection::SendingPunchPackets);
    addPendingConnection(conn);
    conn->mConnectSendCount = 0;

@@ -967,6 +967,7 @@ void renderProjectile(Point pos, U32 type, U32 time)
    }
 }
 
+
 void renderMine(Point pos, bool armed, bool visible)
 {
    F32 mod = 0.8;
@@ -1187,20 +1188,50 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
 }
 
 
-void renderEnergyItem(Point pos)
+void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 {
-   renderEnergyItem(pos, false, NULL, 1);
+   //renderEnergySymbol(Point(UserInterface::horizMargin / 2, UserInterface::canvasHeight - UserInterface::vertMargin - 10), .45);
+   //static F32 curEnergy = 0.f;
+
+   //curEnergy = (curEnergy + s->mEnergy) * 0.5f;
+
+   const S32 GAUGE_WIDTH = 200;
+   const S32 GUAGE_HEIGHT = 20;
+
+   F32 full = F32(energy) / F32(maxEnergy) * GAUGE_WIDTH;
+
+   // Guage fill
+   glBegin(GL_POLYGON);
+      glColor3f(0, 0, 1);
+      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin);
+
+      glColor3f(0, 1, 1);
+      glVertex2f(UserInterface::horizMargin + full, UserInterface::canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin + full, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+   glEnd();
+
+   // Guage outline
+   glBegin(GL_LINES);
+      glColor3f(1, 1 ,1);
+      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, UserInterface::canvasHeight - UserInterface::vertMargin);
+
+      // Show safety line
+      F32 cutoffx = (cooldownThreshold * GAUGE_WIDTH) / maxEnergy;
+
+      glColor3f(1, 1, 0);
+      glVertex2f(UserInterface::horizMargin + cutoffx, UserInterface::canvasHeight - UserInterface::vertMargin - 23);
+      glVertex2f(UserInterface::horizMargin + cutoffx, UserInterface::canvasHeight - UserInterface::vertMargin + 4);
+   glEnd();
 }
 
 
-void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
+// Render the actual lightning bolt
+void renderEnergySymbol(Color overrideColor, F32 alpha)
 {
-   F32 scaleFactor = forEditor ? .45 : 1;    // Resize for editor
-
-   glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
-   glScalef(scaleFactor, scaleFactor, 1);
-
    // Yellow lightning bolt
    glColor(overrideColor == 0 ? Color(1,1,0) : overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
@@ -1215,12 +1246,40 @@ void renderEnergyItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
    // Orangey circle
    glLineWidth(3);
    glColor(overrideColor == 0 ? Color(1, .67 ,0) : overrideColor, alpha);
-
-   drawCircle(Point(0,0), 16);
    glLineWidth(gDefaultLineWidth);
+}
 
+void renderEnergySymbol(const Point &pos, F32 scaleFactor)
+{
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scaleFactor, scaleFactor, 1);
+      renderEnergySymbol(0, 1);
    glPopMatrix();
 }
+
+
+void renderEnergyItem(const Point &pos, bool forEditor, Color overrideColor, F32 alpha)
+{
+   F32 scaleFactor = forEditor ? .45 : 1;    // Resize for editor
+
+   glPushMatrix();
+      glTranslatef(pos.x, pos.y, 0);
+      glScalef(scaleFactor, scaleFactor, 1);
+
+      renderEnergySymbol(overrideColor, alpha);
+
+      drawCircle(Point(0,0), 16);
+      glLineWidth(gDefaultLineWidth);
+   glPopMatrix();
+}
+
+
+void renderEnergyItem(const Point &pos)
+{
+   renderEnergyItem(pos, false, 0, 1);
+}
+
 
 
 void renderSpeedZone(Vector<Point> points, U32 time)

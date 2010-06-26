@@ -778,11 +778,22 @@ void ServerGame::idle(U32 timeDelta)
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected
 
-   if(mGameSuspended)     // If game is suspended, we need do nothing more
-      return;
-
+   
    mNetInterface->checkBanlistTimeouts(timeDelta);    // Unban players who's bans have expired
 
+      // Periodically update our status on the master, so they know what we're doing...
+   if(mMasterUpdateTimer.update(timeDelta))
+   {
+      MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+      if(masterConn && masterConn->isEstablished())
+         masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
+      mMasterUpdateTimer.reset(UpdateServerStatusTime);
+   }
+
+   mNetInterface->processConnections();
+
+   if(mGameSuspended)     // If game is suspended, we need do nothing more
+      return;
 
    for(GameConnection *walk = GameConnection::getClientList(); walk ; walk = walk->getNextClient())
       walk->addToTimeCredit(timeDelta);
@@ -808,8 +819,6 @@ void ServerGame::idle(U32 timeDelta)
 
    processDeleteList(timeDelta);
 
-   mNetInterface->processConnections();
-
 
    // Load a new level if the time is out on the current one
    if(mLevelSwitchTimer.update(timeDelta))
@@ -818,14 +827,7 @@ void ServerGame::idle(U32 timeDelta)
       getGameType()->updateRatings();
       cycleLevel(NEXT_LEVEL);
    }
-   // Periodically update our status on the master, so they know what we're doing...
-   if(mMasterUpdateTimer.update(timeDelta))
-   {
-      MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
-      if(masterConn && masterConn->isEstablished())
-         masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
-      mMasterUpdateTimer.reset(UpdateServerStatusTime);
-   }
+
 
    // Lastly, play any sounds server might have made...
    SFXObject::process();
@@ -853,6 +855,23 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
       mStars[i].x = TNL::Random::readF();      // Between 0 and 1
       mStars[i].y = TNL::Random::readF();
    }
+
+   // //Create some random hexagons
+   //for(U32 i = 0; i < NumStars; i++)
+   //{
+   //   F32 x = TNL::Random::readF();
+   //   F32 y = TNL::Random::readF();
+   //   F32 ang = TNL::Random::readF() * Float2Pi;
+   //   F32 size = TNL::Random::readF() * .1;
+
+
+   //   for(S32 j = 0; j < 6; j++)
+   //   {
+   //      mStars[i * 6 + j].x = x + sin(ang + Float2Pi / 6 * j) * size;      // Between 0 and 1
+   //      mStars[i * 6 + j].y = y + cos(ang + Float2Pi / 6 * j) * size;
+   //   }
+   //}
+
 
    mScreenSaverTimer.reset(59000);         // Fire screen saver supression every 59 seconds
 }
@@ -1056,9 +1075,9 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
 
    S32 fx1 = gIniSettings.starsInDistance ? -1 - ((S32) (cameraPos.x / starDist)) : 0;
-   S32 fx2 = gIniSettings.starsInDistance ? 1 - ((S32) (cameraPos.x / starDist)) : 0;
+   S32 fx2 = gIniSettings.starsInDistance ?  1 - ((S32) (cameraPos.x / starDist)) : 0;
    S32 fy1 = gIniSettings.starsInDistance ? -1 - ((S32) (cameraPos.y / starDist)) : 0;
-   S32 fy2 = gIniSettings.starsInDistance ? 1 - ((S32) (cameraPos.y / starDist)) : 0;
+   S32 fy2 = gIniSettings.starsInDistance ?  1 - ((S32) (cameraPos.y / starDist)) : 0;
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
@@ -1072,6 +1091,11 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
             glTranslatef(xPage, yPage, 0);
 
          glDrawArrays(GL_POINTS, 0, NumStars);
+         
+         //glColor3f(.1,.1,.1);
+         // for(S32 i = 0; i < 50; i++)
+         //   glDrawArrays(GL_LINE_LOOP, i * 6, 6);
+
          glPopMatrix();
       }
 
@@ -1407,40 +1431,12 @@ void ClientGame::renderNormal()
    {
       Ship *s = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());
       if(s)
-      {
-         //static F32 curEnergy = 0.f;
-
-         //curEnergy = (curEnergy + s->mEnergy) * 0.5f;
-         F32 energy = s->mEnergy / F32(Ship::EnergyMax);
-         U32 totalLineCount = 100;
-
-         F32 full = energy * totalLineCount;
-         glBegin(GL_POLYGON);
-         glColor3f(0, 0, 1);
-         glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin - 20);
-         glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin);
-         glColor3f(0, 1, 1);
-         glVertex2f(UserInterface::horizMargin + full * 2, UserInterface::canvasHeight - UserInterface::vertMargin);
-         glVertex2f(UserInterface::horizMargin + full * 2, UserInterface::canvasHeight - UserInterface::vertMargin - 20);
-         glEnd();
-
-         glColor3f(1, 1 ,1);
-         glBegin(GL_LINES);
-            glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin - 20);
-            glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin);
-            glVertex2f(UserInterface::horizMargin + totalLineCount * 2, UserInterface::canvasHeight - UserInterface::vertMargin - 20);
-            glVertex2f(UserInterface::horizMargin + totalLineCount * 2, UserInterface::canvasHeight - UserInterface::vertMargin);
-         // Show safety line.
-         glColor3f(1, 1, 0);
-         F32 cutoffx = (Ship::EnergyCooldownThreshold * totalLineCount * 2) / Ship::EnergyMax;
-         glVertex2f(UserInterface::horizMargin + cutoffx, UserInterface::canvasHeight - UserInterface::vertMargin - 23);
-         glVertex2f(UserInterface::horizMargin + cutoffx, UserInterface::canvasHeight - UserInterface::vertMargin + 4);
-         glEnd();
-      }
+         renderEnergyGuage(s->mEnergy, Ship::EnergyMax, Ship::EnergyCooldownThreshold);
    }
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
+
 
 void ClientGame::render()
 {
