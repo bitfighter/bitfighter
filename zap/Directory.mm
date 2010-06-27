@@ -29,7 +29,7 @@
 
 #include "Directory.h"
 #import <Cocoa/Cocoa.h>
-#include "tnl/tnlVector.h"
+#include "tnlVector.h"
 
 using TNL::Vector;
 using std::string;
@@ -43,7 +43,7 @@ bool getLevels(string subdir, Vector<string> &files)
     //durations of these functions.
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSFileManager *fm = [NSFileManager defaultManager];
-    NSArray *filelist = [fm directoryContentsAtPath:[NSString stringWithCString:subdir.c_str()]];
+    NSArray *filelist = [fm directoryContentsAtPath:[NSString stringWithUTF8String:subdir.c_str()]];
     
     if (filelist == nil)
     {

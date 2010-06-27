@@ -2,4 +2,6 @@
 // Prefix header for all source files of the 'tnl' target in the 'tnl' project.
 //
 
-#include <Carbon/Carbon.h>
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif

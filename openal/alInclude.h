@@ -29,8 +29,6 @@
 
 #if defined(TNL_OS_MAC_OSX)
 #include <OpenAL/alc.h>
-#   include "ALUT/alut.h"       // Use RDW's FreeALUT framework framework
-#elif defined(TNL_OS_LINUX)
 #include <alut.h>		   // <--- Note that this alut.h is the same as the one included above in the OSX block
 #else    // Windows
 #include <alc.h>

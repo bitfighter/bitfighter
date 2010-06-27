@@ -32,7 +32,7 @@
 #define	PRIVATE_H
 
 #ifdef __GNUC__
-  #define INLINE extern __inline__
+  #define INLINE static inline
 #elif defined(__MWERKS__)
   #define INLINE __inline
 #else
