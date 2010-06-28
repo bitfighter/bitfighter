@@ -47,6 +47,7 @@
 #include "huntersGame.h"         // For lua object defs
 #include "engineeredObjects.h"   // For lua object defs
 #include "teleporter.h"          // ""
+#include "../lua/luaprofiler-2.0.2/src/luaprofiler.h"      // For... the profiler!
 #include "config.h"
 #include "BotNavMeshZone.h"      // For BotNavMeshZone class definition
 #include "luaGameInfo.h"
@@ -1444,6 +1445,9 @@ bool Robot::startLua()
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
 
+#ifdef USE_PROFILER
+   init_profiler(L);
+#endif
 
    // Load some libraries
    luaopen_base(L);

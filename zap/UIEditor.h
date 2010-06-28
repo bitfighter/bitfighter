@@ -353,7 +353,7 @@ private:
 
    S32 mCurrentTeam;
 
-   bool snapDisabled;
+   bool mSnapDisabled;
 
    ShowMode mShowMode;
    bool mHasBotNavZones;
@@ -558,7 +558,9 @@ public:
    Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
 
    // Snapping related functions:
-   Point snapToLevelGrid(Point const &p, bool snapWhileOnDock = false);
+   Point snapPoint(Point const &p, bool snapWhileOnDock = false);
+   Point snapPointToLevelGrid(Point const &p);
+
    static S32 checkEdgesForSnap(const Point &clickPoint, const Vector<Point> &verts, bool abcFormat, F32 &minDist, 
                                 Point &snapPoint);
    S32 checkCornersForSnap(const Point &clickPoint, const Vector<Point> &verts, F32 &minDist, Point &snapPoint);

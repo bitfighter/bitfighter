@@ -10,6 +10,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tnl", "tnl\tnl.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-vec", "lua\lua-vec\lua-vec.vcxproj", "{9D7B0AAD-B135-449D-8E12-1ED548AC1048}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "lua-profiler", "lua-profiler\lua-profiler.vcxproj", "{244B32A0-6E4E-4597-ABE8-1AD87402AFB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -36,6 +38,10 @@ Global
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Debug|Win32.Build.0 = Debug|Win32
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Release|Win32.ActiveCfg = Release|Win32
 		{9D7B0AAD-B135-449D-8E12-1ED548AC1048}.Release|Win32.Build.0 = Release|Win32
+		{244B32A0-6E4E-4597-ABE8-1AD87402AFB2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{244B32A0-6E4E-4597-ABE8-1AD87402AFB2}.Debug|Win32.Build.0 = Debug|Win32
+		{244B32A0-6E4E-4597-ABE8-1AD87402AFB2}.Release|Win32.ActiveCfg = Release|Win32
+		{244B32A0-6E4E-4597-ABE8-1AD87402AFB2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

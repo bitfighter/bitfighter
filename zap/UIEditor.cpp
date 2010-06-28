@@ -859,7 +859,7 @@ void EditorUserInterface::onActivate()
 
    mUnmovedItems = mItems;
 
-   snapDisabled = false;      // Hold [space] to temporarily disable snapping
+   mSnapDisabled = false;      // Hold [space] to temporarily disable snapping
 
    // Reset display parameters...
    centerView();
@@ -910,12 +910,34 @@ void EditorUserInterface::onReactivate()
 }
 
 
-Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
+Point EditorUserInterface::snapPointToLevelGrid(Point const &p)
 {
-   if(mouseOnDock() && !snapWhileOnDock) 
+   if(mSnapDisabled)
       return p;
 
-   Point snapPoint = p;
+   // First, find a snap point based on our grid
+   F32 mulFactor, divFactor;
+   if(mCurrentScale >= 100)
+   {
+      mulFactor = 10;
+      divFactor = 0.1;
+   }
+   else
+   {
+      mulFactor = 2;
+      divFactor = 0.5;
+   }
+
+   return Point(floor(p.x * mulFactor + 0.5) * divFactor, floor(p.y * mulFactor + 0.5) * divFactor);
+}
+
+
+Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
+{
+   if(mouseOnDock() && !snapWhileOnDock) 
+      return p;      // No snapping!
+
+   Point snapPoint(p);
 
    if(mDraggingObjects)
    {
@@ -935,30 +957,16 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    F32 maxSnapDist = 100 / (mCurrentScale * mCurrentScale);
    F32 minDist = maxSnapDist;
 
-
-   bool snapToCorners = mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker;
-   bool snapToEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].geomType() == geomPoly;
+   // Where will we be snapping things?
+   bool snapToWallCorners = mDraggingObjects && mItems[mSnapVertex_i].index != ItemBarrierMaker;
+   bool snapToWallEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].geomType() == geomPoly;
    bool snapToNavZoneEdges = mSnapVertex_i != NONE && mItems[mSnapVertex_i].index == ItemNavMeshZone;
-   bool snapToLevelGrid = !snapToNavZoneEdges && !snapDisabled;
+   bool snapToLevelGrid = !snapToNavZoneEdges && !mSnapDisabled;
 
 
-   if(snapToLevelGrid)
+   if(snapToLevelGrid)     // Lowest priority
    {
-      // First, find a snap point based on our grid
-      F32 mulFactor, divFactor;
-      if(mCurrentScale >= 100)
-      {
-         mulFactor = 10;
-         divFactor = 0.1;
-      }
-      else
-      {
-         mulFactor = 2;
-         divFactor = 0.5;
-      }
-
-      snapPoint.set(floor(p.x * mulFactor + 0.5) * divFactor, floor(p.y * mulFactor + 0.5) * divFactor);
-
+      snapPoint = snapPointToLevelGrid(p);
       minDist = snapPoint.distSquared(p);
    }
 
@@ -966,7 +974,7 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    // Now look for other things we might want to snap to
    for(S32 i = 0; i < mItems.size(); i++)
    {
-       // Don't snap to selected items or items with selected verts
+      // Don't snap to selected items or items with selected verts
       if(mItems[i].selected || mItems[i].anyVertsSelected())    
          continue;
 
@@ -981,10 +989,11 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
       }
    }
 
-   
+
+   // Build a list of walls we might be snapping to if we're snapping to either the edges or corners
    static Vector<DatabaseObject *> foundObjects;
 
-   if(snapToCorners || snapToEdges)
+   if(snapToWallCorners || snapToWallEdges)
    {
       foundObjects.clear();
       mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
@@ -992,24 +1001,13 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
 
 
    // Search for a corner to snap to - by using segment ends, we'll also look for intersections between segments
-   if(snapToCorners)
+   if(snapToWallCorners)
    {
       for(S32 i = 0; i < foundObjects.size(); i++)
       {
          WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
 
          checkCornersForSnap(p, seg->edges, minDist, snapPoint);
-
-         //for(S32 j = 0; j < seg->edges.size(); j++)
-         //{
-                 
-         //   F32 dist = seg->edges[j].distSquared(p);
-         //   if(dist < minDist)
-         //   {
-         //      minDist = dist;
-         //      snapPoint.set(seg->edges[j]);
-         //   }
-         //}
       }
    }
 
@@ -1018,7 +1016,7 @@ Point EditorUserInterface::snapToLevelGrid(Point const &p, bool snapWhileOnDock)
    // decreasing(increasing??) it will require being closer to a wall to snap to it.
    if(minDist >= 90 / (mCurrentScale * mCurrentScale))
    {
-      if(snapToEdges)
+      if(snapToWallEdges)
       {   
          // Check the edges of walls -- we'll reuse the list of walls we found earlier when looking for corners
          for(S32 i = 0; i < foundObjects.size(); i++)
@@ -1128,7 +1126,7 @@ void EditorUserInterface::renderGrid()
    if(mShowingReferenceShip)
       return;   
 
-   F32 colorFact = snapDisabled ? .5 : 1;
+   F32 colorFact = mSnapDisabled ? .5 : 1;
    if(mCurrentScale >= 100)
    {
       F32 gridScale = mCurrentScale * 0.1;      // Draw tenths
@@ -1222,7 +1220,7 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    if(mSnapVertex_i != NONE)
       pos = mItems[mSnapVertex_i].vert(mSnapVertex_j);
    else
-      pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
+      pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
    F32 xpos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
 
@@ -1407,7 +1405,7 @@ void EditorUserInterface::render()
 
    if(mCreatingPoly || mCreatingPolyline)    // Draw geomLine features under construction
    {
-      mNewItem.addVert(snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)));
+      mNewItem.addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
       glLineWidth(3);
 
       if(mCreatingPoly) // Wall
@@ -2350,7 +2348,7 @@ void EditorUserInterface::pasteSelection()
 
    clearSelection();       // Only the pasted items should be selected
 
-   Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
+   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
    // Diff between mouse pos and original object (item will be pasted such that the first vertex is at mouse pos)
    Point offset = pos - mClipboard[0].vert(0);    
@@ -2806,7 +2804,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
          offset.set(.4, 0);
 
       // Instantiate object so we are in essence dragging a non-dock item
-      Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) - offset, true);
+      Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos) - offset, true);
 
       // Gross struct avoids extra construction
       WorldItem item =
@@ -2851,9 +2849,9 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
    // in the selection, and we just want the damn thing where we put it.
    // (*origPoint - mMouseDownPos) represents distance from item's snap vertex where we "grabbed" it
    if(mItems[mSnapVertex_i].geomType() == geomPoint || (mItemHit != NONE && mItems[mItemHit].anyVertsSelected()))
-      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos))  - origPoint;
+      delta = snapPoint(convertCanvasToLevelCoord(mMousePos))  - origPoint;
    else
-      delta = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos) + origPoint - mMouseDownPos) - origPoint;
+      delta = snapPoint(convertCanvasToLevelCoord(mMousePos) + origPoint - mMouseDownPos) - origPoint;
 
    // Update the locations of all items we're moving to show them being dragged.  Note that an item cannot be
    // selected if one of its vertices are.
@@ -3201,7 +3199,7 @@ void EditorUserInterface::insertNewItem(GameItems itemType)
    clearSelection();
    saveUndoState(mItems);
 
-   Point pos = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));
+   Point pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
    S32 team = -1;
 
    // Get team affiliation from dockItem of same type
@@ -3539,7 +3537,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(mNewItem.vertCount() >= gMaxPolygonPoints)     // Limit number of points in a polygon/polyline
             return;
          //else
-         mNewItem.addVert(snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)));
+         mNewItem.addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
          mNewItem.onGeomChanging();
          return;
       }
@@ -3555,7 +3553,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             return;
 
          mMostRecentState = mItems;
-         Point newVertex = snapToLevelGrid(convertCanvasToLevelCoord(mMousePos));      // adding vertex w/ right-mouse
+         Point newVertex = snapPoint(convertCanvasToLevelCoord(mMousePos));      // adding vertex w/ right-mouse
 
          // Insert an extra vertex at the mouse clicked point, and then select it.
          mItems[mItemHit].insertVert(newVertex, mEdgeHit + 1);
@@ -3587,7 +3585,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             type = ItemBarrierMaker;
          }
 
-         mNewItem = WorldItem(type, snapToLevelGrid(convertCanvasToLevelCoord(mMousePos)), TEAM_NEUTRAL, false,
+         mNewItem = WorldItem(type, snapPoint(convertCanvasToLevelCoord(mMousePos)), TEAM_NEUTRAL, false,
                               type == ItemBarrierMaker ? Barrier::BarrierWidth : 2);
       }
    }
@@ -3857,7 +3855,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       gEditorMenuUserInterface.activate();
    }
    else if(keyCode == KEY_SPACE)
-      snapDisabled = true;
+      mSnapDisabled = true;
    else if(keyCode == KEY_TAB)
       mShowingReferenceShip = true;
 }
@@ -3894,7 +3892,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
          mOut = false;
          break;
       case KEY_SPACE:
-         snapDisabled = false;
+         mSnapDisabled = false;
          break;
       case KEY_TAB:
          mShowingReferenceShip = false;
@@ -4968,9 +4966,10 @@ void WorldItem::processEndPoints()
 
 Point WorldItem::snapEngineeredObject(const Point &pos)
 {  
+   Point snappedPos = gEditorUserInterface.snapPointToLevelGrid(pos);
    Point anchor, nrml;
    DatabaseObject *mountSeg = EngineeredObject::
-               findAnchorPointAndNormal(getGridDatabase(), pos, 1 / getGridSize(), false, anchor, nrml);
+               findAnchorPointAndNormal(getGridDatabase(), snappedPos, 1 / getGridSize(), false, anchor, nrml);
 
    if(mountSeg)
    {
@@ -4984,7 +4983,7 @@ Point WorldItem::snapEngineeredObject(const Point &pos)
    else
    {
       snapped = false;
-      return pos;
+      return snappedPos;
    }
 }
 
