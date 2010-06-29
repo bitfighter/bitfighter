@@ -79,8 +79,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
    }
    else if(msgIndex == HuntersMsgGameOverTie)
    {
-      gGameUserInterface.displayMessage(Color(0.6f, 1.0f, 0.8f),
-                     "The game ended in a tie.");
+      gGameUserInterface.displayMessage(Color(0.6f, 1.0f, 0.8f), "The game ended in a tie.");
       SFXObject::play(SFXFlagDrop);
    }
 }
@@ -155,7 +154,7 @@ HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 }
 
 
-// the ship will come from flag->mount
+// The ship will come from flag->mount
 void HuntersGameType::flagDropped(Ship *theShip, FlagItem *flag)
 {
    HuntersFlagItem *theFlag = findFirstNexusFlag(theShip);
@@ -530,7 +529,8 @@ void HuntersFlagItem::renderItem(Point pos)
          else
             glColor3f(1, 1, 1);
 
-         UserInterface::drawStringf(pos.x +10, pos.y - 15, 12, "%d", mFlagCount);
+         UserInterface::drawStringf(pos.x + 10, pos.y - 46, 12, "%d", mFlagCount);
+         //UserInterface::drawStringf(pos.x - 5, pos.y - 30, 12, "%d", mFlagCount);
       }
    }
 }
