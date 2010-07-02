@@ -116,23 +116,25 @@ public:
    static const U32 CHAT_NAMELIST_SIZE = 11;  // Size of names of people in chatroom
 
 
-   Vector<StringTableEntry> mPlayersInGlobalChat;
+   static Vector<StringTableEntry> mPlayersInGlobalChat;
 };
 
 
 ///////////////////////////////////////
 ///////////////////////////////////////
 
-class ChatUserInterface: public UserInterface, public AbstractChat
+class ChatUserInterface : public UserInterface, public AbstractChat
 {
 private:
-   const char *menuTitle;
    Color menuSubTitleColor;
 
-   const char *menuFooter;
+   virtual void renderHeader();
+   //virtual void renderFooter();
+   virtual void onOutGameChat();    // What to do if user presses [F5]
+   bool mRenderUnderlyingUI;
 
 public:
-   ChatUserInterface();          // Constructor
+   ChatUserInterface();             // Constructor
 
    // UI related
    void render();
@@ -144,9 +146,26 @@ public:
    void onEscape();
 
    void idle(U32 timeDelta);
+
+   void setRenderUnderlyingUI(bool render) { mRenderUnderlyingUI = render; }
 };
 
 extern ChatUserInterface gChatInterface;
+
+///////////////////////////////////////
+///////////////////////////////////////
+
+class SuspendedUserInterface : public ChatUserInterface
+{
+private:
+   void renderHeader();
+   void onOutGameChat();      // What to do if user presses [F5]
+
+public:
+   SuspendedUserInterface();          // Constructor
+};
+
+extern SuspendedUserInterface gSuspendedInterface;
 
 };
 

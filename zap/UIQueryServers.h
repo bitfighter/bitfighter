@@ -54,6 +54,7 @@ private:
    bool mItemSelectedWithMouse;
    bool mSortAscending;
    bool mShouldSort;
+   bool mAnnounced;           // Have we announced to the master that we've joined the chat room?
 
    S32 selectedId;
    S32 mSortColumn;
@@ -76,7 +77,7 @@ public:
    U32 time;
 
    enum {
-      MaxServerNameLen = 20,
+      MaxServerNameLen = 40,
       MaxServerDescrLen = 254,
       ServersPerScreen = 21,     // unused, delete
       ServersAbove = 9,

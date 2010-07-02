@@ -825,7 +825,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
       stream->write(mass);
       stream->write(mTeam);
 
-      // now write all the mounts:
+      // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
       {
          if(mMountedItems[i].isValid())
@@ -839,7 +839,7 @@ U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *st
          }
       }
       stream->writeFlag(false);
-   }  // end initial update
+   }  // End initial update
 
 
 

@@ -44,6 +44,8 @@
 #include "UINameEntry.h"
 #include "luaLevelGenerator.h"
 
+//#include "UIChat.h"
+
 #include "BotNavMeshZone.h"      // For zone clearing code
 
 #include "../glut/glutInclude.h"
@@ -592,6 +594,7 @@ void ServerGame::suspendGame(GameConnection *requestor)
 
    mGameSuspended = true;    
    mSuspendor = requestor;
+   //mCommanderZoomDelta = CommanderMapZoomTime;     // When suspended, we show cmdr's map, need to make sure it's fully zoomed out
 
    cycleLevel(REPLAY_LEVEL);  // Restart current level to make setting traps more difficult
 }
@@ -768,7 +771,8 @@ void ServerGame::idle(U32 timeDelta)
    }
 
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
-   // This will prevent locally hosted game from immediately suspending for a frame.  A little hacky, but works!
+   // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
+   // connect.  A little hacky, but works!
    if(mPlayerCount == 0 && !mGameSuspended && mCurrentTime != 0)
       suspendGame();
    else if( mGameSuspended && ((mPlayerCount > 0 && !mSuspendor) || mPlayerCount > 1) )
@@ -911,6 +915,12 @@ void ClientGame::idle(U32 timeDelta)
 
    checkConnectionToMaster(timeDelta);   // If no current connection to master, create (or recreate) one
 
+   if(isSuspended())
+   {
+      mNetInterface->processConnections();
+      return;
+   }
+
    // Only update at most MaxMoveTime milliseconds
    if(timeDelta > Move::MaxMoveTime)
       timeDelta = Move::MaxMoveTime;
@@ -987,7 +997,7 @@ void ClientGame::idle(U32 timeDelta)
    FXManager::tick((F32)timeDelta * 0.001f);    // Processes sparks and teleporter effects
    SFXObject::process();                        // Process sound effects (SFX)
 
-   mNetInterface->processConnections();
+   mNetInterface->processConnections();         // Here we can pass on our updated ship info to the server
 
    if(mScreenSaverTimer.update(timeDelta))
    {
@@ -1041,9 +1051,27 @@ void ClientGame::zoomCommanderMap()
 }
 
 
-U32 ClientGame::getPlayerCount() 
+// Unused
+U32 ClientGame::getPlayerAndRobotCount() 
 { 
-   return mGameType ? mGameType->mClientList.size() : (U32)PLAYER_COUNT_UNAVAILABLE;       // + 1 to include local client
+   return mGameType ? mGameType->mClientList.size() : (U32)PLAYER_COUNT_UNAVAILABLE; 
+}
+
+
+U32 ClientGame::getPlayerCount()
+{
+   if(!mGameType)
+      return (U32)PLAYER_COUNT_UNAVAILABLE;
+
+   U32 players = 0;
+
+   for(S32 i = 0; i < mGameType->mClientList.size(); i++)
+   {
+      if(!mGameType->mClientList[i]->isRobot)
+         players++;
+   }
+
+   return players;
 }
 
 
@@ -1444,7 +1472,7 @@ void ClientGame::render()
       return;
 
    if(mGameSuspended)
-      renderSuspended();
+      renderCommander();
    else if(mCommanderZoomDelta)
       renderCommander();
    else

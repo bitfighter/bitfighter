@@ -37,7 +37,9 @@
 namespace Zap
 {
 
-const char *arrow = ">";
+Vector<StringTableEntry> AbstractChat::mPlayersInGlobalChat;
+
+const char *ARROW = ">";
 const S32 AFTER_ARROW_SPACE = 5;
 const S32 lineWidth = UserInterface::canvasWidth - 2 * UserInterface::horizMargin;
 
@@ -86,7 +88,7 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate)
 void AbstractChat::addCharToMessage(char ascii)
 {
    // Limit chat messages to the size that can be displayed on receiver's screen
-   S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), arrow) + AFTER_ARROW_SPACE +
+   S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), ARROW) + AFTER_ARROW_SPACE +
                    UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
 
    // Only add char if there's room
@@ -99,8 +101,8 @@ void AbstractChat::addCharToMessage(char ascii)
 // First message has index == 0, second has index == 1, etc.
 ChatMessage AbstractChat::getMessage(U32 index)
 {
-   U32 first = (mMessageCount < MESSAGES_TO_RETAIN) ? 0 : mMessageCount % MESSAGES_TO_RETAIN;
-   return mMessages[(first + index) % MESSAGES_TO_RETAIN];
+   //U32 first = (mMessageCount < MESSAGES_TO_RETAIN) ? 0 : mMessageCount % MESSAGES_TO_RETAIN;
+   return mMessages[index % MESSAGES_TO_RETAIN];
 }
 
 
@@ -146,17 +148,18 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
       if(i >= min(firstMsg + numberToDisplay, mMessageCount))       // No more messages to display
          return;
 
-      ChatMessage msg = getMessage(i + firstMsg);
+      ChatMessage msg = getMessage(i + firstMsg); 
       glColor(msg.color);
 
       S32 xpos = UserInterface::horizMargin / 2;
-      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2, CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());   // + 2 just looks better!
+      xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
+                                                    CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());   
       xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());
 
       if(msg.isPrivate)
          xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
 
-      xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, arrow) + AFTER_ARROW_SPACE;
+      xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
 
       UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
 
@@ -189,7 +192,7 @@ void AbstractChat::deliverPrivateMessage(const char *sender, const char *message
    {
       gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor,
          "Private message from %s: Press [%s] to enter chat mode", sender, keyCodeToString(keyOUTGAMECHAT));
-      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", arrow, message);
+      gGameUserInterface.displayMessage(GameUserInterface::privateF5MessageDisplayedInGameColor, "%s %s", ARROW, message);
    }
 }
 
@@ -231,15 +234,13 @@ void AbstractChat::renderChatters(S32 xpos, S32 ypos)
          xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_NAMELIST_SIZE, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
 }
 
-///////////////////////////////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 // Constructor
 ChatUserInterface::ChatUserInterface()
 {
    setMenuID(GlobalChatUI);
-
-   menuTitle = "GameLobby / Global Chat";
-   menuFooter = "Type your message | ENTER to send | ESC exits";
 }
 
 
@@ -256,7 +257,7 @@ static const S32 MENU_SUBTITLE_SIZE = 18;
 
 void ChatUserInterface::render()
 {
-   if (prevUIs.size())           // If there is an underlying menu...
+   if (mRenderUnderlyingUI && prevUIs.size())           // If there is an underlying menu...
    {
       prevUIs.last()->render();  // ...render it...
       glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
@@ -270,26 +271,13 @@ void ChatUserInterface::render()
       glDisable(GL_BLEND);
    }
 
-   // Draw title, subtitle, and footer
-   glColor3f(1, 1, 1);
-   drawCenteredString(vertMargin, MENU_TITLE_SIZE, menuTitle);
+   // Render header
+   renderHeader();
 
-   string subtitle = "Not currently connected to any game server";
-
-   if(gClientGame && gClientGame->getConnectionToServer())
-   {
-      string name = gClientGame->getConnectionToServer()->getServerName();
-      if(name == "")
-         subtitle = "Connected to game server with no name";
-      else
-         subtitle = "Connected to game server \"" + name + "\"";
-   }
-
+   // And footer
    glColor3f(0, 1, 0);
-   drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
-
    S32 vertFooterPos = canvasHeight - vertMargin - VERT_FOOTER_SIZE;
-   drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, menuFooter);
+   drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, "Type your message | ENTER to send | ESC exits");
 
    renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
 
@@ -322,9 +310,33 @@ void ChatUserInterface::render()
 }
 
 
+void ChatUserInterface::renderHeader()
+{
+   // Draw title, subtitle, and footer
+   glColor3f(1, 1, 1);
+   drawCenteredString(vertMargin, MENU_TITLE_SIZE, "GameLobby / Global Chat");
+
+   string subtitle = "Not currently connected to any game server";
+
+   if(gClientGame && gClientGame->getConnectionToServer())
+   {
+      string name = gClientGame->getConnectionToServer()->getServerName();
+      if(name == "")
+         subtitle = "Connected to game server with no name";
+      else
+         subtitle = "Connected to game server \"" + name + "\"";
+   }
+
+   glColor3f(0, 1, 0);
+   drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
+}
+
+
 void ChatUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(keyCode == keyOUTGAMECHAT || keyCode == KEY_ESCAPE)
+   if(keyCode == keyOUTGAMECHAT)
+      onOutGameChat();
+   else if(keyCode == KEY_ESCAPE)
       onEscape();
    else if (keyCode == KEY_ENTER)                // Submits message
       issueChat();
@@ -345,7 +357,14 @@ void ChatUserInterface::onActivate()
       conn->c2mJoinGlobalChat();
 
    mPlayersInGlobalChat.clear();
+   mRenderUnderlyingUI = true;
    gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
+}
+
+
+void ChatUserInterface::onOutGameChat()
+{
+   onEscape();
 }
 
 
@@ -356,7 +375,55 @@ void ChatUserInterface::onEscape()
    UserInterface::playBoop();
 }
 
+
 ChatUserInterface gChatInterface;
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor
+SuspendedUserInterface::SuspendedUserInterface()
+{
+   setMenuID(SuspendedUI);
+}
+
+
+void SuspendedUserInterface::renderHeader()
+{
+   if(gClientGame->isSuspended())
+   {
+      glColor3f(1,1,1);
+      drawCenteredString(vertMargin, MENU_TITLE_SIZE, "-- GAME SUSPENDED -- ");
+   }
+   else
+   {
+      glColor3f(1,0,0);
+      drawCenteredString(vertMargin, MENU_TITLE_SIZE, "!! GAME RESTARTED !! ");
+   }
+
+   string subtitle = "Not currently connected to any game server";
+
+   if(gClientGame && gClientGame->getConnectionToServer())
+   {
+      string name = gClientGame->getConnectionToServer()->getServerName();
+      if(name == "")
+         subtitle = "Connected to game server with no name";
+      else
+         subtitle = "Connected to game server \"" + name + "\"";
+   }
+
+   glColor3f(0, 1, 0);
+   drawCenteredString(vertMargin + MENU_TITLE_SIZE + TITLE_SUBTITLE_GAP, MENU_SUBTITLE_SIZE, subtitle.c_str());
+}
+
+
+void SuspendedUserInterface::onOutGameChat()
+{
+   // Do nothing
+}
+
+SuspendedUserInterface gSuspendedInterface;
+
 
 };
 

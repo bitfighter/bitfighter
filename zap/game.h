@@ -33,6 +33,7 @@
 #include "timer.h"
 #include "gameLoader.h"
 #include "point.h"
+#include "UIChat.h"
 
 #ifdef TNL_OS_WIN32
 #include <windows.h>   // For screensaver... windows only feature, I'm afraid!
@@ -322,8 +323,6 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class Ship;
-
 class ClientGame : public Game
 {
 private:
@@ -367,7 +366,9 @@ public:
    bool isServer() { return false; }
    void idle(U32 timeDelta);
    void zoomCommanderMap();
-   U32 getPlayerCount();
+
+   U32 getPlayerAndRobotCount();    // Returns number of human and robot players
+   U32 getPlayerCount();            // Returns number of human players
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }

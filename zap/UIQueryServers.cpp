@@ -47,6 +47,7 @@ static const U32 MENU_HEADER_TEXTSIZE = 14;
 static const U32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
 static const U32 SERVER_ENTRY_TEXTSIZE = 14;
 static const U32 SERVER_ENTRY_VERT_GAP = 4;
+static const U32 SERVER_ENTRY_HEIGHT = SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP;
 static const U32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
 
 static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_HEADER_TEXTSIZE;
@@ -98,6 +99,7 @@ void QueryServersUserInterface::onActivate()
    mItemSelectedWithMouse = false;
    mScrollingUpMode = false;
    mJustMovedMouse = false;
+   mAnnounced = false;
 
    mPage = 0;     // Start off showing the first page, as expected
 
@@ -146,7 +148,11 @@ void QueryServersUserInterface::contactEveryone()
 
    if(conn)
    {
-      conn->c2mJoinGlobalChat();    // Announce our presence in the chat room
+      if(!mAnnounced)
+      {
+         conn->c2mJoinGlobalChat();    // Announce our presence in the chat room
+         mAnnounced = true;
+      }
       conn->startServerQuery();
       mWaitingForResponseFromMaster = true;
    }
@@ -440,8 +446,8 @@ void QueryServersUserInterface::addHiddenServer(Address addr, U32 time)
 
 #define MOUSE_IN_HEADER_ROW mousePos.y >= COLUMNS_TOP && mousePos.y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1
 #define chatHeight (mShowChat ? 285 : 0)     // Height of chat block overall
-#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) - 1))
-#define FIRST_SERVER (mPage * serversToShow)
+#define serversToShow ((S32)((canvasHeight - vertMargin - 20 - chatHeight - COLUMNS_TOP - COLUMN_HEADER_HEIGHT) / SERVER_ENTRY_HEIGHT - 1))
+#define FIRST_SERVER_INDEX (mPage * serversToShow)
 #define mLastServer (min(servers.size() - 1, (mPage + 1) * serversToShow - 1))
 
 
@@ -455,7 +461,7 @@ S32 QueryServersUserInterface::getSelectedIndex()
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
       Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
-      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP)) + FIRST_SERVER - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
+      S32 indx = (S32) floor(( mousePos.y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / SERVER_ENTRY_HEIGHT) + FIRST_SERVER_INDEX - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
 
       // Bounds checking
       if(indx < 0)
@@ -591,7 +597,7 @@ void QueryServersUserInterface::render()
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
-      U32 y = ITEMS_TOP + (selectedIndex - FIRST_SERVER - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + (SERVER_ENTRY_TEXTSIZE - 12);
+      U32 y = ITEMS_TOP + (selectedIndex - FIRST_SERVER_INDEX - 1) * SERVER_ENTRY_HEIGHT + (SERVER_ENTRY_TEXTSIZE - 12);
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
       for(S32 i = 1; i >= 0; i--)
@@ -609,9 +615,9 @@ void QueryServersUserInterface::render()
          glEnd();
       }
 
-      for(S32 i = FIRST_SERVER; i <= mLastServer; i++)
+      for(S32 i = FIRST_SERVER_INDEX; i <= mLastServer; i++)
       {
-         y = ITEMS_TOP + (i - FIRST_SERVER - 1) * (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) + 2;
+         y = ITEMS_TOP + (i - FIRST_SERVER_INDEX - 1) * SERVER_ENTRY_HEIGHT + 2;
          ServerRef &s = servers[i];
 
          if(i == selectedIndex)
@@ -840,7 +846,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          // Clicked too high... do nothing
       }
-      else if(keyCode == MOUSE_LEFT && mousePos.y > COLUMNS_TOP + (SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT_GAP) * min(servers.size() + 1, serversToShow + 2))
+      else if(keyCode == MOUSE_LEFT && mousePos.y > COLUMNS_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, serversToShow + 2))
       {
          // Clicked too low... also do nothing
       }
@@ -878,7 +884,10 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    {
       mShowChat = !mShowChat;
       if(mShowChat) 
+      {
          gChatInterface.activate();
+         gChatInterface.setRenderUnderlyingUI(false);    // Don't want this screen to bleed through...
+      }
    }
 
    else if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)
@@ -941,7 +950,6 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
-
    }
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)
    {
@@ -974,7 +982,7 @@ void QueryServersUserInterface::sortSelected()
    }
    sort();
 
-    selectedId = servers[currentItem].id;
+   selectedId = servers[currentItem].id;
 }
 
 
@@ -998,6 +1006,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
    mJustMovedMouse = true;
+   mItemSelectedWithMouse = true;
 }
 
 

@@ -17,8 +17,26 @@
 // Do LuaShip proxies remain constant over time (i.e. does 013 fix for Buvet.bot now work?)
 // Make sure things work when ship is deleted.  Do we get nils back (and not crashes)?
 
-// TODO:
-// Create color global for reticle color
+
+// Ideas for interactive help/tutorial:
+//=======================================
+// Mine: Explodes when ships fly too close
+// Beware: Enemy mines are hard to see!        (plant your own w/ the mine layer weapon)
+// Teleport: takes you to another location on the map
+// Friendly FF: Lets friendly ships pass
+// Enemy FF: Lets enemy ships pass - destroy by shooting the base
+// Neutral FF: Claim it for your team by repairing with the repair module
+// Friendly Turret: Targets enemies, but won't hurt you (on purpose)
+// Enemy Turret: Defends enemy teritory.  Destroy with multiple shots
+// Neutral turret: Claim it for your team by repairing with the repair module
+// Timer shows time left in game
+// Heatlh indicator shows health left
+// basic controls:  x/x/x/x to move; use 1,2,3 to select weapons; <c> shows overview map
+// Messages will appear here -->
+// See current game info by pressing [F2]
+
+
+     
 
 
 // Random point in zone, random zone, isInCaptureZone should return actual capture zone

@@ -168,6 +168,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
    mTime += deltaT;
+
    // Deal with our timeout...  could rewrite with a timer!
    if(timeout > deltaT)
    {
@@ -198,6 +199,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
          isTriggered = true;
          setMaskBits(TeleportMask);
          timeout = TeleporterDelay;    // Temporarily disable teleporter
+         // break; <=== maybe, need to test
       }
    }
 

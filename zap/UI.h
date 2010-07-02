@@ -64,6 +64,7 @@ enum UIID {
    GameUI,
    GenericUI,
    GlobalChatUI,
+   SuspendedUI,
    InstructionsUI,
    KeyDefUI,
    LevelUI,

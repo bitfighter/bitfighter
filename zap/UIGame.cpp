@@ -151,6 +151,9 @@ void GameUserInterface::onActivate()
 
 void GameUserInterface::onReactivate()
 {
+   if(gClientGame->isSuspended())
+      unsuspendGame();
+
    gDisableShipKeyboardInput = false;
    glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
    setPlayMode();
@@ -327,6 +330,7 @@ void GameUserInterface::render()
       if(theGameType)
          theGameType->renderInterfaceOverlay(mInScoreboardMode);
    }
+
 #if 0
 // Some code for outputting the position of the ship for finding good spawns
 GameConnection *con = gClientGame->getConnectionToServer();
@@ -831,11 +835,11 @@ void GameUserInterface::disableMovementKey(KeyCode keyCode)
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   if(gClientGame->isSuspended() && keyCode == KEY_SPACE)
-   {
-      unsuspendGame();
-      return;
-   }
+   //if(gClientGame->isSuspended() && keyCode == KEY_SPACE)
+   //{
+   //   unsuspendGame();
+   //   return;
+   //}
 
    S32 inputMode = gIniSettings.inputMode;
 
@@ -1717,14 +1721,14 @@ void GameUserInterface::suspendGame()
 {
    gClientGame->getConnectionToServer()->suspendGame();     // Tell server we're suspending
    gClientGame->suspendGame();                              // Suspend locally
+   gSuspendedInterface.activate();                          // And enter chat mode
 }
 
 
 void GameUserInterface::unsuspendGame()
 {
    gClientGame->unsuspendGame();                            // Unsuspend locally
-   gClientGame->getConnectionToServer()->unsuspendGame();   // Tell the client we're unsuspending
-   
+   gClientGame->getConnectionToServer()->unsuspendGame();   // Tell the server we're unsuspending
 }
 
 
