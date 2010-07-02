@@ -10,7 +10,7 @@
 ; General
 
 ;Name and file
-Name    "Bitfighter"                      ; App name
+Name    "Bitfighter"                               ; App name
 OutFile "Bitfighter-Installer-${curVersion}.exe"   ; Name of the installer file to write
 
 ;Default installation folder
@@ -88,7 +88,7 @@ Section "Install"
   File ..\exe\levelgen_helper_functions.lua
   File ..\exe\lua_helper_functions.lua
   
-  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%LOCALAPPDATA%\Bitfighter$\""
+  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%DOCUMENTS%\Bitfighter$\""
 
   File ".\Windows specific\OpenAL32.dll"     
   File ".\Windows specific\glut32.dll"
@@ -101,15 +101,15 @@ Section "Install"
   SetOutPath "$INSTDIR\sfx"
   File /r ".\sfx\*.wav"
 
-  SetOutPath "$LOCALAPPDATA\Bitfighter\levels"
+  SetOutPath "$DOCUMENTS\Bitfighter\levels"
   File /r ".\levels\*.level"  
   File /r ".\levels\*.levelgen"
 
-  SetOutPath "$LOCALAPPDATA\Bitfighter\robots"
+  SetOutPath "$DOCUMENTS\Bitfighter\robots"
   File /r ".\robots\*.bot" 
 
   
-  SetOutPath "$LOCALAPPDATA\Bitfighter\screenshots"
+  SetOutPath "$DOCUMENTS\Bitfighter\screenshots"
   File ".\screenshots\readme.txt"
   
   ;Store installation folder
@@ -125,12 +125,12 @@ Section "Install"
       WriteINIStr "$SMPROGRAMS\Bitfighter\Bitfighter Home Page.url" "InternetShortcut" "URL" "http://www.bitfighter.org/"
       CreateShortCut "$SMPROGRAMS\Bitfighter\Uninstall Bitfighter.lnk" "$INSTDIR\uninstall-bitfighter.exe"
       SetOutPath $INSTDIR
-      CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%LOCALAPPDATA%\Bitfighter$\""
+      CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%DOCUMENTS%\Bitfighter$\""
    NoStartMenu:
    
    MessageBox MB_YESNO|MB_ICONQUESTION "Would you like to add a desktop icon for Bitfighter?" IDNO NoDesktopIcon
       SetOutPath $INSTDIR
-      CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%LOCALAPPDATA%\Bitfighter$\""
+      CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%DOCUMENTS%\Bitfighter$\""
    NoDesktopIcon:
      
    SetOutPath $INSTDIR     
