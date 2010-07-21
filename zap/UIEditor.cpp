@@ -4396,13 +4396,36 @@ void WallSegmentManager::recomputeAllWallGeometry()
 {
    gEditorUserInterface.buildAllWallSegmentEdgesAndPoints();
 
+   //for(S32 i = 0; i < wallSegments.size(); i++)
+   //   wallSegments[i]->invalid = false;
+
    for(S32 i = 0; i < wallSegments.size() - 1; i++)
       for(S32 j = i + 1; j < wallSegments.size(); j++)
+      //{
          if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
          {
             clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
             clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
          }
+
+      //   // Check to see if there are any edges left -- if a wall segment is completely covered by another segment, 
+      //   // all edges will disappear, and it no longer serves any purpose
+      //   if(wallSegments[i]->edges.size() == 0)
+      //      wallSegments[i]->invalid = true;
+
+      //   if(wallSegments[j]->edges.size() == 0)
+      //      wallSegments[j]->invalid = true;
+      //}
+
+
+   //// Now delete any segments we marked as invalid -- we don't really need them any more, and they just get in the way
+   //for(S32 i = 0; i < wallSegments.size(); i++)
+   //   if(wallSegments[i]->invalid)
+   //   {
+   //      delete wallSegments[i];    // Destructor will remove segment from database
+   //      wallSegments.erase_fast(i);
+   //      i--;
+   //   }
 }
 
 
@@ -4426,7 +4449,7 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
    Rect allSegExtent;
 
    // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
-   for(S32 i = 0; i < item->extendedEndPoints.size() - 1; i += 2)
+   for(S32 i = 0; i < item->extendedEndPoints.size(); i += 2)
    {
       WallSegment *newSegment = new WallSegment(item->mId);    // Create the segment
       wallSegments.push_back(newSegment);                      // Add it to our master segment list
@@ -4524,6 +4547,7 @@ void WallSegmentManager::deleteAllSegments()
 void WallSegmentManager::deleteSegments(S32 owner)
 {
    S32 count = wallSegments.size();
+
    for(S32 i = 0; i < count; i++)
       if(wallSegments[i]->mOwner == owner)
       {
@@ -5059,7 +5083,7 @@ GridDatabase *WorldItem::getGridDatabase()
 
 
 bool WorldItem::getCollisionPoly(Vector<Point> &polyPoints)
-{
+{  /// ????
    if(index == ItemBarrierMaker)    // Barrier items will be represented in by their segments in the database
       return false;
 

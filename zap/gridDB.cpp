@@ -263,6 +263,9 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
 
       if(fillVector[i]->getCollisionPoly(poly))
       {
+         if(poly.size() == 0)    // This can happen in the editor when a wall segment is completely hidden by another
+            continue;
+
          Point normal;
          if(PolygonLineIntersect(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
          {
@@ -287,6 +290,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
          }
       }
    }
+
    if(retObject)
       surfaceNormal.normalize();
 
