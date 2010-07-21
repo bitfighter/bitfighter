@@ -73,8 +73,9 @@ const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 // Some colors
 
 extern Color gNexusOpenColor;
-extern Color gWallOutlineColor;
-extern Color gWallFillColor;
+extern Color WALL_OUTLINE_COLOR;
+extern Color GAME_WALL_FILL_COLOR;
+extern Color EDITOR_WALL_FILL_COLOR;
 
 
 static const Color inactiveSpecialAttributeColor = Color(.6, .6, .6);
@@ -1601,20 +1602,6 @@ void EditorUserInterface::renderVertex(VertexRenderStyles style, Point v, S32 nu
 }
 
 
-// Draw barriermMakers (walls) or lineItems
-void EditorUserInterface::renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines, bool selected, bool highlighted, S32 team, F32 alpha, bool convert)
-{
-   if(itemType == ItemBarrierMaker)
-      glColor(mShowingReferenceShip ? gWallFillColor : Color(.5, .5, 1), alpha);    
-   else if(itemType == ItemLineItem)
-      glColor(getTeamColor(team), alpha);
-   else
-      TNLAssert(false, "Invalid game item type!");
-
-   // Render wall fill
-   wallSegmentManager.renderWalls(convert, alpha);
-}
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 /*
@@ -1864,16 +1851,23 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
       }
    }
-   else if(item.geomType() == geomLine )   // Can barrierMaker (wall) or linework item
+   else if(item.index == ItemLineItem)
    {
-      if(!fillRendered)    // Put this in here so the walls will be rendered in the right layer-order
+      glColor(getTeamColor(item.team), alpha);
+      item.renderPolylineCenterline(alpha);
+
+      renderLinePolyVertices(item, alpha);
+   }
+   else if(item.index == ItemBarrierMaker)  
+   {
+      if(!fillRendered)    // All walls need to be rendered at the same time, but we only want to do them once
       {
-         renderPolylineFill(item.index, item.getVerts(), item.mRenderLineSegments, item.selected, 
-                            (item.litUp && vertexToLightUp == NONE), item.team, alpha);
-         fillRendered = true;  
+         wallSegmentManager.renderWalls(true, alpha);
+
+         fillRendered = true;  // Prevent re-rendering of walls this pass
       }  
 
-      if(!(mShowingReferenceShip && item.index == ItemBarrierMaker))
+      if(!mShowingReferenceShip)
          item.renderPolylineCenterline(alpha);
 
       renderLinePolyVertices(item, alpha);
@@ -4395,37 +4389,20 @@ GridDatabase *getGridDatabase()
 void WallSegmentManager::recomputeAllWallGeometry()
 {
    gEditorUserInterface.buildAllWallSegmentEdgesAndPoints();
+   clipAllWallEdges(wallSegments);
+}
 
-   //for(S32 i = 0; i < wallSegments.size(); i++)
-   //   wallSegments[i]->invalid = false;
 
+// Static method, used above and from instructions
+void WallSegmentManager::clipAllWallEdges(Vector<WallSegment *> &wallSegments)
+{
    for(S32 i = 0; i < wallSegments.size() - 1; i++)
       for(S32 j = i + 1; j < wallSegments.size(); j++)
-      //{
          if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
          {
             clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
             clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
          }
-
-      //   // Check to see if there are any edges left -- if a wall segment is completely covered by another segment, 
-      //   // all edges will disappear, and it no longer serves any purpose
-      //   if(wallSegments[i]->edges.size() == 0)
-      //      wallSegments[i]->invalid = true;
-
-      //   if(wallSegments[j]->edges.size() == 0)
-      //      wallSegments[j]->invalid = true;
-      //}
-
-
-   //// Now delete any segments we marked as invalid -- we don't really need them any more, and they just get in the way
-   //for(S32 i = 0; i < wallSegments.size(); i++)
-   //   if(wallSegments[i]->invalid)
-   //   {
-   //      delete wallSegments[i];    // Destructor will remove segment from database
-   //      wallSegments.erase_fast(i);
-   //      i--;
-   //   }
 }
 
 
@@ -4451,19 +4428,16 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
    // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
    for(S32 i = 0; i < item->extendedEndPoints.size(); i += 2)
    {
-      WallSegment *newSegment = new WallSegment(item->mId);    // Create the segment
-      wallSegments.push_back(newSegment);                      // Add it to our master segment list
+      WallSegment *newSegment = new WallSegment(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
+                                                item->width / getGridSize(), item->mId );    // Create the segment
+      wallSegments.push_back(newSegment);       // And add it to our master segment list
+   }
 
-      // Calculate segment corners by expanding the extended end points into a rectangle
-      expandCenterlineToOutline(item->extendedEndPoints[i], item->extendedEndPoints[i+1], 
-                                item->width / getGridSize(), newSegment->corners); 
+   for(S32 i = 0; i < wallSegments.size(); i++)
+   {
+      wallSegments[i]->addToDatabase();              // Add it to our spatial database
 
-      newSegment->resetEdges();                 // Recompute the edges based on our new corner points
-
-      Rect segExtent(newSegment->corners);
-      newSegment->setExtent(segExtent);         // Calculate a bounding box around the segment
-      newSegment->addToDatabase();              // Add it to our spatial database
-
+      Rect segExtent(wallSegments[i]->corners);      // Calculate a bounding box around the segment
       if(i == 0)
          allSegExtent.set(segExtent);
       else
@@ -4565,22 +4539,17 @@ void WallSegmentManager::renderWalls(bool convert, F32 alpha)
       gEditorUserInterface.setLevelToCanvasCoordConversion(convert);
    
       for(S32 i = 0; i < wallSegments.size(); i++)
-      {
-         glBegin(GL_POLYGON);
-            for(S32 j = 0; j < wallSegments[i]->corners.size(); j++)
-               glVertex(wallSegments[i]->corners[j]);
-         glEnd();
-      }
+         wallSegments[i]->renderFill();
     
       // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
-      glColor(gWallOutlineColor, alpha);
-      glBegin(GL_LINES);
-         for(S32 i = 0; i < wallSegments.size(); i++)
-            for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
-               glVertex(wallSegments[i]->edges[j]);
-      glEnd();
+      for(S32 i = 0; i < wallSegments.size(); i++)
+         wallSegments[i]->renderOutline(alpha);
+
    glPopMatrix();
 }
+
+
+
 
 
 // Clear any borders associated with the specified zone
@@ -5023,7 +4992,7 @@ void WorldItem::renderPolylineCenterline(F32 alpha)
    else
       glColor(gEditorUserInterface.getTeamColor(team), alpha);
 
-   glLineWidth(3);
+   glLineWidth(WALL_SPINE_WIDTH);
    renderPolyline();
    glLineWidth(gDefaultLineWidth);
 }
@@ -5302,6 +5271,20 @@ GridDatabase *WallSegment::getGridDatabase()
 }
 
 
+// Constructor
+WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 owner) 
+{ 
+   expandCenterlineToOutline(start, end, width, corners);   // Calculate segment corners by expanding the extended end points into a rectangle
+   resetEdges();                                            // Recompute the edges based on our new corner points
+
+   Rect extent(corners);
+   setExtent(extent); 
+
+   mOwner = owner; 
+   invalid = false; 
+}
+
+
 // Destructor
 WallSegment::~WallSegment()
 { 
@@ -5328,6 +5311,31 @@ void WallSegment::resetEdges()
    edges.push_back(corners[1]);    edges.push_back(corners[2]);      // Edge 2
    edges.push_back(corners[2]);    edges.push_back(corners[3]);      // Edge 3
    edges.push_back(corners[3]);    edges.push_back(corners[0]);      // Edge 4
+}
+
+
+void WallSegment::renderOutline(F32 alpha)
+{
+   glColor(WALL_OUTLINE_COLOR, alpha);
+
+   glBegin(GL_LINES);
+      for(S32 i = 0; i < edges.size(); i++)
+         glVertex(edges[i]);
+   glEnd();
+}
+
+
+void WallSegment::renderFill()
+{
+   // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
+   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && gEditorUserInterface.isShowingReferenceShip();
+
+   glColor(useGameColor ? GAME_WALL_FILL_COLOR : EDITOR_WALL_FILL_COLOR);
+   
+   glBegin(GL_POLYGON);
+      for(S32 i = 0; i < corners.size(); i++)
+         glVertex(corners[i]);
+   glEnd();
 }
 
 

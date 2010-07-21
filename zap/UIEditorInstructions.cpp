@@ -166,9 +166,9 @@ static ControlStringsEditor gControls1[] = {
          { "Center Display", "Z" },
          { "Toggle script results", "Ctrl-R" },
       { "-", NULL },       // Horiz. line
+   { "Editing", "HEADER" },
          { "Cut/Copy/Paste", "Ctrl-X/C/V"},
          { "Delete Selection", "Del" },
-      { "-", NULL },       // Horiz. line
          { "Undo", "Ctrl-Z" },
          { "Redo", "Ctrl-Shift-Z" },
          { NULL, NULL },      // End of col1
@@ -193,6 +193,7 @@ static ControlStringsEditor gControls1[] = {
 
 // For page 2 of basic instructions
 static ControlStringsEditor gControls2[] = {
+   { "Size & Rotation", "HEADER" },
          { "Flip Horiz/Vertical", "H, V" },
          { "Rotate about (0,0)", "R, Shift-R" },
          { "Arbitrary rotate", "Ctrl-Shift-R" },
@@ -309,7 +310,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
 
 static const char *wallInstructions[] =
 {
-   "Create walls with right mouse button",
+   "Create walls with right mouse button; hold [~] to create line",
    "Finish wall by left-clicking",
    "Drag and drop individual vertices or an entire wall",
    "Split wall at selected vertex with [/]",
@@ -320,7 +321,8 @@ static const char *wallInstructions[] =
 };
 
 
-extern void constructBarrierOutlinePoints(const Vector<Point> &verts, F32 width, Vector<Point> &barrierPoints);
+extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
+extern void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &points);
 
 void EditorInstructionsUserInterface::renderPageWalls()
 {
@@ -353,29 +355,52 @@ void EditorInstructionsUserInterface::renderPageWalls()
 
    if(mAnimStage > 6)
    {
-      Vector<Point> barPoints;
-      F32 width = 25;
-      //constructBarrierOutlinePoints(points, width, barPoints);  // Populates barPoints with points representing barrier
+      const F32 width = 25;
+     
+      // Extend end points --> populates extendedEndPoints
+      Vector<Point> extendedEndPoints;
+      constructBarrierEndPoints(points, width, extendedEndPoints);
 
-      gEditorUserInterface.renderPolylineFill(ItemBarrierMaker, points, barPoints, false, -1, 1, false);
+       Vector<WallSegment *> wallSegments;
+
+      // Create a series of WallSegments, each representing a sequential pair of vertices on our wall
+      for(S32 i = 0; i < extendedEndPoints.size(); i += 2)
+      {
+         WallSegment *newSegment = new WallSegment(extendedEndPoints[i], extendedEndPoints[i+1], width);    // Create a new segment
+         wallSegments.push_back(newSegment);                   // Add it to our segment list
+      }
+
+      WallSegmentManager::clipAllWallEdges(wallSegments);      // Remove interior wall outline fragments
+
+      for(S32 i = 0; i < wallSegments.size(); i++)
+         wallSegments[i]->renderFill();
+
+      for(S32 i = 0; i < wallSegments.size(); i++)
+         wallSegments[i]->renderOutline(1.0);
+
+      for(S32 i = 0; i < wallSegments.size(); i++)
+         delete wallSegments[i];
    }
 
    glColor(mAnimStage <= 11 ? Color(1,1,0) : gEditorUserInterface.getTeamColor(-1));
 
-   glLineWidth(3);
+   glLineWidth(WALL_SPINE_WIDTH);
 
    glBegin(GL_LINE_STRIP);
       for(S32 i = 0; i < points.size(); i++)
-         glVertex2f(points[i].x, points[i].y);
+         glVertex(points[i]);
    glEnd();
+
    glLineWidth(gDefaultLineWidth);
+
+
 
    for(S32 i = 0; i < points.size(); i++)
       if(i < (points.size() - ((mAnimStage > 6) ? 0 : 1) ) && !(i == 2 && (mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)))
          gEditorUserInterface.renderVertex(SelectedItemVertex, points[i], i);
       else if(mAnimStage == 9 || mAnimStage == 10 || mAnimStage == 11)
-         gEditorUserInterface.renderVertex(HighlightedVertex, points[i], i);
-      else
+         gEditorUserInterface.renderVertex(SelectedVertex, points[i], i);
+      else  // mAnimStage > 11, moving vertices about
          gEditorUserInterface.renderVertex(HighlightedVertex, points[i], -1);
 
    // And now some written instructions

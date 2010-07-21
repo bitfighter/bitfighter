@@ -69,7 +69,8 @@ enum ShowMode
 
 struct WallSegment : public DatabaseObject
 {
-   WallSegment(S32 owner = -1) { mOwner = owner; invalid = false; }
+public:
+   WallSegment(const Point &start, const Point &end, F32 width, S32 owner = -1);
    ~WallSegment();
 
    Vector<Point> edges;    
@@ -80,6 +81,9 @@ struct WallSegment : public DatabaseObject
 
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
+   
+   void renderOutline(F32 alpha);
+   void renderFill();
 
    ////////////////////
    //  DatabaseObject methods
@@ -147,6 +151,9 @@ enum GeomType {
 
 
 extern bool isConvex(const Vector<Point> &verts);
+
+const S32 WALL_SPINE_WIDTH = 3;     // Width of line representing centerline of barriers
+
 
 class WorldItem : public DatabaseObject
 {  
@@ -287,6 +294,7 @@ public:
 
    void buildWallSegmentEdgesAndPoints(WorldItem *item);
    void recomputeAllWallGeometry();
+   static void clipAllWallEdges(Vector<WallSegment *> &wallSegments);
  
    ////////////////
    // Render functions
@@ -485,6 +493,7 @@ public:
    Color getTeamColor(S32 team);     // Return a color based on team index (needed by editor instructions)
    bool isFlagGame(char *mGameType);
    bool isTeamFlagGame(char *mGameType);
+   bool isShowingReferenceShip() { return mShowingReferenceShip; }
 
    void clearUndoHistory();         // Wipe undo/redo history
 
@@ -503,8 +512,6 @@ public:
    bool mDraggingObjects;     // Should be private
 
    // Render walls & lineItems
-   void renderPolylineFill(GameItems itemType, const Vector<Point> &verts, const Vector<Point> &outlines,
-                           bool selected, bool highlighted, S32 team, F32 alpha = 1.0, bool convert = true);   
    void renderVertex(VertexRenderStyles style, Point v, S32 number, F32 alpha = 1, S32 size = 5);
 
    void setLevelToCanvasCoordConversion(bool convert = true);

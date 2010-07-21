@@ -227,24 +227,9 @@ void LineItem::render()
    //TNLAssert(mRenderPoints.size() % 4 == 0, "Invalid number of points in mRenderPoints vector!");
 
    glBegin(GL_LINE_STRIP); 
-   for(S32 i = 0; i < mPolyBounds.size(); i++)
-      glVertex(mPolyBounds[i]);
+      for(S32 i = 0; i < mPolyBounds.size(); i++)
+         glVertex(mPolyBounds[i]);
    glEnd();
-
-   //}
-   //else
-   //{
-   //   for(S32 i = 0; i < mRenderPoints.size(); i += 4)
-   //   { 
-   //      glBegin(GL_POLYGON);
-   //         glVertex(mRenderPoints[i]);
-   //         glVertex(mRenderPoints[i+1]);
-   //         glVertex(mRenderPoints[i+2]);
-   //         glVertex(mRenderPoints[i+3]);
-   //      glEnd();
-   //   }
-   //}
-
 }
 
 // This object should be drawn below others

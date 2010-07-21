@@ -88,7 +88,7 @@ Section "Install"
   File ..\exe\levelgen_helper_functions.lua
   File ..\exe\lua_helper_functions.lua
   
-  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%DOCUMENTS%\Bitfighter$\""
+  CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
 
   File ".\Windows specific\OpenAL32.dll"     
   File ".\Windows specific\glut32.dll"
@@ -125,12 +125,12 @@ Section "Install"
       WriteINIStr "$SMPROGRAMS\Bitfighter\Bitfighter Home Page.url" "InternetShortcut" "URL" "http://www.bitfighter.org/"
       CreateShortCut "$SMPROGRAMS\Bitfighter\Uninstall Bitfighter.lnk" "$INSTDIR\uninstall-bitfighter.exe"
       SetOutPath $INSTDIR
-      CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%DOCUMENTS%\Bitfighter$\""
+      CreateShortCut "$SMPROGRAMS\Bitfighter\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
    NoStartMenu:
    
    MessageBox MB_YESNO|MB_ICONQUESTION "Would you like to add a desktop icon for Bitfighter?" IDNO NoDesktopIcon
       SetOutPath $INSTDIR
-      CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"%DOCUMENTS%\Bitfighter$\""
+      CreateShortCut "$DESKTOP\Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
    NoDesktopIcon:
      
    SetOutPath $INSTDIR     
