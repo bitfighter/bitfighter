@@ -292,6 +292,16 @@ void GameUserInterface::render()
    }
 
    gClientGame->render();
+   
+   glColor4f(0, 0, 0, mProgressBarFadeTimer.getFraction());  
+   glEnable(GL_BLEND);
+   glBegin(GL_POLYGON);
+      glVertex2f(0, 0);
+      glVertex2f(canvasWidth, 0);
+      glVertex2f(canvasWidth, canvasHeight);
+      glVertex2f(0, canvasHeight);
+   glEnd();
+   glDisable(GL_BLEND);
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)
@@ -408,6 +418,7 @@ void GameUserInterface::renderProgressBar()
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
       glEnable(GL_BLEND);
+
       glColor4f(0, 1, 0, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
       // Outline
@@ -422,19 +433,17 @@ void GameUserInterface::renderProgressBar()
       // whole mechanism is used for is to display something to the user, this should work fine.
       F32 barWidth = mShowProgressBar ? ((F32) width * (F32) gClientGame->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
 
-      glBegin(GL_LINE_LOOP);
-         glVertex2f(left, canvasHeight - vertMargin);
-         glVertex2f(left + width, canvasHeight - vertMargin);
-         glVertex2f(left + width, canvasHeight - vertMargin - height);
-         glVertex2f(left, canvasHeight - vertMargin - height);
-      glEnd();
+      for(S32 i = 1; i >= 0; i--)
+      {
+         S32 w = i ? width : barWidth;
 
-      glBegin(GL_POLYGON);
-         glVertex2f(left, canvasHeight - vertMargin);
-         glVertex2f(left + barWidth, canvasHeight - vertMargin);
-         glVertex2f(left + barWidth, canvasHeight - vertMargin - height);
-         glVertex2f(left, canvasHeight - vertMargin - height);
-      glEnd();
+         glBegin(i ? GL_LINE_LOOP : GL_POLYGON);
+            glVertex2f(left, canvasHeight - vertMargin);
+            glVertex2f(left + w, canvasHeight - vertMargin);
+            glVertex2f(left + w, canvasHeight - vertMargin - height);
+            glVertex2f(left, canvasHeight - vertMargin - height);
+         glEnd();
+      }
 
       glDisable(GL_BLEND);
    }

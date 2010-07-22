@@ -1113,7 +1113,8 @@ void GameType::spawnRobot(Robot *robot)
 
 Point GameType::getSpawnPoint(S32 team)
 {
-   TNLAssert(mTeams[team].spawnPoints.size(), "No spawn points!");             // Game dies if there are no spawn points for a team.  Don't let this happen.
+   if(mTeams[team].spawnPoints.size() == 0)
+      return Point(0,0);
 
    S32 spawnIndex = TNL::Random::readI() % mTeams[team].spawnPoints.size();    // Pick random spawn point
    return mTeams[team].spawnPoints[spawnIndex];
@@ -1322,7 +1323,7 @@ extern Color gHostileTeamColor;
 // This method can be overridden by other game types that handle colors differently
 Color GameType::getTeamColor(S32 team)
 {
-   if(team == -1)
+   if(team == -1 || team >= mTeams.size())
       return gNeutralTeamColor;
    else if(team == -2)
       return gHostileTeamColor;
@@ -1750,18 +1751,24 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
 
 
 // Broadcast info about the current level... code gets run on client, obviously
-GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, S32 objectCount, bool levelHasLoadoutZone),
-                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount, levelHasLoadoutZone))
+GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
+                                                StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone),
+                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount, lx, ly, ux, uy, levelHasLoadoutZone))
 {
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
    mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
+
+   mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
 
    gClientGame->mObjectsLoaded = 0;                      // Reset item counter
    gGameUserInterface.mShowProgressBar = true;           // Show progress bar
+   gClientGame->setInCommanderMap(true);
+   gClientGame->resetZoomDelta();
+
    mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
 }
 
@@ -2012,7 +2019,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
-   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, mLevelHasLoadoutZone);
+   s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, 
+                   gServerWorldBounds.min.x, gServerWorldBounds.min.y, gServerWorldBounds.max.x, gServerWorldBounds.max.y, mLevelHasLoadoutZone);
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
@@ -2058,6 +2066,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    c2sSyncMessagesComplete(sequence);
 
    gGameUserInterface.mShowProgressBar = false;
+   gClientGame->setInCommanderMap(false);    // Will trigger a zooming in from cmap to the regular one
+   gClientGame->clearZoomDelta();
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
 

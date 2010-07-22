@@ -93,7 +93,7 @@ static SFXProfile sfxProfilesModern[] = {
  {  "ship_shield.wav",     false, 0.15f, true,  150, 500 },
  {  "ship_sensor.wav",     false, 0.15f, true,  150, 500 },
  {  "ship_repair.wav",     false, 0.15f, true,  150, 500 },
- {  "ship_cloak.wav",      false, 0.15f, true,  150, 500 },
+ {  "ship_cloak.wav",      false, 0.35f, true,  150, 500 },
 
  // Flag noises
  {  "flag_capture.wav",    true,  0.45f, false, 0,   0 },
@@ -166,7 +166,7 @@ static SFXProfile sfxProfilesClassic[] = {
  {  "ship_shield.wav",     false, 0.15f, true,  150, 500 },
  {  "ship_sensor.wav",     false, 0.15f, true,  150, 500 },
  {  "ship_repair.wav",     false, 0.15f, true,  150, 500 },
- {  "ship_cloak.wav",      false, 0.15f, true,  150, 500 },
+ {  "ship_cloak.wav",      false, 0.35f, true,  150, 500 },
 
  // Flag noises
  {  "flag_capture.wav",    true,  0.45f, false, 0,   0 },

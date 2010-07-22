@@ -1415,7 +1415,7 @@ void Ship::render(S32 layerIndex)
 
    GameConnection *conn = gClientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
-   S32 localPlayerTeam = conn ? conn->getControlObject()->getTeam() : Item::NO_TEAM;      // Only used to show cloaked teammates
+   S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
 
    F32 alpha = 1.0;
 

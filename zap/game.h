@@ -350,6 +350,7 @@ public:
    GameConnection *getConnectionToServer();
 
    bool getInCommanderMap() { return mInCommanderMap; }
+   void setInCommanderMap(bool inCommanderMap) { mInCommanderMap = inCommanderMap; }
 
    F32 getCommanderZoomFraction() { return mCommanderZoomDelta / F32(CommanderMapZoomTime); }
    Point worldToScreenPoint(Point p);
@@ -362,7 +363,8 @@ public:
    void renderSuspended();    // Render suspended game
 
    void renderOverlayMap();   // Render the overlay map in normal play mode
-   void resetZoomDelta() { mCommanderZoomDelta = CommanderMapZoomTime; }      // Used by teleporter
+   void resetZoomDelta() { mCommanderZoomDelta = CommanderMapZoomTime; } 
+   void clearZoomDelta() { mCommanderZoomDelta = 0; }
    bool isServer() { return false; }
    void idle(U32 timeDelta);
    void zoomCommanderMap();

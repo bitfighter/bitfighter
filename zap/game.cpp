@@ -216,7 +216,6 @@ Point Game::computePlayerVisArea(Ship *ship)
 {
    F32 fraction = ship->getSensorZoomFraction();
 
-   Point ret;
    Point regVis(PlayerHorizVisDistance, PlayerVertVisDistance);
    Point sensVis(PlayerSensorHorizVisDistance, PlayerSensorVertVisDistance);
 
@@ -1203,17 +1202,10 @@ static Vector<GameObject *> renderObjects;
 
 void ClientGame::renderCommander()
 {
-   GameObject *controlObject = mConnectionToServer->getControlObject();
-   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
-   if(!u)
-      return;
-
-   Point position = u->getRenderPos();
-
    F32 zoomFrac = getCommanderZoomFraction();
 
-   // Set up the view to show the whole level.
-   mWorldBounds = computeWorldObjectExtents(); // TODO: Cache this value!  ?  Or not?
+   // Set up the view to show the whole level
+   mWorldBounds = gGameUserInterface.mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : computeWorldObjectExtents(); 
 
    Point worldCenter = mWorldBounds.getCenter();
    Point worldExtents = mWorldBounds.getExtents();
@@ -1227,21 +1219,27 @@ void ClientGame::renderCommander()
    else
       worldExtents.x *= screenAspectRatio / aspectRatio;
 
-   Point offset = (worldCenter - position) * zoomFrac + position;
-   Point visSize = computePlayerVisArea(u) * 2;
+   glPushMatrix();
+
+   GameObject *controlObject = mConnectionToServer->getControlObject();
+   Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
+   
+   Point position = u ? u->getRenderPos() : Point(0,0);
+
+   Point visSize = u ? computePlayerVisArea(u) * 2 : worldExtents;
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
-   Point visScale(UserInterface::canvasWidth / modVisSize.x,
-                  UserInterface::canvasHeight / modVisSize.y );
-
-   glPushMatrix();
    glTranslatef(gScreenWidth / 2, gScreenHeight / 2, 0);    // Put (0,0) at the center of the screen
 
+   Point visScale(UserInterface::canvasWidth / modVisSize.x, UserInterface::canvasHeight / modVisSize.y );
    glScalef(visScale.x, visScale.y, 1);
+
+   Point offset = (worldCenter - position) * zoomFrac + position;
    glTranslatef(-offset.x, -offset.y, 0);
 
    if(zoomFrac < 0.95)
       drawStars(1 - zoomFrac, offset, modVisSize);
+ 
 
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects
    rawRenderObjects.clear();
@@ -1251,68 +1249,71 @@ void ClientGame::renderCommander()
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
-   // Get info about the current player
-   GameType *gt = gClientGame->getGameType();
-   S32 playerTeam = -1;
-
-   if(gt)
+   if(u)
    {
-      playerTeam = u->getTeam();
-      Color teamColor = gt->getTeamColor(playerTeam);
+      // Get info about the current player
+      GameType *gt = gClientGame->getGameType();
+      S32 playerTeam = -1;
 
-      for(S32 i = 0; i < renderObjects.size(); i++)
+      if(gt)
       {
-         // Render ship visibility range, and that of our teammates
-         if(renderObjects[i]->getObjectTypeMask() & (ShipType | RobotType))
+         playerTeam = u->getTeam();
+         Color teamColor = gt->getTeamColor(playerTeam);
+
+         for(S32 i = 0; i < renderObjects.size(); i++)
          {
-            Ship *ship = dynamic_cast<Ship *>(renderObjects[i]);
-
-            // Get team of this object
-            S32 ourTeam = ship->getTeam();
-            if((ourTeam == playerTeam && getGameType()->isTeamGame()) || ship == u)  // On our team (in team game) || the ship is us
+            // Render ship visibility range, and that of our teammates
+            if(renderObjects[i]->getObjectTypeMask() & (ShipType | RobotType))
             {
-               Point p = ship->getRenderPos();
-               Point visExt = computePlayerVisArea(ship);
+               Ship *ship = dynamic_cast<Ship *>(renderObjects[i]);
 
-               glColor(teamColor * zoomFrac * 0.35);
+               // Get team of this object
+               S32 ourTeam = ship->getTeam();
+               if((ourTeam == playerTeam && getGameType()->isTeamGame()) || ship == u)  // On our team (in team game) || the ship is us
+               {
+                  Point p = ship->getRenderPos();
+                  Point visExt = computePlayerVisArea(ship);
 
-               glBegin(GL_POLYGON);
-                  glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y + visExt.y);
-                  glVertex2f(p.x - visExt.x, p.y + visExt.y);
-               glEnd();
+                  glColor(teamColor * zoomFrac * 0.35);
+
+                  glBegin(GL_POLYGON);
+                     glVertex2f(p.x - visExt.x, p.y - visExt.y);
+                     glVertex2f(p.x + visExt.x, p.y - visExt.y);
+                     glVertex2f(p.x + visExt.x, p.y + visExt.y);
+                     glVertex2f(p.x - visExt.x, p.y + visExt.y);
+                  glEnd();
+               }
             }
          }
-      }
 
-      Vector<DatabaseObject *> spyBugObjects;
-      mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldBounds);
+         Vector<DatabaseObject *> spyBugObjects;
+         mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldBounds);
 
-      // Render spy bug visibility range second, so ranges appear above ship scanner range
-      for(S32 i = 0; i < spyBugObjects.size(); i++)
-      {
-         if(spyBugObjects[i]->getObjectTypeMask() & SpyBugType)
+         // Render spy bug visibility range second, so ranges appear above ship scanner range
+         for(S32 i = 0; i < spyBugObjects.size(); i++)
          {
-            SpyBug *sb = dynamic_cast<SpyBug *>(spyBugObjects[i]);
-
-            // Use the following if this crashes
-            // if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : StringTableEntry(""), getGameType()->isTeamGame());
-            if(sb->isVisibleToPlayer( playerTeam, getGameType()->mLocalClient->name, getGameType()->isTeamGame() ))
+            if(spyBugObjects[i]->getObjectTypeMask() & SpyBugType)
             {
-               const Point &p = sb->getRenderPos();
-               Point visExt(gSpyBugRange, gSpyBugRange);
-               glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
+               SpyBug *sb = dynamic_cast<SpyBug *>(spyBugObjects[i]);
 
-               glBegin(GL_POLYGON);
-                  glVertex2f(p.x - visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y - visExt.y);
-                  glVertex2f(p.x + visExt.x, p.y + visExt.y);
-                  glVertex2f(p.x - visExt.x, p.y + visExt.y);
-               glEnd();
+               // Use the following if this crashes
+               // if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : StringTableEntry(""), getGameType()->isTeamGame());
+               if(sb->isVisibleToPlayer( playerTeam, getGameType()->mLocalClient->name, getGameType()->isTeamGame() ))
+               {
+                  const Point &p = sb->getRenderPos();
+                  Point visExt(gSpyBugRange, gSpyBugRange);
+                  glColor(teamColor * zoomFrac * 0.45);     // Slightly different color than that used for ships
 
-               glColor(teamColor * 0.8);     // Draw a marker in the middle
-               drawCircle(position, 2);
+                  glBegin(GL_POLYGON);
+                     glVertex2f(p.x - visExt.x, p.y - visExt.y);
+                     glVertex2f(p.x + visExt.x, p.y - visExt.y);
+                     glVertex2f(p.x + visExt.x, p.y + visExt.y);
+                     glVertex2f(p.x - visExt.x, p.y + visExt.y);
+                  glEnd();
+
+                  glColor(teamColor * 0.8);     // Draw a marker in the middle
+                  drawCircle(u->getRenderPos(), 2);
+               }
             }
          }
       }
@@ -1412,6 +1413,9 @@ void ClientGame::renderOverlayMap()
 
 void ClientGame::renderNormal()
 {
+    if(!hasValidControlObject())
+      return;
+
    GameObject *controlObject = mConnectionToServer->getControlObject();
    Ship *u = dynamic_cast<Ship *>(controlObject);      // This is the local player's ship
    if(!u)
@@ -1468,12 +1472,16 @@ void ClientGame::renderNormal()
 
 void ClientGame::render()
 {
-   if(!hasValidControlObject())
+   bool renderObjectsWhileLoading = true;
+
+   if(!renderObjectsWhileLoading && !hasValidControlObject())
       return;
 
-   if(mGameSuspended)
+   if(gGameUserInterface.mShowProgressBar)
       renderCommander();
-   else if(mCommanderZoomDelta)
+   else if(mGameSuspended)
+      renderCommander();
+   else if(mCommanderZoomDelta > 0)
       renderCommander();
    else
       renderNormal();
