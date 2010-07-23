@@ -956,10 +956,9 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
          barrier.width = Barrier::MAX_BARRIER_WIDTH;
 
-
-
       for(S32 i = 2; i < argc; i++)
          barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
+
       if(barrier.verts.size() > 3)
       {
          barrier.solid = false;
@@ -2066,8 +2065,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    c2sSyncMessagesComplete(sequence);
 
    gGameUserInterface.mShowProgressBar = false;
-   gClientGame->setInCommanderMap(false);    // Will trigger a zooming in from cmap to the regular one
-   gClientGame->clearZoomDelta();
+   gClientGame->setInCommanderMap(false);    // Start game in regular mode
+   gClientGame->clearZoomDelta();            // No in zoom effect
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
 

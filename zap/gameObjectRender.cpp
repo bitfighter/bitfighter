@@ -1278,6 +1278,17 @@ void renderEnergyItem(const Point &pos)
 }
 
 
+extern Color WALL_OUTLINE_COLOR;
+
+void renderWallEdges(const Vector<Point> &edges, F32 alpha)
+{
+   glColor(WALL_OUTLINE_COLOR, alpha);
+   glBegin(GL_LINES);
+      for(S32 i = 0; i < edges.size(); i++)
+         glVertex(edges[i]);
+   glEnd();
+}
+
 
 void renderSpeedZone(Vector<Point> points, U32 time)
 {

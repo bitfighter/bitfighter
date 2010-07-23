@@ -73,7 +73,6 @@ const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 // Some colors
 
 extern Color gNexusOpenColor;
-extern Color WALL_OUTLINE_COLOR;
 extern Color GAME_WALL_FILL_COLOR;
 extern Color EDITOR_WALL_FILL_COLOR;
 
@@ -160,8 +159,9 @@ void EditorUserInterface::populateDock()
       S32 yPos = 35;
       const S32 spacer = 35;
 
-      mDockItems.push_back(WorldItem(ItemRepair, Point(xPos - 10, yPos), mCurrentTeam, true, 0, 0));
-      mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
+      // Reinstate in 014!
+      mDockItems.push_back(WorldItem(ItemRepair, Point(xPos /*- 10*/, yPos), mCurrentTeam, true, 0, 0));
+      //mDockItems.push_back(WorldItem(ItemEnergy, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
 
       yPos += spacer;
       mDockItems.push_back(WorldItem(ItemForceField, Point(xPos, yPos), mCurrentTeam, true, 0, 0));
@@ -4745,8 +4745,8 @@ void WorldItem::decreaseWidth(S32 amt)
    
    width -= ((S32) width % amt) ? (S32) width % amt : amt;      // Dirty, ugly thing
 
-   if(width < Barrier::MAX_BARRIER_WIDTH)
-      width = Barrier::MAX_BARRIER_WIDTH;
+   if(width < Barrier::MIN_BARRIER_WIDTH)
+      width = Barrier::MIN_BARRIER_WIDTH;
 
    onGeomChanged();
 }
@@ -4857,6 +4857,11 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
       if(itemDef[index].hasWidth)
       {
          width = atof(argv[arg]);
+
+         // Enforce max wall width so things are consistent between editor and game
+         if(index == ItemBarrierMaker)
+            width = min(width, Barrier::MAX_BARRIER_WIDTH);
+
          arg++;
       }
 
@@ -5316,12 +5321,7 @@ void WallSegment::resetEdges()
 
 void WallSegment::renderOutline(F32 alpha)
 {
-   glColor(WALL_OUTLINE_COLOR, alpha);
-
-   glBegin(GL_LINES);
-      for(S32 i = 0; i < edges.size(); i++)
-         glVertex(edges[i]);
-   glEnd();
+   renderWallEdges(edges, alpha);
 }
 
 

@@ -306,7 +306,6 @@ bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 }
 
 
-extern Color WALL_OUTLINE_COLOR;
 extern Color GAME_WALL_FILL_COLOR;
 
 void Barrier::render(S32 layerIndex)
@@ -356,12 +355,8 @@ void Barrier::render(S32 layerIndex)
          }
       }
 
-      // Actual outline rendering code here:
-      glColor(WALL_OUTLINE_COLOR);
-      glBegin(GL_LINES);
-         for(S32 i = 0; i < mRenderLineSegments.size(); i++)
-            glVertex(mRenderLineSegments[i]);
-      glEnd();
+      renderWallEdges(mRenderLineSegments);
+
    }
 }
 

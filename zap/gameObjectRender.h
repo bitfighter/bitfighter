@@ -129,6 +129,9 @@ extern void renderEnergyItem(const Point &pos, bool forEditor, Color overrideCol
 extern void renderEnergySymbol(Color overrideColor, F32 alpha);      // Render lightning bolt symbol
 extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
 
+// Wall rendering
+void renderWallEdges(const Vector<Point> &edges, F32 alpha = 1.0);
+
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
 void renderSpeedZone(Vector<Point>, U32 time);
 
