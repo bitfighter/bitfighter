@@ -394,8 +394,8 @@ extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm protocol (must be int)
-#define CS_PROTOCOL_VERSION 24     // Change this when releasing an incompatible cs protocol (must be int)  --> bumped up for beta7
-#define BUILD_VERSION 833          // Version of the game according to SVN, will be unique every release (must be int)
+#define CS_PROTOCOL_VERSION 24     // Change this when releasing an incompatible cs protocol (must be int)
+#define BUILD_VERSION 838          // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "013-beta-7"     // Change this with every release -- for display purposes only, string, 
                                           // will also be used for name of installer on windows, so be careful with spaces
 };
