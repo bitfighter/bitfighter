@@ -75,8 +75,20 @@ public:
    /// collide always returns true for Barrier objects.
    bool collide(GameObject *otherObject) { return true; }
 
+   // Takes a list of vertices and converts them into a list of lines representing the edges of an object
+   static void resetEdges(const Vector<Point> &corners, Vector<Point> &edges);
+
+   // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
+   static void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
+
    /// clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
-   //void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints);
+   static void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints);
+
+   static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
+
+   // Clean up edge geometry and get barriers ready for proper rendering
+   void prepareRenderingGeometry();
+   
 
    TNL_DECLARE_CLASS(Barrier);
 };

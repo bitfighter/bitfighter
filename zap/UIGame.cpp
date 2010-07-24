@@ -292,16 +292,19 @@ void GameUserInterface::render()
    }
 
    gClientGame->render();
-   
-   glColor4f(0, 0, 0, mProgressBarFadeTimer.getFraction());  
-   glEnable(GL_BLEND);
-   glBegin(GL_POLYGON);
-      glVertex2f(0, 0);
-      glVertex2f(canvasWidth, 0);
-      glVertex2f(canvasWidth, canvasHeight);
-      glVertex2f(0, canvasHeight);
-   glEnd();
-   glDisable(GL_BLEND);
+
+   // Provide fade in effect as level begins; doesn't work quite right because game is so busy at this point that 
+   // it fades in jerkily.
+
+   //glColor4f(0, 0, 0, mProgressBarFadeTimer.getFraction());  
+   //glEnable(GL_BLEND);
+   //glBegin(GL_POLYGON);
+   //   glVertex2f(0, 0);
+   //   glVertex2f(canvasWidth, 0);
+   //   glVertex2f(canvasWidth, canvasHeight);
+   //   glVertex2f(0, canvasHeight);
+   //glEnd();
+   //glDisable(GL_BLEND);
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)

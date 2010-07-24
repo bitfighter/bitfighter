@@ -145,9 +145,13 @@ public:
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
 
    Game(const Address &theBindAddress);      // Constructor
-   virtual ~Game() { /* do nothing */ };
+   virtual ~Game() { /* do nothing */ };     // Destructor
+   
    Rect computeWorldObjectExtents();
+   Rect computeBarrierExtents();
+
    Point computePlayerVisArea(Ship *ship);
+
 
    void addToDeleteList(GameObject *theObject, U32 delay);
 
@@ -327,8 +331,8 @@ class ClientGame : public Game
 {
 private:
    enum {
-      NumStars = 256,      // 256 stars should be enough for anybody!   -- Bill Gates
-      CommanderMapZoomTime = 350,
+      NumStars = 256,               // 256 stars should be enough for anybody!   -- Bill Gates
+      CommanderMapZoomTime = 350,   // Transition time between regular map and commander's map; in ms, higher = slower
    };
 
    Point mStars[NumStars];
@@ -374,6 +378,8 @@ public:
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }
+
+   void prepareBarrierRenderingGeometry();      // Get walls ready for display
 };
 
 ////////////////////////////////////////

@@ -95,10 +95,6 @@ static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 
 static Vector<WorldItem> *mLoadTarget;
 
-extern void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &points);
-extern void clipRenderLinesToPoly(const Vector<Point> &polyVerts, Vector<Point> &lineSegments);
-
-
 enum EntryMode {
    EntryID,
    EntryAngle,
@@ -4400,8 +4396,8 @@ void WallSegmentManager::clipAllWallEdges(Vector<WallSegment *> &wallSegments)
       for(S32 j = i + 1; j < wallSegments.size(); j++)
          if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
          {
-            clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
-            clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
+            Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
+            Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
          }
 }
 
@@ -4498,8 +4494,8 @@ void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
 
          if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
          {
-            clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
-            clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
+            Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
+            Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
          }
       }
       
@@ -4951,14 +4947,12 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
 }
 
 
-extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
-
 void WorldItem::processEndPoints()
 {
    if(index != ItemBarrierMaker)
       return;
 
-   constructBarrierEndPoints(mVerts, width / getGridSize(), extendedEndPoints);
+   Barrier::constructBarrierEndPoints(mVerts, width / getGridSize(), extendedEndPoints);
 }
 
 
@@ -5279,8 +5273,11 @@ GridDatabase *WallSegment::getGridDatabase()
 // Constructor
 WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 owner) 
 { 
-   expandCenterlineToOutline(start, end, width, corners);   // Calculate segment corners by expanding the extended end points into a rectangle
-   resetEdges();                                            // Recompute the edges based on our new corner points
+   // Calculate segment corners by expanding the extended end points into a rectangle
+   Barrier::expandCenterlineToOutline(start, end, width, corners);   
+
+   // Recompute the edges based on our new corner points
+   resetEdges();                                            
 
    Rect extent(corners);
    setExtent(extent); 
@@ -5310,12 +5307,7 @@ WallSegment::~WallSegment()
 // Resets edges of a wall segment to their factory settings; i.e. 4 simple walls representing a simple outline
 void WallSegment::resetEdges()
 {
-   edges.clear();
-
-   edges.push_back(corners[0]);    edges.push_back(corners[1]);      // Edge 1
-   edges.push_back(corners[1]);    edges.push_back(corners[2]);      // Edge 2
-   edges.push_back(corners[2]);    edges.push_back(corners[3]);      // Edge 3
-   edges.push_back(corners[3]);    edges.push_back(corners[0]);      // Edge 4
+   Barrier::resetEdges(corners, edges);
 }
 
 

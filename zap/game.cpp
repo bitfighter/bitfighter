@@ -193,12 +193,15 @@ void Game::removeFromGameObjectList(GameObject *theObject)
    TNLAssert(0, "Object not in game's list!");
 }
 
+
+// Delete all objects of specified type
 void Game::deleteObjects(U32 typeMask)
 {
    for(S32 i = 0; i < mGameObjects.size(); i++)
       if(mGameObjects[i]->getObjectTypeMask() & typeMask)
          mGameObjects[i]->deleteObject(0);
 }
+
 
 Rect Game::computeWorldObjectExtents()
 {
@@ -208,6 +211,18 @@ Rect Game::computeWorldObjectExtents()
    Rect theRect = mGameObjects[0]->getExtent();
    for(S32 i = 1; i < mGameObjects.size(); i++)
       theRect.unionRect(mGameObjects[i]->getExtent());
+   return theRect;
+}
+
+
+Rect Game::computeBarrierExtents()
+{
+   Rect theRect;
+
+   for(S32 i = 0; i < mGameObjects.size(); i++)
+      if(mGameObjects[i]->getObjectTypeMask() & BarrierType)
+         theRect.unionRect(mGameObjects[i]->getExtent());
+
    return theRect;
 }
 
@@ -1006,6 +1021,19 @@ void ClientGame::idle(U32 timeDelta)
 }
 
 
+// Client only
+void ClientGame::prepareBarrierRenderingGeometry()
+{
+   for(S32 i = 0; i < mGameObjects.size(); i++)
+      if(mGameObjects[i]->getObjectTypeMask() & BarrierType)
+      {
+         Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
+         if(barrier)
+            barrier->prepareRenderingGeometry();
+      }
+}
+
+
 // Fire keyboard event to suppress screen saver
 void ClientGame::supressScreensaver()
 {
@@ -1472,7 +1500,7 @@ void ClientGame::renderNormal()
 
 void ClientGame::render()
 {
-   bool renderObjectsWhileLoading = true;
+   bool renderObjectsWhileLoading = false;
 
    if(!renderObjectsWhileLoading && !hasValidControlObject())
       return;

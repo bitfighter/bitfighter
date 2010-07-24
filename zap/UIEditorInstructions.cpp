@@ -27,6 +27,7 @@
 #include "game.h"
 #include "input.h"
 #include "config.h"
+#include "barrier.h"            
 #include "UIEditorInstructions.h"
 #include "UIMenus.h"
 #include "UIGame.h"
@@ -321,9 +322,6 @@ static const char *wallInstructions[] =
 };
 
 
-extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
-extern void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &points);
-
 void EditorInstructionsUserInterface::renderPageWalls()
 {
    // Draw animated creation of walls
@@ -359,7 +357,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
      
       // Extend end points --> populates extendedEndPoints
       Vector<Point> extendedEndPoints;
-      constructBarrierEndPoints(points, width, extendedEndPoints);
+      Barrier::constructBarrierEndPoints(points, width, extendedEndPoints);
 
        Vector<WallSegment *> wallSegments;
 

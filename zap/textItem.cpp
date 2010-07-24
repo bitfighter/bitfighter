@@ -207,7 +207,6 @@ LineItem::LineItem()
    mObjectTypeMask |= CommandMapVisType;
 }
 
-extern void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
 void LineItem::render()
 {

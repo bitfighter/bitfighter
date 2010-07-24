@@ -2013,13 +2013,16 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
       gGameUserInterface.displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
 }
 
-// Runs after the server knows that the ghost is available and addressable via the getGhostIndex()
+// Runs after the server knows that the client is available and addressable via the getGhostIndex()
 // Runs on server, obviously
 void GameType::onGhostAvailable(GhostConnection *theConnection)
 {
    NetObject::setRPCDestConnection(theConnection);    // Focus all RPCs on client only
+
+   Rect barrierExtents = gServerGame->computeBarrierExtents();
+
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, 
-                   gServerWorldBounds.min.x, gServerWorldBounds.min.y, gServerWorldBounds.max.x, gServerWorldBounds.max.y, mLevelHasLoadoutZone);
+                   barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, mLevelHasLoadoutZone);
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
@@ -2047,9 +2050,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    s2cAddBarriers(v, 0, false);
 
    for(S32 i = 0; i < mBarriers.size(); i++)
-   {
       s2cAddBarriers(mBarriers[i].verts, mBarriers[i].width, mBarriers[i].solid);
-   }
+
    s2cSetTimeRemaining(mGameTimer.getCurrent());      // Tell client how much time left in current game
    s2cSetGameOver(mGameOver);
    s2cSyncMessagesComplete(theConnection->getGhostingSequence());
@@ -2064,13 +2066,17 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);
 
+   gClientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
+
    gGameUserInterface.mShowProgressBar = false;
    gClientGame->setInCommanderMap(false);    // Start game in regular mode
    gClientGame->clearZoomDelta();            // No in zoom effect
+   
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
 
 
+// Client acknowledges that it has recieved s2cSyncMessagesComplete, and is ready to go
 GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
@@ -2082,6 +2088,7 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 }
 
 
+// Gets called multiple times as barriers are added
 GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid), (barrier, width, solid))
 {
    if(!barrier.size())
