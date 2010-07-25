@@ -4977,6 +4977,7 @@ Point WorldItem::snapEngineeredObject(const Point &pos)
       snapped = false;
       return snappedPos;
    }
+
 }
 
 
@@ -5284,6 +5285,9 @@ WallSegment::WallSegment(const Point &start, const Point &end, F32 width, S32 ow
 
    mOwner = owner; 
    invalid = false; 
+
+   // Set some things required by DatabaseObject
+   mObjectTypeMask = BarrierType;
 }
 
 

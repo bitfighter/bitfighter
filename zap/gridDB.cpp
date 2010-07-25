@@ -109,6 +109,7 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
          for(BucketEntry *walk = mBuckets[x & BucketMask][y & BucketMask]; walk; walk = walk->nextInBucket)
          {
             DatabaseObject *theObject = walk->theObject;
+
             if(theObject->mLastQueryId != mQueryId &&
                (theObject->getObjectTypeMask() & typeMask) &&
                theObject->extent.intersects(extents) )
