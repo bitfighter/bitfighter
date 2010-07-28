@@ -47,7 +47,7 @@ LoadoutItem gLoadoutModules[] = {
    { KEY_3, BUTTON_3, ModuleRepair,  "Repair Module",         "", ModuleNone },
    { KEY_4, BUTTON_4, ModuleSensor,  "Enhanced Sensor",       "(makes Spy Bug Placer available)", ModuleNone },
    { KEY_5, BUTTON_5, ModuleCloak,   "Cloak Field Modulator", "", ModuleNone },
-   { KEY_6, BUTTON_6, ModuleEngineer,   "Engineer", "", ModuleNone },
+   //{ KEY_6, BUTTON_6, ModuleEngineer,   "Engineer", "", ModuleNone },
    { KEY_UNKNOWN, KEY_UNKNOWN, 0, NULL, NULL, ModuleNone },
 };
 
