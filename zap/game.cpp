@@ -977,7 +977,8 @@ void ClientGame::idle(U32 timeDelta)
       GameObject *controlObject = mConnectionToServer->getControlObject();
       Ship *ship = dynamic_cast<Ship *>(controlObject);
 
-      if(ship && ship->getActualVel().len() > 1000)      // 1000 is completely arbitrary, but it seems to work well...
+      const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
+      if(ship && ship->getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
          theMove->left = theMove->right = theMove->up = theMove->down = 0;
 
       mConnectionToServer->addPendingMove(theMove);
@@ -992,14 +993,14 @@ void ClientGame::idle(U32 timeDelta)
          if(mGameObjects[i] == controlObject)
          {
             mGameObjects[i]->setCurrentMove(*theMove);
-            mGameObjects[i]->idle(GameObject::ClientIdleControlMain);
+            mGameObjects[i]->idle(GameObject::ClientIdleControlMain);  // on client, object is our control object
          }
          else
          {
             Move m = mGameObjects[i]->getCurrentMove();
             m.time = timeDelta;
             mGameObjects[i]->setCurrentMove(m);
-            mGameObjects[i]->idle(GameObject::ClientIdleMainRemote);
+            mGameObjects[i]->idle(GameObject::ClientIdleMainRemote);    // on client, object is not our control object
          }
       }
 

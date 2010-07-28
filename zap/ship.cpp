@@ -498,7 +498,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    mSensorZoomTimer.update(mCurrentMove.time);
    mCloakTimer.update(mCurrentMove.time);
 
-   //bool engineerWasActive = isModuleActive(ModuleEngineer);
+   bool engineerWasActive = isModuleActive(ModuleEngineer);
 
    if(path == GameObject::ServerIdleControlFromClient ||
       path == GameObject::ClientIdleControlMain ||
@@ -565,6 +565,7 @@ bool Ship::findRepairTargets()
    return mRepairTargets.size() != 0;
 }
 
+
 // Repairs ALL repair targets found above
 void Ship::repairTargets()
 {
@@ -590,7 +591,7 @@ void Ship::processEnergy()
       Ship::EnergyBoostDrain,
       Ship::EnergySensorDrain,
       Ship::EnergyRepairDrain,
-      0,    // ModuleEngineer
+      Ship::EnergyEngineerCost,    // ModuleEngineer
       Ship::EnergyCloakDrain,
    };
 
@@ -610,10 +611,8 @@ void Ship::processEnergy()
 
    // No boost if we're not moving.
     if(mModuleActive[ModuleBoost] &&
-       mCurrentMove.up == 0 &&
-       mCurrentMove.down == 0 &&
-       mCurrentMove.left == 0 &&
-       mCurrentMove.right == 0)
+       mCurrentMove.up == 0 && mCurrentMove.down == 0 &&
+       mCurrentMove.left == 0 && mCurrentMove.right == 0)
    {
       mModuleActive[ModuleBoost] = false;
    }
@@ -767,7 +766,7 @@ void Ship::updateModuleSounds()
       SFXShipBoost,
       SFXSensorActive,
       SFXRepairActive,
-      -1, // No engineer pack, yo!
+      SFXUIBoop, // Need better sound...
       SFXCloakActive,
    };
 

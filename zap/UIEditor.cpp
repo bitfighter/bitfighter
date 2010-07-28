@@ -4855,7 +4855,7 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
          width = atof(argv[arg]);
 
          // Enforce max wall width so things are consistent between editor and game
-         if(index == ItemBarrierMaker && width < Barrier::MAX_BARRIER_WIDTH)
+         if(index == ItemBarrierMaker && width > Barrier::MAX_BARRIER_WIDTH)
             width = Barrier::MAX_BARRIER_WIDTH;
 
          arg++;
