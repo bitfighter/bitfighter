@@ -4781,7 +4781,7 @@ S32 WorldItem::getRadius(F32 scale)
    else if(index == ItemResource)
       return ResourceItem::RESOURCE_ITEM_RADIUS;
    else if(index == ItemAsteroid)
-      return Asteroid::ASTEROID_RADIUS * .75f;
+      return S32((F32)Asteroid::ASTEROID_RADIUS * 0.75f);
    else if(index == ItemTurret && renderFull(scale))
       return 25;
    else return NONE;    // Use default
@@ -4855,8 +4855,8 @@ bool WorldItem::processArguments(S32 argc, const char **argv)
          width = atof(argv[arg]);
 
          // Enforce max wall width so things are consistent between editor and game
-         if(index == ItemBarrierMaker)
-            width = min(width, Barrier::MAX_BARRIER_WIDTH);
+         if(index == ItemBarrierMaker && width < Barrier::MAX_BARRIER_WIDTH)
+            width = Barrier::MAX_BARRIER_WIDTH;
 
          arg++;
       }

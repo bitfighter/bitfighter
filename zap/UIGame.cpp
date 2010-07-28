@@ -440,7 +440,7 @@ void GameUserInterface::renderProgressBar()
       // a disconcerting effect, as if the level did not fully load.  Rather than waste any more time on this problem, we'll just
       // fill in the status bar while it's fading, to make it look like the level fully loaded.  Since the only thing that this
       // whole mechanism is used for is to display something to the user, this should work fine.
-      F32 barWidth = mShowProgressBar ? ((F32) width * (F32) gClientGame->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
+      S32 barWidth = mShowProgressBar ? S32((F32) width * (F32) gClientGame->mObjectsLoaded / (F32) gt->mObjectsExpected) : width;
 
       for(S32 i = 1; i >= 0; i--)
       {

@@ -119,11 +119,11 @@ Color AbstractChat::getNextColor()
       Color(0.86,0.078,1),    Color(0.78,0.08,0.52),
       Color(0.93,0.5,0),      Color(0.63,0.32,0.18),
       Color(0.5,1,1),         Color(1,0.73,1),
-      Color(0.48,0.41,0.93),  NULL
+      Color(0.48,0.41,0.93),  0
    };
 
    mColorPtr++;
-   if(colorList[mColorPtr] == NULL)
+   if(colorList[mColorPtr] == 0)
       mColorPtr = 0;
 
    return colorList[mColorPtr];
