@@ -498,8 +498,6 @@ void Ship::idle(GameObject::IdleCallPath path)
    mSensorZoomTimer.update(mCurrentMove.time);
    mCloakTimer.update(mCurrentMove.time);
 
-   bool engineerWasActive = isModuleActive(ModuleEngineer);
-
    if(path == GameObject::ServerIdleControlFromClient ||
       path == GameObject::ClientIdleControlMain ||
       path == GameObject::ClientIdleControlReplay)
@@ -508,7 +506,7 @@ void Ship::idle(GameObject::IdleCallPath path)
       processWeaponFire();
       processEnergy();
    }
-
+     
    if(path == GameObject::ClientIdleMainRemote)
    {
       // For ghosts, find some repair targets for rendering the repair effect

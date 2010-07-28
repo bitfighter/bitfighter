@@ -1827,8 +1827,6 @@ void Robot::idle(GameObject::IdleCallPath path)
    mSensorZoomTimer.update(mCurrentMove.time);
    mCloakTimer.update(mCurrentMove.time);
 
-   bool engineerWasActive = isModuleActive(ModuleEngineer);
-
    if(path == GameObject::ServerIdleMainLoop)    // Was ClientIdleControlReplay
    {
       // Process weapons and energy on controlled object objects

@@ -205,12 +205,36 @@ void Game::deleteObjects(U32 typeMask)
 
 Rect Game::computeWorldObjectExtents()
 {
-   if(!mGameObjects.size())
+    if(!mGameObjects.size())
       return Rect();
 
-   Rect theRect = mGameObjects[0]->getExtent();
-   for(S32 i = 1; i < mGameObjects.size(); i++)
+   // All this rigamarole is to make world extent correct for levels that do not overlap (0,0)
+   // The problem is that the GameType is treated as an object, and has the extent (0,0), and
+   // a mask of UnknownType.  Fortunately, the GameType tends to be first, so what we do is skip
+   // all objects until we find an UnknownType object, then start creating our extent from there.
+   // We have to assign theRect to an extent object initially to avoid getting the default coords
+   // of (0,0) that are assigned by the constructor.
+   Rect theRect;
+
+   S32 first = -1;
+
+   // Look for first non-UnknownType object
+   for(S32 i = 0; i < mGameObjects.size() && first == -1; i++)
+   {
+      if(mGameObjects[i]->getObjectTypeMask() != UnknownType)
+      {
+         theRect = mGameObjects[i]->getExtent();
+         first = i;
+      }
+   }
+
+   if(first == -1)      // No suitable objects found
+      return Rect();
+
+   // Now start unioning the extents of remaining objects.  Should be all of them.
+   for(S32 i = first + 1; i < mGameObjects.size(); i++)
       theRect.unionRect(mGameObjects[i]->getExtent());
+
    return theRect;
 }
 

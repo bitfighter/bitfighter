@@ -1292,6 +1292,7 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 
 
 extern md5wrapper md5;
+extern void engClientCreateObject(GameConnection *connection, U32 object);
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
@@ -1497,7 +1498,6 @@ void GameUserInterface::processCommand(Vector<string> &words)
       changeServerNameDescr(gc, GameConnection::DeleteLevel, words);
    }
 
-
    else if(words[0] == "suspend")
    {
       U32 players = gClientGame->getPlayerCount();
@@ -1508,6 +1508,13 @@ void GameUserInterface::processCommand(Vector<string> &words)
       }
       suspendGame();    // Do the deed
    }
+
+   // TODO:  This is wrong, and will probably crash with a remote server
+   /*else if(words[0] == "engf")
+      engClientCreateObject(gClientGame->getConnectionToServer(), EngineeredForceField);
+   else if(words[0] == "engt")
+      engClientCreateObject(gClientGame->getConnectionToServer(), EngineeredTurret);*/
+
 
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
