@@ -153,7 +153,8 @@ void GameObject::damageObject(DamageInfo *theInfo)
 
 static Vector<DatabaseObject *> fillVector;
 
-void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask, DamageInfo &info, F32 force)
+// Returns number of ships hit
+S32 GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask, DamageInfo &info, F32 force)
 {
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance
@@ -166,6 +167,9 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
    // Ghosts can't do damage.
    if(isGhost())
       info.damageAmount = 0;
+
+
+   S32 shipsHit = 0;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -225,7 +229,12 @@ void GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemas
          localInfo.damageAmount *= localInfo.damageSelfMultiplier;
 
       foundObject->damageObject(&localInfo);
+
+      if(foundObject->getObjectTypeMask() & (ShipType | RobotType))
+         shipsHit++;
    }
+
+   return shipsHit;
 }
 
 void GameObject::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &ext)

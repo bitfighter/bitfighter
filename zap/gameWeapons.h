@@ -35,6 +35,8 @@ using namespace TNL;
 namespace Zap
 {
 
+
+// Note that WeaponType can be used as an array index
 enum WeaponType
 {
    WeaponPhaser = 0,
@@ -49,10 +51,6 @@ enum WeaponType
    InvalidWeapon,
 };
 
-enum WeaponConsts
-{
-   MaxFireDelay = 2048,
-};
 
 // Note that not all WeaponTypes are Projectile weapons, so don't have ProjectileTypes
 enum ProjectileType

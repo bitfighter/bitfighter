@@ -277,6 +277,8 @@ public:
 
    virtual void damageObject(DamageInfo *theInfo);
 
+   static void computeMaxFireDelay();
+
    void writeControlState(BitStream *stream);
    void readControlState(BitStream *stream);
 

@@ -80,6 +80,9 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
       mTeam = shooter->getTeam();
       mKillString = shooter->getKillString();
    }
+   else
+      setOwner(NULL);
+
    mType = gWeapons[type].projectileType;
    mWeaponType = type;
 }
@@ -168,6 +171,9 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
       theInfo.damageSelfMultiplier = gWeapons[mWeaponType].damageSelfMultiplier;
 
       hitObject->damageObject(&theInfo);
+
+      if(hitShip && mShooter.isValid() && mShooter->getControllingClient().isValid())
+         mShooter->getControllingClient()->getClientRef()->mStatistics.countHit(mWeaponType);
    }
 
    mTimeRemaining = 0;
@@ -348,11 +354,14 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
 
    mTimeRemaining = gWeapons[WeaponBurst].projLiveTime;
    exploded = false;
+
    if(shooter)
    {
       setOwner(shooter->getOwner());
       mTeam = shooter->getTeam();
    }
+   else
+      setOwner(NULL);
 
    mRadius = 7;
    mMass = 1;
@@ -371,6 +380,9 @@ void GrenadeProjectile::idle(IdleCallPath path)
 
    if(isGhost()) return;
 
+
+   // Here on down is server only
+
    // Update TTL
    S32 deltaT = mCurrentMove.time;
    if(path == GameObject::ClientIdleMainRemote)
@@ -385,7 +397,7 @@ void GrenadeProjectile::idle(IdleCallPath path)
 }
 
 
-U32  GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 GrenadeProjectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 ret = Parent::packUpdate(connection, updateMask, stream);
    stream->writeFlag(exploded);
@@ -464,7 +476,11 @@ void GrenadeProjectile::explode(Point pos, WeaponType weaponType)
       info.damageType           = DamageTypeArea;
       info.damageSelfMultiplier = gWeapons[weaponType].damageSelfMultiplier;
 
-      radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
+      S32 hits = radiusDamage(pos, InnerBlastRadius, OuterBlastRadius, DamagableTypes, info);
+
+      if(getOwner())
+         for(S32 i = 0; i < hits; i++)
+            getOwner()->getClientRef()->mStatistics.countHit(mWeaponType);
    }
    exploded = true;
 }
@@ -505,7 +521,10 @@ Mine::Mine(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
       mTeam = planter->getTeam();
    }
    else
+   {
       mTeam = -2;    // Hostile to all, as mines generally are!
+      setOwner(NULL);
+   }
 
    mArmed = false;
    mKillString = "mine";      // Triggers special message when player killed
@@ -679,7 +698,10 @@ SpyBug::SpyBug(Point pos, Ship *planter) : GrenadeProjectile(pos, Point())
       mTeam = planter->getTeam();
    }
    else
+   {
       mTeam = -1;
+      setOwner(NULL);
+   }
 }
 
 

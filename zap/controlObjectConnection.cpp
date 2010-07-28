@@ -40,6 +40,8 @@ ControlObjectConnection::ControlObjectConnection()
    mMoveTimeCredit = 0;
 }
 
+
+// Only gets run on the server
 void ControlObjectConnection::setControlObject(GameObject *theObject)
 {
    if(controlObject.isValid())
@@ -174,7 +176,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
          firstMoveIndex++;
       }
    }
-   else
+   else     // Is connection to server
    {
       bool controlObjectValid = bstream->readFlag();
 

@@ -40,6 +40,7 @@
 #include "gameWeapons.h"
 #include "gameObjectRender.h"
 #include "config.h"
+#include "statistics.h"
 
 #include "glutInclude.h"
 
@@ -383,7 +384,10 @@ void Ship::processWeaponFire()
          mFireTimer.reset(gWeapons[curWeapon].fireDelay);
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);
 
-         if(!isGhost())
+         if(getControllingClient().isValid())
+            getControllingClient()->getClientRef()->mStatistics.countShot(curWeapon);
+
+         if(!isGhost())    // i.e. server only
          {
             Point dir = getAimVector();
             createWeaponProjectiles(curWeapon, dir, mMoveState[ActualState].pos, mMoveState[ActualState].vel, CollisionRadius - 2, this);
@@ -421,7 +425,7 @@ void Ship::controlMoveReplayComplete()
 
 void Ship::idle(GameObject::IdleCallPath path)
 {
-   // don't process exploded ships
+   // Don't process exploded ships
    if(hasExploded)
       return;
 
@@ -576,6 +580,7 @@ void Ship::repairTargets()
    for(S32 i = 0; i < mRepairTargets.size(); i++)
       mRepairTargets[i]->damageObject(&di);
 }
+
 
 void Ship::processEnergy()
 {
@@ -787,6 +792,18 @@ void Ship::updateModuleSounds()
 }
 
 
+static U32 MaxFireDelay = 0;
+
+// static method, only run during init on both client and server
+void Ship::computeMaxFireDelay()
+{
+   for(S32 i = 0; i < WeaponCount; i++)
+   {
+      if(gWeapons[i].fireDelay > MaxFireDelay)
+         MaxFireDelay = gWeapons[i].fireDelay;
+   }
+}
+
 void Ship::writeControlState(BitStream *stream)
 {
    stream->write(mMoveState[ActualState].pos.x);
@@ -814,7 +831,7 @@ void Ship::readControlState(BitStream *stream)
 
 // Writes the player's ghost update from the server to the client
 // Any changes here need to be reflected in Ship::unpackUpdate
-U32  Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    GameConnection *gameConnection = (GameConnection *) connection;
 

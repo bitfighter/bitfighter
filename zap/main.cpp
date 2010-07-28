@@ -717,7 +717,7 @@ void idle()
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
 
-   if(integerTime >= 10)
+   if(integerTime >= 10)         // Thus max frame rate = 100
    {
       lastTimer = currentTimer;
       unusedFraction = timeElapsed - integerTime;
@@ -1687,6 +1687,7 @@ int main(int argc, char **argv)
    processStartupParams();                   // And merge command line params and INI settings
    SFXObject::init();
 
+   Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server

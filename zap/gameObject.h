@@ -221,7 +221,7 @@ public:
 
    virtual bool collide(GameObject *hitObject) { return false; }
 
-   void radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask, DamageInfo &info, F32 force = 2000.f);
+   S32 radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask, DamageInfo &info, F32 force = 2000.f);
    virtual void damageObject(DamageInfo *damageInfo);
 
    bool onGhostAdd(GhostConnection *theConnection);

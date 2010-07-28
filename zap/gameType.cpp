@@ -37,6 +37,8 @@
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 
+#include "statistics.h"
+
 
 #include "glutInclude.h"
 
@@ -56,6 +58,7 @@ namespace Zap
 #ifdef TNL_OS_MAC_OSX
 const S32 GameType::gMaxTeams;
 #endif
+
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
@@ -77,8 +80,6 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 ////////////////////////////////////////   _                 _       _ 
 ////////////////////////////////////////  /  | o  _  ._ _|_ |_)  _ _|_ 
 ////////////////////////////////////////  \_ | | (/_ | | |_ | \ (/_ |  
-
-class PlayerInfo;
 
 // Constructor
 ClientRef::ClientRef()    
@@ -327,6 +328,7 @@ void GameType::idle(GameObject::IdleCallPath path)
 
       mGameTimer.update(deltaT);
       mZoneGlowTimer.update(deltaT);
+
       return;  // We're out of here!
    }
 
@@ -1047,21 +1049,13 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
 }
 
 
+// Find client object given a player name
 ClientRef *GameType::findClientRef(const StringTableEntry &name)
 {
    for(S32 clientIndex = 0; clientIndex < mClientList.size(); clientIndex++)
       if(mClientList[clientIndex]->name == name)
          return mClientList[clientIndex];
    return NULL;
-}
-
- 
-Color GameType::getClientColor(const StringTableEntry &clientName)
-{
-   ClientRef *cl = findClientRef(clientName);
-   if(cl)
-      return mTeams[cl->getTeam()].color;
-   return Color();
 }
 
 

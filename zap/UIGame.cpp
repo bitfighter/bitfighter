@@ -222,7 +222,7 @@ void GameUserInterface::idle(U32 timeDelta)
    }
 
    // Time to recalc FPS?
-   if (mFPSVisible)        // Only bother if we're displaying the value...
+   if(mFPSVisible)        // Only bother if we're displaying the value...
    {
       if(timeDelta > mRecalcFPSTimer)
       {
@@ -327,6 +327,12 @@ void GameUserInterface::render()
       {
          glColor3f(1, 1, 1);
          drawStringf(canvasWidth - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
+         /*drawStringf(canvasWidth - horizMargin - 220, vertMargin + 25, 20, "S: %d,%d | H: %d,%d", 
+               gServerGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getShots(),
+               gClientGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getShots(),
+
+               gServerGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getHits(),
+               gClientGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getHits() );*/
       }
 
       // Render QuickChat / Loadout menus

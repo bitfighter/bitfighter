@@ -32,6 +32,7 @@
 #include "teamInfo.h"
 #include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
+#include "statistics.h"
 #include <string>
 
 namespace Zap
@@ -67,6 +68,8 @@ public:
 
    F32 getRating() { return mRating; }
    void setRating(F32 rating) { mRating = rating; }
+
+   Statistics mStatistics;        // Player statistics tracker
 
    LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
@@ -278,7 +281,6 @@ public:
    GameType();    // Constructor
    void countTeamPlayers();
 
-   Color getClientColor(const StringTableEntry &clientName);
    ClientRef *findClientRef(const StringTableEntry &name);
 
    bool processArguments(S32 argc, const char **argv);

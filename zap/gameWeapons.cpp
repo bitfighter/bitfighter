@@ -30,9 +30,6 @@
 namespace Zap
 {
 
-// do not add a weapon with a fire delay > Ship::MaxFireDelay
-// or update the constant.
-
 WeaponInfo gWeapons[] =    //                 Fire   Min    Drain Proj  Proj  Dam-   Damage to Can damage Projectile
 {                          //    Name         Delay  Energy Energy Vel. Life  age   self mult.   teammate  Type
    WeaponInfo( StringTableEntry("Phaser"),      100,   500,   500,  600, 1000, 0.21f,   0,       false,   ProjectilePhaser ),

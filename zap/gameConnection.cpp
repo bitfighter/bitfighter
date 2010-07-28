@@ -153,7 +153,7 @@ void GameConnection::setClientRef(ClientRef *theRef)
 }
 
 
-// See comment above about why mClientRef should never be NULL
+// See comment above about why mClientRef should never be NULL.  Actually, it can be null while server is quitting the game.
 ClientRef *GameConnection::getClientRef()
 {
    return mClientRef;
