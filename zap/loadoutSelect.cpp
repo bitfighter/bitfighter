@@ -47,14 +47,16 @@ LoadoutItem gLoadoutModules[] = {
    { KEY_3, BUTTON_3, ModuleRepair,  "Repair Module",         "", ModuleNone },
    { KEY_4, BUTTON_4, ModuleSensor,  "Enhanced Sensor",       "(makes Spy Bug Placer available)", ModuleNone },
    { KEY_5, BUTTON_5, ModuleCloak,   "Cloak Field Modulator", "", ModuleNone },
-   //{ KEY_6, BUTTON_6, ModuleEngineer,   "Engineer", "", ModuleNone },
+#if ENABLE_ENGINEER == 1
+   { KEY_6, BUTTON_6, ModuleEngineer,   "Engineer", "", ModuleNone },
+#endif
    { KEY_UNKNOWN, KEY_UNKNOWN, 0, NULL, NULL, ModuleNone },
 };
 
 LoadoutItem gLoadoutWeapons[] = {
    { KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone },
    { KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone },
-   { KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone },
+   { KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone }, 
    { KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone },
    { KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone },
 // { KEY_6, 5, WeaponHeatSeeker, "Heat Seeker"},      // Need to make changes below to support this
@@ -107,7 +109,7 @@ void LoadoutHelper::render()
    UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSize, "%s", helpStr);
    yPos += fontSize + 4;
 
-   LoadoutItem *list;
+   LoadoutItem *list; 
    list = getList(mCurrentIndex);
 
    for(U32 i = 0; list[i].text; i++)

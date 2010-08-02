@@ -220,15 +220,13 @@ Rect Game::computeWorldObjectExtents()
 
    // Look for first non-UnknownType object
    for(S32 i = 0; i < mGameObjects.size() && first == -1; i++)
-   {
       if(mGameObjects[i]->getObjectTypeMask() != UnknownType)
       {
          theRect = mGameObjects[i]->getExtent();
          first = i;
       }
-   }
 
-   if(first == -1)      // No suitable objects found
+   if(first == -1)      // No suitable objects found, return empty extents
       return Rect();
 
    // Now start unioning the extents of remaining objects.  Should be all of them.

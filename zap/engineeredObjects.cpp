@@ -37,27 +37,34 @@ namespace Zap
 
 static Vector<DatabaseObject *> fillVector;
 
-// Not used at the moment...
-void engClientCreateObject(GameConnection *connection, U32 object)
+
+// Runs on server
+bool engClientCreateObject(GameConnection *connection, U32 object)
 {
    Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());
    if(!ship)
-      return;
+      return false;
 
-   if(!ship->carryingResource())
-      return;
+   if(!ship->carryingResource())    // Ship needs a resource
+      return false;
 
+   // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
    Point startPoint = ship->getActualPos();
    Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;
 
    F32 collisionTime;
    Point collisionNormal;
 
-   GameObject *hitObject = ship->findObjectLOS(BarrierType,MoveObject::ActualState, startPoint, endPoint, 
+   GameObject *hitObject = ship->findObjectLOS(BarrierType, MoveObject::ActualState, startPoint, endPoint, 
                                                collisionTime, collisionNormal);
 
-   if(!hitObject)
-      return;
+   if(!hitObject)    // No appropriate walls found, sorry!
+   {
+      static const StringTableEntry message("Could not find a suitable wall for mounting the item.");
+      connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
+
+      return false;
+   }
 
    Point deployPosition = startPoint + (endPoint - startPoint) * collisionTime;
 
@@ -65,6 +72,7 @@ void engClientCreateObject(GameConnection *connection, U32 object)
    deployPosition += collisionNormal;
 
    EngineeredObject *deployedObject = NULL;
+
    switch(object)
    {
       case EngineeredTurret:
@@ -73,41 +81,50 @@ void engClientCreateObject(GameConnection *connection, U32 object)
       case EngineeredForceField:
          deployedObject = new ForceFieldProjector(ship->getTeam(), deployPosition, collisionNormal);
          break;
+      default:
+         return false;
    }
-   deployedObject->setOwner(ship);
 
+   deployedObject->setOwner(connection);
    deployedObject->computeExtent();
+
    if(!deployedObject || !deployedObject->checkDeploymentPosition())
    {
-      static StringTableEntry message("Unable to deploy in that location.");
+      static const StringTableEntry message("Unable to deploy in that location.");
 
       connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
       delete deployedObject;
-      return;
+      return false;
    }
+
    if(!ship->engineerBuildObject())
    {
-      static StringTableEntry message("Not enough energy to build object.");
+      static const StringTableEntry message("Not enough energy to build object.");
 
       connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
       delete deployedObject;
-      return;
+      return false;
    }
+
    deployedObject->addToGame(gServerGame);
    deployedObject->onEnabled();
-   Item *theItem = ship->unmountResource();
 
-   deployedObject->setResource(theItem);
+   Item *resource = ship->unmountResource();
+
+   deployedObject->setResource(resource);
+
+   return true;
 }
+
 
 // Constructor
 EngineeredObject::EngineeredObject(S32 team, Point anchorPoint, Point anchorNormal)
 {
-   mHealth = 1.f;
+   mHealth = 1.0f;
    mTeam = team;
    mOriginalTeam = mTeam;
    mAnchorPoint = anchorPoint;
-   mAnchorNormal= anchorNormal;
+   mAnchorNormal = anchorNormal;
    mIsDestroyed = false;
    mHealRate = 0;
 
@@ -122,7 +139,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 
    mTeam = atoi(argv[0]);
    mOriginalTeam = mTeam;
-   if(mTeam == -1)      // Neutral object starts with no health, can be repaired by anyone
+   if(mTeam == -1)      // Neutral object starts with no health, can be repaired and claimed by anyone
       mHealth = 0;
    
    Point pos;
@@ -136,8 +153,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    }
 
    // Find the mount point:
-   Point normal;
-   Point anchor;
+   Point normal, anchor;
 
    if(!findAnchorPointAndNormal(getGridDatabase(), pos, 1, true, anchor, normal))
       return false;      // Found no mount point
@@ -185,12 +201,6 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
    }
 
    return closestWall;
-}
-
-
-void EngineeredObject::setOwner(Ship *owner)
-{
-   mOwner = owner;
 }
 
 
@@ -286,20 +296,17 @@ void EngineeredObject::computeExtent()
 {
    Vector<Point> v;
    getCollisionPoly(v);
-   Rect r(v[0], v[0]);
-   for(S32 i = 1; i < v.size(); i++)
-      r.unionPoint(v[i]);
+   Rect r(v);
+
    setExtent(r);
 }
 
 
 void EngineeredObject::explode()
 {
-   enum {
-      NumShipExplosionColors = 12,
-   };
+   const S32 EXPLOSION_COLOR_COUNT = 12;
 
-   static Color ShipExplosionColors[NumShipExplosionColors] = {
+   static Color ExplosionColors[EXPLOSION_COLOR_COUNT] = {
    Color(1, 0, 0),
    Color(0.9, 0.5, 0),
    Color(1, 1, 1),
@@ -316,16 +323,12 @@ void EngineeredObject::explode()
 
    SFXObject::play(SFXShipExplode, getActualPos(), Point());
 
-   F32 a, b;
+   F32 a = TNL::Random::readF() * 0.4 + 0.5;
+   F32 b = TNL::Random::readF() * 0.2 + 0.9;
+   F32 c = TNL::Random::readF() * 0.15 + 0.125;
+   F32 d = TNL::Random::readF() * 0.2 + 0.9;
 
-   a = TNL::Random::readF() * 0.4 + 0.5;
-   b = TNL::Random::readF() * 0.2 + 0.9;
-
-   F32 c, d;
-   c = TNL::Random::readF() * 0.15 + 0.125;
-   d = TNL::Random::readF() * 0.2 + 0.9;
-
-   FXManager::emitExplosion(getActualPos(), 0.65, ShipExplosionColors, NumShipExplosionColors);
+   FXManager::emitExplosion(getActualPos(), 0.65, ExplosionColors, EXPLOSION_COLOR_COUNT);
    FXManager::emitBurst(getActualPos(), Point(a,c) * 0.6, Color(1,1,0.25), Color(1,0,0));
    FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6, Color(1,1,0), Color(0,1,1));
 
@@ -380,23 +383,28 @@ bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2)
 }
 
 
+// Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
+// a wall or another engineered item
 bool EngineeredObject::checkDeploymentPosition()
 {
    Vector<DatabaseObject *> foundObjects;
-   Vector<Point> polyBounds;
-   getCollisionPoly(polyBounds);
+   Vector<Point> thisBounds;
+   getCollisionPoly(thisBounds);
 
    Rect queryRect = getExtent();
    gServerGame->getGridDatabase()->findObjects(BarrierType | EngineeredType, foundObjects, queryRect);
+
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
-      Vector<Point> compareBounds;
-      dynamic_cast<GameObject *>(foundObjects[i])->getCollisionPoly(compareBounds);
-      if(PolygonsIntersect(polyBounds, compareBounds))
-         return false;
+      Vector<Point> foundObjectBounds;
+      dynamic_cast<GameObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
+
+      if(PolygonsIntersect(thisBounds, foundObjectBounds))     // Do they intersect?
+         return false;     // Bad location
    }
-   return true;
+   return true;            // Good location
 }
+
 
 U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -407,6 +415,7 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
       stream->write(mAnchorNormal.x);
       stream->write(mAnchorNormal.y);
    }
+
    if(stream->writeFlag(updateMask & TeamMask))
       stream->write(mTeam);
 
@@ -417,6 +426,7 @@ U32 EngineeredObject::packUpdate(GhostConnection *connection, U32 updateMask, Bi
    }
    return 0;
 }
+
 
 void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
@@ -432,15 +442,18 @@ void EngineeredObject::unpackUpdate(GhostConnection *connection, BitStream *stre
    }
    if(stream->readFlag())
       stream->read(&mTeam);
+
    if(stream->readFlag())
    {
       mHealth = stream->readFloat(6);
       bool wasDestroyed = mIsDestroyed;
       mIsDestroyed = stream->readFlag();
+
       if(mIsDestroyed && !wasDestroyed && !initial)
          explode();
    }
 }
+
 
 void EngineeredObject::healObject(S32 time)
 {
@@ -448,6 +461,7 @@ void EngineeredObject::healObject(S32 time)
       return;
 
    F32 prevHealth = mHealth;
+
    if(mHealTimer.update(time))
    {
       mHealth += .1;

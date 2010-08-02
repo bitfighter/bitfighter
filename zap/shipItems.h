@@ -48,6 +48,7 @@ enum EngineerBuildObjects
 {
    EngineeredTurret,
    EngineeredForceField,
+   EngineeredObjectCount
 };
 
 };

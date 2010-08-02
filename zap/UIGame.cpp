@@ -1292,7 +1292,6 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 
 
 extern md5wrapper md5;
-extern void engClientCreateObject(GameConnection *connection, U32 object);
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
@@ -1509,12 +1508,10 @@ void GameUserInterface::processCommand(Vector<string> &words)
       suspendGame();    // Do the deed
    }
 
-   // TODO:  This is wrong, and will probably crash with a remote server
-   /*else if(words[0] == "engf")
-      engClientCreateObject(gClientGame->getConnectionToServer(), EngineeredForceField);
-   else if(words[0] == "engt")
-      engClientCreateObject(gClientGame->getConnectionToServer(), EngineeredTurret);*/
-
+   else if(ENABLE_ENGINEER && words[0] == "engf")
+      gc->c2sEngineerDeployObject(EngineeredForceField);
+   else if(ENABLE_ENGINEER && words[0] == "engt")
+      gc->c2sEngineerDeployObject(EngineeredTurret);
 
    else
       displayMessage(gCmdChatColor, "!!! Invalid command: %s", words[0].c_str());
@@ -1549,6 +1546,12 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/setservername");
    mChatCmds.push_back("/setserverdescr");
    mChatCmds.push_back("/deletecurrentlevel");
+
+   if(ENABLE_ENGINEER)
+   {
+      mChatCmds.push_back("/engf");
+      mChatCmds.push_back("/engt");
+   }
 }
 
 

@@ -51,9 +51,9 @@ GameObject::GameObject()
 }
 
 
-void GameObject::setOwner(GameConnection *c)
+void GameObject::setOwner(GameConnection *connection)
 {
-   mOwner = c;
+   mOwner = connection;
 }
 
 

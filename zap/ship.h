@@ -145,7 +145,7 @@ public:
       EnergyRepairDrain = 15000,
       EnergySensorDrain = 8000,
       EnergyCloakDrain = 8000,
-      EnergyEngineerCost = 75000,
+      EnergyEngineerCost = 75000,         // Energy consumed when using engineer module
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
@@ -222,6 +222,7 @@ public:
    {
       if(mEnergy < EnergyEngineerCost)
          return false;
+
       mEnergy -= EnergyEngineerCost;
       return true;
    }

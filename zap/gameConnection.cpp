@@ -30,6 +30,7 @@
 #include "config.h"        // For gIniSettings support
 #include "IniFile.h"       // For CIniFile def
 #include "playerInfo.h"
+#include "shipItems.h"     // For EngineerBuildObjects enum
 
 #include "UI.h"
 #include "UIEditor.h"
@@ -214,7 +215,27 @@ void GameConnection::changeParam(const char *param, ParamType type)
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+extern bool engClientCreateObject(GameConnection *connection, U32 object);
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type), (type), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+{
+   if(engClientCreateObject(this, type))
+   {
+      // Announce the build
+      StringTableEntry msg( "%e0 has engineered a %e1." );
+      Vector<StringTableEntry> e;
+      e.push_back(getClientName());
+      e.push_back(type == EngineeredTurret ? "turret" : "force field");
+   
+      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+         walk->s2cDisplayMessageE(ColorAqua, SFXNone, msg, e);
+   }
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    // If gAdminPassword is blank, no one can get admin permissions except the local host, if there is one...
    if(gAdminPassword != "" && !strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), pass))

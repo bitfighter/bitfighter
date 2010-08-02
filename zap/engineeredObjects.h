@@ -33,8 +33,6 @@
 namespace Zap
 {
 
-extern void engClientCreateObject(GameConnection *connection, U32 object);
-
 class EngineeredObject : public GameObject, public LuaItem
 {
 private:
@@ -42,9 +40,7 @@ private:
 
 protected:
    F32 mHealth;
-   //Color mTeamColor;   ok to delete
    SafePtr<Item> mResource;
-   SafePtr<Ship> mOwner;
    Point mAnchorPoint;
    Point mAnchorNormal;
    bool mIsDestroyed;
@@ -80,7 +76,6 @@ public:
 
    void explode();
    bool isDestroyed() { return mIsDestroyed; }
-   void setOwner(Ship *owner);    
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 

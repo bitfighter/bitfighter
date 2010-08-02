@@ -159,6 +159,7 @@ This change will resolve many installation and permissions issues.
 <li>Fixed textItem bounds miscalculation that caused large text to "jump" onto screen</li>
 <li>Fixed /dcoord display position bug</li>
 <li>Fixed robot bug reporting incorrect team for flags</li>
+<li>Fixed extent bug when computing extents of levels that do not overlap (0,0)</li>
 
 */
 

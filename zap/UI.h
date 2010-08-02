@@ -42,6 +42,9 @@ using namespace std;
 namespace Zap
 {
 
+
+#define ENABLE_ENGINEER 0
+
 static const float gDefaultLineWidth = 2.0f;
 
 const S32 gScreenHeight = 600;

@@ -137,23 +137,6 @@ void Ship::initialize(Point &pos)
 // Push a LuaShip proxy onto the stack
 void Ship::push(lua_State *L)
 {
-   //LuaShip *luaship;
-
-   //lua_getglobal(L, "_lookupShipInDirectory");
-   //lua_pcall(L, 0, 1, 0)   // Passing 0 params, getting 1 back
-
-   //if(lua_isnil(L, 1))     // Didn't find one
-   //{
-   //   lua_pop(L, 1);       // Get rid of the nil!
-
-      //luaship = new LuaShip(this);
-   //   lua_pushlightuserdata(L, luaship);
-   //   lua_pushlightuserdata(L, this);
-   //   storeShipInWeakTable(L, this, luaship);   // Store luaship in Lua table, using "this" as key
-   //}
-   //else
-   //   luaship = lua_getref
-
    Lunar<LuaShip>::push(L, &luaProxy, false);     // true ==> Lua will delete it's reference to this object when it's done with it
 }
 
@@ -269,7 +252,6 @@ void Ship::findObjectsUnderShip(GameObjectType type)
 }
 
 
-
 extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
 // Returns the zone in question if this ship is in a zone of type zoneType
@@ -331,7 +313,6 @@ bool Ship::isOnObject(GameObject *object)
    else
       return false;
 }
-
 
 
  // Returns vector for aiming a weapon based on direction ship is facing
@@ -589,7 +570,7 @@ void Ship::processEnergy()
       Ship::EnergyBoostDrain,
       Ship::EnergySensorDrain,
       Ship::EnergyRepairDrain,
-      Ship::EnergyEngineerCost,    // ModuleEngineer
+      0,    // ModuleEngineer, costs no energy to use
       Ship::EnergyCloakDrain,
    };
 

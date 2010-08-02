@@ -29,6 +29,7 @@
 
 #include "sfx.h"
 #include "controlObjectConnection.h"
+#include "shipItems.h"     // For EngineerBuildObjects enum
 #include "tnlNetConnection.h"
 #include "timer.h"
 #include <time.h>
@@ -158,12 +159,14 @@ public:
    void setGotPermissionsReply(bool gotReply) { mGotPermissionsReply = gotReply; }
    bool gotPermissionsReply() { return mGotPermissionsReply; }
 
-   // Chage passwords on the server
-   void changeParam(const char *param, ParamType type);
-
-
+   // Suspend/unsuspend game
    TNL_DECLARE_RPC(c2sSuspendGame, (bool suspend));
    TNL_DECLARE_RPC(s2cUnsuspend, ());
+
+   TNL_DECLARE_RPC(c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type));      // Player using engineer module
+
+   // Chage passwords on the server
+   void changeParam(const char *param, ParamType type);
 
    TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));
    TNL_DECLARE_RPC(c2sLevelChangePassword, (StringPtr pass));
