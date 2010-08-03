@@ -26,8 +26,9 @@
 
 #include "tnl.h"
 #include "tnlAssert.h"
-#include <stdarg.h>
 #include "tnlLog.h"
+#include <stdarg.h>
+#include <cstdio>
 
 namespace TNL {
 
