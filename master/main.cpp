@@ -42,7 +42,7 @@ Vector<string> MOTDStringVecOld;
 
 Vector<U32> MOTDVersionVec;
 Vector<string> MOTDStringVec;
-U32 gLatestReleasedCSProtocol = 0;
+U32 gLatestReleasedCSProtocol = 0; // Will be updated with value from cfg file
 
 const char *gMasterName;           // Name of the master server
 string gJasonOutFile;              // File where JSON data gets dumped

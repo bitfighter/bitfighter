@@ -29,6 +29,13 @@
 // client, server, or master end as needed.  This interface will be compiled into both the
 // master and the individual clients.
 
+//
+//   IMPORTANT NOTE!!!
+//
+//   When adding new RPCs that did not exist in previous versions of the game, make sure to give them a new
+//   rpcVersion number, otherwise clients will not be able to connect!
+//
+
 TNL_IMPLEMENT_RPC(MasterServerInterface, c2mQueryServers,
    (U32 queryId, U32 regionMask, U32 minPlayers, U32 maxPlayers, U32 infoFlags,
    U32 maxBots, U32 minCPUSpeed, StringTableEntry gameType, StringTableEntry missionType),
@@ -47,7 +54,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, c2mRequestArrangedConnection, (U32 requ
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2sClientRequestedArrangedConnection,
    (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters),
    (requestId, possibleAddresses, connectionParameters),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3) {}
 
       // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
       TNL_IMPLEMENT_RPC(MasterServerInterface, m2cClientRequestedArrangedConnection,
@@ -58,7 +65,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2sClientRequestedArrangedConnection,
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mAcceptArrangedConnection,
    (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData),
    (requestId, internalAddress, connectionData),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
       // TODO: Delete after 014 -- replaced with identical s2mAcceptArrangedConnection above
       TNL_IMPLEMENT_RPC(MasterServerInterface, c2mAcceptArrangedConnection,
@@ -76,7 +83,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mAcceptArrangedConnection,
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRejectArrangedConnection,
    (U32 requestId, ByteBufferPtr rejectData),
    (requestId, rejectData),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cArrangedConnectionAccepted,
    (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData),
@@ -92,7 +99,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mUpdateServerStatus, (
    StringTableEntry levelName, StringTableEntry levelType,
    U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags),
    (levelName, levelType, botCount, playerCount, maxPlayers, infoFlags),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 0) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
       // TODO: Delete after 014 -- replaced with identical s2mUpdateServerStatus above
       TNL_IMPLEMENT_RPC(MasterServerInterface, c2mUpdateServerStatus, (
@@ -141,11 +148,11 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendUpdgradeStatus, (bool needToUpgr
 // Send player statistics to the master server
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics, (StringTableEntry playerName, Vector<U16> shots, Vector<U16> hits),
    (playerName, shots, hits),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
 // Send game statistics to the master server
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
                                                                  RangedU32<0,MAX_PLAYERS> players, S16 time),
    (gameType, levelName, players, time),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
