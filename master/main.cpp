@@ -644,7 +644,7 @@ public:
       }
 
       // Name | shots | hits
-      logprintf("PLAYER: %s\t%d\t%d", playerName.getString(), totalShots, totalHits);
+      f_logprintf(LogConsumer::StatisticsFilter, "PLAYER: %s\t%d\t%d", playerName.getString(), totalShots, totalHits);
    }
 
 
@@ -666,7 +666,8 @@ public:
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
       // GameType | Time | Level name | players | time
-      logprintf("GAME\t%s\t%s\t%s\t%d\t%s", getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players, timestr.c_str() );
+      f_logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%s", 
+               getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players, timestr.c_str() );
    }
 
 
@@ -938,6 +939,8 @@ S32 MasterServerConnection::gClientListCount = 0;
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
+////////////////////////////////////////
+////////////////////////////////////////
 
 #include <stdio.h>
 
@@ -951,9 +954,12 @@ public:
 } gStdoutLogConsumer;
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 class FileLogConsumer : public LogConsumer    // Dumps logs to file
 {
-private:
+protected:
    FILE *f;
 public:
    FileLogConsumer(const char* logFile="bitfighter_master.log")
@@ -976,9 +982,27 @@ public:
          fflush(f);
       }
    }
-} gFileLogConsumer;
+} gFileLogConsumer; 
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class StatisticsFileLogConsumer : public FileLogConsumer    // Dumps logs to bitfighter_player_stats.log
+{
+public:
+   StatisticsFileLogConsumer(const char* logFile="bitfighter_player_stats.log")
+   {
+      f = fopen(logFile, "a");
+      logString("------ Bitfighter Player Statistics File ------");
+
+      setFilterType(LogConsumer::StatisticsFilter);
+   }
+
+} gStatisticsLogConsumer;
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 enum {
    DefaultMasterPort = 25955,

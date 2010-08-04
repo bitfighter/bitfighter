@@ -52,18 +52,18 @@ extern Vector<string> MOTDStringVec;
 
 void processConfigLine(int argc, string argv[])
 {
-   if(!stricmp(argv[0].c_str(), "port") && argc > 1)             // port --> set port
+   if(argv[0] == "port" && argc > 1)             // port --> set port
       gMasterPort = atoi(argv[1].c_str());
 
    // The following chunk can go away when we retire CMProtocol version 0
-   else if(!stricmp(argv[0].c_str(), "motd") && argc > 2)        // motd --> set motd for version 0 clients
+   else if(argv[0] == "motd" && argc > 2)   // motd --> set motd for version 0 clients
    {
       MOTDTypeVecOld.push_back(argv[1]);    // version
       MOTDStringVecOld.push_back(argv[2]);  // message
    }
 
    // CMProtocol version 1 entries look a bit different, but serves the same basic function...
-   else if(!stricmp(argv[0].c_str(), "setmotd") && argc > 2)      // setmotd --> set motd for version 1+ clients
+   else if(argv[0] == "setmotd" && argc > 2)      // setmotd --> set motd for version 1+ clients
    {
       U32 version = atoi(argv[1].c_str());        // Build version this message corresponds to, allows us to set different messages for different clients
       MOTDVersionVec.push_back(version);
@@ -71,7 +71,7 @@ void processConfigLine(int argc, string argv[])
    }
 
    // New usemotd directive tells server to use the message stored in the file motd
-   else if(!stricmp(argv[0].c_str(), "usemotd") && argc > 2)        // usemotd --> read motd file from local folder
+   else if(argv[0] == "usemotd" && argc > 2)      // usemotd --> read motd file from local folder
    {
       U32 version = atoi(argv[1].c_str());        // Build version this message corresponds to, allows us to set different messages for different clients
       char *file = strdup(argv[2].c_str());       // Message stored in this file
@@ -99,14 +99,13 @@ void processConfigLine(int argc, string argv[])
       fclose(f);
    }
 
-
-   else if(!stricmp(argv[0].c_str(), "name") && argc > 1)        // name --> set server's name
+   else if(argv[0] == "name" && argc > 1)        // name --> set server's name
       gMasterName = argv[1].c_str();
 
-   else if(!stricmp(argv[0].c_str(), "protocol") && argc > 1)    // protocol --> latest and greatest version of c-s protocol
+   else if(argv[0] == "protocol" && argc > 1)    // protocol --> latest and greatest version of c-s protocol
       gLatestReleasedCSProtocol = atoi(argv[1].c_str());
 
-   else if(!stricmp(argv[0].c_str(), "json_file") && argc > 1)   // json file
+   else if(argv[0] == "json_file" && argc > 1)   // json file
       gJasonOutFile = argv[1].c_str();
 }
 
@@ -147,12 +146,20 @@ inline void addArg()
    }
 }
 
+inline void clearArgv()
+{
+   for(S32 i = 0; i < MaxArgc; i++)
+      argv[i] = "";
+}
+
 int parseArgs(const char *string)
 {
    int numObjects = 0;
 
    argc = 0;
    argLen = 0;
+   clearArgv();
+
    argString = string;
    char c;
 
@@ -233,10 +240,15 @@ stateEatingComment:
 stateLineParseDone:
    if(argc)
       processConfigLine(argc, argv);
+   
+   // Reset everything...
    argc = 0;
    argLen = 0;
+   clearArgv();
+
    if(c)
       goto stateEatingWhitespace;
+
    return numObjects;
 }
 
