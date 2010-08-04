@@ -463,7 +463,7 @@ public:
          possibleAddresses.push_back(internalAddress);
 
       // And inform the other part of the request
-      conn->m2sClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
+      conn->m2cClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
    }
 
 
