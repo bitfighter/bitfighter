@@ -191,18 +191,18 @@ void Projectile::idle(GameObject::IdleCallPath path)
       Point endPos = pos + velocity * (F32)deltaT * 0.001;
 
       // Check for collision along projected route of movement
-      static Vector<GameObject *> disableVector;
+      static Vector<GameObject *> disabledList;
 
       Rect queryRect(pos, endPos);     // Bounding box of our travels
 
-      disableVector.clear();
+      disabledList.clear();
 
       U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
       // Don't collide with shooter during first 500ms of life
       if(mShooter.isValid() && aliveTime < 500)
       {
-         disableVector.push_back(mShooter);
+         disabledList.push_back(mShooter);
          mShooter->disableCollision();
       }
 
@@ -221,17 +221,17 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
          // Disable collisions with things that don't want to be
          // collided with (i.e. whose collide methods return false)
-         disableVector.push_back(hitObject);
+         disabledList.push_back(hitObject);
          hitObject->disableCollision();
       }
 
       // Re-enable collison flag for ship and items in our path that don't want to be collided with
-      // Note that if we hit an object that does want to be collided with, it won't be in disableVector
+      // Note that if we hit an object that does want to be collided with, it won't be in disabledList
       // and thus collisions will not have been disabled, and thus don't need to be re-enabled.
       // Our collision detection is done, and hitObject contains the first thing that the projectile hit.
 
-      for(S32 i = 0; i < disableVector.size(); i++)
-         disableVector[i]->enableCollision();
+      for(S32 i = 0; i < disabledList.size(); i++)
+         disabledList[i]->enableCollision();
 
       if(hitObject)  // Hit something...  should we bounce?
       {
@@ -266,7 +266,45 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
       }
       else        // Hit nothing, advance projectile to endPos
-         pos = endPos;
+      {
+         //// Steer towards a nearby testitem
+         //static Vector<DatabaseObject *> targetItems;
+         //targetItems.clear();
+         //Rect searchArea(pos, 2000);
+         //S32 HeatSeekerTargetType = TestItemType | ResourceItemType;
+         //findObjects(HeatSeekerTargetType, targetItems, searchArea);
+
+         //F32 maxPull = 0;
+         //Point dist;
+         //Point maxDist;
+
+         //for(S32 i = 0; i < targetItems.size(); i++)
+         //{
+         //   GameObject *target = dynamic_cast<GameObject *>(targetItems[i]);
+         //   dist.set(pos - target->getActualPos());
+
+         //   F32 pull = min(100.0f / dist.len(), 1.0);      // Pull == strength of attraction
+         //   
+         //   pull *= (target->getObjectTypeMask() & ResourceItemType) ? .5 : 1;
+
+         //   if(pull > maxPull)
+         //   {
+         //      maxPull = pull;
+         //      maxDist.set(dist);
+         //   }
+         //   
+         //}
+
+         //if(maxPull > 0)
+         //{
+         //   F32 speed = velocity.len();
+         //   velocity += (velocity - maxDist) * maxPull;
+         //   velocity.normalize(speed);
+         //   endPos.set(pos + velocity * (F32)deltaT * 0.001);  // Apply the adjusted velocity right now!
+         //}
+
+         pos.set(endPos);     // Keep this line
+      }
 
       Rect newExtent(pos,pos);
       setExtent(newExtent);

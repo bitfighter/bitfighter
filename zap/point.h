@@ -136,7 +136,7 @@ struct Rect
    Rect() { set(Point(), Point()); }                          // Constuctor
    Rect(const Point &p1, const Point &p2) { set(p1, p2); }    // Constuctor
    Rect(F32 x1, F32 y1, F32 x2, F32 y2) { set(Point(x1, y1), Point(x2, y2)); }  // Constuctor
-   Rect(const Point &p, member_type size) {                   // Constuctor
+   Rect(const Point &p, member_type size) {                   // Constuctor, takes point and "radius"
       min.x = p.x - size/2;
       max.x = p.x + size/2;
       min.y = p.y - size/2;

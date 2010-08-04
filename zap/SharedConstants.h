@@ -24,11 +24,16 @@
 //------------------------------------------------------------------------------------
 
 
+#ifndef _SHARED_CONSTANTS_H_
+#define _SHARED_CONSTANTS_H_
+
 // Constants that need to be the same on both the game and the master server
 // This file is shared between both code bases.
 
 #define MAX_CHAT_MSG_LENGTH 2048
 #define MAX_SHORT_TEXT_LEN 32
-static const int MOTDLen = 256;
+static const int MOTD_LEN = 256;
+static const int MAX_PLAYERS = 128;    // Absolute maximum players ever allowed in a game
 
+#endif
 

@@ -953,7 +953,7 @@ void saveSettingsToINI()
          gINI.KeyComment("Levels", " Level1=ctf.level");
          gINI.KeyComment("Levels", " Level2=zonecontrol.level");
          gINI.KeyComment("Levels", " ... etc ...");
-         gINI.KeyComment("Levels", "This list can be overidden on the command line with the -leveldir, -levels, or -alllevels parameters.");
+         gINI.KeyComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
          gINI.KeyComment("Levels", "----------------");
       }
 

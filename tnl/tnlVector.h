@@ -76,7 +76,7 @@ template<class T> class Vector
    void  construct(U32 start, U32 end); ///< Constructs elements from <i>start</i> to <i>end-1</i>
    void  construct(U32 start, U32 end, const T* array);
   public:
-   Vector(const U32 initialSize = 0);
+   Vector(const U32 initialSize = 0);     // Constructor
    Vector(const Vector&);
    ~Vector();
 

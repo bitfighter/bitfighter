@@ -45,7 +45,7 @@ Vector<string> MOTDStringVec;
 U32 gLatestReleasedCSProtocol = 0;
 
 const char *gMasterName;           // Name of the master server
-const char *gJasonOutFile;         // File where JSON data gets dumped
+string gJasonOutFile;              // File where JSON data gets dumped
 bool gNeedToWriteStatus = true;    // Tracks whether we need to update our status file, for possible display on a website
 
 class MasterServerConnection;
@@ -228,8 +228,8 @@ public:
                  StringTableEntry gameType, StringTableEntry missionType)
    )
    {
-      Vector<IPAddress> theVector(IPMessageAddressCount);
-      theVector.reserve(IPMessageAddressCount);
+      Vector<IPAddress> theVector(IP_MESSAGE_ADDRESS_COUNT);
+      theVector.reserve(IP_MESSAGE_ADDRESS_COUNT);
 
       for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
       {
@@ -263,7 +263,7 @@ public:
          theVector.push_back(walk->getNetAddress().toIPAddress());
 
          // If we get a packet's worth, send it to the client and empty our buffer...
-         if(theVector.size() == IPMessageAddressCount)
+         if(theVector.size() == IP_MESSAGE_ADDRESS_COUNT)
          {
             m2cQueryServersResponse(queryId, theVector);
             theVector.clear();
@@ -344,8 +344,11 @@ public:
    // This gets updated whenver we gain or lose a server, at most every RewriteTime ms
    static void writeClientServerList_JSON()
    {
+      if(gJasonOutFile == "")
+         return;
+
       bool first = true;
-      FILE *f = fopen(gJasonOutFile, "w");
+      FILE *f = fopen(gJasonOutFile.c_str(), "w");
       if(f)
       {
          // First the servers
@@ -375,7 +378,7 @@ public:
          fclose(f);
       }
       else
-         logprintf("Could not write to JSON file %s...", gJasonOutFile);
+         logprintf("Could not write to JSON file %s...", gJasonOutFile.c_str());
    }
 
    /*  Resulting JSON data should look like this:
@@ -413,7 +416,7 @@ public:
       if(!conn)
       {
          ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterNoSuchHost, (U32) strlen(MasterNoSuchHost) + 1);
-            c2mRejectArrangedConnection(requestId, ptr);
+            s2mRejectArrangedConnection(requestId, ptr);
          return;
       }
 
@@ -459,16 +462,52 @@ public:
       if(!theInternalAddress.isEqualAddress(anyAddress) && theInternalAddress != theAddress)
          possibleAddresses.push_back(internalAddress);
 
-      // And inform the other part of the request.
-      conn->m2cClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
+      // And inform the other part of the request
+      conn->m2sClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
    }
 
 
-   /// c2mAcceptArrangedConnection is sent by a server to notify the master that it will accept the connection
-   /// request from a client.  The requestId parameter sent by the MasterServer in m2cClientRequestedArrangedConnection
+   /// s2mAcceptArrangedConnection is sent by a server to notify the master that it will accept the connection
+   /// request from a client.  The requestId parameter sent by the MasterServer in m2sClientRequestedArrangedConnection
    /// should be sent back as the requestId field.  The internalAddress is the server's self-determined IP address.
 
    // Called to indicate a connect request is being accepted.
+   TNL_DECLARE_RPC_OVERRIDE(s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
+   {
+      GameConnectRequest *req = findAndRemoveRequest(requestId);
+      if(!req)
+         return;
+
+      Address theAddress = getNetAddress();
+      Vector<IPAddress> possibleAddresses;
+
+      theAddress.port++;
+      possibleAddresses.push_back(theAddress.toIPAddress());
+
+      theAddress.port--;
+      possibleAddresses.push_back(theAddress.toIPAddress());
+
+      Address theInternalAddress(internalAddress);
+      Address anyAddress;
+      if(!theInternalAddress.isEqualAddress(anyAddress) && theInternalAddress != theAddress)
+         possibleAddresses.push_back(internalAddress);
+
+
+      char buffer[256];
+      strcpy(buffer, getNetAddress().toString());
+
+      logprintf("[%s] Server: %s accept connection request from %s", getTimeStamp().c_str(), buffer,
+         req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+
+      // If we still know about the requestor, tell him his connection was accepted...
+      if(req->initiator.isValid())
+         req->initiator->m2cArrangedConnectionAccepted(req->initiatorQueryId, possibleAddresses, connectionData);
+
+      delete req;
+   }
+
+
+   // TODO: Delete after 014
    TNL_DECLARE_RPC_OVERRIDE(c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData))
    {
       GameConnectRequest *req = findAndRemoveRequest(requestId);
@@ -504,9 +543,8 @@ public:
    }
 
 
-   // c2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
-   // request specified by the requestId.  The rejectData will be passed along to the requesting client.
-   // Called to indicate a connect request is being rejected.
+
+   // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection
    TNL_DECLARE_RPC_OVERRIDE(c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
    {
       GameConnectRequest *req = findAndRemoveRequest(requestId);
@@ -524,10 +562,27 @@ public:
    }
 
 
-   // c2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
-   // and mission types, any player counts and the current info flags.
+   // s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
+   // request specified by the requestId.  The rejectData will be passed along to the requesting client.
+   // Called to indicate a connect request is being rejected.
+   TNL_DECLARE_RPC_OVERRIDE(s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData))
+   {
+      GameConnectRequest *req = findAndRemoveRequest(requestId);
+      if(!req)
+         return;
 
-   // Called to update the status of a game server
+      logprintf("[%s] Server: %s reject connection request from %s",
+         getTimeStamp().c_str(), getNetAddress().toString(),
+         req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+
+      if(req->initiator.isValid())
+         req->initiator->m2cArrangedConnectionRejected(req->initiatorQueryId, rejectData);
+
+      delete req;
+   }
+
+
+   // TODO: Delete after 014 -- replaced with identical s2mUpdateServerStatus
    TNL_DECLARE_RPC_OVERRIDE(c2mUpdateServerStatus, (
       StringTableEntry levelName, StringTableEntry levelType,
       U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
@@ -548,6 +603,70 @@ public:
       checkActivityTime(15000);      // 15 secs
 
       gNeedToWriteStatus = true;
+   }
+
+
+   // s2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
+   // and mission types, any player counts and the current info flags.
+   // Updates the master with the current status of a game server.
+   TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (
+      StringTableEntry levelName, StringTableEntry levelType,
+      U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
+   {
+      // If we didn't know we were a game server, don't accept updates
+      if(!mIsGameServer)
+         return;
+
+      mLevelName = levelName;
+      mLevelType = levelType;
+
+      mNumBots = botCount;
+      mPlayerCount = playerCount;
+      mMaxPlayers = maxPlayers;
+      mInfoFlags = infoFlags;
+
+      // Check to ensure we're not getting flooded with these requests
+      checkActivityTime(15000);      // 15 secs
+
+      gNeedToWriteStatus = true;
+   }
+
+
+   // Send player statistics to the master server
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, Vector<U16> shots, Vector<U16> hits))
+   {
+      S32 totalShots = 0, totalHits = 0;
+
+      for(S32 i = 0; i < shots.size(); i++)
+      {
+         totalShots += shots[i];
+         totalHits += hits[i];
+      }
+
+      // Name | shots | hits
+      logprintf("PLAYER: %s\t%d\t%d", playerName.getString(), totalShots, totalHits);
+   }
+
+
+   // TODO: Get this to be the same as UI::itos()
+   // Convert int to string 
+   string itos(S32 i)
+   {
+      char outString[100];
+      dSprintf(outString, sizeof(outString), "%d", i);
+      return outString;
+   }
+
+
+   // Send game statistics to the master server
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
+                                                    RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
+   {
+      string timestr = itos(timeInSecs / 60) + ":";
+      timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
+
+      // GameType | Time | Level name | players | time
+      logprintf("GAME\t%s\t%s\t%s\t%d\t%s", getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players, timestr.c_str() );
    }
 
 
@@ -668,9 +787,13 @@ public:
       return true;
    }
 
+
+
+
    // Appears unused!
    //static void checkConnectTimeouts()
    //{
+   //   const S32 ConnectRequestTimeout = 30000;      // 30 secs
    //   U32 currentTime = Platform::getRealMilliseconds();
 
    //   // Expire any connect requests that have grown old...
@@ -687,7 +810,7 @@ public:
    //            
    //            // For older clients (009 and below)
    //            if(mCMProtocolVersion <= 1)
-   //               gcr->initiator->c2mRejectArrangedConnection(gcr->initiatorQueryId, reqTimeoutBuffer);
+   //               gcr->initiator->s2mRejectArrangedConnection(gcr->initiatorQueryId, reqTimeoutBuffer);
    //            // For clients 010 and above
    //            else
    //               gcr->initiator->s2mRejectArrangedConnection(gcr->initiatorQueryId, reqTimeoutBuffer, ConnectionAttemptTimedOut);

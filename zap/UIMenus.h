@@ -174,7 +174,7 @@ class MainMenuUserInterface : public MenuUserInterface
 {
 private:
    typedef MenuUserInterface Parent;
-   char motd[MOTDLen];
+   char motd[MOTD_LEN];
    U32 motdArriveTime;
    Timer mFadeInTimer;        // Track the brief fade in interval the first time menu is shown
    Timer mColorTimer;

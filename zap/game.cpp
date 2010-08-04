@@ -104,7 +104,7 @@ MasterServerConnection *Game::getConnectionToMaster()
 
 GameType *Game::getGameType()
 {
-   return mGameType;    // This is a safePtr, so will never be NULL
+   return mGameType;    // This is a safePtr, so it can be NULL, but will never point off into space
 }
 
 
@@ -1347,9 +1347,8 @@ void ClientGame::renderCommander()
             {
                SpyBug *sb = dynamic_cast<SpyBug *>(spyBugObjects[i]);
 
-               // Use the following if this crashes
-               // if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : StringTableEntry(""), getGameType()->isTeamGame());
-               if(sb->isVisibleToPlayer( playerTeam, getGameType()->mLocalClient->name, getGameType()->isTeamGame() ))
+               if(sb->isVisibleToPlayer(playerTeam, getGameType()->mLocalClient ? getGameType()->mLocalClient->name : 
+                                                                                  StringTableEntry(""), getGameType()->isTeamGame()))
                {
                   const Point &p = sb->getRenderPos();
                   Point visExt(gSpyBugRange, gSpyBugRange);

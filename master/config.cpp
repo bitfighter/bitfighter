@@ -40,7 +40,7 @@ using namespace std;
 
 extern U32 gMasterPort;
 extern const char *gMasterName;
-extern const char *gJasonOutFile;
+extern string gJasonOutFile;
 
 extern U32 gLatestReleasedCSProtocol;
 
@@ -88,8 +88,8 @@ void processConfigLine(int argc, string argv[])
          return;
       }
 
-      char message[MOTDLen];
-      if(fgets(message, MOTDLen, f))
+      char message[MOTD_LEN];
+      if(fgets(message, MOTD_LEN, f))
          MOTDStringVec.push_back(message);
       else
          MOTDStringVec.push_back("Welcome to Bitfighter!");

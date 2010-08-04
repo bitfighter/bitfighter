@@ -27,8 +27,9 @@
 #ifndef _MASTERINTERFACE_H_
 #define _MASTERINTERFACE_H_
 
-#include "../tnl/tnlEventConnection.h"
-#include "../tnl/tnlRPC.h"
+#include "../zap/SharedConstants.h"
+#include "tnlEventConnection.h"
+#include "tnlRPC.h"
 
 using namespace TNL;
 
@@ -37,11 +38,7 @@ using namespace TNL;
 static const char USED_EXTERNAL *MasterNoSuchHost = "No Such Host";
 static const char USED_EXTERNAL *MasterRequestTimedOut = "Timed Out";
 
-enum MasterConstants {
-   ConnectRequestTimeout = 30000,
-   IPMessageAddressCount = 30,
-   GameMissionTypesPerPacket = 20,
-};
+const S32 IP_MESSAGE_ADDRESS_COUNT = 30;
 
 /// The MasterServerInterface is the RPC interface to the TNL example Master Server.
 /// The default Master Server tracks a list of public servers and allows clients
@@ -87,7 +84,7 @@ public:
 
    /// m2cQueryServersResponse is sent by the master server in response to a c2mQueryServers RPC, to
    /// return a partial list of the servers that matched the specified filter criteria.  Because packets
-   /// are limited in size, the response server list is broken up into lists of at most IPMessageAddressCount IP addresses
+   /// are limited in size, the response server list is broken up into lists of at most IP_MESSAGE_ADDRESS_COUNT IP addresses
    /// per message.  The Master Server will always send a final, empty m2cQueryServersResponse to signify that the list
    /// is complete.
    TNL_DECLARE_RPC(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
@@ -100,20 +97,31 @@ public:
       IPAddress remoteAddress, IPAddress internalAddress,
       ByteBufferPtr connectionParameters));
 
-   /// m2cClientRequestedArranged connection is sent from the master to a server to notify it that
+   /// m2sClientRequestedArranged connection is sent from the master to a server to notify it that
    /// a client has requested a connection.  The possibleAddresses vector is a list of possible IP addresses
    /// that the server should attempt to connect to for that client if it accepts the connection request.
-   TNL_DECLARE_RPC(m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
+   TNL_DECLARE_RPC(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
       ByteBufferPtr connectionParameters));
+            
+         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
+         TNL_DECLARE_RPC(m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
+            ByteBufferPtr connectionParameters));
 
-   /// c2mAcceptArrangedConnection is sent by a server to notify the master that it will accept the connection
-   /// request from a client.  The requestId parameter sent by the MasterServer in m2cClientRequestedArrangedConnection
+   /// s2mAcceptArrangedConnection is sent by a server to notify the master that it will accept the connection
+   /// request from a client.  The requestId parameter sent by the MasterServer in m2sClientRequestedArrangedConnection
    /// should be sent back as the requestId field.  The internalAddress is the server's self-determined IP address.
-   TNL_DECLARE_RPC(c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData));
+   TNL_DECLARE_RPC(s2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData));
 
-   /// c2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
+         // TODO: Delete after 014 -- replaced with identical s2mAcceptArrangedConnection above
+         TNL_DECLARE_RPC(c2mAcceptArrangedConnection, (U32 requestId, IPAddress internalAddress, ByteBufferPtr connectionData));
+
+   /// s2mRejectArrangedConnection notifies the Master Server that the server is rejecting the arranged connection
    /// request specified by the requestId.  The rejectData will be passed along to the requesting client.
-   TNL_DECLARE_RPC(c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData));
+   TNL_DECLARE_RPC(s2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData));
+
+         // TODO: Delete after 014 -- replaced with identical s2mRejectArrangedConnection above
+         TNL_DECLARE_RPC(c2mRejectArrangedConnection, (U32 requestId, ByteBufferPtr rejectData));
+
 
    /// m2cArrangedConnectionAccepted is sent to a client that has previously requested a connection to a listed server
    /// via c2mRequestArrangedConnection if the server accepted the connection.  The possibleAddresses vector is the list
@@ -125,11 +133,18 @@ public:
    /// server, or when the request times out because the server never responded.
    TNL_DECLARE_RPC(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
 
-   /// c2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
+         // TODO: Delete after 014
+         TNL_DECLARE_RPC(c2mUpdateServerStatus, (
+            StringTableEntry levelName, StringTableEntry levelType,
+            U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
+
+   /// s2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
    /// and mission types, any player counts and the current info flags.
-   TNL_DECLARE_RPC(c2mUpdateServerStatus, (
+   TNL_DECLARE_RPC(s2mUpdateServerStatus, (
       StringTableEntry levelName, StringTableEntry levelType,
       U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags));
+
+
 
    /// m2cSetMOTD is sent to a client when the connection is established.  The
    /// client's game string is used to pick which MOTD will be sent.
@@ -158,6 +173,10 @@ public:
    TNL_DECLARE_RPC(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick) );
    TNL_DECLARE_RPC(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick) );
    TNL_DECLARE_RPC(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
+
+   // Version 2 RPCs
+   TNL_DECLARE_RPC(s2mSendPlayerStatistics, (StringTableEntry playerName, Vector<U16> shots, Vector<U16> hits) );
+   TNL_DECLARE_RPC(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, RangedU32<0,MAX_PLAYERS> players, S16 time) );
 };
 
 

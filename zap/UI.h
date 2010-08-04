@@ -101,7 +101,6 @@ private:
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fixed);
 
 public:
-   
    static const S32 MenuItemHeight = 45;
 
    static UserInterface *current;            // Currently active menu

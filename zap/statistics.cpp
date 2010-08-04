@@ -29,14 +29,13 @@ namespace Zap
 {
 
 // Constructor
-Statistics::Statistics() 
+Statistics::Statistics() : mShots(WeaponCount), mHits(WeaponCount)
 {
    for(S32 i = 0; i < WeaponCount; i++)
    {
-      mShots[i] = 0;
-      mHits[i] = 0;
+      mShots.push_back(0);
+      mHits.push_back(0);
    }
-
 }
 
 
@@ -66,6 +65,18 @@ S32 Statistics::getShots()
 S32 Statistics::getShots(WeaponType weaponType)
 {
    return mShots[(S32)weaponType];
+}
+
+
+Vector<U16> Statistics::getShotsVector()
+{
+   return mShots;
+}
+   
+
+Vector<U16> Statistics::getHitsVector()
+{
+   return mHits;
 }
 
 
@@ -100,4 +111,6 @@ F32 Statistics::getHitRate(WeaponType weaponType)
 }
 
 
+
 }
+

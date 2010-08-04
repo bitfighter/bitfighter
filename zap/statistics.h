@@ -39,8 +39,9 @@ namespace Zap
 class Statistics
 {
 private:
-   S32 mShots[WeaponCount];
-   S32 mHits[WeaponCount];
+   Vector<U16> mShots;
+   Vector<U16> mHits;
+
 public:
    Statistics();      // Constructor
 
@@ -55,6 +56,9 @@ public:
 
    F32 getHitRate();                         // Report overall hit rate
    F32 getHitRate(WeaponType weaponType);    // Report hit rate for specified weapon
+
+   Vector<U16> getShotsVector();
+   Vector<U16> getHitsVector();
 };
 
 };

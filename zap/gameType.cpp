@@ -38,6 +38,7 @@
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 
 #include "statistics.h"
+#include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
 
 
 #include "glutInclude.h"
@@ -80,6 +81,7 @@ S32 gDefaultGameTypeIndex = 0;  // What we'll default to if the name provided is
 ////////////////////////////////////////   _                 _       _ 
 ////////////////////////////////////////  /  | o  _  ._ _|_ |_)  _ _|_ 
 ////////////////////////////////////////  \_ | | (/_ | | |_ | \ (/_ |  
+////////////////////////////////////////
 
 // Constructor
 ClientRef::ClientRef()    
@@ -106,8 +108,10 @@ ClientRef::~ClientRef()
 }
 
 
-////////////////////////////////////////
-////////////////////////////////////////
+////////////////////////////////////////      __              ___           
+////////////////////////////////////////     /__  _. ._ _   _  |    ._   _  
+////////////////////////////////////////     \_| (_| | | | (/_ | \/ |_) (/_ 
+////////////////////////////////////////                         /  |       
 
 TNL_IMPLEMENT_NETOBJECT(GameType);
 
@@ -739,6 +743,8 @@ void GameType::renderTalkingClients()
    }
 }
 
+
+// Server only
 void GameType::gameOverManGameOver()
 {
    if(mGameOver)     // Only do this once
@@ -749,11 +755,38 @@ void GameType::gameOverManGameOver()
    s2cSetGameOver(true);         // Alerts clients that the game is over
    gServerGame->gameEnded();     // Sets level-switch timer, which gives us a short delay before switching games
 
-   onGameOver();
+   onGameOver();                 // Call game-specific end-of-game code
+
+   saveGameStats();
+}
+
+// Transmit statistics to the master server
+void GameType::saveGameStats()
+{
+   // Currently, only transmits statistics to the master server
+   if(MASTER_PROTOCOL_VERSION >= 2)
+   {
+      MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+      GameType *gameType = gServerGame->getGameType();
+      if(masterConn && gameType)
+      {
+         S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
+         masterConn->s2mSendGameStatistics(gameType->getGameTypeString(), gameType->mLevelName, gameType->mClientList.size(), timeInSecs);
+
+         for(S32 i = 0; i < gameType->mClientList.size(); i++)
+         {
+            Vector<U16> shots = gameType->mClientList[i]->mStatistics.getShotsVector();
+            Vector<U16> hits  = gameType->mClientList[i]->mStatistics.getHitsVector();
+
+            masterConn->s2mSendPlayerStatistics(gameType->mClientList[i]->name, shots, hits); // Send game statistics to the master server
+         }
+      }
+   }
 }
 
 
 // Handle the end-of-game...  handles all games... not in any subclasses
+// Can be overridden for any game-specific game over stuff
 void GameType::onGameOver()
 {
    static StringTableEntry tieMessage("The game ended in a tie.");
@@ -817,6 +850,7 @@ void GameType::onGameOver()
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagCapture, winMessage, e);
    }
 }
+
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)

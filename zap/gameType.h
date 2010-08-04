@@ -237,6 +237,7 @@ public:
    Timer mGameTimeUpdateTimer;
    Timer mLevelInfoDisplayTimer;
    Timer mInputModeChangeAlertDisplayTimer;
+
    bool mCanSwitchTeams;         // Player can switch teams when this is true, not when it is false
 
    S32 mWinningScore;            // Game over when team (or player in individual games) gets this score
@@ -293,6 +294,8 @@ public:
    void idle(GameObject::IdleCallPath path);
 
    void gameOverManGameOver();
+   void saveGameStats();                     // Transmit statistics to the master server
+
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score
    virtual void onGameOver();
 

@@ -94,15 +94,17 @@ void MasterServerConnection::requestArrangedConnection(const Address &remoteAddr
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
    ByteBufferPtr connectionParameters))
 {
    if(!mIsGameServer)   // We're not a server!
    {
       TNL::logprintf("Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
-      c2mRejectArrangedConnection(requestId, connectionParameters);
+      s2mRejectArrangedConnection(requestId, connectionParameters);
       return;
    }
+
+   // Server only from here on down
 
    Vector<Address> fullPossibleAddresses;
    for(S32 i = 0; i < possibleAddresses.size(); i++)
@@ -112,7 +114,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedCon
    if(gServerGame->getNetInterface()->isHostBanned(fullPossibleAddresses[0]))
    {
       TNL::logprintf("Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
-      c2mRejectArrangedConnection(requestId, connectionParameters);
+      s2mRejectArrangedConnection(requestId, connectionParameters);
       return;
    }
 
@@ -124,7 +126,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedCon
    ByteBufferPtr b = new ByteBuffer(data, sizeof(data));
    b->takeOwnership();
 
-   c2mAcceptArrangedConnection(requestId, localAddress, b);
+   s2mAcceptArrangedConnection(requestId, localAddress, b);
    GameConnection *conn = new GameConnection();
 
    conn->setNetAddress(fullPossibleAddresses[0]);
@@ -139,6 +141,55 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedCon
 
    conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
 }
+
+         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
+         TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
+            ByteBufferPtr connectionParameters))
+         {
+            if(!mIsGameServer)   // We're not a server!
+            {
+               TNL::logprintf("Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
+               s2mRejectArrangedConnection(requestId, connectionParameters);
+               return;
+            }
+
+            // Server only from here on down
+
+            Vector<Address> fullPossibleAddresses;
+            for(S32 i = 0; i < possibleAddresses.size(); i++)
+               fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
+
+            // Check if the specified host is banned on this server
+            if(gServerGame->getNetInterface()->isHostBanned(fullPossibleAddresses[0]))
+            {
+               TNL::logprintf("Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
+               s2mRejectArrangedConnection(requestId, connectionParameters);
+               return;
+            }
+
+            // Ok, let's do the arranged connection!
+            U8 data[Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2];
+
+            TNL::Random::read(data, sizeof(data));
+            IPAddress localAddress = getInterface()->getFirstBoundInterfaceAddress().toIPAddress();
+            ByteBufferPtr b = new ByteBuffer(data, sizeof(data));
+            b->takeOwnership();
+
+            s2mAcceptArrangedConnection(requestId, localAddress, b);
+            GameConnection *conn = new GameConnection();
+
+            conn->setNetAddress(fullPossibleAddresses[0]);
+
+            TNL::logprintf("Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
+            TNL::logprintf("  Generated shared secret data: %s", b->encodeBase64()->getBuffer());
+
+            ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
+            Nonce nonce(data);
+            Nonce serverNonce(data + Nonce::NonceSize);
+            theSharedData->takeOwnership();
+
+            conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
+         }
 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
 {

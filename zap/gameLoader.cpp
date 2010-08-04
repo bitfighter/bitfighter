@@ -265,10 +265,6 @@ bool getLevels(string dir, Vector<string> &files)
    DIR *dp;
    struct dirent *dirp;
 
-   //string dir = "levels";
-   //if (subdir != "")
-   //   dir += "\\" + subdir;         // OK, this isn't really cross platform, but this will likely need to be modded
-   //                                 // for Linux anyway, and the Mac stuff is handled elsewhere...
    if((dp = opendir(dir.c_str())) == NULL)
       return false;
 
@@ -309,16 +305,18 @@ void LevelListLoader::buildLevelList()
       return;
    }
 
-   // If neither -leveldir nor -alllevels were not specified on the cmd line, and the INI file has some specified, use those
-   if(gCmdLineSettings.dirs.levelDir == "" && !gCmdLineSettings.alllevels && gIniSettings.levelList.size() > 0)
-   {
-      gLevelList = gIniSettings.levelList;
-      removeSkippedLevels();
-      return;
-   }
+   //// If -leveldir was not specified on the cmd line, and the INI file has some specified, use those
+   //if(gCmdLineSettings.dirs.levelDir == "" && gIniSettings.levelList.size() > 0)
+   //{
+   //   gLevelList = gIniSettings.levelList;
+   //   removeSkippedLevels();
+   //   return;
+   //}
 
-   // Otherwise we need to build our level list by looking at the filesystem  (n.b. gLevelDir defaults to the "levels" folder under the bitfighter install dir)
+   // Otherwise we need to build our level list by looking at the filesystem  
+   // (n.b. gLevelDir defaults to the "levels" folder under the Bitfighter data install dir)
    gLevelList.clear();
+
    Vector<string> levelfiles;
 
    if(!getLevels(gConfigDirs.levelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!

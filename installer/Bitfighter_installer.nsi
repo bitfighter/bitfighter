@@ -92,8 +92,7 @@ Section "Install"
 
   File ".\Windows specific\OpenAL32.dll"     
   File ".\Windows specific\glut32.dll"
-  File ".\Windows specific\lua5.1.dll"
-  File ".\Windows specific\lua51.dll"
+
   File "readme.txt"
   File "End-User License.txt"
   File ".\Windows specific\twoplayers.bat"

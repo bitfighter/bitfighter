@@ -226,7 +226,7 @@ void UserInterface::renderCurrent()    // static
 }
 
 
-// Convert int to string
+// Convert int to string -- static method
 string UserInterface::itos(S32 i)
 {
    char outString[100];

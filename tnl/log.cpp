@@ -160,9 +160,9 @@ std::string getTimeStamp()
   time ( &rawtime );
   timeinfo = localtime ( &rawtime );
 
-  strftime(buffer, TIMESIZE, "%a %d-%m-%Y %H:%M:%S", timeinfo);
+  strftime(buffer, TIMESIZE, "%Y-%m-%d %a %H:%M:%S", timeinfo);
 
-  return(std::string(buffer));      // Does this not seem a ridiculous use of strings??
+  return(std::string(buffer));   
 }
 
 

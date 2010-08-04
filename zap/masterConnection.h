@@ -71,12 +71,18 @@ public:
    void requestArrangedConnection(const Address &remoteAddress);
    void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags)
    {
-      c2mUpdateServerStatus(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags);
+      s2mUpdateServerStatus(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags);
    }
 
    TNL_DECLARE_RPC_OVERRIDE(m2cQueryServersResponse, (U32 queryId, Vector<IPAddress> ipList));
-   TNL_DECLARE_RPC_OVERRIDE(m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
+
+   TNL_DECLARE_RPC_OVERRIDE(m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
       ByteBufferPtr connectionParameters));
+
+         // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
+         TNL_DECLARE_RPC_OVERRIDE(m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
+            ByteBufferPtr connectionParameters));
+
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
 

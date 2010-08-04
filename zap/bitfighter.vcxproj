@@ -49,13 +49,12 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>../glut;</AdditionalLibraryDirectories>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <AdditionalDependencies>../Debug/libtomcrypt.lib;../Debug/tnl.lib;../Debug/lua-vec.lib;../openal/ALut.lib;../openal/OpenAL32.lib;../win_include_do_not_distribute/dinput8.lib;../win_include_do_not_distribute/dsound.lib;../win_include_do_not_distribute/dxguid.lib;Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRTD.lib;msvcprtd.lib</IgnoreSpecificDefaultLibraries>
     </Link>

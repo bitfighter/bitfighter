@@ -83,7 +83,6 @@ struct CmdLineSettings
    string serverPassword;  // Password required to connect to server
    string adminPassword;   // Password required to perform certain admin functions
    string levelChangePassword;   // Password required to change levels and such
-   bool alllevels;         // Did user specify -alllevels param?
 
    ConfigDirectories dirs;
 
@@ -126,7 +125,6 @@ struct CmdLineSettings
       winWidth = -1;
       xpos = -9999;
       ypos = -9999;
-      alllevels = false;
    };
 };
 

@@ -146,12 +146,15 @@ This change will resolve many installation and permissions issues.
 <li>-password command line parameter changed to -serverpassword</li>
 <li>When all players leave game, game advances to next level, and suspends itself until a player joins.  That way, when players join, level is "fresh" and ready to go.  May also reduce processor load and power consumption</li>
 <li>Added ability to put game into suspended animation, automatically restarting when other players join (/suspend command)</li>
+<li>Removed allLevels command line parameter, and disabled INI level specification</li>
 
 <h4>Linux</h4>
 <li>Added ability to specify locations of various resouces on the cmd line.  See http://bitfighter.org/wiki/index.php?title=Command_line_parameters#Specifying_folders for details.</li>
+<li>Bitfighter should build on both 32 and 64 bit environments</li>
 
 <h4>Windows</h4>
 <li>Windows installer now does a better job of installing files in their "proper" location</li>
+<li>Windows installer now installs data files (levels, robots, etc.) in My Documents on Win7.  Untested on XP and Vista, but should work</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -604,7 +607,7 @@ void exitGame()
 
 
 // If we can't load any levels, here's the plan...
-void abortHosting()
+void abortHosting_noLevels()
 {
    if(gDedicatedServer)
    {
@@ -661,7 +664,7 @@ void initHostGame(Address bindAddress, bool testMode)
    }
    else
    {
-      abortHosting();
+      abortHosting_noLevels();
       return;
    }
 
@@ -682,7 +685,7 @@ void hostGame()
 
    else        // No levels loaded... we'll crash if we try to start a game
    {
-      abortHosting();
+      abortHosting_noLevels();
       return;
    }
 
@@ -869,11 +872,13 @@ public:
       firstLine = "------ Bitfighter Log File ------\n";
    }
 
+
    ~FileLogConsumer()
    {
       if(f)
          fclose(f);
    }
+
 
    void open()
    {
@@ -881,6 +886,7 @@ public:
       isOpen = true;    // Set this here to avoid endless loops when the next line is executed!
       logString(firstLine);
    }
+
 
    void logString(const char *string)
    {
@@ -1139,18 +1145,12 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             exitGame(1);
          }
       }
-      // Specify to include all levels in levels folder -- not really needed any more, but can be used as a shortcut to tell game to ignore levels in INI file...
-      else if(!stricmp(argv[i], "-alllevels"))     // no additional args
-      {
-         i--;  // compentsate for +=2 in for loop with single param
-         gCmdLineSettings.alllevels = true;
-      }
 
       else if(!stricmp(argv[i], "-rootdatadir"))      // additional arg required
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify the robots folder with the -rootdatadir option");
+            logprintf("You must specify the root data folder with the -rootdatadir option");
             exitGame(1);
          }
 
@@ -1426,14 +1426,15 @@ void InitSdlVideo()
 
 // Basically checks if the folder base exists, and if not, makes it a subdir of levels
 // Typos on the user's part can lead to hilarity!
-string getLevelsFolder(string base)
+string getLevelsFolder(string folder, string potentialContainer)
 {
    // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
    struct stat st;
-   if(stat(base.c_str(), &st) != 0 )
-      return gConfigDirs.levelDir + "/" + base;      // It doesn't
+
+   if(stat(folder.c_str(), &st) != 0 )
+      return joindir(potentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
    else
-      return base;                                   // It does
+      return folder;                                 // It does
 }
 
 
@@ -1496,26 +1497,44 @@ void processStartupParams()
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
   
-   // This way, the main level dir can be specified in the INI, but it can either be overridden here,
-   // or a subfolder can be specified, depending on what's in the leveldir param
-   gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir != "" ? gCmdLineSettings.dirs.levelDir : gIniSettings.levelDir);
+   if(gCmdLineSettings.dirs.levelDir != "")
+   {
+      // User has specified levelDir, but we don't know if this is an absolute path, or is a subdir under something else
+      // container will hold the best candidate for a containing folder
+      if(gCmdLineSettings.dirs.rootDataDir != "")  // ==> Look in rootDataDir/levels/levelDir
+         gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, joindir(gCmdLineSettings.dirs.rootDataDir, "levels"));
+      else if(gIniSettings.levelDir != "")         // ==> Look in iniLevelDir/levelDir
+         gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
+      else                                         // ==> Try just plain old levelDir
+         gConfigDirs.levelDir = gCmdLineSettings.dirs.levelDir;    
+   }
+
+   // No leveldir param on cmd line, try rootDataDir with "levels" appended
+   else if(gCmdLineSettings.dirs.rootDataDir != "")
+      gConfigDirs.levelDir = joindir(gCmdLineSettings.dirs.rootDataDir, "levels");
+
+   // No leveldir param or rootDataDir specified on cmd line... is there anything in the INI file?
+   else if(gIniSettings.levelDir != "")
+      gConfigDirs.levelDir = gIniSettings.levelDir;
+
+   // No? then stick with default of "levels" already in gConfigDirs.levelDir
    
+
+   if(gIniSettings.levelDir == "")                      // If there is nothing in the INI,
+      gIniSettings.levelDir = gConfigDirs.levelDir;     // write a good default to the INI
+
+
    // Other folders can't currently be specified in the INI file
    if(gCmdLineSettings.dirs.rootDataDir != "") 
    {
-       gConfigDirs.iniDir = gCmdLineSettings.dirs.rootDataDir;
-       gConfigDirs.logDir = gCmdLineSettings.dirs.rootDataDir;
-       gConfigDirs.robotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "robots");
-       gConfigDirs.screenshotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "screenshots");
-       gConfigDirs.levelDir = joindir(gCmdLineSettings.dirs.rootDataDir, "levels");
+      gConfigDirs.iniDir = gCmdLineSettings.dirs.rootDataDir;
+      gConfigDirs.logDir = gCmdLineSettings.dirs.rootDataDir;
+      gConfigDirs.robotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "robots");
+      gConfigDirs.screenshotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "screenshots");
+      // leveldir param handled above
    }
 
-   if(gIniSettings.levelDir != "")
-      gConfigDirs.levelDir = gIniSettings.levelDir;
-   else
-      gIniSettings.levelDir = gConfigDirs.levelDir;     // So a good default will be written to the INI
-
-
+   // Specific params override rootDataDir
    if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gCmdLineSettings.dirs.iniDir;
    if(gCmdLineSettings.dirs.logDir != "") gConfigDirs.logDir = gCmdLineSettings.dirs.logDir;
    if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gCmdLineSettings.dirs.luaDir;
@@ -1544,8 +1563,8 @@ void processStartupParams()
       maxplay = gCmdLineSettings.maxplayers;
    else
       maxplay = gIniSettings.maxplayers;
-   if (maxplay < 0 || maxplay > 128)
-      maxplay = 128;
+   if (maxplay < 0 || maxplay > MAX_PLAYERS)
+      maxplay = MAX_PLAYERS;
    gMaxPlayers = (U32) maxplay;
 
 
@@ -1600,7 +1619,7 @@ void processStartupParams()
 // Any folders not set here default to current folder
 void setDefaultConfigDirs()
 {
-   gConfigDirs.levelDir = "levels";
+   gConfigDirs.levelDir = "levels";     
    gConfigDirs.robotDir = "robots";
    gConfigDirs.screenshotDir = "screenshots";
    gConfigDirs.sfxDir = "sfx";
