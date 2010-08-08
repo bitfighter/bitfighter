@@ -596,6 +596,7 @@ void loadSettingsFromINI()
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
 
    gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys",              (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
+
    gIniSettings.logConnectionProtocol = (lcase(gINI.GetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"))) == "yes");
    gIniSettings.logNetConnection      = (lcase(gINI.GetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"))) == "yes");
    gIniSettings.logEventConnection    = (lcase(gINI.GetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"))) == "yes");
@@ -604,6 +605,17 @@ void loadSettingsFromINI()
    gIniSettings.logPlatform           = (lcase(gINI.GetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"))) == "yes");
    gIniSettings.logNetBase            = (lcase(gINI.GetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"))) == "yes");
    gIniSettings.logUDP                = (lcase(gINI.GetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.logFatalError         = (lcase(gINI.GetValue("Diagnostics", "LogFatalError",          (gIniSettings.logFatalError        ? "Yes" : "No"))) == "yes");
+   gIniSettings.logError              = (lcase(gINI.GetValue("Diagnostics", "LogError",               (gIniSettings.logError             ? "Yes" : "No"))) == "yes");
+   gIniSettings.logWarning            = (lcase(gINI.GetValue("Diagnostics", "LogWarning",             (gIniSettings.logWarning           ? "Yes" : "No"))) == "yes");
+   gIniSettings.logConnection         = (lcase(gINI.GetValue("Diagnostics", "LogConnection",          (gIniSettings.logConnection        ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.logLevelLoaded        = (lcase(gINI.GetValue("Diagnostics", "LogLevelLoaded",          (gIniSettings.logLevelLoaded        ? "Yes" : "No"))) == "yes");
+   gIniSettings.logLuaObjectLifecycle = (lcase(gINI.GetValue("Diagnostics", "LogLuaObjectLifecycle",   (gIniSettings.logLuaObjectLifecycle ? "Yes" : "No"))) == "yes");
+   gIniSettings.luaLevelGenerator     = (lcase(gINI.GetValue("Diagnostics", "LuaLevelGenerator",       (gIniSettings.luaLevelGenerator     ? "Yes" : "No"))) == "yes");
+   gIniSettings.luaBotMessage         = (lcase(gINI.GetValue("Diagnostics", "LuaBotMessage",           (gIniSettings.luaBotMessage         ? "Yes" : "No"))) == "yes");
+   gIniSettings.serverFilter          = (lcase(gINI.GetValue("Diagnostics", "ServerFilter",            (gIniSettings.serverFilter          ? "Yes" : "No"))) == "yes");
 
 
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
@@ -924,8 +936,20 @@ void saveSettingsToINI()
       gINI.KeyComment("Diagnostics", " LogPlatform - Log Platform events (Yes/No)");
       gINI.KeyComment("Diagnostics", " LogNetBase - Log NetBase events (Yes/No)");
       gINI.KeyComment("Diagnostics", " LogUDP - Log UDP events (Yes/No)");
+
+      gINI.KeyComment("Diagnostics", " LogFatalError - Log fatal errors; should be left on (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogError - Log serious errors; should be left on (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogWarning - Log less serious errors (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogConnection - High level logging connections with remote machines (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
+      gINI.KeyComment("Diagnostics", " LuaBotMessage - Message from a bot (Yes/No)");
+      gINI.KeyComment("Diagnostics", " ServerFilter - For logging messages specific to hosting games (Yes/No)");
+      gINI.KeyComment("Diagnostics", "                (Note: these messages will go to bitfighter_server.log regardless of this setting) ");
       gINI.KeyComment("Diagnostics", "----------------");
    }
+
    gINI.SetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"), true);
    gINI.SetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"), true);
    gINI.SetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"), true);
@@ -935,6 +959,17 @@ void saveSettingsToINI()
    gINI.SetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"), true);
    gINI.SetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"), true);
    gINI.SetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"), true);
+
+   gINI.SetValue("Diagnostics", "LogFatalError",         (gIniSettings.logFatalError         ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogError",              (gIniSettings.logError              ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogWarning",            (gIniSettings.logWarning            ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogConnection",         (gIniSettings.logConnection         ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogLevelLoaded",        (gIniSettings.logLevelLoaded        ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LogLuaObjectLifecycle", (gIniSettings.logLuaObjectLifecycle ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LuaLevelGenerator",     (gIniSettings.luaLevelGenerator     ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "LuaBotMessage",         (gIniSettings.luaBotMessage         ? "Yes" : "No"), true);
+   gINI.SetValue("Diagnostics", "ServerFilter",          (gIniSettings.serverFilter          ? "Yes" : "No"), true);
+
 
 
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value

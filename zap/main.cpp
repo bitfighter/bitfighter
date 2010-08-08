@@ -167,29 +167,6 @@ This change will resolve many installation and permissions issues.
 
 */
 
-/* Logging notes for converting logprintf to TNLLogMessage and friends
-
-// Error logging (client and master)
-LogFatalError -- logs fatal errors; should be left on
-LogError -- logs serious errofs; should be left on
-
-// Master server events (master only)
-LogConnection -- logs remote connections on master
-LogConnectionManager -- logs server attempts to manage connections between clients and servers
-LogChat -- logs global chat messages relayed through master
-
-
-// Network events (client and master?)
-LogConnectionProtocol	-- details about packets sent/recv'd
-LogNetConnection
-LogEventConnection
-LogGhostConnection
-LogNetInterface		-- higher level network events such as connection attempts and the like
-LogPlatform
-LogNetBase
-LogUDP
-*/
-
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
@@ -1446,6 +1423,16 @@ void processStartupParams()
    gMainLog.setMsgType(LogConsumer::LogNetBase, gIniSettings.logNetBase);
    gMainLog.setMsgType(LogConsumer::LogUDP, gIniSettings.logUDP);
 
+   gMainLog.setMsgType(LogConsumer::LogFatalError, gIniSettings.logFatalError); 
+   gMainLog.setMsgType(LogConsumer::LogError, gIniSettings.logError); 
+   gMainLog.setMsgType(LogConsumer::LogWarning, gIniSettings.logWarning); 
+   gMainLog.setMsgType(LogConsumer::LogConnection, gIniSettings.logConnection); 
+   gMainLog.setMsgType(LogConsumer::LogLevelLoaded, gIniSettings.logLevelLoaded); 
+   gMainLog.setMsgType(LogConsumer::LogLuaObjectLifecycle, gIniSettings.logLuaObjectLifecycle); 
+   gMainLog.setMsgType(LogConsumer::LuaLevelGenerator, gIniSettings.luaLevelGenerator); 
+   gMainLog.setMsgType(LogConsumer::LuaBotMessage, gIniSettings.luaBotMessage); 
+   gMainLog.setMsgType(LogConsumer::ServerFilter, gIniSettings.serverFilter); 
+
 
    // These options can come either from cmd line or INI file
    if(gCmdLineSettings.name != "")
@@ -1639,7 +1626,7 @@ void setupLogging()
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
 
    gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");     
-   gMainLog.setMsgTypes(events);     
+   //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
    gStdoutLog.setMsgTypes(events);   // writes to stdout

@@ -84,7 +84,6 @@ public:
 
       ServerFilter            = BIT(18),     // For logging messages specific to hosting games
       StatisticsFilter        = BIT(19),     // For logging player/game statistics
-      TestFilter              = BIT(20),
       
       All = 0xFFFFFFFF,
       AllErrorTypes = LogFatalError | LogError | LogWarning,

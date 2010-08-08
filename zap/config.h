@@ -202,6 +202,16 @@ struct IniSettings      // With defaults specified
    bool logNetBase;
    bool logUDP;
 
+   bool logFatalError;        
+   bool logError;             
+   bool logWarning;           
+   bool logConnection;        
+   bool logLevelLoaded;       
+   bool logLuaObjectLifecycle;
+   bool luaLevelGenerator;    
+   bool luaBotMessage;        
+   bool serverFilter;  
+
 
    Vector<StringTableEntry> levelList;
 
@@ -253,6 +263,7 @@ struct IniSettings      // With defaults specified
 
       burstGraphicsMode = 1;
 
+      // Specify which events to log
       logConnectionProtocol = false;
       logNetConnection = false;
       logEventConnection = false;
@@ -261,6 +272,16 @@ struct IniSettings      // With defaults specified
       logPlatform = false;
       logNetBase = false;
       logUDP = false;
+
+      logFatalError = true;       
+      logError = true;            
+      logWarning = true;          
+      logConnection = true;       
+      logLevelLoaded = true;      
+      logLuaObjectLifecycle = false;
+      luaLevelGenerator = true;   
+      luaBotMessage = true;       
+      serverFilter = false; 
    }
 };
 
