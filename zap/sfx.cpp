@@ -768,7 +768,7 @@ void SFXObject::stop()
 
 void SFXObject::init()
 {
-   logprintf(LogError, "No OpenAL support on this platform.");
+   logprintf(LogConsumer::LogError, "No OpenAL support on this platform.");
 }
 
 void SFXObject::process()

@@ -108,7 +108,7 @@ void LogConsumer::logprintf(const char *format, ...)
 
 #ifdef TNL_ENABLE_LOGGING
 
-// All logging should pass through this method
+// All logging should pass through this method -- disabling it via the ifdef should cause logging to not happen, but it's untested
 void LogConsumer::prepareAndLogString(const char *format, va_list args)
 {
    char msg[2048]; 
