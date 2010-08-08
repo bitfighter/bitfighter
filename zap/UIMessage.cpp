@@ -64,7 +64,7 @@ void MessageUserInterface::setMessage(U32 id, char *message)
 {
    if (id < 1 || id > mNumLines)       // Protect devs from themselves...
    {
-      TNL::logprintf("Invalid line number in setMessage: %d", id);
+      logprintf(LogConsumer::LogError, "Invalid line number in setMessage: %d", id);
       return;
    }
 

@@ -44,7 +44,7 @@ LuaGameInfo::LuaGameInfo(lua_State *L)
 // Destructor
 LuaGameInfo::~LuaGameInfo()
 {
-   logprintf("deleted LuaGameObject (%p)\n", this);     // Never gets run...
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted LuaGameObject (%p)\n", this);     // Never gets run...
 }
 
 
@@ -166,7 +166,7 @@ LuaWeaponInfo::LuaWeaponInfo(WeaponType weapon)
 // Destructor
 LuaWeaponInfo::~LuaWeaponInfo()
 {
-   logprintf("deleted LuaWeaponInfo object (%p)\n", this);     // Never gets run...
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted LuaWeaponInfo object (%p)\n", this);     // Never gets run...
 }
 
 
@@ -268,7 +268,7 @@ LuaLoadout::LuaLoadout(U32 loadoutItems[])
 // Destructor
 LuaLoadout::~LuaLoadout()
 {
-   logprintf("deleted LuaLoadout object (%p)\n", this);     // Never gets run...
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted LuaLoadout object (%p)\n", this);     // Never gets run...
 }
 
 

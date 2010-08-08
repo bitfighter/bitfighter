@@ -348,7 +348,7 @@ void GhostConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
          if(mConnectionParameters.mDebugObjectSizes)
             bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, startPos - BitStreamPosBitSize);
 
-         TNLLogMessageV(LogGhostConnection, ("GhostConnection %s GHOST %d", walk->obj->getClassName(), bstream->getBitPosition() - 16 - startPos));
+         logprintf(LogConsumer::LogGhostConnection, "GhostConnection %s GHOST %d", walk->obj->getClassName(), bstream->getBitPosition() - 16 - startPos);
 
          TNLAssert((retMask & (~updateMask)) == 0, "Cannot set new bits in packUpdate return");
       }
@@ -677,7 +677,7 @@ void GhostConnection::activateGhosting()
       return;
 
    mGhostingSequence++;
-   TNLLogMessageV(LogGhostConnection, ("Ghosting activated - %d", mGhostingSequence));
+   logprintf(LogConsumer::LogGhostConnection, "Ghosting activated - %d", mGhostingSequence);
    
    TNLAssert((mGhostFreeIndex == 0) && (mGhostZeroUpdateIndex == 0), "Error: ghosts in the ghost list before activate.");
    
@@ -700,7 +700,7 @@ TNL_IMPLEMENT_RPC(GhostConnection, rpcStartGhosting,
                   (U32 sequence), (sequence),
       NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   TNLLogMessageV(LogGhostConnection, ("Got GhostingStarting %d", sequence));
+   logprintf(LogConsumer::LogGhostConnection, "Got GhostingStarting %d", sequence);
 
    if(!doesGhostTo())
    {
@@ -715,7 +715,7 @@ TNL_IMPLEMENT_RPC(GhostConnection, rpcReadyForNormalGhosts,
                   (U32 sequence), (sequence),
       NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 0)
 {
-   TNLLogMessageV(LogGhostConnection, ("Got ready for normal ghosts %d %d", sequence, mGhostingSequence));
+   logprintf(LogConsumer::LogGhostConnection, "Got ready for normal ghosts %d %d", sequence, mGhostingSequence);
    if(!doesGhostFrom())
    {
       setLastError("Invalid packet.");

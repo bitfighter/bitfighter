@@ -321,7 +321,8 @@ void LevelListLoader::buildLevelList()
 
    if(!getLevels(gConfigDirs.levelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
    {
-      logprintf("Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
+       logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
+       return;
    }
 
    levelfiles.sort(alphaSort);   // Just to be sure...
@@ -348,7 +349,7 @@ void LevelListLoader::removeSkippedLevels()
       for(S32 j = 0; j < gLevelSkipList.size(); j++)
          if(!strcmp(filename_i.c_str(), gLevelSkipList[j].getString()))
          {
-            s_logprintf("Loader skipping level %s listed in LevelSkipList (see INI file)", gLevelList[i].getString());
+            logprintf(LogConsumer::ServerFilter, "Loader skipping level %s listed in LevelSkipList (see INI file)", gLevelList[i].getString());
             gLevelList.erase(i);
             i--;
             break;

@@ -108,12 +108,9 @@ void NetClassRep::initialize()
 
          qsort((void *) &dynamicTable[0], dynamicTable.size(), sizeof(NetClassRep *), ACRCompare);
 
-         TNLLogBlock(LogNetBase,
-            logprintf("Class Group: %d  Class Type: %d  count: %d",
-               group, type, dynamicTable.size());
-            for(S32 i = 0; i < dynamicTable.size(); i++)
-               logprintf("%s", dynamicTable[i]->getClassName());
-         )
+         logprintf(LogConsumer::LogNetBase, "Class Group: %d  Class Type: %d  count: %d", group, type, dynamicTable.size());
+         for(S32 i = 0; i < dynamicTable.size(); i++)
+            logprintf(LogConsumer::LogNetBase, "%s", dynamicTable[i]->getClassName());
 
          mClassTable[group][type] = dynamicTable;
    
@@ -130,13 +127,16 @@ void NetClassRep::initialize()
 
 void NetClassRep::logBitUsage()
 {
-   logprintf("Net Class Bit Usage:");
+   logprintf(LogConsumer::LogNetBase, "Net Class Bit Usage:");
+
    for(NetClassRep *walk = mClassLinkList; walk; walk = walk->mNextClass)
    {
       if(walk->mInitialUpdateCount)
-         logprintf("%s (Initial) - Count: %d   Avg Size: %g", walk->mClassName, walk->mInitialUpdateCount, walk->mInitialUpdateBitsUsed / F32(walk->mInitialUpdateCount));
+         logprintf(LogConsumer::LogNetBase, "%s (Initial) - Count: %d   Avg Size: %g", 
+               walk->mClassName, walk->mInitialUpdateCount, walk->mInitialUpdateBitsUsed / F32(walk->mInitialUpdateCount));
       if(walk->mPartialUpdateCount)
-         logprintf("%s (Partial) - Count: %d   Avg Size: %g", walk->mClassName, walk->mPartialUpdateCount, walk->mPartialUpdateBitsUsed / F32(walk->mPartialUpdateCount));
+         logprintf(LogConsumer::LogNetBase, "%s (Partial) - Count: %d   Avg Size: %g", 
+               walk->mClassName, walk->mPartialUpdateCount, walk->mPartialUpdateBitsUsed / F32(walk->mPartialUpdateCount));
    }
 }
 

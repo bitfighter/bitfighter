@@ -203,7 +203,7 @@ void LuaObject::checkArgCount(lua_State *L, S32 argsWanted, const char *methodNa
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s called with %d args, expected %d", methodName, args, argsWanted);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -219,7 +219,7 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName, S
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s called with out-of-bounds arg: %d (val=%d)", methodName, index, val);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -235,7 +235,7 @@ lua_Integer LuaObject::getInt(lua_State *L, S32 index, const char *methodName)
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -251,7 +251,7 @@ F32 LuaObject::getFloat(lua_State *L, S32 index, const char *methodName)
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected numeric arg at position %d", methodName, index);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -267,7 +267,7 @@ bool LuaObject::getBool(lua_State *L, S32 index, const char *methodName)
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected boolean arg at position %d", methodName, index);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -283,7 +283,7 @@ const char *LuaObject::getString(lua_State *L, S32 index, const char *methodName
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected string arg at position %d", methodName, index);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -306,7 +306,7 @@ Point LuaObject::getVec(lua_State *L, S32 index, const char *methodName)
    {
       char msg[256];
       dSprintf(msg, sizeof(msg), "%s expected vector arg at position %d", methodName, index);
-      logprintf(msg);
+      logprintf(LogConsumer::LogError, msg);
 
       throw LuaException(msg);
    }
@@ -334,7 +334,7 @@ Point LuaObject::getPointOrXY(lua_State *L, S32 index, const char *methodName)
    // Uh oh...
    char msg[256];
    dSprintf(msg, sizeof(msg), "%s expected either a point or a pair of numbers at position %d", methodName, index);
-   logprintf(msg);
+   logprintf(LogConsumer::LogError, msg);
 
    throw LuaException(msg);
 }
@@ -385,7 +385,7 @@ LuaItem *LuaItem::getItem(lua_State *L, S32 index, U32 type, const char *functio
       default:
          char msg[256];
          dSprintf(msg, sizeof(msg), "%s expected item as arg at position %d", functionName, index);
-         logprintf(msg);
+         logprintf(LogConsumer::LogError, msg);
 
          throw LuaException(msg);
    }
@@ -447,7 +447,7 @@ LuaPoint::LuaPoint(Point point)
 // Destructor
 LuaPoint::~LuaPoint()
 {
-   // logprintf("deleted LuaPoint object (%p)\n", this);
+   // logprintf("deleted LuaPoint object (%p)\n", this);  ==> called a lot
 }
 
 

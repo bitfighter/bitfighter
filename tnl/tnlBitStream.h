@@ -347,7 +347,7 @@ inline bool BitStream::readFlag()
    bitNum++;
    return ret;
 }
-extern void logprintf(const char *format, ...);
+//extern void logprintf(const char *format, ...);
 
 inline void BitStream::writeIntAt(U32 value, U8 bitCount, U32 bitPosition)
 {

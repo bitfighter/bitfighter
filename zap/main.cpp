@@ -147,6 +147,7 @@ This change will resolve many installation and permissions issues.
 <li>When all players leave game, game advances to next level, and suspends itself until a player joins.  That way, when players join, level is "fresh" and ready to go.  May also reduce processor load and power consumption</li>
 <li>Added ability to put game into suspended animation, automatically restarting when other players join (/suspend command)</li>
 <li>Removed allLevels command line parameter, and disabled INI level specification</li>
+<li>Enhanced logging</li>
 
 <h4>Linux</h4>
 <li>Added ability to specify locations of various resouces on the cmd line.  See http://bitfighter.org/wiki/index.php?title=Command_line_parameters#Specifying_folders for details.</li>
@@ -164,6 +165,29 @@ This change will resolve many installation and permissions issues.
 <li>Fixed robot bug reporting incorrect team for flags</li>
 <li>Fixed extent bug when computing extents of levels that do not overlap (0,0)</li>
 
+*/
+
+/* Logging notes for converting logprintf to TNLLogMessage and friends
+
+// Error logging (client and master)
+LogFatalError -- logs fatal errors; should be left on
+LogError -- logs serious errofs; should be left on
+
+// Master server events (master only)
+LogConnection -- logs remote connections on master
+LogConnectionManager -- logs server attempts to manage connections between clients and servers
+LogChat -- logs global chat messages relayed through master
+
+
+// Network events (client and master?)
+LogConnectionProtocol	-- details about packets sent/recv'd
+LogNetConnection
+LogEventConnection
+LogGhostConnection
+LogNetInterface		-- higher level network events such as connection attempts and the like
+LogPlatform
+LogNetBase
+LogUDP
 */
 
 //-----------------------------------------------------------------------------------
@@ -212,6 +236,7 @@ This change will resolve many installation and permissions issues.
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
 #include <sys/stat.h>
+#include <stdio.h>      // For logging to console
 
 using namespace TNL;
 
@@ -611,8 +636,8 @@ void abortHosting_noLevels()
 {
    if(gDedicatedServer)
    {
-      logprintf("No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
-      s_logprintf("No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
+      logprintf(LogConsumer::LogError, "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
+      logprintf(LogConsumer::ServerFilter, "No levels found in folder %s.  Cannot host a game.", gConfigDirs.levelDir.c_str());
       //printf("No levels were loaded from folder %s.  Cannot host a game.", gLevelDir.c_str());      ==> Does nothing
       exitGame(1);
    }
@@ -647,12 +672,12 @@ void initHostGame(Address bindAddress, bool testMode)
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
    {
-      s_logprintf("----------\nbitfighter server started [%s]", getTimeStamp().c_str());
-      s_logprintf("hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
+      logprintf(LogConsumer::ServerFilter, "----------\nBitfighter server started [%s]", getTimeStamp().c_str());
+      logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
 
       LevelListLoader::buildLevelList();     // Populates gLevelList
 
-      s_logprintf("Loaded %d levels:", gLevelList.size());
+      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", gLevelList.size());
    }
 
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
@@ -678,7 +703,7 @@ void hostGame()
    gServerGame->hostingModePhase = ServerGame::Hosting;
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
-      s_logprintf("\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
+      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
 
    if(gServerGame->getLevelNameCount())             // Levels loaded --> start game!
       gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);   // Start the first level
@@ -694,9 +719,6 @@ void hostGame()
 
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
       joinGame(Address(), false, true);   // ...then we'll play, too!
-      //      (let the system assign ip and port, false -> not from master, true -> local connection)
-   //else
-   //   printf("Bitfighter host launched.\n");     ==> Does nothing
 }
 
 
@@ -837,87 +859,47 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
 
 string joindir(string path, string filename)
 {
+   // If there is no path, there's nothing to join -- just return filename
+   if(path == "")
+      return filename;
+
+   // Does path already have a trailing delimieter?  If so, we'll use that.
+   if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
+      return path + filename;
+
+   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
    return (path == "" ? filename : path + "/" + filename);
 }
 
 
-#include <stdio.h>
-// Each instnatiation of a LogConsumer subclass gets a copy of all log messages.  Here we'll log both
-// to the screen as well as to a file called bitfighter.log
-class StdoutLogConsumer : public LogConsumer   // Dumps logs to stdout
-{
-public:
-   void logString(const char *string)
-   {
-      printf("%s", string);
-   }
-} gStdoutLogConsumer;
+//
+//////////////////////////////////////////
+//////////////////////////////////////////
+//
+//// Each instnatiation of a LogConsumer subclass gets a copy of all log messages.  Here we'll log both
+//// to the screen as well as to a file called bitfighter.log
+//class StdoutLogConsumer : public LogConsumer   // Dumps logs to stdout
+//{
+//public:
+//   void logString(const char *string)
+//   {
+//      printf("%s", string);
+//   }
+//};
 
 
-class FileLogConsumer : public LogConsumer     // Dumps logs to bitfighter.log
-{
-protected:
-   FILE *f;
-   const char *filename;
-   const char *mode;
-   const char *firstLine;
-   bool isOpen;  // RDW - This was "boolean" (CE - Too much Java!)
 
-public:
-   FileLogConsumer(const char* logFile="bitfighter.log")
-   {
-      filename = logFile;
-      isOpen = false;
-      mode = "w";
-      firstLine = "------ Bitfighter Log File ------\n";
-   }
+////////////////////////////////////////
+////////////////////////////////////////
 
+// Our logfiles
+StdoutLogConsumer gStdoutLog;     // Logs to console, when there is one
 
-   ~FileLogConsumer()
-   {
-      if(f)
-         fclose(f);
-   }
+FileLogConsumer gMainLog;
+FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 
-
-   void open()
-   {
-      f = fopen(joindir(gConfigDirs.logDir, filename).c_str(), mode);
-      isOpen = true;    // Set this here to avoid endless loops when the next line is executed!
-      logString(firstLine);
-   }
-
-
-   void logString(const char *string)
-   {
-      // Do this whole lazy initialize thing to ensure that we've read our command line and know where to
-      // create the logfile by the time we get here.
-      if(!isOpen)
-         open();
-
-      if(f)
-      {
-         fprintf(f, "%s", string);
-         fflush(f);
-      }
-   }
-} gFileLogConsumer;
-
-
-class ServerFileLogConsumer : public FileLogConsumer    // Dumps logs to bitfighter_server.log
-{
-public:
-   ServerFileLogConsumer(const char* logFile="bitfighter_server.log")
-   {
-      filename = logFile;
-      isOpen = false;
-      mode = "a";
-      firstLine = "";
-
-      setFilterType(LogConsumer::ServerFilter);
-   }
-
-} gServerLogConsumer;
+////////////////////////////////////////
+////////////////////////////////////////
 
 
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
@@ -1043,7 +1025,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          }
          else
          {
-            logprintf("You must specify a server address to connect to with the -connect option");
+            logprintf(LogConsumer::LogError, "You must specify a server address to connect to with the -connect option");
             exitGame(1);
          }
       }
@@ -1054,7 +1036,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.masterAddress = argv[i+1];
          else
          {
-            logprintf("You must specify a master server address with -master option");
+            logprintf(LogConsumer::LogError, "You must specify a master server address with -master option");
             exitGame(1);
          }
       }
@@ -1065,7 +1047,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.hostaddr = argv[i+1];
          else
          {
-            logprintf("You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)");
+            logprintf(LogConsumer::LogError, "You must specify a host address for the host to listen on (e.g. IP:Any:28000 or IP:192.169.1.100:5500)");
             exitGame(1);
          }
       }
@@ -1076,7 +1058,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.loss = atof(argv[i+1]);
          else
          {
-            logprintf("You must specify a loss rate between 0 and 1 with the -loss option");
+            logprintf(LogConsumer::LogError, "You must specify a loss rate between 0 and 1 with the -loss option");
             exitGame(1);
          }
       }
@@ -1087,7 +1069,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.lag = atoi(argv[i+1]);
          else
          {
-            logprintf("You must specify a lag (in ms) with the -lag option");
+            logprintf(LogConsumer::LogError, "You must specify a lag (in ms) with the -lag option");
             exitGame(1);
          }
       }
@@ -1108,7 +1090,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.name = argv[i+1];
          else
          {
-            logprintf("You must enter a nickname with the -name option");
+            logprintf(LogConsumer::LogError, "You must enter a nickname with the -name option");
             exitGame(1);
          }
       }
@@ -1119,7 +1101,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.serverPassword = argv[i+1];
          else
          {
-            logprintf("You must enter a password with the -serverpassword option");
+            logprintf(LogConsumer::LogError, "You must enter a password with the -serverpassword option");
             exitGame(1);
          }
       }
@@ -1130,7 +1112,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.adminPassword = argv[i+1];
          else
          {
-            logprintf("You must specify an admin password with the -adminpassword option");
+            logprintf(LogConsumer::LogError, "You must specify an admin password with the -adminpassword option");
             exitGame(1);
          }
       }
@@ -1141,7 +1123,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.levelChangePassword = argv[i+1];
          else
          {
-            logprintf("You must specify an level-change password with the -levelchangepassword option");
+            logprintf(LogConsumer::LogError, "You must specify an level-change password with the -levelchangepassword option");
             exitGame(1);
          }
       }
@@ -1150,7 +1132,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify the root data folder with the -rootdatadir option");
+            logprintf(LogConsumer::LogError, "You must specify the root data folder with the -rootdatadir option");
             exitGame(1);
          }
 
@@ -1162,7 +1144,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify a levels subfolder with the -leveldir option");
+            logprintf(LogConsumer::LogError, "You must specify a levels subfolder with the -leveldir option");
             exitGame(1);
          }
 
@@ -1173,7 +1155,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify a the folder where your INI file is stored with the -inidir option");
+            logprintf(LogConsumer::LogError, "You must specify a the folder where your INI file is stored with the -inidir option");
             exitGame(1);
          }
 
@@ -1184,7 +1166,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify your log folder with the -logdir option");
+            logprintf(LogConsumer::LogError, "You must specify your log folder with the -logdir option");
             exitGame(1);
          }
 
@@ -1195,7 +1177,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify the folder where the Lua helper scripts are stored with the -luadir option");
+            logprintf(LogConsumer::LogError, "You must specify the folder where the Lua helper scripts are stored with the -luadir option");
             exitGame(1);
          }
 
@@ -1206,7 +1188,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify the robots folder with the -robotdir option");
+            logprintf(LogConsumer::LogError, "You must specify the robots folder with the -robotdir option");
             exitGame(1);
          }
 
@@ -1217,7 +1199,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify your screenshots folder with the -screenshotdir option");
+            logprintf(LogConsumer::LogError, "You must specify your screenshots folder with the -screenshotdir option");
             exitGame(1);
          }
 
@@ -1228,20 +1210,19 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify your sounds folder with the -sfxdir option");
+            logprintf(LogConsumer::LogError, "You must specify your sounds folder with the -sfxdir option");
             exitGame(1);
          }
 
          gCmdLineSettings.dirs.sfxDir = argv[i+1].getString();
       }
 
-
       // Specify list of levels...  all remaining params will be taken as level names
       else if(!stricmp(argv[i], "-levels"))     // additional arg(s) required
       {
          if(!hasAdditionalArg)
          {
-            logprintf("You must specify one or more levels to load with the -levels option");
+            logprintf(LogConsumer::LogError, "You must specify one or more levels to load with the -levels option");
             exitGame(1);
          }
 
@@ -1260,7 +1241,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.hostname = argv[i+1];
          else
          {
-            logprintf("You must specify a server name with the -hostname option");
+            logprintf(LogConsumer::LogError, "You must specify a server name with the -hostname option");
             exitGame(1);
          }
       }
@@ -1270,7 +1251,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.hostdescr = argv[i+1];
          else
          {
-            logprintf("You must specify a description (use quotes) with the -hostdescr option");
+            logprintf(LogConsumer::LogError, "You must specify a description (use quotes) with the -hostdescr option");
             exitGame(1);
          }
       }
@@ -1281,7 +1262,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.maxplayers = atoi(argv[i+1]);
          else
          {
-            logprintf("You must specify the max number of players on your server with the -maxplayers option");
+            logprintf(LogConsumer::LogError, "You must specify the max number of players on your server with the -maxplayers option");
             exitGame(1);
          }
       }
@@ -1308,7 +1289,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          }
          else
          {
-            logprintf("You must specify the x and y position of the window with the -winpos option");
+            logprintf(LogConsumer::LogError, "You must specify the x and y position of the window with the -winpos option");
             exitGame(1);
          }
       }
@@ -1319,7 +1300,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gCmdLineSettings.winWidth = atoi(argv[i+1]);
          else
          {
-            logprintf("You must specify the width of the game window with the -winwidth option");
+            logprintf(LogConsumer::LogError, "You must specify the width of the game window with the -winwidth option");
             exitGame(1);
          }
       }
@@ -1336,7 +1317,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             gUseStickNumber = atoi(argv[i+1]);           /////////////////////////////////////////  TODO: should be part of gCmdLineSettings
          else
          {
-            logprintf("You must specify the joystick you want to use with the -usestick option");
+            logprintf(LogConsumer::LogError, "You must specify the joystick you want to use with the -usestick option");
             exitGame(1);
          }
       }
@@ -1361,7 +1342,7 @@ void InitSdlVideo()
    if (SDL_Init(SDL_INIT_VIDEO) < 0)
    {
        // Failed, exit.
-       logprintf("SDL Video initialization failed: %s", SDL_GetError( ));
+       logprintf(LogFatalError, "SDL Video initialization failed: %s", SDL_GetError( ));
        exitGame();
    }
 
@@ -1370,7 +1351,7 @@ void InitSdlVideo()
 
    if( !info ) {
        // This should probably never happen.
-       logprintf("SDL Video query failed: %s", SDL_GetError());
+       logprintf(LogFatalError, "SDL Video query failed: %s", SDL_GetError());
        exitGame();
    }
 
@@ -1415,7 +1396,7 @@ void InitSdlVideo()
       // including DISPLAY not being set, the specified
       // resolution not being available, etc.
 
-      logprintf("SDL Video mode set failed: %s", SDL_GetError());
+      logprintf(LogFatalError, "SDL Video mode set failed: %s", SDL_GetError());
       exitGame();
    }
 
@@ -1455,15 +1436,15 @@ void processStartupParams()
    gSimulatedLag = gCmdLineSettings.lag;
 
    // Enable some logging...
-   TNLLogEnable(LogConnectionProtocol, gIniSettings.logConnectionProtocol);
-   TNLLogEnable(LogNetConnection, gIniSettings.logNetConnection);
-   TNLLogEnable(LogEventConnection, gIniSettings.logEventConnection);
-   TNLLogEnable(LogGhostConnection, gIniSettings.logGhostConnection);
+   gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, gIniSettings.logConnectionProtocol);
+   gMainLog.setMsgType(LogConsumer::LogNetConnection, gIniSettings.logNetConnection);
+   gMainLog.setMsgType(LogConsumer::LogEventConnection, gIniSettings.logEventConnection);
+   gMainLog.setMsgType(LogConsumer::LogGhostConnection, gIniSettings.logGhostConnection);
 
-   TNLLogEnable(LogNetInterface, gIniSettings.logNetInterface);
-   TNLLogEnable(LogPlatform, gIniSettings.logPlatform);
-   TNLLogEnable(LogNetBase, gIniSettings.logNetBase);
-   TNLLogEnable(LogUDP, gIniSettings.logUDP);
+   gMainLog.setMsgType(LogConsumer::LogNetInterface, gIniSettings.logNetInterface);
+   gMainLog.setMsgType(LogConsumer::LogPlatform, gIniSettings.logPlatform);
+   gMainLog.setMsgType(LogConsumer::LogNetBase, gIniSettings.logNetBase);
+   gMainLog.setMsgType(LogConsumer::LogUDP, gIniSettings.logUDP);
 
 
    // These options can come either from cmd line or INI file
@@ -1616,16 +1597,6 @@ void processStartupParams()
 }
 
 
-// Any folders not set here default to current folder
-void setDefaultConfigDirs()
-{
-   gConfigDirs.levelDir = "levels";     
-   gConfigDirs.robotDir = "robots";
-   gConfigDirs.screenshotDir = "screenshots";
-   gConfigDirs.sfxDir = "sfx";
-}
-
-
 void processCmdLineParams(int argc, char **argv)
 {
    Vector<TNL::StringPtr> theArgv;
@@ -1662,10 +1633,27 @@ void processCmdLineParams(int argc, char **argv)
 }
 
 
+void setupLogging()
+{
+   // Specify which events each logfile will listen for
+   S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
+
+   gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");     
+   gMainLog.setMsgTypes(events);     
+   gMainLog.logprintf("------ Bitfighter Log File ------");
+
+   gStdoutLog.setMsgTypes(events);   // writes to stdout
+
+   gServerLog.init(joindir(gConfigDirs.logDir, "bitfighter_server.log"), "a");
+   gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter); 
+   gStdoutLog.logprintf("Welcome to Bitfighter!");
+}
+
 };  // namespace Zap
 
 
 using namespace Zap;
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -1683,20 +1671,18 @@ int main(int argc, char **argv)
    // Move to the application bundle's path (RDW)
    moveToAppPath();
 #endif
-   setDefaultConfigDirs();
-   gCmdLineSettings.init();      // Init cmd line settings struct
 
    processCmdLineParams(argc, argv);
 
-   string dir = "";
-   
-   // Go through the following rigamarole because gConfigDirs hasn't been setup yet...
-   if(gCmdLineSettings.dirs.iniDir != "")               // Direct specification of ini path takes precedence
-       dir = gCmdLineSettings.dirs.iniDir;
-   else if(gCmdLineSettings.dirs.rootDataDir != "")     // over specification via rootdatadir param
-       dir = gCmdLineSettings.dirs.rootDataDir;
+   gConfigDirs.init();    
 
-   gINI.SetPath(joindir(dir, "bitfighter.ini"));   
+
+   // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
+   // only way to specify a non-standard location is via the command line, which we've now read.
+   setupLogging();
+
+   // Load the INI file
+   gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));   
    gIniSettings.init();                      // Init struct that holds INI settings
 
 
@@ -1705,6 +1691,7 @@ int main(int argc, char **argv)
    loadSettingsFromINI();                    // Read INI
 
    processStartupParams();                   // And merge command line params and INI settings
+
    SFXObject::init();
 
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges

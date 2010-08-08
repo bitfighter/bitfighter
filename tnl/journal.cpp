@@ -246,9 +246,10 @@ void Journal::checkReadPosition()
                                                                                     // Changing to > fixes the problem, or at least the symptom.
    {
       if(!mReadStream.isValid())
-         logprintf("checkReadPosition failed: Invalid stream read");
+         logprintf(LogConsumer::LogFatalError, "checkReadPosition failed: Invalid stream read");
       else
-         logprintf("checkReadPosition failed: Read past end of journal");
+         logprintf(LogConsumer::LogFatalError, "checkReadPosition failed: Read past end of journal");
+
       TNL_DEBUGBREAK();
    }
 }
@@ -272,7 +273,7 @@ void Journal::beginBlock(U32 blockId, bool writeBlock)
       TNL_JOURNAL_READ( (&startToken) );
       if((startToken ^ 0x1234) != blockId)
       {
-         logprintf("Expected token %s - got %s", JournalBlockTypeToken::findName(blockId), JournalBlockTypeToken::findName(startToken ^ 0x1234));
+         logprintf(LogConsumer::LogFatalError, "Expected token %s - got %s", JournalBlockTypeToken::findName(blockId), JournalBlockTypeToken::findName(startToken ^ 0x1234);
          TNL_DEBUGBREAK();
       }
 #endif
@@ -295,7 +296,7 @@ void Journal::endBlock(U32 blockId, bool writeBlock)
       TNL_JOURNAL_READ( (&endToken) );
       if((endToken ^ 0x5678) != blockId)
       {
-         logprintf("Expected token %s - got %s", JournalBlockTypeToken::findName(blockId), JournalBlockTypeToken::findName(endToken ^ 0x5678));
+         logprintf(LogConsumer::LogFatalError, "Expected token %s - got %s", JournalBlockTypeToken::findName(blockId), JournalBlockTypeToken::findName(endToken ^ 0x5678);
          TNL_DEBUGBREAK();
       }
 #endif

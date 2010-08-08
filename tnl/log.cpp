@@ -26,10 +26,10 @@
 
 #include "tnlLog.h"
 #include "tnlDataChunker.h"
-#include <stdarg.h>
 #include <time.h>
 #include <string.h>
-#include <stdio.h>  // For newer versions of gcc?
+#include <stdio.h>   // For newer versions of gcc?
+#include <stdarg.h>  // For va_list
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -38,32 +38,152 @@
 namespace TNL
 {
 
+////////////////////////////////////////
+////////////////////////////////////////
+
 LogConsumer *LogConsumer::mLinkedList = NULL;
 
-LogConsumer::LogConsumer()    // Constructor
+// Constructor -- add log to consumer list
+LogConsumer::LogConsumer()    
 {
-   mFilterType = GeneralFilter;
+   //mFilterType = GeneralFilter;
+   mMsgTypes = 0xFFFFFFFF;       // All types on by default
+
    mNextConsumer = mLinkedList;
+
    if(mNextConsumer)
       mNextConsumer->mPrevConsumer = this;
+
    mPrevConsumer = NULL;
    mLinkedList = this;
 }
 
+// Destructor -- remove log from consumer list
 LogConsumer::~LogConsumer()
 {
    if(mNextConsumer)
       mNextConsumer->mPrevConsumer = mPrevConsumer;
+
    if(mPrevConsumer)
       mPrevConsumer->mNextConsumer = mNextConsumer;
    else
       mLinkedList = mNextConsumer;
 }
 
-void LogConsumer::setFilterType(FilterType type)
+
+void LogConsumer::setMsgTypes(S32 types)
 {
-   mFilterType = type;
+   mMsgTypes = types;
 }
+
+
+void LogConsumer::setMsgType(MsgType msgType, bool enable)
+{
+   if(enable)
+      mMsgTypes |= msgType;
+   else
+      mMsgTypes &= ~msgType;
+}
+
+
+// Find all logs that are listenting to a specified MessageType and forward the message to them.  Static method.
+void LogConsumer::logString(LogConsumer::MsgType msgType, const char *format, va_list args)
+{
+   for(LogConsumer *walk = LogConsumer::getLinkedList(); walk; walk = walk->getNext())
+      if(walk->mMsgTypes & msgType)     // Only log to the requested type of logfile
+         walk->prepareAndLogString(format, args);
+}
+
+
+void LogConsumer::logprintf(const char *format, ...)
+{
+   va_list args; 
+   va_start(args, format); 
+      
+   prepareAndLogString(format, args);
+
+   va_end(args);
+}
+
+
+#ifdef TNL_ENABLE_LOGGING
+
+// All logging should pass through this method
+void LogConsumer::prepareAndLogString(const char *format, va_list args)
+{
+   char msg[2048]; 
+   vsnprintf(msg, sizeof(msg), format, args); 
+   std::string message(msg);
+
+   // Unless string ends with a '\', add a newline char
+   if(message[message.length() - 1] == '\\')
+      message.erase(message.length() - 1, 1);
+   else
+      message.append("\n");
+
+   writeString(message.c_str());    // <== each log class will have it's own way of doing this
+}
+
+#else
+
+void LogConsumer::prepareAndLogString(const char *format, va_list args)
+{
+   // Do nothing
+}
+
+#endif
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// Constructor -- open the file
+FileLogConsumer::FileLogConsumer()    // Constructor
+{
+   // Do nothing
+}
+
+
+// Destructor -- close the file
+FileLogConsumer::~FileLogConsumer()    
+{
+   if(f)
+      fclose(f);
+}
+
+void FileLogConsumer::init(std::string logFile, const char *mode)
+{
+   if(f)
+      fclose(f);
+
+   f = fopen(logFile.c_str(), mode);
+   if(!f)
+      TNLAssert(false, "Can't open log file for writing!");    // TODO: What should we really do?
+}
+
+
+void FileLogConsumer::writeString(const char *string)
+{
+   if(f)
+   {
+      fprintf(f, "%s", string);
+      fflush(f);
+   }
+   else
+      TNLAssert(false, "Logfile not initialized!");
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+void StdoutLogConsumer::writeString(const char *string)
+{
+   printf("%s", string);
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 LogType *LogType::linkedList = NULL;
 LogType *LogType::current = NULL;
@@ -86,68 +206,29 @@ LogType *LogType::find(const char *name)
 }
 #endif
 
-void LogConsumer::logString(const char *string)
+
+// Logs to logfiles that have subscribed to specified message type
+void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
 {
-   // by default the LogConsumer will output to the platform debug 
-   // string printer, but only if we're in debug mode
-   // this will be overridden by child classes
-#ifdef TNL_DEBUG
-   Platform::outputDebugString(string);
-#endif
-}
+   va_list args;    
+   va_start(args, format);
 
-// Note: Pretty sure this is safe from buffer overflows, and all strings end up null terminated
-void logger(LogConsumer::FilterType filtertype, const char *format, va_list args)
-{
-   char buffer[4096];
-   U32 bufferStart = 0;
-   if(LogType::current)
-   {
-      strncpy(buffer, LogType::current->typeName, sizeof(buffer));
-      bufferStart = strlen(buffer);
-
-      buffer[bufferStart] = ':';
-      buffer[bufferStart+1] = ' ';
-      bufferStart += 2;
-   }
-
-  // -1 below makes sure we have enough room for a "\n" if we need to append one
-   vsnprintf(buffer + bufferStart, sizeof(buffer) - bufferStart - 1, format, args);
-   
-   // If last char is a "\", chop it off, otherwise append newline
-   U32 len = strlen(buffer);  // Should never be >= our buffer length, so appending newline should be ok
-
-   if(len > 0 && buffer[len - 1] == '\\')
-      buffer[len - 1] = '\0';    // Don't use NULL here, will cause type problems
-   else
-      strcat(buffer, "\n");      // strcat should include terminal null
-
-   for(LogConsumer *walk = LogConsumer::getLinkedList(); walk; walk = walk->getNext())
-      if(walk->mFilterType == filtertype)     // Only log to the requested type of logfile
-         walk->logString(buffer);
-
-   Platform::outputDebugString(buffer);
+   LogConsumer::logString(msgType, format, args);
+   va_end(args);
 }
 
 
+// Logs to general log
 void logprintf(const char *format, ...)
 {
-   va_list s;    
-   va_start( s, format );
+   va_list args;    
+   va_start(args, format);
 
-   logger(LogConsumer::GeneralFilter, format, s);
-   va_end(s);
+   LogConsumer::logString(LogConsumer::All, format, args);
+
+   va_end(args);
 }
 
-// Log a message to the server log --> wraps logger
-void s_logprintf(const char *format, ...)
-{
-   va_list s;    
-   va_start( s, format );
-
-   logger(LogConsumer::ServerFilter, format, s);
-   va_end(s);
-}
 
 // Return a nicely formatted date/time stamp
 std::string getTimeStamp()
@@ -179,7 +260,7 @@ std::string getShortTimeStamp()
 
   strftime(buffer, TIMESIZE, "%H:%M", timeinfo);
 
-  return(std::string(buffer));      // Does this not seem a ridiculous use of strings??
+  return(std::string(buffer));     
 }
 
 

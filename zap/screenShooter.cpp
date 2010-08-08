@@ -557,22 +557,7 @@ void Screenshooter::saveScreenshot()
          ctr++;
       }   
 
-      // The following block is for writing TGA files
-      //if ((filex = fopen(filename, "wb")) == NULL) {
-      //     logprintf("Error opening file for screenshot: %s\n", filename);
-	   //   return;
-      //}
-
       glReadPixels(0, 0, w, h, GL_BGR_EXT, GL_UNSIGNED_BYTE, pixels);
-
-      // The following block is for writing TGA files
-      //U8 TGAheader[12]={0,0,2,0,0,0,0,0,0,0,0,0};
-      //U8 header[6] = { w % 256, w/256, h % 256, h/256, 24, 0 };
-      //
-      //fwrite(TGAheader, sizeof(U8), 12, filex);
-      //fwrite(header, sizeof(U8), 6, filex);
-      //fwrite(pixels, sizeof(GLubyte), buffsize, filex);
-      //fclose(filex);
 
       BITMAPINFOHEADER header;
 

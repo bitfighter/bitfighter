@@ -121,7 +121,11 @@ static bool init()
       WSADATA stWSAData;
       success = !WSAStartup(0x0101, &stWSAData);
 
-      logprintf("Winsock initialization %s", success ? "succeeded." : "failed!");
+      if(success)
+         logprintf(LogConsumer::LogNetInterface, "Winsock initialization succeeded.");
+      else
+         logprintf(LogConsumer::LogError, "Winsock initialization failed.");
+       
    }
 #elif defined( TNL_OS_XBOX )
       XNetStartupParams xnsp;
@@ -138,7 +142,11 @@ static bool init()
       if( iResult != NO_ERROR )
          success = false;
 
-      logprintf("Winsock initialization %s", success ? "succeeded." : "failed!");
+      if(success)
+         logprintf(LogNetInterface, "Winsock initialization succeeded.")
+      else
+         logprintf(LogError, "Winsock initialization failed.")
+
 #endif
    initCount++;
    return success;
@@ -232,7 +240,7 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
 #endif
    else
    {
-      TNLLogMessageV(LogUDP, ("Attempted to create a socket bound to an invalid transport."));
+      logprintf(LogConsumer::LogError, "Attempted to create a socket bound to an invalid transport.");
    }
    if(mPlatformSocket != INVALID_SOCKET)
    {
@@ -249,21 +257,21 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
       getsockname(mPlatformSocket, (PSOCKADDR) &address, &addressSize);
       SocketToTNLAddress(&address, &boundAddress);
 
-      TNLLogMessageV(LogUDP, ("%s socket created - bound to address: %s", socketType, boundAddress.toString()));
+      logprintf(LogConsumer::LogUDP, "%s socket created - bound to address: %s", socketType, boundAddress.toString());
 
       // set the send and receive buffer sizes
       error = setsockopt(mPlatformSocket, SOL_SOCKET, SO_RCVBUF, (char *) &recvBufferSize, sizeof(recvBufferSize));
       if(!error)
       {
-         TNLLogMessageV(LogUDP, ("%s socket receive buffer size set to %d.", socketType, recvBufferSize));
+         logprintf(LogConsumer::LogUDP, "%s socket receive buffer size set to %d.", socketType, recvBufferSize);
          error = setsockopt(mPlatformSocket, SOL_SOCKET, SO_SNDBUF, (char *) &sendBufferSize, sizeof(sendBufferSize));
       }
       else
-         TNLLogMessageV(LogUDP, ("%s socket error: unable to set the receive buffer size on socket.", socketType));
+         logprintf(LogConsumer::LogError, "%s socket error: unable to set the receive buffer size on socket.", socketType);
 
       if(!error)
       {
-         TNLLogMessageV(LogUDP, ("%s socket send buffer size set to %d.", socketType, recvBufferSize));
+         logprintf(LogConsumer::LogUDP, "%s socket send buffer size set to %d.", socketType, recvBufferSize);
 
          if(mTransportProtocol != TCPProtocol)
          {
@@ -273,7 +281,7 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
          }
       }
       else
-         TNLLogMessageV(LogUDP, ("%s socket error: unable to set the send buffer size on socket.", socketType));
+         logprintf(LogConsumer::LogError, "%s socket error: unable to set the send buffer size on socket.", socketType);
 
 
       // set the nonblocking IO flag
@@ -290,16 +298,16 @@ Socket::Socket(const Address &bindAddress, U32 sendBufferSize, U32 recvBufferSiz
       }
       else
       {
-         TNLLogMessageV(LogUDP, ("%s socket error: unable to set broadcast mode on socket.", socketType));
+         logprintf(LogConsumer::LogError, "%s socket error: unable to set broadcast mode on socket.", socketType);
       }
 
       if(!error)
       {
-         TNLLogMessageV(LogUDP, ("%s socket non-blocking IO set.  Socket initialized.", socketType));
+         logprintf(LogConsumer::LogUDP, "%s socket non-blocking IO set.  Socket initialized.", socketType);
       }
       else
       {
-         TNLLogMessageV(LogUDP, ("Error prevented successful initialization of %s socket.", socketType));
+         logprintf(LogConsumer::LogError, "Error prevented successful initialization of %s socket.", socketType);
          closesocket(mPlatformSocket);
          mPlatformSocket = INVALID_SOCKET;
       }

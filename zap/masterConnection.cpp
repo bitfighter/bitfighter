@@ -99,7 +99,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 {
    if(!mIsGameServer)   // We're not a server!
    {
-      TNL::logprintf("Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
+      logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
       s2mRejectArrangedConnection(requestId, connectionParameters);
       return;
    }
@@ -113,7 +113,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    // Check if the specified host is banned on this server
    if(gServerGame->getNetInterface()->isHostBanned(fullPossibleAddresses[0]))
    {
-      TNL::logprintf("Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
+      logprintf(LogConsumer::LogConnection, "Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
       s2mRejectArrangedConnection(requestId, connectionParameters);
       return;
    }
@@ -131,8 +131,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 
    conn->setNetAddress(fullPossibleAddresses[0]);
 
-   TNL::logprintf("Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
-   TNL::logprintf("  Generated shared secret data: %s", b->encodeBase64()->getBuffer());
+   logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
+   //logprintf(LogConnection, "  Generated shared secret data: %s", b->encodeBase64()->getBuffer()));
 
    ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
    Nonce nonce(data);
@@ -148,7 +148,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
          {
             if(!mIsGameServer)   // We're not a server!
             {
-               TNL::logprintf("Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
+               logprintf(LogConsumer::LogConnection, "Rejecting arranged connection from %s", Address(possibleAddresses[0]).toString());
                s2mRejectArrangedConnection(requestId, connectionParameters);
                return;
             }
@@ -162,7 +162,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
             // Check if the specified host is banned on this server
             if(gServerGame->getNetInterface()->isHostBanned(fullPossibleAddresses[0]))
             {
-               TNL::logprintf("Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
+               logprintf(LogConsumer::LogConnection, "Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
                s2mRejectArrangedConnection(requestId, connectionParameters);
                return;
             }
@@ -180,8 +180,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 
             conn->setNetAddress(fullPossibleAddresses[0]);
 
-            TNL::logprintf("Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
-            TNL::logprintf("  Generated shared secret data: %s", b->encodeBase64()->getBuffer());
+            logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
+            //TNL::logprintf("  Generated shared secret data: %s", b->encodeBase64()->getBuffer());
 
             ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
             Nonce nonce(data);
@@ -195,8 +195,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
 {
    if(!mIsGameServer && requestId == mCurrentQueryId && connectionData->getBufferSize() >= Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2)
    {
-      TNL::logprintf("Remote host accepted arranged connection.");
-      TNL::logprintf("  Shared secret data: %s", connectionData->encodeBase64()->getBuffer());
+      logprintf(LogConsumer::LogConnection, "Remote host accepted arranged connection.");
+      //TNL::logprintf("  Shared secret data: %s", connectionData->encodeBase64()->getBuffer());
 
       Vector<Address> fullPossibleAddresses;
       for(S32 i = 0; i < possibleAddresses.size(); i++)
@@ -229,7 +229,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected
 {
    if(!mIsGameServer && requestId == mCurrentQueryId)
    {
-      TNL::logprintf("Remote host rejected arranged connection...");       // Perhaps because the player was kicked/banned?
+      logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Perhaps because the player was kicked/banned?
       onConnectionTerminated(ReasonTimedOut, "Connection timed out");
       endGame();
       gMainMenuUserInterface.activate();
@@ -339,7 +339,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
 void MasterServerConnection::onConnectionEstablished()
 {
-   TNL::logprintf("%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
+   logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
 }
 
 };

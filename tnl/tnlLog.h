@@ -33,41 +33,63 @@
 
 namespace TNL
 {
-
-/// Global interface to the TNL logging system.
-///
-/// The TNL logging system is consumer based. This is just a
-/// global stub that routes the log string to all the consumers.
-///
-/// You should <b>really</b> be using the TNLLogMessage() and
-/// TNLLogMessageV() macros instead of calling this.
-///
-/// @see LogConsumer
-extern void logprintf(const char *format, ...);
-extern void s_logprintf(const char *format, ...);
-extern std::string getTimeStamp();
-extern std::string getShortTimeStamp();
-
+///   
 /// LogConsumer is the base class for the message logging system in TNL.
 ///
 /// TNL by default doesn't log messages anywhere, but users of the library
 /// can instantiate subclasses that override the logString method.
 /// Any instantiated subclass of LogConsumer will receive all general
 /// logprintf's, as well as any TNLLogMessages that are enabled via
-/// the TNLLogEnable macro.
+/// the setMsgType() and setMsgTypes() functions.
+///
+   
 class LogConsumer
 {
-   LogConsumer *mNextConsumer; ///< Next LogConsumer in the global linked list of log consumers.
-   LogConsumer *mPrevConsumer; ///< Previous LogConsumer in the global linked list of log consumers.
+private:
+   LogConsumer *mNextConsumer;         ///< Next LogConsumer in the global linked list of log consumers.
+   LogConsumer *mPrevConsumer;         ///< Previous LogConsumer in the global linked list of log consumers.
 
-   static LogConsumer *mLinkedList;       ///< Head of the global linked list of log consumers.
+   static LogConsumer *mLinkedList;    ///< Head of the global linked list of log consumers.
 
 public:
+   enum MsgType {   
+      None                    = 0,
 
-   enum FilterType {
-      GeneralFilter,          // For logging general messages
-      ServerFilter,           // For logging messages specific to the server
+      // Error logging
+      LogFatalError           = BIT(0),      // Log fatal errors; should be left on
+      LogError                = BIT(1),      // Log serious errors; should be left on
+      LogWarning              = BIT(2),      // Log less serious errors
+ 
+      LogConnection           = BIT(3),      // High level logging connections with remote machines
+
+      // Master server events
+      LogConnectionManager    = BIT(4),      // Log server attempts to manage connections between clients and servers
+      LogChat                 = BIT(5),      // Log global chat messages relayed through master
+
+      // TNL network events
+      LogConnectionProtocol	= BIT(6),      // Details about packets sent/recv'd
+      LogNetConnection        = BIT(7),      // Packet send/rcv info
+      LogEventConnection      = BIT(8),      // Event connection info
+      LogGhostConnection      = BIT(9),      // Info about ghosting
+      LogNetInterface		   = BIT(10),     // Higher level network events such as connection attempts and the like
+      LogPlatform             = BIT(11),     // Log message in lieu of showing message to user on non-Windows platforms; only used for Asserts
+      LogNetBase              = BIT(12),     // Info about network object classes
+      LogUDP                  = BIT(13),     // Logs UDP socket bindings and params
+
+      LogLevelLoaded          = BIT(14),     // When a level is loaded
+
+      LogLuaObjectLifecycle   = BIT(15),     // Creation and destruciton of lua objects
+      LuaLevelGenerator       = BIT(16),     // Messages from the LuaLevelGenerator     
+      LuaBotMessage           = BIT(17),     // Message from a bot, to go to lua msg console
+
+      ServerFilter            = BIT(18),     // For logging messages specific to hosting games
+      StatisticsFilter        = BIT(19),     // For logging player/game statistics
+      TestFilter              = BIT(20),
+      
+      All = 0xFFFFFFFF,
+      AllErrorTypes = LogFatalError | LogError | LogWarning,
    };
+
 
    /// Constructor adds this LogConsumer to the global linked list.
    LogConsumer();
@@ -76,7 +98,8 @@ public:
    virtual ~LogConsumer();
 
    /// Set the consumer type, that controls which loggers get written to
-   void setFilterType(FilterType type);
+   void setMsgTypes(S32 types);                    // Set one or more types or'ed together
+   void setMsgType(MsgType msgType, bool enable);  // Enable or disable a single type
 
 
    /// Returns the head of the linked list of all log consumers.
@@ -85,14 +108,49 @@ public:
    /// Returns the next LogConsumer in the linked list.
    LogConsumer *getNext() { return mNextConsumer; }
 
-   FilterType mFilterType;
+   //FilterType mFilterType;
+   S32 mMsgTypes;    // A bitmap of MsgType values
 
-   /// Writes a string to this instance of LogConsumer.
-   ///
-   /// By default the string is sent to the Platform::outputDebugString function. Subclasses
-   /// might log to a file, a remote service, or even a message box.
-   virtual void logString(const char *string);
+   void logprintf(const char *format, ...);   // Writes a string to this instance of LogConsumer, bypassing all filtering
+
+   static void logString(LogConsumer::MsgType msgType, const char *format, va_list args);
+
+private:
+   void prepareAndLogString(const char *format, va_list args);
+   virtual void writeString(const char *string) = 0;
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class FileLogConsumer : public LogConsumer    // Dumps logs to file
+{
+protected:
+   FILE *f;
+
+public:
+   FileLogConsumer();      // Constructor
+   ~FileLogConsumer();     // Destructor
+
+   void init(std::string logFile, const char *mode = "a");
+
+   void writeString(const char *string);
+}; 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+class StdoutLogConsumer : public LogConsumer    // Dumps to stdout
+{
+public:
+   void writeString(const char *string);
+};
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 
 struct LogType
 {
@@ -109,40 +167,21 @@ struct LogType
 #endif
 };
 
-#ifdef TNL_ENABLE_LOGGING
 
-struct LogTypeRef
-{
-   LogType *theLogType;
-   LogTypeRef(const char *name)
-   {
-      theLogType = LogType::find(name);
-   }
-};
+/// Global interface to the TNL logging system.
+///
+/// The TNL logging system is consumer based. This is just a
+/// global stub that routes the log string to all the consumers.
+///
+/// It is best to specify a message type when using logprintf... using the form without a message type will write the message to all
+/// logs, and should only be used for short-term debug logging.
+///
+/// @see LogConsumer
+extern void logprintf(LogConsumer::MsgType msgType, const char *format, ...);
+extern void logprintf(const char *format, ...);
 
-///   LogConnectionProtocol,
-///   LogNetConnection,
-///   LogEventConnection,
-///   LogGhostConnection,
-///   LogNetInterface,
-///   LogPlatform,
-
-/// Logs a message of the specified type to the currently active LogConsumers.
-#define TNLLogMessage(logType, message) { static TNL::LogTypeRef theType(#logType); if(theType.theLogType->isEnabled) { TNL::LogType::setCurrent(theType.theLogType); logprintf("%s", message); TNL::LogType::setCurrent(NULL); } }
-
-/// Logs a printf-style variable argument message of the specified type to the currently active LogConsumers.
-#define TNLLogMessageV(logType, message) { static TNL::LogTypeRef theType(#logType); if(theType.theLogType->isEnabled) { TNL::LogType::setCurrent(theType.theLogType); logprintf message; TNL::LogType::setCurrent(NULL); } }
-
-#define TNLLogEnable(logType, enabled) { static TNL::LogTypeRef theType(#logType); theType.theLogType->isEnabled = enabled; }
-
-#define TNLLogBlock(logType, code) { static TNL::LogTypeRef theType(#logType); if(theType.theLogType->isEnabled) { TNL::LogType::setCurrent(theType.theLogType); { code } TNL::LogType::setCurrent(NULL); } }
-
-#else
-#define TNLLogMessage(logType, message)  { }
-#define TNLLogMessageV(logType, message) { }
-#define TNLLogEnable(logType, enabled) { }
-#define TNLLogBlock(logType, code) { }
-#endif
+extern std::string getTimeStamp();
+extern std::string getShortTimeStamp();
 
 };
 

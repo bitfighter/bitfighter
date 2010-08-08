@@ -20,7 +20,7 @@
 
 //#include <tchar.h>
 
-#include "../tnl/tnlLog.h"        // For logprintf
+//#include "../tnl/tnlLog.h"        // For logprintf
 
 // C++ Includes
 //#include "stdafx.h"
@@ -28,10 +28,10 @@
 #include <fstream>
 #include <sstream>
 
-#include "../tnl/tnlJournal.h"    // For journaling support
+#include "tnlJournal.h"       // For journaling support
 
 #include "zapjournal.h"
-#include "SweptEllipsoid.h"      // For string trimming functions
+#include "SweptEllipsoid.h"   // For string trimming functions
 
 
 // C Includes

@@ -74,7 +74,7 @@ LuaLevelGenerator::LuaLevelGenerator(lua_State *L)
 // Destructor
 LuaLevelGenerator::~LuaLevelGenerator()
 {
-   logprintf("deleted LuaLevelGenerator (%p)\n", this);
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaLevelGenerator (%p)\n", this);
 }
 
 
@@ -87,7 +87,7 @@ void LuaLevelGenerator::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf("***LEVELGEN ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
+   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
 
    va_end(args);
 }
@@ -237,7 +237,7 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
    static const char *methodName = "LuaLevelGenerator:logprint()";
    checkArgCount(L, 1, methodName);
 
-   logprintf("LuaLevelGenerator: %s", getString(L, 1, methodName));
+   logprintf(LogConsumer::LuaLevelGenerator, "LuaLevelGenerator: %s", getString(L, 1, methodName));
    return 0;
 }
 

@@ -81,8 +81,7 @@ GameConnection::~GameConnection()
    mNext->mPrev = mPrev;
 
    // Log the disconnect...
-   TNL::logprintf("%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
-
+   logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
 
    if(isConnectionToClient() && gServerGame->getSuspendor() == this)     // isConnectionToClient only true if we're the server
       gServerGame->suspenderLeftGame();
@@ -96,7 +95,9 @@ GameConnection::~GameConnection()
 
      double elapsed = difftime (quitTime, joinTime);
 
-     TNL::s_logprintf("%s [%s] quit [%s] (%.2lf secs)", mClientName.getString(), isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str(), elapsed);
+     logprintf(LogConsumer::ServerFilter, "%s [%s] quit [%s] (%.2lf secs)", mClientName.getString(), 
+                                               isLocalConnection() ? "Local Connection" : getNetAddressString(), 
+                                               getTimeStamp().c_str(), elapsed);
    }
 }
 
@@ -284,12 +285,13 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    // Add a message to the server log
    if(type == (U32)DeleteLevel)
-      s_logprintf("User [%s] added level [%s] to server skip list", mClientRef->name.getString(), 
-            gServerGame->getCurrentLevelFileName().getString());
+      logprintf(LogConsumer::ServerFilter, "User [%s] added level [%s] to server skip list", mClientRef->name.getString(), 
+                                                gServerGame->getCurrentLevelFileName().getString());
    else
    {
       const char *types[] = { "level change password", "admin password", "server password", "server name", "server description" };
-      s_logprintf("User [%s] %s %s", mClientRef->name.getString(), strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
+      logprintf(LogConsumer::ServerFilter, "User [%s] %s %s", mClientRef->name.getString(), 
+                                                strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
    }
 
 
@@ -474,9 +476,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    if(mClientRef)
    {
       if(granted)
-         s_logprintf("User [%s] granted admin permissions", mClientRef->name.getString());
+         logprintf(LogConsumer::ServerFilter, "User [%s] granted admin permissions", mClientRef->name.getString());
       else
-         s_logprintf("User [%s] denied admin permissions", mClientRef->name.getString());
+         logprintf(LogConsumer::ServerFilter, "User [%s] denied admin permissions", mClientRef->name.getString());
    }
 
    setIsAdmin(granted);
@@ -513,9 +515,9 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    if(mClientRef)
    {
       if(granted)
-         s_logprintf("User [%s] granted level change permissions", mClientRef->name.getString());
+         logprintf(LogConsumer::ServerFilter, "User [%s] granted level change permissions", mClientRef->name.getString());
       else
-         s_logprintf("User [%s] denied level change permissions", mClientRef->name.getString());
+         logprintf(LogConsumer::ServerFilter, "User [%s] denied level change permissions", mClientRef->name.getString());
    }
 
    setIsLevelChanger(granted);
@@ -768,7 +770,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetCla
    if(!mIsAdmin)
       return;
 
-   s_logprintf("User [%s] requested shutdown in %d seconds", mClientRef->name.getString(), time);
+   logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds", mClientRef->name.getString(), time);
 
    gServerGame->setShuttingDown(true, time, mClientRef);
 
@@ -789,7 +791,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
    if(!mIsAdmin)
       return;
 
-   s_logprintf("User %s canceled shutdown", mClientRef->name.getString());
+   logprintf(LogConsumer::ServerFilter, "User %s canceled shutdown", mClientRef->name.getString());
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
       if(walk != this)     // Don't send message to cancellor!
@@ -982,7 +984,8 @@ void GameConnection::onConnectionEstablished()
    {
       setGhostFrom(false);
       setGhostTo(true);
-      TNL::logprintf("%s - connected to server.", getNetAddressString());
+      logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
+
       setFixedRateParameters(50, 50, 2000, 2000);
    }
    else                 // Server-side
@@ -1007,11 +1010,12 @@ void GameConnection::onConnectionEstablished()
          s2cSetIsLevelChanger(true, false);         // Tell client, but don't display notification
       }
 
-      TNL::logprintf("%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
+      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
+
       if(isLocalConnection())
-         TNL::s_logprintf("%s [%s] joined [%s]", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
+         logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
       else
-         TNL::s_logprintf("%s [%s] joined [%s]", mClientName.getString(), getNetAddressString(), getTimeStamp().c_str());
+         logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), getNetAddressString(), getTimeStamp().c_str());
    }
 }
 

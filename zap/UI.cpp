@@ -39,7 +39,7 @@ using namespace TNL;
 #include "../glut/glutInclude.h"
 
 #include <string>
-#include <stdarg.h>
+#include <stdarg.h>     // For va_args
 
 
 #ifdef ZAP_DEDICATED
@@ -97,11 +97,11 @@ void UserInterface::reactivate()
 // Dump all items in the prevUIs vector for debugging purposes
 void UserInterface::dumpPreviousQueue()
 {
-   TNL::logprintf("Previous UI/menu tree (%d elements):", prevUIs.size());
+   logprintf("Previous UI/menu tree (%d elements):", prevUIs.size());
    for(S32 i = 0; i < prevUIs.size(); i++)
    {
       UserInterface *prev = prevUIs[i];
-      TNL::logprintf("    ->%d", prev->getMenuID());
+      logprintf("    ->%d", prev->getMenuID());
    }
 }
 

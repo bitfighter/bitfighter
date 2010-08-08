@@ -294,7 +294,7 @@ public:
    bool loadLevel(string fileName);       // Load a level
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
-   string getLevelFileName(string base);     // Handles prepending subfolder, if needed
+   string getLevelFileName(string base);     // Joins base and dir, if appropriate
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);      // Figures out the level index if the input is a relative index
    string getLevelFileNameFromIndex(S32 indx);

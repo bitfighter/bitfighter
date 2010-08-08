@@ -1620,10 +1620,9 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 // This is the only constructor that's used.
 LuaShip::LuaShip(Ship *ship): thisShip(ship)
 {
-   //thisShip = ship;
    id++;
    mId = id;
-   logprintf("Creating luaship %d", mId);
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Creating luaship %d", mId);
 }
 
 
@@ -1662,7 +1661,7 @@ GameObject *LuaShip::getGameObject()
 {
    if(thisShip.isNull())    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
    {
-      logprintf("Bad programmer!");
+      logprintf(LogConsumer::LuaBotMessage, "Bad programmer!");
       return NULL;      // Not right
    }
    else

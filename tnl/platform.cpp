@@ -96,7 +96,7 @@ void Platform::AlertOK(const char *windowTitle, const char *message)
 {
 //   ShowCursor(true);
 //   MessageBox(NULL, message, windowTitle, MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TASKMODAL | MB_OK);
-   TNLLogMessageV(LogPlatform, ("AlertOK: %s - %s", message, windowTitle));
+   logprintf(LogConsumer::LogPlatform, "AlertOK: %s - %s", message, windowTitle);
    return;
 }
 
@@ -105,7 +105,7 @@ bool Platform::AlertOKCancel(const char *windowTitle, const char *message)
 {
 //   ShowCursor(true);
 //   return MessageBox(NULL, message, windowTitle, MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TASKMODAL | MB_OKCANCEL) == IDOK;
-   TNLLogMessageV(LogPlatform, ("AlertOKCancel: %s - %s", message, windowTitle));
+   logprintf(LogConsumer::LogPlatform, "AlertOKCancel: %s - %s", message, windowTitle);
    return false;
 }
 
@@ -114,7 +114,7 @@ bool Platform::AlertRetry(const char *windowTitle, const char *message)
 {
 //   ShowCursor(true);
 //   return (MessageBox(NULL, message, windowTitle, MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TASKMODAL | MB_RETRYCANCEL) == IDRETRY);
-   TNLLogMessageV(LogPlatform, ("AlertRetry: %s - %s", message, windowTitle));
+   logprintf(LogConsumer::LogPlatform, "AlertRetry: %s - %s", message, windowTitle);
    return false;
 }
 
@@ -398,7 +398,7 @@ void Platform::AlertOK(const char *windowTitle, const char *message)
 {
 //   ShowCursor(true);
 //   MessageBox(NULL, message, windowTitle, MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TASKMODAL | MB_OK);
-   TNLLogMessageV(LogPlatform, ("AlertOK: %s - %s", message, windowTitle));
+   logprintf(LogConsumer::LogPlatform, "AlertOK: %s - %s", message, windowTitle);
    return;
 }
 
@@ -407,7 +407,7 @@ bool Platform::AlertOKCancel(const char *windowTitle, const char *message)
 {
 //   ShowCursor(true);
 //   return MessageBox(NULL, message, windowTitle, MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TASKMODAL | MB_OKCANCEL) == IDOK;
-   TNLLogMessageV(LogPlatform, ("AlertOKCancel: %s - %s", message, windowTitle));
+   logprintf(LogConsumer::LogPlatform, "AlertOKCancel: %s - %s", message, windowTitle);
    return false;
 }
 
@@ -416,7 +416,7 @@ bool Platform::AlertRetry(const char *windowTitle, const char *message)
 {
 //   ShowCursor(true);
 //   return (MessageBox(NULL, message, windowTitle, MB_ICONINFORMATION | MB_SETFOREGROUND | MB_TASKMODAL | MB_RETRYCANCEL) == IDRETRY);
-   TNLLogMessageV(LogPlatform, ("AlertRetry: %s - %s", message, windowTitle));
+   logprintf(LogConsumer::LogPlatform, "AlertRetry: %s - %s", message, windowTitle);
    return false;
 }
 

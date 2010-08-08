@@ -85,7 +85,6 @@ void LoadoutHelper::show(bool fromController)
 }
 
 extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
-extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
@@ -201,16 +200,12 @@ bool LoadoutHelper::isValidItem(S32 index)
       return true;
 }
 
+
 void LoadoutHelper::idle(U32 timeDelta)
 {
-   // Try removing the timeout altogether
-   //if(mIdleTimer.update(timeDelta))
-   //{
-   //   gGameUserInterface.setPlayMode();
-   //   if(gIniSettings.verboseHelpMessages)
-   //      gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- ship design unchanged.");
-   //}
+   // Do nothing
 }
+
 
 // Return true if key did something, false if key had no effect
 // Runs on client

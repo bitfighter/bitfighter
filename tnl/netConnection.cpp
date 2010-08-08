@@ -223,9 +223,9 @@ void NetConnection::writeRawPacket(BitStream *bstream, NetPacketType packetType)
       S32 start = bstream->getBitPosition();
       bstream->setStringTable(mStringTable);
 
-      TNLLogMessageV(LogNetConnection, ("NetConnection %s: START %s", mNetAddress.toString(), getClassName()) );
+      logprintf(LogConsumer::LogNetConnection, "NetConnection %s: START %s", mNetAddress.toString(), getClassName());
       writePacket(bstream, note);
-      TNLLogMessageV(LogNetConnection, ("NetConnection %s: END %s - %d bits", mNetAddress.toString(), getClassName(), bstream->getBitPosition() - start) );
+      logprintf(LogConsumer::LogNetConnection, "NetConnection %s: END %s - %d bits", mNetAddress.toString(), getClassName(), bstream->getBitPosition() - start);
    }
    if(!mSymmetricCipher.isNull())
    {
@@ -238,12 +238,13 @@ void NetConnection::readRawPacket(BitStream *bstream)
 {
    if(mSimulatedPacketLoss && Random::readF() < mSimulatedPacketLoss)
    {
-      TNLLogMessageV(LogNetConnection, ("NetConnection %s: RECVDROP - %d", mNetAddress.toString(), getLastSendSequence()));
+      logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECVDROP - %d", mNetAddress.toString(), getLastSendSequence());
       return;
    }
-   TNLLogMessageV(LogNetConnection, ("NetConnection %s: RECV- %d bytes", mNetAddress.toString(), bstream->getMaxReadBitPosition() >> 3));
+   logprintf(LogConsumer::LogNetConnection, "NetConnection %s: RECV- %d bytes", mNetAddress.toString(), bstream->getMaxReadBitPosition() >> 3);
 
    mErrorBuffer[0] = 0;
+
    if(readPacketHeader(bstream))
    {
       mLastPacketRecvTime = mInterface->getCurrentTime();
@@ -302,11 +303,11 @@ void NetConnection::writePacketHeader(BitStream *stream, NetPacketType packetTyp
 
    //if(isNetworkConnection())
    //{
-   //   TNLLogMessageV(LogBlah, ("SND: mLSQ: %08x  pkLS: %08x  pt: %d abc: %d",
+   //   logprintf(LogBlah, ("SND: mLSQ: %08x  pkLS: %08x  pt: %d abc: %d",
    //      mLastSendSeq, mLastSeqRecvd, packetType, ackByteCount));
    //}
 
-   TNLLogMessageV(LogConnectionProtocol, ("build hdr %d %d", mLastSendSeq, packetType));
+   logprintf(LogConsumer::LogConnectionProtocol, "build hdr %d %d", mLastSendSeq, packetType);
 }
 
 bool NetConnection::readPacketHeader(BitStream *pstream)
@@ -381,7 +382,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
       mSymmetricCipher->setupCounter(pkSequenceNumber, pkHighestAck, pkPacketType, 0);
       if(!pstream->decryptAndCheckHash(MessageSignatureBytes, PacketHeaderByteSize, mSymmetricCipher))
       {
-         TNLLogMessage(LogNetConnection, "Packet failed crypto");
+         logprintf(LogConsumer::LogNetConnection, "Packet failed crypto");
          return false;
       }
    }
@@ -399,17 +400,16 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
 
    //if(isNetworkConnection())
    //{
-   //   TNLLogMessageV(LogBlah, ("RCV: mHA: %08x  pkHA: %08x  mLSQ: %08x  pkSN: %08x  pkLS: %08x  pkAM: %08x",
-   //      mHighestAckedSeq, pkHighestAck, mLastSendSeq, pkSequenceNumber, mLastSeqRecvd, pkAckMask[0]));
+   //   logprintf(LogBlah, "RCV: mHA: %08x  pkHA: %08x  mLSQ: %08x  pkSN: %08x  pkLS: %08x  pkAM: %08x",
+   //      mHighestAckedSeq, pkHighestAck, mLastSendSeq, pkSequenceNumber, mLastSeqRecvd, pkAckMask[0]);
    //}
 
    U32 pkSendDelay = (pstream->readInt(8) << 3) + 4;
 
-   TNLLogBlock(LogConnectionProtocol,
-      for(U32 i = mLastSeqRecvd+1; i < pkSequenceNumber; i++)
-         logprintf ("Not recv %d", i);
-      logprintf("Recv %d %s", pkSequenceNumber, packetTypeNames[pkPacketType]);
-   );
+   for(U32 i = mLastSeqRecvd+1; i < pkSequenceNumber; i++)
+      logprintf(LogConsumer::LogConnectionProtocol, "Not recv %d", i);
+
+   logprintf(LogConsumer::LogConnectionProtocol, "Recv %d %s", pkSequenceNumber, packetTypeNames[pkPacketType]);
 
    // shift up the ack mask by the packet difference
    // this essentially nacks all the packets dropped
@@ -446,7 +446,7 @@ bool NetConnection::readPacketHeader(BitStream *pstream)
       U32 ackMaskWord = (pkHighestAck - notifyIndex) >> 5;
 
       bool packetTransmitSuccess = (pkAckMask[ackMaskWord] & (1 << ackMaskBit)) != 0;
-      TNLLogMessageV(LogConnectionProtocol, ("Ack %d %d", notifyIndex, packetTransmitSuccess));
+      logprintf(LogConsumer::LogConnectionProtocol, "Ack %d %d", notifyIndex, packetTransmitSuccess);
 
       mHighestAckedSendTime = 0;
       handleNotify(notifyIndex, packetTransmitSuccess);
@@ -558,7 +558,7 @@ void NetConnection::sendPingPacket()
 {
    PacketStream ps;
    writeRawPacket(&ps, PingPacket);
-   TNLLogMessageV(LogConnectionProtocol, ("send ping %d", mLastSendSeq));
+   logprintf(LogConsumer::LogConnectionProtocol, "send ping %d", mLastSendSeq);
 
    sendPacket(&ps);
 }
@@ -567,7 +567,7 @@ void NetConnection::sendAckPacket()
 {
    PacketStream ps;
    writeRawPacket(&ps, AckPacket);
-   TNLLogMessageV(LogConnectionProtocol, ("send ack %d", mLastSendSeq));
+   logprintf(LogConsumer::LogConnectionProtocol, "send ack %d", mLastSendSeq);
 
    sendPacket(&ps);
 }
@@ -576,7 +576,7 @@ void NetConnection::sendAckPacket()
 
 void NetConnection::handleNotify(U32 sequence, bool recvd)
 {
-   TNLLogMessageV(LogNetConnection, ("NetConnection %s: NOTIFY %d %s", mNetAddress.toString(), sequence, recvd ? "RECVD" : "DROPPED"));
+   logprintf(LogConsumer::LogNetConnection, "NetConnection %s: NOTIFY %d %s", mNetAddress.toString(), sequence, recvd ? "RECVD" : "DROPPED");
 
    PacketNotify *note = mNotifyQueueHead;
    TNLAssert(note != NULL, "Error: got a notify with a null notify head.");
@@ -596,14 +596,14 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
          {
             // Slow start strategy
             cwnd++;
-            TNLLogMessageV(LogNetConnection, ("PKT SSOK - ssthresh = %f     cwnd=%f", ssthresh, cwnd));
+            logprintf(LogConsumer::LogNetConnection, "PKT SSOK - ssthresh = %f     cwnd=%f", ssthresh, cwnd);
 
          } else {
             // We are in normal state..
             if(cwnd < MaxPacketWindowSize-2)
                cwnd += 1/cwnd;
 
-            TNLLogMessageV(LogNetConnection, ("PKT   OK - ssthresh = %f     cwnd=%f", ssthresh, cwnd));
+            logprintf(LogConsumer::LogNetConnection, "PKT   OK - ssthresh = %f     cwnd=%f", ssthresh, cwnd);
 
          }
       }
@@ -619,7 +619,7 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
          cwnd -= 1;
          if(cwnd < 2) cwnd = 2;
 
-/*         TNLLogMessageV(LogNetConnection, ("  * ack=%f   pktDt=%d    time=%f (%d)     seq=%d %d %d %d",
+/*         logprintf(LogConsumer::LogNetConnection, "  * ack=%f   pktDt=%d    time=%f (%d)     seq=%d %d %d %d",
                         ack,
                         ackDelta,
                         deltaT / 1000.0f,
@@ -628,7 +628,7 @@ void NetConnection::handleNotify(U32 sequence, bool recvd)
                         mLastRecvAckAck,
                         mLastSeqRecvdAck,
                         mHighestAckedSeq
-         )); */
+         ); */
 
       }
 
@@ -702,11 +702,11 @@ NetError NetConnection::sendPacket(BitStream *stream)
 {
    if(mSimulatedPacketLoss && Random::readF() < mSimulatedPacketLoss)
    {
-      TNLLogMessageV(LogNetConnection, ("NetConnection %s: SENDDROP - %d", mNetAddress.toString(), getLastSendSequence()));
+      logprintf(LogConsumer::LogNetConnection, "NetConnection %s: SENDDROP - %d", mNetAddress.toString(), getLastSendSequence());
       return NoError;
    }
 
-   TNLLogMessageV(LogNetConnection, ("NetConnection %s: SEND - %d bytes", mNetAddress.toString(), stream->getBytePosition()));
+   logprintf(LogConsumer::LogNetConnection, "NetConnection %s: SEND - %d bytes", mNetAddress.toString(), stream->getBytePosition());
 
    // do nothing on send if this is a demo replay.
    if(isLocalConnection())

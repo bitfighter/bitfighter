@@ -79,7 +79,7 @@ void processConfigLine(int argc, string argv[])
       FILE *f = fopen(file, "r");
       if(!f)
       {
-         logprintf("Unable to open motd file %s.", file);
+         logprintf(LogConsumer::LogError, "Unable to open MOTD file \"%s\" -- using default MOTD.", file);
 
          // Save a default message
          MOTDStringVec.push_back("Welcome to Bitfighter!");
@@ -254,10 +254,11 @@ stateLineParseDone:
 
 void readConfigFile()
 {
-   FILE *f = fopen("master.cfg", "r");
+   const char *configFile = "master.cfg";
+   FILE *f = fopen(configFile, "r");
    if(!f)
    {
-      logprintf("Unable to open config file.");
+      logprintf(LogConsumer::LogError, "Unable to open config file \"%s\"", configFile);
       return;
    }
 
@@ -275,7 +276,7 @@ void readConfigFile()
    parseArgs(fileData);
 
    if(gLatestReleasedCSProtocol == 0)
-      logprintf("Unable to find a valid protocol line in cfg file... disabling update checks!");
+      logprintf(LogConsumer::LogError, "Unable to find a valid protocol line in config file... disabling update checks!");
 
    fclose(f);
 }

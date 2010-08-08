@@ -57,9 +57,7 @@ public:
    LuaShip() { /* do nothing */ };             // C++ default constructor ==> not used.  Constructor with Ship (above) used instead
    LuaShip(lua_State *L) { /* do nothing */ }; // Lua constructor ==> not used.  Class only instantiated from C++.
 
-   ~LuaShip(){
-       logprintf("Killing luaShip %d", mId);
-   };                      // Destructor
+   ~LuaShip(){ logprintf(LogConsumer::LogLuaObjectLifecycle, "Killing luaShip %d", mId); };                      // Destructor
 
    static S32 id;
    S32 mId;

@@ -327,7 +327,6 @@ static void unqueueBuffers(S32 sourceIndex)
          if(alGetError() != AL_NO_ERROR)
             return;
 
-         //logprintf("unqueued buffer %d\n", buffer);
          processed--;
 
          // ok, this is a lame solution - but the way OpenAL should work is...
@@ -374,7 +373,6 @@ void SFXObject::queueBuffer(ByteBufferPtr p)
          ptr++;
       }
 
-      //logprintf("queued buffer %d - %d max %d len\n", buffer, max, mInitialBuffer->getBufferSize());
       alBufferData(buffer, AL_FORMAT_MONO16, mInitialBuffer->getBuffer(),
             mInitialBuffer->getBufferSize(), 8000);
       alSourceQueueBuffers(source, 1, &buffer);
@@ -501,7 +499,7 @@ void SFXObject::init()
    // alcOpenDevice: If the function returns NULL, then no sound driver/device has been found.
    if(!gDevice)
    {
-      logprintf("Failed to intitialize OpenAL.");
+      logprintf(LogConsumer::LogError, "Failed to intitialize OpenAL.");
       return;
    }
 
@@ -556,20 +554,23 @@ void SFXObject::init()
 #endif
       if(alGetError() != AL_NO_ERROR)
       {
-         logprintf("Failure (1) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName);   // Log any errors...
-         return;                                                                       // ...and disable all sounds
+         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName); 
+         return;                                                                       
       }
 
       alBufferData(gBuffers[i], format, data, size, freq);
       alutUnloadWAV(format, data, size, freq);
+
       if(alGetError() != AL_NO_ERROR)
       {
-         logprintf("Failure (2) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName);   // Log any errors
+         logprintf(LogConsumer::LogError, "Failure (2) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName);   
          return;
       }
    }
+
    gSFXValid = true;
 }
+
 
 void SFXObject::process()
 {
@@ -767,7 +768,7 @@ void SFXObject::stop()
 
 void SFXObject::init()
 {
-   logprintf("No OpenAL support on this platform.");
+   logprintf(LogError, "No OpenAL support on this platform.");
 }
 
 void SFXObject::process()

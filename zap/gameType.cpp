@@ -419,7 +419,6 @@ S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 }
 
 
-extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)

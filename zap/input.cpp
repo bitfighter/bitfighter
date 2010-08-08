@@ -418,9 +418,8 @@ void renderDPad(Point center, F32 radius, bool upActivated, bool downActivated, 
    }
 }
 
-extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
+extern IniSettings gIniSettings;
 
 // Only partially implemented at the moment...
 S32 getControllerButtonRenderedSize(KeyCode keyCode)

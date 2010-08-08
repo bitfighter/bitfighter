@@ -57,7 +57,7 @@ S32 LuaUtil::logprint(lua_State *L)
    static const char *methodName = "LuaUtil:logprint()";
    checkArgCount(L, 2, methodName);
 
-   logprintf("%s: %s", getString(L, 1, methodName), getString(L, 2, methodName));
+   logprintf(LogConsumer::LuaBotMessage, "%s: %s", getString(L, 1, methodName), getString(L, 2, methodName));
    return 0;
 }
 

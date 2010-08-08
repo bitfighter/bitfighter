@@ -502,7 +502,7 @@ void NetInterface::startConnection(NetConnection *conn)
 
 void NetInterface::sendConnectChallengeRequest(NetConnection *conn)
 {
-   TNLLogMessageV(LogNetInterface, ("Sending Connect Challenge Request to %s", conn->getNetAddress().toString()));
+   logprintf(LogConsumer::LogNetInterface, "Sending Connect Challenge Request to %s", conn->getNetAddress().toString());
    PacketStream out;
    out.write(U8(ConnectChallengeRequest));
    ConnectionParameters &params = conn->getConnectionParameters();
@@ -517,7 +517,7 @@ void NetInterface::sendConnectChallengeRequest(NetConnection *conn)
 
 void NetInterface::handleConnectChallengeRequest(const Address &addr, BitStream *stream)
 {
-   TNLLogMessageV(LogNetInterface, ("Received Connect Challenge Request from %s", addr.toString()));
+   logprintf(LogConsumer::LogNetInterface, "Received Connect Challenge Request from %s", addr.toString());
 
    if(!mAllowConnections)
       return;
@@ -551,7 +551,7 @@ void NetInterface::sendConnectChallengeResponse(const Address &addr, Nonce &clie
       else
          out.write(mPrivateKey->getPublicKey());
    }
-   TNLLogMessageV(LogNetInterface, ("Sending Challenge Response: %8x", identityToken));
+   logprintf(LogConsumer::LogNetInterface, "Sending Challenge Response: %8x", identityToken);
 
    out.sendto(mSocket, addr);
 }
@@ -609,7 +609,7 @@ void NetInterface::handleConnectChallengeResponse(const Address &address, BitStr
       theParams.mUsingCrypto = true;
    }
 
-   TNLLogMessageV(LogNetInterface, ("Received Challenge Response: %8x", theParams.mClientIdentity ));
+   logprintf(LogConsumer::LogNetInterface, "Received Challenge Response: %8x", theParams.mClientIdentity);
 
    conn->setConnectionState(NetConnection::ComputingPuzzleSolution);
    conn->mConnectSendCount = 0;
@@ -626,7 +626,7 @@ void NetInterface::continuePuzzleSolution(NetConnection *conn)
 
    if(solved)
    {
-      logprintf("Client puzzle solved in %d ms.", Platform::getRealMilliseconds() - conn->mConnectLastSendTime);
+      logprintf(LogConsumer::LogNetInterface, "Client puzzle solved in %d ms.", Platform::getRealMilliseconds() - conn->mConnectLastSendTime);
       conn->setConnectionState(NetConnection::AwaitingConnectResponse);
       sendConnectRequest(conn);
    }
@@ -638,7 +638,7 @@ void NetInterface::continuePuzzleSolution(NetConnection *conn)
 
 void NetInterface::sendConnectRequest(NetConnection *conn)
 {
-   TNLLogMessageV(LogNetInterface, ("Sending Connect Request"));
+   logprintf(LogConsumer::LogNetInterface, "Sending Connect Request");
    PacketStream out;
    ConnectionParameters &theParams = conn->getConnectionParameters();
 
@@ -750,7 +750,7 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
    U32 connectSequence;
    theParams.mDebugObjectSizes = stream->readFlag();
    stream->read(&connectSequence);
-   TNLLogMessageV(LogNetInterface, ("Received Connect Request %8x", theParams.mClientIdentity));
+   logprintf(LogConsumer::LogNetInterface, "Received Connect Request %8x", theParams.mClientIdentity);
 
    if(connect)
       disconnect(connect, NetConnection::ReasonSelfDisconnect, "NewConnection");
@@ -791,7 +791,7 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
 
 void NetInterface::sendConnectAccept(NetConnection *conn)
 {
-   TNLLogMessageV(LogNetInterface, ("Sending Connect Accept - connection established."));
+   logprintf(LogConsumer::LogNetInterface, "Sending Connect Accept - connection established.");
 
    PacketStream out;
    out.write(U8(ConnectAccept));
@@ -862,7 +862,7 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
 
    conn->setConnectionState(NetConnection::Connected);
    conn->onConnectionEstablished(); // notify the connection that it has been established
-   TNLLogMessageV(LogNetInterface, ("Received Connect Accept - connection established."));
+   logprintf(LogConsumer::LogNetInterface, "Received Connect Accept - connection established.");
 }
 
 //-----------------------------------------------------------------------------
@@ -905,7 +905,7 @@ void NetInterface::handleConnectReject(const Address &address, BitStream *stream
    char reasonStr[256];
    stream->readString(reasonStr);
 
-   TNLLogMessageV(LogNetInterface, ("Received Connect Reject - reason code %d (%s)", reason, reasonStr));
+   logprintf(LogConsumer::LogNetInterface, "Received Connect Reject - reason code %d (%s)", reason, reasonStr);
 
    // If the reason is a bad puzzle solution, try once more with a new nonce
    if(reason == NetConnection::ReasonPuzzle && !p.mPuzzleRetried)
@@ -970,10 +970,10 @@ void NetInterface::sendPunchPackets(NetConnection *conn)
    {
       out.sendto(mSocket, theParams.mPossibleAddresses[i]);
 
-      TNLLogMessageV(LogNetInterface, ("Sending punch packet (%s, %s) to %s",
+      logprintf(LogConsumer::LogNetInterface, "Sending punch packet (%s, %s) to %s",
          ByteBuffer(theParams.mNonce.data, Nonce::NonceSize).encodeBase64()->getBuffer(),
          ByteBuffer(theParams.mServerNonce.data, Nonce::NonceSize).encodeBase64()->getBuffer(),
-         theParams.mPossibleAddresses[i].toString()));
+         theParams.mPossibleAddresses[i].toString());
    }
    conn->mConnectSendCount++;
    conn->mConnectLastSendTime = getCurrentTime();
@@ -989,7 +989,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 
    ByteBuffer b(firstNonce.data, Nonce::NonceSize);
 
-   TNLLogMessageV(LogNetInterface, ("Received punch packet from %s - %s", theAddress.toString(), b.encodeBase64()->getBuffer()));
+   logprintf(LogConsumer::LogNetInterface, "Received punch packet from %s - %s", theAddress.toString(), b.encodeBase64()->getBuffer());
 
    for(i = 0; i < mPendingConnections.size(); i++)
    {
@@ -1085,7 +1085,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
       theParams.mUsingCrypto = true;
    }
    conn->setNetAddress(theAddress);
-   TNLLogMessageV(LogNetInterface, ("Punch from %s matched nonces - connecting...", theAddress.toString()));
+   logprintf(LogConsumer::LogNetInterface, "Punch from %s matched nonces - connecting...", theAddress.toString());
 
    conn->setConnectionState(NetConnection::AwaitingConnectResponse);
    conn->mConnectSendCount = 0;
@@ -1096,7 +1096,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 
 void NetInterface::sendArrangedConnectRequest(NetConnection *conn)
 {
-   TNLLogMessageV(LogNetInterface, ("Sending Arranged Connect Request"));
+   logprintf(LogConsumer::LogNetInterface, "Sending Arranged Connect Request");
    PacketStream out;
 
    ConnectionParameters &theParams = conn->getConnectionParameters();
@@ -1212,7 +1212,7 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
    U32 connectSequence;
    theParams.mDebugObjectSizes = stream->readFlag();
    stream->read(&connectSequence);
-   TNLLogMessageV(LogNetInterface, ("Received Arranged Connect Request"));
+   logprintf(LogConsumer::LogNetInterface, "Received Arranged Connect Request");
 
    if(oldConnection)
       disconnect(oldConnection, NetConnection::ReasonSelfDisconnect, "");

@@ -127,7 +127,7 @@ BOOL CALLBACK EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance,
    if(FAILED(gDirectInput->CreateDevice( pdidInstance->guidInstance, &gJoystick, NULL )))
       return DIENUM_CONTINUE;
    strcpy(gJoystickName, pdidInstance->tszProductName);
-   TNL::logprintf("Joystick found: %s", gJoystickName);
+   logprintf("Joystick found: %s", gJoystickName);
    gSticksFound++;
    return gSticksFound == gUseStickNumber ? DIENUM_STOP : DIENUM_CONTINUE;     // DIENUM_CONTINUE will find both multiple joysticks...
 }

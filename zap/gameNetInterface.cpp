@@ -88,7 +88,6 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
       case Ping:
          if(mGame->isServer())
          {
-            logprintf("Got a ping!");
             Nonce clientNonce;
             clientNonce.read(stream);
 
@@ -170,8 +169,6 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
 // Send ping to the server.  If server has different PROTOCOL_VERSION, the packet will be ignored.
 void GameNetInterface::sendPing(const Address &theAddress, const Nonce &clientNonce)
 {
-   TNL::logprintf("pinging server %s...", theAddress.toString());
-
    PacketStream packet;
    packet.write(U8(Ping));
    clientNonce.write(&packet);
@@ -181,8 +178,6 @@ void GameNetInterface::sendPing(const Address &theAddress, const Nonce &clientNo
 
 void GameNetInterface::sendQuery(const Address &theAddress, const Nonce &clientNonce, U32 identityToken)
 {
-   TNL::logprintf("querying server %s...", theAddress.toString());
-
    PacketStream packet;
    packet.write(U8(Query));
    clientNonce.write(&packet);

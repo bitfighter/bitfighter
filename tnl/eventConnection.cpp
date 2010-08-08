@@ -93,15 +93,18 @@ bool EventConnection::readConnectRequest(BitStream *stream, const char **errorSt
    if(!Parent::readConnectRequest(stream, errorString))
       return false;
 
-   U32 classCount;
-   stream->read(&classCount);
+   U32 remoteClassCount;
+   stream->read(&remoteClassCount);
 
-   U32 myCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);
-   if(myCount <= classCount)
-      mEventClassCount = myCount;
+   U32 localClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);
+
+   // If remote client has more classes defined than we do, assume they're defined in the same order, and truncate our
+   // class count and limt ourselves to working with what we have locally.
+   if(localClassCount <= remoteClassCount)
+      mEventClassCount = localClassCount;
    else
    {
-      mEventClassCount = classCount;
+      mEventClassCount = remoteClassCount;
       if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))
          return false;
    }
@@ -157,7 +160,7 @@ void EventConnection::packetDropped(PacketNotify *pnotify)
             // It was a guaranteed ordered packet, reinsert it back into
             // mSendEventQueueHead in the right place (based on seq numbers)
 
-            TNLLogMessageV(LogEventConnection, ("EventConnection %s: DroppedGuaranteed - %d", getNetAddressString(), walk->mSeqCount));
+            logprintf(LogConsumer::LogEventConnection, "EventConnection %s: DroppedGuaranteed - %d", getNetAddressString(), walk->mSeqCount);
             while(*insertList && (*insertList)->mSeqCount < walk->mSeqCount)
                insertList = &((*insertList)->mNextEvent);
             
@@ -223,7 +226,7 @@ void EventConnection::packetReceived(PacketNotify *pnotify)
    {
       mLastAckedEventSeq++;
       EventNote *next = mNotifyEventList->mNextEvent;
-      TNLLogMessageV(LogEventConnection, ("EventConnection %s: NotifyDelivered - %d", getNetAddressString(), mNotifyEventList->mSeqCount));
+      logprintf(LogConsumer::LogEventConnection, "EventConnection %s: NotifyDelivered - %d", getNetAddressString(), mNotifyEventList->mSeqCount);
       mNotifyEventList->mEvent->notifyDelivered(this, true);
       mEventNoteChunker.free(mNotifyEventList);
       mNotifyEventList = next;
@@ -257,7 +260,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       bstream->writeInt(classId, mEventClassBitSize);
 
       ev->mEvent->pack(this, bstream);
-      TNLLogMessageV(LogEventConnection, ("EventConnection %s: WroteEvent %s - %d bits", getNetAddressString(), ev->mEvent->getDebugName(), bstream->getBitPosition() - start));
+      logprintf(LogConsumer::LogEventConnection, "EventConnection %s: WroteEvent %s - %d bits", getNetAddressString(), ev->mEvent->getDebugName(), bstream->getBitPosition() - start);
 
       if(mConnectionParameters.mDebugObjectSizes)
          bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, start);
@@ -313,7 +316,7 @@ void EventConnection::writePacket(BitStream *bstream, PacketNotify *pnotify)
       ev->mEvent->pack(this, bstream);
 
       ev->mEvent->getClassRep()->addInitialUpdate(bstream->getBitPosition() - start);
-      TNLLogMessageV(LogEventConnection, ("EventConnection %s: WroteEvent %s - %d bits", getNetAddressString(), ev->mEvent->getDebugName(), bstream->getBitPosition() - start));
+      logprintf(LogConsumer::LogEventConnection, "EventConnection %s: WroteEvent %s - %d bits", getNetAddressString(), ev->mEvent->getDebugName(), bstream->getBitPosition() - start);
 
       if(mConnectionParameters.mDebugObjectSizes)
          bstream->writeIntAt(bstream->getBitPosition(), BitStreamPosBitSize, start - BitStreamPosBitSize);
@@ -431,7 +434,7 @@ void EventConnection::readPacket(BitStream *bstream)
       EventNote *note = mEventNoteChunker.alloc();
       note->mEvent = evt;
       note->mSeqCount = seq;
-      TNLLogMessageV(LogEventConnection, ("EventConnection %s: RecvdGuaranteed %d", getNetAddressString(), seq));
+      logprintf(LogConsumer::LogEventConnection, "EventConnection %s: RecvdGuaranteed %d", getNetAddressString(), seq);
 
       while(*waitInsert && (*waitInsert)->mSeqCount < seq)
          waitInsert = &((*waitInsert)->mNextEvent);
@@ -446,7 +449,7 @@ void EventConnection::readPacket(BitStream *bstream)
       EventNote *temp = mWaitSeqEvents;
       mWaitSeqEvents = temp->mNextEvent;
       
-      TNLLogMessageV(LogEventConnection, ("EventConnection %s: ProcessGuaranteed %d", getNetAddressString(), temp->mSeqCount));
+      logprintf(LogConsumer::LogEventConnection, "EventConnection %s: ProcessGuaranteed %d", getNetAddressString(), temp->mSeqCount);
       processEvent(temp->mEvent);
       mEventNoteChunker.free(temp);
       if(mErrorBuffer[0])

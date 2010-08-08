@@ -98,7 +98,7 @@ LuaTeamInfo::LuaTeamInfo(Team team)
 // Destructor
 LuaTeamInfo::~LuaTeamInfo()
 {
-   logprintf("deleted LuaTeamInfo (%p)\n", this);     // Never gets run...
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaTeamInfo (%p)\n", this);     // Never gets run...
 }
 
 

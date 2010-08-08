@@ -30,6 +30,7 @@
 #include "../zap/SharedConstants.h"
 #include <stdio.h>
 #include <string>
+#include <stdarg.h>     // For va_args
 #include <time.h>
 
 using namespace TNL;
@@ -167,28 +168,31 @@ public:
       // unlink it if it's in the list
       mPrev->mNext = mNext;
       mNext->mPrev = mPrev;
-      logprintf("[%s] %s disconnected", getTimeStamp().c_str(), getNetAddress().toString());
 
       if(mIsGameServer)
       {
          gServerListCount--;
-         logprintf("[%s] Server disconnected", getTimeStamp().c_str());
+
+         // SERVER_DISCONNECT | timestamp | player/server name
+         logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
       }
       else
       {
          gClientListCount--;
-         logprintf("[%s] Client disconnected", getTimeStamp().c_str());
+
+         // CLIENT_DISCONNECT | timestamp | player name
+         logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
       }
 
       if(isInGlobalChat)
          for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-            if (walk->isInGlobalChat)
+            if(walk->isInGlobalChat)
                walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
 
       gNeedToWriteStatus = true;
    }
 
-   /// Adds this connection to the doubly linked list of servers.
+   /// Adds this connection to the doubly linked list of servers
    void linkToServerList()
    {
       mNext = gServerList.mNext;
@@ -198,8 +202,9 @@ public:
       gServerListCount++;
 
       gNeedToWriteStatus = true;
-      logprintf("[%s] Server connected [%s]", getTimeStamp().c_str(), mPlayerOrServerName.getString());
-      logprintf("-> %s", mServerDescr.getString());
+
+      // SERVER_CONNECT | timestamp | server name | server description
+      logprintf(LogConsumer::LogConnection, "SERVER_CONNECT\t%s\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString(), mServerDescr.getString());
    }
 
 
@@ -212,7 +217,9 @@ public:
       gClientListCount++;
 
       gNeedToWriteStatus = true;
-      logprintf("[%s] Client connected [%s]", getTimeStamp().c_str(), mPlayerOrServerName.getString());
+
+      // CLIENT_CONNECT | timestamp | player name
+      logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
    }
 
 
@@ -341,7 +348,7 @@ public:
 
 
    // Write a current count of clients/servers for display on a website, using JSON format
-   // This gets updated whenver we gain or lose a server, at most every RewriteTime ms
+   // This gets updated whenver we gain or lose a server, at most every REWRITE_TIME ms
    static void writeClientServerList_JSON()
    {
       if(gJasonOutFile == "")
@@ -371,14 +378,14 @@ public:
                first = false;
             }
 
-         // Finally, the player and server counts
+            // Finally, the player and server counts
             fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d\n}\n", MasterServerConnection::gServerListCount, MasterServerConnection::gClientListCount);
 
          fflush(f);
          fclose(f);
       }
       else
-         logprintf("Could not write to JSON file %s...", gJasonOutFile.c_str());
+         logprintf(LogConsumer::LogError, "Could not write to JSON file \"%s\"", gJasonOutFile.c_str());
    }
 
    /*  Resulting JSON data should look like this:
@@ -429,8 +436,8 @@ public:
       req->requestTime = Platform::getRealMilliseconds();
 
  
-      logprintf("Client: %s requested connection to %s",
-         getNetAddress().toString(), conn->getNetAddress().toString());
+      logprintf(LogConsumer::LogConnectionManager, "Client: %s requested connection to %s", 
+                                                        getNetAddress().toString(), conn->getNetAddress().toString());
 
       // Add the request to the relevant lists (the global list, this connection's list,
       // and the other connection's list).
@@ -496,8 +503,8 @@ public:
       char buffer[256];
       strcpy(buffer, getNetAddress().toString());
 
-      logprintf("[%s] Server: %s accept connection request from %s", getTimeStamp().c_str(), buffer,
-         req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+      logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accepted connection request from %s", getTimeStamp().c_str(), buffer, 
+                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
       // If we still know about the requestor, tell him his connection was accepted...
       if(req->initiator.isValid())
@@ -532,8 +539,8 @@ public:
       char buffer[256];
       strcpy(buffer, getNetAddress().toString());
 
-      logprintf("[%s] Server: %s accept connection request from %s", getTimeStamp().c_str(), buffer,
-         req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+      logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accept connection request from %s", getTimeStamp().c_str(), buffer,
+                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
       // If we still know about the requestor, tell him his connection was accepted...
       if(req->initiator.isValid())
@@ -551,10 +558,9 @@ public:
       if(!req)
          return;
 
-      logprintf("[%s] Server: %s reject connection request from %s",
-         getTimeStamp().c_str(), getNetAddress().toString(),
-         req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
-
+      logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s reject connection request from %s",
+                                                        getTimeStamp().c_str(), getNetAddress().toString(),
+                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");    
       if(req->initiator.isValid())
          req->initiator->m2cArrangedConnectionRejected(req->initiatorQueryId, rejectData);
 
@@ -571,9 +577,9 @@ public:
       if(!req)
          return;
 
-      logprintf("[%s] Server: %s reject connection request from %s",
-         getTimeStamp().c_str(), getNetAddress().toString(),
-         req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+      logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s reject connection request from %s",
+                                                        getTimeStamp().c_str(), getNetAddress().toString(),
+                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
 
       if(req->initiator.isValid())
          req->initiator->m2cArrangedConnectionRejected(req->initiatorQueryId, rejectData);
@@ -643,8 +649,8 @@ public:
          totalHits += hits[i];
       }
 
-      // Name | shots | hits
-      f_logprintf(LogConsumer::StatisticsFilter, "PLAYER: %s\t%d\t%d", playerName.getString(), totalShots, totalHits);
+      // PLAYER | name | shots | hits
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%d\t%d", playerName.getString(), totalShots, totalHits);
    }
 
 
@@ -665,9 +671,9 @@ public:
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
-      // GameType | Time | Level name | players | time
-      f_logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%s", 
-               getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players, timestr.c_str() );
+      // GAME | GameType | Time | Level name | players | time
+      logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%s", 
+                    getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players.value, timestr.c_str() );
    }
 
 
@@ -778,18 +784,19 @@ public:
          m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this
 
       if(mCMProtocolVersion == 0)
-         logprintf("[%s] %s connected with protocol 0, version %s, from %s", getTimeStamp().c_str(), mIsGameServer ? "Server" : "Client", 
-            mVersionString.getString(), getNetAddress().toString());
+      {
+         // Don't even bother -- there's none of these clients out there anymore!
+      }
       else  // mCMProtocolVersion >= 1
-         logprintf("[%s] %s connected with protocol %d, build %d, from %s, using %s",
-                   getTimeStamp().c_str(),
-                   mIsGameServer ? "Server":"Client", mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
-                   strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
+      {
+         // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
+         logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
+                                                    mIsGameServer ? "SERVER_INFO" : "CLIENT_INFO", getTimeStamp().c_str(),
+                                                    mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
+                                                    strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
+      }
       return true;
    }
-
-
-
 
    // Appears unused!
    //static void checkConnectTimeouts()
@@ -893,7 +900,7 @@ public:
 
          if(buildingTo)       // If we're still in buildingTo mode by the time we get here, it means...
          {
-            logprintf("malformed private message: %s", message.getString());
+            logprintf(LogConsumer::LogError, "Malformed private message: %s", message.getString());
             return;           // ...that there was no body of the message.  In which case, we're done.
          }
 
@@ -916,9 +923,13 @@ public:
 
       // Log F5 chat messages
       if(isPrivate)
-         logprintf("Relayed private msg from %s to %s: %s", mPlayerOrServerName.getString(), privateTo, strippedMessage);
+      {
+         logprintf(LogConsumer::LogChat, "Relayed private msg from %s to %s: %s", mPlayerOrServerName.getString(), privateTo, strippedMessage);
+      }
       else
-         logprintf("Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
+      {
+         logprintf(LogConsumer::LogChat, "Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
+         }
    }
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
@@ -944,78 +955,38 @@ S32 MasterServerConnection::gClientListCount = 0;
 
 #include <stdio.h>
 
-class StdoutLogConsumer : public LogConsumer
-{
-public:
-   void logString(const char *string)
-   {
-      printf("%s", string);
-   }
-} gStdoutLogConsumer;
+////////////////////////////////////////
+////////////////////////////////////////
 
+FileLogConsumer gFileLogConsumer;
+FileLogConsumer gStatisticsLogConsumer;
+StdoutLogConsumer gStdoutLogConsumer;
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class FileLogConsumer : public LogConsumer    // Dumps logs to file
-{
-protected:
-   FILE *f;
-public:
-   FileLogConsumer(const char* logFile="bitfighter_master.log")
-   {
-      f = fopen(logFile, "a");
-      logString("------ Bitfighter Master Server Log File ------");
-   }
 
-   ~FileLogConsumer()
-   {
-      if(f)
-         fclose(f);
-   }
-
-   void logString(const char *string)
-   {
-      if(f)
-      {
-         fprintf(f, "%s", string);
-         fflush(f);
-      }
-   }
-} gFileLogConsumer; 
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class StatisticsFileLogConsumer : public FileLogConsumer    // Dumps logs to bitfighter_player_stats.log
-{
-public:
-   StatisticsFileLogConsumer(const char* logFile="bitfighter_player_stats.log")
-   {
-      f = fopen(logFile, "a");
-      logString("------ Bitfighter Player Statistics File ------");
-
-      setFilterType(LogConsumer::StatisticsFilter);
-   }
-
-} gStatisticsLogConsumer;
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-enum {
-   DefaultMasterPort = 25955,
-};
-
-
-U32 gMasterPort = DefaultMasterPort;
+U32 gMasterPort = 25955;      // <== Default, can be overwritten in cfg file
 
 extern void readConfigFile();
 
 int main(int argc, const char **argv)
 {
    gMasterName = "Bitfighter Master Server";    // Default, can be overridden in cfg file
+
+   // Configure logging
+   S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LogConnectionManager | LogConsumer::LogChat;
+
+   gFileLogConsumer.init("bitfighter_master.log", "a");
+   gFileLogConsumer.setMsgTypes(events);                               // Primary logfile
+   gFileLogConsumer.logprintf("------ Bitfighter Master Server Log File ------");
+
+   gStatisticsLogConsumer.init("bitfighter_player_stats.log", "a");
+   gStatisticsLogConsumer.setMsgTypes(LogConsumer::StatisticsFilter);  // Statistics file
+
+   gStdoutLogConsumer.setMsgTypes(events);                             // stdout
+
+
 
    // Parse command line parameters...
    readConfigFile();
@@ -1027,16 +998,15 @@ int main(int argc, const char **argv)
    //gNetInterface->setRequiresKeyExchange(true);
    //gNetInterface->setPrivateKey(new AsymmetricKey(20));
 
-   logprintf("[%s] Master Server %s started - listening on port %d", getTimeStamp().c_str(), gMasterName, gMasterPort);
+   // Log a welcome message in the main log and to the console
+   gFileLogConsumer.logprintf("[%s] Master Server %s started - listening on port %d", getTimeStamp().c_str(), gMasterName, gMasterPort);
+   gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName, gMasterPort);
 
-
-   enum {
-      RewriteTime = 5000,     // Rewrite status file at most this often (in ms)
-      RereadTime = 5000,      // How often to we re-read our config file? (in ms)
-   };
+   const S32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
+   const S32 REREAD_TIME = 5000;         // How often to we re-read our config file? (in ms)
 
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
-   U32 lastWroteStatusTime = Platform::getRealMilliseconds() - RewriteTime;    // So we can do a write right off the bat
+   U32 lastWroteStatusTime = Platform::getRealMilliseconds() - REWRITE_TIME;    // So we can do a write right off the bat
 
     // And until infinity, process whatever comes our way.
   for(;;)     // To infinity and beyond!!
@@ -1045,13 +1015,13 @@ int main(int argc, const char **argv)
       gNetInterface->checkIncomingPackets();
       gNetInterface->processConnections();
 
-      if(currentTime - lastConfigReadTime > RereadTime)     // Reread the config file every 5000ms
+      if(currentTime - lastConfigReadTime > REREAD_TIME)     // Reread the config file every 5000ms
       {
          lastConfigReadTime = currentTime;
          readConfigFile();
       }
 
-      if(gNeedToWriteStatus && currentTime - lastWroteStatusTime > RewriteTime)     // Write status file as need, at most every RewriteTime ms
+      if(gNeedToWriteStatus && currentTime - lastWroteStatusTime > REWRITE_TIME)     // Write status file as need, at most every REWRITE_TIME ms
       {
          lastWroteStatusTime = currentTime;
          MasterServerConnection::writeClientServerList_JSON();

@@ -613,7 +613,7 @@ KeyCode standardSDLKeyToKeyCode(S32 key)
 	   case SDLK_UNDO:
 		   return KEY_UNDO;
       default:
-         logprintf("Unknown key: %d", key);
+         logprintf(LogConsumer::LogWarning, "Unknown key detected: %d", key);
          return KEY_UNKNOWN;
    }
 }
@@ -852,7 +852,7 @@ KeyCode standardGLUTKeyToKeyCode(int key)
       case 63: // ?
          return KEY_SLASH;
       default:
-         logprintf("Unknown key: %d", key);
+         logprintf(LogConsumer::LogWarning, "Unknown key detected: %d", key);
          return KEY_UNKNOWN;
    }
 }
@@ -907,7 +907,7 @@ KeyCode specialGLUTKeyToKeyCode(int key)
       case GLUT_KEY_F12:
          return KEY_F12;
       default:
-         logprintf("Unknown special key: %d", key);
+         logprintf(LogConsumer::LogWarning, "Unknown special key: %d", key);
          return KEY_UNKNOWN;
    }
 }

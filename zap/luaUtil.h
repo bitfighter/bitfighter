@@ -27,7 +27,7 @@
 #define _LUAUTIL_H_
 
 #include "luaObject.h"
-#include "tnlLog.h"     // for logprintf
+//#include "tnlLog.h"     // for logprintf
 #include "tnlRandom.h"
 
 using namespace std;

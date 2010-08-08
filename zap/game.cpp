@@ -136,7 +136,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
          mConnectionToMaster->connect(mNetInterface, gMasterAddress);
          mNextMasterTryTime = MasterServerConnectAttemptDelay;
 
-         TNL::logprintf("%s connecting to master [%s]...", isServer() ? "Server" : "Client", gMasterAddress.toString());
+         logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", gMasterAddress.toString());
       }
       else if (!gReadyToConnectToMaster)
          mNextMasterTryTime = 0;
@@ -321,8 +321,6 @@ S32 ServerGame::getRobotCount()
 }
 
 
-extern CmdLineSettings gCmdLineSettings;
-
 // This gets called when you first host a game
 void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
 {
@@ -360,18 +358,19 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who)
       // If there's no other clients, then just shutdown now
       if(GameConnection::onlyClientIs(mShutdownOriginator))
       {
-         s_logprintf("Server shutdown requested by %s.  No other players, so shutting down now.", mShutdownOriginator->getClientName().getString());
+         logprintf(LogConsumer::ServerFilter, "Server shutdown requested by %s.  No other players, so shutting down now.", 
+                                                   mShutdownOriginator->getClientName().getString());
          mShutdownTimer.reset(1);
       }
       else
       {
-         s_logprintf("Server shutdown in %d seconds, requested by %s.", time, mShutdownOriginator->getClientName().getString());
+         logprintf(LogConsumer::ServerFilter, "Server shutdown in %d seconds, requested by %s.", 
+                                                   time, mShutdownOriginator->getClientName().getString());
          mShutdownTimer.reset(time * 1000);
       }
-
    }
    else
-      s_logprintf("Server shutdown canceled.", time, mShutdownOriginator->getClientName().getString());
+      logprintf(LogConsumer::ServerFilter, "Server shutdown canceled.");
 }
 
 
@@ -404,11 +403,11 @@ void ServerGame::loadNextLevel()
 
          mScopeAlwaysList.clear();
 
-         logprintf ("Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
+         logprintf(LogConsumer::LogLevelLoaded, "Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
       }
       else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list.
       {
-         logprintf("Could not load level %s.  Skipping...", levelName.c_str());
+         logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", levelName.c_str());
          mLevelInfos.erase(mLevelLoadIndex);
          mLevelLoadIndex--;
       }
@@ -458,15 +457,15 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
 
 
 extern ConfigDirectories gConfigDirs;
+extern string joindir(string path, string filename);
 
 string ServerGame::getLevelFileName(string base)
 {
-
-#ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
+   #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
       return = "d:\\media\\levels\\" + base;
-#endif
+   #endif
 
-   return gConfigDirs.levelDir + (gConfigDirs.levelDir != "" ? "/" : "") + base;
+   return joindir(gConfigDirs.levelDir, base);
 }
 
 
@@ -583,12 +582,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    gBotNavMeshZones.clear();
 
-   s_logprintf("Loading %s [%s]... \\", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+   logprintf(LogConsumer::ServerFilter, "Loading %s [%s]... \\", gServerGame->getLevelNameFromIndex(mCurrentLevelIndex).getString(), 
+                                             gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
 
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
 
-   s_logprintf("Done. [%s]", getTimeStamp().c_str());
+   logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
 
    // Analyze zone connections
@@ -662,10 +662,11 @@ inline string getPathFromFilename( const string& filename )
    return filename.substr( 0, max(pos1, pos2) + 1 );
 }
 
+static string origFilename;      // Name of file we're trying to load
 
 bool ServerGame::loadLevel(string filename)
 {
-   string origFilename = filename;
+   origFilename = filename;
    mGridSize = DefaultGridSize;
 
    mObjectsLoaded = 0;
@@ -675,7 +676,7 @@ bool ServerGame::loadLevel(string filename)
       filename += ".level";
       if(!initLevelFromFile(filename.c_str()))
       {
-         logprintf("Unable to open level file %s.  Skipping...", origFilename.c_str());
+         logprintf("Unable to open level file \"%s\".  Skipping...", origFilename.c_str());
          return false;
       }
    }
@@ -683,7 +684,7 @@ bool ServerGame::loadLevel(string filename)
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())
    {
-      logprintf("Warning: Missing game type... using default");
+      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", origFilename.c_str());
       GameType *g = new GameType;
       g->addToGame(this);
    }
@@ -715,12 +716,13 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
    {                                      //    specifiying how many pixels in a grid cell)
       if(argc < 2)
       {
-         TNL::logprintf("Improperly formed GridSize parameter -- using default");
+         logprintf(LogConsumer::LogWarning, "Improperly formed GridSize parameter in level \"%s\"", origFilename.c_str());
          return;
       }
       mGridSize = max(min((F32) atof(argv[1]), (F32) maxGridSize), (F32) minGridSize);
    }
-   else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
+   // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
+   else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    
    {
       char obj[LevelLoader::MaxArgLen + 1];
 
@@ -743,7 +745,7 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
 
       if(!object)    // Well... that was a bad idea!
       {
-         TNL::logprintf("Invalid object type: %s -- ignoring", obj);
+         logprintf(LogConsumer::LogWarning, "Unknown object type \"%s\" in level \"%s\"", obj, origFilename.c_str());
          delete theObject;
       }
       else  // object was valid
@@ -755,7 +757,7 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
 
          if(!validArgs)
          {
-            logprintf("Object %s had invalid parameters, ignoring...", obj);
+            logprintf(LogConsumer::LogWarning, "Object \"%s\" in level \"%s\"", obj, origFilename.c_str());
             object->removeFromGame();
             object->destroySelf();
          }
@@ -939,7 +941,6 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 }
 
 extern void JoystickUpdateMove(Move *theMove);
-extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern Point gMousePos;
 

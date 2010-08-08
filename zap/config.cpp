@@ -43,7 +43,6 @@ namespace Zap
 {
 
 extern CIniFile gINI;
-extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern string lcase(string strToConvert);
 
@@ -1035,6 +1034,42 @@ void writeSkipList()
       gINI.SetValue("LevelSkipList", levelIndx, filename, true);
    }
 }
+
+//////////////////////////////////
+//////////////////////////////////
+
+extern string joindir(string path, string filename);
+extern CmdLineSettings gCmdLineSettings;
+
+string initHelper(string cmdLineDir, string rootDataDir, string subdir)
+{
+   if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
+      return cmdLineDir;
+   else if(rootDataDir != "")       // ...over specification via rootdatadir param
+      return joindir(rootDataDir, subdir);
+   else 
+      return subdir;
+}
+
+
+extern ConfigDirectories gConfigDirs;
+
+void ConfigDirectories::init()
+{
+   string rootDataDir = gCmdLineSettings.dirs.rootDataDir;
+
+   // rootDataDir used to specify the following folders
+   gConfigDirs.levelDir      = initHelper(gCmdLineSettings.dirs.levelDir,      rootDataDir, "levels");
+   gConfigDirs.robotDir      = initHelper(gCmdLineSettings.dirs.robotDir,      rootDataDir, "robots");
+   gConfigDirs.iniDir        = initHelper(gCmdLineSettings.dirs.iniDir,        rootDataDir, "");
+   gConfigDirs.logDir        = initHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
+   gConfigDirs.screenshotDir = initHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
+
+   // rootDataDir not used for sfx or lua folders
+   gConfigDirs.sfxDir        = initHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
+   gConfigDirs.luaDir        = initHelper(gCmdLineSettings.dirs.luaDir,        "", "");      
+}
+
 
 };
 

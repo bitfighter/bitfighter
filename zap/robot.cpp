@@ -75,9 +75,6 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    for(S32 i = 0; i < EventManager::EventTypes; i++)
       subscriptions[i] = false;
 
-
-   logprintf("ID = %d",this->mId);
-
    // The following sets scads of global vars in the Lua instance that mimic the use of the enums we use everywhere
 
    // Game Objects
@@ -182,7 +179,7 @@ LuaRobot::~LuaRobot()
       if(subscriptions[i])
          eventManager.unsubscribeImmediate(thisRobot->getL(), (EventManager::EventType)i);
 
-   logprintf("deleted Lua Robot Object (%p)\n", this);
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Deleted Lua Robot Object (%p)\n", this);
 }
 
 
@@ -1215,7 +1212,7 @@ void EventManager::fireEvent(EventType eventType)
       }
       catch(LuaException &e)
       {
-         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1237,7 +1234,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       }
       catch(LuaException &e)
       {
-         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1265,7 +1262,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       }
       catch(LuaException &e)
       {
-         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1292,7 +1289,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
       }
       catch(LuaException &e)
       {
-         logprintf("Robot error firing event %d: %s.", eventType, e.what());
+         logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1355,7 +1352,7 @@ Robot::~Robot()
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
    delete mPlayerInfo;     
 
-   logprintf("Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
+   logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }
 
 
@@ -1640,7 +1637,7 @@ void Robot::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf("***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
+   logprintf(LogConsumer::LuaBotMessage, "***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
 
    va_end(args);
 }

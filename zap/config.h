@@ -55,13 +55,23 @@ struct ConfigDirectories {
    string luaDir;
    string rootDataDir;
 
-   ConfigDirectories() { levelDir = ""; robotDir = ""; sfxDir = ""; iniDir = ""; logDir = ""; 
-                         screenshotDir = ""; luaDir = ""; }                                      // Quickie Constructor
+   ConfigDirectories()     // Quickie Constructor
+   { 
+      levelDir = "levels";     
+      robotDir = "robots";
+      screenshotDir = "screenshots";
+      sfxDir = "sfx";
+      // Others default to ""
+   }
+
+   void init();
 };
 
 
 struct CmdLineSettings
 {
+   CmdLineSettings() { init(); }    // Quickie constructor
+
    bool clientMode;        // Start with client active
    bool serverMode;        // Start in server mode
    bool connectRemote;
