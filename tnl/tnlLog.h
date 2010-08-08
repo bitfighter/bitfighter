@@ -30,6 +30,7 @@
 #include "tnlBitSet.h"
 #include "tnl.h"
 #include <string.h>
+#include <stdarg.h>
 
 namespace TNL
 {
