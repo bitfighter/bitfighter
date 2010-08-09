@@ -108,14 +108,13 @@ public:
    /// Returns the next LogConsumer in the linked list.
    LogConsumer *getNext() { return mNextConsumer; }
 
-   //FilterType mFilterType;
-   S32 mMsgTypes;    // A bitmap of MsgType values
 
    void logprintf(const char *format, ...);   // Writes a string to this instance of LogConsumer, bypassing all filtering
 
    static void logString(LogConsumer::MsgType msgType, const char *format, va_list args);
 
 private:
+   S32 mMsgTypes;    // A bitmap of MsgType values
    void prepareAndLogString(const char *format, va_list args);
    virtual void writeString(const char *string) = 0;
 };
@@ -135,6 +134,7 @@ public:
 
    void init(std::string logFile, const char *mode = "a");
 
+private:
    void writeString(const char *string);
 }; 
 
@@ -144,7 +144,7 @@ public:
 
 class StdoutLogConsumer : public LogConsumer    // Dumps to stdout
 {
-public:
+private:
    void writeString(const char *string);
 };
 

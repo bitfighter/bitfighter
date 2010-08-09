@@ -3302,7 +3302,7 @@ U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can
    {
       if( ((i == Text) && itemDef[mItems[item].index].hasText) ||
           ((i == RepopDelay) && itemDef[mItems[item].index].hasRepop) ||
-          ((i == GoFastSpeed || i == GoFastSnap) && !strcmp(itemDef[mItems[item].index].name, "SpeedZone")) ||   // strcmp ==> kind of janky
+          ((i == GoFastSpeed || i == GoFastSnap) && (GameItems)item == ItemSpeedZone) ||  
           (i == NoAttribute ) )
          return i;
    }
