@@ -947,8 +947,7 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    // Turrets & forcefields: Snap to a wall edge as first (and only) choice
    if(mDraggingObjects &&
             (mItems[mSnapVertex_i].index == ItemTurret || mItems[mSnapVertex_i].index == ItemForceField))
-      return mItems[mSnapVertex_i].snapEngineeredObject(p);
-
+      return mItems[mSnapVertex_i].snapEngineeredObject(snapPointToLevelGrid(p));
 
 
    F32 maxSnapDist = 100 / (mCurrentScale * mCurrentScale);
@@ -3163,7 +3162,14 @@ void EditorUserInterface::joinBarrier()
 void EditorUserInterface::deleteItem(S32 itemIndex)
 {
    if(mItems[itemIndex].index == ItemBarrierMaker)
-      wallSegmentManager.deleteSegments(mItems[itemIndex].mId);
+   {
+      // Need to recompute boundaries of any intersecting walls
+      wallSegmentManager.invalidateIntersectingSegments(&mItems[itemIndex]);  // Mark intersecting segments invalid
+      wallSegmentManager.deleteSegments(mItems[itemIndex].mId);               // Delete the segments associated with the wall
+      wallSegmentManager.recomputeInvalidWallSegmentIntersections();          // Recompute intersections
+      recomputeAllEngineeredItems();         // Really only need to recompute items that were attached to deleted wall... but we
+                                             // don't yet have a method to do that, and I'm feeling lazy at the moment
+   }
    else if(mItems[itemIndex].index == ItemNavMeshZone)
       deleteBorderSegs(mItems[itemIndex].mId);
 
@@ -4448,9 +4454,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 }
 
 
-// Called when a wall segment has somehow changed.  All current and previously intersecting segments 
-// need to be recomputed.
-void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
+// Takes a wall, finds all intersecting segments, and marks them invalid
+void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
 {
    static Vector<DatabaseObject *> intersectingSegments;
 
@@ -4482,6 +4487,12 @@ void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
    for(S32 i = 0; i < intersectingSegments.size(); i++)
       dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
 
+}
+
+
+// Look at all our wallSegments, and recompute boundary geometry for any items marked as invalid 
+void WallSegmentManager::recomputeInvalidWallSegmentIntersections()
+{
    for(S32 i = 0; i < wallSegments.size(); i++)
    {
       if(!wallSegments[i]->invalid)
@@ -4501,6 +4512,15 @@ void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
       
       wallSegments[i]->invalid = false;
    }
+}
+
+
+// Called when a wall segment has somehow changed.  All current and previously intersecting segments 
+// need to be recomputed.
+void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
+{
+   invalidateIntersectingSegments(item);
+   recomputeInvalidWallSegmentIntersections();
 }
 
 
@@ -4958,10 +4978,9 @@ void WorldItem::processEndPoints()
 
 Point WorldItem::snapEngineeredObject(const Point &pos)
 {  
-   Point snappedPos = gEditorUserInterface.snapPointToLevelGrid(pos);
    Point anchor, nrml;
    DatabaseObject *mountSeg = EngineeredObject::
-               findAnchorPointAndNormal(getGridDatabase(), snappedPos, 1 / getGridSize(), false, anchor, nrml);
+               findAnchorPointAndNormal(getGridDatabase(), pos, 1 / getGridSize(), false, anchor, nrml);
 
    if(mountSeg)
    {
@@ -4975,7 +4994,7 @@ Point WorldItem::snapEngineeredObject(const Point &pos)
    else
    {
       snapped = false;
-      return snappedPos;
+      return pos;
    }
 
 }
@@ -5178,13 +5197,14 @@ void WorldItem::onGeomChanged()
       processEndPoints();
       getWallSegmentManager()->computeWallSegmentIntersections(this);
 
-      gEditorUserInterface.recomputeAllEngineeredItems();
+      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered line
 
-      // Find any forcefields that might intersect our new wall segment and recalc them
-      for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
-         if(gEditorUserInterface.mItems[i].index == ItemForceField &&
-                                 gEditorUserInterface.mItems[i].getExtent().intersects(getExtent()))
-            gEditorUserInterface.mItems[i].findForceFieldEnd();
+      // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
+      //// Find any forcefields that might intersect our new wall segment and recalc them
+      //for(S32 i = 0; i < gEditorUserInterface.mItems.size(); i++)
+      //   if(gEditorUserInterface.mItems[i].index == ItemForceField &&
+      //                           gEditorUserInterface.mItems[i].getExtent().intersects(getExtent()))
+      //      gEditorUserInterface.mItems[i].findForceFieldEnd();
    }
 
    else if(index == ItemForceField)

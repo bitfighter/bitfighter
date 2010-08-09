@@ -292,6 +292,12 @@ public:
    // Recalucate edge geometry for all walls when item has changed
    void computeWallSegmentIntersections(WorldItem *item); 
 
+   // Takes a wall, finds all intersecting segments, and marks them invalid
+   void invalidateIntersectingSegments(WorldItem *item);
+
+   // Look at all our wallSegments, and recompute boundary geometry for any items marked as invalid 
+   void recomputeInvalidWallSegmentIntersections();
+
    void buildWallSegmentEdgesAndPoints(WorldItem *item);
    void recomputeAllWallGeometry();
    static void clipAllWallEdges(Vector<WallSegment *> &wallSegments);
