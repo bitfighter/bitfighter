@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D8E517612111FDC00C6D883 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D8E517412111FDC00C6D883 /* statistics.cpp */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		94010DF011D7CCD600E2DBB2 /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5311D7CCD600E2DBB2 /* barrier.cpp */; };
 		94010DF111D7CCD600E2DBB2 /* BotNavMeshZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */; };
@@ -157,6 +158,8 @@
 		256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bitfighter_Prefix.pch; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		6D8E517412111FDC00C6D883 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
+		6D8E517512111FDC00C6D883 /* statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = statistics.h; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Bitfighter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94010D5311D7CCD600E2DBB2 /* barrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = barrier.cpp; sourceTree = "<group>"; };
@@ -316,9 +319,9 @@
 		94010E8011D7CF0200E2DBB2 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 		94010E8211D7CF0200E2DBB2 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		94010E8411D7CF0200E2DBB2 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		9462BEA011D7D25D00791A0B /* ALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ALUT.framework; path = /Users/ryan/Desktop/zap/trunk/openal/ALUT.framework; sourceTree = "<absolute>"; };
-		9462C33911D7D5EA00791A0B /* libtomcrypt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libtomcrypt.framework; path = /Users/ryan/Desktop/zap/trunk/libtomcrypt/build/Release/libtomcrypt.framework; sourceTree = "<absolute>"; };
-		9462C33D11D7D5FA00791A0B /* tnl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = tnl.framework; path = /Users/ryan/Desktop/zap/trunk/tnl/build/Release/tnl.framework; sourceTree = "<absolute>"; };
+		9462BEA011D7D25D00791A0B /* ALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ALUT.framework; path = ../openal/ALUT.framework; sourceTree = SOURCE_ROOT; };
+		9462C33911D7D5EA00791A0B /* libtomcrypt.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libtomcrypt.framework; path = ../libtomcrypt/build/Release/libtomcrypt.framework; sourceTree = SOURCE_ROOT; };
+		9462C33D11D7D5FA00791A0B /* tnl.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = tnl.framework; path = ../tnl/build/Release/tnl.framework; sourceTree = SOURCE_ROOT; };
 		9462C37711D7D66400791A0B /* lapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lapi.c; path = "../lua/lua-vec/src/lapi.c"; sourceTree = SOURCE_ROOT; };
 		9462C37811D7D66400791A0B /* lapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = lapi.h; path = "../lua/lua-vec/src/lapi.h"; sourceTree = SOURCE_ROOT; };
 		9462C37911D7D66400791A0B /* lauxlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lauxlib.c; path = "../lua/lua-vec/src/lauxlib.c"; sourceTree = SOURCE_ROOT; };
@@ -456,6 +459,8 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				6D8E517412111FDC00C6D883 /* statistics.cpp */,
+				6D8E517512111FDC00C6D883 /* statistics.h */,
 				9462C40811D7D84000791A0B /* textItem.cpp */,
 				9462C3FE11D7D80400791A0B /* masterInterface.cpp */,
 				9462C3F511D7D7C700791A0B /* lpc10.h */,
@@ -866,6 +871,7 @@
 				9462C3F911D7D7C700791A0B /* lpc10enc.c in Sources */,
 				9462C3FF11D7D80400791A0B /* masterInterface.cpp in Sources */,
 				9462C40911D7D84000791A0B /* textItem.cpp in Sources */,
+				6D8E517612111FDC00C6D883 /* statistics.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
