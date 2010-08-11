@@ -315,6 +315,10 @@ void PickupItem::idle(GameObject::IdleCallPath path)
             for(S32 i = 0; i < gt->mClientList.size(); i++)
             {
                TNLAssert(gt->mClientList[i]->clientConnection, "Defunct client connection in item.cpp!");
+
+               if(!gt->mClientList[i]->clientConnection)
+                  continue;
+
                Ship *client_ship = dynamic_cast<Ship *>(gt->mClientList[i]->clientConnection->getControlObject());
 
                if(!client_ship)
