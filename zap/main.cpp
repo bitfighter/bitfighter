@@ -849,23 +849,6 @@ string joindir(string path, string filename)
 }
 
 
-//
-//////////////////////////////////////////
-//////////////////////////////////////////
-//
-//// Each instnatiation of a LogConsumer subclass gets a copy of all log messages.  Here we'll log both
-//// to the screen as well as to a file called bitfighter.log
-//class StdoutLogConsumer : public LogConsumer   // Dumps logs to stdout
-//{
-//public:
-//   void logString(const char *string)
-//   {
-//      printf("%s", string);
-//   }
-//};
-
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 

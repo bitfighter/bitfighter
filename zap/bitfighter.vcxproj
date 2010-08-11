@@ -50,6 +50,8 @@
       <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\glut;..\openal;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

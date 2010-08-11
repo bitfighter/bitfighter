@@ -87,34 +87,36 @@ void LogConsumer::setMsgType(MsgType msgType, bool enable)
 
 
 // Find all logs that are listenting to a specified MessageType and forward the message to them.  Static method.
-void LogConsumer::logString(LogConsumer::MsgType msgType, const char *format, va_list args)
+void LogConsumer::logString(LogConsumer::MsgType msgType, std::string message)
 {
    for(LogConsumer *walk = LogConsumer::getLinkedList(); walk; walk = walk->getNext())
       if(walk->mMsgTypes & msgType)     // Only log to the requested type of logfile
-         walk->prepareAndLogString(format, args);
+         walk->prepareAndLogString(message);
 }
 
 
 void LogConsumer::logprintf(const char *format, ...)
 {
+   char msg[2048]; 
+
    va_list args; 
    va_start(args, format); 
-      
-   prepareAndLogString(format, args);
+
+   vsnprintf(msg, sizeof(msg), format, args); 
 
    va_end(args);
+
+   std::string message(msg);
+
+   prepareAndLogString(message);
 }
 
 
 #ifdef TNL_ENABLE_LOGGING
 
 // All logging should pass through this method -- disabling it via the ifdef should cause logging to not happen, but it's untested
-void LogConsumer::prepareAndLogString(const char *format, va_list args)
+void LogConsumer::prepareAndLogString(std::string message)
 {
-   char msg[2048]; 
-   vsnprintf(msg, sizeof(msg), format, args); 
-   std::string message(msg);
-
    // Unless string ends with a '\', add a newline char
    if(message[message.length() - 1] == '\\')
       message.erase(message.length() - 1, 1);
@@ -126,7 +128,7 @@ void LogConsumer::prepareAndLogString(const char *format, va_list args)
 
 #else
 
-void LogConsumer::prepareAndLogString(const char *format, va_list args)
+void LogConsumer::prepareAndLogString(std::string message)
 {
    // Do nothing
 }
@@ -210,23 +212,36 @@ LogType *LogType::find(const char *name)
 // Logs to logfiles that have subscribed to specified message type
 void logprintf(LogConsumer::MsgType msgType, const char *format, ...)
 {
-   va_list args;    
-   va_start(args, format);
+   char msg[2048]; 
 
-   LogConsumer::logString(msgType, format, args);
+   va_list args; 
+   va_start(args, format); 
+
+   vsnprintf(msg, sizeof(msg), format, args); 
+
    va_end(args);
+
+   std::string message(msg);
+
+   LogConsumer::logString(msgType, message);
 }
 
 
 // Logs to general log
 void logprintf(const char *format, ...)
 {
-   va_list args;    
-   va_start(args, format);
+   char msg[2048]; 
 
-   LogConsumer::logString(LogConsumer::All, format, args);
+   va_list args; 
+   va_start(args, format); 
+
+   vsnprintf(msg, sizeof(msg), format, args); 
 
    va_end(args);
+
+   std::string message(msg);
+
+   LogConsumer::logString(LogConsumer::All, message);
 }
 
 

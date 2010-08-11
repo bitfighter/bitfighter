@@ -111,11 +111,11 @@ public:
 
    void logprintf(const char *format, ...);   // Writes a string to this instance of LogConsumer, bypassing all filtering
 
-   static void logString(LogConsumer::MsgType msgType, const char *format, va_list args);
+   static void logString(LogConsumer::MsgType msgType, std::string message);
 
 private:
    S32 mMsgTypes;    // A bitmap of MsgType values
-   void prepareAndLogString(const char *format, va_list args);
+   void prepareAndLogString(std::string message);
    virtual void writeString(const char *string) = 0;
 };
 
