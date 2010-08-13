@@ -106,7 +106,6 @@ private:
    bool isBusy;
    bool mIsRobot;
 
-   S32 mJustTeleported;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(GameObjectType type); 
@@ -165,6 +164,7 @@ public:
       PowersMask = BIT(6),       // Which modules are active
       LoadoutMask = BIT(7),
       RespawnMask = BIT(8),      // For when robots respawn
+      TeleportMask = BIT(9),     // Ship has just teleported
    };
 
    Timer mFireTimer;

@@ -84,8 +84,6 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
 
    isBusy = false;      // On client, will be updated in initial packet set from server.  Not used on server.
 
-   mJustTeleported = 0;
-
    mSparkElapsed = 0;
 
    // Create our proxy object for Lua access
@@ -182,19 +180,7 @@ void Ship::setActualPos(Point p, bool warp)
    mMoveState[RenderState].pos = p;
 
    if(warp)
-   {
-      setMaskBits(PositionMask | WarpPositionMask);
-
-      // OK, so what's going on here is this: when a ship comes into scope, TNL sets all the mask bits to 1.  Unfortunately, this triggers
-      // the spinny spawn effect, even if the ship isn't spawning, just flying into scope range.  To avoid this, we need an "out-of-
-      // channel", non-bitmap method of tracking when the teleport effect should be displayed.  That's what mJustTeleported is about.
-      // However, for some reason, this variable needs to persist for a time in order for it to be properly propagated to all the clients.
-      // Therefore, we set the value to 5 (determined experimentally), which means the value will be "true" for 5 frames.  1, 2, and 3 were
-      // all unsufficient to get the effect out to all clients.  5 works under lab conditions; only time will tell how it works in the field.
-      // It may be that this number needs to be bumped up a bit, or that it needs to work as some sort of timer, or other mechanism.  For now,
-      // though, this seems good.
-      mJustTeleported = 5;
-   }
+      setMaskBits(PositionMask | WarpPositionMask | TeleportMask);
    else
       setMaskBits(PositionMask);
 }
@@ -507,9 +493,6 @@ void Ship::idle(GameObject::IdleCallPath path)
          mTrail[i].tick(mCurrentMove.time);
       updateModuleSounds();
    }
-
-   if(mJustTeleported)
-      mJustTeleported--;
 }
 
 static Vector<DatabaseObject *> foundObjects;
@@ -873,7 +856,9 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    stream->writeFlag(getControllingClient()->isBusy());
 
    stream->writeFlag(updateMask & WarpPositionMask/* && updateMask != -1*/);   // Commented out caused U32/S32 comparison warning
-   stream->writeFlag(mJustTeleported);      // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
+
+   // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
+   stream->writeFlag(updateMask & TeleportMask && !(updateMask & InitialMask));      
 
    bool shouldWritePosition = (updateMask & InitialMask) || gameConnection->getControlObject() != this;
    if(!shouldWritePosition)

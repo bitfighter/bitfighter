@@ -85,9 +85,14 @@ EventConnection::~EventConnection()
 void EventConnection::writeConnectRequest(BitStream *stream)
 {
    Parent::writeConnectRequest(stream);
-   stream->write(NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent));
+   stream->write(NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent));   // Essentially a count of RPCs (c2s, s2c, etc.)
 }
 
+
+// Reads the NetEvent class count max that the remote host is requesting.
+// If this host has MORE NetEvent classes declared, the mEventClassCount
+// is set to the requested count, and is verified to lie on a boundary between versions.
+// This gets run when someone is connecting to us
 bool EventConnection::readConnectRequest(BitStream *stream, const char **errorString)
 {
    if(!Parent::readConnectRequest(stream, errorString))
@@ -96,13 +101,13 @@ bool EventConnection::readConnectRequest(BitStream *stream, const char **errorSt
    U32 remoteClassCount;
    stream->read(&remoteClassCount);
 
-   U32 localClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);
+   U32 localClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);   // Essentially a count of RPCs 
 
-   // If remote client has more classes defined than we do, assume they're defined in the same order, and truncate our
-   // class count and limt ourselves to working with what we have locally.
+   // If remote client has more classes defined than we do, hope/assume they're defined in the same order.
+   // This implies the remote client is a higher version than the server  
    if(localClassCount <= remoteClassCount)
       mEventClassCount = localClassCount;
-   else
+   else     // We have more RPCs on the local machine ==> implies remote machine is lower version than ours
    {
       mEventClassCount = remoteClassCount;
       if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))

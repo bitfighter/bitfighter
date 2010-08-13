@@ -81,6 +81,7 @@ This change will resolve many installation and permissions issues.
 <li>Soccer ball now warps back to starting point rather than "drifting" back</li>
 <li>Loadout/weapon indicators now more "vector graphicy", colors no longer botched on Vista/Win7</li>
 <li>Infrastructure in place for goals with different values -- only need editor UI and level file syntax</li>
+<li>More orderly disconnect from master server when quitting game should make current player counts more accurate and timely</li>
 
 <h4>SFX</h4>
 <li>New sound when ship hit by projectile</li>
@@ -106,6 +107,7 @@ This change will resolve many installation and permissions issues.
 <li>Robot names are now "uniqued"</li>
 <li>Overrode Lua's random generator to use one that's a bit more... random</li>
 <li>Added setAngle() and setPolar() methods to point object</li>
+<li>Bots no longer appear as tiny blobs after passing through teleporters</li>
 
 <h4>Editor</h4>
 <li>Many small improvements to editor</li>
@@ -151,11 +153,11 @@ This change will resolve many installation and permissions issues.
 
 <h4>Linux</h4>
 <li>Added ability to specify locations of various resouces on the cmd line.  See http://bitfighter.org/wiki/index.php?title=Command_line_parameters#Specifying_folders for details.</li>
-<li>Bitfighter should build on both 32 and 64 bit environments</li>
+<li>Bitfighter builds on both 32 and 64 bit environments</li>
 
 <h4>Windows</h4>
 <li>Windows installer now does a better job of installing files in their "proper" location</li>
-<li>Windows installer now installs data files (levels, robots, etc.) in My Documents on Win7.  Untested on XP and Vista, but should work</li>
+<li>Windows installer now installs data files (levels, robots, etc.) in My Documents on Win7 and XP.  Untested on Vista, but should work</li>
 
 <h4>Bugs</h4>
 <li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
@@ -910,9 +912,15 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 // Disconnect from servers and exit game in an orderly fashion
 void endGame()
 {
-   // Disconnect from master server
+   
+   // Cancel any in-progress attempts to connect
    if(gClientGame && gClientGame->getConnectionToMaster())
+   {
       gClientGame->getConnectionToMaster()->cancelArrangedConnectionAttempt();
+
+      // Tell the master that we're quitting
+      gClientGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   }
 
    // Disconnect from game server
    if(gClientGame && gClientGame->getConnectionToServer())

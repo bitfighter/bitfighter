@@ -159,6 +159,7 @@ public:
       mPrev = this;
       setIsConnectionToClient();
       setIsAdaptive();
+      isInGlobalChat = false;
    }
 
    /// Destructor removes the connection from the doubly linked list of

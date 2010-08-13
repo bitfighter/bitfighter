@@ -397,7 +397,7 @@ class PacketStream : public BitStream
    U8 buffer[MaxPacketDataSize]; ///< internal buffer for packet data, sized to the maximum UDP packet size.
 public:
    /// Constructor assigns the internal buffer to the BitStream.
-   PacketStream(U32 targetPacketSize = MaxPacketDataSize) : BitStream(buffer, targetPacketSize, MaxPacketDataSize) {}
+   PacketStream(U32 targetPacketSize = MaxPacketDataSize) : BitStream(buffer, targetPacketSize, MaxPacketDataSize) { buffer[0] = 0; }
    /// Sends this packet to the specified address through the specified socket.
    NetError sendto(Socket &outgoingSocket, const Address &theAddress);
    /// Reads a packet into the stream from the specified socket.

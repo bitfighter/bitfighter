@@ -96,6 +96,7 @@ NetConnection::NetConnection()
    mLastPingSendTime = 0;
 
    mLastSeqRecvd = 0;
+
    mHighestAckedSeq = mInitialSendSeq;
    mLastSendSeq = mInitialSendSeq; // start sending at mInitialSendSeq + 1
    mAckMask[0] = 0;
@@ -105,6 +106,7 @@ NetConnection::NetConnection()
    cwnd = 2;
    ssthresh = 30;
    mLastSeqRecvdAck = 0;
+   mLastAckTime = 0;
 
    mPingTimeout = DefaultPingTimeout;
    mPingRetryCount = DefaultPingRetryCount;
@@ -251,7 +253,7 @@ void NetConnection::readRawPacket(BitStream *bstream)
 
       readPacketRateInfo(bstream);
       bstream->setStringTable(mStringTable);
-      readPacket(bstream);
+      readPudacket(bstream);
 
       if(!bstream->isValid() && !mErrorBuffer[0])
          NetConnection::setLastError("Invalid Packet.");

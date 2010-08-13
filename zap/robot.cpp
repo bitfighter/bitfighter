@@ -1313,6 +1313,8 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    mCurrentZone = -1;
    flightPlanTo = -1;
 
+   mLastMoveTime = 0;
+
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
    respawnTimer.reset(100, RobotRespawnDelay);
 
@@ -1323,6 +1325,9 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotN
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
    mTotalScore = 0;
+
+   for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
+      mModuleActive[i] = false;
 }
 
 
@@ -1842,7 +1847,8 @@ void Robot::idle(GameObject::IdleCallPath path)
       repairTargets();
 
    // If we're on the client, do some effects
-   if(path == GameObject::ClientIdleMainRemote)
+   if(path == GameObject::ClientIdleControlMain ||
+      path == GameObject::ClientIdleMainRemote)
    {
       mWarpInTimer.update(mCurrentMove.time);
       // Emit some particles, trail sections and update the turbo noise
