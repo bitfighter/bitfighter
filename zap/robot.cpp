@@ -1593,6 +1593,12 @@ void Robot::onAddedToGame(Game *game)
 // Basically exists to override Ship::kill(info)
  void Robot::kill(DamageInfo *theInfo)
 {
+   GameConnection *killer = theInfo->damagingObject ? theInfo->damagingObject->getOwner() : NULL;
+   ClientRef *killerRef = killer ? killer->getClientRef() : NULL;
+
+   if(killerRef)
+      killerRef->mStatistics.addKill();
+
    kill();
 }
 

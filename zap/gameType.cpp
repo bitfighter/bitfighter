@@ -759,26 +759,24 @@ void GameType::gameOverManGameOver()
    saveGameStats();
 }
 
+
 // Transmit statistics to the master server
 void GameType::saveGameStats()
 {
    // Currently, only transmits statistics to the master server
-   if(MASTER_PROTOCOL_VERSION >= 2)
+   MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+   GameType *gameType = gServerGame->getGameType();
+   if(masterConn && gameType)
    {
-      MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
-      GameType *gameType = gServerGame->getGameType();
-      if(masterConn && gameType)
+      S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
+      masterConn->s2mSendGameStatistics(gameType->getGameTypeString(), gameType->mLevelName, gameType->mClientList.size(), timeInSecs);
+
+      for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
-         S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
-         masterConn->s2mSendGameStatistics(gameType->getGameTypeString(), gameType->mLevelName, gameType->mClientList.size(), timeInSecs);
+         Vector<U16> shots = gameType->mClientList[i]->mStatistics.getShotsVector();
+         Vector<U16> hits  = gameType->mClientList[i]->mStatistics.getHitsVector();
 
-         for(S32 i = 0; i < gameType->mClientList.size(); i++)
-         {
-            Vector<U16> shots = gameType->mClientList[i]->mStatistics.getShotsVector();
-            Vector<U16> hits  = gameType->mClientList[i]->mStatistics.getHitsVector();
-
-            masterConn->s2mSendPlayerStatistics(gameType->mClientList[i]->name, shots, hits); // Send game statistics to the master server
-         }
+         masterConn->s2mSendPlayerStatistics(gameType->mClientList[i]->name, shots, hits); // Send game statistics to the master server
       }
    }
 }
@@ -1516,19 +1514,30 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
    ClientRef *killerRef = killer ? killer->getClientRef() : NULL;
    ClientRef *clientRef = theClient->getClientRef();
 
+   clientRef->mStatistics.addDeath();
+
    StringTableEntry killerDescr = killerObject->getKillString();
 
    if(killerRef)     // Known killer
    {
       if(killerRef == clientRef)    // We killed ourselves -- should have gone easy with the bouncers!
+      {
+         killerRef->mStatistics.addSuicide();
          updateScore(killerRef, KillSelf);
+      }
 
-      // Punish those who kill members of their own team.  Should do nothing with friendly fire disabled
+      // Should do nothing with friendly fire disabled
       else if(isTeamGame() && killerRef->getTeam() == clientRef->getTeam())   // Same team in a team game
+      {
+         killerRef->mStatistics.addFratricide();
          updateScore(killerRef, KillTeammate);
+      }
 
-      else                                                              // Different team, or not a team game
+      else                                                                    // Different team, or not a team game
+      {
+         killerRef->mStatistics.addKill();
          updateScore(killerRef, KillEnemy);
+      }
 
       s2cKillMessage(clientRef->name, killerRef->name, killerObject->getKillString());
    }
@@ -1543,6 +1552,7 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
          if( projectile && projectile->mShooter.isValid() && dynamic_cast<Turret *>(projectile->mShooter.getPointer()) )
             updateScore(clientRef, KilledByTurret, 0);
       }
+
 
       s2cKillMessage(clientRef->name, NULL, killerDescr);
    }
@@ -1641,7 +1651,7 @@ void GameType::updateScore(ClientRef *client, ScoringEvent event, S32 data)
 {
    if(client)
       updateScore(client, client->getTeam(), event, data);
-   // else, no one to score...    sometimes client really does come in as null
+   // else, no one to score... sometimes client really does come in as null
 }
 
 

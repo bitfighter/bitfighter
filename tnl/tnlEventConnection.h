@@ -127,8 +127,8 @@ private:
 
 protected:
    U32 mEventClassCount;      ///< Number of NetEvent classes supported by this connection
-   U32 mEventClassBitSize;    ///< Bit field width of NetEvent class count.
-   U32 mEventClassVersion;    ///< The highest version number of events on this connection.
+   U32 mEventClassBitSize;    ///< Bit field width of NetEvent class count.  i.e. how many bits needed to represent all classes?
+   U32 mEventClassVersion;    ///< The highest version number of events on this connection.  --> assigned, but never read
 
    /// Writes the NetEvent class count into the stream, so that the remote
    /// host can negotiate a class count for the connection
@@ -146,7 +146,7 @@ protected:
    /// a boundary between versions.
    bool readConnectAccept(BitStream *stream, const char **errorString);
 public:
-   /// returns the highest event version number supported on this connection.
+   /// returns the highest event version number supported on this connection --> unused
    U32 getEventClassVersion() { return mEventClassVersion; }
 
    /// Posts a NetEvent for processing on the remote host

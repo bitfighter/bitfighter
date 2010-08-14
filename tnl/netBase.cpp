@@ -58,6 +58,7 @@ Object* NetClassRep::create(const char* className)
          return walk->create();
 
    TNLAssertV(0, ("Couldn't find class rep for dynamic class: %s", className));   // Bad level line, typically not fatal in production
+
    return NULL;
 }
 
@@ -70,11 +71,13 @@ Object* NetClassRep::create(const U32 groupId, const U32 typeId, const U32 class
 
    if(mClassTable[groupId][typeId][classId])
       return mClassTable[groupId][typeId][classId]->create();
+
    return NULL;
 }
 
 //--------------------------------------
 
+// Sort by class version first, then by class name
 static S32 QSORT_CALLBACK ACRCompare(const void *aptr, const void *bptr)
 {
    const NetClassRep *a = *((const NetClassRep **) aptr);
@@ -85,32 +88,41 @@ static S32 QSORT_CALLBACK ACRCompare(const void *aptr, const void *bptr)
    return strcmp(a->getClassName(), b->getClassName());
 }
 
+
+// These used only for logging purposes below
+const char *NetClassGroupNames[] = { "Game Group", "Community Group", "Master Group", "Unused Group" };
+const char *NetClassTypeNames[] = { "Object Type", "Data Type", "Event Type" };
+
 void NetClassRep::initialize()
 {
    if(mInitialized)
       return;
+
    Vector<NetClassRep *> dynamicTable;
       
    NetClassRep *walk;
    
-   for (U32 group = 0; group < NetClassGroupCount; group++)
+   for(U32 group = 0; group < NetClassGroupCount; group++)
    {
       U32 groupMask = 1 << group;
       for(U32 type = 0; type < NetClassTypeCount; type++)
       {
-         for (walk = mClassLinkList; walk; walk = walk->mNextClass)
+         for(walk = mClassLinkList; walk; walk = walk->mNextClass)
          {
             if(walk->getClassType() == (NetClassType)type && walk->mClassGroupMask & groupMask)
                dynamicTable.push_back(walk);
          }
-         if(!dynamicTable.size())
+         if(dynamicTable.size() == 0)
             continue;
 
+         // Sort by class version then class name, so at least everyone agrees on the order of the classes
          qsort((void *) &dynamicTable[0], dynamicTable.size(), sizeof(NetClassRep *), ACRCompare);
 
-         logprintf(LogConsumer::LogNetBase, "Class Group: %d  Class Type: %d  count: %d", group, type, dynamicTable.size());
+         logprintf(LogConsumer::LogNetBase, "Class Group: %d (%s) Class Type: %d (%s)  Count: %d", 
+                                            group, NetClassGroupNames[group], type, NetClassTypeNames[type], dynamicTable.size());
+
          for(S32 i = 0; i < dynamicTable.size(); i++)
-            logprintf(LogConsumer::LogNetBase, "%s", dynamicTable[i]->getClassName());
+            logprintf(LogConsumer::LogNetBase, "\tClass %d: %s", i + 1, dynamicTable[i]->getClassName());
 
          mClassTable[group][type] = dynamicTable;
    
@@ -125,18 +137,23 @@ void NetClassRep::initialize()
    mInitialized = true;
 }
 
+
+// Only called on exit
 void NetClassRep::logBitUsage()
 {
-   logprintf(LogConsumer::LogNetBase, "Net Class Bit Usage:");
+   logprintf(LogConsumer::LogNetBase, "Net Class Bit Usage (i.e. how much data did we transmit?):");
 
    for(NetClassRep *walk = mClassLinkList; walk; walk = walk->mNextClass)
    {
       if(walk->mInitialUpdateCount)
-         logprintf(LogConsumer::LogNetBase, "%s (Initial) - Count: %d   Avg Size: %g", 
-               walk->mClassName, walk->mInitialUpdateCount, walk->mInitialUpdateBitsUsed / F32(walk->mInitialUpdateCount));
+         logprintf(LogConsumer::LogNetBase, "%s (Initialized) - Count: %d   Total: %d   Avg Size: %g", 
+               walk->mClassName, walk->mInitialUpdateCount, walk->mInitialUpdateBitsUsed, 
+               walk->mInitialUpdateBitsUsed / F32(walk->mInitialUpdateCount));
+
       if(walk->mPartialUpdateCount)
-         logprintf(LogConsumer::LogNetBase, "%s (Partial) - Count: %d   Avg Size: %g", 
-               walk->mClassName, walk->mPartialUpdateCount, walk->mPartialUpdateBitsUsed / F32(walk->mPartialUpdateCount));
+         logprintf(LogConsumer::LogNetBase, "%s (Updated) - Count: %d   Total: %d   Avg Size: %g", 
+               walk->mClassName, walk->mPartialUpdateCount, walk->mPartialUpdateBitsUsed, 
+               walk->mPartialUpdateBitsUsed / F32(walk->mPartialUpdateCount));
    }
 }
 

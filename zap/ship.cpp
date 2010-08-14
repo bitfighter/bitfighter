@@ -1171,6 +1171,7 @@ void Ship::kill(DamageInfo *theInfo)
       if(gt)
          gt->controlObjectForClientKilled(controllingClient, this, theInfo->damagingObject);
    }
+
    kill();
 }
 

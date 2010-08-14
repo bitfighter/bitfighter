@@ -203,7 +203,7 @@ public:
       DirAny,            ///< This event can be sent from the server or the client
       DirServerToClient, ///< This event can only be sent from the server to the client
       DirClientToServer, ///< This event can only be sent from the client to the server
-   } mEventDirection;   ///< Direction this event is allowed to travel in the network
+   } mEventDirection;    ///< Direction this event is allowed to travel in the network
 
    enum GuaranteeType {
       GuaranteedOrdered = 0, ///< Event delivery is guaranteed and will be processed in the order it

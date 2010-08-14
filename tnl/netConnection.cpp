@@ -253,12 +253,14 @@ void NetConnection::readRawPacket(BitStream *bstream)
 
       readPacketRateInfo(bstream);
       bstream->setStringTable(mStringTable);
-      readPudacket(bstream);
+      readPacket(bstream);
 
       if(!bstream->isValid() && !mErrorBuffer[0])
-         NetConnection::setLastError("Invalid Packet.");
+         NetConnection::setLastError("Invalid Packet -- broken bstream");
+
       if(mErrorBuffer[0])
          getInterface()->handleConnectionError(this, mErrorBuffer);
+
       mErrorBuffer[0] = 0;
    }
 }

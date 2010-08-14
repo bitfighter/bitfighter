@@ -71,6 +71,8 @@ enum NetClassType {
    NetClassTypeEvent,      ///< Event classes
    NetClassTypeCount,
 };
+// >>>>> Note NetClassTypeNames def in netBase!
+
 
 /// NetClassGroups are used to define different service types
 /// for an application.
@@ -81,22 +83,25 @@ enum NetClassType {
 /// in that group.
 enum NetClassGroup {
    NetClassGroupGame,      ///< Group for game related network classes
-   NetClassGroupCommunity, ///< Group for community server/authentication classes
+   NetClassGroupCommunity, ///< Group for community server/authentication classes   >>> unused in Bitfighter
    NetClassGroupMaster,    ///< Group for simple master server.
-   NetClassGroupUnused2,   ///< Reserved group.
+   NetClassGroupUnused2,   ///< Reserved group.                                     >>> unused in Bitfighter
    NetClassGroupCount,
    NetClassGroupInvalid = NetClassGroupCount,
 };
+// >>>>> Note NetClassGroupNames def in netBase!
+
 
 /// Mask values used to indicate which NetClassGroup(s) a NetObject or NetEvent
 /// can be transmitted through.
 enum NetClassMask {
    NetClassGroupGameMask      = 1 << NetClassGroupGame,
-   NetClassGroupCommunityMask = 1 << NetClassGroupCommunity,
+   NetClassGroupCommunityMask = 1 << NetClassGroupCommunity,      // Unused in Bitfighter
    NetClassGroupMasterMask    = 1 << NetClassGroupMaster,
 
    NetClassGroupAllMask = (1 << NetClassGroupCount) - 1,
 };
+
 
 class Object;
 
@@ -202,8 +207,8 @@ protected:
 
    U32 mInitialUpdateBitsUsed; ///< Number of bits used on initial updates of objects of this class.
    U32 mPartialUpdateBitsUsed; ///< Number of bits used on partial updates of objects of this class.
-   U32 mInitialUpdateCount; ///< Number of objects of this class constructed over a connection.
-   U32 mPartialUpdateCount; ///< Number of objects of this class updated over a connection.
+   U32 mInitialUpdateCount;    ///< Number of objects of this class constructed over a connection.
+   U32 mPartialUpdateCount;    ///< Number of objects of this class updated over a connection.
 
    /// Next declared NetClassRep.
    ///
@@ -261,6 +266,7 @@ public:
       { return mNetClassBitSize[classGroup][classType]; }
 
    /// Returns true if the given class count is on a version boundary
+   //  i.e. if the next RPC is a higher version than the current one, indicated by count
    static bool isVersionBorderCount(U32 classGroup, U32 classType, U32 count)
       { return count == U32(mClassTable[classGroup][classType].size()) ||
                (count > 0 && mClassTable[classGroup][classType][count]->getClassVersion() !=
@@ -459,7 +465,7 @@ inline const char * Object::getClassName() const
    return getClassRep()->getClassName();
 }
 
-/// Base class for Object reference counting.
+/// Base class for Object reference counting
 class RefObjectRef
 {
 protected:

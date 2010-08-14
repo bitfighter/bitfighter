@@ -42,8 +42,13 @@ private:
    Vector<U16> mShots;
    Vector<U16> mHits;
 
+   U16 mKills;          // Enemy kills
+   U16 mDeaths;         // Times died
+   U16 mSuicides;       // Self kills
+   U16 mFratricides;    // Tammate kills
+
 public:
-   Statistics();      // Constructor
+   Statistics();        // Constructor
 
    void countShot(WeaponType weaponType);    // Record a shot
    void countHit(WeaponType weaponType);     // Record a hit
@@ -56,6 +61,19 @@ public:
 
    F32 getHitRate();                         // Report overall hit rate
    F32 getHitRate(WeaponType weaponType);    // Report hit rate for specified weapon
+
+   void addKill();      // Player killed another player
+   U16 getKills();      // Report cumulated kills
+
+   void addDeath();     // Player got killed
+   U16 getDeaths();     // Report cumulated deaths
+
+   void addSuicide();   // Player killed self
+   U16 getSuicides();   // Report cumulated suicides
+
+   void addFratricide();   // Player killed self
+   U16 getFratricides();   // Report cumulated suicides
+
 
    Vector<U16> getShotsVector();
    Vector<U16> getHitsVector();

@@ -36,6 +36,11 @@ Statistics::Statistics() : mShots(WeaponCount), mHits(WeaponCount)
       mShots.push_back(0);
       mHits.push_back(0);
    }
+
+   mKills = 0;
+   mDeaths = 0;
+   mSuicides = 0;
+   mFratricides = 0;
 }
 
 
@@ -110,6 +115,58 @@ F32 Statistics::getHitRate(WeaponType weaponType)
    return (F32)mHits[(S32)weaponType] / (F32)mShots[(S32)weaponType];
 }
 
+
+// Player killed another player
+void Statistics::addKill()
+{
+   mKills++;
+}
+
+// Report cumulated kills
+U16 Statistics::getKills()
+{
+   return mKills;
+}
+
+
+// Player got killed
+void Statistics::addDeath()
+{
+   mDeaths++;
+}
+
+// Report cumulated deaths
+U16 Statistics::getDeaths()
+{
+   return mDeaths;
+}
+
+
+// Player killed self
+void Statistics::addSuicide()
+{
+   mSuicides++;
+}
+
+// Report cumulated suicides
+U16 Statistics::getSuicides()
+{
+   return mSuicides;
+}
+
+
+
+// Player killed teammate
+void Statistics::addFratricide()
+{
+   mFratricides++;
+}
+
+// Report cumulated fratricides
+U16 Statistics::getFratricides()
+{
+   return mFratricides;
+}
 
 
 }

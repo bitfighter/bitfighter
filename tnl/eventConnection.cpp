@@ -103,37 +103,44 @@ bool EventConnection::readConnectRequest(BitStream *stream, const char **errorSt
 
    U32 localClassCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);   // Essentially a count of RPCs 
 
-   // If remote client has more classes defined than we do, hope/assume they're defined in the same order.
-   // This implies the remote client is a higher version than the server  
+   // If remote client has more classes defined than we do, hope/assume they're defined in the same order, so that we at least agree
+   // on the available set of RPCs.
+   // This implies the client is higher version than the server  
    if(localClassCount <= remoteClassCount)
-      mEventClassCount = localClassCount;
-   else     // We have more RPCs on the local machine ==> implies remote machine is lower version than ours
+      mEventClassCount = localClassCount;    // We're only willing to support as many as we have
+   else     // We have more RPCs on the local machine ==> implies server is higher version than client
    {
-      mEventClassCount = remoteClassCount;
+      mEventClassCount = remoteClassCount;   // We're willing to support the number of classes the client has
+
+      // Check if the next RPC is a higher version than the current one specified by mEventClassCount
       if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))
-         return false;
+         return false;     // If not, abort connection
    }
+
    mEventClassVersion = NetClassRep::getClass(getNetClassGroup(), NetClassTypeEvent, mEventClassCount-1)->getClassVersion();
    mEventClassBitSize = getNextBinLog2(mEventClassCount);
    return true;
 }
 
+
 void EventConnection::writeConnectAccept(BitStream *stream)
 {
    Parent::writeConnectAccept(stream);
-   stream->write(mEventClassCount);
+   stream->write(mEventClassCount);    // Tell the client how many RPCs we, the server, are willing to support
+                                       // (we may support more... see how this val is calced above)
 }
+
 
 bool EventConnection::readConnectAccept(BitStream *stream, const char **errorString)
 {
    if(!Parent::readConnectAccept(stream, errorString))
       return false;
 
-   stream->read(&mEventClassCount);
-   U32 myCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);
+   stream->read(&mEventClassCount);                                                      // Number of RPCs the remote server is willing to support
+   U32 myCount = NetClassRep::getNetClassCount(getNetClassGroup(), NetClassTypeEvent);   // Number we, the client, support
 
-   if(mEventClassCount > myCount)
-      return false;
+   if(mEventClassCount > myCount)      // Normally, these should be equal.  If the server is not willing to support as many RPCs as we want to use,
+      return false;                    // then bail.
 
    if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))
       return false;
@@ -393,22 +400,23 @@ void EventConnection::readPacket(BitStream *bstream)
       U32 classId = bstream->readInt(mEventClassBitSize);
       if(classId >= mEventClassCount)
       {
-         setLastError("Invalid packet.");
-         return;
-      }
-      NetEvent *evt = (NetEvent *) Object::create(getNetClassGroup(), NetClassTypeEvent, classId);
-      if(!evt)
-      {
-         setLastError("Invalid packet.");
+         setLastError("Invalid packet -- classId too high.");
          return;
       }
 
-      // check if the direction this event moves is a valid direction.
+      NetEvent *evt = (NetEvent *) Object::create(getNetClassGroup(), NetClassTypeEvent, classId);
+      if(!evt)
+      {
+         setLastError("Invalid packet -- couldn't create event.");
+         return;
+      }
+
+      // Check if the direction this event moves is a valid direction.
       if(   (evt->getEventDirection() == NetEvent::DirUnset)
          || (evt->getEventDirection() == NetEvent::DirServerToClient && isConnectionToClient())
          || (evt->getEventDirection() == NetEvent::DirClientToServer && isConnectionToServer()) )
       {
-         setLastError("Invalid Packet.");
+         setLastError("Invalid Packet -- event direction wrong.");
          return;
       }
 
@@ -420,8 +428,7 @@ void EventConnection::readPacket(BitStream *bstream)
       if(mConnectionParameters.mDebugObjectSizes)
       {
          TNLAssert(endingPosition == bstream->getBitPosition(),
-            avar("unpack did not match pack for event of class %s.",
-            evt->getClassName()) );
+                   avar("Unpack did not match pack for event of class %s.", evt->getClassName()) );
       }
 
       if(unguaranteedPhase)
