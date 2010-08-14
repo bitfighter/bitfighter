@@ -640,7 +640,7 @@ public:
 
 
    // Send player statistics to the master server
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, Vector<U16> shots, Vector<U16> hits))
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
    {
       S32 totalShots = 0, totalHits = 0;
 
@@ -650,8 +650,8 @@ public:
          totalHits += hits[i];
       }
 
-      // PLAYER | name | shots | hits
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%d\t%d", playerName.getString(), totalShots, totalHits);
+      // PLAYER | name | kills | deaths | suicides | shots | hits 
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%d\t%d", playerName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
 

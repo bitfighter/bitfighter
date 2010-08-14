@@ -146,8 +146,9 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendUpdgradeStatus, (bool needToUpgr
 
 
 // Send player statistics to the master server
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics, (StringTableEntry playerName, Vector<U16> shots, Vector<U16> hits),
-   (playerName, shots, hits),
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics, 
+   (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits),
+   (playerName, kills, deaths, suicides, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
 // Send game statistics to the master server

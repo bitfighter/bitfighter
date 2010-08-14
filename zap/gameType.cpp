@@ -773,10 +773,12 @@ void GameType::saveGameStats()
 
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
-         Vector<U16> shots = gameType->mClientList[i]->mStatistics.getShotsVector();
-         Vector<U16> hits  = gameType->mClientList[i]->mStatistics.getHitsVector();
+         Statistics *statistics = &gameType->mClientList[i]->mStatistics;
+         Vector<U16> shots = statistics->getShotsVector();
+         Vector<U16> hits  = statistics->getHitsVector();
 
-         masterConn->s2mSendPlayerStatistics(gameType->mClientList[i]->name, shots, hits); // Send game statistics to the master server
+         masterConn->s2mSendPlayerStatistics(gameType->mClientList[i]->name, statistics->getKills(), statistics->getDeaths(), 
+                                             statistics->getSuicides(), shots, hits); // Send game statistics to the master server
       }
    }
 }

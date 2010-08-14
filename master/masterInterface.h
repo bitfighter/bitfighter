@@ -175,7 +175,7 @@ public:
    TNL_DECLARE_RPC(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
 
    // Version 2 RPCs
-   TNL_DECLARE_RPC(s2mSendPlayerStatistics, (StringTableEntry playerName, Vector<U16> shots, Vector<U16> hits) );
+   TNL_DECLARE_RPC(s2mSendPlayerStatistics, (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits) );
    TNL_DECLARE_RPC(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, RangedU32<0,MAX_PLAYERS> players, S16 time) );
 };
 
