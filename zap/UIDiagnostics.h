@@ -37,6 +37,7 @@ class DiagnosticUserInterface : public UserInterface
 {
 private:
    bool mActive;
+   S32 mCurPage;
 public:
    DiagnosticUserInterface();     // Constructor
    void onActivate();
@@ -46,6 +47,7 @@ public:
    void onKeyDown(KeyCode keyCode, char ascii);
    bool isActive();
 };
+
 
 extern DiagnosticUserInterface gDiagnosticInterface;
 

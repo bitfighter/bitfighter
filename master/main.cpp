@@ -651,9 +651,8 @@ public:
       }
 
       // PLAYER | name | kills | deaths | suicides | shots | hits 
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%d\t%d", playerName.getString(), kills, deaths, suicides, totalShots, totalHits);
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
-
 
    // TODO: Get this to be the same as UI::itos()
    // Convert int to string 

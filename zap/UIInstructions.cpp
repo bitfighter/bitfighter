@@ -56,9 +56,9 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 1;
 }
 
-const S32 NumPages = 10;
+static const S32 NUM_PAGES = 10;
 
-const char *pageHeaders[] = {
+static const char *pageHeaders[] = {
    "CONTROLS",
    "LOADOUT SELECTION",
    "WEAPON PROJECTILES",
@@ -75,7 +75,7 @@ void InstructionsUserInterface::render()
 {
    glColor3f(1,0,0);
    drawStringf(3, 3, 25, "INSTRUCTIONS - %s", pageHeaders[mCurPage - 1]);
-   drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage, NumPages);
+   drawStringf(625, 3, 25, "PAGE %d/%d", mCurPage, NUM_PAGES);
    drawCenteredString(571, 20, "LEFT - previous page  RIGHT, SPACE - next page  ESC exits");
    glColor3f(0.7, 0.7, 0.7);
    glBegin(GL_LINES);
@@ -119,7 +119,7 @@ void InstructionsUserInterface::render()
          break;
 
 
-      // When adding page, be sure to increase NumPages, and add item to pageHeaders array
+      // When adding page, be sure to increase NUM_PAGES, and add item to pageHeaders array
    }
 }
 
@@ -714,7 +714,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
 void InstructionsUserInterface::nextPage()
 {
    mCurPage++;
-   if(mCurPage > NumPages)
+   if(mCurPage > NUM_PAGES)
       mCurPage = 1;
 }
 
@@ -723,7 +723,7 @@ void InstructionsUserInterface::prevPage()
    if(mCurPage > 1)
       mCurPage--;
    else
-      mCurPage = NumPages;
+      mCurPage = NUM_PAGES;
 }
 
 void InstructionsUserInterface::exitInstructions()

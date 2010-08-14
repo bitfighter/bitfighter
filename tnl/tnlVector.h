@@ -99,6 +99,10 @@ template<class T> class Vector
    S32 size() const;
    bool empty() const;
 
+   T&       get(S32 index);
+   const T& get(S32 index) const;
+   T&       get(U32 index) { return get(S32(index)); }
+
    T&       front();
    const T& front() const;
    T&       back();
@@ -332,6 +336,19 @@ template<class T> inline bool Vector<T>::empty() const
 //   //return *end();
 //   return;
 //}
+
+
+template<class T> inline T& Vector<T>::get(S32 index)
+{
+   return mArray[index];
+}
+
+
+template<class T> inline const T& Vector<T>::get(S32 index) const
+{
+   return mArray[index];
+}
+
 
 template<class T> inline void Vector<T>::push_front(const T &x)
 {
