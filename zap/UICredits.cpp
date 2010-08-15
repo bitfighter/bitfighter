@@ -36,7 +36,7 @@ namespace Zap
 
 const char *gGameCredits[] = {
    "developed by Chris Eykamp",
-   "Origianlly based on Zap demo in OpenTNL",
+   "Originally based on Zap demo in OpenTNL",
    "-",
    "Mac support:",
    "Ryan Witmer",

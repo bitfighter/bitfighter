@@ -1549,7 +1549,7 @@ void renderStaticBitfighterLogo()
 {
    glColor3f(0, 1, 0);
    renderBitfighterLogo(73, 1, 0);
-   UserInterface::drawCenteredString(120, 10, ZAP_GAME_RELEASE);
+   UserInterface::drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
 }
 
 

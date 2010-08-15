@@ -56,11 +56,12 @@ DiagnosticUserInterface gDiagnosticInterface;
 
 
 static const char *pageHeaders[] = {
-   "FIRST",
-   "FOLDERS"
+   "PLAYING",
+   "FOLDERS",
+   "HOSTING"
 };
 
-static const S32 NUM_PAGES = 2;
+static const S32 NUM_PAGES = 3;
 
 
 
@@ -118,16 +119,152 @@ S32 findLongestString(F32 size, const Vector<const char *> *strings)
 }
 
 
+static Vector<const char *>names;
+static Vector<const char *>vals;
+
+static S32 longestName;
+static S32 nameWidth;
+static S32 spaceWidth;
+static S32 longestVal;
+static S32 totLen;
+
+extern ConfigDirectories gConfigDirs;
+
+static void initFoldersBlock(S32 textsize)
+{
+   names.push_back("Level Dir:");
+   vals.push_back(gConfigDirs.levelDir.c_str());
+      
+   names.push_back("INI Dir:");
+   vals.push_back(gConfigDirs.iniDir.c_str());
+      
+   names.push_back("Log Dir:");
+   vals.push_back(gConfigDirs.logDir.c_str());
+      
+   names.push_back("Lua Dir:");
+   vals.push_back(gConfigDirs.luaDir.c_str());
+      
+   names.push_back("Robot Dir:");
+   vals.push_back(gConfigDirs.robotDir.c_str());
+      
+   names.push_back("Scrnshot Dir:");
+   vals.push_back(gConfigDirs.screenshotDir.c_str());
+      
+   names.push_back("SFX Dir:");
+   vals.push_back(gConfigDirs.sfxDir.c_str());
+
+   names.push_back("");
+   vals.push_back("");
+
+   names.push_back("Root Data Dir:");
+   vals.push_back(gCmdLineSettings.dirs.rootDataDir == "" ? "None specified" : gCmdLineSettings.dirs.rootDataDir.c_str());
+
+   longestName = findLongestString(textsize, &names);
+   nameWidth = UserInterface::getStringWidth(textsize, names[longestName]);
+   spaceWidth = UserInterface::getStringWidth(textsize, " ");
+   longestVal = findLongestString(textsize, &vals);
+
+   totLen = nameWidth + spaceWidth + UserInterface::getStringWidth(textsize, vals[longestVal]);
+}
+
+
+static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
+{
+   if(names.size() == 0)      // Lazy init
+      initFoldersBlock(textsize);
+
+   for(S32 i = 0; i < names.size(); i++)
+   {
+      S32 xpos = (UserInterface::canvasWidth - totLen) / 2;
+      glColor3f(0,1,1);
+      UserInterface::drawString(xpos, ypos, textsize, names[i]);
+      xpos += nameWidth + spaceWidth;
+      glColor3f(1,1,1);
+      UserInterface::drawString(xpos, ypos, textsize, vals[i]);
+
+      ypos += textsize + gap;
+   }
+
+   return ypos;
+}
+
+
+static S32 showVersionBlock(S32 textsize, S32 gap, S32 ypos)
+{
+   glColor3f(1,1,1);
+
+   S32 x = UserInterface::getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | CPU: %s | OS: %s | Cmplr: %s",
+           MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "M/C Ver: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%d", MASTER_PROTOCOL_VERSION);
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | C/S Ver: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%d", CS_PROTOCOL_VERSION);
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Build: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%d", BUILD_VERSION);
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "/");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", ZAP_GAME_RELEASE);
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | CPU: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_CPU_STRING);
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | OS: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_OS_STRING);
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Cmplr: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_COMPILER_STRING);
+
+   return ypos + textsize + gap * 2;
+}
+
+
+extern Color gMasterServerBlue;
+
+static S32 showMasterBlock(S32 textsize, S32 ypos, S32 gap, bool leftcol)
+{
+   UserInterface::drawCenteredStringPair2Colf(ypos, textsize, leftcol, "Master Srvr Addr:", "%s", gMasterAddress.toString());
+      
+   ypos += textsize + gap;
+   if(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished())
+   {
+      glColor(gMasterServerBlue);
+      UserInterface::drawCenteredString2Colf(ypos, textsize, leftcol, "Connected to [%s]", 
+                                             gClientGame->getConnectionToMaster()->getMasterName().c_str() );
+   }
+   else
+   {
+      glColor3f(1, 0, 0);
+      UserInterface::drawCenteredString2Col(ypos, textsize, leftcol, "Could not establish connection with Master Server" );
+   }
+
+   return ypos + textsize + gap;
+}
+
+
+
 extern ClientGame *gClientGame;
 extern const S32 gJoystickNameLength;
 extern char gJoystickName[gJoystickNameLength];
 extern ControllerTypeType gAutoDetectedJoystickType;
 extern U32 gSticksFound;
-extern Color gMasterServerBlue;
 extern string gLevelDir;
 extern Vector<StringTableEntry> gLevelList;
-extern ConfigDirectories gConfigDirs;
-
 
 void DiagnosticUserInterface::render()
 {
@@ -167,277 +304,215 @@ void DiagnosticUserInterface::render()
    if(mCurPage == 0)
    {
       glColor3f(1,0,0);
-      drawCenteredString(vertMargin + 35, 18, "Is something wrong?");
+      drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
 
       S32 x;
       x = getCenteredStringStartingPosf(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently %s]", gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
       glColor3f(0,1,0);
-      drawString(x, vertMargin + 60, ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
+      drawString(x, vertMargin + 63, ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
       x += getStringWidth(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
       glColor3f(1,0,0);
-      drawString(x, vertMargin + 60, ts, gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
+      drawString(x, vertMargin + 63, ts, gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
       x += getStringWidth(ts, gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
       glColor3f(0,1,0);
-      drawString(x, vertMargin + 60, ts, "]");
+      drawString(x, vertMargin + 63, ts, "]");
 
+      // Box around something wrong? block
       glColor3f(0,1,1);
       glBegin(GL_LINE_LOOP);
          S32 x1 = horizMargin;
          S32 x2 = canvasWidth - horizMargin;
-         S32 y1 = vertMargin + 33;
-         S32 y2 = vertMargin + 83;
+         S32 y1 = vertMargin + 27;
+         S32 y2 = vertMargin + 90;
 
          glVertex2f(x1, y1);     glVertex2f(x2, y1);
          glVertex2f(x2, y2);     glVertex2f(x1, y2);
       glEnd();
 
 
-
-      glColor3f(1,1,1);
-
-      //////////
-      // Display a bunch of settings using our new 2Col rendering functions (hooray!)
-
-      S32 vpos = 105;
-      S32 textsize = 14;
       const S32 gap = 5;
 
-      x = getCenteredStringStartingPosf(textsize, "M/C Ver: %d | C/S Ver: %d | Build: %s/%d | CPU: %s | OS: %s | Cmplr: %s",
-            MASTER_PROTOCOL_VERSION, CS_PROTOCOL_VERSION, ZAP_GAME_RELEASE, BUILD_VERSION, TNL_CPU_STRING, TNL_OS_STRING, TNL_COMPILER_STRING);
-
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "M/C Ver: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", MASTER_PROTOCOL_VERSION);
-
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | C/S Ver: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", CS_PROTOCOL_VERSION);
-
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | Build: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%d", BUILD_VERSION);
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "/");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", ZAP_GAME_RELEASE);
-
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | CPU: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_CPU_STRING);
-
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | OS: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_OS_STRING);
-
-      glColor3f(1,1,1);
-      x += drawStringAndGetWidthf(x, vpos, textsize, " | Cmplr: ");
-      glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, vpos, textsize, "%s", TNL_COMPILER_STRING);
+      S32 ypos = showVersionBlock(14, gap, 120);
 
       glColor3f(1,1,1);
 
-      vpos += textsize + gap;
+      S32 textsize = 16;
 
-      textsize = 16;
-      // Can have a left-value here
-      drawCenteredString2Colf(vpos, textsize, false, "%s", gMainMenuUserInterface.getNeedToUpgrade() ? "<<Update available>>" : "<<Current version>>");
-
+      drawCenteredString2Colf(ypos, textsize, false, "%s", gMainMenuUserInterface.getNeedToUpgrade() ? 
+                                                           "<<Update available>>" : "<<Current version>>");
+      ypos += textsize + gap;
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
-      drawCenteredStringPair2Colf(vpos, textsize, true, "Nickname:", "%s", gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s", gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
                                                                            gClientGame->getGameType()->mLocalClient->name.getString() : gNameEntryUserInterface.getText());
 
+      ypos += textsize + gap;
 
-      vpos += textsize + gap;
-      drawCenteredStringPair2Colf(vpos, textsize, false, "Host Name:", "%s", gHostName.c_str());
-      drawCenteredStringPair2Colf(vpos, textsize, true, "Master Srvr Addr:", "%s", gMasterAddress.toString());
-      vpos += textsize + gap;
-      if(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished())
-      {
-         glColor(gMasterServerBlue);
-         drawCenteredString2Colf(vpos, 14, true, "Connected to [%s]", gClientGame->getConnectionToMaster()->getMasterName().c_str() );
-      }
-      else
-      {
-         glColor3f(1, 0, 0);
-         drawCenteredString2Col(vpos, 14, true, "Could not establish connection with Master Server" );
-      }
-      drawCenteredStringPair2Colf(vpos, textsize, false, "Host Addr:", "%s", gBindAddress.toString());
-      vpos += textsize + gap;
+      showMasterBlock(textsize, ypos, gap, false);
+
+      ypos += textsize + gap;
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Input Mode:", "%s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+      ypos += textsize + gap;
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Curr. Joystick:", "%s", joystickTypeToString(gIniSettings.joystickType).c_str());
+
+      ypos += textsize + gap;
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Autodetect Str.:", "%s", strcmp(gJoystickName,"") ? gJoystickName : "<None>");
+
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+
+      // Key states
+      glColor3f(1, 1, 0);
+      U32 hpos = horizMargin;
+      drawString( hpos, ypos, textsize, "Keys down: ");
+      hpos += getStringWidth(textsize, "Keys down: ");
+
+      for (U32 i = 0; i < MAX_KEYS; i++)
+         if(getKeyState((KeyCode) i))
+            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "[%s]", keyCodeToString((KeyCode) i) ) + 5;
+
+      glColor3f(1, 0, 1);
+      ypos += textsize + gap;
+      hpos = horizMargin;
+      hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", gSticksFound);
+
+      for(S32 i = 0; i < MaxJoystickButtons; i++)
+         if(gRawJoystickButtonInputs & (1 << i))
+            hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
+
+      ypos += textsize + gap + 10;
+
+      glColor3f(0, 1, 0);
+      drawCenteredString(ypos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
+
+      //////////
+      // Draw joystick and button map
+      hpos = 100;
+      ypos = gScreenHeight - vertMargin - 110;
+      //S32 butts = gControllerButtonCounts[something here];
+
+      renderDPad(Point(hpos, ypos), 25, getKeyState(BUTTON_DPAD_UP), getKeyState(BUTTON_DPAD_DOWN),
+                 getKeyState(BUTTON_DPAD_LEFT), getKeyState(BUTTON_DPAD_RIGHT), "DPad", "(Menu Nav)");
+      hpos += 75;
+
+      renderDPad(Point(hpos, ypos), 25, getKeyState(STICK_1_UP), getKeyState(STICK_1_DOWN),
+                 getKeyState(STICK_1_LEFT), getKeyState(STICK_1_RIGHT), "L Stick", "(Move)");
+      hpos += 75;
+
+      renderDPad(Point(hpos, ypos), 25, getKeyState(STICK_2_UP), getKeyState(STICK_2_DOWN),
+                 getKeyState(STICK_2_LEFT), getKeyState(STICK_2_RIGHT), "R Stick", "(Fire)");
+      hpos += 55;
+
+      renderControllerButton(hpos, ypos, BUTTON_1, getKeyState(BUTTON_1));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_2, getKeyState(BUTTON_2));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_3, getKeyState(BUTTON_3));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_4, getKeyState(BUTTON_4));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_5, getKeyState(BUTTON_5));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_6, getKeyState(BUTTON_6));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_7, getKeyState(BUTTON_7));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_8, getKeyState(BUTTON_8));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_BACK, getKeyState(BUTTON_BACK));
+      hpos += 40;
+      renderControllerButton(hpos, ypos, BUTTON_START, getKeyState(BUTTON_START));
+   }
+   else if(mCurPage == 1)
+   {
+      S32 ypos = vertMargin + 35;
+      S32 textsize = 15;
+      S32 gap = 5;
+
+      drawString(horizMargin, ypos, textsize, "Folders are either an absolute path or a path relative to the program execution folder");
+      ypos += textsize + gap;
+      drawString(horizMargin, ypos, textsize, "or local folder, depending on OS.  If an entry is blank, Bitfighter will look for files");
+      ypos += textsize + gap;
+      drawString(horizMargin, ypos, textsize, "in the program folder or local folder, depending on OS.");
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+      drawString(horizMargin, ypos, textsize, "See the Command line parameters section of the wiki at bitfighter.org for more information.");
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+
+      glColor3f(1,0,0);
+      drawCenteredString(ypos, textsize, "Currently reading data and settings from:");
+      ypos += textsize + gap + gap;
+
+      ypos = showFoldersBlock(textsize, ypos, gap+2);
+   }
+   else if(mCurPage == 2)
+   {
+      S32 gap = 5;
+      S32 textsize = 16;
+
+      S32 ypos = vertMargin + 35;
 
       glColor3f(1,1,1);
-      drawCenteredStringPair2Colf(vpos, textsize, false, "Admin/Level Ch. PW:", "%s/%s", gAdminPassword.c_str(), gLevelChangePassword.c_str());
-      vpos += textsize + gap;
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Name:", "%s", gHostName.c_str());
+      drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", gLevelChangePassword == "" ?
+                                                                    "None - anyone can change" : gLevelChangePassword.c_str());
+      ypos += textsize + gap;
 
-      glColor3f(0,1,1);
-      drawCenteredStringPair2Colf(vpos, textsize, true, "Input Mode:", "%s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
+      drawCenteredStringPair2Colf(ypos, 14, false, "Admin PW:", "%s", gAdminPassword == "" ? 
+                                                                     "None - no one can get admin" : gAdminPassword.c_str());
+      ypos += textsize + gap;
 
+      drawCenteredStringPair2Colf(ypos, textsize, false, "Server PW:", "%s", gServerPassword == "" ? 
+                                                                             "None needed to play" : gServerPassword.c_str());
 
-      x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d | Server PW: %s", gMaxPlayers, gServerPassword.c_str());
+      ypos += textsize + gap;
+      ypos += textsize + gap;
 
-         glColor3f(1,1,1);
-         x += drawStringAndGetWidthf(x, vpos, textsize, "Max Players: ");
-         glColor3f(1,1,0);
-         x += drawStringAndGetWidthf(x, vpos, textsize, "%d", gMaxPlayers);
-
-         glColor3f(1,1,1);
-         x += drawStringAndGetWidthf(x, vpos, textsize, " | Server PW: ");
-         glColor3f(1,1,0);
-         x += drawStringAndGetWidthf(x, vpos, textsize, "%s", gServerPassword.c_str());
-
+      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", gMaxPlayers);
       glColor3f(1,1,1);
+      x += drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
+      glColor3f(1,1,0);
+      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", gMaxPlayers);
 
-      vpos += textsize + gap;
-      drawCenteredStringPair2Colf(vpos, textsize, true, "Curr. Joystick:", "%s", joystickTypeToString(gIniSettings.joystickType).c_str());
-      vpos += textsize + gap;
+      ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(vpos, textsize, true, "Autodetect Str.:", "%s", strcmp(gJoystickName,"") ? gJoystickName : "<None>");
-      drawCenteredStringPair2Colf(vpos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms/%2.0f%%", gSimulatedLag, gSimulatedPacketLoss * 100);
-      vpos += textsize + gap;
-      vpos += textsize + gap;
+      drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms /%2.0f%%", gSimulatedLag, gSimulatedPacketLoss * 100);
+      ypos += textsize + gap;
+      ypos += textsize + gap;
+      
 
       // Dump out names of loaded levels...
       glColor3f(1,1,1);
-      string allLevels = "Levels: [" + gConfigDirs.levelDir + "] ";
-      for(S32 i = 0; i < gLevelList.size(); i++)
-         allLevels += string(gLevelList[i].getString()) + "; ";
+      string allLevels = "Levels: ";
+
+      if(gLevelList.size() == 0)
+         allLevels += " >>> Level list won't be resolved until you start hosting <<<"; 
+      else
+         for(S32 i = 0; i < gLevelList.size(); i++)
+            allLevels += string(gLevelList[i].getString()) + "; ";
 
       U32 i, j, k;
       i = j = k = 0;
-      for(j = 0; j < 3 && i < allLevels.length(); j++)
+      
+      for(j = 0; j < 4 && i < allLevels.length(); j++)
       {
          for(; getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < gScreenWidth - 2 * horizMargin && i < allLevels.length(); i++)   // first arg empty
          {
             ;     // Do nothing...
          }
 
-         drawString(horizMargin, vpos, textsize - 6, allLevels.substr(k, i - k).c_str());
+         drawString(horizMargin, ypos, textsize - 6, allLevels.substr(k, i - k).c_str());
          k = i;
-         vpos += textsize + gap - 5;
+         ypos += textsize + gap - 5;
       }
 
-      vpos += (textsize + gap) * (3 - j);
-
-     glColor3f(1, 1, 1);
-     U32 hpos = horizMargin;
-
-      // Key states
-      glColor3f(1, 1, 0);
-      drawString( hpos, vpos, textsize, "Keys down: ");
-      hpos += getStringWidth(textsize, "Keys down: ");
-
-     for (U32 i = 0; i < MAX_KEYS; i++)
-        if(getKeyState((KeyCode) i))
-           hpos += drawStringAndGetWidthf( hpos, vpos, textsize - 2, "[%s]", keyCodeToString((KeyCode) i) ) + 5;
-
-      glColor3f(1, 0, 1);
-      vpos += textsize + gap;
-      hpos = horizMargin;
-      hpos += drawStringAndGetWidthf( hpos, vpos, textsize - 2, "Raw Controller Input [%d]: ", gSticksFound);
-
-      for(S32 i = 0; i < MaxJoystickButtons; i++)
-         if(gRawJoystickButtonInputs & (1 << i))
-            hpos += drawStringAndGetWidthf( hpos, vpos, textsize - 2, "(%d)", i ) + 5;
-
-      vpos += textsize + gap + 10;
-
-      glColor3f(0, 1, 0);
-      drawCenteredString(vpos, textsize, "Hint: If you're having joystick problems, check your controller's 'mode' button.");
-
-      //////////
-      // Draw joystick and button map
-      hpos = 100;
-      vpos = gScreenHeight - vertMargin - 110;
-      //S32 butts = gControllerButtonCounts[something here];
-
-      renderDPad(Point(hpos, vpos), 25, getKeyState(BUTTON_DPAD_UP), getKeyState(BUTTON_DPAD_DOWN),
-                 getKeyState(BUTTON_DPAD_LEFT), getKeyState(BUTTON_DPAD_RIGHT), "DPad", "(Menu Nav)");
-      hpos += 75;
-
-      renderDPad(Point(hpos, vpos), 25, getKeyState(STICK_1_UP), getKeyState(STICK_1_DOWN),
-                 getKeyState(STICK_1_LEFT), getKeyState(STICK_1_RIGHT), "L Stick", "(Move)");
-      hpos += 75;
-
-      renderDPad(Point(hpos, vpos), 25, getKeyState(STICK_2_UP), getKeyState(STICK_2_DOWN),
-                 getKeyState(STICK_2_LEFT), getKeyState(STICK_2_RIGHT), "R Stick", "(Fire)");
-      hpos += 55;
-
-      renderControllerButton(hpos, vpos, BUTTON_1, getKeyState(BUTTON_1));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_2, getKeyState(BUTTON_2));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_3, getKeyState(BUTTON_3));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_4, getKeyState(BUTTON_4));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_5, getKeyState(BUTTON_5));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_6, getKeyState(BUTTON_6));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_7, getKeyState(BUTTON_7));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_8, getKeyState(BUTTON_8));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_BACK, getKeyState(BUTTON_BACK));
-      hpos += 40;
-      renderControllerButton(hpos, vpos, BUTTON_START, getKeyState(BUTTON_START));
-   }
-   else if(mCurPage == 1)
-   {
-      S32 ypos = vertMargin + 35;
-      const S32 textsize = 14;
-      const S32 gap = 5;
-
-      Vector<const char *>names;
-      Vector<const char *>vals;
-
-      names.push_back("Level Dir:");
-      vals.push_back(gConfigDirs.levelDir.c_str());
-      
-      names.push_back("INI Dir:");
-      vals.push_back(gConfigDirs.iniDir.c_str());
-      
-      names.push_back("Log Dir:");
-      vals.push_back(gConfigDirs.logDir.c_str());
-      
-      names.push_back("Lua Dir:");
-      vals.push_back(gConfigDirs.luaDir.c_str());
-      
-      names.push_back("Robot Dir:");
-      vals.push_back(gConfigDirs.robotDir.c_str());
-      
-      names.push_back("Scrnshot Dir:");
-      vals.push_back(gConfigDirs.screenshotDir.c_str());
-      
-      names.push_back("SFX Dir:");
-      vals.push_back(gConfigDirs.sfxDir.c_str());
-
-      names.push_back("Root Data Dir:");
-      vals.push_back(gCmdLineSettings.dirs.rootDataDir == "" ? "None specified" : gCmdLineSettings.dirs.rootDataDir.c_str());
-      
-      S32 longestName = findLongestString(textsize, &names);
-      S32 nameWidth = getStringWidth(textsize, names[longestName]);
-      S32 spaceWidth = getStringWidth(textsize, " ");
-      S32 longestVal = findLongestString(textsize, &vals);
-
-      S32 totLen = nameWidth + spaceWidth + getStringWidth(textsize, vals[longestVal]);
-
-      for(S32 i = 0; i < names.size(); i++)
-      {
-         S32 xpos = (canvasWidth - totLen) / 2;
-         glColor3f(0,1,1);
-         drawString(xpos, ypos, textsize, names[i]);
-         xpos += nameWidth + spaceWidth;
-         glColor3f(1,1,1);
-         drawString(xpos, ypos, textsize, vals[i]);
-
-         ypos += textsize + gap;
-      }
+      ypos += (textsize + gap) * (3 - j);
    }
 }
 

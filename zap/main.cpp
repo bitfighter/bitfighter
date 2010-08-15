@@ -912,7 +912,6 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 // Disconnect from servers and exit game in an orderly fashion
 void endGame()
 {
-   
    // Cancel any in-progress attempts to connect
    if(gClientGame && gClientGame->getConnectionToMaster())
    {
@@ -928,6 +927,8 @@ void endGame()
 
    delete gServerGame;
    gServerGame = NULL;
+
+   gMainMenuUserInterface.levelLoadDisplayDisplay = false;
 
    if(gDedicatedServer)
       exitGame();
