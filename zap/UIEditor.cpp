@@ -688,6 +688,7 @@ void EditorUserInterface::validateLevel()
    bool foundSoccerBall = false;
    bool foundNexus = false;
    bool foundTeamFlags = false;
+   bool foundTeamFlagSpawns = false;
    bool foundFlags = false;
 
    Vector<bool> foundSpawn;
@@ -698,7 +699,6 @@ void EditorUserInterface::validateLevel()
    for(S32 i = 0; i < mTeams.size(); i++)      // Initialize vector
       foundSpawn.push_back(false);
 
-   // First check to make sure every team has at least one spawn point
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index == ItemSpawn && mItems[i].team >= 0)
          foundSpawn[mItems[i].team] = true;
@@ -712,7 +712,13 @@ void EditorUserInterface::validateLevel()
          if(mItems[i].team >= 0)
             foundTeamFlags = true;
       }
+      else if(mItems[i].index == ItemFlagSpawn)
+      {
+         if(mItems[i].team >= 0)
+            foundTeamFlagSpawns = true;
+      }
 
+   // Make sure each team has a spawn point
    for(S32 i = 0; i < foundSpawn.size(); i++)
       if(!foundSpawn[i])
       {
@@ -732,7 +738,7 @@ void EditorUserInterface::validateLevel()
          hasError = true;
       }
 
-   if (hasError)     // Compose error message
+   if(hasError)     // Compose error message
       mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teams + teamList);
 
    // The other thing that can cause a crash is a soccer ball in a a game other than SoccerGameType
@@ -751,6 +757,10 @@ void EditorUserInterface::validateLevel()
       mLevelErrorMsgs.push_back("WARNING: This game type does not use flags.");
    else if(foundTeamFlags && !isTeamFlagGame(mGameType))
       mLevelErrorMsgs.push_back("WARNING: This game type does not use team flags.");
+
+   // Check for team flag spawns on games with no team flags
+   if(foundTeamFlagSpawns && !foundTeamFlags)
+      mLevelErrorMsgs.push_back("WARNING: Found team flag spawns but no team flags.");
 }
 
 
@@ -2145,7 +2155,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          {
             glColor(white);
 
-            const char *healword = (item.index == ItemTurret || item.index == ItemForceField) ? "10% Heal" : "Regen";
+            const char *healword = (item.index == ItemTurret || item.index == ItemForceField) ? "10% Heal" : 
+                                   ((item.index == ItemFlagSpawn || item.index == ItemAsteroidSpawn) ? "Spawn Time" : "Regen");
 
             Point offset = item.getSelectionOffset(mCurrentScale).rotate(item.normal.ATAN2()) * mCurrentScale;
 

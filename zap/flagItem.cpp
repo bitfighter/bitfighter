@@ -155,7 +155,7 @@ void FlagItem::sendHome()
    Vector<FlagSpawn> spawnPoints;
    GameType *gt = getGame()->getGameType();
 
-   if(!gt->isTeamFlagGame() || mTeam < 0)     // Neutral or hostile flag
+   if(!gt->isTeamFlagGame() || mTeam < 0)     // Neutral or hostile flag in a team game
       spawnPoints = gt->mFlagSpawnPoints;
    else              // Team flag
       spawnPoints = gt->mTeams[mTeam].flagSpawnPoints;
