@@ -2140,7 +2140,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       // If this is an item that has a repop attribute, and the item is selected, draw the text
       if(!item.mDockItem && itemDef[item.index].hasRepop)
       {
-         if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == NONE) || isBeingEdited)
+         if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == NONE) &&
+            (item.index != ItemFlagSpawn || !strcmp(mGameType, "HuntersGameType")) || isBeingEdited)
          {
             glColor(white);
 
