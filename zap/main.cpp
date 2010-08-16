@@ -865,14 +865,15 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 
 
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
+// or player has specified -connect param on cmd line, bypassing master server
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
-   if(isFromMaster && gClientGame->getConnectionToMaster())
+   if(isFromMaster && gClientGame->getConnectionToMaster())     // Request an arranged connection
    {
       gClientGame->getConnectionToMaster()->requestArrangedConnection(remoteAddress);
       gGameUserInterface.activate();
    }
-   else
+   else                                                        // Try a direct connection
    {
       GameConnection *theConnection = new GameConnection();
       gClientGame->setConnectionToServer(theConnection);
@@ -1554,13 +1555,6 @@ void processStartupParams()
    if(gCmdLineSettings.clientMode)               // Create ClientGame object
       gClientGame = new ClientGame(Address());   //   let the system figure out IP address and assign a port
 
-   //LevelListLoader::buildLevelList();            // Get our level list squared away before we jump off to initHostGame() if that's what's going to happen
-
-   if(gCmdLineSettings.serverMode)
-      initHostGame(gBindAddress, false);         // Start hosting
-   else if(gCmdLineSettings.connectRemote)       //       or
-      joinGame(gConnectAddress, false, false);   // Connect to a game server (i.e. bypass master matchmaking)
-
 
    // Not immediately starting a connection...  start out with name entry or main menu
    if(!gCmdLineSettings.connectRemote && !gDedicatedServer)
@@ -1671,9 +1665,14 @@ int main(int argc, char **argv)
 
    processStartupParams();                   // And merge command line params and INI settings
 
+   if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
+      initHostGame(gBindAddress, false);     // Start hosting
+
+
    SFXObject::init();
 
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
+
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
@@ -1723,6 +1722,10 @@ int main(int argc, char **argv)
 
       atexit(onExit);
       gOptionsMenuUserInterface.actualizeScreenMode(true);     // Create a display window
+
+      if(gCmdLineSettings.connectRemote)        // Only true when -server param specified
+         joinGame(gConnectAddress, false, false);     // Connect to a game server (i.e. bypass master matchmaking)
+
 
       glutMainLoop();         // Launch GLUT on it's merry way.  It'll call back with events and when idling.
       // dedicatedServerLoop();  //    Instead, with SDL, loop forever, running the idle command endlessly
