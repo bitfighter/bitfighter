@@ -166,6 +166,7 @@ This change will resolve many installation and permissions issues.
 <li>Fixed /dcoord display position bug</li>
 <li>Fixed robot bug reporting incorrect team for flags</li>
 <li>Fixed extent bug when computing extents of levels that do not overlap (0,0)</li>
+<li>Game no longer crashes when using the -connect param</li>
 
 */
 
@@ -1664,6 +1665,7 @@ int main(int argc, char **argv)
    loadSettingsFromINI();                    // Read INI
 
    processStartupParams();                   // And merge command line params and INI settings
+   Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
 
    if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
       initHostGame(gBindAddress, false);     // Start hosting
@@ -1671,7 +1673,6 @@ int main(int argc, char **argv)
 
    SFXObject::init();
 
-   Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
 
 
 #ifndef ZAP_DEDICATED
