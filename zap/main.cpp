@@ -49,125 +49,6 @@ XXX need to document timers, new luavec stuff XXX
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
 
 
-<ul>
-<h4>UPGRADE INSTRUCTIONS</h4>
-In Windows, Bitfighter will now attempt to put the level folders, the INI file, the screenshots folder, etc. in the folder pointed to by
-"%LOCALAPPDATA%/Bitfighter", which, on Windows 7, typically maps to something like "C:\Users\Chris\AppData\Local\Bitfighter".  After installing 013 
-for the first time, you should copy any levels, INI files, etc. to that folder, and overwriting any data that is there.
-
-This change will resolve many installation and permissions issues.
-
-<h4>Big changes</h4>
-<li>Added energy item</li>
-<li>Added ability to add arbitrary lin_ework to levels, complementing existing text.  To add lines, hold ~ and right-click.</li>
-<li>Started trasnsition of Join menu into Game Lobby</li>
-<li>Started developing framework for remote server management</li>
-
-<h4>Smaller changes</h4>
-<li>Added Restart Level to game options menu if you have level change permissions</li>
-<li>Moved Add 2 Mins option to LevelChanger permission level (with older servers you'll still need admin rights)</li>
-<li>Added asteroids, testItems, soccerball, and resourceItems to help screen, enhanced instruction colors</li>
-<li>Fixed several in-game crashing issues</li>
-<li>Minor efficiency improvements on rendering routines</li>
-<li>Retrieve games now allow non-team flags</li>
-<li>Bouncers now do half-damage to shooter, rather than full as in previous releases</li>
-<li>Triples no longer damage shooter</li>
-<li>Password entry in INI file now changed to ServerPassword -- if you use this, you'll need to manually update your INI file</li>
-<li>HuntersFlagItem <x> <y> can no longer be used in level files.  Please use FlagItem -1 <x> <y> instead!!  Note that this line is only present in hand-modified level files</li>
-<li>Min/max player level params now used when selecting levels</li>
-<li>Slight improvement when rendering walls joining at acute angles</li>
-<li>XBOX controller on windows now much better supported</li>
-<li>Bot nav mesh zones can be displayed in-game by using /dzones command</li>
-<li>Soccer ball now warps back to starting point rather than "drifting" back</li>
-<li>Loadout/weapon indicators now more "vector graphicy", colors no longer botched on Vista/Win7</li>
-<li>Infrastructure in place for goals with different values -- only need editor UI and level file syntax</li>
-<li>More orderly disconnect from master server when quitting game should make current player counts more accurate and timely</li>
-
-<h4>SFX</h4>
-<li>New sound when ship hit by projectile</li>
-<li>New sound when using GoFast</li>
-<li>New SFX when players join/quit game</li>
-
-<h4>Bots</h4>
-<li>Added enhanced timer class to Lua scripting</li>
-<li>Moved some "unwrapped" functionality into main() function</li>
-<li>Renamed getMove() function to onTick() ==> existing bots will need to be updated</li>
-<li>Fixed module "always on" bug</li>
-<li>Fixed "shoot through shielded robot" bug</li>
-<li>Event manager now working.  Can now add game events easily.</li>
-<li>Added ShipSpawned, ShipKilled events</li>
-<li>Added ship:isAlive() method</li>
-<li>Return nil rather than dummy value when method called on dead ship (e.g. in 012, ship:getLoc() returned 0,0 if ship was dead, now returns nil)</li>
-<li>Got rid of NexusFlagitem --> Now all flag are FlagItems, for all games</li>
-<li>getName() function now run first, so game will have bot's name before any real game logic gets run</li>
-<li>Created Player object with info about individual players/bots which you can get from Ship, GameInfo, and TeamInfo objects</li>
-<li>Restructured the way bots are initialized so that all bots are loaded and getName()s are run before any main() functions are run</li>
-<li>Can now pass arguments to bots from level file using arg struct, just like with levelgens</li>
-<li>Robots now shown on scoreboard and in various menus where players are listed</li>
-<li>Robot names are now "uniqued"</li>
-<li>Overrode Lua's random generator to use one that's a bit more... random</li>
-<li>Added setAngle() and setPolar() methods to point object</li>
-<li>Bots no longer appear as tiny blobs after passing through teleporters</li>
-
-<h4>Editor</h4>
-<li>Many small improvements to editor</li>
-<li>Fixed editor crashing issue caused by double-delete of item</li>
-<li>Fixed editor crash while caused by pasting objects in the middle of a drag operation</li>
-<li>Undo/redo more efficient -- will perform better with large levels and deep undo states (and will no longer crash!)</li>
-<li>Added autosave -- will keep a current copy of the level on disk in the event of a crash (though crashes are much rarer now)</li>
-<li>Ctrl-left click now starts a wall</li>
-<li>Can now add arbitrary line items in editor: hold "~" while right-clicking to start</li>
-<li>Editor remembers name of last edited file</li>
-<li>Ctrl-A can now be used to hide navMeshZones</li>
-<li>Improved preview mode (when holding Tab key)</li>
-<li>Text in editor now subject to same min/max size constraints as text in the game</li>
-<li>Team names can be changed in the editor</li>
-<li>When moving, items now snap to grid based on vertex closest to cursor, giving much greater control over placement.  Snapping vertex highlighted in magenta.</li>
-<li>Can now snap items to other items, not just to grid</li>
-<li>Hovering over an item no longer counts as selecting it</li>
-<li>Increased readibility of node numbers on selected lines/polygons</li>
-<li>Holding tab now only shows range of selected turrets/spybugs</li>
-<li>When editing navMeshZones, non-convex zones rendered in red to indicate potential problems</li>
-<li>Improved snapping of nav mesh zones, including rendering of connections between zones</li>
-<li>Grid fades when grid-snapping disabled</li>
-<li>Changing wall widths is now undoable</li>
-<li>Arbitrary scaling of selected items now works with Ctrl-Shift-X</li>
-<li>There are now multiple edit modes (normal, bot nav mesh zone mode, etc.) customized for different purposes -- use Ctrl-A to toggle</li>
-<li>Switched H and F key assignments -- F now inserts forcefield, H flips selection around horizontal axis</li>
-<li>Holding <shift> while panning causes pan speed to increase -- good for larger levels at higher zoom scales</li>
-<li>Improved coordinate display on dock -- now shows coords of snapping vertex when dragging an item</li>
-<li>Editor now starts with (0,0) centered on the middle of the screen</li>
-
-<h4>Server management</h4>
-<li>Added /shutdown, /setlevpass, /setserverpass, and /setadminpass chat commands (see in-game help)</li>
-<li>Added /setservername and /setserverdescr commands</li>
-<li>Added /deletecurrentlevel command to remove level from remote server (file not deleted, but won't be loaded in future)</li>
-<li>New orderly shutdown process when using /shutdown command (i.e. players notified, dedicated servers can be terminated, etc.)</li>
-<li>If level change password is left blank, all players granted access (not so for admin password)</li>
-<li>If level change password is set to blank, all players currently connected are silently granted access to level change menu</li>
-<li>-password command line parameter changed to -serverpassword</li>
-<li>When all players leave game, game advances to next level, and suspends itself until a player joins.  That way, when players join, level is "fresh" and ready to go.  May also reduce processor load and power consumption</li>
-<li>Added ability to put game into suspended animation, automatically restarting when other players join (/suspend command)</li>
-<li>Removed allLevels command line parameter, and disabled INI level specification</li>
-<li>Enhanced logging</li>
-
-<h4>Linux</h4>
-<li>Added ability to specify locations of various resouces on the cmd line.  See http://bitfighter.org/wiki/index.php?title=Command_line_parameters#Specifying_folders for details.</li>
-<li>Bitfighter builds on both 32 and 64 bit environments</li>
-
-<h4>Windows</h4>
-<li>Windows installer now does a better job of installing files in their "proper" location</li>
-<li>Windows installer now installs data files (levels, robots, etc.) in My Documents on Win7 and XP.  Untested on Vista, but should work</li>
-
-<h4>Bugs</h4>
-<li>Fixed rare Zap-era crash condition when player shoots a soccer ball, but quits game before goal is scored</li>
-<li>Fixed turret/forcefield "in the middle of space" bug</li>
-<li>Fixed textItem bounds miscalculation that caused large text to "jump" onto screen</li>
-<li>Fixed /dcoord display position bug</li>
-<li>Fixed robot bug reporting incorrect team for flags</li>
-<li>Fixed extent bug when computing extents of levels that do not overlap (0,0)</li>
-<li>Game no longer crashes when using the -connect param</li>
-
 */
 
 //-----------------------------------------------------------------------------------
@@ -848,7 +729,7 @@ string joindir(string path, string filename)
       return path + filename;
 
    // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
-   return (path == "" ? filename : path + "/" + filename);
+   return path + "/" + filename;
 }
 
 
@@ -1378,15 +1259,19 @@ void InitSdlVideo()
 
 // Basically checks if the folder base exists, and if not, makes it a subdir of levels
 // Typos on the user's part can lead to hilarity!
-string getLevelsFolder(string folder, string potentialContainer)
+string getLevelsFolder(string folder, string potentialContainer, string otherPotentialContainer = "")
 {
    // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
    struct stat st;
 
-   if(stat(folder.c_str(), &st) != 0 )
+   if(stat(folder.c_str(), &st) == 0 )               // Does folder exist on its own?
+      return folder;                                 // Yes -- return it
+   else if(stat(joindir(potentialContainer, folder).c_str(), &st) == 0)
       return joindir(potentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
-   else
-      return folder;                                 // It does
+   else if(stat(joindir(otherPotentialContainer, folder).c_str(), &st) == 0)
+      return joindir(otherPotentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
+
+   return folder;    // Out of options!
 }
 
 
@@ -1459,12 +1344,14 @@ void processStartupParams()
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
   
-   if(gCmdLineSettings.dirs.levelDir != "")
+   if(gCmdLineSettings.dirs.levelDir != "")     // always true, since we prepopulate .levelDir???
    {
       // User has specified levelDir, but we don't know if this is an absolute path, or is a subdir under something else
       // container will hold the best candidate for a containing folder
-      if(gCmdLineSettings.dirs.rootDataDir != "")  // ==> Look in rootDataDir/levels/levelDir
-         gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, joindir(gCmdLineSettings.dirs.rootDataDir, "levels"));
+      if(gCmdLineSettings.dirs.rootDataDir != "")  // ==> Look in rootDataDir/levels/levelDir, then rootDataDir/levelDir
+         gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, joindir(gCmdLineSettings.dirs.rootDataDir, "levels"), 
+                                                gCmdLineSettings.dirs.rootDataDir);
+
       else if(gIniSettings.levelDir != "")         // ==> Look in iniLevelDir/levelDir
          gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
       else                                         // ==> Try just plain old levelDir

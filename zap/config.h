@@ -57,10 +57,10 @@ struct ConfigDirectories {
 
    ConfigDirectories()     // Quickie Constructor
    { 
-      levelDir = "levels";     
-      robotDir = "robots";
-      screenshotDir = "screenshots";
-      sfxDir = "sfx";
+      //levelDir = "levels";     
+      //robotDir = "robots";
+      //screenshotDir = "screenshots";
+      //sfxDir = "sfx";
       // Others default to ""
    }
 
