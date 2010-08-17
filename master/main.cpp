@@ -45,7 +45,7 @@ Vector<U32> MOTDVersionVec;
 Vector<string> MOTDStringVec;
 U32 gLatestReleasedCSProtocol = 0; // Will be updated with value from cfg file
 
-const char *gMasterName;           // Name of the master server
+string gMasterName;                // Name of the master server
 string gJasonOutFile;              // File where JSON data gets dumped
 bool gNeedToWriteStatus = true;    // Tracks whether we need to update our status file, for possible display on a website
 
@@ -778,7 +778,7 @@ public:
                break;
             }
 
-      m2cSetMOTD(gMasterName, motdString.c_str());
+      m2cSetMOTD(gMasterName.c_str(), motdString.c_str());
 
       if(mCMProtocolVersion >= 1)
          m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this
@@ -999,8 +999,8 @@ int main(int argc, const char **argv)
    //gNetInterface->setPrivateKey(new AsymmetricKey(20));
 
    // Log a welcome message in the main log and to the console
-   gFileLogConsumer.logprintf("[%s] Master Server %s started - listening on port %d", getTimeStamp().c_str(), gMasterName, gMasterPort);
-   gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName, gMasterPort);
+   gFileLogConsumer.logprintf("[%s] Master Server %s started - listening on port %d", getTimeStamp().c_str(), gMasterName.c_str(), gMasterPort);
+   gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName.c_str(), gMasterPort);
 
    const S32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
    const S32 REREAD_TIME = 5000;         // How often to we re-read our config file? (in ms)

@@ -39,7 +39,7 @@ using namespace TNL;
 using namespace std;
 
 extern U32 gMasterPort;
-extern const char *gMasterName;
+extern string gMasterName;
 extern string gJasonOutFile;
 
 extern U32 gLatestReleasedCSProtocol;
@@ -100,7 +100,7 @@ void processConfigLine(int argc, string argv[])
    }
 
    else if(argv[0] == "name" && argc > 1)        // name --> set server's name
-      gMasterName = argv[1].c_str();
+      gMasterName = argv[1];
 
    else if(argv[0] == "protocol" && argc > 1)    // protocol --> latest and greatest version of c-s protocol
       gLatestReleasedCSProtocol = atoi(argv[1].c_str());
