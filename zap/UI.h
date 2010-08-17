@@ -179,7 +179,7 @@ public:
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString(S32 y, U32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, U32 size, const char *format, ...);
-   static S32 UserInterface::drawCenteredStringPairf(S32 y, U32 size, const char *left, const char *right, ...);
+   static S32 drawCenteredStringPairf(S32 y, U32 size, const char *left, const char *right, ...);
 
    // Draw text centered in a left or right column (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *str);
