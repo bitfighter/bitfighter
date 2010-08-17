@@ -143,18 +143,29 @@ void NetClassRep::logBitUsage()
 {
    logprintf(LogConsumer::LogNetBase, "Net Class Bit Usage (i.e. how much data did we transmit?):");
 
+   bool atLeastOne = false;
+
    for(NetClassRep *walk = mClassLinkList; walk; walk = walk->mNextClass)
    {
       if(walk->mInitialUpdateCount)
+      {
          logprintf(LogConsumer::LogNetBase, "%s (Initialized) - Count: %d   Total: %d   Avg Size: %g", 
                walk->mClassName, walk->mInitialUpdateCount, walk->mInitialUpdateBitsUsed, 
                walk->mInitialUpdateBitsUsed / F32(walk->mInitialUpdateCount));
+         atLeastOne = true;
+      }
 
       if(walk->mPartialUpdateCount)
+      {
          logprintf(LogConsumer::LogNetBase, "%s (Updated) - Count: %d   Total: %d   Avg Size: %g", 
                walk->mClassName, walk->mPartialUpdateCount, walk->mPartialUpdateBitsUsed, 
                walk->mPartialUpdateBitsUsed / F32(walk->mPartialUpdateCount));
+         atLeastOne = true;
+      }
    }
+
+   if(!atLeastOne)
+      logprintf(LogConsumer::LogNetBase, "No net class data was transmitted");
 }
 
 

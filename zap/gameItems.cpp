@@ -72,7 +72,7 @@ const char RepairItem::className[] = "RepairItem";      // Class name as it appe
 // Lua constructor
 RepairItem::RepairItem(lua_State *L)
 {
-   // Do nothing, for now...  should take params from stack and create RepairItem object
+   mObjectTypeMask |= RepairItemType;
 }
 
 
@@ -135,7 +135,7 @@ const char EnergyItem::className[] = "EnergyItem";      // Class name as it appe
 // Lua constructor
 EnergyItem::EnergyItem(lua_State *L)
 {
-   // Do nothing, for now...  should take params from stack and create RepairItem object
+   mObjectTypeMask |= EnergyItemType;
 }
 
 
