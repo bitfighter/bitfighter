@@ -52,7 +52,7 @@ class MasterServerConnection : public MasterServerInterface
    string mMasterName;
 
 public:
-   MasterServerConnection(bool isGameServer = false, U32 infoFlags = 0)
+   MasterServerConnection(bool isGameServer = false, U32 infoFlags = 0)    // Constructor
    {
       mIsGameServer = isGameServer;
       mInfoFlags = infoFlags;

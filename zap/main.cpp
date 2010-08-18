@@ -796,17 +796,12 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
 }
 
-// Disconnect from servers and exit game in an orderly fashion
+// Disconnect from servers and exit game in an orderly fashion.  But stay connected to the master until we exit the program altogether
 void endGame()
 {
    // Cancel any in-progress attempts to connect
    if(gClientGame && gClientGame->getConnectionToMaster())
-   {
       gClientGame->getConnectionToMaster()->cancelArrangedConnectionAttempt();
-
-      // Tell the master that we're quitting
-      //gClientGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
-   }
 
    // Disconnect from game server
    if(gClientGame && gClientGame->getConnectionToServer())
@@ -822,10 +817,17 @@ void endGame()
 }
 
 
-// Run when we're quitting the game
+// Run when we're quitting the game, returning to the OS
 void onExit()
 {
    endGame();
+
+   // Tell the master that we're quitting
+   if(gClientGame && gClientGame->getConnectionToMaster())
+      gClientGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   if(gServerGame && gServerGame->getConnectionToMaster())
+      gServerGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+
    SFXObject::shutdown();
    ShutdownJoystick();
 
