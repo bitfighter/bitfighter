@@ -55,16 +55,8 @@ struct ConfigDirectories {
    string luaDir;
    string rootDataDir;
 
-   ConfigDirectories()     // Quickie Constructor
-   { 
-      //levelDir = "levels";     
-      //robotDir = "robots";
-      //screenshotDir = "screenshots";
-      //sfxDir = "sfx";
-      // Others default to ""
-   }
-
-   void init();
+   static void resolveDirs();
+   static void resolveLevelDir();
 };
 
 

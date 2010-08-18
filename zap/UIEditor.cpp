@@ -845,6 +845,23 @@ string EditorUserInterface::getLevelFileName()
 
 void EditorUserInterface::onActivate()
 {
+   if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no editing for you!
+   {
+      gEditorUserInterface.reactivatePrevUI();     // Must come before the error msg, so it will become the previous UI when that one exits
+
+      gErrorMsgUserInterface.reset();
+      gErrorMsgUserInterface.setTitle("HOUSTON, WE HAVE A PROBLEM");
+      gErrorMsgUserInterface.setMessage(1, "No valid level folder was found..."); 
+      gErrorMsgUserInterface.setMessage(2, "cannot start the level editor");
+      gErrorMsgUserInterface.setMessage(4, "Check the LevelDir parameter in your INI file,");
+      gErrorMsgUserInterface.setMessage(5, "or your command-line parameters to make sure");
+      gErrorMsgUserInterface.setMessage(6, "you have correctly specified a valid folder.");
+      gErrorMsgUserInterface.activate();
+
+      return;
+   }
+
+
    // Check if we have a level name:
    if(getLevelFileName() == "")         // We need to take a detour to get a level name
    {

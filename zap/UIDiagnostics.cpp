@@ -133,7 +133,7 @@ extern ConfigDirectories gConfigDirs;
 static void initFoldersBlock(S32 textsize)
 {
    names.push_back("Level Dir:");
-   vals.push_back(gConfigDirs.levelDir.c_str());
+   vals.push_back(gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
       
    names.push_back("INI Dir:");
    vals.push_back(gConfigDirs.iniDir.c_str());
@@ -147,7 +147,7 @@ static void initFoldersBlock(S32 textsize)
    names.push_back("Robot Dir:");
    vals.push_back(gConfigDirs.robotDir.c_str());
       
-   names.push_back("Scrnshot Dir:");
+   names.push_back("Screenshot Dir:");
    vals.push_back(gConfigDirs.screenshotDir.c_str());
       
    names.push_back("SFX Dir:");

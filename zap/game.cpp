@@ -128,8 +128,9 @@ void Game::checkConnectionToMaster(U32 timeDelta)
 {
    if(!mConnectionToMaster.isValid())
    {
-      if(gMasterAddress == Address())
+      if(gMasterAddress == Address())     // Check for a valid address
          return;
+
       if(mNextMasterTryTime < timeDelta && gReadyToConnectToMaster)
       {
          mConnectionToMaster = new MasterServerConnection(isServer(), 0);

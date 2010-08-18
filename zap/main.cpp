@@ -96,7 +96,6 @@ XXX need to document timers, new luavec stuff XXX
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
-#include <sys/stat.h>
 #include <stdio.h>      // For logging to console
 
 using namespace TNL;
@@ -512,7 +511,7 @@ void abortHosting_noLevels()
       gErrorMsgUserInterface.setMessage(5, "you have correctly specified a folder containing");
       gErrorMsgUserInterface.setMessage(6, "valid level files.");
       gErrorMsgUserInterface.setMessage(8, "Trying to load levels from folder:");
-      gErrorMsgUserInterface.setMessage(9, gConfigDirs.levelDir.c_str());
+      gErrorMsgUserInterface.setMessage(9, gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
       gErrorMsgUserInterface.activate();
    }
    delete gServerGame;
@@ -561,6 +560,12 @@ void initHostGame(Address bindAddress, bool testMode)
 
 void hostGame()
 {
+   if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no hosting for you!
+   {
+      abortHosting_noLevels();
+      return;
+   }
+
    gServerGame->hostingModePhase = ServerGame::Hosting;
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
@@ -732,7 +737,6 @@ string joindir(string path, string filename)
    return path + "/" + filename;
 }
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -801,7 +805,7 @@ void endGame()
       gClientGame->getConnectionToMaster()->cancelArrangedConnectionAttempt();
 
       // Tell the master that we're quitting
-      gClientGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+      //gClientGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
    }
 
    // Disconnect from game server
@@ -1259,20 +1263,20 @@ void InitSdlVideo()
 
 // Basically checks if the folder base exists, and if not, makes it a subdir of levels
 // Typos on the user's part can lead to hilarity!
-string getLevelsFolder(string folder, string potentialContainer, string otherPotentialContainer = "")
-{
-   // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
-   struct stat st;
-
-   if(stat(folder.c_str(), &st) == 0 )               // Does folder exist on its own?
-      return folder;                                 // Yes -- return it
-   else if(stat(joindir(potentialContainer, folder).c_str(), &st) == 0)
-      return joindir(potentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
-   else if(stat(joindir(otherPotentialContainer, folder).c_str(), &st) == 0)
-      return joindir(otherPotentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
-
-   return folder;    // Out of options!
-}
+//string getLevelsFolder(string folder, string potentialContainer, string otherPotentialContainer = "")
+//{
+//   // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
+//   struct stat st;
+//
+//   if(stat(folder.c_str(), &st) == 0 )               // Does folder exist on its own?
+//      return folder;                                 // Yes -- return it
+//   else if(stat(joindir(potentialContainer, folder).c_str(), &st) == 0)
+//      return joindir(potentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
+//   else if(stat(joindir(otherPotentialContainer, folder).c_str(), &st) == 0)
+//      return joindir(otherPotentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
+//
+//   return folder;    // Out of options!
+//}
 
 
 // Now integrate INI settings with those from the command line and process them
@@ -1344,31 +1348,26 @@ void processStartupParams()
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
   
-   if(gCmdLineSettings.dirs.levelDir != "")     // always true, since we prepopulate .levelDir???
-   {
-      // User has specified levelDir, but we don't know if this is an absolute path, or is a subdir under something else
-      // container will hold the best candidate for a containing folder
-      if(gCmdLineSettings.dirs.rootDataDir != "")  // ==> Look in rootDataDir/levels/levelDir, then rootDataDir/levelDir
-         gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, joindir(gCmdLineSettings.dirs.rootDataDir, "levels"), 
-                                                gCmdLineSettings.dirs.rootDataDir);
+   /*
+   If gCmdLineSettings.dirs.rootDataDir is specified then try
+      levelDir
+      rootDataDir/levels/levelDir,
+      rootDataDir/levelDir
+   If gIniSettings.levelDir is specified
+      gIniSettings.levelDir/levelDir
+      gIniSettings.levelDir
+   Otherwise, fall back on 
+      leveldir
 
-      else if(gIniSettings.levelDir != "")         // ==> Look in iniLevelDir/levelDir
-         gConfigDirs.levelDir = getLevelsFolder(gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
-      else                                         // ==> Try just plain old levelDir
-         gConfigDirs.levelDir = gCmdLineSettings.dirs.levelDir;    
-   }
+      ===  needs to be changed ===
+      If rootDataDir specified
+      rootDataDir/levels
 
-   // No leveldir param on cmd line, try rootDataDir with "levels" appended
-   else if(gCmdLineSettings.dirs.rootDataDir != "")
-      gConfigDirs.levelDir = joindir(gCmdLineSettings.dirs.rootDataDir, "levels");
+      */
 
-   // No leveldir param or rootDataDir specified on cmd line... is there anything in the INI file?
-   else if(gIniSettings.levelDir != "")
-      gConfigDirs.levelDir = gIniSettings.levelDir;
+   gConfigDirs.resolveLevelDir(); 
 
-   // No? then stick with default of "levels" already in gConfigDirs.levelDir
-   
-
+ 
    if(gIniSettings.levelDir == "")                      // If there is nothing in the INI,
       gIniSettings.levelDir = gConfigDirs.levelDir;     // write a good default to the INI
 
@@ -1535,8 +1534,7 @@ int main(int argc, char **argv)
 
    processCmdLineParams(argc, argv);
 
-   gConfigDirs.init();    
-
+   gConfigDirs.resolveDirs();    // Resolve all folders except for levels folder, resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.

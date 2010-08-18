@@ -29,6 +29,8 @@
 #include "quickChat.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
 
+#include <sys/stat.h>      // For testing existence of folders
+
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
@@ -1076,7 +1078,7 @@ void writeSkipList()
 extern string joindir(string path, string filename);
 extern CmdLineSettings gCmdLineSettings;
 
-string initHelper(string cmdLineDir, string rootDataDir, string subdir)
+string resolutionHelper(string cmdLineDir, string rootDataDir, string subdir)
 {
    if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
       return cmdLineDir;
@@ -1089,20 +1091,181 @@ string initHelper(string cmdLineDir, string rootDataDir, string subdir)
 
 extern ConfigDirectories gConfigDirs;
 
-void ConfigDirectories::init()
+// Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
+void ConfigDirectories::resolveDirs()
 {
    string rootDataDir = gCmdLineSettings.dirs.rootDataDir;
 
    // rootDataDir used to specify the following folders
-   gConfigDirs.levelDir      = initHelper(gCmdLineSettings.dirs.levelDir,      rootDataDir, "levels");
-   gConfigDirs.robotDir      = initHelper(gCmdLineSettings.dirs.robotDir,      rootDataDir, "robots");
-   gConfigDirs.iniDir        = initHelper(gCmdLineSettings.dirs.iniDir,        rootDataDir, "");
-   gConfigDirs.logDir        = initHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
-   gConfigDirs.screenshotDir = initHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
+   gConfigDirs.robotDir      = resolutionHelper(gCmdLineSettings.dirs.robotDir,      rootDataDir, "robots");
+   gConfigDirs.iniDir        = resolutionHelper(gCmdLineSettings.dirs.iniDir,        rootDataDir, "");
+   gConfigDirs.logDir        = resolutionHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
+   gConfigDirs.screenshotDir = resolutionHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
 
    // rootDataDir not used for sfx or lua folders
-   gConfigDirs.sfxDir        = initHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
-   gConfigDirs.luaDir        = initHelper(gCmdLineSettings.dirs.luaDir,        "", "");      
+   gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
+   gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "");      
+}
+
+
+// Join without checking for blank parts
+static string strictjoindir(const string &part1, const string &part2)
+{
+   // Does path already have a trailing delimieter?  If so, we'll use that.
+   if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
+      return part1 + part2;
+
+   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
+   return part1 + "/" + part2;
+}
+
+
+// Three arg version
+static string strictjoindir(const string &part1, const string &part2, const string &part3)
+{
+   return strictjoindir(part1, strictjoindir(part2, part3));
+}
+
+
+static bool exists(const string &path)
+{
+   struct stat st;
+
+   if(stat(path.c_str(), &st) == 0 )               // Does path exist?
+      return true;                                 // Yes -- return it
+   else
+      return false;
+}
+
+
+static bool assignifexists(const string &path)
+{
+   if(exists(path))
+   {
+      gConfigDirs.levelDir = path;
+      return true;
+   }
+
+   return false;
+}
+
+
+// Figure out where the levels are.  This is exceedingly complex.
+//
+// Here are the rules:
+//
+// rootDataDir is specified on the command line via the -rootdatadir parameter
+// levelDir is specified on the command line via the -leveldir parameter
+// iniLevelDir is specified in the INI file
+//
+// Prioritize command line over INI setting
+// 
+// If rootDataDir is specified then try
+//	    If levelDir is also specified try
+//      		levelDir       ==> will have the effect of ignoring rootDataDir
+//      		rootDataDir/levels/levelDir
+//      		rootDataDir/levelDir
+//	    End
+//	
+//	    rootDataDir/levels
+// End	   ==> Don't use rootDataDir
+//      
+// If iniLevelDir is specified
+//	    If levelDir is also specified try
+//      		iniLevelDir/levelDir
+//     End	
+//     iniLevelDir
+// End	 ==> Don't use iniLevelDir
+//      
+// levels
+//
+// If none of the above work, no hosting/editing for you!
+//
+static void doResolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir)
+{
+   if(rootDataDir != "")
+   {
+      if(levelDir != "")
+      {
+         if(assignifexists(levelDir))
+            return;
+         else if(assignifexists(strictjoindir(rootDataDir, "levels", levelDir)))
+            return;
+         else if(assignifexists(strictjoindir(rootDataDir, levelDir)))
+            return;
+      }
+
+      if(assignifexists(strictjoindir(rootDataDir, "levels")))
+         return;
+   }
+
+   // rootDataDir is blank, or nothing using it worked
+   if(iniLevelDir != "")
+   {
+      if(levelDir != "")
+      {
+         if(assignifexists(strictjoindir(iniLevelDir, levelDir)))
+            return;
+      }
+
+      if(assignifexists(iniLevelDir))
+         return;
+   }
+
+   if(assignifexists("levels"))
+      return;
+
+   gConfigDirs.levelDir = "";    // Surrender
+}
+
+
+static void testLevelDirResolution()
+{
+   // These need to exist!
+   // c:\temp\leveldir
+   // c:\temp\leveldir2\levels\leveldir
+   // For last test to work, need to run from folder that has no levels subdir
+
+   /* 
+   cd \temp
+   mkdir leveldir
+   mkdir leveldir2
+   cd leveldir2
+   mkdir levels
+   cd levels
+   mkdir leveldir
+   */
+   
+   // rootDataDir, levelDir, iniLevelDir
+   doResolveLevelDir("c:/temp", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levelDir
+   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   doResolveLevelDir("c:/temp/leveldir2", "leveldir", "c:/ini/level/dir/");       // rootDataDir/levels/levelDir
+   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir2/levels/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   doResolveLevelDir("c:/temp/leveldir2", "c:/temp/leveldir", "c:/ini/level/dir/");       // levelDir
+   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   doResolveLevelDir("c:/temp/leveldir2", "nosuchfolder", "c:/ini/level/dir/");       // rootDataDir/levels
+   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir2/levels", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   doResolveLevelDir("c:/temp/nosuchfolder", "leveldir", "c:/temp/");       // iniLevelDir/levelDir
+   TNLAssertV(gConfigDirs.levelDir == "c:/temp/leveldir", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   doResolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/temp");       // iniLevelDir
+   TNLAssertV(gConfigDirs.levelDir == "c:/temp", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   doResolveLevelDir("c:/temp/nosuchfolder", "nosuchfolder", "c:/does/not/exist");       // total failure
+   TNLAssertV(gConfigDirs.levelDir == "", ("Bad leveldir: %s", gConfigDirs.levelDir.c_str()));
+
+   printf("passed leveldir resolution tests!\n");
+}
+
+
+void ConfigDirectories::resolveLevelDir()
+{
+   //testLevelDirResolution();
+   doResolveLevelDir(gCmdLineSettings.dirs.rootDataDir, gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
 }
 
 
