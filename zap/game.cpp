@@ -458,7 +458,7 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
 
 
 extern ConfigDirectories gConfigDirs;
-extern string joindir(string path, string filename);
+extern string joindir(const string &path, const string &filename);
 
 string ServerGame::getLevelFileName(string base)
 {

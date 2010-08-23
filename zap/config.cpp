@@ -1075,10 +1075,10 @@ void writeSkipList()
 //////////////////////////////////
 //////////////////////////////////
 
-extern string joindir(string path, string filename);
+extern string joindir(const string &path, const string &filename);
 extern CmdLineSettings gCmdLineSettings;
 
-string resolutionHelper(string cmdLineDir, string rootDataDir, string subdir)
+string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, const string &subdir)
 {
    if(cmdLineDir != "")             // Direct specification of ini path takes precedence...
       return cmdLineDir;

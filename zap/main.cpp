@@ -723,7 +723,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
  }
 
 
-string joindir(string path, string filename)
+string joindir(const string &path, const string &filename)
 {
    // If there is no path, there's nothing to join -- just return filename
    if(path == "")
@@ -822,11 +822,7 @@ void onExit()
 {
    endGame();
 
-   // Tell the master that we're quitting
-   if(gClientGame && gClientGame->getConnectionToMaster())
-      gClientGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
-   if(gServerGame && gServerGame->getConnectionToMaster())
-      gServerGame->getConnectionToMaster()->disconnect(NetConnection::ReasonSelfDisconnect, "");
+   delete gClientGame;     // Has effect of disconnecting from master
 
    SFXObject::shutdown();
    ShutdownJoystick();
@@ -1262,25 +1258,6 @@ void InitSdlVideo()
 }
 */
 
-
-// Basically checks if the folder base exists, and if not, makes it a subdir of levels
-// Typos on the user's part can lead to hilarity!
-//string getLevelsFolder(string folder, string potentialContainer, string otherPotentialContainer = "")
-//{
-//   // See if levelsFolder could refer to a standalone folder (rather than a subfolder of gLevelDir)
-//   struct stat st;
-//
-//   if(stat(folder.c_str(), &st) == 0 )               // Does folder exist on its own?
-//      return folder;                                 // Yes -- return it
-//   else if(stat(joindir(potentialContainer, folder).c_str(), &st) == 0)
-//      return joindir(potentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
-//   else if(stat(joindir(otherPotentialContainer, folder).c_str(), &st) == 0)
-//      return joindir(otherPotentialContainer, folder);    // It doesn't, so we'll try this and hope for the best
-//
-//   return folder;    // Out of options!
-//}
-
-
 // Now integrate INI settings with those from the command line and process them
 void processStartupParams()
 {
@@ -1349,48 +1326,12 @@ void processStartupParams()
       gLevelChangePassword = gIniSettings.levelChangePassword;
    // else rely on gLevelChangePassword default of ""   i.e. no one can change levels on the server
 
-  
-   /*
-   If gCmdLineSettings.dirs.rootDataDir is specified then try
-      levelDir
-      rootDataDir/levels/levelDir,
-      rootDataDir/levelDir
-   If gIniSettings.levelDir is specified
-      gIniSettings.levelDir/levelDir
-      gIniSettings.levelDir
-   Otherwise, fall back on 
-      leveldir
-
-      ===  needs to be changed ===
-      If rootDataDir specified
-      rootDataDir/levels
-
-      */
-
    gConfigDirs.resolveLevelDir(); 
 
  
    if(gIniSettings.levelDir == "")                      // If there is nothing in the INI,
       gIniSettings.levelDir = gConfigDirs.levelDir;     // write a good default to the INI
 
-
-   // Other folders can't currently be specified in the INI file
-   if(gCmdLineSettings.dirs.rootDataDir != "") 
-   {
-      gConfigDirs.iniDir = gCmdLineSettings.dirs.rootDataDir;
-      gConfigDirs.logDir = gCmdLineSettings.dirs.rootDataDir;
-      gConfigDirs.robotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "robots");
-      gConfigDirs.screenshotDir = joindir(gCmdLineSettings.dirs.rootDataDir, "screenshots");
-      // leveldir param handled above
-   }
-
-   // Specific params override rootDataDir
-   if(gCmdLineSettings.dirs.iniDir != "") gConfigDirs.iniDir = gCmdLineSettings.dirs.iniDir;
-   if(gCmdLineSettings.dirs.logDir != "") gConfigDirs.logDir = gCmdLineSettings.dirs.logDir;
-   if(gCmdLineSettings.dirs.luaDir != "") gConfigDirs.luaDir = gCmdLineSettings.dirs.luaDir;
-   if(gCmdLineSettings.dirs.robotDir != "") gConfigDirs.robotDir = gCmdLineSettings.dirs.robotDir;
-   if(gCmdLineSettings.dirs.screenshotDir != "") gConfigDirs.screenshotDir = gCmdLineSettings.dirs.screenshotDir;
-   if(gCmdLineSettings.dirs.sfxDir != "") gConfigDirs.sfxDir = gCmdLineSettings.dirs.sfxDir;
 
    if(gCmdLineSettings.hostname != "")
       gHostName = gCmdLineSettings.hostname;

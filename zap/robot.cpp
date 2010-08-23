@@ -1400,7 +1400,7 @@ void Robot::startBots()
 
 
 extern ConfigDirectories gConfigDirs;
-extern string joindir(string path, string filename);
+extern string joindir(const string &path, const string &filename);
 
 bool Robot::startLua()
 {

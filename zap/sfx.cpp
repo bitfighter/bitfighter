@@ -481,7 +481,7 @@ void SFXObject::stop()
 
 
 extern ConfigDirectories gConfigDirs;
-extern string joindir(string path, string filename);
+extern string joindir(const string &path, const string &filename);
 
 void SFXObject::init()
 {

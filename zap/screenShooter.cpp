@@ -506,7 +506,7 @@ write_long(FILE *fp, /* I - File to write to */
 ////////////////////////////////////////////
 
 extern ConfigDirectories gConfigDirs;
-extern string joindir(string path, string filename);
+extern string joindir(const string &path, const string &filename);
 
 void Screenshooter::saveScreenshot()
 { 

@@ -253,7 +253,7 @@ GameItemRec itemDef[] = {
    { "BarrierMaker",        true,     false,     false,       false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
    { "LineItem",            true,     true,      true,        false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
    { "Teleporter",          false,    false,     false,       false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
-   { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Rpr",      "Repair",       "Repairs damage to ships. [B]" },
+   { "RepairItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",      "Repair",       "Repairs damage to ships. [B]" },
    { "EnergyItem",          false,    false,     false,       false,   true,    geomPoint,       0,     false,  "Energy items",           "Enrg",     "Energy",       "Restores energy to ships" },
    { "TestItem",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Test items",             "Test",     "Test Item",    "Bouncy object that floats around and gets in the way." },
    { "Asteroid",            false,    false,     false,       false,   false,   geomPoint,       0,     true,   "Asteroids",              "Ast.",     "Asteroid",     "Shootable asteroid object.  Just like the arcade game." },
@@ -3337,7 +3337,7 @@ U32 EditorUserInterface::getNextAttr(S32 item)       // Not sure why this fn can
    {
       if( ((i == Text) && itemDef[mItems[item].index].hasText) ||
           ((i == RepopDelay) && itemDef[mItems[item].index].hasRepop) ||
-          ((i == GoFastSpeed || i == GoFastSnap) && (GameItems)item == ItemSpeedZone) ||  
+          ((i == GoFastSpeed || i == GoFastSnap) && mItems[item].index == ItemSpeedZone) ||  
           (i == NoAttribute ) )
          return i;
    }
