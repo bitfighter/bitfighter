@@ -43,13 +43,14 @@ class ChatMessage
 public:
    ChatMessage() { /* do nothing */ }                             // Quickie constructor
 
-   ChatMessage(string frm, string msg, Color col, bool isPriv)    // "Real" constructor
+   ChatMessage(string frm, string msg, Color col, bool isPriv, bool isSys)    // "Real" constructor
    {
       color = col;
       message = msg;
       from = frm;
       time = getShortTimeStamp();   // Record time message arrived
       isPrivate = isPriv;
+      isSystem = isSys;
    }
 
    Color color;      // Chat message colors
@@ -57,6 +58,7 @@ public:
    string from;      // Hold corresponding nicks
    string time;      // Time message arrived
    bool isPrivate;   // Holds public/private status of message
+   bool isSystem;    // Message from system?
 };
 
 
@@ -81,6 +83,8 @@ private:
 
    static U32 mMessageCount;
 
+   Color getColor(string name);
+
 protected:
    // Message data
    static ChatMessage mMessages[MESSAGES_TO_RETAIN];
@@ -95,7 +99,7 @@ protected:
 
 public:
    AbstractChat();      // Constructor
-   void newMessage(string from, string message, bool isPrivate);   // Handle incoming msg
+   void newMessage(string from, string message, bool isPrivate, bool isSystem);   // Handle incoming msg
 
    void addCharToMessage(char ascii);     // Append char to message being composed
    void clearChat();                      // Clear message being composed
@@ -108,6 +112,11 @@ public:
 
    void renderChatters(S32 xpos, S32 ypos);   // Render list of other people in chat room
    void deliverPrivateMessage(const char *sender, const char *message);
+
+   // Handle players joining and leaving the chat session
+   void playerJoinedGlobalChat(const StringTableEntry &playerNick);
+   void playerLeftGlobalChat(const StringTableEntry &playerNick);
+
 
    // Sizes and other things to help with positioning
    static const U32 CHAT_FONT_SIZE = 14;      // Font size to display those messages

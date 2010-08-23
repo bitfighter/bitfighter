@@ -255,7 +255,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool 
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntry playerNick, bool isPrivate, StringPtr message))
 {
    //if(!mIsGameServer)
-      gChatInterface.newMessage(playerNick.getString(), message.getString(), isPrivate);
+      gChatInterface.newMessage(playerNick.getString(), message.getString(), isPrivate, false);
 }
 
 
@@ -263,7 +263,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendChat, (StringTableEntr
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick))
 {
-   gChatInterface.mPlayersInGlobalChat.push_back(playerNick);
+   gChatInterface.playerJoinedGlobalChat(playerNick);
 }
 
 
@@ -282,12 +282,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayersInGlobalChat, (Vect
 // Runs on client only (but initiated by master)
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cPlayerLeftGlobalChat, (StringTableEntry playerNick))
 {
-   for(S32 i = 0; i < gChatInterface.mPlayersInGlobalChat.size(); i++)
-      if(gChatInterface.mPlayersInGlobalChat[i] == playerNick)
-      {
-         gChatInterface.mPlayersInGlobalChat.erase_fast(i);
-         break;
-      }
+   gChatInterface.playerLeftGlobalChat(playerNick);
 }
 
 

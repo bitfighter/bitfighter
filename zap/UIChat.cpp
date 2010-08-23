@@ -59,8 +59,17 @@ AbstractChat::AbstractChat()
 }
 
 
+Color AbstractChat::getColor(string name)
+{
+   if(mFromColors.count(name) == 0)    
+      mFromColors[name] = getNextColor();          
+
+   return mFromColors[name]; 
+}
+
+
 // We received a new incoming chat message...  Add it to the list
-void AbstractChat::newMessage(string from, string message, bool isPrivate)
+void AbstractChat::newMessage(string from, string message, bool isPrivate, bool isSystem)
 {
    bool isFromUs = (from == string(gNameEntryUserInterface.getText()));  // Is this message from us?
 
@@ -71,17 +80,36 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate)
       color = Color(1,1,1);                               // If so, use white
    else                                                   // Otherwise...
    {
-      if (mFromColors.count(from) == 0)                   // ...see if we have a color for this nick.  If we don't, count will be 0
+      if(mFromColors.count(from) == 0)                   // ...see if we have a color for this nick.  If we don't, count will be 0
          mFromColors[from] = getNextColor();              // If not, get a new one
 
       color = mFromColors[from];
    }
 
-   mMessages[mMessageCount % MESSAGES_TO_RETAIN] = ChatMessage(from, message, color, isPrivate);
+   mMessages[mMessageCount % MESSAGES_TO_RETAIN] = ChatMessage(from, message, color, isPrivate, isSystem);
    mMessageCount++;
 
    if(isFromUs && isPrivate)
       deliverPrivateMessage(from.c_str(), message.c_str());
+}
+
+
+void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
+{
+   mPlayersInGlobalChat.push_back(playerNick);
+   newMessage(gNameEntryUserInterface.getText(), "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
+}
+
+
+void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
+{
+   for(S32 i = 0; i < gChatInterface.mPlayersInGlobalChat.size(); i++)
+      if(gChatInterface.mPlayersInGlobalChat[i] == playerNick)
+      {
+         gChatInterface.mPlayersInGlobalChat.erase_fast(i);
+         newMessage(gNameEntryUserInterface.getText(), "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
+         break;
+      }
 }
 
 
@@ -153,13 +181,16 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
 
       S32 xpos = UserInterface::horizMargin / 2;
       xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos + (CHAT_FONT_SIZE - CHAT_TIME_FONT_SIZE) / 2 + 2,  // + 2 just looks better!
-                                                    CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str());   
-      xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());
+                                                    CHAT_TIME_FONT_SIZE, "[%s] ", msg.time.c_str()); 
+
+      if(!msg.isSystem)
+         xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, msg.from.c_str());     // No sender for system message
 
       if(msg.isPrivate)
          xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_FONT_SIZE, "*");
 
-      xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
+      if(!msg.isSystem)
+         xpos += UserInterface::drawStringAndGetWidth(xpos, ypos, CHAT_FONT_SIZE, ARROW) + AFTER_ARROW_SPACE;
 
       UserInterface::drawString(xpos, ypos, CHAT_FONT_SIZE, msg.message.c_str());
 
@@ -208,7 +239,7 @@ void AbstractChat::issueChat()
          conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(gNameEntryUserInterface.getText(), mLineEditor.c_str(), false);
+      newMessage(gNameEntryUserInterface.getText(), mLineEditor.c_str(), false, false);
    }
    clearChat();     // Clear message
 
@@ -225,13 +256,19 @@ void AbstractChat::clearChat()
 
 void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 {
-   glColor3f(1,1,0);
+   
 
    if(mPlayersInGlobalChat.size() == 0)
       UserInterface::drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
    else
       for(S32 i = 0; i < mPlayersInGlobalChat.size(); i++)
-         xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_NAMELIST_SIZE, "%s%s", mPlayersInGlobalChat[i].getString(), (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+      {
+         const char *name = mPlayersInGlobalChat[i].getString();
+
+         glColor(getColor(name));      // use it
+
+         xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, CHAT_NAMELIST_SIZE, "%s%s", name, (i < mPlayersInGlobalChat.size() - 1) ? "; " : "");
+      }
 }
 
 ////////////////////////////////////////
