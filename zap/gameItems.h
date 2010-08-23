@@ -110,7 +110,7 @@ static const S32 AsteroidPoints = 12;
 static const F32 asteroidRenderSize[] = { .8, .4, .2, -1 };      // Must end in -1
 static const S32 asteroidRenderSizes = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
 
-static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(S32) - 1;
+static const S32 mSizeIndexLength = sizeof(asteroidRenderSize) / sizeof(F32) - 1;
 
 static const S8 AsteroidCoords[AsteroidDesigns][AsteroidPoints][2] =   // <== Wow!  A 3D array!
 {

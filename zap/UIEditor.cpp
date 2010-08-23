@@ -4408,6 +4408,88 @@ void EditorMenuUserInterface::render()
 }
 
 
+
+// See if item with specified id is selected
+bool EditorUserInterface::itemIsSelected(S32 id)
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].selected && mItems[i].mId == id)
+         return true;
+
+   return false;
+}
+
+
+// Clear any borders associated with the specified zone
+void EditorUserInterface::deleteBorderSegs(S32 zoneId)
+{
+ 
+   for(S32 i = 0; i < zoneBorders.size(); i++)
+      if(zoneBorders[i].mOwner1 == zoneId || zoneBorders[i].mOwner2 == zoneId)
+      {
+         zoneBorders.erase_fast(i);
+         i--;
+      }
+}
+
+
+void EditorUserInterface::rebuildBorderSegs(S32 zoneId)
+{
+   deleteBorderSegs(zoneId);
+   S32 i = NONE;
+
+   for(S32 j = 0; j < mItems.size(); j++)
+      if(mItems[j].mId == zoneId)
+      {
+         i = j;
+         break;
+      }
+
+   if(i == NONE)  // Couldn't find any matching zones...
+      return;
+
+   for(S32 j = 0; j < mItems.size(); j++)
+      checkZones(i, j);
+}
+
+
+void EditorUserInterface::rebuildAllBorderSegs()
+{
+   zoneBorders.clear();
+
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].index != ItemNavMeshZone)
+         continue;
+
+      for(S32 j = i; j < mItems.size(); j++)
+         checkZones(i, j);   
+   }
+}
+
+
+void EditorUserInterface::checkZones(S32 i, S32 j)
+{
+   static ZoneBorder zoneBorder;
+   F32 scaleFact = 1 / mGridSize;
+
+   if(i == j || mItems[j].index != ItemNavMeshZone)
+      return;      // Don't check self...
+         
+   // Do zones i and j touch?  First a quick and dirty bounds check:
+   if(!mItems[i].getExtent().intersectsOrBorders(mItems[j].getExtent()))
+      return;
+
+   if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), scaleFact, zoneBorder.borderStart, zoneBorder.borderEnd))
+   {
+      zoneBorder.mOwner1 = mItems[i].mId;
+      zoneBorder.mOwner2 = mItems[j].mId;
+
+      zoneBorders.push_back(zoneBorder);
+   }
+}
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -4584,8 +4666,12 @@ void WallSegmentManager::renderWalls(bool convert, F32 alpha)
       gEditorUserInterface.setLevelToCanvasCoordConversion(convert);
    
       for(S32 i = 0; i < wallSegments.size(); i++)
-         wallSegments[i]->renderFill();
-    
+      {
+         bool beingDragged = gEditorUserInterface.mDraggingObjects && gEditorUserInterface.itemIsSelected(wallSegments[i]->mOwner);
+
+         wallSegments[i]->renderFill(beingDragged);
+      }
+
       // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderOutline(alpha);
@@ -4593,78 +4679,6 @@ void WallSegmentManager::renderWalls(bool convert, F32 alpha)
    glPopMatrix();
 }
 
-
-
-
-
-// Clear any borders associated with the specified zone
-void EditorUserInterface::deleteBorderSegs(S32 zoneId)
-{
- 
-   for(S32 i = 0; i < zoneBorders.size(); i++)
-      if(zoneBorders[i].mOwner1 == zoneId || zoneBorders[i].mOwner2 == zoneId)
-      {
-         zoneBorders.erase_fast(i);
-         i--;
-      }
-}
-
-
-void EditorUserInterface::rebuildBorderSegs(S32 zoneId)
-{
-   deleteBorderSegs(zoneId);
-   S32 i = NONE;
-
-   for(S32 j = 0; j < mItems.size(); j++)
-      if(mItems[j].mId == zoneId)
-      {
-         i = j;
-         break;
-      }
-
-   if(i == NONE)  // Couldn't find any matching zones...
-      return;
-
-   for(S32 j = 0; j < mItems.size(); j++)
-      checkZones(i, j);
-}
-
-
-void EditorUserInterface::rebuildAllBorderSegs()
-{
-   zoneBorders.clear();
-
-   for(S32 i = 0; i < mItems.size(); i++)
-   {
-      if(mItems[i].index != ItemNavMeshZone)
-         continue;
-
-      for(S32 j = i; j < mItems.size(); j++)
-         checkZones(i, j);   
-   }
-}
-
-
-void EditorUserInterface::checkZones(S32 i, S32 j)
-{
-   static ZoneBorder zoneBorder;
-   F32 scaleFact = 1 / mGridSize;
-
-   if(i == j || mItems[j].index != ItemNavMeshZone)
-      return;      // Don't check self...
-         
-   // Do zones i and j touch?  First a quick and dirty bounds check:
-   if(!mItems[i].getExtent().intersectsOrBorders(mItems[j].getExtent()))
-      return;
-
-   if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), scaleFact, zoneBorder.borderStart, zoneBorder.borderEnd))
-   {
-      zoneBorder.mOwner1 = mItems[i].mId;
-      zoneBorder.mOwner2 = mItems[j].mId;
-
-      zoneBorders.push_back(zoneBorder);
-   }
-}
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -5370,12 +5384,12 @@ void WallSegment::renderOutline(F32 alpha)
 }
 
 
-void WallSegment::renderFill()
+void WallSegment::renderFill(bool renderLight)
 {
    // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
    bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && gEditorUserInterface.isShowingReferenceShip();
 
-   glColor(useGameColor ? GAME_WALL_FILL_COLOR : EDITOR_WALL_FILL_COLOR);
+   glColor((useGameColor ? GAME_WALL_FILL_COLOR : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));
    
    glBegin(GL_POLYGON);
       for(S32 i = 0; i < corners.size(); i++)

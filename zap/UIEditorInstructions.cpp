@@ -371,7 +371,7 @@ void EditorInstructionsUserInterface::renderPageWalls()
       WallSegmentManager::clipAllWallEdges(wallSegments);      // Remove interior wall outline fragments
 
       for(S32 i = 0; i < wallSegments.size(); i++)
-         wallSegments[i]->renderFill();
+         wallSegments[i]->renderFill(false);
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderOutline(1.0);

@@ -83,7 +83,7 @@ public:
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
    void renderOutline(F32 alpha);
-   void renderFill();
+   void renderFill(bool renderLight);
 
    ////////////////////
    //  DatabaseObject methods
@@ -587,7 +587,9 @@ public:
 
    void deleteItem(S32 itemIndex);
 
-   void runScript();    // Run associated levelgen script
+   bool itemIsSelected(S32 id);           // See if item with specified id is selected
+
+   void runScript();                      // Run associated levelgen script
 };
 
 

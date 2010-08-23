@@ -48,6 +48,13 @@ XXX need to document timers, new luavec stuff XXX
 
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
 
+/* Fixes for 013b
+<h4>Bug fixes</h4>
+<li>Fixed bug in editor that prevented editing of GoFast attributes</li>
+<li>32 vertex loadout zones no longer crash game</li>
+
+<h4>Editor enhancements</h4>
+<li>Walls rendered differently when dragged</li>
 
 */
 
