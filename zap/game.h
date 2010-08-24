@@ -401,6 +401,8 @@ extern void endGame();
 };
 
 
+//#define fix013b  <== enables fixes incompatible with 013a
+
 #endif
 
 

@@ -44,7 +44,11 @@ protected:
    void packUpdate(GhostConnection *connection, BitStream *stream)
    {
       // - 1 because writeEnum ranges from 0 to n-1; mPolyBounds.size() ranges from 1 to n
-      stream->writeEnum(mPolyBounds.size() - 1, gMaxPolygonPoints);  
+      stream->writeEnum(mPolyBounds.size()
+#ifdef fix013b
+         - 1
+#endif
+         , gMaxPolygonPoints);  
       for(S32 i = 0; i < mPolyBounds.size(); i++)
       {
          stream->write(mPolyBounds[i].x);
@@ -55,7 +59,11 @@ protected:
 
    U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
-      U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
+      U32 size = stream->readEnum(gMaxPolygonPoints) 
+#ifdef fix013b
+         + 1
+#endif
+;
       for(U32 i = 0; i < size; i++)
       {
          Point p;

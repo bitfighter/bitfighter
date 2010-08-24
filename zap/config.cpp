@@ -108,7 +108,7 @@ void loadKeyBindings()
    // These were moved to main.cpp to get them defined before the menus
 }
 
-void saveKeyBindings()
+static void writeKeyBindings()
 {
    gINI.SetValue("KeyboardKeyBindings", "SelWeapon1", keyCodeToString(keySELWEAP1[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "SelWeapon2", keyCodeToString(keySELWEAP2[Keyboard]), true);
@@ -130,7 +130,6 @@ void saveKeyBindings()
    gINI.SetValue("KeyboardKeyBindings", "ShipLeft", keyCodeToString(keyLEFT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShipRight", keyCodeToString(keyRIGHT[Keyboard]), true);
    gINI.SetValue("KeyboardKeyBindings", "ShowScoreboard", keyCodeToString(keySCRBRD[Keyboard]), true);
-
 
    gINI.SetValue("JoystickKeyBindings", "SelWeapon1", keyCodeToString(keySELWEAP1[Joystick]), true);
    gINI.SetValue("JoystickKeyBindings", "SelWeapon2", keyCodeToString(keySELWEAP2[Joystick]), true);
@@ -154,7 +153,30 @@ void saveKeyBindings()
    gINI.SetValue("JoystickKeyBindings", "ShowScoreboard", keyCodeToString(keySCRBRD[Joystick]), true);
 }
 
-void saveDefaultQuickChatMessages()
+
+/*  INI file looks a little like this:
+   [QuickChatMessagesGroup1]
+   Key=F
+   Button=1
+   Caption=Flag
+
+   [QuickChatMessagesGroup1_Message1]
+   Key=G
+   Button=Button 1
+   Caption=Flag Gone!
+   Message=Our flag is not in the base!
+   MessageType=Team     -or-     MessageType=Global
+
+   == or, a top tiered message might look like this ==
+
+   [QuickChat_Message1]
+   Key=A
+   Button=Button 1
+   Caption=Hello
+   MessageType=Hello there!
+
+*/
+static void writeDefaultQuickChatMessages()
 {
    // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
    S32 keys = gINI.GetNumKeys();
@@ -167,7 +189,7 @@ void saveDefaultQuickChatMessages()
    }
 
    gINI.AddKeyName("QuickChatMessages");
-   if (gINI.NumKeyComments("QuickChatMessages") == 0)
+   if(gINI.NumKeyComments("QuickChatMessages") == 0)
    {
       gINI.KeyComment("QuickChatMessages", "----------------");
       gINI.KeyComment("QuickChatMessages", " The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the way the messages are");
@@ -686,31 +708,6 @@ void loadSettingsFromINI()
       }
    }
 
-   // Run save now so that if there are no QuickChat messages, we will get a good default set.
-   saveDefaultQuickChatMessages();
-   /*  INI file looks a little like this:
-   [QuickChatMessagesGroup1]
-   Key=F
-   Button=1
-   Caption=Flag
-
-   [QuickChatMessagesGroup1_Message1]
-   Key=G
-   Button=Button 1
-   Caption=Flag Gone!
-   Message=Our flag is not in the base!
-   MessageType=Team     -or-     MessageType=Global
-
-   == or, a top tiered message might look like this ==
-
-   [QuickChat_Message1]
-   Key=A
-   Button=Button 1
-   Caption=Hello
-   MessageType=Hello there!
-
-   */
-
    // Add initial node
    QuickChatNode emptynode;
    emptynode.depth = 0;    // This is a beginning or ending node
@@ -806,124 +803,10 @@ void loadSettingsFromINI()
 }
 
 
-extern Vector<StringTableEntry> gLevelList;
-
-void saveSettingsToINI()
+static void writeDiagnostics()
 {
-   if(!gINI.NumHeaderComments())
-   {
-      gINI.HeaderComment("Bitfighter configuration file");
-      gINI.HeaderComment("=============================");
-      gINI.HeaderComment("This file is intended to be user-editable, but some settings here may be overwritten by the game.");
-      gINI.HeaderComment("If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
-      gINI.HeaderComment("First, some basic terminology:");
-      gINI.HeaderComment("[section]");
-      gINI.HeaderComment("key=value");
-      gINI.HeaderComment("");
-   }
-
-   gINI.AddKeyName("Effects");
-   if (gINI.NumKeyComments("Effects") == 0)
-   {
-      gINI.KeyComment("Effects", "----------------");
-      gINI.KeyComment("Effects", " Various visual effects");
-      gINI.KeyComment("Effects", " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
-      gINI.KeyComment("Effects", "----------------");
-   }
-
-   gINI.SetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"), true);
-
-   gINI.AddKeyName("Sounds");
-   if (gINI.NumKeyComments("Sounds") == 0)
-   {
-      gINI.KeyComment("Sounds", "----------------");
-      gINI.KeyComment("Sounds", " Sound settings");
-      gINI.KeyComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
-      gINI.KeyComment("Sounds", "----------------");
-   }
-
-   gINI.SetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10), true);
-   gINI.SetValueI("Sounds", "MusicVolume",   (S32) (gIniSettings.musicVolLevel * 10), true);
-   gINI.SetValueI("Sounds", "VoiceChatVolume",   (S32) (gIniSettings.voiceChatVolLevel * 10), true);
-
-   gINI.SetValue("Sounds", "SFXSet", gIniSettings.sfxSet == sfxClassicSet ? "Classic" : "Modern", true);
-
-   gINI.AddKeyName("Settings");
-   if (gINI.NumKeyComments("Settings") == 0)
-   {
-      gINI.KeyComment("Settings", "----------------");
-      gINI.KeyComment("Settings", " Settings entries contain a number of different options");
-      gINI.KeyComment("Settings", " WindowMode - Fullscreen or Window");
-      gINI.KeyComment("Settings", " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-      gINI.KeyComment("Settings", " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
-      gINI.KeyComment("Settings", " VoiceEcho - Play echo when recording a voice message? Yes/No");
-      gINI.KeyComment("Settings", " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
-      gINI.KeyComment("Settings", " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      gINI.KeyComment("Settings", " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
-      gINI.KeyComment("Settings", " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
-      gINI.KeyComment("Settings", " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
-      gINI.KeyComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
-      gINI.KeyComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      gINI.KeyComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
-      gINI.KeyComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
-      gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
-      gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
-      gINI.KeyComment("Settings", "----------------");
-   }
-   gINI.SetValue("Settings",  "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"), true);
-   gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
-   gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
-   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
-   gINI.SetValue("Settings",  "VoiceEcho", (gIniSettings.echoVoice ? "Yes" : "No"), true);
-   gINI.SetValue("Settings",  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"), true);
-   // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
-
-   gINI.SetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"), true);
-   gINI.SetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"), true);
-   gINI.SetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"), true);
-   gINI.SetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType), true);
-   gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress, true);
-   gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName, true);
-   gINI.SetValue("Settings", "LastName", gIniSettings.lastName, true);
-   gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
-
-   gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
-
-   gINI.AddKeyName("Host");
-   if (gINI.NumKeyComments("Host") == 0)
-   {
-      gINI.KeyComment("Host", "----------------");
-      gINI.KeyComment("Host", " The Host section contains entries that configure the game when you are hosting");
-      gINI.KeyComment("Host", " ServerName - The name others will see when they are browsing for servers (max 20 chars)");
-      gINI.KeyComment("Host", " ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
-      gINI.KeyComment("Host", " ServerDescription - A one line description of your server.  Please include nickname and physical location!");
-      gINI.KeyComment("Host", " ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
-      gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.");
-      gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
-      gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
-      gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
-      gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
-
-//      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
-      gINI.KeyComment("Host", "----------------");
-   }
-   gINI.SetValue("Host", "ServerName", gIniSettings.hostname, true);
-   gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr, true);
-   gINI.SetValue("Host", "ServerDescription", gIniSettings.hostdescr, true);
-   gINI.SetValue("Host", "ServerPassword", gIniSettings.serverPassword, true);
-   gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword, true);
-   gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword, true);
-   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir, true);
-   gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers, true);
-//   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay, true);
-   gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
-
-
-
    gINI.AddKeyName("Diagnostics");
+
    if (gINI.NumKeyComments("Diagnostics") == 0)
    {
       gINI.KeyComment("Diagnostics", "----------------");
@@ -971,9 +854,131 @@ void saveSettingsToINI()
    gINI.SetValue("Diagnostics", "LuaLevelGenerator",     (gIniSettings.luaLevelGenerator     ? "Yes" : "No"), true);
    gINI.SetValue("Diagnostics", "LuaBotMessage",         (gIniSettings.luaBotMessage         ? "Yes" : "No"), true);
    gINI.SetValue("Diagnostics", "ServerFilter",          (gIniSettings.serverFilter          ? "Yes" : "No"), true);
+}
 
 
+static void writeEffects()
+{
+   gINI.AddKeyName("Effects");
 
+   if (gINI.NumKeyComments("Effects") == 0)
+   {
+      gINI.KeyComment("Effects", "----------------");
+      gINI.KeyComment("Effects", " Various visual effects");
+      gINI.KeyComment("Effects", " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
+      gINI.KeyComment("Effects", "----------------");
+   }
+
+   gINI.SetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"), true);
+}
+
+static void writeSounds()
+{
+   gINI.AddKeyName("Sounds");
+
+   if (gINI.NumKeyComments("Sounds") == 0)
+   {
+      gINI.KeyComment("Sounds", "----------------");
+      gINI.KeyComment("Sounds", " Sound settings");
+      gINI.KeyComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
+      gINI.KeyComment("Sounds", "----------------");
+   }
+
+   gINI.SetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10), true);
+   gINI.SetValueI("Sounds", "MusicVolume",   (S32) (gIniSettings.musicVolLevel * 10), true);
+   gINI.SetValueI("Sounds", "VoiceChatVolume",   (S32) (gIniSettings.voiceChatVolLevel * 10), true);
+
+   gINI.SetValue("Sounds", "SFXSet", gIniSettings.sfxSet == sfxClassicSet ? "Classic" : "Modern", true);
+}
+
+
+static void writeSettings()
+{
+   gINI.AddKeyName("Settings");
+
+   if (gINI.NumKeyComments("Settings") == 0)
+   {
+      gINI.KeyComment("Settings", "----------------");
+      gINI.KeyComment("Settings", " Settings entries contain a number of different options");
+      gINI.KeyComment("Settings", " WindowMode - Fullscreen or Window");
+      gINI.KeyComment("Settings", " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
+      gINI.KeyComment("Settings", " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+      gINI.KeyComment("Settings", " VoiceEcho - Play echo when recording a voice message? Yes/No");
+      gINI.KeyComment("Settings", " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
+      gINI.KeyComment("Settings", " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
+      gINI.KeyComment("Settings", " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
+      gINI.KeyComment("Settings", " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
+      gINI.KeyComment("Settings", " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
+      gINI.KeyComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
+      gINI.KeyComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
+      gINI.KeyComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
+      gINI.KeyComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
+      gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
+      gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
+      gINI.KeyComment("Settings", "----------------");
+   }
+   gINI.SetValue("Settings",  "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"), true);
+   gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
+   gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
+   gINI.SetValue("Settings",  "VoiceEcho", (gIniSettings.echoVoice ? "Yes" : "No"), true);
+   gINI.SetValue("Settings",  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"), true);
+   // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
+
+   gINI.SetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"), true);
+   gINI.SetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"), true);
+   gINI.SetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"), true);
+   gINI.SetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType), true);
+   gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress, true);
+   gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName, true);
+   gINI.SetValue("Settings", "LastName", gIniSettings.lastName, true);
+   gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
+
+   gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
+}
+
+
+static void writeHost()
+{
+   gINI.AddKeyName("Host");
+
+   if (gINI.NumKeyComments("Host") == 0)
+   {
+      gINI.KeyComment("Host", "----------------");
+      gINI.KeyComment("Host", " The Host section contains entries that configure the game when you are hosting");
+      gINI.KeyComment("Host", " ServerName - The name others will see when they are browsing for servers (max 20 chars)");
+      gINI.KeyComment("Host", " ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
+      gINI.KeyComment("Host", " ServerDescription - A one line description of your server.  Please include nickname and physical location!");
+      gINI.KeyComment("Host", " ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
+      gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.");
+      gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
+      gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
+      gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
+      gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
+
+//      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
+      gINI.KeyComment("Host", "----------------");
+   }
+   gINI.SetValue("Host", "ServerName", gIniSettings.hostname, true);
+   gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr, true);
+   gINI.SetValue("Host", "ServerDescription", gIniSettings.hostdescr, true);
+   gINI.SetValue("Host", "ServerPassword", gIniSettings.serverPassword, true);
+   gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword, true);
+   gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword, true);
+   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir, true);
+   gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers, true);
+//   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay, true);
+   gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
+}
+
+
+extern Vector<StringTableEntry> gLevelList;
+
+static void writeLevels()
+{
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
    if(gINI.FindKey("Levels") == gINI.noID)    // Key doesn't exist... let's write one
@@ -1000,10 +1005,11 @@ void saveSettingsToINI()
          gINI.SetValue("Levels", string(levelName), gLevelList[i].getString(), true);
       }
    }
+}
 
 
-   writeSkipList();
-
+static void writeReservedNames()
+{
    gINI.AddKeyName("ReservedNames");
    if (gINI.NumKeyComments("ReservedNames") == 0)
    {
@@ -1018,8 +1024,11 @@ void saveSettingsToINI()
       gINI.KeyComment("ReservedNames", "----------------");
    }
    // By default, this section is empty
+}
 
 
+static void writeTesting()
+{
    gINI.AddKeyName("Testing");
    if (gINI.NumKeyComments("Testing") == 0)
    {
@@ -1030,9 +1039,41 @@ void saveSettingsToINI()
       gINI.KeyComment("Testing", "----------------");
    }
    gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
+}
 
-   saveKeyBindings();
-   //saveDefaultQuickChatMessages();  <-- no need to save now... we ran save while initializing, and nothing would have changed
+
+static void writeINIHeader()
+{
+   if(!gINI.NumHeaderComments())
+   {
+      gINI.HeaderComment("Bitfighter configuration file");
+      gINI.HeaderComment("=============================");
+      gINI.HeaderComment("This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      gINI.HeaderComment("If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      gINI.HeaderComment("First, some basic terminology:");
+      gINI.HeaderComment("[section]");
+      gINI.HeaderComment("key=value");
+      gINI.HeaderComment("");
+   }
+}
+
+
+
+void saveSettingsToINI()
+{
+   writeINIHeader();
+
+   writeHost();
+   writeEffects();
+   writeSounds();
+   writeSettings();
+   writeDiagnostics();
+   writeLevels();
+   writeSkipList();
+   writeReservedNames();
+   writeTesting();
+   writeKeyBindings();
+   writeDefaultQuickChatMessages();    // Does nothing if there are already chat messages in the INI
 
    gINI.WriteFile();
 }
@@ -1043,7 +1084,8 @@ void writeSkipList()
    // If there is no LevelSkipList key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write our current skip list (which may have been specified via remote server management tools)
 
-   gINI.DeleteKey("LevelSkipList");    // Delete all current entries to prevent user renumberings to be corrected from tripping us up
+   gINI.DeleteKey("LevelSkipList");       // Delete all current entries to prevent user renumberings to be corrected from tripping us up
+                                          // This may the unfortunate side-effect of pushing this section to the bottom of the INI file
 
    gINI.AddKeyName("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
 
@@ -1218,7 +1260,7 @@ static void doResolveLevelDir(const string &rootDataDir, const string &levelDir,
    gConfigDirs.levelDir = "";    // Surrender
 }
 
-
+#ifdef false
 static void testLevelDirResolution()
 {
    // These need to exist!
@@ -1260,7 +1302,7 @@ static void testLevelDirResolution()
 
    printf("passed leveldir resolution tests!\n");
 }
-
+#endif
 
 void ConfigDirectories::resolveLevelDir()
 {

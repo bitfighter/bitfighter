@@ -45,7 +45,6 @@ Lunar<LoadoutZone>::RegType LoadoutZone::methods[] =
    {0,0}    // End method list
 };
 
-extern S32 gMaxPolygonPoints;
 
 // C++ constructor
 LoadoutZone::LoadoutZone()
