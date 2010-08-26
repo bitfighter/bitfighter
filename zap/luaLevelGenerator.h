@@ -65,6 +65,7 @@ public:
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }
    S32 getGridSize(lua_State *L);
+   S32 getPlayerCount(lua_State *L);
 
    // Implement LevelLoader abstract method
    void processLevelLoadLine(int argc, U32 id, const char **argv);

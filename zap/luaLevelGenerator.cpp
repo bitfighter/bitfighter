@@ -102,6 +102,7 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
    method(LuaLevelGenerator, addLevelLine),
 
    method(LuaLevelGenerator, getGridSize),
+   method(LuaLevelGenerator, getPlayerCount),
 
    {0,0}    // End method list
 };
@@ -181,7 +182,6 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 }
 
 
-
 // Simply grabs parameters from the Lua stack, and passes them off to processLevelLoadLine().  Unfortunately,
 // this involves packing everything into an array of char strings, which is frightfully prone to programmer
 // error and buffer overflows and such...
@@ -245,6 +245,12 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
 S32 LuaLevelGenerator::getGridSize(lua_State *L)
 {
    return returnFloat(L, mGridSize);
+}
+
+
+S32 LuaLevelGenerator::getPlayerCount(lua_State *L)
+{
+   return returnInt(L, gServerGame ? gServerGame->getPlayerCount() : 1 );
 }
 
 

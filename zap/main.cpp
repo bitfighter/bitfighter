@@ -55,9 +55,13 @@ XXX need to document timers, new luavec stuff XXX
 
 <h4>Enhancements</h4>
 <li>Global chat screens now show players joining/leaving, list players using their message color instead of yellow</li>
+<li>Added very minor cpu throttling when playing with FPS > 100.  Should help reduce system load and power usage.</li>
 
 <h4>Editor enhancements</h4>
 <li>Walls rendered differently when dragged</li>
+
+<h4>Levelgens</h4>
+<li>Player count is now available when running the levelgen using levelgen:getPlayerCount() function</li>
 
 */
 
@@ -663,10 +667,11 @@ void idle()
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.
-   U32 sleepTime = 1;
+   U32 sleepTime =  1; //integerTime< 8 ? 8-integerTime : 1;
 
-   if(gClientGame && integerTime >= 10) sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
-
+   if(gClientGame && integerTime >= 10) 
+      sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
+     
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
    if(gDedicatedServer && gServerGame->isSuspended())
