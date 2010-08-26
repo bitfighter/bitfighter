@@ -318,7 +318,7 @@ static void unqueueBuffers(S32 sourceIndex)
       ALint processed;
       alGetError();
 
-      alGetSourcei(gSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);
+      alGetSourcei(gSources[sourceIndex], AL_BUFFERS_PROCESSED, &processed);   // CRASH here with greg on OS X with malloc error double free, index = 1
 
       while(processed)
       {

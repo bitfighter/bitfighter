@@ -1,38 +1,73 @@
-/*
- * 	This is the C++ implementation of the MD5 Message-Digest
- * 	Algorithm desrcipted in RFC 1321.
- * 	I translated the C code from this RFC to C++.
- * 	There is now warranty.
+/* 
+ * hashlib++ - a simple hash library for C++
  * 
- * 	Feb. 12. 2005
- * 	Benjamin Grüdelbach
+ * Copyright (c) 2007-2010 Benjamin Grüdelbach
+ * 
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ * 
+ * 	1)     Redistributions of source code must retain the above copyright
+ * 	       notice, this list of conditions and the following disclaimer.
+ * 
+ * 	2)     Redistributions in binary form must reproduce the above copyright
+ * 	       notice, this list of conditions and the following disclaimer in
+ * 	       the documentation and/or other materials provided with the
+ * 	       distribution.
+ * 	     
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+//----------------------------------------------------------------------	
 
 /*
- *	Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
- *	rights reserved.
- *
- *	License to copy and use this software is granted provided that it
- *	is identified as the "RSA Data Security, Inc. MD5 Message-Digest
- *	Algorithm" in all material mentioning or referencing this software
- *	or this function.
- *
- *	License is also granted to make and use derivative works provided
- *	that such works are identified as "derived from the RSA Data
- *	Security, Inc. MD5 Message-Digest Algorithm" in all material
- *	mentioning or referencing the derived work.
- *
- *	RSA Data Security, Inc. makes no representations concerning either
- *	the merchantability of this software or the suitability of this
- *	software for any particular purpose. It is provided "as is"
- *	without express or implied warranty of any kind.
- *
- *	These notices must be retained in any copies of any part of this
- *	documentation and/or software.
+ * The hashlib++ MD5 implementation is derivative from the sourcecode
+ * published in RFC 1321 
+ * 
+ * Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
+ * rights reserved.
+ * 
+ * License to copy and use this software is granted provided that it
+ * is identified as the "RSA Data Security, Inc. MD5 Message-Digest
+ * Algorithm" in all material mentioning or referencing this software
+ * or this function.
+ * 
+ * License is also granted to make and use derivative works provided
+ * that such works are identified as "derived from the RSA Data
+ * Security, Inc. MD5 Message-Digest Algorithm" in all material
+ * mentioning or referencing the derived work.
+ * 
+ * RSA Data Security, Inc. makes no representations concerning either
+ * the merchantability of this software or the suitability of this
+ * software for any particular purpose. It is provided "as is"
+ * without express or implied warranty of any kind.
+ * 
+ * These notices must be retained in any copies of any part of this
+ * documentation and/or software.
  */
 
-//md5 class include
+//----------------------------------------------------------------------	
+
+/**
+ *  @file 	md5.cpp
+ *  @brief	This file contains the implementation of the MD5 class
+ *  @date 	Mo 17 Sep 2007
+ */  
+
+//----------------------------------------------------------------------
+//hashlib++ includes
 #include "md5.h"
+
+//----------------------------------------------------------------------
+// defines
 
 // Constants for MD5Transform routine.
 #define S11 7
@@ -64,8 +99,11 @@ static unsigned char PADDING[64] = {
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define I(x, y, z) ((y) ^ ((x) | (~z)))
 
-/* ROTATE_LEFT rotates x left n bits. */
-#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32-(n))))
+/*
+ * ROTATE_LEFT rotates x left n bits. 
+ * cast to unsigned int to guarantee support for 64Bit System
+ */
+#define ROTATE_LEFT(x, n) (((x) << (n)) | (( (unsigned int) x) >> (32-(n))))
 
 /*
 FF, GG, HH, and II transformations for rounds 1, 2, 3, and 4.
@@ -93,93 +131,14 @@ Rotation is separate from addition to prevent recomputation.
  (a) += (b); \
   }
 
-/* MD5 initialization. Begins an MD5 operation, writing a new context. */
-void MD5::MD5Init (MD5_CTX *context)
-{
-	  context->count[0] = context->count[1] = 0;
-	  context->state[0] = 0x67452301;
-	  context->state[1] = 0xefcdab89;
-	  context->state[2] = 0x98badcfe;
-	  context->state[3] = 0x10325476;
-}
+//----------------------------------------------------------------------	
+//private member-functions
 
-/*
-	 MD5 block update operation. Continues an MD5 message-digest
-	 operation, processing another message block, and updating the
-	 context.
-*/
-void MD5::MD5Update (MD5_CTX *context, unsigned char *input, size_t inputLen)
-{
-	  unsigned int index, partLen;
-     size_t i;
-
-	  /* Compute number of bytes mod 64 */
-	  index = (unsigned int)((context->count[0] >> 3) & 0x3F);
-
-	  /* Update number of bits */
-	  if ( (context->count[0] += ((unsigned long int)inputLen << 3))
-	       < ((unsigned long int)inputLen << 3))
-		context->count[1]++;
-
-	  context->count[1] += ((unsigned long int)inputLen >> 29);
-	  partLen = 64 - index;
-
-	  /*
-	   * Transform as many times as possible.
-	   */
-	  if (inputLen >= partLen) 
-	  {
-		 MD5_memcpy ((POINTER)&context->buffer[index], (POINTER)input, partLen);
-		 MD5Transform (context->state, context->buffer);
-
-		 for (i = partLen; i + 63 < inputLen; i += 64)
-		   MD5Transform (context->state, &input[i]);
-
-		 index = 0;
-	  }
-	  else 
-	 	i = 0;
-
-	  /* Buffer remaining input */
-	  MD5_memcpy ((POINTER)&context->buffer[index],
-	              (POINTER)&input[i],
-		            inputLen-i);
-}
-
-/*
- * MD5 finalization. Ends an MD5 message-digest operation, writing the
- * the message digest and zeroizing the context.
- */
-void MD5::MD5Final (unsigned char digest[16], MD5_CTX *context)
-{
-	unsigned char bits[8];
-	unsigned int index, padLen;
-
-	/* Save number of bits */
-	Encode (bits, context->count, 8);
-
-	/* 
-	 * Pad out to 56 mod 64.
-	 */
-	index = (unsigned int)((context->count[0] >> 3) & 0x3f);
-	padLen = (index < 56) ? (56 - index) : (120 - index);
-	MD5Update (context, PADDING, padLen);
-
-	/* Append length (before padding) */
-	MD5Update (context, bits, 8);
-
-	/* Store state in digest */
-	Encode (digest, context->state, 16);
-
-	/*
-	 * Zeroize sensitive information.
-	 */
-	MD5_memset ((POINTER)context, 0, sizeof (*context));
-}
-
-/*
- * MD5 basic transformation. Transforms state based on block.
- */
+/**
+ *  @brief 	Basic transformation. Transforms state based on block.
+ *  @param	state	state to transform
+ *  @param	block	block to transform
+ */  
 void MD5::MD5Transform (unsigned long int state[4], unsigned char block[64])
 {
 	unsigned long int a = state[0], b = state[1], c = state[2], d = state[3], x[16];
@@ -270,10 +229,13 @@ void MD5::MD5Transform (unsigned long int state[4], unsigned char block[64])
 	MD5_memset ((POINTER)x, 0, sizeof (x));
 }
 
-/* 
- * Encodes input (unsigned long int) into output (unsigned char). Assumes len is
- * a multiple of 4.
- */
+/**
+ *  @brief 	Encodes input data
+ *  @param	output Encoded data as OUT parameter
+ *  @param	input Input data
+ *  @param	len The length of the input assuming it is a
+ *  		multiple of 4
+ */  
 void MD5::Encode (unsigned char *output, unsigned long int *input, unsigned int len)
 {
 	unsigned int i, j;
@@ -286,10 +248,13 @@ void MD5::Encode (unsigned char *output, unsigned long int *input, unsigned int 
 	}
 }
 
-/*
- * Decodes input (unsigned char) into output (unsigned long int). Assumes len is
- * a multiple of 4.
- */
+/**
+ *  @brief 	Decodes input data into output
+ *  @param	output Decoded data as OUT parameter
+ *  @param	input Input data
+ *  @param	len The length of the input assuming it is a
+ *  		multiple of 4
+ */  
 void MD5::Decode (unsigned long int *output, unsigned char *input, unsigned int len)
 {
 	  unsigned int i, j;
@@ -301,28 +266,138 @@ void MD5::Decode (unsigned long int *output, unsigned char *input, unsigned int 
 			     (((unsigned long int)input[j+3]) << 24);
 }
 
-/*
- * Note: Replace "for loop" with standard memcpy if possible.
- */
-void MD5::MD5_memcpy (POINTER output, POINTER input, size_t len)
+/**
+ *  @brief 	internal memory management
+ *  @param	output OUT parameter where POINTER is a unsigned
+ *  		char*
+ *  @param	input Data to copy where POINTER is a unsigned char*
+ *  @param	len The length of the data
+ */  
+void MD5::MD5_memcpy (POINTER output, POINTER input, unsigned int len)
 {
-	size_t i;
+	/*
+	 * TODO-Note: Replace "for loop" with standard memcpy if possible.
+	 */
+	unsigned int i;
 
 	for (i = 0; i < len; i++)
 		output[i] = input[i];
 }
 
-/*
- * Note: Replace "for loop" with standard memset if possible.
- */
+/**
+ *  @brief 	internal memory management
+ *  @param 	output OUT parameter where POINTER is an unsigned
+ *  		char*
+ *  @param	value Value to fill the memory with
+ *  @param	len The length of the data
+ *  
+ */  
 void MD5::MD5_memset (POINTER output,int value,unsigned int len)
 {
+	/*
+	 * TODO-Note: Replace "for loop" with standard memset if possible.
+	 */
 	unsigned int i;
 	for (i = 0; i < len; i++)
 		((char *)output)[i] = (char)value;
 }
 
-/*
- * EOF
- */
+//----------------------------------------------------------------------	
+//public member-functions
 
+/**
+ *  @brief 	Initialization begins an operation,
+ *  		writing a new context
+ *  @param 	context	The HL_MD5_CTX context to initialize
+ */  
+void MD5::MD5Init (HL_MD5_CTX *context)
+{
+	  context->count[0] = context->count[1] = 0;
+	  context->state[0] = 0x67452301;
+	  context->state[1] = 0xefcdab89;
+	  context->state[2] = 0x98badcfe;
+	  context->state[3] = 0x10325476;
+}
+
+/**
+ *  @brief 	Block update operation. Continues an md5
+ *  		message-digest operation, processing another
+ *  		message block, and updating the context.
+ *  @param	context The HL_MD5_CTX context to update
+ *  @param	input The data to write into the context
+ *  @param	inputLen The length of the input data
+ */  
+void MD5::MD5Update (HL_MD5_CTX *context, unsigned char *input, unsigned int inputLen)
+{
+	  unsigned int i, index, partLen;
+
+	  /* Compute number of bytes mod 64 */
+	  index = (unsigned int)((context->count[0] >> 3) & 0x3F);
+
+	  /* Update number of bits */
+	  if ( (context->count[0] += ((unsigned long int)inputLen << 3))
+	       < ((unsigned long int)inputLen << 3))
+		context->count[1]++;
+
+	  context->count[1] += ((unsigned long int)inputLen >> 29);
+	  partLen = 64 - index;
+
+	  /*
+	   * Transform as many times as possible.
+	   */
+	  if (inputLen >= partLen) 
+	  {
+		 MD5_memcpy ((POINTER)&context->buffer[index], (POINTER)input, partLen);
+		 MD5Transform (context->state, context->buffer);
+
+		 for (i = partLen; i + 63 < inputLen; i += 64)
+		   MD5Transform (context->state, &input[i]);
+
+		 index = 0;
+	  }
+	  else 
+	 	i = 0;
+
+	  /* Buffer remaining input */
+	  MD5_memcpy ((POINTER)&context->buffer[index],
+	              (POINTER)&input[i],
+		      inputLen-i);
+}
+
+/**
+ *  @brief 	Finalization ends the md5 message-digest 
+ *  		operation, writing the the message digest and
+ *  		zeroizing the context.
+ *  @param	digest This is an OUT parameter which contains
+ *  		the created hash after the method returns
+ *  @param	context The context to finalize
+ */  
+void MD5::MD5Final (unsigned char digest[16], HL_MD5_CTX *context)
+{
+	unsigned char bits[8];
+	unsigned int index, padLen;
+
+	/* Save number of bits */
+	Encode (bits, context->count, 8);
+
+	/* 
+	 * Pad out to 56 mod 64.
+	 */
+	index = (unsigned int)((context->count[0] >> 3) & 0x3f);
+	padLen = (index < 56) ? (56 - index) : (120 - index);
+	MD5Update (context, PADDING, padLen);
+
+	/* Append length (before padding) */
+	MD5Update (context, bits, 8);
+
+	/* Store state in digest */
+	Encode (digest, context->state, 16);
+
+	/*
+	 * Zeroize sensitive information.
+	 */
+	MD5_memset ((POINTER)context, 0, sizeof (*context));
+}
+
+//----------------------------------------------------------------------
+//EOF

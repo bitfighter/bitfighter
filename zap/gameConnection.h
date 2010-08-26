@@ -64,6 +64,7 @@ private:
    typedef ControlObjectConnection Parent;
    time_t joinTime;
    bool mAcheivedConnection;
+   std::string mLastEnteredLevelChangePassword;      // For saving passwords 
 
    // The server maintains a linked list of clients...
    GameConnection *mNext;
@@ -137,7 +138,7 @@ public:
    StringTableEntryRef getClientName() { return mClientName; }
 
    void submitAdminPassword(const char *password);
-   void submitLevelChangePassword(const char *password);
+   void submitLevelChangePassword(std::string password);
 
    void suspendGame();
    void unsuspendGame();

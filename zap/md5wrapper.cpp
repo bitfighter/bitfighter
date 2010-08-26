@@ -31,7 +31,7 @@
  */	
 std::string md5wrapper::hashit(std::string text)
 {
-	MD5_CTX ctx;
+	HL_MD5_CTX ctx;
 	
 	//init md5
 	md5->MD5Init(&ctx);
@@ -102,41 +102,14 @@ std::string md5wrapper::getHashFromString(std::string text)
 	return this->hashit(text); 
 }
 
-std::string md5wrapper::getHashFromString(const char *text)
-{
-   std::string str;
-
-   // Check for null
-   if(text == 0)
-      str = "";
-   else
-      str = std::string(text);
-
-   return getHashFromString(str);
-}
-
 
 std::string md5wrapper::getSaltedHashFromString(std::string text)
 {
    // From http://clsc.net/tools/random-string-generator.php, in case you care!
+   // Changing this will break compatibility with any clients/servers using a different salt.
    std::string salt = "8-0qf_C5z5xoH_M_--39_0xS5mPC99bbq9q-g80-003_4b__m7";
 	return this->hashit(lcase(text) + salt); 
 }
-
-std::string md5wrapper::getSaltedHashFromString(const char *text)
-{
-   std::string str;
-
-   // Check for null
-   if(text == 0)
-      str = "";
-   else
-      str = std::string(text);
-
-   return getSaltedHashFromString(str);
-}
-
-
 
 
 /*
@@ -149,7 +122,7 @@ std::string md5wrapper::getSaltedHashFromString(const char *text)
 std::string md5wrapper::getHashFromFile(std::string filename)	
 {
 	FILE *file;
-  	MD5_CTX context;
+  	HL_MD5_CTX context;
   
 	size_t len;    // Was int, VC++ complained, if this doesn't compile, switch it back
   	unsigned char buffer[1024], digest[16];

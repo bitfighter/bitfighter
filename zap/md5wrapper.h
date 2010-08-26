@@ -51,11 +51,9 @@ class md5wrapper
 		 * string
 		 */	
 		std::string getHashFromString(std::string text);
-		std::string getHashFromString(const char *text);
 
       // Gets hash with appended salt, and makes text lowercase for case insensitivity
 		std::string getSaltedHashFromString(std::string text);
-		std::string getSaltedHashFromString(const char *text);
 
 		/*
 		 * creates a MD5 hash from

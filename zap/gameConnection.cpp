@@ -71,6 +71,7 @@ GameConnection::GameConnection()
    mGamesPlayed = 0;  // Overall
    mRating = 0;       // Overall
    mAcheivedConnection = false;
+   mLastEnteredLevelChangePassword = "";
 }
 
 // Destructor
@@ -168,15 +169,19 @@ void GameConnection::submitAdminPassword(const char *password)
 {
    c2sAdminPassword(md5.getSaltedHashFromString(password).c_str());
    setGotPermissionsReply(false);
-   setWaitingForPermissionsReply(true);
+   setWaitingForPermissionsReply(true);      // Means we'll show a reply from the server
 }
 
 
-void GameConnection::submitLevelChangePassword(const char *password)
+void GameConnection::submitLevelChangePassword(string password)    // password here has not yet been encrypted
 {
-   c2sLevelChangePassword(md5.getSaltedHashFromString(password).c_str());
+   string encrypted = md5.getSaltedHashFromString(password);
+   c2sLevelChangePassword(encrypted.c_str());
+
+   mLastEnteredLevelChangePassword = encrypted;
+
    setGotPermissionsReply(false);
-   setWaitingForPermissionsReply(true);
+   setWaitingForPermissionsReply(true);      // Means we'll show a reply from the server
 }
 
 
@@ -254,7 +259,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    // If password is blank, permissions always granted
-   if(gLevelChangePassword == "" || (gLevelChangePassword != "" && !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass)))
+   if(gLevelChangePassword == "" || !strcmp(md5.getSaltedHashFromString(gLevelChangePassword).c_str(), pass))
    {
       setIsLevelChanger(true);
       s2cSetIsLevelChanger(true, true);                                           // Tell client they have been granted access
@@ -458,10 +463,23 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 //   gGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 //}
 
+
+// This gets called under two circumstances; when it's a new game, or when the server's name is changed by an admin
 TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (name),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    setServerName(name);
+
+   // If we know the level change password, apply for permissions if we don't already have them
+   if(!isLevelChanger())
+   {
+      string levelChangePassword = gINI.GetValue("SavedLevelChangePasswords", getServerName());
+      if(levelChangePassword != "")
+      {
+         c2sLevelChangePassword(levelChangePassword.c_str());
+         setWaitingForPermissionsReply(false);     // Want to return silently
+      }
+   }
 }
 
 
@@ -488,21 +506,24 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    setGotPermissionsReply(true);
 
    // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
-   if(!waitingForPermissionsReply())
-      return;
-
-   if(granted)
-      // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
-      if(UserInterface::current->getMenuID() == GameMenuUI)
-         gGameMenuUserInterface.menuSubTitle = adminPassSuccessMsg;
+   if(waitingForPermissionsReply())
+   {
+      if(granted)
+      {
+         // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
+         if(UserInterface::current->getMenuID() == GameMenuUI)
+            gGameMenuUserInterface.menuSubTitle = adminPassSuccessMsg;
+         else
+            gGameUserInterface.displayMessage(gCmdChatColor, adminPassSuccessMsg);
+      }
       else
-         gGameUserInterface.displayMessage(gCmdChatColor, adminPassSuccessMsg);
-
-   else
-      if(UserInterface::current->getMenuID() == GameMenuUI)
-         gGameMenuUserInterface.menuSubTitle = adminPassFailureMsg;
-      else
-         gGameUserInterface.displayMessage(gCmdChatColor, adminPassFailureMsg);
+      {
+         if(UserInterface::current->getMenuID() == GameMenuUI)
+            gGameMenuUserInterface.menuSubTitle = adminPassFailureMsg;
+         else
+            gGameUserInterface.displayMessage(gCmdChatColor, adminPassFailureMsg);
+      }
+   }
 }
 
 
@@ -520,15 +541,23 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
          logprintf(LogConsumer::ServerFilter, "User [%s] denied level change permissions", mClientRef->name.getString());
    }
 
+   // If we entered a password, and it worked, let's save it for next time
+   if(granted && mLastEnteredLevelChangePassword != "")
+   {
+      gINI.SetValue("SavedLevelChangePasswords", getServerName(), mLastEnteredLevelChangePassword, true);
+      mLastEnteredLevelChangePassword = "";
+   }
+
+   // We have the wrong password, let's make sure it's not saved
+   if(!granted)
+      gINI.DeleteValue("SavedLevelChangePasswords", getServerName());
+
    setIsLevelChanger(granted);
 
    setGotPermissionsReply(true);
 
    // If we're not waiting, don't show us a message.  Supresses superflous messages on startup.
-   if(!waitingForPermissionsReply())
-      return;
-
-   if(notify)
+   if(waitingForPermissionsReply() && notify)
    {
       if(granted)
       {
@@ -833,7 +862,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    string password = "";
    if(isLocal)
    {
-      // Do we need a password?  Look for the name in our reserved names list.
+      // Do we have a password?  Look for the name in our reserved names list.
       for(S32 i = 0; i < gIniSettings.reservedNames.size(); i++)
          if(!stricmp(gIniSettings.reservedNames[i].c_str(), mClientName.getString()))
          {
@@ -986,7 +1015,7 @@ void GameConnection::onConnectionEstablished()
       setGhostTo(true);
       logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
 
-      setFixedRateParameters(50, 50, 2000, 2000);
+      setFixedRateParameters(50, 50, 2000, 2000);       // U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth
    }
    else                 // Server-side
    {
