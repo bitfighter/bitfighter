@@ -102,6 +102,19 @@ std::string md5wrapper::getHashFromString(std::string text)
 	return this->hashit(text); 
 }
 
+std::string md5wrapper::getHashFromString(const char *text)
+{
+   std::string str;
+
+   // Check for null
+   if(text == 0)
+      str = "";
+   else
+      str = std::string(text);
+
+   return getHashFromString(str);
+}
+
 
 std::string md5wrapper::getSaltedHashFromString(std::string text)
 {
@@ -110,6 +123,21 @@ std::string md5wrapper::getSaltedHashFromString(std::string text)
    std::string salt = "8-0qf_C5z5xoH_M_--39_0xS5mPC99bbq9q-g80-003_4b__m7";
 	return this->hashit(lcase(text) + salt); 
 }
+
+std::string md5wrapper::getSaltedHashFromString(const char *text)
+{
+   std::string str;
+
+   // Check for null
+   if(text == 0)
+      str = "";
+   else
+      str = std::string(text);
+
+   return getSaltedHashFromString(str);
+}
+
+
 
 
 /*
