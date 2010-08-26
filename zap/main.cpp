@@ -619,13 +619,14 @@ void idle()
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
 
-   if(integerTime >= 10)         // Thus max frame rate = 100
+   if(integerTime >= 10)         // Thus max frame rate = 100 fps
    {
       lastTimer = currentTimer;
       unusedFraction = timeElapsed - integerTime;
 
       gZapJournal.idle(integerTime);
    }
+
 
    // So, what's with all the SDL code in here?  I looked at converting from GLUT to SDL, in order to get
    // a richer set of keyboard events.  Looks possible, but SDL appears to be missing some very handy
@@ -659,12 +660,12 @@ void idle()
    gZapJournal.display();    // Draw the screen --> GLUT handles this via callback, with SDL we need to do it in our main loop
    END SDL event polling */
 
+
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.
    U32 sleepTime = 1;
 
-   if(gClientGame) sleepTime = 0;      // Live player at the console
-
+   if(gClientGame && integerTime >= 10) sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
 
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
