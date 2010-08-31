@@ -52,6 +52,8 @@ XXX need to document timers, new luavec stuff XXX
 <h4>Bug fixes</h4>
 <li>Fixed bug in editor that prevented editing of GoFast attributes</li>
 <li>32 vertex loadout zones no longer crash game</li>
+<li>Fix for invalid md5 hash on 64 bit machines</li>
+<li>Fix for crashing spybug problem</li>
 
 <h4>Enhancements</h4>
 <li>Global chat screens now show players joining/leaving, list players using their message color instead of yellow</li>
