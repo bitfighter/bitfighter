@@ -68,6 +68,11 @@ XXX need to document timers, new luavec stuff XXX
 
 */
 
+/* Fixes for 013c
+
+
+*/
+
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game

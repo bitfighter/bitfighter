@@ -616,9 +616,8 @@ public:
    // s2mUpdateServerStatus updates the status of a server to the Master Server, specifying the current game
    // and mission types, any player counts and the current info flags.
    // Updates the master with the current status of a game server.
-   TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (
-      StringTableEntry levelName, StringTableEntry levelType,
-      U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
+   TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
+                                                    U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
    {
       // If we didn't know we were a game server, don't accept updates
       if(!mIsGameServer)
@@ -640,7 +639,8 @@ public:
 
 
    // Send player statistics to the master server
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics, (StringTableEntry playerName, 
+                                                      U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
    {
       S32 totalShots = 0, totalHits = 0;
 
@@ -652,6 +652,22 @@ public:
 
       // PLAYER | name | kills | deaths | suicides | shots | hits 
       logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), kills, deaths, suicides, totalShots, totalHits);
+   }
+
+      // Send player statistics to the master server
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, 
+                                                        U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
+   {
+      S32 totalShots = 0, totalHits = 0;
+
+      for(S32 i = 0; i < shots.size(); i++)
+      {
+         totalShots += shots[i];
+         totalHits += hits[i];
+      }
+
+      // PLAYER | name | team | kills | deaths | suicides | shots | hits 
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
    // TODO: Get this to be the same as UI::itos()
@@ -674,6 +690,24 @@ public:
       // GAME | GameType | Time | Level name | players | time
       logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%s", 
                     getTimeStamp().c_str(), gameType.getString(), levelName.getString(), players.value, timestr.c_str() );
+   }
+
+
+      // Send game statistics to the master server
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, 
+                                                      Vector<StringTableEntry> teams, Vector<S32> teamScores,
+                                                      RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
+   {
+      string timestr = itos(timeInSecs / 60) + ":";
+      timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
+
+      // GAME | GameType | time | level name | teams | players | time
+      logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%d\t%s", 
+                    getTimeStamp().c_str(), gameType.getString(), levelName.getString(), teams.size(), players.value, timestr.c_str() );
+
+      // TEAM | team name | score
+      for(S32 i = 0; i < teams.size(); i++)
+         logprintf("TEAM\t%s\t%d", teams[i].getString(), teamScores[i]);
    }
 
 

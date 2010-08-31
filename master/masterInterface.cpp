@@ -151,9 +151,23 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics,
    (playerName, kills, deaths, suicides, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
+
 // Send game statistics to the master server
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
                                                                  RangedU32<0,MAX_PLAYERS> players, S16 time),
    (gameType, levelName, players, time),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
+
+
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_2, 
+   (StringTableEntry playerName, StringTableEntry teamName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits),
+   (playerName, teamName, kills, deaths, suicides, shots, hits),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName,
+                                                                   Vector<StringTableEntry> teams, Vector<S32> teamScores,
+                                                                   RangedU32<0,MAX_PLAYERS> players, S16 time),
+   (gameType, levelName, teams, teamScores, players, time),
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 

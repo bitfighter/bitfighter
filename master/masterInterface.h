@@ -177,6 +177,13 @@ public:
    // Version 2 RPCs
    TNL_DECLARE_RPC(s2mSendPlayerStatistics, (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits) );
    TNL_DECLARE_RPC(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, RangedU32<0,MAX_PLAYERS> players, S16 time) );
+
+   // Version 3 RPCs
+   TNL_DECLARE_RPC(s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, U16 kills, U16 deaths, U16 suicides, 
+                                               Vector<U16> shots, Vector<U16> hits) );
+   TNL_DECLARE_RPC(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, Vector<StringTableEntry> teams, 
+                                             Vector<S32> teamScores, RangedU32<0,MAX_PLAYERS> players, S16 time) );
+
 };
 
 

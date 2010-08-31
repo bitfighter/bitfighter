@@ -608,7 +608,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
 
       // Build a list of teams, so we can sort by score
-      Vector<Team> teams;
+      Vector<Team> teams(mTeams.size());
 
       for(S32 i = 0; i < mTeams.size(); i++)
          teams.push_back(mTeams[i]);
@@ -787,19 +787,36 @@ void GameType::saveGameStats()
    // Currently, only transmits statistics to the master server
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
    GameType *gameType = gServerGame->getGameType();
+
    if(masterConn && gameType)
    {
+      // Build a list of teams, so we can sort by score
+      Vector<Team> sortTeams(mTeams.size());
+
+      for(S32 i = 0; i < mTeams.size(); i++)
+         sortTeams.push_back(mTeams[i]);
+
+      sortTeams.sort(teamScoreSort);
+
+      // Push team names and scores into a structure we can pass via rpc; these will be sorted by score
+      Vector<StringTableEntry> teams(sortTeams.size());
+      Vector<S32> scores(sortTeams.size());
+
+      for(S32 i = 0; i < sortTeams.size(); i++)
+      {
+         teams.push_back(sortTeams[i].getName());
+         scores.push_back(sortTeams[i].getScore());
+      }
+
       S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
-      masterConn->s2mSendGameStatistics(gameType->getGameTypeString(), gameType->mLevelName, gameType->mClientList.size(), timeInSecs);
+      masterConn->s2mSendGameStatistics_2(gameType->getGameTypeString(), gameType->mLevelName, teams, scores, gameType->mClientList.size(), timeInSecs);
 
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
          Statistics *statistics = &gameType->mClientList[i]->mStatistics;
-         Vector<U16> shots = statistics->getShotsVector();
-         Vector<U16> hits  = statistics->getHitsVector();
-
-         masterConn->s2mSendPlayerStatistics(gameType->mClientList[i]->name, statistics->getKills(), statistics->getDeaths(), 
-                                             statistics->getSuicides(), shots, hits); // Send game statistics to the master server
+         masterConn->s2mSendPlayerStatistics_2(gameType->mClientList[i]->name, gameType->getTeamName(gameType->mClientList[i]->getTeam()), 
+                                             statistics->getKills(), statistics->getDeaths(), 
+                                             statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
       }
    }
 }
