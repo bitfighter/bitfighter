@@ -60,6 +60,8 @@ namespace Zap
 const S32 GameType::gMaxTeams;
 #endif
 
+//static Timer mTestTimer(10 * 1000);
+//static bool on = true;
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
 // All names are of the form xxxGameType, and have a corresponding class xxxGame
@@ -395,6 +397,25 @@ void GameType::idle(GameObject::IdleCallPath path)
          mAsteroidSpawnPoints[i].timer.reset();                                            // Reset the spawn timer
       }
    }
+
+   //if(mTestTimer.update(deltaT))
+   //{
+   //   on = !on;
+
+   //   if(!on)
+   //   {
+   //      Vector<F32> v;
+   //      s2cAddBarriers(v, 0, false);
+   //   }
+   //   else
+   //   {
+   //      for(S32 i = 0; i < mBarriers.size(); i++)
+   //         s2cAddBarriers(mBarriers[i].verts, mBarriers[i].width, mBarriers[i].solid);
+   //   }
+
+   //   mTestTimer.reset();
+   //}
+  
 
    // Process any pending Robot events
    Robot::getEventManager().update();
@@ -878,6 +899,7 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 extern Rect gServerWorldBounds;
 
 // Find all spubugs in the game, and store them for future reference
+// server only
 void GameType::catalogSpybugs()
 {
    mSpyBugs.clear();

@@ -1042,17 +1042,38 @@ static void writeTesting()
 }
 
 
+static void writePasswordSection_helper(string section)
+{
+   gINI.AddKeyName(section);
+   if (gINI.NumKeyComments(section) == 0)
+   {
+      gINI.KeyComment(section, "----------------");
+      gINI.KeyComment(section, " This section holds passwords you've entered to get access to various servers.  They are hashed,");
+      gINI.KeyComment(section, " so there's not much you can do by modifying these values.  You could, however, copy them to another");
+      gINI.KeyComment(section, " machine and thereby grant another user permissions without revealing the password.  Not sure why");
+      gINI.KeyComment(section, " you'd want to, though.");
+      gINI.KeyComment(section, "----------------");
+   }
+}
+
+static void writePasswordSection()
+{
+   writePasswordSection_helper("SavedLevelChangePasswords");
+   writePasswordSection_helper("SavedAdminPasswords");
+}
+
+
 static void writeINIHeader()
 {
    if(!gINI.NumHeaderComments())
    {
       gINI.HeaderComment("Bitfighter configuration file");
       gINI.HeaderComment("=============================");
-      gINI.HeaderComment("This file is intended to be user-editable, but some settings here may be overwritten by the game.");
-      gINI.HeaderComment("If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
-      gINI.HeaderComment("First, some basic terminology:");
-      gINI.HeaderComment("[section]");
-      gINI.HeaderComment("key=value");
+      gINI.HeaderComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      gINI.HeaderComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      gINI.HeaderComment(" First, some basic terminology:");
+      gINI.HeaderComment(" [section]");
+      gINI.HeaderComment(" key=value");
       gINI.HeaderComment("");
    }
 }
@@ -1072,6 +1093,7 @@ void saveSettingsToINI()
    writeSkipList();
    writeReservedNames();
    writeTesting();
+   writePasswordSection();
    writeKeyBindings();
    writeDefaultQuickChatMessages();    // Does nothing if there are already chat messages in the INI
 

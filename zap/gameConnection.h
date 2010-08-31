@@ -64,7 +64,10 @@ private:
    typedef ControlObjectConnection Parent;
    time_t joinTime;
    bool mAcheivedConnection;
-   std::string mLastEnteredLevelChangePassword;      // For saving passwords 
+
+   // For saving passwords
+   std::string mLastEnteredLevelChangePassword;
+   std::string mLastEnteredAdminPassword;       
 
    // The server maintains a linked list of clients...
    GameConnection *mNext;

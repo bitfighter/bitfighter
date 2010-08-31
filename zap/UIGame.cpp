@@ -35,6 +35,7 @@
 #include "UIErrorMessage.h"
 #include "gameType.h"
 #include "lpc10.h"
+#include "IniFile.h"    // For access to gINI functions
 
 #include "../tnl/tnlEndian.h"
 
@@ -1254,6 +1255,9 @@ static bool hasAdmin(GameConnection *gc, const char *failureMessage)
 }
 
 
+extern CIniFile gINI;
+extern md5wrapper md5;
+
 static void changePassword(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words, bool required)
 {
    if(required)
@@ -1267,9 +1271,28 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
       gc->changeParam(words[1].c_str(), type);
    }
    else if(words.size() < 2)
+   {
       gc->changeParam("", type);
-   else
+   }
+
+   if(words.size() < 2)    // Empty password
+   {
+      // Clear any saved password for this server
+      if(type == GameConnection::LevelChangePassword)
+         gINI.DeleteValue("SavedLevelChangePasswords", gc->getServerName());
+      else if(type == GameConnection::AdminPassword)
+         gINI.DeleteValue("SavedAdminPasswords", gc->getServerName());
+   }
+   else                    // Non-empty password
+   {
       gc->changeParam(words[1].c_str(), type);
+
+      // Save the password so the user need not enter it again the next time they're on this server
+      if(type == GameConnection::LevelChangePassword)
+         gINI.SetValue("SavedLevelChangePasswords", gc->getServerName(), md5.getSaltedHashFromString(words[1]), true);
+      else if(type == GameConnection::AdminPassword)
+         gINI.SetValue("SavedAdminPasswords", gc->getServerName(), md5.getSaltedHashFromString(words[1]), true);
+   }
 }
 
 

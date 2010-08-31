@@ -37,9 +37,6 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(Barrier);
 
-U32 Barrier::mBarrierChangeIndex = 1;
-
-
 
 void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid)
 {
@@ -111,11 +108,10 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    mWidth = width;
 
-   if(points.size() == 2)    // It's a regular segment, need to make a little larger to accodate width
+   if(points.size() == 2)    // It's a regular segment, need to make a little larger to accomodate width
       extent.expand(Point(width, width));
 
    setExtent(extent);
-   mLastBarrierChangeIndex = 0;
 
     mSolid = solid;
 

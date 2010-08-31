@@ -52,9 +52,6 @@ public:
 
    static const S32 BarrierWidth = 50; ///< The default width of the barrier in game units
 
-   static U32 mBarrierChangeIndex; ///< Global counter that is incremented every time a new barrier is added on the client.
-   U32 mLastBarrierChangeIndex;    ///< Index to check against the global counter - if it is different, then this barrier's polygon outline will be clipped against all adjacent barriers.
-
    Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
 
    /// Barrier constructor

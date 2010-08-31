@@ -72,6 +72,7 @@ GameConnection::GameConnection()
    mRating = 0;       // Overall
    mAcheivedConnection = false;
    mLastEnteredLevelChangePassword = "";
+   mLastEnteredAdminPassword = "";
 }
 
 // Destructor
@@ -167,7 +168,11 @@ extern md5wrapper md5;
 
 void GameConnection::submitAdminPassword(const char *password)
 {
-   c2sAdminPassword(md5.getSaltedHashFromString(password).c_str());
+   string encrypted = md5.getSaltedHashFromString(password);
+   c2sAdminPassword(encrypted.c_str());
+
+   mLastEnteredAdminPassword = encrypted;
+
    setGotPermissionsReply(false);
    setWaitingForPermissionsReply(true);      // Means we'll show a reply from the server
 }
@@ -471,12 +476,23 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
    setServerName(name);
 
    // If we know the level change password, apply for permissions if we don't already have them
-   if(!isLevelChanger())
+   if(!mIsLevelChanger)
    {
       string levelChangePassword = gINI.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
          c2sLevelChangePassword(levelChangePassword.c_str());
+         setWaitingForPermissionsReply(false);     // Want to return silently
+      }
+   }
+
+   // If we know the admin password, apply for permissions if we don't already have them
+   if(!mIsAdmin)
+   {
+      string adminPassword = gINI.GetValue("SavedAdminPasswords", getServerName());
+      if(adminPassword != "")
+      {
+         c2sAdminPassword(adminPassword.c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -500,8 +516,22 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
    }
 
    setIsAdmin(granted);
-   if(granted)                      // Don't want to rescind level change permissions for entering a bad PW
-         setIsLevelChanger(true);
+
+   // Admin permissions automatically give level change permission
+   if(granted)                      // Don't rescind level change permissions for entering a bad admin PW
+      setIsLevelChanger(true);
+
+
+   // If we entered a password, and it worked, let's save it for next time
+   if(granted && mLastEnteredAdminPassword != "")
+   {
+      gINI.SetValue("SavedAdminPasswords", getServerName(), mLastEnteredAdminPassword, true);
+      mLastEnteredAdminPassword = "";
+   }
+
+   // We have the wrong password, let's make sure it's not saved
+   if(!granted)
+      gINI.DeleteValue("SavedAdminPasswords", getServerName());
 
    setGotPermissionsReply(true);
 
@@ -551,6 +581,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
    // We have the wrong password, let's make sure it's not saved
    if(!granted)
       gINI.DeleteValue("SavedLevelChangePasswords", getServerName());
+
 
    setIsLevelChanger(granted);
 

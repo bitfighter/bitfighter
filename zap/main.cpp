@@ -56,12 +56,13 @@ XXX need to document timers, new luavec stuff XXX
 <h4>Enhancements</h4>
 <li>Global chat screens now show players joining/leaving, list players using their message color instead of yellow</li>
 <li>Added very minor cpu throttling when playing with FPS > 100.  Should help reduce system load and power usage.</li>
+<li>level change and admin passwords now remembered for specific servers, and are automatically entered upon connect</li>
 
 <h4>Editor enhancements</h4>
 <li>Walls rendered differently when dragged</li>
 
 <h4>Levelgens</h4>
-<li>Player count is now available when running the levelgen using levelgen:getPlayerCount() function</li>
+<li>Player count is now available when running the levelgen using the new getPlayerCount() function</li>
 
 */
 
@@ -1180,7 +1181,6 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          logprintf("See http://bitfighter.org/wiki/index.php?title=Command_line_parameters for information");
          exitGame(0);
       }
-      // Highly speculative use of different joysticks
       else if(!stricmp(argv[i], "-usestick")) // additional arg required
       {
          if(hasAdditionalArg)
