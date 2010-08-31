@@ -801,15 +801,23 @@ void GameType::saveGameStats()
       // Push team names and scores into a structure we can pass via rpc; these will be sorted by score
       Vector<StringTableEntry> teams(sortTeams.size());
       Vector<S32> scores(sortTeams.size());
+      Vector<RangedU32<0,256> > colorR(mTeams.size());
+      Vector<RangedU32<0,256> > colorG(mTeams.size());
+      Vector<RangedU32<0,256> > colorB(mTeams.size());
 
       for(S32 i = 0; i < sortTeams.size(); i++)
       {
          teams.push_back(sortTeams[i].getName());
          scores.push_back(sortTeams[i].getScore());
+
+         colorR.push_back(RangedU32<0,256>(sortTeams[i].color.r * 255));
+         colorG.push_back(RangedU32<0,256>(sortTeams[i].color.g * 255));
+         colorB.push_back(RangedU32<0,256>(sortTeams[i].color.b * 255));
       }
 
       S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
-      masterConn->s2mSendGameStatistics_2(gameType->getGameTypeString(), gameType->mLevelName, teams, scores, gameType->mClientList.size(), timeInSecs);
+      masterConn->s2mSendGameStatistics_2(gameType->getGameTypeString(), gameType->mLevelName, teams, scores, 
+                                          colorR, colorG, colorB, gameType->mClientList.size(), timeInSecs);
 
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {

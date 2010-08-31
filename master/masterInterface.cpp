@@ -167,7 +167,8 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_2,
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName,
                                                                    Vector<StringTableEntry> teams, Vector<S32> teamScores,
+                                                                   Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
                                                                    RangedU32<0,MAX_PLAYERS> players, S16 time),
-   (gameType, levelName, teams, teamScores, players, time),
+   (gameType, levelName, teams, teamScores, colorR, colorG, colorB, players, time),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 

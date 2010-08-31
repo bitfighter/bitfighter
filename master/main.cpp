@@ -666,8 +666,8 @@ public:
          totalHits += hits[i];
       }
 
-      // PLAYER | name | team | kills | deaths | suicides | shots | hits 
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
+      // PLAYER | stats version | name | team | kills | deaths | suicides | shots | hits 
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t2\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
    // TODO: Get this to be the same as UI::itos()
@@ -696,18 +696,19 @@ public:
       // Send game statistics to the master server
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
+                                                      Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
                                                       RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
    {
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
-      // GAME | GameType | time | level name | teams | players | time
-      logprintf(LogConsumer::StatisticsFilter, "GAME\t%s\t%s\t%s\t%d\t%d\t%s", 
+      // GAME | stats version | GameType | time | level name | teams | players | time
+      logprintf(LogConsumer::StatisticsFilter, "GAME\t2\t%s\t%s\t%s\t%d\t%d\t%s", 
                     getTimeStamp().c_str(), gameType.getString(), levelName.getString(), teams.size(), players.value, timestr.c_str() );
 
-      // TEAM | team name | score
+      // TEAM | stats version | team name | score
       for(S32 i = 0; i < teams.size(); i++)
-         logprintf("TEAM\t%s\t%d", teams[i].getString(), teamScores[i]);
+         logprintf("TEAM\t2\t%s\t%d", teams[i].getString(), teamScores[i]);
    }
 
 
