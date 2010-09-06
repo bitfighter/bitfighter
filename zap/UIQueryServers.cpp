@@ -74,7 +74,7 @@ QueryServersUserInterface::QueryServersUserInterface()
    mHighlightColumn = 0;
    mSortAscending = true;
    mRecievedListOfServersFromMaster = false;
-   mouseScrollTimer.setPeriod(10*MenuUserInterface::MouseScrollInterval);
+   mouseScrollTimer.setPeriod(10 * MenuUserInterface::MOUSE_SCROLL_INTERVAL);
 
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));

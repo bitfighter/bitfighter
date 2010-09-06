@@ -30,9 +30,11 @@
 #include "input.h"
 #include "keyCode.h"
 #include "point.h"
+#include "teamInfo.h"      // For Team def
 
 #include "tnlNetBase.h"
 #include "tnlTypes.h"
+
 
 #include <string>
 
@@ -49,59 +51,124 @@ enum PlayerType {
    PlayerTypeIrrelevant
 };
 
-struct MenuItem
+
+////////////////////////////////////
+////////////////////////////////////
+
+class MenuItem
 {
-   const char *mText;   // Text displayed on menu
-   U32 mIndex;          // Unique int index
-   KeyCode key1;        // Allow two shortcut keys per menu item...
+private:
+   string mText;     // Text displayed on menu
+   U32 mIndex;       // Unique int index
+
+protected:
+   Color color;      // Color in which item should be displayed
+
+public:
+   // Constructor
+   MenuItem(U32 index, string text, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1,1,1))
+   {
+      mText = text;
+      mIndex = index;
+      key1 = k1;
+      key2 = k2;
+      color = c;
+   }
+
+   KeyCode key1;     // Allow two shortcut keys per menu item...
    KeyCode key2;
-   Color color;         // Color in which item should be displayed
-   PlayerType mType;    // Type of player, for name menu
-   S32 mPlayers;        // Num players, for team select menu
-   S32 mScore;          // Team score, for team select menu
-   bool mCurrTeam;      // Is this a player's current team? (for team select menu)
 
-   // Constructor I
-   MenuItem(const char *text = 0, U32 index = 0, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1))
-   {
-      mText = text;
-      mIndex = index;
-      key1 = k1;
-      key2 = k2;
-      color = c;
-      mType = PlayerTypeIrrelevant;
-      mPlayers = -1;
-      mScore = -1;
-   }
-
-   // Constructor II
-   MenuItem(const char *text, U32 index, KeyCode k1, KeyCode k2, Color c, PlayerType type)
-   {
-      mText = text;
-      mIndex = index;
-      key1 = k1;
-      key2 = k2;
-      color = c;
-      mType = type;
-      mPlayers = -1;
-      mScore = -1;
-   }
-
-   // Constructor III
-   MenuItem(const char *text, U32 index, KeyCode k1, KeyCode k2, Color c, bool currTeam, S32 players, S32 score)
-   {
-      mText = text;
-      mIndex = index;
-      key1 = k1;
-      key2 = k2;
-      color = c;
-      mType = PlayerTypeIrrelevant;
-      mPlayers = players;
-      mScore = score;
-      mCurrTeam = currTeam;
-   }
-
+   virtual void render(S32 ypos);
+   S32 getIndex() { return mIndex; }
+   const char *getText() { return mText.c_str(); }
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class ToggleMenuItem : public MenuItem
+{
+private:
+   string mValue;
+public:
+   ToggleMenuItem(U32 index, string text, string value, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+         MenuItem(index, text, k1, k2, color)
+         {
+            mValue = value;
+         }
+
+   virtual void render(S32 ypos);
+};
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+class PlayerMenuItem : public MenuItem
+{
+private:
+   PlayerType mType;    // Type of player, for name menu
+
+public:
+   // Constructor
+   PlayerMenuItem(U32 index, const char *text, KeyCode k1, Color color, PlayerType type) :
+         MenuItem(index, text, k1, KEY_UNKNOWN, color)
+   {
+      mType = type;
+   }
+
+   virtual void render(S32 ypos);
+};
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+class TeamMenuItem : public MenuItem
+{
+private:
+   Team mTeam;
+   bool mIsCurrent;     // Is this a player's current team? 
+
+public:
+   TeamMenuItem(U32 index, Team team, KeyCode keyCode, bool isCurrent);      // Constructor
+
+   void render(S32 ypos);
+};
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+class EditableMenuItem : public ToggleMenuItem
+{
+private:
+   LineEditor mLineEditor;
+   bool mIsActive;
+   string mEmptyVal;
+
+public:
+   // Contstuctor
+   EditableMenuItem( U32 index, const char *text, string val, string emptyVal, U32 maxLen, KeyCode k1, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1) ) :
+            ToggleMenuItem(index, text, val.c_str(), k1, k2, c),
+            mLineEditor(LineEditor(maxLen, val))
+   {
+      mEmptyVal = emptyVal;
+      mIsActive = false;
+   }
+
+public:
+   virtual void render(S32 ypos);
+   void addChar(char ch) { mLineEditor.addChar(ch); }
+   void handleBackspace(KeyCode keyCode) { mLineEditor.handleBackspace(keyCode); }
+   void setActive(bool isActive) { mIsActive = isActive; }
+   string getValue() { return mLineEditor.getString(); }
+};
+
+
+////////////////////////////////////
+////////////////////////////////////
 
 // This class is the template for most all of our menus...
 class MenuUserInterface : public UserInterface
@@ -115,18 +182,30 @@ private:
    bool mRepeatMode;
    bool mKeyDown;
 
+   // Helper rendering functions
+   static void renderArrowAbove(S32 pos);
+   static void renderArrowAbove(S32 pos, S32 height);
+
+   static void renderArrowBelow(S32 pos);
+   static void renderArrowBelow(S32 pos, S32 height);
+
+   static void renderMenuInstructions(S32 variant);
+
 protected:
    S32 currOffset;
-   
+
+   // Handle keyboard input while a menu is displayed
+   virtual bool preprocessKeys(KeyCode keyCode, char ascii);    // Return true if key was handled, false to pass to preprocessKeys()
+   virtual bool processMenuSpecificKeys(KeyCode keyCode, char ascii);
+   virtual bool processKeys(KeyCode keyCode, char ascii);
+
 public:
    MenuUserInterface();                // Constructor
 
    bool itemSelectedWithMouse;
-   Vector<MenuItem> menuItems;
+   Vector<MenuItem *> menuItems;
 
-   enum {
-      MouseScrollInterval = 100,
-   };
+   static const S32 MOUSE_SCROLL_INTERVAL = 100;
 
    char menuTitle[255];
    const char *menuSubTitle;
@@ -139,7 +218,7 @@ public:
    S32 selectedIndex;
 
    void render();    // Draw the basic menu
-   virtual void renderExtras() { /* Do nothing */ }     // For drawing something extra on a menu, not currently used...
+   virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu, not currently used...
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
@@ -150,22 +229,8 @@ public:
    void onReactivate();
 
    virtual void onEscape();
-   virtual void processSelection(U32 index) = 0;
+   virtual void processSelection(U32 index) = 0;         // Must implement!
    virtual void processShiftSelection(U32 index) { /* Do nothing */ }
-
-   // Handle keyboard input while a menu is displayed
-   virtual void processMenuSpecificKeys(KeyCode keyCode);
-   virtual void processStandardKeys(KeyCode keyCode);
-
-   // Helper rendering functions
-   static void renderArrowAbove(S32 pos);
-   static void renderArrowAbove(S32 pos, S32 height);
-
-   static void renderArrowBelow(S32 pos);
-   static void renderArrowBelow(S32 pos, S32 height);
-
-   static void renderMenuInstructions(S32 variant);
-
 };
 
 //////////
@@ -189,9 +254,6 @@ private:
    bool mNeedToUpgrade;       // True if client is out of date and needs to upgrade, false if we're on the latest version
    bool mShowedUpgradeAlert;  // So we don't show the upgrade message more than once
 
-   Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
-   S32 mLevelLoadDisplayTotal;
-
 public:
    MainMenuUserInterface();                     // Constructor
    void processSelection(U32 index);
@@ -205,21 +267,19 @@ public:
    bool firstTime;                              // Is this the first time the menu is shown?
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
-
-   void addProgressListItem(string item);
-   void renderProgressListItems();
-   Timer levelLoadDisplayFadeTimer;
-   bool levelLoadDisplayDisplay;
-   void clearLevelLoadDisplay();
 };
 
 extern MainMenuUserInterface gMainMenuUserInterface;
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class OptionsMenuUserInterface : public MenuUserInterface
 {
 private:
    typedef MenuUserInterface Parent;
+
 public:
    OptionsMenuUserInterface();               // Constructor
    void processSelection(U32 index);         // Process selected menu item when right arrow is pressed
@@ -236,11 +296,80 @@ public:
 
 extern OptionsMenuUserInterface gOptionsMenuUserInterface;
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class HostMenuUserInterface : public MenuUserInterface
+{
+   enum MenuItems {
+      OPT_HOST,
+      OPT_NAME,
+      OPT_DESCR,
+      OPT_LVL_PASS,
+      OPT_ADMIN_PASS,
+      OPT_PASS,
+      OPT_PORT,
+      OPT_COUNT
+   };
+
+   static const S32 FIRST_EDITABLE_ITEM = OPT_NAME;
+
+   typedef MenuUserInterface Parent;
+
+private:
+   typedef MenuUserInterface Parent;
+
+   Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
+   S32 mLevelLoadDisplayTotal;
+   S32 mEditingIndex;                        // Index of item we're editing, -1 if none
+
+   bool preprocessKeys(KeyCode keyCode, char ascii);    
+
+public:
+   HostMenuUserInterface();                  // Constructor
+   void processSelection(U32 index);         // Process selected menu item when right arrow is pressed
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   void setActive(S32 i);     // Specify which item is being actively edited, -1 for none
+   void render();
+
+   void idle(U32 timeDelta);
+
+   void saveSettings();       // Save parameters in INI file
+
+   // For displaying the list of levels as we load them:
+   Timer levelLoadDisplayFadeTimer;
+   bool levelLoadDisplayDisplay;
+   void addProgressListItem(string item);
+   void renderProgressListItems();
+   void clearLevelLoadDisplay();
+};
+
+extern HostMenuUserInterface gHostMenuUserInterface;
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class GameType;
 
 class GameMenuUserInterface : public MenuUserInterface
 {
+   enum {
+      OPT_OPTIONS,
+      OPT_HELP,
+      OPT_ADMIN,
+      OPT_KICK,
+      OPT_LEVEL_CHANGE_PW,
+      OPT_CHOOSELEVEL,
+      OPT_ADD2MINS,
+      OPT_RESTART,
+      OPT_QUIT
+   };
+
+
 private:
    typedef MenuUserInterface Parent;
    SafePtr<GameType> mGameType;
@@ -260,11 +389,15 @@ public:
 
 extern GameMenuUserInterface gGameMenuUserInterface;
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class LevelMenuUserInterface : public MenuUserInterface
 {
 private:
    typedef MenuUserInterface Parent;
+
 public:
    LevelMenuUserInterface();        // Constructor
    void onActivate();
@@ -274,16 +407,21 @@ public:
 };
 
 extern LevelMenuUserInterface gLevelMenuUserInterface;
-//////////
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class LevelMenuSelectUserInterface : public MenuUserInterface
 {
 private:
    typedef MenuUserInterface Parent;
+
 public:
    LevelMenuSelectUserInterface();        // Constructor
    string category;
    void onActivate();
-   void processMenuSpecificKeys(KeyCode keyCode);  // Custom key handling for level selection menus
+   bool processMenuSpecificKeys(KeyCode keyCode, char ascii);  // Custom key handling for level selection menus
 
    void processSelection(U32 index);
    void processShiftSelection(U32 index);
@@ -292,12 +430,16 @@ public:
 
 extern LevelMenuSelectUserInterface gLevelMenuSelectUserInterface;
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class AdminMenuUserInterface : public MenuUserInterface
 {
 private:
    typedef MenuUserInterface Parent;
    SafePtr<GameType> mGameType;
+
 public:
    AdminMenuUserInterface();      // Constructor
    void onActivate();
@@ -306,7 +448,10 @@ public:
    void onEscape();
 };
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class PlayerMenuUserInterface : public MenuUserInterface
 {
 private:
@@ -326,7 +471,10 @@ public:
 
 extern PlayerMenuUserInterface gPlayerMenuUserInterface;
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class TeamMenuUserInterface : public MenuUserInterface
 {
 private:

@@ -166,10 +166,10 @@ void TeamDefUserInterface::render()
          char numstr[10];
          dSprintf(numstr, sizeof(numstr), "Team %d: ", j+1);
 
-         char namestr[nameLen + 20];    // Added a little extra, just to cover any contingency...
+         char namestr[MAX_NAME_LEN + 20];    // Added a little extra, just to cover any contingency...
          dSprintf(namestr, sizeof(namestr), "%s%s", numstr, gEditorUserInterface.mTeams[j].getName().getString());
 
-         char colorstr[16];            // "(100, 100, 100)" + 1 for null
+         char colorstr[16];                  // "(100, 100, 100)" + 1 for null
          dSprintf(colorstr, sizeof(colorstr), "(%d, %d, %d)", S32(gEditorUserInterface.mTeams[j].color.r * 100),
                                                               S32(gEditorUserInterface.mTeams[j].color.g * 100),
                                                               S32(gEditorUserInterface.mTeams[j].color.b * 100));

@@ -40,7 +40,6 @@ using namespace std;
 namespace Zap
 {
 
-#define nameLen 256
 #define gameTypeLen 256
 
 class TeamEditor;

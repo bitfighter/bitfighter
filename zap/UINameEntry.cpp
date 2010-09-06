@@ -97,8 +97,7 @@ void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          onEscape();
          break;
       default:
-         if(isValid(ascii))      // Allows us to override isValid and create character filters
-            lineEditor.addChar(ascii);
+         lineEditor.addChar(ascii);
    }
 }
 
@@ -106,15 +105,6 @@ void TextEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 void TextEntryUserInterface::setString(string str)
 {
    lineEditor.setString(str);
-}
-
-
-// By default, all chars are valid.  Override to be more restrictive
-bool TextEntryUserInterface::isValid(char ascii)
-{
-   if (ascii)
-      return true;
-   return false;
 }
 
 
@@ -201,17 +191,6 @@ void LevelNameEntryUserInterface::onEscape()
    reactivatePrevUI();      //gMainMenuUserInterface
 }
 
-// Only allow alpha-numeric and _s
-bool LevelNameEntryUserInterface::isValid(char ascii)
-{
-   if ( (ascii >= '0' && ascii <= '9') ||
-        (ascii == '_') ||
-        (ascii >= 'A' && ascii <= 'Z') ||
-        (ascii >= 'a' && ascii <= 'z') )
-      return true;
-
-   else return false;
-}
 
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {

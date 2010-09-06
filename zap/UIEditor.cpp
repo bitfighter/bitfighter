@@ -532,7 +532,7 @@ void EditorUserInterface::loadLevel()
 }
 
 
-extern S32 gMaxPlayers;
+//extern S32 gMaxPlayers;
 
 // Process a line read from level file
 void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)
@@ -624,6 +624,9 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
 void EditorUserInterface::runScript()
 {
    // Parse mScriptLine
+
+   if(mScriptLine == "")      // No script included!!
+      return;
 
    Vector<string> scriptArgs;
 
@@ -4326,18 +4329,14 @@ extern IniSettings gIniSettings;
 void EditorMenuUserInterface::setupMenus()
 {
    menuItems.clear();
-   menuItems.push_back(MenuItem("RETURN TO EDITOR", 0, KEY_R, KEY_UNKNOWN));
-   if(gIniSettings.fullscreen)
-      menuItems.push_back(MenuItem("GAME MODE: WINDOWED",   1, KEY_G, KEY_UNKNOWN));
-   else
-      menuItems.push_back(MenuItem("GAME MODE: FULLSCREEN", 1, KEY_G, KEY_UNKNOWN));
-
-   menuItems.push_back(MenuItem("TEST LEVEL",   2, KEY_T, KEY_UNKNOWN));
-   menuItems.push_back(MenuItem("SAVE LEVEL",   3, KEY_S, KEY_UNKNOWN));
-   menuItems.push_back(MenuItem("INSTRUCTIONS", 4, KEY_I, keyHELP));
-   menuItems.push_back(MenuItem("LEVEL PARAMETERS", 9, KEY_L, KEY_F3));
-   menuItems.push_back(MenuItem("MANAGE TEAMS", 5, KEY_M, KEY_F2));
-   menuItems.push_back(MenuItem("QUIT",         6, KEY_Q, KEY_UNKNOWN));
+   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", KEY_R, KEY_UNKNOWN));
+   menuItems.push_back(new ToggleMenuItem(1, "GAME MODE:", gIniSettings.fullscreen ? "WINDOWED" : "FULLSCREEN", KEY_G, KEY_UNKNOWN));
+   menuItems.push_back(new MenuItem(2, "TEST LEVEL",       KEY_T, KEY_UNKNOWN));
+   menuItems.push_back(new MenuItem(3, "SAVE LEVEL",       KEY_S, KEY_UNKNOWN));
+   menuItems.push_back(new MenuItem(4, "INSTRUCTIONS",     KEY_I, keyHELP));
+   menuItems.push_back(new MenuItem(5, "LEVEL PARAMETERS", KEY_L, KEY_F3));
+   menuItems.push_back(new MenuItem(6, "MANAGE TEAMS",     KEY_M, KEY_F2));
+   menuItems.push_back(new MenuItem(7, "QUIT",             KEY_Q, KEY_UNKNOWN));
 }
 
 
@@ -4364,13 +4363,13 @@ void EditorMenuUserInterface::processSelection(U32 index)
       case 4:                                         // Instructions
          gEditorInstructionsUserInterface.activate();
          break;
-      case 9:
+      case 5:
          gGameParamUserInterface.activate();
          break;
-      case 5:                                         // Team editor
+      case 6:                                         // Team editor
          gTeamDefUserInterface.activate();
          break;
-      case 6:
+      case 7:
          if(gEditorUserInterface.mNeedToSave)
          {
             gYesNoUserInterface.reset();

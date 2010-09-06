@@ -464,26 +464,35 @@ S32 UserInterface::get2ColStartingPos(bool leftCol)      // Must be S32 to avoid
 }
 
 
-// Draws a string centered on the screen, with different parts colored differently
-S32 UserInterface::drawCenteredStringPairf(S32 y, U32 size, const char *left, const char *right, ...)
+// Returns starting position of value, which is useful for positioning the cursor in an editable menu entry
+S32 UserInterface::drawCenteredStringPair(S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 
+                                          const char *leftStr, const char *rightStr)
 {
-   va_list args;
-   va_start(args, right);
-   char buffer[2048];
-   vsnprintf(buffer, sizeof(buffer), right, args);
-   va_end(args);
+   S32 xpos = getCenteredStringStartingPosf(size, "%s %s", leftStr, rightStr);
 
-   S32 offset = getStringWidth(size, left) + getStringWidth(size, " ");
-   S32 width = offset + getStringWidth(size, buffer);
-   S32 x = (S32)((S32) canvasWidth - (getStringWidth(size, left) + getStringWidth(size, buffer))) / 2;
+   glColor(leftColor);
+   xpos += UserInterface::drawStringAndGetWidthf(xpos, ypos, size, "%s ", leftStr);
 
-   glColor3f(1,1,1);
-   drawString(x, y, size, left);
-   glColor3f(0,1,1);
-   drawString(x + offset, y, size, buffer);
+   glColor(rightColor);
+   UserInterface::drawString(xpos, ypos, size, rightStr);
 
-   return x;
+   return xpos;
 }
+
+//// Draws a string centered on the screen, with different parts colored differently
+//S32 UserInterface::drawCenteredStringPair(S32 y, U32 size, const Color &col1, const Color &col2, const char *left, const char *right)
+//{
+//   S32 offset = getStringWidth(size, left) + getStringWidth(size, " ");
+//   S32 width = offset + getStringWidth(size, buffer);
+//   S32 x = (S32)((S32) canvasWidth - (getStringWidth(size, left) + getStringWidth(size, buffer))) / 2;
+//
+//   glColor(col1);
+//   drawString(x, y, size, left);
+//   glColor(col2);
+//   drawString(x + offset, y, size, buffer);
+//
+//   return x;
+//}
 
 
 // Draws a string centered in the left or right half of the screen, with different parts colored differently

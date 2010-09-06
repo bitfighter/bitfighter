@@ -41,8 +41,8 @@ using namespace std;
 
 enum ParamType
 {
-   TypeShortString,     // gMaxGameNameLength max length
-   TypeLongString,      // gMaxGameDescrLength max length
+   TypeShortString,     // MAX_GAME_NAME_LEN max length
+   TypeLongString,      // MAX_GAME_DESCR_LEN max length
    TypeInt,
    TypeGameType,
    TypeFileName,
@@ -77,9 +77,9 @@ struct MenuItem2     // An extended menu item complete with values good for edit
       // Set a limit on entry length.  Note that these are fairly aribitrary...
       U32 len = 255;
       if(valType == TypeShortString)
-         len = gMaxGameNameLength;
+         len = MAX_GAME_NAME_LEN;
       else if(valType == TypeLongString)
-         len = gMaxGameDescrLength;
+         len = MAX_GAME_DESCR_LEN;
       else if(valType == TypeFileName)
          len = MAX_SHORT_TEXT_LEN;
 

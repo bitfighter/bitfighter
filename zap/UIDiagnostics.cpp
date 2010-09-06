@@ -39,7 +39,7 @@
 namespace Zap
 {
 
-extern string gHostName;
+extern string gHostName, gHostDescr;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern F32 gSimulatedPacketLoss;
@@ -189,7 +189,7 @@ static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
 }
 
 
-static S32 showVersionBlock(S32 textsize, S32 gap, S32 ypos)
+static S32 showVersionBlock(S32 ypos, S32 textsize, S32 gap)
 {
    glColor3f(1,1,1);
 
@@ -231,6 +231,26 @@ static S32 showVersionBlock(S32 textsize, S32 gap, S32 ypos)
    x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", TNL_COMPILER_STRING);
 
    return ypos + textsize + gap * 2;
+}
+
+
+static S32 showNameDescrBlock(S32 ypos, S32 textsize, S32 gap)
+{
+   glColor3f(1,1,1);
+
+   S32 x = UserInterface::getCenteredStringStartingPosf(textsize, "Server Name: %s | Descr: %s", gHostName.c_str(), gHostDescr.c_str());
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "Server Name: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", gHostName.c_str());
+
+   glColor3f(1,1,1);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, " | Descr: ");
+   glColor3f(1,1,0);
+   x += UserInterface::drawStringAndGetWidthf(x, ypos, textsize, "%s", gHostDescr.c_str());
+
+   return ypos + textsize + gap;
 }
 
 
@@ -332,7 +352,7 @@ void DiagnosticUserInterface::render()
 
       const S32 gap = 5;
 
-      S32 ypos = showVersionBlock(14, gap, 120);
+      S32 ypos = showVersionBlock(120, 14, gap);
 
       glColor3f(1,1,1);
 
@@ -458,12 +478,14 @@ void DiagnosticUserInterface::render()
       S32 ypos = vertMargin + 35;
 
       glColor3f(1,1,1);
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Name:", "%s", gHostName.c_str());
+      ypos += showNameDescrBlock(ypos, textsize, gap);
+
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
       drawCenteredStringPair2Colf(ypos, 14, false, "Lvl Change PW:", "%s", gLevelChangePassword == "" ?
                                                                     "None - anyone can change" : gLevelChangePassword.c_str());
       ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Host Addr:", "%s", gBindAddress.toString());
+      
       drawCenteredStringPair2Colf(ypos, 14, false, "Admin PW:", "%s", gAdminPassword == "" ? 
                                                                      "None - no one can get admin" : gAdminPassword.c_str());
       ypos += textsize + gap;

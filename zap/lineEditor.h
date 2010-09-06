@@ -58,7 +58,8 @@ public:
    enum LineEditorFilter {
       allAsciiFilter,      // any ascii character
       digitsOnlyFilter,    // 0-9
-      numericFilter        // 0-9, -, .
+      numericFilter,       // 0-9, -, .
+      fileNameFilter       // A-Z, a-z, 0-9, _
    };
 
    LineEditor(U32 maxLength = 256, string value = "");     // Constructor

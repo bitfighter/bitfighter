@@ -265,8 +265,8 @@ void GameUserInterface::idle(U32 timeDelta)
    mProgressBarFadeTimer.update(timeDelta);
 
    // Should we move this timer over to UIGame??
-   if(gMainMenuUserInterface.levelLoadDisplayFadeTimer.update(timeDelta))
-      gMainMenuUserInterface.clearLevelLoadDisplay();
+   if(gHostMenuUserInterface.levelLoadDisplayFadeTimer.update(timeDelta))
+      gHostMenuUserInterface.clearLevelLoadDisplay();
 }
 
 
@@ -317,7 +317,7 @@ void GameUserInterface::render()
       renderCurrentChat();       // Render any chat msg user is composing
       renderLoadoutIndicators(); // Draw indicators for the various loadout items
 
-      gMainMenuUserInterface.renderProgressListItems();  // This is the list of levels loaded while hosting
+      gHostMenuUserInterface.renderProgressListItems();  // This is the list of levels loaded while hosting
 
       renderProgressBar();       // This is the status bar that shows progress of loading this level
 

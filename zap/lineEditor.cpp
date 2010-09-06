@@ -70,7 +70,7 @@ void LineEditor::drawCursor(S32 x, S32 y, U32 fontSize)
    {
       S32 w = UserInterface::getStringWidth((F32)fontSize, mLine.c_str());
 
-      UserInterface::drawString(x + w, y, fontSize, "_");
+      UserInterface::drawString(x + w + S32(F32(mLine.length())/5.1), y, fontSize, "_");  // Mostly right, but still a tiny bit off
    }
 }
 
@@ -100,15 +100,24 @@ void LineEditor::drawCursorAngle(S32 x, S32 y, F32 fontSize, F32 angle)
 
 void LineEditor::addChar(const char c) 
 { 
+   if(c == 0)
+      return;
+
    if((mFilter == digitsOnlyFilter) && (c < '0' || c > '9'))
       return;
       
    if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
       return;
 
-   string s(1,c);
-   if(length() < mMaxLen) mLine.append(s); 
+   if((mFilter == fileNameFilter) && ! ( (c >= '0' && c <= '9') ||
+                                         (c == '_')             ||
+                                         (c >= 'A' && c <= 'Z') ||
+                                         (c >= 'a' && c <= 'z') )  )
+      return;
+   
+   if(length() < mMaxLen) mLine.append(string(1,c)); 
 }
+
 
 // keyCode will have either backspace or delete in it -- basically a convenience function
 void LineEditor::handleBackspace(KeyCode keyCode)

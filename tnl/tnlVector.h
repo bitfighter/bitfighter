@@ -135,6 +135,7 @@ template<class T> class Vector
    void erase(U32);
    void erase_fast(U32);
    void clear();
+   void deleteAndClear();
    void compact();
 
    void sort(compare_func f);
@@ -288,6 +289,14 @@ template<class T> inline const T& Vector<T>::last() const
 template<class T> inline void Vector<T>::clear()
 {
    setSize(0);
+}
+
+template<class T> inline void Vector<T>::deleteAndClear()
+{
+   for(U32 i = 0; i < mElementCount; i++)
+      delete mArray[i];
+
+   clear();
 }
 
 //-----------------------------------------------------------------------------

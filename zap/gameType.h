@@ -40,7 +40,7 @@ namespace Zap
 
 // Some forward declarations
 class GoalZone;
-struct MenuItem;
+class MenuItem;
 class Item;
 class SFXObject;
 class VoiceDecoder;
@@ -389,10 +389,10 @@ public:
 
 
    // Handle additional game-specific menu options for the client and the admin
-   virtual void addClientGameMenuOptions(Vector<MenuItem> &menuOptions);
+   virtual void addClientGameMenuOptions(Vector<MenuItem *> &menuOptions);
    virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
 
-   virtual void addAdminGameMenuOptions(Vector<MenuItem> &menuOptions);
+   virtual void addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions);
 
    TNL_DECLARE_RPC(c2sAddTime, (U32 time));                                    // Admin is adding time to the game
    TNL_DECLARE_RPC(c2sChangeTeams, (S32 team));                                // Player wants to change teams

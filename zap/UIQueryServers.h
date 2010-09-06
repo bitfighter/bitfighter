@@ -76,12 +76,10 @@ public:
    Timer mMasterRequeryTimer;
    U32 time;
 
+   static const S32 MaxServerNameLen = 40;
+   static const S32 MaxServerDescrLen = 254;
+
    enum {
-      MaxServerNameLen = 40,
-      MaxServerDescrLen = 254,
-      ServersPerScreen = 21,     // unused, delete
-      ServersAbove = 9,
-      ServersBelow = 9,
       MaxPendingPings = 15,
       MaxPendingQueries = 10,
       PingQueryTimeout = 1500,

@@ -49,7 +49,117 @@
 namespace Zap
 {
 
-const S32 gMaxMenuSize = 8;      // Max number of menu items we show on screen before we go into scrolling mode
+
+// Convert string to lower case
+string lcase(string strToConvert)
+{
+   for(U32 i = 0; i < strToConvert.length(); i++)
+      strToConvert[i] = tolower(strToConvert[i]);
+   return strToConvert;
+}
+
+// Convert string to upper case
+string ucase(string strToConvert)
+{
+   for(U32 i = 0; i < strToConvert.length(); i++)
+      strToConvert[i] = toupper(strToConvert[i]);
+   return strToConvert;
+}
+
+// Sorts alphanumerically by menuItem.value
+S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
+{
+   return stricmp((*a)->getText(), (*b)->getText());
+}
+
+
+static const S32 FONT_SIZE = 25;
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+void MenuItem::render(S32 ypos)
+{
+   glColor(color);
+   UserInterface::drawCenteredStringf(ypos, FONT_SIZE, "%s >", getText());
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+void ToggleMenuItem::render(S32 ypos)
+{
+   UserInterface::drawCenteredStringPair(ypos, FONT_SIZE, color, Color(0,1,1), getText(), mValue.c_str());
+}
+
+////////////////////////////////////
+////////////////////////////////////
+
+void PlayerMenuItem::render(S32 ypos)
+{
+   string temp = getText();
+
+   // Add a player type prefix if requested
+   if(mType == PlayerTypePlayer)
+      temp = "[Player] " + temp;
+   else if(mType == PlayerTypeAdmin)
+      temp = "[Admin] " + temp;
+   else if(mType == PlayerTypeRobot)
+      temp = "[Robot] " + temp;
+
+   glColor(color);
+   UserInterface::drawCenteredString(ypos, 25, temp.c_str());
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+#include "teamInfo.h"      // For Team def
+
+// Constructor
+TeamMenuItem::TeamMenuItem(U32 index, Team team, KeyCode keyCode, bool isCurrent) :
+                        MenuItem(index, team.getName().getString(), keyCode, KEY_UNKNOWN, team.color)
+{
+   mTeam = team;
+   mIsCurrent = isCurrent;
+}
+
+
+void TeamMenuItem::render(S32 ypos)
+{
+   string temp = getText();
+
+   char str[63];
+   dSprintf(str, sizeof(str), " [%d / %d]", mTeam.numPlayers, mTeam.getScore());
+
+   if(mIsCurrent)      // Draw indicator on current team
+      temp = "-> " + temp;
+
+   temp = temp + str;
+
+   glColor(color);
+   UserInterface::drawCenteredString(ypos, FONT_SIZE, temp.c_str());
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+void EditableMenuItem::render(S32 ypos)
+{
+   S32 xpos = UserInterface::drawCenteredStringPair(ypos, FONT_SIZE, color, Color(0,1,1), getText(), 
+                                                    mLineEditor.getString() != "" ? mLineEditor.c_str() : mEmptyVal.c_str());
+   if(mIsActive)
+      mLineEditor.drawCursor(xpos, ypos, FONT_SIZE);
+}
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+static const S32 MAX_MENU_SIZE = 8;      // Max number of menu items we show on screen before we go into scrolling mode
 
 MenuUserInterface::MenuUserInterface()    // Constructor
 {
@@ -99,7 +209,7 @@ S32 MenuUserInterface::getOffset()
    S32 offset = 0;
    S32 count = menuItems.size();
 
-   if(count > gMaxMenuSize)     // Do some sort of scrolling
+   if(count > MAX_MENU_SIZE)     // Do some sort of scrolling
    {
       offset = currOffset;
 
@@ -107,13 +217,13 @@ S32 MenuUserInterface::getOffset()
       // which can't be done when using the keyboard
       if(selectedIndex - currOffset < (itemSelectedWithMouse ? 0 : 1))
          offset = selectedIndex - (itemSelectedWithMouse ? 0 : 1);
-      else if( selectedIndex - currOffset > (gMaxMenuSize - (itemSelectedWithMouse ? 1 : 2)) )
-         offset = selectedIndex - (gMaxMenuSize - (itemSelectedWithMouse ? 1 : 2));
+      else if( selectedIndex - currOffset > (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2)) )
+         offset = selectedIndex - (MAX_MENU_SIZE - (itemSelectedWithMouse ? 1 : 2));
 
       if(offset < 0)
          offset = 0;
-      else if(offset + gMaxMenuSize >= menuItems.size())
-         offset = menuItems.size() - gMaxMenuSize;
+      else if(offset + MAX_MENU_SIZE >= menuItems.size())
+         offset = menuItems.size() - MAX_MENU_SIZE;
    }
    currOffset = offset;
 
@@ -125,7 +235,7 @@ S32 MenuUserInterface::getOffset()
 S32 MenuUserInterface::getYStart()
 {
    S32 vertOff = (getMenuID() == MainUI) ? 40 : 0;    // Make room for the logo on the main menu
-   return (canvasHeight - min(menuItems.size(), gMaxMenuSize) * UserInterface::MenuItemHeight) / 2 + vertOff;
+   return (canvasHeight - min(menuItems.size(), MAX_MENU_SIZE) * UserInterface::MenuItemHeight) / 2 + vertOff;
 }
 
 
@@ -170,8 +280,8 @@ void MenuUserInterface::renderMenuInstructions(S32 variant)
 	  drawString(x, y, size, msg2);
 	  x += getStringWidth(size, msg2);
 
-	  renderControllerButton(x, y + 4, BUTTON_BACK, false);
-	  x += getControllerButtonRenderedSize(BUTTON_BACK);
+	  renderControllerButton(x + 4, y + 4, BUTTON_BACK, false);
+	  x += getControllerButtonRenderedSize(BUTTON_BACK) + 4;
 
      glColor3f(1,1,1);
 	  drawString(x, y, size, "exits menu");
@@ -214,8 +324,8 @@ void MenuUserInterface::render()
 
    S32 count = menuItems.size();
 
-   if(count > gMaxMenuSize)     // Need some sort of scrolling
-      count = gMaxMenuSize;
+   if(count > MAX_MENU_SIZE)     // Need some sort of scrolling
+      count = MAX_MENU_SIZE;
 
    S32 yStart = getYStart();
    S32 offset = getOffset();
@@ -225,65 +335,38 @@ void MenuUserInterface::render()
       S32 y = yStart + i * UserInterface::MenuItemHeight;
 
       if(selectedIndex == i + offset)  // Highlight selected item
-      {
-         glColor3f(0, 0, 0.4);         // Fill
-         glBegin(GL_POLYGON);
-            glVertex2f(0, y - 2);
-            glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + 25 + 5);
-            glVertex2f(0, y + 25 + 5);
-         glEnd();
+         for(S32 j = 1; j >= 0; j--)
+         {
+            glColor(j ? Color(0,0,0.4) : Color(0,0,1));         // Fill, then outline
+            glBegin(j ? GL_POLYGON : GL_LINES);
+               glVertex2f(0, y - 2);
+               glVertex2f(canvasWidth, y - 2);
+               glVertex2f(canvasWidth, y + 25 + 5);
+               glVertex2f(0, y + 25 + 5);
+            glEnd();
+         }
 
-         glColor3f(0, 0, 1);           // Outline
-         glBegin(GL_LINES);
-            glVertex2f(0, y - 2);
-            glVertex2f(canvasWidth, y - 2);
-            glVertex2f(canvasWidth, y + 25 + 5);
-            glVertex2f(0, y + 25 + 5);
-         glEnd();
-      }
-      glColor(menuItems[i+offset].color);
-
-      string temp = menuItems[i+offset].mText;
-
-      // Add a player type prefix if requested
-      if(menuItems[i+offset].mType == PlayerTypePlayer)
-         temp = "[Player] " + temp;
-      else if(menuItems[i+offset].mType == PlayerTypeAdmin)
-         temp = "[Admin] " + temp;
-      else if(menuItems[i+offset].mType == PlayerTypeRobot)
-         temp = "[Robot] " + temp;
-
-      if(menuItems[i+offset].mPlayers != -1)    // Must be a team list
-      {
-         char str[24];
-         dSprintf(str, 24, " [%d / %d]", menuItems[i+offset].mPlayers, menuItems[i+offset].mScore);
-         if(menuItems[i+offset].mCurrTeam)      // Draw indicator on current team
-            temp = "-> " + temp;
-         temp = temp + str;
-      }
-
-      drawCenteredString(y, 25, temp.c_str());
+      menuItems[i+offset]->render(y);
    }
 
    // Render an indicator that there are scrollable items above and/or below
-   if(menuItems.size() > gMaxMenuSize)
+   if(menuItems.size() > MAX_MENU_SIZE)
    {
       glColor3f(0, 0, 1);
 
       if(offset > 0)                                  // There are items above
          renderArrowAbove(yStart);
 
-      if(offset < menuItems.size() - gMaxMenuSize)    // There are items below
-         renderArrowBelow(yStart + UserInterface::MenuItemHeight * gMaxMenuSize);
+      if(offset < menuItems.size() - MAX_MENU_SIZE)    // There are items below
+         renderArrowBelow(yStart + UserInterface::MenuItemHeight * MAX_MENU_SIZE);
    }
 
    renderExtras();  // Draw something unique on a menu.  Not currently used anywhere...
 }
 
-#define ARROW_WIDTH 100
-#define ARROW_HEIGHT 20
-#define ARROW_MARGIN 5
+static const S32 ARROW_WIDTH = 100;
+static const S32 ARROW_HEIGHT = 20;
+static const S32 ARROW_MARGIN = 5;
 
 void MenuUserInterface::renderArrowAbove(S32 pos)
 {
@@ -325,11 +408,6 @@ void MenuUserInterface::renderArrowBelow(S32 pos, S32 height)
 }
 
 
-#undef ARROW_WIDTH
-#undef ARROW_HEIGHT
-#undef ARROW_MARGIN
-
-
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
@@ -345,7 +423,7 @@ void MenuUserInterface::onMouseMoved(S32 x, S32 y)
 
 void MenuUserInterface::processMouse()
 {
-   if(menuItems.size() > gMaxMenuSize)    // We have a scrolling situation here...
+   if(menuItems.size() > MAX_MENU_SIZE)    // We have a scrolling situation here...
    {
       //S32 yStart = getYStart();
 
@@ -358,14 +436,14 @@ void MenuUserInterface::processMouse()
          }
          selectedIndex = currOffset;
       }
-      else if(selectedIndex > currOffset + gMaxMenuSize - 1)   // Scroll down
+      else if(selectedIndex > currOffset + MAX_MENU_SIZE - 1)   // Scroll down
       {
-         if(!mScrollTimer.getCurrent() && selectedIndex > currOffset + gMaxMenuSize - 2)
+         if(!mScrollTimer.getCurrent() && selectedIndex > currOffset + MAX_MENU_SIZE - 2)
          {
             currOffset++;
-            mScrollTimer.reset(MouseScrollInterval);
+            mScrollTimer.reset(MOUSE_SCROLL_INTERVAL);
          }
-         selectedIndex = currOffset + gMaxMenuSize - 1;
+         selectedIndex = currOffset + MAX_MENU_SIZE - 1;
       }
       else
          mScrollTimer.clear();
@@ -379,7 +457,7 @@ void MenuUserInterface::processMouse()
    else if(selectedIndex >= menuItems.size())         // Scrolled off bottom of list
    {
       selectedIndex = menuItems.size() - 1;
-      currOffset = max(menuItems.size() - gMaxMenuSize, 0);
+      currOffset = max(menuItems.size() - MAX_MENU_SIZE, 0);
    }
 }
 
@@ -398,17 +476,22 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
                       gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
    {
-      if(keyCode == KEY_ESCAPE)
+      if(keyCode == KEY_ESCAPE)     // can only get here when hosting
       {
          gServerGame->hostingModePhase = ServerGame::NotHosting;
-         gMainMenuUserInterface.clearLevelLoadDisplay();
+         gHostMenuUserInterface.clearLevelLoadDisplay();
          endGame();
       }
       return;
    }
 
    gMainMenuUserInterface.firstTime = false;    // Stop animations if a key is pressed
-   processMenuSpecificKeys(keyCode);            // This will, in turn, call the more generic keyboard handler if needed
+
+   preprocessKeys(keyCode, ascii) || processMenuSpecificKeys(keyCode, ascii) || processKeys(keyCode, ascii);
+
+   // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
+   if(keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT && keyCode != KEY_ESCAPE)
+      glutSetCursor(GLUT_CURSOR_NONE);
 }
 
 
@@ -419,33 +502,42 @@ void MenuUserInterface::onKeyUp(KeyCode keyCode)
 }
 
 
-// Generic handler looks for keystrokes and translates them into menu actions
-void MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode)
+bool MenuUserInterface::preprocessKeys(KeyCode keyCode, char ascii)
 {
-   // First check for some shortcut keys
+   return false;
+}
 
-   for(S32 i = 0; i < menuItems.size(); i++)
-   {
-      if(keyCode == menuItems[i].key1 || keyCode == menuItems[i].key2)
+
+// Generic handler looks for keystrokes and translates them into menu actions
+bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
+{
+    if(!preprocessKeys(keyCode, ascii))
+    {
+      // First check for some shortcut keys
+
+      for(S32 i = 0; i < menuItems.size(); i++)
       {
-         selectedIndex = i;
-         UserInterface::playBoop();
+         if(keyCode == menuItems[i]->key1 || keyCode == menuItems[i]->key2)
+         {
+            selectedIndex = i;
+            UserInterface::playBoop();
 
-         if(getKeyState(KEY_SHIFT))
-            processShiftSelection(menuItems[i].mIndex);
-         else
-            processSelection(menuItems[i].mIndex);
+            if(getKeyState(KEY_SHIFT))
+               processShiftSelection(menuItems[i]->getIndex());
+            else
+               processSelection(menuItems[i]->getIndex());
 
-         return;
+            return true;
+         }
       }
    }
 
-   // Still here?  Try the standard keys
-   processStandardKeys(keyCode);
+   return false;
 }
 
+
 // Process the keys that work on all menus
-void MenuUserInterface::processStandardKeys(KeyCode keyCode)
+bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || /*keyCode == BUTTON_DPAD_RIGHT ||*/ keyCode == BUTTON_START || keyCode == MOUSE_LEFT)
    {
@@ -459,14 +551,14 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
          Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
 
          if(mousePos.y < yStart || mousePos.y > yStart + (menuItems.size() + 1) * UserInterface::MenuItemHeight)
-            return;
+            return true;
       }
-      processSelection(menuItems[selectedIndex].mIndex);
+      processSelection(menuItems[selectedIndex]->getIndex());
    }
    else if(keyCode == KEY_LEFT || /*keyCode == BUTTON_DPAD_LEFT ||*/ keyCode == MOUSE_RIGHT)
    {
       UserInterface::playBoop();
-      processShiftSelection(menuItems[selectedIndex].mIndex);
+      processShiftSelection(menuItems[selectedIndex]->getIndex());
    }
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
    {
@@ -480,10 +572,10 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
 
       if(selectedIndex < 0)                        // Scrolling off the top
       {
-         if((menuItems.size() > gMaxMenuSize) && mRepeatMode)        // Allow wrapping on long menus only when not in repeat mode
+         if((menuItems.size() > MAX_MENU_SIZE) && mRepeatMode)        // Allow wrapping on long menus only when not in repeat mode
          {
             selectedIndex = 0;               // No wrap --> (first item)
-            return;                          // (leave before playBoop)
+            return true;                     // (leave before playBoop)
          }
          else                                      // Always wrap on shorter menus
             selectedIndex = menuItems.size() - 1;  // Wrap --> (select last item)
@@ -498,10 +590,10 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
 
       if(selectedIndex >= menuItems.size())     // Scrolling off the bottom
       {
-         if((menuItems.size() > gMaxMenuSize) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
+         if((menuItems.size() > MAX_MENU_SIZE) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
          {
             selectedIndex = menuItems.size() - 1;                 // No wrap --> (last item)
-            return;                                               // (leave before playBoop)
+            return true;                                          // (leave before playBoop)
          }
          else                     // Always wrap on shorter menus
             selectedIndex = 0;    // Wrap --> (first item)
@@ -514,15 +606,7 @@ void MenuUserInterface::processStandardKeys(KeyCode keyCode)
       UserInterface::playBoop();
    }
 
-//   else if(keyCode == keyDIAG)            // Turn on diagnostic overlay
-//   {
-//      gDiagnosticInterface.activate();
-//      UserInterface::playBoop();
-//   }
-
-   // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
-   if(keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT && keyCode != KEY_ESCAPE)
-      glutSetCursor(GLUT_CURSOR_NONE);
+   return true;      // Probably wrong, but doesn't really matter at this point
 }
 
 
@@ -547,18 +631,16 @@ MainMenuUserInterface::MainMenuUserInterface()
    menuFooterContainsInstructions = false;
    mNeedToUpgrade = false;                         // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;                    // So we don't show the upgrade message more than once
-   levelLoadDisplayFadeTimer.setPeriod(1000);
-   gMainMenuUserInterface.levelLoadDisplayDisplay = true;
 
-   //                                  Text              ID      Keys
-   menuItems.push_back(MenuItem("JOIN LAN/INTERNET GAME", 0, KEY_J, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem("HOST GAME",              1, KEY_H, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem("INSTRUCTIONS",           2, KEY_I, keyHELP     ));
-   menuItems.push_back(MenuItem("OPTIONS",                3, KEY_O, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem("LEVEL EDITOR",           4, KEY_L, KEY_E       ));
-   menuItems.push_back(MenuItem("CREDITS",                5, KEY_C, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem("QUIT",                   6, KEY_Q, KEY_UNKNOWN ));
+   menuItems.push_back(new MenuItem(0, "JOIN LAN/INTERNET GAME", KEY_J, KEY_UNKNOWN ));
+   menuItems.push_back(new MenuItem(1, "HOST GAME",              KEY_H, KEY_UNKNOWN ));
+   menuItems.push_back(new MenuItem(2, "INSTRUCTIONS",           KEY_I, keyHELP     ));
+   menuItems.push_back(new MenuItem(3, "OPTIONS",                KEY_O, KEY_UNKNOWN ));
+   menuItems.push_back(new MenuItem(4, "LEVEL EDITOR",           KEY_L, KEY_E       ));
+   menuItems.push_back(new MenuItem(5, "CREDITS",                KEY_C, KEY_UNKNOWN ));
+   menuItems.push_back(new MenuItem(6, "QUIT",                   KEY_Q, KEY_UNKNOWN ));
 }
+
 
 void MainMenuUserInterface::onActivate()
 {
@@ -570,8 +652,6 @@ void MainMenuUserInterface::onActivate()
    mColorTimer.reset(ColorTime);
    mColorTimer2.reset(ColorTime2);
    mTransDir = true;
-   mLevelLoadDisplayTotal = 0;
-   clearLevelLoadDisplay();
 
    if(firstTime)
       gSplashUserInterface.activate();          // Show splash screen the first time throug
@@ -581,7 +661,7 @@ void MainMenuUserInterface::onActivate()
 // Set the MOTD we recieved from the master
 void MainMenuUserInterface::setMOTD(const char *motdString)
 {
-   strcpy(motd, motdString);
+   strcpy(motd, motdString);     // ???
    if(gClientGame)
       motdArriveTime = gClientGame->getCurrentTime();    // Used for scrolling the message
 }
@@ -598,18 +678,6 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
 
 void MainMenuUserInterface::render()
 {
-   // If we're in LoadingLevels mode, show the progress panel...
-   renderProgressListItems();
-   if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
-                      gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
-   {
-      // There will be exactly one new entry every time we get here!
-      addProgressListItem("Loaded level " + gServerGame->getLastLevelLoadName() + "...");
-      return;
-   }
-
-   // else...
-
   Parent::render();
 
    if(motd[0])
@@ -641,41 +709,6 @@ void MainMenuUserInterface::render()
 
    // Render logo at top, never faded
    renderStaticBitfighterLogo();
-}
-
-
-// Add bit of text to progress item, and manage the list
-void MainMenuUserInterface::addProgressListItem(string item)
-{
-   mLevelLoadDisplayNames.push_back(item);
-
-   mLevelLoadDisplayTotal++;
-
-   // Keep the list from growing too long:
-   if(mLevelLoadDisplayNames.size() > 15)
-      mLevelLoadDisplayNames.erase(0);
-}
-
-
-void MainMenuUserInterface::clearLevelLoadDisplay()
-{
-   mLevelLoadDisplayNames.clear();
-   mLevelLoadDisplayTotal = 0;
-}
-
-
-void MainMenuUserInterface::renderProgressListItems()
-{
-   if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
-   {
-      glEnable(GL_BLEND);
-      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
-      {
-         glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
-         drawStringf(100, canvasHeight - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 15, "%s", mLevelLoadDisplayNames[i].c_str());
-      }
-      glDisable(GL_BLEND);
-   }
 }
 
 
@@ -724,26 +757,26 @@ void MainMenuUserInterface::processSelection(U32 index)
 {
    switch(index)
    {
-      case 0:
+      case 0:     // Join
          gQueryServersUserInterface.activate();
          break;
-      case 1:
-         initHostGame(Address(IPProtocol, Address::Any, 28000), false);
+      case 1:     // Host
+         gHostMenuUserInterface.activate();
          break;
-      case 2:
+      case 2:     // Help
          gInstructionsUserInterface.activate();
-         break;
-      case 3:
+         break;      
+      case 3:     // Options
          gOptionsMenuUserInterface.activate();
          break;
-      case 4:
+      case 4:     // Edit
          gEditorUserInterface.setLevelFileName("");      // Reset this so we get the level entry screen
          gEditorUserInterface.activate();
          break;
-      case 5:
+      case 5:     // Credits
          gCreditsUserInterface.activate();
          break;
-      case 6:
+      case 6:     // Quit
          exitGame();
          break;
    }
@@ -756,7 +789,14 @@ void MainMenuUserInterface::onEscape()
    exitGame();    // Quit!
 }
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+extern CmdLineSettings gCmdLineSettings;
+extern IniSettings gIniSettings;
+extern CIniFile gINI;
+
 OptionsMenuUserInterface gOptionsMenuUserInterface;
 
 // Constructor
@@ -766,35 +806,13 @@ OptionsMenuUserInterface::OptionsMenuUserInterface()
    dSprintf(menuTitle, sizeof(menuTitle), "OPTIONS MENU:");
 }
 
-extern CmdLineSettings gCmdLineSettings;
-extern IniSettings gIniSettings;
 
 void OptionsMenuUserInterface::onActivate()
 {
    Parent::onActivate();
    setupMenus();
-   gDisableShipKeyboardInput = true;       // Keep keystrokes from getting to game
 }
 
-
-// Convert string to lower case
-string lcase(string strToConvert)
-{
-   for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = tolower(strToConvert[i]);
-   return strToConvert;
-}
-
-// Convert string to upper case
-string ucase(string strToConvert)
-{
-   for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = toupper(strToConvert[i]);
-   return strToConvert;
-}
-
-
-extern CIniFile gINI;
 
 // Note that this is called from main() after INI file is loaded
 void OptionsMenuUserInterface::setJoystick(ControllerTypeType jsType)
@@ -813,190 +831,38 @@ void OptionsMenuUserInterface::setJoystick(ControllerTypeType jsType)
       gIniSettings.inputMode = Joystick;
 }
 
+
+static string getVolMsg(F32 volume)
+{
+   S32 vol = U32((volume + 0.05) * 10.0);
+
+   string msg = UserInterface::itos(vol);
+
+   if(vol == 0)
+      msg += " [MUTE]";
+
+   return msg;
+}
+
+
 void OptionsMenuUserInterface::setupMenus()
 {
-   menuItems.clear();
-   if(gIniSettings.controlsRelative)
-      menuItems.push_back(MenuItem("CONTROLS: RELATIVE", 0, KEY_C, KEY_UNKNOWN));
-   else
-      menuItems.push_back(MenuItem("CONTROLS: ABSOLUTE", 0, KEY_C, KEY_UNKNOWN));
+   menuItems.deleteAndClear();
 
-   if(gIniSettings.fullscreen)
-      menuItems.push_back(MenuItem("GAME MODE: FULLSCREEN", 1, KEY_G, KEY_UNKNOWN));
-   else
-      menuItems.push_back(MenuItem("GAME MODE: WINDOWED", 1, KEY_G, KEY_UNKNOWN));
+   menuItems.push_back(new ToggleMenuItem(0, "CONTROLS:", gIniSettings.controlsRelative ? "RELATIVE" : "ABSOLUTE", KEY_C, KEY_UNKNOWN));
+   menuItems.push_back(new ToggleMenuItem(1, "GAME MODE:", gIniSettings.fullscreen ? "FULLSCREEN" : "WINDOWED", KEY_G, KEY_UNKNOWN));
+   menuItems.push_back(new ToggleMenuItem(2, "PRIMARY INPUT:", gIniSettings.inputMode == Keyboard ? "KEYBOARD" : "JOYSTICK", KEY_P, KEY_I));
+   menuItems.push_back(new ToggleMenuItem(3, "JOYSTICK:", joystickTypeToPrettyString(gIniSettings.joystickType).c_str(), KEY_J, KEY_UNKNOWN));
 
-   if(gIniSettings.inputMode == Keyboard)
-      menuItems.push_back(MenuItem("PRIMARY INPUT: KEYBOARD", 2, KEY_P, KEY_I));
-   else
-      menuItems.push_back(MenuItem("PRIMARY INPUT: JOYSTICK", 2, KEY_P, KEY_I));
+   menuItems.push_back(new MenuItem(4, "DEFINE KEYS / BUTTONS", KEY_D, KEY_K));
 
-   // Why won't this work??  MenuItem wants a const char, and this doesn't seem to provide it...  If this worked, we'd get rid
-   // of the following block, and reduce duplication of code...
-   // It won't work because by the time we need the string, it's gone out of scope, and man C++ really sucks with strings.
-   // I should rewrite this crap in Perl ;-)
-
-   //char str[255];
-   //dSprintf(str, sizeof(str), "JOYSTICK: %s", ucase(joystickTypeToPrettyString(gIniSettings.joystickType)).c_str() );
-   //menuItems.push_back(MenuItem(str, 3, KEY_J, KEY_UNKNOWN));
-
-   switch(gIniSettings.joystickType)
-   {
-      case LogitechWingman:
-         menuItems.push_back(MenuItem("JOYSTICK: LOGITECH WINGMAN DUAL-ANALOG", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case LogitechDualAction:
-         menuItems.push_back(MenuItem("JOYSTICK: LOGITECH DUAL ACTION", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case SaitekDualAnalogP880:
-         menuItems.push_back(MenuItem("JOYSTICK: SAITEK P-880 DUAL-ANALOG", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case SaitekDualAnalogRumblePad:
-         menuItems.push_back(MenuItem("JOYSTICK: SAITEK P-480 DUAL-ANALOG", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case PS2DualShock:
-         menuItems.push_back(MenuItem("JOYSTICK: PS2 DUALSHOCK USB", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case PS2DualShockConversionCable:
-         menuItems.push_back(MenuItem("JOYSTICK: PS2 DUALSHOCK CONVERSION CABLE", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case XBoxController:
-         menuItems.push_back(MenuItem("JOYSTICK: XBOX CONTROLLER USB", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      case XBoxControllerOnXBox:
-         menuItems.push_back(MenuItem("JOYSTICK: XBOX CONTROLLER", 3, KEY_J, KEY_UNKNOWN));
-         break;
-      default:
-         menuItems.push_back(MenuItem("JOYSTICK: UNKNOWN", 3, KEY_J, KEY_UNKNOWN));
-   }
-
-
-   menuItems.push_back(MenuItem("DEFINE KEYS / BUTTONS", 4, KEY_D, KEY_K));
-
-   // Yes, this is entirely lame, but I'm sick of trying to figure out
-   // why a more logical construct isn't working, and hell, this works
-   // and is fast and probably no one else is ever going to see it anyway.
-   // Except you, of course ;-)
-   // Alright, I know why the more logical construct won't work, but the way
-   // around it is with a global variable or somesuch, which will be even kludgier
-   // than this.
-   switch ((U32) ((gIniSettings.sfxVolLevel + 0.05) * 10.0))
-   {
-      case 0:
-         menuItems.push_back(MenuItem("SFX VOLUME: 0 [MUTE]", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 1:
-         menuItems.push_back(MenuItem("SFX VOLUME: 1", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 2:
-         menuItems.push_back(MenuItem("SFX VOLUME: 2", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 3:
-         menuItems.push_back(MenuItem("SFX VOLUME: 3", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 4:
-         menuItems.push_back(MenuItem("SFX VOLUME: 4", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 5:
-         menuItems.push_back(MenuItem("SFX VOLUME: 5", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 6:
-         menuItems.push_back(MenuItem("SFX VOLUME: 6", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 7:
-         menuItems.push_back(MenuItem("SFX VOLUME: 7", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 8:
-         menuItems.push_back(MenuItem("SFX VOLUME: 8", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 9:
-         menuItems.push_back(MenuItem("SFX VOLUME: 9", 5, KEY_S, KEY_UNKNOWN));
-         break;
-      case 10:
-         menuItems.push_back(MenuItem("SFX VOLUME: 10", 5, KEY_S, KEY_UNKNOWN));
-         break;
-   }
+   menuItems.push_back(new ToggleMenuItem(5, "SFX VOLUME:", getVolMsg(gIniSettings.sfxVolLevel), KEY_S, KEY_UNKNOWN));
+   menuItems.push_back(new ToggleMenuItem(7, "VOICE CHAT VOLUME:", getVolMsg(gIniSettings.voiceChatVolLevel), KEY_V, KEY_UNKNOWN));
 
    // No music yet, so keep this out to keep menus from getting too long.  Uncomment when we have music.
-   //switch ((U32) ((gIniSettings.musicVolLevel + 0.05) * 10.0))    // See comment above explaining lameness
-   //{
-   //   case 0:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 0 [MUTE]", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 1:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 1", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 2:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 2", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 3:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 3", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 4:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 4", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 5:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 5", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 6:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 6", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 7:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 7", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 8:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 8", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 9:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 9", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //   case 10:
-   //      menuItems.push_back(MenuItem("MUSIC VOLUME: 10", 6, KEY_M, KEY_UNKNOWN));
-   //      break;
-   //}
+   //menuItems.push_back(new MenuItem("MUSIC VOLUME:", getVolMsg(gIniSettings.musicVolLevel), 6, KEY_M, KEY_UNKNOWN));
 
-   switch ((U32) ((gIniSettings.voiceChatVolLevel + 0.05) * 10.0))    // See comment above explaining lameness
-   {
-      case 0:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 0 [MUTE]", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 1:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 1", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 2:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 2", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 3:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 3", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 4:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 4", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 5:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 5", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 6:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 6", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 7:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 7", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 8:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 8", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 9:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 9", 7, KEY_V, KEY_UNKNOWN));
-         break;
-      case 10:
-         menuItems.push_back(MenuItem("VOICE CHAT VOLUME: 10", 7, KEY_V, KEY_UNKNOWN));
-         break;
-   }
-
-
-   if(gIniSettings.echoVoice)
-      menuItems.push_back(MenuItem("VOICE ECHO: ENABLED", 8, KEY_E, KEY_UNKNOWN));
-   else
-      menuItems.push_back(MenuItem("VOICE ECHO: DISABLED", 8, KEY_E, KEY_UNKNOWN));
+   menuItems.push_back(new ToggleMenuItem(8, "VOICE ECHO:", gIniSettings.echoVoice ? "ENABLED" : "DISABLED", KEY_E, KEY_UNKNOWN));
 }
 
 
@@ -1113,10 +979,212 @@ void OptionsMenuUserInterface::processShiftSelection(U32 index)   // Handler for
 void OptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI();
-   UserInterface::reactivatePrevUI();      //gGameUserInterface
+   reactivatePrevUI();      //gGameUserInterface
 }
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+HostMenuUserInterface gHostMenuUserInterface;
+
+// Constructor
+HostMenuUserInterface::HostMenuUserInterface()
+{
+   setMenuID(HostingUI);
+   dSprintf(menuTitle, sizeof(menuTitle), "HOST A GAME:");
+
+   levelLoadDisplayFadeTimer.setPeriod(1000);
+   gHostMenuUserInterface.levelLoadDisplayDisplay = true;
+   mEditingIndex = -1;     // Not editing at the start
+}
+
+
+void HostMenuUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+
+   mLevelLoadDisplayTotal = 0;
+   clearLevelLoadDisplay();
+}
+
+
+extern string gHostName;
+extern string gHostDescr;
+extern string gLevelChangePassword;
+extern string gAdminPassword;
+extern string gServerPassword;
+
+void HostMenuUserInterface::setupMenus()
+{
+   menuItems.deleteAndClear();
+
+   menuItems.push_back(new MenuItem        (OPT_HOST,       "START HOSTING", KEY_H));
+
+   menuItems.push_back(new EditableMenuItem(OPT_NAME,       "SERVER NAME:",           gHostName,            "<Bitfighter Host>", 
+                                            QueryServersUserInterface::MaxServerNameLen,  KEY_N));
+
+   menuItems.push_back(new EditableMenuItem(OPT_DESCR,      "DESCRIPTION:",    gHostDescr,           "<Empty>",                    
+                                           QueryServersUserInterface::MaxServerDescrLen, KEY_D));
+
+   menuItems.push_back(new EditableMenuItem(OPT_LVL_PASS,   "LEVEL CHANGE PASSWORD:", gLevelChangePassword, "<Anyone can change levels>", 
+                                            MAX_PASSWORD_LENGTH, KEY_L));
+
+   menuItems.push_back(new EditableMenuItem(OPT_ADMIN_PASS, "ADMIN PASSWORD:",        gAdminPassword,       "<No remote admin access>",   
+                                            MAX_PASSWORD_LENGTH, KEY_A));
+
+   menuItems.push_back(new EditableMenuItem(OPT_PASS,       "CONNECTION PASSWORD:",   gServerPassword,      "<Anyone can connect>",       
+                                            MAX_PASSWORD_LENGTH, KEY_C));
+
+   menuItems.push_back(new EditableMenuItem(OPT_PORT,       "PORT:",                  "",                   "Defaults to 28000", 
+                                            10, KEY_P));
+}
+
+
+extern void initHostGame(Address bindAddress, bool testMode);
+
+void HostMenuUserInterface::processSelection(U32 index)        // Handler for unshifted menu shortcut key
+{
+   switch(index)
+   {
+   case OPT_HOST:
+      saveSettings();
+      initHostGame(Address(IPProtocol, Address::Any, 28000), false);
+      break;
+   case OPT_NAME:
+   case OPT_DESCR:   
+   case OPT_LVL_PASS:
+   case OPT_ADMIN_PASS:
+   case OPT_PASS:
+   case OPT_PORT:   
+      setActive(index);
+      break;
+   };
+}
+
+
+void HostMenuUserInterface::setActive(S32 i)
+{
+   if(mEditingIndex != -1)
+      dynamic_cast<EditableMenuItem *>(menuItems[mEditingIndex])->setActive(false);
+
+   mEditingIndex = i;
+
+   if(mEditingIndex != -1)
+   {
+      dynamic_cast<EditableMenuItem *>(menuItems[mEditingIndex])->setActive(true);
+      selectedIndex = mEditingIndex;
+   }
+}
+
+
+// Save options to INI file, and return to our regularly scheduled program
+// This only gets called when escape not already handled by preprocessKeys(), i.e. when we're not editing
+void HostMenuUserInterface::onEscape()
+{
+   saveSettings();
+   reactivatePrevUI();     
+}
+
+
+// Save parameters in INI file
+void HostMenuUserInterface::saveSettings()
+{
+   gHostName            = gIniSettings.hostname            = dynamic_cast<EditableMenuItem *>(menuItems[OPT_NAME])->getValue();
+   gHostDescr           = gIniSettings.hostdescr           = dynamic_cast<EditableMenuItem *>(menuItems[OPT_DESCR])->getValue();
+   gLevelChangePassword = gIniSettings.levelChangePassword = dynamic_cast<EditableMenuItem *>(menuItems[OPT_LVL_PASS])->getValue();
+   gAdminPassword       = gIniSettings.adminPassword       = dynamic_cast<EditableMenuItem *>(menuItems[OPT_ADMIN_PASS])->getValue();    
+   gServerPassword      = gIniSettings.serverPassword      = dynamic_cast<EditableMenuItem *>(menuItems[OPT_PASS])->getValue();
+
+   saveSettingsToINI();
+}
+
+
+// This gets run before any of the other process keys methods; used here to intercept keys intended for an active editor
+bool HostMenuUserInterface::preprocessKeys(KeyCode keyCode, char ascii)
+{
+   if(mEditingIndex == -1)
+      return false;
+
+   // The following only get processed if we're editing a menu item
+   if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER)
+      setActive(-1);
+
+   else if(keyCode == KEY_TAB)
+   {
+      setActive(mEditingIndex == OPT_COUNT - 1 ? FIRST_EDITABLE_ITEM : mEditingIndex + 1);
+   }
+
+   else if(keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)
+      dynamic_cast<EditableMenuItem *>(menuItems[mEditingIndex])->handleBackspace(keyCode);
+
+   else dynamic_cast<EditableMenuItem *>(menuItems[mEditingIndex])->addChar(ascii);
+
+   return true;
+}
+
+
+void HostMenuUserInterface::idle(U32 timeDelta)
+{
+   Parent::idle(timeDelta);   
+   LineEditor::updateCursorBlink(timeDelta);
+}
+
+
+void HostMenuUserInterface::render()
+{
+   Parent::render();
+
+   // If we're in LoadingLevels mode, show the progress panel...
+   renderProgressListItems();
+   if(gServerGame && (gServerGame->hostingModePhase == ServerGame::LoadingLevels || 
+                      gServerGame->hostingModePhase == ServerGame::DoneLoadingLevels))
+   {
+      // There will be exactly one new entry every time we get here!
+      addProgressListItem("Loaded level " + gServerGame->getLastLevelLoadName() + "...");
+   }
+}
+
+
+// Add bit of text to progress item, and manage the list
+void HostMenuUserInterface::addProgressListItem(string item)
+{
+   mLevelLoadDisplayNames.push_back(item);
+
+   mLevelLoadDisplayTotal++;
+
+   // Keep the list from growing too long:
+   if(mLevelLoadDisplayNames.size() > 15)
+      mLevelLoadDisplayNames.erase(0);
+}
+
+
+void HostMenuUserInterface::clearLevelLoadDisplay()
+{
+   mLevelLoadDisplayNames.clear();
+   mLevelLoadDisplayTotal = 0;
+}
+
+
+void HostMenuUserInterface::renderProgressListItems()
+{
+   if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
+   {
+      glEnable(GL_BLEND);
+      for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
+      {
+         glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
+         drawStringf(100, canvasHeight - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 15, "%s", mLevelLoadDisplayNames[i].c_str());
+      }
+      glDisable(GL_BLEND);
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 GameMenuUserInterface gGameMenuUserInterface;
 
 // Constructor
@@ -1152,27 +1220,14 @@ void GameMenuUserInterface::onReactivate()
 }
 
 
-enum {
-   OPT_OPTIONS,
-   OPT_HELP,
-   OPT_ADMIN,
-   OPT_KICK,
-   OPT_LEVEL_CHANGE_PW,
-   OPT_CHOOSELEVEL,
-   OPT_ADD2MINS,
-   OPT_RESTART,
-   OPT_QUIT
-};
-
-
 void GameMenuUserInterface::buildMenu()
 {
-   menuItems.clear();
+   menuItems.deleteAndClear();
 
    lastInputMode = gIniSettings.inputMode;      // Save here so we can see if we need to display alert msg if input mode changes
 
-   menuItems.push_back(MenuItem("OPTIONS",      OPT_OPTIONS, KEY_O, KEY_UNKNOWN));
-   menuItems.push_back(MenuItem("INSTRUCTIONS", OPT_HELP, KEY_I, keyHELP));
+   menuItems.push_back(new MenuItem(OPT_OPTIONS, "OPTIONS",      KEY_O));
+   menuItems.push_back(new MenuItem(OPT_HELP,    "INSTRUCTIONS", KEY_I, keyHELP));
    GameType *theGameType = gClientGame->getGameType();
 
    // Add any game-specific menu items
@@ -1187,12 +1242,12 @@ void GameMenuUserInterface::buildMenu()
    {
       if(gc->isLevelChanger())
       {
-         menuItems.push_back(MenuItem("PLAY DIFFERENT LEVEL", OPT_CHOOSELEVEL, KEY_L, KEY_P));
-         menuItems.push_back(MenuItem("ADD TIME (2 MINS)", OPT_ADD2MINS, KEY_T, KEY_2));
-         menuItems.push_back(MenuItem("RESTART LEVEL", OPT_RESTART, KEY_R, KEY_UNKNOWN));
+         menuItems.push_back(new MenuItem(OPT_CHOOSELEVEL, "PLAY DIFFERENT LEVEL", KEY_L, KEY_P));
+         menuItems.push_back(new MenuItem(OPT_ADD2MINS,    "ADD TIME (2 MINS)",    KEY_T, KEY_2));
+         menuItems.push_back(new MenuItem(OPT_RESTART,     "RESTART LEVEL",        KEY_R));
       }
       else
-         menuItems.push_back(MenuItem("ENTER LEVEL CHANGE PASSWORD", OPT_LEVEL_CHANGE_PW, KEY_L, KEY_P));
+         menuItems.push_back(new MenuItem(OPT_LEVEL_CHANGE_PW, "ENTER LEVEL CHANGE PASSWORD", KEY_L, KEY_P));
 
       if(gc->isAdmin())
       {
@@ -1205,19 +1260,17 @@ void GameMenuUserInterface::buildMenu()
             theGameType->addAdminGameMenuOptions(menuItems);
          }
 
-         menuItems.push_back(MenuItem("KICK A PLAYER", OPT_KICK, KEY_K, KEY_UNKNOWN));
+         menuItems.push_back(new MenuItem(OPT_KICK, "KICK A PLAYER", KEY_K));
       }
       else
-         menuItems.push_back(MenuItem("ENTER ADMIN PASSWORD", OPT_ADMIN, KEY_A, KEY_E));
+         menuItems.push_back(new MenuItem(OPT_ADMIN, "ENTER ADMIN PASSWORD", KEY_A, KEY_E));
    }
 
    if(cameFromEditor())    // Came from editor
-      menuItems.push_back(MenuItem("RETURN TO EDITOR", OPT_QUIT, KEY_Q, (cameFromEditor() ? KEY_R : KEY_UNKNOWN) ));
+      menuItems.push_back(new MenuItem(OPT_QUIT, "RETURN TO EDITOR", KEY_Q, (cameFromEditor() ? KEY_R : KEY_UNKNOWN) ));
    else
-      menuItems.push_back(MenuItem("QUIT GAME", OPT_QUIT, KEY_Q, KEY_UNKNOWN));
+      menuItems.push_back(new MenuItem(OPT_QUIT, "QUIT GAME", KEY_Q));
 }
-
-
 
 
 void GameMenuUserInterface::processSelection(U32 index)        // Handler for unshifted menu shortcut key
@@ -1280,13 +1333,9 @@ void GameMenuUserInterface::onEscape()
 
 }
 
-// Sorts alphanumerically by menuItem.value
-S32 QSORT_CALLBACK menuItemValueSort(MenuItem *a, MenuItem *b)
-{
-   return stricmp((a)->mText, (b)->mText);
-}
+////////////////////////////////////////
+////////////////////////////////////////
 
-//////////
 LevelMenuUserInterface gLevelMenuUserInterface;
 
 // Constructor
@@ -1295,7 +1344,8 @@ LevelMenuUserInterface::LevelMenuUserInterface()
    setMenuID(LevelTypeUI);
 }
 
-#define ALL_LEVELS "All Levels"
+
+static const char *ALL_LEVELS = "All Levels";
 
 void LevelMenuUserInterface::onActivate()
 {
@@ -1306,29 +1356,30 @@ void LevelMenuUserInterface::onActivate()
    if(!gc || !gc->mLevelInfos.size())
       return;
 
-   menuItems.clear();
+   menuItems.deleteAndClear();
 
    char c[] = "A";   // Shortcut key
-   menuItems.push_back( MenuItem(ALL_LEVELS, 9999, stringToKeyCode(c), KEY_UNKNOWN) );
+   menuItems.push_back(new MenuItem(9999, ALL_LEVELS, stringToKeyCode(c)));
 
    // Cycle through all levels, looking for unique type strings
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
    {
       S32 j;
       for(j = 0; j < menuItems.size(); j++)
-         if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), menuItems[j].mText) )     
+         if(gc->mLevelInfos[i].levelName == "" || !stricmp(gc->mLevelInfos[i].levelType.getString(), menuItems[j]->getText()) )     
          {
             break;                  // Skip over levels with blank names or duplicate entries
          }
       if(j == menuItems.size())     // Must be a new type
       {
          strncpy(c, gc->mLevelInfos[i].levelType.getString(), 1);
-         menuItems.push_back(MenuItem(gc->mLevelInfos[i].levelType.getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
+         menuItems.push_back(new MenuItem(i, gc->mLevelInfos[i].levelType.getString(), stringToKeyCode(c)));
       }
    }
 
    menuItems.sort(menuItemValueSort);
 }
+
 
 void LevelMenuUserInterface::processSelection(U32 index)        // Handler for unshifted menu shortcut key
 {
@@ -1354,7 +1405,10 @@ void LevelMenuUserInterface::onEscape()
    reactivatePrevUI();    // to gGameUserInterface
 }
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 LevelMenuSelectUserInterface gLevelMenuSelectUserInterface;
 
 // Constructor
@@ -1372,7 +1426,7 @@ void LevelMenuSelectUserInterface::onActivate()
    if(!gc || !gc->mLevelInfos.size())
       return;
 
-   menuItems.clear();
+   menuItems.deleteAndClear();
  
    char c[] = "A";  
    for(S32 i = 0; i < gc->mLevelInfos.size(); i++)
@@ -1383,7 +1437,7 @@ void LevelMenuSelectUserInterface::onActivate()
          !strcmp(category.c_str(), ALL_LEVELS) )
       {
          strncpy(c, gc->mLevelInfos[i].levelName.getString(), 1);
-         menuItems.push_back(MenuItem(gc->mLevelInfos[i].levelName.getString(), i, stringToKeyCode(c), KEY_UNKNOWN));
+         menuItems.push_back(new MenuItem(i, gc->mLevelInfos[i].levelName.getString(), stringToKeyCode(c)));
       }
    }
 
@@ -1400,7 +1454,7 @@ void LevelMenuSelectUserInterface::onActivate()
 
 
 // Override parent, and make keys simply go to first level with that letter, rather than selecting it automatically
-void LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode)
+bool LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
 {
    // First check for some shortcut keys
    for(S32 i = 0; i < menuItems.size(); i++)
@@ -1410,17 +1464,16 @@ void LevelMenuSelectUserInterface::processMenuSpecificKeys(KeyCode keyCode)
       if(indx >= menuItems.size())
          indx -= menuItems.size();
 
-      if(keyCode == menuItems[indx].key1 || keyCode == menuItems[indx].key2)
+      if(keyCode == menuItems[indx]->key1 || keyCode == menuItems[indx]->key2)
       {
          selectedIndex = indx;
          UserInterface::playBoop();
 
-         return;
+         return true;
       }
    }
 
-   // Still here?  Try the parent
-   Parent::processMenuSpecificKeys(keyCode);
+   return false;
 }
 
 
@@ -1434,17 +1487,21 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)             // Ha
    reactivateMenu(gGameUserInterface);    // Jump back to the game menu
 }
 
+
 void LevelMenuSelectUserInterface::processShiftSelection(U32 index)        // Handler for shifted menu shortcut key
 {
    processSelection(index);
 }
+
 
 void LevelMenuSelectUserInterface::onEscape()
 {
    reactivatePrevUI();    // to gLevelMenuUserInterface
 }
 
-//////////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 PlayerMenuUserInterface gPlayerMenuUserInterface;
 
@@ -1457,7 +1514,7 @@ PlayerMenuUserInterface::PlayerMenuUserInterface()
 // By putting all this code in render, it allows menus to be dynamically updated.
 void PlayerMenuUserInterface::render()
 {
-   menuItems.clear();
+   menuItems.deleteAndClear();
    GameType *gt = gClientGame->getGameType();
    if (!gt)
       return;
@@ -1474,8 +1531,8 @@ void PlayerMenuUserInterface::render()
       // Will be used to show admin/player/robot prefix on menu
       PlayerType pt = gt->mClientList[i]->isRobot ? PlayerTypeRobot : (gt->mClientList[i]->isAdmin ? PlayerTypeAdmin : PlayerTypePlayer);    
 
-      Color col = gt->getTeamColor(gt->mClientList[i]->getTeam());
-      menuItems.push_back(MenuItem(gt->mClientList[i]->name.getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, pt));
+      Color color = gt->getTeamColor(gt->mClientList[i]->getTeam());
+      menuItems.push_back(new PlayerMenuItem(i, gt->mClientList[i]->name.getString(), stringToKeyCode(c), color, pt));
    }
 
    menuItems.sort(menuItemValueSort);
@@ -1496,7 +1553,7 @@ void PlayerMenuUserInterface::processSelection(U32 index)        // Handler for 
 {
    // Find selected player, and put that value into index
    for(S32 i = 0; i < menuItems.size(); i++)
-      if(menuItems[i].mIndex == index)
+      if(menuItems[i]->getIndex() == index)
       {
          index = i;
          break;
@@ -1506,11 +1563,11 @@ void PlayerMenuUserInterface::processSelection(U32 index)        // Handler for 
    if(action == ChangeTeam)
    {
       gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-      gTeamMenuUserInterface.nameToChange = menuItems[index].mText;
+      gTeamMenuUserInterface.nameToChange = menuItems[index]->getText();
    }
    else if(gc)    // action == Kick
    {
-      StringTableEntry e(menuItems[index].mText);
+      StringTableEntry e(menuItems[index]->getText());
       gc->c2sAdminPlayerAction(e, action, -1);
    }
 
@@ -1524,7 +1581,8 @@ void PlayerMenuUserInterface::processShiftSelection(U32 index)   // Handler for 
 }
 
 
-//////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 TeamMenuUserInterface gTeamMenuUserInterface;
 
@@ -1534,10 +1592,11 @@ TeamMenuUserInterface::TeamMenuUserInterface()
    setMenuID(TeamUI);
 }
 
-// By putting all this code in render, it allows menus to be dynamically updated.
+// By reconstructing our menu at render time, changes to teams caused by others will be reflected immediately
 void TeamMenuUserInterface::render()
 {
-   menuItems.clear();
+   menuItems.deleteAndClear();
+
    GameType *gt = gClientGame->getGameType();
    if (!gt)
       return;
@@ -1549,11 +1608,9 @@ void TeamMenuUserInterface::render()
    {
       strncpy(c, gt->mTeams[i].getName().getString(), 1);     // Grab first char of name for a shortcut key
 
-      Color col = gt->mTeams[i].color;
-      S32 players = gt->mTeams[i].numPlayers;
-      S32 score = gt->mTeams[i].getScore();
       bool isCurrent = (i == gt->getTeam(nameToChange));
-      menuItems.push_back(MenuItem(gt->mTeams[i].getName().getString(), i, stringToKeyCode(c), KEY_UNKNOWN, col, isCurrent, players, score));
+      
+      menuItems.push_back(new TeamMenuItem(i, gt->mTeams[i], stringToKeyCode(c), isCurrent));
    }
 
    string name = "";

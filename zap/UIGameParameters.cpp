@@ -150,13 +150,13 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          string val = str.substr(lastPos, str.size() - lastPos);
 
          if(token == "LevelName")
-            menuItems[2].mLineEditor.setString(val.substr(0, gMaxGameNameLength));
+            menuItems[2].mLineEditor.setString(val.substr(0, MAX_GAME_NAME_LEN));
          else if(token == "LevelDescription")
-            menuItems[3].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
+            menuItems[3].mLineEditor.setString(val.substr(0, MAX_GAME_DESCR_LEN));
          else if(token == "LevelCredits")
-            menuItems[4].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
+            menuItems[4].mLineEditor.setString(val.substr(0, MAX_GAME_DESCR_LEN));
          else if(token == "Script")
-            menuItems[5].mLineEditor.setString(val.substr(0, gMaxGameDescrLength));
+            menuItems[5].mLineEditor.setString(val.substr(0, MAX_GAME_DESCR_LEN));
          else if(token == "GridSize")
             menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), static_cast<int>(Game::maxGridSize)), static_cast<int>(Game::minGridSize));
          else if(token == "MinPlayers")
@@ -460,7 +460,7 @@ void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if((menuItems[selectedIndex].mValType == TypeShortString || menuItems[selectedIndex].mValType == TypeLongString) && ascii)
       menuItems[selectedIndex].mLineEditor.addChar(ascii);
 
-   else if(menuItems[selectedIndex].mValType == TypeFileName && gLevelNameEntryUserInterface.isValid(ascii))
+   else if(menuItems[selectedIndex].mValType == TypeFileName)
       menuItems[selectedIndex].mLineEditor.addChar(ascii);
    }
 

@@ -46,6 +46,9 @@ protected:
    bool resetOnActivate;
    LineEditor lineEditor;
 
+   virtual void onAccept(const char *text) = 0;
+   virtual void onEscape() = 0;
+
 public:
    TextEntryUserInterface()   // Constructor
    {
@@ -65,11 +68,8 @@ public:
 
    void onKeyDown(KeyCode keyCode, char ascii);
 
-   virtual void onAccept(const char *text) = 0;
-   virtual void onEscape() = 0;
    const char *getText() { return lineEditor.c_str(); }
    void setString(string str);
-   virtual bool isValid(char ascii);      // Ensure only valid characters are entered
 };
 
 ////////////////
@@ -99,11 +99,11 @@ public:
       instr1 = "";
       instr2 = "Enter an existing level, or create your own!";
       resetOnActivate = false;
+      lineEditor.setFilter(LineEditor::fileNameFilter);
    }
 
    virtual void onAccept(const char *text);
    virtual void onEscape();
-   bool isValid(char ascii);
 };
 
 extern LevelNameEntryUserInterface gLevelNameEntryUserInterface;

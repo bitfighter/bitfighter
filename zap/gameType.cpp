@@ -956,7 +956,7 @@ void GameType::onAddedToGame(Game *theGame)
 
 
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
-extern S32 gMaxPlayers;
+//extern S32 gMaxPlayers;
 
 static const S32 MIN_REC_PLAYERS = 1;
 static const S32 MAX_REC_PLAYERS = 255;
@@ -1073,7 +1073,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          if(i < argc - 1)
             s += " ";
       }
-      mLevelName.set(s.substr(0, gMaxGameNameLength).c_str());
+      mLevelName.set(s.substr(0, MAX_GAME_NAME_LEN).c_str());
    }
    else if(!stricmp(argv[0], "LevelDescription"))
    {
@@ -1084,7 +1084,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          if(i < argc - 1)
             s += " ";
       }
-      mLevelDescription.set(s.substr(0, gMaxGameDescrLength).c_str());
+      mLevelDescription.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
    }
    else if(!stricmp(argv[0], "LevelCredits"))
    {
@@ -1095,7 +1095,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          if(i < argc - 1)
             s += " ";
       }
-      mLevelCredits.set(s.substr(0, gMaxGameDescrLength).c_str());
+      mLevelCredits.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
    }
    else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min players for this map
    {
@@ -1778,18 +1778,18 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 }
 
 // Add any additional game-specific menu items, processed below
-void GameType::addClientGameMenuOptions(Vector<MenuItem> &menuOptions)
+void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
 {
    if(isTeamGame() && mTeams.size() > 1 && !mBetweenLevels)
    {
       GameConnection *gc = gClientGame->getConnectionToServer();
 
       if(mCanSwitchTeams || (gc && gc->isAdmin()))
-         menuOptions.push_back(MenuItem("SWITCH TEAMS", 1000, KEY_S, KEY_T));
+         menuOptions.push_back(new MenuItem(1000, "SWITCH TEAMS", KEY_S, KEY_T));
       else
       {
-         menuOptions.push_back(MenuItem("WAITING FOR SERVER TO ALLOW", 99998, KEY_UNKNOWN, KEY_UNKNOWN, Color(1, 0, 0)));
-         menuOptions.push_back(MenuItem("YOU TO SWITCH TEAMS", 99999, KEY_UNKNOWN, KEY_UNKNOWN, Color(1, 0, 0)));
+         menuOptions.push_back(new MenuItem(99998, "WAITING FOR SERVER TO ALLOW", KEY_UNKNOWN, KEY_UNKNOWN, Color(1, 0, 0)));
+         menuOptions.push_back(new MenuItem(99999, "YOU TO SWITCH TEAMS",         KEY_UNKNOWN, KEY_UNKNOWN, Color(1, 0, 0)));
       }
    }
 }
@@ -1827,11 +1827,12 @@ void GameType::processClientGameMenuOption(U32 index)
    }
 }
 
+
 // Add any additional game-specific admin menu items, processed below
-void GameType::addAdminGameMenuOptions(Vector<MenuItem> &menuOptions)
+void GameType::addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions)
 {
    if(isTeamGame() && mTeams.size() > 1)
-      menuOptions.push_back(MenuItem("CHANGE A PLAYER'S TEAM", 2000, KEY_C, KEY_UNKNOWN));
+      menuOptions.push_back(new MenuItem(2000, "CHANGE A PLAYER'S TEAM", KEY_C));
 }
 
 

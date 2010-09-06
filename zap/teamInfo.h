@@ -28,12 +28,13 @@
 
 #include "luaGameInfo.h"
 #include "flagItem.h"
-#include "UIEditor.h"   // For nameLen
 #include "lineEditor.h"
 #include "tnl.h"
 
 namespace Zap
 {
+
+static const S32 MAX_NAME_LEN = 256;
 
 class AbstractTeam
 {

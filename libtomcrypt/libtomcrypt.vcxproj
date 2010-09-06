@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Template|Win32">
+      <Configuration>Template</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}</ProjectGuid>
+    <RootNamespace>libtomcrypt</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>TNL_ENABLE_LOGGING;TNL_DEBUG;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>
+      </PrecompiledHeaderOutputFile>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <PrecompiledHeaderOutputFile>.\Release/libtomcrypt.pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0409</Culture>
+    </ResourceCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+    </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="aes.c" />
+    <ClCompile Include="base64.c" />
+    <ClCompile Include="bits.c" />
+    <ClCompile Include="blowfish.c" />
+    <ClCompile Include="cast5.c" />
+    <ClCompile Include="cbc.c" />
+    <ClCompile Include="cfb.c" />
+    <ClCompile Include="crypt.c" />
+    <ClCompile Include="ctr.c" />
+    <ClCompile Include="des.c" />
+    <ClCompile Include="dh.c" />
+    <ClCompile Include="dsa.c" />
+    <ClCompile Include="ecb.c" />
+    <ClCompile Include="ecc.c" />
+    <ClCompile Include="gf.c" />
+    <ClCompile Include="hash.c" />
+    <ClCompile Include="hmac.c" />
+    <ClCompile Include="keyring.c" />
+    <ClCompile Include="md2.c" />
+    <ClCompile Include="md4.c" />
+    <ClCompile Include="md5.c" />
+    <ClCompile Include="mem.c" />
+    <ClCompile Include="mpi.c" />
+    <ClCompile Include="noekeon.c" />
+    <ClCompile Include="ofb.c" />
+    <ClCompile Include="omac.c" />
+    <ClCompile Include="packet.c" />
+    <ClCompile Include="prime.c" />
+    <ClCompile Include="rc2.c" />
+    <ClCompile Include="rc4.c" />
+    <ClCompile Include="rc5.c" />
+    <ClCompile Include="rc6.c" />
+    <ClCompile Include="rmd128.c" />
+    <ClCompile Include="rmd160.c" />
+    <ClCompile Include="rsa.c" />
+    <ClCompile Include="safer+.c" />
+    <ClCompile Include="safer.c" />
+    <ClCompile Include="safer_tab.c" />
+    <ClCompile Include="sha1.c" />
+    <ClCompile Include="sha256.c" />
+    <ClCompile Include="sha512.c" />
+    <ClCompile Include="skipjack.c" />
+    <ClCompile Include="sprng.c" />
+    <ClCompile Include="strings.c" />
+    <ClCompile Include="tiger.c" />
+    <ClCompile Include="twofish.c" />
+    <ClCompile Include="twofish_tab.c" />
+    <ClCompile Include="xtea.c" />
+    <ClCompile Include="yarrow.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mycrypt.h" />
+    <ClInclude Include="mycrypt_argchk.h" />
+    <ClInclude Include="mycrypt_cfg.h" />
+    <ClInclude Include="mycrypt_cipher.h" />
+    <ClInclude Include="mycrypt_custom.h" />
+    <ClInclude Include="mycrypt_gf.h" />
+    <ClInclude Include="mycrypt_hash.h" />
+    <ClInclude Include="mycrypt_kr.h" />
+    <ClInclude Include="mycrypt_macros.h" />
+    <ClInclude Include="mycrypt_misc.h" />
+    <ClInclude Include="mycrypt_pk.h" />
+    <ClInclude Include="mycrypt_prng.h" />
+    <ClInclude Include="tommath.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="\home\libtomcrypt\test\test.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>

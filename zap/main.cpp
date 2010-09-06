@@ -45,31 +45,19 @@
 /*
 XXX need to document timers, new luavec stuff XXX
 
-
 /shutdown enhancements: on screen timer after msg dismissed, instant dismissal of local notice, notice in join menu, shutdown after level, auto shutdown when quitting and players connected
-
-/* Fixes for 013b
-<h4>Bug fixes</h4>
-<li>Fixed bug in editor that prevented editing of GoFast attributes</li>
-<li>32 vertex loadout zones no longer crash game</li>
-<li>Fix for invalid md5 hash on 64 bit machines</li>
-<li>Fix for crashing spybug problem</li>
-
-<h4>Enhancements</h4>
-<li>Global chat screens now show players joining/leaving, list players using their message color instead of yellow</li>
-<li>Added very minor cpu throttling when playing with FPS > 100.  Should help reduce system load and power usage.</li>
-<li>level change and admin passwords now remembered for specific servers, and are automatically entered upon connect</li>
-
-<h4>Editor enhancements</h4>
-<li>Walls rendered differently when dragged</li>
-
-<h4>Levelgens</h4>
-<li>Player count is now available when running the levelgen using the new getPlayerCount() function</li>
 
 */
 
 /* Fixes for 013c
+<h4>Enhancements</h4>
+<li>Improved menu system; better use of colors to make screen less monotonous</li>
+<li>Can now edit hosting parameters directly from hosting screen -- resulting values will be written to the INI file for future use</li>
 
+<h4>Bug Fixes</h4>
+<ul>
+<li>Hitting ctrl-R no longer crashes editor when there is no level gen script
+</ul>
 
 */
 
@@ -539,8 +527,8 @@ void abortHosting_noLevels()
    delete gServerGame;
    gServerGame = NULL;
 
-   gMainMenuUserInterface.levelLoadDisplayDisplay = false;
-   gMainMenuUserInterface.levelLoadDisplayFadeTimer.clear();
+   gHostMenuUserInterface.levelLoadDisplayDisplay = false;
+   gHostMenuUserInterface.levelLoadDisplayFadeTimer.clear();
 
    return;
 }
@@ -567,7 +555,7 @@ void initHostGame(Address bindAddress, bool testMode)
    {
       gServerGame->setLevelList(gLevelList);
       gServerGame->resetLevelLoadIndex();
-      gMainMenuUserInterface.levelLoadDisplayDisplay = true;
+      gHostMenuUserInterface.levelLoadDisplayDisplay = true;
    }
    else
    {
@@ -580,11 +568,12 @@ void initHostGame(Address bindAddress, bool testMode)
 }
 
 
+// All levels loaded, we're ready to go
 void hostGame()
 {
    if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no hosting for you!
    {
-      abortHosting_noLevels();
+      abortHosting_noLevels();         // Not sure this would ever get called...
       return;
    }
 
@@ -594,7 +583,7 @@ void hostGame()
       logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
 
    if(gServerGame->getLevelNameCount())             // Levels loaded --> start game!
-      gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);   // Start the first level
+      gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);   // Start with the first level
 
    else        // No levels loaded... we'll crash if we try to start a game
    {
@@ -602,8 +591,8 @@ void hostGame()
       return;
    }
 
-   gMainMenuUserInterface.levelLoadDisplayDisplay = false;
-   gMainMenuUserInterface.levelLoadDisplayFadeTimer.reset();
+   gHostMenuUserInterface.levelLoadDisplayDisplay = false;
+   gHostMenuUserInterface.levelLoadDisplayFadeTimer.reset();
 
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
       joinGame(Address(), false, true);   // ...then we'll play, too!
@@ -834,7 +823,7 @@ void endGame()
    delete gServerGame;
    gServerGame = NULL;
 
-   gMainMenuUserInterface.levelLoadDisplayDisplay = false;
+   gHostMenuUserInterface.levelLoadDisplayDisplay = false;
 
    if(gDedicatedServer)
       exitGame();

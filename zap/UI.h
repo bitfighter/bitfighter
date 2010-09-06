@@ -50,8 +50,8 @@ static const float gDefaultLineWidth = 2.0f;
 const S32 gScreenHeight = 600;
 const S32 gScreenWidth = 800;
 
-const U32 gMaxGameNameLength = 32;     // Any longer, and it won't fit on-screen
-const U32 gMaxGameDescrLength = 60;    // Any longer, and it won't fit on-screen
+const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
+const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen
 
 
 enum UIID {
@@ -68,6 +68,7 @@ enum UIID {
    GenericUI,
    GlobalChatUI,
    SuspendedUI,
+   HostingUI,
    InstructionsUI,
    KeyDefUI,
    LevelUI,
@@ -102,6 +103,7 @@ private:
 
 public:
    static const S32 MenuItemHeight = 45;
+   static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu
    static Vector<UserInterface *> prevUIs;   // Previously active menus
@@ -179,7 +181,8 @@ public:
    // Draw text centered on screen (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString(S32 y, U32 size, const char *str);
    static S32 drawCenteredStringf(S32 y, U32 size, const char *format, ...);
-   static S32 drawCenteredStringPairf(S32 y, U32 size, const char *left, const char *right, ...);
+   static S32 drawCenteredStringPair(S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 
+                                     const char *leftStr, const char *rightStr);
 
    // Draw text centered in a left or right column (normal and formatted versions)  --> now return starting location
    static S32 drawCenteredString2Col(S32 y, U32 size, bool leftCol, const char *str);

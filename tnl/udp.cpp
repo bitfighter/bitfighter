@@ -601,6 +601,7 @@ bool Address::operator ==(const Address &theAddress) const
       netNum[3] == theAddress.netNum[3];
 }
 
+// Constructor
 Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
 {
    transport = type;
@@ -614,13 +615,13 @@ Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
             netNum[0] = 0;
             break;
          case Localhost:
-            netNum[0] = htonl(0x7F000001);
+            netNum[0] = htonl(0x7F000001);         // 127.0.0.1; i.e. loopback address
             break;
          case Broadcast:
-            netNum[0] = htonl(INADDR_BROADCAST);
+            netNum[0] = htonl(INADDR_BROADCAST);  // http://www-2.cs.cmu.edu/~srini/15-441/F01.full/www/assignments/P2/htmlsim_split/node19.html
             break;
          case Any:
-            netNum[0] = htonl(INADDR_ANY);
+            netNum[0] = htonl(INADDR_ANY);        // INADDR_ANY : anyone from any network can connect, using any IP address bound to the PC.
             break;
       }
    }

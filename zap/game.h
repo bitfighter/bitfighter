@@ -389,7 +389,7 @@ extern ServerGame *gServerGame;
 extern ClientGame *gClientGame;
 extern Address gMasterAddress;
 
-extern void initHostGame(Address bindAddress, bool testMode);
+//extern void initHostGame(Address bindAddress, bool testMode);
 extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
