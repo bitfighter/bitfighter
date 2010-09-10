@@ -34,7 +34,8 @@ using namespace TNL;
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
 #include "game.h"
-#include "UIEditor.h"      // <--- we need to get rid of this one!
+//#include "UIEditor.h"      // <--- we need to get rid of this one!
+//#include "UICredits.h"     // <--- don't want this one either
 
 #include "../glut/glutInclude.h"
 
@@ -65,6 +66,7 @@ S32 UserInterface::chatMargin = UserInterface::vertMargin + gLoadoutIndicatorHei
 extern const S32 gScreenHeight;
 extern const S32 gScreenWidth;
 
+
 S32 UserInterface::canvasWidth = gScreenWidth;
 S32 UserInterface::canvasHeight = gScreenHeight;
 S32 UserInterface::windowWidth = gScreenWidth;
@@ -79,7 +81,6 @@ Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displaye
 
 void UserInterface::activate(bool save)
 {
-
    if (current && save)       // Current is not really current any more... it's actually the previously active UI
       prevUIs.push_back(current);
 
@@ -108,10 +109,10 @@ void UserInterface::dumpPreviousQueue()
 
 // Did we arrive at our current interface via the Editor?
 // If the editor is in prevUIs, then we came from there
-bool UserInterface::cameFromEditor()
+bool UserInterface::cameFrom(UIID menuID)
 {
    for(S32 i = 0; i < prevUIs.size(); i++)
-      if (prevUIs[i] == &gEditorUserInterface)
+      if(prevUIs[i]->getMenuID() == menuID)
          return true;
 
    return false;
@@ -463,6 +464,8 @@ S32 UserInterface::get2ColStartingPos(bool leftCol)      // Must be S32 to avoid
    return leftCol ? (canvasWidth / 4) : (canvasWidth - (canvasWidth / 4));
 }
 
+
+extern void glColor(const Color &c, float alpha = 1.0);
 
 // Returns starting position of value, which is useful for positioning the cursor in an editable menu entry
 S32 UserInterface::drawCenteredStringPair(S32 ypos, U32 size, const Color &leftColor, const Color &rightColor, 

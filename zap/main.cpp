@@ -721,7 +721,8 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
    UserInterface::renderCurrent();
 
    // Render master connection state if we're not connected
-   if(gClientGame && gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
+   if(gClientGame && gClientGame->getConnectionToMaster() && 
+      gClientGame->getConnectionToMaster()->getConnectionState() != NetConnection::Connected)
    {
       glColor3f(1, 1, 1);
       UserInterface::drawStringf(10, 550, 15, "Master Server - %s", gConnectStatesTable[gClientGame->getConnectionToMaster()->getConnectionState()]);
@@ -1464,6 +1465,49 @@ void setupLogging()
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 
+
+// Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
+// This has the unfortunate side-effect of triggering a mouse move event.  
+void actualizeScreenMode(bool first = false)
+{
+   if(gIniSettings.fullscreen)      // Entering fullscreen mode
+   {
+      if(!first)
+      {
+         gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
+         gIniSettings.winYPos = glutGet(GLUT_WINDOW_Y);
+
+         gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
+         gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+      }
+
+      glutFullScreen();
+   }
+   else           // Leaving fullscreen, entering windowed mode
+   {
+      glutReshapeWindow((int) (gScreenWidth * gIniSettings.winSizeFact), (int) (gScreenHeight * gIniSettings.winSizeFact) );
+      glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
+   }
+}
+
+
+void setJoystick(ControllerTypeType jsType)
+{
+   // Set joystick type if we found anything other than None or Unknown
+   // Otherwise, it makes more sense to remember what the user had last specified
+
+   if (jsType != NoController && jsType != UnknownController && jsType != GenericController)
+      gIniSettings.joystickType = jsType;
+   // else do nothing and leave the value we read from the INI file alone
+
+   // Set primary input to joystick if any controllers were found, even a generic one
+   if(jsType == NoController || jsType == UnknownController)
+      gIniSettings.inputMode = Keyboard;
+   else
+      gIniSettings.inputMode = Joystick;
+}
+
+
 };  // namespace Zap
 
 
@@ -1518,13 +1562,13 @@ int main(int argc, char **argv)
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
    {
-      FXManager::init();                     // Get ready for sparks!!  C'mon baby!!
+      FXManager::init();                                    // Get ready for sparks!!  C'mon baby!!
       InitJoystick();
-      resetKeyStates();                      // Reset keyboard state mapping to show no keys depressed
+      resetKeyStates();                                     // Reset keyboard state mapping to show no keys depressed
       gAutoDetectedJoystickType = autodetectJoystickType();
-      gOptionsMenuUserInterface.setJoystick(gAutoDetectedJoystickType);     // Will override INI settings, so process INI first
+      setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
 
-      glutInitWindowSize(gScreenWidth, gScreenHeight);                      // Does this actually do anything?  Seem to get same result, regardless of params!
+      glutInitWindowSize(gScreenWidth, gScreenHeight);      // Does this actually do anything?  Seem to get same result, regardless of params!
       glutInit(&argc, argv);
 
 
@@ -1562,7 +1606,7 @@ int main(int argc, char **argv)
       glLineWidth(gDefaultLineWidth);
 
       atexit(onExit);
-      gOptionsMenuUserInterface.actualizeScreenMode(true);     // Create a display window
+      actualizeScreenMode(true);                // Create a display window
 
       if(gCmdLineSettings.connectRemote)        // Only true when -server param specified
          joinGame(gConnectAddress, false, false);     // Connect to a game server (i.e. bypass master matchmaking)

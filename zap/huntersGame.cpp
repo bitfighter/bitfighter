@@ -183,45 +183,13 @@ void HuntersGameType::flagDropped(Ship *theShip, FlagItem *flag)
 }
 
 
-// Describe the arguments processed above...
-Vector<GameType::ParameterDescription> HuntersGameType::describeArguments()
+// Create some game-specific menu items for the GameParameters menu from the arguments processed above...
+void HuntersGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   Vector<GameType::ParameterDescription> descr;
-
-   GameType::ParameterDescription item;
-   item.name = "Game Time:";
-   item.help = "Time game will last";
-   item.value = 10;
-   item.units = "mins";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   item.name = "Time for Nexus to Open:";
-   item.help = "Time it takes for the Nexus to open";
-   item.value = 1;
-   item.units = "mins";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   item.name = "Time Nexus Remains Open:";
-   item.help = "Time that the Nexus will remain open";
-   item.value = 30;
-   item.units = "secs";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   item.name = "Score Limit:";
-   item.help = "Game ends when one player or team gets this score";
-   item.value = 5000;
-   item.units = "points";
-   item.minval = 100;
-   item.maxval = 20000;
-   descr.push_back(item);
-
-   return descr;
+   menuItems.push_back(new CounterMenuItem("Game Time:", 8, 1, 1, 99, "mins", "", "Time game will last"));
+   menuItems.push_back(new CounterMenuItem("Time for Nexus to Open:", 1, 1, 1, 99, "mins", "", "Time it takes for the Nexus to open"));
+   menuItems.push_back(new CounterMenuItem("Time Nexus Remains Open:", 30, 1, 1, 99, "secs", "", "Time that the Nexus will remain open"));
+   menuItems.push_back(new CounterMenuItem("Score to Win:", 5000, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));
 }
 
 

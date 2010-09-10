@@ -30,6 +30,7 @@
 #include "gameObject.h"
 #include "flagItem.h"
 #include "teamInfo.h"
+#include "UIMenus.h"       // For MenuItem defs needed in addGameSpecificParameterMenuItems() and overrides
 #include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
 #include "statistics.h"
@@ -285,7 +286,7 @@ public:
    ClientRef *findClientRef(const StringTableEntry &name);
 
    bool processArguments(S32 argc, const char **argv);
-   virtual Vector<GameType::ParameterDescription> describeArguments();
+   void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void onAddedToGame(Game *theGame);
 
@@ -390,7 +391,7 @@ public:
 
    // Handle additional game-specific menu options for the client and the admin
    virtual void addClientGameMenuOptions(Vector<MenuItem *> &menuOptions);
-   virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
+   //virtual void processClientGameMenuOption(U32 index);                        // Param used only to hold team, at the moment
 
    virtual void addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions);
 

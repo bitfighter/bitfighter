@@ -84,6 +84,7 @@ public:
    ~CreditsUserInterface();       // Destructor
 
    void onActivate();
+   void onReactivate();
    void addFX(CreditsFX *fx) { fxList.push_back(fx); }
    void idle(U32 timeDelta);
    void render();

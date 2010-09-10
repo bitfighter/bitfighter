@@ -75,7 +75,7 @@ public:
    bool isCarryingItems(Ship *ship);
    void flagDropped(Ship *theShip, FlagItem *theFlag);
 
-   Vector<GameType::ParameterDescription> describeArguments();
+   void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void addNexus(HuntersNexusObject *theObject);
    void shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus);

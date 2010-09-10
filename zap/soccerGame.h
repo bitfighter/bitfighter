@@ -68,7 +68,6 @@ public:
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 
-
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
    TNL_DECLARE_CLASS(SoccerGameType);
 };
@@ -94,7 +93,6 @@ public:
    void damageObject(DamageInfo *theInfo);
    void idle(GameObject::IdleCallPath path);
    bool processArguments(S32 argc, const char **argv);
-   Vector<GameType::ParameterDescription> describeArguments();
 
    void onAddedToGame(Game *theGame);
 

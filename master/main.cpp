@@ -708,7 +708,7 @@ public:
 
       // TEAM | stats version | team name | score
       for(S32 i = 0; i < teams.size(); i++)
-         logprintf("TEAM\t2\t%s\t%d", teams[i].getString(), teamScores[i]);
+         logprintf("TEAM\t2\t%s\t%d\t%d\t%d\t%d", teams[i].getString(), teamScores[i], (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
    }
 
 

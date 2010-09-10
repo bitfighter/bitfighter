@@ -65,7 +65,7 @@ public:
 
    bool processArguments(S32 argc, const char **argv);
 
-   Vector<GameType::ParameterDescription> describeArguments();
+   void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void idle(GameObject::IdleCallPath path);
 

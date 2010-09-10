@@ -141,7 +141,7 @@ struct IniSettings      // With defaults specified
 {
    bool controlsRelative;
    bool fullscreen;
-   S32 joystickType;
+   U32 joystickType;
    bool echoVoice;
 
    F32 sfxVolLevel;                 // SFX volume (0 = silent, 1 = full bore)

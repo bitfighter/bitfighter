@@ -51,12 +51,14 @@ const S32 gScreenHeight = 600;
 const S32 gScreenWidth = 800;
 
 const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
+const U32 MAX_FILE_NAME_LEN = 32;     // Completely arbitrary
 const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen
 
 
 enum UIID {
    AdminPasswordEntryUI,
    ChatUI,
+   CreditsUI,
    DiagnosticsScreenUI,
    EditorInstructionsUI,
    EditorUI,
@@ -102,7 +104,6 @@ private:
    static void doDrawAngleString(S32 x, S32 y, F32 size, F32 angle, const char *string, bool fixed);
 
 public:
-   static const S32 MenuItemHeight = 45;
    static const S32 MAX_PASSWORD_LENGTH = 32;      // Arbitrary, doesn't matter, but needs to be _something_
 
    static UserInterface *current;            // Currently active menu
@@ -116,7 +117,8 @@ public:
    static S32 windowWidth, windowHeight, canvasWidth, canvasHeight;
    static S32 vertMargin, horizMargin;
    static S32 chatMargin;
-   static bool cameFromEditor();             // Did we arrive at our current interface via the Editor?
+
+   static bool cameFrom(UIID menuID);        // Did we arrive at our current interface via the specified interface?
 
    static void renderCurrent();
 

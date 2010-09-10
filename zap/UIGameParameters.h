@@ -39,63 +39,46 @@ namespace Zap
 
 using namespace std;
 
-enum ParamType
-{
-   TypeShortString,     // MAX_GAME_NAME_LEN max length
-   TypeLongString,      // MAX_GAME_DESCR_LEN max length
-   TypeInt,
-   TypeGameType,
-   TypeFileName,
-   TypeNone
-};
-
-struct MenuItem2     // An extended menu item complete with values good for editing!
-{
-   const char *mTitle;      // Text displayed on menu
-   KeyCode key1;            // Allow two shortcut keys per menu item...
-   KeyCode key2;
-
-   // Note that menuItems can have either a string or an int value.  So we'll create a slot for each,
-   // and use menuValIsString to tell us which to use.
-   LineEditor mLineEditor;   // Value for this item (string)
-   S32 mValI;                // Value for this item (int)
-   S32 mMinVal;              // Minimum numeric value for this parameter, if applicable
-   S32 mMaxVal;              // Maximum numeric value for this parameter, if applicable
-   const char *mUnits;       // What units do numeric values represent?
-   const char *mHelp;        // Brief help string
-
-   ParamType mValType; // What type of data to show for this item
-
-   Color color;
-
-   // Default constructor, unused
-   MenuItem2() { TNLAssert(false, "Don't use this constructor!") }
-
-   // Constructor
-   MenuItem2(const char *title, string strVal, S32 intVal, S32 min, S32 max, const char *units, const char *help, ParamType valType, KeyCode k1, KeyCode k2, Color c = Color(1, 1, 1))
-   {
-      // Set a limit on entry length.  Note that these are fairly aribitrary...
-      U32 len = 255;
-      if(valType == TypeShortString)
-         len = MAX_GAME_NAME_LEN;
-      else if(valType == TypeLongString)
-         len = MAX_GAME_DESCR_LEN;
-      else if(valType == TypeFileName)
-         len = MAX_SHORT_TEXT_LEN;
-
-      mTitle = title;
-      mLineEditor = LineEditor(len, strVal);
-      mValI = intVal;
-      mUnits = units;
-      mHelp = help;
-      mValType = valType;
-      mMinVal = min;
-      mMaxVal = max;
-      key1 = k1;
-      key2 = k2;
-      color = c;
-   }
-};
+//
+//struct MenuItem2 : MenuItem    // An extended menu item complete with values good for editing!
+//{
+//   // Note that menuItems can have either a string or an int value.  So we'll create a slot for each,
+//   // and use menuValIsString to tell us which to use.
+//   LineEditor mLineEditor;   // Value for this item (string)
+//   S32 mValI;                // Value for this item (int)
+//   S32 mMinVal;              // Minimum numeric value for this parameter, if applicable
+//   S32 mMaxVal;              // Maximum numeric value for this parameter, if applicable
+//   const char *mUnits;       // What units do numeric values represent?
+//   const char *mHelp;        // Brief help string
+//
+//
+//   // Default constructor, unused
+//   //MenuItem2() { TNLAssert(false, "Don't use this constructor!") }
+//
+//   // Constructor
+//   MenuItem2(string title, string strVal, S32 intVal, S32 min, S32 max, const char *units, const char *help, 
+//             ParamType valType, KeyCode k1, KeyCode k2, Color color = Color(1, 1, 1))
+//             :    MenuItem(0, title, k1, k2, color)
+//
+//   {
+//      // Set a limit on entry length.  Note that these are fairly aribitrary...
+//      U32 len = 255;
+//      if(valType == TypeShortString)
+//         len = MAX_GAME_NAME_LEN;
+//      else if(valType == TypeLongString)
+//         len = MAX_GAME_DESCR_LEN;
+//      else if(valType == TypeFileName)
+//         len = MAX_SHORT_TEXT_LEN;
+//
+//      mLineEditor = LineEditor(len, strVal);
+//      mValI = intVal;
+//      mUnits = units;
+//      mHelp = help;
+//      mValType = valType;
+//      mMinVal = min;
+//      mMaxVal = max;
+//   }
+//};
 
 
 class GameParamUserInterface : public MenuUserInterface     // By subclassing this, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
@@ -105,7 +88,7 @@ private:
    void updateMenuItems(S32 gameTypeIndex);     // Update list of menu items, based on gGameTypeNames index
    void processSelection(U32 index) { }         // Needed for MenuUserInterface subclassing... does nothing
 
-   bool didAnythingGetChanged();                // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
+   bool anythingChanged();                      // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
    void buildGameParamList();                   // Take the info from our menus and create a list of lines we can stick in a level file (which we'll store in gameParams)
 
    Vector<string> origGameParams;    // Copy of the game parameters as specified when we activated the GameParameters, used to compare before and after to detect changes
@@ -113,7 +96,10 @@ private:
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
 
-   bool isEditableString(MenuItem2 item);    // True if type uses the LineEditor
+   string getParamVal(string paramName);      // Find value in our list of params
+
+   virtual S32 getTextSize() { return 18; }
+   virtual S32 getGap() { return 14; }
 
 public:
    GameParamUserInterface();         // Constructor
@@ -126,12 +112,10 @@ public:
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   Vector<MenuItem2> savedMenuItems;
-   Vector<MenuItem2> menuItems;
-   void render();              // Draw the menu
+   Vector<MenuItem> savedMenuItems;    // TODO:  WON'T WORK!! Save values only, not entire menu item!
 
    void idle(U32 timeDelta);
-   void onKeyDown(KeyCode keyCode, char ascii);
+   //void onKeyDown(KeyCode keyCode, char ascii);
    void onMouseMoved(S32 x, S32 y);
 
 

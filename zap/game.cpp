@@ -720,7 +720,7 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
          logprintf(LogConsumer::LogWarning, "Improperly formed GridSize parameter in level \"%s\"", origFilename.c_str());
          return;
       }
-      mGridSize = max(min((F32) atof(argv[1]), (F32) maxGridSize), (F32) minGridSize);
+      mGridSize = max(min((F32) atof(argv[1]), (F32) MAX_GRID_SIZE), (F32) MIN_GRID_SIZE);
    }
    // True if we haven't yet created a gameType || false if processLevelItem can't do anything with the line
    else if(mGameType.isNull() || !mGameType->processLevelItem(argc, argv))    

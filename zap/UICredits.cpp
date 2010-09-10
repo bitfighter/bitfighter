@@ -61,12 +61,16 @@ const char *gGameCredits[] = {
    NULL                    // ...then this
 };
 
+
+static bool quitting = false;
+
+
 CreditsUserInterface gCreditsUserInterface;
 
 // Constructor
 CreditsUserInterface::CreditsUserInterface()
 {
-   setMenuID(ChatUI);
+   setMenuID(CreditsUI);
 }
 
 
@@ -82,8 +86,10 @@ CreditsUserInterface::~CreditsUserInterface()
    fxList.clear();
 }
 
+
 void CreditsUserInterface::onActivate()
 {
+   quitting = false;
    gSplashUserInterface.activate();          // Show splash animation at beginning of credits
 
    // Construct the creditsfx objects here, they will
@@ -111,6 +117,14 @@ void CreditsUserInterface::onActivate()
       fxList[rand]->setActive(true);
    }
 }
+
+
+void CreditsUserInterface::onReactivate()
+{
+   if(quitting)
+      quit();     
+}
+
 
 void CreditsUserInterface::idle(U32 timeDelta)
 {
@@ -242,6 +256,7 @@ void SplashUserInterface::onActivate()
    mType = 3;     // For now, we'll stick with this one, as it's the best!
 }
 
+
 void SplashUserInterface::idle(U32 timeDelta)
 {
    if(mSplashTimer.update(timeDelta))
@@ -256,6 +271,7 @@ void SplashUserInterface::idle(U32 timeDelta)
    if(mPhase > 3)
       quit();
 }
+
 
 void SplashUserInterface::render()
 {
@@ -303,9 +319,13 @@ extern Point gMousePos;
 
 void SplashUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   quitting = true;
    quit();                              // Quit the interface when any key is pressed...  any key at all.
+
    if (keyCode != KEY_ESCAPE && keyCode != KEY_ENTER && keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT)    // Unless user hit Enter or Escape, or some other thing
+   {
       current->onKeyDown(keyCode, ascii);                // pass keystroke on  (after reactivate in quit(), current is now the underlying UI)
+   }
 
    if(keyCode == MOUSE_LEFT && keyCode == MOUSE_MIDDLE && keyCode == MOUSE_RIGHT)
       current->onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);

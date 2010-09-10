@@ -26,7 +26,6 @@
 #include "gameType.h"
 #include "ship.h"
 #include "UIGame.h"
-#include "UIMenus.h"
 #include "UINameEntry.h"
 #include "gameNetInterface.h"
 #include "flagItem.h"
@@ -150,29 +149,11 @@ bool GameType::processArguments(S32 argc, const char **argv)
 }
 
 
-// Describe the arguments processed above...
-Vector<GameType::ParameterDescription> GameType::describeArguments()
+// Create some game-specific menu items for the GameParameters menu
+void GameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   Vector<GameType::ParameterDescription> descr;
-   GameType::ParameterDescription item;
-
-   item.name = "Game Time:";
-   item.help = "Time game will last";
-   item.value = 8;
-   item.units = "mins";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   item.name = "Score to Win:";
-   item.help = "Game ends when one team gets this score";
-   item.value = 10;
-   item.units = "points";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   return descr;
+   menuItems.push_back(new CounterMenuItem("Game Time:", 8, 1, 1, 99, "mins", "", "Time game will last"));
+   menuItems.push_back(new CounterMenuItem("Score to Win:", 10, 1, 1, 99, "points", "", "Game ends when one team gets this score"));
 }
 
 
@@ -1777,6 +1758,31 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
    }
 }
 
+
+static void switchTeamsCallback(U32 unused)
+{
+   GameType *gt = gClientGame->getGameType();
+   if(!gt)
+      return;
+
+   // If there are only two teams, just switch teams and skip the rigamarole
+   if(gt->mTeams.size() == 2)
+   {
+      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
+      if(!ship)
+         return;
+
+      gt->c2sChangeTeams(1 - ship->getTeam());                 // If two teams, team will either be 0 or 1, so "1 - " will toggle
+      UserInterface::reactivateMenu(gGameUserInterface);       // Jump back into the game (this option takes place immediately)
+   }
+   else
+   {
+      gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
+      gTeamMenuUserInterface.nameToChange = gNameEntryUserInterface.getText();      // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
+   }
+ }
+
+
 // Add any additional game-specific menu items, processed below
 void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
 {
@@ -1785,46 +1791,20 @@ void GameType::addClientGameMenuOptions(Vector<MenuItem *> &menuOptions)
       GameConnection *gc = gClientGame->getConnectionToServer();
 
       if(mCanSwitchTeams || (gc && gc->isAdmin()))
-         menuOptions.push_back(new MenuItem(1000, "SWITCH TEAMS", KEY_S, KEY_T));
+         menuOptions.push_back(new MenuItem(0, "SWITCH TEAMS", switchTeamsCallback, "", KEY_S, KEY_T));
       else
       {
-         menuOptions.push_back(new MenuItem(99998, "WAITING FOR SERVER TO ALLOW", KEY_UNKNOWN, KEY_UNKNOWN, Color(1, 0, 0)));
-         menuOptions.push_back(new MenuItem(99999, "YOU TO SWITCH TEAMS",         KEY_UNKNOWN, KEY_UNKNOWN, Color(1, 0, 0)));
+         menuOptions.push_back(new MenuItem(0, "WAITING FOR SERVER TO ALLOW", NULL, "", KEY_UNKNOWN, KEY_UNKNOWN, Color(1,0,0)));
+         menuOptions.push_back(new MenuItem(0, "YOU TO SWITCH TEAMS",         NULL, "", KEY_UNKNOWN, KEY_UNKNOWN, Color(1,0,0)));
       }
    }
 }
 
 
-// Process any additional game-specific menu items added above
-void GameType::processClientGameMenuOption(U32 index)
+static void switchPlayersTeamCallback(U32 unused)
 {
-   if(index == 1000)
-   {
-      // If there are only two teams, just switch teams and skip the rigamarole
-      if(mTeams.size() == 2)
-      {
-         GameType *gt = gClientGame->getGameType();
-         if(!gt)
-            return;
-
-         Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());  // Returns player's ship...
-         if(!ship)
-            return;
-
-         gt->c2sChangeTeams(1 - ship->getTeam());                 // If two teams, team will either be 0 or 1, so "1 - " will toggle
-         UserInterface::reactivateMenu(gGameUserInterface);       // Jump back into the game (this option takes place immediately)
-      }
-      else
-      {
-         gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-         gTeamMenuUserInterface.nameToChange = gNameEntryUserInterface.getText();      // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
-      }
-   }
-   else if(index == 2000)
-   {
-      gPlayerMenuUserInterface.action = PlayerMenuUserInterface::ChangeTeam;
-      gPlayerMenuUserInterface.activate();
-   }
+   gPlayerMenuUserInterface.action = PlayerMenuUserInterface::ChangeTeam;
+   gPlayerMenuUserInterface.activate();
 }
 
 
@@ -1832,7 +1812,7 @@ void GameType::processClientGameMenuOption(U32 index)
 void GameType::addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions)
 {
    if(isTeamGame() && mTeams.size() > 1)
-      menuOptions.push_back(new MenuItem(2000, "CHANGE A PLAYER'S TEAM", KEY_C));
+      menuOptions.push_back(new MenuItem(0, "CHANGE A PLAYER'S TEAM", switchPlayersTeamCallback, "", KEY_C));
 }
 
 

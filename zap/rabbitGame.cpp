@@ -100,46 +100,16 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv)
    return true;
 }
 
-// Describe the arguments processed above...
-Vector<GameType::ParameterDescription> RabbitGameType::describeArguments()
+
+// Create some game-specific menu items for the GameParameters menu from the arguments processed above...
+void RabbitGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   Vector<GameType::ParameterDescription> descr;
-
-   GameType::ParameterDescription item;
-   item.name = "Game Time:";
-   item.help = "Time game will last";
-   item.value = 8;
-   item.units = "mins";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   item.name = "Score to Win:";
-   item.help = "Game ends when one team gets this score";
-   item.value = 100;
-   item.units = "points";
-   item.minval = 5;
-   item.maxval = 500;
-   descr.push_back(item);
-
-   item.name = "Flag Return Timer:";
-   item.help = "What is this??";
-   item.value = 10;
-   item.units = "secs";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   item.name = "Point Earn Rate:";
-   item.help = "Time you must hold the flag to earn a point";
-   item.value = 30;
-   item.units = "points per minute";
-   item.minval = 1;
-   item.maxval = 99;
-   descr.push_back(item);
-
-   return descr;
+   menuItems.push_back(new CounterMenuItem("Game Time:", 8, 1, 1, 99, "mins", "", "Time game will last"));
+   menuItems.push_back(new CounterMenuItem("Score to Win:", 60, 5, 5, 500, "points", "", "Game ends when one player or team gets this score"));
+   menuItems.push_back(new CounterMenuItem("Flag Return Timer:", 10, 1, 1, 99, "secs", "", "Time it takes for an uncaptured flag to return home"));
+   menuItems.push_back(new CounterMenuItem("Point Earn Rate:", 30, 1, 1, 99, "points per minute", "", "Rate player holding the flag accrues points"));
 }
+
 
 bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 {

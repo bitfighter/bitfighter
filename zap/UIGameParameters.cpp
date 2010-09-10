@@ -44,7 +44,7 @@ namespace Zap
 GameParamUserInterface gGameParamUserInterface;
 
 // Constructor
-GameParamUserInterface::GameParamUserInterface()
+GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
 {
    setMenuID(GameParamsUI);
    menuTitle = "Game Parameters Menu";
@@ -66,10 +66,6 @@ extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
 extern S32 gMaxPlayers;
 
-static S32 NumberOfPreGameSpecificParams;
-
-#define MIN_PLAYERS_INDEX (mGameSpecificParams + NumberOfPreGameSpecificParams + 1)
-
 void GameParamUserInterface::updateMenuItems(const char *gt)
 {
    // Figure out what index our gametype index is.  This is kind of ugly.  We'll assume that gt has a valid string because if not, game would have crashed already!
@@ -84,62 +80,193 @@ void GameParamUserInterface::updateMenuItems(const char *gt)
    updateMenuItems(i);
 }
 
+
+// It would be more efficient to simply parse our list and create a lookup table
+string GameParamUserInterface::getParamVal(string paramName)
+{
+   const string delimiters = " \t";       // Spaces or tabs delimit our lines
+
+   for(S32 i = 0; i < gameParams.size(); i++)
+   {
+      string str = gameParams[i];
+      string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
+      string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
+
+      string token = str.substr(lastPos, pos - lastPos);
+      lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
+      string val = str.substr(lastPos, str.size() - lastPos);
+
+      if(token == paramName)
+         return val;
+   }
+
+   return "";
+}
+
+static const S32 OPT_GAMETYPE = 0;
+static const S32 OPT_FILENAME = 1;
+static const S32 OPT_LEVEL_NAME = 2;
+static const S32 OPT_LEVEL_DESCR = 3;
+static const S32 OPT_CREDITS = 4;
+static const S32 OPT_SCRIPT = 5;
+
+static const S32 FIRST_GAME_SPECIFIC_PARAM = 6;
+
+static S32 OPT_GRIDSIZE = OPT_SCRIPT + 1;
+static S32 OPT_MIN_PLAYERS = OPT_GRIDSIZE + 1;
+static S32 OPT_MAX_PLAYERS = OPT_MIN_PLAYERS + 1;
+
+
+static void backToEditorCallback(U32 unused)
+{
+   gGameParamUserInterface.onEscape();
+}
+
+
 // Does the actual work of updating the menu items!
 void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 {
    TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);          // Instantiate our gameType object
    GameType *gameType = dynamic_cast<GameType*>(theObject);                        // and cast it to GameType
-   Vector<GameType::ParameterDescription> params = gameType->describeArguments();  // Find out what this game wants
-
-   mGameSpecificParams = params.size();
 
    // Save existing values of the menu items, so we can grab them again if the user selects the same game...
-   if(menuItems.size())
+   //if(menuItems.size())
+   //{
+   //   for(S32 i = 0; i < menuItems.size(); i++)
+   //   {
+   //      bool found = false;
+   //      if(savedMenuItems.size())
+   //         for(S32 j = 0; j < savedMenuItems.size(); j++)
+   //            if(!strcmp(savedMenuItems[j].getText(), menuItems[i]->getText())) // Found an already saved parameter with the same name... overwrite the saved values with a new ones
+   //            {
+   //               savedMenuItems[j].setValue(menuItems[i]->getValue());
+   //               savedMenuItems[j].setIntValue(menuItems[i]->getIntValue());
+   //               //savedMenuItems[j].mLineEditor = dynamic_cast<EditableMenuItem *>(menuItems[i])->getLineEditor();
+   //               found = true;
+   //               break;
+   //            }
+   //      if(!found)                                                     // We don't already have an item with this name.  We'd better add this to our list of saved items.
+   //         savedMenuItems.push_back(*menuItems[i]);
+   //   }
+   //}
+
+
+   menuItems.deleteAndClear();
+
+   Vector<string> gameTypes;
+
+   for(S32 i = 0; gGameTypeNames[i]; i++)
    {
-      for(S32 i = 0; i < menuItems.size(); i++)
-      {
-         bool found = false;
-         if(savedMenuItems.size())
-            for(S32 j = 0; j < savedMenuItems.size(); j++)
-               if(!strcmp(savedMenuItems[j].mTitle, menuItems[i].mTitle)) // Found an already saved parameter with the same name... overwrite the saved values with a new ones
-               {
-                  savedMenuItems[j].mValI = menuItems[i].mValI;
-                  savedMenuItems[j].mLineEditor = menuItems[i].mLineEditor;
-                  found = true;
-                  break;
-               }
-         if(!found)                                                     // We don't already have an item with this name.  We'd better add this to our list of saved items.
-            savedMenuItems.push_back(menuItems[i]);
-      }
+      // The following seems rather wasteful, but this is hardly a performance sensitive area...
+      GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
+      gameTypes.push_back(gameType->getGameTypeString());
+
+      //if(toupper(gameType->getGameTypeString()[0]) == toupper(ascii))      // Compare first letter of game name with what user typed
+      //{
+      //   menuItems[selectedIndex]->mValI = i;
+      //   updateMenuItems(i);
+      //   break;
+      //}
    }
-   menuItems.clear();
+
+   menuItems.push_back(new ToggleMenuItem("Game Type:",       
+                                          gameTypes,
+                                          gtIndex,
+                                          true,
+                                          NULL,
+                                          gameType->getInstructionString(),
+                                          KEY_G ));
+
 
    string fn = gEditorUserInterface.getLevelFileName();                 // We'll chop off the .level bit below...
-   menuItems.push_back(MenuItem2("Game Type:",       gameType->getGameTypeString(),  gtIndex,    0, 0, "", gameType->getInstructionString(),                        TypeGameType,      KEY_G, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Filename:",        fn.substr(0,fn.find_last_of('.')), 0,       0, 0, "", "File this level is stored in",                          TypeFileName,      KEY_F, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level Name:",      "New Bitfighter Level",            0,       0, 0, "", "Choose a short, catchy name",                           TypeShortString,   KEY_N, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level Descr:",     "",                                0,       0, 0, "", "A brief description of the level",                      TypeLongString,    KEY_D, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Level By:",        "",                                0,       0, 0, "", "Who created this level",                                TypeLongString,    KEY_B, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Levelgen Script:", "",                                0,       0, 0, "", "Levelgen script & args to be run when level is loaded", TypeLongString,    KEY_L, KEY_UNKNOWN ));
+   menuItems.push_back(new EditableMenuItem("Filename:",                         // name
+                                            fn,                                  // val
+                                            "",                                  // empty val
+                                            "File where this level is stored",   // help
+                                            MAX_FILE_NAME_LEN, 
+                                            KEY_D));
 
-   NumberOfPreGameSpecificParams = 6;
+   menuItems.push_back(new EditableMenuItem("Level Name:", 
+                                            getParamVal("LevelName"), 
+                                            "", 
+                                            "The level's name -- pick a good one!",  
+                                            MAX_GAME_NAME_LEN, 
+                                            KEY_N));
 
-   S32 i;
-   for(i = 0; i < mGameSpecificParams; i++)
-      menuItems.push_back(MenuItem2(params[i].name,  "", params[i].value,  params[i].minval, params[i].maxval,   params[i].units,    params[i].help,   TypeInt,   KEY_UNKNOWN, KEY_UNKNOWN ));
+   menuItems.push_back(new EditableMenuItem("Level Descr:", 
+                                            getParamVal("LevelDescription"), 
+                                            "", 
+                                            "A brief description of the level",                     
+                                            MAX_GAME_DESCR_LEN, 
+                                            KEY_D));
 
-   menuItems.push_back(MenuItem2("Grid Size:",       "", Game::DefaultGridSize, Game::minGridSize, Game::maxGridSize, "pixels",   "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255.",      TypeInt,   KEY_S, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Min Players:",     "", 0,                                      0,      gMaxPlayers, "players",  "Min. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("Max Players:",     "", 0,                                      0,      gMaxPlayers, "players",  "Max. players you would recommend for this level (helps server select the next level)", TypeInt,   KEY_M, KEY_UNKNOWN ));
-   menuItems.push_back(MenuItem2("RETURN TO EDITOR", "", 0,                                      0,                0, "",         "",                                                                                     TypeNone,  KEY_Q, KEY_R       ));
-   mQuitItemIndex = i + 9;
+   menuItems.push_back(new EditableMenuItem("Level By:", 
+                                            getParamVal("LevelCredits"), 
+                                            "", 
+                                            "Who created this level",                                  
+                                            MAX_GAME_DESCR_LEN, 
+                                            KEY_B));
+
+   menuItems.push_back(new EditableMenuItem("Levelgen Script:", 
+                                            getParamVal("Script"), 
+                                            "<None>", 
+                                            "Levelgen script & args to be run when level is loaded",  
+                                            255, 
+                                            KEY_L));
+   // Game specific items
+   gameType->addGameSpecificParameterMenuItems(menuItems);
+
+   mGameSpecificParams = menuItems.size() - FIRST_GAME_SPECIFIC_PARAM;
+
+   OPT_GRIDSIZE = menuItems.size();
+   OPT_MIN_PLAYERS = OPT_GRIDSIZE + 1;
+   OPT_MAX_PLAYERS = OPT_MIN_PLAYERS + 1;
+
+
+   // Some more standard items
+   menuItems.push_back(new CounterMenuItem("Grid Size:",       
+                                           Game::DefaultGridSize,    // value
+                                           Game::MIN_GRID_SIZE,      // increment
+                                           Game::MIN_GRID_SIZE,      // min val
+                                           Game::MAX_GRID_SIZE,      // max val
+                                           "pixels",                 // units
+                                           "", 
+                                           "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255.",      
+                                           KEY_S));
+
+   menuItems.push_back(new CounterMenuItem("Min Players:",       
+                                           0,                  // value
+                                           1,                  // increment
+                                           0,                  // min val
+                                           gMaxPlayers,        // max val
+                                           "players",          // units
+                                           "N/A", 
+                                           "Min. players you would recommend for this level (helps server select the next level)",      
+                                           KEY_M));
+
+   menuItems.push_back(new CounterMenuItem("Max Players:",       
+                                           0,                  // value
+                                           1,                  // increment
+                                           0,                  // min val
+                                           gMaxPlayers,        // max val
+                                           "players",          // units
+                                           "N/A",
+                                           "Max. players you would recommend for this level (helps server select the next level)",      
+                                           KEY_S));
+
+   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", backToEditorCallback, "", KEY_Q, KEY_R));
+
+   mQuitItemIndex = menuItems.size() - 1;
 
    // Now populate the menu with values derived from our saved values
+
+   for(S32 i = 0; i < gameParams.size(); i++)
+      logprintf("%d == %s", i, gameParams[i].c_str());
 
    if(gameParams.size())
    {
       const string delimiters = " \t";       // Spaces or tabs will delimit our lines
-      for(i = 0; i < gameParams.size(); i++)
+      for(S32 i = 0; i < gameParams.size(); i++)
       {
          string str = gameParams[i];
          string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
@@ -149,39 +276,40 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
          string val = str.substr(lastPos, str.size() - lastPos);
 
-         if(token == "LevelName")
-            menuItems[2].mLineEditor.setString(val.substr(0, MAX_GAME_NAME_LEN));
-         else if(token == "LevelDescription")
-            menuItems[3].mLineEditor.setString(val.substr(0, MAX_GAME_DESCR_LEN));
-         else if(token == "LevelCredits")
-            menuItems[4].mLineEditor.setString(val.substr(0, MAX_GAME_DESCR_LEN));
-         else if(token == "Script")
-            menuItems[5].mLineEditor.setString(val.substr(0, MAX_GAME_DESCR_LEN));
-         else if(token == "GridSize")
-            menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI = max(min(atoi(val.c_str()), static_cast<int>(Game::maxGridSize)), static_cast<int>(Game::minGridSize));
+         if(token == "GridSize")
+         {
+            S32 gridSize = max(min(atoi(val.c_str()), Game::MAX_GRID_SIZE), Game::MIN_GRID_SIZE);
+            menuItems[OPT_GRIDSIZE]->setValue(gridSize);
+         }
          else if(token == "MinPlayers")
-            menuItems[MIN_PLAYERS_INDEX].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+         {
+            S32 minPlayers = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            menuItems[OPT_MIN_PLAYERS]->setValue(minPlayers);
+         }
          else if(token == "MaxPlayers")
-            menuItems[MIN_PLAYERS_INDEX + 1].mValI = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+         {
+            S32 maxPlayers = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            menuItems[OPT_MAX_PLAYERS]->setValue(maxPlayers);
+         }
       }
 
       // And apply our GameType arguments to the game specific parameter settings, if any were provided in a level file we loaded
       if(!ignoreGameParams)
-         for(i = 0; i < min(gEditorUserInterface.mGameTypeArgs.size(), mGameSpecificParams); i++)
-            menuItems[i + NumberOfPreGameSpecificParams].mValI = gEditorUserInterface.mGameTypeArgs[i];
+         for(S32 i = 0; i < min(gEditorUserInterface.mGameTypeArgs.size(), mGameSpecificParams); i++)
+            menuItems[i + FIRST_GAME_SPECIFIC_PARAM]->setValue(gEditorUserInterface.mGameTypeArgs[i]);
    }
 
    // Lastly, scan through our list of saved items and replace the default values with those modified here in this interface
    // This operates like a poor man's dictionary
-   if(savedMenuItems.size())
-      for(S32 i = 1; i < menuItems.size(); i++)                         // Start with 1 because we don't want to overwrite our game type, which is #0!
-         for(S32 j = 0; j < savedMenuItems.size(); j++)
-            if(!strcmp(savedMenuItems[j].mTitle, menuItems[i].mTitle))    // Found a match
-            {
-               menuItems[i].mValI = savedMenuItems[j].mValI;
-               menuItems[i].mLineEditor = savedMenuItems[j].mLineEditor;
-               break;
-            }
+   //if(savedMenuItems.size())
+   //   for(S32 i = 1; i < menuItems.size(); i++)                    // Start with 1 because we don't want to overwrite our game type, which is #0!
+   //      for(S32 j = 0; j < savedMenuItems.size(); j++)
+   //         if(!strcmp(savedMenuItems[j].getText(), menuItems[i]->getText()))    // Found a match
+   //         {
+   //            menuItems[i]->mValI = savedMenuItems[j].mValI;
+   //            dynamic_cast<EditableMenuItem *>(menuItems[i])->setLineEditor(savedMenuItems[j].mLineEditor);
+   //            break;
+   //         }
 }
 
 
@@ -191,114 +319,24 @@ void GameParamUserInterface::idle(U32 timeDelta)
 }
 
 
-bool inline GameParamUserInterface::isEditableString(MenuItem2 item)
-{
-   return item.mValType == TypeShortString || item.mValType == TypeLongString || item.mValType == TypeFileName;
-}
-
-
 static const U32 itemHeight = 30;
 static const U32 yStart = UserInterface::vertMargin + 90;
 
-void GameParamUserInterface::render()
-{
-   const U32 fontSize = 15;
 
-   glColor3f(1, 1, 1);
-   drawCenteredString(vertMargin, 30, menuTitle);
-   drawCenteredString(vertMargin + 35, 18, menuSubTitle);
-
-   glColor3f(1, 1, 1);
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, "UP, DOWN to choose | ESC exits menu");
-
-   for(S32 i = 0; i < menuItems.size(); i++)
-   {
-      U32 y = yStart + i * itemHeight;
-
-      if(selectedIndex == i)           // Highlight selected item
-      {
-         for(S32 j = 1; j >= 0; j--)
-         {
-            glColor(j ? Color(0,0,0.4) : Color(0, 0, 1));      // Fill : outline
-            glBegin(j ? GL_POLYGON : GL_LINES);
-               glVertex2f(0, y - 2);
-               glVertex2f(canvasWidth, y - 2);
-               glVertex2f(canvasWidth, y + fontSize + 8);
-               glVertex2f(0, y + fontSize + 8);
-            glEnd();
-         }
-      }
-
-      S32 titleWidth = getStringWidth(fontSize, menuItems[i].mTitle);
-      S32 space = getStringWidth(fontSize, " ");
-
-      string dispString = menuItems[i].mLineEditor.isEmpty() ? "<none>" : menuItems[i].mLineEditor.getString();
-
-      bool isStringLike = menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
-                          menuItems[i].mValType == TypeGameType    || menuItems[i].mValType == TypeFileName;
-
-      bool needsCursor =  menuItems[i].mValType == TypeShortString || menuItems[i].mValType == TypeLongString ||
-                                                                      menuItems[i].mValType == TypeFileName;
-
-      // Hande special cases
-      if((i == MIN_PLAYERS_INDEX || i == MIN_PLAYERS_INDEX + 1) && menuItems[i].mValI == menuItems[i].mMinVal)
-      {
-         isStringLike = true;
-         dispString = "N/A";
-      }
-
-      S32 xpos;
-
-      if(isStringLike)
-         xpos = (gScreenWidth - titleWidth - getStringWidth(fontSize, dispString.c_str()) - space) / 2;
-      else if(menuItems[i].mValType == TypeInt)
-         xpos = (gScreenWidth - getStringWidthf(fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits) - titleWidth - space) / 2;
-      else
-         xpos = (gScreenWidth - titleWidth) / 2;
-
-      glColor3f(0,1,1);
-      drawString(xpos, y, fontSize, menuItems[i].mTitle);
-
-      glColor(selectedIndex == i ? Color(1,0,0) : Color(1,1,1));
-
-
-      if(isStringLike)
-         drawString(xpos + titleWidth + space, y, fontSize, dispString.c_str());
-      else if(menuItems[i].mValType == TypeInt)
-         drawStringf(xpos + titleWidth + space, y, fontSize, "%d %s", menuItems[i].mValI, menuItems[i].mUnits);
-      // else draw nothing
-
-      if(selectedIndex == i && isEditableString(menuItems[i]))     // This is the currently selected item, and it needs a cursor!  Stat!
-         menuItems[i].mLineEditor.drawCursor(xpos + titleWidth + space, y, fontSize);
-   }
-
-   // Draw the help string
-   glColor3f(0, 1, 0);
-   S32 ypos = canvasHeight - vertMargin - 50;
-
-   if(menuItems[selectedIndex].mValType == TypeInt)
-   {
-      drawCenteredString(ypos, fontSize,  "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change.");
-      ypos -= fontSize + 5;
-   }
-
-   drawCenteredString(ypos, fontSize, menuItems[selectedIndex].mHelp);
-}
-
-
-// Run this as we're exiting the menu
+// Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
 {
-   strcpy(gEditorUserInterface.mGameType, gGameTypeNames[menuItems[0].mValI]);   // Save current game type
+   S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[OPT_GAMETYPE])->getValueIndex();
+   strcpy(gEditorUserInterface.mGameType, gGameTypeNames[gameTypeIndex]);   // Save current game type
 
    // Compose GameType string from GameType and level-specific params
-   gEditorUserInterface.setLevelFileName(menuItems[1].mLineEditor.getString());  // Save level file name, if it changed.  Or hell, even if it didn't
-   gEditorUserInterface.setLevelGenScriptName(menuItems[5].mLineEditor.getString());
+   gEditorUserInterface.setLevelFileName(menuItems[OPT_FILENAME]->getValue());  // Save level file name if it changed. Or hell, even if it didn't
+   gEditorUserInterface.setLevelGenScriptName(menuItems[OPT_SCRIPT]->getValue());
 
-   gEditorUserInterface.setGridSize(menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI); 
+   gEditorUserInterface.setGridSize(menuItems[OPT_GRIDSIZE]->getIntValue()); 
    buildGameParamList();
 
-   if(didAnythingGetChanged())
+   if(anythingChanged())
    {
       gEditorUserInterface.mNeedToSave = true;        // Need to save to retain our changes
       gEditorUserInterface.mAllUndoneUndoLevel = -1;  // This change can't be undone
@@ -310,39 +348,39 @@ void GameParamUserInterface::onEscape()
    UserInterface::reactivatePrevUI();
 }
 
-// Take the info from our menus and create a list of lines we can stick in a level file without further ado
+
+// Take the info from our menus and create a list of lines for the level file
 void GameParamUserInterface::buildGameParamList()
 {
    gEditorUserInterface.mGameTypeArgs.clear();
    gameParams.clear();
 
    char str[gameTypeLen];
-   strcpy(str, gGameTypeNames[menuItems[0].mValI]);      // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
+   
+   S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[OPT_GAMETYPE])->getValueIndex();
+   strcpy(str, gGameTypeNames[gameTypeIndex]);      // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
 
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
-   for(S32 i = 0; i < mGameSpecificParams; i++)
+   for(S32 i = FIRST_GAME_SPECIFIC_PARAM; i < FIRST_GAME_SPECIFIC_PARAM + mGameSpecificParams; i++)
    {
-      dSprintf(str, sizeof(str), "%s %d", str, menuItems[i + NumberOfPreGameSpecificParams].mValI);
-      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i + NumberOfPreGameSpecificParams].mValI);      // Save the already-parsed GameType args in a vector for use if we re-enter this interface
+      dSprintf(str, sizeof(str), "%s %d", str, menuItems[i]->getIntValue());
+      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getIntValue());  // Save the already-parsed GameType args in a vector for use if we re-enter this interface
    }
 
    // Compose other game description strings
    gameParams.push_back(str);
-   gameParams.push_back("LevelName " + menuItems[2].mLineEditor.getString());
-   gameParams.push_back("LevelDescription " + menuItems[3].mLineEditor.getString());
-   gameParams.push_back("LevelCredits " + menuItems[4].mLineEditor.getString());
-   gameParams.push_back("Script " + menuItems[5].mLineEditor.getString());
-   dSprintf(str, sizeof(str), "GridSize %d", menuItems[mGameSpecificParams + NumberOfPreGameSpecificParams].mValI);
-   gameParams.push_back(str);
-   dSprintf(str, sizeof(str), "MinPlayers %d", menuItems[MIN_PLAYERS_INDEX].mValI);
-   gameParams.push_back(str);
-   dSprintf(str, sizeof(str), "MaxPlayers %d", menuItems[MIN_PLAYERS_INDEX + 1].mValI);
-   gameParams.push_back(str);
+   gameParams.push_back("LevelName "        + string(menuItems[OPT_LEVEL_NAME]->getValue()));
+   gameParams.push_back("LevelDescription " + string(menuItems[OPT_LEVEL_DESCR]->getValue()));
+   gameParams.push_back("LevelCredits "     + string(menuItems[OPT_CREDITS]->getValue()));
+   gameParams.push_back("Script "           + string(menuItems[OPT_SCRIPT]->getValue()));
+   gameParams.push_back("GridSize "         + string(menuItems[OPT_GRIDSIZE]->getValue()));
+   gameParams.push_back("MinPlayers "       + string(menuItems[OPT_MIN_PLAYERS]->getValue()));
+   gameParams.push_back("MaxPlayers "       + string(menuItems[OPT_MAX_PLAYERS]->getValue()));
 }
 
 
 // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
-bool GameParamUserInterface::didAnythingGetChanged()
+bool GameParamUserInterface::anythingChanged()
 {
    if(origGameParams.size() != gameParams.size())
       return true;
@@ -353,116 +391,6 @@ bool GameParamUserInterface::didAnythingGetChanged()
 
    return false;
 }
-
-
-void GameParamUserInterface::onKeyDown(KeyCode keyCode, char ascii)
-{
-   if(selectedIndex != -1 && isEditableString(menuItems[selectedIndex]) && (keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE))
-      menuItems[selectedIndex].mLineEditor.handleBackspace(keyCode);
-
-   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK || (selectedIndex == mQuitItemIndex && (keyCode == KEY_ENTER || keyCode == MOUSE_LEFT)))   // Esc - Quit
-   {
-      UserInterface::playBoop();
-      onEscape();
-   }
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP || (keyCode == KEY_TAB && getKeyState(KEY_SHIFT)))        // Prev item
-   {
-      UserInterface::playBoop();
-      selectedIndex--;
-      if(selectedIndex < 0)
-         selectedIndex = menuItems.size() - 1;
-      glutSetCursor(GLUT_CURSOR_NONE);
-   }
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_ENTER || keyCode == KEY_TAB)    // Next item
-   {
-      UserInterface::playBoop();
-      selectedIndex++;
-      if(selectedIndex >= menuItems.size())
-         selectedIndex = 0;
-      glutSetCursor(GLUT_CURSOR_NONE);
-   }
-   else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
-   {
-      UserInterface::playBoop();
-      gChatInterface.activate();
-   }
-
-   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_RIGHT  || keyCode == MOUSE_LEFT))   // Inc. by mMinVal, use shift to go faster!
-   {
-      // Special case:
-      S32 min = menuItems[selectedIndex].mMinVal;
-      if(selectedIndex == MIN_PLAYERS_INDEX || selectedIndex == MIN_PLAYERS_INDEX + 1)
-         min = 1;
-
-      S32 inc = getKeyState(KEY_SHIFT) ? min * 10 : min;
-
-      if(menuItems[selectedIndex].mValI + inc <= menuItems[selectedIndex].mMaxVal)
-         menuItems[selectedIndex].mValI += inc;
-      else
-         menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMaxVal;
-   }
-   else if (menuItems[selectedIndex].mValType == TypeInt && (keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT))    // Dec. by mMinVal, use shift to go faster!
-   {
-      // Special case:
-      S32 min = menuItems[selectedIndex].mMinVal;
-      if(selectedIndex == MIN_PLAYERS_INDEX || selectedIndex == MIN_PLAYERS_INDEX + 1)
-         min = 1;
-
-      S32 inc = getKeyState(KEY_SHIFT) ? min * 10 : min;
-
-      if(menuItems[selectedIndex].mValI - inc >= menuItems[selectedIndex].mMinVal)
-         menuItems[selectedIndex].mValI -= inc;
-      else
-         menuItems[selectedIndex].mValI = menuItems[selectedIndex].mMinVal;
-   }
-   else if(menuItems[selectedIndex].mValType == TypeGameType)     // Game type menu item
-   {
-      if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)           // Next game type
-      {
-         menuItems[selectedIndex].mValI++;
-         ignoreGameParams = true;              // Game parameters specified in level file no longer make sense if we've changed game type!
-         if(!gGameTypeNames[menuItems[selectedIndex].mValI])
-            menuItems[selectedIndex].mValI = 0;
-
-         updateMenuItems(menuItems[selectedIndex].mValI);
-      }
-      else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)     // Prev game type
-      {
-         menuItems[selectedIndex].mValI--;
-         if(menuItems[selectedIndex].mValI < 0)
-         {
-            // Find last menuItem string
-            S32 indx;
-            for(indx = 0; gGameTypeNames[indx]; indx++)
-               ;     // Do nothing...
-            indx--;
-            menuItems[selectedIndex].mValI = indx;
-         }
-          updateMenuItems(menuItems[selectedIndex].mValI);
-      }
-      else    // First letter of a game type?
-      {
-         for(S32 i = 0; gGameTypeNames[i]; i++)
-         {
-            // The following seems rather wasteful, but this is hardly a performance sensitive area...
-            GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
-
-            if(toupper(gameType->getGameTypeString()[0]) == toupper(ascii))      // Compare first letter of game name with what user typed
-            {
-               menuItems[selectedIndex].mValI = i;
-               updateMenuItems(i);
-               break;
-            }
-         }
-      }
-   }
-
-   else if((menuItems[selectedIndex].mValType == TypeShortString || menuItems[selectedIndex].mValType == TypeLongString) && ascii)
-      menuItems[selectedIndex].mLineEditor.addChar(ascii);
-
-   else if(menuItems[selectedIndex].mValType == TypeFileName)
-      menuItems[selectedIndex].mLineEditor.addChar(ascii);
-   }
 
 
 void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
@@ -480,7 +408,6 @@ void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
       selectedIndex = 0;
 }
 
-#undef MIN_PLAYERS_INDEX
 
 };
 

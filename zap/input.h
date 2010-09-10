@@ -81,8 +81,7 @@ enum ButtonInfo {
    ControllerButtonDPadRight = 1 << 13,
 };
 
-// the following functions are defined differently on each platform
-// in the the platInput.cpp files.
+// The following functions are defined differently on each platform in the the platInput.cpp files
 
 void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown );
 
@@ -100,5 +99,3 @@ extern string joystickTypeToPrettyString(S32 controllerType);
 };
 
 #endif
-
-

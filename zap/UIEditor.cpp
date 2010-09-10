@@ -477,9 +477,9 @@ void EditorUserInterface::loadLevel()
    mLoadTarget = &mItems;
    mGameTypeArgs.clear();
    gGameParamUserInterface.gameParams.clear();
-   gGameParamUserInterface.savedMenuItems.clear();
-   gGameParamUserInterface.menuItems.clear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
-   mGridSize = Game::DefaultGridSize;              // Used in editor for scaling walls and text items appropriately
+   gGameParamUserInterface.savedMenuItems.clear();          // clear() because this is not a pointer vector
+   gGameParamUserInterface.menuItems.deleteAndClear();      // Keeps interface from using our menuItems to rebuild savedMenuItems
+   mGridSize = Game::DefaultGridSize;                       // Used in editor for scaling walls and text items appropriately
 
    mGameType[0] = 0;                   // Clear mGameType
    char fileBuffer[1024];
@@ -4314,7 +4314,7 @@ EditorMenuUserInterface gEditorMenuUserInterface;
 EditorMenuUserInterface::EditorMenuUserInterface()
 {
    setMenuID(EditorMenuUI);
-   dSprintf(menuTitle, sizeof(menuTitle), "EDITOR MENU");
+   menuTitle = "EDITOR MENU";
 }
 
 void EditorMenuUserInterface::onActivate()
@@ -4325,75 +4325,79 @@ void EditorMenuUserInterface::onActivate()
 
 
 extern IniSettings gIniSettings;
+extern MenuItem *getWindowModeMenuItem();
+
+//////////
+// Editor menu callbacks
+//////////
+
+void reactivatePrevUICallback(U32 unused)
+{
+   gEditorUserInterface.reactivatePrevUI();
+}
+
+static void testLevelCallback(U32 unused)
+{
+   gEditorUserInterface.testLevel();
+}
+
+
+void returnToEditorCallback(U32 unused)
+{
+   gEditorUserInterface.saveLevel(true, true);  // Save level
+   gEditorUserInterface.setSaveMessage("Saved " + gEditorUserInterface.getLevelFileName(), true);
+   gEditorUserInterface.reactivatePrevUI();        // Return to editor
+}
+
+static void activateHelpCallback(U32 unused)
+{
+   gEditorInstructionsUserInterface.activate();
+}
+
+static void activateLevelParamsCallback(U32 unused)
+{
+   gGameParamUserInterface.activate();
+}
+
+static void activateTeamDefCallback(U32 unused)
+{
+   gTeamDefUserInterface.activate();
+}
+
+void quitEditorCallback(U32 unused)
+{
+   if(gEditorUserInterface.mNeedToSave)
+   {
+      gYesNoUserInterface.reset();
+      gYesNoUserInterface.setInstr("Press [Y] to save, [N] to quit [ESC] to cancel");
+      gYesNoUserInterface.setTitle("SAVE YOUR EDITS?");
+      gYesNoUserInterface.setMessage(1, "You have not saved your edits to the level.");
+      gYesNoUserInterface.setMessage(3, "Do you want to?");
+      gYesNoUserInterface.registerYesFunction(saveLevelCallback);
+      gYesNoUserInterface.registerNoFunction(backToMainMenuCallback);
+      gYesNoUserInterface.activate();
+   }
+   else
+      gEditorUserInterface.reactivateMenu(gMainMenuUserInterface);
+
+   gEditorUserInterface.clearUndoHistory();        // Clear up a little memory
+}
+
+//////////
 
 void EditorMenuUserInterface::setupMenus()
 {
-   menuItems.clear();
-   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", KEY_R, KEY_UNKNOWN));
-   menuItems.push_back(new ToggleMenuItem(1, "GAME MODE:", gIniSettings.fullscreen ? "WINDOWED" : "FULLSCREEN", KEY_G, KEY_UNKNOWN));
-   menuItems.push_back(new MenuItem(2, "TEST LEVEL",       KEY_T, KEY_UNKNOWN));
-   menuItems.push_back(new MenuItem(3, "SAVE LEVEL",       KEY_S, KEY_UNKNOWN));
-   menuItems.push_back(new MenuItem(4, "INSTRUCTIONS",     KEY_I, keyHELP));
-   menuItems.push_back(new MenuItem(5, "LEVEL PARAMETERS", KEY_L, KEY_F3));
-   menuItems.push_back(new MenuItem(6, "MANAGE TEAMS",     KEY_M, KEY_F2));
-   menuItems.push_back(new MenuItem(7, "QUIT",             KEY_Q, KEY_UNKNOWN));
+   menuItems.deleteAndClear();
+   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", reactivatePrevUICallback,    "", KEY_R));
+   menuItems.push_back(getWindowModeMenuItem());
+   menuItems.push_back(new MenuItem(0, "TEST LEVEL",       testLevelCallback,           "", KEY_T));
+   menuItems.push_back(new MenuItem(0, "SAVE LEVEL",       returnToEditorCallback,      "", KEY_S));
+   menuItems.push_back(new MenuItem(0, "INSTRUCTIONS",     activateHelpCallback,        "", KEY_I, keyHELP));
+   menuItems.push_back(new MenuItem(0, "LEVEL PARAMETERS", activateLevelParamsCallback, "", KEY_L, KEY_F3));
+   menuItems.push_back(new MenuItem(0, "MANAGE TEAMS",     activateTeamDefCallback,     "", KEY_M, KEY_F2));
+   menuItems.push_back(new MenuItem(0, "QUIT",             quitEditorCallback,          "", KEY_Q, KEY_UNKNOWN));
 }
 
-
-void EditorMenuUserInterface::processSelection(U32 index)
-{
-   switch(index)
-   {
-      case 0:
-         //gEditorUserInterface.activate(false);
-         reactivatePrevUI();
-         break;
-      case 1:
-         gOptionsMenuUserInterface.toggleFullscreen();
-         setupMenus();
-         break;
-      case 2:
-         gEditorUserInterface.testLevel();
-         break;
-      case 3:
-         gEditorUserInterface.saveLevel(true, true);  // Save level
-         gEditorUserInterface.setSaveMessage("Saved " + gEditorUserInterface.getLevelFileName(), true);
-         reactivatePrevUI();        // Return to editor
-         break;
-      case 4:                                         // Instructions
-         gEditorInstructionsUserInterface.activate();
-         break;
-      case 5:
-         gGameParamUserInterface.activate();
-         break;
-      case 6:                                         // Team editor
-         gTeamDefUserInterface.activate();
-         break;
-      case 7:
-         if(gEditorUserInterface.mNeedToSave)
-         {
-            gYesNoUserInterface.reset();
-            gYesNoUserInterface.setInstr("Press [Y] to save, [N] to quit [ESC] to cancel");
-            gYesNoUserInterface.setTitle("SAVE YOUR EDITS?");
-            gYesNoUserInterface.setMessage(1, "You have not saved your edits to the level.");
-            gYesNoUserInterface.setMessage(3, "Do you want to?");
-            gYesNoUserInterface.registerYesFunction(saveLevelCallback);
-            gYesNoUserInterface.registerNoFunction(backToMainMenuCallback);
-            gYesNoUserInterface.activate();
-         }
-         else
-            reactivateMenu(gMainMenuUserInterface);
-
-         gEditorUserInterface.clearUndoHistory();  // Clear up a little memory
-         break;
-   }
-}
-
-
-void EditorMenuUserInterface::processShiftSelection(U32 index)
-{
-   processSelection(index);
-}
 
 void EditorMenuUserInterface::onEscape()
 {

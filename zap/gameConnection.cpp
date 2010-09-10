@@ -1083,7 +1083,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 {
    if(isInitiator())    // i.e. this is a client that connected to the server
    {
-      if (UserInterface::cameFromEditor())
+      if(UserInterface::cameFrom(EditorUI))
          UserInterface::reactivateMenu(gEditorUserInterface);
       else
          UserInterface::reactivateMenu(gMainMenuUserInterface);

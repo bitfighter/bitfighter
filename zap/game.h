@@ -124,12 +124,12 @@ protected:
    bool mGameSuspended;                   // True if we're in "suspended animation" mode
 
 public:
+   static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
+   static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
+   static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
+
    enum
    {
-      DefaultGridSize = 255,           // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
-      minGridSize = 5,                 // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
-      maxGridSize = 1000,              // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
-
       PlayerHorizVisDistance = 600,    // How far player can see normally horizontally...
       PlayerVertVisDistance = 450,     // ...and vertically
 
@@ -396,7 +396,7 @@ extern void endGame();
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm/sm protocol (must be int)
 #define CS_PROTOCOL_VERSION 28     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 926          // Version of the game according to SVN, will be unique every release (must be int)
-#define ZAP_GAME_RELEASE "013b"    // Change this with every release -- for display purposes only, string, 
+#define ZAP_GAME_RELEASE "013c"    // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces
 };
 
