@@ -27,16 +27,8 @@
 #define _UIMENUS_H_
 
 #include "UI.h"
-#include "input.h"
-#include "keyCode.h"
-#include "point.h"
-#include "teamInfo.h"      // For Team def
-
-#include "tnlNetBase.h"
-#include "tnlTypes.h"
-
-
-#include <string>
+#include "input.h"         // For InputMode def
+#include "UIMenuItems.h"
 
 
 namespace Zap
@@ -44,225 +36,6 @@ namespace Zap
 
 using namespace std;
 
-enum PlayerType {
-   PlayerTypePlayer,
-   PlayerTypeAdmin,
-   PlayerTypeRobot,
-   PlayerTypeIrrelevant
-};
-
-enum MenuItemTypes {
-   MenuItemType,
-   ToggleMenuItemType,
-   CounterMenuItemType,
-   EditableMenuItemType,   
-   PlayerMenuItemType,
-   TeamMenuItemType
-};
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-class MenuItem
-{
-private:
-   string mText;     // Text displayed on menu
-   string mHelp;     // An optional help string
-   S32 mIndex;
-
-protected:
-   Color color;      // Color in which item should be displayed
-   void (*mCallback)(U32);
-
-public:
-   MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
-
-   // Constructor
-   MenuItem(S32 index, string text, void (*callback)(U32), string help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1,1,1))
-   {
-      mText = text;
-      key1 = k1;
-      key2 = k2;
-      color = c;
-      mCallback = callback;
-      mHelp = help;
-      mIndex = (U32)index;
-   }
-
-   KeyCode key1;     // Allow two shortcut keys per menu item...
-   KeyCode key2;
-
-   virtual MenuItemTypes getItemType() { return MenuItemType; }
-   virtual void render(S32 ypos, S32 textsize);
-   const char *getHelp() { return mHelp.c_str(); }
-   const char *getText() { return mText.c_str(); }
-   
-   virtual const char *getSpecialEditingInstructions() { return ""; }
-   virtual const char *getValue() { return ""; }
-   virtual S32 getIntValue() { return 0; }
-   virtual void setValue(S32 val) { /* Do nothing */ }
-
-   virtual void handleKey(KeyCode keyCode, char ascii);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class ToggleMenuItem : public MenuItem
-{
-private:
-   string mValue;
-   U32 mIndex;
-   Vector<string> mOptions;
-   bool mWrap;
-
-public:
-   ToggleMenuItem(string title, Vector<string> options, U32 currOption, bool wrap, void (*callback)(U32), string help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
-         MenuItem(-1, title, callback, help, k1, k2,  color)
-   {
-      mValue = "";
-      mIndex = currOption;  
-      mOptions = options;
-      mWrap = wrap;
-   }
-
-   virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
-   virtual const char *getValue() { return mValue.c_str(); }
-   virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
-   virtual S32 getValueIndex() { return mIndex; }
-
-   virtual void render(S32 ypos, S32 textsize);
-   virtual void handleKey(KeyCode keyCode, char ascii);
-};
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-class CounterMenuItem : public MenuItem
-{
-private:
-   S32 mValue;
-   S32 mStep;
-   S32 mMinValue;
-   S32 mMaxValue;
-   string mUnits;
-   string mMinMsg;
-
-   virtual void increment(S32 fact = 1); 
-   virtual void decrement(S32 fact = 1);
-
-public:
-   CounterMenuItem(string title, S32 value, S32 step, S32 minVal, S32 maxVal, string units, string minMsg, string help, 
-                   KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
-      MenuItem(-1, title, NULL, help, k1, k2,  color)
-   {
-      mValue = value;
-      mStep = step;
-      mMinValue = minVal;
-      mMaxValue = maxVal;
-      mUnits = units;
-      mMinMsg = minMsg;
-   }
-
-   virtual void render(S32 ypos, S32 textsize);
-
-   virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
-   virtual const char *getValue() { return UserInterface::itos(mValue).c_str(); }
-   const char *getUnits() { return mUnits.c_str(); }
-   virtual S32 getIntValue() { return mValue; }
-   virtual void setValue(S32 value) { mValue = value; }
-   virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
-   virtual void handleKey(KeyCode keyCode, char ascii);
-};
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-class EditableMenuItem : public MenuItem
-{
-private:
-   LineEditor mLineEditor;
-   bool mIsActive;
-   string mEmptyVal;
-
-public:
-   // Contstuctor
-   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1) ) :
-            MenuItem(-1, title, NULL, help, k1, k2, c),
-            mLineEditor(LineEditor(maxLen, val))
-   {
-      mEmptyVal = emptyVal;
-      mIsActive = false;
-   }
-
-public:
-   virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
-   virtual void render(S32 ypos, S32 textsize);
-   virtual void handleKey(KeyCode keyCode, char ascii);
-
-   void setActive(bool isActive) { mIsActive = isActive; }
-
-   LineEditor getLineEditor() { return mLineEditor; }
-   void setLineEditor(LineEditor editor) { mLineEditor = editor; }
-
-   //string getValue() { return mLineEditor.getString(); }
-   virtual const char *getValue() { return mLineEditor.c_str(); }
-};
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-class PlayerMenuItem : public MenuItem
-{
-private:
-   PlayerType mType;    // Type of player, for name menu
-
-public:
-   // Constructor
-   PlayerMenuItem(S32 index, const char *text, void (*callback)(U32), KeyCode k1, Color color, PlayerType type) :
-         MenuItem(index, text, callback, "", k1, KEY_UNKNOWN, color)
-   {
-      mType = type;
-   }
-
-   virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
-   virtual void render(S32 ypos, S32 textsize);
-};
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-class TeamMenuItem : public MenuItem
-{
-private:
-   Team mTeam;
-   bool mIsCurrent;     // Is this a player's current team? 
-
-public:
-   TeamMenuItem(S32 index, Team team, void (*callback)(U32), KeyCode keyCode, bool isCurrent) :
-                  MenuItem(index, team.getName().getString(), callback, "", keyCode, KEY_UNKNOWN, team.color)
-{
-   mTeam = team;
-   mIsCurrent = isCurrent;
-}
-
-   virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
-   void render(S32 ypos, S32 textsize);
-};
-
-
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
-////////////////////////////////////
 
 // This class is the template for most all of our menus...
 class MenuUserInterface : public UserInterface
@@ -295,11 +68,12 @@ public:
 
    static const S32 MOUSE_SCROLL_INTERVAL = 100;
 
-   const char *menuTitle;
-   const char *menuSubTitle;
-   Color menuSubTitleColor;
-   const char *menuFooter;
-   bool menuFooterContainsInstructions;
+   const char *mMenuTitle;
+   const char *mMenuSubTitle;
+   const char *mMenuFooter;
+
+   Color mMenuSubTitleColor;
+   bool mMenuFooterContainsInstructions;
 
    void idle(U32 timeDelta); 
 
@@ -317,8 +91,6 @@ public:
    void onReactivate();
 
    virtual void onEscape();
-   //virtual void processSelection(U32 index) = 0;         // Must implement!
-   //virtual void processShiftSelection(U32 index) { /* Do nothing */ }
 };
 
 //////////
@@ -415,11 +187,7 @@ public:
    void onEscape();
    void setupMenus();
    void onActivate();
-   void setActive(S32 i);     // Specify which item is being actively edited, -1 for none
    void render();
-
-   void idle(U32 timeDelta);
-
    void saveSettings();       // Save parameters in INI file
 
    // For displaying the list of levels as we load them:

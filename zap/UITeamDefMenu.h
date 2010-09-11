@@ -60,10 +60,10 @@ private:
 
 public:
    TeamDefUserInterface();      // Constructor
-   const char *menuTitle;
-   const char *menuSubTitle;
-   Color menuSubTitleColor;
-   const char *menuFooter;
+   const char *mMenuTitle;
+   const char *mMenuSubTitle;
+   Color mMenuSubTitleColor;
+   const char *mMenuFooter;
 
    void render();              // Draw the menu
    void idle(U32 timeDelta);

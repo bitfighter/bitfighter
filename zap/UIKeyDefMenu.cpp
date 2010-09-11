@@ -52,8 +52,8 @@ extern IniSettings gIniSettings;
 KeyDefMenuUserInterface::KeyDefMenuUserInterface()
 {
    setMenuID(KeyDefUI);
-   menuTitle = "Define Keys";
-   menuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";
+   mMenuTitle = "Define Keys";
+   mMenuFooter = "UP, DOWN, LEFT, RIGHT to choose | ENTER to select | ESC exits menu";
 }
 
 
@@ -78,11 +78,11 @@ void KeyDefMenuUserInterface::onActivate()
    errorMsg = "";
 
    if(gIniSettings.inputMode == Joystick)
-      menuSubTitle = "Input Mode: Joystick";
+      mMenuSubTitle = "Input Mode: Joystick";
    else
-      menuSubTitle = "Input Mode: Keyboard";
+      mMenuSubTitle = "Input Mode: Keyboard";
 
-   menuSubTitleColor = Color(1,1,1);   // white
+   mMenuSubTitleColor = Color(1,1,1);   // white
 
    if (gIniSettings.inputMode == Joystick)
    {
@@ -178,13 +178,13 @@ void KeyDefMenuUserInterface::render()
    }
 
    glColor3f(1, 1, 1);
-   drawCenteredString(vertMargin, 30, menuTitle);
-   drawCenteredString(vertMargin + 35, 18, menuSubTitle);
+   drawCenteredString(vertMargin, 30, mMenuTitle);
+   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
    glColor3f(0, 1, 0);
    drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
    glColor3f(1, 1, 1);
 
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, menuFooter);
+   drawCenteredString(canvasHeight - vertMargin - 20, 18, mMenuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;

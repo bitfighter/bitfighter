@@ -135,7 +135,7 @@ public:
 class ChatUserInterface : public UserInterface, public AbstractChat
 {
 private:
-   Color menuSubTitleColor;
+   Color mMenuSubTitleColor;
 
    virtual void renderHeader();
    //virtual void renderFooter();

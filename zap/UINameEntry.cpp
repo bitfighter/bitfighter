@@ -148,39 +148,6 @@ void NameEntryUserInterface::onAccept(const char *name)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-PasswordEntryUserInterface gPasswordEntryUserInterface;
-
-void PasswordEntryUserInterface::onEscape()
-{
-   gMainMenuUserInterface.activate();
-}
-
-void PasswordEntryUserInterface::onAccept(const char *text)
-{
-   joinGame(connectAddress, false, false);      // Not from master, not local
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-ReservedNamePasswordEntryUserInterface gReservedNamePasswordEntryUserInterface;
-
-void ReservedNamePasswordEntryUserInterface::onEscape()
-{
-   gMainMenuUserInterface.activate();
-}
-
-void ReservedNamePasswordEntryUserInterface::onAccept(const char *text)
-{
-   joinGame(connectAddress, false, false);      // Not from master, not local
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
-extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 
 LevelNameEntryUserInterface gLevelNameEntryUserInterface;
@@ -207,9 +174,7 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-AdminPasswordEntryUserInterface gAdminPasswordEntryUserInterface;
-
-void AdminPasswordEntryUserInterface::render()
+void PasswordEntryUserInterface::render()
 {
    if(gClientGame->getConnectionToServer())
    {
@@ -218,9 +183,9 @@ void AdminPasswordEntryUserInterface::render()
       glEnable(GL_BLEND);
          glBegin(GL_POLYGON);
             glVertex2f(0, 0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0, canvasHeight);
+            glVertex2f(UserInterface::canvasWidth, 0);
+            glVertex2f(UserInterface::canvasWidth, UserInterface::canvasHeight);
+            glVertex2f(0, UserInterface::canvasHeight);
          glEnd();
       glDisable(GL_BLEND);
    }
@@ -228,25 +193,91 @@ void AdminPasswordEntryUserInterface::render()
    Parent::render();
 }
 
-void AdminPasswordEntryUserInterface::onEscape()
+
+void PasswordEntryUserInterface::onEscape()
 {
    reactivatePrevUI();
 }
 
-extern md5wrapper md5;
 
-void AdminPasswordEntryUserInterface::onAccept(const char *text)
+////////////////////////////////////////
+////////////////////////////////////////
+
+void PreGamePasswordEntryUserInterface::onEscape()
+{
+   gMainMenuUserInterface.activate();
+}
+
+void PreGamePasswordEntryUserInterface::onAccept(const char *text)
+{
+   joinGame(connectAddress, false, false);      // Not from master, not local
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+void InGamePasswordEntryUserInterface::onAccept(const char *text)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(gc)
    {
-      gc->submitAdminPassword(text);
+      submitPassword(gc, text);
 
       reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
-      gGameMenuUserInterface.menuSubTitle = "** checking password **";     // ...then set the message
+      gGameMenuUserInterface.mMenuSubTitle = "** checking password **";     // ...then set the message
    }
    else
       reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+ServerPasswordEntryUserInterface gServerPasswordEntryUserInterface;
+
+// Constructor
+ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface()        
+{
+   setMenuID(PasswordEntryUI);
+   title = "ENTER SERVER PASSWORD:";
+   instr1 = "";
+   instr2 = "Enter the password required for access to the server";
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+ReservedNamePasswordEntryUserInterface gReservedNamePasswordEntryUserInterface;
+
+// Constructor
+ReservedNamePasswordEntryUserInterface::ReservedNamePasswordEntryUserInterface()       
+{
+   setMenuID(ReservedNamePasswordEntryUI);
+   title = "ENTER USERNAME PASSWORD:";
+   instr1 = "The username you are using has been reserved on this server.";
+   instr2 = "Please enter the password to use this name here.";
+}
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+AdminPasswordEntryUserInterface gAdminPasswordEntryUserInterface;
+
+// Constructor
+AdminPasswordEntryUserInterface::AdminPasswordEntryUserInterface()      
+{
+   setMenuID(AdminPasswordEntryUI);
+   title = "ENTER ADMIN PASSWORD:";
+   instr1 = "";
+   instr2 = "Enter the admin password to perform admin tasks and change levels on this server";
+}
+
+
+void AdminPasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
+{
+   gameConnection->submitAdminPassword(text);
 }
 
 
@@ -255,46 +286,24 @@ void AdminPasswordEntryUserInterface::onAccept(const char *text)
 
 LevelChangePasswordEntryUserInterface gLevelChangePasswordEntryUserInterface;
 
-void LevelChangePasswordEntryUserInterface::render()
+// Constructor
+LevelChangePasswordEntryUserInterface::LevelChangePasswordEntryUserInterface()      
 {
-   if(gClientGame->getConnectionToServer())
-   {
-      gGameUserInterface.render();
-      glColor4f(0, 0, 0, 0.5);
-      glEnable(GL_BLEND);
-         glBegin(GL_POLYGON);
-            glVertex2f(0, 0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0, canvasHeight);
-         glEnd();
-      glDisable(GL_BLEND);
-   }
-
-   Parent::render();
-}
-
-void LevelChangePasswordEntryUserInterface::onEscape()
-{
-   reactivatePrevUI();
-}
-
-void LevelChangePasswordEntryUserInterface::onAccept(const char *text)
-{
-
-   GameConnection *gc = gClientGame->getConnectionToServer();
-   if(gc)
-   {
-      gc->submitLevelChangePassword(text);
-
-      reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
-      gGameMenuUserInterface.menuSubTitle = "** checking password **";     // ...then set the message
-   }
-   else
-      reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
+   setMenuID(LevelChangePasswordEntryUI);
+   title = "ENTER LEVEL CHANGE PASSWORD:";
+   instr1 = "";
+   instr2 = "Enter the level change password to change levels on this server";
 }
 
 
+void LevelChangePasswordEntryUserInterface::submitPassword(GameConnection *gameConnection, const char *text)
+{
+   gameConnection->submitLevelChangePassword(text);
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 };
 
 

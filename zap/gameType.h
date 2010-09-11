@@ -30,7 +30,7 @@
 #include "gameObject.h"
 #include "flagItem.h"
 #include "teamInfo.h"
-#include "UIMenus.h"       // For MenuItem defs needed in addGameSpecificParameterMenuItems() and overrides
+#include "UIMenuItems.h"   // For MenuItem defs needed in addGameSpecificParameterMenuItems() and overrides
 #include "gameItems.h"     // For AsteroidSpawn
 #include "robot.h"
 #include "statistics.h"
@@ -286,7 +286,7 @@ public:
    ClientRef *findClientRef(const StringTableEntry &name);
 
    bool processArguments(S32 argc, const char **argv);
-   void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
+   virtual void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void onAddedToGame(Game *theGame);
 

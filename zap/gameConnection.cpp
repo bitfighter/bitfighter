@@ -542,14 +542,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
       {
          // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.menuSubTitle = adminPassSuccessMsg;
+            gGameMenuUserInterface.mMenuSubTitle = adminPassSuccessMsg;
          else
             gGameUserInterface.displayMessage(gCmdChatColor, adminPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.menuSubTitle = adminPassFailureMsg;
+            gGameMenuUserInterface.mMenuSubTitle = adminPassFailureMsg;
          else
             gGameUserInterface.displayMessage(gCmdChatColor, adminPassFailureMsg);
       }
@@ -594,14 +594,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
       {
          // Either display the message in the menu subtitle (if the menu is active), or in the message area if not
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.menuSubTitle = levelPassSuccessMsg;
+            gGameMenuUserInterface.mMenuSubTitle = levelPassSuccessMsg;
          else
             gGameUserInterface.displayMessage(gCmdChatColor, levelPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
-            gGameMenuUserInterface.menuSubTitle = levelPassFailureMsg;
+            gGameMenuUserInterface.mMenuSubTitle = levelPassFailureMsg;
          else
             gGameUserInterface.displayMessage(gCmdChatColor, levelPassFailureMsg);
       }
@@ -902,7 +902,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
          }
    }
 
-   stream->writeString(isLocal ? md5.getSaltedHashFromString(gServerPassword).c_str() : md5.getSaltedHashFromString(gPasswordEntryUserInterface.getText()).c_str());
+   stream->writeString(isLocal ? md5.getSaltedHashFromString(gServerPassword).c_str() : md5.getSaltedHashFromString(gServerPasswordEntryUserInterface.getText()).c_str());
    stream->writeString(mClientName.getString());
    stream->writeString(isLocal ? md5.getSaltedHashFromString(password).c_str() : md5.getSaltedHashFromString(gReservedNamePasswordEntryUserInterface.getText()).c_str());
 }
@@ -1179,8 +1179,8 @@ void GameConnection::onConnectTerminated(TerminationReason r, const char *string
    {
       if(!strcmp(string, "PASSWORD"))
       {
-         gPasswordEntryUserInterface.setConnectServer(getNetAddress());
-         gPasswordEntryUserInterface.activate();
+         gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
+         gServerPasswordEntryUserInterface.activate();
       }
       else if(!strcmp(string, "RESERVEDNAME"))
       {

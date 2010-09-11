@@ -80,9 +80,9 @@ TeamDefUserInterface gTeamDefUserInterface;
 TeamDefUserInterface::TeamDefUserInterface()
 {
    setMenuID(TeamDefUI);
-   menuTitle = "Configure Teams";
-   menuSubTitle = "For quick configuration, press [ALT]1-9 to specify number of teams";
-   menuSubTitleColor = Color(1,1,1);
+   mMenuTitle = "Configure Teams";
+   mMenuSubTitle = "For quick configuration, press [ALT]1-9 to specify number of teams";
+   mMenuSubTitleColor = Color(1,1,1);
 }
 
 static const U32 errorMsgDisplayTime = 4000; // 4 seconds
@@ -119,8 +119,8 @@ extern Color gHostileTeamColor;
 void TeamDefUserInterface::render()
 {
    glColor3f(1, 1, 1);
-   drawCenteredString(vertMargin, 30, menuTitle);
-   drawCenteredString(vertMargin + 35, 18, menuSubTitle);
+   drawCenteredString(vertMargin, 30, mMenuTitle);
+   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
 
    glColor3f(0, 1, 0);
    drawCenteredString(canvasHeight - vertMargin - 115, 16, "[1] - [9] selects a team preset for current slot");

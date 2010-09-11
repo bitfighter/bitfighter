@@ -40,6 +40,7 @@ OBJECTS_ZAP=\
    UIInstructions.o\
    UIKeyDefMenu.o\
    UITeamDefMenu.o\
+   UIMenuItems.o\
    UIMenus.o\
    UINameEntry.o\
    UIQueryServers.o\

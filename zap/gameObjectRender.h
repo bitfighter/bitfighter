@@ -28,7 +28,6 @@
 
 #include "tnl.h"
 #include "../glut/glutInclude.h"
-//#include "BotNavMeshZone.h"      // For Border def
 
 #include "point.h"
 #include <string>
@@ -65,8 +64,6 @@ extern void drawCircle(const Point &pos, F32 radius);
 //////////
 // Some things for rendering on screen display
 void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
-
-
 
 extern void renderCenteredString(const Point &pos, S32 size, const char *string);
 extern void renderCenteredString(const Point &pos, F32 size, const char *string);

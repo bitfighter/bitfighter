@@ -69,11 +69,11 @@ private:
 public:
    KeyDefMenuUserInterface();          // Constructor
    Vector<MenuItemExtended> menuItems; // Array of menu items
-   const char *menuTitle;
-   const char *menuSubTitle;
-   Color menuSubTitleColor;
+   const char *mMenuTitle;
+   const char *mMenuSubTitle;
+   Color mMenuSubTitleColor;
 
-   const char *menuFooter;
+   const char *mMenuFooter;
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise

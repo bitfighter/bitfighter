@@ -47,9 +47,10 @@ GameParamUserInterface gGameParamUserInterface;
 GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
 {
    setMenuID(GameParamsUI);
-   menuTitle = "Game Parameters Menu";
-   menuSubTitle = "";
-   //menuSubTitleColor = Color(1,1,1);
+   mMenuTitle = "Game Parameters Menu";
+   mMenuSubTitle = "";
+
+   //mMenuSubTitleColor = Color(1,1,1);
 }
 
 void GameParamUserInterface::onActivate()
@@ -117,44 +118,21 @@ static S32 OPT_MIN_PLAYERS = OPT_GRIDSIZE + 1;
 static S32 OPT_MAX_PLAYERS = OPT_MIN_PLAYERS + 1;
 
 
+static void changeGameTypeCallback(U32 gtIndex)
+{
+   gGameParamUserInterface.updateMenuItems(gtIndex);
+}
+
 static void backToEditorCallback(U32 unused)
 {
    gGameParamUserInterface.onEscape();
 }
 
 
-// Does the actual work of updating the menu items!
-void GameParamUserInterface::updateMenuItems(S32 gtIndex)
+static Vector<string> gameTypes;
+
+static void buildGameTypeList()
 {
-   TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);          // Instantiate our gameType object
-   GameType *gameType = dynamic_cast<GameType*>(theObject);                        // and cast it to GameType
-
-   // Save existing values of the menu items, so we can grab them again if the user selects the same game...
-   //if(menuItems.size())
-   //{
-   //   for(S32 i = 0; i < menuItems.size(); i++)
-   //   {
-   //      bool found = false;
-   //      if(savedMenuItems.size())
-   //         for(S32 j = 0; j < savedMenuItems.size(); j++)
-   //            if(!strcmp(savedMenuItems[j].getText(), menuItems[i]->getText())) // Found an already saved parameter with the same name... overwrite the saved values with a new ones
-   //            {
-   //               savedMenuItems[j].setValue(menuItems[i]->getValue());
-   //               savedMenuItems[j].setIntValue(menuItems[i]->getIntValue());
-   //               //savedMenuItems[j].mLineEditor = dynamic_cast<EditableMenuItem *>(menuItems[i])->getLineEditor();
-   //               found = true;
-   //               break;
-   //            }
-   //      if(!found)                                                     // We don't already have an item with this name.  We'd better add this to our list of saved items.
-   //         savedMenuItems.push_back(*menuItems[i]);
-   //   }
-   //}
-
-
-   menuItems.deleteAndClear();
-
-   Vector<string> gameTypes;
-
    for(S32 i = 0; gGameTypeNames[i]; i++)
    {
       // The following seems rather wasteful, but this is hardly a performance sensitive area...
@@ -168,12 +146,47 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       //   break;
       //}
    }
+}
+
+
+// Does the actual work of updating the menu items!
+void GameParamUserInterface::updateMenuItems(S32 gtIndex)
+{
+   TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);          // Instantiate our gameType object
+   GameType *gameType = dynamic_cast<GameType*>(theObject);                        // and cast it to GameType
+
+   if(gameTypes.size() == 0)     // Should only be run once, as these gameTypes will not change during the session
+      buildGameTypeList();
+
+   // Save existing values of the menu items, so we can grab them again if the user selects the same game
+   if(menuItems.size())
+   {
+      for(S32 i = 0; i < menuItems.size(); i++)
+      {
+         bool found = false;
+
+         if(savedMenuItems.size())
+            for(S32 j = 0; j < savedMenuItems.size(); j++)
+               if(savedMenuItems[j].getParamName() == menuItems[i]->getString())   // Overwrite already saved parameters
+               {
+                  savedMenuItems[j].setValues(menuItems[i]);
+                  found = true;
+                  break;
+               }
+         if(!found)                                                     // We don't already have an item with this name.  We'd better add this to our list of saved items.
+            savedMenuItems.push_back(SavedMenuItem(menuItems[i]));
+      }
+   }
+
+
+   menuItems.deleteAndClear();
+
 
    menuItems.push_back(new ToggleMenuItem("Game Type:",       
                                           gameTypes,
                                           gtIndex,
                                           true,
-                                          NULL,
+                                          changeGameTypeCallback,
                                           gameType->getInstructionString(),
                                           KEY_G ));
 
@@ -260,9 +273,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
    // Now populate the menu with values derived from our saved values
 
-   for(S32 i = 0; i < gameParams.size(); i++)
-      logprintf("%d == %s", i, gameParams[i].c_str());
-
    if(gameParams.size())
    {
       const string delimiters = " \t";       // Spaces or tabs will delimit our lines
@@ -300,28 +310,20 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    }
 
    // Lastly, scan through our list of saved items and replace the default values with those modified here in this interface
-   // This operates like a poor man's dictionary
-   //if(savedMenuItems.size())
-   //   for(S32 i = 1; i < menuItems.size(); i++)                    // Start with 1 because we don't want to overwrite our game type, which is #0!
-   //      for(S32 j = 0; j < savedMenuItems.size(); j++)
-   //         if(!strcmp(savedMenuItems[j].getText(), menuItems[i]->getText()))    // Found a match
-   //         {
-   //            menuItems[i]->mValI = savedMenuItems[j].mValI;
-   //            dynamic_cast<EditableMenuItem *>(menuItems[i])->setLineEditor(savedMenuItems[j].mLineEditor);
-   //            break;
-   //         }
-}
-
-
-void GameParamUserInterface::idle(U32 timeDelta)
-{
-   LineEditor::updateCursorBlink(timeDelta);
+   if(savedMenuItems.size())
+      for(S32 i = 1; i < menuItems.size(); i++)   
+         for(S32 j = 0; j < savedMenuItems.size(); j++)
+            if(menuItems[i]->getString() == savedMenuItems[j].getParamName())    // Found a match
+            {
+               menuItems[i]->setValue(savedMenuItems[j].getParamIVal());
+               //dynamic_cast<EditableMenuItem *>(menuItems[i])->setLineEditor(savedMenuItems[j].mLineEditor);
+               break;
+            }
 }
 
 
 static const U32 itemHeight = 30;
 static const U32 yStart = UserInterface::vertMargin + 90;
-
 
 // Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
@@ -369,13 +371,13 @@ void GameParamUserInterface::buildGameParamList()
 
    // Compose other game description strings
    gameParams.push_back(str);
-   gameParams.push_back("LevelName "        + string(menuItems[OPT_LEVEL_NAME]->getValue()));
-   gameParams.push_back("LevelDescription " + string(menuItems[OPT_LEVEL_DESCR]->getValue()));
-   gameParams.push_back("LevelCredits "     + string(menuItems[OPT_CREDITS]->getValue()));
-   gameParams.push_back("Script "           + string(menuItems[OPT_SCRIPT]->getValue()));
-   gameParams.push_back("GridSize "         + string(menuItems[OPT_GRIDSIZE]->getValue()));
-   gameParams.push_back("MinPlayers "       + string(menuItems[OPT_MIN_PLAYERS]->getValue()));
-   gameParams.push_back("MaxPlayers "       + string(menuItems[OPT_MAX_PLAYERS]->getValue()));
+   gameParams.push_back("LevelName "        + menuItems[OPT_LEVEL_NAME]->getValue());
+   gameParams.push_back("LevelDescription " + menuItems[OPT_LEVEL_DESCR]->getValue());
+   gameParams.push_back("LevelCredits "     + menuItems[OPT_CREDITS]->getValue());
+   gameParams.push_back("Script "           + menuItems[OPT_SCRIPT]->getValue());
+   gameParams.push_back("GridSize "         + menuItems[OPT_GRIDSIZE]->getValue());
+   gameParams.push_back("MinPlayers "       + menuItems[OPT_MIN_PLAYERS]->getValue());
+   gameParams.push_back("MaxPlayers "       + menuItems[OPT_MAX_PLAYERS]->getValue());
 }
 
 

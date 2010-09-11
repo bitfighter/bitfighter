@@ -72,8 +72,9 @@ public:
    void setString(string str);
 };
 
-////////////////
 
+////////////////////////////////////////
+////////////////////////////////////////
 
 class NameEntryUserInterface : public TextEntryUserInterface
 {
@@ -84,7 +85,9 @@ public:
    virtual void onEscape();
 };
 
-////////////////
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 extern NameEntryUserInterface gNameEntryUserInterface;
 extern IniSettings gIniSettings;
@@ -108,91 +111,104 @@ public:
 
 extern LevelNameEntryUserInterface gLevelNameEntryUserInterface;
 
-////////////////
 
-class PasswordEntryUserInterface : public TextEntryUserInterface
+////////////////////////////////////////
+////////////////////////////////////////
+
+class PasswordEntryUserInterface :  public TextEntryUserInterface
 {
-   Address connectAddress;
+   typedef TextEntryUserInterface Parent;
+
 public:
-   PasswordEntryUserInterface()        // Constructor
+   PasswordEntryUserInterface()     // Constructor
    {
-      setMenuID(PasswordEntryUI);
-      title = "ENTER SERVER PASSWORD:";
-      instr1 = "";
-      instr2 = "Enter the password required for access to the server";
       secret = true;
    }
-   void onAccept(const char *text);
-   void onEscape();
-   void setConnectServer(const Address &addr) { connectAddress = addr; }
+
+   virtual void onEscape();
+   virtual void render();
+   virtual void onAccept(const char *text) = 0;
 };
 
-extern PasswordEntryUserInterface gPasswordEntryUserInterface;
 
-////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
-class ReservedNamePasswordEntryUserInterface : public TextEntryUserInterface
+class GameConnection;
+
+class PreGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
 {
+private:
    Address connectAddress;
 public:
-   ReservedNamePasswordEntryUserInterface()        // Constructor
-   {
-      setMenuID(ReservedNamePasswordEntryUI);
-      title = "ENTER USERNAME PASSWORD:";
-      instr1 = "The username you are using has been reserved on this server.";
-      instr2 = "Please enter the password to use this name here.";
-      secret = true;
-   }
    void onAccept(const char *text);
    void onEscape();
    void setConnectServer(const Address &addr) { connectAddress = addr; }
+
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class InGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
+{
+public:
+   virtual void onAccept(const char *text);
+   virtual void submitPassword(GameConnection *gameConnection, const char *text) = 0;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class ServerPasswordEntryUserInterface : public PreGamePasswordEntryUserInterface
+{
+public:
+   ServerPasswordEntryUserInterface();                // Constructor
+};
+
+extern ServerPasswordEntryUserInterface gServerPasswordEntryUserInterface;
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class ReservedNamePasswordEntryUserInterface : public PreGamePasswordEntryUserInterface
+{
+public:
+   ReservedNamePasswordEntryUserInterface();        // Constructor
 };
 
 extern ReservedNamePasswordEntryUserInterface gReservedNamePasswordEntryUserInterface;
 
-////////////////
 
-class AdminPasswordEntryUserInterface : public TextEntryUserInterface
+////////////////////////////////////////
+////////////////////////////////////////
+
+class AdminPasswordEntryUserInterface : public InGamePasswordEntryUserInterface
 {
-   typedef TextEntryUserInterface Parent;
 public:
-   AdminPasswordEntryUserInterface()      // Constructor
-   {
-      setMenuID(AdminPasswordEntryUI);
-      title = "ENTER ADMIN PASSWORD:";
-      instr1 = "";
-      instr2 = "Enter the admin password to perform admin tasks and change levels on this server";
-      secret = true;
-   }
-   void onAccept(const char *text);
-   void onEscape();
-   void render();
+   AdminPasswordEntryUserInterface();           // Constructor
+   void submitPassword(GameConnection *gameConnection, const char *text);
 };
 
 extern AdminPasswordEntryUserInterface gAdminPasswordEntryUserInterface;
 
-////////////////
 
-class LevelChangePasswordEntryUserInterface : public TextEntryUserInterface
+////////////////////////////////////////
+////////////////////////////////////////
+
+class LevelChangePasswordEntryUserInterface : public InGamePasswordEntryUserInterface
 {
-   typedef TextEntryUserInterface Parent;
 public:
-   LevelChangePasswordEntryUserInterface()      // Constructor
-   {
-      setMenuID(LevelChangePasswordEntryUI);
-      title = "ENTER LEVEL CHANGE PASSWORD:";
-      instr1 = "";
-      instr2 = "Enter the level change password to change levels on this server";
-      secret = true;
-   }
-   void onAccept(const char *text);
-   void onEscape();
-   void render();
+   LevelChangePasswordEntryUserInterface();     // Constructor
+   void submitPassword(GameConnection *gameConnection, const char *text);
 };
 
 extern LevelChangePasswordEntryUserInterface gLevelChangePasswordEntryUserInterface;
 
-////////////////
+////////////////////////////////////////
+////////////////////////////////////////
 
 };
 

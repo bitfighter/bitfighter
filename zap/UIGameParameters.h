@@ -39,53 +39,34 @@ namespace Zap
 
 using namespace std;
 
-//
-//struct MenuItem2 : MenuItem    // An extended menu item complete with values good for editing!
-//{
-//   // Note that menuItems can have either a string or an int value.  So we'll create a slot for each,
-//   // and use menuValIsString to tell us which to use.
-//   LineEditor mLineEditor;   // Value for this item (string)
-//   S32 mValI;                // Value for this item (int)
-//   S32 mMinVal;              // Minimum numeric value for this parameter, if applicable
-//   S32 mMaxVal;              // Maximum numeric value for this parameter, if applicable
-//   const char *mUnits;       // What units do numeric values represent?
-//   const char *mHelp;        // Brief help string
-//
-//
-//   // Default constructor, unused
-//   //MenuItem2() { TNLAssert(false, "Don't use this constructor!") }
-//
-//   // Constructor
-//   MenuItem2(string title, string strVal, S32 intVal, S32 min, S32 max, const char *units, const char *help, 
-//             ParamType valType, KeyCode k1, KeyCode k2, Color color = Color(1, 1, 1))
-//             :    MenuItem(0, title, k1, k2, color)
-//
-//   {
-//      // Set a limit on entry length.  Note that these are fairly aribitrary...
-//      U32 len = 255;
-//      if(valType == TypeShortString)
-//         len = MAX_GAME_NAME_LEN;
-//      else if(valType == TypeLongString)
-//         len = MAX_GAME_DESCR_LEN;
-//      else if(valType == TypeFileName)
-//         len = MAX_SHORT_TEXT_LEN;
-//
-//      mLineEditor = LineEditor(len, strVal);
-//      mValI = intVal;
-//      mUnits = units;
-//      mHelp = help;
-//      mValType = valType;
-//      mMinVal = min;
-//      mMaxVal = max;
-//   }
-//};
+////////////////////////////////////
+////////////////////////////////////
 
+class SavedMenuItem
+{
+private:
+   string mParamName;
+   string mParamVal;
+   S32 mParamIVal;
+public:
+   SavedMenuItem() { /* Unused */ }    // Default constructor
+
+   SavedMenuItem(MenuItem *menuItem) { mParamName = menuItem->getText(); setValues(menuItem); }
+
+   void setValues(MenuItem *menuItem) { mParamVal = menuItem->getValue(); mParamIVal = menuItem->getIntValue(); }
+
+   string getParamName() { return mParamName; }
+   string getParamVal() { return mParamVal; }
+   S32 getParamIVal() { return mParamIVal; }
+};
+
+////////////////////////////////////
+////////////////////////////////////
 
 class GameParamUserInterface : public MenuUserInterface     // By subclassing this, I hoped to get the mouse stuff to automatically work, but it didn't.  <sigh>
 {
 private:
    void updateMenuItems(const char *gameType);  // Update list of menu items, based on provided game type. (Different game types require different params, after all)  Wraps the S32 version.
-   void updateMenuItems(S32 gameTypeIndex);     // Update list of menu items, based on gGameTypeNames index
    void processSelection(U32 index) { }         // Needed for MenuUserInterface subclassing... does nothing
 
    bool anythingChanged();                      // Compare list of parameters from before and after a session in the GameParams menu.  Did anything get changed??
@@ -99,23 +80,20 @@ private:
    string getParamVal(string paramName);      // Find value in our list of params
 
    virtual S32 getTextSize() { return 18; }
-   virtual S32 getGap() { return 14; }
+   virtual S32 getGap() { return 12; }
 
 public:
-   GameParamUserInterface();         // Constructor
-   const char *menuTitle;
-   const char *menuSubTitle;
-   const char *menuFooter;
+   GameParamUserInterface();   // Constructor
 
    Vector<string> gameParams;  // Assorted game params, such as gridSize et al
 
    S32 selectedIndex;          // Highlighted menu item
    S32 changingItem;           // Index of key we're changing (in keyDef mode), -1 otherwise
 
-   Vector<MenuItem> savedMenuItems;    // TODO:  WON'T WORK!! Save values only, not entire menu item!
+   void updateMenuItems(S32 gameTypeIndex);     // Update list of menu items, based on gGameTypeNames index
 
-   void idle(U32 timeDelta);
-   //void onKeyDown(KeyCode keyCode, char ascii);
+   Vector<SavedMenuItem> savedMenuItems;   
+
    void onMouseMoved(S32 x, S32 y);
 
 

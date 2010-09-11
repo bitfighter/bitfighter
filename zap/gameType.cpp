@@ -27,6 +27,7 @@
 #include "ship.h"
 #include "UIGame.h"
 #include "UINameEntry.h"
+#include "UIMenus.h"
 #include "gameNetInterface.h"
 #include "flagItem.h"
 #include "gameItems.h"     // For asteroid def.

@@ -34,11 +34,11 @@
 #include "UIDiagnostics.h"
 #include "UIKeyDefMenu.h"
 #include "UIErrorMessage.h"
-#include "gameObjectRender.h"    // For renderBitfighterLogo
+#include "gameObjectRender.h"    // For renderBitfighterLogo, glColor
 #include "game.h"
 #include "gameType.h"
 #include "input.h"
-#include "keyCode.h"
+//#include "keyCode.h"
 #include "IniFile.h"
 #include "config.h"
 
@@ -48,7 +48,6 @@
 
 namespace Zap
 {
-
 
 // Convert string to lower case
 string lcase(string strToConvert)
@@ -79,161 +78,6 @@ extern void actualizeScreenMode(bool = false);
 extern void initHostGame(Address bindAddress, bool testMode);
 extern void exitGame();
 
-
-////////////////////////////////////
-////////////////////////////////////
-
-void MenuItem::render(S32 ypos, S32 textsize)
-{
-   glColor(color);
-   UserInterface::drawCenteredStringf(ypos, textsize, "%s >", getText());
-}
-
-
-void MenuItem::handleKey(KeyCode keyCode, char ascii)
-{
-   if(keyCode == KEY_ENTER || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
-   {
-      if(mCallback)
-         mCallback(mIndex);
-   }
-   else
-   {
-      // Check individual entries for any shortcut keys
-   }
-}
-
-////////////////////////////////////
-////////////////////////////////////
-
-void ToggleMenuItem::render(S32 ypos, S32 textsize)
-{
-   UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mOptions[mIndex].c_str());
-}
-
-
-void ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
-{
-   U32 nextValAfterWrap = mWrap ? 0 : mIndex;
-
-   if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
-   {
-      mIndex = (mIndex == mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
-
-      if(mCallback)
-         mCallback(mIndex);
-   }
-   else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
-   {      
-      U32 nextValAfterWrap = mWrap ? mOptions.size() - 1 : mIndex;
-      mIndex = (mIndex == 0) ? nextValAfterWrap : mIndex - 1;
-      
-      if(mCallback)
-         mCallback(mIndex);
-   }
-
-   else if(keyCode == KEY_ENTER)
-   {
-      mIndex = (mIndex == mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
-
-      if(mCallback)
-         mCallback(mIndex);
-   }
-}
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-void CounterMenuItem::render(S32 ypos, S32 textsize)
-{
-   if(mValue == mMinValue && mMinMsg != "")
-      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mMinMsg.c_str());
-   else
-      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), (UserInterface::itos(mValue) + " " + mUnits).c_str());
-}
-
-
-void CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
-{
-   if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)  
-      increment(getKeyState(KEY_SHIFT) ? 10 : 1);
-
-   else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
-      decrement(getKeyState(KEY_SHIFT) ? 10 : 1);
-}
-
-
-void CounterMenuItem::increment(S32 fact) 
-{ 
-   mValue += mStep * fact; 
-
-   if(mValue > mMaxValue) 
-      mValue = mMaxValue; 
-}
-
-
-void CounterMenuItem::decrement(S32 fact) 
-{ 
-   mValue -= mStep * fact; 
-
-   if(mValue < mMinValue) 
-      mValue = mMinValue; 
-}
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-void PlayerMenuItem::render(S32 ypos, S32 textsize)
-{
-   string temp = getText();
-
-   // Add a player type prefix if requested
-   if(mType == PlayerTypePlayer)
-      temp = "[Player] " + temp;
-   else if(mType == PlayerTypeAdmin)
-      temp = "[Admin] " + temp;
-   else if(mType == PlayerTypeRobot)
-      temp = "[Robot] " + temp;
-
-   glColor(color);
-   UserInterface::drawCenteredString(ypos, textsize, temp.c_str());
-}
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-
-void TeamMenuItem::render(S32 ypos, S32 textsize)
-{
-   glColor(color);
-   UserInterface::drawCenteredStringf(ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getText(), mTeam.numPlayers, mTeam.getScore());
-}
-
-
-////////////////////////////////////
-////////////////////////////////////
-
-void EditableMenuItem::render(S32 ypos, S32 textsize)
-{
-   S32 xpos = UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), 
-                                                    mLineEditor.getString() != "" ? mLineEditor.c_str() : mEmptyVal.c_str());
-   if(mIsActive)
-      mLineEditor.drawCursor(xpos, ypos, textsize);
-}
-
-
-void EditableMenuItem::handleKey(KeyCode keyCode, char ascii) 
-{ 
-   if(keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)
-      mLineEditor.handleBackspace(keyCode); 
-   else
-      mLineEditor.addChar(ascii);
-}
-
-
 ////////////////////////////////////
 ////////////////////////////////////
 
@@ -242,10 +86,10 @@ void EditableMenuItem::handleKey(KeyCode keyCode, char ascii)
 MenuUserInterface::MenuUserInterface()    // Constructor
 {
    setMenuID(GenericUI);
-   menuTitle = "Menu:";
-   menuSubTitle = "";
+   mMenuTitle = "Menu:";
+   mMenuSubTitle = "";
 
-   menuFooterContainsInstructions = true;
+   mMenuFooterContainsInstructions = true;
    selectedIndex = 0;
    itemSelectedWithMouse = false;
    currOffset = 0;
@@ -278,6 +122,8 @@ void MenuUserInterface::idle(U32 timeDelta)
    // (i.e. we don't want to limit scrolling action only to times when user moves mouse)
    if(itemSelectedWithMouse)
       processMouse();
+
+   LineEditor::updateCursorBlink(timeDelta);
 }
 
 
@@ -313,7 +159,11 @@ S32 MenuUserInterface::getOffset()
 S32 MenuUserInterface::getYStart()
 {
    S32 vertOff = (getMenuID() == MainUI) ? 40 : 0;    // Make room for the logo on the main menu
-   return (canvasHeight - min(menuItems.size(), MAX_MENU_SIZE) * (getTextSize() + getGap())) / 2 + vertOff;
+
+   if(getMenuID() == GameParamsUI)  // If we're on the GameParams menu, start at a constant position
+      return 70;
+   else                             // Otherwise, attpempt to center the menu vertically
+      return (canvasHeight - min(menuItems.size(), MAX_MENU_SIZE) * (getTextSize() + getGap())) / 2 + vertOff;
 }
 
 
@@ -328,8 +178,8 @@ static void renderMenuInstructions(S32 variant)
 
    if(gIniSettings.inputMode == Keyboard)
    {
-	  const char *menuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
-	  UserInterface::drawCenteredString(y, size, menuFooter);
+	  const char *mMenuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
+	  UserInterface::drawCenteredString(y, size, mMenuFooter);
    }
    else
    {
@@ -429,29 +279,29 @@ void MenuUserInterface::render()
    }
 
    glColor3f(1, 1, 1);     // white
-   drawCenteredString(vertMargin, 30, menuTitle);
+   drawCenteredString(vertMargin, 30, mMenuTitle);
 
-   glColor(menuSubTitleColor);
-   drawCenteredString(vertMargin + 35, 18, menuSubTitle);
+   glColor(mMenuSubTitleColor);
+   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
 
    glColor3f(1, 1, 1);     // white
-   if(menuFooterContainsInstructions) 
+   if(mMenuFooterContainsInstructions) 
       renderMenuInstructions(1);
    else
-      drawCenteredString(canvasHeight - vertMargin - 20, 18, menuFooter);
+      drawCenteredString(canvasHeight - vertMargin - 20, 18, mMenuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;
 
    S32 count = menuItems.size();
 
-   if(count > MAX_MENU_SIZE)     // Need some sort of scrolling
+   if(count > MAX_MENU_SIZE)     // Need some sort of scrolling?
       count = MAX_MENU_SIZE;
 
    S32 yStart = getYStart();
    S32 offset = getOffset();
 
-   S32 adjfact = 2;     // Just because it looks good
+   S32 adjfact = 2;              // Just because it looks good
    S32 shrinkfact = 1;
 
    for(S32 i = 0; i < count; i++)
@@ -487,7 +337,7 @@ void MenuUserInterface::render()
    }
 
    // Render a help string at the bottom of the menu
-   const S32 helpFontSize = 14;
+   const S32 helpFontSize = 15;
    glColor3f(0, 1, 0);
    S32 ypos = canvasHeight - vertMargin - 50;
 
@@ -579,7 +429,9 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    gMainMenuUserInterface.firstTime = false;    // Stop animations if a key is pressed
 
+   menuItems[selectedIndex]->setActive(false);
    preprocessKeys(keyCode, ascii) || processMenuSpecificKeys(keyCode, ascii) || processKeys(keyCode, ascii);
+   menuItems[selectedIndex]->setActive(true);
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
    if(keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT && keyCode != KEY_ESCAPE)
@@ -612,11 +464,6 @@ bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
          if(keyCode == menuItems[i]->key1 || keyCode == menuItems[i]->key2)
          {
             selectedIndex = i;
-
-            //if(getKeyState(KEY_SHIFT))
-            //   processShiftSelection(menuItems[i]->getIndex());
-            //else
-            //   processSelection(menuItems[i]->getIndex());
 
             menuItems[i]->handleKey(MOUSE_LEFT, 0);
             UserInterface::playBoop();
@@ -760,12 +607,12 @@ MainMenuUserInterface::MainMenuUserInterface()
 {
    firstTime = true;
    setMenuID(MainUI);
-   menuTitle = "";
+   mMenuTitle = "";
    motd[0] = 0;
-   menuSubTitle = "";
-   //menuSubTitleColor = Color(1,1,1);
-   menuFooter = "join us @ www.bitfighter.org";
-   menuFooterContainsInstructions = false;
+   mMenuSubTitle = "";
+   //mMenuSubTitleColor = Color(1,1,1);
+   mMenuFooter = "join us @ www.bitfighter.org";
+   mMenuFooterContainsInstructions = false;
    mNeedToUpgrade = false;                         // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;                    // So we don't show the upgrade message more than once
 
@@ -938,7 +785,7 @@ OptionsMenuUserInterface gOptionsMenuUserInterface;
 OptionsMenuUserInterface::OptionsMenuUserInterface()
 {
    setMenuID(OptionsUI);
-   menuTitle = "OPTIONS MENU:";
+   mMenuTitle = "OPTIONS MENU:";
 }
 
 
@@ -1087,7 +934,7 @@ HostMenuUserInterface gHostMenuUserInterface;
 HostMenuUserInterface::HostMenuUserInterface()
 {
    setMenuID(HostingUI);
-   menuTitle ="HOST A GAME:";
+   mMenuTitle ="HOST A GAME:";
 
    levelLoadDisplayFadeTimer.setPeriod(1000);
    gHostMenuUserInterface.levelLoadDisplayDisplay = true;
@@ -1144,21 +991,6 @@ void HostMenuUserInterface::setupMenus()
 }
 
 
-void HostMenuUserInterface::setActive(S32 i)
-{
-   if(mEditingIndex != -1)
-      dynamic_cast<EditableMenuItem *>(menuItems[mEditingIndex])->setActive(false);
-
-   mEditingIndex = i;
-
-   if(mEditingIndex != -1)
-   {
-      dynamic_cast<EditableMenuItem *>(menuItems[mEditingIndex])->setActive(true);
-      selectedIndex = mEditingIndex;
-   }
-}
-
-
 // Save options to INI file, and return to our regularly scheduled program
 // This only gets called when escape not already handled by preprocessKeys(), i.e. when we're not editing
 void HostMenuUserInterface::onEscape()
@@ -1186,27 +1018,10 @@ bool HostMenuUserInterface::preprocessKeys(KeyCode keyCode, char ascii)
 {
    if(mEditingIndex == -1)
       return false;
-
-   // The following only get processed if we're editing a menu item
-   if(keyCode == KEY_ESCAPE || keyCode == KEY_ENTER)
-      setActive(-1);
-
-   else if(keyCode == KEY_TAB)
-   {
-      setActive(mEditingIndex == OPT_COUNT - 1 ? FIRST_EDITABLE_ITEM : mEditingIndex + 1);
-   }
-
    else
       menuItems[mEditingIndex]->handleKey(keyCode, ascii);
 
    return true;
-}
-
-
-void HostMenuUserInterface::idle(U32 timeDelta)
-{
-   Parent::idle(timeDelta);   
-   LineEditor::updateCursorBlink(timeDelta);
 }
 
 
@@ -1269,7 +1084,7 @@ GameMenuUserInterface gGameMenuUserInterface;
 GameMenuUserInterface::GameMenuUserInterface()
 {
    setMenuID(GameMenuUI);
-   menuTitle = "GAME MENU:";
+   mMenuTitle = "GAME MENU:";
 }
 
 void GameMenuUserInterface::idle(U32 timeDelta)
@@ -1288,13 +1103,13 @@ void GameMenuUserInterface::onActivate()
 {
    Parent::onActivate();
    buildMenu();
-   menuSubTitle = "";
-   menuSubTitleColor = Color(0,1,1);
+   mMenuSubTitle = "";
+   mMenuSubTitleColor = Color(0,1,1);
 }
 
 void GameMenuUserInterface::onReactivate()
 {
-   menuSubTitle = "";
+   mMenuSubTitle = "";
 }
 
 
@@ -1439,7 +1254,7 @@ static void selectLevelTypeCallback(U32 level)
 void LevelMenuUserInterface::onActivate()
 {
    Parent::onActivate();
-   menuTitle = "CHOOSE LEVEL TYPE:";
+   mMenuTitle = "CHOOSE LEVEL TYPE:";
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc || !gc->mLevelInfos.size())
@@ -1468,21 +1283,6 @@ void LevelMenuUserInterface::onActivate()
 
    menuItems.sort(menuItemValueSort);
 }
-
-
-//void LevelMenuUserInterface::processSelection(U32 index)        // Handler for unshifted menu shortcut key
-//{
-//   //Parent::onActivate();
-//   GameConnection *gc = gClientGame->getConnectionToServer();
-//
-//   // Index 9999 is the all levels index
-//   if(index == 9999)
-//      gLevelMenuSelectUserInterface.category  = ALL_LEVELS;
-//   else
-//      gLevelMenuSelectUserInterface.category = gc->mLevelInfos[index].levelType.getString();
-//
-//   gLevelMenuSelectUserInterface.activate();
-//}
 
 
 void LevelMenuUserInterface::onEscape()
@@ -1523,7 +1323,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 void LevelMenuSelectUserInterface::onActivate()
 {
    Parent::onActivate();
-   menuTitle = (string("CHOOSE LEVEL: [") + category + "]").c_str();
+   mMenuTitle = (string("CHOOSE LEVEL: [") + category + "]").c_str();
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc || !gc->mLevelInfos.size())
@@ -1658,9 +1458,9 @@ void PlayerMenuUserInterface::render()
    menuItems.sort(menuItemValueSort);
 
    if(action == Kick)
-      menuTitle = "CHOOSE PLAYER TO KICK:";
+      mMenuTitle = "CHOOSE PLAYER TO KICK:";
    else if(action == ChangeTeam)
-      menuTitle = "CHOOSE WHOSE TEAM TO CHANGE:";
+      mMenuTitle = "CHOOSE WHOSE TEAM TO CHANGE:";
    Parent::render();
 }
 
@@ -1669,9 +1469,6 @@ void PlayerMenuUserInterface::onEscape()
 {
    reactivatePrevUI();   //gGameUserInterface
 }
-
-
-
 
 
 ////////////////////////////////////////
@@ -1755,7 +1552,7 @@ void TeamMenuUserInterface::render()
       name = "";
 
    // Finally, set menu title
-   menuTitle = (string("TEAM TO SWITCH ") + name + "TO:").c_str();       // No space before the TO!
+   mMenuTitle = (string("TEAM TO SWITCH ") + name + "TO:").c_str();       // No space before the TO!
 
    Parent::render();
 }

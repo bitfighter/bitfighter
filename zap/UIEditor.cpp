@@ -754,7 +754,7 @@ void EditorUserInterface::validateLevel()
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
    if(!foundNexus && !strcmp(mGameType, "HuntersGameType"))
-      mLevelErrorMsgs.push_back("ERROR: Hunters game must have a Nexus.");
+      mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
    if(foundFlags && !isFlagGame(mGameType))
       mLevelErrorMsgs.push_back("WARNING: This game type does not use flags.");
@@ -4314,7 +4314,7 @@ EditorMenuUserInterface gEditorMenuUserInterface;
 EditorMenuUserInterface::EditorMenuUserInterface()
 {
    setMenuID(EditorMenuUI);
-   menuTitle = "EDITOR MENU";
+   mMenuTitle = "EDITOR MENU";
 }
 
 void EditorMenuUserInterface::onActivate()
