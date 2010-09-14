@@ -194,42 +194,19 @@ void PasswordEntryUserInterface::render()
 }
 
 
-void PasswordEntryUserInterface::onEscape()
-{
-   reactivatePrevUI();
-}
-
-
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-void PreGamePasswordEntryUserInterface::onEscape()
-{
-   gMainMenuUserInterface.activate();
-}
 
 void PreGamePasswordEntryUserInterface::onAccept(const char *text)
 {
    joinGame(connectAddress, false, false);      // Not from master, not local
 }
 
-////////////////////////////////////////
-////////////////////////////////////////
 
-void InGamePasswordEntryUserInterface::onAccept(const char *text)
+void PreGamePasswordEntryUserInterface::onEscape()
 {
-   GameConnection *gc = gClientGame->getConnectionToServer();
-   if(gc)
-   {
-      submitPassword(gc, text);
-
-      reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
-      gGameMenuUserInterface.mMenuSubTitle = "** checking password **";     // ...then set the message
-   }
-   else
-      reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
+   gMainMenuUserInterface.activate();
 }
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -258,6 +235,29 @@ ReservedNamePasswordEntryUserInterface::ReservedNamePasswordEntryUserInterface()
    title = "ENTER USERNAME PASSWORD:";
    instr1 = "The username you are using has been reserved on this server.";
    instr2 = "Please enter the password to use this name here.";
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+void InGamePasswordEntryUserInterface::onAccept(const char *text)
+{
+   GameConnection *gc = gClientGame->getConnectionToServer();
+   if(gc)
+   {
+      submitPassword(gc, text);
+
+      reactivatePrevUI();                                                  // Reactivating clears subtitle message, so reactivate first...
+      gGameMenuUserInterface.mMenuSubTitle = "** checking password **";     // ...then set the message
+   }
+   else
+      reactivatePrevUI();                                                  // Otherwise, just reactivate the previous menu
+}
+
+void InGamePasswordEntryUserInterface::onEscape()
+{
+   reactivatePrevUI();
 }
 
 ////////////////////////////////////////

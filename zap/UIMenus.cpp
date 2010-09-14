@@ -89,10 +89,10 @@ MenuUserInterface::MenuUserInterface()    // Constructor
    mMenuTitle = "Menu:";
    mMenuSubTitle = "";
 
-   mMenuFooterContainsInstructions = true;
    selectedIndex = 0;
    itemSelectedWithMouse = false;
    currOffset = 0;
+   mRenderInstructions = true;
 }
 
 extern bool gDisableShipKeyboardInput;
@@ -171,16 +171,15 @@ extern IniSettings gIniSettings;
 extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
-static void renderMenuInstructions(S32 variant)
+static void renderMenuInstructions()
 {
    S32 y = UserInterface::canvasHeight - UserInterface::vertMargin - 20;
    const S32 size = 18;
 
+    glColor3f(1, 1, 1);     // white
+
    if(gIniSettings.inputMode == Keyboard)
-   {
-	  const char *mMenuFooter = "UP, DOWN to choose | ENTER to select | ESC exits menu";
-	  UserInterface::drawCenteredString(y, size, mMenuFooter);
-   }
+	  UserInterface::drawCenteredString(y, size, "UP, DOWN to choose | ENTER to select | ESC exits menu");
    else
    {
 	  S32 totalWidth = getControllerButtonRenderedSize(BUTTON_DPAD_UP) + getControllerButtonRenderedSize(BUTTON_DPAD_DOWN) +
@@ -235,6 +234,7 @@ static void renderArrowAbove(S32 pos, S32 height)
    }
 }
 
+
 static void renderArrowBelow(S32 pos, S32 height)
 {
    for(S32 i = 1; i >= 0; i--)
@@ -249,15 +249,6 @@ static void renderArrowBelow(S32 pos, S32 height)
    }
 }
 
-static void renderArrowAbove(S32 pos)
-{
-   renderArrowAbove(pos, ARROW_HEIGHT);
-}
-
-static void renderArrowBelow(S32 pos)
-{
-   renderArrowBelow(pos, ARROW_HEIGHT);
-}
 
 // Basic menu rendering
 void MenuUserInterface::render()
@@ -279,19 +270,16 @@ void MenuUserInterface::render()
    }
 
    glColor3f(1, 1, 1);     // white
-   drawCenteredString(vertMargin, 30, mMenuTitle);
+   drawCenteredString(vertMargin, 30, mMenuTitle.c_str());
 
    glColor(mMenuSubTitleColor);
-   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle);
+   drawCenteredString(vertMargin + 35, 18, mMenuSubTitle.c_str());
 
-   glColor3f(1, 1, 1);     // white
-   if(mMenuFooterContainsInstructions) 
-      renderMenuInstructions(1);
-   else
-      drawCenteredString(canvasHeight - vertMargin - 20, 18, mMenuFooter);
+   if(mRenderInstructions)
+      renderMenuInstructions();
 
-   if(selectedIndex >= menuItems.size())
-      selectedIndex = 0;
+   //if(selectedIndex >= menuItems.size())
+   //   selectedIndex = 0;
 
    S32 count = menuItems.size();
 
@@ -319,9 +307,8 @@ void MenuUserInterface::render()
                glVertex2f(0,           y + getTextSize() + getGap() / 2 + adjfact - shrinkfact);
             glEnd();
          }
-         //drawMenuHighlight(0, y - getGap() / 2 + adjfact, canvasWidth, y + getTextSize() + getGap() / 2 + adjfact, Color(0,0,0.4), Color(0,0,1));
 
-      menuItems[i+offset]->render(y, getTextSize());
+      menuItems[i+offset]->render(y, getTextSize(), selectedIndex == i+offset);
    }
 
    // Render an indicator that there are scrollable items above and/or below
@@ -330,10 +317,10 @@ void MenuUserInterface::render()
       glColor3f(0, 0, 1);
 
       if(offset > 0)                                  // There are items above
-         renderArrowAbove(yStart);
+         renderArrowAbove(yStart, ARROW_HEIGHT);
 
       if(offset < menuItems.size() - MAX_MENU_SIZE)    // There are items below
-         renderArrowBelow(yStart + (getTextSize() + getGap()) * MAX_MENU_SIZE);
+         renderArrowBelow(yStart + (getTextSize() + getGap()) * MAX_MENU_SIZE, ARROW_HEIGHT);
    }
 
    // Render a help string at the bottom of the menu
@@ -347,8 +334,7 @@ void MenuUserInterface::render()
    ypos -= helpFontSize + 5;
    drawCenteredString(ypos, helpFontSize, menuItems[selectedIndex]->getHelp());
 
-
-   renderExtras();  // Draw something unique on a menu.  Not currently used anywhere...
+   renderExtras();  // Draw something unique on a menu
 }
 
 
@@ -367,7 +353,7 @@ void MenuUserInterface::onMouseMoved(S32 x, S32 y)
 
 void MenuUserInterface::processMouse()
 {
-   if(menuItems.size() > MAX_MENU_SIZE)    // We have a scrolling situation here...
+   if(menuItems.size() > MAX_MENU_SIZE)   // We have a scrolling situation here...
    {
       if(selectedIndex < currOffset)      // Scroll up
       {
@@ -429,9 +415,7 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    gMainMenuUserInterface.firstTime = false;    // Stop animations if a key is pressed
 
-   menuItems[selectedIndex]->setActive(false);
-   preprocessKeys(keyCode, ascii) || processMenuSpecificKeys(keyCode, ascii) || processKeys(keyCode, ascii);
-   menuItems[selectedIndex]->setActive(true);
+   menuItems[selectedIndex]->handleKey(keyCode, ascii) || processMenuSpecificKeys(keyCode, ascii) || processKeys(keyCode, ascii);
 
    // Finally, since the user has indicated they want to use keyboard/controller input, hide the cursor
    if(keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT && keyCode != KEY_ESCAPE)
@@ -446,29 +430,20 @@ void MenuUserInterface::onKeyUp(KeyCode keyCode)
 }
 
 
-bool MenuUserInterface::preprocessKeys(KeyCode keyCode, char ascii)
-{
-   return false;
-}
-
-
 // Generic handler looks for keystrokes and translates them into menu actions
 bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
 {
-    if(!preprocessKeys(keyCode, ascii))
-    {
-      // First check for some shortcut keys
+   // First check for some shortcut keys
 
-      for(S32 i = 0; i < menuItems.size(); i++)
+   for(S32 i = 0; i < menuItems.size(); i++)
+   {
+      if(keyCode == menuItems[i]->key1 || keyCode == menuItems[i]->key2)
       {
-         if(keyCode == menuItems[i]->key1 || keyCode == menuItems[i]->key2)
-         {
-            selectedIndex = i;
+         selectedIndex = i;
 
-            menuItems[i]->handleKey(MOUSE_LEFT, 0);
-            UserInterface::playBoop();
-            return true;
-         }
+         menuItems[i]->activatedWithShortcutKey();
+         UserInterface::playBoop();
+         return true;
       }
    }
 
@@ -508,7 +483,7 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
       onEscape();
    }
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)        // Prev item
+   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP || (keyCode == KEY_TAB && getKeyState(KEY_SHIFT)))   // Prev item
    {
       selectedIndex--;
       itemSelectedWithMouse = false;
@@ -535,8 +510,8 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       {
          if((menuItems.size() > MAX_MENU_SIZE) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
          {
-            selectedIndex = menuItems.size() - 1;                 // No wrap --> (last item)
-            return true;                                          // (leave before playBoop)
+            selectedIndex = menuItems.size() - 1;                  // No wrap --> (last item)
+            return true;                                           // (leave before playBoop)
          }
          else                     // Always wrap on shorter menus
             selectedIndex = 0;    // Wrap --> (first item)
@@ -610,9 +585,8 @@ MainMenuUserInterface::MainMenuUserInterface()
    mMenuTitle = "";
    motd[0] = 0;
    mMenuSubTitle = "";
-   //mMenuSubTitleColor = Color(1,1,1);
-   mMenuFooter = "join us @ www.bitfighter.org";
-   mMenuFooterContainsInstructions = false;
+   mRenderInstructions = false;
+
    mNeedToUpgrade = false;                         // Assume we're up-to-date until we hear from the master
    mShowedUpgradeAlert = false;                    // So we don't show the upgrade message more than once
 
@@ -659,6 +633,7 @@ void MainMenuUserInterface::setNeedToUpgrade(bool needToUpgrade)
       showUpgradeAlert();
 }
 
+static const S32 MOTD_POS = 540;
 
 void MainMenuUserInterface::render()
 {
@@ -673,7 +648,7 @@ void MainMenuUserInterface::render()
       U32 delta = gClientGame->getCurrentTime() - motdArriveTime;
       delta = U32(delta * pixelsPerSec * 0.001) % totalWidth;
 
-      drawString(canvasWidth - delta, 540, 20, motd);
+      drawString(canvasWidth - delta, MOTD_POS, 20, motd);
    }
 
    // Fade in the menu here if we are showing it the first time...  this will tie in
@@ -716,6 +691,14 @@ void MainMenuUserInterface::idle(U32 timeDelta)
 bool MainMenuUserInterface::getNeedToUpgrade()
 {
    return mNeedToUpgrade;
+}
+
+
+void MainMenuUserInterface::renderExtras()
+{
+   glColor3f(1,1,1);
+   S32 size = 20;
+   drawCenteredString(canvasHeight - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
 
 
@@ -986,8 +969,8 @@ void HostMenuUserInterface::setupMenus()
    menuItems.push_back(new EditableMenuItem("CONNECTION PASSWORD:",   gServerPassword,      "<Anyone can connect>",       
                                             "", MAX_PASSWORD_LENGTH, KEY_C));
 
-   menuItems.push_back(new EditableMenuItem("PORT:",                  "",                   "Defaults to 28000", 
-                                            "", 10, KEY_P));
+   //menuItems.push_back(new EditableMenuItem("PORT:",                  "28000",              "Use default of 28000", 
+   //                                         "", 10, KEY_P));
 }
 
 
@@ -1010,18 +993,6 @@ void HostMenuUserInterface::saveSettings()
    gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValue();
 
    saveSettingsToINI();
-}
-
-
-// This gets run before any of the other process keys methods; used here to intercept keys intended for an active editor
-bool HostMenuUserInterface::preprocessKeys(KeyCode keyCode, char ascii)
-{
-   if(mEditingIndex == -1)
-      return false;
-   else
-      menuItems[mEditingIndex]->handleKey(keyCode, ascii);
-
-   return true;
 }
 
 
@@ -1323,7 +1294,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 void LevelMenuSelectUserInterface::onActivate()
 {
    Parent::onActivate();
-   mMenuTitle = (string("CHOOSE LEVEL: [") + category + "]").c_str();
+   mMenuTitle = "CHOOSE LEVEL: [" + category + "]";
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc || !gc->mLevelInfos.size())

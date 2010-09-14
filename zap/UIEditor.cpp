@@ -423,8 +423,9 @@ void EditorUserInterface::setLevelFileName(string name)
    if(name == "")
       mEditFileName = "";
    else
-      if(mEditFileName.find('.') == std::string::npos)      // Append extension, if one is needed
+      if(name.find('.') == std::string::npos)      // Append extension, if one is needed
          mEditFileName = name + ".level";
+      // else... what?
 }
 
 

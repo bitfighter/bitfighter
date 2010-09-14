@@ -594,7 +594,6 @@ void QueryServersUserInterface::render()
          selectedIndex = 0;
       }
 
-
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
       U32 y = ITEMS_TOP + (selectedIndex - FIRST_SERVER_INDEX - 1) * SERVER_ENTRY_HEIGHT + (SERVER_ENTRY_TEXTSIZE - 12);
@@ -666,7 +665,7 @@ void QueryServersUserInterface::render()
                   drawString(0, 0, SERVER_ENTRY_TEXTSIZE, "?");
                else
                {
-                  glScalef(5, 5, 1);
+                  glScalef(3.65, 3.65, 1);
                   renderLockIcon();
                }
             glPopMatrix();

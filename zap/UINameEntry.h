@@ -125,9 +125,9 @@ public:
       secret = true;
    }
 
-   virtual void onEscape();
    virtual void render();
    virtual void onAccept(const char *text) = 0;
+   virtual void onEscape() = 0;
 };
 
 
@@ -144,7 +144,6 @@ public:
    void onAccept(const char *text);
    void onEscape();
    void setConnectServer(const Address &addr) { connectAddress = addr; }
-
 };
 
 
@@ -154,7 +153,8 @@ public:
 class InGamePasswordEntryUserInterface :  public PasswordEntryUserInterface
 {
 public:
-   virtual void onAccept(const char *text);
+   void onAccept(const char *text);
+   void onEscape();
    virtual void submitPassword(GameConnection *gameConnection, const char *text) = 0;
 };
 
@@ -169,6 +169,7 @@ public:
 };
 
 extern ServerPasswordEntryUserInterface gServerPasswordEntryUserInterface;
+
 
 ////////////////////////////////////////
 ////////////////////////////////////////

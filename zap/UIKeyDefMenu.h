@@ -38,7 +38,7 @@ namespace Zap
 
 using namespace std;
 
-struct MenuItemExtended
+struct KeyDefMenuItem
 {
    const char *mText;
    U32 mIndex;
@@ -46,7 +46,7 @@ struct MenuItemExtended
    KeyCode *primaryControl;
    string helpString;
 
-   MenuItemExtended(const char *text, U32 index, U32 col, KeyCode *PC, string helpStr)     // Constructor
+   KeyDefMenuItem(const char *text, U32 index, U32 col, KeyCode *PC, string helpStr)     // Constructor
    {
       mText = text;
       mIndex = index;
@@ -62,13 +62,11 @@ private:
    S32 itemsPerCol;           // Approx. half of the items we have
    Timer errorMsgTimer;
    string errorMsg;
-   enum {
-      errorMsgDisplayTime = 6000,
-   };
+   static const S32 errorMsgDisplayTime = 6000;
 
 public:
    KeyDefMenuUserInterface();          // Constructor
-   Vector<MenuItemExtended> menuItems; // Array of menu items
+   Vector<KeyDefMenuItem> menuItems; // Array of menu items
    const char *mMenuTitle;
    const char *mMenuSubTitle;
    Color mMenuSubTitleColor;

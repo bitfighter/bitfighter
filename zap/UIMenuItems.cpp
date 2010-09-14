@@ -31,38 +31,60 @@
 namespace Zap
 {
 
+//// Convert string to lower case
+//string lcase(string strToConvert)
+//{
+//   for(U32 i = 0; i < strToConvert.length(); i++)
+//      strToConvert[i] = tolower(strToConvert[i]);
+//   return strToConvert;
+//}
+//
+//
+//// Convert string to upper case
+//string ucase(string strToConvert)
+//{
+//   for(U32 i = 0; i < strToConvert.length(); i++)
+//      strToConvert[i] = toupper(strToConvert[i]);
+//   return strToConvert;
+//}
+
+
 extern void glColor(const Color &c, float alpha = 1.0);
 
-void MenuItem::render(S32 ypos, S32 textsize)
+void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
-   glColor(color);
+   glColor(isSelected ? Color(1,1,0) : color);
    UserInterface::drawCenteredStringf(ypos, textsize, "%s >", getText());
 }
 
 
-void MenuItem::handleKey(KeyCode keyCode, char ascii)
+bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_ENTER || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
    {
       if(mCallback)
          mCallback(mIndex);
+
+      return true;
    }
    else
    {
       // Check individual entries for any shortcut keys
+
+      return false;
    }
 }
 
 ////////////////////////////////////
 ////////////////////////////////////
 
-void ToggleMenuItem::render(S32 ypos, S32 textsize)
+void ToggleMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
    UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mOptions[mIndex].c_str());
 }
 
 
-void ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
+bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    U32 nextValAfterWrap = mWrap ? 0 : mIndex;
 
@@ -72,6 +94,8 @@ void ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 
       if(mCallback)
          mCallback(mIndex);
+
+      return true;
    }
    else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
    {      
@@ -80,6 +104,8 @@ void ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       
       if(mCallback)
          mCallback(mIndex);
+
+      return true;
    }
 
    else if(keyCode == KEY_ENTER)
@@ -88,14 +114,29 @@ void ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 
       if(mCallback)
          mCallback(mIndex);
+
+      return true;
    }
+
+   else if(ascii)     // Check for the first key of a menu entry. 
+      for(S32 i = 0; i < mOptions.size(); i++)
+      {
+         S32 index = (i + mIndex + 1) % mOptions.size();
+         if(tolower(ascii) == tolower(mOptions[index].data()[0]))
+         {
+            mIndex = index;
+            return true;
+         }
+      }
+
+   return false;
 }
 
 
 ////////////////////////////////////
 ////////////////////////////////////
 
-void CounterMenuItem::render(S32 ypos, S32 textsize)
+void CounterMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
    if(mValue == mMinValue && mMinMsg != "")
       UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mMinMsg.c_str());
@@ -104,13 +145,20 @@ void CounterMenuItem::render(S32 ypos, S32 textsize)
 }
 
 
-void CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
+bool CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)  
+   {
       increment(getKeyState(KEY_SHIFT) ? 10 : 1);
-
+      return true;
+   }
    else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
+   {
       decrement(getKeyState(KEY_SHIFT) ? 10 : 1);
+      return true;
+   }
+
+   return false;
 }
 
 
@@ -135,7 +183,7 @@ void CounterMenuItem::decrement(S32 fact)
 ////////////////////////////////////
 ////////////////////////////////////
 
-void PlayerMenuItem::render(S32 ypos, S32 textsize)
+void PlayerMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
    string temp = getText();
 
@@ -156,7 +204,7 @@ void PlayerMenuItem::render(S32 ypos, S32 textsize)
 ////////////////////////////////////
 
 
-void TeamMenuItem::render(S32 ypos, S32 textsize)
+void TeamMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
    glColor(color);
    UserInterface::drawCenteredStringf(ypos, textsize, "%s%s [%d /%d]", mIsCurrent ? "-> " : "", getText(), mTeam.numPlayers, mTeam.getScore());
@@ -166,21 +214,29 @@ void TeamMenuItem::render(S32 ypos, S32 textsize)
 ////////////////////////////////////
 ////////////////////////////////////
 
-void EditableMenuItem::render(S32 ypos, S32 textsize)
+void EditableMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
-   S32 xpos = UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), 
+   S32 xpos = UserInterface::drawCenteredStringPair(ypos, textsize, color, isSelected ? Color(1,0,0) : Color(0,1,1), getText(), 
                                                     mLineEditor.getString() != "" ? mLineEditor.c_str() : mEmptyVal.c_str());
-   if(isActive())
+   if(isSelected)
       mLineEditor.drawCursor(xpos, ypos, textsize);
 }
 
 
-void EditableMenuItem::handleKey(KeyCode keyCode, char ascii) 
+bool EditableMenuItem::handleKey(KeyCode keyCode, char ascii) 
 { 
    if(keyCode == KEY_DELETE || keyCode == KEY_BACKSPACE)
+   {
       mLineEditor.handleBackspace(keyCode); 
-   else
+      return true;
+   }
+   else if(ascii > 0)
+   {
       mLineEditor.addChar(ascii);
+      return true;
+   }
+   
+   return false;
 }
 
 };

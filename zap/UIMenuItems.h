@@ -64,7 +64,6 @@ private:
    string mText;     // Text displayed on menu
    string mHelp;     // An optional help string
    S32 mIndex;
-   bool mIsActive;
 
 protected:
    Color color;      // Color in which item should be displayed
@@ -83,14 +82,13 @@ public:
       mCallback = callback;
       mHelp = help;
       mIndex = (U32)index;
-      mIsActive = false;
    }
 
    KeyCode key1;     // Allow two shortcut keys per menu item...
    KeyCode key2;
 
    virtual MenuItemTypes getItemType() { return MenuItemType; }
-   virtual void render(S32 ypos, S32 textsize);
+   virtual void render(S32 ypos, S32 textsize, bool isSelected);
    const char *getHelp() { return mHelp.c_str(); }
    const char *getText() { return mText.c_str(); }
    string getString() { return mText; }
@@ -100,9 +98,9 @@ public:
    virtual S32 getIntValue() { return 0; }
    virtual void setValue(S32 val) { /* Do nothing */ }
 
-   virtual void handleKey(KeyCode keyCode, char ascii);
-   void setActive(bool isActive) { mIsActive = isActive; }
-   bool isActive() { return mIsActive; }
+   virtual bool handleKey(KeyCode keyCode, char ascii);
+   virtual void setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
+   virtual void activatedWithShortcutKey() { handleKey(MOUSE_LEFT, 0); }
 };
 
 
@@ -132,8 +130,11 @@ public:
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
    virtual S32 getValueIndex() { return mIndex; }
 
-   virtual void render(S32 ypos, S32 textsize);
-   virtual void handleKey(KeyCode keyCode, char ascii);
+   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual bool handleKey(KeyCode keyCode, char ascii);
+
+   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+
 };
 
 
@@ -166,7 +167,7 @@ public:
       mMinMsg = minMsg;
    }
 
-   virtual void render(S32 ypos, S32 textsize);
+   virtual void render(S32 ypos, S32 textsize, bool isSelected);
 
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
    virtual string getValue() { return UserInterface::itos(mValue); }
@@ -174,7 +175,9 @@ public:
    virtual S32 getIntValue() { return mValue; }
    virtual void setValue(S32 value) { mValue = value; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
-   virtual void handleKey(KeyCode keyCode, char ascii);
+   virtual bool handleKey(KeyCode keyCode, char ascii);
+
+   virtual void activatedWithShortcutKey() { /* Do nothing */ }
 };
 
 
@@ -189,7 +192,7 @@ private:
 
 public:
    // Contstuctor
-   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1) ) :
+   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1) ) :
             MenuItem(-1, title, NULL, help, k1, k2, c),
             mLineEditor(LineEditor(maxLen, val))
    {
@@ -198,13 +201,16 @@ public:
 
 public:
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
-   virtual void render(S32 ypos, S32 textsize);
-   virtual void handleKey(KeyCode keyCode, char ascii);
+   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual bool handleKey(KeyCode keyCode, char ascii);
 
    LineEditor getLineEditor() { return mLineEditor; }
    void setLineEditor(LineEditor editor) { mLineEditor = editor; }
 
    virtual string getValue() { return mLineEditor.getString(); }
+   virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }
+
+   virtual void activatedWithShortcutKey() { /* Do nothing */ }
 };
 
 
@@ -225,7 +231,9 @@ public:
    }
 
    virtual MenuItemTypes getItemType() { return PlayerMenuItemType; }
-   virtual void render(S32 ypos, S32 textsize);
+   virtual void render(S32 ypos, S32 textsize, bool isSelected);
+
+   virtual void activatedWithShortcutKey() { /* Do nothing */ }
 };
 
 
@@ -247,7 +255,10 @@ public:
 }
 
    virtual MenuItemTypes getItemType() { return TeamMenuItemType; }
-   void render(S32 ypos, S32 textsize);
+   void render(S32 ypos, S32 textsize, bool isSelected);
+
+   virtual void activatedWithShortcutKey() { /* Do nothing */ }
+
 };
 
 };

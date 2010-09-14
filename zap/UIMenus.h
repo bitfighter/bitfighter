@@ -44,7 +44,7 @@ private:
    S32 getYStart();     // Get vert pos of first menu item
    S32 getOffset(); 
    Timer mScrollTimer;
-   
+
    // For detecting keys being held down
    bool mRepeatMode;
    bool mKeyDown;
@@ -55,8 +55,9 @@ private:
 protected:
    S32 currOffset;
 
+   bool mRenderInstructions;
+
    // Handle keyboard input while a menu is displayed
-   virtual bool preprocessKeys(KeyCode keyCode, char ascii);    // Return true if key was handled, false to pass to preprocessKeys()
    virtual bool processMenuSpecificKeys(KeyCode keyCode, char ascii);
    virtual bool processKeys(KeyCode keyCode, char ascii);
 
@@ -68,9 +69,8 @@ public:
 
    static const S32 MOUSE_SCROLL_INTERVAL = 100;
 
-   const char *mMenuTitle;
-   const char *mMenuSubTitle;
-   const char *mMenuFooter;
+   string mMenuTitle;
+   string mMenuSubTitle;
 
    Color mMenuSubTitleColor;
    bool mMenuFooterContainsInstructions;
@@ -80,7 +80,7 @@ public:
    S32 selectedIndex;
 
    void render();    // Draw the basic menu
-   virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu, not currently used...
+   virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
@@ -127,7 +127,10 @@ public:
    bool firstTime;                              // Is this the first time the menu is shown?
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
+
+   void renderExtras();
 };
+
 
 extern MainMenuUserInterface gMainMenuUserInterface;
 
@@ -179,8 +182,6 @@ private:
    Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
    S32 mLevelLoadDisplayTotal;
    S32 mEditingIndex;                        // Index of item we're editing, -1 if none
-
-   bool preprocessKeys(KeyCode keyCode, char ascii);    
 
 public:
    HostMenuUserInterface();                  // Constructor

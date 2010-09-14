@@ -43,15 +43,20 @@ namespace Zap
 
 GameParamUserInterface gGameParamUserInterface;
 
+static S32 OPT_GAMETYPE, OPT_FILENAME, OPT_LEVEL_NAME, OPT_LEVEL_DESCR, OPT_CREDITS, OPT_SCRIPT;
+static S32 OPT_GRIDSIZE, OPT_MIN_PLAYERS, OPT_MAX_PLAYERS;
+
+static const S32 FIRST_GAME_SPECIFIC_PARAM = 6;
+
+
 // Constructor
 GameParamUserInterface::GameParamUserInterface() : MenuUserInterface()
 {
    setMenuID(GameParamsUI);
    mMenuTitle = "Game Parameters Menu";
    mMenuSubTitle = "";
-
-   //mMenuSubTitleColor = Color(1,1,1);
 }
+
 
 void GameParamUserInterface::onActivate()
 {
@@ -94,7 +99,7 @@ string GameParamUserInterface::getParamVal(string paramName)
       string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
 
       string token = str.substr(lastPos, pos - lastPos);
-      lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
+      lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"!
       string val = str.substr(lastPos, str.size() - lastPos);
 
       if(token == paramName)
@@ -103,19 +108,6 @@ string GameParamUserInterface::getParamVal(string paramName)
 
    return "";
 }
-
-static const S32 OPT_GAMETYPE = 0;
-static const S32 OPT_FILENAME = 1;
-static const S32 OPT_LEVEL_NAME = 2;
-static const S32 OPT_LEVEL_DESCR = 3;
-static const S32 OPT_CREDITS = 4;
-static const S32 OPT_SCRIPT = 5;
-
-static const S32 FIRST_GAME_SPECIFIC_PARAM = 6;
-
-static S32 OPT_GRIDSIZE = OPT_SCRIPT + 1;
-static S32 OPT_MIN_PLAYERS = OPT_GRIDSIZE + 1;
-static S32 OPT_MAX_PLAYERS = OPT_MIN_PLAYERS + 1;
 
 
 static void changeGameTypeCallback(U32 gtIndex)
@@ -138,14 +130,14 @@ static void buildGameTypeList()
       // The following seems rather wasteful, but this is hardly a performance sensitive area...
       GameType *gameType = dynamic_cast<GameType *>(TNL::Object::create(gGameTypeNames[i]));          // Instantiate our gameType object
       gameTypes.push_back(gameType->getGameTypeString());
-
-      //if(toupper(gameType->getGameTypeString()[0]) == toupper(ascii))      // Compare first letter of game name with what user typed
-      //{
-      //   menuItems[selectedIndex]->mValI = i;
-      //   updateMenuItems(i);
-      //   break;
-      //}
    }
+}
+
+
+// Remove any extension from filename
+static string stripExtension(string filename)
+{
+   return filename.substr(0, filename.find_last_of('.'));
 }
 
 
@@ -178,7 +170,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       }
    }
 
-
    menuItems.deleteAndClear();
 
 
@@ -187,53 +178,58 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                           gtIndex,
                                           true,
                                           changeGameTypeCallback,
-                                          gameType->getInstructionString(),
-                                          KEY_G ));
+                                          gameType->getInstructionString()));
+   OPT_GAMETYPE = menuItems.size() - 1;
 
 
-   string fn = gEditorUserInterface.getLevelFileName();                 // We'll chop off the .level bit below...
+   string fn = stripExtension(gEditorUserInterface.getLevelFileName());
+
    menuItems.push_back(new EditableMenuItem("Filename:",                         // name
                                             fn,                                  // val
                                             "",                                  // empty val
                                             "File where this level is stored",   // help
-                                            MAX_FILE_NAME_LEN, 
-                                            KEY_D));
+                                            MAX_FILE_NAME_LEN));
+   OPT_FILENAME = menuItems.size() - 1;
 
-   menuItems.push_back(new EditableMenuItem("Level Name:", 
-                                            getParamVal("LevelName"), 
-                                            "", 
-                                            "The level's name -- pick a good one!",  
-                                            MAX_GAME_NAME_LEN, 
-                                            KEY_N));
+
+   MenuItem *item = new EditableMenuItem("Level Name:", 
+                                         getParamVal("LevelName"), 
+                                         "", 
+                                         "The level's name -- pick a good one!",  
+                                         MAX_GAME_NAME_LEN);
+   item->setFilter(LineEditor::fileNameFilter);
+   menuItems.push_back(item);
+   OPT_LEVEL_NAME = menuItems.size() - 1;
+   
 
    menuItems.push_back(new EditableMenuItem("Level Descr:", 
                                             getParamVal("LevelDescription"), 
                                             "", 
                                             "A brief description of the level",                     
-                                            MAX_GAME_DESCR_LEN, 
-                                            KEY_D));
+                                            MAX_GAME_DESCR_LEN));
+   OPT_LEVEL_DESCR = menuItems.size() - 1;
+   
 
    menuItems.push_back(new EditableMenuItem("Level By:", 
                                             getParamVal("LevelCredits"), 
                                             "", 
                                             "Who created this level",                                  
-                                            MAX_GAME_DESCR_LEN, 
-                                            KEY_B));
+                                            MAX_GAME_DESCR_LEN));
+   OPT_CREDITS = menuItems.size() - 1;
+
 
    menuItems.push_back(new EditableMenuItem("Levelgen Script:", 
                                             getParamVal("Script"), 
                                             "<None>", 
                                             "Levelgen script & args to be run when level is loaded",  
-                                            255, 
-                                            KEY_L));
+                                            255));
+   OPT_SCRIPT = menuItems.size() - 1;
+
+
    // Game specific items
    gameType->addGameSpecificParameterMenuItems(menuItems);
 
    mGameSpecificParams = menuItems.size() - FIRST_GAME_SPECIFIC_PARAM;
-
-   OPT_GRIDSIZE = menuItems.size();
-   OPT_MIN_PLAYERS = OPT_GRIDSIZE + 1;
-   OPT_MAX_PLAYERS = OPT_MIN_PLAYERS + 1;
 
 
    // Some more standard items
@@ -244,8 +240,9 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                            Game::MAX_GRID_SIZE,      // max val
                                            "pixels",                 // units
                                            "", 
-                                           "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255.",      
-                                           KEY_S));
+                                           "\"Magnification factor.\" Larger values lead to larger levels.  Default is 255."));
+   OPT_GRIDSIZE = menuItems.size() - 1;
+
 
    menuItems.push_back(new CounterMenuItem("Min Players:",       
                                            0,                  // value
@@ -254,8 +251,9 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                            gMaxPlayers,        // max val
                                            "players",          // units
                                            "N/A", 
-                                           "Min. players you would recommend for this level (helps server select the next level)",      
-                                           KEY_M));
+                                           "Min. players you would recommend for this level (to help server select the next level)"));
+   OPT_MIN_PLAYERS = menuItems.size() - 1;
+
 
    menuItems.push_back(new CounterMenuItem("Max Players:",       
                                            0,                  // value
@@ -264,10 +262,11 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                            gMaxPlayers,        // max val
                                            "players",          // units
                                            "N/A",
-                                           "Max. players you would recommend for this level (helps server select the next level)",      
-                                           KEY_S));
+                                           "Max. players you would recommend for this level (to help server select the next level)"));
+   OPT_MAX_PLAYERS = menuItems.size() - 1;
 
-   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", backToEditorCallback, "", KEY_Q, KEY_R));
+
+   menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", backToEditorCallback, ""));
 
    mQuitItemIndex = menuItems.size() - 1;
 
@@ -316,7 +315,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
             if(menuItems[i]->getString() == savedMenuItems[j].getParamName())    // Found a match
             {
                menuItems[i]->setValue(savedMenuItems[j].getParamIVal());
-               //dynamic_cast<EditableMenuItem *>(menuItems[i])->setLineEditor(savedMenuItems[j].mLineEditor);
                break;
             }
 }
@@ -332,7 +330,7 @@ void GameParamUserInterface::onEscape()
    strcpy(gEditorUserInterface.mGameType, gGameTypeNames[gameTypeIndex]);   // Save current game type
 
    // Compose GameType string from GameType and level-specific params
-   gEditorUserInterface.setLevelFileName(menuItems[OPT_FILENAME]->getValue());  // Save level file name if it changed. Or hell, even if it didn't
+   gEditorUserInterface.setLevelFileName(menuItems[OPT_FILENAME]->getValue());   // Save level file name if it changed. Or hell, even if it didn't
    gEditorUserInterface.setLevelGenScriptName(menuItems[OPT_SCRIPT]->getValue());
 
    gEditorUserInterface.setGridSize(menuItems[OPT_GRIDSIZE]->getIntValue()); 
