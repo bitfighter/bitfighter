@@ -394,8 +394,8 @@ extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 2  // Change this when releasing an incompatible cm/sm protocol (must be int)
 #define CS_PROTOCOL_VERSION 29     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 935          // Version of the game according to SVN, will be unique every release (must be int)
-#define ZAP_GAME_RELEASE "014"     // Change this with every release -- for display purposes only, string, 
+#define BUILD_VERSION 936          // Version of the game according to SVN, will be unique every release (must be int)
+#define ZAP_GAME_RELEASE "014 beta 1"     // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces
 };
 
