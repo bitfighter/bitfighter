@@ -177,8 +177,6 @@ class HostMenuUserInterface : public MenuUserInterface
    typedef MenuUserInterface Parent;
 
 private:
-   typedef MenuUserInterface Parent;
-
    Vector<string> mLevelLoadDisplayNames;    // For displaying levels as they're loaded in host mode
    S32 mLevelLoadDisplayTotal;
    S32 mEditingIndex;                        // Index of item we're editing, -1 if none

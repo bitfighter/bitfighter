@@ -799,9 +799,9 @@ void GameType::saveGameStats()
          teams.push_back(sortTeams[i].getName());
          scores.push_back(sortTeams[i].getScore());
 
-         colorR.push_back(RangedU32<0,256>(sortTeams[i].color.r * 255));
-         colorG.push_back(RangedU32<0,256>(sortTeams[i].color.g * 255));
-         colorB.push_back(RangedU32<0,256>(sortTeams[i].color.b * 255));
+         colorR.push_back(RangedU32<0,256>(U32(sortTeams[i].color.r * 255)));
+         colorG.push_back(RangedU32<0,256>(U32(sortTeams[i].color.g * 255)));
+         colorB.push_back(RangedU32<0,256>(U32(sortTeams[i].color.b * 255)));
       }
 
       S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played

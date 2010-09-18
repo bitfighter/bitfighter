@@ -171,18 +171,18 @@ static void initFoldersBlock(S32 textsize)
 static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
 {
    if(names.size() == 0)      // Lazy init
-      initFoldersBlock(textsize);
+      initFoldersBlock((S32)textsize);
 
    for(S32 i = 0; i < names.size(); i++)
    {
       S32 xpos = (UserInterface::canvasWidth - totLen) / 2;
       glColor3f(0,1,1);
-      UserInterface::drawString(xpos, ypos, textsize, names[i]);
+      UserInterface::drawString(xpos, ypos, (S32)textsize, names[i]);
       xpos += nameWidth + spaceWidth;
       glColor3f(1,1,1);
-      UserInterface::drawString(xpos, ypos, textsize, vals[i]);
+      UserInterface::drawString(xpos, ypos, (S32)textsize, vals[i]);
 
-      ypos += textsize + gap;
+      ypos += (S32)textsize + gap;
    }
 
    return ypos;

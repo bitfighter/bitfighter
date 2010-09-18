@@ -284,10 +284,13 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          string token = str.substr(lastPos, pos - lastPos);
          lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
          string val = str.substr(lastPos, str.size() - lastPos);
+   static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
+   static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
+
 
          if(token == "GridSize")
          {
-            S32 gridSize = max(min(atoi(val.c_str()), Game::MAX_GRID_SIZE), Game::MIN_GRID_SIZE);
+            S32 gridSize = max(min(atoi(val.c_str()), MAX_GRID_SIZE), MIN_GRID_SIZE);
             menuItems[OPT_GRIDSIZE]->setValue(gridSize);
          }
          else if(token == "MinPlayers")
