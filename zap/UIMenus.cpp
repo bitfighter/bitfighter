@@ -867,7 +867,11 @@ void OptionsMenuUserInterface::setupMenus()
    opts.clear();
    for(S32 i = 0; i < ControllerTypeCount; i++)
       opts.push_back(joystickTypeToPrettyString(i));
-   menuItems.push_back(new ToggleMenuItem("JOYSTICK:", opts, gIniSettings.joystickType, true, 
+
+   // Simple bounds check -- could be GenericController, UnknownController, or NoController
+   U32 selectedOption = gIniSettings.joystickType < ControllerTypeCount ? gIniSettings.joystickType : 0;
+
+   menuItems.push_back(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
                        setControllerCallback, "Choose which joystick you have if in joystick mode",    KEY_J));
 
    menuItems.push_back(new MenuItem(menuItems.size(), "DEFINE KEYS / BUTTONS", defineKeysCallback, "Remap keyboard or joystick controls", KEY_D, KEY_K));
