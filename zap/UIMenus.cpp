@@ -872,7 +872,7 @@ void OptionsMenuUserInterface::setupMenus()
    U32 selectedOption = gIniSettings.joystickType < ControllerTypeCount ? gIniSettings.joystickType : 0;
 
    menuItems.push_back(new ToggleMenuItem("JOYSTICK:", opts, selectedOption, true, 
-                       setControllerCallback, "Choose which joystick you have if in joystick mode",    KEY_J));
+                       setControllerCallback, "Choose which joystick to use in joystick mode", KEY_J));
 
    menuItems.push_back(new MenuItem(menuItems.size(), "DEFINE KEYS / BUTTONS", defineKeysCallback, "Remap keyboard or joystick controls", KEY_D, KEY_K));
 
