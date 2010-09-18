@@ -167,8 +167,8 @@ AsteroidSpawn::AsteroidSpawn(Point pos, S32 delay)
    timer = Timer(delay);
 };
 
-//////////////////////////////////////////
-
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(Asteroid);
 class LuaAsteroid;
@@ -245,7 +245,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    setMaskBits(ItemChangedMask);    // So our clients will get new size
    setRadius(F32(ASTEROID_RADIUS) * asteroidRenderSize[mSizeIndex]);
 
-   F32 ang = TNL::Random::readF() * Float2Pi;
+   F32 ang = TNL::Random::readF() * Float2Pi;      // Sync
    //F32 vel = asteroidVel;
 
    setPosAng(getActualPos(), ang);
@@ -255,7 +255,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    F32 ang2;
    do
-      ang2 = TNL::Random::readF() * Float2Pi;
+      ang2 = TNL::Random::readF() * Float2Pi;      // Sync
    while(ABS(ang2 - ang) < .0436 );    // That's 20 degrees in radians, folks!
 
    newItem->setPosAng(getActualPos(), ang2);
@@ -362,7 +362,124 @@ Lunar<Asteroid>::RegType Asteroid::methods[] =
 S32 Asteroid::getSize(lua_State *L) { return returnInt(L, getSizeIndex()); }         // Index of current asteroid size (0 = initial size, 1 = next smaller, 2 = ...) (returns int)
 S32 Asteroid::getSizeCount(lua_State *L) { return returnInt(L, getSizeCount()); }    // Number of indexes of size we can have (returns int)
 
+////////////////////////////////////////
+////////////////////////////////////////
 
+TNL_IMPLEMENT_NETOBJECT(Worm);
+
+Worm::Worm() : Item(Point(0,0), true, WORM_RADIUS, 1)
+{
+   mNetFlags.set(Ghostable);
+   mObjectTypeMask |= WormType;
+   hasExploded = false;
+
+   // Give the worm some intial motion in a random direction
+   F32 ang = TNL::Random::readF() * Float2Pi;
+   mNextAng = TNL::Random::readF() * Float2Pi;
+   F32 vel = asteroidVel;
+
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].vel.x = vel * cos(ang);
+      mMoveState[i].vel.y = vel * sin(ang);
+   }
+
+   mDirTimer.reset(1000);
+
+   mKillString = "killed by a worm";
+}
+
+void Worm::renderItem(Point pos)
+{
+   if(!hasExploded)
+      renderWorm(pos);
+}
+
+
+bool Worm::getCollisionCircle(U32 state, Point &center, F32 &radius)
+{
+   center = mMoveState[state].pos;
+   radius = F32(WORM_RADIUS);
+   return true;
+}
+
+
+bool Worm::getCollisionPoly(Vector<Point> &polyPoints)
+{
+   return false;
+}
+
+bool Worm::collide(GameObject *otherObject)
+{
+   // Worms don't collide with one another!
+   return /*dynamic_cast<Worm *>(otherObject) ? false : */true;
+}
+
+
+static const S32 wormVel = 250;
+void Worm::setPosAng(Point pos, F32 ang)
+{
+   for(U32 i = 0; i < MoveStateCount; i++)
+   {
+      mMoveState[i].pos = pos;
+      mMoveState[i].angle = ang;
+      mMoveState[i].vel.x = wormVel * cos(ang);
+      mMoveState[i].vel.y = wormVel * sin(ang);
+   }
+}
+
+void Worm::damageObject(DamageInfo *theInfo)
+{
+   hasExploded = true;
+   deleteObject(500);
+}
+
+
+void Worm::idle(GameObject::IdleCallPath path)
+{
+   if(!isInDatabase())
+      return;
+
+   if(mDirTimer.update(mCurrentMove.time))
+   {
+      //mMoveState[ActualState].angle = TNL::Random::readF() * Float2Pi;
+      F32 ang = mMoveState[ActualState].vel.ATAN2();
+      setPosAng(mMoveState[ActualState].pos, ang + (TNL::Random::readI(0,2) - 1) * FloatPi / 4);
+      mDirTimer.reset(1000);
+      setMaskBits(InitialMask);     // WRONG!!
+   }
+
+   Parent::idle(path);
+}
+
+
+U32 Worm::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+{
+   U32 retMask = Parent::packUpdate(connection, updateMask, stream);
+
+   stream->writeFlag(hasExploded);
+
+   return retMask;
+}
+
+
+void Worm::unpackUpdate(GhostConnection *connection, BitStream *stream)
+{
+   Parent::unpackUpdate(connection, stream);
+
+   bool explode = (stream->readFlag());     // Exploding!  Take cover!!
+
+   if(explode && !hasExploded)
+   {
+      hasExploded = true;
+      disableCollision();
+      //emitAsteroidExplosion(mMoveState[RenderState].pos);
+   }
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 TNL_IMPLEMENT_NETOBJECT(TestItem);
 
@@ -380,6 +497,7 @@ void TestItem::renderItem(Point pos)
 }
 
 
+// Apperas to be server only??
 void TestItem::damageObject(DamageInfo *theInfo)
 {
    // Compute impulse direction
@@ -452,7 +570,7 @@ bool ResourceItem::collide(GameObject *hitObject)
    if(!ship || ship->hasExploded)
       return false;
 
-   if(ship->hasModule(ModuleEngineer) && !ship->carryingResource())
+   if(ship->hasModule(ModuleEngineer) && !ship->isCarryingItem(ResourceItemType))
    {
       if(!isGhost())
          mountToShip(ship);

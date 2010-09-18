@@ -134,6 +134,8 @@ void renderSpeedZone(Vector<Point>, U32 time);
 
 void renderTestItem(Point pos, F32 alpha = 1);
 
+void renderWorm(Point pos);
+
 void renderAsteroid(Point pos, S32 design, F32 radius);
 void renderAsteroid(Point pos, S32 design, F32 radius, Color c, F32 alpha = 1);
 

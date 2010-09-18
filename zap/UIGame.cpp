@@ -795,6 +795,11 @@ void GameUserInterface::dropItem()
    }
 
    gt->c2sDropItem();
+
+   S32 count = ship->mMountedItems.size();
+
+   for(S32 i = count - 1; i >= 0; i--)
+      ship->mMountedItems[i]->onItemDropped();
 }
 
 
@@ -854,12 +859,6 @@ void GameUserInterface::disableMovementKey(KeyCode keyCode)
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   //if(gClientGame->isSuspended() && keyCode == KEY_SPACE)
-   //{
-   //   unsuspendGame();
-   //   return;
-   //}
-
    S32 inputMode = gIniSettings.inputMode;
 
    if(keyCode == keyHELP)          // Turn on help screen
@@ -1118,7 +1117,8 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
 // Return current move (actual move processing in ship.cpp)
 // Will also transform move into "relative" mode if needed
 // Note that all input supplied here will be overwritten if
-// we are using a game controller.
+// we are using a game controller. 
+// Runs only on client
 Move *GameUserInterface::getCurrentMove()
 {
    // (Possible modes = PlayMode, ChatMode, QuickChatMode, LoadoutMode)

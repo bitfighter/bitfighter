@@ -44,7 +44,7 @@ static void initialize()
    yarrow_ready(&prng);
 }
 
-void *getState()
+void *getState()                                      // Doesn't seem to be called
 {
    if(!initialized)
       initialize();
@@ -52,7 +52,7 @@ void *getState()
    return &prng;
 }
 
-void addEntropy(const U8 *randomData, U32 dataLen)
+void addEntropy(const U8 *randomData, U32 dataLen)    // Doesn't seem to be called
 {
    if(!initialized)
       initialize();

@@ -233,21 +233,26 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 }
 
 
-void RabbitGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
+void RabbitGameType::itemDropped(Ship *ship, Item *item)
 {
-   mFlagScoreTimer.reset();
-   mFlagReturnTimer.reset();
-   s2cRabbitMessage(RabbitMsgDrop, theShip->getName());
+   FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-   Point vel = theShip->getActualVel();
+   if(flag)
+   {
+      mFlagScoreTimer.reset();
+      mFlagReturnTimer.reset();
+      s2cRabbitMessage(RabbitMsgDrop, ship->getName());
 
-   //// Add a random vector to the flag
-   //F32 th = TNL::Random::readF() * Float2Pi;
-   //F32 f = (TNL::Random::readF() * 2 - 1) * 100;
-   //Point dvel(cos(th) * f, sin(th) * f);
-   //vel += dvel;
+      Point vel = ship->getActualVel();
 
-   theFlag->setActualVel(vel);
+      //// Add a random vector to the flag
+      //F32 th = TNL::Random::readF() * Float2Pi;
+      //F32 f = (TNL::Random::readF() * 2 - 1) * 100;
+      //Point dvel(cos(th) * f, sin(th) * f);
+      //vel += dvel;
+
+      flag->setActualVel(vel);
+   }
 }
 
 

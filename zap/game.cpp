@@ -824,7 +824,7 @@ void ServerGame::idle(U32 timeDelta)
    
    mNetInterface->checkBanlistTimeouts(timeDelta);    // Unban players who's bans have expired
 
-      // Periodically update our status on the master, so they know what we're doing...
+   // Periodically update our status on the master, so they know what we're doing...
    if(mMasterUpdateTimer.update(timeDelta))
    {
       MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
@@ -855,8 +855,9 @@ void ServerGame::idle(U32 timeDelta)
       // Here is where the time gets set for all the various object moves
       Move thisMove = mGameObjects[i]->getCurrentMove();
       thisMove.time = timeDelta;
-      mGameObjects[i]->setCurrentMove(thisMove);
 
+      // Give the object its move, then have it idle
+      mGameObjects[i]->setCurrentMove(thisMove);
       mGameObjects[i]->idle(GameObject::ServerIdleMainLoop);
    }
 

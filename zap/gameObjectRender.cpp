@@ -1316,6 +1316,24 @@ void renderTestItem(Point pos, F32 alpha)
 }
 
 
+void renderWorm(Point pos)
+{
+   glPushMatrix();
+   glTranslatef(pos.x, pos.y, 0);
+
+   F32 size = (F32)Worm::WORM_RADIUS * .5;
+
+   glColor(Color(1, .1, .1));
+      glBegin(GL_LINE_LOOP);
+         glVertex2f(0,    -size);
+         glVertex2f(size, 0    );
+         glVertex2f(0,    size );
+         glVertex2f(-size, 0   );
+      glEnd();
+   glPopMatrix();
+}
+
+
 void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha)
 {
    glPushMatrix();

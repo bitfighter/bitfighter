@@ -161,6 +161,33 @@ void SoccerGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
+void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
+{
+   // See if this ship is carrying a ball
+   if(!ship->isCarryingItem(SoccerBallItemType))
+      return;
+
+   // The ship has a ball
+   SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->unmountItem(SoccerBallItemType));
+   ball->collide(zone);
+}
+
+
+// Runs on server only, and only when player deliberately drops ball
+void SoccerGameType::itemDropped(Ship *ship, Item *item)
+{
+   TNLAssert(!isGhost(), "Should run on server only!");
+
+   static StringTableEntry dropString("%e0 dropped the ball!");
+
+   Vector<StringTableEntry> e;
+   e.push_back(ship->getName());
+
+   for(S32 i = 0; i < mClientList.size(); i++)
+      mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+}
+
+
 // What does a particular scoring event score?
 S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
@@ -232,7 +259,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radi
    mLastPlayerTouch = NULL;
    mLastPlayerTouchTeam = Item::NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
-   mDragFactor = 0.95;     // 1.0 for no drag
+   mDragFactor = 1.0;     // 1.0 for no drag
 }
 
 
@@ -282,6 +309,33 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 }
 
 
+static const U32 DROP_DELAY = 500;
+
+void SoccerBallItem::onItemDropped()
+{
+   if(!getGame())    // Can happen on first frame of new game
+      return;
+
+   GameType *gt = getGame()->getGameType();
+   if(!gt || !mMount.isValid())
+      return;
+
+   if(!isGhost()) 
+      gt->itemDropped(mMount, this);
+   
+   if(mMount.isValid())
+   {
+      this->setActualPos(mMount->getActualPos()); 
+      this->setActualVel(mMount->getActualVel() * 2);
+   }
+
+   if(!isGhost())    // Server only -- dismount will be run via another codepath on the client
+      dismount();
+
+   mDroppedTimer.reset(DROP_DELAY);
+}
+
+
 void SoccerBallItem::renderItem(Point pos)
 {
    renderSoccerBall(pos);
@@ -290,24 +344,28 @@ void SoccerBallItem::renderItem(Point pos)
 
 void SoccerBallItem::idle(GameObject::IdleCallPath path)
 {
+   mDroppedTimer.update(mCurrentMove.time);
+
    if(mSendHomeTimer.update(mCurrentMove.time))
-      sendHome();
-   else if(mSendHomeTimer.getCurrent())
+      if(!isGhost())
+         sendHome();
+
+   else if(mSendHomeTimer.getCurrent())      // Goal has been scored, waiting for ball to reset
    {
-      F32 accelFraction = 1 - (0.98 * mCurrentMove.time * 0.001f);
+      F32 accelFraction = 1 - (0.95 * mCurrentMove.time * 0.001f);
 
       mMoveState[ActualState].vel *= accelFraction;
       mMoveState[RenderState].vel *= accelFraction;
    }
 
    // The following block will add some friction to the soccer ball
-   //else
-   //{
-   //   F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
-   //
-   //   mMoveState[ActualState].vel *= accelFraction;
-   //   mMoveState[RenderState].vel *= accelFraction;
-   //}
+   else
+   {
+      F32 accelFraction = 1 - (mDragFactor * mCurrentMove.time * 0.001f);
+   
+      mMoveState[ActualState].vel *= accelFraction;
+      mMoveState[RenderState].vel *= accelFraction;
+   }
 
    Parent::idle(path);
 }
@@ -315,6 +373,9 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
 
 void SoccerBallItem::damageObject(DamageInfo *theInfo)
 {
+   if(mMount != NULL)
+      dismount();
+  
    // Compute impulse direction
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
@@ -346,6 +407,8 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
 
 void SoccerBallItem::sendHome()
 {
+   TNLAssert(!isGhost(), "Should only run on server!");
+
    // In soccer game, we use flagSpawn points to designate where the soccer ball should spawn.
    // We'll simply redefine "initial pos" as a random selection of the flag spawn points
 
@@ -363,30 +426,45 @@ void SoccerBallItem::sendHome()
 
 bool SoccerBallItem::collide(GameObject *hitObject)
 {
-   if(isGhost())
+   if(mSendHomeTimer.getCurrent())     // If we've already scored, and we're waiting for the ball to reset, there's nothing to do
       return true;
-
-   // From here on, runs on server
 
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
+      if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
+         return true;
+
       mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
       mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
       mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
+      mDroppedTimer.clear();
+
+      Ship *ship = dynamic_cast<Ship *>(hitObject);
+      this->mountToShip(ship);
+
+      // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
+      if(isGhost() && getGame()->getGameType())
+         getGame()->getGameType()->c2sReaffirmMountItem();
    }
-   else
+   else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {
       GoalZone *goal = dynamic_cast<GoalZone *>(hitObject);
 
-      if(goal && !mSendHomeTimer.getCurrent())
+      if(goal)    
       {
-         SoccerGameType *g = (SoccerGameType *) getGame()->getGameType();
-         g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->mScore);
-         mSendHomeTimer.reset(1500);
+         if(!isGhost())
+         {
+            SoccerGameType *g = (SoccerGameType *) getGame()->getGameType();
+            g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->mScore);
+         }
+
+         static const S32 POST_SCORE_HIATUS = 1500;
+         mSendHomeTimer.reset(POST_SCORE_HIATUS);
       }
    }
    return true;
 }
+
 
 };
 

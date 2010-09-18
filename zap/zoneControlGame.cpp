@@ -58,15 +58,16 @@ public:
       NetObject::setRPCDestConnection(NULL);
    }
 
-   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
-   void flagDropped(Ship *theShip, FlagItem *theFlag);
-   void addZone(GoalZone *z);
-   void addFlag(FlagItem *theFlag)
+   void shipTouchFlag(Ship *ship, FlagItem *flag);
+   void itemDropped(Ship *ship, Item *item);
+   void addZone(GoalZone *zone);
+   void addFlag(FlagItem *flag)
    {
-      mFlag = theFlag;
-      addItemOfInterest(theFlag);
+      mFlag = flag;
+      addItemOfInterest(flag);
    }
-   void shipTouchZone(Ship *s, GoalZone *z);
+
+   void shipTouchZone(Ship *ship, GoalZone *zone);
 
    GameTypes getGameType() { return ZoneControlGame; }
    const char *getGameTypeString() { return "Zone Control"; }
@@ -120,14 +121,22 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       shipTouchZone(theShip, theZone);
 }
 
-void ZoneControlGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
+
+void ZoneControlGameType::itemDropped(Ship *ship, Item *item)
 {
-   s2cSetFlagTeam(-1);
-   static StringTableEntry dropString("%e0 dropped the flag!");
-   Vector<StringTableEntry> e;
-   e.push_back(theShip->getName());
-   for(S32 i = 0; i < mClientList.size(); i++)
-      mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   FlagItem *flag = dynamic_cast<FlagItem *>(item);
+
+   if(flag)
+   {
+      s2cSetFlagTeam(-1);
+      static StringTableEntry dropString("%e0 dropped the flag!");
+
+      Vector<StringTableEntry> e;
+      e.push_back(ship->getName());
+
+      for(S32 i = 0; i < mClientList.size(); i++)
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   }
 }
 
 void ZoneControlGameType::addZone(GoalZone *z)

@@ -191,6 +191,40 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class Worm : public Item
+{
+typedef Item Parent;
+
+public:
+   static const S32 WORM_RADIUS = 5;
+
+private:
+   bool hasExploded;
+   F32 mNextAng;
+   Timer mDirTimer;
+
+public:
+   Worm();     // Constructor  
+
+   void renderItem(Point pos);
+   bool getCollisionPoly(Vector<Point> &polyPoints);
+   bool getCollisionCircle(U32 state, Point &center, F32 &radius);
+   bool collide(GameObject *otherObject);
+   void setPosAng(Point pos, F32 ang);
+   void setNextAng(F32 nextAng) { mNextAng = nextAng; }
+
+   void damageObject(DamageInfo *theInfo);
+   void idle(GameObject::IdleCallPath path);
+   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
+   void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   TNL_DECLARE_CLASS(Worm);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class TestItem : public Item
 {
 public:

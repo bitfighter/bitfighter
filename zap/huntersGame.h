@@ -70,16 +70,16 @@ public:
    bool isSpawnWithLoadoutGame() { return true; }
    bool getMountedObjectsMakesShipsVisible() { return false; }    // Can carry items stealthily in this game
 
-   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
+   void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isCarryingItems(Ship *ship);
-   void flagDropped(Ship *theShip, FlagItem *theFlag);
+   void itemDropped(Ship *ship, Item *item);
 
    void addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems);
 
    void addNexus(HuntersNexusObject *theObject);
-   void shipTouchNexus(Ship *theShip, HuntersNexusObject *theNexus);
-   void onGhostAvailable(GhostConnection *theConnection);
+   void shipTouchNexus(Ship *ship, HuntersNexusObject *nexus);
+   void onGhostAvailable(GhostConnection *connection);
    void idle(GameObject::IdleCallPath path);
    void renderInterfaceOverlay(bool scoreboardVisible);
 
@@ -136,7 +136,7 @@ public:
 
    void renderItem(Point pos);
    void onMountDestroyed();
-   void onItemDropped(Ship *ship);
+   void onItemDropped();
 
    void changeFlagCount(U32 change) { mFlagCount = change; setMaskBits(FlagCountMask); }
    U32 getFlagCount() { return mFlagCount; }

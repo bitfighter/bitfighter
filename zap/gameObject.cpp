@@ -164,7 +164,7 @@ S32 GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask
    fillVector.clear();
    findObjects(typemask, fillVector, queryRect);
 
-   // Ghosts can't do damage.
+   // Ghosts can't do damage
    if(isGhost())
       info.damageAmount = 0;
 

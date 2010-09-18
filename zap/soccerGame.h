@@ -47,6 +47,7 @@ public:
    void updateSoccerScore(Ship *ship, S32 scoringTeam, ScoringEvent scoringEvent, S32 score);   // Helper function to make sure the two-arg version of updateScore doesn't get a null ship
 
    void addZone(GoalZone *theZone);
+   void itemDropped(Ship *ship, Item *item);
    void setBall(SoccerBallItem *theBall);
    void renderInterfaceOverlay(bool scoreboardVisible);
 
@@ -68,9 +69,19 @@ public:
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 
+   void shipTouchZone(Ship *s, GoalZone *z);
+
+   // No firing or modules while carrying the ball!
+   bool okToFire(Ship *ship) { return Parent::okToFire(ship) && ! ship->isCarryingItem(SoccerBallItemType); }             
+   bool okToUseModules(Ship *ship) { return Parent::okToUseModules(ship) && ! ship->isCarryingItem(SoccerBallItemType); } 
+
    TNL_DECLARE_RPC(s2cSoccerScoreMessage, (U32 msgIndex, StringTableEntry clientName, RangedU32<0, GameType::gMaxTeamCount> teamIndex));
    TNL_DECLARE_CLASS(SoccerGameType);
 };
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class SoccerBallItem : public Item
 {
@@ -82,6 +93,8 @@ private:
    S32 mLastPlayerTouchTeam;
    StringTableEntry mLastPlayerTouchName;
    F32 mDragFactor;
+
+   Timer mDroppedTimer;
 
 public:
    SoccerBallItem(Point pos = Point());   // C++ constructor
@@ -95,6 +108,7 @@ public:
    bool processArguments(S32 argc, const char **argv);
 
    void onAddedToGame(Game *theGame);
+   void onItemDropped();
 
    bool collide(GameObject *hitObject);
 

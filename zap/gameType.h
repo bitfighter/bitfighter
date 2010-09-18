@@ -178,6 +178,10 @@ public:
 
    virtual bool isCarryingItems(Ship *ship) { return ship->mMountedItems.size() > 0; }     // Nexus game will override this
 
+   // Some games may place restrictions on when players can fire or use modules
+   virtual bool okToFire(Ship *ship) { return true; }
+   virtual bool okToUseModules(Ship *ship) { return true; }
+
    virtual bool isSpawnWithLoadoutGame() { return false; }  // We do not spawn with our loadout, but instead need to pass through a loadout zone
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
@@ -335,12 +339,12 @@ public:
 
 
    // gameType flag methods for CTF, Rabbit, Football
-   virtual void addFlag(FlagItem *theFlag) {  /* do nothing */  }
-   virtual void flagDropped(Ship *theShip, FlagItem *theFlag) {  /* do nothing */  }
-   virtual void shipTouchFlag(Ship *theShip, FlagItem *theFlag) {  /* do nothing */  }
+   virtual void addFlag(FlagItem *flag) {  /* do nothing */  }
+   virtual void itemDropped(Ship *ship, Item *item) {  /* do nothing */  }
+   virtual void shipTouchFlag(Ship *ship, FlagItem *flag) {  /* do nothing */  }
 
-   virtual void addZone(GoalZone *theZone) {  /* do nothing */  }
-   virtual void shipTouchZone(Ship *theShip, GoalZone *theZone) {  /* do nothing */  }
+   virtual void addZone(GoalZone *zone) {  /* do nothing */  }
+   virtual void shipTouchZone(Ship *ship, GoalZone *zone) {  /* do nothing */  }
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);
@@ -387,7 +391,7 @@ public:
    TNL_DECLARE_RPC(c2sAdvanceWeapon, ());
    TNL_DECLARE_RPC(c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index));
    TNL_DECLARE_RPC(c2sDropItem, ());
-
+   TNL_DECLARE_RPC(c2sReaffirmMountItem, ());
 
    // Handle additional game-specific menu options for the client and the admin
    virtual void addClientGameMenuOptions(Vector<MenuItem *> &menuOptions);

@@ -123,20 +123,27 @@ public:
    }
 
 
-   void flagDropped(Ship *theShip, FlagItem *theFlag)
+   void flagDropped(Ship *ship, Item *item)
    {
-      static StringTableEntry aString("a");
-      static StringTableEntry theString("the");
-      static StringTableEntry dropString("%e0 dropped %e1 flag!");
-      Vector<StringTableEntry> e;
-      e.push_back(theShip->getName());
-      if(mFlags.size() == 1)
-         e.push_back(theString);
-      else
-         e.push_back(aString);
+      FlagItem *flag = dynamic_cast<FlagItem *>(item);
 
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      if(flag)
+      {
+         static StringTableEntry aString("a");
+         static StringTableEntry theString("the");
+         static StringTableEntry dropString("%e0 dropped %e1 flag!");
+
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getName());
+
+         if(mFlags.size() == 1)
+            e.push_back(theString);
+         else
+            e.push_back(aString);
+
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      }
    }
 
 
@@ -183,7 +190,7 @@ public:
                break;
 
          mFlags[flagIndex]->setZone(z);                           // Assign zone to the flag
-         mFlags[flagIndex]->mTimer.reset(ScoreTime);              // Start countdown until scorin' time!
+         mFlags[flagIndex]->mTimer.reset(ScoreTime);              // Start countdown 'til scorin' time!
          mountedFlag->setActualPos(z->getExtent().getCenter());   // Put flag smartly in center of capture zone
 
          updateScore(s, ReturnFlagToZone);

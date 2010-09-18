@@ -120,13 +120,19 @@ public:
    }
 
 
-   void flagDropped(Ship *theShip, FlagItem *theFlag)
+   void flagDropped(Ship *ship, Item *item)
    {
-      static StringTableEntry dropString("%e0 dropped a flag!");
-      Vector<StringTableEntry> e;
-      e.push_back(theShip->getName());
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      FlagItem *flag = dynamic_cast<FlagItem *>(item);
+
+      if(flag)
+      {
+         static StringTableEntry dropString("%e0 dropped a flag!");
+         Vector<StringTableEntry> e;
+         e.push_back(ship->getName());
+
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+      }
    }
 
 

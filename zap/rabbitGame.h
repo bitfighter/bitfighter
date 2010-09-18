@@ -69,9 +69,10 @@ public:
 
    void idle(GameObject::IdleCallPath path);
 
-   void addFlag(FlagItem *theFlag);
-   void flagDropped(Ship *theShip, FlagItem *theFlag);
-   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
+   void addFlag(FlagItem *flag);
+   void itemDropped(Ship *ship, Item *item);
+   void shipTouchFlag(Ship *ship, FlagItem *flag);
+
    bool isFlagGame() { return true; }
    S32 getFlagCount() { return 1; }
 

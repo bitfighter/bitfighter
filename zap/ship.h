@@ -239,8 +239,8 @@ public:
    S32 carryingFlag();     // Returns index of first flag, or NO_FLAG if ship has no flags
    S32 getFlagCount();     // Returns the number of flags ship is carrying
 
-   bool carryingResource();
-   Item *unmountResource();
+   bool isCarryingItem(GameObjectType objectType);
+   Item *unmountItem(GameObjectType objectType);
 
    F32 getSensorZoomFraction() { return 1 - mSensorZoomTimer.getFraction(); }
    Point getAimVector();

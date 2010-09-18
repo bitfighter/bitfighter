@@ -45,7 +45,7 @@ bool engClientCreateObject(GameConnection *connection, U32 object)
    if(!ship)
       return false;
 
-   if(!ship->carryingResource())    // Ship needs a resource
+   if(!ship->isCarryingItem(ResourceItemType))    // Ship needs a resource
       return false;
 
    // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
@@ -109,7 +109,7 @@ bool engClientCreateObject(GameConnection *connection, U32 object)
    deployedObject->addToGame(gServerGame);
    deployedObject->onEnabled();
 
-   Item *resource = ship->unmountResource();
+   Item *resource = ship->unmountItem(ResourceItemType);
 
    deployedObject->setResource(resource);
 

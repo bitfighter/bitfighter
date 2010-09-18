@@ -39,6 +39,7 @@ private:
 
 protected:
    typedef Item Parent;                 // RDW - This need to be protected, or child classes can't access it.
+
    U32 mFlagCount;                      // How many flags does this represet?
    Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
    static const U32 dropDelay = 500;    // in ms
@@ -56,7 +57,7 @@ public:
    virtual void sendHome();
 
    virtual void onMountDestroyed();
-   virtual void onItemDropped(Ship *ship);
+   virtual void onItemDropped();
    virtual bool collide(GameObject *hitObject);
    virtual bool isAtHome();
    Timer mTimer;                       // Used for games like HTF where time a flag is held is important

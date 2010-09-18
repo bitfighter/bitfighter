@@ -60,7 +60,7 @@ namespace Zap
 const S32 GameType::gMaxTeams;
 #endif
 
-//static Timer mTestTimer(10 * 1000);
+static Timer mTestTimer(1 * 1000);
 //static bool on = true;
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString
@@ -381,6 +381,13 @@ void GameType::idle(GameObject::IdleCallPath path)
    }
 
    //if(mTestTimer.update(deltaT))
+   //{
+   //   Worm *worm = dynamic_cast<Worm *>(TNL::Object::create("Worm"));
+   //   F32 ang = TNL::Random::readF() * Float2Pi;
+   //   worm->setPosAng(Point(0,0), ang);
+   //   worm->addToGame(gServerGame);
+   //   mTestTimer.reset(10000);
+   //}
    //{
    //   on = !on;
 
@@ -2254,9 +2261,6 @@ GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
 GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   //GameType *gt = gServerGame->getGameType();
-   //if(!gt)
-   //   return;
 
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
    if(!ship)
@@ -2264,11 +2268,23 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
    S32 count = ship->mMountedItems.size();
    for(S32 i = count - 1; i >= 0; i--)
-   {
-      ship->mMountedItems[i]->onItemDropped(ship);
-   }
+      ship->mMountedItems[i]->onItemDropped();
 }
 
+
+GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (), ())
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+
+   Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
+   if(!ship)
+      return;
+
+   S32 count = ship->mMountedItems.size();
+
+   for(S32 i = count - 1; i >= 0; i--)
+      ship->mMountedItems[i]->setMountedMask();
+}
 
 // Client tells server that they chose the specified weapon
 GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))

@@ -343,7 +343,7 @@ void Ship::processWeaponFire()
 
    WeaponType curWeapon = mWeapon[mActiveWeaponIndx];
 
-   if(mCurrentMove.fire && mFireTimer.getCurrent() == 0)
+   if(mCurrentMove.fire && mFireTimer.getCurrent() == 0 && getGame()->getGameType() && getGame()->getGameType()->okToFire(this))
    {
       if(mEnergy >= gWeapons[curWeapon].minEnergy)
       {
@@ -471,7 +471,7 @@ void Ship::idle(GameObject::IdleCallPath path)
    {
       // Process weapons and energy on controlled object objects
       processWeaponFire();
-      processEnergy();
+      processEnergy();     // and modules
    }
      
    if(path == GameObject::ClientIdleMainRemote)
@@ -564,14 +564,17 @@ void Ship::processEnergy()
       mModuleActive[i] = false;
    }
 
-   if(mEnergy > EnergyCooldownThreshold)
+   if(mEnergy > EnergyCooldownThreshold)     // Only turn off cooldown if energy has risen above threshold, not if it falls below
       mCooldown = false;
 
+   // Make sure we're allowed to use modules
+   bool allowed = getGame()->getGameType() && getGame()->getGameType()->okToUseModules(this);
+
    for(S32 i = 0; i < ShipModuleCount; i++)
-      if(mCurrentMove.module[i] && !mCooldown)  // No modules if we're too hot
+      if(mCurrentMove.module[i] && !mCooldown && allowed)  // No modules if we're too hot or game has disallowed them
          mModuleActive[mModule[i]] = true;
 
-   // No boost if we're not moving.
+   // No boost if we're not moving
     if(mModuleActive[ModuleBoost] &&
        mCurrentMove.up == 0 && mCurrentMove.down == 0 &&
        mCurrentMove.left == 0 && mCurrentMove.right == 0)
@@ -689,8 +692,7 @@ void Ship::damageObject(DamageInfo *theInfo)
    GameConnection *damagerOwner = theInfo->damagingObject->getOwner();
    GameConnection *victimOwner = this->getOwner();
 
-   // Remember that healing things will do negative damage
-
+   // Healing things do negative damage
    mHealth -= theInfo->damageAmount * ((victimOwner && damagerOwner == victimOwner) ? theInfo->damageSelfMultiplier : 1);
    setMaskBits(HealthMask);
 
@@ -1081,24 +1083,24 @@ S32 Ship::getFlagCount()
 }
 
 
-bool Ship::carryingResource()
+bool Ship::isCarryingItem(GameObjectType objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeMask() & ResourceItemType)
+      if(mMountedItems[i].isValid() && mMountedItems[i]->getObjectTypeMask() & objectType)
          return true;
    return false;
 }
 
 
-Item *Ship::unmountResource()
+Item *Ship::unmountItem(GameObjectType objectType)
 {
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
    {
-      if(mMountedItems[i]->getObjectTypeMask() & ResourceItemType)
+      if(mMountedItems[i]->getObjectTypeMask() & objectType)
       {
-         Item *ret = mMountedItems[i];
-         ret->dismount();
-         return ret;
+         Item *item = mMountedItems[i];
+         item->dismount();
+         return item;
       }
    }
    return NULL;

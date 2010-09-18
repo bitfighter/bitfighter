@@ -42,9 +42,9 @@ private:
 
 public:
    bool isFlagGame() { return true; }
-   void addFlag(FlagItem *theFlag);
-   void shipTouchFlag(Ship *theShip, FlagItem *theFlag);
-   void flagDropped(Ship *theShip, FlagItem *theFlag);
+   void addFlag(FlagItem *flag);
+   void shipTouchFlag(Ship *ship, FlagItem *flag);
+   void itemDropped(Ship *ship, Item *item);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
    void renderInterfaceOverlay(bool scoreboardVisible);
 

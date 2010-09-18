@@ -154,21 +154,20 @@ HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 }
 
 
-// The ship will come from flag->mount
-void HuntersGameType::flagDropped(Ship *theShip, FlagItem *flag)
+// The ship will come from flag->mount.  *item will be NULL.
+void HuntersGameType::itemDropped(Ship *ship, Item *item)
 {
-   HuntersFlagItem *theFlag = findFirstNexusFlag(theShip);
-   U32 flagCount = theFlag ? theFlag->getFlagCount() : 0;
+   HuntersFlagItem *flag = findFirstNexusFlag(ship);
+   U32 flagCount = flag ? flag->getFlagCount() : 0;
 
    if(flagCount == 0)
       return;
 
    Vector<StringTableEntry> e;
 
-   e.push_back(theShip->getName());
+   e.push_back(ship->getName());
    if(flagCount > 1)
       e.push_back(UserInterface::itos(flagCount).c_str());
-
 
    static StringTableEntry dropOneString( "%e0 dropped a flag!");
    static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");
@@ -528,9 +527,9 @@ void HuntersFlagItem::onMountDestroyed()
 }
 
 
-void HuntersFlagItem::onItemDropped(Ship *ship)
+void HuntersFlagItem::onItemDropped()
 {
-   getGame()->getGameType()->flagDropped(mMount, NULL);
+   getGame()->getGameType()->itemDropped(mMount, NULL);
    dropFlags(mFlagCount);        // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
 

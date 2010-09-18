@@ -244,14 +244,20 @@ bool FlagItem::collide(GameObject *hitObject)
 
 
 // Private helper function -- what happens when flag is dropped?
+// Can run on client and server
 void FlagItem::flagDropped()
 {
+   if(!getGame())    // Can happen on game startup
+      return;
+
    GameType *gt = getGame()->getGameType();
    if(!gt || !mMount.isValid())
       return;
 
-   gt->flagDropped(mMount, this);
-   dismount();
+   gt->itemDropped(mMount, this);
+   
+   if(!isGhost())    // Server only
+      dismount();
 }
 
 
@@ -261,7 +267,7 @@ void FlagItem::onMountDestroyed()
 }
 
 
-void FlagItem::onItemDropped(Ship *ship)
+void FlagItem::onItemDropped()
 {
    flagDropped();
    mDroppedTimer.reset(dropDelay);

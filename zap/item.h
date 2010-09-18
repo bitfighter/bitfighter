@@ -74,6 +74,7 @@ public:
    void setActualVel(Point vel);
 
    void mountToShip(Ship *theShip);
+   void setMountedMask() { setMaskBits(MountMask); }
 
    bool isMounted() { return mIsMounted; }
    void setZone(GoalZone *theZone);
@@ -87,7 +88,7 @@ public:
    virtual void renderItem(Point pos) = 0;
 
    virtual void onMountDestroyed();
-   virtual void onItemDropped(Ship *ship) { /* do nothing */ };
+   virtual void onItemDropped() { /* do nothing */ };
 
    bool collide(GameObject *otherObject);
 

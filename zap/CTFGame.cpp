@@ -110,14 +110,23 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 }
 
 
-void CTFGameType::flagDropped(Ship *theShip, FlagItem *theFlag)
+class FlagItem;
+
+void CTFGameType::itemDropped(Ship *ship, Item *item)
 {
-   static StringTableEntry dropString("%e0 dropped the %e1 flag!");
-   Vector<StringTableEntry> e;
-   e.push_back(theShip->getName());
-   e.push_back(mTeams[theFlag->getTeam()].getName());
-   for(S32 i = 0; i < mClientList.size(); i++)
-      mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   FlagItem *flag = dynamic_cast<FlagItem *>(item);
+
+   if(flag)
+   {
+      static StringTableEntry dropString("%e0 dropped the %e1 flag!");
+
+      Vector<StringTableEntry> e;
+      e.push_back(ship->getName());
+      e.push_back(mTeams[flag->getTeam()].getName());
+
+      for(S32 i = 0; i < mClientList.size(); i++)
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagDrop, dropString, e);
+   }
 }
 
 

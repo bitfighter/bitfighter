@@ -71,15 +71,19 @@ void Item::render()
 }
 
 
-void Item::mountToShip(Ship *theShip)
+// Runs on both client and server, comes from collision() on the server and the colliding client, and from
+// unpackUpdate() in the case of all clients
+void Item::mountToShip(Ship *theShip)     // theShip could be NULL here
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
+
    dismount();
    mMount = theShip;
    if(theShip)
+   {
       theShip->mMountedItems.push_back(this);
-
-   mIsMounted = true;
+      mIsMounted = true;
+   }
    setMaskBits(MountMask);
 }
 
@@ -95,14 +99,16 @@ void Item::dismount()
    if(mMount.isValid())
    {
       for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
-      {
          if(mMount->mMountedItems[i].getPointer() == this)
          {
-            mMount->mMountedItems.erase(i);
+            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
             break;
          }
-      }
    }
+   
+   if(isGhost())     // Client only
+      onItemDropped();
+
    mMount = NULL;
    mIsMounted = false;
    setMaskBits(MountMask);
@@ -201,10 +207,11 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       writeCompressedVelocity(mMoveState[ActualState].vel, 511, stream);      // 511? Why?
       stream->writeFlag(updateMask & WarpPositionMask);
    }
-   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))
+   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))   // True for mask, then True if mounted
    {
-      S32 index = connection->getGhostIndex(mMount);
-      if(stream->writeFlag(index != -1))
+      S32 index = connection->getGhostIndex(mMount);     // Index of ship with item mounted
+
+      if(stream->writeFlag(index != -1))                 // True if some ship has item, false if nothing is mounted
          stream->writeInt(index, GhostConnection::GhostIdBitSize);
       else
          retMask |= MountMask;
@@ -236,27 +243,32 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
        // Do nothing
    }
-   if(stream->readFlag())
+
+   if(stream->readFlag())     // PositionMask
    {
       ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
       readCompressedVelocity(mMoveState[ActualState].vel, 511, stream);    // 511?  What? Why?
       positionChanged = true;
       interpolate = !stream->readFlag();
    }
-   if(stream->readFlag())
+
+   if(stream->readFlag())     // MountMask
    {
-      bool shouldMount = stream->readFlag();
-      if(shouldMount)
+      bool isMounted = stream->readFlag();
+      if(isMounted)
       {
          Ship *theShip = NULL;
+         
          if(stream->readFlag())
             theShip = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
+
          mountToShip(theShip);
       }
       else
          dismount();
    }
-   if(stream->readFlag())
+
+   if(stream->readFlag())     // ZoneMask
    {
       bool hasZone = stream->readFlag();
       if(hasZone)
