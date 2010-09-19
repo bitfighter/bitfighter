@@ -1314,8 +1314,6 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 }
 
 
-extern md5wrapper md5;
-
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
 void GameUserInterface::processCommand(Vector<string> &words)
