@@ -202,8 +202,8 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
 // Render outgoing chat message composition line
 void AbstractChat::renderMessageComposition(S32 ypos)
 {
-   static const char *PROMPT_STR = "> ";     // For composition only
-   static const S32 xStartPos = UserInterface::horizMargin + UserInterface::getStringWidth(AbstractChat::CHAT_FONT_SIZE, PROMPT_STR);
+   const char *PROMPT_STR = "> ";     // For composition only
+   const S32 xStartPos = UserInterface::horizMargin + UserInterface::getStringWidth(AbstractChat::CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(0,1,1);
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
