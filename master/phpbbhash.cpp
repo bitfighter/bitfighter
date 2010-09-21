@@ -43,7 +43,6 @@ bool PHPBB3Password::check_hash(string password, string hash) {
 }
 
 
-static md5wrapper md5;
 
 
 string PHPBB3Password::md5(string data) {
@@ -54,6 +53,8 @@ string PHPBB3Password::md5(string data) {
 	//md5_finish(&state, hash);
 	//string ret;
 	//for (int i=0; i<16; i++) ret += hash[i];
+   static md5wrapper md5;
+
    return md5.getHashFromString(data);
 }
 

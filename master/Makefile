@@ -9,11 +9,15 @@
 CC=g++ -g -I../tnl #-O2
 
 OBJECTS_MASTER=\
-   main.o\
-   masterInterface.o\
-   config.o
+   main.o \
+   masterInterface.o \
+   config.o \
+   authenticator.o \
+   phpbbhash.o\
+   ../mysql++/connection.o
 
-CFLAGS=
+# If you get an error about not being able to find the mysql headers, try removing this flag
+CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED
 
 .cpp.o : 
 	$(CC) -c $(CFLAGS) $<

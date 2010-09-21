@@ -115,7 +115,7 @@
 	// even then, not if included from a MySQL++ header file, since
 	// config.h cannot be safely installed with the other headers.
 #	if defined(MYSQLPP_NOT_HEADER) && !defined(MYSQLPP_XCODE)
-#		include "config.h"
+//#		include "config.h"
 #	endif
 
 	// Make DLL stuff a no-op on this platform.
