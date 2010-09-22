@@ -6,6 +6,9 @@
 # 
 # Configuration
 #
+#MYSQLFLAGS=-I/usr/include/mysql -Imysql++ 
+LDFLAGS= ./mysql++/libmysqlpp.so ../zap/md5wrapper.o ../zap/md5.o
+
 CC=g++ -g -I../tnl #-O2
 
 OBJECTS_MASTER=\
@@ -13,19 +16,21 @@ OBJECTS_MASTER=\
    masterInterface.o \
    config.o \
    authenticator.o \
-   phpbbhash.o\
-   ../mysql++/connection.o
+   phpbbhash.o
 
 # If you get an error about not being able to find the mysql headers, try removing this flag
 CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED
 
+
 .cpp.o : 
-	$(CC) -c $(CFLAGS) $<
+	$(CC) $(MYSQLFLAGS) -c $(CFLAGS) $<
 
 default: $(OBJECTS_MASTER)
 # For linux and Mac, uncomment the following, and comment out the Windows line below
 
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+
+
 # For windows, uncomment out the line below, and comment out the line above
 #   $(CC) -o ../exe/master $(OBJECTS_MASTER)  ../tnl/libtnl.a   ../libtomcrypt/libtomcrypt.a   C:/MinGW/lib/libwsock32.a  -lstdc++ -lm  
 

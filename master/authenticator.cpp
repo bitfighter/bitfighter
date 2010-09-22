@@ -25,7 +25,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "phpbbhash.h"
 #include <string.h>
 #include <ctype.h>
-#include <../mysql++/mysql++.h>
+#include "mysql++/lib/mysql++.h"
 
 using namespace mysqlpp;
 using namespace std;
