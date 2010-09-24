@@ -25,7 +25,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PHPBBHASH_H
 
 #include <string>
-#include "../zap/md5.h"
 
 using namespace std;
 
@@ -37,10 +36,12 @@ public:
 	bool check_hash(string password, string hash);
 
 	string encode(string input, int count);
-	static string md5(string data);
+	string md5(string data);
 	
 private:
 	string itoa64;
 };
 
 #endif
+
+

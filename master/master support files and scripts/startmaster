@@ -1,2 +1,3 @@
+LD_LIBRARY_PATH=/home/eykamp/bitFighter/server/mysql++
 nohup ./master &
 echo $! > master_pid

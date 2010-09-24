@@ -28,6 +28,7 @@
 #include "../tnl/tnlVector.h"
 #include "../tnl/tnlAsymmetricKey.h"
 #include "../zap/SharedConstants.h"
+#include "authenticator.h"   // For authenticating users against the PHPBB3 database
 #include <stdio.h>
 #include <string>
 #include <stdarg.h>     // For va_args
@@ -1005,6 +1006,7 @@ U32 gMasterPort = 25955;      // <== Default, can be overwritten in cfg file
 
 extern void readConfigFile();
 
+
 int main(int argc, const char **argv)
 {
    gMasterName = "Bitfighter Master Server";    // Default, can be overridden in cfg file
@@ -1021,6 +1023,48 @@ int main(int argc, const char **argv)
 
    gStdoutLogConsumer.setMsgTypes(events);                             // stdout
 
+
+/////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/*
+Authenticator authenticator;
+
+// These need to be in config file:
+string mySqlAddress = "127.0.0.1";      // IP address where mysql server lives
+string dbUsername = "eykamp";           // Username for accessing database
+string dbPassword = "thinner";            
+string database = "bf_phpbb";          
+string tablePrefix = "phpbb_";          // Table prefix in the form phpbb_, ok to be empty
+
+// Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
+//		    1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
+//		    2 = alphanumeric (only allows alphanumeric characters in the username)
+//
+// We'll use level 1 for now, so users can put special characters in their username
+authenticator.initialize(mySqlAddress, dbUsername, dbPassword, database, tablePrefix, 1);
+
+
+// These from the client
+string username = "xxx";
+string password = "yyy";
+
+S32 errorcode;
+if(!authenticator.authenticate(username, password, errorcode))   // returns true if the username was found and the password is correct, else false
+{
+//	errorCodes:
+//		0 = unable to connect to mysql server
+//		1 = username doesn't exist
+//		2 = invalid password
+//		3 = username contains invalid characters (possibly an sql injection attempt)
+   logprintf("ERROR: %d", errorcode);
+}
+else
+{
+   logprintf("VALID!!");
+}
+*/
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 
    // Parse command line parameters...

@@ -1,5 +1,7 @@
 /*
 Copyright (c) 2009, William M Brandt (aka 'Taekvideo')
+[[Minor modifications for Bitfighter usage by Chris Eykamp]]
+
 All rights reserved.
 Email: taekvideo@gmail.com (feel free to contact me with any questions, concerns, or suggestions)
 
@@ -23,9 +25,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "phpbbhash.h"
-#include "../zap/md5wrapper.h"
+#include "mycrypt.h"
 #include <ctype.h>
 #include <math.h>
+
 
 PHPBB3Password::PHPBB3Password(){
 	itoa64 = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -43,19 +46,16 @@ bool PHPBB3Password::check_hash(string password, string hash) {
 }
 
 
-
-
 string PHPBB3Password::md5(string data) {
-	//unsigned char hash[16];
-	//md5_state_t state;
-	//md5_init(&state);
-	//md5_append(&state, (const unsigned char *)data.c_str(), data.length());
-	//md5_finish(&state, hash);
-	//string ret;
-	//for (int i=0; i<16; i++) ret += hash[i];
-   static md5wrapper md5;
+	unsigned char hash[16];
+	hash_state state;
+	md5_init(&state);
 
-   return md5.getHashFromString(data);
+	md5_process(&state, (const unsigned char *)data.c_str(), data.length());
+	md5_done(&state, hash);
+	string ret;
+	for (int i=0; i<16; i++) ret += hash[i];
+	return ret;
 }
 
 string PHPBB3Password::encode(string input, int count) {

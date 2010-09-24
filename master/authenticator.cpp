@@ -1,5 +1,6 @@
 /*
 Copyright (c) 2009, William M Brandt (aka 'Taekvideo')
+[[Minor modifications for Bitfighter usage by Chris Eykamp]]
 All rights reserved.
 Email: taekvideo@gmail.com (feel free to contact me with any questions, concerns, or suggestions)
 
@@ -25,7 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "phpbbhash.h"
 #include <string.h>
 #include <ctype.h>
-#include "mysql++/lib/mysql++.h"
+#include "../mysql++/lib/mysql++.h"
 
 using namespace mysqlpp;
 using namespace std;

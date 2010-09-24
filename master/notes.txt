@@ -1,17 +1,9 @@
-Personal notes on how to build the master server on a system with PHPBB3 installed so that account info
-can be shared.  These notes reflect only my personal experience, and are not intended as a comprehensive
-how-to for building the master server, which, after all, most people will not need to do.
-
+need libmysqlclient-dev
 need mysql++
 	wget http://tangentsoft.net/mysql++/releases/mysql++-3.1.0.tar.gz
 	./configure
 	make
 	(Note, to get it to compile, I needed to add #include <string.h> to the file that complained.  This seems to be a known bug)
 
-After compiling, move the whole mysql++ folder into bitfighter/master
-
-Need to make sure that zap/md5 and zap/md5wrapper have been compiled.  I did this by modifying the makefile in the zap folder so that only those two files would be compiled.  The linker complained, but the files were compiled to .o files, which is all we really need.
-
-At that point, I was able to run make in the master folder, and build the master server.
-
-Hopefully, subsequent iterations will only require updating the source and running the master makefile.
+After compiling, move the whole mysql++ folder to be parallel with master, and
+rename it mysql++
