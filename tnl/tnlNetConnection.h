@@ -217,10 +217,11 @@ public:
 
    enum TerminationReason {
       ReasonTimedOut,
-      ReasonNeedPassword,
       ReasonSelfDisconnect,
       ReasonKickedByAdmin,
       ReasonFloodControl,
+      ReasonBadLogin,
+      ReasonInvalidUsername,  // Username contains illegal characters
       ReasonPuzzle,
       ReasonError,
       ReasonShutdown,
@@ -509,18 +510,18 @@ public:
    /// If force is true and there is space in the window, it will always send a packet.
    void checkPacketSend(bool force, U32 currentTime);
 
-   /// Connection state flags for a NetConnection instance.
+   /// Connection state flags for a NetConnection instance.  If this list is modifed, please check if netInterface.cpp needs updates as well
    enum NetConnectionState {
-      NotConnected=0,            ///< Initial state of a NetConnection instance - not connected.
-      AwaitingChallengeResponse, ///< We've sent a challenge request, awaiting the response.
+      NotConnected=0,            ///< Initial state of a NetConnection instance - not connected
+      AwaitingChallengeResponse, ///< We've sent a challenge request, awaiting the response
       SendingPunchPackets,       ///< The state of a pending arranged connection when both sides haven't heard from the other yet
-      ComputingPuzzleSolution,   ///< We've received a challenge response, and are in the process of computing a solution to its puzzle.
-      AwaitingConnectResponse,   ///< We've received a challenge response and sent a connect request.
-      ConnectTimedOut,           ///< The connection timed out during the connection process.
-      ConnectRejected,           ///< The connection was rejected.
-      Connected,                 ///< We've accepted a connect request, or we've received a connect response accept.
-      Disconnected,              ///< The connection has been disconnected.
-      TimedOut,                  ///< The connection timed out.
+      ComputingPuzzleSolution,   ///< We've received a challenge response, and are in the process of computing a solution to its puzzle
+      AwaitingConnectResponse,   ///< We've received a challenge response and sent a connect request
+      ConnectTimedOut,           ///< The connection timed out during the connection process
+      ConnectRejected,           ///< The connection was rejected
+      Connected,                 ///< We've accepted a connect request, or we've received a connect response accept
+      Disconnected,              ///< The connection has been disconnected
+      TimedOut,                  ///< The connection timed out
       StateCount,
    };
 

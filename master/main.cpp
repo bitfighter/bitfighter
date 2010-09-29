@@ -50,6 +50,17 @@ string gMasterName;                // Name of the master server
 string gJasonOutFile;              // File where JSON data gets dumped
 bool gNeedToWriteStatus = true;    // Tracks whether we need to update our status file, for possible display on a website
 
+// Variables for managing access to MySQL
+string gMySqlAddress;
+string gDbUsername;
+string gDbPassword;
+
+// Variables for verifying usernames/passwords in PHPBB3
+string gPhpbb3Database;
+string gPhpbb3TablePrefix;
+
+
+
 class MasterServerConnection;
 
 class GameConnectRequest
@@ -223,6 +234,55 @@ public:
       // CLIENT_CONNECT | timestamp | player name
       logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
    }
+
+   enum AuthenticationStatus {
+      Authenticated,
+      CantConnect,
+      UnknownUser,
+      WrongPassword,
+      InvalidUsername,
+      Unsupported,
+      UnknownStatus
+   };
+
+#define VERIFY_PHPBB3
+
+#ifdef VERIFY_PHPBB3
+
+   // Check username & password against database
+   AuthenticationStatus verifyCredentials(string username, string password)
+   {
+      static Authenticator authenticator;
+
+      // Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
+      //		    1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
+      //		    2 = alphanumeric (only allows alphanumeric characters in the username)
+      //
+      // We'll use level 1 for now, so users can put special characters in their username
+      authenticator.initialize(gMySqlAddress, gDbUsername, gDbPassword, gPhpbb3Database, gPhpbb3TablePrefix, 1);
+
+      S32 errorcode;
+      if(authenticator.authenticate(username, password, errorcode))   // returns true if the username was found and the password is correct
+         return Authenticated;
+      else
+      {
+         switch(errorcode)
+         {
+            case 0:  return CantConnect;
+            case 1:  return UnknownUser;
+            case 2:  return WrongPassword;
+            case 3:  return InvalidUsername;
+            default: return UnknownStatus;
+         }
+      }
+   }
+#else
+      // Check name & pw against database
+   AuthenticationStatus verifyCredentials(string name, string password)
+   {
+      return Unsupported;
+   }
+#endif
 
 
    // Client has contacted us and requested a list of active servers
@@ -779,7 +839,40 @@ public:
          bstream->readString(readstr);
          mPlayerOrServerName = readstr;
 
-         linkToClientList();
+         if(mCMProtocolVersion <= 2)
+            linkToClientList();
+
+         else     // Read a password and check it out
+         {
+            bstream->readString(readstr);
+            string password = readstr;
+
+            // Verify name and password against our PHPBB3 database
+            AuthenticationStatus stat = verifyCredentials(mPlayerOrServerName.getString(), password);
+            if(stat == Authenticated || stat == UnknownUser || stat == Unsupported)
+            {
+               linkToClientList();
+               // Send message back to client to let them know their authentication status
+
+            }
+            else if(stat == WrongPassword)
+            {
+               logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
+               disconnect(ReasonBadLogin, "");
+            }
+            else if(stat == InvalidUsername)
+            {
+               logprintf(LogConsumer::LogConnection, "User name %s contains illegal characters", mPlayerOrServerName.getString());
+               // Send message back to client to request new username/password
+               disconnect(ReasonInvalidUsername, "");
+            }
+            else if(stat == CantConnect || stat == UnknownStatus)
+            {
+               // Send message back to client to let them know things went wrong
+               logprintf(LogConsumer::LogConnection, "Connection gone wrong when user %s connected", mPlayerOrServerName.getString());
+            }
+         }
+
       }
 
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
@@ -821,7 +914,7 @@ public:
 
       if(mCMProtocolVersion == 0)
       {
-         // Don't even bother -- there's none of these clients out there anymore!
+         // Don't even bother -- none of these clients are out there anymore!
       }
       else  // mCMProtocolVersion >= 1
       {
@@ -908,7 +1001,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(c2mSendChat, (StringPtr message))
    {
       bool isPrivate = false;
-      char privateTo[MAX_SHORT_TEXT_LEN + 1];
+      char privateTo[MAX_PLAYER_NAME_LENGTH + 1];
       char strippedMessage[MAX_CHAT_MSG_LENGTH + 1];
 
       // Check if the message is private.  If so, we need to parse it.
@@ -928,7 +1021,7 @@ public:
                if (c == ' ' || c == '\t')
                   buildingTo = false;
                else
-                  if (j < MAX_SHORT_TEXT_LEN) privateTo[j++] = c;
+                  if (j < MAX_PLAYER_NAME_LENGTH) privateTo[j++] = c;
             }
             else
                if (k < MAX_CHAT_MSG_LENGTH) strippedMessage[k++] = c;
@@ -1022,49 +1115,6 @@ int main(int argc, const char **argv)
    gStatisticsLogConsumer.setMsgTypes(LogConsumer::StatisticsFilter);  // Statistics file
 
    gStdoutLogConsumer.setMsgTypes(events);                             // stdout
-
-
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-/*
-Authenticator authenticator;
-
-// These need to be in config file:
-string mySqlAddress = "127.0.0.1";      // IP address where mysql server lives
-string dbUsername = "eykamp";           // Username for accessing database
-string dbPassword = "thinner";            
-string database = "bf_phpbb";          
-string tablePrefix = "phpbb_";          // Table prefix in the form phpbb_, ok to be empty
-
-// Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
-//		    1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
-//		    2 = alphanumeric (only allows alphanumeric characters in the username)
-//
-// We'll use level 1 for now, so users can put special characters in their username
-authenticator.initialize(mySqlAddress, dbUsername, dbPassword, database, tablePrefix, 1);
-
-
-// These from the client
-string username = "xxx";
-string password = "yyy";
-
-S32 errorcode;
-if(!authenticator.authenticate(username, password, errorcode))   // returns true if the username was found and the password is correct, else false
-{
-//	errorCodes:
-//		0 = unable to connect to mysql server
-//		1 = username doesn't exist
-//		2 = invalid password
-//		3 = username contains invalid characters (possibly an sql injection attempt)
-   logprintf("ERROR: %d", errorcode);
-}
-else
-{
-   logprintf("VALID!!");
-}
-*/
-////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////
 
 
    // Parse command line parameters...

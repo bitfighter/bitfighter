@@ -52,6 +52,9 @@ private:
    virtual S32 getTextSize() { return 23; }
    virtual S32 getGap() { return 18; }
 
+   virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
+   void advanceItem();                                   // What happens when we move on to the next menu item?
+
 protected:
    S32 currOffset;
 
@@ -60,6 +63,7 @@ protected:
    // Handle keyboard input while a menu is displayed
    virtual bool processMenuSpecificKeys(KeyCode keyCode, char ascii);
    virtual bool processKeys(KeyCode keyCode, char ascii);
+   
 
 public:
    MenuUserInterface();                // Constructor
@@ -80,8 +84,6 @@ public:
    S32 selectedIndex;
 
    void render();    // Draw the basic menu
-   virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
-
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
    void onMouseMoved(S32 x, S32 y);
@@ -114,6 +116,8 @@ private:
    bool mNeedToUpgrade;       // True if client is out of date and needs to upgrade, false if we're on the latest version
    bool mShowedUpgradeAlert;  // So we don't show the upgrade message more than once
 
+   void renderExtras();
+
 public:
    MainMenuUserInterface();                     // Constructor
    void processSelection(U32 index);
@@ -127,8 +131,6 @@ public:
    bool firstTime;                              // Is this the first time the menu is shown?
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
-
-   void renderExtras();
 };
 
 
@@ -199,6 +201,27 @@ public:
 
 extern HostMenuUserInterface gHostMenuUserInterface;
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class NameEntryUserInterface : public MenuUserInterface
+{
+private:
+   typedef MenuUserInterface Parent;
+   void renderExtras();
+
+public:
+   NameEntryUserInterface();               // Constructor
+   void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
+   void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
+   void onEscape();
+   void setupMenus();
+   void onActivate();
+   //void toggleFullscreen();
+};
+
+
+extern NameEntryUserInterface gNameEntryUserInterface;
 
 ////////////////////////////////////////
 ////////////////////////////////////////

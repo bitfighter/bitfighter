@@ -791,6 +791,7 @@ void NetConnection::setSymmetricCipher(SymmetricCipher *theCipher)
    mSymmetricCipher = theCipher;
 }
 
+
 void NetConnection::connect(NetInterface *theInterface, const Address &address, bool requestKeyExchange, bool requestCertificate)
 {
    mConnectionParameters.mRequestKeyExchange = requestKeyExchange;

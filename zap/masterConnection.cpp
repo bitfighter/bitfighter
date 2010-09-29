@@ -41,6 +41,7 @@ namespace Zap
 extern U32 gSimulatedLag;
 extern F32 gSimulatedPacketLoss;
 extern bool gQuit;
+extern string gPlayerName, gPlayerPassword;
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
@@ -132,7 +133,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    conn->setNetAddress(fullPossibleAddresses[0]);
 
    logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
-   //logprintf(LogConnection, "  Generated shared secret data: %s", b->encodeBase64()->getBuffer()));
 
    ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
    Nonce nonce(data);
@@ -181,7 +181,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
             conn->setNetAddress(fullPossibleAddresses[0]);
 
             logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
-            //TNL::logprintf("  Generated shared secret data: %s", b->encodeBase64()->getBuffer());
 
             ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
             Nonce nonce(data);
@@ -212,16 +211,13 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       Nonce serverNonce(connectionData->getBuffer() + Nonce::NonceSize);
 
       GameConnection *conn = new GameConnection();
-      const char *name = gNameEntryUserInterface.getText();
-      if(!name[0])
-         name = "Chump";
 
       conn->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
-      conn->setClientName(name);
+      conn->setClientName(gPlayerName);
       gClientGame->setConnectionToServer(conn);
 
       conn->connectArranged(getInterface(), fullPossibleAddresses,
-         nonce, serverNonce, theSharedData,true);
+         nonce, serverNonce, theSharedData, true);
    }
 }
 
@@ -313,7 +309,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->writeString(gJoystickName);      // Controller's autodetect string (for research purposes!)
 
 
-   if(bstream->writeFlag(mIsGameServer))     // We're a server
+   if(bstream->writeFlag(mIsGameServer))     // We're a server, tell the master a little about us
    {
       bstream->write((U32) 1000);                              // CPU speed  (dummy)
       bstream->write((U32) 0xFFFFFFFF);                        // region code (dummy) --> want to use this?
@@ -329,7 +325,10 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->writeString(gServerGame->getHostDescr());       // Server description
    }
    else     // We're a client
-      bstream->writeString(gNameEntryUserInterface.getText());  // User's nickname
+   {
+      bstream->writeString(gPlayerName.c_str());       // User's nickname
+      bstream->writeString(gPlayerPassword.c_str());   // and whatever password they supplied
+   }
 }
 
 void MasterServerConnection::onConnectionEstablished()

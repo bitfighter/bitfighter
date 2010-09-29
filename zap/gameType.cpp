@@ -1767,6 +1767,8 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 }
 
 
+extern string gPlayerName;
+
 static void switchTeamsCallback(U32 unused)
 {
    GameType *gt = gClientGame->getGameType();
@@ -1786,7 +1788,7 @@ static void switchTeamsCallback(U32 unused)
    else
    {
       gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-      gTeamMenuUserInterface.nameToChange = gNameEntryUserInterface.getText();      // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
+      gTeamMenuUserInterface.nameToChange = gPlayerName.c_str();
    }
  }
 

@@ -285,6 +285,7 @@ extern ControllerTypeType gAutoDetectedJoystickType;
 extern U32 gSticksFound;
 extern string gLevelDir;
 extern Vector<StringTableEntry> gLevelList;
+extern string gPlayerName, gPlayerPassword;
 
 void DiagnosticUserInterface::render()
 {
@@ -327,7 +328,8 @@ void DiagnosticUserInterface::render()
       drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
 
       S32 x;
-      x = getCenteredStringStartingPosf(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently %s]", gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
+      x = getCenteredStringStartingPosf(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently %s]",            
+                                        gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
       glColor3f(0,1,0);
       drawString(x, vertMargin + 63, ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
       x += getStringWidth(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
@@ -363,8 +365,9 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s", gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
-                                                                           gClientGame->getGameType()->mLocalClient->name.getString() : gNameEntryUserInterface.getText());
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s", 
+                  gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
+                        gClientGame->getGameType()->mLocalClient->name.getString() : gPlayerName.c_str());
 
       ypos += textsize + gap;
 

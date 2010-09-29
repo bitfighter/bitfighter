@@ -42,6 +42,17 @@ extern U32 gMasterPort;
 extern string gMasterName;
 extern string gJasonOutFile;
 
+// Variables for managing access to MySQL
+extern string gMySqlAddress;
+extern string gDbUsername;
+extern string gDbPassword;
+
+// Variables for verifying usernames/passwords in PHPBB3
+extern string gPhpbb3Database;
+extern string gPhpbb3TablePrefix;
+
+
+
 extern U32 gLatestReleasedCSProtocol;
 
 extern Vector<string> MOTDTypeVecOld;
@@ -63,18 +74,18 @@ void processConfigLine(int argc, string argv[])
    }
 
    // CMProtocol version 1 entries look a bit different, but serves the same basic function...
-   else if(argv[0] == "setmotd" && argc > 2)      // setmotd --> set motd for version 1+ clients
+   else if(argv[0] == "setmotd" && argc > 2)   // setmotd --> set motd for version 1+ clients
    {
-      U32 version = atoi(argv[1].c_str());        // Build version this message corresponds to, allows us to set different messages for different clients
+      U32 version = atoi(argv[1].c_str());     // Build version this message corresponds to, so we can set different messages for different clients
       MOTDVersionVec.push_back(version);
       MOTDStringVec.push_back(argv[2]);
    }
 
    // New usemotd directive tells server to use the message stored in the file motd
-   else if(argv[0] == "usemotd" && argc > 2)      // usemotd --> read motd file from local folder
+   else if(argv[0] == "usemotd" && argc > 2)   // usemotd --> read motd file from local folder
    {
-      U32 version = atoi(argv[1].c_str());        // Build version this message corresponds to, allows us to set different messages for different clients
-      char *file = strdup(argv[2].c_str());       // Message stored in this file
+      U32 version = atoi(argv[1].c_str());     // Game build this message corresponds to, allows us to set different messages for different clients
+      char *file = strdup(argv[2].c_str());    // Message stored in this file
 
       FILE *f = fopen(file, "r");
       if(!f)
@@ -107,6 +118,22 @@ void processConfigLine(int argc, string argv[])
 
    else if(argv[0] == "json_file" && argc > 1)   // json file
       gJasonOutFile = argv[1].c_str();
+
+   else if(argv[0] == "my_sql_address" && argc > 1)      // DB address
+      gMySqlAddress = argv[1].c_str();      
+
+   else if(argv[0] == "db_username" && argc > 1)         // Username needed to access db
+      gDbUsername = argv[1].c_str();    
+
+   else if(argv[0] == "db_password" && argc > 1)         // Password needed to access db
+      gDbPassword = argv[1].c_str();   
+
+   else if(argv[0] == "phpbb3_database" && argc > 1)     // Name of phpbb3 database
+      gPhpbb3Database = argv[1].c_str(); 
+
+   else if(argv[0] == "phpbb3_table_prefix" && argc > 1) // Prefix used for phpbb3 tables
+      gPhpbb3TablePrefix = argv[1].c_str();        
+
 }
 
 enum {

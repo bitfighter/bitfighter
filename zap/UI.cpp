@@ -128,6 +128,7 @@ void UserInterface::setMenuID(UIID menuID)
    mInternalMenuID = menuID;
 }
 
+
 // Retrieve interface's name
 UIID UserInterface::getMenuID()
 {

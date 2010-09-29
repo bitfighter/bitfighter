@@ -217,7 +217,7 @@ void TeamMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 void EditableMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
    S32 xpos = UserInterface::drawCenteredStringPair(ypos, textsize, color, isSelected ? Color(1,0,0) : Color(0,1,1), getText(), 
-                                                    mLineEditor.getString() != "" ? mLineEditor.c_str() : mEmptyVal.c_str());
+                                                    mLineEditor.getString() != "" ? mLineEditor.getDisplayString().c_str() : mEmptyVal.c_str());
    if(isSelected)
       mLineEditor.drawCursor(xpos, ypos, textsize);
 }

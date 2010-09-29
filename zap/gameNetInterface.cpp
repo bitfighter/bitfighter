@@ -166,7 +166,8 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
 }
 
 
-// Send ping to the server.  If server has different PROTOCOL_VERSION, the packet will be ignored.
+// Send ping to the server.  If server has different PROTOCOL_VERSION, the packet will be ignored.  This prevents players
+// from seeing servers they are incompatible with.
 void GameNetInterface::sendPing(const Address &theAddress, const Nonce &clientNonce)
 {
    PacketStream packet;

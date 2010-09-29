@@ -42,7 +42,7 @@ protected:
    const char *title;
    const char *instr1;
    const char *instr2;
-   bool secret;
+   
    bool resetOnActivate;
    LineEditor lineEditor;
 
@@ -56,15 +56,17 @@ public:
       title = "ENTER TEXT:";
       instr1 = "";
       instr2 = "Enter some text above";
-      secret = false;
+      setSecret(false);
       cursorPos = 0;
       resetOnActivate = true;
-      lineEditor = LineEditor(MAX_SHORT_TEXT_LEN);
+      lineEditor = LineEditor(MAX_PLAYER_NAME_LENGTH);
    }
 
    void onActivate();
    void render();
    void idle(U32 t);
+
+   void setSecret(bool secret) { lineEditor.setSecret(secret); }
 
    void onKeyDown(KeyCode keyCode, char ascii);
 
@@ -76,20 +78,19 @@ public:
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class NameEntryUserInterface : public TextEntryUserInterface
-{
-public:
-   NameEntryUserInterface();      // Constructor
-
-   virtual void onAccept(const char *text);
-   virtual void onEscape();
-};
+//class NameEntryUserInterface : public MenuUserInterface
+//{
+//public:
+//   NameEntryUserInterface();      // Constructor
+//
+//   virtual void onAccept(const char *text);
+//   virtual void onEscape();
+//};
 
 
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-extern NameEntryUserInterface gNameEntryUserInterface;
 extern IniSettings gIniSettings;
 
 class LevelNameEntryUserInterface : public TextEntryUserInterface
@@ -122,7 +123,7 @@ class PasswordEntryUserInterface :  public TextEntryUserInterface
 public:
    PasswordEntryUserInterface()     // Constructor
    {
-      secret = true;
+      setSecret(true);
    }
 
    virtual void render();

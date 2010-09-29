@@ -92,6 +92,8 @@ public:
    const char *getHelp() { return mHelp.c_str(); }
    const char *getText() { return mText.c_str(); }
    string getString() { return mText; }
+
+   virtual void setSecret(bool secret) { /* Do nothing */ }
    
    virtual const char *getSpecialEditingInstructions() { return ""; }
    virtual string getValue() { return ""; }
@@ -101,6 +103,8 @@ public:
    virtual bool handleKey(KeyCode keyCode, char ascii);
    virtual void setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
    virtual void activatedWithShortcutKey() { handleKey(MOUSE_LEFT, 0); }
+
+   virtual bool enterAdvancesItem() { return false; }       // When enter is pressed, should selection advance to the next item?
 };
 
 
@@ -187,8 +191,10 @@ public:
 class EditableMenuItem : public MenuItem
 {
 private:
-   LineEditor mLineEditor;
    string mEmptyVal;
+
+protected:
+      LineEditor mLineEditor;
 
 public:
    // Contstuctor
@@ -199,7 +205,6 @@ public:
       mEmptyVal = emptyVal;
    }
 
-public:
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
    virtual bool handleKey(KeyCode keyCode, char ascii);
@@ -211,6 +216,22 @@ public:
    virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
+
+   virtual bool enterAdvancesItem() { return true; }
+
+   virtual void setSecret(bool secret) { mLineEditor.setSecret(secret); }
+};
+
+////////////////////////////////////
+////////////////////////////////////
+
+class MaskedEditableMenuItem : public EditableMenuItem
+{
+     MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN,                             Color c = Color(1, 1, 1) ) : 
+         EditableMenuItem(title, val, emptyVal, help, maxLen, k1, k2, c)
+     {
+        mLineEditor.setSecret(true);
+     }
 };
 
 

@@ -43,6 +43,8 @@ const char *ARROW = ">";
 const S32 AFTER_ARROW_SPACE = 5;
 const S32 lineWidth = UserInterface::canvasWidth - 2 * UserInterface::horizMargin;
 
+extern string gPlayerName;
+
 // Initialize some static vars
 U32 AbstractChat::mColorPtr = 0;
 U32 AbstractChat::mMessageCount = 0;
@@ -71,7 +73,7 @@ Color AbstractChat::getColor(string name)
 // We received a new incoming chat message...  Add it to the list
 void AbstractChat::newMessage(string from, string message, bool isPrivate, bool isSystem)
 {
-   bool isFromUs = (from == string(gNameEntryUserInterface.getText()));  // Is this message from us?
+   bool isFromUs = (from == gPlayerName);  // Is this message from us?
 
    // Choose a color
    Color color;
@@ -94,10 +96,14 @@ void AbstractChat::newMessage(string from, string message, bool isPrivate, bool 
 }
 
 
+extern string gPlayerName;
+
 void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 {
    mPlayersInGlobalChat.push_back(playerNick);
-   newMessage(gNameEntryUserInterface.getText(), "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
+
+   // Make the following be from us, so it will be colored white
+   newMessage(gPlayerName, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
 }
 
 
@@ -107,7 +113,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
       if(gChatInterface.mPlayersInGlobalChat[i] == playerNick)
       {
          gChatInterface.mPlayersInGlobalChat.erase_fast(i);
-         newMessage(gNameEntryUserInterface.getText(), "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
+         newMessage(gPlayerName, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
          break;
       }
 }
@@ -116,7 +122,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
 void AbstractChat::addCharToMessage(char ascii)
 {
    // Limit chat messages to the size that can be displayed on receiver's screen
-   S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gNameEntryUserInterface.getText(), ARROW) + AFTER_ARROW_SPACE +
+   S32 xpos = UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%s", gPlayerName.c_str(), ARROW) + AFTER_ARROW_SPACE +
                    UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
 
    // Only add char if there's room
@@ -238,7 +244,7 @@ void AbstractChat::issueChat()
          conn->c2mSendChat(mLineEditor.c_str());
 
       // And display it locally
-      newMessage(gNameEntryUserInterface.getText(), mLineEditor.c_str(), false, false);
+      newMessage(gPlayerName, mLineEditor.getString(), false, false);
    }
    clearChat();     // Clear message
 

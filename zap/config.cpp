@@ -599,9 +599,13 @@ void loadSettingsFromINI()
    gIniSettings.winYPos = max(gINI.GetValueI("Settings", "WindowYPos", gIniSettings.winYPos), 0);
    gIniSettings.winSizeFact = (F32) gINI.GetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact);
    gIniSettings.masterAddress = gINI.GetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress);
+   
    gIniSettings.name = gINI.GetValue("Settings", "Nickname", gIniSettings.name);
+   gIniSettings.password = gINI.GetValue("Settings", "Password", gIniSettings.password);
+
    gIniSettings.defaultName = gINI.GetValue("Settings", "DefaultName", gIniSettings.defaultName);
    gIniSettings.lastName = gINI.GetValue("Settings", "LastName", gIniSettings.lastName);
+   gIniSettings.lastPassword = gINI.GetValue("Settings", "LastPassword", gIniSettings.lastPassword);
    gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
 
 
@@ -915,8 +919,10 @@ static void writeSettings()
       gINI.KeyComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
       gINI.KeyComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
       gINI.KeyComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
+      gINI.KeyComment("Settings", " Password - Password to use if your nickname has been reserved in the forums");
       gINI.KeyComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
       gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
+      gINI.KeyComment("Settings", " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
       gINI.KeyComment("Settings", "----------------");
    }
@@ -935,6 +941,7 @@ static void writeSettings()
    gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress, true);
    gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName, true);
    gINI.SetValue("Settings", "LastName", gIniSettings.lastName, true);
+   gINI.SetValue("Settings", "LastPassword", gIniSettings.lastPassword, true);
    gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
 
    gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);

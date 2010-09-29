@@ -129,7 +129,7 @@ public:
 
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
 
-   void setClientName(const char *name) { mClientName = name; }
+   void setClientName(std::string name) { mClientName = name == "" ? "Chump" : name.c_str(); }
    void setServerName(StringTableEntry name) { mServerName = name; }
 
    std::string getServerName() { return mServerName.getString(); }

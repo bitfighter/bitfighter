@@ -34,10 +34,12 @@ namespace Zap
 
 class RebindKeysUserInterface : public UserInterface
 {
+private:
+   static const S32 BUFFER_LENGTH = 32;
 
 protected:
    const char *title;
-   char buffer[MAX_SHORT_TEXT_LEN + 1];
+   char buffer[BUFFER_LENGTH + 1];
    U32 cursorPos;
    bool secret;
    bool resetOnActivate;

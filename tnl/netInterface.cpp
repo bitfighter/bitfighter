@@ -266,12 +266,15 @@ void NetInterface::addConnection(NetConnection *conn)
 {
    conn->incRef();
    mConnectionList.push_back(conn);
+
    S32 numConnections = mConnectionList.size();
+
    if(numConnections > mConnectionHashTable.size() / 2)
    {
       mConnectionHashTable.setSize(numConnections * 4 - 1);
       for(S32 i = 0; i < mConnectionHashTable.size(); i++)
          mConnectionHashTable[i] = NULL;
+
       for(S32 i = 0; i < numConnections; i++)
       {
          U32 index = mConnectionList[i]->getNetAddress().hash() % mConnectionHashTable.size();
@@ -521,6 +524,7 @@ void NetInterface::handleConnectChallengeRequest(const Address &addr, BitStream 
 
    if(!mAllowConnections)
       return;
+
    Nonce clientNonce;
    clientNonce.read(stream);
    bool wantsKeyExchange = stream->readFlag();
@@ -717,7 +721,7 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
       theParams.mPuzzleSolution, theParams.mNonce, theParams.mServerNonce,
       theParams.mPuzzleDifficulty, theParams.mClientIdentity);
 
-   if(result != ClientPuzzleManager::Success)
+   if(result != ClientPuzzleManager::Success)      // Wrong answer!
    {
       sendConnectReject(&theParams, address, NetConnection::ReasonPuzzle, "");
       return;
@@ -742,7 +746,7 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
       if(!stream->decryptAndCheckHash(NetConnection::MessageSignatureBytes, decryptPos, &theCipher))
          return;
 
-      // now read the first part of the connection's symmetric key
+      // Read the first part of the connection's symmetric key
       stream->read(SymmetricCipher::KeySize, theParams.mSymmetricKey);
       Random::read(theParams.mInitVector, SymmetricCipher::KeySize);
    }
@@ -1047,6 +1051,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
 
    ConnectionParameters &theParams = conn->getConnectionParameters();
    SymmetricCipher theCipher(theParams.mArrangedSecret);
+
    if(!stream->decryptAndCheckHash(NetConnection::MessageSignatureBytes, stream->getBytePosition(), &theCipher))
       return;
 
@@ -1064,6 +1069,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
          theParams.mCertificate = new Certificate(stream);
          if(!theParams.mCertificate->isValid() || !conn->validateCertficate(theParams.mCertificate, true))
             return;
+
          theParams.mPublicKey = theParams.mCertificate->getPublicKey();
       }
       else
@@ -1080,7 +1086,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
       else
          theParams.mPrivateKey = mPrivateKey;
       theParams.mSharedSecret = theParams.mPrivateKey->computeSharedSecretKey(theParams.mPublicKey);
-      //logprintf("shared secret (client) %s", theParams.mSharedSecret->encodeBase64()->getBuffer());
+
       Random::read(theParams.mSymmetricKey, SymmetricCipher::KeySize);
       theParams.mUsingCrypto = true;
    }

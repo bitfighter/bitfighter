@@ -61,12 +61,12 @@ void RebindKeysUserInterface::render()
    drawCenteredString(y, fontSize, title);
    y += 45;
 
-   char astbuffer[MAX_SHORT_TEXT_LEN + 1];
+   char astbuffer[BUFFER_LENGTH + 1];
    const char *renderBuffer=buffer;
    if(secret)
    {
       S32 i;
-      for(i = 0; i < MAX_SHORT_TEXT_LEN; i++)
+      for(i = 0; i < BUFFER_LENGTH; i++)
       {
          if(!buffer[i])
             break;
@@ -111,9 +111,9 @@ void RebindKeysUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       default:
          if (ascii)
          {
-            for(U32 i = MAX_SHORT_TEXT_LEN - 1; i > cursorPos; i--)
+            for(U32 i = BUFFER_LENGTH - 1; i > cursorPos; i--)
                buffer[i] = buffer[i-1];
-            if(cursorPos < MAX_SHORT_TEXT_LEN-1)
+            if(cursorPos < BUFFER_LENGTH-1)
             {
                buffer[cursorPos] = ascii;
                cursorPos++;
@@ -124,10 +124,10 @@ void RebindKeysUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 void RebindKeysUserInterface::setText(const char *text)
 {
-   if(strlen(text) > MAX_SHORT_TEXT_LEN)
+   if(strlen(text) > BUFFER_LENGTH)
    {
-      strncpy(buffer, text, MAX_SHORT_TEXT_LEN);
-      buffer[MAX_SHORT_TEXT_LEN] = 0;
+      strncpy(buffer, text, BUFFER_LENGTH);
+      buffer[BUFFER_LENGTH] = 0;
    }
    else
       strcpy(buffer, text);

@@ -465,6 +465,7 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
       if(keyCode != MOUSE_LEFT)
          itemSelectedWithMouse = false;
+
       else // it was MOUSE_LEFT after all
       {
          // Make sure we're actually pointing at a menu item before we process it
@@ -476,6 +477,9 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       }
 
       menuItems[selectedIndex]->handleKey(keyCode, ascii);
+
+      if(menuItems[selectedIndex]->enterAdvancesItem())
+         advanceItem();
    }
 
    else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
@@ -502,22 +506,8 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
    }
 
    else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_TAB)    // Next item
-   {
-      selectedIndex++;
-      itemSelectedWithMouse = false;
+      advanceItem();
 
-      if(selectedIndex >= menuItems.size())     // Scrolling off the bottom
-      {
-         if((menuItems.size() > MAX_MENU_SIZE) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
-         {
-            selectedIndex = menuItems.size() - 1;                  // No wrap --> (last item)
-            return true;                                           // (leave before playBoop)
-         }
-         else                     // Always wrap on shorter menus
-            selectedIndex = 0;    // Wrap --> (first item)
-      }
-      UserInterface::playBoop();
-   }
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay
    {
       gChatInterface.activate();
@@ -525,6 +515,25 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
    }
 
    return true;      // Probably wrong, but doesn't really matter at this point
+}
+
+
+void MenuUserInterface::advanceItem()
+{
+   selectedIndex++;
+   itemSelectedWithMouse = false;
+
+   if(selectedIndex >= menuItems.size())     // Scrolling off the bottom
+   {
+      if((menuItems.size() > MAX_MENU_SIZE) && mRepeatMode)     // Allow wrapping on long menus only when not in repeat mode
+      {
+         selectedIndex = menuItems.size() - 1;                  // No wrap --> (last item)
+         return;                                                // (leave before playBoop)
+      }
+      else                     // Always wrap on shorter menus
+         selectedIndex = 0;    // Wrap --> (first item)
+   }
+   UserInterface::playBoop();
 }
 
 
@@ -720,31 +729,6 @@ void MainMenuUserInterface::showUpgradeAlert()
 // Take action based on menu selection
 void MainMenuUserInterface::processSelection(U32 index)
 {
-   //switch(index)
-   //{
-   //   case 0:     // Join
-   //      gQueryServersUserInterface.activate();
-   //      break;
-   //   case 1:     // Host
-   //      gHostMenuUserInterface.activate();
-   //      break;
-   //   case 2:     // Help
-   //      gInstructionsUserInterface.activate();
-   //      break;      
-   //   case 3:     // Options
-   //      gOptionsMenuUserInterface.activate();
-   //      break;
-   //   case 4:     // Edit
-   //      gEditorUserInterface.setLevelFileName("");      // Reset this so we get the level entry screen
-   //      gEditorUserInterface.activate();
-   //      break;
-   //   case 5:     // Credits
-   //      gCreditsUserInterface.activate();
-   //      break;
-   //   case 6:     // Quit
-   //      exitGame();
-   //      break;
-   //}
    firstTime = false;
 }
 
@@ -915,6 +899,83 @@ void OptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+NameEntryUserInterface gNameEntryUserInterface;
+extern string gPlayerName, gPlayerPassword;
+
+// Constructor
+NameEntryUserInterface::NameEntryUserInterface()
+{
+   setMenuID(OptionsUI);
+   mMenuTitle = "ENTER YOUR NICKNAME:";
+}
+
+
+void NameEntryUserInterface::onActivate()
+{
+   Parent::onActivate();
+   setupMenus();
+}
+
+
+extern string gPlayerName, gPlayerPassword;
+extern bool gReadyToConnectToMaster;
+
+static void nameAndPasswordAcceptCallback(U32 unused)
+{
+   gMainMenuUserInterface.activate();
+   gReadyToConnectToMaster = true;
+
+   gIniSettings.lastName     = gPlayerName     = gNameEntryUserInterface.menuItems[1]->getValue();
+   gIniSettings.lastPassword = gPlayerPassword = gNameEntryUserInterface.menuItems[2]->getValue();
+
+   saveSettingsToINI();             // Get that baby into the INI file
+}
+
+
+void NameEntryUserInterface::setupMenus()
+{
+   menuItems.deleteAndClear();
+
+   menuItems.push_back(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, ""));
+   menuItems.push_back(new EditableMenuItem("NICKNAME:", gPlayerName, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH));
+   menuItems.push_back(new EditableMenuItem("PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH));
+   
+   menuItems[2]->setSecret(true);
+}
+
+
+void NameEntryUserInterface::renderExtras()
+{
+   const S32 size = 15;
+   const S32 gap = 5;
+
+   S32 rows = 3;
+   S32 row = 0;
+
+   glColor3f(0,1,0);
+
+   drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
+            "You can skip this screen by editing the [Settings] section of Bitfighter.ini");
+   row++;
+
+   drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
+            "A password is only needed if you are using a reserved name.  You can reserve your");
+   row++;
+
+   drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
+            "nickname by registering for the bitfighter.org forums.  Registration is free.");
+}
+
+// Save options to INI file, and return to our regularly scheduled program
+void NameEntryUserInterface::onEscape()
+{
+   exitGame();
+}
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 HostMenuUserInterface gHostMenuUserInterface;
 
 // Constructor
@@ -939,12 +1000,8 @@ void HostMenuUserInterface::onActivate()
 }
 
 
-extern string gHostName;
-extern string gHostDescr;
-extern string gLevelChangePassword;
-extern string gAdminPassword;
-extern string gServerPassword;
-
+extern string gHostName, gHostDescr;
+extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 
 static void startHostingCallback(U32 unused)
 {

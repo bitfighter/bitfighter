@@ -902,9 +902,15 @@ void GameConnection::writeConnectRequest(BitStream *stream)
          }
    }
 
-   stream->writeString(isLocal ? md5.getSaltedHashFromString(gServerPassword).c_str() : md5.getSaltedHashFromString(gServerPasswordEntryUserInterface.getText()).c_str());
+   // Server password... local clients can always connect, so we'll just grab the password from the server!
+   stream->writeString(isLocal ? md5.getSaltedHashFromString(gServerPassword).c_str() : 
+                                 md5.getSaltedHashFromString(gServerPasswordEntryUserInterface.getText()).c_str());
+
    stream->writeString(mClientName.getString());
-   stream->writeString(isLocal ? md5.getSaltedHashFromString(password).c_str() : md5.getSaltedHashFromString(gReservedNamePasswordEntryUserInterface.getText()).c_str());
+
+   // Reserved name password... again local clients get a pass, so we'll again grab the password from the client
+   stream->writeString(isLocal ? md5.getSaltedHashFromString(password).c_str() : 
+                                 md5.getSaltedHashFromString(gReservedNamePasswordEntryUserInterface.getText()).c_str());
 }
 
 
@@ -935,8 +941,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
    stream->readString(buf);
    size_t len = strlen(buf);
 
-   if(len > MAX_SHORT_TEXT_LEN)      // Make sure it isn't too long
-      len = MAX_SHORT_TEXT_LEN;
+   if(len > MAX_PLAYER_PASSWORD_LENGTH)      // Make sure it isn't too long
+      len = MAX_PLAYER_PASSWORD_LENGTH;
 
    // Clean up name, render it safe
 
@@ -1002,8 +1008,9 @@ std::string GameConnection::makeUnique(string name)
 
             char numstr[10];
             sprintf(numstr, ".%d", index);
-			// Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
-            S32 maxNamePos = MAX_SHORT_TEXT_LEN - (S32)strlen(numstr); 
+
+            // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
+            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr); 
             name = name.substr(0, maxNamePos);                         // Make sure name won't grow too long
             proposedName = name + numstr;
 
@@ -1021,8 +1028,8 @@ std::string GameConnection::makeUnique(string name)
             char numstr[10];
             sprintf(numstr, ".%d", index);
 
-			// Max length name can be such that when number is appended, it's still less than MAX_SHORT_TEXT_LEN
-            S32 maxNamePos = MAX_SHORT_TEXT_LEN - (S32)strlen(numstr);   
+			   // Max length name can be such that when number is appended, it's still less than MAX_PLAYER_NAME_LENGTH
+            S32 maxNamePos = MAX_PLAYER_NAME_LENGTH - (S32)strlen(numstr);   
             name = name.substr(0, maxNamePos);                      // Make sure name won't grow too long
             proposedName = name + numstr;
 
@@ -1038,6 +1045,11 @@ std::string GameConnection::makeUnique(string name)
 
 void GameConnection::onConnectionEstablished()
 {
+   const U32 minPacketSendPeriod = 50;
+   const U32 minPacketRecvPeriod = 50;
+   const U32 maxSendBandwidth = 2000; 
+   const U32 maxRecvBandwidth = 2000;
+
    Parent::onConnectionEstablished();
 
    if(isInitiator())    // Client-side
@@ -1046,7 +1058,7 @@ void GameConnection::onConnectionEstablished()
       setGhostTo(true);
       logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
 
-      setFixedRateParameters(50, 50, 2000, 2000);       // U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth
+      setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);       
    }
    else                 // Server-side
    {
@@ -1055,7 +1067,7 @@ void GameConnection::onConnectionEstablished()
       setGhostFrom(true);
       setGhostTo(false);
       activateGhosting();
-      setFixedRateParameters(50, 50, 2000, 2000);        // U32 minPacketSendPeriod, U32 minPacketRecvPeriod, U32 maxSendBandwidth, U32 maxRecvBandwidth
+      setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);        
 
       s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
 
@@ -1071,11 +1083,8 @@ void GameConnection::onConnectionEstablished()
       }
 
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
-
-      if(isLocalConnection())
-         logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), "Local Connection", getTimeStamp().c_str());
-      else
-         logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), getNetAddressString(), getTimeStamp().c_str());
+      logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), 
+                isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
    }
 }
 
@@ -1101,13 +1110,6 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
             gErrorMsgUserInterface.activate();
             break;
 
-         // We should never see this one...
-         case NetConnection::ReasonNeedPassword:
-            gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server.");
-            gErrorMsgUserInterface.setMessage(4, "You need to supply a password!");
-            gErrorMsgUserInterface.activate();
-            break;
-
          case NetConnection::ReasonPuzzle:
             gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:");
             gErrorMsgUserInterface.setMessage(3, "Invalid puzzle solution");
@@ -1120,6 +1122,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
             gErrorMsgUserInterface.setMessage(3, "and have been temporarily banned.");
             gErrorMsgUserInterface.setMessage(5, "You can try another server, host your own,");
             gErrorMsgUserInterface.setMessage(6, "or try the server that kicked you again later.");
+            gNameEntryUserInterface.activate();
             gErrorMsgUserInterface.activate();
 
             // Add this server to our list of servers not to display for a spell...
@@ -1130,6 +1133,22 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
             gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
             gErrorMsgUserInterface.setMessage(3, "because you sent too many connection requests.");
             gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
+            gNameEntryUserInterface.activate();
+            gErrorMsgUserInterface.activate();
+            break;
+
+         case NetConnection::ReasonInvalidUsername:
+            gErrorMsgUserInterface.setMessage(2, "Unable to log you in with the username/password you provided.");
+            gErrorMsgUserInterface.setMessage(3, "If you have an account, please verify your password. If you don't,");
+            gErrorMsgUserInterface.setMessage(4, "then you chose a reserved name; please try another.");
+            gErrorMsgUserInterface.setMessage(6, "Please check your credentials and try again.");
+            gErrorMsgUserInterface.activate();
+            break;
+
+         case NetConnection::ReasonBadLogin:
+            gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
+            gErrorMsgUserInterface.setMessage(3, "because you sent an username that contained illegal characters.");
+            gErrorMsgUserInterface.setMessage(5, "Please try a different name.");
             gErrorMsgUserInterface.activate();
             break;
 

@@ -75,8 +75,11 @@ struct CmdLineSettings
    U32 lag;                // Simulate server lag (in ms)
    string dedicated;
    string name;
+   string password;
+
    string defaultName;     // Name used if user hits <enter> on name entry screen
    string lastName;        // Name the user previously entered
+   string lastPassword;    // Last password user entered on startup screen
    string lastEditorName;  // Name of most recently edited level
 
    string hostname;
@@ -105,22 +108,8 @@ struct CmdLineSettings
       serverMode = false;
       connectRemote = false;
 
-      server = "";
-      connect = "";
-      masterAddress = "";
-      defaultName = "";
-      lastName = "";
-      lastEditorName = "";
-      hostaddr = "";
       loss = 0;
       lag = 0;
-      dedicated = "";
-      name = "";
-      serverPassword = "";
-      adminPassword = "";
-      levelChangePassword = "";
-      hostname = "";
-      hostdescr = "";
       maxplayers = -1;
       window = false;
       fullscreen = false;
@@ -163,8 +152,10 @@ struct IniSettings      // With defaults specified
    InputMode inputMode;             // Joystick or Keyboard
    string masterAddress;            // Default address of our master server
    string name;                     // Player name (none by default)
+   string password;                 // Player pasword (none by default)
    string defaultName;              // Name used if user hits <enter> on name entry screen
    string lastName;                 // Name user entered last time the game was run -- will be used as default on name entry screen
+   string lastPassword;
    string lastEditorName;           // Name of file most recently edited by the user
 
    string hostname;                 // Server name when in host mode
@@ -239,6 +230,7 @@ struct IniSettings      // With defaults specified
       name = "";                         // Player name (none by default)
       defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
       lastName = "ChumpChange";          // Name the user entered last time they ran the game
+      lastPassword = "";
       lastEditorName = "";               // No default editor level name
       hostname = "Bitfighter host";      // Default host name
       hostdescr = "";

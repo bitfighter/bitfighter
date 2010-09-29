@@ -214,6 +214,9 @@ char gJoystickName[gJoystickNameLength] = "";
 
 extern Point gMousePos;
 
+extern NameEntryUserInterface gNameEntryUserInterface;
+
+
 // Since GLUT reports the current mouse pos via a series of events, and does not make
 // its position available upon request, we'll store it when it changes so we'll have
 // it when we need it.
@@ -226,6 +229,9 @@ void setMousePos(S32 x, S32 y)
 Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;    // Our main journaling object
+
+string gPlayerName;
+string gPlayerPassword;
 
 // Handler called by GLUT when window is reshaped
 void GLUT_CB_reshape(int nw, int nh)
@@ -778,14 +784,11 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
       GameConnection *theConnection = new GameConnection();
       gClientGame->setConnectionToServer(theConnection);
 
-      // Use name specified in name entry screen, falling back to defaultName (from INI) if blank
-      const char *name = gNameEntryUserInterface.getText()[0] ? gNameEntryUserInterface.getText() : gIniSettings.defaultName.c_str();
-
-      theConnection->setClientName(name);
+      theConnection->setClientName(gPlayerName);
 
       theConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
 
-      if(local)   // Local client
+      if(local)   // We're a local client... connect to our local server
       {
          theConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
          theConnection->setIsAdmin(true);          // Local connection is always admin
@@ -803,7 +806,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
          }
       }
-      else        // Remote client
+      else        // Connect to a remote server
          theConnection->connect(gClientGame->getNetInterface(), remoteAddress);  // (method in tnlNetConnection)
 
       gGameUserInterface.activate();
@@ -962,7 +965,22 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             exitGame(1);
          }
       }
-      // Specify password for accessing locked ser vers
+      // Specify user password
+      else if(!stricmp(argv[i], "-password"))          // additional arg required
+      {
+         if(hasAdditionalArg)
+            gCmdLineSettings.password = argv[i+1];
+         else
+         {
+            logprintf(LogConsumer::LogError, "You must enter a password with the -password option");
+            exitGame(1);
+         }
+      }
+
+
+
+
+      // Specify password for accessing locked servers
       else if(!stricmp(argv[i], "-serverpassword"))      // additional arg required
       {
          if(hasAdditionalArg)
@@ -1310,12 +1328,30 @@ void processStartupParams()
 
 
    // These options can come either from cmd line or INI file
+   //if(gCmdLineSettings.name != "")
+   //   gNameEntryUserInterface.setString(gCmdLineSettings.name);
+   //else if(gIniSettings.name != "")
+   //   gNameEntryUserInterface.setString(gIniSettings.name);
+   //else
+   //   gNameEntryUserInterface.setString(gIniSettings.lastName);
+
+
    if(gCmdLineSettings.name != "")
-      gNameEntryUserInterface.setString(gCmdLineSettings.name);
+      gPlayerName = gCmdLineSettings.name;
    else if(gIniSettings.name != "")
-      gNameEntryUserInterface.setString(gIniSettings.name);
+      gPlayerName = gIniSettings.name;
    else
-      gNameEntryUserInterface.setString(gIniSettings.lastName);
+      gPlayerName = gIniSettings.lastName;
+
+
+   
+   if(gCmdLineSettings.password != "")
+      gPlayerPassword = gCmdLineSettings.password;
+   else if(gIniSettings.password != "")
+      gPlayerPassword = gIniSettings.password;
+   else
+      gPlayerPassword = gIniSettings.lastPassword;
+
 
    // Put any saved filename into the editor file entry thingy
    gLevelNameEntryUserInterface.setString(gIniSettings.lastEditorName);
@@ -1391,6 +1427,9 @@ void processStartupParams()
 
    if(gCmdLineSettings.name != "")                       // We'll clobber the INI file setting.  Since this
       gIniSettings.name = gCmdLineSettings.name;         // setting is never saved, we won't mess up our INI
+
+   if(gCmdLineSettings.password != "")                   // We'll clobber the INI file setting.  Since this
+      gIniSettings.password = gCmdLineSettings.password; // setting is never saved, we won't mess up our INI
 
 
    // Note that we can be in both clientMode and serverMode (such as when we're hosting a game interactively)

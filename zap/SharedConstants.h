@@ -31,7 +31,9 @@
 // This file is shared between both code bases.
 
 #define MAX_CHAT_MSG_LENGTH 2048
-#define MAX_SHORT_TEXT_LEN 32
+#define MAX_PLAYER_NAME_LENGTH 32      // Max length of a player name
+#define MAX_PLAYER_PASSWORD_LENGTH 32
+
 static const int MOTD_LEN = 256;
 static const int MAX_PLAYERS = 128;    // Absolute maximum players ever allowed in a game
 
