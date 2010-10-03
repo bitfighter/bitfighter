@@ -220,22 +220,37 @@ public:
       ReasonSelfDisconnect,
       ReasonKickedByAdmin,
       ReasonFloodControl,
-      ReasonBadLogin,
-      ReasonInvalidUsername,  // Username contains illegal characters
       ReasonPuzzle,
       ReasonError,
       ReasonShutdown,
-      TerminationReasons,     // Must be last!
+
+      // Reasons the master might reject a client
+      ReasonBadLogin,         // User provided an invalid password for their username
+      ReasonInvalidUsername,  // Username contains illegal characters
+      ReasonBadConnection,    // Something went wrong in the connection
+
+      // Reasons a server might reject a client
+      ReasonInvalidCRC,
+      ReasonIncompatibleRPCCounts,  
+      ReasonServerFull,
+      ReasonNeedServerPassword,
+      ReasonReservedName,
+      
+      TerminationReasons,      // Must be last of enumerated reasons!
+      ReasonNone
    };
 
 protected:
+   /// Called when a pending connection is terminated
+   virtual void onConnectTerminated(NetConnection::TerminationReason reason, const char *rejectionString);   
 
-   virtual void onConnectTerminated(NetConnection::TerminationReason reason, const char *rejectionString);     ///< Called when a pending connection is terminated
-   virtual void onConnectionTerminated(NetConnection::TerminationReason, const char *errorDisconnectString);   ///< Called when this established connection is terminated for any reason
-   virtual void onConnectionEstablished();  ///< Called when the connection is successfully established with the remote host.
+   /// Called when this established connection is terminated for any reason
+   virtual void onConnectionTerminated(NetConnection::TerminationReason, const char *errorDisconnectString);   
 
-   /// validates that the given certificate is a valid certificate for this
-   /// connection.
+   /// Called when the connection is successfully established with the remote host
+   virtual void onConnectionEstablished();  
+
+   /// Calidates that the given certificate is a valid certificate for this connection
    virtual bool validateCertficate(Certificate *theCertificate, bool isInitiator) { return true; }
 
    /// Validates that the given public key is valid for this connection.  If this
@@ -244,20 +259,20 @@ protected:
    /// of the connection did not provide a certificate.
    virtual bool validatePublicKey(AsymmetricKey *theKey, bool isInitiator) { return true; }
 
-   /// Fills the connect request packet with additional custom data (from a subclass).
+   /// Fills the connect request packet with additional custom data (from a subclass
    virtual void writeConnectRequest(BitStream *stream);
 
-   /// Called after this connection instance is created on a non-initiating host (server).
+   /// Called after this connection instance is created on a non-initiating host (server)
    ///
    /// Reads data sent by the writeConnectRequest method and returns true if the connection is accepted
    /// or false if it's not.  The errorString pointer should be filled if the connection is rejected.
-   virtual bool readConnectRequest(BitStream *stream, const char **errorString);
+   virtual bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
-   /// Writes any data needed to start the connection on the accept packet.
+   /// Writes any data needed to start the connection on the accept packet
    virtual void writeConnectAccept(BitStream *stream);
 
-   /// Reads out the extra data read by writeConnectAccept and returns true if it is processed properly.
-   virtual bool readConnectAccept(BitStream *stream, const char **errorString);
+   /// Reads out the extra data read by writeConnectAccept and returns true if it is processed properly
+   virtual bool readConnectAccept(BitStream *stream, TerminationReason &reason);
 
    virtual void readPacket(BitStream *bstream);                      ///< Called to read a subclass's packet data from the packet.
 

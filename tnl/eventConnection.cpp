@@ -93,9 +93,9 @@ void EventConnection::writeConnectRequest(BitStream *stream)
 // If this host has MORE NetEvent classes declared, the mEventClassCount
 // is set to the requested count, and is verified to lie on a boundary between versions.
 // This gets run when someone is connecting to us
-bool EventConnection::readConnectRequest(BitStream *stream, const char **errorString)
+bool EventConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
 {
-   if(!Parent::readConnectRequest(stream, errorString))
+   if(!Parent::readConnectRequest(stream, reason))
       return false;
 
    U32 remoteClassCount;
@@ -114,7 +114,10 @@ bool EventConnection::readConnectRequest(BitStream *stream, const char **errorSt
 
       // Check if the next RPC is a higher version than the current one specified by mEventClassCount
       if(!NetClassRep::isVersionBorderCount(getNetClassGroup(), NetClassTypeEvent, mEventClassCount))
+      {
+         reason = ReasonIncompatibleRPCCounts;
          return false;     // If not, abort connection
+      }
    }
 
    mEventClassVersion = NetClassRep::getClass(getNetClassGroup(), NetClassTypeEvent, mEventClassCount-1)->getClassVersion();
@@ -131,9 +134,9 @@ void EventConnection::writeConnectAccept(BitStream *stream)
 }
 
 
-bool EventConnection::readConnectAccept(BitStream *stream, const char **errorString)
+bool EventConnection::readConnectAccept(BitStream *stream, NetConnection::TerminationReason &reason)
 {
-   if(!Parent::readConnectAccept(stream, errorString))
+   if(!Parent::readConnectAccept(stream, reason))
       return false;
 
    stream->read(&mEventClassCount);                                                      // Number of RPCs the remote server is willing to support

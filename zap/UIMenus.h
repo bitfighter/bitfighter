@@ -209,6 +209,7 @@ class NameEntryUserInterface : public MenuUserInterface
 private:
    typedef MenuUserInterface Parent;
    void renderExtras();
+   NetConnection::TerminationReason mReason;
 
 public:
    NameEntryUserInterface();               // Constructor
@@ -217,7 +218,7 @@ public:
    void onEscape();
    void setupMenus();
    void onActivate();
-   //void toggleFullscreen();
+   void setReactivationReason(NetConnection::TerminationReason r);
 };
 
 

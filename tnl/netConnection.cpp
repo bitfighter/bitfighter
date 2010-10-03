@@ -803,6 +803,7 @@ void NetConnection::connect(NetInterface *theInterface, const Address &address, 
    mInterface->startConnection(this);
 }
 
+
 void NetConnection::connectArranged(NetInterface *connectionInterface, const Vector<Address> &possibleAddresses, 
                                     Nonce &nonce, Nonce &serverNonce, ByteBufferPtr sharedSecret, bool isInitiator, 
                                     bool requestsKeyExchange, bool requestsCertificate)
@@ -852,7 +853,7 @@ void NetConnection::writeConnectRequest(BitStream *stream)
    stream->write(U32(NetClassRep::getClassGroupCRC(getNetClassGroup())));
 }
 
-bool NetConnection::readConnectRequest(BitStream *stream, const char **errorString)
+bool NetConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
 {
    U32 classGroup, classCRC;
    stream->read(&classGroup);
@@ -861,19 +862,17 @@ bool NetConnection::readConnectRequest(BitStream *stream, const char **errorStri
    if((NetClassGroup)classGroup == getNetClassGroup() && classCRC == NetClassRep::getClassGroupCRC(getNetClassGroup()))
       return true;
 
-   *errorString = "CHR_INVALID";
+   reason = ReasonInvalidCRC;
    return false;
 }
 
 void NetConnection::writeConnectAccept(BitStream *stream)
 {
-   //stream;
+   // Do nothing
 }
 
-bool NetConnection::readConnectAccept(BitStream *stream, const char **errorString)
+bool NetConnection::readConnectAccept(BitStream *stream, TerminationReason &reason)
 {
-   //stream;
-   //errorString;
    return true;
 }
 
@@ -882,7 +881,7 @@ bool NetConnection::connectLocal(NetInterface *connectionInterface, NetInterface
    Object *co = Object::create(getClassName());
    NetConnection *client = this;
    NetConnection *server = dynamic_cast<NetConnection *>(co);
-   const char *error = NULL;
+   NetConnection::TerminationReason reason;
    PacketStream stream;
 
    if(!server)
@@ -903,14 +902,14 @@ bool NetConnection::connectLocal(NetInterface *connectionInterface, NetInterface
    stream.setBytePosition(0);
    client->writeConnectRequest(&stream);
    stream.setBytePosition(0);
-   if(!server->readConnectRequest(&stream, &error))
+   if(!server->readConnectRequest(&stream, reason))
       goto errorOut;
 
    stream.setBytePosition(0);
    server->writeConnectAccept(&stream);
    stream.setBytePosition(0);
 
-   if(!client->readConnectAccept(&stream, &error))
+   if(!client->readConnectAccept(&stream, reason))
       goto errorOut;
 
    client->setConnectionState(NetConnection::Connected);

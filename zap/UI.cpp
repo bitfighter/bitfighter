@@ -563,7 +563,7 @@ void UserInterface::playBoop()
 
 //extern void glColor(const Color &c, float alpha = 1);
 
-void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines)
+void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
 {
    const S32 inset = 100;        // Inset for left and right edges of box
    const S32 titleSize = 30;     // Size of title
@@ -573,9 +573,12 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    const S32 instrGap = 15;      // Gap between last line of text and instruction line
 
    S32 boxHeight = titleSize + titleGap + 2 * vertMargin + (msgLines + 1) * (textSize + textGap) + instrGap;
-   S32 boxTop = (canvasHeight - boxHeight) / 2;
 
-   //glEnable(GL_BLEND);
+   if(!strcmp(instr, ""))
+      boxHeight -= (instrGap + textSize);
+
+   S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
+
    for(S32 i = 1; i >= 0; i--)
    {
       glColor(i ? Color(.3,0,0) : Color(1,1,1));        // Draw the box
@@ -588,7 +591,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
       glEnd();
    
    }
-   //glDisable(GL_BLEND);
 
    // Draw title, message, and footer
    glColor3f(1,1,1);

@@ -916,14 +916,14 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
 // On the server side of things, read the connection request, and return if everything looks legit.  If not, provide an error string
 // to help diagnose the problem, or prompt further data from client (such as a password).
-bool GameConnection::readConnectRequest(BitStream *stream, const char **errorString)
+bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
 {
-   if(!Parent::readConnectRequest(stream, errorString))
+   if(!Parent::readConnectRequest(stream, reason))
       return false;
 
    if(gServerGame->isFull())
    {
-      *errorString = "Server Full.";
+      reason = ReasonServerFull;
       return false;
    }
 
@@ -933,7 +933,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
    stream->readString(buf);
    if(gServerPassword != "" && stricmp(buf, md5.getSaltedHashFromString(gServerPassword).c_str()))
    {
-      *errorString = "PASSWORD";
+      reason = ReasonNeedServerPassword;
       return false;
    }
 
@@ -978,7 +978,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, const char **errorStr
 
    if(password != "" && stricmp(pwbuf, md5.getSaltedHashFromString(password).c_str()))
    {
-      *errorString = "RESERVEDNAME";
+      reason = ReasonReservedName;
       return false;
    }
 
@@ -1179,7 +1179,9 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
    }
    else     // Server
    {
-      if(getClientRef() != NULL)    // ClientRef might be NULL if the server is quitting the game, in which case we don't need to fire these events anyway
+      // ClientRef might be NULL if the server is quitting the game, in which case we 
+      // don't need to fire these events anyway
+      if(getClientRef() != NULL)
       {
          getClientRef()->getPlayerInfo()->setDefunct();
          Robot::getEventManager().fireEvent(NULL, EventManager::PlayerLeftEvent, getClientRef()->getPlayerInfo());
@@ -1187,21 +1189,21 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 
       gServerGame->removeClient(this);
    }
-
 }
 
 
-// I'm thinking that this function only gets called while the player is trying to connect to a server.
-void GameConnection::onConnectTerminated(TerminationReason r, const char *string)
+// This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
+// Compare to onConnectionTerminated()
+void GameConnection::onConnectTerminated(TerminationReason reason)
 {
    if(isInitiator())
    {
-      if(!strcmp(string, "PASSWORD"))
+      if(reason == ReasonNeedServerPassword)
       {
          gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
          gServerPasswordEntryUserInterface.activate();
       }
-      else if(!strcmp(string, "RESERVEDNAME"))
+      else if(reason == ReasonReservedName)
       {
          gReservedNamePasswordEntryUserInterface.setConnectServer(getNetAddress());
          gReservedNamePasswordEntryUserInterface.activate();

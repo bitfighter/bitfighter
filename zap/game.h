@@ -100,6 +100,8 @@ class Game
 {
 protected:
    U32 mNextMasterTryTime;
+   bool mReadyToConnectToMaster;
+
    F32 mGridSize;          // GridSize for this level (default defined below)
 
    struct DeleteRef
@@ -145,7 +147,7 @@ public:
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
 
    Game(const Address &theBindAddress);      // Constructor
-   virtual ~Game() { /* do nothing */ };     // Destructor
+   virtual ~Game() { /* Do nothing */ };     // Destructor
    
    Rect computeWorldObjectExtents();
    Rect computeBarrierExtents();
@@ -186,6 +188,10 @@ public:
    void processDeleteList(U32 timeDelta);
 
    bool isSuspended() { return mGameSuspended; }
+
+   void resetMasterConnectTimer() { mNextMasterTryTime = 0; }
+
+   void setReadyToConnectToMaster(bool ready) { mReadyToConnectToMaster = ready; }
 
    S32 mObjectsLoaded;        // Objects in a given level, used for status bar.  On server it's objects loaded from file, on client, it's objects dl'ed from server.
 };

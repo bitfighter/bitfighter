@@ -907,23 +907,34 @@ NameEntryUserInterface::NameEntryUserInterface()
 {
    setMenuID(OptionsUI);
    mMenuTitle = "ENTER YOUR NICKNAME:";
+   mReason = NetConnection::ReasonNone;
 }
+
+
+void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationReason r) 
+{ 
+   mReason = r; 
+   mMenuTitle = ""; 
+}
+
 
 
 void NameEntryUserInterface::onActivate()
 {
    Parent::onActivate();
    setupMenus();
+   gClientGame->setReadyToConnectToMaster(false);
 }
 
 
 extern string gPlayerName, gPlayerPassword;
-extern bool gReadyToConnectToMaster;
 
 static void nameAndPasswordAcceptCallback(U32 unused)
 {
    gMainMenuUserInterface.activate();
-   gReadyToConnectToMaster = true;
+   gClientGame->setReadyToConnectToMaster(true);
+   gClientGame->resetMasterConnectTimer();
+
 
    gIniSettings.lastName     = gPlayerName     = gNameEntryUserInterface.menuItems[1]->getValue();
    gIniSettings.lastPassword = gPlayerPassword = gNameEntryUserInterface.menuItems[2]->getValue();
@@ -964,6 +975,17 @@ void NameEntryUserInterface::renderExtras()
 
    drawCenteredString(canvasHeight - vertMargin - 30 - (rows - row) * size - (rows - row) * gap, size, 
             "nickname by registering for the bitfighter.org forums.  Registration is free.");
+
+
+   if(mReason == NetConnection::ReasonBadLogin|| mReason == NetConnection::ReasonInvalidUsername)
+   {
+      const char *message[] = { "If you have reserved this name by registering for",
+                                "the forums, enter your forum password below. Otherwise,",
+                                "this user name may be reserved. Please choose another."
+                              };
+
+      renderMessageBox("Invalid Name or Password", "", message, 3, -190);
+   }
 }
 
 // Save options to INI file, and return to our regularly scheduled program

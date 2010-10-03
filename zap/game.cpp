@@ -61,7 +61,7 @@ using namespace TNL;
 namespace Zap
 {
 
-// global Game objects
+// Global Game objects
 ServerGame *gServerGame = NULL;
 ClientGame *gClientGame = NULL;
 
@@ -77,6 +77,8 @@ extern const S32 gScreenWidth;
 Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(256))
 {
    mNextMasterTryTime = 0;
+   mReadyToConnectToMaster = false;
+
    mCurrentTime = 0;
    mGameSuspended = false;
 
@@ -131,16 +133,17 @@ void Game::checkConnectionToMaster(U32 timeDelta)
       if(gMasterAddress == Address())     // Check for a valid address
          return;
 
-      if(mNextMasterTryTime < timeDelta && gReadyToConnectToMaster)
+      if(mNextMasterTryTime < timeDelta && mReadyToConnectToMaster)
       {
-         mConnectionToMaster = new MasterServerConnection(isServer(), 0);
-         mConnectionToMaster->connect(mNetInterface, gMasterAddress);
+          logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", 
+                    gMasterAddress.toString());
 
-         logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", gMasterAddress.toString());
+          mConnectionToMaster = new MasterServerConnection(isServer(), 0);
+          mConnectionToMaster->connect(mNetInterface, gMasterAddress);
 
          mNextMasterTryTime = MASTER_SERVER_FAILURE_RETRY;     // 10 secs, just in case this attempt fails
       }
-      else if(!gReadyToConnectToMaster)
+      else if(!mReadyToConnectToMaster)
          mNextMasterTryTime = 0;
       else
          mNextMasterTryTime -= timeDelta;

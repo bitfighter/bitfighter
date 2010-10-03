@@ -69,7 +69,8 @@ public:
 
    void cancelArrangedConnectionAttempt() { mCurrentQueryId++; }
    void requestArrangedConnection(const Address &remoteAddress);
-   void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags)
+   void updateServerStatus(StringTableEntry levelName, StringTableEntry levelType, U32 botCount, 
+                           U32 playerCount, U32 maxPlayers, U32 infoFlags)
    {
       s2mUpdateServerStatus(levelName, levelType, botCount, playerCount, maxPlayers, infoFlags);
    }
@@ -80,17 +81,19 @@ public:
       ByteBufferPtr connectionParameters));
 
          // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-         TNL_DECLARE_RPC_OVERRIDE(m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
-            ByteBufferPtr connectionParameters));
+         TNL_DECLARE_RPC_OVERRIDE(m2cClientRequestedArrangedConnection, 
+               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters));
 
-   TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
+   TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, 
+               (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
 
    TNL_DECLARE_RPC_OVERRIDE(m2cSetMOTD, (StringPtr masterName, StringPtr motdString));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));
 
-   TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      // Incoming out-of-game chat message from master
-
+   // Incoming out-of-game chat message from master
+   TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      
+   
    // For managing list of players in global chat
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerJoinedGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
@@ -99,9 +102,9 @@ public:
 
    void writeConnectRequest(BitStream *bstream);
    void onConnectionEstablished();
+   void onConnectTerminated(TerminationReason r, const char *string);
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
-
 };
 
 };

@@ -107,43 +107,6 @@ void TextEntryUserInterface::setString(string str)
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-//
-//NameEntryUserInterface gNameEntryUserInterface;
-//extern void exitGame();
-//
-//void NameEntryUserInterface::onEscape()
-//{
-//   exitGame();
-//}
-//
-//extern bool gReadyToConnectToMaster;
-//extern IniSettings gIniSettings;
-//
-//NameEntryUserInterface::NameEntryUserInterface()      // Constructor
-//{
-//   setMenuID(NameEntryUI);
-//   title = "ENTER YOUR NICKNAME:";
-//   instr1 = "You can skip this screen by adding a Nickname=YourNameHere line";
-//   instr2 = "to the [Settings] section of Bitfighter.ini";
-//   resetOnActivate = false;
-//}
-//
-//
-//void NameEntryUserInterface::onAccept(const char *name)
-//{
-//   if(!strcmp(name, ""))     // Non-blank entries required!
-//      setString(gIniSettings.defaultName.c_str());
-//
-//   gMainMenuUserInterface.activate();
-//   gReadyToConnectToMaster = true;
-//   gIniSettings.lastName = name;
-//   
-//   saveSettingsToINI();             // Get that baby into the INI file
-//}
-//
-
-////////////////////////////////////////
-////////////////////////////////////////
 
 extern IniSettings gIniSettings;
 

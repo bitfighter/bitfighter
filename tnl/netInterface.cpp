@@ -143,22 +143,22 @@ U32 NetInterface::computeClientIdentityToken(const Address &address, const Nonce
 
 void NetInterface::addPendingConnection(NetConnection *connection)
 {
-   // make sure we're not already connected to the host at the
+   // Make sure we're not already connected to the host at the
    // connection's Address
    findAndRemovePendingConnection(connection->getNetAddress());
    NetConnection *temp = findConnection(connection->getNetAddress());
    if(temp)
       disconnect(temp, NetConnection::ReasonSelfDisconnect, "Reconnecting");
 
-   // hang on to the connection and add it to the pending connection list
+   // Hang on to the connection and add it to the pending connection list
    connection->incRef();
-   mPendingConnections.push_back(connection);
+   mPendingConnections.push_back(connection);   // (only place where something is added to the mPendingConnections list)
 }
 
+
+// Search the pending connection list for the specified connection and remove it
 void NetInterface::removePendingConnection(NetConnection *connection)
 {
-   // search the pending connection list for the specified connection
-   // and remove it.
    for(S32 i = 0; i < mPendingConnections.size(); i++)
       if(mPendingConnections[i] == connection)
       {
@@ -167,6 +167,7 @@ void NetInterface::removePendingConnection(NetConnection *connection)
          return;
       }
 }
+
 
 NetConnection *NetInterface::findPendingConnection(const Address &address)
 {
@@ -427,7 +428,6 @@ void NetInterface::checkIncomingPackets()
 
 void NetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {
-
    // Determine what to do with this packet:
 
    if(pStream->getBuffer()[0] & 0x80) // it's a protocol packet...
@@ -453,7 +453,7 @@ void NetInterface::processPacket(const Address &sourceAddress, BitStream *pStrea
          handleInfoPacket(sourceAddress, packetType, pStream);
       else
       {
-         // check if there's a connection already:
+         // Check if there's a connection already:
          switch(packetType)
          {
             case ConnectChallengeRequest:
@@ -723,7 +723,7 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
 
    if(result != ClientPuzzleManager::Success)      // Wrong answer!
    {
-      sendConnectReject(&theParams, address, NetConnection::ReasonPuzzle, "");
+      sendConnectReject(&theParams, address, NetConnection::ReasonPuzzle);
       return;
    }
 
@@ -777,10 +777,10 @@ void NetInterface::handleConnectRequest(const Address &address, BitStream *strea
    if(theParams.mUsingCrypto)
       conn->setSymmetricCipher(new SymmetricCipher(theParams.mSymmetricKey, theParams.mInitVector));
 
-   const char *errorString = NULL;
-   if(!conn->readConnectRequest(stream, &errorString))
+   NetConnection::TerminationReason reason;
+   if(!conn->readConnectRequest(stream, reason))
    {
-      sendConnectReject(&theParams, address, NetConnection::ReasonError, errorString);
+      sendConnectReject(&theParams, address, reason);
       return;
    }
    addConnection(conn);
@@ -849,12 +849,13 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
    stream->read(&recvSequence);
    conn->setInitialRecvSequence(recvSequence);
 
-   const char *errorString = NULL;
-   if(!conn->readConnectAccept(stream, &errorString))
+   NetConnection::TerminationReason reason;
+   if(!conn->readConnectAccept(stream, reason))
    {
       removePendingConnection(conn);
       return;
    }
+
    if(theParams.mUsingCrypto)
    {
       stream->read(SymmetricCipher::KeySize, theParams.mInitVector);
@@ -873,7 +874,7 @@ void NetInterface::handleConnectAccept(const Address &address, BitStream *stream
 // NetInterface connection rejection and handling
 //-----------------------------------------------------------------------------
 
-void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &theAddress, NetConnection::TerminationReason reason, const char *reasonStr)
+void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &theAddress, NetConnection::TerminationReason reason)
 {
    //if(!reason)
    //   return; // if the stream is NULL, we reject silently
@@ -883,7 +884,7 @@ void NetInterface::sendConnectReject(ConnectionParameters *conn, const Address &
    conn->mNonce.write(&out);
    conn->mServerNonce.write(&out);
    out.writeEnum(reason, NetConnection::TerminationReasons);
-   out.writeString(reasonStr);
+   out.writeString("");
    out.sendto(mSocket, theAddress);
 }
 
@@ -1228,10 +1229,10 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
    if(theParams.mUsingCrypto)
       conn->setSymmetricCipher(new SymmetricCipher(theParams.mSymmetricKey, theParams.mInitVector));
 
-   const char *errorString = NULL;
-   if(!conn->readConnectRequest(stream, &errorString))
+   NetConnection::TerminationReason reason;
+   if(!conn->readConnectRequest(stream, reason))
    {
-      sendConnectReject(&theParams, theAddress, NetConnection::ReasonError, errorString);
+      sendConnectReject(&theParams, theAddress, reason);
       removePendingConnection(conn);
       return;
    }
@@ -1249,10 +1250,11 @@ void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitSt
 void NetInterface::disconnect(NetConnection *conn, NetConnection::TerminationReason reason, const char *reasonString)
 {
    // If we're still connecting...
-   if(conn->getConnectionState() == NetConnection::AwaitingChallengeResponse ||
+   if(conn->getConnectionState() == NetConnection::NotConnected ||
+      conn->getConnectionState() == NetConnection::AwaitingChallengeResponse ||
       conn->getConnectionState() == NetConnection::AwaitingConnectResponse ||
       conn->getConnectionState() == NetConnection::SendingPunchPackets  ||
-      conn->getConnectionState() == NetConnection::ComputingPuzzleSolution   )
+      conn->getConnectionState() == NetConnection::ComputingPuzzleSolution)
    {
       conn->onConnectTerminated(reason, reasonString);
       removePendingConnection(conn);

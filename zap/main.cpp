@@ -192,8 +192,6 @@ Color EDITOR_WALL_FILL_COLOR(.5, .5, 1);        // Walls filled with this in edi
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
-bool gReadyToConnectToMaster = false;           // When we're sure we have a nickname, we'll set this to true and proceed to connect to the master
-
 string gServerPassword = "";
 string gAdminPassword = "";
 string gLevelChangePassword = "";
@@ -867,7 +865,7 @@ void setParamsForDedicatedMode()
    gCmdLineSettings.clientMode = false;
    gCmdLineSettings.serverMode = true;
    gDedicatedServer = true;
-   gReadyToConnectToMaster = true;
+   gServerGame->setReadyToConnectToMaster(true);
 
    gCmdLineSettings.connectRemote = false;
 }
@@ -1446,7 +1444,7 @@ void processStartupParams()
       else
       {
          gMainMenuUserInterface.activate();
-         gReadyToConnectToMaster = true;         // Set elsewhere if in dedicated server mode
+         gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
       }
    }
 }

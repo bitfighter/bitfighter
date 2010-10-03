@@ -270,12 +270,11 @@ static S32 showMasterBlock(S32 textsize, S32 ypos, S32 gap, bool leftcol)
    else
    {
       glColor3f(1, 0, 0);
-      UserInterface::drawCenteredString2Col(ypos, textsize, leftcol, "Could not establish connection with Master Server" );
+      UserInterface::drawCenteredString2Col(ypos, textsize, leftcol, "Could not connect to Master Server" );
    }
 
    return ypos + textsize + gap;
 }
-
 
 
 extern ClientGame *gClientGame;

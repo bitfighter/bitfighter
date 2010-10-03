@@ -289,7 +289,7 @@ protected:
 
    /// Sends a connect rejection to a valid connect request in response to possible error
    /// conditions (server full, wrong password, etc).
-   void sendConnectReject(ConnectionParameters *theParams, const Address &theAddress, NetConnection::TerminationReason reason, const char *errorString);
+   void sendConnectReject(ConnectionParameters *theParams, const Address &theAddress, NetConnection::TerminationReason reason);
 
    /// Handles a connect rejection packet by notifying the connection object
    /// that the connection was rejected.

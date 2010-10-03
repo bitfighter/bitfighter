@@ -245,7 +245,7 @@ public:
       UnknownStatus
    };
 
-#define VERIFY_PHPBB3
+// #define VERIFY_PHPBB3
 
 #ifdef VERIFY_PHPBB3
 
@@ -280,7 +280,7 @@ public:
       // Check name & pw against database
    AuthenticationStatus verifyCredentials(string name, string password)
    {
-      return Unsupported;
+      return WrongPassword; //Unsupported;
    }
 #endif
 
@@ -773,9 +773,9 @@ public:
    }
 
 
-   bool readConnectRequest(BitStream *bstream, const char **errorString)
+   bool readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
-      if(!Parent::readConnectRequest(bstream, errorString))
+      if(!Parent::readConnectRequest(bstream, reason))
          return false;
 
       // We first read a string in -- in protocol version 0, the version was sent as a string.  In susbsequent
@@ -834,7 +834,7 @@ public:
 
          linkToServerList();
       }
-      else     // Not a server? Must be a client
+      else     // Not a server? Must be a player client
       {
          bstream->readString(readstr);
          mPlayerOrServerName = readstr;
@@ -859,46 +859,37 @@ public:
             {
                logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
                disconnect(ReasonBadLogin, "");
+               reason = ReasonBadLogin;
+               return false;
             }
             else if(stat == InvalidUsername)
             {
                logprintf(LogConsumer::LogConnection, "User name %s contains illegal characters", mPlayerOrServerName.getString());
                // Send message back to client to request new username/password
                disconnect(ReasonInvalidUsername, "");
+               reason = ReasonInvalidUsername;
+               return false;
             }
             else if(stat == CantConnect || stat == UnknownStatus)
             {
                // Send message back to client to let them know things went wrong
                logprintf(LogConsumer::LogConnection, "Connection gone wrong when user %s connected", mPlayerOrServerName.getString());
+               reason = ReasonBadConnection;
+               return false;
             }
          }
-
       }
 
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
-      //U32 matchLen = 0;
       string motdString = "Welcome to Bitfighter!";  // Default msg
 
       if(mCMProtocolVersion == 0)
          for(S32 i = 0; i < MOTDTypeVecOld.size(); i++)
-         {
-            //U32 len;
-            //const char *type = MOTDTypeVecOld[i];
-            //for(len = 0; type[len] == mVersionString.getString()[len] && type[len] != 0; len++)
-            //   ;     // Do nothing... the action is in the for statement!
-
-            //if(len > matchLen)
-            //{
-            //   matchLen = len;
-            //   motdString = MOTDStringVecOld[i];
-            //}
-
             if(!strcmp(mVersionString.getString(), MOTDTypeVecOld[i].c_str()))
             {
                motdString = MOTDStringVecOld[i];
                break;
             }
-         }
       else     // mCMProtocolVersion >= 1
          for(S32 i = 0; i < MOTDVersionVec.size(); i++)
             if(mClientBuild == MOTDVersionVec[i])

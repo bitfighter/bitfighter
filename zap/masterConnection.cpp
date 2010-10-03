@@ -28,6 +28,7 @@
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "UIChat.h"
+#include "UIErrorMessage.h"
 #include "gameConnection.h"
 #include "gameNetInterface.h"
 #include "gameObject.h"
@@ -180,9 +181,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
 
             conn->setNetAddress(fullPossibleAddresses[0]);
 
-            logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", Address(fullPossibleAddresses[0]).toString());
+            logprintf(LogConsumer::LogConnection, "Accepting arranged connection from %s", 
+                                                  Address(fullPossibleAddresses[0]).toString());
 
-            ByteBufferPtr theSharedData = new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
+            ByteBufferPtr theSharedData = 
+                        new ByteBuffer(data + 2 * Nonce::NonceSize, sizeof(data) - 2 * Nonce::NonceSize);
             Nonce nonce(data);
             Nonce serverNonce(data + Nonce::NonceSize);
             theSharedData->takeOwnership();
@@ -190,9 +193,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
             conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
          }
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, 
+                           (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
 {
-   if(!mIsGameServer && requestId == mCurrentQueryId && connectionData->getBufferSize() >= Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2)
+   if(!mIsGameServer && requestId == mCurrentQueryId && 
+                  connectionData->getBufferSize() >= Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2)
    {
       logprintf(LogConsumer::LogConnection, "Remote host accepted arranged connection.");
       //TNL::logprintf("  Shared secret data: %s", connectionData->encodeBase64()->getBuffer());
@@ -221,7 +226,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
    }
 }
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, 
+                           (U32 requestId, ByteBufferPtr rejectData))
 {
    if(!mIsGameServer && requestId == mCurrentQueryId)
    {
@@ -335,6 +341,45 @@ void MasterServerConnection::onConnectionEstablished()
 {
    logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
 }
+
+
+// Only gets called while the player is trying to connect to the master server, and fails
+void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *string)
+{
+   if(isInitiator())
+   {
+      //ReasonBadLogin,         // User provided an invalid password for their username
+      //ReasonInvalidUsername,  // Username contains illegal characters
+      //ReasonBadConnection,    // Something went wrong in the connection
+
+      if(reason == ReasonBadLogin)
+      {
+         //gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
+         gNameEntryUserInterface.activate();
+         gNameEntryUserInterface.setReactivationReason(reason);
+      }
+      else if(reason == ReasonReservedName)
+      {
+         //gReservedNamePasswordEntryUserInterface.setConnectServer(getNetAddress());
+         gReservedNamePasswordEntryUserInterface.activate();
+         gNameEntryUserInterface.setReactivationReason(reason);
+      }
+      else  // Looks like the connection failed for some unknown reason.  Server died?
+      {
+         UserInterface::reactivateMenu(gMainMenuUserInterface);
+
+         // Display a context-appropriate error message
+         gErrorMsgUserInterface.reset();
+         gErrorMsgUserInterface.setTitle("Connection Terminated");
+
+         gMainMenuUserInterface.activate();
+         gErrorMsgUserInterface.setMessage(2, "Lost connection with the server.");
+         gErrorMsgUserInterface.setMessage(3, "Unable to join game.  Please try again.");
+         gErrorMsgUserInterface.activate();
+      }
+   }
+}
+
 
 };
 

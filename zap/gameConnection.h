@@ -114,10 +114,7 @@ public:
       ParamTypeCount       // Must be last
    };
 
-
-   enum {
-      BanDuration = 30000,     // Players are banned for 30secs after being kicked
-   };
+   static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
 
    GameConnection();    // Constructor
    ~GameConnection();   // Destructor
@@ -221,11 +218,11 @@ public:
 
    const Vector<U32> &getLoadout() { return mLoadout; }
    void writeConnectRequest(BitStream *stream);
-   bool readConnectRequest(BitStream *stream, const char **errorString);
+   bool readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason);
 
    void onConnectionEstablished();
 
-   void onConnectTerminated(TerminationReason r, const char *);
+   void onConnectTerminated(TerminationReason r);
 
    void onConnectionTerminated(TerminationReason r, const char *string);
 

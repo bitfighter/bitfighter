@@ -141,7 +141,7 @@ public:
 
    static string itos(S32 i);     // Convert an integer to a string
 
-   void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines);
+   void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
 
 
    // Draw string at given location (normal and formatted versions)
