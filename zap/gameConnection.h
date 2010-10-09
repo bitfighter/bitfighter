@@ -65,6 +65,8 @@ private:
    time_t joinTime;
    bool mAcheivedConnection;
 
+   bool mIsVerified;    // True if the connection has a verified account confirmed by the master
+
    // For saving passwords
    std::string mLastEnteredLevelChangePassword;
    std::string mLastEnteredAdminPassword;       
@@ -197,9 +199,9 @@ public:
    TNL_DECLARE_RPC(s2cDisplayMessageBox, (StringTableEntry title, StringTableEntry instr, Vector<StringTableEntry> message));
    TNL_DECLARE_RPC(s2cAddLevel, (StringTableEntry name, StringTableEntry type));
    TNL_DECLARE_RPC(c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative));
-   TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time));
+   TNL_DECLARE_RPC(c2sRequestShutdown, (U16 time, StringPtr reason));
    TNL_DECLARE_RPC(c2sRequestCancelShutdown, ());
-   TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, bool originator));
+   TNL_DECLARE_RPC(s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator));
    TNL_DECLARE_RPC(s2cCancelShutdown, ());
 
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
@@ -210,6 +212,8 @@ public:
    static GameConnection *getClientList();
    static S32 getClientCount();
    static bool onlyClientIs(GameConnection *client);
+
+   void setVerified(bool isVerified) { mIsVerified = isVerified;  logprintf("Player %s has been verified", mClientName.getString()); }
 
 
    GameConnection *getNextClient();

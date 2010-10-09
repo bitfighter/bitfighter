@@ -150,6 +150,9 @@ public:
    /// client's game string is used to pick which MOTD will be sent.
    TNL_DECLARE_RPC(m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString));
 
+   // If the user has a verified name, send this message back so they know the "correct spelling" of the name
+   TNL_DECLARE_RPC(m2cSetAuthenticated, (StringTableEntry correctedName));
+
 
    // c2mSendChat sends an out-of-game chat message from the client to the master server
    // where it is relayed to other "out-of-game" clients

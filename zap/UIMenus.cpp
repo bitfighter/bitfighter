@@ -951,6 +951,7 @@ void NameEntryUserInterface::setupMenus()
    menuItems.push_back(new EditableMenuItem("NICKNAME:", gPlayerName, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH));
    menuItems.push_back(new EditableMenuItem("PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH));
    
+   menuItems[1]->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins
    menuItems[2]->setSecret(true);
 }
 
@@ -977,7 +978,7 @@ void NameEntryUserInterface::renderExtras()
             "nickname by registering for the bitfighter.org forums.  Registration is free.");
 
 
-   if(mReason == NetConnection::ReasonBadLogin|| mReason == NetConnection::ReasonInvalidUsername)
+   if(mReason == NetConnection::ReasonBadLogin || mReason == NetConnection::ReasonInvalidUsername)
    {
       const char *message[] = { "If you have reserved this name by registering for",
                                 "the forums, enter your forum password below. Otherwise,",

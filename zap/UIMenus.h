@@ -212,7 +212,7 @@ private:
    NetConnection::TerminationReason mReason;
 
 public:
-   NameEntryUserInterface();               // Constructor
+   NameEntryUserInterface();                    // Constructor
    void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
    void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
    void onEscape();

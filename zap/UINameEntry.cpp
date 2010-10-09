@@ -186,21 +186,6 @@ ServerPasswordEntryUserInterface::ServerPasswordEntryUserInterface()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-ReservedNamePasswordEntryUserInterface gReservedNamePasswordEntryUserInterface;
-
-// Constructor
-ReservedNamePasswordEntryUserInterface::ReservedNamePasswordEntryUserInterface()       
-{
-   setMenuID(ReservedNamePasswordEntryUI);
-   title = "ENTER USERNAME PASSWORD:";
-   instr1 = "The username you are using has been reserved on this server.";
-   instr2 = "Please enter the password to use this name here.";
-}
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 void InGamePasswordEntryUserInterface::onAccept(const char *text)
 {
    GameConnection *gc = gClientGame->getConnectionToServer();

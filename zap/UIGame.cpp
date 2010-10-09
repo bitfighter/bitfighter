@@ -400,16 +400,19 @@ void GameUserInterface::renderShutdownMessage()
    }
    else if(mShutdownMode == Canceled)
    {
-      const char *msg[] = { "", "Server shutdown sequence canceled.  Play on!", "", "", "" };     // Keep same number of messages as above, so if message changes, it will be a smooth transition
+      // Keep same number of messages as above, so if message changes, it will be a smooth transition
+      const char *msg[] = { "", "Server shutdown sequence canceled.  Play on!", "", "", "" };     
+
       renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 5);
    }
 }
 
 
-void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, bool initiator)
+void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, string why, bool initiator)
 {
    mShutdownMode = ShuttingDown;
    mShutdownName = who;
+   mShutdownReason = why;
    mShutdownInitiator = initiator;
    mShutdownTimer.reset(time * 1000);
 }
@@ -1400,7 +1403,8 @@ void GameUserInterface::processCommand(Vector<string> &words)
          time = (U16) atoi(words[1].c_str());
       if(time <= 0)
          time = 10;
-      gc->c2sRequestShutdown(time);
+      string reason = "";  // <=== get from cmd line
+      gc->c2sRequestShutdown(time, reason.c_str());
    }
    else if(words[0] == "kick")      // Kick a player
    {

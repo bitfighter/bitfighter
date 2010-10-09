@@ -102,6 +102,7 @@ private:
    ShutdownMode mShutdownMode;
 
    StringTableEntry mShutdownName;  // Name of user who iniated the shutdown
+   string mShutdownReason;          // Reason user provided for the shutdown
    bool mShutdownInitiator;         // True if local client initiated shutdown (and can therefore cancel it)
 
    bool mGotControlUpdate;
@@ -192,7 +193,7 @@ public:
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
 
-   void shutdownInitiated(U16 time, StringTableEntry who, bool initiator);
+   void shutdownInitiated(U16 time, StringTableEntry who, string why, bool initiator);
    void shutdownCanceled();
 
    Vector<string> parseString(const char *str);    // Break a chat msg into parsable bits

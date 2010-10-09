@@ -91,6 +91,8 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cSetMOTD, (StringPtr masterName, StringPtr motdString));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));
 
+   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated, (StringTableEntry correctedName));
+
    // Incoming out-of-game chat message from master
    TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      
    
@@ -102,7 +104,8 @@ public:
 
    void writeConnectRequest(BitStream *bstream);
    void onConnectionEstablished();
-   void onConnectTerminated(TerminationReason r, const char *string);
+   //void onConnectionTerminated(blah);                                    // An existing connection has been terminated
+   //void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 };

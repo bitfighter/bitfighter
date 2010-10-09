@@ -107,13 +107,16 @@ void LineEditor::addChar(const char c)
    if((mFilter == digitsOnlyFilter) && (c < '0' || c > '9'))
       return;
       
-   if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
+   else if((mFilter == numericFilter) && (c != '-' && c != '.' && (c < '0' || c > '9')))
       return;
 
-   if((mFilter == fileNameFilter) && ! ( (c >= '0' && c <= '9') ||
-                                         (c == '_')             ||
-                                         (c >= 'A' && c <= 'Z') ||
-                                         (c >= 'a' && c <= 'z') )  )
+   else if((mFilter == noQuoteFilter) && (c == '"' ))
+      return;
+   
+   else if((mFilter == fileNameFilter) && ! ( (c >= '0' && c <= '9') ||
+                                              (c == '_')             ||
+                                              (c >= 'A' && c <= 'Z') ||
+                                              (c >= 'a' && c <= 'z') )  )
       return;
    
    if(length() < mMaxLen) mLine.append(string(1,c)); 

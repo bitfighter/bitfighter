@@ -56,8 +56,21 @@ XXX need to document timers, new luavec stuff XXX
 
 <h4>Bug Fixes</h4>
 <ul>
-<li>Hitting ctrl-R no longer crashes editor when there is no level gen script
+<li>Hitting ctrl-R no longer crashes editor when there is no level gen script</li>
+<li>Now possible to take multiple screen shots without locking game</li>
+
 </ul>
+
+
+014
+Soccer revamp -- can pickup, carry, and pass ball
+
+<h4>User Interface</h4>
+<li>More menuing overhaul -- nicer colors, and much better design internally to support multiple menu item types on a single menu</li>
+
+<h4>Verified accounts</h4>
+<ul>User names now verified against forums user list -- if you want to play with a name from the forums, you need to supply the
+forums password for that account</ul>
 
 */
 
@@ -226,10 +239,11 @@ void setMousePos(S32 x, S32 y)
 
 Screenshooter gScreenshooter;    // For taking screen shots
 
-ZapJournal gZapJournal;    // Our main journaling object
+ZapJournal gZapJournal;          // Our main journaling object
 
 string gPlayerName;
 string gPlayerPassword;
+bool gPlayerAuthenticated;       // False unless master server approves name
 
 // Handler called by GLUT when window is reshaped
 void GLUT_CB_reshape(int nw, int nh)
@@ -543,6 +557,8 @@ void initHostGame(Address bindAddress, bool testMode)
 {
    gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
 
+   gServerGame->setReadyToConnectToMaster(true);
+
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
    {
@@ -777,7 +793,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
       gClientGame->getConnectionToMaster()->requestArrangedConnection(remoteAddress);
       gGameUserInterface.activate();
    }
-   else                                                        // Try a direct connection
+   else                                                         // Try a direct connection
    {
       GameConnection *theConnection = new GameConnection();
       gClientGame->setConnectionToServer(theConnection);
@@ -786,7 +802,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
       theConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
 
-      if(local)   // We're a local client... connect to our local server
+      if(local)   // We're a local client, running in the same process as the server... connect to that server
       {
          theConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
          theConnection->setIsAdmin(true);          // Local connection is always admin
@@ -794,7 +810,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
          GameConnection *gc = dynamic_cast<GameConnection *>(theConnection->getRemoteConnectionObject());
 
-         if(gc)                              // gc might evaluate false if a bad password was supplied to a password-protected server
+         if(gc)                              // gc might evaluate false if a bad password was supplied to a password-protected server ??
          {
             gc->setIsAdmin(true);            // Set isAdmin on server
             gc->setIsLevelChanger(true);     // Set isLevelChanger on server
@@ -802,9 +818,10 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->s2cSetIsAdmin(true);                // Set isAdmin on the client
             gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
+            gc->setVerified(gPlayerAuthenticated);
          }
       }
-      else        // Connect to a remote server
+      else        // Connect to a remote server, but not via the master server
          theConnection->connect(gClientGame->getNetInterface(), remoteAddress);  // (method in tnlNetConnection)
 
       gGameUserInterface.activate();
@@ -865,7 +882,6 @@ void setParamsForDedicatedMode()
    gCmdLineSettings.clientMode = false;
    gCmdLineSettings.serverMode = true;
    gDedicatedServer = true;
-   gServerGame->setReadyToConnectToMaster(true);
 
    gCmdLineSettings.connectRemote = false;
 }
@@ -1341,7 +1357,7 @@ void processStartupParams()
    else
       gPlayerName = gIniSettings.lastName;
 
-
+   gPlayerAuthenticated = false;
    
    if(gCmdLineSettings.password != "")
       gPlayerPassword = gCmdLineSettings.password;

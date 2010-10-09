@@ -258,6 +258,7 @@ private:
    bool mShuttingDown;
    Timer mShutdownTimer;
    GameConnection *mShutdownOriginator;   // Who started the shutdown?
+   string mShutdownReason;                // Message from shutdowner to players who are being shutted down
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 

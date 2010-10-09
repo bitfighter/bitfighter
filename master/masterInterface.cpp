@@ -171,3 +171,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEn
                                                                    RangedU32<0,MAX_PLAYERS> players, S16 time),
    (gameType, levelName, teams, teamScores, colorR, colorG, colorB, players, time),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
+
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (StringTableEntry correctedName), (correctedName),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}

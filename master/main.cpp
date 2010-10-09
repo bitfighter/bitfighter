@@ -148,6 +148,7 @@ protected:
    StringTableEntry mLevelName;
    StringTableEntry mLevelType;
    StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
+   bool mAuthenticated;                        ///< True if user was authenticated, false if not
    StringTableEntry mServerDescr;              ///< Server description
    bool isInGlobalChat;
 
@@ -172,6 +173,7 @@ public:
       setIsConnectionToClient();
       setIsAdaptive();
       isInGlobalChat = false;
+      mAuthenticated = false;
    }
 
    /// Destructor removes the connection from the doubly linked list of
@@ -250,12 +252,13 @@ public:
 #ifdef VERIFY_PHPBB3
 
    // Check username & password against database
-   AuthenticationStatus verifyCredentials(string username, string password)
+   AuthenticationStatus verifyCredentials(string &username, string password)
    {
       static Authenticator authenticator;
 
       // Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
       //		    1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
+      //        1 = very basic security (prevents the use of double quote character)
       //		    2 = alphanumeric (only allows alphanumeric characters in the username)
       //
       // We'll use level 1 for now, so users can put special characters in their username
@@ -476,11 +479,10 @@ public:
 
 
    // This is called when a client wishes to arrange a connection with a server
-   TNL_DECLARE_RPC_OVERRIDE(c2mRequestArrangedConnection, (U32 requestId,
-      IPAddress remoteAddress, IPAddress internalAddress,
-      ByteBufferPtr connectionParameters))
+   TNL_DECLARE_RPC_OVERRIDE(c2mRequestArrangedConnection, (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress,
+                                                           ByteBufferPtr connectionParameters) )
    {
-      // First, make sure that we're connected with the server that they're requesting a connection with
+      // First, make sure that we're connected with the server the player is requesting a connection with
       MasterServerConnection *conn = (MasterServerConnection *) gNetInterface->findConnection(remoteAddress);
       if(!conn)
       {
@@ -524,15 +526,14 @@ public:
       theAddress.port--;
       possibleAddresses.push_back(theAddress.toIPAddress());
 
-      // Or the address the port thinks it's talking to.
-      // (That is, if it's not the any address.)
+      // Or the address the port thinks it's talking to, if it's not the "any" address
       Address theInternalAddress(internalAddress);
       Address anyAddress;
       if(!theInternalAddress.isEqualAddress(anyAddress) && theInternalAddress != theAddress)
          possibleAddresses.push_back(internalAddress);
 
       // And inform the other part of the request
-      conn->m2cClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
+      conn->m2sClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
    }
 
 
@@ -566,9 +567,10 @@ public:
       strcpy(buffer, getNetAddress().toString());
 
       logprintf(LogConsumer::LogConnectionManager, "[%s] Server: %s accepted connection request from %s", getTimeStamp().c_str(), buffer, 
-                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() : "Unknown");
+                                                        req->initiator.isValid() ? req->initiator->getNetAddress().toString() :        
+                                                                                   "Unknown");
 
-      // If we still know about the requestor, tell him his connection was accepted...
+      // If we still know about the requestor, tell him his connection was accepted.  We're done with the request.
       if(req->initiator.isValid())
          req->initiator->m2cArrangedConnectionAccepted(req->initiatorQueryId, possibleAddresses, connectionData);
 
@@ -834,7 +836,7 @@ public:
 
          linkToServerList();
       }
-      else     // Not a server? Must be a player client
+      else     // Not a server?  Must be a player client
       {
          bstream->readString(readstr);
          mPlayerOrServerName = readstr;
@@ -847,12 +849,21 @@ public:
             bstream->readString(readstr);
             string password = readstr;
 
-            // Verify name and password against our PHPBB3 database
-            AuthenticationStatus stat = verifyCredentials(mPlayerOrServerName.getString(), password);
+            // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
+            string name = mPlayerOrServerName.getString();
+            AuthenticationStatus stat = verifyCredentials(name, password);
+
+            mPlayerOrServerName.set(name.c_str());
             if(stat == Authenticated || stat == UnknownUser || stat == Unsupported)
             {
                linkToClientList();
-               // Send message back to client to let them know their authentication status
+               if(stat == Authenticated)
+               {
+                  logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
+                  mAuthenticated = true;
+
+                  m2cSetAuthenticated(name.c_str());
+               }
 
             }
             else if(stat == WrongPassword)

@@ -81,7 +81,7 @@ string PHPBB3Password::encode(string input, int count) {
 string PHPBB3Password::do_hash(string password, string setting) {
 	string output = "*";
 
-	// Check for correct hash
+	// Check for correct hash, return if not found
 	if (setting.substr(0, 3).compare("$H$")) return output;
 
 	int count_log2 = itoa64.find_first_of(setting[3]);

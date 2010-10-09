@@ -60,7 +60,7 @@ public:
    void processPacket(const Address &sourceAddress, BitStream *pStream);
    void banHost(const Address &bannedAddress, U32 bannedMilliseconds);
    void checkBanlistTimeouts(U32 timeElapsed);
-   bool isHostBanned(const Address &theAddress);
+   bool isAddressBanned(const Address &theAddress);
 
 };
 

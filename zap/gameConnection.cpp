@@ -44,7 +44,7 @@
 
 namespace Zap
 {
-// Global list of clients (if we're a server).
+// Global list of clients (if we're a server, created but never accessed if we're a client)
 GameConnection GameConnection::gClientList;
 
 extern string gServerPassword;
@@ -61,6 +61,7 @@ GameConnection::GameConnection()
    setTranslatesStrings();
    mInCommanderMap = false;
    mIsAdmin = false;
+   mIsVerified = false;
    mIsLevelChanger = false;
    mIsBusy = false;
    mGotPermissionsReply = false;
@@ -825,7 +826,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), NetClassGroupGameMask, RPCGuaranteedOrdered, 
+                  RPCDirClientToServer, 1)
 {
    if(!mIsAdmin)
       return;
@@ -835,14 +837,14 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time), (time), NetCla
    gServerGame->setShuttingDown(true, time, mClientRef);
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      walk->s2cInitiateShutdown(time, mClientRef->name, walk == this);
+      walk->s2cInitiateShutdown(time, mClientRef->name, reason, walk == this);
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, bool originator),
-                  (time, name, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
+                  (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   gGameUserInterface.shutdownInitiated(time, name, originator);
+   gGameUserInterface.shutdownInitiated(time, name, reason.getString(), originator);
 }
 
 
@@ -907,10 +909,6 @@ void GameConnection::writeConnectRequest(BitStream *stream)
                                  md5.getSaltedHashFromString(gServerPasswordEntryUserInterface.getText()).c_str());
 
    stream->writeString(mClientName.getString());
-
-   // Reserved name password... again local clients get a pass, so we'll again grab the password from the client
-   stream->writeString(isLocal ? md5.getSaltedHashFromString(password).c_str() : 
-                                 md5.getSaltedHashFromString(gReservedNamePasswordEntryUserInterface.getText()).c_str());
 }
 
 
@@ -928,7 +926,6 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    }
 
    char buf[256];
-   char pwbuf[256];
 
    stream->readString(buf);
    if(gServerPassword != "" && stricmp(buf, md5.getSaltedHashFromString(gServerPassword).c_str()))
@@ -956,31 +953,12 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    while(len && name[len-1] == ' ')
       len--;
 
-   // Remove invisible chars
+   // Remove invisible chars and quotes
    for(size_t i = 0; i < len; i++)
-      if(!(name[i] >= ' ' && name[i] <= '~'))
+      if(name[i] < ' ' || name[i] > '~' || name[i] == '"')
          name[i] = 'X';
 
    name[len] = 0;    // Terminate string properly
-
-   // Take a break from our name cleanup to check the reserved-name-
-   // password (use the cleaned up but not-yet-uniqued name for this)
-   stream->readString(pwbuf);
-
-   string password = "";
-   // Do we need a password?  Look for the name in our reserved names list.
-   for(S32 i = 0; i < gIniSettings.reservedNames.size(); i++)
-      if(!stricmp(gIniSettings.reservedNames[i].c_str(), name))
-      {
-         password = gIniSettings.reservedPWs[i];
-         break;
-      }
-
-   if(password != "" && stricmp(pwbuf, md5.getSaltedHashFromString(password).c_str()))
-   {
-      reason = ReasonReservedName;
-      return false;
-   }
 
    mClientName = name;
    return true;
@@ -1052,7 +1030,7 @@ void GameConnection::onConnectionEstablished()
 
    Parent::onConnectionEstablished();
 
-   if(isInitiator())    // Client-side
+   if(isInitiator())    // Runs on client
    {
       setGhostFrom(false);
       setGhostTo(true);
@@ -1060,7 +1038,7 @@ void GameConnection::onConnectionEstablished()
 
       setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);       
    }
-   else                 // Server-side
+   else                 // Runs on server
    {
       linkToClientList();              // Add to list of clients
       gServerGame->addClient(this);
@@ -1069,11 +1047,12 @@ void GameConnection::onConnectionEstablished()
       activateGhosting();
       setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);        
 
-      s2cSetServerName(gServerGame->getHostName());      // Ideally, this would be part of the connection handshake, but this should work fine
+      s2cSetServerName(gServerGame->getHostName());   // Ideally, this would be part of the connection handshake, but this should work
 
       time(&joinTime);
       mAcheivedConnection = true;
-
+      
+      // Notify the bots that a new player has joined
       Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientRef()->getPlayerInfo());
 
       if(gLevelChangePassword == "")                // Grant level change permissions if level change PW is blank
@@ -1082,12 +1061,16 @@ void GameConnection::onConnectionEstablished()
          s2cSetIsLevelChanger(true, false);         // Tell client, but don't display notification
       }
 
+      //s2mRequestNameVerification(this->mClientName, this->mClientNonce);
+
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), 
                 isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
    }
 }
 
+
+// Established connection is terminated.  Compare to onConnectTerminate() below.
 void GameConnection::onConnectionTerminated(NetConnection::TerminationReason reason, const char *reasonStr)
 {
    if(isInitiator())    // i.e. this is a client that connected to the server
@@ -1193,7 +1176,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 
 
 // This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
-// Compare to onConnectionTerminated()
+// Compare to onConnectIONTerminated()
 void GameConnection::onConnectTerminated(TerminationReason reason)
 {
    if(isInitiator())
@@ -1202,11 +1185,6 @@ void GameConnection::onConnectTerminated(TerminationReason reason)
       {
          gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
          gServerPasswordEntryUserInterface.activate();
-      }
-      else if(reason == ReasonReservedName)
-      {
-         gReservedNamePasswordEntryUserInterface.setConnectServer(getNetAddress());
-         gReservedNamePasswordEntryUserInterface.activate();
       }
       else  // Looks like the connection failed for some unknown reason.  Server died?
       {

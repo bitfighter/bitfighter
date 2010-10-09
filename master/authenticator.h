@@ -47,7 +47,7 @@ public:
 						 2 = alphanumeric (only allows alphanumeric characters in the username)
 	*/
 	void initialize(std::string server, std::string username, std::string password, std::string database, std::string tablePrefix, int securityLevel = 1);
-	bool authenticate(std::string username, std::string password);
+	bool authenticate(std::string &username, std::string password);
 	/*
 	username: The username to verify in the database.
 	password: The password the user is attempting to login with.
@@ -58,10 +58,10 @@ public:
 		2 = invalid password
 		3 = username contains invalid characters (possibly an sql injection attempt)
 	*/
-	bool authenticate(std::string username, std::string password, int &errorCode);
+	bool authenticate(std::string &username, std::string password, int &errorCode);
 	/*
 		0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
-		1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
+		1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)  (only " is forbidden by PHPBB3)
 		2 = alphanumeric (only allows alphanumeric characters in the username)
 	*/
 	void setSecurityLevel(int level);

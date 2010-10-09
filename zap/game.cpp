@@ -781,7 +781,8 @@ void ServerGame::addClient(GameConnection *theConnection)
 
    // If we're shutting down, display a notice to the user
    if(mShuttingDown)
-      theConnection->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), false);
+      theConnection->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), 
+                                         mShutdownReason.c_str(), false);
 
    if(mGameType.isValid())
       mGameType->serverAddClient(theConnection);

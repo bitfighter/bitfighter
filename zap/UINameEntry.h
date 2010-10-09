@@ -175,18 +175,6 @@ extern ServerPasswordEntryUserInterface gServerPasswordEntryUserInterface;
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ReservedNamePasswordEntryUserInterface : public PreGamePasswordEntryUserInterface
-{
-public:
-   ReservedNamePasswordEntryUserInterface();        // Constructor
-};
-
-extern ReservedNamePasswordEntryUserInterface gReservedNamePasswordEntryUserInterface;
-
-
-////////////////////////////////////////
-////////////////////////////////////////
-
 class AdminPasswordEntryUserInterface : public InGamePasswordEntryUserInterface
 {
 public:

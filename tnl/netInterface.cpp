@@ -565,33 +565,35 @@ void NetInterface::sendConnectChallengeResponse(const Address &addr, Nonce &clie
 void NetInterface::handleConnectChallengeResponse(const Address &address, BitStream *stream)
 {
    NetConnection *conn = findPendingConnection(address);
-   if(!conn || conn->getConnectionState() != NetConnection::AwaitingChallengeResponse)
+   if(!conn || conn->getConnectionState() != NetConnection::AwaitingChallengeResponse)    // Not expecting a connection, abort!
       return;
 
    Nonce theNonce;
    theNonce.read(stream);
 
    ConnectionParameters &theParams = conn->getConnectionParameters();
-   if(theNonce != theParams.mNonce)
+
+   if(theNonce != theParams.mNonce)    // Nonces don't match, abort!
       return;
 
    stream->read(&theParams.mClientIdentity);
 
-   // see if the server wants us to solve a client puzzle
+   // See if the server wants us to solve a client puzzle
    theParams.mServerNonce.read(stream);
    stream->read(&theParams.mPuzzleDifficulty);
 
-   if(theParams.mPuzzleDifficulty > ClientPuzzleManager::MaxPuzzleDifficulty)
+   if(theParams.mPuzzleDifficulty > ClientPuzzleManager::MaxPuzzleDifficulty)    // Puzzle too hard, abort!
       return;
 
-   // see if the connection needs to be authenticated or uses key exchange
+   // See if the connection needs to be authenticated or uses key exchange
    if(stream->readFlag())
    {
       if(stream->readFlag())
       {
          theParams.mCertificate = new Certificate(stream);
-         if(!theParams.mCertificate->isValid() || !conn->validateCertficate(theParams.mCertificate, true))
+         if(!theParams.mCertificate->isValid() || !conn->validateCertficate(theParams.mCertificate, true))  // Invalid cert, abort!
             return;
+
          theParams.mPublicKey = theParams.mCertificate->getPublicKey();
       }
       else
@@ -626,11 +628,14 @@ void NetInterface::handleConnectChallengeResponse(const Address &address, BitStr
 void NetInterface::continuePuzzleSolution(NetConnection *conn)
 {
    ConnectionParameters &theParams = conn->getConnectionParameters();
-   bool solved = ClientPuzzleManager::solvePuzzle(&theParams.mPuzzleSolution, theParams.mNonce, theParams.mServerNonce, theParams.mPuzzleDifficulty, theParams.mClientIdentity);
+   bool solved = ClientPuzzleManager::solvePuzzle(&theParams.mPuzzleSolution, theParams.mNonce, theParams.mServerNonce,
+                                                  theParams.mPuzzleDifficulty, theParams.mClientIdentity);
 
    if(solved)
    {
-      logprintf(LogConsumer::LogNetInterface, "Client puzzle solved in %d ms.", Platform::getRealMilliseconds() - conn->mConnectLastSendTime);
+      logprintf(LogConsumer::LogNetInterface, "Client puzzle solved in %d ms.", 
+                                                         Platform::getRealMilliseconds() - conn->mConnectLastSendTime);
+
       conn->setConnectionState(NetConnection::AwaitingConnectResponse);
       sendConnectRequest(conn);
    }
@@ -918,7 +923,7 @@ void NetInterface::handleConnectReject(const Address &address, BitStream *stream
       p.mPuzzleRetried = true;
       conn->setConnectionState(NetConnection::AwaitingChallengeResponse);
       conn->mConnectSendCount = 0;
-      p.mNonce.getRandom();
+      p.mNonce.getRandom();                  // Generate new nonce
       sendConnectChallengeRequest(conn);
       return;
    }

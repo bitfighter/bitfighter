@@ -43,6 +43,7 @@ extern U32 gSimulatedLag;
 extern F32 gSimulatedPacketLoss;
 extern bool gQuit;
 extern string gPlayerName, gPlayerPassword;
+extern bool gPlayerAuthenticated;
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
@@ -96,8 +97,8 @@ void MasterServerConnection::requestArrangedConnection(const Address &remoteAddr
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
-   ByteBufferPtr connectionParameters))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedConnection, 
+                              (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionParameters))
 {
    if(!mIsGameServer)   // We're not a server!
    {
@@ -106,14 +107,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
       return;
    }
 
-   // Server only from here on down
+   // From here on, we're running on a game server that the master is trying to arrange a connection with
 
    Vector<Address> fullPossibleAddresses;
    for(S32 i = 0; i < possibleAddresses.size(); i++)
       fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
 
-   // Check if the specified host is banned on this server
-   if(gServerGame->getNetInterface()->isHostBanned(fullPossibleAddresses[0]))
+   // Check if the requestor is banned on this server
+   if(gServerGame->getNetInterface()->isAddressBanned(fullPossibleAddresses[0]))
    {
       logprintf(LogConsumer::LogConnection, "Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
       s2mRejectArrangedConnection(requestId, connectionParameters);
@@ -128,7 +129,8 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    ByteBufferPtr b = new ByteBuffer(data, sizeof(data));
    b->takeOwnership();
 
-   s2mAcceptArrangedConnection(requestId, localAddress, b);
+   // Let the server know we're accepting the connection, and pass back our buffer of random data (b)
+   s2mAcceptArrangedConnection(requestId, localAddress, b);    
    GameConnection *conn = new GameConnection();
 
    conn->setNetAddress(fullPossibleAddresses[0]);
@@ -141,6 +143,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    theSharedData->takeOwnership();
 
    conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
+   conn->setVerified(true);
 }
 
          // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
@@ -161,7 +164,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
                fullPossibleAddresses.push_back(Address(possibleAddresses[i]));
 
             // Check if the specified host is banned on this server
-            if(gServerGame->getNetInterface()->isHostBanned(fullPossibleAddresses[0]))
+            if(gServerGame->getNetInterface()->isAddressBanned(fullPossibleAddresses[0]))
             {
                logprintf(LogConsumer::LogConnection, "Blocking connection from banned address %s", fullPossibleAddresses[0].toString());
                s2mRejectArrangedConnection(requestId, connectionParameters);
@@ -200,7 +203,6 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
                   connectionData->getBufferSize() >= Nonce::NonceSize * 2 + SymmetricCipher::KeySize * 2)
    {
       logprintf(LogConsumer::LogConnection, "Remote host accepted arranged connection.");
-      //TNL::logprintf("  Shared secret data: %s", connectionData->encodeBase64()->getBuffer());
 
       Vector<Address> fullPossibleAddresses;
       for(S32 i = 0; i < possibleAddresses.size(); i++)
@@ -221,8 +223,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       conn->setClientName(gPlayerName);
       gClientGame->setConnectionToServer(conn);
 
-      conn->connectArranged(getInterface(), fullPossibleAddresses,
-         nonce, serverNonce, theSharedData, true);
+      conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
    }
 }
 
@@ -244,6 +245,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
    setMasterName(masterName.getString());
    gMainMenuUserInterface.setMOTD(motdString); 
 }
+
+
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, (StringTableEntry correctedName))
+{
+   gPlayerName = correctedName.getString();
+   gPlayerAuthenticated = true;
+}
+
 
 // Alert user to the fact that their client is (or is not) out of date
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSendUpdgradeStatus, (bool needToUpgrade))
@@ -341,45 +350,6 @@ void MasterServerConnection::onConnectionEstablished()
 {
    logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
 }
-
-
-// Only gets called while the player is trying to connect to the master server, and fails
-void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *string)
-{
-   if(isInitiator())
-   {
-      //ReasonBadLogin,         // User provided an invalid password for their username
-      //ReasonInvalidUsername,  // Username contains illegal characters
-      //ReasonBadConnection,    // Something went wrong in the connection
-
-      if(reason == ReasonBadLogin)
-      {
-         //gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
-         gNameEntryUserInterface.activate();
-         gNameEntryUserInterface.setReactivationReason(reason);
-      }
-      else if(reason == ReasonReservedName)
-      {
-         //gReservedNamePasswordEntryUserInterface.setConnectServer(getNetAddress());
-         gReservedNamePasswordEntryUserInterface.activate();
-         gNameEntryUserInterface.setReactivationReason(reason);
-      }
-      else  // Looks like the connection failed for some unknown reason.  Server died?
-      {
-         UserInterface::reactivateMenu(gMainMenuUserInterface);
-
-         // Display a context-appropriate error message
-         gErrorMsgUserInterface.reset();
-         gErrorMsgUserInterface.setTitle("Connection Terminated");
-
-         gMainMenuUserInterface.activate();
-         gErrorMsgUserInterface.setMessage(2, "Lost connection with the server.");
-         gErrorMsgUserInterface.setMessage(3, "Unable to join game.  Please try again.");
-         gErrorMsgUserInterface.activate();
-      }
-   }
-}
-
 
 };
 

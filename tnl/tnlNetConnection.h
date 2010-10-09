@@ -234,7 +234,6 @@ public:
       ReasonIncompatibleRPCCounts,  
       ReasonServerFull,
       ReasonNeedServerPassword,
-      ReasonReservedName,
       
       TerminationReasons,      // Must be last of enumerated reasons!
       ReasonNone

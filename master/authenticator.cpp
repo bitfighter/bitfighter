@@ -60,12 +60,26 @@ void Authenticator::initialize(string server, string username, string password, 
 	}
 }
 
-bool Authenticator::authenticate(string username, string password){
+bool Authenticator::authenticate(string &username, string password){
 	int errorCode;
 	return (authenticate(username, password, errorCode));
 }
 
-bool Authenticator::authenticate(string username, string password, int &errorCode){
+
+// From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
+std::string& replacestring( std::string& strString, const std::string& strOld, const std::string& strNew )
+{
+    for ( int nReplace = strString.rfind( strOld ); nReplace != std::string::npos; nReplace = strString.rfind( strOld, nReplace - 1 ) )
+    {
+        strString.replace( nReplace, strOld.length(), strNew );
+        if ( nReplace == 0 )
+            break;
+    }
+    return strString;
+}
+
+
+bool Authenticator::authenticate(string &username, string password, int &errorCode){
 	try{
 		for (unsigned int i=0; i<username.length(); i++) username[i] = tolower(username[i]);
 		if (!isSqlSafe(username)){
@@ -80,26 +94,36 @@ bool Authenticator::authenticate(string username, string password, int &errorCod
 			}
 		}
 		Query qry = connection->query("");
-		string qryText = "SELECT username_clean, user_password FROM " + prefix + "users WHERE username_clean = '" + username + "'";
+
+      // Provide some protection against injection attacks
+      string safeUsername = replacestring(replacestring(username, "\\", "\\\\"), "'", "''");      
+
+		string qryText = "SELECT username, user_password FROM " + prefix + "users WHERE UPPER(username) = UPPER('" + safeUsername + "')";
 		StoreQueryResult results = qry.store(qryText.c_str(),qryText.length());
 
 		if (results.num_rows() == 0){
 			errorCode = 1; //username not found
 			return false;
 		}
-		PHPBB3Password hasher;
-		if (!hasher.check_hash(password, results[0]["user_password"].c_str())){
-			errorCode = 2; //invalid password
-			return false;
+
+      PHPBB3Password hasher;
+
+		if (!hasher.check_hash(password, results[0]["user_password"].c_str()))
+      {
+         username = results[0]["username"];     // Normalize username
+			errorCode = 2;                         // invalid password
+			return false;                          // validation failure
 		}
-		return true; //password is correct
+      // else
+      username = results[0]["username"];        // Normalize username
+		return true;                              // password is correct
 	}
 	catch(mysqlpp::ConnectionFailed e){
-		errorCode = 0; //unable to connect to mysql server
+		errorCode = 0;       // unable to connect to mysql server
 		return false;
 	}
 	catch (mysqlpp::BadQuery e){
-		errorCode = 0; //unable to connect to mysql server
+		errorCode = 0;       // unable to connect to mysql server
 		return false;
 	}
 }
@@ -109,7 +133,7 @@ void Authenticator::setSecurityLevel(int level){
 }
 
 bool Authenticator::isSqlSafe(string s){
-	string dangerousCharacters = "(\"*^';&></) ";
+	string dangerousCharacters = "\""; //"(\"*^';&></) ";
 	switch (securityLevel){
 		case 0:
 			return true;
@@ -121,5 +145,4 @@ bool Authenticator::isSqlSafe(string s){
 			for (unsigned int i=0; i<s.length(); i++) if(!isalnum(s[i])) return false;
 			return true;
 	}
-	
 }

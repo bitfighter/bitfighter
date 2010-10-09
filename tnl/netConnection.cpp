@@ -69,7 +69,7 @@ static const char *packetTypeNames[] =
 NetConnection::NetConnection()
 {
    mInitialSendSeq = Random::readI();
-   Random::read(mConnectionParameters.mNonce.data, Nonce::NonceSize);
+   mConnectionParameters.mNonce.getRandom();
 
    mSimulatedLatency = 0;
    mSimulatedPacketLoss = 0;
