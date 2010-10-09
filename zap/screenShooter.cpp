@@ -546,7 +546,7 @@ void Screenshooter::saveScreenshot()
 
       while(true)
       {
-         dSprintf(filename, 256, "screenshot_%d.bmp", folder, ctr);
+         dSprintf(filename, 256, "screenshot_%d.bmp", ctr);
          fullfilename = joindir(folder, filename);
          filex = fopen(fullfilename.c_str(), "rb");
          if (filex == NULL) 
