@@ -826,15 +826,16 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
 }
 
 
-TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), NetClassGroupGameMask, RPCGuaranteedOrdered, 
-                  RPCDirClientToServer, 1)
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reason), (time, reason), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    if(!mIsAdmin)
       return;
 
-   logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds", mClientRef->name.getString(), time);
+   logprintf(LogConsumer::ServerFilter, "User [%s] requested shutdown in %d seconds [%s]", 
+         mClientRef->name.getString(), time, reason.getString());
 
-   gServerGame->setShuttingDown(true, time, mClientRef);
+   gServerGame->setShuttingDown(true, time, mClientRef, reason.getString());
 
    for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
       walk->s2cInitiateShutdown(time, mClientRef->name, reason, walk == this);
@@ -844,7 +845,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
                   (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   gGameUserInterface.shutdownInitiated(time, name, reason.getString(), originator);
+   gGameUserInterface.shutdownInitiated(time, name, reason, originator);
 }
 
 
@@ -859,7 +860,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
       if(walk != this)     // Don't send message to cancellor!
          walk->s2cCancelShutdown();
 
-   gServerGame->setShuttingDown(false, 0, NULL);
+   gServerGame->setShuttingDown(false, 0, NULL, "");
 }
 
 

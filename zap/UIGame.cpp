@@ -386,29 +386,29 @@ void GameUserInterface::renderShutdownMessage()
 
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
-         const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "" };
-         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 5);
+         const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
+         renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 7);
       }
       else                       // Remote user intiated the shutdown
       {
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
 
-         const char *msg[] = { "", timemsg, "", whomsg, "" };
-         renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to dismiss", msg, 5);
+         const char *msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
+         renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to dismiss", msg, 7);
       }
    }
    else if(mShutdownMode == Canceled)
    {
       // Keep same number of messages as above, so if message changes, it will be a smooth transition
-      const char *msg[] = { "", "Server shutdown sequence canceled.  Play on!", "", "", "" };     
+      const char *msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
 
-      renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 5);
+      renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 7);
    }
 }
 
 
-void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, string why, bool initiator)
+void GameUserInterface::shutdownInitiated(U16 time, StringTableEntry who, StringPtr why, bool initiator)
 {
    mShutdownMode = ShuttingDown;
    mShutdownName = who;
@@ -1399,11 +1399,25 @@ void GameUserInterface::processCommand(Vector<string> &words)
          return;
 
       U16 time = 0;
+      bool timefound = true;
+      string reason;
+
       if(words.size() > 1)
          time = (U16) atoi(words[1].c_str());
       if(time <= 0)
+      {
          time = 10;
-      string reason = "";  // <=== get from cmd line
+         timefound = false;
+      }
+
+      S32 first = timefound ? 2 : 1;
+      for(S32 i = first; i < words.size(); i++)
+      {
+         if(i != first)
+            reason = reason + " ";
+         reason = reason + words[i];
+      }
+
       gc->c2sRequestShutdown(time, reason.c_str());
    }
    else if(words[0] == "kick")      // Kick a player

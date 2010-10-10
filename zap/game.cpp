@@ -353,7 +353,7 @@ string ServerGame::getLastLevelLoadName()
 
 
 // Control whether we're in shut down mode or not
-void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who)
+void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason)
 {
    mShuttingDown = shuttingDown;
    if(shuttingDown)
@@ -369,8 +369,8 @@ void ServerGame::setShuttingDown(bool shuttingDown, U16 time, ClientRef *who)
       }
       else
       {
-         logprintf(LogConsumer::ServerFilter, "Server shutdown in %d seconds, requested by %s.", 
-                                                   time, mShutdownOriginator->getClientName().getString());
+         logprintf(LogConsumer::ServerFilter, "Server shutdown in %d seconds, requested by %s, for reason [%s].", 
+            time, mShutdownOriginator->getClientName().getString(), reason.getString());
          mShutdownTimer.reset(time * 1000);
       }
    }
@@ -782,7 +782,7 @@ void ServerGame::addClient(GameConnection *theConnection)
    // If we're shutting down, display a notice to the user
    if(mShuttingDown)
       theConnection->s2cInitiateShutdown(mShutdownTimer.getCurrent() / 1000, mShutdownOriginator->getClientName(), 
-                                         mShutdownReason.c_str(), false);
+                                         "Sorry -- server shutting down", false);
 
    if(mGameType.isValid())
       mGameType->serverAddClient(theConnection);

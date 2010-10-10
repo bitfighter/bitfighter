@@ -258,7 +258,6 @@ private:
    bool mShuttingDown;
    Timer mShutdownTimer;
    GameConnection *mShutdownOriginator;   // Who started the shutdown?
-   string mShutdownReason;                // Message from shutdowner to players who are being shutted down
 
    S32 mLevelLoadIndex;                   // For keeping track of where we are in the level loading process.  NOT CURRENT LEVEL IN PLAY!
 
@@ -291,7 +290,7 @@ public:
    void addClient(GameConnection *theConnection);
    void removeClient(GameConnection *theConnection);
 
-   void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who);        // Control whether we're in shut down mode or not
+   void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 
    void setLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();
@@ -400,7 +399,7 @@ extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 3  // Change this when releasing an incompatible cm/sm protocol (must be int)
-#define CS_PROTOCOL_VERSION 29     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 30     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 936          // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "014 beta 1"     // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces

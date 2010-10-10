@@ -618,7 +618,7 @@ static ControlStringsEditor commands[] = {
 };
 
 static ControlStringsEditor adminCommands[] = {
-   { "/shutdown [time in secs]", "Start orderly shutdown of server (def. = 10 secs)" },
+   { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
    { "/setlevpass [passwd]",     "Set level change password (use blank to clear)" },
    { "/setadminpass <passwd>",   "Set admin password" },
    { "/setserverpass [passwd]",  "Set server password  (use blank to clear)" },

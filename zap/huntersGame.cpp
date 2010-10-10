@@ -529,7 +529,11 @@ void HuntersFlagItem::onMountDestroyed()
 
 void HuntersFlagItem::onItemDropped()
 {
-   getGame()->getGameType()->itemDropped(mMount, NULL);
+   GameType *gameType = getGame()->getGameType();
+   if(!gameType)                 // Crashed here once, don't know why, so I added the check
+      return;
+
+   gameType->itemDropped(mMount, NULL);
    dropFlags(mFlagCount);        // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
 
