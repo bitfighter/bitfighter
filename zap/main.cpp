@@ -53,6 +53,7 @@ XXX need to document timers, new luavec stuff XXX
 <h4>Enhancements</h4>
 <li>Improved menu system; better use of colors to make screen less monotonous</li>
 <li>Can now edit hosting parameters directly from hosting screen -- resulting values will be written to the INI file for future use</li>
+<li>Can now supply a reason when using /shutdown command (e.g. /shutdown 30 Need to change levels; will restart shortly!)</li>
 
 <h4>Bug Fixes</h4>
 <ul>
@@ -311,12 +312,18 @@ void GLUT_CB_passivemotion(int x, int y)
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, y))
 {
-
    // Glut sometimes fires spurious events.  Let's ignore those.
    if(x == gMousePos.x && y == gMousePos.y)
       return;
 
+   // This firstTime rigamarole prevents onMouseMoved() from firing when game first starts up; if we're in full screen mode,
+   // GLUT calls this callback immediately.  Thanks, GLUT!
+   bool firstTime = (gMousePos.x == -1);     
+
    setMousePos(x, y);
+
+   if(firstTime)
+      return;
 
    if(UserInterface::current)
       UserInterface::current->onMouseMoved(x, y);

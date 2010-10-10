@@ -918,7 +918,6 @@ void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationRea
 }
 
 
-
 void NameEntryUserInterface::onActivate()
 {
    Parent::onActivate();

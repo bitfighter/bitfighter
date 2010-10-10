@@ -617,14 +617,15 @@ static ControlStringsEditor commands[] = {
    { NULL, NULL },      // End of list
 };
 
+
 static ControlStringsEditor adminCommands[] = {
    { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
-   { "/setlevpass [passwd]",     "Set level change password (use blank to clear)" },
-   { "/setadminpass <passwd>",   "Set admin password" },
-   { "/setserverpass [passwd]",  "Set server password  (use blank to clear)" },
-   { "/setservername <name>",    "Set server name" },
-   { "/setserverdescr <descr>",  "Set server description" },
-   { "/deletecurrentlevel",      "Remove current level from server" },
+   { "/setlevpass [passwd]",       "Set level change password (use blank to clear)" },
+   { "/setadminpass <passwd>",     "Set admin password" },
+   { "/setserverpass [passwd]",    "Set server password  (use blank to clear)" },
+   { "/setservername <name>",      "Set server name" },
+   { "/setserverdescr <descr>",    "Set server description" },
+   { "/deletecurrentlevel",        "Remove current level from server" },
 
    { NULL, NULL },      // End of list
 };
@@ -656,7 +657,8 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
    const S32 instrSize = 18;
 
    glColor3f(0,1,0);
-   drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", keyCodeToString(keyCMDCHAT[gIniSettings.inputMode]));
+   drawStringf(cmdCol, ypos, instrSize, "Enter a cmd by pressing [%s], or by typing one at the chat prompt", 
+               keyCodeToString(keyCMDCHAT[gIniSettings.inputMode]));
    ypos += 28;
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;
@@ -666,7 +668,6 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
       drawString(cmdCol, ypos, instrSize, "Admin permissions are required to use these commands");
       ypos += 28;
    }
-
 
    Color cmdColor =   Color(0, 1, 1);
    Color descrColor = Color (1, 1, 1);
@@ -718,6 +719,7 @@ void InstructionsUserInterface::nextPage()
       mCurPage = 1;
 }
 
+
 void InstructionsUserInterface::prevPage()
 {
    if(mCurPage > 1)
@@ -726,11 +728,13 @@ void InstructionsUserInterface::prevPage()
       mCurPage = NUM_PAGES;
 }
 
+
 void InstructionsUserInterface::exitInstructions()
 {
    UserInterface::playBoop();
    reactivatePrevUI();      //gGameUserInterface
 }
+
 
 void InstructionsUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {

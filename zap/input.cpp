@@ -59,7 +59,7 @@ enum AlignType {
    ALIGN_RIGHT
 };
 
-Point gMousePos;
+Point gMousePos(-1,-1);
 F32 gJoystickInput[JOYSTICK_COUNT][AXIS_COUNT];
 U32 gRawJoystickButtonInputs;
 

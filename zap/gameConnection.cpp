@@ -352,8 +352,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       gINI.WriteFile();    // Save new INI settings to disk
    }
 
-   
-
    // Some messages we might show the user... should these just be inserted directly below?
    static StringTableEntry levelPassChanged("Level change password changed");
    static StringTableEntry levelPassCleared("Level change password cleared -- anyone can change levels");
@@ -1178,7 +1176,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 
 // This function only gets called while the player is trying to connect to a server.  Connection has not yet been established.
 // Compare to onConnectIONTerminated()
-void GameConnection::onConnectTerminated(TerminationReason reason)
+void GameConnection::onConnectTerminated(TerminationReason reason, const char *notUsed)
 {
    if(isInitiator())
    {

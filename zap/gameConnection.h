@@ -226,7 +226,7 @@ public:
 
    void onConnectionEstablished();
 
-   void onConnectTerminated(TerminationReason r);
+   void onConnectTerminated(TerminationReason r, const char *notUsed);
 
    void onConnectionTerminated(TerminationReason r, const char *string);
 
