@@ -43,6 +43,7 @@ extern U32 gSimulatedLag;
 extern F32 gSimulatedPacketLoss;
 extern bool gQuit;
 extern string gPlayerName, gPlayerPassword;
+extern Nonce gClientId;
 extern bool gPlayerAuthenticated;
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
@@ -343,6 +344,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    {
       bstream->writeString(gPlayerName.c_str());       // User's nickname
       bstream->writeString(gPlayerPassword.c_str());   // and whatever password they supplied
+      gClientId.write(bstream);  
    }
 }
 
@@ -350,6 +352,24 @@ void MasterServerConnection::onConnectionEstablished()
 {
    logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
 }
+
+
+// A still-being-established connection has been terminated
+void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *string)   
+{
+   if(reason == NetConnection::ReasonDuplicateId )
+   {
+      gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
+      gErrorMsgUserInterface.setMessage(3, "because you sent a duplicate player id. Player ids are");
+      gErrorMsgUserInterface.setMessage(4, "generated randomly, and collisions are extremely rare.");
+      gErrorMsgUserInterface.setMessage(5, "Please restart Bitfighter and try again.  Statistically");
+      gErrorMsgUserInterface.setMessage(6, "speaking, you should never see this message again!");
+      gErrorMsgUserInterface.activate();
+
+      gClientGame->setReadyToConnectToMaster(false);
+   }
+}
+
 
 };
 

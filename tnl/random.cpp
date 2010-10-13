@@ -52,11 +52,12 @@ void *getState()                                      // Doesn't seem to be call
    return &prng;
 }
 
-void addEntropy(const U8 *randomData, U32 dataLen)    // Doesn't seem to be called
+
+// Needs at least 16 bytes of entropy to be effective.  Can call repeated times to accumulate entropy.
+void addEntropy(const U8 *randomData, U32 dataLen)    
 {
    if(!initialized)
       initialize();
-
    yarrow_add_entropy(randomData, dataLen, &prng);
    entropyAdded += dataLen;
    

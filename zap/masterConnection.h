@@ -44,8 +44,8 @@ class MasterServerConnection : public MasterServerInterface
 {
    typedef MasterServerInterface Parent;
 
-   // ID of our current query.
-   U32 mCurrentQueryId;
+   
+   U32 mCurrentQueryId;    // ID of our current query
 
    bool mIsGameServer;
    U32 mInfoFlags;
@@ -105,7 +105,7 @@ public:
    void writeConnectRequest(BitStream *bstream);
    void onConnectionEstablished();
    //void onConnectionTerminated(blah);                                    // An existing connection has been terminated
-   //void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated
+   void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 };

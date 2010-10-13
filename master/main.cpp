@@ -135,7 +135,8 @@ protected:
                                         ///< below will hold actual version numbers, and this var will hold a "+".
 
    U32              mCMProtocolVersion; ///< Version of the protocol we'll be using to converse with the client
-   U32              mCSProtocolVersion; ///< Protocol version client will use to talk to server (client can only play with others using this same version)
+   U32              mCSProtocolVersion; ///< Protocol version client will use to talk to server (client can only play with others 
+                                        ///     using this same version)
    U32              mClientBuild;       ///< Build number of the client (different builds may use same protocols)
 
    // The following are mostly dummy values at the moment... we may use them later.
@@ -148,6 +149,8 @@ protected:
    StringTableEntry mLevelName;
    StringTableEntry mLevelType;
    StringTableEntry mPlayerOrServerName;       ///< Player's nickname, hopefully unique, but not enforced, or server's name
+   Nonce mPlayerId;                            ///< (Hopefully) unique ID of this player
+
    bool mAuthenticated;                        ///< True if user was authenticated, false if not
    StringTableEntry mServerDescr;              ///< Server description
    bool isInGlobalChat;
@@ -844,10 +847,24 @@ public:
          if(mCMProtocolVersion <= 2)
             linkToClientList();
 
-         else     // Read a password and check it out
+         else     // Level 3 or above: Read a password & id and check them out
          {
             bstream->readString(readstr);
             string password = readstr;
+            
+            mPlayerId.read(bstream);
+
+            // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
+            // possibilities, it most likely will be.
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+               if(walk != this && walk->mCMProtocolVersion >= 3 && walk->mPlayerId == mPlayerId)
+               {
+                  logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
+                                                                                               walk->mPlayerOrServerName.getString());
+                  disconnect(ReasonDuplicateId, "");
+                  reason = ReasonDuplicateId;
+                  return false;
+               }
 
             // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
             string name = mPlayerOrServerName.getString();
@@ -894,14 +911,8 @@ public:
       // Figure out which MOTD to send to client, based on game version (stored in mVersionString)
       string motdString = "Welcome to Bitfighter!";  // Default msg
 
-      if(mCMProtocolVersion == 0)
-         for(S32 i = 0; i < MOTDTypeVecOld.size(); i++)
-            if(!strcmp(mVersionString.getString(), MOTDTypeVecOld[i].c_str()))
-            {
-               motdString = MOTDStringVecOld[i];
-               break;
-            }
-      else     // mCMProtocolVersion >= 1
+      if(mCMProtocolVersion >= 1)    // Don't even bother with level 0 clients -- none of these clients are out there anymore!
+      {
          for(S32 i = 0; i < MOTDVersionVec.size(); i++)
             if(mClientBuild == MOTDVersionVec[i])
             {
@@ -909,23 +920,17 @@ public:
                break;
             }
 
-      m2cSetMOTD(gMasterName.c_str(), motdString.c_str());
-
-      if(mCMProtocolVersion >= 1)
          m2cSendUpdgradeStatus(gLatestReleasedCSProtocol > mCSProtocolVersion);   // Version 0 clients will disconnect if we try this
 
-      if(mCMProtocolVersion == 0)
-      {
-         // Don't even bother -- none of these clients are out there anymore!
-      }
-      else  // mCMProtocolVersion >= 1
-      {
          // CLIENT/SERVER_INFO | timestamp | protocol version | build number | address | controller
          logprintf(LogConsumer::LogConnection, "%s\t%s\t%d\t%d\t%s\t%s",
                                                     mIsGameServer ? "SERVER_INFO" : "CLIENT_INFO", getTimeStamp().c_str(),
                                                     mCMProtocolVersion, mClientBuild, getNetAddress().toString(),
                                                     strcmp(mAutoDetectStr.getString(), "") ? mAutoDetectStr.getString():"<None>");
       }
+
+      m2cSetMOTD(gMasterName.c_str(), motdString.c_str());     // Even level 0 clients can handle this
+
       return true;
    }
 
@@ -1078,6 +1083,23 @@ S32 MasterServerConnection::gServerListCount = 0;
 S32 MasterServerConnection::gClientListCount = 0;
 
 
+
+void seedRandomNumberGenerator()
+{
+   time_t seconds;
+   seconds = time(NULL);
+   const S32 len = 4;
+   unsigned char buf[len];
+
+   buf[0] = U8(seconds);
+   buf[1] = U8(seconds >> 8);
+   buf[2] = U8(seconds >> 16);
+   buf[3] = U8(seconds >> 24);
+
+   Random::addEntropy(buf, len);
+}
+
+
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
@@ -1105,6 +1127,8 @@ extern void readConfigFile();
 int main(int argc, const char **argv)
 {
    gMasterName = "Bitfighter Master Server";    // Default, can be overridden in cfg file
+
+   seedRandomNumberGenerator();
 
    // Configure logging
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LogConnectionManager | LogConsumer::LogChat;

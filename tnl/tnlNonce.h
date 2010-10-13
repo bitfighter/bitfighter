@@ -43,9 +43,10 @@ struct Nonce
    enum {
       NonceSize = 8,
    };
-   U8 data[NonceSize];
 
-   Nonce() {}
+   U8 data[NonceSize];  // 8 bytes, 2^64 possibilities
+
+   Nonce() { for(S32 i = 0; i < NonceSize; i++) data[i] = 0; }    // Constructor, initialize data to all 0s.
    Nonce(const U8 *ptr) { memcpy(data, ptr, NonceSize); }
 
    bool operator==(const Nonce &theOtherNonce) const { return !memcmp(data, theOtherNonce.data, NonceSize); }

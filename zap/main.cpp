@@ -242,9 +242,13 @@ Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;          // Our main journaling object
 
+/////
+// TODO: Put these into some sort of struct?
 string gPlayerName;
 string gPlayerPassword;
+Nonce gClientId;
 bool gPlayerAuthenticated;       // False unless master server approves name
+/////
 
 // Handler called by GLUT when window is reshaped
 void GLUT_CB_reshape(int nw, int nh)
@@ -559,12 +563,41 @@ void abortHosting_noLevels()
 }
 
 
+// This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
+// We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
+void seedRandomNumberGenerator(string name)
+{
+   time_t seconds;
+   seconds = time(NULL);
+   const S32 timeByteCount = 4;
+   const S32 totalByteCount = 16;
+
+   S32 nameBytes = min(name.length(), totalByteCount - timeByteCount);     // # of bytes we get from the provided name
+
+   unsigned char buf[totalByteCount];
+
+   // Bytes from the time
+   buf[0] = U8(seconds);
+   buf[1] = U8(seconds >> 8);
+   buf[2] = U8(seconds >> 16);
+   buf[3] = U8(seconds >> 24);
+
+   // Bytes from the name
+   for(S32 i = 0; i < nameBytes; i++)
+      buf[i + timeByteCount] = name.at(i);
+
+   Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok
+}
+
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(Address bindAddress, bool testMode)
 {
    gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
 
+
    gServerGame->setReadyToConnectToMaster(true);
+   seedRandomNumberGenerator(gHostName);
+   gClientId.getRandom();                    // Generate a player ID
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
@@ -1467,7 +1500,10 @@ void processStartupParams()
       else
       {
          gMainMenuUserInterface.activate();
+
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
+         seedRandomNumberGenerator(gIniSettings.name);
+         gClientId.getRandom();                    // Generate a player ID
       }
    }
 }
@@ -1614,9 +1650,7 @@ int main(int argc, char **argv)
    if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
       initHostGame(gBindAddress, false);     // Start hosting
 
-
    SFXObject::init();
-
 
 
 #ifndef ZAP_DEDICATED

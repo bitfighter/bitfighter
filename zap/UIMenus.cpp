@@ -341,6 +341,11 @@ void MenuUserInterface::render()
 // Handle mouse input, figure out which menu item we're over, and highlight it
 void MenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
+   // Really only matters when starting to host game... don't want to be able to change menu items while the levels are loading.
+   // This is purely an aesthetic issue, a minor irritant.
+   if(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels)
+      return;
+
    itemSelectedWithMouse = true;
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
@@ -927,18 +932,22 @@ void NameEntryUserInterface::onActivate()
 
 
 extern string gPlayerName, gPlayerPassword;
+extern void seedRandomNumberGenerator(string name);
+extern Nonce gClientId;
 
 static void nameAndPasswordAcceptCallback(U32 unused)
 {
    gMainMenuUserInterface.activate();
-   gClientGame->setReadyToConnectToMaster(true);
    gClientGame->resetMasterConnectTimer();
-
 
    gIniSettings.lastName     = gPlayerName     = gNameEntryUserInterface.menuItems[1]->getValue();
    gIniSettings.lastPassword = gPlayerPassword = gNameEntryUserInterface.menuItems[2]->getValue();
 
    saveSettingsToINI();             // Get that baby into the INI file
+
+   gClientGame->setReadyToConnectToMaster(true);
+   seedRandomNumberGenerator(gPlayerName);
+   gClientId.getRandom();                    // Generate a player ID
 }
 
 

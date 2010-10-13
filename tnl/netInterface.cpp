@@ -344,7 +344,7 @@ void NetInterface::processConnections()
                sendConnectChallengeRequest(pending);
          }
          else if(pending->getConnectionState() == NetConnection::AwaitingConnectResponse &&
-            getCurrentTime() > pending->mConnectLastSendTime + ConnectRetryTime)
+                                    getCurrentTime() > pending->mConnectLastSendTime + ConnectRetryTime)
          {
             if(pending->mConnectSendCount > ConnectRetryCount)
             {
@@ -647,9 +647,16 @@ void NetInterface::continuePuzzleSolution(NetConnection *conn)
 
 void NetInterface::sendConnectRequest(NetConnection *conn)
 {
-   logprintf(LogConsumer::LogNetInterface, "Sending Connect Request");
    PacketStream out;
    ConnectionParameters &theParams = conn->getConnectionParameters();
+
+   const char *destDescr;
+   if(theParams.mIsLocal)
+      destDescr = "local in-process server";
+   else
+      destDescr = conn->getNetAddress().toString();
+
+   logprintf(LogConsumer::LogNetInterface, "Sending connect request to %s", destDescr);
 
    out.write(U8(ConnectRequest));
    theParams.mNonce.write(&out);

@@ -36,8 +36,7 @@ ClassChunker<EventConnection::EventNote> EventConnection::mEventNoteChunker;
 
 EventConnection::EventConnection()
 {
-   // event management data:
-
+   // Event management data:
    mNotifyEventList = NULL;
    mSendEventQueueHead = NULL;
    mSendEventQueueTail = NULL;
