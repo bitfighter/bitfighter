@@ -196,6 +196,7 @@ void Platform::forceQuit()
    ExitProcess(1);
 }
 
+// Returns the time since the system was started
 U32 Platform::getRealMilliseconds()
 {
    U32 tickCount;

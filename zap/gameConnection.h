@@ -65,8 +65,6 @@ private:
    time_t joinTime;
    bool mAcheivedConnection;
 
-   bool mIsVerified;    // True if the connection has a verified account confirmed by the master
-
    // For saving passwords
    std::string mLastEnteredLevelChangePassword;
    std::string mLastEnteredAdminPassword;       
@@ -84,6 +82,12 @@ private:
    bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
    StringTableEntry mClientName;
+   Nonce mClientId;
+   bool mClientClaimsToBeVerified;
+   bool mClientNeedsToBeVerified;
+   bool mIsVerified;          // True if the connection has a verified account confirmed by the master
+
+   
    StringTableEntry mServerName;
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;
@@ -128,7 +132,7 @@ public:
 
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
 
-   void setClientName(std::string name) { mClientName = name == "" ? "Chump" : name.c_str(); }
+   void setClientNameAndId(std::string name, Nonce id) { mClientName = name == "" ? "Chump" : name.c_str(); mClientId = id; }
    void setServerName(StringTableEntry name) { mServerName = name; }
 
    std::string getServerName() { return mServerName.getString(); }
@@ -191,8 +195,10 @@ public:
 
    TNL_DECLARE_RPC(c2sRequestLoadout, (Vector<U32> loadout));     // Client has changed his loadout configuration
 
-   TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
-   TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString, Vector<StringTableEntry> e));
+   TNL_DECLARE_RPC(s2cDisplayMessageESI, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, 
+                   StringTableEntry formatString, Vector<StringTableEntry> e, Vector<StringPtr> s, Vector<S32> i));
+   TNL_DECLARE_RPC(s2cDisplayMessageE, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, 
+                   StringTableEntry formatString, Vector<StringTableEntry> e));
    TNL_DECLARE_RPC(s2cTouchdownScored, (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e));
 
    TNL_DECLARE_RPC(s2cDisplayMessage, (RangedU32<0, ColorCount> color, RangedU32<0, NumSFXBuffers> sfx, StringTableEntry formatString));
@@ -208,13 +214,17 @@ public:
 
    TNL_DECLARE_RPC(c2sSetServerAlertVolume, (S8 vol));
 
+   TNL_DECLARE_RPC(s2cSetAuthenticated, (Vector<U8> id));
+
 
    static GameConnection *getClientList();
    static S32 getClientCount();
    static bool onlyClientIs(GameConnection *client);
 
-   void setVerified(bool isVerified) { mIsVerified = isVerified;  logprintf("Player %s has been verified", mClientName.getString()); }
+   Nonce *getClientId() { return &mClientId; }
 
+   void setAuthenticated(bool isVerified);    // Runs on server only, after receiving a message from the master, or on local connection
+   bool isAuthenticated() { return mIsVerified; }
 
    GameConnection *getNextClient();
 

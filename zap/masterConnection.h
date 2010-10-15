@@ -87,11 +87,10 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionAccepted, 
                (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData));
    TNL_DECLARE_RPC_OVERRIDE(m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData));
+   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName));
 
    TNL_DECLARE_RPC_OVERRIDE(m2cSetMOTD, (StringPtr masterName, StringPtr motdString));
    TNL_DECLARE_RPC_OVERRIDE(m2cSendUpdgradeStatus, (bool needToUpgrade));
-
-   TNL_DECLARE_RPC_OVERRIDE(m2cSetAuthenticated, (StringTableEntry correctedName));
 
    // Incoming out-of-game chat message from master
    TNL_DECLARE_RPC_OVERRIDE(m2cSendChat, (StringTableEntry clientName, bool isPrivate, StringPtr message));      
@@ -101,10 +100,13 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick));
    TNL_DECLARE_RPC_OVERRIDE(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
 
+   void requestAuthentication(StringTableEntry mClientName, Nonce mClientId);
+
+   TNL_DECLARE_RPC_OVERRIDE(m2sSetAuthenticated, (Vector<U8> id, RangedU32<0,AuthenticationStatusCount> status));
 
    void writeConnectRequest(BitStream *bstream);
    void onConnectionEstablished();
-   //void onConnectionTerminated(blah);                                    // An existing connection has been terminated
+   //void onConnectionTerminated(blah);                                  // An existing connection has been terminated
    void onConnectTerminated(TerminationReason r, const char *string);    // A still-being-established connection has been terminated
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);

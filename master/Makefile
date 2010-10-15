@@ -1,6 +1,6 @@
 # Bitfighter Master Server Makefile
 #
-# This makefile is for Linux / MinGW on Windows
+# This makefile is for Linux 
 
 
 # 
@@ -20,8 +20,9 @@ OBJECTS_MASTER=\
    authenticator.o\
    phpbbhash.o
 
-# If you get an error about not being able to find the mysql headers, try removing this flag
-CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED
+# If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
+# To disable PHPBB3 integration, remove VERIFY_PHPBB3 flag
+CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED -DVERIFY_PHPBB3
 
 
 .cpp.o : 

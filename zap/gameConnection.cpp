@@ -31,6 +31,7 @@
 #include "IniFile.h"       // For CIniFile def
 #include "playerInfo.h"
 #include "shipItems.h"     // For EngineerBuildObjects enum
+#include "masterConnection.h"    // For MasterServerConnection def
 
 #include "UI.h"
 #include "UIEditor.h"
@@ -61,7 +62,6 @@ GameConnection::GameConnection()
    setTranslatesStrings();
    mInCommanderMap = false;
    mIsAdmin = false;
-   mIsVerified = false;
    mIsLevelChanger = false;
    mIsBusy = false;
    mGotPermissionsReply = false;
@@ -74,6 +74,10 @@ GameConnection::GameConnection()
    mAcheivedConnection = false;
    mLastEnteredLevelChangePassword = "";
    mLastEnteredAdminPassword = "";
+
+   mClientClaimsToBeVerified = false;     // Does client report that they are verified
+   mClientNeedsToBeVerified = false;      // If so, do we still need to verify that claim?
+   mIsVerified = false;                   // Final conclusion... client is or is not verified
 }
 
 // Destructor
@@ -115,7 +119,7 @@ void GameConnection::linkToClientList()
 }
 
 
-GameConnection *GameConnection::getClientList()
+GameConnection *GameConnection::getClientList()       // static
 {
    return gClientList.getNextClient();
 }
@@ -129,6 +133,37 @@ S32 GameConnection::getClientCount()
       count++;
 
    return count;
+}
+
+
+// Definitive, final declaration of whether this player is (or is not) verified on this server
+// Runs on both client (tracking other players) and server (tracking all players)
+void GameConnection::setAuthenticated(bool isVerified)
+{ 
+   mIsVerified = isVerified; 
+   mClientNeedsToBeVerified = false; 
+
+   if(isConnectionToClient())    // Only run this bit if we are a server
+   {
+      // If we are verified, we need to alert any connected clients, so they can render ships properly
+      if(isVerified)
+      {
+         for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+            if(*walk->getClientId() != mClientId)
+               walk->s2cSetAuthenticated(mClientId.toVector());
+      }
+   }
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (Vector<U8> id), (id), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
+{
+   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+      if(*walk->getClientId() == mClientId)
+      {
+         walk->setAuthenticated(true);
+         break;
+      }
 }
 
 
@@ -255,7 +290,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
       setIsAdmin(true);          // Enter admin PW and...
       setIsLevelChanger(true);   // ...get these permissions too!
       s2cSetIsAdmin(true);                                                 // Tell client they have been granted access
-      gServerGame->getGameType()->s2cClientBecameAdmin(mClientRef->name);  // Announce change to world
+
+      GameType *gt = gServerGame->getGameType();
+
+      if(gt)
+         gt->s2cClientBecameAdmin(mClientRef->name);  // Announce change to world
    }
    else
       s2cSetIsAdmin(false);                                                // Tell client they have NOT been granted access
@@ -882,6 +921,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 
 
 extern IniSettings gIniSettings;
+extern Nonce gClientId;
 
 // Send password, client's name, and version info to game server
 void GameConnection::writeConnectRequest(BitStream *stream)
@@ -890,29 +930,20 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
 
-   // If we're the local player, determine if we need a password to use our user name...  if so, supply it so the user doesn't need to enter it.
-   string password = "";
-   if(isLocal)
-   {
-      // Do we have a password?  Look for the name in our reserved names list.
-      for(S32 i = 0; i < gIniSettings.reservedNames.size(); i++)
-         if(!stricmp(gIniSettings.reservedNames[i].c_str(), mClientName.getString()))
-         {
-            password = gIniSettings.reservedPWs[i];
-            break;
-         }
-   }
-
    // Server password... local clients can always connect, so we'll just grab the password from the server!
    stream->writeString(isLocal ? md5.getSaltedHashFromString(gServerPassword).c_str() : 
                                  md5.getSaltedHashFromString(gServerPasswordEntryUserInterface.getText()).c_str());
 
+   // Write some info about the client... name, id, and verification status
    stream->writeString(mClientName.getString());
+   mClientId.write(stream);
+   stream->writeFlag(mIsVerified);    
 }
 
 
 // On the server side of things, read the connection request, and return if everything looks legit.  If not, provide an error string
 // to help diagnose the problem, or prompt further data from client (such as a password).
+// Note that we'll always go through this, even if the client is running on in the same process as the server.
 bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::TerminationReason &reason)
 {
    if(!Parent::readConnectRequest(stream, reason))
@@ -933,12 +964,12 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       return false;
    }
 
-   // Now read the player name
+   // Now read the player name, id, and verification status
    stream->readString(buf);
    size_t len = strlen(buf);
 
-   if(len > MAX_PLAYER_PASSWORD_LENGTH)      // Make sure it isn't too long
-      len = MAX_PLAYER_PASSWORD_LENGTH;
+   if(len > MAX_PLAYER_NAME_LENGTH)      // Make sure it isn't too long
+      len = MAX_PLAYER_NAME_LENGTH;
 
    // Clean up name, render it safe
 
@@ -960,6 +991,15 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    name[len] = 0;    // Terminate string properly
 
    mClientName = name;
+
+   mClientId.read(stream);
+   mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
+   mIsVerified = false;
+
+   MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+   if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
+      masterConn->requestAuthentication(mClientName, mClientId);  // Fire off an authentication request
+
    return true;
 }
 
@@ -1116,28 +1156,6 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
             gErrorMsgUserInterface.setMessage(3, "because you sent too many connection requests.");
             gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
             gNameEntryUserInterface.activate();
-            gErrorMsgUserInterface.activate();
-            break;
-
-         case NetConnection::ReasonInvalidUsername:
-            gErrorMsgUserInterface.setMessage(2, "Unable to log you in with the username/password you provided.");
-            gErrorMsgUserInterface.setMessage(3, "If you have an account, please verify your password. If you don't,");
-            gErrorMsgUserInterface.setMessage(4, "then you chose a reserved name; please try another.");
-            gErrorMsgUserInterface.setMessage(6, "Please check your credentials and try again.");
-            gErrorMsgUserInterface.activate();
-            break;
-
-         case NetConnection::ReasonBadLogin:
-            gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
-            gErrorMsgUserInterface.setMessage(3, "because you sent an username that contained illegal characters.");
-            gErrorMsgUserInterface.setMessage(5, "Please try a different name.");
-            gErrorMsgUserInterface.activate();
-            break;
-
-         case NetConnection::ReasonError:
-            gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:");
-            gErrorMsgUserInterface.setMessage(3, reasonStr);
-            gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
             gErrorMsgUserInterface.activate();
             break;
 

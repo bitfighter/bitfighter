@@ -285,6 +285,7 @@ extern U32 gSticksFound;
 extern string gLevelDir;
 extern Vector<StringTableEntry> gLevelList;
 extern string gPlayerName, gPlayerPassword;
+extern bool gPlayerAuthenticated;
 
 void DiagnosticUserInterface::render()
 {
@@ -364,9 +365,10 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       // This following line is a bit of a beast, but it will return a valid result at any stage of being in or out of a game.
       // If the server modifies a user name to make it unique, this will display the modified version.
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s", 
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)", 
                   gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
-                        gClientGame->getGameType()->mLocalClient->name.getString() : gPlayerName.c_str());
+                        gClientGame->getGameType()->mLocalClient->name.getString() : gPlayerName.c_str(), 
+                        gPlayerAuthenticated ? "Verified" : "Not verified");
 
       ypos += textsize + gap;
 

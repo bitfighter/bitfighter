@@ -244,8 +244,7 @@ ZapJournal gZapJournal;          // Our main journaling object
 
 /////
 // TODO: Put these into some sort of struct?
-string gPlayerName;
-string gPlayerPassword;
+string gPlayerName, gPlayerPassword;
 Nonce gClientId;
 bool gPlayerAuthenticated;       // False unless master server approves name
 /////
@@ -640,10 +639,11 @@ void hostGame()
    gServerGame->hostingModePhase = ServerGame::Hosting;
 
    for(S32 i = 0; i < gServerGame->getLevelNameCount(); i++)
-      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), gServerGame->getLevelFileNameFromIndex(i).c_str());
+      logprintf(LogConsumer::ServerFilter, "\t%s [%s]", gServerGame->getLevelNameFromIndex(i).getString(), 
+                                                        gServerGame->getLevelFileNameFromIndex(i).c_str());
 
-   if(gServerGame->getLevelNameCount())             // Levels loaded --> start game!
-      gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);   // Start with the first level
+   if(gServerGame->getLevelNameCount())                  // Levels loaded --> start game!
+      gServerGame->cycleLevel(ServerGame::FIRST_LEVEL);  // Start with the first level
 
    else        // No levels loaded... we'll crash if we try to start a game
    {
@@ -836,11 +836,13 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    else                                                         // Try a direct connection
    {
       GameConnection *theConnection = new GameConnection();
-      gClientGame->setConnectionToServer(theConnection);
 
-      theConnection->setClientName(gPlayerName);
-
+      // Configure our new connection
+      theConnection->setClientNameAndId(gPlayerName, gClientId);
+      theConnection->setAuthenticated(gPlayerAuthenticated);
       theConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
+
+      gClientGame->setConnectionToServer(theConnection);
 
       if(local)   // We're a local client, running in the same process as the server... connect to that server
       {
@@ -850,7 +852,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
          GameConnection *gc = dynamic_cast<GameConnection *>(theConnection->getRemoteConnectionObject());
 
-         if(gc)                              // gc might evaluate false if a bad password was supplied to a password-protected server ??
+         if(gc)                              
          {
             gc->setIsAdmin(true);            // Set isAdmin on server
             gc->setIsLevelChanger(true);     // Set isLevelChanger on server
@@ -858,11 +860,10 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->s2cSetIsAdmin(true);                // Set isAdmin on the client
             gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
-            gc->setVerified(gPlayerAuthenticated);
          }
       }
       else        // Connect to a remote server, but not via the master server
-         theConnection->connect(gClientGame->getNetInterface(), remoteAddress);  // (method in tnlNetConnection)
+         theConnection->connect(gClientGame->getNetInterface(), remoteAddress);  
 
       gGameUserInterface.activate();
    }

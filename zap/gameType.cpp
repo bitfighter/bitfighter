@@ -2076,7 +2076,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
 {
    ClientRef *cl = findClientRef(name);
    cl->isAdmin = true;
-   if(gClientGame->getGameType()->mClientList.size() && name != gClientGame->getGameType()->mLocalClient->name.getString())    // Don't show message to self
+   if(gClientGame->getGameType()->mClientList.size() && name != gClientGame->getGameType()->mLocalClient->name)    // Don't show message to self
       gGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 }
 
@@ -2086,7 +2086,7 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 {
    ClientRef *cl = findClientRef(name);
    cl->isLevelChanger = true;
-   if(gClientGame->getGameType()->mClientList.size() && name != gClientGame->getGameType()->mLocalClient->name.getString())    // Don't show message to self
+   if(gClientGame->getGameType()->mClientList.size() && name != gClientGame->getGameType()->mLocalClient->name)    // Don't show message to self
       gGameUserInterface.displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
 }
 

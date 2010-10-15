@@ -69,6 +69,7 @@ const S32 IP_MESSAGE_ADDRESS_COUNT = 30;
 // use the TNL_IMPLEMENT_RPC_OVERRIDE macro to write the actual code in
 // masterConnection.cpp.
 
+
 class MasterServerInterface : public EventConnection
 {
 public:
@@ -151,7 +152,7 @@ public:
    TNL_DECLARE_RPC(m2cSetMOTD, (TNL::StringPtr masterName, TNL::StringPtr motdString));
 
    // If the user has a verified name, send this message back so they know the "correct spelling" of the name
-   TNL_DECLARE_RPC(m2cSetAuthenticated, (StringTableEntry correctedName));
+   TNL_DECLARE_RPC(m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName));
 
 
    // c2mSendChat sends an out-of-game chat message from the client to the master server
@@ -186,9 +187,14 @@ public:
                                                Vector<U16> shots, Vector<U16> hits) );
    TNL_DECLARE_RPC(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, Vector<StringTableEntry> teams, 
                                              Vector<S32> teamScores, 
-                                             Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
+                                             Vector<RangedU32<0,256> > colorR, 
+                                             Vector<RangedU32<0,256> > colorG, 
+                                             Vector<RangedU32<0,256> > colorB, 
                                              RangedU32<0,MAX_PLAYERS> players, S16 time) );
 
+
+   TNL_DECLARE_RPC(s2mRequestAuthentication, (StringTableEntry name, Vector<U8> id));
+   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, RangedU32<0,AuthenticationStatusCount> status));
 };
 
 

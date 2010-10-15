@@ -33,6 +33,8 @@
 #include "gameNetInterface.h"
 #include "gameObject.h"
 
+#include "SharedConstants.h"    // For AuthenticationStatus enum
+
 #include "../tnl/tnl.h"
 #include "../tnl/tnlNetInterface.h"
 
@@ -144,12 +146,12 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
    theSharedData->takeOwnership();
 
    conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
-   conn->setVerified(true);
 }
 
          // TODO: Delete after 014 -- replaced with identical m2sClientRequestedArrangedConnection above
-         TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, (U32 requestId, Vector<IPAddress> possibleAddresses,
-            ByteBufferPtr connectionParameters))
+         TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cClientRequestedArrangedConnection, 
+                                    (U32 requestId, Vector<IPAddress> possibleAddresses,
+                                     ByteBufferPtr connectionParameters))
          {
             if(!mIsGameServer)   // We're not a server!
             {
@@ -212,28 +214,29 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       ByteBufferPtr theSharedData =
                      new ByteBuffer(
                            (U8 *) connectionData->getBuffer() + Nonce::NonceSize * 2,
-                           connectionData->getBufferSize() - Nonce::NonceSize * 2
-                     );
+                           connectionData->getBufferSize() - Nonce::NonceSize * 2 );
 
       Nonce nonce(connectionData->getBuffer());
       Nonce serverNonce(connectionData->getBuffer() + Nonce::NonceSize);
 
+      // Client is creating new connection to game server
       GameConnection *conn = new GameConnection();
 
       conn->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
-      conn->setClientName(gPlayerName);
+      
+      conn->setClientNameAndId(gPlayerName, gClientId);
+
       gClientGame->setConnectionToServer(conn);
 
       conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
    }
 }
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, 
-                           (U32 requestId, ByteBufferPtr rejectData))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionRejected, (U32 requestId, ByteBufferPtr rejectData))
 {
    if(!mIsGameServer && requestId == mCurrentQueryId)
    {
-      logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Perhaps because the player was kicked/banned?
+      logprintf(LogConsumer::LogConnection, "Remote host rejected arranged connection...");    // Maybe player was kicked/banned?
       onConnectionTerminated(ReasonTimedOut, "Connection timed out");
       endGame();
       gMainMenuUserInterface.activate();
@@ -248,10 +251,36 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 }
 
 
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, (StringTableEntry correctedName))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, 
+                                    (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName))
 {
-   gPlayerName = correctedName.getString();
-   gPlayerAuthenticated = true;
+   if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
+   {
+      gPlayerName = correctedName.getString();
+      gPlayerAuthenticated = true;
+   }
+   else 
+      gPlayerAuthenticated = false;
+}
+
+
+// Now we know that player with specified id has an approved name
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, RangedU32<0,AuthenticationStatusCount> status))
+{
+   Nonce clientId(id);     // Reconstitute our id into a nonce
+
+   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+      if(*walk->getClientId() == clientId)
+      {
+         if(status == AuthenticationStatusAuthenticatedName)
+            walk->setAuthenticated(true);
+         else if(status == AuthenticationStatusUnauthenticatedName)
+            walk->setAuthenticated(false);
+
+         // other possibility: AuthenticationStatusTryAgainLater
+
+         break;
+      }
 }
 
 
@@ -318,7 +347,8 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 {
    Parent::writeConnectRequest(bstream);
 
-   bstream->writeString("+");                // Just a dummy string to indicate we'll be using a different protocol than the original, version will be specified
+   bstream->writeString("+");                // Just a dummy string to indicate we'll be using a different protocol than the original, 
+                                             // version will be specified
    bstream->write(MASTER_PROTOCOL_VERSION);  // Version of the protocol we'll be using to communicate with the master
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
@@ -355,21 +385,55 @@ void MasterServerConnection::onConnectionEstablished()
 
 
 // A still-being-established connection has been terminated
-void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *string)   
+void MasterServerConnection::onConnectTerminated(TerminationReason reason, const char *reasonStr)   
 {
-   if(reason == NetConnection::ReasonDuplicateId )
+   switch(reason)
    {
-      gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
-      gErrorMsgUserInterface.setMessage(3, "because you sent a duplicate player id. Player ids are");
-      gErrorMsgUserInterface.setMessage(4, "generated randomly, and collisions are extremely rare.");
-      gErrorMsgUserInterface.setMessage(5, "Please restart Bitfighter and try again.  Statistically");
-      gErrorMsgUserInterface.setMessage(6, "speaking, you should never see this message again!");
-      gErrorMsgUserInterface.activate();
+      case NetConnection::ReasonDuplicateId:
+         gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server");
+         gErrorMsgUserInterface.setMessage(3, "because you sent a duplicate player id. Player ids are");
+         gErrorMsgUserInterface.setMessage(4, "generated randomly, and collisions are extremely rare.");
+         gErrorMsgUserInterface.setMessage(5, "Please restart Bitfighter and try again.  Statistically");
+         gErrorMsgUserInterface.setMessage(6, "speaking, you should never see this message again!");
+         gErrorMsgUserInterface.activate();
 
-      gClientGame->setReadyToConnectToMaster(false);
+         gClientGame->setReadyToConnectToMaster(false);
+         break;
+
+      case NetConnection::ReasonBadLogin:
+         gErrorMsgUserInterface.setMessage(2, "Unable to log you in with the username/password you");
+         gErrorMsgUserInterface.setMessage(3, "provided. If you have an account, please verify your");
+         gErrorMsgUserInterface.setMessage(4, "password. Otherwise, you chose a reserved name; please");
+         gErrorMsgUserInterface.setMessage(5, "try another.");
+         gErrorMsgUserInterface.setMessage(7, "Please check your credentials and try again.");
+
+         gNameEntryUserInterface.activate();
+         gErrorMsgUserInterface.activate();
+         break;
+
+      case NetConnection::ReasonInvalidUsername:
+         gErrorMsgUserInterface.setMessage(2, "Your connection was rejected by the server because");
+         gErrorMsgUserInterface.setMessage(3, "you sent an username that contained illegal characters.");
+         gErrorMsgUserInterface.setMessage(5, "Please try a different name.");
+
+         gNameEntryUserInterface.activate();
+         gErrorMsgUserInterface.activate();
+         break;
+
+      case NetConnection::ReasonError:
+         gErrorMsgUserInterface.setMessage(2, "Unable to connect to the server.  Recieved message:");
+         gErrorMsgUserInterface.setMessage(3, reasonStr);
+         gErrorMsgUserInterface.setMessage(5, "Please try a different game server, or try again later.");
+         gErrorMsgUserInterface.activate();
+         break;
    }
 }
 
+
+void MasterServerConnection::requestAuthentication(StringTableEntry clientName, Nonce clientId)
+{
+   s2mRequestAuthentication(clientName, clientId.toVector());
+}
 
 };
 

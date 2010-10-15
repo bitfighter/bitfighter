@@ -167,11 +167,25 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_2,
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName,
                                                                    Vector<StringTableEntry> teams, Vector<S32> teamScores,
-                                                                   Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
+                                                                   Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, 
+                                                                   Vector<RangedU32<0,256> > colorB, 
                                                                    RangedU32<0,MAX_PLAYERS> players, S16 time),
    (gameType, levelName, teams, teamScores, colorR, colorG, colorB, players, time),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 
 
-TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (StringTableEntry correctedName), (correctedName),
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, 
+                                                               StringPtr correctedName), 
+                                                               (authStatus, correctedName),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, (StringTableEntry name, Vector<U8> id), (name, id),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 5) {}
+
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, (Vector<U8> id, 
+                              RangedU32<0,AuthenticationStatusCount> status), (id, status),
+                  NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
+
+
+
+

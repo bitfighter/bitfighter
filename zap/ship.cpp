@@ -1427,6 +1427,18 @@ void Ship::render(S32 layerIndex)
 #endif
       glColor4f(1,1,1,textAlpha);
       UserInterface::drawStringc(0, 30, textSize, str.c_str());
+
+      // Underline name if player is authenticated
+      if(conn->isAuthenticated())
+      {
+         S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
+         glBegin(GL_LINES);
+            glVertex2f(-xoff, 33 + textSize);
+            glVertex2f(xoff, 33 + textSize);
+         glEnd();
+      }
+
+
       glDisable(GL_BLEND);
       glLineWidth(gDefaultLineWidth);
    }

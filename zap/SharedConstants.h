@@ -37,5 +37,13 @@
 static const int MOTD_LEN = 256;
 static const int MAX_PLAYERS = 128;    // Absolute maximum players ever allowed in a game
 
+enum AuthenticationStatus {
+   AuthenticationStatusAuthenticatedName,
+   AuthenticationStatusUnauthenticatedName,
+   AuthenticationStatusTryAgainLater,
+   AuthenticationStatusFailed,
+   AuthenticationStatusCount
+};
+
 #endif
 

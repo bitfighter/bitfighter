@@ -55,6 +55,8 @@ string gMySqlAddress;
 string gDbUsername;
 string gDbPassword;
 
+U32 gServerStartTime;
+
 // Variables for verifying usernames/passwords in PHPBB3
 string gPhpbb3Database;
 string gPhpbb3TablePrefix;
@@ -240,7 +242,7 @@ public:
       logprintf(LogConsumer::LogConnection, "CLIENT_CONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
    }
 
-   enum AuthenticationStatus {
+   enum PHPBB3AuthenticationStatus {
       Authenticated,
       CantConnect,
       UnknownUser,
@@ -250,12 +252,10 @@ public:
       UnknownStatus
    };
 
-// #define VERIFY_PHPBB3
-
-#ifdef VERIFY_PHPBB3
+#ifdef VERIFY_PHPBB3    // Defined in Linux Makefile, not in VC++ project
 
    // Check username & password against database
-   AuthenticationStatus verifyCredentials(string &username, string password)
+   PHPBB3AuthenticationStatus verifyCredentials(string &username, string password)
    {
       static Authenticator authenticator;
 
@@ -284,7 +284,7 @@ public:
    }
 #else
       // Check name & pw against database
-   AuthenticationStatus verifyCredentials(string name, string password)
+   PHPBB3AuthenticationStatus verifyCredentials(string name, string password)
    {
       return WrongPassword; //Unsupported;
    }
@@ -778,6 +778,32 @@ public:
    }
 
 
+   // Game server wants to know if user name has been verified
+   TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (StringTableEntry name, Vector<U8> id))
+   {
+      Nonce clientId(id);     // Reconstitute our id
+
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         if(walk->mPlayerId == clientId)
+         {
+            AuthenticationStatus status;
+
+            if(name == walk->mPlayerOrServerName)
+               status = AuthenticationStatusAuthenticatedName;
+
+            // If server just restarted, clients will need to reauthenticate, and that may take some time.
+            // We'll give them 90 seconds.
+            else if(Platform::getRealMilliseconds() - gServerStartTime < 90000)      
+               status = AuthenticationStatusTryAgainLater;             
+            else
+               status = AuthenticationStatusUnauthenticatedName;
+
+            m2sSetAuthenticated(id, status);
+            break;
+         }
+   }
+
+
    bool readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
       if(!Parent::readConnectRequest(bstream, reason))
@@ -868,22 +894,11 @@ public:
 
             // Verify name and password against our PHPBB3 database.  Name will be set to the correct case if it is authenticated.
             string name = mPlayerOrServerName.getString();
-            AuthenticationStatus stat = verifyCredentials(name, password);
+            PHPBB3AuthenticationStatus stat = verifyCredentials(name, password);
 
             mPlayerOrServerName.set(name.c_str());
-            if(stat == Authenticated || stat == UnknownUser || stat == Unsupported)
-            {
-               linkToClientList();
-               if(stat == Authenticated)
-               {
-                  logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
-                  mAuthenticated = true;
 
-                  m2cSetAuthenticated(name.c_str());
-               }
-
-            }
-            else if(stat == WrongPassword)
+            if(stat == WrongPassword)
             {
                logprintf(LogConsumer::LogConnection, "User %s provided the wrong password", mPlayerOrServerName.getString());
                disconnect(ReasonBadLogin, "");
@@ -898,13 +913,20 @@ public:
                reason = ReasonInvalidUsername;
                return false;
             }
-            else if(stat == CantConnect || stat == UnknownStatus)
+            linkToClientList();
+            if(stat == Authenticated)
             {
-               // Send message back to client to let them know things went wrong
-               logprintf(LogConsumer::LogConnection, "Connection gone wrong when user %s connected", mPlayerOrServerName.getString());
-               reason = ReasonBadConnection;
-               return false;
+               logprintf(LogConsumer::LogConnection, "Authenticated user %s", mPlayerOrServerName.getString());
+               mAuthenticated = true;
+
+               m2cSetAuthenticated((U32)AuthenticationStatusAuthenticatedName, name.c_str());
             }
+
+            else if(stat == UnknownUser || stat == Unsupported)
+               m2cSetAuthenticated(AuthenticationStatusUnauthenticatedName, "");
+
+            else  // stat == CantConnect || stat == UnknownStatus
+               m2cSetAuthenticated(AuthenticationStatusFailed, "");
          }
       }
 
@@ -1084,19 +1106,20 @@ S32 MasterServerConnection::gClientListCount = 0;
 
 
 
+
 void seedRandomNumberGenerator()
 {
-   time_t seconds;
-   seconds = time(NULL);
-   const S32 len = 4;
-   unsigned char buf[len];
+   U32 time = Platform::getRealMilliseconds();
 
-   buf[0] = U8(seconds);
-   buf[1] = U8(seconds >> 8);
-   buf[2] = U8(seconds >> 16);
-   buf[3] = U8(seconds >> 24);
+   U8 buf[16];
 
-   Random::addEntropy(buf, len);
+   buf[0] = U8(time);
+   buf[1] = U8(time >> 8);
+   buf[2] = U8(time >> 16);
+   buf[3] = U8(time >> 24);
+
+   // Need at least 16 bytes to make anything happen.  We'll provide 4 sort of good ones, and 12 bytes of uninitialized crap.
+   Random::addEntropy(buf, 16);
 }
 
 
@@ -1126,6 +1149,8 @@ extern void readConfigFile();
 
 int main(int argc, const char **argv)
 {
+   gServerStartTime = Platform::getRealMilliseconds();
+
    gMasterName = "Bitfighter Master Server";    // Default, can be overridden in cfg file
 
    seedRandomNumberGenerator();
@@ -1161,7 +1186,7 @@ int main(int argc, const char **argv)
    const S32 REREAD_TIME = 5000;         // How often to we re-read our config file? (in ms)
 
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
-   U32 lastWroteStatusTime = Platform::getRealMilliseconds() - REWRITE_TIME;    // So we can do a write right off the bat
+   U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
 
     // And until infinity, process whatever comes our way.
   for(;;)     // To infinity and beyond!!
@@ -1176,7 +1201,8 @@ int main(int argc, const char **argv)
          readConfigFile();
       }
 
-      if(gNeedToWriteStatus && currentTime - lastWroteStatusTime > REWRITE_TIME)     // Write status file as need, at most every REWRITE_TIME ms
+      // Write status file as need, at most every REWRITE_TIME ms
+      if(gNeedToWriteStatus && currentTime - lastWroteStatusTime > REWRITE_TIME)  
       {
          lastWroteStatusTime = currentTime;
          MasterServerConnection::writeClientServerList_JSON();
