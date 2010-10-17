@@ -1137,7 +1137,7 @@ void GameType::spawnShip(GameConnection *theClient)
    Point spawnPoint = getSpawnPoint(teamIndex);
 
    //                     Player's name, team, and spawning location
-   Ship *newShip = new Ship(cl->name, teamIndex, spawnPoint);
+   Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
 
    theClient->setControlObject(newShip);
    newShip->setOwner(theClient);

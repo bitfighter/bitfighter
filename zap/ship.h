@@ -112,6 +112,8 @@ private:
 
 protected:
    StringTableEntry mPlayerName;
+   bool mIsAuthenticated;
+
    bool mModuleActive[ModuleCount];       // Is that module active at this moment?
 
    ShipModule mModule[ShipModuleCount];   // Modules ship is carrying
@@ -155,16 +157,16 @@ public:
    };
 
    enum MaskBits {
-      InitialMask = BIT(0),      // Initial ship position
-      PositionMask = BIT(1),     // Ship position to be sent
-      MoveMask = BIT(2),         // New user input
-      WarpPositionMask = BIT(3), // When ship makes a big jump in position
+      InitialMask = BIT(0),         // Initial ship position
+      PositionMask = BIT(1),        // Ship position to be sent
+      MoveMask = BIT(2),            // New user input
+      WarpPositionMask = BIT(3),    // When ship makes a big jump in position
       ExplosionMask = BIT(4),
       HealthMask = BIT(5),
-      PowersMask = BIT(6),       // Which modules are active
+      PowersMask = BIT(6),          // Which modules are active
       LoadoutMask = BIT(7),
-      RespawnMask = BIT(8),      // For when robots respawn
-      TeleportMask = BIT(9),     // Ship has just teleported
+      RespawnMask = BIT(8),         // For when robots respawn
+      TeleportMask = BIT(9),        // Ship has just teleported
    };
 
    Timer mFireTimer;
@@ -176,6 +178,7 @@ public:
    Point mImpulseVector;
 
    StringTableEntry getName() { return mPlayerName; }
+   void setIsAuthenticated(bool isAuthenticated) { mIsAuthenticated = isAuthenticated; }
 
    SFXHandle mModuleSound[ModuleCount];
 
@@ -203,7 +206,9 @@ public:
 
    virtual void render(S32 layerIndex);
 
-   Ship(StringTableEntry playerName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      // Constructor
+   // Constructor
+   Ship(StringTableEntry playerName="", bool isAuthenticated = false, S32 team = -1, Point p = Point(0,0), F32 m = 1.0, bool isRobot = false);      
+   
    ~Ship();           // Destructor
 
    F32 getHealth() { return mHealth; }

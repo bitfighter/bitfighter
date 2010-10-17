@@ -292,7 +292,7 @@ public:
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 
-   void setLevelList(Vector<StringTableEntry> levelList);
+   void buildLevelList(Vector<StringTableEntry> levelList);
    void resetLevelLoadIndex();
    void loadNextLevel();
    string getLastLevelLoadName();         // For updating the UI

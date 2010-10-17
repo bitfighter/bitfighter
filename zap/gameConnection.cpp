@@ -138,32 +138,26 @@ S32 GameConnection::getClientCount()
 
 // Definitive, final declaration of whether this player is (or is not) verified on this server
 // Runs on both client (tracking other players) and server (tracking all players)
-void GameConnection::setAuthenticated(bool isVerified)
+void GameConnection::setAuthenticated(bool isAuthenticated)
 { 
-   mIsVerified = isVerified; 
+   mIsVerified = isAuthenticated; 
    mClientNeedsToBeVerified = false; 
 
    if(isConnectionToClient())    // Only run this bit if we are a server
    {
       // If we are verified, we need to alert any connected clients, so they can render ships properly
-      if(isVerified)
-      {
-         for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-            if(*walk->getClientId() != mClientId)
-               walk->s2cSetAuthenticated(mClientId.toVector());
-      }
+
+      Ship *ship = dynamic_cast<Ship *>(getControlObject());
+      if(ship)
+         ship->setIsAuthenticated(isAuthenticated);
+
+      //if(isAuthenticated)
+      //{
+      //   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+      //      if(*walk->getClientId() != mClientId)
+      //         walk->s2cSetAuthenticated(mClientId.toVector());
+      //}
    }
-}
-
-
-TNL_IMPLEMENT_RPC(GameConnection, s2cSetAuthenticated, (Vector<U8> id), (id), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
-{
-   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      if(*walk->getClientId() == mClientId)
-      {
-         walk->setAuthenticated(true);
-         break;
-      }
 }
 
 
@@ -937,7 +931,7 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    // Write some info about the client... name, id, and verification status
    stream->writeString(mClientName.getString());
    mClientId.write(stream);
-   stream->writeFlag(mIsVerified);    
+   stream->writeFlag(mIsVerified);    // Tell server whether we (the client) claim to be authenticated
 }
 
 

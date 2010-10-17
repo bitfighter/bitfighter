@@ -64,7 +64,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 // Constructor
 // Note that most of these values are set in the initial packet set from the server (see packUpdate() below)
 // Also, the following is also run by robot's constructor
-Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
+Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
 
@@ -76,7 +76,10 @@ Ship::Ship(StringTableEntry playerName, S32 team, Point p, F32 m, bool isRobot) 
    mTeam = team;
    mass = m;            // Ship's mass
 
-   mPlayerName = playerName;     // This will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
+   // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
+   mPlayerName = playerName;  
+   mIsAuthenticated = isAuthenticated;
+
    mIsRobot = isRobot;
 
    if(!isRobot)         // Robots will run this during their own initialization; no need to run it twice!
@@ -792,13 +795,14 @@ void Ship::readControlState(BitStream *stream)
    mActiveWeaponIndx = stream->readRangedU32(0, WeaponCount);
 }
 
-// Writes the player's ghost update from the server to the client
+
+// Transmit ship status from server to client
 // Any changes here need to be reflected in Ship::unpackUpdate
 U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    GameConnection *gameConnection = (GameConnection *) connection;
 
-   if(isInitialUpdate())      // This stuff gets sent only once
+   if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       stream->writeFlag(getGame()->getCurrentTime() - getCreationTime() < 300);  // If true, ship will appear to spawn on client
       stream->writeStringTableEntry(mPlayerName);
@@ -837,6 +841,8 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 //   }
 //}
 
+   stream->writeFlag(mIsAuthenticated);   // Authentication status --> always send, as that's cheaper than sending a flag indicating whether
+                                          // we'll be sending this bit
 
    stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits
                                                                // are set (as happens when a ship comes into scope).  Therefore, we'll force
@@ -878,14 +884,11 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
          writeCompressedVelocity(mMoveState[RenderState].vel, BoostMaxVelocity + 1, stream);
       }
       if(stream->writeFlag(updateMask & MoveMask))
-      {
          mCurrentMove.pack(stream, NULL, false);      // Send current move
-      }
+
       if(stream->writeFlag(updateMask & PowersMask))
-      {
          for(S32 i = 0; i < ModuleCount; i++)         // Send info about which modules are active
             stream->writeFlag(mModuleActive[i]);
-      }
    }
    return 0;
 }
@@ -908,6 +911,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       playSpawnEffect = stream->readFlag();
 
       stream->readStringTableEntry(&mPlayerName);
+
       stream->read(&mass);
       stream->read(&mTeam);
 
@@ -946,6 +950,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 //}
 //
 //}
+
+   mIsAuthenticated = stream->readFlag();    // Authentication status -- always sent because it's cheaper
 
    if(stream->readFlag())        // Respawn <--- will only occur on robots, will always be false with ships
    {
@@ -1400,13 +1406,7 @@ void Ship::render(S32 layerIndex)
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
 
-   F32 alpha = 1.0;
-
-   if(isModuleActive(ModuleCloak))
-      alpha = mCloakTimer.getFraction();
-   else
-      alpha = 1 - mCloakTimer.getFraction();
-
+   F32 alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
@@ -1429,7 +1429,7 @@ void Ship::render(S32 layerIndex)
       UserInterface::drawStringc(0, 30, textSize, str.c_str());
 
       // Underline name if player is authenticated
-      if(conn->isAuthenticated())
+      if(mIsAuthenticated)
       {
          S32 xoff = UserInterface::getStringWidth(textSize, str.c_str()) / 2;
          glBegin(GL_LINES);
@@ -1437,7 +1437,6 @@ void Ship::render(S32 layerIndex)
             glVertex2f(xoff, 33 + textSize);
          glEnd();
       }
-
 
       glDisable(GL_BLEND);
       glLineWidth(gDefaultLineWidth);

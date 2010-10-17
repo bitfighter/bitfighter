@@ -126,9 +126,9 @@ private:
    typedef NetObject Parent;
    Game *mGame;
    U32 mCreationTime;
-   SafePtr<GameConnection> mControllingClient;
+   SafePtr<GameConnection> mControllingClient;     // Only has meaning on the server, will be null on the client
    SafePtr<GameConnection> mOwner;
-   U32 mDisableCollisionCount;      // No collisions with this object if true
+   U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
 
    F32 mRadius;
    F32 mMass;
@@ -166,7 +166,7 @@ public:
    void setOwner(GameConnection *c);
 
    SafePtr<GameConnection> getControllingClient() { return mControllingClient; }
-   void setControllingClient(GameConnection *c) { mControllingClient = c; }
+   void setControllingClient(GameConnection *c) { mControllingClient = c; }         // This only gets run on the server
 
    GameConnection *getOwner();
    GridDatabase *getGridDatabase();

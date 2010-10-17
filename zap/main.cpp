@@ -612,7 +612,7 @@ void initHostGame(Address bindAddress, bool testMode)
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
    if(gLevelList.size())
    {
-      gServerGame->setLevelList(gLevelList);
+      gServerGame->buildLevelList(gLevelList);     // Take levels in gLevelList and create a set of empty levelInfo records
       gServerGame->resetLevelLoadIndex();
       gHostMenuUserInterface.levelLoadDisplayDisplay = true;
    }

@@ -1305,7 +1305,7 @@ TNL_IMPLEMENT_NETOBJECT(Robot);
 Vector<Robot *> Robot::robots;
 
 // Constructor, runs on client and server
-Robot::Robot(StringTableEntry robotName, S32 team, Point p, F32 m) : Ship(robotName, team, p, m, true)
+Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
@@ -1520,6 +1520,7 @@ bool Robot::startLua()
 
    // Make sure name is unique
    mPlayerName = GameConnection::makeUnique(name).c_str();
+   mIsAuthenticated = false;
 
    // Note main() will be run later, after all bots have been loaded
    return true;

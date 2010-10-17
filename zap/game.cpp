@@ -326,8 +326,8 @@ S32 ServerGame::getRobotCount()
 }
 
 
-// This gets called when you first host a game
-void ServerGame::setLevelList(Vector<StringTableEntry> levelList)
+// This gets called when you first load the host menu
+void ServerGame::buildLevelList(Vector<StringTableEntry> levelList)
 {
    mLevelInfos.clear();
 
@@ -345,7 +345,9 @@ void ServerGame::resetLevelLoadIndex()
 // This is only used while we're building a list of levels to display on the host during loading.
 string ServerGame::getLastLevelLoadName()
 {
-   if(getLevelNameCount() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
+   if(mLevelInfos.size() == 0)     // Could happen if there are no valid levels specified wtih -levels param, for example
+      return "";
+   else if(mLevelLoadIndex == 0)    // Still not sure when this would happen
       return "";
    else
       return mLevelInfos[mLevelLoadIndex - 1].levelName.getString();
@@ -409,14 +411,13 @@ void ServerGame::loadNextLevel()
          mScopeAlwaysList.clear();
 
          logprintf(LogConsumer::LogLevelLoaded, "Loaded level %s of type %s [%s]", name.getString(), type.getString(), levelName.c_str());
+         mLevelLoadIndex++;
       }
       else     // Level could not be loaded -- it's either missing or invalid.  Remove it from our level list.
       {
          logprintf(LogConsumer::LogWarning, "Could not load level %s.  Skipping...", levelName.c_str());
          mLevelInfos.erase(mLevelLoadIndex);
-         mLevelLoadIndex--;
       }
-      mLevelLoadIndex++;
    }
 
    if(mLevelLoadIndex == mLevelInfos.size())
@@ -776,7 +777,7 @@ extern bool gDedicatedServer;
 void ServerGame::addClient(GameConnection *theConnection)
 {
    // Send our list of levels and their types to the connecting client
-   for(S32 i = 0; i < mLevelInfos.size();i++)
+   for(S32 i = 0; i < mLevelInfos.size(); i++)
       theConnection->s2cAddLevel(mLevelInfos[i].levelName, mLevelInfos[i].levelType);
 
    // If we're shutting down, display a notice to the user

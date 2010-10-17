@@ -214,9 +214,6 @@ public:
 
    TNL_DECLARE_RPC(c2sSetServerAlertVolume, (S8 vol));
 
-   TNL_DECLARE_RPC(s2cSetAuthenticated, (Vector<U8> id));
-
-
    static GameConnection *getClientList();
    static S32 getClientCount();
    static bool onlyClientIs(GameConnection *client);

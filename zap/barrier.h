@@ -48,7 +48,7 @@ public:
 
    F32 mWidth;
    static const S32 MIN_BARRIER_WIDTH = 1;
-   static const S32 MAX_BARRIER_WIDTH = 1000;      // Geowar has walls at least 350 units wide, so going lower will break at least one level
+   static const S32 MAX_BARRIER_WIDTH = 2500;      // Geowar has walls at least 350 units wide, so going lower will break at least one level
 
    static const S32 BarrierWidth = 50; ///< The default width of the barrier in game units
 
