@@ -846,12 +846,14 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
       if(local)   // We're a local client, running in the same process as the server... connect to that server
       {
+         // Stuff on client side, so interface will offer the correct options
          theConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
          theConnection->setIsAdmin(true);          // Local connection is always admin
          theConnection->setIsLevelChanger(true);   // Local connection can always change levels
 
          GameConnection *gc = dynamic_cast<GameConnection *>(theConnection->getRemoteConnectionObject());
 
+         // Stuff on server side
          if(gc)                              
          {
             gc->setIsAdmin(true);            // Set isAdmin on server
@@ -860,6 +862,8 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->s2cSetIsAdmin(true);                // Set isAdmin on the client
             gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
+
+            gc->setAuthenticated(gPlayerAuthenticated);
          }
       }
       else        // Connect to a remote server, but not via the master server

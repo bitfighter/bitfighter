@@ -992,7 +992,7 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
    if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
-      masterConn->requestAuthentication(mClientName, mClientId);  // Fire off an authentication request
+      masterConn->requestAuthentication(mClientName, mClientId);              // Ask master if client name/id match and are authenticated
 
    return true;
 }
