@@ -102,7 +102,7 @@ public:
 
    void requestAuthentication(StringTableEntry mClientName, Nonce mClientId);
 
-   TNL_DECLARE_RPC_OVERRIDE(m2sSetAuthenticated, (Vector<U8> id, RangedU32<0,AuthenticationStatusCount> status));
+   TNL_DECLARE_RPC_OVERRIDE(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
 
    void writeConnectRequest(BitStream *bstream);
    void onConnectionEstablished();

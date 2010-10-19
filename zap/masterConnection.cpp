@@ -251,6 +251,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetMOTD, (StringPtr master
 }
 
 
+// The master server has looked at our name and password, and determined if we're in the database properly.  Here's it's reply:
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated, 
                                     (RangedU32<0, AuthenticationStatusCount> authStatus, StringPtr correctedName))
 {
@@ -260,12 +261,16 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
       gPlayerAuthenticated = true;
    }
    else 
-      gPlayerAuthenticated = false;
+      gPlayerAuthenticated = false;       
+
+   if(gClientGame->getConnectionToServer())
+      gClientGame->getConnectionToServer()->c2sSetAuthenticated();
 }
 
 
 // Now we know that player with specified id has an approved name
-TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, RangedU32<0,AuthenticationStatusCount> status))
+TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
+         RangedU32<0,AuthenticationStatusCount> status))
 {
    Nonce clientId(id);     // Reconstitute our id into a nonce
 
@@ -273,11 +278,19 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
       if(*walk->getClientId() == clientId)
       {
          if(status == AuthenticationStatusAuthenticatedName)
+         {
+            walk->setClientName(name);
             walk->setAuthenticated(true);
+         }
          else if(status == AuthenticationStatusUnauthenticatedName)
-            walk->setAuthenticated(false);
-
-         // other possibility: AuthenticationStatusTryAgainLater
+         {  // braces needed
+            if(walk->getAuthenticationCounter() > 1)     // Client gets two bites at the apple, to cover rare race condition
+               walk->setAuthenticated(false);
+            else
+               walk->resetAuthenticationTimer();
+         }
+         else if(status == AuthenticationStatusTryAgainLater)
+            walk->resetAuthenticationTimer();
 
          break;
       }
@@ -432,7 +445,7 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
 
 void MasterServerConnection::requestAuthentication(StringTableEntry clientName, Nonce clientId)
 {
-   s2mRequestAuthentication(clientName, clientId.toVector());
+   s2mRequestAuthentication(clientId.toVector(), clientName);
 }
 
 };

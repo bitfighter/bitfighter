@@ -805,7 +805,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       stream->writeFlag(getGame()->getCurrentTime() - getCreationTime() < 300);  // If true, ship will appear to spawn on client
-      stream->writeStringTableEntry(mPlayerName);
       stream->write(mass);
       stream->write(mTeam);
 
@@ -825,7 +824,11 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       stream->writeFlag(false);
    }  // End initial update
 
-
+   if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
+   {
+      stream->writeStringTableEntry(mPlayerName);
+      stream->writeFlag(mIsAuthenticated);
+   }
 
 //if(isRobot())
 //{
@@ -841,8 +844,6 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 //   }
 //}
 
-   stream->writeFlag(mIsAuthenticated);   // Authentication status --> always send, as that's cheaper than sending a flag indicating whether
-                                          // we'll be sending this bit
 
    stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits
                                                                // are set (as happens when a ship comes into scope).  Therefore, we'll force
@@ -910,8 +911,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       shipwarped = true;
       playSpawnEffect = stream->readFlag();
 
-      stream->readStringTableEntry(&mPlayerName);
-
       stream->read(&mass);
       stream->read(&mTeam);
 
@@ -924,6 +923,14 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       }
 
    }  // initial update
+
+
+   if(stream->readFlag())     // Player authentication status changed
+   {
+      stream->readStringTableEntry(&mPlayerName);
+      string name = mPlayerName.getString();    // TODO: Del
+      mIsAuthenticated = stream->readFlag();
+   }
 
 
 //if(isRobot())
@@ -951,7 +958,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 //
 //}
 
-   mIsAuthenticated = stream->readFlag();    // Authentication status -- always sent because it's cheaper
 
    if(stream->readFlag())        // Respawn <--- will only occur on robots, will always be false with ships
    {

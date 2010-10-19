@@ -140,7 +140,6 @@ public:
       PlayerSensorHorizVisDistance = 1060,   // How far player can see with sensor activated horizontally...
       PlayerSensorVertVisDistance = 795,     // ...and vertically
 
-      MASTER_SERVER_FAILURE_RETRY = 10000,   // 10 secs
       PLAYER_COUNT_UNAVAILABLE = -1,
    };
 

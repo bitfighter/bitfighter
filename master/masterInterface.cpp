@@ -179,11 +179,11 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (RangedU32<0, Auth
                                                                (authStatus, correctedName),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
 
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, (StringTableEntry name, Vector<U8> id), (name, id),
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name), (id, name),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirClientToServer, 5) {}
 
-TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, (Vector<U8> id, 
-                              RangedU32<0,AuthenticationStatusCount> status), (id, status),
+TNL_IMPLEMENT_RPC(MasterServerInterface, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
+                              RangedU32<0,AuthenticationStatusCount> status ), (id, name, status ),
                   NetClassGroupMasterMask, RPCGuaranteed, RPCDirServerToClient, 5) {}
 
 

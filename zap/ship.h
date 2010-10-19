@@ -167,6 +167,7 @@ public:
       LoadoutMask = BIT(7),
       RespawnMask = BIT(8),         // For when robots respawn
       TeleportMask = BIT(9),        // Ship has just teleported
+      AuthenticationMask = BIT(10), // Player authentication status changed
    };
 
    Timer mFireTimer;
@@ -178,7 +179,8 @@ public:
    Point mImpulseVector;
 
    StringTableEntry getName() { return mPlayerName; }
-   void setIsAuthenticated(bool isAuthenticated) { mIsAuthenticated = isAuthenticated; }
+   void setIsAuthenticated(bool isAuthenticated, StringTableEntry name) { mIsAuthenticated = isAuthenticated; mPlayerName = name;
+                           setMaskBits(AuthenticationMask); }
 
    SFXHandle mModuleSound[ModuleCount];
 

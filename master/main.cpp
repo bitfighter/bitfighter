@@ -779,7 +779,7 @@ public:
 
 
    // Game server wants to know if user name has been verified
-   TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (StringTableEntry name, Vector<U8> id))
+   TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
    {
       Nonce clientId(id);     // Reconstitute our id
 
@@ -788,7 +788,7 @@ public:
          {
             AuthenticationStatus status;
 
-            if(name == walk->mPlayerOrServerName)
+            if(!stricmp(name.getString(), walk->mPlayerOrServerName.getString()))      // Need case insensitive comparison here
                status = AuthenticationStatusAuthenticatedName;
 
             // If server just restarted, clients will need to reauthenticate, and that may take some time.
@@ -798,7 +798,7 @@ public:
             else
                status = AuthenticationStatusUnauthenticatedName;
 
-            m2sSetAuthenticated(id, status);
+            m2sSetAuthenticated(id, walk->mPlayerOrServerName, status);
             break;
          }
    }

@@ -193,8 +193,8 @@ public:
                                              RangedU32<0,MAX_PLAYERS> players, S16 time) );
 
 
-   TNL_DECLARE_RPC(s2mRequestAuthentication, (StringTableEntry name, Vector<U8> id));
-   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, RangedU32<0,AuthenticationStatusCount> status));
+   TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
+   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
 };
 
 

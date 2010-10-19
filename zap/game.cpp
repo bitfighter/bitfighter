@@ -141,7 +141,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
           mConnectionToMaster = new MasterServerConnection(isServer(), 0);
           mConnectionToMaster->connect(mNetInterface, gMasterAddress);
 
-         mNextMasterTryTime = MASTER_SERVER_FAILURE_RETRY;     // 10 secs, just in case this attempt fails
+         mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY;     // 10 secs, just in case this attempt fails
       }
       else if(!mReadyToConnectToMaster)
          mNextMasterTryTime = 0;
@@ -845,7 +845,10 @@ void ServerGame::idle(U32 timeDelta)
       return;
 
    for(GameConnection *walk = GameConnection::getClientList(); walk ; walk = walk->getNextClient())
+   {
       walk->addToTimeCredit(timeDelta);
+      walk->updateAuthenticationTimer(timeDelta);
+   }
 
    // Compute new world extents -- these might change if a ship flies far away, for example...
    // In practice, we could probably just set it and forget it when we load a level.

@@ -86,6 +86,8 @@ private:
    bool mClientClaimsToBeVerified;
    bool mClientNeedsToBeVerified;
    bool mIsVerified;          // True if the connection has a verified account confirmed by the master
+   Timer mAuthenticationTimer;
+   S32 mAuthenticationCounter;
 
    
    StringTableEntry mServerName;
@@ -96,6 +98,8 @@ private:
 
 public:
    Vector<LevelInfo> mLevelInfos;
+
+   static const S32 MASTER_SERVER_FAILURE_RETRY = 10000;   // 10 secs
 
    enum MessageColors
    {
@@ -133,6 +137,8 @@ public:
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
 
    void setClientNameAndId(std::string name, Nonce id) { mClientName = name == "" ? "Chump" : name.c_str(); mClientId = id; }
+
+   void setClientName(StringTableEntry name) { mClientName = name; }
    void setServerName(StringTableEntry name) { mServerName = name; }
 
    std::string getServerName() { return mServerName.getString(); }
@@ -178,6 +184,8 @@ public:
    TNL_DECLARE_RPC(c2sAdminPassword, (StringPtr pass));
    TNL_DECLARE_RPC(c2sLevelChangePassword, (StringPtr pass));
 
+   TNL_DECLARE_RPC(c2sSetAuthenticated, ());      // Tell server that the client is (or claims to be) authenticated
+
    TNL_DECLARE_RPC(c2sSetParam, (StringPtr param, RangedU32<0, ParamTypeCount> type));
 
 
@@ -221,7 +229,11 @@ public:
    Nonce *getClientId() { return &mClientId; }
 
    void setAuthenticated(bool isVerified);    // Runs on server only, after receiving a message from the master, or on local connection
+   void resetAuthenticationTimer() { mAuthenticationTimer.reset(MASTER_SERVER_FAILURE_RETRY + 1000); mAuthenticationCounter++;}
+   S32 getAuthenticationCounter() { return mAuthenticationCounter; }
    bool isAuthenticated() { return mIsVerified; }
+   void requestAuthenticationVerificationFromMaster();
+   void updateAuthenticationTimer(U32 timeDelta);
 
    GameConnection *getNextClient();
 

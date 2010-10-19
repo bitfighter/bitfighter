@@ -77,6 +77,7 @@ GameConnection::GameConnection()
 
    mClientClaimsToBeVerified = false;     // Does client report that they are verified
    mClientNeedsToBeVerified = false;      // If so, do we still need to verify that claim?
+   mAuthenticationCounter = 0;            // Counts number of retries
    mIsVerified = false;                   // Final conclusion... client is or is not verified
 }
 
@@ -149,14 +150,7 @@ void GameConnection::setAuthenticated(bool isAuthenticated)
 
       Ship *ship = dynamic_cast<Ship *>(getControlObject());
       if(ship)
-         ship->setIsAuthenticated(isAuthenticated);
-
-      //if(isAuthenticated)
-      //{
-      //   for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-      //      if(*walk->getClientId() != mClientId)
-      //         walk->s2cSetAuthenticated(mClientId.toVector());
-      //}
+         ship->setIsAuthenticated(isAuthenticated, mClientName);
    }
 }
 
@@ -272,6 +266,17 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          walk->s2cDisplayMessageE(ColorAqua, SFXNone, msg, e);
    }
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sSetAuthenticated, (), (), 
+                  NetClassGroupGameMask, RPCGuaranteed, RPCDirClientToServer, 2)
+{
+   mIsVerified = false; 
+   mClientNeedsToBeVerified = true; 
+   mClientClaimsToBeVerified = true;
+
+   requestAuthenticationVerificationFromMaster();
 }
 
 
@@ -987,14 +992,27 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    mClientName = name;
 
    mClientId.read(stream);
-   mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
    mIsVerified = false;
+   mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
 
+   requestAuthenticationVerificationFromMaster();
+   return true;
+}
+
+
+void GameConnection::updateAuthenticationTimer(U32 timeDelta)
+{
+   if(mAuthenticationTimer.update(timeDelta))
+      requestAuthenticationVerificationFromMaster();
+}
+
+
+void GameConnection::requestAuthenticationVerificationFromMaster()
+{
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+
    if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
       masterConn->requestAuthentication(mClientName, mClientId);              // Ask master if client name/id match and are authenticated
-
-   return true;
 }
 
 
