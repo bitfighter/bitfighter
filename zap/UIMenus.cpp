@@ -797,9 +797,9 @@ static void setControlsCallback(U32 val)
    gIniSettings.controlsRelative = (val == 1);
 }
 
-static void setFullscreenCallback(U32 val)
+static void setFullscreenCallback(U32 mode)
 {
-   gIniSettings.fullscreen = (val == 1);
+   gIniSettings.displayMode = (DisplayMode)mode;
    actualizeScreenMode();
 }
 
@@ -829,8 +829,9 @@ MenuItem *getWindowModeMenuItem()
 {
    Vector<string> opts;   
    opts.push_back("WINDOWED");
+   opts.push_back("FULLSCREEN STRETCHED");
    opts.push_back("FULLSCREEN");
-   return new ToggleMenuItem("GAME MODE:", opts, gIniSettings.fullscreen ? 1 : 0, true, 
+   return new ToggleMenuItem("DISPLAY MODE:", opts, (U32)gIniSettings.displayMode, true, 
                               setFullscreenCallback, "Set the game mode to windowed or fullscreen",    KEY_G);
 }
 
@@ -886,9 +887,11 @@ void OptionsMenuUserInterface::setupMenus()
 }
 
 
-void OptionsMenuUserInterface::toggleFullscreen()
+void OptionsMenuUserInterface::toggleDisplayMode()
 {
-   gIniSettings.fullscreen = !gIniSettings.fullscreen;
+   DisplayMode mode = DisplayMode((U32)gIniSettings.displayMode + 1);
+   gIniSettings.displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
+
    actualizeScreenMode();
 }
 

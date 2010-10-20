@@ -152,7 +152,7 @@ public:
    void onEscape();
    void setupMenus();
    void onActivate();
-   void toggleFullscreen();
+   void toggleDisplayMode();
 };
 
 extern OptionsMenuUserInterface gOptionsMenuUserInterface;

@@ -541,12 +541,36 @@ static void writeDefaultQuickChatMessages()
 
 
 // Convert a string value to our sfxSets enum
-inline sfxSets stringToSFXSet(string sfxSet)
+static sfxSets stringToSFXSet(string sfxSet)
 {
    if(lcase(sfxSet) == "classic")
       return sfxClassicSet;
    else
       return sfxModernSet;
+}
+
+
+// Convert a string value to our sfxSets enum
+static DisplayMode stringToDisplayMode(string mode)
+{
+   if(lcase(mode) == "fullscreen-stretch")
+      return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   else if(lcase(mode) == "fullscreen")
+      return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+   else 
+      return DISPLAY_MODE_WINDOWED;
+}
+
+
+// Convert a string value to our sfxSets enum
+static string displayModeToString(DisplayMode mode)
+{
+   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
+      return "Fullscreen-Stretch";
+   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+      return "Fullscreen";
+   else
+      return "Window";
 }
 
 
@@ -588,7 +612,8 @@ void loadSettingsFromINI()
    else if(gIniSettings.alertsVolLevel < 0)
       gIniSettings.alertsVolLevel = 0;
 
-   gIniSettings.fullscreen = (lcase(gINI.GetValue("Settings", "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"))) == "fullscreen");
+   
+   gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
    gIniSettings.controlsRelative = (lcase(gINI.GetValue("Settings", "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
    gIniSettings.echoVoice = (lcase(gINI.GetValue("Settings", "VoiceEcho",(gIniSettings.echoVoice ? "Yes" : "No"))) == "yes");
    gIniSettings.showWeaponIndicators = (lcase(gINI.GetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"))) == "yes");
@@ -647,29 +672,6 @@ void loadSettingsFromINI()
 
 
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
-
-   // Load the ReservedNames section...
-   if(gINI.FindKey("ReservedNames") != gINI.noID)
-   {
-      S32 numNames = gINI.NumValues("ReservedNames");
-
-      for(S32 i = 0; i < numNames; i++)
-      {
-         string candidate = gINI.ValueName("ReservedNames", i);
-
-         if(lcase(candidate.substr(0,4)) == "name")
-         {
-            string name = gINI.GetValue("ReservedNames", candidate, "");
-            string pw = gINI.GetValue("ReservedNames", "Password"+candidate.substr(4, string::npos), "");
-
-            if(name != "" && pw != "")
-            {
-               gIniSettings.reservedNames.push_back(name);
-               gIniSettings.reservedPWs.push_back(pw);
-            }
-         }
-      }
-   }
 
    loadKeyBindings();
 
@@ -899,6 +901,19 @@ static void writeSounds()
 }
 
 
+void saveWindowMode()
+{
+   gINI.SetValue("Settings",  "WindowMode", displayModeToString(gIniSettings.displayMode), true);
+}
+
+
+void saveWindowPosition(S32 x, S32 y)
+{
+   gINI.SetValueI("Settings", "WindowXPos", x, true);
+   gINI.SetValueI("Settings", "WindowYPos", y, true);
+}
+
+
 static void writeSettings()
 {
    gINI.AddKeyName("Settings");
@@ -907,7 +922,7 @@ static void writeSettings()
    {
       gINI.KeyComment("Settings", "----------------");
       gINI.KeyComment("Settings", " Settings entries contain a number of different options");
-      gINI.KeyComment("Settings", " WindowMode - Fullscreen or Window");
+      gINI.KeyComment("Settings", " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
       gINI.KeyComment("Settings", " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
       gINI.KeyComment("Settings", " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
       gINI.KeyComment("Settings", " VoiceEcho - Play echo when recording a voice message? Yes/No");
@@ -926,9 +941,9 @@ static void writeSettings()
       gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
       gINI.KeyComment("Settings", "----------------");
    }
-   gINI.SetValue("Settings",  "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"), true);
-   gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
-   gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+   saveWindowMode();
+   saveWindowPosition(gIniSettings.winXPos, gIniSettings.winYPos);
+
    gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
    gINI.SetValue("Settings",  "VoiceEcho", (gIniSettings.echoVoice ? "Yes" : "No"), true);
    gINI.SetValue("Settings",  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"), true);

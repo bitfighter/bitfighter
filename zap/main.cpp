@@ -258,23 +258,13 @@ void GLUT_CB_reshape(int nw, int nh)
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeight), (newWidth, newHeight))
 {
    // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
-   if(gIniSettings.fullscreen)
+   if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      // The following block will attempt to keep graphics from being stretched on a monitor with non-standard proportions
-      // It works, but the effect is worse than the stretching, in my opinion.
-      //F32 fact;
-      //if((newWidth - UserInterface::canvasWidth) > (newHeight - UserInterface::canvasHeight))
-      //   fact = max((F32) newHeight / (F32) UserInterface::canvasHeight, 0.15f);
-      //else
-      //   fact = max((F32) newWidth / (F32) UserInterface::canvasWidth, 0.15f);
-
-      //newHeight = UserInterface::canvasHeight * fact;
-      //newWidth = UserInterface::canvasWidth * fact;
-
       UserInterface::windowWidth = newWidth;
       UserInterface::windowHeight = newHeight;
       return;
    }
+
 
    // Constrain window to correct proportions...
    if((newWidth - UserInterface::canvasWidth) > (newHeight - UserInterface::canvasHeight))
@@ -370,7 +360,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, keydown, (U8 key), (key))
    // First check for some "universal" keys.  If keydown isn't one of those, we'll pass the key onto the keyDown handler
    // Check for ALT-ENTER --> toggles window mode/full screen
    if(key == '\r' && (glutGetModifiers() & GLUT_ACTIVE_ALT))
-      gOptionsMenuUserInterface.toggleFullscreen();
+      gOptionsMenuUserInterface.toggleDisplayMode();
    else if(key == 17)      // GLUT reports Ctrl-Q as 17
       gScreenshooter.phase = 1;
    else
@@ -894,6 +884,9 @@ void endGame()
 }
 
 
+extern void saveWindowMode();
+extern void saveWindowPosition(S32 x, S32 y);
+
 // Run when we're quitting the game, returning to the OS
 void onExit()
 {
@@ -905,12 +898,10 @@ void onExit()
    ShutdownJoystick();
 
    // Save settings to capture window position
-   gINI.SetValue("Settings", "WindowMode", (gIniSettings.fullscreen ? "Fullscreen" : "Window"), true);
-   if(!gIniSettings.fullscreen)
-   {
-      gINI.SetValueI("Settings", "WindowXPos", glutGet(GLUT_WINDOW_X), true);
-      gINI.SetValueI("Settings", "WindowYPos", glutGet(GLUT_WINDOW_Y), true);
-   }
+   saveWindowMode();
+
+   if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
+      saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
 
    gINI.WriteFile();
 
@@ -1215,14 +1206,21 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       else if(!stricmp(argv[i], "-window"))     // no additional args
       {
          i--;  // compentsate for +=2 in for loop with single param
-         gCmdLineSettings.window = true;
+         gCmdLineSettings.displayMode = DISPLAY_MODE_WINDOWED;
       }
       // Start in fullscreen mode
       else if(!stricmp(argv[i], "-fullscreen")) // no additional args
       {
          i--;
-         gCmdLineSettings.fullscreen = true;
+         gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
       }
+      // Start in fullscreen-stretch mode
+      else if(!stricmp(argv[i], "-fullscreen-stretch")) // no additional args
+      {
+         i--;
+         gCmdLineSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+      }
+
       // Specify position of window
       else if(!stricmp(argv[i], "-winpos"))     // 2 additional args required
       {
@@ -1467,10 +1465,8 @@ void processStartupParams()
    gMaxPlayers = (U32) maxplay;
 
 
-   if(gCmdLineSettings.fullscreen)
-      gIniSettings.fullscreen = true;    // Simply clobber the gINISettings copy
-   else if(gCmdLineSettings.window)
-      gIniSettings.fullscreen = false;
+   if(gCmdLineSettings.displayMode != DISPLAY_MODE_UNKNOWN)
+      gIniSettings.displayMode = gCmdLineSettings.displayMode;    // Simply clobber the gINISettings copy
 
    if(gCmdLineSettings.xpos != -9999)
       gIniSettings.winXPos = gCmdLineSettings.xpos;
@@ -1570,22 +1566,63 @@ void setupLogging()
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
 void actualizeScreenMode(bool first = false)
-{
-   if(gIniSettings.fullscreen)      // Entering fullscreen mode
+{      
+   if(gIniSettings.oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
    {
-      if(!first)
-      {
-         gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
-         gIniSettings.winYPos = glutGet(GLUT_WINDOW_Y);
+      gIniSettings.winXPos = glutGet(GLUT_WINDOW_X);
+      gIniSettings.winYPos = glutGet(GLUT_WINDOW_Y);
 
-         gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
-         gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
-      }
+      gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
+      gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
+   }
+   gIniSettings.oldDisplayMode = gIniSettings.displayMode;
+
+   if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
+   {
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+	   glLoadIdentity();
+      glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+	   glLoadIdentity();
+
+      glDisable(GL_SCISSOR_TEST);
 
       glutFullScreen();
    }
+   else if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
+   {
+      S32 w = (gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight - gPhysicalScreenWidth) / 2;
+      //S32 h = (gPhysicalScreenHeight * gScreenWidth / gPhysicalScreenWidth - gPhysicalScreenHeight) / 2;
+
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+	   glLoadIdentity();
+
+      glOrtho(w, gPhysicalScreenWidth * gScreenHeight/gPhysicalScreenHeight + w, gScreenHeight, 0, 0, 1);    
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+	   glLoadIdentity();
+
+      glScissor(-w, 0, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight, gPhysicalScreenHeight);
+      glEnable(GL_SCISSOR_TEST);
+
+      glutFullScreen();
+   }
+
    else           // Leaving fullscreen, entering windowed mode
    {
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+	   glLoadIdentity();
+      glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
+      glMatrixMode(GL_MODELVIEW);
+      glPushMatrix();
+	   glLoadIdentity();
+
+      glDisable(GL_SCISSOR_TEST);
+
       glutReshapeWindow((int) (gScreenWidth * gIniSettings.winSizeFact), (int) (gScreenHeight * gIniSettings.winSizeFact) );
       glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
    }
@@ -1697,10 +1734,19 @@ int main(int argc, char **argv)
       glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor -- we'll turn this back on in the editor, or when the user tries to use mouse to work menus
 
       glMatrixMode(GL_PROJECTION);
-      glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);
+      //glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   // Original line, good for windowed mode
+
+      S32 w = (gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight - gPhysicalScreenWidth) / 2;
+      //S32 h = (gPhysicalScreenHeight * gScreenWidth / gPhysicalScreenWidth - gPhysicalScreenHeight) / 2;
+
+      glOrtho(w, gPhysicalScreenWidth * gScreenHeight/gPhysicalScreenHeight + w, gScreenHeight, 0, 0, 1);    
       glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
-      glTranslatef(gScreenWidth/2, gScreenHeight/2, 0);
+
+      glScissor(-w, 0, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight, gPhysicalScreenHeight);
+      glEnable(GL_SCISSOR_TEST);
+
+      glTranslatef(gScreenWidth/2, gScreenHeight/2, 0);     // Put 0,0 at the center of the screen
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glLineWidth(gDefaultLineWidth);
 

@@ -18,7 +18,8 @@ OBJECTS_MASTER=\
    masterInterface.o\
    config.o\
    authenticator.o\
-   phpbbhash.o
+   phpbbhash.o \
+   database.o
 
 # If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
 # To disable PHPBB3 integration, remove VERIFY_PHPBB3 flag

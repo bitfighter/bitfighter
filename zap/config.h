@@ -45,6 +45,19 @@ using namespace Zap;
 namespace Zap
 {
 
+enum sfxSets {
+   sfxClassicSet,
+   sfxModernSet
+};
+
+enum DisplayMode {
+   DISPLAY_MODE_WINDOWED,
+   DISPLAY_MODE_FULL_SCREEN_STRETCHED,
+   DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED,
+   DISPLAY_MODE_UNKNOWN
+};
+
+
 struct ConfigDirectories {
    string levelDir;
    string robotDir;
@@ -93,8 +106,8 @@ struct CmdLineSettings
 
    S32 maxplayers;
 
-   bool window;            // Window param supplied
-   bool fullscreen;        // Fullscreen param supplied
+   //bool window;                // Window param supplied
+   DisplayMode displayMode;    // Fullscreen param supplied
 
    S32 winWidth;
    S32 xpos;
@@ -111,8 +124,7 @@ struct CmdLineSettings
       loss = 0;
       lag = 0;
       maxplayers = -1;
-      window = false;
-      fullscreen = false;
+      displayMode = DISPLAY_MODE_UNKNOWN;
       winWidth = -1;
       xpos = -9999;
       ypos = -9999;
@@ -120,16 +132,11 @@ struct CmdLineSettings
 };
 
 
-enum sfxSets {
-   sfxClassicSet,
-   sfxModernSet
-};
-
-
 struct IniSettings      // With defaults specified
 {
    bool controlsRelative;
-   bool fullscreen;
+   DisplayMode displayMode;
+   DisplayMode oldDisplayMode;
    U32 joystickType;
    bool echoVoice;
 
@@ -195,7 +202,6 @@ struct IniSettings      // With defaults specified
    bool luaBotMessage;        
    bool serverFilter;  
 
-
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;
@@ -206,7 +212,8 @@ struct IniSettings      // With defaults specified
    void init()
    {
       controlsRelative = false;          // Relative controls is lame!
-      fullscreen = true;
+      displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+      oldDisplayMode = DISPLAY_MODE_UNKNOWN;
       joystickType = NoController;
       echoVoice = false;
 

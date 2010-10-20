@@ -928,7 +928,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // Player authentication status changed
    {
       stream->readStringTableEntry(&mPlayerName);
-      string name = mPlayerName.getString();    // TODO: Del
       mIsAuthenticated = stream->readFlag();
    }
 
