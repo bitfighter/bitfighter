@@ -424,9 +424,9 @@ private:
                                               // for cycling through the various editable attributes
    WorldItem mNewItem;
    F32 mCurrentScale;
-   Point mCurrentOffset;
-   Point mMousePos;
-   Point mMouseDownPos;
+   Point mCurrentOffset;         // Coords of UR corner of screen
+   Point mMousePos;              // Where the mouse is at the moment
+   Point mMouseDownPos;          // Where the mouse was pressed for a drag operation
 
    void renderGenericItem(Point pos, Color c, F32 alpha);
    void renderGrid();                                       // Draw background snap grid
@@ -482,6 +482,11 @@ private:
    void finishedDragging();
    bool showingNavZones();
 
+protected:
+   void onActivate();
+   void onReactivate();
+   void onDeactivate();
+
 public:
    ~EditorUserInterface();    // Destructor
    void setLevelFileName(string name);
@@ -529,9 +534,6 @@ public:
    void onMouseMoved(S32 x, S32 y);
    void onMouseDragged(S32 x, S32 y);
 
-   void onActivate();
-   void onReactivate();
-
    void populateDock();                         // Load up dock with game-specific items to drag and drop
 
    F32 mGridSize;    // Should be private
@@ -569,6 +571,9 @@ public:
    Point convertCanvasToLevelCoord(Point p) { return (p - mCurrentOffset) * (1 / mCurrentScale); }
    Point convertLevelToCanvasCoord(Point p, bool convert = true) { return convert ? p * mCurrentScale + mCurrentOffset : p; }
 
+   void onPreDisplayModeChange();   // Called when we shift between windowed and fullscreen mode, before change is made
+   void onDisplayModeChange();      // Called when we shift between windowed and fullscreen mode, after change is made
+
    // Snapping related functions:
    Point snapPoint(Point const &p, bool snapWhileOnDock = false);
    Point snapPointToLevelGrid(Point const &p);
@@ -594,19 +599,19 @@ public:
 
 class EditorMenuUserInterface : public MenuUserInterface
 {
-public:
-   EditorMenuUserInterface();    // Constructor
-
 private:
    typedef MenuUserInterface Parent;
-
-public:
-   void render();
-   void onActivate();
    void setupMenus();
    void processSelection(U32 index);
    void processShiftSelection(U32 index);
    void onEscape();
+
+protected:
+   void onActivate();
+
+public:
+   EditorMenuUserInterface();    // Constructor
+   void render();
 };
 
 extern EditorUserInterface gEditorUserInterface;

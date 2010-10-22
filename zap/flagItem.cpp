@@ -254,10 +254,11 @@ void FlagItem::flagDropped()
    if(!gt || !mMount.isValid())
       return;
 
-   gt->itemDropped(mMount, this);
-   
    if(!isGhost())    // Server only
+   {
+      gt->itemDropped(mMount, this);
       dismount();
+   }
 }
 
 

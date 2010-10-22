@@ -847,6 +847,8 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
+extern void actualizeScreenMode(bool);
+
 void EditorUserInterface::onActivate()
 {
    if(gConfigDirs.levelDir == "")      // Never did resolve a leveldir... no editing for you!
@@ -864,7 +866,6 @@ void EditorUserInterface::onActivate()
 
       return;
    }
-
 
    // Check if we have a level name:
    if(getLevelFileName() == "")         // We need to take a detour to get a level name
@@ -908,6 +909,14 @@ void EditorUserInterface::onActivate()
    mSpecialAttribute = NoAttribute;
 
    mSaveMsgTimer = 0;
+
+   actualizeScreenMode(true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+}
+
+
+void EditorUserInterface::onDeactivate()
+{
+   actualizeScreenMode(true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
 }
 
 
@@ -933,8 +942,26 @@ void EditorUserInterface::onReactivate()
 
    if(mCurrentTeam >= mTeams.size())
       mCurrentTeam = 0;
+   
+   actualizeScreenMode(true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+}
 
-   populateDock();           // If game type has changed, items on dock will change
+
+static Point sCenter;
+
+// Called when we shift between windowed and fullscreen mode, before change is made
+void EditorUserInterface::onPreDisplayModeChange()
+{
+   sCenter.set(mCurrentOffset.x - canvasWidth / 2, mCurrentOffset.y - canvasHeight / 2);
+}
+
+// Called when we shift between windowed and fullscreen mode, after change is made
+void EditorUserInterface::onDisplayModeChange()
+{
+   // Recenter canvas -- note that canvasWidth may change during displayMode change
+   mCurrentOffset.set(sCenter.x + canvasWidth / 2, sCenter.y + canvasHeight / 2);
+
+   populateDock();               // If game type has changed, items on dock will change
 }
 
 
@@ -2307,7 +2334,7 @@ void EditorUserInterface::renderGenericItem(Point pos, Color c, F32 alpha)
 void EditorUserInterface::setTranslationAndScale(const Point &pos)
 {
    glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
-   glTranslatef(-pos.x + pos.x * mGridSize / mCurrentScale, -pos.y + pos.y * mGridSize / mCurrentScale, 0);
+   glTranslatef(pos.x * mGridSize / mCurrentScale - pos.x, pos.y * mGridSize / mCurrentScale - pos.y, 0);
 }
 
 
@@ -3294,7 +3321,7 @@ void EditorUserInterface::centerView()
 
       // If we have only one point object in our level, the following will correct
       // for any display weirdness.
-      if(minx == maxx && miny == maxy)
+      if(minx == maxx && miny == maxy)    // i.e. a single point item
       {
          mCurrentScale = MIN_SCALE;
          mCurrentOffset.set(canvasWidth/2 - mCurrentScale * minx, canvasHeight/2 - mCurrentScale * miny);
@@ -4071,6 +4098,7 @@ void EditorUserInterface::idle(U32 timeDelta)
      mCurrentScale = MIN_SCALE;
    else if(mCurrentScale < MAX_SCALE)
       mCurrentScale = MAX_SCALE;
+
    Point newMousePoint = convertLevelToCanvasCoord(mouseLevelPoint);
    mCurrentOffset += mMousePos - newMousePoint;
 
@@ -4317,6 +4345,7 @@ EditorMenuUserInterface::EditorMenuUserInterface()
    setMenuID(EditorMenuUI);
    mMenuTitle = "EDITOR MENU";
 }
+
 
 void EditorMenuUserInterface::onActivate()
 {
@@ -5391,7 +5420,8 @@ void WallSegment::renderOutline(F32 alpha)
 void WallSegment::renderFill(bool renderLight)
 {
    // We'll use the editor color most of the time; only in preview mode in the editor do we use the game color
-   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && gEditorUserInterface.isShowingReferenceShip();
+   bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && 
+                       gEditorUserInterface.isShowingReferenceShip();
 
    glColor((useGameColor ? GAME_WALL_FILL_COLOR : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));
    

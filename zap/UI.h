@@ -50,8 +50,6 @@ static const float gDefaultLineWidth = 2.0f;
 const S32 gScreenHeight = 600;
 const S32 gScreenWidth = 800;
 
-const S32 gPhysicalScreenWidth = 1366;
-const S32 gPhysicalScreenHeight = 768;
 
 const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
 const U32 MAX_FILE_NAME_LEN = 32;     // Completely arbitrary
@@ -128,7 +126,10 @@ public:
    virtual void render();
    virtual void idle(U32 timeDelta);
    virtual void onActivate();
+   virtual void onDeactivate() { /* Do nothing */ }
    virtual void onReactivate();
+   virtual void onPreDisplayModeChange() { /* Do nothing */ }
+   virtual void onDisplayModeChange() { /* Do nothing */ }
 
    void activate(bool save = true);
    virtual void reactivate();

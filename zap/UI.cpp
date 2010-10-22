@@ -81,10 +81,16 @@ Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displaye
 
 void UserInterface::activate(bool save)
 {
-   if (current && save)       // Current is not really current any more... it's actually the previously active UI
-      prevUIs.push_back(current);
+   UserInterface *prev = current;
+
+   if(current && save)        // Current is not really current any more... it's actually the previously active UI
+       prevUIs.push_back(current);
 
    current = this;            // Now it is current
+
+   if(prev)
+      prev->onDeactivate();
+
    onActivate();              // Activate the now current current UI
 }
 
@@ -121,7 +127,7 @@ bool UserInterface::cameFrom(UIID menuID)
 
 // Set interface's name.  This name is used internally only for debugging
 // and to identify interfaces when searching for matches.  Each interface
-// should have a unique name.
+// should have a unique id.
 
 void UserInterface::setMenuID(UIID menuID)
 {
@@ -129,7 +135,7 @@ void UserInterface::setMenuID(UIID menuID)
 }
 
 
-// Retrieve interface's name
+// Retrieve interface's id
 UIID UserInterface::getMenuID()
 {
    return mInternalMenuID;

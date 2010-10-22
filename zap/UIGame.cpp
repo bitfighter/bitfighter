@@ -799,10 +799,10 @@ void GameUserInterface::dropItem()
 
    gt->c2sDropItem();
 
-   S32 count = ship->mMountedItems.size();
+   //S32 count = ship->mMountedItems.size();
 
-   for(S32 i = count - 1; i >= 0; i--)
-      ship->mMountedItems[i]->onItemDropped();
+   //for(S32 i = count - 1; i >= 0; i--)
+   //   ship->mMountedItems[i]->onItemDropped();
 }
 
 

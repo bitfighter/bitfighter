@@ -224,6 +224,9 @@ F32 gSlipFriction = 400;      // Friction, on a slip square
 
 char gJoystickName[gJoystickNameLength] = "";
 
+S32 gPhysicalScreenWidth;
+S32 gPhysicalScreenHeight;
+
 extern Point gMousePos;
 
 extern NameEntryUserInterface gNameEntryUserInterface;
@@ -1563,6 +1566,18 @@ void setupLogging()
 }
 
 
+static void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
+{
+   glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+   glOrtho(left, right, bottom, top, zNear, zFar);   
+
+   glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
 void actualizeScreenMode(bool first = false)
@@ -1575,35 +1590,39 @@ void actualizeScreenMode(bool first = false)
       gINI.SetValueI("Settings", "WindowXPos", gIniSettings.winXPos, true);
       gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
    }
-   gIniSettings.oldDisplayMode = gIniSettings.displayMode;
 
-   if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
+   UserInterface::current->onPreDisplayModeChange();
+
+   UserInterface::canvasHeight = gScreenHeight;
+   UserInterface::canvasWidth = gScreenWidth;
+
+   // When we're in the editor, let's take advantage of the entire screen unstretched
+   if(UserInterface::current->getMenuID() == EditorUI && 
+            (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
-      glMatrixMode(GL_PROJECTION);
-      glPushMatrix();
-	   glLoadIdentity();
-      glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
-	   glLoadIdentity();
+      F32 magFactor = 0.85;      // Smaller values give bigger magnification; makes small things easier to see on full screen
+      UserInterface::canvasHeight = gPhysicalScreenHeight * magFactor;
+      UserInterface::canvasWidth = gPhysicalScreenWidth * magFactor;
+
+      setOrtho(0, gPhysicalScreenWidth * magFactor, gPhysicalScreenHeight * magFactor, 0, 0, 1);
 
       glDisable(GL_SCISSOR_TEST);
-
+      glutFullScreen();
+   }
+   else if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
+   {
+      setOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
+      glDisable(GL_SCISSOR_TEST);
       glutFullScreen();
    }
    else if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
    {
+      glClear(GL_COLOR_BUFFER_BIT);
+
       S32 w = (gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight - gPhysicalScreenWidth) / 2;
       //S32 h = (gPhysicalScreenHeight * gScreenWidth / gPhysicalScreenWidth - gPhysicalScreenHeight) / 2;
 
-      glMatrixMode(GL_PROJECTION);
-      glPushMatrix();
-	   glLoadIdentity();
-
-      glOrtho(w, gPhysicalScreenWidth * gScreenHeight/gPhysicalScreenHeight + w, gScreenHeight, 0, 0, 1);    
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
-	   glLoadIdentity();
+      setOrtho(w, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight + w, gScreenHeight, 0, 0, 1);    
 
       glScissor(-w, 0, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight, gPhysicalScreenHeight);
       glEnable(GL_SCISSOR_TEST);
@@ -1611,21 +1630,17 @@ void actualizeScreenMode(bool first = false)
       glutFullScreen();
    }
 
-   else           // Leaving fullscreen, entering windowed mode
+   else        // DISPLAY_MODE_WINDOWED
    {
-      glMatrixMode(GL_PROJECTION);
-      glPushMatrix();
-	   glLoadIdentity();
-      glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
-      glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
-	   glLoadIdentity();
+      setOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
 
       glDisable(GL_SCISSOR_TEST);
 
       glutReshapeWindow((int) (gScreenWidth * gIniSettings.winSizeFact), (int) (gScreenHeight * gIniSettings.winSizeFact) );
       glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
    }
+
+   UserInterface::current->onDisplayModeChange();
 }
 
 
@@ -1707,6 +1722,8 @@ int main(int argc, char **argv)
       glutInitWindowSize(gScreenWidth, gScreenHeight);      // Does this actually do anything?  Seem to get same result, regardless of params!
       glutInit(&argc, argv);
 
+      gPhysicalScreenWidth = glutGet(GLUT_SCREEN_WIDTH);
+      gPhysicalScreenHeight = glutGet(GLUT_SCREEN_HEIGHT);
 
       // On OS X, glutInit changes the working directory to the app
       // bundle's resource directory.  We don't want that. (RDW)
@@ -1732,19 +1749,6 @@ int main(int argc, char **argv)
 
       glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling
       glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor -- we'll turn this back on in the editor, or when the user tries to use mouse to work menus
-
-      glMatrixMode(GL_PROJECTION);
-      //glOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   // Original line, good for windowed mode
-
-      S32 w = (gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight - gPhysicalScreenWidth) / 2;
-      //S32 h = (gPhysicalScreenHeight * gScreenWidth / gPhysicalScreenWidth - gPhysicalScreenHeight) / 2;
-
-      glOrtho(w, gPhysicalScreenWidth * gScreenHeight/gPhysicalScreenHeight + w, gScreenHeight, 0, 0, 1);    
-      glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-
-      glScissor(-w, 0, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight, gPhysicalScreenHeight);
-      glEnable(GL_SCISSOR_TEST);
 
       glTranslatef(gScreenWidth/2, gScreenHeight/2, 0);     // Put 0,0 at the center of the screen
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

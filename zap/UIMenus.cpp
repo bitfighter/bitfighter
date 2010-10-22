@@ -799,6 +799,8 @@ static void setControlsCallback(U32 val)
 
 static void setFullscreenCallback(U32 mode)
 {
+   gIniSettings.oldDisplayMode = gIniSettings.displayMode;     // Save existing setting
+
    gIniSettings.displayMode = (DisplayMode)mode;
    actualizeScreenMode();
 }
@@ -887,10 +889,36 @@ void OptionsMenuUserInterface::setupMenus()
 }
 
 
+static bool isFullScreen(DisplayMode displayMode)
+{
+   return displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+}
+
+
 void OptionsMenuUserInterface::toggleDisplayMode()
 {
-   DisplayMode mode = DisplayMode((U32)gIniSettings.displayMode + 1);
-   gIniSettings.displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
+   DisplayMode oldMode = gIniSettings.oldDisplayMode;
+
+   gIniSettings.oldDisplayMode = gIniSettings.displayMode;     // Save current setting
+   // When we're in the editor, and we toggle views, we'll skip one of the fullscreen modes, as they essentially do the same thing in that UI
+   if(UserInterface::current->getMenuID() == EditorUI)
+   {
+      if(isFullScreen(gIniSettings.displayMode))
+         gIniSettings.displayMode = DISPLAY_MODE_WINDOWED;
+
+      // If we know what the previous fullscreen mode was, use that
+      else if(isFullScreen(oldMode))
+         gIniSettings.displayMode = oldMode;
+
+      // Otherwise, pick some sort of full-screen mode...
+      else
+         gIniSettings.displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   }
+   else  // Not in the editor, just advance to the next mode
+   {
+      DisplayMode mode = DisplayMode((U32)gIniSettings.displayMode + 1);
+      gIniSettings.displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
+   }
 
    actualizeScreenMode();
 }
