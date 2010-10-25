@@ -476,7 +476,6 @@ private:
 
    void insertNewItem(GameItems itemType);                                                    // Insert a new object into the game
 
-   Vector<StringTableEntry> mgLevelList;
    bool mWasTesting;
 
    void finishedDragging();

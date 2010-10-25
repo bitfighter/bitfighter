@@ -52,8 +52,8 @@ public:
 class LevelListLoader
 {
 public:
-   static void buildLevelList();
-   static void removeSkippedLevels();
+   static Vector<std::string> buildLevelList();
+   static void removeSkippedLevels(Vector<std::string> &levelList);
 };
 
 

@@ -215,7 +215,7 @@ Address gConnectAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
       // Above is equivalent to ("IP:Any:28000")
 
-Vector<StringTableEntry> gLevelList;      // Levels we'll play when we're hosting
+//Vector<StringTableEntry> gLevelList;      // Levels we'll play when we're hosting
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
 // Lower = more slippery!  Not used at the moment...
@@ -559,8 +559,7 @@ void abortHosting_noLevels()
 // We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
 void seedRandomNumberGenerator(string name)
 {
-   time_t seconds;
-   seconds = time(NULL);
+   U32 seconds = Platform::getRealMilliseconds();
    const S32 timeByteCount = 4;
    const S32 totalByteCount = 16;
 
@@ -581,11 +580,18 @@ void seedRandomNumberGenerator(string name)
    Random::addEntropy(buf, totalByteCount);     // May be some uninitialized bytes at the end of the buffer, but that's ok
 }
 
+
+// Build a list of levels
+Vector<string> buildLevelList()
+{
+   return LevelListLoader::buildLevelList(); 
+}
+
+
 // Host a game (and maybe even play a bit, too!)
-void initHostGame(Address bindAddress, bool testMode)
+void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
 {
    gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
-
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);
@@ -597,15 +603,13 @@ void initHostGame(Address bindAddress, bool testMode)
       logprintf(LogConsumer::ServerFilter, "----------\nBitfighter server started [%s]", getTimeStamp().c_str());
       logprintf(LogConsumer::ServerFilter, "hostname=[%s], hostdescr=[%s]", gServerGame->getHostName(), gServerGame->getHostDescr());
 
-      LevelListLoader::buildLevelList();     // Populates gLevelList
-
-      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", gLevelList.size());
+      logprintf(LogConsumer::ServerFilter, "Loaded %d levels:", levelList.size());
    }
 
    // Parse all levels, make sure they are in some sense valid, and record some critical parameters
-   if(gLevelList.size())
+   if(levelList.size())
    {
-      gServerGame->buildLevelList(gLevelList);     // Take levels in gLevelList and create a set of empty levelInfo records
+      gServerGame->buildLevelList(levelList);     // Take levels in gLevelList and create a set of empty levelInfo records
       gServerGame->resetLevelLoadIndex();
       gHostMenuUserInterface.levelLoadDisplayDisplay = true;
    }
@@ -1168,7 +1172,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          // We'll overwrite our main level list directly, so if we're writing the INI for the first time,
          // we'll use the cmd line args to generate the INI Level keys, rather than the built-in defaults.
          for(S32 j = i+1; j < argc; j++)
-            gCmdLineSettings.specifiedLevels.push_back(StringTableEntry(argv[j]));
+            gCmdLineSettings.specifiedLevels.push_back(argv[j].getString());
 
          return;     // This param must be last, so no more args to process.  We can return.
 
@@ -1566,12 +1570,15 @@ void setupLogging()
 }
 
 
-static void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble zNear, GLdouble zFar)
+static void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
 {
    glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-   glOrtho(left, right, bottom, top, zNear, zFar);   
+   // The best understanding I can get for glOrtho is that these are the coordinates you want to appear at the four corners of the
+   // physical screen. If you want a "black border" down one side of the screen, you need to make left negative, so that 0 would 
+   // appear some distance in from the left edge of the physical screen.  The same applies to the other coordinates as well.
+   glOrtho(left, right, bottom, top, 0, 1);   
 
    glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -1580,7 +1587,7 @@ static void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble to
 
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
-void actualizeScreenMode(bool first = false)
+void actualizeScreenMode(bool changingInterfaces, bool first = false)
 {      
    if(gIniSettings.oldDisplayMode == DISPLAY_MODE_WINDOWED && !first)
    {
@@ -1591,7 +1598,10 @@ void actualizeScreenMode(bool first = false)
       gINI.SetValueI("Settings", "WindowYPos", gIniSettings.winYPos, true);
    }
 
-   UserInterface::current->onPreDisplayModeChange();
+   if(changingInterfaces)
+      UserInterface::prevUIs.last()->onPreDisplayModeChange();
+   else
+      UserInterface::current->onPreDisplayModeChange();
 
    UserInterface::canvasHeight = gScreenHeight;
    UserInterface::canvasWidth = gScreenWidth;
@@ -1604,14 +1614,14 @@ void actualizeScreenMode(bool first = false)
       UserInterface::canvasHeight = gPhysicalScreenHeight * magFactor;
       UserInterface::canvasWidth = gPhysicalScreenWidth * magFactor;
 
-      setOrtho(0, gPhysicalScreenWidth * magFactor, gPhysicalScreenHeight * magFactor, 0, 0, 1);
+      setOrtho(0, gPhysicalScreenWidth * magFactor, gPhysicalScreenHeight * magFactor, 0);
 
       glDisable(GL_SCISSOR_TEST);
       glutFullScreen();
    }
    else if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
    {
-      setOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
+      setOrtho(0, gScreenWidth, gScreenHeight, 0);   
       glDisable(GL_SCISSOR_TEST);
       glutFullScreen();
    }
@@ -1619,24 +1629,44 @@ void actualizeScreenMode(bool first = false)
    {
       glClear(GL_COLOR_BUFFER_BIT);
 
-      S32 w = (gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight - gPhysicalScreenWidth) / 2;
-      //S32 h = (gPhysicalScreenHeight * gScreenWidth / gPhysicalScreenWidth - gPhysicalScreenHeight) / 2;
+      // Figure out if the screen is constrained by height or width
+      if((F32)gPhysicalScreenWidth / (F32)gPhysicalScreenHeight >= (F32)gScreenWidth / (F32)gScreenHeight)         // Screen is landscape
+      {
+         // F32 drawAreaWidth = (F32)gScreenWidth * (F32)gPhysicalScreenHeight / (F32)gScreenHeight;
+         //F32 physicalMargin = ((F32)gPhysicalScreenWidth - drawAreaWidth) / 2;
+         //F32 drawMargin = physicalMargin * (F32)gScreenHeight / (F32)gPhysicalScreenHeight;
 
-      setOrtho(w, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight + w, gScreenHeight, 0, 0, 1);    
+         F32 scalingRatio = (F32)gPhysicalScreenHeight / (F32)gScreenHeight;
+         F32 drawAreaWidth = (F32)gScreenWidth * scalingRatio;
+         F32 physicalMargin = ((F32)gPhysicalScreenWidth - drawAreaWidth) / 2;
+         F32 drawMargin = physicalMargin / scalingRatio;
 
-      glScissor(-w, 0, gPhysicalScreenWidth * gScreenHeight / gPhysicalScreenHeight, gPhysicalScreenHeight);
-      glEnable(GL_SCISSOR_TEST);
+         setOrtho(-drawMargin, gScreenWidth + drawMargin, gScreenHeight, 0);      // l,r,b,t
+         glScissor(physicalMargin, 0, drawAreaWidth, gPhysicalScreenHeight);      // x,y,w,h
+      }
+      else                                                                                                        // Screen is portrait
+      {
+         F32 scalingRatio = (F32)gPhysicalScreenWidth / (F32)gScreenWidth;
+         F32 drawAreaHeight = (F32)gScreenHeight * scalingRatio;
+         F32 physicalMargin = ((F32)gPhysicalScreenHeight - drawAreaHeight) / 2;
+         F32 drawMargin = physicalMargin / scalingRatio;
+
+         setOrtho(0, gScreenWidth, gScreenHeight + drawMargin, -drawMargin);      // l,r,b,t
+         glScissor(0, physicalMargin, gPhysicalScreenWidth, drawAreaHeight);      // x,y,w,h
+      }
+      
+      glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
 
       glutFullScreen();
    }
 
    else        // DISPLAY_MODE_WINDOWED
    {
-      setOrtho(0, gScreenWidth, gScreenHeight, 0, 0, 1);   
+      setOrtho(0, gScreenWidth, gScreenHeight, 0);   
 
       glDisable(GL_SCISSOR_TEST);
 
-      glutReshapeWindow((int) (gScreenWidth * gIniSettings.winSizeFact), (int) (gScreenHeight * gIniSettings.winSizeFact) );
+      glutReshapeWindow((S32) ((F32)gScreenWidth * gIniSettings.winSizeFact), (S32) ((F32)gScreenHeight * gIniSettings.winSizeFact) );
       glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
    }
 
@@ -1705,7 +1735,7 @@ int main(int argc, char **argv)
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
 
    if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
-      initHostGame(gBindAddress, false);     // Start hosting
+      initHostGame(gBindAddress, buildLevelList(), false);     // Start hosting
 
    SFXObject::init();
 
@@ -1755,9 +1785,9 @@ int main(int argc, char **argv)
       glLineWidth(gDefaultLineWidth);
 
       atexit(onExit);
-      actualizeScreenMode(true);                // Create a display window
+      actualizeScreenMode(false, true);               // Create a display window
 
-      if(gCmdLineSettings.connectRemote)        // Only true when -server param specified
+      if(gCmdLineSettings.connectRemote)              // Only true when -server param specified
          joinGame(gConnectAddress, false, false);     // Connect to a game server (i.e. bypass master matchmaking)
 
 

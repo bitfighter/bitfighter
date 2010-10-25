@@ -113,7 +113,7 @@ struct CmdLineSettings
    S32 xpos;
    S32 ypos;
 
-   Vector<StringTableEntry> specifiedLevels;
+   Vector<string> specifiedLevels;
 
    void init()
    {

@@ -74,8 +74,7 @@ S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
 }
 
 
-extern void actualizeScreenMode(bool = false);
-extern void initHostGame(Address bindAddress, bool testMode);
+extern void actualizeScreenMode(bool, bool = false);
 extern void exitGame();
 
 ////////////////////////////////////
@@ -802,7 +801,7 @@ static void setFullscreenCallback(U32 mode)
    gIniSettings.oldDisplayMode = gIniSettings.displayMode;     // Save existing setting
 
    gIniSettings.displayMode = (DisplayMode)mode;
-   actualizeScreenMode();
+   actualizeScreenMode(false);
 }
 
 static void defineKeysCallback(U32 unused)
@@ -920,7 +919,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
       gIniSettings.displayMode = (mode == DISPLAY_MODE_UNKNOWN) ? (DisplayMode) 0 : mode;    // Bounds check 
    }
 
-   actualizeScreenMode();
+   actualizeScreenMode(false);
 }
 
 
@@ -1064,11 +1063,15 @@ void HostMenuUserInterface::onActivate()
 
 extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
+extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
+extern Vector<string> buildLevelList();
 
 static void startHostingCallback(U32 unused)
 {
    gHostMenuUserInterface.saveSettings();
-   initHostGame(Address(IPProtocol, Address::Any, 28000), false);
+
+   Vector<string> levelList = buildLevelList();
+   initHostGame(Address(IPProtocol, Address::Any, 28000), levelList, false);
 }
 
 

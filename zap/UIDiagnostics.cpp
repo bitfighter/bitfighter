@@ -283,7 +283,6 @@ extern char gJoystickName[gJoystickNameLength];
 extern ControllerTypeType gAutoDetectedJoystickType;
 extern U32 gSticksFound;
 extern string gLevelDir;
-extern Vector<StringTableEntry> gLevelList;
 extern string gPlayerName, gPlayerPassword;
 extern bool gPlayerAuthenticated;
 
@@ -517,11 +516,11 @@ void DiagnosticUserInterface::render()
       glColor3f(1,1,1);
       string allLevels = "Levels: ";
 
-      if(gLevelList.size() == 0)
+      if(!gServerGame)
          allLevels += " >>> Level list won't be resolved until you start hosting <<<"; 
       else
-         for(S32 i = 0; i < gLevelList.size(); i++)
-            allLevels += string(gLevelList[i].getString()) + "; ";
+         for(S32 i = 0; i < gServerGame->getLevelCount(); i++)
+            allLevels += string(gServerGame->getLevelNameFromIndex(i).getString()) + "; ";
 
       U32 i, j, k;
       i = j = k = 0;

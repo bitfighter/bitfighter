@@ -997,56 +997,39 @@ static void writeHost()
 }
 
 
-extern Vector<StringTableEntry> gLevelList;
+//extern Vector<StringTableEntry> gLevelList;
 
 static void writeLevels()
 {
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
    if(gINI.FindKey("Levels") == gINI.noID)    // Key doesn't exist... let's write one
-   {
-      gINI.AddKeyName("Levels");      // Create the key, then provide some comments for documentation purposes
-      if (gINI.NumKeyComments("Levels") == 0)
-      {
-         gINI.KeyComment("Levels", "----------------");
-         gINI.KeyComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
-         gINI.KeyComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
-         gINI.KeyComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
-         gINI.KeyComment("Levels", " Example:");
-         gINI.KeyComment("Levels", " Level1=ctf.level");
-         gINI.KeyComment("Levels", " Level2=zonecontrol.level");
-         gINI.KeyComment("Levels", " ... etc ...");
-         gINI.KeyComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
-         gINI.KeyComment("Levels", "----------------");
-      }
+      gINI.AddKeyName("Levels");              
 
+   if(gINI.NumKeyComments("Levels") == 0)
+   {
+      gINI.KeyComment("Levels", "----------------");
+      gINI.KeyComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
+      gINI.KeyComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
+      gINI.KeyComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
+      gINI.KeyComment("Levels", " Example:");
+      gINI.KeyComment("Levels", " Level1=ctf.level");
+      gINI.KeyComment("Levels", " Level2=zonecontrol.level");
+      gINI.KeyComment("Levels", " ... etc ...");
+      gINI.KeyComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
+      gINI.KeyComment("Levels", "----------------");
+
+      /*
       char levelName[256];
       for(S32 i = 0; i < gLevelList.size(); i++)
       {
          dSprintf(levelName, 255, "Level%d", i);
          gINI.SetValue("Levels", string(levelName), gLevelList[i].getString(), true);
       }
+      */
    }
 }
 
-
-static void writeReservedNames()
-{
-   gINI.AddKeyName("ReservedNames");
-   if (gINI.NumKeyComments("ReservedNames") == 0)
-   {
-      gINI.KeyComment("ReservedNames", "----------------");
-      gINI.KeyComment("ReservedNames", " Reserved names can be used to require a user with a specific name to enter a password to use that name.");
-      gINI.KeyComment("ReservedNames", " This is a temporary solution, and will likely be replaced in future versions of the game.  Note too that");
-      gINI.KeyComment("ReservedNames", " names can be reserved only on the server where they are defined.");
-      gINI.KeyComment("ReservedNames", " Usage: Name1=JoJo");
-      gINI.KeyComment("ReservedNames", "        Password1=MyPass");
-      gINI.KeyComment("ReservedNames", " Name/Password pairs can use any (reasonable) alpha-numeric suffix, but they must match, and any unmatched");
-      gINI.KeyComment("ReservedNames", " entries will be discarded.");
-      gINI.KeyComment("ReservedNames", "----------------");
-   }
-   // By default, this section is empty
-}
 
 
 static void writeTesting()
@@ -1113,7 +1096,6 @@ void saveSettingsToINI()
    writeDiagnostics();
    writeLevels();
    writeSkipList();
-   writeReservedNames();
    writeTesting();
    writePasswordSection();
    writeKeyBindings();

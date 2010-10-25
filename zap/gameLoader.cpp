@@ -291,66 +291,56 @@ S32 QSORT_CALLBACK alphaSort(string *a, string *b)
 extern ConfigDirectories gConfigDirs;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
-extern Vector<StringTableEntry> gLevelList;
 extern Vector<StringTableEntry> gLevelSkipList;
 
-// Create the definititve list of levels for hosting a game
-void LevelListLoader::buildLevelList()
+// Create a list of levels for hosting a game, but does not read the files or do any validation of them
+Vector<string> LevelListLoader::buildLevelList()
 {
+   Vector<string> levelList;
+
    // If user specified a list of levels on the command line, use those
    if(gCmdLineSettings.specifiedLevels.size() > 0)
+      levelList = gCmdLineSettings.specifiedLevels;
+   else
    {
-      gLevelList = gCmdLineSettings.specifiedLevels;
-      removeSkippedLevels();
-      return;
+      // Otherwise we need to build our level list by looking at the filesystem  
+      // (n.b. gLevelDir defaults to the "levels" folder under the Bitfighter data install dir)
+      Vector<string> levelfiles;
+
+      if(!getLevels(gConfigDirs.levelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
+      {
+         logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
+         return levelList;    // empty
+      }
+
+      levelfiles.sort(alphaSort);   // Just to be sure...
+
+      for (S32 i = 0; i < levelfiles.size(); i++)
+         levelList.push_back(levelfiles[i]);
    }
 
-   //// If -leveldir was not specified on the cmd line, and the INI file has some specified, use those
-   //if(gCmdLineSettings.dirs.levelDir == "" && gIniSettings.levelList.size() > 0)
-   //{
-   //   gLevelList = gIniSettings.levelList;
-   //   removeSkippedLevels();
-   //   return;
-   //}
-
-   // Otherwise we need to build our level list by looking at the filesystem  
-   // (n.b. gLevelDir defaults to the "levels" folder under the Bitfighter data install dir)
-   gLevelList.clear();
-
-   Vector<string> levelfiles;
-
-   if(!getLevels(gConfigDirs.levelDir, levelfiles))    // True if error reading level...  print message... or just PANIC!!
-   {
-       logprintf(LogConsumer::LogError, "Could not read any levels from the levels folder \"%s\".", gConfigDirs.levelDir.c_str());
-       return;
-   }
-
-   levelfiles.sort(alphaSort);   // Just to be sure...
-
-   for (S32 i = 0; i < levelfiles.size(); i++)
-      gLevelList.push_back(StringTableEntry(levelfiles[i].c_str()));
-
-   removeSkippedLevels();
+   removeSkippedLevels(levelList);
+   return levelList;
 }
 
 
 extern string lcase(string strToConvert);
 
 // Remove any levels listed in gLevelSkipList from gLevelList.  Not foolproof!
-void LevelListLoader::removeSkippedLevels()
+void LevelListLoader::removeSkippedLevels(Vector<std::string> &levelList)
 {
-   for(S32 i = 0; i < gLevelList.size(); i++)
+   for(S32 i = 0; i < levelList.size(); i++)
    {
       // Make sure we have the right extension
-      string filename_i = lcase(gLevelList[i].getString());
+      string filename_i = lcase(levelList[i]);
       if(filename_i.find(".level") == string::npos)
          filename_i += ".level";
 
       for(S32 j = 0; j < gLevelSkipList.size(); j++)
          if(!strcmp(filename_i.c_str(), gLevelSkipList[j].getString()))
          {
-            logprintf(LogConsumer::ServerFilter, "Loader skipping level %s listed in LevelSkipList (see INI file)", gLevelList[i].getString());
-            gLevelList.erase(i);
+            logprintf(LogConsumer::ServerFilter, "Loader skipping level %s listed in LevelSkipList (see INI file)", levelList[i].c_str());
+            levelList.erase(i);
             i--;
             break;
          }

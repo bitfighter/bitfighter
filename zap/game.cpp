@@ -327,7 +327,7 @@ S32 ServerGame::getRobotCount()
 
 
 // This gets called when you first load the host menu
-void ServerGame::buildLevelList(Vector<StringTableEntry> levelList)
+void ServerGame::buildLevelList(Vector<string> &levelList)
 {
    mLevelInfos.clear();
 
@@ -425,6 +425,7 @@ void ServerGame::loadNextLevel()
 }
 
 
+// Helps resolve meta-indices such as NEXT_LEVEL.  If you pass it a normal level index, you'll just get that back.
 S32 ServerGame::getAbsoluteLevelIndex(S32 indx)
 {
    if(indx == NEXT_LEVEL)

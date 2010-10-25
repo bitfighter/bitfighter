@@ -826,7 +826,6 @@ void EditorUserInterface::teamsHaveChanged()
 }
 
 
-
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
@@ -847,7 +846,7 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
-extern void actualizeScreenMode(bool);
+extern void actualizeScreenMode(bool, bool);
 
 void EditorUserInterface::onActivate()
 {
@@ -876,6 +875,7 @@ void EditorUserInterface::onActivate()
 
       return;
    }
+
    mLevelErrorMsgs.clear();
    mSaveMsgTimer.clear();
 
@@ -910,17 +910,15 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   actualizeScreenMode(true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+   actualizeScreenMode(false, true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
 }
 
 
 void EditorUserInterface::onDeactivate()
 {
-   actualizeScreenMode(true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+   actualizeScreenMode(true, true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
 }
 
-
-extern Vector<StringTableEntry> gLevelList;
 
 void EditorUserInterface::onReactivate()
 {
@@ -929,11 +927,8 @@ void EditorUserInterface::onReactivate()
    mEditingSpecialAttrItem = NONE;     // Probably not necessary
    mSpecialAttribute = NoAttribute;
 
-//   mSaveMsgTimer = 0;         // Don't show the saved game message any more --> but now we reactivate editor automatically, so don't need this
-
    if(mWasTesting)
    {
-      gLevelList = mgLevelList;        // Restore level list 
       mWasTesting = false;
       mSaveMsgTimer.clear();
    }
@@ -943,7 +938,7 @@ void EditorUserInterface::onReactivate()
    if(mCurrentTeam >= mTeams.size())
       mCurrentTeam = 0;
    
-   actualizeScreenMode(true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+   actualizeScreenMode(true, true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
 }
 
 
@@ -4270,7 +4265,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 }
 
 
-extern void initHostGame(Address bindAddress, bool testMode);
+extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
 extern CmdLineSettings gCmdLineSettings;
 
 void EditorUserInterface::testLevel()
@@ -4311,13 +4306,11 @@ void EditorUserInterface::testLevel()
    {
       mEditFileName = tmpFileName;     // Restore the level name
 
-      mgLevelList = gLevelList;
-      gLevelList.clear();
-
       mWasTesting = true;
 
-      gLevelList.push_front("editor.tmp");
-      initHostGame(Address(IPProtocol, Address::Any, 28000), true);
+      Vector<string> levelList;
+      levelList.push_back("editor.tmp");
+      initHostGame(Address(IPProtocol, Address::Any, 28000), levelList, true);
    }
 
    mNeedToSave = nts;                  // Restore saved parameters

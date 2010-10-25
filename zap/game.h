@@ -213,13 +213,14 @@ public:
    // Used on client side where we don't care about min/max players
    LevelInfo(StringTableEntry name, StringTableEntry type)     
    {
-      levelName = name;  levelType = type; 
+      levelName = name;  
+      levelType = type; 
    }
 
    // Used on server side, augmented with setInfo method below
-   LevelInfo(StringTableEntry levelFile)
+   LevelInfo(string levelFile)
    {
-      levelFileName = levelFile;
+      levelFileName = levelFile.c_str();
    }
 
    // Used on server side
@@ -291,7 +292,7 @@ public:
 
    void setShuttingDown(bool shuttingDown, U16 time, ClientRef *who, StringPtr reason);  
 
-   void buildLevelList(Vector<StringTableEntry> levelList);
+   void buildLevelList(Vector<string> &levelList);
    void resetLevelLoadIndex();
    void loadNextLevel();
    string getLastLevelLoadName();         // For updating the UI
