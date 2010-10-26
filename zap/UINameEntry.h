@@ -62,13 +62,13 @@ public:
       lineEditor = LineEditor(MAX_PLAYER_NAME_LENGTH);
    }
 
-   void onActivate();
+   virtual void onActivate();
    void render();
    void idle(U32 t);
 
    void setSecret(bool secret) { lineEditor.setSecret(secret); }
 
-   void onKeyDown(KeyCode keyCode, char ascii);
+   virtual void onKeyDown(KeyCode keyCode, char ascii);
 
    const char *getText() { return lineEditor.c_str(); }
    void setString(string str);
@@ -95,19 +95,29 @@ extern IniSettings gIniSettings;
 
 class LevelNameEntryUserInterface : public TextEntryUserInterface
 {
+
+typedef TextEntryUserInterface Parent;
+
+private:
+   S32 mLevelIndex;
+   Vector<string> mLevels;
+
 public:
    LevelNameEntryUserInterface()       // Constructor
    {
       setMenuID(LevelNameEntryUI);
       title = "ENTER LEVEL TO EDIT:";
-      instr1 = "";
-      instr2 = "Enter an existing level, or create your own!";
+      instr1 = "Enter an existing level, or create your own!";
+      instr2 = "<- and -> keys retrieve existing level names";
       resetOnActivate = false;
       lineEditor.setFilter(LineEditor::fileNameFilter);
    }
 
+   virtual void onKeyDown(KeyCode keyCode, char ascii);
    virtual void onAccept(const char *text);
    virtual void onEscape();
+
+   virtual void onActivate();
 };
 
 extern LevelNameEntryUserInterface gLevelNameEntryUserInterface;

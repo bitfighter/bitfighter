@@ -1064,13 +1064,12 @@ void HostMenuUserInterface::onActivate()
 extern string gHostName, gHostDescr;
 extern string gLevelChangePassword, gAdminPassword, gServerPassword;
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
-extern Vector<string> buildLevelList();
 
 static void startHostingCallback(U32 unused)
 {
    gHostMenuUserInterface.saveSettings();
 
-   Vector<string> levelList = buildLevelList();
+   Vector<string> levelList = LevelListLoader::buildLevelList();
    initHostGame(Address(IPProtocol, Address::Any, 28000), levelList, false);
 }
 

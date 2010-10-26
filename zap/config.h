@@ -106,7 +106,6 @@ struct CmdLineSettings
 
    S32 maxplayers;
 
-   //bool window;                // Window param supplied
    DisplayMode displayMode;    // Fullscreen param supplied
 
    S32 winWidth;

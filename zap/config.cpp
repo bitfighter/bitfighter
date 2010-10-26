@@ -550,7 +550,7 @@ static sfxSets stringToSFXSet(string sfxSet)
 }
 
 
-// Convert a string value to our sfxSets enum
+// Convert a string value to a DisplayMode enum value
 static DisplayMode stringToDisplayMode(string mode)
 {
    if(lcase(mode) == "fullscreen-stretch")
@@ -996,8 +996,6 @@ static void writeHost()
    gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
 }
 
-
-//extern Vector<StringTableEntry> gLevelList;
 
 static void writeLevels()
 {

@@ -119,6 +119,56 @@ void LevelNameEntryUserInterface::onEscape()
 }
 
 
+void LevelNameEntryUserInterface::onActivate()
+{
+   Parent::onActivate();
+   mLevelIndex = 0;
+
+   mLevels = LevelListLoader::buildLevelList();
+
+   // Remove the extension from the level file
+   for(S32 i = 0; i < mLevels.size(); i++)
+       mLevels[i] = mLevels[i].substr(0, mLevels[i].find_last_of('.'));
+
+   // See if our current level name is on the list -- if so, set mLevelIndex to that level
+   for(S32 i = 0; i < mLevels.size(); i++)
+      if(!stricmp(mLevels[i].c_str(), lineEditor.c_str()))
+      {
+         mLevelIndex = i;
+         break;
+      }
+}
+
+
+void LevelNameEntryUserInterface::onKeyDown(KeyCode keyCode, char ascii)
+{
+   if(keyCode == KEY_RIGHT)
+   {
+      if(mLevels.size() == 0)
+         return;
+
+      mLevelIndex++;
+      if(mLevelIndex >= mLevels.size())
+         mLevelIndex = 0;
+
+      lineEditor.setString(mLevels[mLevelIndex]);
+   }
+   else if(keyCode == KEY_LEFT)
+   {
+      if(mLevels.size() == 0)
+         return;
+
+      mLevelIndex--;
+      if(mLevelIndex < 0)
+         mLevelIndex = mLevels.size() - 1;
+
+      lineEditor.setString(mLevels[mLevelIndex]);
+   }
+   else
+      Parent::onKeyDown(keyCode, ascii);
+}
+
+
 void LevelNameEntryUserInterface::onAccept(const char *name)
 {
    gEditorUserInterface.setLevelFileName(name);

@@ -145,7 +145,7 @@ class Screenshooter
 {
 private:
    S32 mWidth;
-   S32 mHeight;
+   S32 mXpos, mYpos;
 
 public: 
    S32 phase;

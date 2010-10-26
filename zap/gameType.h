@@ -343,8 +343,8 @@ public:
    virtual void itemDropped(Ship *ship, Item *item) {  /* do nothing */  }
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag) {  /* do nothing */  }
 
-   virtual void addZone(GoalZone *zone) {  /* do nothing */  }
-   virtual void shipTouchZone(Ship *ship, GoalZone *zone) {  /* do nothing */  }
+   virtual void addZone(GoalZone *zone) {  /* Do nothing */  }
+   virtual void shipTouchZone(Ship *ship, GoalZone *zone) {  /* Do nothing */  }
 
    void queryItemsOfInterest();
    void performScopeQuery(GhostConnection *connection);

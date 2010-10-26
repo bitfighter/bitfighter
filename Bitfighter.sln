@@ -1,0 +1,46 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "master", "master\master.vcxproj", "{FF787492-56E4-4BCC-8687-96A7A049D38C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bitfighter", "zap\bitfighter.vcxproj", "{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tnl", "tnl\tnl.vcxproj", "{5AAE89B5-1F53-4539-9899-071E68FD9A29}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtomcrypt", "..\release-013e\libtomcrypt\libtomcrypt.vcxproj", "{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		Template|Win32 = Template|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF787492-56E4-4BCC-8687-96A7A049D38C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FF787492-56E4-4BCC-8687-96A7A049D38C}.Debug|Win32.Build.0 = Debug|Win32
+		{FF787492-56E4-4BCC-8687-96A7A049D38C}.Release|Win32.ActiveCfg = Release|Win32
+		{FF787492-56E4-4BCC-8687-96A7A049D38C}.Release|Win32.Build.0 = Release|Win32
+		{FF787492-56E4-4BCC-8687-96A7A049D38C}.Template|Win32.ActiveCfg = Release|Win32
+		{FF787492-56E4-4BCC-8687-96A7A049D38C}.Template|Win32.Build.0 = Release|Win32
+		{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}.Debug|Win32.Build.0 = Debug|Win32
+		{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}.Release|Win32.ActiveCfg = Release|Win32
+		{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}.Release|Win32.Build.0 = Release|Win32
+		{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}.Template|Win32.ActiveCfg = Release|Win32
+		{0C8C67C6-F880-4F5E-B581-93CBBAC5FA8A}.Template|Win32.Build.0 = Release|Win32
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29}.Debug|Win32.Build.0 = Debug|Win32
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29}.Release|Win32.ActiveCfg = Release|Win32
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29}.Release|Win32.Build.0 = Release|Win32
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29}.Template|Win32.ActiveCfg = Template|Win32
+		{5AAE89B5-1F53-4539-9899-071E68FD9A29}.Template|Win32.Build.0 = Template|Win32
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}.Debug|Win32.Build.0 = Debug|Win32
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}.Release|Win32.ActiveCfg = Release|Win32
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}.Release|Win32.Build.0 = Release|Win32
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}.Template|Win32.ActiveCfg = Template|Win32
+		{3F7F7B79-4473-4CAB-A54E-4274A9F1A01A}.Template|Win32.Build.0 = Template|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

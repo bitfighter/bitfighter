@@ -507,15 +507,24 @@ write_long(FILE *fp, /* I - File to write to */
 
 extern ConfigDirectories gConfigDirs;
 extern string joindir(const string &path, const string &filename);
+extern void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top);
+extern void actualizeScreenMode(bool changingInterfaces, bool first = false);
+extern IniSettings gIniSettings;
 
 void Screenshooter::saveScreenshot()
-{ 
+{  
    if(phase == 1)
    {
+      // Save window size/pos for restoration later
       mWidth = UserInterface::windowWidth;
-      mHeight = UserInterface::windowHeight;
+      mXpos = glutGet(GLUT_WINDOW_X);
+      mYpos = glutGet(GLUT_WINDOW_Y);
 
       glutReshapeWindow(gScreenWidth, gScreenHeight);    // Resize window to "standard" size
+
+      setOrtho(0, gScreenWidth, gScreenHeight, 0); 
+      glDisable(GL_SCISSOR_TEST);
+
       phase++;
    }
 
@@ -583,7 +592,14 @@ void Screenshooter::saveScreenshot()
 
       SaveDIBitmap(fullfilename.c_str(), bmpInfo, pixels);    
 
-      glutReshapeWindow(mWidth, mHeight);      // Restore window 
+      if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
+      {
+         gIniSettings.winSizeFact = (F32)mWidth / (F32)gScreenWidth;
+         gIniSettings.winXPos = mXpos;
+         gIniSettings.winYPos = mYpos;
+      }
+
+      actualizeScreenMode(false, true);
 
       delete [] pixels;  
       delete bmpInfo;

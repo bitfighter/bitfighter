@@ -497,7 +497,7 @@ void TestItem::renderItem(Point pos)
 }
 
 
-// Apperas to be server only??
+// Appears to be server only??
 void TestItem::damageObject(DamageInfo *theInfo)
 {
    // Compute impulse direction

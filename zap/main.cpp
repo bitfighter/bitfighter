@@ -581,13 +581,6 @@ void seedRandomNumberGenerator(string name)
 }
 
 
-// Build a list of levels
-Vector<string> buildLevelList()
-{
-   return LevelListLoader::buildLevelList(); 
-}
-
-
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
 {
@@ -1570,7 +1563,7 @@ void setupLogging()
 }
 
 
-static void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
+void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
 {
    glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -1632,10 +1625,6 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
       // Figure out if the screen is constrained by height or width
       if((F32)gPhysicalScreenWidth / (F32)gPhysicalScreenHeight >= (F32)gScreenWidth / (F32)gScreenHeight)         // Screen is landscape
       {
-         // F32 drawAreaWidth = (F32)gScreenWidth * (F32)gPhysicalScreenHeight / (F32)gScreenHeight;
-         //F32 physicalMargin = ((F32)gPhysicalScreenWidth - drawAreaWidth) / 2;
-         //F32 drawMargin = physicalMargin * (F32)gScreenHeight / (F32)gPhysicalScreenHeight;
-
          F32 scalingRatio = (F32)gPhysicalScreenHeight / (F32)gScreenHeight;
          F32 drawAreaWidth = (F32)gScreenWidth * scalingRatio;
          F32 physicalMargin = ((F32)gPhysicalScreenWidth - drawAreaWidth) / 2;
@@ -1663,10 +1652,9 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
    else        // DISPLAY_MODE_WINDOWED
    {
       setOrtho(0, gScreenWidth, gScreenHeight, 0);   
-
       glDisable(GL_SCISSOR_TEST);
 
-      glutReshapeWindow((S32) ((F32)gScreenWidth * gIniSettings.winSizeFact), (S32) ((F32)gScreenHeight * gIniSettings.winSizeFact) );
+      glutReshapeWindow((S32) ((F32)gScreenWidth * gIniSettings.winSizeFact), (S32) ((F32)gScreenHeight * gIniSettings.winSizeFact));
       glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
    }
 
@@ -1735,7 +1723,7 @@ int main(int argc, char **argv)
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
 
    if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
-      initHostGame(gBindAddress, buildLevelList(), false);     // Start hosting
+      initHostGame(gBindAddress, LevelListLoader::buildLevelList(), false);     // Start hosting
 
    SFXObject::init();
 
