@@ -375,11 +375,13 @@ void HuntersGameType::renderInterfaceOverlay(bool scoreboardVisible)
    U32 minsRemaining = timeLeft / (60000);
    U32 secsRemaining = (timeLeft - (minsRemaining * 60000)) / 1000;
 
-   UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65 - UserInterface::getStringWidth(20, NEXUS_STR),
-      UserInterface::canvasHeight - UserInterface::vertMargin - 45, 20, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
+   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - UserInterface::getStringWidth(20, NEXUS_STR),
+                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 45, 
+                              20, "%s%02d:%02d", NEXUS_STR, minsRemaining, secsRemaining);
 
    for(S32 i = 0; i < mYardSaleWaypoints.size(); i++)
       renderObjectiveArrow(mYardSaleWaypoints[i].pos, Color(1,1,1));
+
    for(S32 i = 0; i < mNexus.size(); i++)
       renderObjectiveArrow(mNexus[i], mNexusIsOpen ? gNexusOpenColor : gNexusClosedColor);
 }

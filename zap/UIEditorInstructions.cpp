@@ -218,9 +218,9 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    S32 starty = 50;
    S32 y;
    S32 col1 = horizMargin;
-   S32 col2 = horizMargin + S32(canvasWidth * 0.25) + 45;     // +45 to make a little more room for Action column
-   S32 col3 = horizMargin + S32(canvasWidth * 0.5);
-   S32 col4 = horizMargin + S32(canvasWidth * 0.75) + 45;
+   S32 col2 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 45;     // +45 to make a little more room for Action column
+   S32 col3 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.5);
+   S32 col4 = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.75) + 45;
    S32 actCol = col1;      // Action column
    S32 contCol = col2;     // Control column
    bool firstCol = true;

@@ -202,8 +202,11 @@ public:
 
    void setVolume(VolumeType volType, Vector<string> &words);
 
-   void onMouseMoved(S32 x, S32 y);
+   // Mouse handling
    void onMouseDragged(S32 x, S32 y);
+   void onMouseMoved(S32 x, S32 y);
+   void onMouseMoved();
+
    void onActivate();               // Gets run when interface is first activated
    void onReactivate();             // Gets run when interface is subsequently reactivated
 

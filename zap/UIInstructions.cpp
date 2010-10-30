@@ -195,6 +195,7 @@ extern IniSettings gIniSettings;
 // This has become rather ugly and inelegant.  Sorry!
 void InstructionsUserInterface::renderPage1()
 {
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    S32 starty = 75;
    S32 y;
    S32 col1 = horizMargin;
@@ -457,7 +458,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
    {
       const char *text = gGameObjectInfo[i * 2];
       const char *desc = gGameObjectInfo[i * 2 + 1];
-      U32 index = i - startIndex;
+      S32 index = i - startIndex;
 
       Point objStart((index & 1) * 400, (index >> 1) * 165);
       objStart += Point(200, 90);
@@ -651,8 +652,8 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
 
    S32 ypos = 50;
 
-   S32 cmdCol = horizMargin;                                    // Action column
-   S32 descrCol = horizMargin + S32(canvasWidth * 0.25) + 55;   // Control column
+   S32 cmdCol = horizMargin;                                                         // Action column
+   S32 descrCol = horizMargin + S32(gScreenInfo.getGameCanvasWidth() * 0.25) + 55;   // Control column
 
    const S32 instrSize = 18;
 

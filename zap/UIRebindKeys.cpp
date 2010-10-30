@@ -56,7 +56,7 @@ void RebindKeysUserInterface::render()
    const S32 fontSize = 20;
    const S32 fontSizeBig = 30;
 
-   U32 y = (canvasHeight / 2) - fontSize;
+   U32 y = (gScreenInfo.getGameCanvasHeight() / 2) - fontSize;
 
    drawCenteredString(y, fontSize, title);
    y += 45;
@@ -78,7 +78,7 @@ void RebindKeysUserInterface::render()
    drawCenteredString(y, fontSizeBig, renderBuffer);
 
    U32 width = getStringWidth(fontSizeBig, renderBuffer);
-   S32 x = (canvasWidth - width) / 2;
+   S32 x = (gScreenInfo.getGameCanvasWidth() - width) / 2;
 
    if(LineEditor::cursorBlink)  
       drawString(x + getStringWidthf(fontSizeBig, renderBuffer, cursorPos), y, fontSizeBig, "_");

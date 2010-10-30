@@ -62,6 +62,7 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_ENTER || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
    {
+      UserInterface::playBoop();
       if(mCallback)
          mCallback(mIndex);
 
@@ -70,7 +71,6 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
    else
    {
       // Check individual entries for any shortcut keys
-
       return false;
    }
 }
@@ -95,6 +95,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       if(mCallback)
          mCallback(mIndex);
 
+      UserInterface::playBoop();
       return true;
    }
    else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
@@ -105,6 +106,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       if(mCallback)
          mCallback(mIndex);
 
+      UserInterface::playBoop();
       return true;
    }
 
@@ -115,6 +117,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       if(mCallback)
          mCallback(mIndex);
 
+      UserInterface::playBoop();
       return true;
    }
 
@@ -125,6 +128,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
          if(tolower(ascii) == tolower(mOptions[index].data()[0]))
          {
             mIndex = index;
+            UserInterface::playBoop();
             return true;
          }
       }

@@ -46,9 +46,21 @@ struct Point
    Point() { x = 0; y = 0; }
    Point(const Point& pt) { x = pt.x; y = pt.y; }
    Point(F32 in_x, F32 in_y) { x = in_x; y = in_y; }
+   Point(S32 in_x, S32 in_y) { x = (F32)in_x; y = (F32)in_y; }
+   Point(F64 in_x, F64 in_y) { x = (F32)in_x; y = (F32)in_y; }
+   Point(F64 in_x, S32 in_y) { x = (F32)in_x; y = (F32)in_y; }
+   Point(F32 in_x, S32 in_y) { x = (F32)in_x; y = (F32)in_y; }
+   Point(S32 in_x, F32 in_y) { x = (F32)in_x; y = (F32)in_y; }
+
 
    void set(F32 ix, F32 iy) { x = ix; y = iy; }
+   void set(S32 ix, S32 iy) { x = (F32)ix; y = (F32)iy; }
+   void set(F64 ix, F64 iy) { x = (F32)ix; y = (F32)iy; }
+   void set(F64 ix, S32 iy) { x = (F32)ix; y = (F32)iy; }
+
    void set(const Point &pt) { x = pt.x; y = pt.y; }
+   void set(const Point *pt) { x = pt->x; y = pt->y; }
+
 
    Point operator+(const Point &pt) const { return Point (x + pt.x, y + pt.y); }
    Point operator-(const Point &pt) const { return Point (x - pt.x, y - pt.y); }

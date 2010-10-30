@@ -55,6 +55,7 @@ void TextEntryUserInterface::render()
 
    const S32 fontSize = 20;
    const S32 fontSizeBig = 30;
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    S32 y = (canvasHeight / 2) - fontSize;
 
@@ -186,16 +187,19 @@ void LevelNameEntryUserInterface::onAccept(const char *name)
 
 void PasswordEntryUserInterface::render()
 {
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    if(gClientGame->getConnectionToServer())
    {
       gGameUserInterface.render();
       glColor4f(0, 0, 0, 0.5);
       glEnable(GL_BLEND);
          glBegin(GL_POLYGON);
-            glVertex2f(0, 0);
-            glVertex2f(UserInterface::canvasWidth, 0);
-            glVertex2f(UserInterface::canvasWidth, UserInterface::canvasHeight);
-            glVertex2f(0, UserInterface::canvasHeight);
+            glVertex2f(0,           0);
+            glVertex2f(canvasWidth, 0);
+            glVertex2f(canvasWidth, canvasHeight);
+            glVertex2f(0,           canvasHeight);
          glEnd();
       glDisable(GL_BLEND);
    }

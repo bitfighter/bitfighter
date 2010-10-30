@@ -31,6 +31,7 @@
 #include "timer.h"
 #include "point.h"
 #include "lineEditor.h"
+#include "config.h"     // For DisplayMode enum
 
 #include "tnl.h"
 
@@ -46,10 +47,6 @@ namespace Zap
 #define ENABLE_ENGINEER 0
 
 static const float gDefaultLineWidth = 2.0f;
-
-const S32 gScreenHeight = 600;
-const S32 gScreenWidth = 800;
-
 
 const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
 const U32 MAX_FILE_NAME_LEN = 32;     // Completely arbitrary
@@ -97,6 +94,99 @@ enum UIID {
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class ScreenInfo
+{
+private:
+   static const S32 GAME_WIDTH = 800;
+   static const S32 GAME_HEIGHT = 600;
+
+   Point mWindowMousePos, mCanvasMousePos;    
+
+   S32 mPhysicalScreenWidth, mPhysicalScreenHeight;
+   S32 mGameCanvasWidth, mGameCanvasHeight;     // Size of screen; in game, will always be 800x600, but may be different in editor fullscreen
+   S32 mWindowWidth, mWindowHeight;             // Window dimensions in physical pixels
+   F32 mScalingRatio;                           // Ratio of physical pixels to virtual pixels
+   bool mIsLandscape;                           // Is our screen landscape or portrait?
+
+public:
+   ScreenInfo()      // Constructor
+   { 
+      resetGameCanvasSize();        // Initialize GameCanvasSize vars
+      mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
+   }     
+
+   // Can't initialize until glut has been set up
+   void init(S32 physicalScreenWidth, S32 physicalScreenHeight)
+   {
+      mPhysicalScreenWidth = physicalScreenWidth;
+      mPhysicalScreenHeight = physicalScreenHeight;
+
+      F32 physicalScreenRatio = (F32)mPhysicalScreenWidth / (F32)mPhysicalScreenHeight;     
+      F32 gameCanvasRatio = (F32)mGameCanvasWidth / (F32)mGameCanvasHeight;
+
+      mIsLandscape = physicalScreenRatio >= gameCanvasRatio;
+      mScalingRatio = mIsLandscape ? (F32)mPhysicalScreenHeight / (F32)mGameCanvasHeight : (F32)mPhysicalScreenWidth / (F32)mGameCanvasWidth;
+   }
+
+   void setWindowSize(S32 width, S32 height) { mWindowWidth = width; mWindowHeight = height; }
+   S32 getWindowWidth() { return mWindowWidth; }
+   S32 getWindowHeight() { return mWindowHeight; }
+
+   // The following methods return values in PHYSICAL pixels -- how large is the entire physical monitor?
+   S32 getPhysicalScreenWidth() { return mPhysicalScreenWidth; }        
+   S32 getPhysicalScreenHeight() { return mPhysicalScreenHeight; }      
+
+   // Game canvas size in physical pixels, assuming full screen unstretched mode
+   S32 getDrawAreaWidth()  { return mIsLandscape ? S32((F32)mGameCanvasWidth * mScalingRatio) : mPhysicalScreenWidth; }
+   S32 getDrawAreaHeight() { return mIsLandscape ? mPhysicalScreenHeight : S32((F32)mGameCanvasHeight * mScalingRatio); }
+
+   // Dimensions of black bars in physical pixels in full-screen unstretched mode.  Does not reflect current window mode
+   S32 getHorizPhysicalMargin() { return mIsLandscape ? (mPhysicalScreenWidth - getDrawAreaWidth()) / 2 : 0; }
+   S32 getVertPhysicalMargin()  { return mIsLandscape ? 0 : (mPhysicalScreenHeight - getDrawAreaHeight()) / 2; }
+
+   // Dimensions of black bars in physical pixes, based on current window mode
+   S32 getHorizPhysicalMargin(DisplayMode mode) { return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getHorizPhysicalMargin() : 0; }
+   S32 getVertPhysicalMargin(DisplayMode mode)  { return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getVertPhysicalMargin() : 0; }
+
+   // The following methods return values in VIRTUAL pixels, not accurate in editor
+   void setGameCanvasSize(S32 width, S32 height) { mGameCanvasWidth = width; mGameCanvasHeight = height; }
+   void resetGameCanvasSize() { mGameCanvasWidth = GAME_WIDTH; mGameCanvasHeight = GAME_HEIGHT; }
+   S32 getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800
+   S32 getGameCanvasHeight() { return mGameCanvasHeight; }     // canvasHeight, usually 600
+
+   // Dimensions of black bars in game-sized pixels
+   S32 getHorizDrawMargin() { return mIsLandscape ? S32(getHorizPhysicalMargin() / mScalingRatio) : 0; }
+   S32 getVertDrawMargin()  { return mIsLandscape ? 0 : S32(getVertPhysicalMargin() / mScalingRatio); }
+
+   bool isLandscape() { return mIsLandscape; }     // Whether physical screen is landscape, or at least more landscape than our game window
+
+   // Convert physical window screen coordinates into virtual, in-game coordinate
+   Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode) { return convertWindowToCanvasCoord((S32)p.x, (S32)p.y, mode); }
+   Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode) { 
+      printf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d ||physicalMargin: %d,%d\n",
+               x, y, mCanvasMousePos.x, mCanvasMousePos.y, getHorizPhysicalMargin(mode),
+              getVertPhysicalMargin(mode),getWindowWidth(),getWindowHeight(),
+              mGameCanvasWidth, mGameCanvasHeight,
+              getHorizPhysicalMargin(mode),getVertPhysicalMargin(mode));
+
+         return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)), 
+                      (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / (getWindowHeight() - 2 * getVertPhysicalMargin(mode))); }
+
+   void setMousePos(S32 x, S32 y, DisplayMode mode) { 
+      if(x == 0 && y == 0)
+         int x = 99;
+      mWindowMousePos.set(x,y); mCanvasMousePos.set(convertWindowToCanvasCoord(x,y,mode)); }
+
+   const Point *getMousePos() { return &mCanvasMousePos; }
+   const Point *getWindowMousePos() { return &mWindowMousePos; }
+
+};
+
+extern ScreenInfo gScreenInfo;
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class UserInterface
 {
 private:
@@ -115,7 +205,6 @@ public:
    UIID getMenuID();                         // Retrieve interface's name
    UIID getPrevMenuID();                     // Retrieve previous interface's name
 
-   static S32 windowWidth, windowHeight, canvasWidth, canvasHeight;
    static S32 vertMargin, horizMargin;
    static S32 chatMargin;
 
@@ -160,6 +249,9 @@ public:
    // Draw strings centered at point
    static void drawStringfc(F32 x, F32 y, U32 size, const char *format, ...);
    static void drawStringc(F32 x, F32 y, U32 size, const char *string);
+
+   // Draw strings right-aligned at point
+   static void drawStringfr(F32 x, F32 y, U32 size, const char *format, ...);
 
    // Draw string and get it's width
    static S32 drawStringAndGetWidth(F32 x, F32 y, U32 size, const char *string);
@@ -210,11 +302,14 @@ public:
    static S32 getStringWidth(F32 size, const char *str);
    static S32 getStringWidthf(U32 size, const char *format, ...);
 
-   Point convertWindowToCanvasCoord(Point p) { return Point(p.x * canvasWidth / windowWidth, p.y * canvasHeight / windowHeight); }
+   // TODO: Move to ScreenInfo
+   Point convertWindowToCanvasCoord(Point p) { return Point(p.x * gScreenInfo.getGameCanvasWidth() / gScreenInfo.getWindowWidth(), 
+                                                            p.y * gScreenInfo.getGameCanvasHeight() / gScreenInfo.getWindowHeight()); }
 
 
    static void playBoop();    // Make some noise!
 };
+
 
 };
 

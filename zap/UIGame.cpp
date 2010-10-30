@@ -122,14 +122,13 @@ GameUserInterface::GameUserInterface()
 
 
 extern bool gDisableShipKeyboardInput;
-extern Point gMousePos;
 
 void GameUserInterface::onActivate()
 {
-   gDisableShipKeyboardInput = false;                     // Make sure our ship controls are active
-   mMissionOverlayActive = false;                         // Turn off the mission overlay (if it was on)
-   glutSetCursor(GLUT_CURSOR_NONE);                       // Turn off cursor
-   onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);    // Make sure ship pointed is towards mouse
+   gDisableShipKeyboardInput = false;  // Make sure our ship controls are active
+   mMissionOverlayActive = false;      // Turn off the mission overlay (if it was on)
+   glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
+   onMouseMoved();                     // Make sure ship pointed is towards mouse
 
    // Clear out any lingering chat messages
    for(S32 i = 0; i < MessageStoreCount; i++)
@@ -162,8 +161,7 @@ void GameUserInterface::onReactivate()
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModActivated[i] = false;
 
-   // Call onMouseMoved to get ship pointed at current cursor location
-   onMouseMoved((S32) gMousePos.x, (S32) gMousePos.y);
+   onMouseMoved();   // Call onMouseMoved to get ship pointed at current cursor location
 }
 
 
@@ -307,8 +305,9 @@ void GameUserInterface::render()
    //glEnd();
    //glDisable(GL_BLEND);
 
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)
+   // TODO: Can delete these two lines???
+   //glMatrixMode(GL_MODELVIEW);
+   //glLoadIdentity();          // OpenGL command to load an identity matrix (see OpenGL docs)
 
    if(!gClientGame->isSuspended())
    {
@@ -327,13 +326,7 @@ void GameUserInterface::render()
       if(mFPSVisible)
       {
          glColor3f(1, 1, 1);
-         drawStringf(canvasWidth - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
-         /*drawStringf(canvasWidth - horizMargin - 220, vertMargin + 25, 20, "S: %d,%d | H: %d,%d", 
-               gServerGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getShots(),
-               gClientGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getShots(),
-
-               gServerGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getHits(),
-               gClientGame->getGameType()->findClientRef("Watusimoto")->mStatistics.getHits() );*/
+         drawStringf(gScreenInfo.getGameCanvasWidth() - horizMargin - 220, vertMargin, 20, "%4.1f fps | %1.0f ms", mFPSAvg, mPingAvg);
       }
 
       // Render QuickChat / Loadout menus
@@ -350,6 +343,8 @@ void GameUserInterface::render()
       if(theGameType)
          theGameType->renderInterfaceOverlay(mInScoreboardMode);
    }
+
+   renderShutdownMessage();
 
 #if 0
 // Some code for outputting the position of the ship for finding good spawns
@@ -368,9 +363,6 @@ if(con)
 if(mGotControlUpdate)
    drawString(710, 10, 30, "CU");
 #endif
-
-
-   renderShutdownMessage();
 }
 
 
@@ -436,7 +428,7 @@ void GameUserInterface::renderProgressBar()
 
       // Outline
       const S32 left = 200;
-      const S32 width = canvasWidth - 2 * left;
+      const S32 width = gScreenInfo.getGameCanvasWidth() - 2 * left;
       const S32 height = 10;
 
       // For some reason, there are occasions where the status bar doesn't progress all the way over during the load process.
@@ -451,10 +443,10 @@ void GameUserInterface::renderProgressBar()
          S32 w = i ? width : barWidth;
 
          glBegin(i ? GL_LINE_LOOP : GL_POLYGON);
-            glVertex2f(left, canvasHeight - vertMargin);
-            glVertex2f(left + w, canvasHeight - vertMargin);
-            glVertex2f(left + w, canvasHeight - vertMargin - height);
-            glVertex2f(left, canvasHeight - vertMargin - height);
+            glVertex2f(left,     gScreenInfo.getGameCanvasHeight() - vertMargin);
+            glVertex2f(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin);
+            glVertex2f(left + w, gScreenInfo.getGameCanvasHeight() - vertMargin - height);
+            glVertex2f(left,     gScreenInfo.getGameCanvasHeight() - vertMargin - height);
          glEnd();
       }
 
@@ -476,14 +468,14 @@ void GameUserInterface::renderReticle()
       if(!gIniSettings.controlsRelative)
       {
          F32 len = mMousePoint.len();
-         checkMousePos(windowWidth * 100 / canvasWidth,
-                     windowHeight * 100 / canvasHeight);
+         checkMousePos(gScreenInfo.getWindowWidth() * 100 / canvasWidth,
+                     gScreenInfo.getWindowHeight() * 100 / canvasHeight);
 
          if(len > 100)
             realMousePoint *= 100 / len;
       }
 #endif
-      Point offsetMouse = mMousePoint + Point(canvasWidth / 2, canvasHeight / 2);
+      Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
       glEnable(GL_BLEND);
       glColor4f(0,1,0, 0.7);
@@ -501,12 +493,12 @@ void GameUserInterface::renderReticle()
          glColor4f(0,1,0, 0.7);
          glVertex2f(offsetMouse.x - 30, offsetMouse.y);
       }
-      if(offsetMouse.x < canvasWidth - 30)
+      if(offsetMouse.x < gScreenInfo.getGameCanvasWidth() - 30)
       {
          glColor4f(0,1,0, 0.7);
          glVertex2f(offsetMouse.x + 30, offsetMouse.y);
          glColor4f(0,1,0, 0);
-         glVertex2f(canvasWidth, offsetMouse.y);
+         glVertex2f(gScreenInfo.getGameCanvasWidth(), offsetMouse.y);
       }
       if(offsetMouse.y > 30)
       {
@@ -515,12 +507,12 @@ void GameUserInterface::renderReticle()
          glColor4f(0,1,0, 0.7);
          glVertex2f(offsetMouse.x, offsetMouse.y - 30);
       }
-      if(offsetMouse.y < canvasHeight - 30)
+      if(offsetMouse.y < gScreenInfo.getGameCanvasHeight() - 30)
       {
          glColor4f(0,1,0, 0.7);
          glVertex2f(offsetMouse.x, offsetMouse.y + 30);
          glColor4f(0,1,0, 0);
-         glVertex2f(offsetMouse.x, canvasHeight);
+         glVertex2f(offsetMouse.x, gScreenInfo.getGameCanvasHeight());
       }
 
       glEnd();
@@ -532,7 +524,6 @@ void GameUserInterface::renderReticle()
       glColor3f(1,.5,.5);
       drawCenteredString(225, 20, "You are in joystick mode.");
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
-
    }
 }
 
@@ -692,7 +683,7 @@ void GameUserInterface::renderCurrentChat()
                     (gIniSettings.showWeaponIndicators ? UserInterface::chatMargin : UserInterface::vertMargin) +
                     (mMessageDisplayMode == LongFixed ? MessageStoreCount : MessageDisplayCount) * (FONTSIZE + FONT_GAP);
 
-   S32 width = canvasWidth - 2 * UserInterface::horizMargin - (nameWidth - promptSize) + 6;
+   S32 width = gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - (nameWidth - promptSize) + 6;
 
 
    // Render text entry box like thingy
@@ -722,20 +713,24 @@ void GameUserInterface::renderCurrentChat()
 }
 
 
-
 void GameUserInterface::onMouseDragged(S32 x, S32 y)
 {
-   onMouseMoved(x, y);
+   onMouseMoved();
 }
 
-// We'll store the mouse location in mMousePoint for use when we need it
+
 void GameUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   mMousePoint = Point(x - (S32) windowWidth / 2, y - (S32) windowHeight / 2);
-   mMousePoint.x = mMousePoint.x * canvasWidth / windowWidth;
-   mMousePoint.y = mMousePoint.y * canvasHeight / windowHeight;
+   onMouseMoved();
+}
 
-   if (gClientGame->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
+
+void GameUserInterface::onMouseMoved()
+{
+   mMousePoint.set(gScreenInfo.getMousePos()->x - gScreenInfo.getGameCanvasWidth()  / 2,
+                   gScreenInfo.getMousePos()->y - gScreenInfo.getGameCanvasHeight() / 2);
+
+   if(gClientGame->getInCommanderMap())     // Ship not in center of the screen in cmdrs map.  Where is it?
    {
       // If we join a server while in commander's map, we'll be here without a gameConnection and we'll get a crash without this check
       GameConnection *gameConnection = gClientGame->getConnectionToServer();
@@ -749,7 +744,8 @@ void GameUserInterface::onMouseMoved(S32 x, S32 y)
 
       Point p = gClientGame->worldToScreenPoint( ship->getRenderPos() );
 
-      mCurrentMove.angle = atan2(mMousePoint.y + canvasHeight / 2 - p.y, mMousePoint.x + canvasWidth / 2 - p.x);
+      mCurrentMove.angle = atan2(mMousePoint.y + gScreenInfo.getGameCanvasHeight() / 2 - p.y, 
+                                 mMousePoint.x + gScreenInfo.getGameCanvasWidth() / 2 - p.x);
    }
 
    else     // Ship is at center of the screen
@@ -1068,7 +1064,8 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             S32 nameWidth = max(nameSize, promptSize);
             // Above block repeated above
 
-            if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) < canvasWidth - 2 * horizMargin - 3)
+            if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) < 
+                                                gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - 3)
                mLineEditor.addChar(ascii);
          }
       }

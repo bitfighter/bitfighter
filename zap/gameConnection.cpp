@@ -1215,6 +1215,21 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
          gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
          gServerPasswordEntryUserInterface.activate();
       }
+      else if(reason == ReasonServerFull)
+      {
+         UserInterface::reactivateMenu(gMainMenuUserInterface);
+
+         // Display a context-appropriate error message
+         gErrorMsgUserInterface.reset();
+         gErrorMsgUserInterface.setTitle("Connection Terminated");
+
+         gMainMenuUserInterface.activate();
+         gErrorMsgUserInterface.setMessage(2, "Could not connect to server");
+         gErrorMsgUserInterface.setMessage(3, "because server is full.");
+         gErrorMsgUserInterface.setMessage(5, "Please try a different server, or try again later.");
+         gErrorMsgUserInterface.activate();
+
+      }
       else  // Looks like the connection failed for some unknown reason.  Server died?
       {
          UserInterface::reactivateMenu(gMainMenuUserInterface);

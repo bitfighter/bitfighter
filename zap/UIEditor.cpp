@@ -66,7 +66,7 @@ namespace Zap
 
 EditorUserInterface gEditorUserInterface;
 
-const U32 DOCK_WIDTH = 50;
+const S32 DOCK_WIDTH = 50;
 const S32 MIN_SCALE = 300;    // Most zoomed-in scale
 const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 
@@ -151,7 +151,7 @@ void EditorUserInterface::populateDock()
    mDockItems.clear();
    if(mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones)
    {
-      S32 xPos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
+      S32 xPos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
       S32 yPos = 35;
       const S32 spacer = 35;
 
@@ -199,26 +199,27 @@ void EditorUserInterface::populateDock()
       mDockItems.push_back(WorldItem(ItemResource, Point(xPos + 10, yPos), mCurrentTeam, true, 0, 0));
 
       yPos += 25;
-      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 
+      mDockItems.push_back(WorldItem(ItemLoadoutZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
                                      mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
       yPos += 25;
 
       if(!strcmp(mGameType, "HuntersGameType"))
       {
-         mDockItems.push_back(WorldItem(ItemNexus, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 
+         mDockItems.push_back(WorldItem(ItemNexus, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
                                         mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += 25;
       }
       else
       {
-         mDockItems.push_back(WorldItem(ItemGoalZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, yPos), 
+         mDockItems.push_back(WorldItem(ItemGoalZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
                                         mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += spacer;
       }
    }
    else if(mShowMode == NavZoneMode)
    {
-      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(canvasWidth - horizMargin - DOCK_WIDTH + 5, canvasHeight - vertMargin - 82), 
+      mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, 
+                                                            gScreenInfo.getGameCanvasHeight() - vertMargin - 82), 
                                      TEAM_NEUTRAL, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
    }
 }
@@ -947,14 +948,14 @@ static Point sCenter;
 // Called when we shift between windowed and fullscreen mode, before change is made
 void EditorUserInterface::onPreDisplayModeChange()
 {
-   sCenter.set(mCurrentOffset.x - canvasWidth / 2, mCurrentOffset.y - canvasHeight / 2);
+   sCenter.set(mCurrentOffset.x - gScreenInfo.getGameCanvasWidth() / 2, mCurrentOffset.y - gScreenInfo.getGameCanvasHeight() / 2);
 }
 
 // Called when we shift between windowed and fullscreen mode, after change is made
 void EditorUserInterface::onDisplayModeChange()
 {
    // Recenter canvas -- note that canvasWidth may change during displayMode change
-   mCurrentOffset.set(sCenter.x + canvasWidth / 2, sCenter.y + canvasHeight / 2);
+   mCurrentOffset.set(sCenter.x + gScreenInfo.getGameCanvasWidth() / 2, sCenter.y + gScreenInfo.getGameCanvasHeight() / 2);
 
    populateDock();               // If game type has changed, items on dock will change
 }
@@ -1179,21 +1180,22 @@ void EditorUserInterface::renderGrid()
    if(mCurrentScale >= 100)
    {
       F32 gridScale = mCurrentScale * 0.1;      // Draw tenths
+
       F32 xStart = fmod(mCurrentOffset.x, gridScale);
       F32 yStart = fmod(mCurrentOffset.y, gridScale);
 
       glColor3f(.2 * colorFact, .2 * colorFact, .2 * colorFact);
       glBegin(GL_LINES);
-         while(yStart < canvasHeight)
+         while(yStart < gScreenInfo.getGameCanvasHeight())
          {
             glVertex2f(0, yStart);
-            glVertex2f(canvasWidth, yStart);
+            glVertex2f(gScreenInfo.getGameCanvasWidth(), yStart);
             yStart += gridScale;
          }
-         while(xStart < canvasWidth)
+         while(xStart < gScreenInfo.getGameCanvasWidth())
          {
             glVertex2f(xStart, 0);
-            glVertex2f(xStart, canvasHeight);
+            glVertex2f(xStart, gScreenInfo.getGameCanvasHeight());
             xStart += gridScale;
          }
       glEnd();
@@ -1206,16 +1208,16 @@ void EditorUserInterface::renderGrid()
 
       glColor3f(0.4 * colorFact, 0.4 * colorFact, 0.4 * colorFact);
       glBegin(GL_LINES);
-         while(yStart < canvasHeight)
+         while(yStart < gScreenInfo.getGameCanvasHeight())
          {
             glVertex2f(0, yStart);
-            glVertex2f(canvasWidth, yStart);
+            glVertex2f(gScreenInfo.getGameCanvasWidth(), yStart);
             yStart += mCurrentScale;
          }
-         while(xStart < canvasWidth)
+         while(xStart < gScreenInfo.getGameCanvasWidth())
          {
             glVertex2f(xStart, 0);
-            glVertex2f(xStart, canvasHeight);
+            glVertex2f(xStart, gScreenInfo.getGameCanvasHeight());
             xStart += mCurrentScale;
          }
       glEnd();
@@ -1226,13 +1228,15 @@ void EditorUserInterface::renderGrid()
    Point origin = convertLevelToCanvasCoord(Point(0,0));
    glBegin(GL_LINES );
       glVertex2f(0, origin.y);
-      glVertex2f(canvasWidth, origin.y);
+      glVertex2f(gScreenInfo.getGameCanvasWidth(), origin.y);
       glVertex2f(origin.x, 0);
-      glVertex2f(origin.x, canvasHeight);
+      glVertex2f(origin.x, gScreenInfo.getGameCanvasHeight());
    glEnd();
    glLineWidth(gDefaultLineWidth);
 }
 
+
+extern ScreenInfo gScreenInfo;
 
 S32 getDockHeight(ShowMode mode)
 {
@@ -1241,13 +1245,15 @@ S32 getDockHeight(ShowMode mode)
    else if(mode == NavZoneMode)
       return 92;
    else  // mShowMode == ShowAllObjects || mShowMode == ShowAllButNavZones
-      return EditorUserInterface::canvasHeight - 2 * EditorUserInterface::vertMargin;
+      return gScreenInfo.getGameCanvasHeight() - 2 * EditorUserInterface::vertMargin;
 }
 
 
 void EditorUserInterface::renderDock(F32 width)    // width is current wall width, used for displaying info on dock
 {
    // Render item dock down RHS of screen
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    S32 dockHeight = getDockHeight(mShowMode);
 
@@ -1271,31 +1277,31 @@ void EditorUserInterface::renderDock(F32 width)    // width is current wall widt
    else
       pos = snapPoint(convertCanvasToLevelCoord(mMousePos));
 
-   F32 xpos = canvasWidth - horizMargin - DOCK_WIDTH / 2;
+   F32 xpos = gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH / 2;
 
    char text[50];
    glColor(white);
    dSprintf(text, sizeof(text), "%2.2f|%2.2f", pos.x, pos.y);
-   drawStringc(xpos, canvasHeight - vertMargin - 15, 8, text);
+   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 8, text);
 
    // And scale
    dSprintf(text, sizeof(text), "%2.2f", mCurrentScale);
-   drawStringc(xpos, canvasHeight - vertMargin - 25, 8, text);
+   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 25, 8, text);
 
    // Show number of teams
    dSprintf(text, sizeof(text), "Teams: %d",  mTeams.size());
-   drawStringc(xpos, canvasHeight - vertMargin - 35, 8, text);
+   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 35, 8, text);
 
    glColor(mNeedToSave ? red : green);     // Color level name by whether it needs to be saved or not
    dSprintf(text, sizeof(text), "%s%s", mNeedToSave ? "*" : "", mEditFileName.substr(0, mEditFileName.find_last_of('.')).c_str());    // Chop off extension
-   drawStringc(xpos, canvasHeight - vertMargin - 45, 8, text);
+   drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 45, 8, text);
 
    // And wall width as needed
    if(width != NONE)
    {
       glColor(white);
       dSprintf(text, sizeof(text), "Width: %2.0f", width);
-      drawStringc(xpos, canvasHeight - vertMargin - 55, 8, text);
+      drawStringc(xpos, gScreenInfo.getGameCanvasHeight() - vertMargin - 55, 8, text);
    }
 }
 
@@ -1335,8 +1341,8 @@ void EditorUserInterface::renderTextEntryOverlay()
 
       // Render entry box    
       glEnable(GL_BLEND);
-      S32 xpos = (canvasWidth - boxwidth) / 2;
-      S32 ypos = (canvasHeight - boxheight) / 2;
+      S32 xpos = (gScreenInfo.getGameCanvasWidth()  - boxwidth) / 2;
+      S32 ypos = (gScreenInfo.getGameCanvasHeight() - boxheight) / 2;
 
       for(S32 i = 1; i >= 0; i--)
       {
@@ -1537,9 +1543,9 @@ void EditorUserInterface::render()
 
          glColor3f(.1, 1, .1);
          // Center string between left side of screen and edge of dock
-         S32 x = (S32)((S32) canvasWidth - horizMargin - DOCK_WIDTH - 
+         S32 x = (S32)(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH - 
                        getStringWidth(15, itemDef[mDockItems[hoverItem].index].helpText)) / 2;
-         drawString(x, canvasHeight - vertMargin - 15, 15, itemDef[mDockItems[hoverItem].index].helpText);
+         drawString(x, gScreenInfo.getGameCanvasHeight() - vertMargin - 15, 15, itemDef[mDockItems[hoverItem].index].helpText);
       }
    }
 
@@ -1560,7 +1566,7 @@ void EditorUserInterface::render()
 
       glEnable(GL_BLEND);
          glColor4f(mSaveMsgColor.r, mSaveMsgColor.g, mSaveMsgColor.b, alpha);
-         drawCenteredString(canvasHeight - vertMargin - 65, 25, mSaveMsg.c_str());
+         drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 65, 25, mSaveMsg.c_str());
       glDisable(GL_BLEND);
    }
 
@@ -1572,8 +1578,8 @@ void EditorUserInterface::render()
 
       glEnable(GL_BLEND);
          glColor4f(mWarnMsgColor.r, mWarnMsgColor.g, mWarnMsgColor.b, alpha);
-         drawCenteredString(canvasHeight / 4, 25, mWarnMsg1.c_str());
-         drawCenteredString(canvasHeight / 4 + 30, 25, mWarnMsg2.c_str());
+         drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
+         drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
       glDisable(GL_BLEND);
    }
 
@@ -2770,11 +2776,15 @@ S32 EditorUserInterface::findHitItemOnDock(Point canvasPos)
 }
 
 
-extern Point gMousePos;
-
 void EditorUserInterface::onMouseMoved(S32 x, S32 y)
 {
-   mMousePos = convertWindowToCanvasCoord(gMousePos);
+   onMouseMoved();
+}
+
+
+void EditorUserInterface::onMouseMoved()
+{
+   mMousePos.set(gScreenInfo.getMousePos());
 
    if(mCreatingPoly || mCreatingPolyline)
       return;
@@ -3237,8 +3247,9 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    mSnapVertex_i = NONE;
    mSnapVertex_j = NONE;
    itemToLightUp = NONE;
-   mUnmovedItems.erase(itemIndex);
-   onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);   // Reset cursor  
+   mUnmovedItems.erase(itemIndex);\
+
+   onMouseMoved();   // Reset cursor  
 }
 
 
@@ -3319,22 +3330,24 @@ void EditorUserInterface::centerView()
       if(minx == maxx && miny == maxy)    // i.e. a single point item
       {
          mCurrentScale = MIN_SCALE;
-         mCurrentOffset.set(canvasWidth/2 - mCurrentScale * minx, canvasHeight/2 - mCurrentScale * miny);
+         mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2  - mCurrentScale * minx, 
+                            gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * miny);
       }
       else
       {
          F32 midx = (minx + maxx) / 2;
          F32 midy = (miny + maxy) / 2;
 
-         mCurrentScale = min(canvasWidth / (maxx - minx), canvasHeight / (maxy - miny));
+         mCurrentScale = min(gScreenInfo.getGameCanvasWidth() / (maxx - minx), gScreenInfo.getGameCanvasHeight() / (maxy - miny));
          mCurrentScale /= 1.3;      // Zoom out a bit
-         mCurrentOffset.set(canvasWidth / 2 - mCurrentScale * midx, canvasHeight/2 - mCurrentScale * midy);
+         mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2  - mCurrentScale * midx, 
+                            gScreenInfo.getGameCanvasHeight() / 2 - mCurrentScale * midy);
       }
    }
    else     // Put (0,0) at center of screen
    {
       mCurrentScale = 100;
-      mCurrentOffset.set(canvasWidth / 2, canvasHeight / 2);
+      mCurrentOffset.set(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
    }
 }
 
@@ -3581,7 +3594,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(getKeyState(MOUSE_LEFT) && !getKeyState(KEY_CTRL))         // Prevent weirdness
          return;  
 
-      mMousePos = convertWindowToCanvasCoord(gMousePos);
+      mMousePos.set(gScreenInfo.getMousePos());
 
       if(mCreatingPoly || mCreatingPolyline)
       {
@@ -3646,7 +3659,8 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          return;
 
       mDraggingDockItem = NONE;
-      mMousePos = convertWindowToCanvasCoord(gMousePos);
+      mMousePos.set(gScreenInfo.getMousePos());
+
       if(mCreatingPoly || mCreatingPolyline)          // Save any polygon/polyline we might be creating
       {
          saveUndoState(mItems);             // Save state prior to addition of new polygon
@@ -3819,9 +3833,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(mShowMode == ShowWallsOnly && !mDraggingObjects)
          glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);
 
-      populateDock();      // Different modes have different items
+      populateDock();   // Different modes have different items
 
-      onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);   // Reset mouse to spray if appropriate
+      onMouseMoved();   // Reset mouse to spray if appropriate
    }
    else if(keyCode == KEY_LEFT || keyCode == KEY_A)   // Left or A - Pan left
       mLeft = true;
@@ -3950,7 +3964,7 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
          break;
       case MOUSE_LEFT:
       case MOUSE_RIGHT:    // test
-         mMousePos = convertWindowToCanvasCoord(gMousePos);
+         mMousePos.set(gScreenInfo.getMousePos());
 
          if(mDragSelecting)      // We were drawing a selection box
          {
@@ -4042,10 +4056,10 @@ void EditorUserInterface::finishedDragging()
 
 bool EditorUserInterface::mouseOnDock()
 {
-   return (mMousePos.x >= canvasWidth - DOCK_WIDTH - horizMargin &&
-           mMousePos.x <= canvasWidth - horizMargin &&
-           mMousePos.y >= canvasHeight - vertMargin - getDockHeight(mShowMode) &&
-           mMousePos.y <= canvasHeight - vertMargin);
+   return (mMousePos.x >= gScreenInfo.getGameCanvasWidth() - DOCK_WIDTH - horizMargin &&
+           mMousePos.x <= gScreenInfo.getGameCanvasWidth() - horizMargin &&
+           mMousePos.y >= gScreenInfo.getGameCanvasHeight() - vertMargin - getDockHeight(mShowMode) &&
+           mMousePos.y <= gScreenInfo.getGameCanvasHeight() - vertMargin);
 }
 
 
@@ -4881,9 +4895,9 @@ S32 WorldItem::getRadius(F32 scale)
 Point WorldItem::getSelectionOffset(F32 scale)
 {
    if(index == ItemTurret && renderFull(scale))
-      return Point(0, .075);
+      return Point(0.0, .075);
    else if(index == ItemForceField && renderFull(scale))
-      return Point(0, .035);     
+      return Point(0.0, .035);     
    else
       return Point(0, 0);     // No offset for most items
 }

@@ -422,7 +422,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 
          F32 dist = pos.distanceTo(dests[i]);
 
-         Point mid = Point(pos.x + .75 * cosa * dist, pos.y + .75 * sina * dist);
+         Point mid(pos.x + .75 * cosa * dist, pos.y + .75 * sina * dist);
 
          glBegin(GL_POLYGON);
             glColor4f(1, 1, 1, .25 * alpha);
@@ -1195,33 +1195,35 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
    const S32 GAUGE_WIDTH = 200;
    const S32 GUAGE_HEIGHT = 20;
 
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    F32 full = F32(energy) / F32(maxEnergy) * GAUGE_WIDTH;
 
    // Guage fill
    glBegin(GL_POLYGON);
       glColor3f(0, 0, 1);
-      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
 
       glColor3f(0, 1, 1);
-      glVertex2f(UserInterface::horizMargin + full, UserInterface::canvasHeight - UserInterface::vertMargin);
-      glVertex2f(UserInterface::horizMargin + full, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin + full, canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin + full, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
    glEnd();
 
    // Guage outline
    glBegin(GL_LINES);
       glColor3f(1, 1 ,1);
-      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2f(UserInterface::horizMargin, UserInterface::canvasHeight - UserInterface::vertMargin);
-      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, UserInterface::canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
-      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, UserInterface::canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin, canvasHeight - UserInterface::vertMargin);
+      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin - GUAGE_HEIGHT);
+      glVertex2f(UserInterface::horizMargin + GAUGE_WIDTH, canvasHeight - UserInterface::vertMargin);
 
       // Show safety line
       F32 cutoffx = (cooldownThreshold * GAUGE_WIDTH) / maxEnergy;
 
       glColor3f(1, 1, 0);
-      glVertex2f(UserInterface::horizMargin + cutoffx, UserInterface::canvasHeight - UserInterface::vertMargin - 23);
-      glVertex2f(UserInterface::horizMargin + cutoffx, UserInterface::canvasHeight - UserInterface::vertMargin + 4);
+      glVertex2f(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin - 23);
+      glVertex2f(UserInterface::horizMargin + cutoffx, canvasHeight - UserInterface::vertMargin + 4);
    glEnd();
 }
 
@@ -1583,7 +1585,10 @@ void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask)
    glPushMatrix();
 
    glScalef(scale * fact, scale * fact, 0);  // Scale it down...
-   glTranslatef( (UserInterface::canvasWidth / (fact * scale) - 3609) / 2, yPos / (fact * scale) - 594 / 2, 0);      // 3609 is the diff btwn the min and max x coords below, 594 is same for y
+
+   // 3609 is the diff btwn the min and max x coords below, 594 is same for y
+   glTranslatef( (gScreenInfo.getGameCanvasWidth() / (fact * scale) - 3609) / 2, yPos / (fact * scale) - 594 / 2, 0);      
+   
    glRotatef(angle, 0, 0, 1);
 
    U32 pos = 0;

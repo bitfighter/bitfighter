@@ -433,6 +433,8 @@ extern IniSettings gIniSettings;
 
 void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    if(mLevelInfoDisplayTimer.getCurrent() || gGameUserInterface.mMissionOverlayActive)
    {
       F32 alpha = 1;
@@ -441,24 +443,24 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       glEnable(GL_BLEND);
          glColor4f(1, 1, 1, alpha);
-         UserInterface::drawCenteredStringf(UserInterface::canvasHeight / 2 - 180, 30, "Level: %s", mLevelName.getString());
-         UserInterface::drawCenteredStringf(UserInterface::canvasHeight / 2 - 140, 30, "Game Type: %s", getGameTypeString());
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", mLevelName.getString());
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", getGameTypeString());
          glColor4f(0, 1, 1, alpha);
-         UserInterface::drawCenteredString(UserInterface::canvasHeight / 2 - 100, 20, getInstructionString());
+         UserInterface::drawCenteredString(canvasHeight / 2 - 100, 20, getInstructionString());
          glColor4f(1, 0, 1, alpha);
-         UserInterface::drawCenteredString(UserInterface::canvasHeight / 2 - 75, 20, mLevelDescription.getString());
+         UserInterface::drawCenteredString(canvasHeight / 2 - 75, 20, mLevelDescription.getString());
 
          glColor4f(0, 1, 0, alpha);
-         UserInterface::drawCenteredStringf(UserInterface::canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
+         UserInterface::drawCenteredStringf(canvasHeight - 100, 20, "Press [%s] to see this information again", keyCodeToString(keyMISSION));
 
          if(strcmp(mLevelCredits.getString(), ""))    // Credits string is not empty
          {
             glColor4f(1, 0, 0, alpha);
-            UserInterface::drawCenteredStringf(UserInterface::canvasHeight / 2 + 50, 20, "%s", mLevelCredits.getString());
+            UserInterface::drawCenteredStringf(canvasHeight / 2 + 50, 20, "%s", mLevelCredits.getString());
          }
 
          glColor4f(1, 1, 0, alpha);
-         UserInterface::drawCenteredStringf(UserInterface::canvasHeight / 2 - 50, 20, "Score to Win: %d", mWinningScore);
+         UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", mWinningScore);
 
       glDisable(GL_BLEND);
 
@@ -480,12 +482,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    if((mGameOver || scoreboardVisible) && mTeams.size() > 0)      // Render scoreboard
    {
-      U32 totalWidth = UserInterface::canvasWidth - UserInterface::horizMargin * 2;
+      U32 totalWidth = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin * 2;
       S32 teams = isTeamGame() ? mTeams.size() : 1;
 
-      U32 columnCount = teams;
-      if(columnCount > 2)
-         columnCount = 2;
+      U32 columnCount = min(teams, 2);
 
       U32 teamWidth = totalWidth / columnCount;
       S32 maxTeamPlayers = 0;
@@ -509,7 +509,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       U32 teamAreaHeight = isTeamGame() ? 40 : 0;
       U32 numTeamRows = (mTeams.size() + 1) >> 1;
 
-      U32 totalHeight = (UserInterface::canvasHeight - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
+      U32 totalHeight = (gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin * 2) / numTeamRows - (numTeamRows - 1) * 2;
       U32 maxHeight = min(30, (totalHeight - teamAreaHeight) / maxTeamPlayers);
 
       U32 sectionHeight = (teamAreaHeight + maxHeight * maxTeamPlayers);
@@ -517,7 +517,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       for(S32 i = 0; i < teams; i++)
       {
-         S32 yt = (UserInterface::canvasHeight - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
+         S32 yt = (gScreenInfo.getGameCanvasHeight() - totalHeight) / 2 + (i >> 1) * (sectionHeight + 2);  // y-top
          S32 yb = yt + sectionHeight;     // y-bottom
          S32 xl = 10 + (i & 1) * teamWidth;
          S32 xr = xl + teamWidth - 2;
@@ -606,7 +606,9 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       for(S32 i = 0; i < teams.size(); i++)
       {
-         Point pos(UserInterface::canvasWidth - UserInterface::horizMargin - 35, UserInterface::canvasHeight - UserInterface::vertMargin - lroff - i * 38);
+         Point pos(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 35, 
+                   gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 38);
+
          renderFlag(pos + Point(-20, 18), teams[i].color);
          glColor3f(1,1,1);
          UserInterface::drawStringf(pos.x, pos.y, 32, "%d", teams[i].getScore());
@@ -727,12 +729,14 @@ void GameType::renderTimeLeft()
    S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", getShortName(), mWinningScore);
 
    glColor3f(0,1,1);
-   UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65 - len - 5,
-      UserInterface::canvasHeight - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, gtsize, "[%s/%d]", getShortName(), mWinningScore);
+   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65 - len - 5,
+                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, 
+                              gtsize, "[%s/%d]", getShortName(), mWinningScore);
 
    glColor3f(1,1,1);
-   UserInterface::drawStringf(UserInterface::canvasWidth - UserInterface::horizMargin - 65,
-      UserInterface::canvasHeight - UserInterface::vertMargin - 20, size, "%02d:%02d", minsRemaining, secsRemaining);
+   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65,
+                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20, 
+                              size, "%02d:%02d", minsRemaining, secsRemaining);
 }
 
 

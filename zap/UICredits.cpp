@@ -173,7 +173,7 @@ CreditsScroller::CreditsScroller()
    // thus creating groups, the first of which is generally the job, followed
    // by 0 or more people doing that job
 
-   S32 pos = (UserInterface::canvasHeight + CreditSpace);
+   S32 pos = (gScreenInfo.getGameCanvasHeight() + CreditSpace);
    S32 index = 0;
    CreditsInfo c;
 
@@ -226,8 +226,8 @@ void CreditsScroller::render()
    glBegin(GL_POLYGON);
       glVertex2f(0, 0);
       glVertex2f(0, 150);
-      glVertex2f(UserInterface::canvasWidth, 150);
-      glVertex2f(UserInterface::canvasWidth, 0);
+      glVertex2f(gScreenInfo.getGameCanvasWidth(), 150);
+      glVertex2f(gScreenInfo.getGameCanvasWidth(), 0);
    glEnd();
 
    renderStaticBitfighterLogo();    // And add our logo at the top of the page
@@ -280,55 +280,63 @@ void SplashUserInterface::render()
       glColor3f(0, mSplashTimer.getFraction(), 1);
 
       if(mType == 1)          // Twirl
-         renderBitfighterLogo((S32)canvasHeight / 2, (1 - mSplashTimer.getFraction()), (1 - mSplashTimer.getFraction()) * 360.0f);
+         renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
+                             (1 - mSplashTimer.getFraction()), (1 - mSplashTimer.getFraction()) * 360.0f);
       else if(mType == 2)     // Zoom in
-         renderBitfighterLogo((S32)canvasHeight / 2, 1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, (mSplashTimer.getFraction()) * 20);
+         renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 
+                              1 + pow(mSplashTimer.getFraction(), 2) * 20.0f, (mSplashTimer.getFraction()) * 20);
       else if(mType == 3)     // Single letters
       {
          F32 fr = pow(mSplashTimer.getFraction(), 2);
-         renderBitfighterLogo(canvasHeight / 2, fr * 20.0f + 1, 0, 1 << 0);
-         renderBitfighterLogo(canvasHeight / 2, fr * 50.0f + 1, 0, 1 << 1);
-         renderBitfighterLogo(canvasHeight / 2, fr * 10.0f + 1, 0, 1 << 2);
-         renderBitfighterLogo(canvasHeight / 2, fr *  2.0f + 1, 0, 1 << 3);
-         renderBitfighterLogo(canvasHeight / 2, fr * 14.0f + 1, 0, 1 << 4);
-         renderBitfighterLogo(canvasHeight / 2, fr *  6.0f + 1, 0, 1 << 5);
-         renderBitfighterLogo(canvasHeight / 2, fr * 33.0f + 1, 0, 1 << 6);
-         renderBitfighterLogo(canvasHeight / 2, fr *  9.0f + 1, 0, 1 << 7);
-         renderBitfighterLogo(canvasHeight / 2, fr * 25.0f + 1, 0, 1 << 8);
-         renderBitfighterLogo(canvasHeight / 2, fr * 15.0f + 1, 0, 1 << 9);
+
+         S32 ctr = gScreenInfo.getGameCanvasHeight() / 2;
+
+         renderBitfighterLogo(ctr, fr * 20.0f + 1, 0, 1 << 0);
+         renderBitfighterLogo(ctr, fr * 50.0f + 1, 0, 1 << 1);
+         renderBitfighterLogo(ctr, fr * 10.0f + 1, 0, 1 << 2);
+         renderBitfighterLogo(ctr, fr *  2.0f + 1, 0, 1 << 3);
+         renderBitfighterLogo(ctr, fr * 14.0f + 1, 0, 1 << 4);
+         renderBitfighterLogo(ctr, fr *  6.0f + 1, 0, 1 << 5);
+         renderBitfighterLogo(ctr, fr * 33.0f + 1, 0, 1 << 6);
+         renderBitfighterLogo(ctr, fr *  9.0f + 1, 0, 1 << 7);
+         renderBitfighterLogo(ctr, fr * 25.0f + 1, 0, 1 << 8);
+         renderBitfighterLogo(ctr, fr * 15.0f + 1, 0, 1 << 9);
       }
    }
    else if(mPhase == 2)           // Resting phase
    {
       glColor3f(0, 0, 1);
-      renderBitfighterLogo(canvasHeight / 2, 1, 0);
+      renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 1, 0);
    }
    else if(mPhase == 3)           // Rising phase
    {
       glColor3f(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
-      renderBitfighterLogo((S32)(73.0f + ((F32) canvasHeight / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1, 0);
+      renderBitfighterLogo((S32)(73.0f + ((F32) gScreenInfo.getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1, 0);
    }
 }
+
 
 void SplashUserInterface::quit()
 {
    UserInterface::reactivatePrevUI();      //gMainMenuUserInterface
 }
 
-extern Point gMousePos;
 
 void SplashUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    quitting = true;
    quit();                              // Quit the interface when any key is pressed...  any key at all.
 
-   if (keyCode != KEY_ESCAPE && keyCode != KEY_ENTER && keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT)    // Unless user hit Enter or Escape, or some other thing
+   if(keyCode != KEY_ESCAPE && keyCode != KEY_ENTER && keyCode != MOUSE_LEFT && keyCode != MOUSE_MIDDLE && keyCode != MOUSE_RIGHT)    // Unless user hit Enter or Escape, or some other thing
    {
       current->onKeyDown(keyCode, ascii);                // pass keystroke on  (after reactivate in quit(), current is now the underlying UI)
    }
 
    if(keyCode == MOUSE_LEFT && keyCode == MOUSE_MIDDLE && keyCode == MOUSE_RIGHT)
-      current->onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);
+   {
+      const Point *mousePos = gScreenInfo.getWindowMousePos();
+      current->onMouseMoved((S32)mousePos->x, (S32)mousePos->y);
+   }
 }
 
 

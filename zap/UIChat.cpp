@@ -41,7 +41,6 @@ Vector<StringTableEntry> AbstractChat::mPlayersInGlobalChat;
 
 const char *ARROW = ">";
 const S32 AFTER_ARROW_SPACE = 5;
-const S32 lineWidth = UserInterface::canvasWidth - 2 * UserInterface::horizMargin;
 
 extern string gPlayerName;
 
@@ -126,7 +125,8 @@ void AbstractChat::addCharToMessage(char ascii)
                    UserInterface::getStringWidth(CHAT_TIME_FONT_SIZE, "[00:00] ");
 
    // Only add char if there's room
-   if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mLineEditor.c_str(), ascii) < lineWidth)
+   if(xpos + (S32) UserInterface::getStringWidthf(CHAT_FONT_SIZE, "%s%c", mLineEditor.c_str(), ascii) < 
+                                                  gScreenInfo.getGameCanvasWidth() - 2 * UserInterface::horizMargin)
       mLineEditor.addChar(ascii);
 }
 
@@ -209,7 +209,7 @@ void AbstractChat::renderMessages(U32 ypos, U32 numberToDisplay)            // y
 void AbstractChat::renderMessageComposition(S32 ypos)
 {
    const char *PROMPT_STR = "> ";     // For composition only
-   const S32 xStartPos = UserInterface::horizMargin + UserInterface::getStringWidth(AbstractChat::CHAT_FONT_SIZE, PROMPT_STR);
+   const S32 xStartPos = UserInterface::horizMargin + UserInterface::getStringWidth(CHAT_FONT_SIZE, PROMPT_STR);
 
    glColor3f(0,1,1);
    UserInterface::drawString(UserInterface::horizMargin, ypos, CHAT_FONT_SIZE, PROMPT_STR);
@@ -306,9 +306,9 @@ void ChatUserInterface::render()
       glEnable(GL_BLEND);
       glBegin(GL_POLYGON);
          glVertex2f(0, 0);
-         glVertex2f(canvasWidth, 0);
-         glVertex2f(canvasWidth, canvasHeight);
-         glVertex2f(0, canvasHeight);
+         glVertex2f(gScreenInfo.getGameCanvasWidth(), 0);
+         glVertex2f(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
+         glVertex2f(0, gScreenInfo.getGameCanvasHeight());
       glEnd();
       glDisable(GL_BLEND);
    }
@@ -318,7 +318,7 @@ void ChatUserInterface::render()
 
    // And footer
    glColor3f(0, 1, 0);
-   S32 vertFooterPos = canvasHeight - vertMargin - VERT_FOOTER_SIZE;
+   S32 vertFooterPos = gScreenInfo.getGameCanvasHeight() - vertMargin - VERT_FOOTER_SIZE;
    drawCenteredString(vertFooterPos, VERT_FOOTER_SIZE - 2, "Type your message | ENTER to send | ESC exits");
 
    renderChatters(horizMargin, vertFooterPos - CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2);
@@ -328,12 +328,12 @@ void ChatUserInterface::render()
 
    U32 y = UserInterface::vertMargin + 60;
 
-   static const S32 chatAreaHeight = canvasHeight - 2 * vertMargin -                   // Screen area less margins
-                     VERT_FOOTER_SIZE -                                                // Instructions at the bottom
-                     CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2  -                      // Names of those in chatroom
-                     MENU_TITLE_SIZE - TITLE_SUBTITLE_GAP - MENU_SUBTITLE_SIZE -       // Title/subtitle display
-                     CHAT_FONT_SIZE - CHAT_FONT_MARGIN -                               // Chat composition
-                     CHAT_FONT_SIZE;                                                   // Not sure... just need a little more space??
+   static const S32 chatAreaHeight = gScreenInfo.getGameCanvasHeight() - 2 * vertMargin -   // Screen area less margins
+                     VERT_FOOTER_SIZE -                                                     // Instructions at the bottom
+                     CHAT_NAMELIST_SIZE - CHAT_FONT_MARGIN * 2  -                           // Names of those in chatroom
+                     MENU_TITLE_SIZE - TITLE_SUBTITLE_GAP - MENU_SUBTITLE_SIZE -            // Title/subtitle display
+                     CHAT_FONT_SIZE - CHAT_FONT_MARGIN -                                    // Chat composition
+                     CHAT_FONT_SIZE;                                                        // Not sure... just need a little more space??
 
    static const S32 MessageDisplayCount = chatAreaHeight / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN);
 

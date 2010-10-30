@@ -175,7 +175,7 @@ static S32 showFoldersBlock(F32 textsize, S32 ypos, S32 gap)
 
    for(S32 i = 0; i < names.size(); i++)
    {
-      S32 xpos = (UserInterface::canvasWidth - totLen) / 2;
+      S32 xpos = (gScreenInfo.getGameCanvasWidth() - totLen) / 2;
       glColor3f(0,1,1);
       UserInterface::drawString(xpos, ypos, (S32)textsize, names[i]);
       xpos += nameWidth + spaceWidth;
@@ -342,7 +342,7 @@ void DiagnosticUserInterface::render()
       glColor3f(0,1,1);
       glBegin(GL_LINE_LOOP);
          S32 x1 = horizMargin;
-         S32 x2 = canvasWidth - horizMargin;
+         S32 x2 = gScreenInfo.getGameCanvasWidth() - horizMargin;
          S32 y1 = vertMargin + 27;
          S32 y2 = vertMargin + 90;
 
@@ -390,7 +390,7 @@ void DiagnosticUserInterface::render()
 
       // Key states
       glColor3f(1, 1, 0);
-      U32 hpos = horizMargin;
+      S32 hpos = horizMargin;
       drawString( hpos, ypos, textsize, "Keys down: ");
       hpos += getStringWidth(textsize, "Keys down: ");
 
@@ -415,7 +415,7 @@ void DiagnosticUserInterface::render()
       //////////
       // Draw joystick and button map
       hpos = 100;
-      ypos = gScreenHeight - vertMargin - 110;
+      ypos = gScreenInfo.getGameCanvasHeight() - vertMargin - 110;
       //S32 butts = gControllerButtonCounts[something here];
 
       renderDPad(Point(hpos, ypos), 25, getKeyState(BUTTON_DPAD_UP), getKeyState(BUTTON_DPAD_DOWN),
@@ -527,7 +527,8 @@ void DiagnosticUserInterface::render()
       
       for(j = 0; j < 4 && i < allLevels.length(); j++)
       {
-         for(; getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < gScreenWidth - 2 * horizMargin && i < allLevels.length(); i++)   // first arg empty
+         for(; getStringWidth(textsize - 6, allLevels.substr(k, i - k).c_str()) < 
+               gScreenInfo.getGameCanvasWidth() - 2 * horizMargin && i < allLevels.length(); i++)   // first arg empty
          {
             ;     // Do nothing...
          }

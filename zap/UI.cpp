@@ -63,15 +63,6 @@ extern S32 gLoadoutIndicatorHeight;
 
 S32 UserInterface::chatMargin = UserInterface::vertMargin + gLoadoutIndicatorHeight + 5;
 
-extern const S32 gScreenHeight;
-extern const S32 gScreenWidth;
-
-
-S32 UserInterface::canvasWidth = gScreenWidth;
-S32 UserInterface::canvasHeight = gScreenHeight;
-S32 UserInterface::windowWidth = gScreenWidth;
-S32 UserInterface::windowHeight = gScreenHeight;
-
 UserInterface *UserInterface::current = NULL;
 Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
 
@@ -189,7 +180,7 @@ extern ServerGame *gServerGame;
 // Clean up and get ready to render
 void UserInterface::renderCurrent()    // static
 {
-   glViewport(0, 0, windowWidth, windowHeight);
+   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
 
    glClearColor(0, 0, 0, 1.0);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -204,11 +195,10 @@ void UserInterface::renderCurrent()    // static
    // By putting this here, it will always get rendered, regardless of which UI (if any) is active (kind of ugly)
    // This block will dump any keys and raw stick button inputs depressed to the screen when in diagnostic mode
    // This should make it easier to see what happens when users press joystick buttons
-
    if(gIniSettings.diagnosticKeyDumpMode)
    {
      glColor3f(1, 1, 1);
-     S32 vpos = gScreenHeight / 2;
+     S32 vpos = gScreenInfo.getGameCanvasHeight() / 2;
      S32 hpos = horizMargin;
 
       glColor3f(1, 1, 1);
@@ -382,6 +372,14 @@ void UserInterface::drawStringfc(F32 x, F32 y, U32 size, const char *format, ...
    drawStringc(x, y, size, buffer);
 }
 
+
+void UserInterface::drawStringfr(F32 x, F32 y, U32 size, const char *format, ...)
+{
+   makeBuffer;
+   S32 pos = getStringWidth(size, buffer);
+   drawStringc(x - pos, y, size, buffer);
+}
+
    
 S32 UserInterface::drawStringAndGetWidth(F32 x, F32 y, U32 size, const char *string)
 {
@@ -407,7 +405,7 @@ void UserInterface::drawStringc(F32 x, F32 y, U32 size, const char *string)
 
 S32 UserInterface::drawCenteredString(S32 y, U32 size, const char *string)
 {
-   S32 x = (S32)((S32) canvasWidth - getStringWidth(size, string)) / 2;
+   S32 x = (gScreenInfo.getGameCanvasWidth() - getStringWidth(size, string)) / 2;
    drawString(x, y, size, string);
    return x;
 }
@@ -423,7 +421,7 @@ S32 UserInterface::drawCenteredStringf(S32 y, U32 size, const char *format, ...)
 // Figure out the first position of our CenteredString
 S32 UserInterface::getCenteredStringStartingPos(U32 size, const char *string)
 {
-   S32 x = canvasWidth / 2;                  // x must be S32 in case it leaks off left side of screen
+   S32 x = gScreenInfo.getGameCanvasWidth() / 2;      // x must be S32 in case it leaks off left side of screen
    x -= getStringWidth(size, string) / 2;
 
    return x;
@@ -465,9 +463,10 @@ S32 UserInterface::drawCenteredString2Colf(S32 y, U32 size, bool leftCol, const 
    return drawCenteredString2Col(y, size, leftCol, buffer);
 }
 
-
+   
 S32 UserInterface::get2ColStartingPos(bool leftCol)      // Must be S32 to avoid problems downstream
 {
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    return leftCol ? (canvasWidth / 4) : (canvasWidth - (canvasWidth / 4));
 }
 
@@ -530,7 +529,7 @@ S32 UserInterface::drawCenteredStringPair2Colf(S32 y, U32 size, bool leftCol, co
 // Draw a left-justified string at column # (1-4)
 void UserInterface::drawString4Col(S32 y, U32 size, U32 col, const char *string)
 {
-   drawString(horizMargin + ((canvasWidth - 2 * horizMargin) / 4 * (col - 1)), y, size, string);
+   drawString(horizMargin + ((gScreenInfo.getGameCanvasWidth() - 2 * horizMargin) / 4 * (col - 1)), y, size, string);
 }
 
 
@@ -571,6 +570,9 @@ void UserInterface::playBoop()
 
 void UserInterface::renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset)
 {
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    const S32 inset = 100;        // Inset for left and right edges of box
    const S32 titleSize = 30;     // Size of title
    const S32 titleGap = 10;      // Spacing between title and first line of text

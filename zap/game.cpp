@@ -67,8 +67,7 @@ ClientGame *gClientGame = NULL;
 
 Rect gServerWorldBounds = Rect();
 
-extern const S32 gScreenHeight;
-extern const S32 gScreenWidth;
+extern ScreenInfo gScreenInfo;
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
@@ -954,8 +953,6 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 
 extern void JoystickUpdateMove(Move *theMove);
 extern IniSettings gIniSettings;
-extern Point gMousePos;
-
 
 void ClientGame::idle(U32 timeDelta)
 {
@@ -981,7 +978,8 @@ void ClientGame::idle(U32 timeDelta)
       else
          mCommanderZoomDelta -= timeDelta;
 
-      gGameUserInterface.onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y); // Keep ship pointed towards mouse
+      const Point *winMousePos = gScreenInfo.getWindowMousePos();
+      gGameUserInterface.onMouseMoved();     // Keep ship pointed towards mouse
    }
    else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime) // Zooming out to commander's map
    {
@@ -989,9 +987,11 @@ void ClientGame::idle(U32 timeDelta)
       if(mCommanderZoomDelta > CommanderMapZoomTime)
          mCommanderZoomDelta = CommanderMapZoomTime;
 
-      gGameUserInterface.onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y); // Keep ship pointed towards mouse
-
+      const Point *winMousePos = gScreenInfo.getWindowMousePos();
+      gGameUserInterface.onMouseMoved();  // Keep ship pointed towards mouse
    }
+   // else we're not zooming in or out, which is most of the time
+
 
    Move *theMove = gGameUserInterface.getCurrentMove();       // Get move from keyboard input
 
@@ -1000,8 +1000,6 @@ void ClientGame::idle(U32 timeDelta)
    // kill the joystick.  The design of combining joystick input and move updating really sucks.
    if(gIniSettings.inputMode == Joystick || UserInterface::current == &gOptionsMenuUserInterface)
       JoystickUpdateMove(theMove);
-
-   //gGameUserInterface.checkCurrentMove(theMove);     // In ChatMode and QuickChatMode, stop all action by overwriting the current move with zeros
 
 
    theMove->time = timeDelta;
@@ -1199,8 +1197,12 @@ S32 QSORT_CALLBACK renderSortCompare(GameObject **a, GameObject **b)
 }
 
 
+// Called from renderObjectiveArrow() & ship's onMouseMoved() when in commander's map
 Point ClientGame::worldToScreenPoint(Point p)
 {
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    GameObject *controlObject = mConnectionToServer->getControlObject();
 
    Ship *ship = dynamic_cast<Ship *>(controlObject);
@@ -1208,17 +1210,17 @@ Point ClientGame::worldToScreenPoint(Point p)
       return Point(0,0);
 
    Point position = ship->getRenderPos();    // Ship's location (which will be coords of screen's center)
-
+   
    if(mCommanderZoomDelta)    // In commander's map, or zooming in/out
    {
       F32 zoomFrac = getCommanderZoomFraction();
       Point worldCenter = mWorldBounds.getCenter();
       Point worldExtents = mWorldBounds.getExtents();
-      worldExtents.x *= UserInterface::canvasWidth / F32(UserInterface::canvasWidth - (UserInterface::horizMargin * 2));
-      worldExtents.y *= UserInterface::canvasHeight / F32(UserInterface::canvasHeight - (UserInterface::vertMargin * 2));
+      worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
+      worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
       F32 aspectRatio = worldExtents.x / worldExtents.y;
-      F32 screenAspectRatio = UserInterface::canvasWidth / F32(UserInterface::canvasHeight);
+      F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
       if(aspectRatio > screenAspectRatio)
          worldExtents.y *= aspectRatio / screenAspectRatio;
       else
@@ -1228,17 +1230,17 @@ Point ClientGame::worldToScreenPoint(Point p)
       Point visSize = computePlayerVisArea(ship) * 2;
       Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
-      Point visScale(UserInterface::canvasWidth / modVisSize.x,
-         UserInterface::canvasHeight / modVisSize.y );
+      Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
 
-      Point ret = (p - offset) * visScale + Point((gScreenWidth / 2), (gScreenHeight / 2));
+      Point ret = (p - offset) * visScale + Point((gScreenInfo.getGameCanvasWidth() / 2), (gScreenInfo.getGameCanvasHeight() / 2));
       return ret;
    }
    else                       // Normal map view
    {
       Point visExt = computePlayerVisArea(ship);
-      Point scaleFactor((gScreenWidth / 2) / visExt.x, (gScreenHeight / 2) / visExt.y);
-      Point ret = (p - position) * scaleFactor + Point((gScreenWidth / 2), (gScreenHeight / 2));
+      Point scaleFactor((gScreenInfo.getGameCanvasWidth() / 2) / visExt.x, (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y);
+
+      Point ret = (p - position) * scaleFactor + Point((gScreenInfo.getGameCanvasWidth() / 2), (gScreenInfo.getGameCanvasHeight() / 2));
       return ret;
    }
 }
@@ -1249,7 +1251,7 @@ void ClientGame::renderSuspended()
    glColor3f(1,1,0);
    S32 textHeight = 20;
    S32 textGap = 5;
-   S32 ypos = gScreenHeight / 2 - 3 * (textHeight + textGap);
+   S32 ypos = gScreenInfo.getGameCanvasHeight() / 2 - 3 * (textHeight + textGap);
 
    UserInterface::drawCenteredString(ypos, textHeight, "==> Game is currently suspended, waiting for other players <==");
    ypos += textHeight + textGap;
@@ -1267,17 +1269,20 @@ static Vector<GameObject *> renderObjects;
 void ClientGame::renderCommander()
 {
    F32 zoomFrac = getCommanderZoomFraction();
+   
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    // Set up the view to show the whole level
    mWorldBounds = gGameUserInterface.mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : computeWorldObjectExtents(); 
 
    Point worldCenter = mWorldBounds.getCenter();
    Point worldExtents = mWorldBounds.getExtents();
-   worldExtents.x *= UserInterface::canvasWidth / F32(UserInterface::canvasWidth - (UserInterface::horizMargin * 2));
-   worldExtents.y *= UserInterface::canvasHeight / F32(UserInterface::canvasHeight - (UserInterface::vertMargin * 2));
+   worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
+   worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
    F32 aspectRatio = worldExtents.x / worldExtents.y;
-   F32 screenAspectRatio = UserInterface::canvasWidth / F32(UserInterface::canvasHeight);
+   F32 screenAspectRatio = F32(canvasWidth) / F32(canvasHeight);
    if(aspectRatio > screenAspectRatio)
       worldExtents.y *= aspectRatio / screenAspectRatio;
    else
@@ -1293,9 +1298,10 @@ void ClientGame::renderCommander()
    Point visSize = u ? computePlayerVisArea(u) * 2 : worldExtents;
    Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
-   glTranslatef(gScreenWidth / 2, gScreenHeight / 2, 0);    // Put (0,0) at the center of the screen
+   // Put (0,0) at the center of the screen
+   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);    
 
-   Point visScale(UserInterface::canvasWidth / modVisSize.x, UserInterface::canvasHeight / modVisSize.y );
+   Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
    glScalef(visScale.x, visScale.y, 1);
 
    Point offset = (worldCenter - position) * zoomFrac + position;
@@ -1410,15 +1416,18 @@ void ClientGame::renderCommander()
 
 void ClientGame::renderOverlayMap()
 {
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    GameObject *controlObject = mConnectionToServer->getControlObject();
    Ship *u = dynamic_cast<Ship *>(controlObject);
 
    Point position = u->getRenderPos();
 
-   S32 mapWidth = UserInterface::canvasWidth / 4;
-   S32 mapHeight = UserInterface::canvasHeight / 4;
+   S32 mapWidth = canvasWidth / 4;
+   S32 mapHeight = canvasHeight / 4;
    S32 mapX = UserInterface::horizMargin;        // This may need to the the UL corner, rather than the LL one
-   S32 mapY = UserInterface::canvasHeight - UserInterface::vertMargin - mapHeight;
+   S32 mapY = canvasHeight - UserInterface::vertMargin - mapHeight;
    F32 mapScale = 0.10;
 
    glBegin(GL_LINE_LOOP);
@@ -1487,10 +1496,13 @@ void ClientGame::renderNormal()
    Point position = u->getRenderPos();
 
    glPushMatrix();
-   glTranslatef(gScreenWidth / 2, gScreenHeight / 2, 0);       // Put (0,0) at the center of the screen
+
+   // Put (0,0) at the center of the screen
+   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);       
 
    Point visExt = computePlayerVisArea(dynamic_cast<Ship *>(u));
-   glScalef((gScreenWidth / 2) / visExt.x, (gScreenHeight / 2) / visExt.y, 1);
+   glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
+            (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
 
    glTranslatef(-position.x, -position.y, 0);
 

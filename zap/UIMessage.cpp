@@ -45,11 +45,12 @@ void MessageUserInterface::onActivate()
       mFadeTimer.reset(mFadeTime);
 }
 
+
 void MessageUserInterface::reset()
 {
    mTitle = "Message";     // Default title
-   mWidth = gScreenWidth - 200;
-   mHeight = gScreenHeight - 200;
+   mWidth = gScreenInfo.getGameCanvasWidth() - 200;
+   mHeight = gScreenInfo.getGameCanvasHeight() - 200;
    mFadeTime = 0;          // 0 --> "Hit any key to continue"
    mMessageColor = Color(1, 1, 1);
    mVertOffset = 0;
@@ -58,6 +59,7 @@ void MessageUserInterface::reset()
    for(S32 i = 0; i < mNumLines; i++)
       mMessage[i] = "";
 }
+
 
 // First line is 1
 void MessageUserInterface::setMessage(U32 id, char *message)
@@ -121,8 +123,11 @@ void MessageUserInterface::idle(U32 timeDelta)
 
 void MessageUserInterface::render()
 {
-   U32 hInset = (gScreenHeight - mHeight) / 2;
-   U32 wInset = (gScreenWidth - mWidth) / 2;
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   U32 hInset = (canvasHeight - mHeight) / 2;
+   U32 wInset = (canvasWidth - mWidth) / 2;
 
    // Fade effect
    F32 fadeFactor;
@@ -142,18 +147,18 @@ void MessageUserInterface::render()
    {
       glColor4f(.3, 0, 0, fadeFactor * 0.95);    // Draw a box
       glBegin(GL_POLYGON);
-      glVertex2f(wInset + mVertOffset, hInset);
-      glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
-      glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
-      glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
+         glVertex2f(wInset + mVertOffset, hInset);
+         glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
+         glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
+         glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
       glEnd();
 
       glColor4f(1, 1, 1, fadeFactor); // Add a border
       glBegin(GL_LINE_LOOP);
-      glVertex2f(wInset + mVertOffset, hInset);
-      glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
-      glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
-      glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
+         glVertex2f(wInset + mVertOffset, hInset);
+         glVertex2f(canvasWidth - wInset + mVertOffset, hInset);
+         glVertex2f(canvasWidth - wInset + mVertOffset, canvasHeight - hInset);
+         glVertex2f(wInset + mVertOffset, canvasHeight - hInset);
       glEnd();
    }
 

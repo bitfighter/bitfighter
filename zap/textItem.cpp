@@ -128,10 +128,10 @@ void TextItem::computeExtent()
    F32 x = pos.x + mSize * descenderFactor * sinang;
    F32 y = pos.y + mSize * descenderFactor * cosang;
 
-   Point c1 = Point(x - h * sinang * .5, y);
-   Point c2 = Point(x + w * cosang - h * sinang * .5, y + w * sinang);
-   Point c3 = Point(x + h * sinang * .5 + w * cosang, y - h * cosang + w * sinang);
-   Point c4 = Point(x + h * sinang * .5, y - h * cosang);
+   Point c1 = Point(x - h * sinang * .5f, y);
+   Point c2 = Point(x + w * cosang - h * sinang * .5f, y + w * sinang);
+   Point c3 = Point(x + h * sinang * .5f + w * cosang, y - h * cosang + w * sinang);
+   Point c4 = Point(x + h * sinang * .5f, y - h * cosang);
 
    F32 minx = min(c1.x, min(c2.x, min(c3.x, c4.x)));
    F32 miny = min(c1.y, min(c2.y, min(c3.y, c4.y)));

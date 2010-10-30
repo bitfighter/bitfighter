@@ -131,9 +131,10 @@ public:
    {
       ExplodeMask = Item::FirstFreeMask,
       FirstFreeMask = ExplodeMask << 1,
-      InnerBlastRadius = 100,
-      OuterBlastRadius = 250,
    };
+
+   static const S32 InnerBlastRadius = 100;
+   static const S32 OuterBlastRadius = 250;
 
    S32 mTimeRemaining;
    bool exploded;
@@ -176,11 +177,11 @@ public:
    enum Constants
    {
       ArmedMask = GrenadeProjectile::FirstFreeMask,
-
       SensorRadius     = 50,
-      InnerBlastRadius = 75,
-      OuterBlastRadius = 100,
    };
+
+   static const S32 InnerBlastRadius = 100;
+   static const S32 OuterBlastRadius = 250;
 
    Mine(Point pos = Point(), Ship *owner=NULL);    // Constructor
 

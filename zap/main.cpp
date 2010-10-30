@@ -49,16 +49,9 @@ XXX need to document timers, new luavec stuff XXX
 
 */
 
-/* Fixes for 013c
+/* Fixes for 013f
 <h4>Enhancements</h4>
-<li>Improved menu system; better use of colors to make screen less monotonous</li>
-<li>Can now edit hosting parameters directly from hosting screen -- resulting values will be written to the INI file for future use</li>
-<li>Can now supply a reason when using /shutdown command (e.g. /shutdown 30 Need to change levels; will restart shortly!)</li>
-
-<h4>Bug Fixes</h4>
-<ul>
-<li>Hitting ctrl-R no longer crashes editor when there is no level gen script</li>
-<li>Now possible to take multiple screen shots without locking game</li>
+<li>Better user message when server is full</li>
 
 </ul>
 
@@ -227,19 +220,25 @@ char gJoystickName[gJoystickNameLength] = "";
 S32 gPhysicalScreenWidth;
 S32 gPhysicalScreenHeight;
 
-extern Point gMousePos;
-
 extern NameEntryUserInterface gNameEntryUserInterface;
 
 
 // Since GLUT reports the current mouse pos via a series of events, and does not make
 // its position available upon request, we'll store it when it changes so we'll have
 // it when we need it.
+//
+// Note that when we are in the editor, we need to override the display mode because our
+// canvas dimensions are irregular.
 void setMousePos(S32 x, S32 y)
 {
-   gMousePos.x = x;
-   gMousePos.y = y;
+   DisplayMode reportedDisplayMode = gIniSettings.displayMode;
+
+   if(UserInterface::current->getMenuID() == EditorUI && reportedDisplayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+      reportedDisplayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+
+   gScreenInfo.setMousePos(x, y, reportedDisplayMode);
 }
+
 
 Screenshooter gScreenshooter;    // For taking screen shots
 
@@ -263,25 +262,26 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeig
    // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
    if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
    {
-      UserInterface::windowWidth = newWidth;
-      UserInterface::windowHeight = newHeight;
+      gScreenInfo.setWindowSize(newWidth, newHeight);
       return;
    }
 
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
+   F32 MIN_SCALING_FACT = 0.15;     // Limits minimum window size
 
    // Constrain window to correct proportions...
-   if((newWidth - UserInterface::canvasWidth) > (newHeight - UserInterface::canvasHeight))
-      gIniSettings.winSizeFact = max((F32) newHeight / (F32) UserInterface::canvasHeight, 0.15f);
+   if((newWidth - canvasWidth) > (newHeight - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
+      gIniSettings.winSizeFact = max((F32) newHeight / (F32)canvasHeight, MIN_SCALING_FACT);
    else
-      gIniSettings.winSizeFact = max((F32) newWidth / (F32) UserInterface::canvasWidth, 0.15f);
+      gIniSettings.winSizeFact = max((F32) newWidth / (F32)canvasWidth, MIN_SCALING_FACT);
 
-   newHeight = (S32)(UserInterface::canvasHeight * gIniSettings.winSizeFact);
-   newWidth  = (S32)(UserInterface::canvasWidth  * gIniSettings.winSizeFact);
+   S32 width  = (S32)(canvasWidth  * gIniSettings.winSizeFact);   // virtual * (physical/virtual) = physical
+   S32 height = (S32)(canvasHeight * gIniSettings.winSizeFact);    
 
-   glutReshapeWindow(newWidth, newHeight);
-
-   UserInterface::windowWidth = newWidth;
-   UserInterface::windowHeight = newHeight;
+   glutReshapeWindow(width, height);
+   gScreenInfo.setWindowSize(width, height);        
 
    gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
 }
@@ -308,13 +308,15 @@ void GLUT_CB_passivemotion(int x, int y)
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, y))
 {
+   const Point *winMousePos = gScreenInfo.getWindowMousePos();
+
    // Glut sometimes fires spurious events.  Let's ignore those.
-   if(x == gMousePos.x && y == gMousePos.y)
+   if(x == winMousePos->x && y == winMousePos->y)
       return;
 
    // This firstTime rigamarole prevents onMouseMoved() from firing when game first starts up; if we're in full screen mode,
    // GLUT calls this callback immediately.  Thanks, GLUT!
-   bool firstTime = (gMousePos.x == -1);     
+   bool firstTime = (winMousePos->x == -1); 
 
    setMousePos(x, y);
 
@@ -324,6 +326,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, passivemotion, (S32 x, S32 y), (x, 
    if(UserInterface::current)
       UserInterface::current->onMouseMoved(x, y);
 }
+
 
 void keyDown(KeyCode keyCode, char ascii)    // Launch the onKeyDown event
 {
@@ -554,6 +557,11 @@ void abortHosting_noLevels()
    return;
 }
 
+
+// GCC thinks min isn't defined, VC++ thinks it is
+#ifndef min
+#define min(a,b) ((a) <= (b) ? (a) : (b))
+#endif
 
 // This is not a very good way of seeding the prng, but it should generate unique, if not cryptographicly secure, streams.
 // We'll get 4 bytes from the time, up to 12 bytes from the name, and any left over slots will be filled with unitialized junk.
@@ -1332,7 +1340,7 @@ void InitSdlVideo()
    flags = SDL_OPENGL | SDL_RESIZABLE ; // | SDL_FULLSCREEN;
 
 
-   if(SDL_SetVideoMode(gScreenWidth, gScreenHeight, gBPP, flags ) == 0)
+   if(SDL_SetVideoMode(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), gBPP, flags ) == 0)
    {
       // This could happen for a variety of reasons,
       // including DISPLAY not being set, the specified
@@ -1473,7 +1481,7 @@ void processStartupParams()
    if(gCmdLineSettings.ypos != -9999)
       gIniSettings.winYPos = gCmdLineSettings.ypos;
    if(gCmdLineSettings.winWidth > 0)
-      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) UserInterface::canvasWidth, 0.15f);
+      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), 0.15f);
 
    if(gCmdLineSettings.masterAddress != "")
       gMasterAddress.set(gCmdLineSettings.masterAddress);
@@ -1578,6 +1586,9 @@ void setOrtho(GLdouble left, GLdouble right, GLdouble bottom, GLdouble top)
 }
 
 
+ScreenInfo gScreenInfo;
+
+
 // Actually put us in windowed or full screen mode.  Pass true the first time this is used, false subsequently.
 // This has the unfortunate side-effect of triggering a mouse move event.  
 void actualizeScreenMode(bool changingInterfaces, bool first = false)
@@ -1596,54 +1607,46 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
    else
       UserInterface::current->onPreDisplayModeChange();
 
-   UserInterface::canvasHeight = gScreenHeight;
-   UserInterface::canvasWidth = gScreenWidth;
+   DisplayMode displayMode = gIniSettings.displayMode;
+
+   gScreenInfo.resetGameCanvasSize();     // Set GameCanvasSize vars back to their default values
 
    // When we're in the editor, let's take advantage of the entire screen unstretched
    if(UserInterface::current->getMenuID() == EditorUI && 
             (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
       F32 magFactor = 0.85;      // Smaller values give bigger magnification; makes small things easier to see on full screen
-      UserInterface::canvasHeight = gPhysicalScreenHeight * magFactor;
-      UserInterface::canvasWidth = gPhysicalScreenWidth * magFactor;
+      gScreenInfo.setGameCanvasSize(gScreenInfo.getPhysicalScreenWidth() * magFactor, gScreenInfo.getPhysicalScreenHeight() * magFactor);
 
-      setOrtho(0, gPhysicalScreenWidth * magFactor, gPhysicalScreenHeight * magFactor, 0);
+      displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
+   }
 
+   if(displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
+   {
       glDisable(GL_SCISSOR_TEST);
+      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
+
       glutFullScreen();
    }
-   else if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED) 
+
+   else if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
    {
-      setOrtho(0, gScreenWidth, gScreenHeight, 0);   
-      glDisable(GL_SCISSOR_TEST);
-      glutFullScreen();
-   }
-   else if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
-   {
-      glClear(GL_COLOR_BUFFER_BIT);
+      glDisable(GL_SCISSOR_TEST);      // Should be unnecessary, but maybe this helps Unknown Joe's screen issue?
+      glClear(GL_COLOR_BUFFER_BIT);    // Clear the screen
 
-      // Figure out if the screen is constrained by height or width
-      if((F32)gPhysicalScreenWidth / (F32)gPhysicalScreenHeight >= (F32)gScreenWidth / (F32)gScreenHeight)         // Screen is landscape
-      {
-         F32 scalingRatio = (F32)gPhysicalScreenHeight / (F32)gScreenHeight;
-         F32 drawAreaWidth = (F32)gScreenWidth * scalingRatio;
-         F32 physicalMargin = ((F32)gPhysicalScreenWidth - drawAreaWidth) / 2;
-         F32 drawMargin = physicalMargin / scalingRatio;
+      S32 horizDrawMargin = gScreenInfo.getHorizDrawMargin();     // In game pixels, not
+      S32 vertDrawMargin = gScreenInfo.getVertDrawMargin();       // physical screen pixels
 
-         setOrtho(-drawMargin, gScreenWidth + drawMargin, gScreenHeight, 0);      // l,r,b,t
-         glScissor(physicalMargin, 0, drawAreaWidth, gPhysicalScreenHeight);      // x,y,w,h
-      }
-      else                                                                                                        // Screen is portrait
-      {
-         F32 scalingRatio = (F32)gPhysicalScreenWidth / (F32)gScreenWidth;
-         F32 drawAreaHeight = (F32)gScreenHeight * scalingRatio;
-         F32 physicalMargin = ((F32)gPhysicalScreenHeight - drawAreaHeight) / 2;
-         F32 drawMargin = physicalMargin / scalingRatio;
+      setOrtho(-horizDrawMargin,                                        // left
+                gScreenInfo.getGameCanvasWidth() + horizDrawMargin,     // right
+                gScreenInfo.getGameCanvasHeight() + vertDrawMargin,     // bottom
+               -vertDrawMargin);                                        // top
 
-         setOrtho(0, gScreenWidth, gScreenHeight + drawMargin, -drawMargin);      // l,r,b,t
-         glScissor(0, physicalMargin, gPhysicalScreenWidth, drawAreaHeight);      // x,y,w,h
-      }
-      
+      glScissor(gScreenInfo.getHorizPhysicalMargin(),    // x
+                gScreenInfo.getVertPhysicalMargin(),     // y
+                gScreenInfo.getDrawAreaWidth(),          // width
+                gScreenInfo.getDrawAreaHeight());        // height
+
       glEnable(GL_SCISSOR_TEST);    // Turn on clipping to keep the margins clear
 
       glutFullScreen();
@@ -1651,14 +1654,16 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
 
    else        // DISPLAY_MODE_WINDOWED
    {
-      setOrtho(0, gScreenWidth, gScreenHeight, 0);   
+      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
       glDisable(GL_SCISSOR_TEST);
 
-      glutReshapeWindow((S32) ((F32)gScreenWidth * gIniSettings.winSizeFact), (S32) ((F32)gScreenHeight * gIniSettings.winSizeFact));
+      glutReshapeWindow((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact), 
+                        (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));
+
       glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
    }
 
-   UserInterface::current->onDisplayModeChange();
+   UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
 }
 
 
@@ -1723,10 +1728,12 @@ int main(int argc, char **argv)
    Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
 
    if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
-      initHostGame(gBindAddress, LevelListLoader::buildLevelList(), false);     // Start hosting
+   {
+      Vector<string> levels = LevelListLoader::buildLevelList();
+      initHostGame(gBindAddress, levels, false);     // Start hosting
+   }
 
-   SFXObject::init();
-
+   SFXObject::init();  // Even dedicated server needs sound
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
@@ -1737,11 +1744,8 @@ int main(int argc, char **argv)
       gAutoDetectedJoystickType = autodetectJoystickType();
       setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
 
-      glutInitWindowSize(gScreenWidth, gScreenHeight);      // Does this actually do anything?  Seem to get same result, regardless of params!
+      glutInitWindowSize(100, 100);     // Does this actually do anything?  Seem to get same result, regardless of params!
       glutInit(&argc, argv);
-
-      gPhysicalScreenWidth = glutGet(GLUT_SCREEN_WIDTH);
-      gPhysicalScreenHeight = glutGet(GLUT_SCREEN_HEIGHT);
 
       // On OS X, glutInit changes the working directory to the app
       // bundle's resource directory.  We don't want that. (RDW)
@@ -1750,6 +1754,8 @@ int main(int argc, char **argv)
 #endif
       // InitSdlVideo();      // Get our main SDL rendering window all set up
       // SDL_ShowCursor(0);   // Hide cursor
+
+      gScreenInfo.init(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));     
 
       glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
       glutCreateWindow(gWindowTitle);
@@ -1768,7 +1774,9 @@ int main(int argc, char **argv)
       glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling
       glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor -- we'll turn this back on in the editor, or when the user tries to use mouse to work menus
 
-      glTranslatef(gScreenWidth/2, gScreenHeight/2, 0);     // Put 0,0 at the center of the screen
+      // Put 0,0 at the center of the screen
+      glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
+
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glLineWidth(gDefaultLineWidth);
 

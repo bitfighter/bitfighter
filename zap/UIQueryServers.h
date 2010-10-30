@@ -38,11 +38,38 @@
 namespace Zap
 {
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+class Button
+{
+private:
+   S32 mX, mY, mTextSize, mPadding;
+   const char *mLabel;
+   S32 mLabelLen;       // Computed length of label
+   void (*mOnClickCallback)();
+   bool mouseOver(S32 mouseX, S32 mouseY);
+   bool mTransparent;
+   Color mBgColor, mFgColor, mHlColor;
+
+public:
+   Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)());   // Constructor
+
+   void render(S32 mouseX, S32 mouseY);
+   void onClick(S32 mouseX, S32 mouseY);
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
 class QueryServersUserInterface : public UserInterface, public AbstractChat
 {
 private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
    bool mMouseAtBottomFixFactor;    // UGLY
+
+   Vector<Button> buttons;
 
    S32 mPage;
 
@@ -61,9 +88,16 @@ private:
    S32 mHighlightColumn;
    S32 mLastSortColumn;
    bool mShowChat;
+   S32 mMessageDisplayCount;  // Number of chat messages to show
    bool mJustMovedMouse;      // Track whether user is in mouse or keyboard mode
+   bool mDraggingDivider;     // Track whether we are dragging the divider between chat and the servers
 
    void recalcCurrentIndex();
+
+   // Break up the render function a little
+   void renderTopBanner();
+
+   bool mouseInHeaderRow(const Point *pos);
 
 public:
    QueryServersUserInterface();      // Constructor
@@ -78,6 +112,9 @@ public:
 
    static const S32 MaxServerNameLen = 40;
    static const S32 MaxServerDescrLen = 254;
+
+   void advancePage();
+   void backPage();
 
    enum {
       MaxPendingPings = 15,
@@ -137,6 +174,7 @@ public:
       S32 xStart;
       ColumnInfo(const char *nm = NULL, U32 xs = 0) { name = nm; xStart = xs; }     // Constructor
    };
+
    struct HiddenServer
    {
       U32 timeUntilShow;
@@ -144,6 +182,7 @@ public:
       HiddenServer(Address addr, U32 time) { serverAddress = addr; timeUntilShow = time; }
 
    };
+
    Vector<ServerRef> servers;
    Vector<ColumnInfo> columns;
    Vector<HiddenServer> hidden;
@@ -152,6 +191,8 @@ public:
    // Functions for handling user input
    void onKeyDown(KeyCode keyCode, char ascii);
    void onMouseMoved(S32 x, S32 y);
+   void onKeyUp(KeyCode keyCode);
+   void onMouseDragged(S32 x, S32 y);
 
 
    void onActivate();         // Run when select server screeen is displayed
@@ -167,7 +208,8 @@ public:
 
    // Handle responses to packets we sent
    void gotPingResponse(const Address &theAddress, const Nonce &clientNonce, U32 clientIdentityToken);
-   void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
+   void gotQueryResponse(const Address &theAddress, const Nonce &clientNonce, const char *serverName, const char *serverDescr, 
+                         U32 playerCount, U32 maxPlayers, U32 botCount, bool dedicated, bool test, bool passwordRequired);
 };
 
 extern QueryServersUserInterface gQueryServersUserInterface;

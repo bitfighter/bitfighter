@@ -162,6 +162,9 @@ inline bool isDuplicate(S32 key)
 
 void KeyDefMenuUserInterface::render()
 {
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
@@ -171,7 +174,7 @@ void KeyDefMenuUserInterface::render()
       glBegin(GL_POLYGON);
       glVertex2f(0, 0);
       glVertex2f(canvasWidth, 0);
-      glVertex2f(canvasWidth, canvasHeight);
+      glVertex2f(canvasWidth, gScreenInfo.getGameCanvasHeight());
       glVertex2f(0, canvasHeight);
       glEnd();
       glDisable(GL_BLEND);
@@ -184,7 +187,7 @@ void KeyDefMenuUserInterface::render()
    drawCenteredString(vertMargin + 63, 14, "You can define different keys for keyboard or joystick mode.  Switch in Options menu.");
    glColor3f(1, 1, 1);
 
-   drawCenteredString(canvasHeight - vertMargin - 20, 18, mMenuFooter);
+   drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 20, 18, mMenuFooter);
 
    if(selectedIndex >= menuItems.size())
       selectedIndex = 0;
@@ -376,7 +379,7 @@ void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
    Point mousePos = convertWindowToCanvasCoord(Point(x,y));
 
    // Which column is the mouse in?  Left half of screen = 0, right half = 1
-   S32 col = (mousePos.x < (canvasWidth - horizMargin) / 2) ? 0 : 1;
+   S32 col = (mousePos.x < (gScreenInfo.getGameCanvasWidth() - horizMargin) / 2) ? 0 : 1;
    S32 row = min(max(static_cast<int>(floor(( mousePos.y - yStart ) / height)), 0), menuItems.size() - 1);
 
    selectedIndex = min(max(row + firstItemInCol2 * col, 0), menuItems.size() - 1);    // Bounds checking

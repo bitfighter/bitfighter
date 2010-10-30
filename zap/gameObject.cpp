@@ -154,7 +154,7 @@ void GameObject::damageObject(DamageInfo *theInfo)
 static Vector<DatabaseObject *> fillVector;
 
 // Returns number of ships hit
-S32 GameObject::radiusDamage(Point pos, U32 innerRad, U32 outerRad, U32 typemask, DamageInfo &info, F32 force)
+S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask, DamageInfo &info, F32 force)
 {
    // Check for players within range.  If so, blast them to little tiny bits!
    // Those within innerRad get full force of the damage.  Those within outerRad get damage prop. to distance

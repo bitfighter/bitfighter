@@ -216,6 +216,7 @@ public:
    ~NetConnection();
 
    enum TerminationReason {
+      // Reasons the server might terminate an existing connection
       ReasonTimedOut,
       ReasonSelfDisconnect,
       ReasonKickedByAdmin,
@@ -224,19 +225,19 @@ public:
       ReasonError,
       ReasonShutdown,
 
-      // Reasons the master might reject a client
-      ReasonBadLogin,         // User provided an invalid password for their username
-      ReasonDuplicateId,      // User provided duplicate ID to that of another client; should never happen
-      ReasonInvalidUsername,  // Username contains illegal characters
-      ReasonBadConnection,    // Something went wrong in the connection
+      // Reasons the master might reject a client at connect time
+      ReasonBadLogin,               // User provided an invalid password for their username
+      ReasonDuplicateId,            // User provided duplicate ID to that of another client; should never happen
+      ReasonInvalidUsername,        // Username contains illegal characters
+      ReasonBadConnection,          // Something went wrong in the connection
 
-      // Reasons a server might reject a client
+      // Reasons a server might reject a client at connect time
       ReasonInvalidCRC,
-      ReasonIncompatibleRPCCounts,  
-      ReasonServerFull,
-      ReasonNeedServerPassword,
+      ReasonIncompatibleRPCCounts,  // Incompatible version of the software, should never happen due to our version management
+      ReasonServerFull,             // Too many players
+      ReasonNeedServerPassword,     // Server requires a password -- either provided none, or an incorrect one
       
-      TerminationReasons,      // Must be last of enumerated reasons!
+      TerminationReasons,           // Must be last of enumerated reasons!
       ReasonNone
    };
 

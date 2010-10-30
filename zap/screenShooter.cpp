@@ -512,17 +512,18 @@ extern void actualizeScreenMode(bool changingInterfaces, bool first = false);
 extern IniSettings gIniSettings;
 
 void Screenshooter::saveScreenshot()
-{  
+{ 
    if(phase == 1)
    {
       // Save window size/pos for restoration later
-      mWidth = UserInterface::windowWidth;
+      mWidth = gScreenInfo.getWindowWidth();
       mXpos = glutGet(GLUT_WINDOW_X);
       mYpos = glutGet(GLUT_WINDOW_Y);
 
-      glutReshapeWindow(gScreenWidth, gScreenHeight);    // Resize window to "standard" size
+      // Resize window to "standard" size, where 1 virtual pixel = 1 physical pixel
+      glutReshapeWindow(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());    
 
-      setOrtho(0, gScreenWidth, gScreenHeight, 0); 
+      setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0); 
       glDisable(GL_SCISSOR_TEST);
 
       phase++;
@@ -532,9 +533,9 @@ void Screenshooter::saveScreenshot()
    {
       glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-      S32 w = gScreenWidth;
-      S32 h = gScreenHeight;
-      S32 buffsize = w * h * 3;
+      S32 w = gScreenInfo.getGameCanvasWidth();
+      S32 h = gScreenInfo.getGameCanvasHeight();
+      S32 buffsize = w * h * 3;     // 3 bytes per pixel
 
       GLubyte *pixels = new GLubyte [buffsize];
       if (pixels == NULL) 
@@ -594,7 +595,7 @@ void Screenshooter::saveScreenshot()
 
       if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
       {
-         gIniSettings.winSizeFact = (F32)mWidth / (F32)gScreenWidth;
+         gIniSettings.winSizeFact = (F32)mWidth / (F32)gScreenInfo.getGameCanvasWidth();
          gIniSettings.winXPos = mXpos;
          gIniSettings.winYPos = mYpos;
       }

@@ -95,7 +95,6 @@ MenuUserInterface::MenuUserInterface()    // Constructor
 }
 
 extern bool gDisableShipKeyboardInput;
-extern Point gMousePos;
 
 // Gets run when menu is activated.  This is also called by almost all other menus/subclasses.
 void MenuUserInterface::onActivate()
@@ -162,7 +161,7 @@ S32 MenuUserInterface::getYStart()
    if(getMenuID() == GameParamsUI)  // If we're on the GameParams menu, start at a constant position
       return 70;
    else                             // Otherwise, attpempt to center the menu vertically
-      return (canvasHeight - min(menuItems.size(), MAX_MENU_SIZE) * (getTextSize() + getGap())) / 2 + vertOff;
+      return (gScreenInfo.getGameCanvasHeight() - min(menuItems.size(), MAX_MENU_SIZE) * (getTextSize() + getGap())) / 2 + vertOff;
 }
 
 
@@ -172,7 +171,10 @@ extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 static void renderMenuInstructions()
 {
-   S32 y = UserInterface::canvasHeight - UserInterface::vertMargin - 20;
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
+   S32 y = canvasHeight - UserInterface::vertMargin - 20;
    const S32 size = 18;
 
     glColor3f(1, 1, 1);     // white
@@ -185,7 +187,7 @@ static void renderMenuInstructions()
 					   getControllerButtonRenderedSize(BUTTON_START) +   getControllerButtonRenderedSize(BUTTON_BACK) +
 					   UserInterface::getStringWidth(size, "to choose |  to select |  exits menu");
 
-	  S32 x = UserInterface::canvasWidth/2 - UserInterface::horizMargin - totalWidth/2;
+	  S32 x = canvasWidth / 2 - UserInterface::horizMargin - totalWidth/2;
 
 	  renderControllerButton(x, y, BUTTON_DPAD_UP, false);
 	  x += getControllerButtonRenderedSize(BUTTON_DPAD_UP) + UserInterface::getStringWidth(size, " ");
@@ -221,14 +223,16 @@ static const S32 ARROW_MARGIN = 5;
 
 static void renderArrowAbove(S32 pos, S32 height)
 {
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
       glColor(i ? Color(0, 0, 0) : Color(0, 0, 1));
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f( (UserInterface::canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         glVertex2f( (UserInterface::canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
-         glVertex2f(UserInterface::canvasWidth / 2, pos - (height + ARROW_MARGIN ) - 7);
+         glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
+         glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos - ARROW_MARGIN - 7);
+         glVertex2f(canvasWidth / 2, pos - (height + ARROW_MARGIN ) - 7);
       glEnd();
    }
 }
@@ -236,14 +240,15 @@ static void renderArrowAbove(S32 pos, S32 height)
 
 static void renderArrowBelow(S32 pos, S32 height)
 {
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    for(S32 i = 1; i >= 0; i--)
    {
       // First create a black poly to blot out what's behind, then the arrow itself
       glColor(i ? Color(0, 0, 0) : Color(0, 0, 1));
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f( (UserInterface::canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-         glVertex2f( (UserInterface::canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
-         glVertex2f(UserInterface::canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
+         glVertex2f( (canvasWidth - ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
+         glVertex2f( (canvasWidth + ARROW_WIDTH) / 2, pos + ARROW_MARGIN - 7);
+         glVertex2f(canvasWidth / 2, pos + (height + ARROW_MARGIN) - 7);
       glEnd();
    }
 }
@@ -252,6 +257,9 @@ static void renderArrowBelow(S32 pos, S32 height)
 // Basic menu rendering
 void MenuUserInterface::render()
 {
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
@@ -348,8 +356,7 @@ void MenuUserInterface::onMouseMoved(S32 x, S32 y)
    itemSelectedWithMouse = true;
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
-   Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
-   selectedIndex = U32( floor(( mousePos.y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + currOffset;
+   selectedIndex = U32( floor(( gScreenInfo.getMousePos()->y - getYStart() + 10 ) / (getTextSize() + getGap())) ) + currOffset;
 
    processMouse();
 }
@@ -474,9 +481,9 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       {
          // Make sure we're actually pointing at a menu item before we process it
          S32 yStart = getYStart();
-         Point mousePos = gEditorUserInterface.convertWindowToCanvasCoord(gMousePos);
+         const Point *mousePos = gScreenInfo.getMousePos();
 
-         if(mousePos.y < yStart || mousePos.y > yStart + (menuItems.size() + 1) * (getTextSize() + getGap()))
+         if(mousePos->y < yStart || mousePos->y > yStart + (menuItems.size() + 1) * (getTextSize() + getGap()))
             return true;
       }
 
@@ -652,6 +659,9 @@ void MainMenuUserInterface::render()
 {
   Parent::render();
 
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+
    if(motd[0])
    {
       U32 width = getStringWidth(20, motd);
@@ -711,7 +721,7 @@ void MainMenuUserInterface::renderExtras()
 {
    glColor3f(1,1,1);
    S32 size = 20;
-   drawCenteredString(canvasHeight - vertMargin - size, size, "join us @ www.bitfighter.org");
+   drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - size, size, "join us @ www.bitfighter.org");
 }
 
 
@@ -786,10 +796,12 @@ static void setSFXVolumeCallback(U32 vol)
    gIniSettings.sfxVolLevel = F32(vol) / 10;
 }
 
+
 static void setVoiceVolumeCallback(U32 vol)
 {
    gIniSettings.voiceChatVolLevel = F32(vol) / 10;
 }
+
 
 static void setControlsCallback(U32 val)
 {
@@ -967,6 +979,7 @@ extern Nonce gClientId;
 
 static void nameAndPasswordAcceptCallback(U32 unused)
 {
+
    gMainMenuUserInterface.activate();
    gClientGame->resetMasterConnectTimer();
 
@@ -998,8 +1011,9 @@ void NameEntryUserInterface::renderExtras()
 {
    const S32 size = 15;
    const S32 gap = 5;
+   const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   S32 rows = 3;
+   const S32 rows = 3;
    S32 row = 0;
 
    glColor3f(0,1,0);
@@ -1163,8 +1177,10 @@ void HostMenuUserInterface::renderProgressListItems()
       glEnable(GL_BLEND);
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
-         glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
-         drawStringf(100, canvasHeight - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 15, "%s", mLevelLoadDisplayNames[i].c_str());
+         glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * 
+                                        (levelLoadDisplayDisplay ? 1 : levelLoadDisplayFadeTimer.getFraction()) );
+         drawStringf(100, gScreenInfo.getGameCanvasHeight() - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 
+                     15, "%s", mLevelLoadDisplayNames[i].c_str());
       }
       glDisable(GL_BLEND);
    }
@@ -1444,7 +1460,10 @@ void LevelMenuSelectUserInterface::onActivate()
    currOffset = 0;
 
    if(itemSelectedWithMouse)
-      onMouseMoved((S32)gMousePos.x, (S32)gMousePos.y);
+   {
+      const Point *mousePos = gScreenInfo.getWindowMousePos();
+      onMouseMoved((S32)mousePos->x, (S32)mousePos->y);
+   }
    else
       selectedIndex = 0;
 }
