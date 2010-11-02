@@ -1453,8 +1453,6 @@ void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 
 void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFact)
 {
-//If you customize a team color so that none of the values R/G/B exceed 66 (or thereabouts), that team's force field beams come out grey. The ship color, turrets, and loadout zones are all very clear, but the force fields all look hostile/neutral. It makes unrepaired force field projectors especially difficult to manage. I'm assuming that force field beam color is determined by applying some operation to team color, and that's why a certain threshold produces the grey beam. Really, it would be fine if the color was determined by the highest values. For example, a team 00 00 50 Dark Blue team would do well to have a plain blue (00 00 100) force field beam. It's probably unwise to have two blue teams in one map, so any confusion about force field ownership is warranted. However, there's no reason a 00 00 50 Dark Blue team and a 50 00 00 Dark Red team should have the same color force field beams.
-
    // Make sure colors are bright enough to be visible
    if((c.r < 0.5) && (c.g < 0.5) && (c.b < 0.5))
    {
@@ -1466,10 +1464,10 @@ void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFa
    Vector<Point> geom;
    ForceField::getGeom(start, end, geom, scaleFact);
 
-  glColor(fieldUp ? c : c * 0.5);
-  glBegin(GL_LINE_LOOP);
-   for(S32 i = 0; i < geom.size(); i++)
-      glVertex(geom[i]);
+   glColor(fieldUp ? c : c * 0.5);
+   glBegin(GL_LINE_LOOP);
+      for(S32 i = 0; i < geom.size(); i++)
+         glVertex(geom[i]);
    glEnd();
 }
 
@@ -1654,17 +1652,19 @@ void glColor(const Color &c, float alpha)
 void drawSquare(const Point &pos, S32 size, bool filled)
 {
     glBegin(filled ? GL_POLYGON : GL_LINE_LOOP);
-    glVertex2f(pos.x - size, pos.y - size);
-    glVertex2f(pos.x + size, pos.y - size);
-    glVertex2f(pos.x + size, pos.y + size);
-    glVertex2f(pos.x - size, pos.y + size);
+       glVertex2f(pos.x - size, pos.y - size);
+       glVertex2f(pos.x + size, pos.y - size);
+       glVertex2f(pos.x + size, pos.y + size);
+       glVertex2f(pos.x - size, pos.y + size);
     glEnd();
 }
+
 
 void drawSquare(const Point &pos, S32 size)
 {
     drawSquare(pos, size, false);
 }
+
 
 void drawSquare(const Point &pos, F32 size)
 {

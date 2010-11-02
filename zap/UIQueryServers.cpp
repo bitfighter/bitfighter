@@ -43,8 +43,9 @@
 
 namespace Zap
 {
-      
-static const U32 MENU_HEADER_TEXTSIZE = 14;     // Size of text in column headers
+
+// Text sizes and the like
+static const U32 COLUMN_HEADER_TEXTSIZE = 14;     // Size of text in column headers
 static const U32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
 static const U32 SERVER_ENTRY_TEXTSIZE = 14;
 static const U32 SERVER_ENTRY_VERT_GAP = 4; 
@@ -52,25 +53,18 @@ static const U32 SERVER_ENTRY_HEIGHT = SERVER_ENTRY_TEXTSIZE + SERVER_ENTRY_VERT
 static const U32 SEL_SERVER_INSTR_SIZE = 18;    // Size of "UP, DOWN TO SELECT..." text
 static const U32 SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE = 10;
 
-static const U32 ITEMS_TOP = UserInterface::vertMargin + 55 + 30 + MENU_HEADER_TEXTSIZE;
-static const U32 COLUMNS_TOP = ITEMS_TOP - MENU_HEADER_TEXTSIZE - 10 - MENU_HEADER_TEXTSIZE;
-static const U32 COLUMN_HEADER_HEIGHT = MENU_HEADER_TEXTSIZE + 6;
+// Positions of things on the screen
+static const U32 BANNER_HEIGHT = 76;  // Height of top green banner area
+static const U32 COLUMN_HEADER_TOP = BANNER_HEIGHT + 1;
+static const U32 COLUMN_HEADER_HEIGHT = COLUMN_HEADER_TEXTSIZE + 6;
 
+static const U32 TOP_OF_SERVER_LIST = BANNER_HEIGHT + COLUMN_HEADER_TEXTSIZE + 9;     // 9 provides some visual padding  [99]
+static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_INSTR_SIZE + SERVER_DESCR_TEXTSIZE + SERVER_ENTRY_VERT_GAP + 10);
 
 // "Chat window" includes chat composition, but not list of names of people in chatroom
 #define BOTTOM_OF_CHAT_WINDOW (gScreenInfo.getGameCanvasHeight() - vertMargin / 2 - CHAT_NAMELIST_SIZE)
 
 #define CHAT_HEIGHT        (mShowChat ? mMessageDisplayCount * (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) : 0)   // Height of chat block overall
-#define DIVIDER_POS        (BOTTOM_OF_CHAT_WINDOW - CHAT_HEIGHT - CHAT_FONT_SIZE - CHAT_FONT_MARGIN)      // Horiz. line btwn servers & chat
-#define COLUMNS_BOTTOM     (DIVIDER_POS - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE - 3)
-#define SERVERS_TO_SHOW    (S32(F32(COLUMNS_BOTTOM - ITEMS_TOP) / F32(SERVER_ENTRY_TEXTSIZE + 4)) + 1)
-#define FIRST_SERVER_INDEX (mPage * SERVERS_TO_SHOW)
-#define TOTAL_PAGES ((servers.size() - 1) / SERVERS_TO_SHOW)
-
-
-#define MOUSE_OVER_SERVERS  mousePos.y >= ITEMS_TOP && mousePos.y <= COLUMNS_BOTTOM
-#define DIVIDER_POS_MOUSE_HIT_MARGIN 4
-#define MOUSE_OVER_DIVIDER mousePos->y >= DIVIDER_POS - DIVIDER_POS_MOUSE_HIT_MARGIN && mousePos->y <= DIVIDER_POS + DIVIDER_POS_MOUSE_HIT_MARGIN
 
 
 // Some colors
@@ -108,6 +102,8 @@ QueryServersUserInterface::QueryServersUserInterface()
    mRecievedListOfServersFromMaster = false;
    mouseScrollTimer.setPeriod(10 * MenuUserInterface::MOUSE_SCROLL_INTERVAL);
 
+   mServersPerPage = 8;    // To start with, anyway...
+
    // Column name, x-start pos
    columns.push_back(ColumnInfo("SERVER NAME", 3));
    columns.push_back(ColumnInfo("STAT", 400));
@@ -125,7 +121,7 @@ QueryServersUserInterface::QueryServersUserInterface()
 
    // Create our buttons
    S32 textsize = 12;
-   S32 ypos = COLUMNS_TOP - textsize - 20;
+   S32 ypos = BANNER_HEIGHT - 30;
 
    Button prevButton = Button(horizMargin, ypos, textsize, 4, "PREV", white, yellow, prevButtonClickedCallback);
    Button nextButton = Button(gScreenInfo.getGameCanvasWidth() - horizMargin - 50, ypos, 
@@ -485,7 +481,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
        contactEveryone();
 
    // Go to previous page if a server has gone away and the last server has disappeared from the current screen
-   while(FIRST_SERVER_INDEX >= servers.size() && mPage > 0)
+   while(getFirstServerIndexOnCurrentPage() >= servers.size() && mPage > 0)
        mPage--;
 
 }  // end idle
@@ -501,7 +497,7 @@ void QueryServersUserInterface::addHiddenServer(Address addr, U32 time)
 
 bool QueryServersUserInterface::mouseInHeaderRow(const Point *pos)
 {
-   return pos->y >= COLUMNS_TOP && pos->y < COLUMNS_TOP + COLUMN_HEADER_HEIGHT - 1;
+   return pos->y >= COLUMN_HEADER_TOP && pos->y < COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT - 1;
 }
 
 
@@ -512,24 +508,24 @@ S32 QueryServersUserInterface::getSelectedIndex()
 
    // This crazy thing can happen if the number of servers changes and suddenly there's none shown on the screen
    // Shouldn't happen anymore due to check in idle() function
-   if(FIRST_SERVER_INDEX >= servers.size())
+   if(getFirstServerIndexOnCurrentPage() >= servers.size())
       return -1;
 
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
       
-      S32 indx = floor((gScreenInfo.getMousePos()->y - ITEMS_TOP + MENU_HEADER_TEXTSIZE + 5) / SERVER_ENTRY_HEIGHT) + 
-                 FIRST_SERVER_INDEX - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
+      S32 indx = floor((gScreenInfo.getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
+                 getFirstServerIndexOnCurrentPage() - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
 
       // Bounds checking and such
       if(indx < 0)
          indx = 0;
       else if(indx >= servers.size())
          indx = servers.size() - 1;
-      else if(indx < FIRST_SERVER_INDEX)
-         indx = FIRST_SERVER_INDEX;
-      else if(indx > SERVERS_TO_SHOW + FIRST_SERVER_INDEX - 1)
-         indx = SERVERS_TO_SHOW + FIRST_SERVER_INDEX - 1;
+      else if(indx < getFirstServerIndexOnCurrentPage())
+         indx = getFirstServerIndexOnCurrentPage();
+      else if(indx > mServersPerPage + getFirstServerIndexOnCurrentPage() - 1)
+         indx = mServersPerPage + getFirstServerIndexOnCurrentPage() - 1;
       
       return indx;
    }
@@ -585,9 +581,6 @@ extern Color gMasterServerBlue;
 
 void QueryServersUserInterface::render()
 {
-   static const S32 fontsize = 20;
-   static const S32 fontgap = 5;
-
    const S32 canvasWidth =  gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
@@ -627,11 +620,19 @@ void QueryServersUserInterface::render()
       // Horizontal divider between game list and chat window
       glColor(white);
       glBegin(GL_LINES);
-         glVertex2f(horizMargin, DIVIDER_POS);
-         glVertex2f(canvasWidth - horizMargin, DIVIDER_POS);
+         glVertex2f(horizMargin, getDividerPos());
+         glVertex2f(canvasWidth - horizMargin, getDividerPos());
       glEnd();
 
-      S32 ypos = DIVIDER_POS + 3;      // 3 = gap after divider
+
+      //glColor(red);
+      //glBegin(GL_LINES);
+      //   glVertex2f(horizMargin, barpos);
+      //   glVertex2f(canvasWidth - horizMargin, barpos);
+      //glEnd();
+
+
+      S32 ypos = getDividerPos() + 3;      // 3 = gap after divider
 
       renderMessages(ypos, mMessageDisplayCount);
 
@@ -641,7 +642,7 @@ void QueryServersUserInterface::render()
 
    // Instructions at bottom of server selection section
    glColor(white);
-   drawCenteredString(DIVIDER_POS - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE, SEL_SERVER_INSTR_SIZE, 
+   drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
    if(servers.size())      // There are servers to display...
@@ -656,7 +657,7 @@ void QueryServersUserInterface::render()
 
       S32 colwidth = columns[1].xStart - columns[0].xStart;    
 
-      U32 y = ITEMS_TOP + (selectedIndex - FIRST_SERVER_INDEX - 1) * SERVER_ENTRY_HEIGHT + (SERVER_ENTRY_TEXTSIZE - 12);
+      U32 y = TOP_OF_SERVER_LIST + (selectedIndex - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT;
 
       // Render box behind selected item -- do this first so that it will not obscure descenders on letters like g in the column above
       for(S32 i = 1; i >= 0; i--)
@@ -674,18 +675,18 @@ void QueryServersUserInterface::render()
          glEnd();
       }
 
-      S32 lastServer = min(servers.size() - 1, (mPage + 1) * SERVERS_TO_SHOW - 1);
+      S32 lastServer = min(servers.size() - 1, (mPage + 1) * mServersPerPage - 1);
 
-      for(S32 i = FIRST_SERVER_INDEX; i <= lastServer; i++)
+      for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
-         y = ITEMS_TOP + (i - FIRST_SERVER_INDEX - 1) * SERVER_ENTRY_HEIGHT + 2;
+         y = TOP_OF_SERVER_LIST + (i - getFirstServerIndexOnCurrentPage()) * SERVER_ENTRY_HEIGHT + 2;
          ServerRef &s = servers[i];
 
          if(i == selectedIndex)
          {
             // Render server description at bottom
             glColor(s.msgColor);
-            U32 serverDescrLoc = canvasHeight - vertMargin - SEL_SERVER_INSTR_SIZE - SERVER_DESCR_TEXTSIZE - SERVER_ENTRY_VERT_GAP - CHAT_HEIGHT;
+            U32 serverDescrLoc = TOP_OF_SERVER_LIST + mServersPerPage * SERVER_ENTRY_HEIGHT  ;
             drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
          }
 
@@ -766,23 +767,56 @@ void QueryServersUserInterface::render()
       drawmsg2 = true;
 
 
+   renderColumnHeaders();
+
+   if(drawmsg1 || drawmsg2)
+      renderMessageBox(drawmsg1, drawmsg2);
+}
+
+
+void QueryServersUserInterface::renderTopBanner()
+{
+   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
+   // Top banner
+   glColor3f(0, 0.35, 0);
+   glBegin(GL_POLYGON);
+      glVertex2f(0, 0);
+      glVertex2f(canvasWidth, 0);
+      glVertex2f(canvasWidth, BANNER_HEIGHT);
+      glVertex2f(0, BANNER_HEIGHT);
+   glEnd();
+
+   glColor(white);
+   drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
+
+   drawStringf(horizMargin, vertMargin, 12, "SERVERS: %d", servers.size());
+   drawStringfr(canvasWidth, vertMargin, 12, "PAGE %d/%d", mPage + 1, getLastPage() + 1);
+}
+
+
+void QueryServersUserInterface::renderColumnHeaders()
+{
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+
    // Draw vertical dividing lines
    glColor3f(0.7, 0.7, 0.7);
+
    for(S32 i = 1; i < columns.size(); i++)
    {
       glBegin(GL_LINES);
-         glVertex2f(columns[i].xStart - 4, COLUMNS_TOP);
-         glVertex2f(columns[i].xStart - 4, COLUMNS_BOTTOM);
+         glVertex2f(columns[i].xStart - 4, COLUMN_HEADER_TOP);
+         glVertex2f(columns[i].xStart - 4, TOP_OF_SERVER_LIST + mServersPerPage * SERVER_ENTRY_HEIGHT + 2);
       glEnd();
    }
 
    // Horizontal lines under column headers
    glBegin(GL_LINES);
-      glVertex2f(0, COLUMNS_TOP);
-      glVertex2f(canvasWidth, COLUMNS_TOP);
+      glVertex2f(0, COLUMN_HEADER_TOP);
+      glVertex2f(canvasWidth, COLUMN_HEADER_TOP);
 
-      glVertex2f(0, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
-      glVertex2f(canvasWidth, COLUMNS_TOP + MENU_HEADER_TEXTSIZE + 7);
+      glVertex2f(0, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
+      glVertex2f(canvasWidth, COLUMN_HEADER_TOP + COLUMN_HEADER_TEXTSIZE + 7);
    glEnd();
 
 
@@ -799,16 +833,16 @@ void QueryServersUserInterface::render()
       // Render box around (behind, really) selected column
       glColor(i ? Color(.4, .4, 0) : white);
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(x1, COLUMNS_TOP);
-         glVertex2f(x2, COLUMNS_TOP);
-         glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-         glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2f(x1, COLUMN_HEADER_TOP);
+         glVertex2f(x2, COLUMN_HEADER_TOP);
+         glVertex2f(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2f(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
       glEnd();
    }
 
    // And now the column header text itself
    for(S32 i = 0; i < columns.size(); i++) 
-      drawString(columns[i].xStart, COLUMNS_TOP + 3, MENU_HEADER_TEXTSIZE, columns[i].name);
+      drawString(columns[i].xStart, COLUMN_HEADER_TOP + 3, COLUMN_HEADER_TEXTSIZE, columns[i].name);
 
    // Highlight selected column
    if(mHighlightColumn != mSortColumn) 
@@ -822,87 +856,75 @@ void QueryServersUserInterface::render()
 
       glColor(white);
       glBegin(GL_LINE_LOOP);
-         glVertex2f(x1, COLUMNS_TOP);
-         glVertex2f(x2, COLUMNS_TOP);
-         glVertex2f(x2, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
-         glVertex2f(x1, COLUMNS_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2f(x1, COLUMN_HEADER_TOP);
+         glVertex2f(x2, COLUMN_HEADER_TOP);
+         glVertex2f(x2, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
+         glVertex2f(x1, COLUMN_HEADER_TOP + COLUMN_HEADER_HEIGHT + 1);
       glEnd();
-   }
-
-   // Warning... the following section is pretty darned ugly!  We're just drawing a message box...
-   if(drawmsg1 || drawmsg2)
-   {
-      const char *msg1, *msg2;
-      S32 lines;
-      if(drawmsg1)
-      {
-         msg1 = "There are currently no games online.";
-         msg2 = "Why don't you host one?";
-         lines = 2;
-      }
-      else
-      {
-         msg1 = "Contacting master server...";
-         msg2 = "";
-         lines = 1;
-      }
-
-      const S32 strwid = getStringWidth(fontsize, msg1);
-      const S32 msgboxMargin = 20;
-
-      S32 ypos = mShowChat ? ITEMS_TOP + 10 + (DIVIDER_POS - ITEMS_TOP + 4) * 2 / 5 : canvasHeight / 2 ;
-      ypos += (lines - 2) * (F32(fontsize + fontgap) * .5);
-
-      const S32 ypos1 = ypos - lines * (fontsize + fontgap) - msgboxMargin;
-      const S32 ypos2 = ypos + msgboxMargin;
-
-      const S32 xpos1 = (canvasWidth - strwid) / 2 - msgboxMargin; 
-      const S32 xpos2 = (canvasWidth + strwid) / 2 + msgboxMargin;
-
-      for(S32 i = 1; i >= 0; i--)    // First fill, then outline
-      {
-         glColor(i ? Color(.4, 0, 0) : red);
-
-         glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(xpos1, ypos1);
-            glVertex2f(xpos1, ypos2);
-            glVertex2f(xpos2, ypos2);
-            glVertex2f(xpos2, ypos1);
-         glEnd();
-      }
-
-      glColor(white);
-
-      drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
-      drawCenteredString(ypos - (fontsize + fontgap), fontsize, msg2);
    }
 }
 
 
-void QueryServersUserInterface::renderTopBanner()
+void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 {
-   const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   // Warning... the following section is pretty darned ugly!  We're just drawing a message box...
 
-   // Top banner
-   glColor3f(0, 0.35, 0);
-   glBegin(GL_POLYGON);
-      glVertex2f(0, 0);
-      glVertex2f(canvasWidth, 0);
-      glVertex2f(canvasWidth, COLUMNS_TOP);
-      glVertex2f(0, COLUMNS_TOP);
-   glEnd();
+   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
+   const S32 fontsize = 20;
+   const S32 fontgap = 5;
+
+   const char *msg1, *msg2;
+   S32 lines;
+   if(drawmsg1)
+   {
+      msg1 = "There are currently no games online.";
+      msg2 = "Why don't you host one?";
+      lines = 2;
+   }
+   else
+   {
+      msg1 = "Contacting master server...";
+      msg2 = "";
+      lines = 1;
+   }
+
+   const S32 strwid = getStringWidth(fontsize, msg1);
+   const S32 msgboxMargin = 20;
+
+   S32 ypos = mShowChat ? TOP_OF_SERVER_LIST + 25 + (getDividerPos() - TOP_OF_SERVER_LIST) * 2 / 5 : canvasHeight / 2 ;
+   ypos += (lines - 2) * (F32(fontsize + fontgap) * .5);
+
+   const S32 ypos1 = ypos - lines * (fontsize + fontgap) - msgboxMargin;
+   const S32 ypos2 = ypos + msgboxMargin;
+
+   const S32 xpos1 = (canvasWidth - strwid) / 2 - msgboxMargin; 
+   const S32 xpos2 = (canvasWidth + strwid) / 2 + msgboxMargin;
+
+   for(S32 i = 1; i >= 0; i--)    // First fill, then outline
+   {
+      glColor(i ? Color(.4, 0, 0) : red);
+
+      glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
+         glVertex2f(xpos1, ypos1);
+         glVertex2f(xpos1, ypos2);
+         glVertex2f(xpos2, ypos2);
+         glVertex2f(xpos2, ypos1);
+      glEnd();
+   }
+
+   // Now text
    glColor(white);
-   drawCenteredString(vertMargin + 7, 35, "BITFIGHTER GAME LOBBY");
 
-   drawStringf(horizMargin, vertMargin, 12, "SERVERS: %d", servers.size());
-   drawStringfr(canvasWidth, vertMargin, 12, "PAGE %d/%d", mPage + 1, TOTAL_PAGES + 1);
+   drawCenteredString(ypos - lines * (fontsize + fontgap), fontsize, msg1);
+   drawCenteredString(ypos - (fontsize + fontgap), fontsize, msg2);
 }
 
 
 void QueryServersUserInterface::recalcCurrentIndex()
 {
-   S32 indx = mPage * SERVERS_TO_SHOW + selectedId % SERVERS_TO_SHOW - 1;
+   S32 indx = mPage * mServersPerPage + selectedId % mServersPerPage - 1;
    if(indx >= servers.size())
       indx = servers.size() - 1;
 
@@ -925,17 +947,17 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          sortSelected();
       }
-      else if(keyCode == MOUSE_LEFT && mousePos->y < COLUMNS_TOP)
+      else if(keyCode == MOUSE_LEFT && mousePos->y < COLUMN_HEADER_TOP)
       {
          // Check buttons -- they're all up here for the moment
          for(S32 i = 0; i < buttons.size(); i++)
             buttons[i].onClick(mousePos->x, mousePos->y);
       }
-      else if(keyCode == MOUSE_LEFT && MOUSE_OVER_DIVIDER)
+      else if(keyCode == MOUSE_LEFT && isMouseOverDivider())
       {
          mDraggingDivider = true;
       }
-      else if(keyCode == MOUSE_LEFT && mousePos->y > COLUMNS_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, SERVERS_TO_SHOW + 2))
+      else if(keyCode == MOUSE_LEFT && mousePos->y > COLUMN_HEADER_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, mServersPerPage + 2))
       {
          // Clicked too low... also do nothing
       }
@@ -1026,7 +1048,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       currentIndex = getSelectedIndex() - 1;
       if(currentIndex < 0)
          currentIndex = servers.size() - 1;
-      mPage = currentIndex / SERVERS_TO_SHOW; 
+      mPage = currentIndex / mServersPerPage; 
 
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
@@ -1038,7 +1060,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(currentIndex >= servers.size())
          currentIndex = 0;
 
-      mPage = currentIndex / SERVERS_TO_SHOW;
+      mPage = currentIndex / mServersPerPage;
 
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
@@ -1052,7 +1074,7 @@ void QueryServersUserInterface::backPage()
    mPage--;
 
    if(mPage < 0)
-      mPage = TOTAL_PAGES;      // Last page
+      mPage = getLastPage();      // Last page
 
    recalcCurrentIndex();
 }
@@ -1061,7 +1083,7 @@ void QueryServersUserInterface::backPage()
 void QueryServersUserInterface::advancePage()
 {
    mPage++;
-   if(mPage > TOTAL_PAGES)  
+   if(mPage > getLastPage())  
       mPage = 0;                 // First page
 
    recalcCurrentIndex();
@@ -1084,18 +1106,18 @@ void QueryServersUserInterface::onMouseDragged(S32 x, S32 y)
 
    if(mDraggingDivider)
    {
-      // Recalc divider position
-      S32 messageEntryHeight = CHAT_FONT_SIZE + CHAT_FONT_MARGIN;
-      S32 chatHeight = BOTTOM_OF_CHAT_WINDOW - mousePos->y - messageEntryHeight - CHAT_FONT_MARGIN;
-      S32 selectionCenteringCorrection = (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) * 0.5 + 3;
-      
-      S32 msgCount = (chatHeight + selectionCenteringCorrection) / S32(CHAT_FONT_SIZE + CHAT_FONT_MARGIN); 
+      S32 MIN_SERVERS_PER_PAGE = 4;
+      S32 MAX_SERVERS_PER_PAGE = 18;
 
-      // Set some bounds on how many messages to display
-      const S32 MIN_MESSAGE_COUNT = 5;
-      const S32 MAX_MESSAGE_COUNT = 20;
+      mServersPerPage = (mousePos->y - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
 
-      mMessageDisplayCount = min(max(msgCount, MIN_MESSAGE_COUNT), MAX_MESSAGE_COUNT);         
+      // Bounds checking
+      if(mServersPerPage < MIN_SERVERS_PER_PAGE)
+         mServersPerPage = MIN_SERVERS_PER_PAGE;
+      else if(mServersPerPage > MAX_SERVERS_PER_PAGE)
+         mServersPerPage = MAX_SERVERS_PER_PAGE;
+
+      mMessageDisplayCount = (BOTTOM_OF_CHAT_WINDOW - getDividerPos() - 4) / (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) - 1;         
    }
 }
 
@@ -1138,7 +1160,7 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
          }
    }
 
-   else if(MOUSE_OVER_DIVIDER)
+   else if(isMouseOverDivider())
       glutSetCursor(GLUT_CURSOR_UP_DOWN);
 
    else
@@ -1146,6 +1168,22 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 
    mItemSelectedWithMouse = true;
    mJustMovedMouse = true;
+}
+
+
+S32 QueryServersUserInterface::getDividerPos()
+{
+   return TOP_OF_SERVER_LIST + mServersPerPage * SERVER_ENTRY_HEIGHT + AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER;
+}
+
+
+bool QueryServersUserInterface::isMouseOverDivider()
+{
+   F32 mouseY = gScreenInfo.getMousePos()->y;
+
+   S32 hitMargin = 4;
+
+   return (mouseY >= getDividerPos() - hitMargin) && (mouseY <= getDividerPos() + hitMargin);
 }
 
 

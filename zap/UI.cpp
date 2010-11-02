@@ -178,7 +178,7 @@ extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
 
 // Clean up and get ready to render
-void UserInterface::renderCurrent()    // static
+void UserInterface::renderCurrent()   
 {
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
 

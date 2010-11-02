@@ -72,6 +72,9 @@ private:
    Vector<Button> buttons;
 
    S32 mPage;
+   S32 mServersPerPage;
+   S32 getFirstServerIndexOnCurrentPage() { return mPage * mServersPerPage; }
+   S32 getLastPage() { return (servers.size() - 1) / mServersPerPage; }
 
    Timer mouseScrollTimer;
    void sortSelected();
@@ -92,10 +95,13 @@ private:
    bool mJustMovedMouse;      // Track whether user is in mouse or keyboard mode
    bool mDraggingDivider;     // Track whether we are dragging the divider between chat and the servers
 
+
    void recalcCurrentIndex();
 
    // Break up the render function a little
    void renderTopBanner();
+   void renderColumnHeaders();
+   void renderMessageBox(bool msg1, bool msg2);
 
    bool mouseInHeaderRow(const Point *pos);
 
@@ -194,6 +200,8 @@ public:
    void onKeyUp(KeyCode keyCode);
    void onMouseDragged(S32 x, S32 y);
 
+   S32 getDividerPos();
+   bool isMouseOverDivider();
 
    void onActivate();         // Run when select server screeen is displayed
    void idle(U32 t);          // Idle loop
