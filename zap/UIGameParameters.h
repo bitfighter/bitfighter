@@ -94,9 +94,6 @@ public:
 
    Vector<SavedMenuItem> savedMenuItems;   
 
-   void onMouseMoved(S32 x, S32 y);
-
-
    void onActivate();
    void onEscape();
 

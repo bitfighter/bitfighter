@@ -978,7 +978,6 @@ void ClientGame::idle(U32 timeDelta)
       else
          mCommanderZoomDelta -= timeDelta;
 
-      const Point *winMousePos = gScreenInfo.getWindowMousePos();
       gGameUserInterface.onMouseMoved();     // Keep ship pointed towards mouse
    }
    else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime) // Zooming out to commander's map
@@ -987,7 +986,6 @@ void ClientGame::idle(U32 timeDelta)
       if(mCommanderZoomDelta > CommanderMapZoomTime)
          mCommanderZoomDelta = CommanderMapZoomTime;
 
-      const Point *winMousePos = gScreenInfo.getWindowMousePos();
       gGameUserInterface.onMouseMoved();  // Keep ship pointed towards mouse
    }
    // else we're not zooming in or out, which is most of the time

@@ -2839,7 +2839,7 @@ void EditorUserInterface::onMouseMoved()
 
 void EditorUserInterface::onMouseDragged(S32 x, S32 y)
 {
-   mMousePos = convertWindowToCanvasCoord(Point(x,y));
+   mMousePos.set(gScreenInfo.getMousePos());
 
    if(mCreatingPoly || mCreatingPolyline || mDragSelecting || mEditingSpecialAttrItem != NONE)
       return;
@@ -3247,7 +3247,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    mSnapVertex_i = NONE;
    mSnapVertex_j = NONE;
    itemToLightUp = NONE;
-   mUnmovedItems.erase(itemIndex);\
+   mUnmovedItems.erase(itemIndex);
 
    onMouseMoved();   // Reset cursor  
 }

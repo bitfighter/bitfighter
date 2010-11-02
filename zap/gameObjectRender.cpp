@@ -422,23 +422,24 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 
          F32 dist = pos.distanceTo(dests[i]);
 
-         Point mid(pos.x + .75 * cosa * dist, pos.y + .75 * sina * dist);
+         F32 midx = pos.x + .75 * cosa * dist;
+         F32 midy = pos.y + .75 * sina * dist;
 
          glBegin(GL_POLYGON);
             glColor4f(1, 1, 1, .25 * alpha);
             glVertex2f(pos.x + asina * wid, pos.y + acosa * wid);
-            glVertex2f(mid.x + asina * wid, mid.y + acosa * wid);
-            glVertex2f(mid.x - asina * wid, mid.y - acosa * wid);
+            glVertex2f(midx + asina * wid, midy + acosa * wid);
+            glVertex2f(midx - asina * wid, midy - acosa * wid);
             glVertex2f(pos.x - asina * wid, pos.y - acosa * wid);
          glEnd();
 
          glBegin(GL_POLYGON);
-            glVertex2f(mid.x + asina * wid, mid.y + acosa * wid);
+            glVertex2f(midx + asina * wid, midy + acosa * wid);
             glColor4f(1, 1, 1, 0);
             glVertex2f(dests[i].x + asina * wid, dests[i].y + acosa * wid);
             glVertex2f(dests[i].x - asina * wid, dests[i].y - acosa * wid);
             glColor4f(1, 1, 1, .25 * alpha);
-            glVertex2f(mid.x - asina * wid, mid.y - acosa * wid);
+            glVertex2f(midx - asina * wid, midy - acosa * wid);
          glEnd();
       }
 

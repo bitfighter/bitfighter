@@ -80,7 +80,8 @@ extern void exitGame();
 ////////////////////////////////////
 ////////////////////////////////////
 
-#define MAX_MENU_SIZE S32(450 / (getTextSize() + getGap()))   // Max number of menu items we show on screen before we go into scrolling mode
+// Max number of menu items we show on screen before we go into scrolling mode
+#define MAX_MENU_SIZE S32((gScreenInfo.getGameCanvasHeight() - 150) / (getTextSize() + getGap()))   
 
 MenuUserInterface::MenuUserInterface()    // Constructor
 {
@@ -285,9 +286,6 @@ void MenuUserInterface::render()
    if(mRenderInstructions)
       renderMenuInstructions();
 
-   //if(selectedIndex >= menuItems.size())
-   //   selectedIndex = 0;
-
    S32 count = menuItems.size();
 
    if(count > MAX_MENU_SIZE)     // Need some sort of scrolling?
@@ -296,7 +294,7 @@ void MenuUserInterface::render()
    S32 yStart = getYStart();
    S32 offset = getOffset();
 
-   S32 adjfact = 2;              // Just because it looks good
+   S32 adjfact = 0;              // Just because it looks good  (was 2, which looks crappy on gameParams menu.  0 seems to look ok everywhere.
    S32 shrinkfact = 1;
 
    for(S32 i = 0; i < count; i++)
@@ -346,7 +344,7 @@ void MenuUserInterface::render()
 
 
 // Handle mouse input, figure out which menu item we're over, and highlight it
-void MenuUserInterface::onMouseMoved(S32 x, S32 y)
+void MenuUserInterface::onMouseMoved()
 {
    // Really only matters when starting to host game... don't want to be able to change menu items while the levels are loading.
    // This is purely an aesthetic issue, a minor irritant.
@@ -424,7 +422,8 @@ void MenuUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       return;
    }
 
-   gMainMenuUserInterface.firstTime = false;    // Stop animations if a key is pressed
+   if(!gMainMenuUserInterface.mFirstTime)
+      gMainMenuUserInterface.showAnimation = false;    // Stop animations if a key is pressed
 
    menuItems[selectedIndex]->handleKey(keyCode, ascii) || processMenuSpecificKeys(keyCode, ascii) || processKeys(keyCode, ascii);
 
@@ -600,7 +599,8 @@ MainMenuUserInterface gMainMenuUserInterface;
 // Constructor
 MainMenuUserInterface::MainMenuUserInterface()
 {
-   firstTime = true;
+   showAnimation = true;
+   mFirstTime = true;
    setMenuID(MainUI);
    mMenuTitle = "";
    motd[0] = 0;
@@ -631,7 +631,9 @@ void MainMenuUserInterface::onActivate()
    mColorTimer2.reset(ColorTime2);
    mTransDir = true;
 
-   if(firstTime)
+   mFirstTime = false;
+
+   if(showAnimation)
       gSplashUserInterface.activate();          // Show splash screen the first time throug
 }
 
@@ -676,7 +678,7 @@ void MainMenuUserInterface::render()
 
    // Fade in the menu here if we are showing it the first time...  this will tie in
    // nicely with the splash screen, and make the transition less jarring and sudden
-   if(firstTime)
+   if(showAnimation)
    {
       glEnable(GL_BLEND);
          glBegin(GL_POLYGON);
@@ -743,7 +745,8 @@ void MainMenuUserInterface::showUpgradeAlert()
 // Take action based on menu selection
 void MainMenuUserInterface::processSelection(U32 index)
 {
-   firstTime = false;
+   if(!mFirstTime)
+      showAnimation = false;
 }
 
 
@@ -1460,10 +1463,7 @@ void LevelMenuSelectUserInterface::onActivate()
    currOffset = 0;
 
    if(itemSelectedWithMouse)
-   {
-      const Point *mousePos = gScreenInfo.getWindowMousePos();
-      onMouseMoved((S32)mousePos->x, (S32)mousePos->y);
-   }
+      onMouseMoved();
    else
       selectedIndex = 0;
 }

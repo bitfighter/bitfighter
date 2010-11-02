@@ -363,11 +363,9 @@ void TeamDefUserInterface::onMouseMoved(S32 x, S32 y)
 {
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
-   Point mousePos = convertWindowToCanvasCoord(Point(x, y));
-   
    S32 teams = gEditorUserInterface.mTeams.size();
 
-   selectedIndex = (S32)((mousePos.y - yStart + 6) / (fontsize + fontgap)) - 2; 
+   selectedIndex = (S32)((gScreenInfo.getMousePos()->y - yStart + 6) / (fontsize + fontgap)) - 2; 
 
    if(selectedIndex >= teams)
       selectedIndex = teams - 1;

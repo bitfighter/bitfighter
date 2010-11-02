@@ -468,8 +468,8 @@ void GameUserInterface::renderReticle()
       if(!gIniSettings.controlsRelative)
       {
          F32 len = mMousePoint.len();
-         checkMousePos(gScreenInfo.getWindowWidth() * 100 / canvasWidth,
-                     gScreenInfo.getWindowHeight() * 100 / canvasHeight);
+         checkMousePos(gScreenInfo.getWindowWidth()  * 100 / canvasWidth,
+                       gScreenInfo.getWindowHeight() * 100 / canvasHeight);
 
          if(len > 100)
             realMousePoint *= 100 / len;

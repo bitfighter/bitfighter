@@ -211,6 +211,7 @@ void CreditsScroller::updateFX(U32 delta)
    }
 }
 
+
 void CreditsScroller::render()
 {
    glColor3f(1,1,1);

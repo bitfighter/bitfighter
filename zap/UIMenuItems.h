@@ -217,7 +217,7 @@ public:
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 
-   virtual bool enterAdvancesItem() { return true; }
+      
 
    virtual void setSecret(bool secret) { mLineEditor.setSecret(secret); }
 };

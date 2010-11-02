@@ -49,7 +49,7 @@ private:
    bool mRepeatMode;
    bool mKeyDown;
 
-   virtual S32 getTextSize() { return 23; }
+   virtual S32 getTextSize() { return 23; }              // Let menus set their own text size
    virtual S32 getGap() { return 18; }
 
    virtual void renderExtras() { /* Do nothing */ }      // For drawing something extra on a menu
@@ -86,7 +86,8 @@ public:
    void render();    // Draw the basic menu
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
-   void onMouseMoved(S32 x, S32 y);
+   void onMouseMoved(S32 x, S32 y) { onMouseMoved(); }      // Redirect to argless version
+   void onMouseMoved();
    void processMouse();
 
    void onActivate();
@@ -128,7 +129,8 @@ public:
    void onActivate();
    void setNeedToUpgrade(bool needToUpgrade);   // Is client in need of an upgrade?
 
-   bool firstTime;                              // Is this the first time the menu is shown?
+   bool showAnimation;                          // Is this the first time the menu is shown?
+   bool mFirstTime;
    void showUpgradeAlert();                     // Display message to the user that it is time to upgrade
    bool getNeedToUpgrade();
 };

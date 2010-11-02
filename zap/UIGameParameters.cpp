@@ -62,8 +62,8 @@ void GameParamUserInterface::onActivate()
 {
    selectedIndex = 0;      // First item selected when we begin
    updateMenuItems(gEditorUserInterface.mGameType);
-   buildGameParamList();   // This will essentially "normalize" our parameter list, making sure that all params are present and in a standard order.
-   origGameParams = gameParams;     // Save a copy of the params coming in for comparison when we leave to see if anything changed.
+   buildGameParamList();            // "Normalize" parameter list, making sure all params are present and in a standard order
+   origGameParams = gameParams;     // Save a copy of the params coming in for comparison when we leave to see what changed
    glutSetCursor(GLUT_CURSOR_NONE);
 }
 
@@ -74,7 +74,8 @@ extern S32 gMaxPlayers;
 
 void GameParamUserInterface::updateMenuItems(const char *gt)
 {
-   // Figure out what index our gametype index is.  This is kind of ugly.  We'll assume that gt has a valid string because if not, game would have crashed already!
+   // Figure out what index our gametype index is.  This is kind of ugly.  We'll assume that gt has a valid string because if not, 
+   // the game would have crashed already!
    S32 i;
    for(i = 0; gGameTypeNames[i]; i++)
       if(!strcmp(gt, gGameTypeNames[i]))
@@ -165,7 +166,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                   found = true;
                   break;
                }
-         if(!found)                                                     // We don't already have an item with this name.  We'd better add this to our list of saved items.
+         if(!found)           // We don't already have an item with this name.  We'd better add this to our list of saved items.
             savedMenuItems.push_back(SavedMenuItem(menuItems[i]));
       }
    }
@@ -284,13 +285,10 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          string token = str.substr(lastPos, pos - lastPos);
          lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
          string val = str.substr(lastPos, str.size() - lastPos);
-   static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
-   static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
-
 
          if(token == "GridSize")
          {
-            S32 gridSize = max(min(atoi(val.c_str()), MAX_GRID_SIZE), MIN_GRID_SIZE);
+            S32 gridSize = max(min(atoi(val.c_str()), Game::MAX_GRID_SIZE), Game::MIN_GRID_SIZE);
             menuItems[OPT_GRIDSIZE]->setValue(gridSize);
          }
          else if(token == "MinPlayers")
@@ -323,8 +321,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 }
 
 
-static const U32 itemHeight = 30;
-static const U32 yStart = UserInterface::vertMargin + 90;
 
 // Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
@@ -361,13 +357,17 @@ void GameParamUserInterface::buildGameParamList()
    char str[gameTypeLen];
    
    S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[OPT_GAMETYPE])->getValueIndex();
-   strcpy(str, gGameTypeNames[gameTypeIndex]);      // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
+
+   // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
+   strcpy(str, gGameTypeNames[gameTypeIndex]);      
 
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
    for(S32 i = FIRST_GAME_SPECIFIC_PARAM; i < FIRST_GAME_SPECIFIC_PARAM + mGameSpecificParams; i++)
    {
       dSprintf(str, sizeof(str), "%s %d", str, menuItems[i]->getIntValue());
-      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getIntValue());  // Save the already-parsed GameType args in a vector for use if we re-enter this interface
+
+      // Save the already-parsed GameType args in a vector for use if we re-enter this interface
+      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getIntValue());  
    }
 
    // Compose other game description strings
@@ -393,22 +393,6 @@ bool GameParamUserInterface::anythingChanged()
          return true;
 
    return false;
-}
-
-
-void GameParamUserInterface::onMouseMoved(S32 x, S32 y)
-{
-   glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
-
-   Point mousePos = convertWindowToCanvasCoord(Point(x, y));
-
-   selectedIndex = (S32)((mousePos.y - yStart + 6) / itemHeight);
-
-   if(selectedIndex >= menuItems.size())
-      selectedIndex = menuItems.size() - 1;
-
-   if(selectedIndex < 0)
-      selectedIndex = 0;
 }
 
 

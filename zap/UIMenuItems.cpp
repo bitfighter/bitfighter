@@ -128,6 +128,10 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
          if(tolower(ascii) == tolower(mOptions[index].data()[0]))
          {
             mIndex = index;
+            
+            if(mCallback)
+               mCallback(mIndex);
+
             UserInterface::playBoop();
             return true;
          }

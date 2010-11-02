@@ -60,7 +60,7 @@ namespace Zap
 const S32 GameType::gMaxTeams;
 #endif
 
-static Timer mTestTimer(1 * 1000);
+//static Timer mTestTimer(10 * 1000);
 //static bool on = true;
 
 // List of valid game types -- these are the "official" names, not the more user-friendly names provided by getGameTypeString

@@ -172,10 +172,10 @@ void KeyDefMenuUserInterface::render()
       glColor4f(0, 0, 0, 0.6);
       glEnable(GL_BLEND);
       glBegin(GL_POLYGON);
-      glVertex2f(0, 0);
-      glVertex2f(canvasWidth, 0);
-      glVertex2f(canvasWidth, gScreenInfo.getGameCanvasHeight());
-      glVertex2f(0, canvasHeight);
+         glVertex2f(0, 0);
+         glVertex2f(canvasWidth, 0);
+         glVertex2f(canvasWidth, gScreenInfo.getGameCanvasHeight());
+         glVertex2f(0, canvasHeight);
       glEnd();
       glDisable(GL_BLEND);
    }
@@ -376,11 +376,11 @@ void KeyDefMenuUserInterface::onMouseMoved(S32 x, S32 y)
 {
    glutSetCursor(GLUT_CURSOR_RIGHT_ARROW);            // Show cursor when user moves mouse
 
-   Point mousePos = convertWindowToCanvasCoord(Point(x,y));
+   const Point *mousePos = gScreenInfo.getMousePos();
 
    // Which column is the mouse in?  Left half of screen = 0, right half = 1
-   S32 col = (mousePos.x < (gScreenInfo.getGameCanvasWidth() - horizMargin) / 2) ? 0 : 1;
-   S32 row = min(max(static_cast<int>(floor(( mousePos.y - yStart ) / height)), 0), menuItems.size() - 1);
+   S32 col = (mousePos->x < (gScreenInfo.getGameCanvasWidth() - horizMargin) / 2) ? 0 : 1;
+   S32 row = min(max(static_cast<int>(floor(( mousePos->y - yStart ) / height)), 0), menuItems.size() - 1);
 
    selectedIndex = min(max(row + firstItemInCol2 * col, 0), menuItems.size() - 1);    // Bounds checking
 

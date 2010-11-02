@@ -148,7 +148,8 @@ void QueryServersUserInterface::onActivate()
 
    mPage = 0;     // Start off showing the first page, as expected
 
-   ///*
+   
+#if 1
    // Populate server list with dummy data to see how it looks
    for(U32 i = 0; i < 512; i++)
    {
@@ -165,10 +166,12 @@ void QueryServersUserInterface::onActivate()
       s.playerCount = Random::readF() * s.maxPlayers;
       s.pingTimedOut = false;
       s.everGotQueryResponse = false;
-      
+      s.serverDescr = "Here is  description.  There are many like it, but this one is mine.";
+      s.msgColor = yellow; 
       servers.push_back(s);
    }
-   //*/
+#endif
+   
    mSortColumn = 0;
    mHighlightColumn = 0;
    pendingPings = 0;

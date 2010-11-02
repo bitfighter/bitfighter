@@ -163,11 +163,11 @@ public:
    // Convert physical window screen coordinates into virtual, in-game coordinate
    Point convertWindowToCanvasCoord(const Point &p, DisplayMode mode) { return convertWindowToCanvasCoord((S32)p.x, (S32)p.y, mode); }
    Point convertWindowToCanvasCoord(S32 x, S32 y, DisplayMode mode) { 
-      printf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d ||physicalMargin: %d,%d\n",
-               x, y, mCanvasMousePos.x, mCanvasMousePos.y, getHorizPhysicalMargin(mode),
-              getVertPhysicalMargin(mode),getWindowWidth(),getWindowHeight(),
-              mGameCanvasWidth, mGameCanvasHeight,
-              getHorizPhysicalMargin(mode),getVertPhysicalMargin(mode));
+      //printf("Point: %d, %d || canvas %2.0f, %2.0f ||margin h/v: %d/%d || window w/h: %d,%d || canvas w/h %d,%d ||physicalMargin: %d,%d\n",
+      //         x, y, mCanvasMousePos.x, mCanvasMousePos.y, getHorizPhysicalMargin(mode),
+      //        getVertPhysicalMargin(mode),getWindowWidth(),getWindowHeight(),
+      //        mGameCanvasWidth, mGameCanvasHeight,
+      //        getHorizPhysicalMargin(mode),getVertPhysicalMargin(mode));
 
          return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)), 
                       (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / (getWindowHeight() - 2 * getVertPhysicalMargin(mode))); }
@@ -303,8 +303,8 @@ public:
    static S32 getStringWidthf(U32 size, const char *format, ...);
 
    // TODO: Move to ScreenInfo
-   Point convertWindowToCanvasCoord(Point p) { return Point(p.x * gScreenInfo.getGameCanvasWidth() / gScreenInfo.getWindowWidth(), 
-                                                            p.y * gScreenInfo.getGameCanvasHeight() / gScreenInfo.getWindowHeight()); }
+   //Point convertWindowToCanvasCoord(Point p) { return Point(p.x * gScreenInfo.getGameCanvasWidth() / gScreenInfo.getWindowWidth(), 
+   //                                                         p.y * gScreenInfo.getGameCanvasHeight() / gScreenInfo.getWindowHeight()); }
 
 
    static void playBoop();    // Make some noise!
