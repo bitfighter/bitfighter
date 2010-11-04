@@ -142,6 +142,10 @@ static string stripExtension(string filename)
 }
 
 
+extern const S32 Game::MIN_GRID_SIZE;
+extern const S32 Game::MAX_GRID_SIZE;
+
+
 // Does the actual work of updating the menu items!
 void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 {

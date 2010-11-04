@@ -16,17 +16,6 @@
 #
 ########################################
 #
-# Building under Windows using MinGW:
-#
-# You can build Bitfighter under Windows using MinGW by following these steps:
-# 1. Download and install MinGW
-# 2. Follow the steps in the readme in the win_include_do_not_distribute folder
-# 3. Build the program using mingw32-make
-# 4. Need to figure out linking to GLUT
-# DOESN'T FULLY WORK
-#
-########################################
-#
 # Here are the steps needed to install on a fresh Ubuntu install:
 #
 # Download the source code from SVN repository
@@ -50,19 +39,22 @@
 default:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
-	@$(MAKE) -C master
+	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
 	@$(MAKE) -C zap	
 
 dedicated:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
-	@$(MAKE) -C master
+	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src 
 	@$(MAKE) -C zap	dedicated
 
 bitfighter:
 	@$(MAKE) -C zap
+
+master:
+	@$(MAKE) -C master
 
 .PHONY: clean 
 
@@ -79,7 +71,4 @@ cleano:
 	@$(MAKE) -C master cleano
 	@$(MAKE) -C lua/lua-vec/src cleano
 	@$(MAKE) -C zap	cleano
-
-docs:
-#	@$(MAKE) -C docs
 

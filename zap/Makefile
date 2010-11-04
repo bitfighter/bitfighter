@@ -103,7 +103,7 @@ OBJECTS_ZAP=\
    md5wrapper.o\
    md5.o\
    BotNavMeshZone.o\
-   ../master/masterInterface.o\
+   ../master/masterInterface.o
 
 CFLAGS=
 DFLAGS=
@@ -112,36 +112,37 @@ OPENAL=-lopenal -lalut
 WFLAGS=
 
 
-
 .c.o:
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
 .cpp.o : 
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
+default: bitfighter
 
-default: ../exe/bitfighter
-
-bitfighter: ../exe/bitfighter
-
-bitfightered: ../exe/bitfightered
 
 dedicated: CFLAGS=-DZAP_DEDICATED 
 dedicated: GLUT=
 dedicated: OPENAL=
 dedicated: EXEFILE=bitfighterd
-dedicated: ../exe/bitfighter
+dedicated: bitfighter
 
 
-../exe/bitfighter: $(OBJECTS_ZAP)
-# Avoid errors with mingw by removing gch files with mingw 
-#  rm -f *.gch    
+bitfighter: $(OBJECTS_ZAP)
 	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) -lstdc++  -lm
 
-../master/masterInterface.o:
-	make -C ../master
 
-clean:
+# We need one file in the master folder to be compiled to make this all work.  This
+# will make sure the master is compiled, and will compile it if it is not.  We'll use
+# the nophpbb option so that it will work on systems that have no phpbb integration
+# going on, which, for most users, will be the case.  
+#
+# Note also that this rule needs to be below the bitfighter rule above.
+#
+../master/masterInterface.o:
+	make -C ../master nophpbb
+
+clean: 
 	rm -f $(OBJECTS_ZAP) ../exe/bitfighter ../exe/bitfightered
 
 cleano:

@@ -1735,6 +1735,7 @@ int main(int argc, char **argv)
 
    SFXObject::init();  // Even dedicated server needs sound
 
+
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
    {
