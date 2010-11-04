@@ -64,9 +64,6 @@ static const U32 AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER = (SEL_SERVER_IN
 // "Chat window" includes chat composition, but not list of names of people in chatroom
 #define BOTTOM_OF_CHAT_WINDOW (gScreenInfo.getGameCanvasHeight() - vertMargin / 2 - CHAT_NAMELIST_SIZE)
 
-#define CHAT_HEIGHT        (mShowChat ? mMessageDisplayCount * (CHAT_FONT_SIZE + CHAT_FONT_MARGIN) : 0)   // Height of chat block overall
-
-
 // Some colors
 static const Color red = Color(1,0,0);
 static const Color green = Color(0,1,0);
@@ -145,7 +142,7 @@ void QueryServersUserInterface::onActivate()
    mPage = 0;     // Start off showing the first page, as expected
 
    
-#if 1
+#if 0
    // Populate server list with dummy data to see how it looks
    for(U32 i = 0; i < 512; i++)
    {
@@ -522,10 +519,12 @@ S32 QueryServersUserInterface::getSelectedIndex()
          indx = 0;
       else if(indx >= servers.size())
          indx = servers.size() - 1;
-      else if(indx < getFirstServerIndexOnCurrentPage())
+
+      // Even after that check, we can still have an indx that extends below the bottom of our screen
+      if(indx < getFirstServerIndexOnCurrentPage())
          indx = getFirstServerIndexOnCurrentPage();
-      else if(indx > mServersPerPage + getFirstServerIndexOnCurrentPage() - 1)
-         indx = mServersPerPage + getFirstServerIndexOnCurrentPage() - 1;
+      else if(indx > getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1)
+         indx = getServersPerPage() + getFirstServerIndexOnCurrentPage() - 1;
       
       return indx;
    }
@@ -617,22 +616,17 @@ void QueryServersUserInterface::render()
    // Show some chat messages
    if(mShowChat)
    {
+       S32 dividerPos = getDividerPos();
+
       // Horizontal divider between game list and chat window
       glColor(white);
       glBegin(GL_LINES);
-         glVertex2f(horizMargin, getDividerPos());
-         glVertex2f(canvasWidth - horizMargin, getDividerPos());
+         glVertex2f(horizMargin, dividerPos);
+         glVertex2f(canvasWidth - horizMargin, dividerPos);
       glEnd();
 
 
-      //glColor(red);
-      //glBegin(GL_LINES);
-      //   glVertex2f(horizMargin, barpos);
-      //   glVertex2f(canvasWidth - horizMargin, barpos);
-      //glEnd();
-
-
-      S32 ypos = getDividerPos() + 3;      // 3 = gap after divider
+      S32 ypos = dividerPos + 3;      // 3 = gap after divider
 
       renderMessages(ypos, mMessageDisplayCount);
 
@@ -668,14 +662,14 @@ void QueryServersUserInterface::render()
             glColor(i ? Color(0,0,0.4) : blue);     
 
          glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-            glVertex2f(1, y);
-            glVertex2f(canvasWidth - 1, y);
-            glVertex2f(canvasWidth - 1, y + SERVER_ENTRY_TEXTSIZE + 4);
-            glVertex2f(1, y + SERVER_ENTRY_TEXTSIZE + 4);
+            glVertex2f(0, y);
+            glVertex2f(canvasWidth, y);
+            glVertex2f(canvasWidth, y + SERVER_ENTRY_TEXTSIZE + 4);
+            glVertex2f(0, y + SERVER_ENTRY_TEXTSIZE + 4);
          glEnd();
       }
 
-      S32 lastServer = min(servers.size() - 1, (mPage + 1) * mServersPerPage - 1);
+      S32 lastServer = min(servers.size() - 1, (mPage + 1) * getServersPerPage() - 1);
 
       for(S32 i = getFirstServerIndexOnCurrentPage(); i <= lastServer; i++)
       {
@@ -686,7 +680,7 @@ void QueryServersUserInterface::render()
          {
             // Render server description at bottom
             glColor(s.msgColor);
-            U32 serverDescrLoc = TOP_OF_SERVER_LIST + mServersPerPage * SERVER_ENTRY_HEIGHT  ;
+            U32 serverDescrLoc = TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT  ;
             drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
          }
 
@@ -763,7 +757,7 @@ void QueryServersUserInterface::render()
    // Show some special messages if there are no servers, or we're not connected to the master
    else if(connectedToMaster && mRecievedListOfServersFromMaster)        // We have our response, and there were no servers
       drawmsg1 = true;
-   else if(!connectedToMaster)     // Still waiting for a response...
+   else if(!connectedToMaster)     // Still waiting to connect to the master...
       drawmsg2 = true;
 
 
@@ -806,7 +800,7 @@ void QueryServersUserInterface::renderColumnHeaders()
    {
       glBegin(GL_LINES);
          glVertex2f(columns[i].xStart - 4, COLUMN_HEADER_TOP);
-         glVertex2f(columns[i].xStart - 4, TOP_OF_SERVER_LIST + mServersPerPage * SERVER_ENTRY_HEIGHT + 2);
+         glVertex2f(columns[i].xStart - 4, TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2);
       glEnd();
    }
 
@@ -924,7 +918,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
 
 void QueryServersUserInterface::recalcCurrentIndex()
 {
-   S32 indx = mPage * mServersPerPage + selectedId % mServersPerPage - 1;
+   S32 indx = mPage * getServersPerPage() + selectedId % getServersPerPage() - 1;
    if(indx >= servers.size())
       indx = servers.size() - 1;
 
@@ -957,7 +951,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       {
          mDraggingDivider = true;
       }
-      else if(keyCode == MOUSE_LEFT && mousePos->y > COLUMN_HEADER_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, mServersPerPage + 2))
+      else if(keyCode == MOUSE_LEFT && mousePos->y > COLUMN_HEADER_TOP + SERVER_ENTRY_HEIGHT * min(servers.size() + 1, getServersPerPage() + 2))
       {
          // Clicked too low... also do nothing
       }
@@ -1048,7 +1042,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       currentIndex = getSelectedIndex() - 1;
       if(currentIndex < 0)
          currentIndex = servers.size() - 1;
-      mPage = currentIndex / mServersPerPage; 
+      mPage = currentIndex / getServersPerPage(); 
 
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
@@ -1060,7 +1054,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(currentIndex >= servers.size())
          currentIndex = 0;
 
-      mPage = currentIndex / mServersPerPage;
+      mPage = currentIndex / getServersPerPage();
 
       glutSetCursor(GLUT_CURSOR_NONE);        // Hide cursor when navigating with keyboard or joystick
       mItemSelectedWithMouse = false;
@@ -1173,17 +1167,32 @@ void QueryServersUserInterface::onMouseMoved(S32 x, S32 y)
 
 S32 QueryServersUserInterface::getDividerPos()
 {
-   return TOP_OF_SERVER_LIST + mServersPerPage * SERVER_ENTRY_HEIGHT + AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER;
+   if(mShowChat)
+      return TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER;
+   else
+      return gScreenInfo.getGameCanvasHeight();
+}
+
+S32 QueryServersUserInterface::getServersPerPage()
+{
+   if(mShowChat)
+      return mServersPerPage;
+   else
+      return (gScreenInfo.getGameCanvasHeight() - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
 }
 
 
 bool QueryServersUserInterface::isMouseOverDivider()
 {
+   if(!mShowChat)       // Divider is only in operation when window is split
+      return false;
+
    F32 mouseY = gScreenInfo.getMousePos()->y;
 
    S32 hitMargin = 4;
+   S32 dividerPos = getDividerPos();
 
-   return (mouseY >= getDividerPos() - hitMargin) && (mouseY <= getDividerPos() + hitMargin);
+   return (mouseY >= dividerPos - hitMargin) && (mouseY <= dividerPos + hitMargin);
 }
 
 
@@ -1270,7 +1279,6 @@ Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color
    mTextSize = textSize;
    mPadding = padding;
    mLabel = label;
-   mLabelLen = UserInterface::getStringWidth(textSize, label);
    mFgColor = fgColor;
    mHlColor = hlColor;
    mTransparent = true;
@@ -1280,7 +1288,7 @@ Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color
 
 bool Button::mouseOver(S32 mouseX, S32 mouseY)
 {
-   return(mouseX >= mX && mouseX <= mX + mPadding * 2 + mLabelLen &&
+   return(mouseX >= mX && mouseX <= mX + mPadding * 2 + UserInterface::getStringWidth(mTextSize, mLabel) &&
           mouseY >= mY && mouseY <= mY + mTextSize + mPadding * 2);
 }
 
@@ -1295,6 +1303,8 @@ void Button::onClick(S32 mouseX, S32 mouseY)
 void Button::render(S32 mouseX, S32 mouseY)
 {
    S32 start = mTransparent ? 0 : 1;
+
+   S32 labelLen = UserInterface::getStringWidth(mTextSize, mLabel);
    for(S32 i = start; i >= 0; i--)
    {
       if(mouseOver(mouseX, mouseY))
@@ -1303,10 +1313,10 @@ void Button::render(S32 mouseX, S32 mouseY)
          glColor(i ? mBgColor : mFgColor);         // Fill then border
 
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);
-         glVertex2f(mX,                            mY);
-         glVertex2f(mX + mPadding * 2 + mLabelLen, mY);
-         glVertex2f(mX + mPadding * 2 + mLabelLen, mY + mTextSize + mPadding * 2);
-         glVertex2f(mX,                            mY + mTextSize + mPadding * 2);
+         glVertex2f(mX,                           mY);
+         glVertex2f(mX + mPadding * 2 + labelLen, mY);
+         glVertex2f(mX + mPadding * 2 + labelLen, mY + mTextSize + mPadding * 2);
+         glVertex2f(mX,                           mY + mTextSize + mPadding * 2);
       glEnd();
    }
 

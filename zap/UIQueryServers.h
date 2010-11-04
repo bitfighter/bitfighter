@@ -46,7 +46,6 @@ class Button
 private:
    S32 mX, mY, mTextSize, mPadding;
    const char *mLabel;
-   S32 mLabelLen;       // Computed length of label
    void (*mOnClickCallback)();
    bool mouseOver(S32 mouseX, S32 mouseY);
    bool mTransparent;
@@ -201,6 +200,7 @@ public:
    void onMouseDragged(S32 x, S32 y);
 
    S32 getDividerPos();
+   S32 getServersPerPage();
    bool isMouseOverDivider();
 
    void onActivate();         // Run when select server screeen is displayed

@@ -142,9 +142,10 @@ static string stripExtension(string filename)
 }
 
 
-extern const S32 Game::MIN_GRID_SIZE;
+#ifndef WIN32
+extern const S32 Game::MIN_GRID_SIZE;     // Needed by gcc, cause errors in VC++... and for Mac?
 extern const S32 Game::MAX_GRID_SIZE;
-
+#endif
 
 // Does the actual work of updating the menu items!
 void GameParamUserInterface::updateMenuItems(S32 gtIndex)
