@@ -1615,7 +1615,14 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
    if(UserInterface::current->getMenuID() == EditorUI && 
             (gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED))
    {
-      F32 magFactor = 0.85;      // Smaller values give bigger magnification; makes small things easier to see on full screen
+      // Smaller values give bigger magnification; makes small things easier to see on full screen
+      F32 magFactor = 0.85;      
+
+      // For screens smaller than normal, we need to readjust magFactor to make sure we get the full canvas height crammed onto
+      // the screen; otherwise our dock will break.  Since this mode is only used in the editor, we don't really care about
+      // screen width; tall skinny screens will work just fine.
+      magFactor = max(magFactor, (F32)gScreenInfo.getGameCanvasHeight() / (F32)gScreenInfo.getPhysicalScreenHeight());
+
       gScreenInfo.setGameCanvasSize(gScreenInfo.getPhysicalScreenWidth() * magFactor, gScreenInfo.getPhysicalScreenHeight() * magFactor);
 
       displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
@@ -1745,7 +1752,10 @@ int main(int argc, char **argv)
       gAutoDetectedJoystickType = autodetectJoystickType();
       setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
 
-      glutInitWindowSize(100, 100);     // Does this actually do anything?  Seem to get same result, regardless of params!
+      // This is required on Linux, has no effect on Windows
+      glutInitWindowSize((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact()),
+                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact()));   
+
       glutInit(&argc, argv);
 
       // On OS X, glutInit changes the working directory to the app
