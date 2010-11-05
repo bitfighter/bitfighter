@@ -1753,8 +1753,8 @@ int main(int argc, char **argv)
       setJoystick(gAutoDetectedJoystickType);               // Will override INI settings, so process INI first
 
       // This is required on Linux, has no effect on Windows
-      glutInitWindowSize((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact()),
-                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact()));   
+      glutInitWindowSize((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact),
+                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));   
 
       glutInit(&argc, argv);
 
