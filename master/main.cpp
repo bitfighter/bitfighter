@@ -28,6 +28,7 @@
 #include "../tnl/tnlVector.h"
 #include "../tnl/tnlAsymmetricKey.h"
 #include "../zap/SharedConstants.h"
+//#include "../zap/stringUtils.h"   // For itos
 #include "authenticator.h"   // For authenticating users against the PHPBB3 database
 #include <stdio.h>
 #include <string>
@@ -75,6 +76,14 @@ public:
    U32 hostQueryId;
    U32 requestTime;
 };
+
+// TODO: Get this from stringUtils... doesn't work for some reason.  Too tired to track it down at the moment...
+std::string itos(S32 i)
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), "%d", i);
+   return outString;
+}
 
 class MasterServerConnection : public MasterServerInterface
 {
@@ -736,16 +745,6 @@ public:
       logprintf(LogConsumer::StatisticsFilter, "PLAYER\t2\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
-   // TODO: Get this to be the same as UI::itos()
-   // Convert int to string 
-   string itos(S32 i)
-   {
-      char outString[100];
-      dSprintf(outString, sizeof(outString), "%d", i);
-      return outString;
-   }
-
-
    // Send game statistics to the master server
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
                                                     RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
@@ -865,7 +864,7 @@ public:
 
          linkToServerList();
       }
-      else     // Not a server?  Must be a player client
+      else     // Not a server? Must be a client
       {
          bstream->readString(readstr);
          mPlayerOrServerName = readstr;
