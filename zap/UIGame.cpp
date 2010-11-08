@@ -875,7 +875,10 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyMISSION)
    {
       mMissionOverlayActive = true;
-      gClientGame->getGameType()->mLevelInfoDisplayTimer.clear();    // Clear level-start display if user hits F2
+
+      GameType *gt = gClientGame->getGameType();
+      if(gt)
+         gt->mLevelInfoDisplayTimer.clear();    // Clear level-start display if user hits F2
    }
    else if(keyCode == KEY_M && getKeyState(KEY_CTRL))    //Ctrl-M, for now, to cycle through message dispaly modes
    {
