@@ -3410,6 +3410,9 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
    mSpecialAttribute = NoAttribute;
 }
 
+   
+extern string itos(S32);
+
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {

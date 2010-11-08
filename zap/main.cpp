@@ -199,6 +199,7 @@ Color EDITOR_WALL_FILL_COLOR(.5, .5, 1);        // Walls filled with this in edi
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
+static const F32 MIN_SCALING_FACT = 0.15;       // Limits minimum window size
 string gServerPassword = "";
 string gAdminPassword = "";
 string gLevelChangePassword = "";
@@ -268,8 +269,6 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeig
 
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
    S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-
-   F32 MIN_SCALING_FACT = 0.15;     // Limits minimum window size
 
    // Constrain window to correct proportions...
    if((newWidth - canvasWidth) > (newHeight - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
@@ -1002,6 +1001,13 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             exitGame(1);
          }
       }
+
+      else if(!stricmp(argv[i], "-forceUpdate"))
+      {
+         gCmdLineSettings.forceUpdate = true;
+         i--;
+      }
+
       // Run as a dedicated server
       else if(!stricmp(argv[i], "-dedicated"))     // additional arg optional
       {
@@ -1481,7 +1487,7 @@ void processStartupParams()
    if(gCmdLineSettings.ypos != -9999)
       gIniSettings.winYPos = gCmdLineSettings.ypos;
    if(gCmdLineSettings.winWidth > 0)
-      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), 0.15f);
+      gIniSettings.winSizeFact = max((F32) gCmdLineSettings.winWidth / (F32) gScreenInfo.getGameCanvasWidth(), MIN_SCALING_FACT);
 
    if(gCmdLineSettings.masterAddress != "")
       gMasterAddress.set(gCmdLineSettings.masterAddress);
@@ -1691,6 +1697,73 @@ void setJoystick(ControllerTypeType jsType)
 }
 
 
+#ifdef WIN32
+#include <direct.h>
+#include <stdlib.h>
+#include "stringUtils.h"      // For itos
+
+// This block is Windows only, so it can do all sorts of icky stuff...
+void launchUpdater(string bitfighterExecutablePathAndFilename)
+{
+   //string executable = ExtractFilename(bitfighterExecutablePathAndFilename);
+
+   string updaterPath = ExtractDirectory(bitfighterExecutablePathAndFilename) + "\\updater";
+   string updaterFileName = updaterPath + "\\bfup.exe";
+
+   S32 buildVersion = gCmdLineSettings.forceUpdate ? 0 : BUILD_VERSION;
+
+   S32 result = (S32) ShellExecuteA( NULL, NULL, updaterFileName.c_str(), itos(buildVersion).c_str(), updaterPath.c_str(), SW_SHOW );
+
+   string msg = "";
+
+   switch(result)
+   {
+      case 0:
+	      msg = "The operating system is out of memory or resources.";
+	      break;
+      case ERROR_FILE_NOT_FOUND:
+	      msg = "The specified file was not found (tried " + updaterFileName + ").";
+	      break;
+      case ERROR_PATH_NOT_FOUND:
+	      msg = "The specified path was not found (tried " + updaterFileName + ").";
+	      break;
+      case ERROR_BAD_FORMAT:
+	      msg = "The .exe file is invalid (non-Win32 .exe or error in .exe image --> tried " + updaterFileName + ").";
+	      break;
+      case SE_ERR_ACCESSDENIED:
+	      msg = "The operating system denied access to the specified file (tried " + updaterFileName + ").";
+	      break;
+      case SE_ERR_ASSOCINCOMPLETE:
+	      msg = "The file name association is incomplete or invalid (tried " + updaterFileName + ").";;
+	      break;
+      case SE_ERR_DDEBUSY:
+	      msg = "The DDE transaction could not be completed because other DDE transactions were being processed.";
+	      break;
+      case SE_ERR_DDEFAIL:
+	      msg = "The DDE transaction failed.";
+	      break;
+      case SE_ERR_DDETIMEOUT:
+	      msg = "The DDE transaction could not be completed because the request timed out.";
+	      break;
+      case SE_ERR_DLLNOTFOUND:
+	      msg = "The specified DLL was not found.";
+	      break;
+      case SE_ERR_NOASSOC:
+	      msg = "There is no application associated with the given file name extension.";
+	      break;
+      case SE_ERR_OOM:
+	      msg = "There was not enough memory to complete the operation.";
+	      break;
+      case SE_ERR_SHARE:
+	      msg = "A sharing violation occurred.";
+	      break;
+   }
+
+   if(msg != "")
+      logprintf(LogConsumer::LogError, "Could not launch updater, returned error: %s", msg.c_str());
+}
+#endif
+
 };  // namespace Zap
 
 
@@ -1797,6 +1870,10 @@ int main(int argc, char **argv)
       if(gCmdLineSettings.connectRemote)              // Only true when -server param specified
          joinGame(gConnectAddress, false, false);     // Connect to a game server (i.e. bypass master matchmaking)
 
+#ifdef WIN32
+      if(gIniSettings.useUpdater)
+            launchUpdater(argv[0]);                   // Spawn external updater tool to check for new version of Bitfighter -- Windows only
+#endif
 
       glutMainLoop();         // Launch GLUT on it's merry way.  It'll call back with events and when idling.
       // dedicatedServerLoop();  //    Instead, with SDL, loop forever, running the idle command endlessly

@@ -42,6 +42,8 @@
 #include "config.h"
 #include "statistics.h"
 
+#include "stringUtils.h"      // For itos
+
 #include "glutInclude.h"
 
 #include <stdio.h>
@@ -1450,7 +1452,7 @@ void Ship::render(S32 layerIndex)
    {
       if(gGameUserInterface.mDebugShowShipCoords)
       {
-         string str = string("@") + UserInterface::itos((S32) getActualPos().x) + "," + UserInterface::itos((S32) getActualPos().y);
+         string str = string("@") + itos((S32) getActualPos().x) + "," + itos((S32) getActualPos().y);
 
          glEnable(GL_BLEND);
             U32 textSize = 18;

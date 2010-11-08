@@ -31,8 +31,8 @@
 #include "timer.h"
 #include "point.h"
 #include "lineEditor.h"
-#include "config.h"     // For DisplayMode enum
-
+#include "config.h"           // For DisplayMode enum
+#include "stringUtils.h"      // For itos
 #include "tnl.h"
 
 #include <string>
@@ -112,6 +112,7 @@ public:
    ScreenInfo()      // Constructor
    { 
       resetGameCanvasSize();        // Initialize GameCanvasSize vars
+      setWindowSize(GAME_WIDTH, GAME_HEIGHT);      // In case these are used in a calculation before they're set... avoids spurious divide by 0
       mWindowMousePos.set(-1,-1);   // -1 is used to indicate initial run
    }     
 
@@ -172,10 +173,7 @@ public:
          return Point((x - getHorizPhysicalMargin(mode)) * getGameCanvasWidth()  / (getWindowWidth()  - 2 * getHorizPhysicalMargin(mode)), 
                       (y - getVertPhysicalMargin(mode))  * getGameCanvasHeight() / (getWindowHeight() - 2 * getVertPhysicalMargin(mode))); }
 
-   void setMousePos(S32 x, S32 y, DisplayMode mode) { 
-      if(x == 0 && y == 0)
-         int x = 99;
-      mWindowMousePos.set(x,y); mCanvasMousePos.set(convertWindowToCanvasCoord(x,y,mode)); }
+   void setMousePos(S32 x, S32 y, DisplayMode mode) { mWindowMousePos.set(x,y); mCanvasMousePos.set(convertWindowToCanvasCoord(x,y,mode)); }
 
    const Point *getMousePos() { return &mCanvasMousePos; }
    const Point *getWindowMousePos() { return &mWindowMousePos; }
@@ -231,8 +229,6 @@ public:
    virtual void onKeyUp(KeyCode keyCode);
    virtual void onMouseMoved(S32 x, S32 y);
    virtual void onMouseDragged(S32 x, S32 y);
-
-   static string itos(S32 i);     // Convert an integer to a string
 
    void renderMessageBox(const char *title, const char *instr, const char *message[], S32 msgLines, S32 vertOffset = 0);
 

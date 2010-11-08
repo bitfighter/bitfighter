@@ -31,6 +31,7 @@
 #include "ship.h"
 #include "gameObjectRender.h"
 #include "SweptEllipsoid.h"      // For centroid calculation for labeling
+#include "stringUtils.h"         // For itos
 
 #include "../glut/glutInclude.h"
 
@@ -167,7 +168,8 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
 
    e.push_back(ship->getName());
    if(flagCount > 1)
-      e.push_back(UserInterface::itos(flagCount).c_str());
+      e.push_back(itos(flagCount).c_str());
+
 
    static StringTableEntry dropOneString( "%e0 dropped a flag!");
    static StringTableEntry dropManyString( "%e0 dropped %e1 flags!");

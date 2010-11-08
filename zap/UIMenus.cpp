@@ -784,7 +784,7 @@ static string getVolMsg(F32 volume)
 {
    S32 vol = U32((volume + 0.05) * 10.0);
 
-   string msg = UserInterface::itos(vol);
+   string msg = itos(vol);
 
    if(vol == 0)
       msg += " [MUTE]";

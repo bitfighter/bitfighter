@@ -90,6 +90,7 @@ OBJECTS_ZAP=\
    sparkManager.o\
    speedZone.o\
    statistics.o\
+   stringUtils.o\
    teamInfo.o\
    teleporter.o\
    textItem.o\

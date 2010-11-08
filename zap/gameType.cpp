@@ -36,6 +36,7 @@
 #include "config.h"
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
+#include "stringUtils.h"    // For itos
 
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
@@ -210,8 +211,8 @@ void GameType::printRules()
          if(teamScore == naScore && indScore == naScore)    // Skip non-scoring events
             continue;
 
-         string teamScoreStr = (teamScore == naScore) ? "N/A" : UserInterface::itos(teamScore);
-         string indScoreStr =  (indScore == naScore)  ? "N/A" : UserInterface::itos(indScore);
+         string teamScoreStr = (teamScore == naScore) ? "N/A" : itos(teamScore);
+         string indScoreStr =  (indScore == naScore)  ? "N/A" : itos(indScore);
 
          printf("%s: %s / %s\n", getScoringEventDescr((ScoringEvent) j).c_str(), indScoreStr.c_str(), teamScoreStr.c_str() );
       }

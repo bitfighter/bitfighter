@@ -86,6 +86,7 @@ struct CmdLineSettings
    string masterAddress;   // Use this master server
    F32 loss;               // Simulate packet loss (0-1)
    U32 lag;                // Simulate server lag (in ms)
+   bool forceUpdate;       // For testing updater
    string dedicated;
    string name;
    string password;
@@ -122,6 +123,7 @@ struct CmdLineSettings
 
       loss = 0;
       lag = 0;
+      forceUpdate = false;
       maxplayers = -1;
       displayMode = DISPLAY_MODE_UNKNOWN;
       winWidth = -1;
@@ -172,6 +174,8 @@ struct IniSettings      // With defaults specified
    string levelChangePassword;      // Password to allow access to level changing functionality on non-local server
    string levelDir;                 // Folder where levels are stored, by default
    S32 maxplayers;                  // Max number of players that can play on local server
+
+   bool useUpdater;                 // Use updater system (windows only)
 
    // Game window location when in windowed mode
    S32 winXPos;
@@ -245,6 +249,8 @@ struct IniSettings      // With defaults specified
       adminPassword = "";
       levelChangePassword = "";
       levelDir = "";
+
+      useUpdater = true;
 
       // Game window location when in windowed mode
       winXPos = 100;

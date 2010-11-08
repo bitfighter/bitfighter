@@ -177,6 +177,7 @@
     <ClCompile Include="..\zap\winJoystick.cpp" />
     <ClCompile Include="..\zap\winmain.cpp" />
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
+    <ClCompile Include="stringUtils.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -265,6 +266,7 @@
     <ClInclude Include="..\zap\UIYesNo.h" />
     <ClInclude Include="..\zap\voiceCodec.h" />
     <ClInclude Include="..\zap\zapjournal.h" />
+    <ClInclude Include="stringUtils.h" />
     <ClInclude Include="UIMenuItems.h" />
   </ItemGroup>
   <ItemGroup>

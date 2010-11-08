@@ -149,7 +149,7 @@ void CounterMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
    if(mValue == mMinValue && mMinMsg != "")
       UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mMinMsg.c_str());
    else
-      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), (UserInterface::itos(mValue) + " " + mUnits).c_str());
+      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), (itos(mValue) + " " + mUnits).c_str());
 }
 
 

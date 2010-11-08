@@ -29,7 +29,7 @@
 #include "keyCode.h"       // For keyCodes!
 #include "teamInfo.h"      // For Team def
 #include "point.h"
-
+#include "stringUtils.h"   // For itos
 #include <string>
 
 
@@ -174,7 +174,7 @@ public:
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
 
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
-   virtual string getValue() { return UserInterface::itos(mValue); }
+   virtual string getValue() { return itos(mValue); }
    const char *getUnits() { return mUnits.c_str(); }
    virtual S32 getIntValue() { return mValue; }
    virtual void setValue(S32 value) { mValue = value; }

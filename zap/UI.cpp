@@ -178,7 +178,7 @@ extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
 
 // Clean up and get ready to render
-void UserInterface::renderCurrent()   
+void UserInterface::renderCurrent()    // static
 {
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
 
@@ -222,16 +222,6 @@ void UserInterface::renderCurrent()
    }
    // End diagnostic key dump mode
 }
-
-
-// Convert int to string -- static method
-string UserInterface::itos(S32 i)
-{
-   char outString[100];
-   dSprintf(outString, sizeof(outString), "%d", i);
-   return outString;
-}
-
 
 extern const F32 radiansToDegreesConversion;
 

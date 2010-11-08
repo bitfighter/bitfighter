@@ -646,6 +646,8 @@ void loadSettingsFromINI()
    gIniSettings.levelDir = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
    gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
 
+   gIniSettings.useUpdater = gINI.GetValueB("Updater", "UseUpdater", gIniSettings.useUpdater);
+
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
 
    gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys",              (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
@@ -963,11 +965,26 @@ static void writeSettings()
 }
 
 
+static void writeUpdater()
+{
+   gINI.AddKeyName("Updater");
+
+   if(gINI.NumKeyComments("Updater") == 0)
+   {
+      gINI.KeyComment("Updater", "----------------");
+      gINI.KeyComment("Updater", " The Updater section contains entries that control how game updates are handled");
+      gINI.KeyComment("Updater", " UseUpdater - Enable or disable process that installs updates (WINDOWS ONLY)");
+      gINI.KeyComment("Updater", "----------------");
+
+      gINI.SetValueB("Updater", "UseUpdater", gIniSettings.useUpdater, true);
+   }
+}
+
 static void writeHost()
 {
    gINI.AddKeyName("Host");
 
-   if (gINI.NumKeyComments("Host") == 0)
+   if(gINI.NumKeyComments("Host") == 0)
    {
       gINI.KeyComment("Host", "----------------");
       gINI.KeyComment("Host", " The Host section contains entries that configure the game when you are hosting");
@@ -1094,6 +1111,7 @@ void saveSettingsToINI()
    writeDiagnostics();
    writeLevels();
    writeSkipList();
+   writeUpdater();
    writeTesting();
    writePasswordSection();
    writeKeyBindings();
