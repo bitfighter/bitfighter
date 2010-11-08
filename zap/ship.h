@@ -101,6 +101,8 @@ public:
 // class derived_class_name: public base_class_name
 class Ship : public MoveObject
 {
+   typedef MoveObject Parent;
+
 private:
    typedef MoveObject Parent;
    bool isBusy;

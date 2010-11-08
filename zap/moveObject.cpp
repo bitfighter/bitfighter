@@ -44,6 +44,13 @@ MoveObject::MoveObject(Point pos, float radius, float mass)    // Constructor
    mRadius = radius;
    mMass = mass;
    mInterpolating = false;
+   mHitLimit = 16;
+}
+
+
+void MoveObject::idle(GameObject::IdleCallPath path)
+{
+   mHitLimit = 16;      // Reset hit limit
 }
 
 
@@ -142,8 +149,6 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 const F32 moveTimeEpsilon = 0.000001f;
 const F32 velocityEpsilon = 0.00001f;
 
-S32 moveObjectHitLimit = 1024;
-
 // Apply mMoveState info to an object to compute it's new position.  Used for ships et. al.
 // isBeingDisplaced is true when the object is being pushed by something else, which will only happen in a collision
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
@@ -202,16 +207,12 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
             displacerList.push_back(this);
 
-            // Only try a limited number of times to avoid a near infinite loop
-            if(moveObjectHitLimit != 0) 
+            // Only try a limited number of times to avoid dragging the game under the dark waves of infinity
+            if(mHitLimit > 0) 
             {
                // Move the displaced object a tiny bit, true -> isBeingDisplaced
                moveObjectHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
-               moveObjectHitLimit--;
-            }
-            else 
-            {
-               int x = 99;
+               mHitLimit--;
             }
          }
       }

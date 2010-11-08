@@ -42,6 +42,8 @@ class GameType;
 
 class Item : public MoveObject, public LuaItem
 {
+   typedef MoveObject Parent;
+
 protected:
    enum MaskBits {
       InitialMask = BIT(0),

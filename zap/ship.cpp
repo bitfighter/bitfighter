@@ -401,6 +401,8 @@ void Ship::idle(GameObject::IdleCallPath path)
    if(hasExploded)
       return;
 
+   Parent::idle(path);
+
    if(path == GameObject::ServerIdleMainLoop && isControlled())
    {
       // If this is a controlled object in the server's main

@@ -162,6 +162,8 @@ void Item::idle(GameObject::IdleCallPath path)
    if(!isInDatabase())
       return;
 
+   Parent::idle(path);
+
    if(mIsMounted)    // Item is mounted on something else
    {
       if(mMount.isNull() || mMount->hasExploded)
