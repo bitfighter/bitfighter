@@ -806,9 +806,13 @@ void ServerGame::removeClient(GameConnection *theConnection)
 }
 
 
+extern S32 moveObjectHitLimit;
+
 // Top-level idle loop for server, runs only on the server by definition
 void ServerGame::idle(U32 timeDelta)
 {
+   moveObjectHitLimit = 2048;      // Reset counter
+
    if( mShuttingDown && (mShutdownTimer.update(timeDelta) || GameConnection::onlyClientIs(mShutdownOriginator)) )
    {
       endGame();
@@ -956,6 +960,8 @@ extern IniSettings gIniSettings;
 
 void ClientGame::idle(U32 timeDelta)
 {
+   moveObjectHitLimit = 32;
+
    mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
 

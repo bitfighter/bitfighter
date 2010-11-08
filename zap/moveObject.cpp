@@ -142,10 +142,11 @@ F32 MoveObject::computeMinSeperationTime(U32 stateIndex, MoveObject *contactShip
 const F32 moveTimeEpsilon = 0.000001f;
 const F32 velocityEpsilon = 0.00001f;
 
+S32 moveObjectHitLimit = 1024;
+
 // Apply mMoveState info to an object to compute it's new position.  Used for ships et. al.
 // isBeingDisplaced is true when the object is being pushed by something else, which will only happen in a collision
 // Remember: stateIndex will be one of 0-ActualState, 1-RenderState, or 2-LastProcessState
-
 void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vector<SafePtr<MoveObject> > displacerList)
 {
    U32 tryCount = 0;
@@ -172,18 +173,18 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
       if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
       {
-         MoveObject *shipHit = (MoveObject *) objectHit;    // shipHit isn't necessarily a ship -- it could be any MoveableType object
-         Point velDelta = shipHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
-         Point posDelta = shipHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
+         MoveObject *moveObjectHit = (MoveObject *) objectHit;    
+         Point velDelta = moveObjectHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
+         Point posDelta = moveObjectHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
          // Prevent infinite loops with a series of objects trying to displace each other forever
          for(S32 i = 0; i < displacerList.size(); i++)
-            if(isBeingDisplaced && (shipHit == displacerList[i]))
+            if(isBeingDisplaced && (moveObjectHit == displacerList[i]))
               return;
  
-         if(posDelta.dot(velDelta) < 0)   // shipHit is closing faster than we are ???
+         if(posDelta.dot(velDelta) < 0)   // moveObjectHit is closing faster than we are ???
          {
-            computeCollisionResponseMoveObject(stateIndex, shipHit);
+            computeCollisionResponseMoveObject(stateIndex, moveObjectHit);
             if(isBeingDisplaced)
                return;
          }
@@ -192,7 +193,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             Point intendedPos = mMoveState[stateIndex].pos + mMoveState[stateIndex].vel * moveTime;
 
             F32 displaceEpsilon = 0.002f;
-            F32 t = computeMinSeperationTime(stateIndex, shipHit, intendedPos);
+            F32 t = computeMinSeperationTime(stateIndex, moveObjectHit, intendedPos);
             if(t <= 0)
                return;   // Some kind of math error, couldn't find result: stop simulating this ship
 
@@ -200,7 +201,18 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             // one another, as this will just recurse deeper and deeper.
 
             displacerList.push_back(this);
-            shipHit->move(t + displaceEpsilon, stateIndex, true, displacerList);    // Move the displaced object a tiny bit, true -> isBeingDisplaced
+
+            // Only try a limited number of times to avoid a near infinite loop
+            if(moveObjectHitLimit != 0) 
+            {
+               // Move the displaced object a tiny bit, true -> isBeingDisplaced
+               moveObjectHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
+               moveObjectHitLimit--;
+            }
+            else 
+            {
+               int x = 99;
+            }
          }
       }
       else if(objectHit->getObjectTypeMask() & (BarrierType | EngineeredType | ForceFieldType))
@@ -357,20 +369,19 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 }
 
 
-// Note that shipHit isn't necessarily a ship -- it could be any MoveObject
 // Runs on both client and server side...
-void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *shipHit)
+void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *moveObjectHit)
 {
-   // collisionVector is simply a line from the center of shipHit to the center of this
-   Point collisionVector = shipHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
+   // collisionVector is simply a line from the center of moveObjectHit to the center of this
+   Point collisionVector = moveObjectHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
 
    collisionVector.normalize();
    // F32 m1 = getMass();             <-- May be useful in future
-   // F32 m2 = shipHit->getMass();
+   // F32 m2 = moveObjectHit->getMass();
 
    // Initial velocities projected onto collisionVector
    F32 v1i = mMoveState[stateIndex].vel.dot(collisionVector);
-   F32 v2i = shipHit->mMoveState[stateIndex].vel.dot(collisionVector);
+   F32 v2i = moveObjectHit->mMoveState[stateIndex].vel.dot(collisionVector);
 
    F32 v1f, v2f;     // Final velocities
 
@@ -381,19 +392,19 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    v1f = ( v1i + v2i - v2f);
 
    mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
-   shipHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
+   moveObjectHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
 
    if(!isGhost())    // i.e., we're on the server
    {
       // Check for asteroids hitting a ship
-      Ship *ship = dynamic_cast<Ship *>(shipHit);
+      Ship *ship = dynamic_cast<Ship *>(moveObjectHit);
       Asteroid *asteroid = dynamic_cast<Asteroid *>(this);
  
       if(!ship)
       {
          // Since asteroids and ships are both MoveObjects, we'll also check to see if ship hit an asteroid
          ship = dynamic_cast<Ship *>(this);
-         asteroid = dynamic_cast<Asteroid *>(shipHit);
+         asteroid = dynamic_cast<Asteroid *>(moveObjectHit);
       }
 
 
@@ -411,7 +422,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    }
 
    if(v1i > 0.25)    // Only make sound if the objects are moving fast enough
-      SFXObject::play(SFXBounceObject, shipHit->mMoveState[stateIndex].pos, Point());
+      SFXObject::play(SFXBounceObject, moveObjectHit->mMoveState[stateIndex].pos, Point());
 }
 
 void MoveObject::updateInterpolation()
