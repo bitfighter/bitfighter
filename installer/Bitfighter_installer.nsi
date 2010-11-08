@@ -96,6 +96,13 @@ Section "Install"
   File "readme.txt"
   File "End-User License.txt"
   File ".\Windows specific\twoplayers.bat"
+  
+  SetOutPath "$INSTDIR\updater"
+  File /r "..\exe\updater\BFUP.exe"
+  File /r "..\exe\updater\bfup.xml"
+  File /r "..\exe\updater\libcurl.dll"
+  File /r "..\exe\updater\License.txt"
+  File /r "..\exe\updater\readme.txt"
 
   SetOutPath "$INSTDIR\sfx"
   File /r ".\sfx\*.wav"
@@ -144,6 +151,7 @@ Section "Uninstall"
   Delete $INSTDIR\uninstall-bitfighter.exe
 
   ; And purge our install dirs, along with everything in them...
+  RMDir /r $INSTDIR\updater
   RMDir /r $INSTDIR\sfx
   RMDir /r $INSTDIR\levels
   RMDir /r $INSTDIR\robots

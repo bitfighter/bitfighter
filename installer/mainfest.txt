@@ -12,6 +12,7 @@ Windows only:
 OpenAL32.dll (from installer/Windows specific/)
 glut32.dll (from installer/Windows specific/)
 twoplayers.bat (from installer/Windows specific)
+Bitfighter updater (bfup)
 
 OS X only:
 ???
