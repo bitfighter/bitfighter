@@ -88,7 +88,7 @@ function findClosest(items, teamIndx)
 
    for indx, item in ipairs(items) do              -- Iterate over our list
 
-logprint(tostring(teamIndx)..","..item:getTeamIndx())
+--logprint(tostring(teamIndx)..","..item:getTeamIndx())
       if teamIndx == nil or item:getTeamIndx() == teamIndx then
 
          -- Use distSquared because it is less computationally expensive

@@ -1451,14 +1451,8 @@ bool Robot::startLua()
    init_profiler(L);
 #endif
 
-   // Load some libraries
-   luaopen_base(L);
-   luaopen_math(L);
-   luaopen_table(L);    // Needed for custom iterators and "values" function included in robot_helper_functions.lua
-   luaopen_debug(L);    // Needed for "strict" implementation
-   luaopen_string(L);   // Needed for elizabot, not much else
-   luaopen_vec(L);      // For vector math
-   //luaopen_package(L);  // Crashes
+   LuaUtil::openLibs(L);
+   LuaUtil::setModulePath(L);
 
    // Push a pointer to this Robot to the Lua stack,
    // then set the global name of this pointer.  This is the name that we'll use to refer

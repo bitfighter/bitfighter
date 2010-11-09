@@ -554,7 +554,7 @@ void SFXObject::init()
 #endif
       if(alGetError() != AL_NO_ERROR)
       {
-         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName); 
+         logprintf(LogConsumer::LogError, "Failure (1) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str()); 
          return;                                                                       
       }
 
@@ -563,7 +563,7 @@ void SFXObject::init()
 
       if(alGetError() != AL_NO_ERROR)
       {
-         logprintf(LogConsumer::LogError, "Failure (2) loading sound file '%s': Game will proceed without sound.", gSFXProfiles[i].fileName);   
+         logprintf(LogConsumer::LogError, "Failure (2) loading sound file '%s': Game will proceed without sound.", fileBuffer.c_str());   
          return;
       }
    }

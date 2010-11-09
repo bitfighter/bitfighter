@@ -56,6 +56,26 @@ void LuaObject::setLuaArgs(lua_State *L, Vector<string> args)
 }
 
 
+extern ConfigDirectories gConfigDirs;
+
+ void LuaObject::setModulePath(lua_State *L)      // static
+ {
+   lua_pushstring(L, "package");
+   lua_gettable(L, LUA_GLOBALSINDEX);
+   lua_pushstring(L, "path");
+   lua_pushstring(L, string(gConfigDirs.luaDir + "/?.lua").c_str());
+   lua_settable(L, -3);
+ }
+
+
+ void LuaObject::openLibs(lua_State *L)      // static
+ {
+   luaL_openlibs(L);    // Load the standard libraries
+   luaopen_vec(L);      // For vector math
+ }
+
+
+
 // Returns a point to calling Lua function
 S32 LuaObject::returnPoint(lua_State *L, const Point &point)
 {

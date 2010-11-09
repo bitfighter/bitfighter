@@ -311,12 +311,8 @@ void LuaLevelGenerator::runScript(lua_State *L, Vector<string> scriptArgs, F32 g
 
    lua_atpanic(L, luaPanicked);    // Register our panic function
 
-   // Load some libraries
-   luaopen_base(L);
-   luaopen_math(L);
-   luaopen_table(L);    // Needed for custom iterators and "values" function included in robot_helper_functions.lua
-   luaopen_debug(L);    // Needed for "strict" implementation
-
+   LuaUtil::openLibs(L);
+   LuaUtil::setModulePath(L);
 
    lua_pushnumber(L, gridSize);
    lua_setglobal(L, "_GRID_SIZE");

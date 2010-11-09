@@ -1188,7 +1188,7 @@ void ConfigDirectories::resolveDirs()
 
    // rootDataDir not used for sfx or lua folders
    gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
-   gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "");      
+   gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");      
 }
 
 

@@ -1807,15 +1807,15 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                   Vector<Point> dest;
                   dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
 
-				  if(mShowingReferenceShip)
-				     renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
-				  else
-				  {
-					 glColor(green);
-					 glLineWidth(3);
-					 drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
-				     glLineWidth(gDefaultLineWidth);
-				  }
+				     if(mShowingReferenceShip)
+				        renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
+				     else
+				     {
+                     glColor(green);
+                     glLineWidth(3);
+                     drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
+                     glLineWidth(gDefaultLineWidth);
+                  }
                }
                else if(item.index == ItemSpeedZone)
                   renderSpeedZone(SpeedZone::generatePoints(pos, convertLevelToCanvasCoord(item.vert(1))), gClientGame->getCurrentTime());
@@ -2172,10 +2172,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                F32 scaleFact = 1 / mGridSize; 
 
                glPushMatrix();
-               setLevelToCanvasCoordConversion();
+                  setLevelToCanvasCoordConversion();
 
-               renderForceField(ForceFieldProjector::getForceFieldStartPoint(item.vert(0), item.normal, scaleFact), 
-                                item.forceFieldEnd, c, true, scaleFact);
+                  renderForceField(ForceFieldProjector::getForceFieldStartPoint(item.vert(0), item.normal, scaleFact), 
+                                   item.forceFieldEnd, c, true, scaleFact);
                glPopMatrix();
             }
 

@@ -1123,11 +1123,11 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          gCmdLineSettings.dirs.logDir = argv[i+1].getString();
       }
 
-      else if(!stricmp(argv[i], "-luadir"))      // additional arg required
+      else if(!stricmp(argv[i], "-scriptsdir"))      // additional arg required
       {
          if(!hasAdditionalArg)
          {
-            logprintf(LogConsumer::LogError, "You must specify the folder where the Lua helper scripts are stored with the -luadir option");
+            logprintf(LogConsumer::LogError, "You must specify the folder where your Lua scripts are stored with the -scriptsdir option");
             exitGame(1);
          }
 

@@ -84,9 +84,6 @@ Section "Install"
 
   SetOutPath "$INSTDIR"
   File ..\exe\Bitfighter.exe
-  File ..\exe\robot_helper_functions.lua
-  File ..\exe\levelgen_helper_functions.lua
-  File ..\exe\lua_helper_functions.lua
   
   CreateShortCut "$INSTDIR\Play Bitfighter.lnk" "$INSTDIR\Bitfighter.exe" "-rootdatadir $\"$DOCUMENTS\Bitfighter$\""
 
@@ -96,6 +93,9 @@ Section "Install"
   File "readme.txt"
   File "End-User License.txt"
   File ".\Windows specific\twoplayers.bat"
+  
+  SetOutPath "$INSTDIR\scripts"
+  File /r "..\exe\scripts\*.lua"
   
   SetOutPath "$INSTDIR\updater"
   File /r "..\exe\updater\BFUP.exe"
@@ -156,6 +156,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\levels
   RMDir /r $INSTDIR\robots
   RMDir /r $INSTDIR\screenshots
+  RMDir /r $INSTDIR\lua
   RMDir /r $INSTDIR
   
   ; Remove the links from the start menu and desktop
