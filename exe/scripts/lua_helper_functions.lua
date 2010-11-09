@@ -35,7 +35,7 @@
 -------------------------------------------------------------------------------
 
 -- Load some additional libraries
-Geom = require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
+require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
 require("timer");
 
 	--
@@ -50,9 +50,6 @@ debug.getregistry = nil
 --]]
 
 
-
--- Declare some global objects
-Timer = {}
 
 --
 -- strict.lua
