@@ -78,6 +78,8 @@ to include the self parameter.
 
 ]]
 
+-- Declare our global timer object
+Timer = {}
 
 -- Initialize a new timer object, called once when object is instantiated
 function Timer:_initialize()

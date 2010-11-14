@@ -209,7 +209,6 @@ string gAdminPassword = "";
 string gLevelChangePassword = "";
 
 Address gMasterAddress;
-Address gConnectAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
       // Above is equivalent to ("IP:Any:28000")
 
@@ -954,8 +953,6 @@ void setParamsForDedicatedMode()
    gCmdLineSettings.clientMode = false;
    gCmdLineSettings.serverMode = true;
    gDedicatedServer = true;
-
-   gCmdLineSettings.connectRemote = false;
 }
 
 

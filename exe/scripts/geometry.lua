@@ -6,9 +6,10 @@
 --
 ---------------------------------------
 
-local M = {}
+Geom = {}
 
-function M.flipPoints(points, horizontal)
+-- Flip points along the X or Y axis.
+function Geom.flipPoints(points, horizontal)
     local newPoints = {}
     for i=1,#points do
         newPoints[i] = points[i]
@@ -21,15 +22,19 @@ function M.flipPoints(points, horizontal)
     return newPoints
 end
 
-function M.translatePoints(points, px, py)
+-- Move points by px, py
+function Geom.translatePoints(points, tx, ty)
     local newPoints = {}
     for i=1,#points do
-        newPoints[i] = Point(points[i]:x()+px, points[i]:y()+py)
+        newPoints[i] = Point(points[i]:x()+tx, points[i]:y()+ty)
     end
     return newPoints
 end
 
-function M.scalePoints(points, sx, sy)
+
+-- Scale points by sx, sy, in reference to the X and Y axes
+function Geom.scalePoints(points, sx, sy)
+    sy = sy or sx   -- Passing only one param will scale same amount in x & y directions
     local newPoints = {}
     for i=1,#points do
         newPoints[i] = Point(points[i]:x()*sx, points[i]:y()*sy)
@@ -37,26 +42,34 @@ function M.scalePoints(points, sx, sy)
     return newPoints
 end
 
-function M.rotatePoints(points, amount)
+
+-- Rotate points about the point (0,0)
+function Geom.rotatePoints(points, angle)
     local newPoints = {}
-    local amountRadians = amount*math.pi/180
+    local angleRadians = angle*math.pi/180
     local pointAngle = 0
     for i=1,#points do
         pointAngle = math.atan2(points[i]:y(),points[i]:x())
-        newPoints[i] = Point(points[i]:len()*math.cos(amountRadians+pointAngle), points[i]:len()*math.sin(amountRadians+pointAngle))
+        newPoints[i] = Point(points[i]:len()*math.cos(angleRadians+pointAngle), points[i]:len()*math.sin(angleRadians+pointAngle))
     end
     return newPoints
 end
 
-function M.transformPoints(points, px, py, sx, sy, rotation)
+
+-- Apply a full transformation to the points, doing a combination of the above in a single operation.  Scales, rotates, then translates.
+function Geom.transformPoints(points, tx, ty, sx, sy, angle)
+    -- Check for single scaling factor, and adjust args
+    if not angle then
+      sx = sy
+      sy = angle
+    end
+    
     local newPoints = {}
-    local amountRadians = rotation*math.pi/180
+    local angleRadians = angle*math.pi/180
     local pointAngle = 0
     for i=1,#points do
         pointAngle = math.atan2(points[i]:y(),points[i]:x())
-        newPoints[i] = Point((points[i]:len()*math.cos(amountRadians+pointAngle))*sx+px, (points[i]:len()*math.sin(amountRadians+pointAngle))*sy+py)
+        newPoints[i] = Point((points[i]:len()*math.cos(angleRadians+pointAngle))*sx+tx, (points[i]:len()*math.sin(angleRadians+pointAngle))*sy+ty)
     end
     return newPoints
 end
-
-return M
