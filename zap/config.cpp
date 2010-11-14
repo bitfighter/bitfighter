@@ -614,6 +614,8 @@ void loadSettingsFromINI()
 
    
    gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
+   gIniSettings.oldDisplayMode = gIniSettings.displayMode;
+
    gIniSettings.controlsRelative = (lcase(gINI.GetValue("Settings", "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
    gIniSettings.echoVoice = (lcase(gINI.GetValue("Settings", "VoiceEcho",(gIniSettings.echoVoice ? "Yes" : "No"))) == "yes");
    gIniSettings.showWeaponIndicators = (lcase(gINI.GetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"))) == "yes");

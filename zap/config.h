@@ -79,10 +79,8 @@ struct CmdLineSettings
 
    bool clientMode;        // Start with client active
    bool serverMode;        // Start in server mode
-   bool connectRemote;
 
    string server;
-   string connect;         // Connect to this server immediately
    string masterAddress;   // Use this master server
    F32 loss;               // Simulate packet loss (0-1)
    U32 lag;                // Simulate server lag (in ms)
@@ -119,7 +117,6 @@ struct CmdLineSettings
    {
       clientMode = true;
       serverMode = false;
-      connectRemote = false;
 
       loss = 0;
       lag = 0;

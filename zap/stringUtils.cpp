@@ -44,9 +44,7 @@ std::string ExtractFilename( const std::string& path )
 }
 
 
-//extern S32 dSprintf(char *buffer, U32 bufferSize, const char *format, ...);
-
-std::string itos(int i)
+std::string itos(S32 i)
 {
    char outString[100];
    dSprintf(outString, sizeof(outString), "%d", i);

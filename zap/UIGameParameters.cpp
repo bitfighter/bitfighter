@@ -203,7 +203,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                          "", 
                                          "The level's name -- pick a good one!",  
                                          MAX_GAME_NAME_LEN);
-   item->setFilter(LineEditor::fileNameFilter);
+   item->setFilter(LineEditor::allAsciiFilter);
    menuItems.push_back(item);
    OPT_LEVEL_NAME = menuItems.size() - 1;
    

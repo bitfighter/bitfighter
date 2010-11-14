@@ -58,6 +58,8 @@ Test various junk in level files and see how they load into the editor, and how 
 #include "luaLevelGenerator.h"
 #include "../glut/glutInclude.h"
 
+#include "oglconsole.h"          // Our console object
+
 #include <ctype.h>
 #include <exception>
 
@@ -96,10 +98,10 @@ static const S32 TEAM_HOSTILE = Item::TEAM_HOSTILE;
 static Vector<WorldItem> *mLoadTarget;
 
 enum EntryMode {
-   EntryID,
-   EntryAngle,
-   EntryScale,
-   EntryNone
+   EntryID,          // Entering an objectID
+   EntryAngle,       // Entering an angle
+   EntryScale,       // Entering a scale
+   EntryNone         // Not in a special entry mode
 };
 
 
@@ -475,7 +477,7 @@ void EditorUserInterface::loadLevel()
    mTeams.clear();
    mSnapVertex_i = NONE;
    mSnapVertex_j = NONE;
-   mLevelGenItems.clear();
+   clearLevelGenItems();
    mLoadTarget = &mItems;
    mGameTypeArgs.clear();
    gGameParamUserInterface.gameParams.clear();
@@ -623,12 +625,22 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
 }    
 
 
+extern OGLCONSOLE_Console gConsole;
+
+void EditorUserInterface::clearLevelGenItems()
+{
+   mLevelGenItems.clear();
+}
+
+
 void EditorUserInterface::runScript()
 {
    // Parse mScriptLine
 
    if(mScriptLine == "")      // No script included!!
       return;
+
+   OGLCONSOLE_Output(gConsole, "Running levelgen script %s\n", mScriptLine.c_str());
 
    Vector<string> scriptArgs;
 
@@ -643,42 +655,28 @@ void EditorUserInterface::runScript()
       pos = mScriptLine.find_first_of(" ", lastPos);          // Find next non-space
    }
 
-   // Clear out any items from the last run
-   mLevelGenItems.clear();
+   clearLevelGenItems();      // Clear out any items from the last run
 
    // Set the load target to the levelgen list, as that's where we want our items stored
    mLoadTarget = &mLevelGenItems;
 
    // Load the items
-   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.levelDir + "/", scriptArgs, mGridSize, this);
+   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.levelDir + "/", scriptArgs, mGridSize, this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
    // Bulk-process new items, walls first
    for(S32 i = 0; i < mLoadTarget->size(); i++)
       if(mLevelGenItems[i].index == ItemBarrierMaker)
+      {
+         if(mLevelGenItems[i].vertCount() < 2)      // Invalid item; delete
+         {
+            mLevelGenItems.erase_fast(i);
+            i--;
+         }
+
          mLevelGenItems[i].processEndPoints();
-
-
-
-
-   //wallSegmentManager.recomputeAllWallGeometry();
-   
-   //// Bulk-process bot nav mesh zone boundaries
-   //for(S32 i = 0; i < mItems.size(); i++)
-   //   if(mItems[i].index == ItemNavMeshZone)
-   //   {
-   //       mItems[i].initializeGeom();
-   //   }
-
-   //gEditorUserInterface.rebuildAllBorderSegs();
-
-   //wallSegmentManager.recomputeAllWallGeometry();
-
-   //for(S32 i = 0; i < mLevelGenItems.size(); i++)
-   //   if(mLevelGenItems[i].index != ItemBarrierMaker)
-   //      mLevelGenItems[i].onGeomChanged();
-
+      }
 
 
    // Reset the target
@@ -847,7 +845,40 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
-extern void actualizeScreenMode(bool, bool);
+// Handle console input
+// Valid commands: help, run, clear, quit, exit
+void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
+{
+    if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
+       OGLCONSOLE_HideConsole();
+
+    else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
+       OGLCONSOLE_Output(console, "Commands: help; run; clear; quit\n");
+
+    else if(!strncmp(cmd, "run", 3))
+      gEditorUserInterface.runScript();
+
+    else if(!strncmp(cmd, "clear", 3))
+      gEditorUserInterface.clearLevelGenItems();
+
+    else if(!strncmp(cmd, "add", 3))
+    {
+        int a, b;
+        if (sscanf(cmd, "add %i %i", &a, &b) == 2)
+        {
+            OGLCONSOLE_Output(console, "%i + %i = %i\n", a, b, a+b);
+            return;
+        }
+
+        OGLCONSOLE_Output(console, "usage: add INT INT\n");
+    }
+
+    else
+      OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd);
+}
+
+
+extern void actualizeScreenMode(bool, bool = false);
 
 void EditorUserInterface::onActivate()
 {
@@ -911,13 +942,16 @@ void EditorUserInterface::onActivate()
 
    mSaveMsgTimer = 0;
 
-   actualizeScreenMode(false, true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+   OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Setup callback for processing console commands
+
+
+   actualizeScreenMode(false); 
 }
 
 
 void EditorUserInterface::onDeactivate()
 {
-   actualizeScreenMode(true, true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+   actualizeScreenMode(true);
 }
 
 
@@ -939,7 +973,7 @@ void EditorUserInterface::onReactivate()
    if(mCurrentTeam >= mTeams.size())
       mCurrentTeam = 0;
    
-   actualizeScreenMode(true, true);    // Not actually the first time, but this will prevent unnecessary saving of window pos
+   actualizeScreenMode(true);
 }
 
 
@@ -3416,147 +3450,23 @@ extern string itos(S32);
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   if(OGLCONSOLE_ProcessBitfighterKeyEvent(keyCode, ascii))      // Pass the key on to the console for processing
+      return;
+
    if(entryMode != EntryNone)
-   {
-      if(keyCode == KEY_ENTER)
-      {
-         if(entryMode == EntryID)
-         {
-            for(S32 i = 0; i < mItems.size(); i++)
-               if(mItems[i].selected)          // Should only be one
-               {
-                  S32 id = atoi(mEntryBox.c_str());
-                  if(mItems[i].id != id)       // Did the id actually change?
-                  {
-                     mItems[i].id = id;
-                     mAllUndoneUndoLevel = -1; // If so, it can't be undone
-                  }
-                  break;
-               }
-         }
-         else if(entryMode == EntryAngle)
-         {
-            F32 angle = (F32) atof(mEntryBox.c_str());
-            rotateSelection(-angle);      // Positive angle should rotate CW, negative makes that happen
-         }
-         else if(entryMode == EntryScale)
-         {
-            F32 scale = (F32) atof(mEntryBox.c_str());
-            scaleSelection(scale);
-         }
+      textEntryKeyHandler(keyCode, ascii);
 
-         entryMode = EntryNone;
-      }
-      else if(keyCode == KEY_ESCAPE)
-      {
-         entryMode = EntryNone;
-      }
-      else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-         mEntryBox.handleBackspace(keyCode);
-
-      else
-         mEntryBox.addChar(ascii);
-
-      // else ignore keystroke
-      return;
-   }
-
-   if(keyCode == KEY_ENTER)       // Enter - Edit props
-   {
-      for(S32 i = 0; i < mItems.size(); i++)
-      {
-         if(mItems[i].selected)
-         {
-            // Force item i to be the one and only selected item type.  This will clear up some problems that
-            // might otherwise occur.  If you have multiple items selected, all will end up with the same values
-            mItems[i].selected = true;
-
-            for(S32 j = 0; j < mItems.size(); j++)
-               if(mItems[j].selected && mItems[j].index != mItems[i].index)
-                  unselectItem(j);
-
-            mEditingSpecialAttrItem = i;
-            mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
-
-            if(mSpecialAttribute != NoAttribute)
-            {
-               mEditingSpecialAttrItem = i;
-               saveUndoState(mItems);
-            }
-            else
-               doneEditingSpecialItem(true);
-
-            break;
-         }
-      }
-      return;
-   }
+   else if(keyCode == KEY_ENTER)       // Enter - Edit props
+      itemPropertiesEnterKeyHandler();
 
    // This first section is the key handlers for when we're editing the special attributes of an item.  Regular
    // key actions are handled below.
-   if(mEditingSpecialAttrItem != NONE)
-   {  /* braces required */
-      if( keyCode == KEY_J && getKeyState(KEY_CTRL) )
-      { /* Do nothing */ }
-      else if(keyCode == KEY_ESCAPE || keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)      // End editing, revert
-      {
-         doneEditingSpecialItem(false); 
-         return;
-      }
-      else if(mSpecialAttribute == Text)
-      {
-         if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
-            mItems[mEditingSpecialAttrItem].lineEditor.handleBackspace(keyCode);
-
-         else if(ascii)       // User typed a character -- add it to the string
-            mItems[mEditingSpecialAttrItem].lineEditor.addChar(ascii);
-      }
-      else if(mSpecialAttribute == RepopDelay)
-      {
-         if(keyCode == KEY_UP)         // Up - increase delay
-         {  /* braces required */
-            if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
-               mItems[mEditingSpecialAttrItem].repopDelay++;
-         }
-         else if(keyCode == KEY_DOWN)  // Down - decrease delay
-         {  /* braces required */
-            if(mItems[mEditingSpecialAttrItem].repopDelay > 0)
-               mItems[mEditingSpecialAttrItem].repopDelay--;
-         }
-      }
-      else if(mSpecialAttribute == GoFastSpeed)
-      {
-         if(keyCode == KEY_UP)         // Up - increase speed
-         {  /* braces required */
-            if(mItems[mEditingSpecialAttrItem].speed < SpeedZone::maxSpeed)
-               mItems[mEditingSpecialAttrItem].speed += 10;
-         }
-         else if(keyCode == KEY_DOWN)  // Down - decrease speed
-         {  /* braces required */
-            if(mItems[mEditingSpecialAttrItem].speed > SpeedZone::minSpeed)
-               mItems[mEditingSpecialAttrItem].speed -= 10;
-         }
-      }
-      else if(mSpecialAttribute == GoFastSnap)
-      {
-         if(keyCode == KEY_UP || keyCode == KEY_DOWN)   // Up/Down - toggle snapping
-         {  /* braces required */
-            mItems[mEditingSpecialAttrItem].boolattr = !mItems[mEditingSpecialAttrItem].boolattr;
-         }
-      }
-
-      mItems[mEditingSpecialAttrItem].onAttrsChanging();
-      return;
-   }
-
-   // Not editing special attributes...
+   else if(mEditingSpecialAttrItem != NONE)
+      specialAttributeKeyHandler(keyCode, ascii);
 
    // Regular key handling from here on down
-   if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
-   {
+   else if(getKeyState(KEY_SHIFT) && keyCode == KEY_0)  // Shift-0 -> Set team to hostile
       setCurrentTeam(-2);
-      return;
-   }
 
    else if(ascii == '#' || ascii == '!')
    {
@@ -3773,6 +3683,9 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       pasteSelection();
    else if(keyCode == KEY_V)              // V - Flip vertical
       flipSelectionVertical();
+   else if(keyCode == KEY_SLASH)
+      OGLCONSOLE_ShowConsole();
+
    else if(keyCode == KEY_L && getKeyState(KEY_CTRL) && getKeyState(KEY_SHIFT))
    {
       loadLevel();                        // Ctrl-Shift-L - Reload level
@@ -3801,7 +3714,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(mLevelGenItems.size() == 0)
             runScript();
          else
-            mLevelGenItems.clear();
+            clearLevelGenItems();
       }
       else
          rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
@@ -3859,7 +3772,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
    else if(keyCode == KEY_E)              // E - Zoom In
          mIn = true;
-   else if(keyCode == KEY_SLASH)          // / - Split barrier on selected vertex
+   else if(keyCode == KEY_BACKSLASH)      // \ - Split barrier on selected vertex
       splitBarrier();
    else if(keyCode == KEY_J)
       joinBarrier();
@@ -3926,6 +3839,138 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mSnapDisabled = true;
    else if(keyCode == KEY_TAB)
       mShowingReferenceShip = true;
+}
+
+
+// Handle keyboard activity when we're editing an item's attributes
+void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
+{
+   if(keyCode == KEY_ENTER)
+   {
+      if(entryMode == EntryID)
+      {
+         for(S32 i = 0; i < mItems.size(); i++)
+            if(mItems[i].selected)          // Should only be one
+            {
+               S32 id = atoi(mEntryBox.c_str());
+               if(mItems[i].id != id)       // Did the id actually change?
+               {
+                  mItems[i].id = id;
+                  mAllUndoneUndoLevel = -1; // If so, it can't be undone
+               }
+               break;
+            }
+      }
+      else if(entryMode == EntryAngle)
+      {
+         F32 angle = (F32) atof(mEntryBox.c_str());
+         rotateSelection(-angle);      // Positive angle should rotate CW, negative makes that happen
+      }
+      else if(entryMode == EntryScale)
+      {
+         F32 scale = (F32) atof(mEntryBox.c_str());
+         scaleSelection(scale);
+      }
+
+      entryMode = EntryNone;
+   }
+   else if(keyCode == KEY_ESCAPE)
+   {
+      entryMode = EntryNone;
+   }
+   else if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+      mEntryBox.handleBackspace(keyCode);
+
+   else
+      mEntryBox.addChar(ascii);
+
+   // else ignore keystroke
+}
+
+
+void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii)
+{
+   if( keyCode == KEY_J && getKeyState(KEY_CTRL) )
+   { /* Do nothing */ }
+   else if(keyCode == KEY_ESCAPE || keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)      // End editing, revert
+   {
+      doneEditingSpecialItem(false); 
+      return;
+   }
+   else if(mSpecialAttribute == Text)
+   {
+      if(keyCode == KEY_BACKSPACE || keyCode == KEY_DELETE)
+         mItems[mEditingSpecialAttrItem].lineEditor.handleBackspace(keyCode);
+
+      else if(ascii)       // User typed a character -- add it to the string
+         mItems[mEditingSpecialAttrItem].lineEditor.addChar(ascii);
+   }
+   else if(mSpecialAttribute == RepopDelay)
+   {
+      if(keyCode == KEY_UP)         // Up - increase delay
+      {  /* braces required */
+         if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
+            mItems[mEditingSpecialAttrItem].repopDelay++;
+      }
+      else if(keyCode == KEY_DOWN)  // Down - decrease delay
+      {  /* braces required */
+         if(mItems[mEditingSpecialAttrItem].repopDelay > 0)
+            mItems[mEditingSpecialAttrItem].repopDelay--;
+      }
+   }
+   else if(mSpecialAttribute == GoFastSpeed)
+   {
+      if(keyCode == KEY_UP)         // Up - increase speed
+      {  /* braces required */
+         if(mItems[mEditingSpecialAttrItem].speed < SpeedZone::maxSpeed)
+            mItems[mEditingSpecialAttrItem].speed += 10;
+      }
+      else if(keyCode == KEY_DOWN)  // Down - decrease speed
+      {  /* braces required */
+         if(mItems[mEditingSpecialAttrItem].speed > SpeedZone::minSpeed)
+            mItems[mEditingSpecialAttrItem].speed -= 10;
+      }
+   }
+   else if(mSpecialAttribute == GoFastSnap)
+   {
+      if(keyCode == KEY_UP || keyCode == KEY_DOWN)   // Up/Down - toggle snapping
+      {  /* braces required */
+         mItems[mEditingSpecialAttrItem].boolattr = !mItems[mEditingSpecialAttrItem].boolattr;
+      }
+   }
+
+   mItems[mEditingSpecialAttrItem].onAttrsChanging();
+}
+
+
+void EditorUserInterface::itemPropertiesEnterKeyHandler()
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].selected)
+      {
+         // Force item i to be the one and only selected item type.  This will clear up some problems that
+         // might otherwise occur.  If you have multiple items selected, all will end up with the same values
+         mItems[i].selected = true;
+
+         for(S32 j = 0; j < mItems.size(); j++)
+            if(mItems[j].selected && mItems[j].index != mItems[i].index)
+               unselectItem(j);
+
+         mEditingSpecialAttrItem = i;
+         mSpecialAttribute = (SpecialAttribute) getNextAttr(i);
+
+         if(mSpecialAttribute != NoAttribute)
+         {
+            mEditingSpecialAttrItem = i;
+            saveUndoState(mItems);
+         }
+         else
+            doneEditingSpecialItem(true);
+
+         break;
+      }
+   }
 }
 
 

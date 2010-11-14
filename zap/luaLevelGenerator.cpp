@@ -36,10 +36,14 @@ static LevelLoader *mCaller;
 //const S32 LevelLoader::MaxArgc;
 #endif
 
+const char *levelGenFile;     // Exists here so exception handler will know what file we were running
+
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, LevelLoader *caller)
+LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, LevelLoader *caller, OGLCONSOLE_Console console)
 {
    mFilename = path + scriptArgs[0];
+   levelGenFile = mFilename.c_str();
+   mConsole = console;
 
    lua_State *L = lua_open();    // Create a new Lua interpreter
 
@@ -78,6 +82,8 @@ LuaLevelGenerator::~LuaLevelGenerator()
 }
 
 
+extern OGLCONSOLE_Console gConsole;
+
 // Some rudimentary error logging.  Perhaps, someday, will become a sort of in-game error console.
 // For now, though, pass all errors through here.
 void LuaLevelGenerator::logError(const char *format, ...)
@@ -87,7 +93,9 @@ void LuaLevelGenerator::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
+   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", levelGenFile, buffer);
+
+   OGLCONSOLE_Output(gConsole, "%s\n", buffer);    // Print message to the console
 
    va_end(args);
 }
@@ -173,7 +181,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
 
    catch(LuaException &e)
    {
-      logError("Error adding wall in %s: %s", methodName, e.what());
+      logError(e.what());
    }
 
    mCaller->parseArgs(line.c_str());

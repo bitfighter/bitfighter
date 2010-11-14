@@ -314,7 +314,7 @@ static const char *wallInstructions[] =
    "Create walls with right mouse button; hold [~] to create line",
    "Finish wall by left-clicking",
    "Drag and drop individual vertices or an entire wall",
-   "Split wall at selected vertex with [/]",
+   "Split wall at selected vertex with [\\]",
    "Join contiguous wall segments with [J]",
    "Toggle display of non-wall objects with [Ctrl-A]",
    "Change wall thickness with [+] & [-] (use [Shift] for smaller changes)",

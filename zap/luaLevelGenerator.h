@@ -30,7 +30,7 @@
 #include "luaUtil.h"
 #include "gameLoader.h"
 #include "tnlLog.h"
-
+#include "oglconsole.h"    // For logging to the console
 
 using namespace std;
 
@@ -42,6 +42,7 @@ class LuaLevelGenerator: public LuaObject
 {
 private:
    string mFilename;
+   OGLCONSOLE_Console mConsole;
    bool loadLuaHelperFunctions(lua_State *L, const char *caller);
    bool loadLevelGenHelperFunctions(lua_State *L);
 
@@ -49,7 +50,7 @@ public:
    void runScript(lua_State *L, Vector<string> scriptArgs, F32 gridSize);
    void logError(const char *format, ...);
 
-   LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridsize, LevelLoader *caller);   // C++ constructor
+   LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridsize, LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    ~LuaLevelGenerator();                 // Destructor
 

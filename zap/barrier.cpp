@@ -160,11 +160,11 @@ void Barrier::resetEdges(const Vector<Point> &corners, Vector<Point> &edges)
 // Given the points in vec, figure out where the ends of the walls should be (they'll need to be extended slighly in some cases
 // for better rendering).  Set extendAmt to 0 to see why it's needed.
 // Populates barrierEnds with the results.
-void Barrier::constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)
+void Barrier::constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds)    // static
 {
    barrierEnds.clear();    // local static vector
 
-   if(vec.size() == 1)     // Protect against bad data
+   if(vec.size() <= 1)     // Protect against bad data
       return;
 
    bool loop = (vec.first() == vec.last());      // Does our barrier form a closed loop?

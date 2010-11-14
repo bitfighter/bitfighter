@@ -1415,4 +1415,12 @@ KeyCode stringToKeyCode(const char *keyname)
 
 }
 
-
+#ifdef __cplusplus
+extern "C" {
+#endif
+// Provide access to getKeyState from C code.
+// Has to be outside the namespace declaration because C doesn't use namespaces.
+int getKeyState_c(int keyCode) { return Zap::getKeyState((Zap::KeyCode)keyCode); }
+#ifdef __cplusplus
+}
+#endif

@@ -528,7 +528,12 @@ public:
    WallSegmentManager *getWallSegmentManager() { return &wallSegmentManager; }
 
    // Handle input
-   void onKeyDown(KeyCode keyCode, char ascii);    // Handles all keyboard inputs, mouse clicks, and button presses
+   void onKeyDown(KeyCode keyCode, char ascii);             // Handle all keyboard inputs, mouse clicks, and button presses
+   void textEntryKeyHandler(KeyCode keyCode, char ascii);   // Handle keyboard activity when we're editing an item's attributes
+   void specialAttributeKeyHandler(KeyCode keyCode, char ascii);
+   void itemPropertiesEnterKeyHandler();
+
+
    void onKeyUp(KeyCode keyCode);
    void onMouseMoved(S32 x, S32 y);
    void onMouseMoved();
@@ -594,6 +599,7 @@ public:
    bool itemIsSelected(S32 id);           // See if item with specified id is selected
 
    void runScript();                      // Run associated levelgen script
+   void clearLevelGenItems();             // Clear any previously created levelgen items
 };
 
 

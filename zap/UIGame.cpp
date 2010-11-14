@@ -52,6 +52,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "oglconsole.h"          // Our console object
+
 namespace Zap
 {
 
@@ -121,6 +123,32 @@ GameUserInterface::GameUserInterface()
 }
 
 
+
+void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
+{
+    if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
+       OGLCONSOLE_HideConsole();
+
+    else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
+       OGLCONSOLE_Output(console, "Commands: help; quit\n");
+
+    else if(!strncmp(cmd, "add", 3))
+    {
+        int a, b;
+        if (sscanf(cmd, "add %i %i", &a, &b) == 2)
+        {
+            OGLCONSOLE_Output(console, "%i + %i = %i\n", a, b, a+b);
+            return;
+        }
+
+        OGLCONSOLE_Output(console, "usage: add INT INT\n");
+    }
+
+    else
+      OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd);
+}
+
+
 extern bool gDisableShipKeyboardInput;
 
 void GameUserInterface::onActivate()
@@ -146,6 +174,8 @@ void GameUserInterface::onActivate()
    mShutdownMode = None;
 
    gClientGame->unsuspendGame();                          // Never suspended when we start
+
+   OGLCONSOLE_EnterKey(processGameConsoleCommand);        // Setup callback for processing console commands
 }
 
 
@@ -794,11 +824,6 @@ void GameUserInterface::dropItem()
    }
 
    gt->c2sDropItem();
-
-   //S32 count = ship->mMountedItems.size();
-
-   //for(S32 i = count - 1; i >= 0; i--)
-   //   ship->mMountedItems[i]->onItemDropped();
 }
 
 
@@ -860,10 +885,20 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
    S32 inputMode = gIniSettings.inputMode;
 
+   if(OGLCONSOLE_ProcessBitfighterKeyEvent(keyCode, ascii))   // Pass the key on to the console for processing
+      return;
+
    if(keyCode == keyHELP)          // Turn on help screen
    {
       UserInterface::playBoop();
       gInstructionsUserInterface.activate();
+      return;
+   }
+   // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
+   // Don't want to open console while chatting, do we?  Only open when not in any special mode.
+   else if(mCurrentMode == PlayMode && keyCode == KEY_SLASH && getKeyState(KEY_SHIFT))   
+   {
+      OGLCONSOLE_ShowConsole();
       return;
    }
    else if(keyCode == keyOUTGAMECHAT)
@@ -1126,7 +1161,8 @@ Move *GameUserInterface::getCurrentMove()
 {
    // (Possible modes = PlayMode, ChatMode, QuickChatMode, LoadoutMode)
 
-   if((mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode ) && !gDisableShipKeyboardInput)
+   if((mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode ) && 
+         !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
       mCurrentMove.up = !mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0;

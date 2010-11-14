@@ -40,6 +40,7 @@ const char *gGameCredits[] = {
    "-",
    "Mac support:",
    "Ryan Witmer",
+   "Max Hushahn",
    "-",
    "Linux support:",
    "Coding_Mike",

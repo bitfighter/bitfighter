@@ -180,10 +180,19 @@ extern ServerGame *gServerGame;
 // Clean up and get ready to render
 void UserInterface::renderCurrent()    // static
 {
-   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+   // Clear screen -- force clear of "black bars" area to avoid flickering on some video cards
+   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+
+   if(scissorMode) 
+      glDisable(GL_SCISSOR_TEST);
 
    glClearColor(0, 0, 0, 1.0);
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT);
+
+   if(scissorMode) 
+      glEnable(GL_SCISSOR_TEST);
+   
+   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();

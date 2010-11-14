@@ -105,6 +105,8 @@ forums password for that account</ul>
 #include "tnlNetInterface.h"
 #include "tnlJournal.h"
 
+#include "oglconsole.h"
+
 #ifdef TNL_OS_MAC_OSX
 #include "Directory.h"
 #endif
@@ -184,6 +186,8 @@ IniSettings gIniSettings;
 
 ControllerTypeType gAutoDetectedJoystickType;   // Remember what sort of joystick was found for diagnostic purposes
 
+OGLCONSOLE_Console gConsole;     // For the moment, we'll just have one console for levelgens and bots.  This may change later.
+
 
 // Some colors -- other candidates include global and local chat colors, which are defined elsewhere.  Include here?
 Color gNexusOpenColor(0, 0.7, 0);
@@ -262,25 +266,28 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeig
 {
    // If we are entering fullscreen mode, then we don't want to mess around with proportions and all that.  Just save window size and get out.
    if(gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_STRETCHED || gIniSettings.displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-   {
       gScreenInfo.setWindowSize(newWidth, newHeight);
-      return;
+
+   else
+   {
+     S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
+     S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
+  
+     // Constrain window to correct proportions...
+     if((newWidth - canvasWidth) > (newHeight - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
+        gIniSettings.winSizeFact = max((F32) newHeight / (F32)canvasHeight, MIN_SCALING_FACT);
+     else
+        gIniSettings.winSizeFact = max((F32) newWidth / (F32)canvasWidth, MIN_SCALING_FACT);
+  
+     S32 width  = (S32)(canvasWidth  * gIniSettings.winSizeFact);   // virtual * (physical/virtual) = physical
+     S32 height = (S32)(canvasHeight * gIniSettings.winSizeFact);    
+  
+     glutReshapeWindow(width, height);
+     gScreenInfo.setWindowSize(width, height);        
    }
 
-   S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
-   S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
-
-   // Constrain window to correct proportions...
-   if((newWidth - canvasWidth) > (newHeight - canvasHeight))      // Wider than taller  (is this right? mixing virtual and physical pixels)
-      gIniSettings.winSizeFact = max((F32) newHeight / (F32)canvasHeight, MIN_SCALING_FACT);
-   else
-      gIniSettings.winSizeFact = max((F32) newWidth / (F32)canvasWidth, MIN_SCALING_FACT);
-
-   S32 width  = (S32)(canvasWidth  * gIniSettings.winSizeFact);   // virtual * (physical/virtual) = physical
-   S32 height = (S32)(canvasHeight * gIniSettings.winSizeFact);    
-
-   glutReshapeWindow(width, height);
-   gScreenInfo.setWindowSize(width, height);        
+   glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+   OGLCONSOLE_Reshape();
 
    gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
 }
@@ -762,6 +769,22 @@ void dedicatedServerLoop()
       idle();     // Idly!
 }
 
+
+static void renderConsole()
+{
+   // Temporarily disable scissors mode so we can use the full width of the screen
+   // to show our console text, black bars be damned!
+   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+
+   if(scissorMode) 
+      glDisable(GL_SCISSOR_TEST);
+
+   OGLCONSOLE_Draw();   
+
+   if(scissorMode) 
+      glEnable(GL_SCISSOR_TEST);
+}
+
 #ifndef ZAP_DEDICATED
 void GLUT_CB_display(void)
 {
@@ -776,6 +799,10 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
 {
    glFlush();
    UserInterface::renderCurrent();
+
+   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+
+   renderConsole();  // Rendered after interface, so it's always on top
 
    // Render master connection state if we're not connected
    if(gClientGame && gClientGame->getConnectionToMaster() && 
@@ -822,7 +849,6 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 
 
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
-// or player has specified -connect param on cmd line, bypassing master server
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
    if(isFromMaster && gClientGame->getConnectionToMaster())     // Request an arranged connection
@@ -833,6 +859,8 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    else                                                         // Try a direct connection
    {
       GameConnection *theConnection = new GameConnection();
+      gClientGame->setConnectionToServer(theConnection);
+
 
       // Configure our new connection
       theConnection->setClientNameAndId(gPlayerName, gClientId);
@@ -901,6 +929,7 @@ void onExit()
 
    delete gClientGame;     // Has effect of disconnecting from master
 
+   OGLCONSOLE_Quit();
    SFXObject::shutdown();
    ShutdownJoystick();
 
@@ -940,25 +969,12 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
    // Process command line args  --> see http://bitfighter.org/wiki/index.php?title=Command_line_parameters
    for(S32 i = 0; i < argc; i+=2)
    {
-      bool hasAdditionalArg = (i != argc - 1 && argv[i + 1].getString()[0] != '-');     // Assume "args" starting with "-" are actually follow-on params
+      // Assume "args" starting with "-" are actually follow-on params
+      bool hasAdditionalArg = (i != argc - 1 && argv[i + 1].getString()[0] != '-');     
       bool has2AdditionalArgs = hasAdditionalArg && (i != argc - 2);
 
-      // Connect to a game server
-      if(!stricmp(argv[i], "-connect"))       // additional arg required
-      {
-         if(hasAdditionalArg)
-         {
-            gCmdLineSettings.connectRemote = true;
-            gCmdLineSettings.connect = argv[i+1];
-         }
-         else
-         {
-            logprintf(LogConsumer::LogError, "You must specify a server address to connect to with the -connect option");
-            exitGame(1);
-         }
-      }
       // Specify a master server
-      else if(!stricmp(argv[i], "-master"))        // additional arg required
+      if(!stricmp(argv[i], "-master"))        // additional arg required
       {
          if(hasAdditionalArg)
             gCmdLineSettings.masterAddress = argv[i+1];
@@ -1370,9 +1386,6 @@ void processStartupParams()
    if(!gCmdLineSettings.dedicated.empty())
       gBindAddress.set(gCmdLineSettings.dedicated);
 
-   if(gCmdLineSettings.connect != "")
-      gConnectAddress.set(gCmdLineSettings.connect);
-
    gSimulatedPacketLoss = gCmdLineSettings.loss;
    gSimulatedLag = gCmdLineSettings.lag;
 
@@ -1508,7 +1521,7 @@ void processStartupParams()
 
 
    // Not immediately starting a connection...  start out with name entry or main menu
-   if(!gCmdLineSettings.connectRemote && !gDedicatedServer)
+   if(!gDedicatedServer)
    {
       if(gIniSettings.name == "")
          gNameEntryUserInterface.activate();
@@ -1644,7 +1657,6 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
 
    else if(displayMode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED) 
    {
-      glDisable(GL_SCISSOR_TEST);      // Should be unnecessary, but maybe this helps Unknown Joe's screen issue?
       glClear(GL_COLOR_BUFFER_BIT);    // Clear the screen
 
       S32 horizDrawMargin = gScreenInfo.getHorizDrawMargin();     // In game pixels, not
@@ -1855,8 +1867,8 @@ int main(int argc, char **argv)
       glutSpecialUpFunc(GLUT_CB_specialkeyup); // Handle key-up events for special keys
       glutMouseFunc(GLUT_CB_mouse);            // Handle mouse-clicks
 
-      glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling
-      glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor -- we'll turn this back on in the editor, or when the user tries to use mouse to work menus
+      glutIdleFunc(idle);                      // Register our idle function.  This will get run whenever GLUT is idling.
+      glutSetCursor(GLUT_CURSOR_NONE);         // Turn off the cursor for now... we'll turn it back on later
 
       // Put 0,0 at the center of the screen
       glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);     
@@ -1867,8 +1879,7 @@ int main(int argc, char **argv)
       atexit(onExit);
       actualizeScreenMode(false, true);               // Create a display window
 
-      if(gCmdLineSettings.connectRemote)              // Only true when -server param specified
-         joinGame(gConnectAddress, false, false);     // Connect to a game server (i.e. bypass master matchmaking)
+      gConsole = OGLCONSOLE_Create();                 // Create our console *after* the screen mode has been actualized
 
 #ifdef WIN32
       if(gIniSettings.useUpdater)
