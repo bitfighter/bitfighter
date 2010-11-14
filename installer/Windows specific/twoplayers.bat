@@ -2,11 +2,11 @@
 @echo off
 IF %2.==. GOTO MissingParams
 
-start bitfighter -name %1 -usestick 1 -window -winwidth 952 -winpos 4 28 %3 %4 %5 %6 %7 %8 %9
-start bitfighter -name %2 -usestick 2 -window -winwidth 952 -winpos 964 28 %3 %4 %5 %6 %7 %8 %9
+start bitfighter -name %1 -usestick 1 -window -winwidth 675 -winpos 4   28 -rootdatadir @@ROOT_DATA_DIR@@   %3 %4 %5 %6 %7 %8 %9
+start bitfighter -name %2 -usestick 2 -window -winwidth 675 -winpos 687 28 -rootdatadir @@ROOT_DATA_DIR@@   %3 %4 %5 %6 %7 %8 %9
 
 GOTO End
-
+1366 - 8
 :MissingParams
 
 echo Usage: twoplayers ^<LeftPlayerName^> ^<RightPlayerName^>
