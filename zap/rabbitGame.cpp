@@ -195,7 +195,6 @@ void RabbitGameType::idle(GameObject::IdleCallPath path)
             mClientList[i]->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
       }
    }
-   Parent::idle(path);
 }
 
 void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
