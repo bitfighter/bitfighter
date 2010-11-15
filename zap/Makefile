@@ -17,7 +17,7 @@
 #
 #######################################
 
-CC=g++ -g  -I../tnl -I../glut -I../openal -DTNL_ENABLE_LOGGING #-O2
+CC=gcc -g  -I../tnl -I../glut -I../openal -DTNL_ENABLE_LOGGING #-O2
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
 INPUT=linuxInput.o 
@@ -76,6 +76,7 @@ OBJECTS_ZAP=\
    masterConnection.o\
    move.o\
    moveObject.o\
+   oglconsole.o\
    playerInfo.o\
    projectile.o\
    quickChat.o\
@@ -130,7 +131,7 @@ dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP)
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) -lstdc++  -lm
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) -lstdc++  -lm -ldl
 
 
 # We need one file in the master folder to be compiled to make this all work.  This
