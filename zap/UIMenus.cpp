@@ -452,7 +452,6 @@ bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
          selectedIndex = i;
 
          menuItems[i]->activatedWithShortcutKey();
-         UserInterface::playBoop();
          return true;
       }
    }
