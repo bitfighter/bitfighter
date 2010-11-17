@@ -26,13 +26,14 @@
 #ifndef _UIEDITORINSTRUCTIONS_H_
 #define _UIEDITORINSTRUCTIONS_H_
 
-#include "UI.h"
+#include "UIAbstractInstructions.h"
 #include "timer.h"
 
 namespace Zap
 {
 
-class EditorInstructionsUserInterface : public UserInterface
+
+class EditorInstructionsUserInterface : public AbstractInstructionsUserInterface
 {
 private:
    U32 mCurPage;
@@ -44,6 +45,7 @@ public:
    void renderPageCommands(S32 page);
    void renderPageWalls();
    void renderPageZones();
+ 
 
    void onKeyDown(KeyCode keyCode, char ascii);
 

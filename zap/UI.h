@@ -221,8 +221,12 @@ public:
    void activate(bool save = true);
    virtual void reactivate();
 
+   void renderConsole();      // Render game console
+
    static void reactivatePrevUI();
    static void reactivateMenu(UserInterface target);
+
+   KeyCode convertJoystickToKeyboard(KeyCode keyCode);
 
    // Input event handlers
    virtual void onKeyDown(KeyCode keyCode, char ascii);

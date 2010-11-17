@@ -769,21 +769,6 @@ void dedicatedServerLoop()
 }
 
 
-static void renderConsole()
-{
-   // Temporarily disable scissors mode so we can use the full width of the screen
-   // to show our console text, black bars be damned!
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
-
-   if(scissorMode) 
-      glDisable(GL_SCISSOR_TEST);
-
-   OGLCONSOLE_Draw();   
-
-   if(scissorMode) 
-      glEnable(GL_SCISSOR_TEST);
-}
-
 #ifndef ZAP_DEDICATED
 void GLUT_CB_display(void)
 {
@@ -798,10 +783,6 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, display, (), ())
 {
    glFlush();
    UserInterface::renderCurrent();
-
-   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
-
-   renderConsole();  // Rendered after interface, so it's always on top
 
    // Render master connection state if we're not connected
    if(gClientGame && gClientGame->getConnectionToMaster() && 

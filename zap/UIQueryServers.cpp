@@ -929,6 +929,7 @@ void QueryServersUserInterface::recalcCurrentIndex()
 // All key handling now under one roof!
 void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
+   keyCode = convertJoystickToKeyboard(keyCode);
    mJustMovedMouse = (keyCode == MOUSE_LEFT || keyCode == MOUSE_MIDDLE || keyCode == MOUSE_RIGHT);
    mDraggingDivider = false;
    S32 currentIndex = -1;
@@ -979,7 +980,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
       }
    }
-   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)  // Return to main menu
+   else if(keyCode == KEY_ESCAPE)  // Return to main menu
    {
       UserInterface::playBoop();
       leaveGlobalChat();
@@ -995,7 +996,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }
 
-   else if(keyCode == KEY_LEFT || keyCode == BUTTON_DPAD_LEFT)
+   else if(keyCode == KEY_LEFT)
    {
       mHighlightColumn--;
       if(mHighlightColumn < 0)
@@ -1005,7 +1006,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          sortSelected();
 
    }
-   else if(keyCode == KEY_RIGHT || keyCode == BUTTON_DPAD_RIGHT)
+   else if(keyCode == KEY_RIGHT)
    {
       mHighlightColumn++;
       if(mHighlightColumn >= columns.size())
@@ -1037,7 +1038,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(servers.size() == 0)
       return;
 
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP)
+   else if(keyCode == KEY_UP)
    {
       currentIndex = getSelectedIndex() - 1;
       if(currentIndex < 0)
@@ -1048,7 +1049,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       mItemSelectedWithMouse = false;
       selectedId = servers[currentIndex].id;
    }
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN)
+   else if(keyCode == KEY_DOWN)
    {
       currentIndex = getSelectedIndex() + 1;
       if(currentIndex >= servers.size())

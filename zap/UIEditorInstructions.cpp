@@ -28,6 +28,7 @@
 #include "input.h"
 #include "config.h"
 #include "barrier.h"            
+#include "UIAbstractInstructions.h"
 #include "UIEditorInstructions.h"
 #include "UIMenus.h"
 #include "UIGame.h"
@@ -106,7 +107,7 @@ void EditorInstructionsUserInterface::onActivate()
    Triangulate::Process(sample5o, sample5f);
 }
 
-static const S32 NUM_PAGES = 4;
+static const S32 NUM_PAGES = 5;
 
 
 const char *pageHeadersEditor[] = {
@@ -114,7 +115,18 @@ const char *pageHeadersEditor[] = {
    "ADVANCED COMMANDS",
    "WALLS AND LINES",
    "BOT NAV ZONES",
+   "SCRIPING CONSOLE"
 };
+
+
+static ControlStringsEditor consoleCommands1[] = {
+   { "add <a> <b>", "Print a + b -- test command" },
+   { "run", "Run the current levelgen" },
+   { "clear", "Clear results of the levelgen" },
+   { "exit, quit", "Close the console" },
+   { NULL, NULL },      // End of list
+};
+
 
 extern EditorUserInterface gEditorUserInterface;
 
@@ -147,14 +159,12 @@ void EditorInstructionsUserInterface::render()
       case 4:
          renderPageZones();
          break;
+      case 5:
+         renderConsoleCommands("Open the console by pressing [/]", consoleCommands1);
+         break;
    }
 }
 
-struct ControlStringsEditor
-{
-   const char *actionString;
-   const char *keyString;
-};
 
 
 // For page 1 of general instructions
@@ -245,7 +255,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
    y = starty + 28;
    for(S32 i = 0; !done; i++)
    {
-      if(!controls[i].actionString)
+      if(!controls[i].command)
       {
          if(!firstCol)
             done = true;
@@ -259,7 +269,7 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
             glColor(secColor);
          }
       }
-      else if(!strcmp(controls[i].actionString, "-"))      // Horiz spacer
+      else if(!strcmp(controls[i].command, "-"))      // Horiz spacer
       {
          glColor3f(0.4, 0.4, 0.4);
          glBegin(GL_LINES);
@@ -267,17 +277,17 @@ void EditorInstructionsUserInterface::renderPageCommands(S32 page)
             glVertex2f(actCol + 335, y + 13);
          glEnd();
       }
-      else if(!strcmp(controls[i].keyString, "HEADER"))
+      else if(!strcmp(controls[i].descr, "HEADER"))
       {
          glColor(groupHeaderColor);
-         drawString(actCol, y, 18, controls[i].actionString);
+         drawString(actCol, y, 18, controls[i].command);
       }
       else
       {
          glColor(txtColor);
-         drawString(actCol, y, 18, controls[i].actionString);      // Textual description of function (1st arg in lists above)
+         drawString(actCol, y, 18, controls[i].command);      // Textual description of function (1st arg in lists above)
          glColor(keyColor);
-         drawString(contCol, y, 18, controls[i].keyString);
+         drawString(contCol, y, 18, controls[i].descr);
       }
       y += 26;
    }

@@ -34,6 +34,7 @@ using namespace TNL;
 #include "input.h"      // For MaxJoystickButtons const
 #include "config.h"
 #include "game.h"
+#include "oglconsole.h"    // For console rendering
 //#include "UIEditor.h"      // <--- we need to get rid of this one!
 //#include "UICredits.h"     // <--- don't want this one either
 
@@ -171,6 +172,57 @@ void UserInterface::reactivateMenu(UserInterface target)
 
 void UserInterface::onActivate()   { /* Do nothing */ }
 void UserInterface::onReactivate() { /* Do nothing */ }
+
+
+// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them below.  This is possibly
+// marginally less efficient, but will reduce maintenance burdens over time.
+KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
+{
+   //if(menuSitck == JOYSTICK_DPAD)
+   //{
+      if(keyCode == BUTTON_DPAD_LEFT) 
+         return KEY_LEFT;
+      if(keyCode == BUTTON_DPAD_RIGHT) 
+         return KEY_RIGHT;
+      if(keyCode == BUTTON_DPAD_UP) 
+         return KEY_UP;
+      if(keyCode == BUTTON_DPAD_DOWN) 
+         return KEY_DOWN;
+   //}
+
+   //if(menuStick == JOYSTICK_STICK1)
+   //{
+      if(keyCode == STICK_1_LEFT) 
+         return KEY_LEFT;
+      if(keyCode == STICK_1_RIGHT) 
+         return KEY_RIGHT;
+      if(keyCode == STICK_1_UP) 
+         return KEY_UP;
+      if(keyCode == STICK_1_DOWN) 
+         return KEY_DOWN;
+   //}
+
+   //if(menuStick == JOYSTICK_STICK2)
+   //{
+      if(keyCode == STICK_2_LEFT) 
+         return KEY_LEFT;
+      if(keyCode == STICK_2_RIGHT) 
+         return KEY_RIGHT;
+      if(keyCode == STICK_2_UP) 
+         return KEY_UP;
+      if(keyCode == STICK_2_DOWN) 
+         return KEY_DOWN;
+   //}
+
+
+   if(keyCode == BUTTON_START) 
+      return KEY_ENTER;
+   if(keyCode == BUTTON_BACK) 
+      return KEY_ESCAPE;
+
+   return keyCode;
+}
+
 
 extern U32 gRawJoystickButtonInputs;
 extern CmdLineSettings gCmdLineSettings;
@@ -562,6 +614,22 @@ S32 UserInterface::getStringWidthf(U32 size, const char *format, ...)
 void UserInterface::playBoop()
 {
    SFXObject::play(SFXUIBoop, 1);
+}
+
+
+void UserInterface::renderConsole()
+{
+   // Temporarily disable scissors mode so we can use the full width of the screen
+   // to show our console text, black bars be damned!
+   bool scissorMode = glIsEnabled(GL_SCISSOR_TEST);
+
+   if(scissorMode) 
+      glDisable(GL_SCISSOR_TEST);
+
+   OGLCONSOLE_Draw();   
+
+   if(scissorMode) 
+      glEnable(GL_SCISSOR_TEST);
 }
 
 

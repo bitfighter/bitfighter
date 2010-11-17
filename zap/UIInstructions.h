@@ -26,14 +26,17 @@
 #ifndef _UIINSTRUCTIONS_H_
 #define _UIINSTRUCTIONS_H_
 
+#include "UIAbstractInstructions.h"
 #include "UI.h"
 
 namespace Zap
 {
 
-class InstructionsUserInterface : public UserInterface
+class InstructionsUserInterface : public AbstractInstructionsUserInterface
 {
+private:
    U32 mCurPage;
+
 public:
    InstructionsUserInterface();      // Constructor
    void render();

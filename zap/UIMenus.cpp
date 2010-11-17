@@ -463,13 +463,15 @@ bool MenuUserInterface::processMenuSpecificKeys(KeyCode keyCode, char ascii)
 // Process the keys that work on all menus
 bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
 {
+   keyCode = convertJoystickToKeyboard(keyCode);
+
    if(keyCode == KEY_LEFT || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT || keyCode == MOUSE_RIGHT)
    {
       menuItems[selectedIndex]->handleKey(keyCode, ascii);
       UserInterface::playBoop();
    }
 
-   else if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || keyCode == BUTTON_START || keyCode == MOUSE_LEFT)
+   else if(keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == KEY_ENTER || keyCode == MOUSE_LEFT)
    {
       UserInterface::playBoop();
       if(keyCode != MOUSE_LEFT)
@@ -491,12 +493,12 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
          advanceItem();
    }
 
-   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
+   else if(keyCode == KEY_ESCAPE)
    {
       UserInterface::playBoop();
       onEscape();
    }
-   else if(keyCode == KEY_UP || keyCode == BUTTON_DPAD_UP || (keyCode == KEY_TAB && getKeyState(KEY_SHIFT)))   // Prev item
+   else if(keyCode == KEY_UP || (keyCode == KEY_TAB && getKeyState(KEY_SHIFT)))   // Prev item
    {
       selectedIndex--;
       itemSelectedWithMouse = false;
@@ -514,7 +516,7 @@ bool MenuUserInterface::processKeys(KeyCode keyCode, char ascii)
       UserInterface::playBoop();
    }
 
-   else if(keyCode == KEY_DOWN || keyCode == BUTTON_DPAD_DOWN || keyCode == KEY_TAB)    // Next item
+   else if(keyCode == KEY_DOWN || keyCode == KEY_TAB)    // Next item
       advanceItem();
 
    else if(keyCode == keyOUTGAMECHAT)     // Turn on Global Chat overlay

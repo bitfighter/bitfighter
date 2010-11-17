@@ -56,7 +56,7 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 1;
 }
 
-static const S32 NUM_PAGES = 10;
+static const S32 NUM_PAGES = 11;
 
 static const char *pageHeaders[] = {
    "CONTROLS",
@@ -69,7 +69,15 @@ static const char *pageHeaders[] = {
    "ADVANCED COMMANDS",
    "ADMIN COMMANDS",
    "DEBUG COMMANDS",
+   "SCRIPING CONSOLE"
 };
+
+static ControlStringsEditor consoleCommands1[] = {
+   { "add <a> <b>", "Print a + b -- test command" },
+   { "exit, quit", "Close the console" },
+   { NULL, NULL },      // End of list
+};
+
 
 void InstructionsUserInterface::render()
 {
@@ -117,6 +125,8 @@ void InstructionsUserInterface::render()
       case 10:
          renderPageCommands(2);     // Debug commands
          break;
+      case 11:
+         renderConsoleCommands("Open the console by pressing [Shift]-[/] in game", consoleCommands1);   // Scripting console
 
 
       // When adding page, be sure to increase NUM_PAGES, and add item to pageHeaders array
@@ -589,13 +599,6 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
       start.y += 75;
    }
 }
-
-
-struct ControlStringsEditor
-{
-   const char *command;
-   const char *descr;
-};
 
 
 // Note that the menu is now full.  Need to add new page or go to 2 cols if we need a new option.

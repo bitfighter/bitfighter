@@ -31,6 +31,13 @@ namespace Zap
 
 #include "keyCodeEnum.h"
 
+enum JoystickJoysticks {
+   JOYSTICK_DPAD,
+   JOYSTICK_STICK_1,
+   JOYSTICK_STICK_2
+};
+
+
 const char *keyCodeToString(KeyCode keyCode);
 KeyCode stringToKeyCode(const char *keyname);
 

@@ -85,6 +85,96 @@ std::string itos(S32 i)
    return outString;
 }
 
+
+static bool isControlCharacter(char ch)
+   {
+      return ch > 0 && ch <= 0x1F;
+   }
+
+static bool containsControlCharacter( const char* str )
+{
+   while ( *str )
+   {
+      if ( isControlCharacter( *(str++) ) )
+         return true;
+   }
+   return false;
+}
+
+
+// Sanitize strings before inclusion into JSON
+static const char *sanitizeForJson(const char *value)
+{
+   unsigned maxsize = strlen(value)*2 + 3; // allescaped+quotes+NULL
+   std::string result;
+   result.reserve(maxsize);  // memory management
+
+   // Return if no escaping needed
+   if (strpbrk(value, "\"\\\b\f\n\r\t<>&") == NULL && !containsControlCharacter(value))
+   {
+      return value;
+   }
+
+   // If any of the above exist then do some escaping
+   for (const char* c=value; *c != 0; ++c)
+   {
+      switch(*c)
+      {
+      // For JSON
+      case '\"':
+         result += "\\\"";
+         break;
+      case '\\':
+         result += "\\\\";
+         break;
+      case '\b':
+         result += "\\b";
+         break;
+      case '\f':
+         result += "\\f";
+         break;
+      case '\n':
+         result += "\\n";
+         break;
+      case '\r':
+         result += "\\r";
+         break;
+      case '\t':
+         result += "\\t";
+         break;
+
+      // For html markup entities
+      case '&':
+         result += "&amp;";
+         break;
+      case '<':
+         result += "&lt;";
+         break;
+      case '>':
+         result += "&gt;";
+         break;
+      default:
+         if ( isControlCharacter( *c ) )
+         {
+            // Do nothing for the moment -- there shouldn't be any control chars here, and if there are we don't really care.
+            // However, some day we might want to support this, so we'll leave the code in place.
+            //std::ostringstream oss;
+            //oss << "\\u" << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << static_cast<int>(*c);
+            //result += oss.str();
+         }
+         else
+         {
+            result += *c;
+         }
+         break;
+      }
+   }
+
+   return result.c_str();
+}
+
+
+
 class MasterServerConnection : public MasterServerInterface
 {
 private:
@@ -441,7 +531,8 @@ public:
             for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
             {
                fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
-                          first ? "":", ", walk->mPlayerOrServerName.getString(), walk->mCSProtocolVersion, walk->mLevelName.getString(), walk->mLevelType.getString(), walk->mPlayerCount);
+                          first ? "" : ", ", sanitizeForJson(walk->mPlayerOrServerName.getString()), 
+                          walk->mCSProtocolVersion, walk->mLevelName.getString(), walk->mLevelType.getString(), walk->mPlayerCount);
                first = false;
             }
 
@@ -451,7 +542,7 @@ public:
             first = true;
             for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
             {
-               fprintf(f, "%s\"%s\"", first ? "":", ", walk->mPlayerOrServerName.getString());
+               fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
                first = false;
             }
 
@@ -494,7 +585,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestArrangedConnection, (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress,
                                                            ByteBufferPtr connectionParameters) )
    {
-      // First, make sure that we're connected with the server the player is requesting a connection with
+      // First, make sure that we're connected with the server that they're requesting a connection with
       MasterServerConnection *conn = (MasterServerConnection *) gNetInterface->findConnection(remoteAddress);
       if(!conn)
       {
@@ -538,7 +629,8 @@ public:
       theAddress.port--;
       possibleAddresses.push_back(theAddress.toIPAddress());
 
-      // Or the address the port thinks it's talking to, if it's not the "any" address
+      // Or the address the port thinks it's talking to.
+      // (That is, if it's not the any address.)
       Address theInternalAddress(internalAddress);
       Address anyAddress;
       if(!theInternalAddress.isEqualAddress(anyAddress) && theInternalAddress != theAddress)
@@ -582,7 +674,7 @@ public:
                                                         req->initiator.isValid() ? req->initiator->getNetAddress().toString() :        
                                                                                    "Unknown");
 
-      // If we still know about the requestor, tell him his connection was accepted.  We're done with the request.
+      // If we still know about the requestor, tell him his connection was accepted...
       if(req->initiator.isValid())
          req->initiator->m2cArrangedConnectionAccepted(req->initiatorQueryId, possibleAddresses, connectionData);
 

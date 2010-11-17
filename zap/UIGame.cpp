@@ -376,6 +376,8 @@ void GameUserInterface::render()
 
    renderShutdownMessage();
 
+   renderConsole();  // Rendered last, so it's always on top
+
 #if 0
 // Some code for outputting the position of the ship for finding good spawns
 GameConnection *con = gClientGame->getConnectionToServer();
