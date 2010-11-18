@@ -1,7 +1,3 @@
 //
 // Prefix header for all source files of the 'Bitfighter' target in the 'Bitfighter' project
 //
-
-#ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
-#endif

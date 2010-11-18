@@ -2,6 +2,3 @@
 // Prefix header for all source files of the 'libtomcrypt' target in the 'libtomcrypt' project.
 //
 
-#ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
-#endif
