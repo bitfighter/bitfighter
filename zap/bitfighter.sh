@@ -24,4 +24,4 @@ sfxdir="$absolute_datadir/sfx"
 scriptsdir="$absolute_datadir/scripts"
 
 # Run the program
-./Bitfighter -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir"
+./Bitfighter -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"

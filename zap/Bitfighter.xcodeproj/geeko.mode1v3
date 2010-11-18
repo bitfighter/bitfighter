@@ -313,7 +313,7 @@
 								<key>PBXProjectModuleGUID</key>
 								<string>1CE0B20306471E060097A5F4</string>
 								<key>PBXProjectModuleLabel</key>
-								<string>libtomcrypt-Info.plist</string>
+								<string>UIEditorInstructions.h</string>
 								<key>PBXSplitModuleInNavigatorKey</key>
 								<dict>
 									<key>Split0</key>
@@ -321,11 +321,11 @@
 										<key>PBXProjectModuleGUID</key>
 										<string>1CE0B20406471E060097A5F4</string>
 										<key>PBXProjectModuleLabel</key>
-										<string>libtomcrypt-Info.plist</string>
+										<string>UIEditorInstructions.h</string>
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>736C235012911684004D66B1</string>
+										<string>73FD7A091295E7A700143CE9</string>
 										<key>history</key>
 										<array>
 											<string>737CE5371290505800D732B7</string>
@@ -335,16 +335,17 @@
 											<string>737CE7DC12905F9F00D732B7</string>
 											<string>737CE7DE12905F9F00D732B7</string>
 											<string>737CE8651290637300D732B7</string>
-											<string>737CE8661290637300D732B7</string>
 											<string>736DE988129066E400C3CB73</string>
 											<string>736DE989129066E400C3CB73</string>
 											<string>736DE98A129066E400C3CB73</string>
 											<string>736DE9F8129094DD00C3CB73</string>
 											<string>736DE9F9129094DD00C3CB73</string>
 											<string>736C22B312911048004D66B1</string>
-											<string>736C22C912911127004D66B1</string>
-											<string>736C234B12911569004D66B1</string>
-											<string>736C234C12911569004D66B1</string>
+											<string>73FD784C1295DDCE00143CE9</string>
+											<string>73FD784D1295DDCE00143CE9</string>
+											<string>73FD784E1295DDCE00143CE9</string>
+											<string>73FD79321295E72500143CE9</string>
+											<string>73FD79351295E72500143CE9</string>
 										</array>
 									</dict>
 									<key>SplitCount</key>
@@ -356,14 +357,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 0}, {671, 315}}</string>
+								<string>{{0, 0}, {671, 288}}</string>
 								<key>RubberWindowFrame</key>
 								<string>17 143 879 586 0 0 1024 746 </string>
 							</dict>
 							<key>Module</key>
 							<string>PBXNavigatorGroup</string>
 							<key>Proportion</key>
-							<string>315pt</string>
+							<string>288pt</string>
 						</dict>
 						<dict>
 							<key>ContentConfiguration</key>
@@ -376,14 +377,14 @@
 							<key>GeometryConfiguration</key>
 							<dict>
 								<key>Frame</key>
-								<string>{{0, 320}, {671, 225}}</string>
+								<string>{{0, 293}, {671, 252}}</string>
 								<key>RubberWindowFrame</key>
 								<string>17 143 879 586 0 0 1024 746 </string>
 							</dict>
 							<key>Module</key>
 							<string>XCDetailModule</string>
 							<key>Proportion</key>
-							<string>225pt</string>
+							<string>252pt</string>
 						</dict>
 					</array>
 					<key>Proportion</key>
@@ -402,9 +403,9 @@
 			</array>
 			<key>TableOfContents</key>
 			<array>
-				<string>736C234412911524004D66B1</string>
+				<string>73FD7A0A1295E7A700143CE9</string>
 				<string>1CE0B1FE06471DED0097A5F4</string>
-				<string>736C234512911524004D66B1</string>
+				<string>73FD7A0B1295E7A700143CE9</string>
 				<string>1CE0B20306471E060097A5F4</string>
 				<string>1CE0B20506471E060097A5F4</string>
 			</array>
@@ -543,7 +544,7 @@
 	<key>WindowOrderList</key>
 	<array>
 		<string>737CE3B512904A1B00D732B7</string>
-		<string>/Users/geeko/temp/svn/zap/release-013f/zap/Bitfighter.xcodeproj</string>
+		<string>/Users/geeko/temp/svn/bitfighter-trunk/zap/Bitfighter.xcodeproj</string>
 	</array>
 	<key>WindowString</key>
 	<string>17 143 879 586 0 0 1024 746 </string>
@@ -623,7 +624,7 @@
 			<key>TableOfContents</key>
 			<array>
 				<string>737CE3B512904A1B00D732B7</string>
-				<string>736C234612911524004D66B1</string>
+				<string>73FD7A0C1295E7A700143CE9</string>
 				<string>1CD0528F0623707200166675</string>
 				<string>XCMainBuildResultsModuleGUID</string>
 			</array>

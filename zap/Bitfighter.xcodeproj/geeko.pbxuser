@@ -77,28 +77,30 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 311497897;
-			PBXWorkspaceStateSaveDate = 311497897;
+			PBXPerProjectTemplateStateSaveDate = 311813933;
+			PBXWorkspaceStateSaveDate = 311813933;
 		};
 		perUserProjectItems = {
-			736C22B312911048004D66B1 /* PBXTextBookmark */ = 736C22B312911048004D66B1 /* PBXTextBookmark */;
-			736C22C912911127004D66B1 /* PBXTextBookmark */ = 736C22C912911127004D66B1 /* PBXTextBookmark */;
-			736C234B12911569004D66B1 /* PBXTextBookmark */ = 736C234B12911569004D66B1 /* PBXTextBookmark */;
-			736C234C12911569004D66B1 /* PlistBookmark */ = 736C234C12911569004D66B1 /* PlistBookmark */;
-			736C235012911684004D66B1 /* PlistBookmark */ = 736C235012911684004D66B1 /* PlistBookmark */;
-			736DE988129066E400C3CB73 /* PBXTextBookmark */ = 736DE988129066E400C3CB73 /* PBXTextBookmark */;
-			736DE989129066E400C3CB73 /* PlistBookmark */ = 736DE989129066E400C3CB73 /* PlistBookmark */;
-			736DE98A129066E400C3CB73 /* PlistBookmark */ = 736DE98A129066E400C3CB73 /* PlistBookmark */;
-			736DE9F8129094DD00C3CB73 /* PBXTextBookmark */ = 736DE9F8129094DD00C3CB73 /* PBXTextBookmark */;
-			736DE9F9129094DD00C3CB73 /* PBXTextBookmark */ = 736DE9F9129094DD00C3CB73 /* PBXTextBookmark */;
-			737CE5371290505800D732B7 /* PBXTextBookmark */ = 737CE5371290505800D732B7 /* PBXTextBookmark */;
-			737CE5381290505800D732B7 /* PBXTextBookmark */ = 737CE5381290505800D732B7 /* PBXTextBookmark */;
-			737CE53A1290505800D732B7 /* PBXTextBookmark */ = 737CE53A1290505800D732B7 /* PBXTextBookmark */;
-			737CE7DB12905F9F00D732B7 /* PBXTextBookmark */ = 737CE7DB12905F9F00D732B7 /* PBXTextBookmark */;
-			737CE7DC12905F9F00D732B7 /* PBXTextBookmark */ = 737CE7DC12905F9F00D732B7 /* PBXTextBookmark */;
-			737CE7DE12905F9F00D732B7 /* PBXTextBookmark */ = 737CE7DE12905F9F00D732B7 /* PBXTextBookmark */;
-			737CE8651290637300D732B7 /* PBXTextBookmark */ = 737CE8651290637300D732B7 /* PBXTextBookmark */;
-			737CE8661290637300D732B7 /* PBXTextBookmark */ = 737CE8661290637300D732B7 /* PBXTextBookmark */;
+			736C22B312911048004D66B1 = 736C22B312911048004D66B1 /* PBXTextBookmark */;
+			736DE988129066E400C3CB73 = 736DE988129066E400C3CB73 /* PBXTextBookmark */;
+			736DE989129066E400C3CB73 = 736DE989129066E400C3CB73 /* PlistBookmark */;
+			736DE98A129066E400C3CB73 = 736DE98A129066E400C3CB73 /* PlistBookmark */;
+			736DE9F8129094DD00C3CB73 = 736DE9F8129094DD00C3CB73 /* PBXTextBookmark */;
+			736DE9F9129094DD00C3CB73 = 736DE9F9129094DD00C3CB73 /* PBXTextBookmark */;
+			737CE5371290505800D732B7 = 737CE5371290505800D732B7 /* PBXTextBookmark */;
+			737CE5381290505800D732B7 = 737CE5381290505800D732B7 /* PBXTextBookmark */;
+			737CE53A1290505800D732B7 = 737CE53A1290505800D732B7 /* PBXTextBookmark */;
+			737CE7DB12905F9F00D732B7 = 737CE7DB12905F9F00D732B7 /* PBXTextBookmark */;
+			737CE7DC12905F9F00D732B7 = 737CE7DC12905F9F00D732B7 /* PBXTextBookmark */;
+			737CE7DE12905F9F00D732B7 = 737CE7DE12905F9F00D732B7 /* PBXTextBookmark */;
+			737CE8651290637300D732B7 = 737CE8651290637300D732B7 /* PBXTextBookmark */;
+			73FD784C1295DDCE00143CE9 = 73FD784C1295DDCE00143CE9 /* PlistBookmark */;
+			73FD784D1295DDCE00143CE9 = 73FD784D1295DDCE00143CE9 /* PBXTextBookmark */;
+			73FD784E1295DDCE00143CE9 = 73FD784E1295DDCE00143CE9 /* PBXTextBookmark */;
+			73FD79321295E72500143CE9 = 73FD79321295E72500143CE9 /* PBXTextBookmark */;
+			73FD79331295E72500143CE9 = 73FD79331295E72500143CE9 /* PBXTextBookmark */;
+			73FD79351295E72500143CE9 = 73FD79351295E72500143CE9 /* PBXTextBookmark */;
+			73FD7A091295E7A700143CE9 /* PBXTextBookmark */ = 73FD7A091295E7A700143CE9 /* PBXTextBookmark */;
 		};
 		sourceControlManager = 737CE2F91290467000D732B7 /* Source Control */;
 		userBuildSettings = {
@@ -113,61 +115,6 @@
 		rType = 0;
 		vrLen = 926;
 		vrLoc = 16724;
-	};
-	736C22C912911127004D66B1 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */;
-		name = "bitfighter.sh: 12";
-		rLen = 0;
-		rLoc = 296;
-		rType = 0;
-		vrLen = 569;
-		vrLoc = 0;
-	};
-	736C22CC12911288004D66B1 /* alInclude.h */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = sourcecode.c.h;
-		name = alInclude.h;
-		path = "/Users/geeko/temp/svn/zap/release-013f/openal/alInclude.h";
-		sourceTree = "<absolute>";
-		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {845, 507}}";
-			sepNavSelRange = "{1538, 0}";
-			sepNavVisRange = "{768, 786}";
-		};
-	};
-	736C234B12911569004D66B1 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 736C22CC12911288004D66B1 /* alInclude.h */;
-		name = "alInclude.h: 35";
-		rLen = 0;
-		rLoc = 1538;
-		rType = 0;
-		vrLen = 786;
-		vrLoc = 768;
-	};
-	736C234C12911569004D66B1 /* PlistBookmark */ = {
-		isa = PlistBookmark;
-		fRef = 737CE312129048B900D732B7 /* libtomcrypt-Info.plist */;
-		fallbackIsa = PBXBookmark;
-		isK = 0;
-		kPath = (
-		);
-		name = "/Users/geeko/temp/svn/zap/release-013f/zap/libtomcrypt-Info.plist";
-		rLen = 0;
-		rLoc = 9223372036854775807;
-	};
-	736C235012911684004D66B1 /* PlistBookmark */ = {
-		isa = PlistBookmark;
-		fRef = 737CE312129048B900D732B7 /* libtomcrypt-Info.plist */;
-		fallbackIsa = PBXBookmark;
-		isK = 0;
-		kPath = (
-			CFBundleVersion,
-		);
-		name = "/Users/geeko/temp/svn/zap/release-013f/zap/libtomcrypt-Info.plist";
-		rLen = 0;
-		rLoc = 9223372036854775807;
 	};
 	736DE988129066E400C3CB73 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -203,10 +150,11 @@
 	};
 	736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {630, 392}}";
+			sepNavIntBoundsRect = "{{0, 0}, {610, 390}}";
 			sepNavSelRange = "{296, 0}";
-			sepNavVisRange = "{0, 257}";
+			sepNavVisRange = "{0, 570}";
 			sepNavVisRect = "{{0, 0}, {630, 291}}";
+			sepNavWindowFrame = "{{15, 183}, {750, 558}}";
 		};
 	};
 	736DE9F8129094DD00C3CB73 /* PBXTextBookmark */ = {
@@ -424,15 +372,101 @@
 		vrLen = 627;
 		vrLoc = 0;
 	};
-	737CE8661290637300D732B7 /* PBXTextBookmark */ = {
+	73FD784C1295DDCE00143CE9 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 737CE312129048B900D732B7 /* libtomcrypt-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			CFBundleVersion,
+		);
+		name = "/Users/geeko/temp/svn/bitfighter-trunk/zap/libtomcrypt-Info.plist";
+		rLen = 0;
+		rLoc = 9223372036854775808;
+	};
+	73FD784D1295DDCE00143CE9 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */;
 		name = "BotNavMeshZone.cpp: 1";
 		rLen = 0;
 		rLoc = 0;
 		rType = 0;
-		vrLen = 626;
+		vrLen = 1098;
 		vrLoc = 0;
+	};
+	73FD784E1295DDCE00143CE9 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */;
+		name = "bitfighter.sh: 12";
+		rLen = 0;
+		rLoc = 296;
+		rType = 0;
+		vrLen = 570;
+		vrLoc = 0;
+	};
+	73FD78551295DF2300143CE9 /* ship.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = ship.h;
+		path = "/Users/geeko/temp/svn/bitfighter-trunk/zap/ship.h";
+		sourceTree = "<absolute>";
+	};
+	73FD79321295E72500143CE9 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73FD78551295DF2300143CE9 /* ship.h */;
+		name = "ship.h: 99";
+		rLen = 0;
+		rLoc = 3539;
+		rType = 0;
+		vrLen = 819;
+		vrLoc = 5403;
+	};
+	73FD79331295E72500143CE9 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		comments = "UIAbstractInstructions.h: No such file or directory";
+		fRef = 73FD79341295E72500143CE9 /* UIEditorInstructions.h */;
+		rLen = 1;
+		rLoc = 28;
+		rType = 1;
+	};
+	73FD79341295E72500143CE9 /* UIEditorInstructions.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = UIEditorInstructions.h;
+		path = "/Users/geeko/temp/svn/bitfighter-trunk/zap/UIEditorInstructions.h";
+		sourceTree = "<absolute>";
+	};
+	73FD79351295E72500143CE9 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73FD79361295E72500143CE9 /* UIEditorInstructions.h */;
+		name = "UIEditorInstructions.h: 29";
+		rLen = 0;
+		rLoc = 1257;
+		rType = 0;
+		vrLen = 466;
+		vrLoc = 1022;
+	};
+	73FD79361295E72500143CE9 /* UIEditorInstructions.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = UIEditorInstructions.h;
+		path = "/Users/geeko/temp/svn/bitfighter-trunk/zap/UIEditorInstructions.h";
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {614, 806}}";
+			sepNavSelRange = "{1257, 0}";
+			sepNavVisRange = "{1022, 458}";
+		};
+	};
+	73FD7A091295E7A700143CE9 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73FD79361295E72500143CE9 /* UIEditorInstructions.h */;
+		name = "UIEditorInstructions.h: 29";
+		rLen = 0;
+		rLoc = 1257;
+		rType = 0;
+		vrLen = 458;
+		vrLoc = 1022;
 	};
 	8D1107260486CEB800E47090 /* Bitfighter */ = {
 		activeExec = 0;
@@ -454,9 +488,9 @@
 	};
 	94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {610, 7163}}";
+			sepNavIntBoundsRect = "{{0, 0}, {614, 7111}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 626}";
+			sepNavVisRange = "{0, 1098}";
 		};
 	};
 	94010D5911D7CCD600E2DBB2 /* controlObjectConnection.cpp */ = {
@@ -487,6 +521,13 @@
 			sepNavSelRange = "{17152, 0}";
 			sepNavVisRange = "{16724, 701}";
 			sepNavWindowFrame = "{{84, 120}, {750, 558}}";
+		};
+	};
+	94010DD211D7CCD600E2DBB2 /* UIEditorInstructions.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {729, 7527}}";
+			sepNavSelRange = "{1281, 0}";
+			sepNavVisRange = "{1022, 469}";
 		};
 	};
 	9462C37711D7D66400791A0B /* lapi.c */ = {

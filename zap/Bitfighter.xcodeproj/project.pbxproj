@@ -148,6 +148,8 @@
 		737CE6B4129055FF00D732B7 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737CE678129055FF00D732B7 /* vector.cpp */; };
 		737CE7A012905E6500D732B7 /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737CE7C312905F6400D732B7 /* oglconsole.c in Sources */ = {isa = PBXBuildFile; fileRef = 737CE7C212905F6400D732B7 /* oglconsole.c */; };
+		73FD7A011295E78800143CE9 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 73FD79CD1295E78800143CE9 /* Makefile */; };
+		73FD7A021295E78800143CE9 /* UIAbstractInstructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		94010DF011D7CCD600E2DBB2 /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5311D7CCD600E2DBB2 /* barrier.cpp */; };
 		94010DF111D7CCD600E2DBB2 /* BotNavMeshZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */; };
@@ -463,6 +465,95 @@
 		737CE677129055FF00D732B7 /* udp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = udp.cpp; path = ../tnl/udp.cpp; sourceTree = SOURCE_ROOT; };
 		737CE678129055FF00D732B7 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = vector.cpp; path = ../tnl/vector.cpp; sourceTree = SOURCE_ROOT; };
 		737CE7C212905F6400D732B7 /* oglconsole.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = oglconsole.c; sourceTree = "<group>"; };
+		73FD79A81295E78700143CE9 /* barrier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = barrier.h; sourceTree = "<group>"; };
+		73FD79A91295E78700143CE9 /* BotNavMeshZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BotNavMeshZone.h; sourceTree = "<group>"; };
+		73FD79AA1295E78700143CE9 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		73FD79AB1295E78700143CE9 /* controlObjectConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = controlObjectConnection.h; sourceTree = "<group>"; };
+		73FD79AC1295E78700143CE9 /* CTFGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CTFGame.h; sourceTree = "<group>"; };
+		73FD79AD1295E78700143CE9 /* Directory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Directory.h; sourceTree = "<group>"; };
+		73FD79AE1295E78700143CE9 /* dirent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dirent.h; sourceTree = "<group>"; };
+		73FD79AF1295E78700143CE9 /* engineeredObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = engineeredObjects.h; sourceTree = "<group>"; };
+		73FD79B01295E78700143CE9 /* flagItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = flagItem.h; sourceTree = "<group>"; };
+		73FD79B11295E78700143CE9 /* ftol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ftol.h; sourceTree = "<group>"; };
+		73FD79B21295E78700143CE9 /* game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = game.h; sourceTree = "<group>"; };
+		73FD79B31295E78700143CE9 /* gameConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameConnection.h; sourceTree = "<group>"; };
+		73FD79B41295E78700143CE9 /* gameItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameItems.h; sourceTree = "<group>"; };
+		73FD79B51295E78700143CE9 /* gameLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameLoader.h; sourceTree = "<group>"; };
+		73FD79B61295E78700143CE9 /* gameNetInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameNetInterface.h; sourceTree = "<group>"; };
+		73FD79B71295E78700143CE9 /* gameObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameObject.h; sourceTree = "<group>"; };
+		73FD79B81295E78700143CE9 /* gameObjectRender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameObjectRender.h; sourceTree = "<group>"; };
+		73FD79B91295E78700143CE9 /* gameType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameType.h; sourceTree = "<group>"; };
+		73FD79BA1295E78700143CE9 /* gameWeapons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gameWeapons.h; sourceTree = "<group>"; };
+		73FD79BB1295E78700143CE9 /* goalZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = goalZone.h; sourceTree = "<group>"; };
+		73FD79BC1295E78700143CE9 /* gridDB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gridDB.h; sourceTree = "<group>"; };
+		73FD79BD1295E78700143CE9 /* gsm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = gsm.h; sourceTree = "<group>"; };
+		73FD79BE1295E78700143CE9 /* huntersGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = huntersGame.h; sourceTree = "<group>"; };
+		73FD79BF1295E78700143CE9 /* IniFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IniFile.h; sourceTree = "<group>"; };
+		73FD79C01295E78700143CE9 /* input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = input.h; sourceTree = "<group>"; };
+		73FD79C11295E78800143CE9 /* item.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = item.h; sourceTree = "<group>"; };
+		73FD79C21295E78800143CE9 /* keyCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyCode.h; sourceTree = "<group>"; };
+		73FD79C31295E78800143CE9 /* keyCodeEnum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyCodeEnum.h; sourceTree = "<group>"; };
+		73FD79C41295E78800143CE9 /* lineEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lineEditor.h; sourceTree = "<group>"; };
+		73FD79C51295E78800143CE9 /* loadoutSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loadoutSelect.h; sourceTree = "<group>"; };
+		73FD79C61295E78800143CE9 /* loadoutZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = loadoutZone.h; sourceTree = "<group>"; };
+		73FD79C71295E78800143CE9 /* lpc10.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lpc10.h; sourceTree = "<group>"; };
+		73FD79C81295E78800143CE9 /* lua.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lua.h; sourceTree = "<group>"; };
+		73FD79C91295E78800143CE9 /* luaGameInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = luaGameInfo.h; sourceTree = "<group>"; };
+		73FD79CA1295E78800143CE9 /* luaLevelGenerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = luaLevelGenerator.h; sourceTree = "<group>"; };
+		73FD79CB1295E78800143CE9 /* luaObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = luaObject.h; sourceTree = "<group>"; };
+		73FD79CC1295E78800143CE9 /* luaUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = luaUtil.h; sourceTree = "<group>"; };
+		73FD79CD1295E78800143CE9 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		73FD79CE1295E78800143CE9 /* masterConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = masterConnection.h; sourceTree = "<group>"; };
+		73FD79CF1295E78800143CE9 /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
+		73FD79D01295E78800143CE9 /* md5wrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5wrapper.h; sourceTree = "<group>"; };
+		73FD79D11295E78800143CE9 /* move.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = move.h; sourceTree = "<group>"; };
+		73FD79D21295E78800143CE9 /* moveObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = moveObject.h; sourceTree = "<group>"; };
+		73FD79D31295E78800143CE9 /* oglconsole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = oglconsole.h; sourceTree = "<group>"; };
+		73FD79D41295E78800143CE9 /* playerInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = playerInfo.h; sourceTree = "<group>"; };
+		73FD79D51295E78800143CE9 /* point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = point.h; sourceTree = "<group>"; };
+		73FD79D61295E78800143CE9 /* polygon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = polygon.h; sourceTree = "<group>"; };
+		73FD79D71295E78800143CE9 /* private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = private.h; sourceTree = "<group>"; };
+		73FD79D81295E78800143CE9 /* projectile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = projectile.h; sourceTree = "<group>"; };
+		73FD79D91295E78800143CE9 /* quickChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quickChat.h; sourceTree = "<group>"; };
+		73FD79DA1295E78800143CE9 /* rabbitGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rabbitGame.h; sourceTree = "<group>"; };
+		73FD79DB1295E78800143CE9 /* resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = resource.h; sourceTree = "<group>"; };
+		73FD79DC1295E78800143CE9 /* robot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = robot.h; sourceTree = "<group>"; };
+		73FD79DD1295E78800143CE9 /* screenShooter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = screenShooter.h; sourceTree = "<group>"; };
+		73FD79DE1295E78800143CE9 /* sfx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sfx.h; sourceTree = "<group>"; };
+		73FD79DF1295E78800143CE9 /* SharedConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SharedConstants.h; sourceTree = "<group>"; };
+		73FD79E01295E78800143CE9 /* shipItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shipItems.h; sourceTree = "<group>"; };
+		73FD79E11295E78800143CE9 /* soccerGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = soccerGame.h; sourceTree = "<group>"; };
+		73FD79E21295E78800143CE9 /* sparkManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sparkManager.h; sourceTree = "<group>"; };
+		73FD79E31295E78800143CE9 /* speedZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = speedZone.h; sourceTree = "<group>"; };
+		73FD79E41295E78800143CE9 /* statistics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = statistics.h; sourceTree = "<group>"; };
+		73FD79E51295E78800143CE9 /* stringUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringUtils.h; sourceTree = "<group>"; };
+		73FD79E61295E78800143CE9 /* SweptEllipsoid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SweptEllipsoid.h; sourceTree = "<group>"; };
+		73FD79E71295E78800143CE9 /* teamInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = teamInfo.h; sourceTree = "<group>"; };
+		73FD79E81295E78800143CE9 /* teleporter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = teleporter.h; sourceTree = "<group>"; };
+		73FD79E91295E78800143CE9 /* textItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = textItem.h; sourceTree = "<group>"; };
+		73FD79EA1295E78800143CE9 /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
+		73FD79EB1295E78800143CE9 /* UI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UI.h; sourceTree = "<group>"; };
+		73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIAbstractInstructions.cpp; sourceTree = "<group>"; };
+		73FD79ED1295E78800143CE9 /* UIAbstractInstructions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIAbstractInstructions.h; sourceTree = "<group>"; };
+		73FD79EE1295E78800143CE9 /* UIChat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIChat.h; sourceTree = "<group>"; };
+		73FD79EF1295E78800143CE9 /* UICredits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UICredits.h; sourceTree = "<group>"; };
+		73FD79F01295E78800143CE9 /* UIDiagnostics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIDiagnostics.h; sourceTree = "<group>"; };
+		73FD79F11295E78800143CE9 /* UIEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIEditor.h; sourceTree = "<group>"; };
+		73FD79F21295E78800143CE9 /* UIErrorMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIErrorMessage.h; sourceTree = "<group>"; };
+		73FD79F31295E78800143CE9 /* UIGame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIGame.h; sourceTree = "<group>"; };
+		73FD79F41295E78800143CE9 /* UIGameParameters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIGameParameters.h; sourceTree = "<group>"; };
+		73FD79F51295E78800143CE9 /* UIInstructions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIInstructions.h; sourceTree = "<group>"; };
+		73FD79F61295E78800143CE9 /* UIKeyDefMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIKeyDefMenu.h; sourceTree = "<group>"; };
+		73FD79F71295E78800143CE9 /* UIMenuItems.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIMenuItems.h; sourceTree = "<group>"; };
+		73FD79F81295E78800143CE9 /* UIMenus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIMenus.h; sourceTree = "<group>"; };
+		73FD79F91295E78800143CE9 /* UIMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIMessage.h; sourceTree = "<group>"; };
+		73FD79FA1295E78800143CE9 /* UINameEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UINameEntry.h; sourceTree = "<group>"; };
+		73FD79FB1295E78800143CE9 /* UIQueryServers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIQueryServers.h; sourceTree = "<group>"; };
+		73FD79FC1295E78800143CE9 /* UIRebindKeys.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIRebindKeys.h; sourceTree = "<group>"; };
+		73FD79FD1295E78800143CE9 /* UITeamDefMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UITeamDefMenu.h; sourceTree = "<group>"; };
+		73FD79FE1295E78800143CE9 /* UIYesNo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIYesNo.h; sourceTree = "<group>"; };
+		73FD79FF1295E78800143CE9 /* voiceCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = voiceCodec.h; sourceTree = "<group>"; };
+		73FD7A001295E78800143CE9 /* zapjournal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zapjournal.h; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Bitfighter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info.plist"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94010D5311D7CCD600E2DBB2 /* barrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = barrier.cpp; sourceTree = "<group>"; };
@@ -715,6 +806,95 @@
 		737CE2FC1290468300D732B7 /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73FD79A81295E78700143CE9 /* barrier.h */,
+				73FD79A91295E78700143CE9 /* BotNavMeshZone.h */,
+				73FD79AA1295E78700143CE9 /* config.h */,
+				73FD79AB1295E78700143CE9 /* controlObjectConnection.h */,
+				73FD79AC1295E78700143CE9 /* CTFGame.h */,
+				73FD79AD1295E78700143CE9 /* Directory.h */,
+				73FD79AE1295E78700143CE9 /* dirent.h */,
+				73FD79AF1295E78700143CE9 /* engineeredObjects.h */,
+				73FD79B01295E78700143CE9 /* flagItem.h */,
+				73FD79B11295E78700143CE9 /* ftol.h */,
+				73FD79B21295E78700143CE9 /* game.h */,
+				73FD79B31295E78700143CE9 /* gameConnection.h */,
+				73FD79B41295E78700143CE9 /* gameItems.h */,
+				73FD79B51295E78700143CE9 /* gameLoader.h */,
+				73FD79B61295E78700143CE9 /* gameNetInterface.h */,
+				73FD79B71295E78700143CE9 /* gameObject.h */,
+				73FD79B81295E78700143CE9 /* gameObjectRender.h */,
+				73FD79B91295E78700143CE9 /* gameType.h */,
+				73FD79BA1295E78700143CE9 /* gameWeapons.h */,
+				73FD79BB1295E78700143CE9 /* goalZone.h */,
+				73FD79BC1295E78700143CE9 /* gridDB.h */,
+				73FD79BD1295E78700143CE9 /* gsm.h */,
+				73FD79BE1295E78700143CE9 /* huntersGame.h */,
+				73FD79BF1295E78700143CE9 /* IniFile.h */,
+				73FD79C01295E78700143CE9 /* input.h */,
+				73FD79C11295E78800143CE9 /* item.h */,
+				73FD79C21295E78800143CE9 /* keyCode.h */,
+				73FD79C31295E78800143CE9 /* keyCodeEnum.h */,
+				73FD79C41295E78800143CE9 /* lineEditor.h */,
+				73FD79C51295E78800143CE9 /* loadoutSelect.h */,
+				73FD79C61295E78800143CE9 /* loadoutZone.h */,
+				73FD79C71295E78800143CE9 /* lpc10.h */,
+				73FD79C81295E78800143CE9 /* lua.h */,
+				73FD79C91295E78800143CE9 /* luaGameInfo.h */,
+				73FD79CA1295E78800143CE9 /* luaLevelGenerator.h */,
+				73FD79CB1295E78800143CE9 /* luaObject.h */,
+				73FD79CC1295E78800143CE9 /* luaUtil.h */,
+				73FD79CD1295E78800143CE9 /* Makefile */,
+				73FD79CE1295E78800143CE9 /* masterConnection.h */,
+				73FD79CF1295E78800143CE9 /* md5.h */,
+				73FD79D01295E78800143CE9 /* md5wrapper.h */,
+				73FD79D11295E78800143CE9 /* move.h */,
+				73FD79D21295E78800143CE9 /* moveObject.h */,
+				73FD79D31295E78800143CE9 /* oglconsole.h */,
+				73FD79D41295E78800143CE9 /* playerInfo.h */,
+				73FD79D51295E78800143CE9 /* point.h */,
+				73FD79D61295E78800143CE9 /* polygon.h */,
+				73FD79D71295E78800143CE9 /* private.h */,
+				73FD79D81295E78800143CE9 /* projectile.h */,
+				73FD79D91295E78800143CE9 /* quickChat.h */,
+				73FD79DA1295E78800143CE9 /* rabbitGame.h */,
+				73FD79DB1295E78800143CE9 /* resource.h */,
+				73FD79DC1295E78800143CE9 /* robot.h */,
+				73FD79DD1295E78800143CE9 /* screenShooter.h */,
+				73FD79DE1295E78800143CE9 /* sfx.h */,
+				73FD79DF1295E78800143CE9 /* SharedConstants.h */,
+				73FD79E01295E78800143CE9 /* shipItems.h */,
+				73FD79E11295E78800143CE9 /* soccerGame.h */,
+				73FD79E21295E78800143CE9 /* sparkManager.h */,
+				73FD79E31295E78800143CE9 /* speedZone.h */,
+				73FD79E41295E78800143CE9 /* statistics.h */,
+				73FD79E51295E78800143CE9 /* stringUtils.h */,
+				73FD79E61295E78800143CE9 /* SweptEllipsoid.h */,
+				73FD79E71295E78800143CE9 /* teamInfo.h */,
+				73FD79E81295E78800143CE9 /* teleporter.h */,
+				73FD79E91295E78800143CE9 /* textItem.h */,
+				73FD79EA1295E78800143CE9 /* timer.h */,
+				73FD79EB1295E78800143CE9 /* UI.h */,
+				73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */,
+				73FD79ED1295E78800143CE9 /* UIAbstractInstructions.h */,
+				73FD79EE1295E78800143CE9 /* UIChat.h */,
+				73FD79EF1295E78800143CE9 /* UICredits.h */,
+				73FD79F01295E78800143CE9 /* UIDiagnostics.h */,
+				73FD79F11295E78800143CE9 /* UIEditor.h */,
+				73FD79F21295E78800143CE9 /* UIErrorMessage.h */,
+				73FD79F31295E78800143CE9 /* UIGame.h */,
+				73FD79F41295E78800143CE9 /* UIGameParameters.h */,
+				73FD79F51295E78800143CE9 /* UIInstructions.h */,
+				73FD79F61295E78800143CE9 /* UIKeyDefMenu.h */,
+				73FD79F71295E78800143CE9 /* UIMenuItems.h */,
+				73FD79F81295E78800143CE9 /* UIMenus.h */,
+				73FD79F91295E78800143CE9 /* UIMessage.h */,
+				73FD79FA1295E78800143CE9 /* UINameEntry.h */,
+				73FD79FB1295E78800143CE9 /* UIQueryServers.h */,
+				73FD79FC1295E78800143CE9 /* UIRebindKeys.h */,
+				73FD79FD1295E78800143CE9 /* UITeamDefMenu.h */,
+				73FD79FE1295E78800143CE9 /* UIYesNo.h */,
+				73FD79FF1295E78800143CE9 /* voiceCodec.h */,
+				73FD7A001295E78800143CE9 /* zapjournal.h */,
 				736DE97F129066D500C3CB73 /* stringUtils.cpp */,
 				736DE9741290662300C3CB73 /* UIMenuItems.cpp */,
 				94010D5311D7CCD600E2DBB2 /* barrier.cpp */,
@@ -1366,6 +1546,8 @@
 				737CE7C312905F6400D732B7 /* oglconsole.c in Sources */,
 				736DE9751290662300C3CB73 /* UIMenuItems.cpp in Sources */,
 				736DE980129066D500C3CB73 /* stringUtils.cpp in Sources */,
+				73FD7A011295E78800143CE9 /* Makefile in Sources */,
+				73FD7A021295E78800143CE9 /* UIAbstractInstructions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

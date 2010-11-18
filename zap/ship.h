@@ -104,7 +104,6 @@ class Ship : public MoveObject
    typedef MoveObject Parent;
 
 private:
-   typedef MoveObject Parent;
    bool isBusy;
    bool mIsRobot;
 
