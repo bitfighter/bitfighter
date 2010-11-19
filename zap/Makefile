@@ -29,6 +29,7 @@ OBJECTS_ZAP=\
    loadoutZone.o\
    SweptEllipsoid.o\
    UI.o\
+   UIAbstractInstructions.o\
    UIChat.o\
    UICredits.o\
    UIDiagnostics.o\

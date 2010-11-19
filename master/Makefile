@@ -8,8 +8,11 @@
 #
 
 # The following lines can be commented out if you are not using PHP or PHPBB3 integration
-MYSQLFLAGS=-I/usr/include/mysql -Imysql++ 
-LDFLAGS= ../mysql++/libmysqlpp.so 
+PHPBB_INCLUDES=-I/usr/include/mysql -Imysql++
+PHPBB_CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED -DVERIFY_PHPBB3
+
+# Note, if you install the correct development package you don't need this
+PHPBB_LDFLAGS=../mysql++/libmysqlpp.so 
 
 CC=g++ -g -I../tnl -I../libtomcrypt #-O2
 
@@ -25,23 +28,25 @@ OBJECTS_PHPBB=\
 
 # If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
 # To disable PHPBB3 integration, remove VERIFY_PHPBB3 flag
-CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED -DVERIFY_PHPBB3
+CFLAGS=
 
 
 .cpp.o : 
-	$(CC) $(MYSQLFLAGS) -c $(CFLAGS) $<
+	$(CC) $(PHPBB_INCLUDES) -c $(PHPBB_CFLAGS) $<
 
 
 default: $(OBJECTS_PHPBB) master
 
 
-nophpbb: CFLAGS=
-nophpbb: OBJECTS_PHPBB= 
-nophpbb: master
+nophpbb: PHPBB_CFLAGS= 
+nophpbb: PHPBB_INCLUDES= 
+nophpbb: PHPBB_LDFLAGS=
+nophpbb: OBJECTS_PHPBB=
+nophpbb: master 
 
 
 master: $(OBJECTS_MASTER)
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(PHPBB_LDFLAGS)
 
 
 cleano:
