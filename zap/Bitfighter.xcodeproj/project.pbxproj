@@ -12,6 +12,143 @@
 		736DE980129066D500C3CB73 /* stringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736DE97F129066D500C3CB73 /* stringUtils.cpp */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		7378261D12960DDF007333BE /* zap_mac_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */; };
+		7378261E12960DDF007333BE /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
+		7378261F12960DDF007333BE /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
+		7378262012960DDF007333BE /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
+		7378262112960DDF007333BE /* screenshots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE41F12904D7D00D732B7 /* screenshots */; };
+		7378262212960DDF007333BE /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = 737CE42212904D7D00D732B7 /* sfx */; };
+		7378262312960DDF007333BE /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		7378262512960DDF007333BE /* barrier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5311D7CCD600E2DBB2 /* barrier.cpp */; };
+		7378262612960DDF007333BE /* BotNavMeshZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */; };
+		7378262712960DDF007333BE /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5711D7CCD600E2DBB2 /* config.cpp */; };
+		7378262812960DDF007333BE /* controlObjectConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5911D7CCD600E2DBB2 /* controlObjectConnection.cpp */; };
+		7378262912960DDF007333BE /* CTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5B11D7CCD600E2DBB2 /* CTFGame.cpp */; };
+		7378262A12960DDF007333BE /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5E11D7CCD600E2DBB2 /* Directory.mm */; };
+		7378262B12960DDF007333BE /* engineeredObjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5F11D7CCD600E2DBB2 /* engineeredObjects.cpp */; };
+		7378262C12960DDF007333BE /* flagItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6111D7CCD600E2DBB2 /* flagItem.cpp */; };
+		7378262D12960DDF007333BE /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6511D7CCD600E2DBB2 /* game.cpp */; };
+		7378262E12960DDF007333BE /* gameConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6711D7CCD600E2DBB2 /* gameConnection.cpp */; };
+		7378262F12960DDF007333BE /* gameItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6911D7CCD600E2DBB2 /* gameItems.cpp */; };
+		7378263012960DDF007333BE /* gameLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6B11D7CCD600E2DBB2 /* gameLoader.cpp */; };
+		7378263112960DDF007333BE /* gameNetInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6D11D7CCD600E2DBB2 /* gameNetInterface.cpp */; };
+		7378263212960DDF007333BE /* gameObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6F11D7CCD600E2DBB2 /* gameObject.cpp */; };
+		7378263312960DDF007333BE /* gameObjectRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7111D7CCD600E2DBB2 /* gameObjectRender.cpp */; };
+		7378263412960DDF007333BE /* gameType.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7311D7CCD600E2DBB2 /* gameType.cpp */; };
+		7378263512960DDF007333BE /* gameWeapons.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7511D7CCD600E2DBB2 /* gameWeapons.cpp */; };
+		7378263612960DDF007333BE /* goalZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7711D7CCD600E2DBB2 /* goalZone.cpp */; };
+		7378263712960DDF007333BE /* gridDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7911D7CCD600E2DBB2 /* gridDB.cpp */; };
+		7378263812960DDF007333BE /* HTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7B11D7CCD600E2DBB2 /* HTFGame.cpp */; };
+		7378263912960DDF007333BE /* huntersGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7C11D7CCD600E2DBB2 /* huntersGame.cpp */; };
+		7378263A12960DDF007333BE /* IniFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D7E11D7CCD600E2DBB2 /* IniFile.cpp */; };
+		7378263B12960DDF007333BE /* input.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8011D7CCD600E2DBB2 /* input.cpp */; };
+		7378263C12960DDF007333BE /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8211D7CCD600E2DBB2 /* item.cpp */; };
+		7378263D12960DDF007333BE /* keyCode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8411D7CCD600E2DBB2 /* keyCode.cpp */; };
+		7378263E12960DDF007333BE /* lineEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8611D7CCD600E2DBB2 /* lineEditor.cpp */; };
+		7378263F12960DDF007333BE /* loadoutSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8811D7CCD600E2DBB2 /* loadoutSelect.cpp */; };
+		7378264012960DDF007333BE /* loadoutZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8A11D7CCD600E2DBB2 /* loadoutZone.cpp */; };
+		7378264112960DDF007333BE /* luaGameInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8D11D7CCD600E2DBB2 /* luaGameInfo.cpp */; };
+		7378264212960DDF007333BE /* luaLevelGenerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D8F11D7CCD600E2DBB2 /* luaLevelGenerator.cpp */; };
+		7378264312960DDF007333BE /* luaObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9111D7CCD600E2DBB2 /* luaObject.cpp */; };
+		7378264412960DDF007333BE /* luaUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9311D7CCD600E2DBB2 /* luaUtil.cpp */; };
+		7378264512960DDF007333BE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9511D7CCD600E2DBB2 /* main.cpp */; };
+		7378264612960DDF007333BE /* masterConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9611D7CCD600E2DBB2 /* masterConnection.cpp */; };
+		7378264712960DDF007333BE /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9811D7CCD600E2DBB2 /* md5.cpp */; };
+		7378264812960DDF007333BE /* md5wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9A11D7CCD600E2DBB2 /* md5wrapper.cpp */; };
+		7378264912960DDF007333BE /* move.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9C11D7CCD600E2DBB2 /* move.cpp */; };
+		7378264A12960DDF007333BE /* moveObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D9E11D7CCD600E2DBB2 /* moveObject.cpp */; };
+		7378264B12960DDF007333BE /* osxInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DA011D7CCD600E2DBB2 /* osxInput.cpp */; };
+		7378264C12960DDF007333BE /* playerInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DA111D7CCD600E2DBB2 /* playerInfo.cpp */; };
+		7378264D12960DDF007333BE /* projectile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DA611D7CCD600E2DBB2 /* projectile.cpp */; };
+		7378264E12960DDF007333BE /* quickChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DA811D7CCD600E2DBB2 /* quickChat.cpp */; };
+		7378264F12960DDF007333BE /* rabbitGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DAA11D7CCD600E2DBB2 /* rabbitGame.cpp */; };
+		7378265012960DDF007333BE /* retrieveGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DAC11D7CCD600E2DBB2 /* retrieveGame.cpp */; };
+		7378265112960DDF007333BE /* robot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DAD11D7CCD600E2DBB2 /* robot.cpp */; };
+		7378265212960DDF007333BE /* screenShooter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DAF11D7CCD600E2DBB2 /* screenShooter.cpp */; };
+		7378265312960DDF007333BE /* sfx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DB111D7CCD600E2DBB2 /* sfx.cpp */; };
+		7378265412960DDF007333BE /* ship.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DB411D7CCD600E2DBB2 /* ship.cpp */; };
+		7378265512960DDF007333BE /* SlipZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DB711D7CCD600E2DBB2 /* SlipZone.cpp */; };
+		7378265612960DDF007333BE /* soccerGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DB811D7CCD600E2DBB2 /* soccerGame.cpp */; };
+		7378265712960DDF007333BE /* sparkManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DBC11D7CCD600E2DBB2 /* sparkManager.cpp */; };
+		7378265812960DDF007333BE /* speedZone.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DBE11D7CCD600E2DBB2 /* speedZone.cpp */; };
+		7378265912960DDF007333BE /* SweptEllipsoid.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DC011D7CCD600E2DBB2 /* SweptEllipsoid.cpp */; };
+		7378265A12960DDF007333BE /* teamInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DC211D7CCD600E2DBB2 /* teamInfo.cpp */; };
+		7378265B12960DDF007333BE /* teleporter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DC411D7CCD600E2DBB2 /* teleporter.cpp */; };
+		7378265C12960DDF007333BE /* UI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DC811D7CCD600E2DBB2 /* UI.cpp */; };
+		7378265D12960DDF007333BE /* UIChat.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DCA11D7CCD600E2DBB2 /* UIChat.cpp */; };
+		7378265E12960DDF007333BE /* UICredits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DCC11D7CCD600E2DBB2 /* UICredits.cpp */; };
+		7378265F12960DDF007333BE /* UIDiagnostics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DCE11D7CCD600E2DBB2 /* UIDiagnostics.cpp */; };
+		7378266012960DDF007333BE /* UIEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DD011D7CCD600E2DBB2 /* UIEditor.cpp */; };
+		7378266112960DDF007333BE /* UIEditorInstructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DD211D7CCD600E2DBB2 /* UIEditorInstructions.cpp */; };
+		7378266212960DDF007333BE /* UIErrorMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DD411D7CCD600E2DBB2 /* UIErrorMessage.cpp */; };
+		7378266312960DDF007333BE /* UIGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DD611D7CCD600E2DBB2 /* UIGame.cpp */; };
+		7378266412960DDF007333BE /* UIGameParameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DD811D7CCD600E2DBB2 /* UIGameParameters.cpp */; };
+		7378266512960DDF007333BE /* UIInstructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DDA11D7CCD600E2DBB2 /* UIInstructions.cpp */; };
+		7378266612960DDF007333BE /* UIKeyDefMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DDC11D7CCD600E2DBB2 /* UIKeyDefMenu.cpp */; };
+		7378266712960DDF007333BE /* UIMenus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DDE11D7CCD600E2DBB2 /* UIMenus.cpp */; };
+		7378266812960DDF007333BE /* UIMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DE011D7CCD600E2DBB2 /* UIMessage.cpp */; };
+		7378266912960DDF007333BE /* UINameEntry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DE211D7CCD600E2DBB2 /* UINameEntry.cpp */; };
+		7378266A12960DDF007333BE /* UIQueryServers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DE411D7CCD600E2DBB2 /* UIQueryServers.cpp */; };
+		7378266B12960DDF007333BE /* UIRebindKeys.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DE611D7CCD600E2DBB2 /* UIRebindKeys.cpp */; };
+		7378266C12960DDF007333BE /* UITeamDefMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DE811D7CCD600E2DBB2 /* UITeamDefMenu.cpp */; };
+		7378266D12960DDF007333BE /* UIYesNo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DEA11D7CCD600E2DBB2 /* UIYesNo.cpp */; };
+		7378266E12960DDF007333BE /* voiceCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DEC11D7CCD600E2DBB2 /* voiceCodec.cpp */; };
+		7378266F12960DDF007333BE /* zoneControlGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010DEF11D7CCD600E2DBB2 /* zoneControlGame.cpp */; };
+		7378267012960DDF007333BE /* lapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C37711D7D66400791A0B /* lapi.c */; };
+		7378267112960DDF007333BE /* lauxlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C37911D7D66400791A0B /* lauxlib.c */; };
+		7378267212960DDF007333BE /* lbaselib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C37B11D7D66400791A0B /* lbaselib.c */; };
+		7378267312960DDF007333BE /* lcode.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C37C11D7D66400791A0B /* lcode.c */; };
+		7378267412960DDF007333BE /* ldblib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C37E11D7D66400791A0B /* ldblib.c */; };
+		7378267512960DDF007333BE /* ldebug.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C37F11D7D66400791A0B /* ldebug.c */; };
+		7378267612960DDF007333BE /* ldo.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38111D7D66400791A0B /* ldo.c */; };
+		7378267712960DDF007333BE /* ldump.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38311D7D66400791A0B /* ldump.c */; };
+		7378267812960DDF007333BE /* lfunc.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38411D7D66400791A0B /* lfunc.c */; };
+		7378267912960DDF007333BE /* lgc.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38611D7D66400791A0B /* lgc.c */; };
+		7378267A12960DDF007333BE /* lgcveclib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38811D7D66400791A0B /* lgcveclib.c */; };
+		7378267B12960DDF007333BE /* linit.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38911D7D66400791A0B /* linit.c */; };
+		7378267C12960DDF007333BE /* liolib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38A11D7D66400791A0B /* liolib.c */; };
+		7378267D12960DDF007333BE /* llex.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38B11D7D66400791A0B /* llex.c */; };
+		7378267E12960DDF007333BE /* lmathlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38E11D7D66400791A0B /* lmathlib.c */; };
+		7378267F12960DDF007333BE /* lmem.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C38F11D7D66400791A0B /* lmem.c */; };
+		7378268012960DDF007333BE /* loadlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39111D7D66400791A0B /* loadlib.c */; };
+		7378268112960DDF007333BE /* lobject.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39211D7D66400791A0B /* lobject.c */; };
+		7378268212960DDF007333BE /* lopcodes.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39411D7D66400791A0B /* lopcodes.c */; };
+		7378268312960DDF007333BE /* loslib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39611D7D66400791A0B /* loslib.c */; };
+		7378268412960DDF007333BE /* lparser.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39711D7D66400791A0B /* lparser.c */; };
+		7378268512960DDF007333BE /* lstate.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39911D7D66400791A0B /* lstate.c */; };
+		7378268612960DDF007333BE /* lstring.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39B11D7D66400791A0B /* lstring.c */; };
+		7378268712960DDF007333BE /* lstrlib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39D11D7D66400791A0B /* lstrlib.c */; };
+		7378268812960DDF007333BE /* ltable.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C39E11D7D66400791A0B /* ltable.c */; };
+		7378268912960DDF007333BE /* ltablib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3A011D7D66400791A0B /* ltablib.c */; };
+		7378268A12960DDF007333BE /* ltm.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3A111D7D66400791A0B /* ltm.c */; };
+		7378268B12960DDF007333BE /* lundump.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3A811D7D66400791A0B /* lundump.c */; };
+		7378268C12960DDF007333BE /* lveclib.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3AA11D7D66400791A0B /* lveclib.c */; };
+		7378268D12960DDF007333BE /* lvm.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3AB11D7D66400791A0B /* lvm.c */; };
+		7378268E12960DDF007333BE /* lzio.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3AD11D7D66400791A0B /* lzio.c */; };
+		7378268F12960DDF007333BE /* print.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3AF11D7D66400791A0B /* print.c */; };
+		7378269012960DDF007333BE /* gsm_decode.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3DE11D7D6D500791A0B /* gsm_decode.c */; };
+		7378269112960DDF007333BE /* gsm_encode.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3DF11D7D6D500791A0B /* gsm_encode.c */; };
+		7378269212960DDF007333BE /* gsm_state.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3E011D7D6D500791A0B /* gsm_state.c */; };
+		7378269312960DDF007333BE /* lpc10dec.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3F611D7D7C700791A0B /* lpc10dec.c */; };
+		7378269412960DDF007333BE /* lpc10enc.c in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3F711D7D7C700791A0B /* lpc10enc.c */; };
+		7378269512960DDF007333BE /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9462C3FE11D7D80400791A0B /* masterInterface.cpp */; };
+		7378269612960DDF007333BE /* textItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9462C40811D7D84000791A0B /* textItem.cpp */; };
+		7378269712960DDF007333BE /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D8E517412111FDC00C6D883 /* statistics.cpp */; };
+		7378269912960DDF007333BE /* UIMenuItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736DE9741290662300C3CB73 /* UIMenuItems.cpp */; };
+		7378269A12960DDF007333BE /* stringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736DE97F129066D500C3CB73 /* stringUtils.cpp */; };
+		7378269B12960DDF007333BE /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 73FD79CD1295E78800143CE9 /* Makefile */; };
+		7378269C12960DDF007333BE /* UIAbstractInstructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */; };
+		7378269E12960DDF007333BE /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
+		7378269F12960DDF007333BE /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
+		737826A012960DDF007333BE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		737826A112960DDF007333BE /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94010E8011D7CF0200E2DBB2 /* GLUT.framework */; };
+		737826A312960DDF007333BE /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C40211D7D82700791A0B /* IOKit.framework */; };
+		737826A412960DDF007333BE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
+		737826A512960DDF007333BE /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3001290483200D732B7 /* OpenAL-Soft.framework */; };
+		737826A612960DDF007333BE /* FreeALUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3041290486800D732B7 /* FreeALUT.framework */; };
+		737826A812960DDF007333BE /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
+		737826A912960DDF007333BE /* libtomcrypt.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
+		737826AD12960DDF007333BE /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		737CE3011290483200D732B7 /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3001290483200D732B7 /* OpenAL-Soft.framework */; };
 		737CE3051290486800D732B7 /* FreeALUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3041290486800D732B7 /* FreeALUT.framework */; };
 		737CE3D812904D0200D732B7 /* FreeALUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE3041290486800D732B7 /* FreeALUT.framework */; };
@@ -273,6 +410,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		7378261912960DDF007333BE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 737CE61C1290553D00D732B7;
+			remoteInfo = tnl;
+		};
+		7378261B12960DDF007333BE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
+			remoteInfo = libtomcrypt;
+		};
 		737CE6221290557900D732B7 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -307,6 +458,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		737826A712960DDF007333BE /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				737826A812960DDF007333BE /* tnl.framework in CopyFiles */,
+				737826A912960DDF007333BE /* libtomcrypt.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		737826AC12960DDF007333BE /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+				737826AD12960DDF007333BE /* bitfighter.sh in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9462BEAA11D7D28B00791A0B /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -332,6 +504,8 @@
 		736DE9741290662300C3CB73 /* UIMenuItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIMenuItems.cpp; sourceTree = "<group>"; };
 		736DE97F129066D500C3CB73 /* stringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringUtils.cpp; sourceTree = "<group>"; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
+		737826B112960DDF007333BE /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		737826B312960DDF007333BE /* Bitfighter-Info copy.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info copy.plist"; sourceTree = "<group>"; };
 		737CE3001290483200D732B7 /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../openal/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		737CE3041290486800D732B7 /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../openal/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
@@ -678,6 +852,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7378269D12960DDF007333BE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7378269E12960DDF007333BE /* tnl.framework in Frameworks */,
+				7378269F12960DDF007333BE /* libtomcrypt.framework in Frameworks */,
+				737826A012960DDF007333BE /* Cocoa.framework in Frameworks */,
+				737826A112960DDF007333BE /* GLUT.framework in Frameworks */,
+				737826A312960DDF007333BE /* IOKit.framework in Frameworks */,
+				737826A412960DDF007333BE /* Carbon.framework in Frameworks */,
+				737826A512960DDF007333BE /* OpenAL-Soft.framework in Frameworks */,
+				737826A612960DDF007333BE /* FreeALUT.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		737CE46A12904E9E00D732B7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -740,6 +929,7 @@
 				8D1107320486CEB800E47090 /* Bitfighter.app */,
 				737CE46C12904E9E00D732B7 /* libtomcrypt.framework */,
 				737CE61D1290553D00D732B7 /* tnl.framework */,
+				737826B112960DDF007333BE /* Bitfighter.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -780,6 +970,7 @@
 				737CE3FC12904D5300D732B7 /* scripts */,
 				94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */,
 				8D1107310486CEB800E47090 /* Bitfighter-Info.plist */,
+				737826B312960DDF007333BE /* Bitfighter-Info copy.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -1225,6 +1416,28 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		7378261712960DDF007333BE /* Bitfighter dedicated */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighter dedicated" */;
+			buildPhases = (
+				7378261C12960DDF007333BE /* Resources */,
+				7378262412960DDF007333BE /* Sources */,
+				7378269D12960DDF007333BE /* Frameworks */,
+				737826A712960DDF007333BE /* CopyFiles */,
+				737826AC12960DDF007333BE /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7378261812960DDF007333BE /* PBXTargetDependency */,
+				7378261A12960DDF007333BE /* PBXTargetDependency */,
+			);
+			name = "Bitfighter dedicated";
+			productInstallPath = "$(HOME)/Applications";
+			productName = Bitfighter;
+			productReference = 737826B112960DDF007333BE /* Bitfighter.app */;
+			productType = "com.apple.product-type.application";
+		};
 		737CE46B12904E9E00D732B7 /* libtomcrypt */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 737CE47312904ED100D732B7 /* Build configuration list for PBXNativeTarget "libtomcrypt" */;
@@ -1299,11 +1512,26 @@
 				8D1107260486CEB800E47090 /* Bitfighter */,
 				737CE46B12904E9E00D732B7 /* libtomcrypt */,
 				737CE61C1290553D00D732B7 /* tnl */,
+				7378261712960DDF007333BE /* Bitfighter dedicated */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		7378261C12960DDF007333BE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7378261D12960DDF007333BE /* zap_mac_icon.icns in Resources */,
+				7378261E12960DDF007333BE /* robots in Resources */,
+				7378261F12960DDF007333BE /* scripts in Resources */,
+				7378262012960DDF007333BE /* levels in Resources */,
+				7378262112960DDF007333BE /* screenshots in Resources */,
+				7378262212960DDF007333BE /* sfx in Resources */,
+				7378262312960DDF007333BE /* bitfighter.sh in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		737CE46812904E9E00D732B7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1335,6 +1563,132 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		7378262412960DDF007333BE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7378262512960DDF007333BE /* barrier.cpp in Sources */,
+				7378262612960DDF007333BE /* BotNavMeshZone.cpp in Sources */,
+				7378262712960DDF007333BE /* config.cpp in Sources */,
+				7378262812960DDF007333BE /* controlObjectConnection.cpp in Sources */,
+				7378262912960DDF007333BE /* CTFGame.cpp in Sources */,
+				7378262A12960DDF007333BE /* Directory.mm in Sources */,
+				7378262B12960DDF007333BE /* engineeredObjects.cpp in Sources */,
+				7378262C12960DDF007333BE /* flagItem.cpp in Sources */,
+				7378262D12960DDF007333BE /* game.cpp in Sources */,
+				7378262E12960DDF007333BE /* gameConnection.cpp in Sources */,
+				7378262F12960DDF007333BE /* gameItems.cpp in Sources */,
+				7378263012960DDF007333BE /* gameLoader.cpp in Sources */,
+				7378263112960DDF007333BE /* gameNetInterface.cpp in Sources */,
+				7378263212960DDF007333BE /* gameObject.cpp in Sources */,
+				7378263312960DDF007333BE /* gameObjectRender.cpp in Sources */,
+				7378263412960DDF007333BE /* gameType.cpp in Sources */,
+				7378263512960DDF007333BE /* gameWeapons.cpp in Sources */,
+				7378263612960DDF007333BE /* goalZone.cpp in Sources */,
+				7378263712960DDF007333BE /* gridDB.cpp in Sources */,
+				7378263812960DDF007333BE /* HTFGame.cpp in Sources */,
+				7378263912960DDF007333BE /* huntersGame.cpp in Sources */,
+				7378263A12960DDF007333BE /* IniFile.cpp in Sources */,
+				7378263B12960DDF007333BE /* input.cpp in Sources */,
+				7378263C12960DDF007333BE /* item.cpp in Sources */,
+				7378263D12960DDF007333BE /* keyCode.cpp in Sources */,
+				7378263E12960DDF007333BE /* lineEditor.cpp in Sources */,
+				7378263F12960DDF007333BE /* loadoutSelect.cpp in Sources */,
+				7378264012960DDF007333BE /* loadoutZone.cpp in Sources */,
+				7378264112960DDF007333BE /* luaGameInfo.cpp in Sources */,
+				7378264212960DDF007333BE /* luaLevelGenerator.cpp in Sources */,
+				7378264312960DDF007333BE /* luaObject.cpp in Sources */,
+				7378264412960DDF007333BE /* luaUtil.cpp in Sources */,
+				7378264512960DDF007333BE /* main.cpp in Sources */,
+				7378264612960DDF007333BE /* masterConnection.cpp in Sources */,
+				7378264712960DDF007333BE /* md5.cpp in Sources */,
+				7378264812960DDF007333BE /* md5wrapper.cpp in Sources */,
+				7378264912960DDF007333BE /* move.cpp in Sources */,
+				7378264A12960DDF007333BE /* moveObject.cpp in Sources */,
+				7378264B12960DDF007333BE /* osxInput.cpp in Sources */,
+				7378264C12960DDF007333BE /* playerInfo.cpp in Sources */,
+				7378264D12960DDF007333BE /* projectile.cpp in Sources */,
+				7378264E12960DDF007333BE /* quickChat.cpp in Sources */,
+				7378264F12960DDF007333BE /* rabbitGame.cpp in Sources */,
+				7378265012960DDF007333BE /* retrieveGame.cpp in Sources */,
+				7378265112960DDF007333BE /* robot.cpp in Sources */,
+				7378265212960DDF007333BE /* screenShooter.cpp in Sources */,
+				7378265312960DDF007333BE /* sfx.cpp in Sources */,
+				7378265412960DDF007333BE /* ship.cpp in Sources */,
+				7378265512960DDF007333BE /* SlipZone.cpp in Sources */,
+				7378265612960DDF007333BE /* soccerGame.cpp in Sources */,
+				7378265712960DDF007333BE /* sparkManager.cpp in Sources */,
+				7378265812960DDF007333BE /* speedZone.cpp in Sources */,
+				7378265912960DDF007333BE /* SweptEllipsoid.cpp in Sources */,
+				7378265A12960DDF007333BE /* teamInfo.cpp in Sources */,
+				7378265B12960DDF007333BE /* teleporter.cpp in Sources */,
+				7378265C12960DDF007333BE /* UI.cpp in Sources */,
+				7378265D12960DDF007333BE /* UIChat.cpp in Sources */,
+				7378265E12960DDF007333BE /* UICredits.cpp in Sources */,
+				7378265F12960DDF007333BE /* UIDiagnostics.cpp in Sources */,
+				7378266012960DDF007333BE /* UIEditor.cpp in Sources */,
+				7378266112960DDF007333BE /* UIEditorInstructions.cpp in Sources */,
+				7378266212960DDF007333BE /* UIErrorMessage.cpp in Sources */,
+				7378266312960DDF007333BE /* UIGame.cpp in Sources */,
+				7378266412960DDF007333BE /* UIGameParameters.cpp in Sources */,
+				7378266512960DDF007333BE /* UIInstructions.cpp in Sources */,
+				7378266612960DDF007333BE /* UIKeyDefMenu.cpp in Sources */,
+				7378266712960DDF007333BE /* UIMenus.cpp in Sources */,
+				7378266812960DDF007333BE /* UIMessage.cpp in Sources */,
+				7378266912960DDF007333BE /* UINameEntry.cpp in Sources */,
+				7378266A12960DDF007333BE /* UIQueryServers.cpp in Sources */,
+				7378266B12960DDF007333BE /* UIRebindKeys.cpp in Sources */,
+				7378266C12960DDF007333BE /* UITeamDefMenu.cpp in Sources */,
+				7378266D12960DDF007333BE /* UIYesNo.cpp in Sources */,
+				7378266E12960DDF007333BE /* voiceCodec.cpp in Sources */,
+				7378266F12960DDF007333BE /* zoneControlGame.cpp in Sources */,
+				7378267012960DDF007333BE /* lapi.c in Sources */,
+				7378267112960DDF007333BE /* lauxlib.c in Sources */,
+				7378267212960DDF007333BE /* lbaselib.c in Sources */,
+				7378267312960DDF007333BE /* lcode.c in Sources */,
+				7378267412960DDF007333BE /* ldblib.c in Sources */,
+				7378267512960DDF007333BE /* ldebug.c in Sources */,
+				7378267612960DDF007333BE /* ldo.c in Sources */,
+				7378267712960DDF007333BE /* ldump.c in Sources */,
+				7378267812960DDF007333BE /* lfunc.c in Sources */,
+				7378267912960DDF007333BE /* lgc.c in Sources */,
+				7378267A12960DDF007333BE /* lgcveclib.c in Sources */,
+				7378267B12960DDF007333BE /* linit.c in Sources */,
+				7378267C12960DDF007333BE /* liolib.c in Sources */,
+				7378267D12960DDF007333BE /* llex.c in Sources */,
+				7378267E12960DDF007333BE /* lmathlib.c in Sources */,
+				7378267F12960DDF007333BE /* lmem.c in Sources */,
+				7378268012960DDF007333BE /* loadlib.c in Sources */,
+				7378268112960DDF007333BE /* lobject.c in Sources */,
+				7378268212960DDF007333BE /* lopcodes.c in Sources */,
+				7378268312960DDF007333BE /* loslib.c in Sources */,
+				7378268412960DDF007333BE /* lparser.c in Sources */,
+				7378268512960DDF007333BE /* lstate.c in Sources */,
+				7378268612960DDF007333BE /* lstring.c in Sources */,
+				7378268712960DDF007333BE /* lstrlib.c in Sources */,
+				7378268812960DDF007333BE /* ltable.c in Sources */,
+				7378268912960DDF007333BE /* ltablib.c in Sources */,
+				7378268A12960DDF007333BE /* ltm.c in Sources */,
+				7378268B12960DDF007333BE /* lundump.c in Sources */,
+				7378268C12960DDF007333BE /* lveclib.c in Sources */,
+				7378268D12960DDF007333BE /* lvm.c in Sources */,
+				7378268E12960DDF007333BE /* lzio.c in Sources */,
+				7378268F12960DDF007333BE /* print.c in Sources */,
+				7378269012960DDF007333BE /* gsm_decode.c in Sources */,
+				7378269112960DDF007333BE /* gsm_encode.c in Sources */,
+				7378269212960DDF007333BE /* gsm_state.c in Sources */,
+				7378269312960DDF007333BE /* lpc10dec.c in Sources */,
+				7378269412960DDF007333BE /* lpc10enc.c in Sources */,
+				7378269512960DDF007333BE /* masterInterface.cpp in Sources */,
+				7378269612960DDF007333BE /* textItem.cpp in Sources */,
+				7378269712960DDF007333BE /* statistics.cpp in Sources */,
+				7378269912960DDF007333BE /* UIMenuItems.cpp in Sources */,
+				7378269A12960DDF007333BE /* stringUtils.cpp in Sources */,
+				7378269B12960DDF007333BE /* Makefile in Sources */,
+				7378269C12960DDF007333BE /* UIAbstractInstructions.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		737CE46912904E9E00D732B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1554,6 +1908,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		7378261812960DDF007333BE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 737CE61C1290553D00D732B7 /* tnl */;
+			targetProxy = 7378261912960DDF007333BE /* PBXContainerItemProxy */;
+		};
+		7378261A12960DDF007333BE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
+			targetProxy = 7378261B12960DDF007333BE /* PBXContainerItemProxy */;
+		};
 		737CE6231290557900D732B7 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
@@ -1572,6 +1936,49 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		737826AF12960DDF007333BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					../openal,
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				HEADER_SEARCH_PATHS = ../tnl;
+				INFOPLIST_FILE = "Bitfighter-Info copy.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = "-DZAP_DEDICATED";
+				PRODUCT_NAME = Bitfighter;
+			};
+			name = Debug;
+		};
+		737826B012960DDF007333BE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					../openal,
+				);
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
+				HEADER_SEARCH_PATHS = ../glut;
+				INFOPLIST_FILE = "Bitfighter-Info copy.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = "-DZAP_DEDICATED";
+				PRODUCT_NAME = Bitfighter;
+			};
+			name = Release;
+		};
 		737CE46D12904E9E00D732B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1776,6 +2183,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighter dedicated" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				737826AF12960DDF007333BE /* Debug */,
+				737826B012960DDF007333BE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		737CE47312904ED100D732B7 /* Build configuration list for PBXNativeTarget "libtomcrypt" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
