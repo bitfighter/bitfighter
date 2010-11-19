@@ -539,8 +539,8 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          glColor3f(1,1,1);
          if(isTeamGame())     // Render team scores
          {
-            renderFlag(Point(xl + 20, yt + 18), c);
-            renderFlag(Point(xr - 20, yt + 18), c);
+            renderFlag(xl + 20, yt + 18, c);
+            renderFlag(xr - 20, yt + 18, c);
 
             glColor3f(1,1,1);
             glBegin(GL_LINES);
@@ -605,14 +605,26 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       teams.sort(teamScoreSort);
 
+      S32 maxScore = getLeadingScore();
+      S32 digits;
+         
+      if(maxScore == 0)
+         digits = 1;
+      else if(maxScore > 0)
+         digits = log10((F32)maxScore) + 1;
+      else
+         digits = log10((F32)maxScore) + 2;
+
+      const S32 textsize = 32;
+      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - digits * UserInterface::getStringWidth(textsize, "0");
+
       for(S32 i = 0; i < teams.size(); i++)
       {
-         Point pos(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 35, 
-                   gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 38);
+         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 38;
 
-         renderFlag(pos + Point(-20, 18), teams[i].color);
+         renderFlag(xpos - 20, ypos + 18, teams[i].color);
          glColor3f(1,1,1);
-         UserInterface::drawStringf(pos.x, pos.y, 32, "%d", teams[i].getScore());
+         UserInterface::drawStringf(xpos, ypos, textsize, "%d", teams[i].getScore());
       }
    }
    renderTimeLeft();
@@ -1671,20 +1683,26 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
       else  // All other scoring events
          s2cSetTeamScore(team, mTeams[team].getScore());    // Broadcast new team score
 
-      mLeadingTeamScore = S32_MIN;
-
-      // Find the leading team...
-      for(S32 i = 0; i < mTeams.size(); i++)
-         if(mTeams[i].getScore() > mLeadingTeamScore)
-         {
-            mLeadingTeamScore = mTeams[i].getScore();
-            mLeadingTeam = i;
-         }  // no break statement in above!
-
+      updateLeadingTeamAndScore();
       newScore = mLeadingTeamScore;
    }
 
    checkForWinningScore(newScore);              // Check if score is high enough to trigger end-of-game
+}
+
+
+// Sets mLeadingTeamScore and mLeadingTeam; runs on client and server
+void GameType::updateLeadingTeamAndScore()
+{
+   mLeadingTeamScore = S32_MIN;
+
+   // Find the leading team...
+   for(S32 i = 0; i < mTeams.size(); i++)
+      if(mTeams[i].getScore() > mLeadingTeamScore)
+      {
+         mLeadingTeamScore = mTeams[i].getScore();
+         mLeadingTeam = i;
+      }  // no break statement in above!
 }
 
 
@@ -2028,6 +2046,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g,
 GAMETYPE_RPC_S2C(GameType, s2cSetTeamScore, (RangedU32<0, GameType::gMaxTeams> teamIndex, U32 score), (teamIndex, score))
 {
    mTeams[teamIndex].setScore(score);
+   updateLeadingTeamAndScore();    
 }
 
 

@@ -2050,7 +2050,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          glPushMatrix();
             glTranslatef(pos.x, pos.y, 0);
             glScalef(0.6, 0.6, 1);
-            renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : 0, alpha);
+            renderFlag(0, 0, c, hideit ? grayedOutColorDim : 0, alpha);
          glPopMatrix();
       }
       else if(item.index == ItemFlagSpawn)    // Draw flag spawn point
@@ -2064,7 +2064,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPushMatrix();
                glTranslatef(pos.x+1, pos.y, 0);
                glScalef(0.4, 0.4, 1);
-               renderFlag(Point(0,0), c, hideit ? grayedOutColorDim : 0, alpha);
+               renderFlag(0, 0, c, hideit ? grayedOutColorDim : 0, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
                drawCircle(Point(-4,0), 26);

@@ -603,22 +603,34 @@ void drawFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
 }
 
 
-void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha)
+void renderFlag(F32 x, F32 y, const Color &flagColor, const Color &mastColor, F32 alpha)
 {
    glPushMatrix();
-   glTranslatef(pos.x, pos.y, 0);
+   glTranslatef(x, y, 0);
 
    drawFlag(flagColor, mastColor, alpha);
 
    glPopMatrix();
 }
 
+
+void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha)
+{
+   renderFlag(pos.x, pos.y, flagColor, mastColor, alpha);
+}
+
 // Could be eliminated with by using an optional param for mastColor, but
 // this seems to cause problems with our extern statements...
 void renderFlag(const Point &pos, const Color &flagColor)
 {
-   renderFlag(pos, flagColor, 0, 1);
+   renderFlag(pos.x, pos.y, flagColor, 0, 1);
 }
+
+void renderFlag(F32 x, F32 y, const Color &flagColor)
+{
+   renderFlag(x, y, flagColor, 0, 1);
+}
+
 
 
 // Not used

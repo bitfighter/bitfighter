@@ -197,7 +197,7 @@ void FlagItem::renderItem(Point pos)
    GameType *gt = getGame()->getGameType();
 
    c = gt->getTeamColor(mTeam);
-
+     
    renderFlag(pos + offset, c);
 }
 

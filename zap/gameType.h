@@ -379,7 +379,8 @@ public:
    void updateScore(ClientRef *client, ScoringEvent event, S32 data = 0);        // used
    void updateScore(S32 team, ScoringEvent event, S32 data = 0);
 
-   void updateRatings();      // Update everyone's game-normalized ratings at the end of the game
+   void updateLeadingTeamAndScore();   // Sets mLeadingTeamScore and mLeadingTeam
+   void updateRatings();               // Update everyone's game-normalized ratings at the end of the game
 
 
    TNL_DECLARE_RPC(s2cSetTeamScore, (RangedU32<0, gMaxTeams> teamIndex, U32 score));

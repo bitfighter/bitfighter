@@ -74,7 +74,10 @@ extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusF
 extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 
 extern void renderFlag(const Point &pos, const Color &flagColor);
+extern void renderFlag(F32 x, F32 y, const Color &flagColor);
 extern void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha);
+extern void renderFlag(F32 x, F32 y, const Color &flagColor, const Color &mastColor, F32 alpha);
+
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
 extern void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha);

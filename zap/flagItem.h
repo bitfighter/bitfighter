@@ -78,10 +78,11 @@ public:
 
    S32 getClassID(lua_State *L) { return returnInt(L, FlagType); }
    
-   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }           // Index of owning team
+   S32 getTeamIndx(lua_State *L) { return returnInt(L, mTeam + 1); }          // Index of owning team
    S32 isInInitLoc(lua_State *L) { return returnBool(L, isAtHome()); }        // Is flag in it's initial location?
    S32 isInCaptureZone(lua_State *L) { return returnBool(L, isInZone()); }    // Is flag in a team's capture zone?
    S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
+
 private:
    void push(lua_State *L) { Lunar<FlagItem>::push(L, this); }
 

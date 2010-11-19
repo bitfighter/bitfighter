@@ -539,7 +539,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
             renderTeleporter(Point(0, 0), 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, Vector<Point>(), false);
             break;
          case 19:
-            renderFlag(Point(0, 0), Color(1, 0, 0));
+            renderFlag(0, 0, Color(1, 0, 0));
             break;
          case 20:    // Loadout zone
             {              // braces needed: see C2360
