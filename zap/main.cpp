@@ -839,8 +839,6 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    else                                                         // Try a direct connection
    {
       GameConnection *theConnection = new GameConnection();
-      gClientGame->setConnectionToServer(theConnection);
-
 
       // Configure our new connection
       theConnection->setClientNameAndId(gPlayerName, gClientId);

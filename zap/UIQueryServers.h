@@ -189,6 +189,9 @@ public:
    };
 
    Vector<ServerRef> servers;
+   ServerRef mLastSelectedServer;
+   string getLastSelectedServerName() { return mLastSelectedServer.serverName; }
+
    Vector<ColumnInfo> columns;
    Vector<HiddenServer> hidden;
    S32 getSelectedIndex();

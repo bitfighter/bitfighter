@@ -29,9 +29,12 @@
 #include "UI.h"
 #include "timer.h"
 #include "config.h"
+#include "md5wrapper.h"    // For hashing
 
 namespace Zap
 {
+
+extern md5wrapper md5;
 
 class TextEntryUserInterface : public UserInterface
 {
@@ -71,6 +74,7 @@ public:
    virtual void onKeyDown(KeyCode keyCode, char ascii);
 
    const char *getText() { return lineEditor.c_str(); }
+   string getSaltedHashText() { return md5.getSaltedHashFromString(lineEditor.getString()); }
    void setString(string str);
 };
 

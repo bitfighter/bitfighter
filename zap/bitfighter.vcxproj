@@ -179,6 +179,7 @@
     <ClCompile Include="..\zap\zoneControlGame.cpp" />
     <ClCompile Include="oglconsole.c" />
     <ClCompile Include="stringUtils.cpp" />
+    <ClCompile Include="UIAbstractInstructions.cpp" />
     <ClCompile Include="UIMenuItems.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -269,6 +270,7 @@
     <ClInclude Include="..\zap\zapjournal.h" />
     <ClInclude Include="oglconsole.h" />
     <ClInclude Include="stringUtils.h" />
+    <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIMenuItems.h" />
   </ItemGroup>
   <ItemGroup>

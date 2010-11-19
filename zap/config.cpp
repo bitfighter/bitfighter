@@ -1082,6 +1082,7 @@ static void writePasswordSection()
 {
    writePasswordSection_helper("SavedLevelChangePasswords");
    writePasswordSection_helper("SavedAdminPasswords");
+   writePasswordSection_helper("SavedServerPasswords");
 }
 
 

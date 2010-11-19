@@ -929,11 +929,21 @@ void GameConnection::writeConnectRequest(BitStream *stream)
 
    bool isLocal = gServerGame;      // Only way to have gServerGame defined is if we're also hosting... ergo, we must be local
 
-   // Server password... local clients can always connect, so we'll just grab the password from the server!
-   stream->writeString(isLocal ? md5.getSaltedHashFromString(gServerPassword).c_str() : 
-                                 md5.getSaltedHashFromString(gServerPasswordEntryUserInterface.getText()).c_str());
+ 
+   string serverPW;
+
+   // If we're local, just use the password we already know because, you know, we're the server
+   if(isLocal)
+      serverPW = md5.getSaltedHashFromString(gServerPassword);
+   // If we have a saved password for this server, use that
+   else if(gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName()) != "")
+      serverPW = gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName());  // Saved pws are already hashed
+   // Otherwise, use whatever's in the interface entry box
+   else 
+      serverPW = gServerPasswordEntryUserInterface.getSaltedHashText();
 
    // Write some info about the client... name, id, and verification status
+   stream->writeString(serverPW.c_str());
    stream->writeString(mClientName.getString());
    mClientId.write(stream);
    stream->writeFlag(mIsVerified);    // Tell server whether we (the client) claim to be authenticated
@@ -996,6 +1006,11 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
    mClientNeedsToBeVerified = mClientClaimsToBeVerified = stream->readFlag();
 
    requestAuthenticationVerificationFromMaster();
+
+   // Not sure, but I think uniquing should happen after verification; if player connects twice, we want
+   // to ensure their name is legit both times, but want to show the altered name so as to distinguish the two.
+   // Probably need to test this scenario to make sure it works as it should.
+   mClientName = makeUnique(mClientName.getString()).c_str();
    return true;
 }
 
@@ -1088,6 +1103,13 @@ void GameConnection::onConnectionEstablished()
       logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
 
       setFixedRateParameters(minPacketSendPeriod, minPacketRecvPeriod, maxSendBandwidth, maxRecvBandwidth);       
+
+      // If we entered a password, and it worked, let's save it for next time.  If we arrive here and the saved password is empty
+      // it means that the user entered a good password.  So we save.
+      bool isLocal = gServerGame;
+      if(!isLocal && gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName()) == "")
+         gINI.SetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName(),      
+                       gServerPasswordEntryUserInterface.getSaltedHashText(), true);
    }
    else                 // Runs on server
    {
@@ -1212,6 +1234,9 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
    {
       if(reason == ReasonNeedServerPassword)
       {
+         // We have the wrong password, let's make sure it's not saved
+         gINI.DeleteValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName());
+
          gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
          gServerPasswordEntryUserInterface.activate();
       }
