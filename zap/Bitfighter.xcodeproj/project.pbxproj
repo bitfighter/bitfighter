@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		6D8E517612111FDC00C6D883 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D8E517412111FDC00C6D883 /* statistics.cpp */; };
+		7364076C1297C36F00F8C095 /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5E11D7CCD600E2DBB2 /* Directory.mm */; };
 		73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73710091129623C6000FE4FE /* ConsoleFont.c */; };
 		73649ABD129761A8004366A3 /* oglconsole.c in Sources */ = {isa = PBXBuildFile; fileRef = 737CE7C212905F6400D732B7 /* oglconsole.c */; };
 		73649BAB12977843004366A3 /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3001290483200D732B7 /* OpenAL-Soft.framework */; };
@@ -31,7 +32,6 @@
 		7378262712960DDF007333BE /* config.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5711D7CCD600E2DBB2 /* config.cpp */; };
 		7378262812960DDF007333BE /* controlObjectConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5911D7CCD600E2DBB2 /* controlObjectConnection.cpp */; };
 		7378262912960DDF007333BE /* CTFGame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5B11D7CCD600E2DBB2 /* CTFGame.cpp */; };
-		7378262A12960DDF007333BE /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5E11D7CCD600E2DBB2 /* Directory.mm */; };
 		7378262B12960DDF007333BE /* engineeredObjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5F11D7CCD600E2DBB2 /* engineeredObjects.cpp */; };
 		7378262C12960DDF007333BE /* flagItem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6111D7CCD600E2DBB2 /* flagItem.cpp */; };
 		7378262D12960DDF007333BE /* game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94010D6511D7CCD600E2DBB2 /* game.cpp */; };
@@ -1579,7 +1579,6 @@
 				7378262712960DDF007333BE /* config.cpp in Sources */,
 				7378262812960DDF007333BE /* controlObjectConnection.cpp in Sources */,
 				7378262912960DDF007333BE /* CTFGame.cpp in Sources */,
-				7378262A12960DDF007333BE /* Directory.mm in Sources */,
 				7378262B12960DDF007333BE /* engineeredObjects.cpp in Sources */,
 				7378262C12960DDF007333BE /* flagItem.cpp in Sources */,
 				7378262D12960DDF007333BE /* game.cpp in Sources */,
@@ -1695,6 +1694,7 @@
 				7378269C12960DDF007333BE /* UIAbstractInstructions.cpp in Sources */,
 				73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */,
 				73649ABD129761A8004366A3 /* oglconsole.c in Sources */,
+				7364076C1297C36F00F8C095 /* Directory.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

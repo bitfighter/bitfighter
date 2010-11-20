@@ -6,6 +6,12 @@ cd "$launch_dir"
 datadir="../Resources"
 userdatadir="$HOME/.bitfighter"
 
+# Am I dedicated?
+dedicated=0
+if [ -f "Bitfighterd" ]; then
+  dedicated=1
+fi
+
 # create settings dir in users home directory
 if [ ! -d "$userdatadir/robots" ]; then
   mkdir "$userdatadir"
@@ -23,19 +29,18 @@ cd -
 sfxdir="$absolute_datadir/sfx"
 scriptsdir="$absolute_datadir/scripts"
 
-# one script to rule them all
-exe="Bitfighter"
-args="-rootDataDir $userdatadir -sfxdir $sfxdir -scriptsdir $scriptsdir $@"
-if [ -f "Bitfighterd" ]; then
+dsdir=""
+if [ $dedicated -eq 1 ]; then
   dsdir="$userdatadir/dedicated_server"
   
   if [ ! -d "$dsdir" ]; then
-    mkdir -p "$userdatadir/dedicated_server"
-  fi
-  
-  exe="Bitfighterd"
-  args="-rootDataDir $userdatadir -sfxdir $sfxdir -scriptsdir $scriptsdir -logdir $dsdir -inidir $dsdir $@"
+    mkdir -p "$dsdir"
+  fi 
 fi
 
 # Run the program
-./"$exe" "$args"
+if [ $dedicated -eq 1 ]; then
+  ./Bitfighterd -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" -logdir "$dsdir" -inidir "$dsdir" "$@"
+else
+  ./Bitfighter -rootDataDir "$userdatadir" -sfxdir "$sfxdir" -scriptsdir "$scriptsdir" "$@"
+fi

@@ -35,38 +35,6 @@ using TNL::Vector;
 using std::string;
 
 
-bool getLevels(string subdir, Vector<string> &files)
-{
-    //subdir = "levels/" + subdir;
-    
-    //Since this isn't an actual Cocoa app, we need an AutoreleasePool for the
-    //durations of these functions.
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSFileManager *fm = [NSFileManager defaultManager];
-    NSArray *filelist = [fm directoryContentsAtPath:[NSString stringWithUTF8String:subdir.c_str()]];
-    
-    if (filelist == nil)
-    {
-        [pool release];
-        
-        return false;
-    } 
-    
-    NSEnumerator *i = [filelist objectEnumerator];
-    
-    while (id object = [i nextObject])
-    {
-        if ([object length] > 6 && [object hasSuffix:@".level"])
-        {
-            files.push_back([object UTF8String]);
-        }
-    }
-    
-    [pool release];
-    
-    return !files.empty();
-}
-
 void moveToAppPath()
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

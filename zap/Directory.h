@@ -37,7 +37,6 @@ namespace TNL
     template <typename> class Vector;
 }
 
-bool getLevels(std::string subdir, TNL::Vector<std::string> &files);
 void moveToAppPath();
 
 #endif

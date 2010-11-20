@@ -37,9 +37,6 @@
 
 #include <stdio.h>
 
-#ifdef __APPLE__
-#include "Directory.h" // For GetLevels
-#endif
 
 using namespace TNL;
 
@@ -246,20 +243,17 @@ bool LevelLoader::initLevelFromFile(const char *file)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifndef TNL_OS_MAC_OSX
-
 #  ifdef TNL_OS_WIN32
 #     include "dirent.h"        // Need local copy for Windows builds
 #  else
-#     include <dirent.h>        // Need standard copy for Linux
+#     include <dirent.h>        // Need standard copy for *NIXes
 #  endif
 
 using namespace std;
 
 // Read files from folder
 // Based on http://www.linuxquestions.org/questions/programming-9/c-list-files-in-directory-379323/
-// Is this platform independent?  Works on Windows and now on Linux, but apparently not on a Mac
-// OSX version in Directory.mm
+// Note: used to include special getLevels() in Directory.mm for Mac only, not needed anymore.
 bool getLevels(string dir, Vector<string> &files)
 {
    DIR *dp;
@@ -278,7 +272,6 @@ bool getLevels(string dir, Vector<string> &files)
    closedir(dp);
    return true;
 }
-#endif      // #ifndef TNL_OS_MAC_OSX
 
 
 // Sorts alphanumerically
