@@ -8,10 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		6D8E517612111FDC00C6D883 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D8E517412111FDC00C6D883 /* statistics.cpp */; };
+		73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73710091129623C6000FE4FE /* ConsoleFont.c */; };
+		73649ABD129761A8004366A3 /* oglconsole.c in Sources */ = {isa = PBXBuildFile; fileRef = 737CE7C212905F6400D732B7 /* oglconsole.c */; };
+		73649BAB12977843004366A3 /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3001290483200D732B7 /* OpenAL-Soft.framework */; };
+		73649BAC12977844004366A3 /* FreeALUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3041290486800D732B7 /* FreeALUT.framework */; };
+		73649BD112977BAA004366A3 /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE3001290483200D732B7 /* OpenAL-Soft.framework */; };
+		73649BD212977BB1004366A3 /* FreeALUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE3041290486800D732B7 /* FreeALUT.framework */; };
 		736DE9751290662300C3CB73 /* UIMenuItems.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736DE9741290662300C3CB73 /* UIMenuItems.cpp */; };
 		736DE980129066D500C3CB73 /* stringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 736DE97F129066D500C3CB73 /* stringUtils.cpp */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		73710092129623C6000FE4FE /* ConsoleFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73710091129623C6000FE4FE /* ConsoleFont.c */; };
 		7378261D12960DDF007333BE /* zap_mac_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */; };
 		7378261E12960DDF007333BE /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		7378261F12960DDF007333BE /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
@@ -141,11 +148,8 @@
 		7378269E12960DDF007333BE /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		7378269F12960DDF007333BE /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737826A012960DDF007333BE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		737826A112960DDF007333BE /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94010E8011D7CF0200E2DBB2 /* GLUT.framework */; };
 		737826A312960DDF007333BE /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C40211D7D82700791A0B /* IOKit.framework */; };
 		737826A412960DDF007333BE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
-		737826A512960DDF007333BE /* OpenAL-Soft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3001290483200D732B7 /* OpenAL-Soft.framework */; };
-		737826A612960DDF007333BE /* FreeALUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE3041290486800D732B7 /* FreeALUT.framework */; };
 		737826A812960DDF007333BE /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		737826A912960DDF007333BE /* libtomcrypt.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737826AD12960DDF007333BE /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
@@ -464,6 +468,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				73649BD212977BB1004366A3 /* FreeALUT.framework in CopyFiles */,
+				73649BD112977BAA004366A3 /* OpenAL-Soft.framework in CopyFiles */,
 				737826A812960DDF007333BE /* tnl.framework in CopyFiles */,
 				737826A912960DDF007333BE /* libtomcrypt.framework in CopyFiles */,
 			);
@@ -501,11 +507,12 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		6D8E517412111FDC00C6D883 /* statistics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = statistics.cpp; sourceTree = "<group>"; };
+		73649AEB12976345004366A3 /* Bitfighterd-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighterd-Info.plist"; sourceTree = "<group>"; };
 		736DE9741290662300C3CB73 /* UIMenuItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UIMenuItems.cpp; sourceTree = "<group>"; };
 		736DE97F129066D500C3CB73 /* stringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringUtils.cpp; sourceTree = "<group>"; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
-		737826B112960DDF007333BE /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		737826B312960DDF007333BE /* Bitfighter-Info copy.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info copy.plist"; sourceTree = "<group>"; };
+		73710091129623C6000FE4FE /* ConsoleFont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConsoleFont.c; sourceTree = "<group>"; };
+		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE3001290483200D732B7 /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../openal/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		737CE3041290486800D732B7 /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../openal/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
@@ -859,11 +866,10 @@
 				7378269E12960DDF007333BE /* tnl.framework in Frameworks */,
 				7378269F12960DDF007333BE /* libtomcrypt.framework in Frameworks */,
 				737826A012960DDF007333BE /* Cocoa.framework in Frameworks */,
-				737826A112960DDF007333BE /* GLUT.framework in Frameworks */,
 				737826A312960DDF007333BE /* IOKit.framework in Frameworks */,
 				737826A412960DDF007333BE /* Carbon.framework in Frameworks */,
-				737826A512960DDF007333BE /* OpenAL-Soft.framework in Frameworks */,
-				737826A612960DDF007333BE /* FreeALUT.framework in Frameworks */,
+				73649BAB12977843004366A3 /* OpenAL-Soft.framework in Frameworks */,
+				73649BAC12977844004366A3 /* FreeALUT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -929,7 +935,7 @@
 				8D1107320486CEB800E47090 /* Bitfighter.app */,
 				737CE46C12904E9E00D732B7 /* libtomcrypt.framework */,
 				737CE61D1290553D00D732B7 /* tnl.framework */,
-				737826B112960DDF007333BE /* Bitfighter.app */,
+				737826B112960DDF007333BE /* Bitfighterd.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -961,6 +967,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				73649AEB12976345004366A3 /* Bitfighterd-Info.plist */,
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
 				737CE61E1290553D00D732B7 /* tnl-Info.plist */,
 				737CE40712904D7D00D732B7 /* levels */,
@@ -970,7 +977,6 @@
 				737CE3FC12904D5300D732B7 /* scripts */,
 				94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */,
 				8D1107310486CEB800E47090 /* Bitfighter-Info.plist */,
-				737826B312960DDF007333BE /* Bitfighter-Info copy.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -997,6 +1003,7 @@
 		737CE2FC1290468300D732B7 /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				73710091129623C6000FE4FE /* ConsoleFont.c */,
 				73FD79A81295E78700143CE9 /* barrier.h */,
 				73FD79A91295E78700143CE9 /* BotNavMeshZone.h */,
 				73FD79AA1295E78700143CE9 /* config.h */,
@@ -1416,9 +1423,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		7378261712960DDF007333BE /* Bitfighter dedicated */ = {
+		7378261712960DDF007333BE /* Bitfighterd */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighter dedicated" */;
+			buildConfigurationList = 737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighterd" */;
 			buildPhases = (
 				7378261C12960DDF007333BE /* Resources */,
 				7378262412960DDF007333BE /* Sources */,
@@ -1432,10 +1439,10 @@
 				7378261812960DDF007333BE /* PBXTargetDependency */,
 				7378261A12960DDF007333BE /* PBXTargetDependency */,
 			);
-			name = "Bitfighter dedicated";
+			name = Bitfighterd;
 			productInstallPath = "$(HOME)/Applications";
 			productName = Bitfighter;
-			productReference = 737826B112960DDF007333BE /* Bitfighter.app */;
+			productReference = 737826B112960DDF007333BE /* Bitfighterd.app */;
 			productType = "com.apple.product-type.application";
 		};
 		737CE46B12904E9E00D732B7 /* libtomcrypt */ = {
@@ -1512,7 +1519,7 @@
 				8D1107260486CEB800E47090 /* Bitfighter */,
 				737CE46B12904E9E00D732B7 /* libtomcrypt */,
 				737CE61C1290553D00D732B7 /* tnl */,
-				7378261712960DDF007333BE /* Bitfighter dedicated */,
+				7378261712960DDF007333BE /* Bitfighterd */,
 			);
 		};
 /* End PBXProject section */
@@ -1686,6 +1693,8 @@
 				7378269A12960DDF007333BE /* stringUtils.cpp in Sources */,
 				7378269B12960DDF007333BE /* Makefile in Sources */,
 				7378269C12960DDF007333BE /* UIAbstractInstructions.cpp in Sources */,
+				73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */,
+				73649ABD129761A8004366A3 /* oglconsole.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1902,6 +1911,7 @@
 				736DE980129066D500C3CB73 /* stringUtils.cpp in Sources */,
 				73FD7A011295E78800143CE9 /* Makefile in Sources */,
 				73FD7A021295E78800143CE9 /* UIAbstractInstructions.cpp in Sources */,
+				73710092129623C6000FE4FE /* ConsoleFont.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1943,7 +1953,7 @@
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					../openal,
+					"\"$(SRCROOT)/../openal\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -1951,11 +1961,18 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
-				HEADER_SEARCH_PATHS = ../tnl;
-				INFOPLIST_FILE = "Bitfighter-Info copy.plist";
+				HEADER_SEARCH_PATHS = (
+					../tnl,
+					../openal,
+					../glut,
+				);
+				INFOPLIST_FILE = "Bitfighterd-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_CFLAGS = "-DZAP_DEDICATED";
-				PRODUCT_NAME = Bitfighter;
+				OTHER_CFLAGS = (
+					"-DTNL_ENABLE_LOGGING",
+					"-DZAP_DEDICATED",
+				);
+				PRODUCT_NAME = Bitfighterd;
 			};
 			name = Debug;
 		};
@@ -1966,16 +1983,23 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					../openal,
+					"\"$(SRCROOT)/../openal\"",
 				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
-				HEADER_SEARCH_PATHS = ../glut;
-				INFOPLIST_FILE = "Bitfighter-Info copy.plist";
+				HEADER_SEARCH_PATHS = (
+					../tnl,
+					../openal,
+					../glut,
+				);
+				INFOPLIST_FILE = "Bitfighterd-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_CFLAGS = "-DZAP_DEDICATED";
-				PRODUCT_NAME = Bitfighter;
+				OTHER_CFLAGS = (
+					"-DTNL_ENABLE_LOGGING",
+					"-DZAP_DEDICATED",
+				);
+				PRODUCT_NAME = Bitfighterd;
 			};
 			name = Release;
 		};
@@ -2120,6 +2144,7 @@
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
 			};
 			name = Debug;
@@ -2138,6 +2163,7 @@
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
 				INFOPLIST_FILE = "Bitfighter-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
 			};
 			name = Release;
@@ -2183,7 +2209,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighter dedicated" */ = {
+		737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighterd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				737826AF12960DDF007333BE /* Debug */,
