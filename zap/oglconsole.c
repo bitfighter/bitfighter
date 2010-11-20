@@ -82,9 +82,18 @@
  * "visible" console visibility modes */
 #define SLIDE_STEPS 25
 
+#ifdef ZAP_DEDICATED
+   typedef int GLuint;
+   typedef double GLDouble;
+   typedef double GLdouble;
+   typedef int GLint;
+#endif
+
 GLuint OGLCONSOLE_glFontHandle = 0;
 int OGLCONSOLE_CreateFont()
 {
+#ifndef ZAP_DEDICATED
+
     {int err=glGetError();if(err)printf("GL ERROR: %i\n",err);}
 #ifdef DEBUG
     puts("Creating OGLCONSOLE font");
@@ -237,6 +246,7 @@ int OGLCONSOLE_CreateFont()
 #ifdef DEBUG
     puts("Created  OGLCONSOLE font");
 #endif
+#endif		// ZAP_DEDICATED
     return 1;
 }
 
@@ -317,6 +327,7 @@ void OGLCONSOLE_DefaultEnterKeyCallback(OGLCONSOLE_Console console, char *cmd)
 
 void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
 {
+#ifndef ZAP_DEDICATED
     GLint viewport[4];
     GLdouble screenWidth, screenHeight;
     int oldTextWidth = console->textWidth;
@@ -392,6 +403,7 @@ void OGLCONSOLE_Resize(_OGLCONSOLE_Console *console)
          free(oldLines);
       }
    }
+#endif
 }
  
 
@@ -406,9 +418,11 @@ OGLCONSOLE_Console OGLCONSOLE_Create()
 {
     _OGLCONSOLE_Console *console;
 
+#ifndef ZAP_DEDICATED
     /* If font hasn't been created, we create it */
     if (!glIsTexture(OGLCONSOLE_glFontHandle))
         OGLCONSOLE_CreateFont();
+#endif
 
     /* Allocate memory for our console */
     console = (void*)malloc(sizeof(_OGLCONSOLE_Console));
@@ -584,6 +598,8 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
  * your program, use Draw() instead */
 void OGLCONSOLE_Render(OGLCONSOLE_Console console)
 {
+#ifndef ZAP_DEDICATED
+
     /* Don't render hidden console */
     if(C->visibility == 0) return;
 
@@ -724,6 +740,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console)
     glPopMatrix();
 
     glPopAttrib();
+#endif
 }
 
 /* Issue rendering commands for a single a string */
@@ -793,11 +810,13 @@ void OGLCONSOLE_DrawCharacter(int c, double x, double y, double w, double h,
         message = c;
     }*/
 
+#ifndef ZAP_DEDICATED
     /* This should occur outside of this function for optimiation TODO: MOVE IT */
     glTexCoord2d(cx, cy); glVertex3d(x,   y,   z);
     glTexCoord2d(cX, cy); glVertex3d(x+w, y,   z);
     glTexCoord2d(cX, cY); glVertex3d(x+w, y+h, z);
     glTexCoord2d(cx, cY); glVertex3d(x,   y+h, z);
+#endif
 }
 
 /* This is the final, internal function for printing text to a console */
