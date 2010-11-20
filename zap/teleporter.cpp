@@ -117,6 +117,7 @@ U32 Teleporter::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       stream->write(mPos.x);
       stream->write(mPos.y);
       stream->write(mDest.size());
+
       for(S32 i = 0; i < mDest.size(); i++)
       {
          stream->write(mDest[i].x);
@@ -197,7 +198,6 @@ void Teleporter::idle(GameObject::IdleCallPath path)
       if((mPos - s->getActualPos()).len() < TeleporterTriggerRadius)
       {
          isTriggered = true;
-         setMaskBits(TeleportMask);
          timeout = TeleporterDelay;    // Temporarily disable teleporter
          // break; <=== maybe, need to test
       }
@@ -205,7 +205,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
 
    if(!isTriggered)
       return;
-
+   
    // We've triggered the teleporter.  Relocate ship.
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
@@ -215,6 +215,7 @@ void Teleporter::idle(GameObject::IdleCallPath path)
          mLastDest = TNL::Random::readI(0, mDest.size() - 1);
          Point newPos = s->getActualPos() - mPos + mDest[mLastDest];    
          s->setActualPos(newPos, true);
+         setMaskBits(TeleportMask);
       }
    }
 }
