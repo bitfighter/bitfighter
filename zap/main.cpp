@@ -1554,13 +1554,21 @@ void setupLogging()
    // Specify which events each logfile will listen for
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
 
-   gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");     
+   if(gDedicatedServer)
+   {
+      gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter_dedicated.log"), "w");
+      gServerLog.init(joindir(gConfigDirs.logDir, "bitfighter_server_dedicated.log"), "a");
+   }
+   else {
+      gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");
+      gServerLog.init(joindir(gConfigDirs.logDir, "bitfighter_server.log"), "a");
+   }
+   
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
    gStdoutLog.setMsgTypes(events);   // writes to stdout
 
-   gServerLog.init(joindir(gConfigDirs.logDir, "bitfighter_server.log"), "a");
    gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter); 
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
@@ -1784,7 +1792,13 @@ int main(int argc, char **argv)
    setupLogging();
 
    // Load the INI file
-   gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));   
+   if(gDedicatedServer)
+   {
+      gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter_dedicated.ini"));
+   }
+   else {
+      gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));
+   }
    gIniSettings.init();                      // Init struct that holds INI settings
 
 
