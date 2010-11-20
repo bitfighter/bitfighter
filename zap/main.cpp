@@ -66,6 +66,17 @@ Soccer revamp -- can pickup, carry, and pass ball
 <ul>User names now verified against forums user list -- if you want to play with a name from the forums, you need to supply the
 forums password for that account</ul>
 
+<h4>Bug fixes<h4>
+<ul>
+<li>Major crashing problem on Intel Macs fixed</li>
+<li>Rare teleporter crash resolved</li>
+</ul>
+
+<h4>Levelgens</h4>
+<ul>
+<li>Added setGameTime(time_in_mins) command<li>
+</ul>
+
 */
 
 //-----------------------------------------------------------------------------------

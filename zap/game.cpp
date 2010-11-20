@@ -774,6 +774,16 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
 }
 
 
+void ServerGame::setGameTime(F32 time)
+{
+   GameType *gt = getGameType();
+   TNLAssert(gt, "Null gametype!");
+
+   if(gt)
+      gt->mGameTimer.reset((U32)time * 1000 * 60);
+}
+
+
 extern bool gDedicatedServer;
 
 void ServerGame::addClient(GameConnection *theConnection)

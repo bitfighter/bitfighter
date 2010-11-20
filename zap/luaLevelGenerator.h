@@ -62,6 +62,7 @@ public:
    virtual S32 addWall(lua_State *L);       // Add a wall
    virtual S32 addItem(lua_State *L);       // Add item using a series of parameters
    virtual S32 addLevelLine(lua_State *L);  // Add raw level line
+   virtual S32 setGameTime(lua_State *L);   // Set the time for this level
 
    S32 logprint(lua_State *L);
    S32 getMachineTime(lua_State *L) { return returnInt(L, Platform::getRealMilliseconds()); }

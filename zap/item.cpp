@@ -309,7 +309,6 @@ PickupItem::PickupItem(Point p, float radius, S32 repopDelay) : Item(p, false, r
    mIsMomentarilyVisible = false;
 
    mNetFlags.set(Ghostable);
-
 }
 
 

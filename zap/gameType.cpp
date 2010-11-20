@@ -1191,6 +1191,7 @@ void GameType::spawnRobot(Robot *robot)
 
 Point GameType::getSpawnPoint(S32 team)
 {
+   // If team has no spawn points, we'll just have them spawn at 0,0
    if(mTeams[team].spawnPoints.size() == 0)
       return Point(0,0);
 

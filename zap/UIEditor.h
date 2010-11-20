@@ -533,6 +533,8 @@ public:
    void specialAttributeKeyHandler(KeyCode keyCode, char ascii);
    void itemPropertiesEnterKeyHandler();
 
+   // This function is only called from the levelgens.  If we're running in the editor, I think we can safely ignore it.
+   void setGameTime(F32 time) { /* Do nothing */ }
 
    void onKeyUp(KeyCode keyCode);
    void onMouseMoved(S32 x, S32 y);

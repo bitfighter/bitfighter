@@ -240,7 +240,7 @@ class ServerGame : public Game, public LevelLoader
 private:
    enum {
       LevelSwitchTime = 5000,
-      UpdateServerStatusTime = 5000,      // Time to update our status on the master server (ms)
+      UpdateServerStatusTime = 5000,      // How often we update our status on the master server (ms)
    };
 
    U32 mMaxPlayers;
@@ -310,6 +310,8 @@ public:
    StringTableEntry getCurrentLevelType();      // Return type of level currently in play
 
    void processLevelLoadLine(U32 argc, U32 id, const char **argv);
+   void setGameTime(F32 time);
+
    bool isServer() { return true; }
    void idle(U32 timeDelta);
    void gameEnded();

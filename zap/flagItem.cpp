@@ -176,8 +176,17 @@ void FlagItem::sendHome()
       }
    }
 
-   S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
-   mInitialPos = spawnPoints[spawnIndex].getPos();
+   if(spawnPoints.size() == 0)      // Protect from crash if this happens, which it shouldn't, but has
+   {
+      logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
+         gServerGame->getCurrentLevelFileName(), mTeam);
+      mInitialPos = Point(0,0);
+   }
+   else
+   {
+      S32 spawnIndex = TNL::Random::readI() % spawnPoints.size();
+      mInitialPos = spawnPoints[spawnIndex].getPos();
+   }
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = mInitialPos;
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);

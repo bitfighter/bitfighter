@@ -218,7 +218,6 @@ stateLineParseDone:
 }  // parseArgs
 
 
-
 bool LevelLoader::initLevelFromFile(const char *file)
 {
    FILE *f = fopen(file, "r");

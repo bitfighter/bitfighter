@@ -81,6 +81,8 @@ LuaLevelGenerator::~LuaLevelGenerator()
    logprintf(LogConsumer::LogLuaObjectLifecycle, "deleted LuaLevelGenerator (%p)\n", this);
 }
 
+// modify basic level parameters like game length and teams.
+
 
 extern OGLCONSOLE_Console gConsole;
 
@@ -111,6 +113,7 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
 
    method(LuaLevelGenerator, getGridSize),
    method(LuaLevelGenerator, getPlayerCount),
+   method(LuaLevelGenerator, setGameTime),
 
    {0,0}    // End method list
 };
@@ -232,6 +235,22 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    const char *line = getString(L, 1, methodName);
 
    mCaller->parseArgs(line);
+
+   //clearStack();
+
+   return 0;
+}
+
+
+// Set the duration of this level
+S32 LuaLevelGenerator::setGameTime(lua_State *L)
+{
+   static const char *methodName = "LevelGenerator:setGameTime()";
+
+   checkArgCount(L, 1, methodName);
+   F32 time = getFloat(L, 1, methodName);
+
+   mCaller->setGameTime(time);
 
    //clearStack();
 
