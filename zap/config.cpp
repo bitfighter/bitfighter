@@ -1245,11 +1245,13 @@ static bool assignifexists(const string &path)
 // levelDir is specified on the command line via the -leveldir parameter
 // iniLevelDir is specified in the INI file
 //
-// Prioritize command line over INI setting
-// 
+// Prioritize command line over INI setting, and -leveldir over -rootdatadir
+//
+// If levelDir exists, just use it (ignoring rootDataDir)
+// ...Otherwise...
+//
 // If rootDataDir is specified then try
 //	    If levelDir is also specified try
-//      		levelDir       ==> will have the effect of ignoring rootDataDir
 //      		rootDataDir/levels/levelDir
 //      		rootDataDir/levelDir
 //	    End
@@ -1268,15 +1270,18 @@ static bool assignifexists(const string &path)
 //
 // If none of the above work, no hosting/editing for you!
 //
+// NOTE: See above for full explanation of what this function is doing
 static void doResolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir)
 {
+   if(levelDir != "")
+      if(assignifexists(levelDir))
+         return;
+
    if(rootDataDir != "")
    {
       if(levelDir != "")
       {
-         if(assignifexists(levelDir))
-            return;
-         else if(assignifexists(strictjoindir(rootDataDir, "levels", levelDir)))
+         if(assignifexists(strictjoindir(rootDataDir, "levels", levelDir)))
             return;
          else if(assignifexists(strictjoindir(rootDataDir, levelDir)))
             return;
