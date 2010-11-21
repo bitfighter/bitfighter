@@ -549,17 +549,18 @@ void ServerGame::cycleLevel(S32 nextLevel)
       bool first = true;
       bool found = false;
 
-      mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();
       S32 currLevel = mCurrentLevelIndex;
 
       // Cycle through the levels looking for one that matches our player counts
       while(first || mCurrentLevelIndex != currLevel)
       {
+         mCurrentLevelIndex = (mCurrentLevelIndex + 1) % mLevelInfos.size();
+
          S32 minPlayers = mLevelInfos[mCurrentLevelIndex].minRecPlayers;
          S32 maxPlayers = mLevelInfos[mCurrentLevelIndex].maxRecPlayers;
 
-         if(maxPlayers == 0)        // i.e. limit doesn't apply (note if limit doesn't apply on the minPlayers, then 
-            maxPlayers = S32_MAX;   // it works out because the smallest number of players is 1).
+         if(maxPlayers <= 0)        // i.e. limit doesn't apply or is invalid (note if limit doesn't apply on the minPlayers, 
+            maxPlayers = S32_MAX;   // then it works out because the smallest number of players is 1).
 
          if(players >= minPlayers && players <= maxPlayers)
          {

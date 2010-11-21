@@ -961,10 +961,6 @@ void GameType::onAddedToGame(Game *theGame)
 
 
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
-//extern S32 gMaxPlayers;
-
-static const S32 MIN_REC_PLAYERS = 1;
-static const S32 MAX_REC_PLAYERS = 255;
 
 // Returns true if we ceated an object here, false otherwise
 bool GameType::processLevelItem(S32 argc, const char **argv)
@@ -1102,16 +1098,11 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       }
       mLevelCredits.set(s.substr(0, MAX_GAME_DESCR_LEN).c_str());
    }
-   else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min players for this map
+   else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min numbrt of players for this map
    {
       if(argc > 1)
 	   {
          minRecPlayers = atoi(argv[1]);
-
-         if(minRecPlayers > MAX_REC_PLAYERS)
-            minRecPlayers = MAX_REC_PLAYERS;
-         else if(minRecPlayers < MIN_REC_PLAYERS)
-            minRecPlayers = MIN_REC_PLAYERS;
 	   }
    }        
    else if(!stricmp(argv[0], "MaxPlayers"))     // Recommend a max players for this map
@@ -1119,11 +1110,6 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       if(argc > 1)
 	   {
          maxRecPlayers = atoi(argv[1]);
-
-         if(maxRecPlayers > MAX_REC_PLAYERS)
-            maxRecPlayers = MAX_REC_PLAYERS;
-         else if(maxRecPlayers < MIN_REC_PLAYERS)
-            maxRecPlayers = MIN_REC_PLAYERS;
 	   }
 
    }
