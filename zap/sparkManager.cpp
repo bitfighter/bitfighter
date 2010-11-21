@@ -46,21 +46,21 @@ struct Spark
 };
 
 
-enum {
-   MaxSparks = 8192,    // Make this an even number
-};
+const U32 MAX_SPARKS = 8192;    // Make this an even number
 
 
-U32 firstFreeIndex[SparkTypeCount];
-U32 grabIndex[SparkTypeCount];
-Spark gSparks[SparkTypeCount][MaxSparks];
+U32 firstFreeIndex[SparkTypeCount];            // Tracks next available slot when we have fewer than MAX_SPARKS 
+U32 lastOverwrittenIndex[SparkTypeCount];      // Keep track of which spark we last overwrote
+
+Spark gSparks[SparkTypeCount][MAX_SPARKS];     // Our sparks themselves... two types, each with room for MAX_SPARKS
+
 
 void init()
 {
-   for(S32 i = 0; i < SparkTypeCount; i++)
+   for(U32 i = 0; i < SparkTypeCount; i++)
    {
       firstFreeIndex[i] = 0;
-      grabIndex[i] = 500;
+      lastOverwrittenIndex[i] = 500;
    }
 }
 
@@ -70,35 +70,39 @@ void emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
    Spark *s;
    Spark *s2;
 
-   if(firstFreeIndex[sparkType] >= MaxSparks - 1)           // Make sure we have room for 2 sparks
-   {
-      s = gSparks[sparkType] + grabIndex[sparkType];
+   U32 sparkIndex;
 
+   U8 slotsNeeded = (sparkType == SparkTypePoint ? 1 : 2);             // We need a U2 data type here!
+
+   // Make sure we have room for an additional spark.  Regular sparks need one slot, line sparks need two.
+   if(firstFreeIndex[sparkType] >= MAX_SPARKS - slotsNeeded)           // Spark list is full... need to overwrite an older spark
+   {
       // Out of room for new sparks.  We'll jump elsewhere in our array and overwrite some older spark.
-      // Bump an arbitrary amount ahead to avoid noticable artifacts by grabbing too many sparks from one place.
+      // Overwrite every nth spark to avoid noticable artifacts by grabbing too many sparks from one place.
       // But make sure we grab a multiple of 2 to avoid wierdness with SparkTypeLine sparks, wich require proper byte alignment.
-      grabIndex[sparkType] = (grabIndex[sparkType] + 100) % (MaxSparks / 2) * 2;
+      // This doesn't matter for point sparks, but neither does it hurt.
+      sparkIndex = (lastOverwrittenIndex[sparkType] + 100) % (MAX_SPARKS / 2 - 1) * 2;
+      lastOverwrittenIndex[sparkType] = sparkIndex;
+      TNLAssert(sparkIndex < MAX_SPARKS - slotsNeeded, "Spark error!");
    }
    else
    {
-      s = gSparks[sparkType] + firstFreeIndex[sparkType];   // Get the next available "empty spark"
-      firstFreeIndex[sparkType]++;
+      sparkIndex = firstFreeIndex[sparkType];
+      firstFreeIndex[sparkType] += slotsNeeded;     // Point sparks take 1 slot, line sparks need 2
    }
+   
+   s = gSparks[sparkType] + sparkIndex;   // Assign our spark to its slot
 
    s->pos = pos;
    s->vel = vel;
    s->color = color;
 
-   if(!ttl)
-      s->ttl = 15 * TNL::Random::readF() * TNL::Random::readF();
-   else
-      s->ttl = ttl;
+   // Use ttl if it was specified, otherwise pick something random
+   s->ttl = ttl ? ttl : 15 * TNL::Random::readF() * TNL::Random::readF();
 
-
-   if(sparkType == SparkTypeLine)
+   if(sparkType == SparkTypeLine)   // Line sparks require two points; add the second here
    {
-      s2 = gSparks[sparkType] + firstFreeIndex[sparkType];   // Since we know we had room for two, this one should be available
-      firstFreeIndex[sparkType]++;
+      s2 = gSparks[sparkType] + sparkIndex + 1;   // Since we know we had room for two, this one should be available
       Point len = vel;
       len.normalize(20);
       s2->pos = (pos - len);
@@ -106,8 +110,6 @@ void emitSpark(Point pos, Point vel, Color color, F32 ttl, SparkType sparkType)
       s2->color = Color(color.r * 1, color.g * 0.25, color.b * 0.25);    // Give the trailing edge of this spark a fade effect
       s2->ttl = s->ttl;
    }
-
-
 }
 
 struct TeleporterEffect
@@ -192,9 +194,10 @@ void render(S32 renderPass)
          renderTeleporter(walk->pos, walk->type, false, Teleporter::TeleportInExpandTime - walk->time, radius, Teleporter::TeleportInRadius, alpha, Vector<Point>(), false);
       }
    }
-   else if(renderPass == 1)
+   else if(renderPass == 1)      // Time for sparks!!
    {
-      for (S32 i = SparkTypeCount-1; i >= 0; i --) {
+      for (S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
+      {
          glPointSize( 2.0f );
          glEnable(GL_BLEND);
 
