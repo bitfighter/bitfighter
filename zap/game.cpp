@@ -1159,10 +1159,18 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    Point upperLeft = cameraPos - visibleExtent * 0.5f;   // UL corner of screen in "world" coords
    Point lowerRight = cameraPos + visibleExtent * 0.5f;  // LR corner of screen in "world" coords
 
-   upperLeft *= 1 / starChunkSize;
+   // When zooming out to commander's view, visibleExtent will grow larger and larger.  At some point, drawing all the stars
+   // needed to fill the zoomed out screen becomes overwhelming, and bogs the computer down.  So we really need to set some
+   // rational limit on where we stop showing stars during the zoom process (recall that stars are hidden when we are done zooming,
+   // so this effect should be transparent to the user expect at the most extreme of scales, and then, the alternative is slowing 
+   // the computer greatly).  Note that 10000 is probably irrationally high.
+   if(visibleExtent.x > 10000 || visibleExtent.y > 10000) 
+      return;
+
+   upperLeft  *= 1 / starChunkSize;
    lowerRight *= 1 / starChunkSize;
 
-   upperLeft.x = floor(upperLeft.x);      // Round to ints, slightly enlarging the corners to ensureloadle
+   upperLeft.x = floor(upperLeft.x);      // Round to ints, slightly enlarging the corners to ensure
    upperLeft.y = floor(upperLeft.y);      // the entire screen is "covered" by the bounding box
 
    lowerRight.x = floor(lowerRight.x) + 0.5;
