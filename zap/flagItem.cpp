@@ -178,9 +178,10 @@ void FlagItem::sendHome()
 
    if(spawnPoints.size() == 0)      // Protect from crash if this happens, which it shouldn't, but has
    {
+      TNLAssert(false, "No flag spawn points!");
       logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
          gServerGame->getCurrentLevelFileName(), mTeam);
-      mInitialPos = Point(0,0);
+      //mInitialPos = Point(0,0);      --> Leave mInitialPos as it was... it will probably be better than (0,0)
    }
    else
    {
