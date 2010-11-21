@@ -23,16 +23,31 @@
 //
 //------------------------------------------------------------------------------------
 
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+
 #include "input.h"
 
 namespace Zap
 {
 
 bool gJoystickInit = false;
+static Display *Xdisplay = XOpenDisplay(NULL);
 
 void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 {
-   shiftDown = controlDown = altDown = false;
+   char key_map_stat[32];
+   XQueryKeymap(Xdisplay, key_map_stat);
+   
+   // This can most definitely be simplified
+   altDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Alt_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Alt_L) & 7)) & 1) ||
+      ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Alt_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Alt_R) & 7)) & 1));
+
+   shiftDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Shift_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Shift_L) & 7)) & 1) ||
+      ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Shift_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Shift_R) & 7)) & 1));
+
+   controlDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Control_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Control_L) & 7)) & 1) ||
+      ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Control_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Control_R) & 7)) & 1));
 }
 
 void InitJoystick()
