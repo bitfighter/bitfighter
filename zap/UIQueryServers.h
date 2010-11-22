@@ -64,6 +64,8 @@ public:
 
 class QueryServersUserInterface : public UserInterface, public AbstractChat
 {
+   typedef AbstractChat ChatParent;
+
 private:
    bool mScrollingUpMode;     // false = scrolling down, true = scrolling up
    bool mMouseAtBottomFixFactor;    // UGLY
@@ -94,6 +96,8 @@ private:
    bool mJustMovedMouse;      // Track whether user is in mouse or keyboard mode
    bool mDraggingDivider;     // Track whether we are dragging the divider between chat and the servers
 
+
+   void issueChat();          // Look for /commands in chat message before handing off to parent
 
    void recalcCurrentIndex();
 

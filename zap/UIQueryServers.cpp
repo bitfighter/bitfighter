@@ -1175,6 +1175,7 @@ S32 QueryServersUserInterface::getDividerPos()
       return gScreenInfo.getGameCanvasHeight();
 }
 
+
 S32 QueryServersUserInterface::getServersPerPage()
 {
    if(mShowChat)
@@ -1237,6 +1238,7 @@ static S32 QSORT_CALLBACK compareFuncAddress(const void *a, const void *b)
    return S32(netNumA - netNumB);
 }
 
+
 void QueryServersUserInterface::sort()
 {
    switch(mSortColumn)
@@ -1269,6 +1271,31 @@ void QueryServersUserInterface::sort()
    }
 }
 
+
+// Look for /commands in chat message before handing off to parent
+void QueryServersUserInterface::issueChat()
+{
+   if(mLineEditor.length() > 10)
+   {
+	   const char * str1 = mLineEditor.c_str();
+	   int a = 0;
+
+	   while(a < 9)      //compare character by character
+	   {       
+		   if(str1[a] != "/connect "[a] ) 
+            a = 99;
+		   a = a + 1;
+	   }
+	   if(a == 9)
+      {
+		   Address addr1( &str1[9] );
+		   joinGame(addr1, false, false);
+		   return;
+	   }
+   }
+
+   ChatParent::issueChat();
+}
 
 ////////////////////////////////////////
 ////////////////////////////////////////

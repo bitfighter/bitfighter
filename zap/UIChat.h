@@ -103,7 +103,7 @@ public:
 
    void addCharToMessage(char ascii);     // Append char to message being composed
    void clearChat();                      // Clear message being composed
-   void issueChat();                      // Send chat message
+   virtual void issueChat();              // Send chat message
 
    void leaveGlobalChat();                // Send msg to master telling them we're leaving chat
 

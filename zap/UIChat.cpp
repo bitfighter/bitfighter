@@ -261,8 +261,6 @@ void AbstractChat::clearChat()
 
 void AbstractChat::renderChatters(S32 xpos, S32 ypos)
 {
-   
-
    if(mPlayersInGlobalChat.size() == 0)
       UserInterface::drawString(xpos, ypos, CHAT_NAMELIST_SIZE, "No other players currently in lobby/chat room");
    else
