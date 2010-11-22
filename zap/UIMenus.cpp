@@ -972,7 +972,7 @@ void NameEntryUserInterface::setReactivationReason(NetConnection::TerminationRea
 void NameEntryUserInterface::onActivate()
 {
    Parent::onActivate();
-   setupMenus();
+   setupMenu();
    gClientGame->setReadyToConnectToMaster(false);
 }
 
@@ -981,8 +981,11 @@ extern string gPlayerName, gPlayerPassword;
 extern void seedRandomNumberGenerator(string name);
 extern Nonce gClientId;
 
+// User is ready to move on... deal with it
 static void nameAndPasswordAcceptCallback(U32 unused)
 {
+   if(gNameEntryUserInterface.prevUIs.size())
+      gNameEntryUserInterface.reactivatePrevUI();
 
    gMainMenuUserInterface.activate();
    gClientGame->resetMasterConnectTimer();
@@ -998,7 +1001,7 @@ static void nameAndPasswordAcceptCallback(U32 unused)
 }
 
 
-void NameEntryUserInterface::setupMenus()
+void NameEntryUserInterface::setupMenu()
 {
    menuItems.deleteAndClear();
 

@@ -218,7 +218,7 @@ public:
    void processSelection(U32 index) { }         // Process selected menu item when right arrow is pressed
    void processShiftSelection(U32 index) { }    // And when the left arrow is pressed
    void onEscape();
-   void setupMenus();
+   void setupMenu();
    void onActivate();
    void setReactivationReason(NetConnection::TerminationReason r);
 };
