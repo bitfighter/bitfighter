@@ -172,6 +172,8 @@ void FlagItem::sendHome()
       if(flag->isAtHome() && (flag->mTeam < 0 || flag->mTeam == mTeam))
       {
          // Need to remove this flag's spawnpoint from the list of potential spawns... it's occupied, after all...
+         // Note that if two spawnpoints are on top of one another, this will remove the first, leaving the other
+         // on the unoccupied list, unless a second flag at this location removes it from the list on a subsequent pass.
          for(S32 j = 0; j < spawnPoints.size(); j++)
             if(spawnPoints[j].getPos() == flag->mInitialPos)
             {
