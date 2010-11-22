@@ -986,8 +986,9 @@ static void nameAndPasswordAcceptCallback(U32 unused)
 {
    if(gNameEntryUserInterface.prevUIs.size())
       gNameEntryUserInterface.reactivatePrevUI();
+   else
+      gMainMenuUserInterface.activate();
 
-   gMainMenuUserInterface.activate();
    gClientGame->resetMasterConnectTimer();
 
    gIniSettings.lastName     = gPlayerName     = gNameEntryUserInterface.menuItems[1]->getValue();
