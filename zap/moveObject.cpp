@@ -395,7 +395,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
    moveObjectHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
 
-   if(!isGhost())    // i.e., we're on the server
+   if(!isGhost())    // Server only
    {
       // Check for asteroids hitting a ship
       Ship *ship = dynamic_cast<Ship *>(moveObjectHit);
@@ -407,7 +407,6 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          ship = dynamic_cast<Ship *>(this);
          asteroid = dynamic_cast<Asteroid *>(moveObjectHit);
       }
-
 
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
       {
@@ -421,10 +420,13 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
          ship->damageObject(&theInfo);
       }
    }
-
-   if(v1i > 0.25)    // Only make sound if the objects are moving fast enough
-      SFXObject::play(SFXBounceObject, moveObjectHit->mMoveState[stateIndex].pos, Point());
+   else     // Client only
+   {
+      if(v1i > 0.25)    // Only make sound if the objects are moving fast enough
+         SFXObject::play(SFXBounceObject, moveObjectHit->mMoveState[stateIndex].pos, Point());
+   }
 }
+
 
 void MoveObject::updateInterpolation()
 {
