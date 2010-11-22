@@ -4,7 +4,7 @@ launch_dir="$( dirname $0 )" # normalize the current directory
 cd "$launch_dir"
 
 datadir="../Resources"
-userdatadir="$HOME/.bitfighter"
+userdatadir="$HOME/Library/Application Support/Bitfighter"
 
 # Am I dedicated?
 dedicated=0
