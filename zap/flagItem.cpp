@@ -51,6 +51,8 @@ void FlagItem::initialize()
 {
    mTeam = -1;
    mFlagCount = 1;
+   mIsAtHome = true;    // All flags start off at home!
+
    mNetFlags.set(Ghostable);
    mObjectTypeMask |= FlagType | CommandMapVisType;
    setZone(NULL);
@@ -138,11 +140,14 @@ void FlagItem::idle(GameObject::IdleCallPath path)
    mDroppedTimer.update(deltaT);
 }
 
-
-bool FlagItem::isAtHome()
+void FlagItem::mountToShip(Ship *theShip)
 {
-   return mMoveState[ActualState].pos == mInitialPos;
+   Parent::mountToShip(theShip);
+
+   if(mIsMounted)    // Will be true unless something went wrong in mountToShip
+      mIsAtHome = false;
 }
+
 
 
 void FlagItem::sendHome()
@@ -170,7 +175,7 @@ void FlagItem::sendHome()
          for(S32 j = 0; j < spawnPoints.size(); j++)
             if(spawnPoints[j].getPos() == flag->mInitialPos)
             {
-               spawnPoints.erase(j);
+               spawnPoints.erase_fast(j);
                break;
             }
       }
@@ -191,6 +196,7 @@ void FlagItem::sendHome()
 
    mMoveState[ActualState].pos = mMoveState[RenderState].pos = mInitialPos;
    mMoveState[ActualState].vel = mMoveState[RenderState].vel = Point(0,0);
+   mIsAtHome = true;
    setMaskBits(PositionMask);
    updateExtent();
 }

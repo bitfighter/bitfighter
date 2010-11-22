@@ -1079,6 +1079,7 @@ F32 getAngleDiff(F32 a, F32 b)
 }
 
 
+// Returns index of first flag mounted on ship, or NO_FLAG if there aren't any
 S32 Ship::carryingFlag()
 {
    for(S32 i = 0; i < mMountedItems.size(); i++)

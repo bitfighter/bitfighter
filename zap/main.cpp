@@ -50,10 +50,6 @@ XXX need to document timers, new luavec stuff XXX
 */
 
 /* Fixes for 013f
-<h4>Enhancements</h4>
-<li>Better user message when server is full</li>
-
-</ul>
 
 
 014
@@ -66,15 +62,40 @@ Soccer revamp -- can pickup, carry, and pass ball
 <ul>User names now verified against forums user list -- if you want to play with a name from the forums, you need to supply the
 forums password for that account</ul>
 
-<h4>Bug fixes<h4>
+<h4>OS X</h4>
 <ul>
-<li>Major crashing problem on Intel Macs fixed</li>
-<li>Rare teleporter crash resolved</li>
+<li>Major crashing issues on Intel Macs now, finally, resolved!!!</li>
+</ul>
+
+<h4>Linux</h4>
+<ul>
+<li>Ctrl keys now work on Linux, making the editor much more accessible.  Yay!</li>
+</ul>
+
+
+<h4>Minor Enhancements</h4>
+<ul>
+<li>Better user message when server is full</li>
+
 </ul>
 
 <h4>Levelgens</h4>
 <ul>
 <li>Added setGameTime(time_in_mins) command<li>
+</ul>
+
+<h4>Bug fixes<h4>
+<ul>
+<li>Rare teleporter crash resolved</li>
+<li>Rare flag crash issue resolved when flags spawn on top of one another</li>
+<li>Min/max player level params properly handled<li>
+<li>Leveldir param now properly handled with specifying an absolute path<li>
+<li>Scores over 99 now visible in team nexus games<li>
+<li>Player names now guaranteed unique on any given server (again)</li>
+<li>Game no longer crashes when too many mines explode at once.</li>
+<li>Ship colliding sound no longer plays on server</li>
+<li>CTF game no longer crashes when two flags are place on top of one another<li>
+<li>Can no longer carry multiple flags in CTF game</li>
 </ul>
 
 */

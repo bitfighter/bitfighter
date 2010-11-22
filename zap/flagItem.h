@@ -36,6 +36,7 @@ class FlagItem : public Item
 private:
    Point mInitialPos;                   // Where flag was "born"
    void flagDropped();
+   bool mIsAtHome;
 
 protected:
    typedef Item Parent;                 // RDW - This need to be protected, or child classes can't access it.
@@ -54,12 +55,17 @@ public:
 
    virtual void onAddedToGame(Game *theGame);
    virtual void renderItem(Point pos);
+
+   void mountToShip(Ship *theShip);
+
    virtual void sendHome();
 
    virtual void onMountDestroyed();
    virtual void onItemDropped();
    virtual bool collide(GameObject *hitObject);
-   virtual bool isAtHome();
+
+   bool isAtHome() { return mIsAtHome; }
+
    Timer mTimer;                       // Used for games like HTF where time a flag is held is important
 
    virtual U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);

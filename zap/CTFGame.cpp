@@ -63,9 +63,11 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
       if(!theFlag->isAtHome())
       {
          static StringTableEntry returnString("%e0 returned the %e1 flag.");
+
          Vector<StringTableEntry> e;
          e.push_back(theShip->getName());
          e.push_back(mTeams[theFlag->getTeam()].getName());
+
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, e);
 
@@ -73,7 +75,7 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
 
          updateScore(theShip, ReturnTeamFlag);
       }
-      else
+      else     // Flag is at home
       {
          // Check if this client has an enemy flag mounted
          for(S32 i = 0; i < theShip->mMountedItems.size(); i++)
@@ -97,15 +99,22 @@ void CTFGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
          }
       }
    }
-   else
+   else     // Touched enemy flag
    {
-      static StringTableEntry takeString("%e0 took the %e1 flag!");
-      Vector<StringTableEntry> e;
-      e.push_back(theShip->getName());
-      e.push_back(mTeams[theFlag->getTeam()].getName());
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
-      theFlag->mountToShip(theShip);
+      // Make sure we don't already have a flag mounted... this will never happen in an ordinary game
+      // But you can only carry one flag in CTF
+      if(theShip->carryingFlag() == NO_FLAG)
+      {
+         // Alert the clients
+         static StringTableEntry takeString("%e0 took the %e1 flag!");
+         Vector<StringTableEntry> e;
+         e.push_back(theShip->getName());
+         e.push_back(mTeams[theFlag->getTeam()].getName());
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+
+         theFlag->mountToShip(theShip);
+      }
    }
 }
 

@@ -75,7 +75,7 @@ public:
    void setActualPos(Point p);
    void setActualVel(Point vel);
 
-   void mountToShip(Ship *theShip);
+   virtual void mountToShip(Ship *theShip);
    void setMountedMask() { setMaskBits(MountMask); }
 
    bool isMounted() { return mIsMounted; }

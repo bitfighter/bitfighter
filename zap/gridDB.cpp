@@ -51,6 +51,11 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
+   if(maxx > minx + 256)
+      maxx = minx + 256;
+   if(maxy > miny + 256)
+      maxy = miny + 256;
+
    for(S32 x = minx; x <= maxx; x++)
       for(S32 y = miny; y <= maxy; y++)
       {
@@ -70,6 +75,12 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    miny = S32(extents.min.y * widthDiv);
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
+
+   if(maxx > minx + 256)
+      maxx = minx + 256;
+   if(maxy > miny + 256)
+      maxy = miny + 256;
+
 
    for(S32 x = minx; x <= maxx; x++)
    {
@@ -99,6 +110,11 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    miny = S32(extents.min.y * widthDiv);
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
+
+   if(maxx > minx + 256)
+      maxx = minx + 256;
+   if(maxy > miny + 256)
+      maxy = miny + 256;
 
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
