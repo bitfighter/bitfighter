@@ -1280,20 +1280,20 @@ void QueryServersUserInterface::issueChat()
 	   const char *str1 = mLineEditor.c_str();
 	   int a = 0;
 
-	   while(a < 9)      // compare character by character
+	   while(a < 9)      // compare character by character, now case insensitive
 	   {       
-		   if(str1[a] != "/connect "[a] ) 
+		   if(str1[a] != "/connect "[a] && str1[a] != "/CONNECT "[a] ) 
             a = S32_MAX;
 		   a++;
 	   }
 	   if(a == 9)
       {
 		   Address addr1(&str1[9]);
+         //endGame(); // avoid error when in game, F5 and type "/Connect"  <== shouldn't be needed when this is in UIQueryServers.cpp
 		   joinGame(addr1, false, false);
 		   return;
 	   }
    }
-
    ChatParent::issueChat();
 }
 
