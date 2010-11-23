@@ -78,7 +78,7 @@ forums password for that account</ul>
 <ul>
 <li>Better user message when server is full</li>
 <li>(1) button on joystick acts like <enter> on menus</li>
-
+<li>Experimental forcefield color enhancement</li>
 </ul>
 
 <h4>Levelgens</h4>

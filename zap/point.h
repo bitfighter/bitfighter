@@ -110,7 +110,8 @@ struct Color
    float r, g, b;
 
    Color(const Color &c) { r = c.r; g = c.g; b = c.b; }
-   Color(float red = 1, float green = 1, float blue = 1) { r = red; g = green; b = blue; }
+   Color(float red, float green, float blue) { r = red; g = green; b = blue; }
+   Color(float grayScale = 1) { r = grayScale; g = grayScale; b = grayScale; }
    void read(const char **argv) { r = (float) atof(argv[0]); g = (float) atof(argv[1]); b = (float) atof(argv[2]); }
 
    void interp(float t, const Color &c1, const Color &c2)
