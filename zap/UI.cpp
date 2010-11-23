@@ -174,8 +174,8 @@ void UserInterface::onActivate()   { /* Do nothing */ }
 void UserInterface::onReactivate() { /* Do nothing */ }
 
 
-// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them below.  This is possibly
-// marginally less efficient, but will reduce maintenance burdens over time.
+// It will be simpler if we translate joystick controls into keyboard actions here rather than check for them elsewhere.  
+// This is possibly marginally less efficient, but will reduce maintenance burdens over time.
 KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
 {
    //if(menuSitck == JOYSTICK_DPAD)
@@ -219,6 +219,8 @@ KeyCode UserInterface::convertJoystickToKeyboard(KeyCode keyCode)
       return KEY_ENTER;
    if(keyCode == BUTTON_BACK) 
       return KEY_ESCAPE;
+   if(keyCode == BUTTON_1)    // Some game pads might not have a START button
+         return KEY_ENTER;
 
    return keyCode;
 }
