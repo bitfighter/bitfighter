@@ -114,6 +114,7 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
    method(LuaLevelGenerator, getGridSize),
    method(LuaLevelGenerator, getPlayerCount),
    method(LuaLevelGenerator, setGameTime),
+   //method(LuaLevelGenerator, pointCanSeePoint),
 
    {0,0}    // End method list
 };
@@ -258,7 +259,21 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
 }
 
 
-
+//S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
+//{
+//   static const char *methodName = "LevelGenerator:pointCanSeePoint()";
+//
+//   checkArgCount(L, 2, methodName);
+//   Point p1 = getPoint(L, 1, methodName);
+//   Point p2 = getPoint(L, 2, methodName);
+//
+//   GridDatabase *db = mCaller->getGridDB();
+//   bool hasLOS = db->pointCanSeePoint(p1, p2);
+//
+//   return returnBool(L, hasLOS);
+//
+//   //clearStack();
+//}
 
 
 // Write a message to the server logfile

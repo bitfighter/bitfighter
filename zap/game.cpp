@@ -1162,7 +1162,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    // When zooming out to commander's view, visibleExtent will grow larger and larger.  At some point, drawing all the stars
    // needed to fill the zoomed out screen becomes overwhelming, and bogs the computer down.  So we really need to set some
    // rational limit on where we stop showing stars during the zoom process (recall that stars are hidden when we are done zooming,
-   // so this effect should be transparent to the user expect at the most extreme of scales, and then, the alternative is slowing 
+   // so this effect should be transparent to the user except at the most extreme of scales, and then, the alternative is slowing 
    // the computer greatly).  Note that 10000 is probably irrationally high.
    if(visibleExtent.x > 10000 || visibleExtent.y > 10000) 
       return;

@@ -1443,13 +1443,23 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 
 void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 {
-   // Make sure colors are bright enough to be visible
-   if((c.r < 0.6) && (c.g < 0.6) && (c.b < 0.6))
-   {
-      c.r += .15;
-      c.g += .15;
-      c.b += .15;
-   }
+   // Make sure colors are dark enough to be visible  but goes to gray 
+   if(c.r < 0.7)   c.r = 0.7;
+   if(c.g < 0.7)   c.g = 0.7;
+   if(c.b < 0.7)   c.b = 0.7;
+
+/*
+K's idea:
+New idea.  Determine the color spectrum that looks good.  Maybe the old default maximum values, and minimum values where we can still distinguish color.  Then calibrate color selection to use our new minimums as "zero" levels.  For example, in the older release, I see the threshold for each value being at about 60.  You can distinguish colors at lower values, but at a glance they just appear gray.  Try loading the level code below in an old version, then adjust the team colors down to 55 to see the difference.  I say we make the new possible color range whatever the old range was from 60-100.
+*/
+
+   // Make sure colors are bright enough to be visible  --> didn't work
+//   if((c.r < 0.6) && (c.g < 0.6) && (c.b < 0.6))
+//   {
+//      c.r += .15;
+//      c.g += .15;
+//      c.b += .15;
+//   }
 
    glColor(enabled ? c : (c * 0.6));
 
@@ -1465,13 +1475,19 @@ void renderForceFieldProjector(Point pos, Point normal, Color c, bool enabled)
 
 void renderForceField(Point start, Point end, Color c, bool fieldUp, F32 scaleFact)
 {
+   // Make sure colors are dark enough to be visible, goes to gray with dark colors
+   if(c.r < 0.5)   c.r = 0.5;
+   if(c.g < 0.5)   c.g = 0.5;
+   if(c.b < 0.5)   c.b = 0.5;
+
+// Tried this, was lame
    // Make sure colors are bright enough to be visible
-   if((c.r < 0.5) && (c.g < 0.5) && (c.b < 0.5))
-   {
-      c.r += .15;
-      c.g += .15;
-      c.b += .15;
-   }
+//   if((c.r < 0.6) && (c.g < 0.6) && (c.b < 0.6))
+//  {
+//      c.r += .15;
+//      c.g += .15;
+//      c.b += .15;
+//   }
 
    Vector<Point> geom;
    ForceField::getGeom(start, end, geom, scaleFact);

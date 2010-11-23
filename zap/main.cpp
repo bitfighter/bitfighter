@@ -57,6 +57,7 @@ Soccer revamp -- can pickup, carry, and pass ball
 
 <h4>User Interface</h4>
 <li>More menuing overhaul -- nicer colors, and much better design internally to support multiple menu item types on a single menu</li>
+<li>Added /connect chat command available in join menu... /connect <address:port> will connect directly, regardess of whether server is shown on list or not.  Bypasses matchmaing with the master server.</li>
 
 <h4>Verified accounts</h4>
 <ul>User names now verified against forums user list -- if you want to play with a name from the forums, you need to supply the

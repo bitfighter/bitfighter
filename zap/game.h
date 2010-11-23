@@ -263,7 +263,7 @@ private:
 
    GameConnection *mSuspendor;            // Player requesting suspension if game suspended by request
 
-   U32 mPlayerCount;             
+   U32 mPlayerCount;    
 
 public:
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor

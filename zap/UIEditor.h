@@ -512,6 +512,7 @@ public:
    Vector<WorldItem> mItems;        // Item list: needs to be public so we can get team info while in UITeamDefMenu
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
+
    void recomputeAllEngineeredItems();
 
    void render();

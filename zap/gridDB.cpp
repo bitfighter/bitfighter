@@ -51,10 +51,10 @@ void GridDatabase::addToDatabase(DatabaseObject *theObject, const Rect &extents)
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   if(maxx > minx + 256)
-      maxx = minx + 256;
-   if(maxy > miny + 256)
-      maxy = miny + 256;
+   if(maxx > minx + BucketRowCount)
+      maxx = minx + BucketRowCount;
+   if(maxy > miny + BucketRowCount)
+      maxy = miny + BucketRowCount;
 
    for(S32 x = minx; x <= maxx; x++)
       for(S32 y = miny; y <= maxy; y++)
@@ -71,15 +71,16 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 {
    S32 minx, miny, maxx, maxy;
    F32 widthDiv = 1 / F32(BucketWidth);
+
    minx = S32(extents.min.x * widthDiv);
    miny = S32(extents.min.y * widthDiv);
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   if(maxx > minx + 256)
-      maxx = minx + 256;
-   if(maxy > miny + 256)
-      maxy = miny + 256;
+   if(maxx > minx + BucketRowCount)
+      maxx = minx + BucketRowCount;
+   if(maxy > miny + BucketRowCount)
+      maxy = miny + BucketRowCount;
 
 
    for(S32 x = minx; x <= maxx; x++)
@@ -111,10 +112,10 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   if(maxx > minx + 256)
-      maxx = minx + 256;
-   if(maxy > miny + 256)
-      maxy = miny + 256;
+   if(maxx > minx + BucketRowCount)
+      maxx = minx + BucketRowCount;
+   if(maxy > miny + BucketRowCount)
+      maxy = miny + BucketRowCount;
 
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
@@ -126,12 +127,12 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
          {
             DatabaseObject *theObject = walk->theObject;
 
-            if(theObject->mLastQueryId != mQueryId &&
-               (theObject->getObjectTypeMask() & typeMask) &&
-               theObject->extent.intersects(extents) )
+            if(theObject->mLastQueryId != mQueryId &&             // Object hasn't been queried; and
+               (theObject->getObjectTypeMask() & typeMask) &&     // is of the right type; and
+               theObject->extent.intersects(extents) )            // overlaps our extents
             {
                walk->theObject->mLastQueryId = mQueryId;    // Flag the object so we know we've already visited it
-               fillVector.push_back(walk->theObject);
+               fillVector.push_back(walk->theObject);       // And save it as a found item
             }
          }
       }
