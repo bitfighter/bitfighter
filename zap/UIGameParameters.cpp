@@ -359,24 +359,25 @@ void GameParamUserInterface::buildGameParamList()
    gEditorUserInterface.mGameTypeArgs.clear();
    gameParams.clear();
 
-   char str[gameTypeLen];
+   std::string gameTypeHeader;
    
    S32 gameTypeIndex = dynamic_cast<ToggleMenuItem *>(menuItems[OPT_GAMETYPE])->getValueIndex();
 
    // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
-   strcpy(str, gGameTypeNames[gameTypeIndex]);      
+   gameTypeHeader += gGameTypeNames[gameTypeIndex];
 
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
    for(S32 i = FIRST_GAME_SPECIFIC_PARAM; i < FIRST_GAME_SPECIFIC_PARAM + mGameSpecificParams; i++)
    {
-      dSprintf(str, sizeof(str), "%s %d", str, menuItems[i]->getIntValue());
+      // Add the game type parameters to the header one by one, separated by a space
+      gameTypeHeader += " " + itos(menuItems[i]->getIntValue());
 
       // Save the already-parsed GameType args in a vector for use if we re-enter this interface
       gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getIntValue());  
    }
 
    // Compose other game description strings
-   gameParams.push_back(str);
+   gameParams.push_back(gameTypeHeader);
    gameParams.push_back("LevelName "        + menuItems[OPT_LEVEL_NAME]->getValue());
    gameParams.push_back("LevelDescription " + menuItems[OPT_LEVEL_DESCR]->getValue());
    gameParams.push_back("LevelCredits "     + menuItems[OPT_CREDITS]->getValue());
