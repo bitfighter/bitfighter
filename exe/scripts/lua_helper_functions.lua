@@ -37,7 +37,7 @@
 -- Load some additional libraries
 require("geometry")   -- Load geometry functions into Geom namespace; call with Geom.function
 require("timer");
-
+require("list");
 	--
 -- Blot out some functions that seem particularly insecure
 --

@@ -789,7 +789,7 @@ void SFXObject::shutdown()
 
 #ifdef TNL_OS_WIN32
 
-#include "../win_include_do_not_distribute/dsound.h"   // See readme in win_include_do_not_distribute folder
+#include "dsound.h"   // See readme in win_include_do_not_distribute folder
 #include <stdio.h>
 
 namespace Zap

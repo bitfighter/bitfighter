@@ -26,7 +26,7 @@
 #define STRICT
 #define DIRECTINPUT_VERSION 0x0800
 #include <windows.h>
-#include "../win_include_do_not_distribute/dinput.h"	 // See readme in win_include_do_not_distribute folder
+#include "dinput.h"	 // See readme in win_include_do_not_distribute folder
 
 #include "gameConnection.h"
 #include "UI.h"
