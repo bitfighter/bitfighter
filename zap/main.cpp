@@ -77,6 +77,7 @@ forums password for that account</ul>
 <h4>Minor Enhancements</h4>
 <ul>
 <li>Better user message when server is full</li>
+<li>(1) button on joystick acts like <enter> on menus</li>
 
 </ul>
 

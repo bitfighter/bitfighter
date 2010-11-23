@@ -187,7 +187,7 @@ void FlagItem::sendHome()
    {
       TNLAssert(false, "No flag spawn points!");
       logprintf(LogConsumer::LogError, "LEVEL ERROR!! Level %s has no flag spawn points for team %d\n**Please submit this level to the devs!**", 
-         gServerGame->getCurrentLevelFileName(), mTeam);
+         gServerGame->getCurrentLevelFileName().getString(), mTeam);
       //mInitialPos = Point(0,0);      --> Leave mInitialPos as it was... it will probably be better than (0,0)
    }
    else
