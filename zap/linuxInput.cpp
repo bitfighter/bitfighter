@@ -23,8 +23,12 @@
 //
 //------------------------------------------------------------------------------------
 
+#ifndef ZAP_DEDICATED
+
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
+
+#endif
 
 #include "input.h"
 
@@ -32,10 +36,14 @@ namespace Zap
 {
 
 bool gJoystickInit = false;
+
+#ifndef ZAP_DEDICATED
 static Display *Xdisplay = XOpenDisplay(NULL);
+#endif
 
 void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 {
+#ifndef ZAP_DEDICATED
    char key_map_stat[32];
    XQueryKeymap(Xdisplay, key_map_stat);
    
@@ -48,6 +56,7 @@ void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 
    controlDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Control_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Control_L) & 7)) & 1) ||
       ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Control_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Control_R) & 7)) & 1));
+#endif
 }
 
 void InitJoystick()

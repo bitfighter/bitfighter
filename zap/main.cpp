@@ -1652,7 +1652,7 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
       // screen width; tall skinny screens will work just fine.
       magFactor = max(magFactor, (F32)gScreenInfo.getGameCanvasHeight() / (F32)gScreenInfo.getPhysicalScreenHeight());
 
-      gScreenInfo.setGameCanvasSize(gScreenInfo.getPhysicalScreenWidth() * magFactor, gScreenInfo.getPhysicalScreenHeight() * magFactor);
+      gScreenInfo.setGameCanvasSize(S32(gScreenInfo.getPhysicalScreenWidth() * magFactor), S32(gScreenInfo.getPhysicalScreenHeight() * magFactor));
 
       displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED; 
    }
