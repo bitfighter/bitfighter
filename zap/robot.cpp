@@ -846,6 +846,14 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    S32 targetZone = findZoneContaining(target);       // Where we're going
 
+   if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
+   {
+      targetZone = findClosestZone(target);
+ 
+      if(targetZone == -1)
+         return returnNil(L);
+   }
+
    // Make sure target is still in the same zone it was in when we created our flightplan.
    // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
    if(thisRobot->flightPlan.size() > 0 && targetZone == thisRobot->flightPlanTo)
@@ -893,16 +901,10 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    S32 currentZone = thisRobot->getCurrentZone();     // Where we are
    if(currentZone == -1)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
-      //return findAndReturnClosestZone(L, thisRobot->getActualPos());
-      return returnNil(L);
 
-   if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
-   {
-      targetZone = findClosestZone(target);
-
-      if(targetZone == -1)
+      currentZone = findClosestZone(thisRobot->getActualPos());
+      if(currentZone == -1)      // That didn't go so well...
          return returnNil(L);
-   }
 
    // We're in, or on the cusp of, the zone containing our target.  We're close!!
    if(currentZone == targetZone)
@@ -992,24 +994,33 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 // Another helper function: finds closest zone to a given point
 S32 LuaRobot::findClosestZone(Point point)
 {
-   F32 distsq = F32_MAX;
-   S32 closest = -1;
-
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+	// Check twice, first with a short distance, then with a longer one
+   F32 distsq = 262144;     // 512^2
+   S32 closest = -2;
+ 
+   while(closest <= -1)
    {
-      Point center = gBotNavMeshZones[i]->getCenter();
-
-      if( gServerGame->getGridDatabase()->pointCanSeePoint(center, point) )
+      for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
       {
-         F32 d = center.distSquared(point);
+         Point center = gBotNavMeshZones[i]->getCenter();
+ 
+         F32 d = center.distSquared(point);     // Use cheaper test first
          if(d < distsq)
          {
-            closest = i;
-            distsq = d;
+            if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))     // This is an expensive test
+            {
+               closest = i;
+               distsq = d;
+            }
          }
       }
+      if(closest < 0) // Didn't find any matches on the first pass, let's expand our radius and try again
+      {
+         closest++;
+         distsq=F32_MAX;
+      }
    }
-
+ 
    return closest;
 }
 
