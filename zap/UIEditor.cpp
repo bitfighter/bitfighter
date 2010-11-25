@@ -699,10 +699,12 @@ void EditorUserInterface::validateLevel()
 
    string teamList, teams;
 
+   // First, catalog items in level
    for(S32 i = 0; i < mTeams.size(); i++)      // Initialize vector
       foundSpawn.push_back(false);
 
    for(S32 i = 0; i < mItems.size(); i++)
+   {
       if(mItems[i].index == ItemSpawn && mItems[i].team >= 0)
          foundSpawn[mItems[i].team] = true;
       else if(mItems[i].index == ItemSoccerBall)
@@ -720,29 +722,10 @@ void EditorUserInterface::validateLevel()
          if(mItems[i].team >= 0)
             foundTeamFlagSpawns = true;
       }
+   }
 
-   // Make sure each team has a spawn point
-   for(S32 i = 0; i < foundSpawn.size(); i++)
-      if(!foundSpawn[i])
-      {
-         dSprintf(buf, sizeof(buf), "%d", i+1);
 
-         if(!hasError)     // This is our first error
-         {
-            teams = "team ";
-            teamList = buf;
-         }
-         else
-         {
-            teams = "teams ";
-            teamList += ", ";
-            teamList += buf;
-         }
-         hasError = true;
-      }
-
-   if(hasError)     // Compose error message
-      mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teams + teamList);
+   // "Unversal errors" -- levelgens can't (yet) change gametype
 
    // The other thing that can cause a crash is a soccer ball in a a game other than SoccerGameType
    if(foundSoccerBall && strcmp(mGameType, "SoccerGameType"))
@@ -764,6 +747,35 @@ void EditorUserInterface::validateLevel()
    // Check for team flag spawns on games with no team flags
    if(foundTeamFlagSpawns && !foundTeamFlags)
       mLevelErrorMsgs.push_back("WARNING: Found team flag spawns but no team flags.");
+
+
+   // Errors that may be corrected by levelgen -- script could add spawns
+
+   if(mScriptLine == "")
+   {
+      // Make sure each team has a spawn point
+      for(S32 i = 0; i < foundSpawn.size(); i++)
+         if(!foundSpawn[i])
+         {
+            dSprintf(buf, sizeof(buf), "%d", i+1);
+
+            if(!hasError)     // This is our first error
+            {
+               teams = "team ";
+               teamList = buf;
+            }
+            else
+            {
+               teams = "teams ";
+               teamList += ", ";
+               teamList += buf;
+            }
+            hasError = true;
+         }
+   }
+
+   if(hasError)     // Compose error message
+      mLevelErrorMsgs.push_back("ERROR: Need spawn point for " + teams + teamList);
 }
 
 

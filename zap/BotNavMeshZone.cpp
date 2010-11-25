@@ -296,7 +296,7 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
 }
 
 
-static const S32 MAX_ZONES = 2000;     // Don't make this go above S16 max - 1 (32,766)
+static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766)
 
 // Returns a path, including the startZone and targetZone 
 Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
@@ -423,7 +423,8 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
                continue;
 
             //	Add zone to the open list if it's not already on it
-            if(whichList[zoneID] != onOpenList) 
+            TNLAssert(newOpenListItemID < MAX_ZONES, "Too many nav zones... try increasing MAX_ZONES!");
+            if(whichList[zoneID] != onOpenList && newOpenListItemID < MAX_ZONES) 
             {	
                // Create a new open list item in the binary heap
                newOpenListItemID = newOpenListItemID + 1;   // Give each new item a unique id
