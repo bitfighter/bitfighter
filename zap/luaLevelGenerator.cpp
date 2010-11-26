@@ -29,7 +29,8 @@
 namespace Zap
 {
 
-static F32 mGridSize;
+static F32 sGridSize;
+static GridDatabase *sGridDatabase;
 static LevelLoader *mCaller;
 
 #ifdef TNL_OS_LINUX
@@ -39,11 +40,12 @@ static LevelLoader *mCaller;
 const char *levelGenFile;     // Exists here so exception handler will know what file we were running
 
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, LevelLoader *caller, OGLCONSOLE_Console console)
+LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, GridDatabase *gridDatabase, LevelLoader *caller, OGLCONSOLE_Console console)
 {
    mFilename = path + scriptArgs[0];
    levelGenFile = mFilename.c_str();
    mConsole = console;
+   sGridDatabase = gridDatabase;
 
    lua_State *L = lua_open();    // Create a new Lua interpreter
 
@@ -52,7 +54,7 @@ LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32
       logError("Could not create Lua interpreter to run %s.  Skipping...", mFilename.c_str());
       return;
    }
-   mGridSize = gridSize;
+   sGridSize = gridSize;
    mCaller = caller;
    runScript(L, scriptArgs, gridSize);
    cleanupAndTerminate(L);
@@ -114,7 +116,7 @@ Lunar<LuaLevelGenerator>::RegType LuaLevelGenerator::methods[] =
    method(LuaLevelGenerator, getGridSize),
    method(LuaLevelGenerator, getPlayerCount),
    method(LuaLevelGenerator, setGameTime),
-   //method(LuaLevelGenerator, pointCanSeePoint),
+   method(LuaLevelGenerator, pointCanSeePoint),
 
    {0,0}    // End method list
 };
@@ -259,21 +261,20 @@ S32 LuaLevelGenerator::setGameTime(lua_State *L)
 }
 
 
-//S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
-//{
-//   static const char *methodName = "LevelGenerator:pointCanSeePoint()";
-//
-//   checkArgCount(L, 2, methodName);
-//   Point p1 = getPoint(L, 1, methodName);
-//   Point p2 = getPoint(L, 2, methodName);
-//
-//   GridDatabase *db = mCaller->getGridDB();
-//   bool hasLOS = db->pointCanSeePoint(p1, p2);
-//
-//   return returnBool(L, hasLOS);
-//
-//   //clearStack();
-//}
+S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
+{
+   static const char *methodName = "LevelGenerator:pointCanSeePoint()";
+
+   checkArgCount(L, 2, methodName);
+   Point p1 = getPoint(L, 1, methodName);
+   Point p2 = getPoint(L, 2, methodName);
+
+   bool hasLOS = sGridDatabase->pointCanSeePoint(p1, p2);
+
+   return returnBool(L, hasLOS);
+
+   //clearStack();
+}
 
 
 // Write a message to the server logfile
@@ -289,7 +290,7 @@ S32 LuaLevelGenerator::logprint(lua_State *L)
 
 S32 LuaLevelGenerator::getGridSize(lua_State *L)
 {
-   return returnFloat(L, mGridSize);
+   return returnFloat(L, sGridSize);
 }
 
 

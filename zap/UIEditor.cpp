@@ -633,6 +633,24 @@ void EditorUserInterface::clearLevelGenItems()
 }
 
 
+void EditorUserInterface::copyScriptItemsToEditor()
+{
+   if(mLevelGenItems.size() == 0)
+      return;     // Print error message?
+
+   for(S32 i = 0; i < mLevelGenItems.size(); i++)
+      mItems.push_back(mLevelGenItems[i]);
+
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index == ItemNavMeshZone)
+          mItems[i].initializeGeom();
+
+   gEditorUserInterface.rebuildAllBorderSegs();
+
+   mLevelGenItems.clear();
+}
+
+
 void EditorUserInterface::runScript()
 {
    // Parse mScriptLine
@@ -661,7 +679,7 @@ void EditorUserInterface::runScript()
    mLoadTarget = &mLevelGenItems;
 
    // Load the items
-   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.levelDir + "/", scriptArgs, mGridSize, this, gConsole);
+   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.levelDir + "/", scriptArgs, mGridSize, getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -3732,6 +3750,10 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else
          rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
+   else if((keyCode == KEY_I) && getKeyState(KEY_CTRL))  // Insert items generated with script into editor
+   {
+      copyScriptItemsToEditor();
+   }
 
    else if((keyCode == KEY_UP) && !getKeyState(KEY_CTRL) || keyCode == KEY_W)  // W or Up - Pan up
       mUp = true;

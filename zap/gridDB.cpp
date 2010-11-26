@@ -106,6 +106,7 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
 void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
    S32 minx, miny, maxx, maxy;
+
    F32 widthDiv = 1 / F32(BucketWidth);
    minx = S32(extents.min.x * widthDiv);
    miny = S32(extents.min.y * widthDiv);

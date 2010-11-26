@@ -994,7 +994,8 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 // Another helper function: finds closest zone to a given point
 S32 LuaRobot::findClosestZone(Point point)
 {
-	// Check twice, first with a short distance, then with a longer one
+	// Make two passes, first with a short distance, second with a longer one.  Hope we find it in the first pass because
+   // the second pass checks all zones, and that could take a while.
    F32 distsq = 262144;     // 512^2
    S32 closest = -3;
  

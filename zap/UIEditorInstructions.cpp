@@ -175,7 +175,8 @@ static ControlStringsEditor gControls1[] = {
          { "Zoom In", "E or Ctrl-Up" },
          { "Zoom Out", "C or Ctrl-Dwn" },
          { "Center Display", "Z" },
-         { "Toggle script results", "Ctrl-R" },
+         { "Toggle Script Results", "Ctrl-R" },
+         { "Insert Results Into Editor", "Ctrl-I" },
       { "-", NULL },       // Horiz. line
    { "Editing", "HEADER" },
          { "Cut/Copy/Paste", "Ctrl-X/C/V"},
