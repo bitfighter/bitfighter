@@ -996,9 +996,9 @@ S32 LuaRobot::findClosestZone(Point point)
 {
 	// Check twice, first with a short distance, then with a longer one
    F32 distsq = 262144;     // 512^2
-   S32 closest = -2;
+   S32 closest = -3;
  
-   while(closest <= -1)
+   while(closest < -1)
    {
       for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
       {
