@@ -166,7 +166,6 @@ void EditorInstructionsUserInterface::render()
 }
 
 
-
 // For page 1 of general instructions
 static ControlStringsEditor gControls1[] = {
    { "Navigation", "HEADER" },

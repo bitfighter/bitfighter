@@ -73,7 +73,7 @@ extern ScreenInfo gScreenInfo;
 //-----------------------------------------------------------------------------------
 
 // Constructor
-Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(256))
+Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(true))
 {
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;

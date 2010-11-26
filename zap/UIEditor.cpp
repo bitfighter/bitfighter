@@ -126,7 +126,7 @@ void backToMainMenuCallback()
 const S32 NONE = -1;
 
 // Constructor
-EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(1))
+EditorUserInterface::EditorUserInterface() : mGridDatabase(GridDatabase(false))
 {
    setMenuID(EditorUI);
 

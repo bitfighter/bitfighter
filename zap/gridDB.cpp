@@ -30,10 +30,13 @@
 namespace Zap
 {
 
-GridDatabase::GridDatabase(S32 bucketWidth)
+// Constructor
+GridDatabase::GridDatabase(bool usingGameCoords)
 {
+   mUsingGameCoords = usingGameCoords;
+
    mQueryId = 0;
-   BucketWidth = bucketWidth;
+   BucketWidth = usingGameCoords ? 255 : 1;
 
    for(U32 i = 0; i < BucketRowCount; i++)
       for(U32 j = 0; j < BucketRowCount; j++)

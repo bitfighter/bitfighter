@@ -51,9 +51,11 @@ XXX need to document timers, new luavec stuff XXX
 
 /* Fixes for 013f
 
-
-014
-Soccer revamp -- can pickup, carry, and pass ball
+<h4>New since beta 2<h4>
+<ul>
+<li>Added pointCanSeePoint(point1, point2) function to levelgens, to provide line-of-sight information for a pair of points.</li>
+<li>Added Ctrl-I key to editor that copies results of levelgen script into editor (must run levelgen first with ctrl-R).  Entities can then be edited and saved like entities created by other means.</li>
+</ul>
 
 <h4>User Interface</h4>
 <li>More menuing overhaul -- nicer colors, and much better design internally to support multiple menu item types on a single menu</li>

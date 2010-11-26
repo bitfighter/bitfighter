@@ -269,9 +269,15 @@ S32 LuaLevelGenerator::pointCanSeePoint(lua_State *L)
    Point p1 = getPoint(L, 1, methodName);
    Point p2 = getPoint(L, 2, methodName);
 
-   bool hasLOS = sGridDatabase->pointCanSeePoint(p1, p2);
+   // There's editor coordinates, and game coordinates.  Game coordinates are just editor coordinates * gridSize.  Scripts run
+   // in editor coordinates, so if the database is storing objects in game coords, we need to adjust our points.
+   if(sGridDatabase->isUsingGameCoords())
+   {
+      p1 *= sGridSize; 
+      p2 *= sGridSize;
+   }
 
-   return returnBool(L, hasLOS);
+   return returnBool(L, sGridDatabase->pointCanSeePoint(p1, p2));
 
    //clearStack();
 }

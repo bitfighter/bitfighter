@@ -44,6 +44,8 @@ BotNavMeshZone::BotNavMeshZone()
    mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging
    mZoneID = gBotNavMeshZones.size();
+
+   //if(gBotNavMeshZones.size() < 900) mNetFlags.set(Ghostable);       //<<< TODO: Get rid of this line!!!!  only 900 zones will load
    gBotNavMeshZones.push_back(this);
 }
 
@@ -117,6 +119,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
    if(!isGhost())     // For now, so we can see them on the client to help with debugging
+      if(gBotNavMeshZones.size() < 50) // avoid start-up very long black screen.    // Causes items to stream in 
       setScopeAlways();
 
    // Don't need to increment our objectloaded counter, as this object resides only on the server

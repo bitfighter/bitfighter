@@ -80,6 +80,9 @@ public:
 
 class GridDatabase
 {
+private:
+   bool mUsingGameCoords;
+
 public:
    enum {
       BucketRowCount = 16,    // Number of buckets per grid row, and number of rows; should be power of 2
@@ -91,11 +94,12 @@ public:
       DatabaseObject *theObject;
       BucketEntry *nextInBucket;
    };
+
    U32 mQueryId;
    BucketEntry *mBuckets[BucketRowCount][BucketRowCount];
    ClassChunker<BucketEntry> mChunker;
 
-   GridDatabase(S32 bucketWidth = 256);      // Constructor
+   GridDatabase(bool usingGameCoords = true);      // Constructor
 
    S32 BucketWidth;     // Width/height of each bucket in pixels
 
@@ -110,6 +114,8 @@ public:
 
    void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);
+
+   bool isUsingGameCoords() { return mUsingGameCoords; }
 };
 
 };
