@@ -638,16 +638,116 @@ void EditorUserInterface::copyScriptItemsToEditor()
    if(mLevelGenItems.size() == 0)
       return;     // Print error message?
 
-   for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      mItems.push_back(mLevelGenItems[i]);
+   Vector<WorldItem> zones;
 
-   for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemNavMeshZone)
-          mItems[i].initializeGeom();
+   for(S32 i = 0; i < mLevelGenItems.size(); i++)
+      if(mLevelGenItems[i].index != ItemNavMeshZone)
+         mItems.push_back(mLevelGenItems[i]);
+      else
+         zones.push_back(mLevelGenItems[i]);
+
+
+   for(S32 i = 0; i < zones.size(); i++)
+      zones[i].initializeGeom();
+
+   removeUnusedNavMeshZones(zones);
+
+   for(S32 i = 0; i < zones.size(); i++)
+      mItems.push_back(zones[i]);
 
    gEditorUserInterface.rebuildAllBorderSegs();
 
    mLevelGenItems.clear();
+}
+
+
+
+static S32 findZoneContaining( Vector<WorldItem> &zones, const Point &p)
+{
+   for(S32 i = 0; i < zones.size(); i++)
+   {
+      // First a quick, crude elimination check then more comprehensive one
+      // Since our zones are convex, we can use the faster method!  Yay!
+      // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
+      if( zones[i].getExtent().contains(p) 
+         && PolygonContains2(zones[i].getVerts().address(), zones[i].getVerts().size(), p) )
+         return i;
+   }
+   return -1;
+}
+
+
+void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
+{
+   Vector<S16> inProcessList; 
+
+   for(S32 i = 0; i < zones.size(); i++)
+      zones[i].flag = false;
+
+   // Start with list of all spawns and teleport outtakes 
+   for(S32 i = 0; i < mItems.size(); i++)
+   {
+      if(mItems[i].index == ItemSpawn)
+      {
+         S32 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[0]);
+         if(zoneIndex >= 0)
+         {
+            zones[zoneIndex].flag = true;        // Mark zone as processed
+            inProcessList.push_back(zoneIndex);
+         }
+      }
+      else if(mItems[i].index == ItemTeleporter)
+      {
+         S32 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[1]);    // Intake = vert0, outtake = vert1
+         if(zoneIndex >= 0)
+         {
+            zones[zoneIndex].flag = true;        // Mark zone as processed
+            inProcessList.push_back(zoneIndex);
+         }
+      }
+   }
+
+   // From here on down, very inefficient, but ok for testing the idea.  Need to precompute some of these things!
+   // Since the order in which we process the zones doesn't matter, work from the end of the last towards the front; it's more efficient 
+   // that way...
+   while(inProcessList.size() > 0)
+   {
+      S32 zoneIndex = inProcessList.last();
+      inProcessList.erase(inProcessList.size() - 1);     // Remove last element      
+
+      // Visit all neighboring zones
+      for(S32 i = 0; i < zones.size(); i++)
+      {
+         if(i == zoneIndex)
+            continue;      // Don't check self...
+
+         // Do zones i and j touch?  First a quick and dirty bounds check:
+         if(!zones[zoneIndex].getExtent().intersectsOrBorders(zones[i].getExtent()))
+            continue;
+
+         static Point start, end;
+         if(zonesTouch(zones[zoneIndex].getVerts(), zones[i].getVerts(), 1 / mGridSize, start, end))
+         {
+            if(!zones[i].flag)           // If zone hasn't been processed...
+            {
+               inProcessList.push_back(i);
+               zones[i].flag = true;     // Mark zone as "in"
+            }
+         }
+      }
+   }
+
+   // Anything not marked as in at this point is out.  Delete it.
+   // TODO: This is TOTALLY INEFFICIENT!!!  Find a better way to delete unmarked zones -- perhaps create a container for zone that
+   // has some pointer back to mItems index.  Could put flag on that container, rather than in BotNavMeshZone as I did to test this idea.
+   for(S32 i = 0; i < zones.size(); i++)
+   {
+      if(!zones[i].flag)
+      {
+         zones.erase_fast(i);
+         i--;
+      }
+   }
 }
 
 
@@ -3729,7 +3829,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          redo();
       else if(getKeyState(KEY_CTRL))    // Ctrl-Z - Undo
          undo(true);
-      else                             // Z - Reset veiw
+      else                              // Z - Reset veiw
         centerView();
    }
    else if(keyCode == KEY_R)
@@ -3750,7 +3850,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else
          rotateSelection(getKeyState(KEY_SHIFT) ? 15 : -15); // Shift-R - Rotate CW, R - Rotate CCW
-   else if((keyCode == KEY_I) && getKeyState(KEY_CTRL))  // Insert items generated with script into editor
+   else if((keyCode == KEY_I) && getKeyState(KEY_CTRL))  // Ctrl-I - Insert items generated with script into editor
    {
       copyScriptItemsToEditor();
    }
@@ -4586,7 +4686,7 @@ void EditorUserInterface::rebuildAllBorderSegs()
       if(mItems[i].index != ItemNavMeshZone)
          continue;
 
-      for(S32 j = i; j < mItems.size(); j++)
+      for(S32 j = i + 1; j < mItems.size(); j++)
          checkZones(i, j);   
    }
 }
@@ -4595,16 +4695,15 @@ void EditorUserInterface::rebuildAllBorderSegs()
 void EditorUserInterface::checkZones(S32 i, S32 j)
 {
    static ZoneBorder zoneBorder;
-   F32 scaleFact = 1 / mGridSize;
 
    if(i == j || mItems[j].index != ItemNavMeshZone)
       return;      // Don't check self...
-         
+
    // Do zones i and j touch?  First a quick and dirty bounds check:
    if(!mItems[i].getExtent().intersectsOrBorders(mItems[j].getExtent()))
       return;
 
-   if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), scaleFact, zoneBorder.borderStart, zoneBorder.borderEnd))
+   if(zonesTouch(mItems[i].getVerts(), mItems[j].getVerts(), 1 / mGridSize, zoneBorder.borderStart, zoneBorder.borderEnd))
    {
       zoneBorder.mOwner1 = mItems[i].mId;
       zoneBorder.mOwner2 = mItems[j].mId;

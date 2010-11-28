@@ -200,15 +200,15 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 
 extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
-S32 findZoneContaining(Point p)
+S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p)
 {
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   for(S32 i = 0; i < zones.size(); i++)
    {
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
       // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
-      if( gBotNavMeshZones[i]->getExtent().contains(p) 
-                        && (PolygonContains2(gBotNavMeshZones[i]->mPolyBounds.address(), gBotNavMeshZones[i]->mPolyBounds.size(), p)) )
+      if( zones[i]->getExtent().contains(p) 
+                        && (PolygonContains2(zones[i]->mPolyBounds.address(), zones[i]->mPolyBounds.size(), p)) )
          return i;
    }
    return -1;
@@ -302,7 +302,7 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
 static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766)
 
 // Returns a path, including the startZone and targetZone 
-Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, Point target)
+Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target)
 {   
    // Because of these variables...
    static U16 onClosedList = 0;

@@ -171,6 +171,8 @@ public:
    void initializeGeom();     // Once we have our points, do some geom preprocessing
 
 
+   bool flag;
+
    bool processArguments(S32 argc, const char **argv);
    S32 getDefaultRepopDelay(GameItems itemType);
    S32 getRadius(F32 scale);
@@ -604,6 +606,8 @@ public:
    void runScript();                      // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items
+
+   void removeUnusedNavMeshZones(Vector<WorldItem> &zones);
 };
 
 

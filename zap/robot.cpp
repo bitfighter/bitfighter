@@ -827,7 +827,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 }
 
 
-extern S32 findZoneContaining(Point p);
+extern S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p);
 
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
@@ -844,7 +844,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   S32 targetZone = findZoneContaining(target);       // Where we're going
+   S32 targetZone = findZoneContaining(gBotNavMeshZones, target);       // Where we're going
 
    if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -1666,7 +1666,7 @@ S32 Robot::getCurrentZone()
    // We're in uncharted territory -- try to get the current zone
    if(mCurrentZone == -1)
    {
-      mCurrentZone = findZoneContaining(getActualPos());
+      mCurrentZone = findZoneContaining(gBotNavMeshZones, getActualPos());
    }
    return mCurrentZone;
 }

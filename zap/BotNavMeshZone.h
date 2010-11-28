@@ -131,7 +131,7 @@ private:
    static Point findGateway(S32 zone1, S32 zone2);
 
 public:
-   static Vector<Point> findPath (S32 startZone, S32 targetZone, Point target);
+   static Vector<Point> findPath (S32 startZone, S32 targetZone, const Point &target);
    
 };
 
