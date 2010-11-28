@@ -628,50 +628,53 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       }
    }
 
-   else if(mTeams.size() > 0 && !isTeamGame())   // Render leaderboard for non-team games
-   {
-      S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
+   //else if(mTeams.size() > 0 && !isTeamGame())   // Render leaderboard for non-team games
+   //{
+   //   S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
 
-      // Build a list of teams, so we can sort by score
-      Vector<RefPtr<ClientRef> > leaderboardList;
+   //   // Build a list of teams, so we can sort by score
+   //   Vector<RefPtr<ClientRef> > leaderboardList;
 
-      // Add you to the leaderboard
-      leaderboardList.push_back(mLocalClient);
-      logprintf("Score = %d", mLocalClient->getScore());
+   //   // Add you to the leaderboard
+   //   if(mLocalClient)
+   //   {
+   //      leaderboardList.push_back(mLocalClient);
+   //      logprintf("Score = %d", mLocalClient->getScore());
+   //   }
 
-      // Get leading player
-      ClientRef *winningClient = mClientList[0];
-      for(S32 i = 1; i < mClientList.size(); i++)
-      {
-         if(mClientList[i]->getScore() > winningClient->getScore())
-         {
-            winningClient = mClientList[i];
-         }
-      }
+   //   // Get leading player
+   //   ClientRef *winningClient = mClientList[0];
+   //   for(S32 i = 1; i < mClientList.size(); i++)
+   //   {
+   //      if(mClientList[i]->getScore() > winningClient->getScore())
+   //      {
+   //         winningClient = mClientList[i];
+   //      }
+   //   }
 
-      // Add leader to the leaderboard
-      leaderboardList.push_back(winningClient);
+   //   // Add leader to the leaderboard
+   //   leaderboardList.push_back(winningClient);
 
-      const S32 textsize = 20;
+   //   const S32 textsize = 20;
 
-      for(S32 i = 0; i < leaderboardList.size(); i++)
-      {
-         const char* prefix = "";
-         if(i == leaderboardList.size() - 1)
-         {
-            prefix = "Leader:";
-         }
-         const char* name = leaderboardList[i]->name.getString();
-         S32 score = leaderboardList[i]->getScore();
+   //   for(S32 i = 0; i < leaderboardList.size(); i++)
+   //   {
+   //      const char* prefix = "";
+   //      if(i == leaderboardList.size() - 1)
+   //      {
+   //         prefix = "Leader:";
+   //      }
+   //      const char* name = leaderboardList[i]->name.getString();
+   //      S32 score = leaderboardList[i]->getScore();
 
-         S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 
-                    UserInterface::getStringWidthf(textsize, "%s %s %d", prefix, name, score);
-         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 24;
+   //      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 
+   //                 UserInterface::getStringWidthf(textsize, "%s %s %d", prefix, name, score);
+   //      S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 24;
 
-         glColor3f(1, 1, 1);
-         UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", prefix, name, score);
-      }
-   }
+   //      glColor3f(1, 1, 1);
+   //      UserInterface::drawStringf(xpos, ypos, textsize, "%s %s %d", prefix, name, score);
+   //   }
+   //}
 
    renderTimeLeft();
    renderTalkingClients();
