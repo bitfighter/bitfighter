@@ -155,7 +155,7 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
    // Find the mount point:
    Point normal, anchor;
 
-   if(!findAnchorPointAndNormal(getGridDatabase(), pos, 1, true, anchor, normal))
+   if(!findAnchorPointAndNormal(getGridDatabase(), pos, MAX_SNAP_DISTANCE, true, anchor, normal))
       return false;      // Found no mount point
 
    mAnchorPoint.set(anchor + normal);
@@ -169,8 +169,8 @@ bool EngineeredObject::processArguments(S32 argc, const char **argv)
 }
 
 
-// This is used for both positioning items in-game and for snapping them to walls in the editor
-DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 scaleFact, 
+// This is used for both positioning items in-game and for snapping them to walls in the editor --> static method
+DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, const Point &pos, F32 snapDist, 
                                                            bool format, Point &anchor, Point &normal)
 {
    F32 minDist = F32_MAX;
@@ -180,7 +180,7 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
    for(F32 theta = 0; theta < Float2Pi; theta += FloatPi * 0.125)    // Reducing to 0.0125 seems to have no effect
    {
       Point dir(cos(theta), sin(theta));
-      dir *= MAX_SNAP_DISTANCE * scaleFact;
+      dir *= snapDist;
 
       F32 t;
       Point n;

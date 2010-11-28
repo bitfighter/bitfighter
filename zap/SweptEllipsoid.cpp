@@ -115,6 +115,15 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
 // Remove collinear points from list.  If this is a polygon, consider removing endpoints as well as midpoints.
 void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
 {
+   // Check for duplicate points
+   for(S32 i = 1; i < points.size() - 1; i++)
+      if(points[i-1] == points[i])
+      {
+         points.erase(i);
+         i--;
+      }
+
+
    for(S32 i = 1; i < points.size() - 1; i++)
    {
       S32 j = i;

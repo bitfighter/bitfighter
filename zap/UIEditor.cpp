@@ -650,13 +650,55 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
 
    for(S32 i = 0; i < zones.size(); i++)
-      zones[i].initializeGeom();
+      zones[i].setExtent(Rect(zones[i].getVerts()));
 
    removeUnusedNavMeshZones(zones);
 
+   Point anchor, nrml;
+
+   // Snap zone boundaries to walls ==> doesn't work well with diagonal lines
+  /* for(S32 i = 0; i < zones.size(); i++)
+   {
+      for(S32 j = 0; j < zones[i].getVerts().size(); j++)
+      {
+         DatabaseObject *mountSeg = EngineeredObject::
+               findAnchorPointAndNormal(getGridDatabase(), zones[i].getVerts()[j], .1, false, anchor, nrml);
+
+         if(mountSeg)
+            zones[i].getVerts()[j].set(anchor);
+      }
+   }
+*/
    // Remove collinear points
    for(S32 i = 0; i < zones.size(); i++)
       removeCollinearPoints(zones[i].getVerts(), true);
+
+
+   // "Squarify" zones (helps clean up some of the junk points in some edge zones)
+   for(S32 i = 0; i < zones.size(); i++)
+   {
+      if(zones[i].getVerts().size() <= 4)      // Square or triangles can't be squarified
+         continue;
+      
+      F32 ulX = zones[i].getExtent().min.x;
+      F32 ulY = zones[i].getExtent().min.y;
+      F32 lrX = zones[i].getExtent().max.x;
+      F32 lrY = zones[i].getExtent().max.y;
+
+      for(S32 j = 0; j < zones[i].getVerts().size(); j++)
+      {
+         if(!(zones[i].getVerts()[j].x == ulX || zones[i].getVerts()[j].x == lrX || 
+              zones[i].getVerts()[j].y == ulY || zones[i].getVerts()[j].y == lrY))
+         {
+            zones[i].getVerts().erase(j);
+            j--;
+         }
+      }
+   }
+
+   for(S32 i = 0; i < zones.size(); i++)
+      zones[i].initializeGeom();
+
 
    // Add zones to editor
    for(S32 i = 0; i < zones.size(); i++)
@@ -5253,7 +5295,7 @@ Point WorldItem::snapEngineeredObject(const Point &pos)
 {  
    Point anchor, nrml;
    DatabaseObject *mountSeg = EngineeredObject::
-               findAnchorPointAndNormal(getGridDatabase(), pos, 1 / getGridSize(), false, anchor, nrml);
+               findAnchorPointAndNormal(getGridDatabase(), pos, EngineeredObject::MAX_SNAP_DISTANCE / getGridSize(), false, anchor, nrml);
 
    if(mountSeg)
    {
@@ -5269,7 +5311,6 @@ Point WorldItem::snapEngineeredObject(const Point &pos)
       snapped = false;
       return pos;
    }
-
 }
 
 
@@ -5470,7 +5511,7 @@ void WorldItem::onGeomChanged()
       processEndPoints();
       getWallSegmentManager()->computeWallSegmentIntersections(this);
 
-      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered line
+      gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
 
       // But if we're doing the above, we don't need to bother with the below... unless we stop being lazy
       //// Find any forcefields that might intersect our new wall segment and recalc them
