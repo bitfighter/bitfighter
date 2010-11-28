@@ -111,6 +111,30 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
       return true;
 }
 
+
+// Remove collinear points from list.  If this is a polygon, consider removing endpoints as well as midpoints.
+void removeCollinearPoints(Vector<Point> &points, bool isPolygon)
+{
+   for(S32 i = 1; i < points.size() - 1; i++)
+   {
+      S32 j = i;
+      while(i < points.size() - 1 && (points[j] - points[j-1]).ATAN2() == (points[i+1] - points[i]).ATAN2())
+         points.erase(i);
+   }
+
+   if(isPolygon)
+   {
+      // Handle wrap-around, where second-to-last, last, and first are collinear
+      while((points[points.size() - 2] - points[points.size() - 1]).ATAN2() == (points[points.size() - 1] - points[0]).ATAN2())
+         points.erase(points.size() - 1);
+
+      // Handle wrap-around, where last, first, and second are collinear
+      while((points[points.size() - 1] - points[0]).ATAN2() == (points[0] - points[1]).ATAN2())
+         points.erase(0);
+   }
+}
+
+
 // From http://www.blackpawn.com/texts/pointinpoly/default.html
 // Messy looking! Quick!
 bool pointInTriangle(Point p, Point a, Point b, Point c)

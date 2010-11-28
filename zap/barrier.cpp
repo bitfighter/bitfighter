@@ -38,24 +38,17 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 
+extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
+
 void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid)
 {
-   Vector<Point> tmp;
    Vector<Point> vec;
 
    // Convert the list of floats into a list of points
    for(S32 i = 1; i < barrier.size(); i += 2)
-      tmp.push_back( Point(barrier[i-1], barrier[i]) );
+      vec.push_back( Point(barrier[i-1], barrier[i]) );
 
-   // Remove collinear points to make rendering nicer and datasets smaller
-   for(S32 i = 0; i < tmp.size(); i++)
-   {
-      S32 j = i;
-      while(i > 0 && i < tmp.size() - 1 && (tmp[j] - tmp[j-1]).ATAN2() == (tmp[i+1] - tmp[i]).ATAN2())
-         i++;
-
-      vec.push_back(tmp[i]);
-   }
+   removeCollinearPoints(vec, false);   // Remove collinear points to make rendering nicer and datasets smaller
 
    if(vec.size() <= 1)
       return;

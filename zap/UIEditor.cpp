@@ -633,6 +633,8 @@ void EditorUserInterface::clearLevelGenItems()
 }
 
 
+extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
+
 void EditorUserInterface::copyScriptItemsToEditor()
 {
    if(mLevelGenItems.size() == 0)
@@ -652,6 +654,11 @@ void EditorUserInterface::copyScriptItemsToEditor()
 
    removeUnusedNavMeshZones(zones);
 
+   // Remove collinear points
+   for(S32 i = 0; i < zones.size(); i++)
+      removeCollinearPoints(zones[i].getVerts(), true);
+
+   // Add zones to editor
    for(S32 i = 0; i < zones.size(); i++)
       mItems.push_back(zones[i]);
 

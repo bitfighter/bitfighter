@@ -252,7 +252,7 @@ public:
 
    virtual bool isConvex() { return Zap::isConvex(mVerts); }      // Only used for navmeshzones
 
-   Vector<Point> getVerts() { return mVerts; }
+   Vector<Point> &getVerts() { return mVerts; }
    Vector<Point> extendedEndPoints;
 
    S32 vertCount() { return mVerts.size(); }
