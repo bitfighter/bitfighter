@@ -341,13 +341,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    mLastUndoIndex--;
    mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
 
-   wallSegmentManager.recomputeAllWallGeometry();
-   recomputeAllEngineeredItems();
-   rebuildAllBorderSegs();
-
-   mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
-   itemToLightUp = NONE;
-   autoSave();
+   rebuildEverything();
 
    mLastUndoStateWasBarrierWidthChange = false;
 }
@@ -360,14 +354,20 @@ void EditorUserInterface::redo()
       mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
    
-      wallSegmentManager.recomputeAllWallGeometry();
-      recomputeAllEngineeredItems();
-      rebuildAllBorderSegs();
-
-      mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
-      itemToLightUp = NONE;
-      autoSave();
+     rebuildEverything();
    }
+}
+
+
+void EditorUserInterface::rebuildEverything()
+{
+   wallSegmentManager.recomputeAllWallGeometry();
+   recomputeAllEngineeredItems();
+   rebuildAllBorderSegs();
+
+   mNeedToSave = (mAllUndoneUndoLevel != mLastUndoIndex);
+   itemToLightUp = NONE;
+   autoSave();
 }
 
 
@@ -640,75 +640,19 @@ void EditorUserInterface::copyScriptItemsToEditor()
    if(mLevelGenItems.size() == 0)
       return;     // Print error message?
 
+   saveUndoState(mItems);
+
    Vector<WorldItem> zones;
 
    for(S32 i = 0; i < mLevelGenItems.size(); i++)
-      if(mLevelGenItems[i].index != ItemNavMeshZone)
-         mItems.push_back(mLevelGenItems[i]);
-      else
-         zones.push_back(mLevelGenItems[i]);
-
-
-   for(S32 i = 0; i < zones.size(); i++)
-      zones[i].setExtent(Rect(zones[i].getVerts()));
-
-   removeUnusedNavMeshZones(zones);
-
-   Point anchor, nrml;
-
-   // Snap zone boundaries to walls ==> doesn't work well with diagonal lines
-  /* for(S32 i = 0; i < zones.size(); i++)
-   {
-      for(S32 j = 0; j < zones[i].getVerts().size(); j++)
-      {
-         DatabaseObject *mountSeg = EngineeredObject::
-               findAnchorPointAndNormal(getGridDatabase(), zones[i].getVerts()[j], .1, false, anchor, nrml);
-
-         if(mountSeg)
-            zones[i].getVerts()[j].set(anchor);
-      }
-   }
-*/
-   // Remove collinear points
-   for(S32 i = 0; i < zones.size(); i++)
-      removeCollinearPoints(zones[i].getVerts(), true);
-
-
-   // "Squarify" zones (helps clean up some of the junk points in some edge zones)
-   for(S32 i = 0; i < zones.size(); i++)
-   {
-      if(zones[i].getVerts().size() <= 4)      // Square or triangles can't be squarified
-         continue;
-      
-      F32 ulX = zones[i].getExtent().min.x;
-      F32 ulY = zones[i].getExtent().min.y;
-      F32 lrX = zones[i].getExtent().max.x;
-      F32 lrY = zones[i].getExtent().max.y;
-
-      for(S32 j = 0; j < zones[i].getVerts().size(); j++)
-      {
-         if(!(zones[i].getVerts()[j].x == ulX || zones[i].getVerts()[j].x == lrX || 
-              zones[i].getVerts()[j].y == ulY || zones[i].getVerts()[j].y == lrY))
-         {
-            zones[i].getVerts().erase(j);
-            j--;
-         }
-      }
-   }
-
-   for(S32 i = 0; i < zones.size(); i++)
-      zones[i].initializeGeom();
-
-
-   // Add zones to editor
-   for(S32 i = 0; i < zones.size(); i++)
-      mItems.push_back(zones[i]);
-
-   gEditorUserInterface.rebuildAllBorderSegs();
+      mItems.push_back(mLevelGenItems[i]);
 
    mLevelGenItems.clear();
-}
 
+   rebuildEverything();
+
+   mLastUndoStateWasBarrierWidthChange = false;
+}
 
 
 static S32 findZoneContaining( Vector<WorldItem> &zones, const Point &p)
@@ -718,8 +662,8 @@ static S32 findZoneContaining( Vector<WorldItem> &zones, const Point &p)
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
       // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
-      if( zones[i].getExtent().contains(p) 
-         && PolygonContains2(zones[i].getVerts().address(), zones[i].getVerts().size(), p) )
+      if( zones[i].getExtent().contains(p) &&
+                  PolygonContains2(zones[i].getVerts().address(), zones[i].getVerts().size(), p) )
          return i;
    }
    return -1;
@@ -1024,33 +968,105 @@ string EditorUserInterface::getLevelFileName()
 }
 
 
+// Run script to generate bot zones
+void EditorUserInterface::generateBotZones()
+{
+   // First, remove any existing nav mesh zones
+   for(S32 i = 0; i < mItems.size(); i++)
+      if(mItems[i].index == ItemNavMeshZone)
+      {
+         mItems.erase_fast(i);
+         i--;
+      }
+
+   // For the moment, base zones are generated via Sam's Lua script, now parked in Lua folder
+   Vector<string> ScriptArgs;
+   ScriptArgs.clear();
+   ScriptArgs.push_back("build_navzones.lua");
+
+   Vector<WorldItem> zones;
+   mLoadTarget = &zones;
+
+   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.luaDir + "/", ScriptArgs, getGridSize(), 
+                                                   getGridDatabase(), this, gConsole);
+
+   for(S32 i = 0; i < zones.size(); i++)
+      zones[i].setExtent(Rect(zones[i].getVerts()));
+
+   removeUnusedNavMeshZones(zones);    // Culls unreachable zones
+
+   Point anchor, nrml;
+
+   // Snap zone boundaries to walls ==> doesn't work well with diagonal lines
+  /* for(S32 i = 0; i < zones.size(); i++)
+   {
+      for(S32 j = 0; j < zones[i].getVerts().size(); j++)
+      {
+         DatabaseObject *mountSeg = EngineeredObject::
+               findAnchorPointAndNormal(getGridDatabase(), zones[i].getVerts()[j], .1, false, anchor, nrml);
+
+         if(mountSeg)
+            zones[i].getVerts()[j].set(anchor);
+      }
+   }
+*/
+   // Remove collinear points -- reduce number of points needed to represent a zone
+   for(S32 i = 0; i < zones.size(); i++)
+      removeCollinearPoints(zones[i].getVerts(), true);
+
+   // "Squarify" zones (helps clean up some of the junk points in some edge zones)
+   for(S32 i = 0; i < zones.size(); i++)
+   {
+      if(zones[i].getVerts().size() <= 4)      // Square or triangles can't be squarified
+         continue;
+      
+      F32 ulX = zones[i].getExtent().min.x;
+      F32 ulY = zones[i].getExtent().min.y;
+      F32 lrX = zones[i].getExtent().max.x;
+      F32 lrY = zones[i].getExtent().max.y;
+
+      for(S32 j = 0; j < zones[i].getVerts().size(); j++)
+      {
+         if(!(zones[i].getVerts()[j].x == ulX || zones[i].getVerts()[j].x == lrX || 
+              zones[i].getVerts()[j].y == ulY || zones[i].getVerts()[j].y == lrY))
+         {
+            zones[i].getVerts().erase(j);
+            j--;
+         }
+      }
+   }
+
+
+   // Initialize the zones
+   for(S32 i = 0; i < zones.size(); i++)
+      zones[i].initializeGeom();
+
+   // Add, finally, add them to the editor
+   for(S32 i = 0; i < zones.size(); i++)
+      mItems.push_back(zones[i]);
+
+   gEditorUserInterface.rebuildAllBorderSegs();
+}
+
+
 // Handle console input
 // Valid commands: help, run, clear, quit, exit
 void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
-    if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
-       OGLCONSOLE_HideConsole();
+   if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
+      OGLCONSOLE_HideConsole();
 
-    else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
-       OGLCONSOLE_Output(console, "Commands: help; run; clear; quit\n");
+   else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
+      OGLCONSOLE_Output(console, "Commands: help; run; clear; genzones; quit\n");
 
-    else if(!strncmp(cmd, "run", 3))
+   else if(!strncmp(cmd, "run", 3))
       gEditorUserInterface.runScript();
 
-    else if(!strncmp(cmd, "clear", 3))
+   else if(!strncmp(cmd, "clear", 3))
       gEditorUserInterface.clearLevelGenItems();
 
-    else if(!strncmp(cmd, "add", 3))
-    {
-        int a, b;
-        if (sscanf(cmd, "add %i %i", &a, &b) == 2)
-        {
-            OGLCONSOLE_Output(console, "%i + %i = %i\n", a, b, a+b);
-            return;
-        }
-
-        OGLCONSOLE_Output(console, "usage: add INT INT\n");
-    }
+   else if(!strncmp(cmd, "genzones", 8))
+      gEditorUserInterface.generateBotZones();
 
     else
       OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd);

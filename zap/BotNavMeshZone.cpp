@@ -45,6 +45,7 @@ BotNavMeshZone::BotNavMeshZone()
    mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging
    mZoneID = gBotNavMeshZones.size();
 
+   // Sending too many zones will overwhelm the client.  Zones should only be send after a /dzones command has been issued.
    //if(gBotNavMeshZones.size() < 900) mNetFlags.set(Ghostable);       //<<< TODO: Get rid of this line!!!!  only 900 zones will load
    gBotNavMeshZones.push_back(this);
 }

@@ -515,6 +515,7 @@ public:
 
    GridDatabase *getGridDatabase() { return &mGridDatabase; }
 
+   void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
    void recomputeAllEngineeredItems();
 
    void render();
@@ -607,6 +608,8 @@ public:
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
+   // For generating nav mesh zones automatically.  Hooray!
+   void generateBotZones();
    void removeUnusedNavMeshZones(Vector<WorldItem> &zones);
 };
 
