@@ -1110,6 +1110,7 @@ bool Ship::isCarryingItem(GameObjectType objectType)
 
 Item *Ship::unmountItem(GameObjectType objectType)
 {
+   logprintf("%s ship->unmountItem", isGhost()? "Client:" : "Server:");
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
    {
       if(mMountedItems[i]->getObjectTypeMask() & objectType)

@@ -113,7 +113,8 @@ protected:
    };
 
    GridDatabase mDatabase;
-   Vector<GameObject *> mGameObjects;
+
+   
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<GameObject> > mScopeAlwaysList;
    U32 mCurrentTime;
@@ -142,6 +143,8 @@ public:
 
       PLAYER_COUNT_UNAVAILABLE = -1,
    };
+
+   Vector<GameObject *> mGameObjects;
 
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
 
@@ -401,7 +404,7 @@ extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 3  // Change this when releasing an incompatible cm/sm protocol (must be int)
-#define CS_PROTOCOL_VERSION 30     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 31     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 1082         // Version of the game according to SVN, will be unique every release (must be int)
 #define ZAP_GAME_RELEASE "014 beta 2"     // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces

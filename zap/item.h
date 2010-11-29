@@ -62,6 +62,8 @@ protected:
    bool mIsCollideable;
    bool mInitial;       // True on initial unpack, false thereafter
 
+   U16 mItemId;         // Item ID, shared between client and server
+
 public:
    Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
@@ -74,6 +76,8 @@ public:
 
    void setActualPos(Point p);
    void setActualVel(Point vel);
+
+   U16 getItemId() { return mItemId; }
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask() { setMaskBits(MountMask); }

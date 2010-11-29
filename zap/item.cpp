@@ -34,13 +34,24 @@
 namespace Zap
 {
 
-   // Constructor
+static U32 sItemId = 1;
+
+// Constructor
 Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, radius, mass)
 {
    mIsMounted = false;
    mIsCollideable = collideable;
    mObjectTypeMask = MoveableType | ItemType | CommandMapVisType;
    mInitial = false;
+
+   // Item Ids are generated on the server and propagated to the clients
+   //if(getGame()->isServer())
+   //{
+      mItemId = sItemId;
+      sItemId++;
+   //}
+   //else  // is client
+   //   mItemId = 0;
 }
 
 bool Item::processArguments(S32 argc, const char **argv)
@@ -76,8 +87,11 @@ void Item::render()
 void Item::mountToShip(Ship *theShip)     // theShip could be NULL here
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
+      logprintf("%s item->mountToShip", isGhost()? "Client:" : "Server:");
 
-   dismount();
+   if(mMount.isValid())
+      dismount();
+
    mMount = theShip;
    if(theShip)
    {
@@ -96,15 +110,16 @@ void Item::onMountDestroyed()
 
 void Item::dismount()
 {
-   if(mMount.isValid())
-   {
-      for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
-         if(mMount->mMountedItems[i].getPointer() == this)
-         {
-            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
-            break;
-         }
-   }
+   if(!mMount.isValid())
+      return;
+      logprintf("%s item->dismount, has mount", isGhost()? "Client:" : "Server:");
+
+   for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
+      if(mMount->mMountedItems[i].getPointer() == this)
+      {
+         mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
+         break;
+      }
    
    if(isGhost())     // Client only
       onItemDropped();
@@ -196,12 +211,14 @@ void Item::idle(GameObject::IdleCallPath path)
    updateExtent();
 }
 
+
 U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    U32 retMask = 0;
    if(stream->writeFlag(updateMask & InitialMask))
    {
-      // Do nothing
+      // Send id in inital packet
+      stream->writeRangedU32(mItemId, 0, U16_MAX);
    }
    if(stream->writeFlag(updateMask & PositionMask))
    {
@@ -209,7 +226,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       writeCompressedVelocity(mMoveState[ActualState].vel, 511, stream);      // 511? Why?
       stream->writeFlag(updateMask & WarpPositionMask);
    }
-   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))   // True for mask, then True if mounted
+   if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
    {
       S32 index = connection->getGhostIndex(mMount);     // Index of ship with item mounted
 
@@ -234,6 +251,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    return retMask;
 }
 
+
 void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool interpolate = false;
@@ -243,7 +261,7 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    if(mInitial)     // InitialMask
    {
-       // Do nothing
+      mItemId = stream->readRangedU32(0, U16_MAX);
    }
 
    if(stream->readFlag())     // PositionMask

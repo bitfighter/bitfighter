@@ -392,7 +392,7 @@ public:
    TNL_DECLARE_RPC(c2sAdvanceWeapon, ());
    TNL_DECLARE_RPC(c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> index));
    TNL_DECLARE_RPC(c2sDropItem, ());
-   TNL_DECLARE_RPC(c2sReaffirmMountItem, ());
+   TNL_DECLARE_RPC(c2sReaffirmMountItem, (U16 itemId));
 
    // Handle additional game-specific menu options for the client and the admin
    virtual void addClientGameMenuOptions(Vector<MenuItem *> &menuOptions);

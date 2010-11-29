@@ -176,6 +176,7 @@ void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 // Runs on server only, and only when player deliberately drops ball
 void SoccerGameType::itemDropped(Ship *ship, Item *item)
 {
+   logprintf("%s SoccerGameType->itemDropped", isGhost()? "Client:" : "Server:");
    TNLAssert(!isGhost(), "Should run on server only!");
 
    static StringTableEntry dropString("%e0 dropped the ball!");
@@ -311,8 +312,10 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 
 static const U32 DROP_DELAY = 500;
 
+// Runs on client & server?
 void SoccerBallItem::onItemDropped()
 {
+   logprintf("%s SoccerBallItem->onItemDropped\n\n", isGhost()? "Client:" : "Server:");
    if(!getGame())    // Can happen on first frame of new game
       return;
 
@@ -320,7 +323,7 @@ void SoccerBallItem::onItemDropped()
    if(!gt || !mMount.isValid())
       return;
 
-   if(!isGhost()) 
+   if(!isGhost())    // Server only
       gt->itemDropped(mMount, this);
    
    if(mMount.isValid())
@@ -434,6 +437,9 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
          return true;
 
+      if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
+         return true;
+
       mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
       mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
       mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
@@ -444,7 +450,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
       // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
       if(isGhost() && getGame()->getGameType())
-         getGame()->getGameType()->c2sReaffirmMountItem();
+         getGame()->getGameType()->c2sReaffirmMountItem(mItemId);
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {
