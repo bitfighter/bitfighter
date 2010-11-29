@@ -89,6 +89,9 @@ void Item::mountToShip(Ship *theShip)     // theShip could be NULL here
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
       logprintf("%s item->mountToShip", isGhost()? "Client:" : "Server:");
 
+   if(mMount.isValid() && mMount == theShip)
+      return;
+
    if(mMount.isValid())
       dismount();
 
