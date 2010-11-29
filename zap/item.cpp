@@ -87,7 +87,7 @@ void Item::render()
 void Item::mountToShip(Ship *theShip)     // theShip could be NULL here
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
-      logprintf("%s item->mountToShip", isGhost()? "Client:" : "Server:");
+      //logprintf("%s item->mountToShip", isGhost()? "Client:" : "Server:");
 
    if(mMount.isValid() && mMount == theShip)
       return;
@@ -115,7 +115,7 @@ void Item::dismount()
 {
    if(!mMount.isValid())
       return;
-      logprintf("%s item->dismount, has mount", isGhost()? "Client:" : "Server:");
+      //logprintf("%s item->dismount, has mount", isGhost()? "Client:" : "Server:");
 
    for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
       if(mMount->mMountedItems[i].getPointer() == this)

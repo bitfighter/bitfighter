@@ -2321,7 +2321,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
 // Client tells server that they dropped flag or other item
 GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 {
-   logprintf("%s GameType->c2sDropItem", isGhost()? "Client:" : "Server:");
+   //logprintf("%s GameType->c2sDropItem", isGhost()? "Client:" : "Server:");
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());
@@ -2336,7 +2336,7 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 
 GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (U16 itemId), (itemId))
 {
-   logprintf("%s GameType->c2sReaffirmMountItem", isGhost()? "Client:" : "Server:");
+   //logprintf("%s GameType->c2sReaffirmMountItem", isGhost()? "Client:" : "Server:");
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
    for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)

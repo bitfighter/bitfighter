@@ -176,7 +176,7 @@ void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 // Runs on server only, and only when player deliberately drops ball
 void SoccerGameType::itemDropped(Ship *ship, Item *item)
 {
-   logprintf("%s SoccerGameType->itemDropped", isGhost()? "Client:" : "Server:");
+   //logprintf("%s SoccerGameType->itemDropped", isGhost()? "Client:" : "Server:");
    TNLAssert(!isGhost(), "Should run on server only!");
 
    static StringTableEntry dropString("%e0 dropped the ball!");
@@ -315,7 +315,7 @@ static const U32 DROP_DELAY = 500;
 // Runs on client & server?
 void SoccerBallItem::onItemDropped()
 {
-   logprintf("%s SoccerBallItem->onItemDropped\n\n", isGhost()? "Client:" : "Server:");
+   //logprintf("%s SoccerBallItem->onItemDropped\n\n", isGhost()? "Client:" : "Server:");
    if(!getGame())    // Can happen on first frame of new game
       return;
 
