@@ -84,23 +84,24 @@ void Item::render()
 
 // Runs on both client and server, comes from collision() on the server and the colliding client, and from
 // unpackUpdate() in the case of all clients
-void Item::mountToShip(Ship *theShip)     // theShip could be NULL here
+//
+// theShip could be NULL here, and this could still be legit (e.g. flag is in scope, and ship is out of scope)
+void Item::mountToShip(Ship *theShip)     
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
       //logprintf("%s item->mountToShip", isGhost()? "Client:" : "Server:");
 
-   if(mMount.isValid() && mMount == theShip)
+   if(mMount.isValid() && mMount == theShip)    // Already mounted on ship!  Nothing to do!
       return;
 
-   if(mMount.isValid())
+   if(mMount.isValid())                         // Mounted on something else; dismount!
       dismount();
 
    mMount = theShip;
    if(theShip)
-   {
       theShip->mMountedItems.push_back(this);
-      mIsMounted = true;
-   }
+
+   mIsMounted = true;
    setMaskBits(MountMask);
 }
 
@@ -113,17 +114,18 @@ void Item::onMountDestroyed()
 
 void Item::dismount()
 {
-   if(!mMount.isValid())
-      return;
+   if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
+   {
       //logprintf("%s item->dismount, has mount", isGhost()? "Client:" : "Server:");
 
-   for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
-      if(mMount->mMountedItems[i].getPointer() == this)
-      {
-         mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
-         break;
-      }
-   
+      for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
+         if(mMount->mMountedItems[i].getPointer() == this)
+         {
+            mMount->mMountedItems.erase(i);     // Remove mounted item from our mount's list of mounted things
+            break;
+         }
+   }
+
    if(isGhost())     // Client only
       onItemDropped();
 
