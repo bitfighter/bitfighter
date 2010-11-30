@@ -34,7 +34,6 @@
 namespace Zap
 {
 class Ship;
-class RabbitFlagItem;
 
 class RabbitGameType : public GameType
 {
@@ -83,7 +82,6 @@ public:
 
    Color getTeamColor(S32 team);
 
-   void onFlagGrabbed(Ship *ship, RabbitFlagItem *flag);
    void onFlagHeld(Ship *ship);
    void onFlaggerDead(Ship *killerShip);
    void onFlaggerKill(Ship *rabbitShip);
