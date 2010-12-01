@@ -23,14 +23,21 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "input.h"
+
 #ifndef ZAP_DEDICATED
 
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 
+
+//some joystick code was taken from http://coding.derkeiler.com/Archive/General/comp.programming/2007-05/msg00480.html
+// need to include /usr/include/linux/joystick.h
+#include <fcntl.h>
+#include <linux/joystick.h>
+
 #endif
 
-#include "input.h"
 
 namespace Zap
 {
@@ -39,7 +46,29 @@ bool gJoystickInit = false;
 
 #ifndef ZAP_DEDICATED
 static Display *Xdisplay = XOpenDisplay(NULL);
+
+
+#define MAX_AXIS 16
+#define MAX_BUTTON 32	// Can fit 32 buttons in a 32 bit integer!
+
+
+struct padData {
+	unsigned char axisCount;
+	unsigned char buttonCount;
+	int fd;
+	int version;
+	char devName[80];
+	int aPos[MAX_AXIS];
+	int bPos[MAX_BUTTON];
+	bool changed;
+	js_event ev;
+};
+
+padData pad1;
+
 #endif
+
+
 
 void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 {
@@ -141,7 +170,8 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 const char *GetJoystickName()
 {
 #ifndef ZAP_DEDICATED
-  if(! gJoystickInit) InitJoystick();
+  if(! gJoystickInit) 
+	InitJoystick();
   return pad1.devName;
 #else
   return "";
