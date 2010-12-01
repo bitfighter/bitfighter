@@ -55,6 +55,8 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>Added pointCanSeePoint(point1, point2) function to levelgens, to provide line-of-sight information for a pair of points.</li>
 <li>Added Ctrl-I key to editor that copies results of levelgen script into editor (must run levelgen first with ctrl-R).  Entities can then be edited and saved like entities created by other means.</li>
+<li>Fixed rabbit flag issue where clients would on occasion lose track of where the flag was</li>
+<li>Some support for joysticks in Linux</li>
 </ul>
 
 <h4>User Interface</h4>

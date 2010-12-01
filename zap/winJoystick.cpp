@@ -181,8 +181,8 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
    // check the state of the buttons:
    buttonMask = 0;
    U32 pov = js.rgdwPOV[0];
-
-   for( U32 i = 0; i < 12; i++ )
+   
+   for( U32 i = 0; i < 32; i++ )       // Most sticks have 12 or fewer buttons, but we can detect up to 32
       if((js.rgbButtons[i] & 0x80) != 0)
          buttonMask |= BIT(i);
 

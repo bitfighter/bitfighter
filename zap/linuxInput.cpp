@@ -59,23 +59,102 @@ void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 #endif
 }
 
+
+// Joystick code loosely based on http://coding.derkeiler.com/Archive/General/comp.programming/2007-05/msg00480.html
 void InitJoystick()
 {
+#ifndef ZAP_DEDICATED
+   pad1.fd = open("/dev/input/js0", O_RDONLY);
+   if (pad1.fd != 0){
+      // Get pad info ...
+      //logprintf("Joystick found");
+      ioctl(pad1.fd, JSIOCGAXES,&pad1.axisCount);
+      ioctl(pad1.fd, JSIOCGBUTTONS, &pad1.buttonCount);
+      ioctl(pad1.fd, JSIOCGVERSION, &pad1.version);
+      ioctl(pad1.fd, JSIOCGNAME(80), &pad1.devName);
+      fcntl(pad1.fd, F_SETFL, O_NONBLOCK);
+      
+      //logprintf ("axis : %d\n", pad1.axisCount);
+      //logprintf ("buttons : %d\n", pad1.buttonCount);
+      //logprintf ("version : %d\n", pad1.version);
+      //logprintf ("name : %s\n", pad1.devName);
+      // set default values
+      pad1.changed = false;
+      for (int i=0;i<pad1.axisCount;i++) pad1.aPos[i]=0;
+      for (int i=0;i<pad1.buttonCount;i++) pad1.bPos[i]=0;
+   }
+   gJoystickInit = true;
+#endif
 }
 
 bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 {
-   return false;
+#ifndef ZAP_DEDICATED
+  if(! gJoystickInit) 
+	InitJoystick();
+	
+  if(pad1.fd == 0) 
+	return false;
+	
+  int result = read(pad1.fd, &pad1.ev, sizeof(pad1.ev));
+  int loop1 = 0;
+  
+  while (result!=0 && loop1 < 100)
+  {
+    loop1++;
+    switch (pad1.ev.type)
+    {
+		case JS_EVENT_INIT:
+		case JS_EVENT_INIT | JS_EVENT_AXIS:
+		case JS_EVENT_INIT | JS_EVENT_BUTTON:
+		  break;
+		case JS_EVENT_AXIS:
+		  pad1.aPos[pad1.ev.number] = pad1.ev.value;
+		  pad1.changed = true;
+		  break;
+		case JS_EVENT_BUTTON:
+		  pad1.bPos[pad1.ev.number] = pad1.ev.value;
+		  pad1.changed = true;
+		break;
+		default:
+		  //logprintf ("Other event ? %d\nnumber=%d\nvalue=%d\n", pad1.ev.type,pad1.ev.number, pad1.ev.value);
+		  break;
+    }
+    result = read(pad1.fd, &pad1.ev, sizeof(pad1.ev));
+  }
+
+  buttonMask = 0;
+  for(S32 b=0; b<pad1.buttonCount; b++)
+    buttonMask = buttonMask | ((pad1.bPos[b] != 0 ? 1 : 0) << b);
+
+  for(S32 b=0; b<pad1.buttonCount && b<MaxJoystickAxes; b++)
+    axes[b] = (F32)pad1.aPos[b]/32768;
+
+  hatMask = 0; //POV (d-pad) either get maps to 2 more axes (logitech dual action), or 4 more buttons?
+
+  return true;
+#else
+  return false;
+#endif
 }
 
 const char *GetJoystickName()
 {
-   return "";     // Apparently no joystick autodetect in Linux...
+#ifndef ZAP_DEDICATED
+  if(! gJoystickInit) InitJoystick();
+  return pad1.devName;
+#else
+  return "";
+#endif
 }
 
 void ShutdownJoystick()
 {
+#ifndef ZAP_DEDICATE
+  if(pad1.fd != 0) close(pad1.fd);
+#endif
 }
+
 
 };
 

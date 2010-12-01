@@ -110,10 +110,18 @@ static S32 keyCodeToButtonIndex(KeyCode keyCode)
    }
 }
 
+// Unfortunately, Linux and Windows map joystick axes differently
 // From ControllerTypeType enum ---> LogitechWingman, LogitechDualAction, SaitekDualAnalogP880, SaitekDualAnalogRumblePad, PS2DualShock, PS2DualShockConversionCable, XBoxController, XBoxControllerOnXBox
 //                                                                Wingmn    DualAct   P880     RumbPad     PS2  PS2 w/Cnvrtr  XBox    XBoxOnXBox
 static U32 controllerButtonCounts[ControllerTypeCount] =          { 9,       10,       9,        10,       10,       10,      10,       14 };     // How many buttons?
-static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
+#ifdef TNL_OS_LINUX
+//                                      ? = need to change?         ?       works       ?          ?        ?         ?        ?         ?
+static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 3 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
+#else
+static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };
+#endif
+ 
+
 
 static U32 controllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
 {
