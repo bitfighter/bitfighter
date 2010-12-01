@@ -75,7 +75,7 @@ void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 #ifndef ZAP_DEDICATED
    char key_map_stat[32];
    XQueryKeymap(Xdisplay, key_map_stat);
-   
+
    // This can most definitely be simplified
    altDown = (((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Alt_L) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Alt_L) & 7)) & 1) ||
       ((key_map_stat[XKeysymToKeycode(Xdisplay,XK_Alt_R) >> 3] >> (XKeysymToKeycode(Xdisplay,XK_Alt_R) & 7)) & 1));
@@ -102,7 +102,7 @@ void InitJoystick()
       ioctl(pad1.fd, JSIOCGVERSION, &pad1.version);
       ioctl(pad1.fd, JSIOCGNAME(80), &pad1.devName);
       fcntl(pad1.fd, F_SETFL, O_NONBLOCK);
-      
+
       //logprintf ("axis : %d\n", pad1.axisCount);
       //logprintf ("buttons : %d\n", pad1.buttonCount);
       //logprintf ("version : %d\n", pad1.version);
@@ -119,15 +119,15 @@ void InitJoystick()
 bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 {
 #ifndef ZAP_DEDICATED
-  if(! gJoystickInit) 
+  if(! gJoystickInit)
 	InitJoystick();
-	
-  if(pad1.fd == 0) 
+
+  if(pad1.fd == 0)
 	return false;
-	
+
   int result = read(pad1.fd, &pad1.ev, sizeof(pad1.ev));
   int loop1 = 0;
-  
+
   while (result!=0 && loop1 < 100)
   {
     loop1++;
@@ -170,7 +170,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 const char *GetJoystickName()
 {
 #ifndef ZAP_DEDICATED
-  if(! gJoystickInit) 
+  if(! gJoystickInit)
 	InitJoystick();
   return pad1.devName;
 #else
@@ -180,7 +180,7 @@ const char *GetJoystickName()
 
 void ShutdownJoystick()
 {
-#ifndef ZAP_DEDICATE
+#ifndef ZAP_DEDICATED
   if(pad1.fd != 0) close(pad1.fd);
 #endif
 }
