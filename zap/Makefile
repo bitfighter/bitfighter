@@ -132,7 +132,7 @@ dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP)
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) -lstdc++  -lm -ldl
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) -lstdc++  -lm -ldl -lX11
 
 
 # We need one file in the master folder to be compiled to make this all work.  This
