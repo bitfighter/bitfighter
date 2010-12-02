@@ -1278,13 +1278,14 @@ void QueryServersUserInterface::issueChat()
    if(mLineEditor.length() > 10)
    {
 	   const char *str1 = mLineEditor.c_str();
-	   int a = 0;
+	   S32 a = 0;
 
 	   while(a < 9)      // compare character by character, now case insensitive
 	   {       
 		   if(str1[a] != "/connect "[a] && str1[a] != "/CONNECT "[a] ) 
             a = S32_MAX;
-		   a++;
+         else
+		      a++;
 	   }
 	   if(a == 9)
       {
