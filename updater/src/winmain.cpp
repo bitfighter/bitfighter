@@ -343,7 +343,7 @@ BOOL KillProcessByName(const char *processToKill)
 	}
 
 	do{
-      //if(!wcscmp(pe32.szExeFile,szProcessToKill))  <-- needed in debug mode, for some reason...
+      //if(!wcscmp(pe32.szExeFile,szProcessToKill)){    //<-- needed in debug mode, for some reason...
 		if(!strcmp(pe32.szExeFile,processToKill)){    //  checks if process at current position has the name of to be killed app
 			hProcess = OpenProcess(PROCESS_TERMINATE,0, pe32.th32ProcessID);  // gets handle to process
 			TerminateProcess(hProcess,0);   // Terminate process by handle
@@ -373,7 +373,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR lpszCmdLine, int nCmdSh
 	}
 	hInst = hInstance;
 	try {
-		GupParameters gupParams("bfup.xml");
+		GupParameters gupParams("C:\\Users\\Chris\\Documents\\bf-trunk\\updater\\bin\\bfup.xml");
 		GupExtraOptions extraOptions("bfupOptions.xml");
 		GupNativeLang nativeLang("nativeLang.xml");
 

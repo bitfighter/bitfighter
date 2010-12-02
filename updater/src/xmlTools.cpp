@@ -19,9 +19,9 @@
 
 #include "xmlTools.h"
 
-GupParameters::GupParameters(const char * xmlFileName) : _currentVersion(""), _className2Close(""), _messageBoxTitle(""), _isSilentMode(true)
+GupParameters::GupParameters(string xmlFileName) : _currentVersion(""), _className2Close(""), _messageBoxTitle(""), _isSilentMode(true)
 {
-	_xmlDoc.LoadFile(xmlFileName);
+	_xmlDoc.LoadFile(xmlFileName.c_str());
 
 	TiXmlNode *root = _xmlDoc.FirstChild("GUPInput");
 	if (!root)

@@ -31,7 +31,7 @@ protected:
 class GupParameters : public XMLTool {
 public:
 	GupParameters() : _currentVersion(""), _className2Close(""), _isSilentMode(true) {};
-	GupParameters(const char * xmlFileName);
+	GupParameters(string xmlFileName);
 	
 	const string & getCurrentVersion() const { return _currentVersion;};
 	const string & getInfoLocation() const {return _infoUrl;};

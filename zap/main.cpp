@@ -49,59 +49,14 @@ XXX need to document timers, new luavec stuff XXX
 
 */
 
-/* Fixes for 013f
-
-<h4>New since beta 2<h4>
+/* Fixes after 014
+<h4></h4>
 <ul>
-<li>Added pointCanSeePoint(point1, point2) function to levelgens, to provide line-of-sight information for a pair of points.</li>
-<li>Added Ctrl-I key to editor that copies results of levelgen script into editor (must run levelgen first with ctrl-R).  Entities can then be edited and saved like entities created by other means.</li>
-<li>Fixed rabbit flag issue where clients would on occasion lose track of where the flag was</li>
-<li>Some support for joysticks in Linux</li>
+<li>
 </ul>
-
 <h4>User Interface</h4>
-<li>More menuing overhaul -- nicer colors, and much better design internally to support multiple menu item types on a single menu</li>
-<li>Added /connect chat command available in join menu... /connect <address:port> will connect directly, regardess of whether server is shown on list or not.  Bypasses matchmaing with the master server.</li>
-
-<h4>Verified accounts</h4>
-<ul>User names now verified against forums user list -- if you want to play with a name from the forums, you need to supply the
-forums password for that account</ul>
-
-<h4>OS X</h4>
 <ul>
-<li>Major crashing issues on Intel Macs now, finally, resolved!!!</li>
-</ul>
-
-<h4>Linux</h4>
-<ul>
-<li>Ctrl keys now work on Linux, making the editor much more accessible.  Yay!</li>
-</ul>
-
-
-<h4>Minor Enhancements</h4>
-<ul>
-<li>Better user message when server is full</li>
-<li>(1) button on joystick acts like <enter> on menus</li>
-<li>Experimental forcefield color enhancement</li>
-</ul>
-
-<h4>Levelgens</h4>
-<ul>
-<li>Added setGameTime(time_in_mins) command<li>
-</ul>
-
-<h4>Bug fixes<h4>
-<ul>
-<li>Rare teleporter crash resolved</li>
-<li>Rare flag crash issue resolved when flags spawn on top of one another</li>
-<li>Min/max player level params properly handled<li>
-<li>Leveldir param now properly handled with specifying an absolute path<li>
-<li>Scores over 99 now visible in team nexus games<li>
-<li>Player names now guaranteed unique on any given server (again)</li>
-<li>Game no longer crashes when too many mines explode at once.</li>
-<li>Ship colliding sound no longer plays on server</li>
-<li>CTF game no longer crashes when two flags are place on top of one another<li>
-<li>Can no longer carry multiple flags in CTF game</li>
+<li>Pressing enter now advances to next menu item on most menus
 </ul>
 
 */
@@ -328,6 +283,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeig
 
    gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
 }
+
 
 // Handler called by GLUT when mouse motion is detected
 void GLUT_CB_motion(int x, int y)

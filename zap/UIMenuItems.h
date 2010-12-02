@@ -67,6 +67,7 @@ private:
 
 protected:
    Color color;      // Color in which item should be displayed
+   bool mEnterAdvancesItem;
    void (*mCallback)(U32);
 
 public:
@@ -82,6 +83,7 @@ public:
       mCallback = callback;
       mHelp = help;
       mIndex = (U32)index;
+      mEnterAdvancesItem = false;
    }
 
    KeyCode key1;     // Allow two shortcut keys per menu item...
@@ -94,6 +96,9 @@ public:
    string getString() { return mText; }
 
    virtual void setSecret(bool secret) { /* Do nothing */ }
+
+   // When enter is pressed, should selection advance to the next item?
+   virtual void setEnterAdvancesItem(bool enterAdvancesItem) { mEnterAdvancesItem = enterAdvancesItem; }
    
    virtual const char *getSpecialEditingInstructions() { return ""; }
    virtual string getValue() { return ""; }
@@ -104,7 +109,7 @@ public:
    virtual void setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
    virtual void activatedWithShortcutKey() { handleKey(MOUSE_LEFT, 0); }
 
-   virtual bool enterAdvancesItem() { return false; }       // When enter is pressed, should selection advance to the next item?
+   virtual bool enterAdvancesItem() { return mEnterAdvancesItem; }      
 };
 
 
@@ -127,6 +132,7 @@ public:
       mIndex = currOption;  
       mOptions = options;
       mWrap = wrap;
+      mEnterAdvancesItem = true;
    }
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
@@ -169,6 +175,7 @@ public:
       mMaxValue = maxVal;
       mUnits = units;
       mMinMsg = minMsg;
+      mEnterAdvancesItem = true;
    }
 
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
@@ -198,11 +205,13 @@ protected:
 
 public:
    // Contstuctor
-   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1, 1, 1) ) :
+   EditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, 
+                    Color c = Color(1, 1, 1) ) :
             MenuItem(-1, title, NULL, help, k1, k2, c),
             mLineEditor(LineEditor(maxLen, val))
    {
       mEmptyVal = emptyVal;
+      mEnterAdvancesItem = true;    
    }
 
    virtual MenuItemTypes getItemType() { return EditableMenuItemType; }
@@ -216,7 +225,6 @@ public:
    virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
-
       
 
    virtual void setSecret(bool secret) { mLineEditor.setSecret(secret); }

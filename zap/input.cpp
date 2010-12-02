@@ -121,7 +121,7 @@ static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 3
 static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };
 #endif
  
-
+// PS3 Joystick: http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
 
 static U32 controllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
 {
