@@ -1591,7 +1591,7 @@ void Robot::onAddedToGame(Game *game)
 
    // Server only from here on out
 
-   setScopeAlways();          // Make them always visible on cmdr map --> del
+   //setScopeAlways();          // Make them always visible on cmdr map --> del
    robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
    eventManager.fireEvent(L, EventManager::PlayerJoinedEvent, getPlayerInfo());
 }

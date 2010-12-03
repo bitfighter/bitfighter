@@ -114,7 +114,7 @@ public:
    Nonce mNonce;
    U32 pendingPings;
    U32 pendingQueries;
-   U32 broadcastPingSendTime;
+   U32 mBroadcastPingSendTime;
    U32 mLastUsedServerId;     // A unique ID we can assign to new servers
    Timer mMasterRequeryTimer;
    U32 time;

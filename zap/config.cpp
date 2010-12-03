@@ -52,8 +52,281 @@ extern string lcase(string strToConvert);
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
 
+// Splits inputString into a series of words using the specified separator
+void parseString(const char *inputString, Vector<string> &words, char seperator)
+{
+	char word[128];
+	S32 wn = 0;       // Where we are in the word we're creating
+	S32 isn = 0;      // Where we are in the inputString we're parsing
+
+	words.clear();
+
+	while(inputString[isn] != 0)
+   {
+		if(inputString[isn] == seperator) 
+      {
+			word[wn] = 0;    // Add terminating NULL
+			if(wn > 0) 
+            words.push_back(word);
+			wn = 0;
+		}
+      else
+      {
+			if(wn < 126)   // Avoid overflows
+         {
+            word[wn] = inputString[isn]; 
+            wn++; 
+         }
+		}
+		isn++;
+	}
+    word[wn] = 0;
+    if(wn > 0) 
+       words.push_back(word);
+}
+
+
+extern Vector<string> prevServerListFromMaster;
+extern Vector<string> alwaysPingList;
+
+static void loadForeignServerInfo()
+{
+	// AlwaysPingList will default to broadcast, can modify the list in the INI
+   // http://learn-networking.com/network-design/how-a-broadcast-address-works
+	parseString(gINI.GetValue("Servers", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
+
+   // These are the servers we found last time we were able to contact the master.
+	// In case the master server fails, we can use this list to try to find some game servers. 
+	parseString(gINI.GetValue("Servers", "ListFromMaster").c_str(), prevServerListFromMaster, ',');
+}
+
+
+static void writeForeignServerInfo()
+{
+   //gINI.AddKeyName("ForeignServers");      <=== Now unneeded!
+
+   if(gINI.NumKeyComments("ForeignServers") == 0)
+   {
+      gINI.KeyComment("ForeignServers", "----------------");
+      gINI.KeyComment("ForeignServers", " AlwaysPingList - Always try to contact these servers, even if they are not listed by the master");
+      gINI.KeyComment("ForeignServers", " ForeignServerList - Most recent list of servers seen; used as a fallback if we can't reach the master");
+      gINI.KeyComment("ForeignServers", "----------------");
+   }
+
+	// Creates comma delimited lists
+	string str = "";
+   for(S32 i = 0; i < alwaysPingList.size(); i++)
+        str += alwaysPingList[i] + ((i < alwaysPingList.size() - 1) ? "," : "");
+	gINI.SetValue("ForeignServers", "AlwaysPingList", str);
+
+	str = "";
+   for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
+        str += prevServerListFromMaster[i] + ((i < prevServerListFromMaster.size() - 1) ? "," : "");
+	gINI.SetValue("ForeignServers", "ForeignServerList", str);
+}
+
+
+// Read levels, if there are any...
+ void loadLevels()
+{
+   if(gINI.FindKey("Levels") != gINI.noID)
+   {
+      S32 numLevels = gINI.NumValues("Levels");
+      Vector<string> levelValNames(numLevels);
+
+      for(S32 i = 0; i < numLevels; i++)
+         levelValNames.push_back(gINI.ValueName("Levels", i));
+
+      levelValNames.sort(alphaSort);
+
+      string level;
+      for(S32 i = 0; i < numLevels; i++)
+      {
+         level = gINI.GetValue("Levels", levelValNames[i], "");
+         if (level != "")
+            gIniSettings.levelList.push_back(StringTableEntry(level.c_str()));
+      }
+   }
+}
+
+
+extern Vector<StringTableEntry> gLevelSkipList;
+
+// Read level deleteList, if there are any.  This could probably be made more efficient by not reading the
+// valnames in first, but what the heck...
+static void loadLevelSkipList()
+{
+   if(gINI.FindKey("LevelSkipList") != gINI.noID)
+   {
+      S32 numLevels = gINI.NumValues("LevelSkipList");
+      Vector<string> levelValNames(numLevels);
+
+      for(S32 i = 0; i < numLevels; i++)
+         levelValNames.push_back(gINI.ValueName("LevelSkipList", i));
+
+      string level;
+      for(S32 i = 0; i < numLevels; i++)
+      {
+         level = gINI.GetValue("LevelSkipList", levelValNames[i], "");
+         if (level != "")
+            gLevelSkipList.push_back(StringTableEntry(level.c_str()));
+      }
+   }
+}
+
+
+// Convert a string value to a DisplayMode enum value
+static DisplayMode stringToDisplayMode(string mode)
+{
+   if(lcase(mode) == "fullscreen-stretch")
+      return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   else if(lcase(mode) == "fullscreen")
+      return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
+   else 
+      return DISPLAY_MODE_WINDOWED;
+}
+
+
+// Convert a string value to our sfxSets enum
+static string displayModeToString(DisplayMode mode)
+{
+   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
+      return "Fullscreen-Stretch";
+   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
+      return "Fullscreen";
+   else
+      return "Window";
+}
+
+
+static void loadGeneralSettings()
+{
+   gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
+   gIniSettings.oldDisplayMode = gIniSettings.displayMode;
+
+   gIniSettings.controlsRelative = (lcase(gINI.GetValue("Settings", "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
+   gIniSettings.echoVoice = (lcase(gINI.GetValue("Settings", "VoiceEcho",(gIniSettings.echoVoice ? "Yes" : "No"))) == "yes");
+   gIniSettings.showWeaponIndicators = (lcase(gINI.GetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"))) == "yes");
+   gIniSettings.verboseHelpMessages = (lcase(gINI.GetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"))) == "yes");
+   gIniSettings.showKeyboardKeys = (lcase(gINI.GetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"))) == "yes");
+   gIniSettings.joystickType = stringToJoystickType(gINI.GetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType)));
+   gIniSettings.winXPos = max(gINI.GetValueI("Settings", "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
+   gIniSettings.winYPos = max(gINI.GetValueI("Settings", "WindowYPos", gIniSettings.winYPos), 0);
+   gIniSettings.winSizeFact = (F32) gINI.GetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact);
+   gIniSettings.masterAddress = gINI.GetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress);
+   
+   gIniSettings.name = gINI.GetValue("Settings", "Nickname", gIniSettings.name);
+   gIniSettings.password = gINI.GetValue("Settings", "Password", gIniSettings.password);
+
+   gIniSettings.defaultName = gINI.GetValue("Settings", "DefaultName", gIniSettings.defaultName);
+   gIniSettings.lastName = gINI.GetValue("Settings", "LastName", gIniSettings.lastName);
+   gIniSettings.lastPassword = gINI.GetValue("Settings", "LastPassword", gIniSettings.lastPassword);
+   gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
+
+   gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
+}
+
+
+static void loadDiagnostics()
+{
+   gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys",              (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.logConnectionProtocol = (lcase(gINI.GetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"))) == "yes");
+   gIniSettings.logNetConnection      = (lcase(gINI.GetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"))) == "yes");
+   gIniSettings.logEventConnection    = (lcase(gINI.GetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"))) == "yes");
+   gIniSettings.logGhostConnection    = (lcase(gINI.GetValue("Diagnostics", "LogGhostConnection",    (gIniSettings.logGhostConnection    ? "Yes" : "No"))) == "yes");
+   gIniSettings.logNetInterface       = (lcase(gINI.GetValue("Diagnostics", "LogNetInterface",       (gIniSettings.logNetInterface       ? "Yes" : "No"))) == "yes");
+   gIniSettings.logPlatform           = (lcase(gINI.GetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"))) == "yes");
+   gIniSettings.logNetBase            = (lcase(gINI.GetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"))) == "yes");
+   gIniSettings.logUDP                = (lcase(gINI.GetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.logFatalError         = (lcase(gINI.GetValue("Diagnostics", "LogFatalError",          (gIniSettings.logFatalError        ? "Yes" : "No"))) == "yes");
+   gIniSettings.logError              = (lcase(gINI.GetValue("Diagnostics", "LogError",               (gIniSettings.logError             ? "Yes" : "No"))) == "yes");
+   gIniSettings.logWarning            = (lcase(gINI.GetValue("Diagnostics", "LogWarning",             (gIniSettings.logWarning           ? "Yes" : "No"))) == "yes");
+   gIniSettings.logConnection         = (lcase(gINI.GetValue("Diagnostics", "LogConnection",          (gIniSettings.logConnection        ? "Yes" : "No"))) == "yes");
+
+   gIniSettings.logLevelLoaded        = (lcase(gINI.GetValue("Diagnostics", "LogLevelLoaded",          (gIniSettings.logLevelLoaded        ? "Yes" : "No"))) == "yes");
+   gIniSettings.logLuaObjectLifecycle = (lcase(gINI.GetValue("Diagnostics", "LogLuaObjectLifecycle",   (gIniSettings.logLuaObjectLifecycle ? "Yes" : "No"))) == "yes");
+   gIniSettings.luaLevelGenerator     = (lcase(gINI.GetValue("Diagnostics", "LuaLevelGenerator",       (gIniSettings.luaLevelGenerator     ? "Yes" : "No"))) == "yes");
+   gIniSettings.luaBotMessage         = (lcase(gINI.GetValue("Diagnostics", "LuaBotMessage",           (gIniSettings.luaBotMessage         ? "Yes" : "No"))) == "yes");
+   gIniSettings.serverFilter          = (lcase(gINI.GetValue("Diagnostics", "ServerFilter",            (gIniSettings.serverFilter          ? "Yes" : "No"))) == "yes");
+}
+
+
+static void loadTestSettings()
+{
+   gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
+}
+
+
+static void loadEffectsSettings()
+{
+   gIniSettings.starsInDistance = (lcase(gINI.GetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
+}
+
+// Convert a string value to our sfxSets enum
+static sfxSets stringToSFXSet(string sfxSet)
+{
+   return (lcase(sfxSet) == "classic") ? sfxClassicSet : sfxModernSet;
+}
+
+
+static void loadSoundSettings()
+{
+   gIniSettings.sfxVolLevel = (float) gINI.GetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10)) / 10.0f;
+   gIniSettings.musicVolLevel = (float) gINI.GetValueI("Sounds", "MusicVolume", (S32) (gIniSettings.musicVolLevel * 10)) / 10.0f;
+   gIniSettings.voiceChatVolLevel = (float) gINI.GetValueI("Sounds", "VoiceChatVolume", (S32) (gIniSettings.voiceChatVolLevel * 10)) / 10.0f;
+
+   string sfxSet = gINI.GetValue("Sounds", "SFXSet", "Modern");
+   gIniSettings.sfxSet = stringToSFXSet(sfxSet);
+
+   // Bounds checking
+   if(gIniSettings.sfxVolLevel > 1.0)
+      gIniSettings.sfxVolLevel = 1.0;
+   else if(gIniSettings.sfxVolLevel < 0)
+      gIniSettings.sfxVolLevel = 0;
+
+   if(gIniSettings.musicVolLevel > 1.0)
+      gIniSettings.musicVolLevel = 1.0;
+   else if(gIniSettings.musicVolLevel < 0)
+      gIniSettings.musicVolLevel = 0;
+
+   if(gIniSettings.voiceChatVolLevel > 1.0)
+      gIniSettings.voiceChatVolLevel = 1.0;
+   else if(gIniSettings.voiceChatVolLevel < 0)
+      gIniSettings.voiceChatVolLevel = 0;
+
+   if(gIniSettings.alertsVolLevel > 1.0)
+      gIniSettings.alertsVolLevel = 1.0;
+   else if(gIniSettings.alertsVolLevel < 0)
+      gIniSettings.alertsVolLevel = 0;
+}
+
+
+static void loadHostConfiguration()
+{
+   gIniSettings.hostname = gINI.GetValue("Host", "ServerName", gIniSettings.hostname);
+   gIniSettings.hostaddr = gINI.GetValue("Host", "ServerAddress", gIniSettings.hostaddr);
+   gIniSettings.hostdescr = gINI.GetValue("Host", "ServerDescription", gIniSettings.hostdescr);
+
+   gIniSettings.serverPassword = gINI.GetValue("Host", "ServerPassword", gIniSettings.serverPassword);
+   gIniSettings.adminPassword = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
+   gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
+   gIniSettings.levelDir = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
+   gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
+
+   gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
+}
+
+
+void loadUpdaterSettings()
+{
+   gIniSettings.useUpdater = gINI.GetValueB("Updater", "UseUpdater", gIniSettings.useUpdater);
+}
+
+
 // Remember: If you change any of these defaults, you'll need to rebuild your INI file to see the results!
-void loadKeyBindings()
+static void loadKeyBindings()
 {                                // Whew!  This is quite the dense block of code!!
    keySELWEAP1[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "SelWeapon1", keyCodeToString(KEY_1)).c_str());
    keySELWEAP2[Keyboard] = stringToKeyCode(gINI.GetValue("KeyboardKeyBindings", "SelWeapon2", keyCodeToString(KEY_2)).c_str());
@@ -176,6 +449,101 @@ static void writeKeyBindings()
    MessageType=Hello there!
 
 */
+
+static void loadQuickChatMessages()
+{
+   // Add initial node
+   QuickChatNode emptynode;
+   emptynode.depth = 0;    // This is a beginning or ending node
+   emptynode.keyCode = KEY_UNKNOWN;
+   emptynode.buttonCode = KEY_UNKNOWN;
+   emptynode.teamOnly = false;
+   emptynode.caption = "";
+   emptynode.msg = "";
+   gQuickChatTree.push_back(emptynode);
+   emptynode.isMsgItem = false;
+
+   // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
+   S32 keys = gINI.GetNumKeys();
+   Vector<string> groups;
+
+   // Next, read any top-level messages
+   Vector<string> messages;
+   for(S32 i = 0; i < keys; i++)
+   {
+      string keyName = gINI.GetKeyName(i);
+      if(keyName.substr(0, 17) == "QuickChat_Message")   // Found message group
+         messages.push_back(keyName);
+   }
+
+   messages.sort(alphaSort);
+
+   for(S32 i = messages.size()-1; i >= 0; i--)
+   {
+      QuickChatNode node;
+      node.depth = 1;   // This is a top-level message node
+      node.keyCode = stringToKeyCode(gINI.GetValue(messages[i], "Key", "A").c_str());
+      node.buttonCode = stringToKeyCode(gINI.GetValue(messages[i], "Button", "Button 1").c_str());
+      node.teamOnly = lcase(gINI.GetValue(messages[i], "MessageType", "Team")) == "team";          // lcase for case insensitivity
+      node.caption = gINI.GetValue(messages[i], "Caption", "Caption");
+      node.msg = gINI.GetValue(messages[i], "Message", "Message");
+      node.isMsgItem = true;
+      gQuickChatTree.push_back(node);
+   }
+
+   for(S32 i = 0; i < keys; i++)
+   {
+      string keyName = gINI.GetKeyName(i);
+      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)   // Found message group
+         groups.push_back(keyName);
+   }
+
+   groups.sort(alphaSort);
+
+   // Now find all the individual message definitions for each key -- match "QuickChatMessagesGroup123_Message456"
+   // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
+   // reenigneer those, let's just iterate backwards and leave the render functions alone.
+
+   for(S32 i = groups.size()-1; i >= 0; i--)
+   {
+      Vector<string> messages;
+      for(S32 j = 0; j < keys; j++)
+      {
+         string keyName = gINI.GetKeyName(j);
+         if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
+            messages.push_back(keyName);
+      }
+
+      messages.sort(alphaSort);
+
+      QuickChatNode node;
+      node.depth = 1;      // This is a group node
+      node.keyCode = stringToKeyCode(gINI.GetValue(groups[i], "Key", "A").c_str());
+      node.buttonCode = stringToKeyCode(gINI.GetValue(groups[i], "Button", "Button 1").c_str());
+      node.teamOnly = lcase(gINI.GetValue(groups[i], "MessageType", "Team")) == "team";
+      node.caption = gINI.GetValue(groups[i], "Caption", "Caption");
+      node.msg = "";
+      node.isMsgItem = false;
+      gQuickChatTree.push_back(node);
+
+      for(S32 j = messages.size()-1; j >= 0; j--)
+      {
+         node.depth = 2;   // This is a message node
+         node.keyCode = stringToKeyCode(gINI.GetValue(messages[j], "Key", "A").c_str());
+         node.buttonCode = stringToKeyCode(gINI.GetValue(messages[j], "Button", "Button 1").c_str());
+         node.teamOnly = lcase(gINI.GetValue(messages[j], "MessageType", "Team")) == "team";          // lcase for case insensitivity
+         node.caption = gINI.GetValue(messages[j], "Caption", "Caption");
+         node.msg = gINI.GetValue(messages[j], "Message", "Message");
+         node.isMsgItem = true;
+         gQuickChatTree.push_back(node);
+      }
+   }
+
+   // Add final node.  Last verse, same as the first.
+   gQuickChatTree.push_back(emptynode);
+}
+
+
 static void writeDefaultQuickChatMessages()
 {
    // Are there any QuickChatMessageGroups?  If not, we'll write the defaults.
@@ -540,274 +908,27 @@ static void writeDefaultQuickChatMessages()
 }
 
 
-// Convert a string value to our sfxSets enum
-static sfxSets stringToSFXSet(string sfxSet)
-{
-   if(lcase(sfxSet) == "classic")
-      return sfxClassicSet;
-   else
-      return sfxModernSet;
-}
-
-
-// Convert a string value to a DisplayMode enum value
-static DisplayMode stringToDisplayMode(string mode)
-{
-   if(lcase(mode) == "fullscreen-stretch")
-      return DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-   else if(lcase(mode) == "fullscreen")
-      return DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED;
-   else 
-      return DISPLAY_MODE_WINDOWED;
-}
-
-
-// Convert a string value to our sfxSets enum
-static string displayModeToString(DisplayMode mode)
-{
-   if(mode == DISPLAY_MODE_FULL_SCREEN_STRETCHED)
-      return "Fullscreen-Stretch";
-   else if(mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED)
-      return "Fullscreen";
-   else
-      return "Window";
-}
-
-
-extern Vector<StringTableEntry> gLevelSkipList;
-
 // Option default values are stored here, in the 3rd prarm of the GetValue call
 // This is only called once, during initial initialization
 void loadSettingsFromINI()
 {
    gINI.ReadFile();        // Read the INI file  (journaling of read lines happens within)
 
-   // Remeber that stricmp returns 0 if the strings match!
-   gIniSettings.starsInDistance = (lcase(gINI.GetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
-   gIniSettings.sfxVolLevel = (float) gINI.GetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10)) / 10.0f;
-   gIniSettings.musicVolLevel = (float) gINI.GetValueI("Sounds", "MusicVolume", (S32) (gIniSettings.musicVolLevel * 10)) / 10.0f;
-   gIniSettings.voiceChatVolLevel = (float) gINI.GetValueI("Sounds", "VoiceChatVolume", (S32) (gIniSettings.voiceChatVolLevel * 10)) / 10.0f;
+   loadSoundSettings();
+   loadEffectsSettings();
+   loadGeneralSettings();
+   loadHostConfiguration();
+   loadUpdaterSettings();
+   loadDiagnostics();
 
-   string sfxSet = gINI.GetValue("Sounds", "SFXSet", "Modern");
-   gIniSettings.sfxSet = stringToSFXSet(sfxSet);
-
-   // Bounds checking
-   if(gIniSettings.sfxVolLevel > 1.0)
-      gIniSettings.sfxVolLevel = 1.0;
-   else if(gIniSettings.sfxVolLevel < 0)
-      gIniSettings.sfxVolLevel = 0;
-
-   if(gIniSettings.musicVolLevel > 1.0)
-      gIniSettings.musicVolLevel = 1.0;
-   else if(gIniSettings.musicVolLevel < 0)
-      gIniSettings.musicVolLevel = 0;
-
-   if(gIniSettings.voiceChatVolLevel > 1.0)
-      gIniSettings.voiceChatVolLevel = 1.0;
-   else if(gIniSettings.voiceChatVolLevel < 0)
-      gIniSettings.voiceChatVolLevel = 0;
-
-   if(gIniSettings.alertsVolLevel > 1.0)
-      gIniSettings.alertsVolLevel = 1.0;
-   else if(gIniSettings.alertsVolLevel < 0)
-      gIniSettings.alertsVolLevel = 0;
-
-   
-   gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
-   gIniSettings.oldDisplayMode = gIniSettings.displayMode;
-
-   gIniSettings.controlsRelative = (lcase(gINI.GetValue("Settings", "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
-   gIniSettings.echoVoice = (lcase(gINI.GetValue("Settings", "VoiceEcho",(gIniSettings.echoVoice ? "Yes" : "No"))) == "yes");
-   gIniSettings.showWeaponIndicators = (lcase(gINI.GetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"))) == "yes");
-   gIniSettings.verboseHelpMessages = (lcase(gINI.GetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"))) == "yes");
-   gIniSettings.showKeyboardKeys = (lcase(gINI.GetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"))) == "yes");
-   gIniSettings.joystickType = stringToJoystickType(gINI.GetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType)));
-   gIniSettings.winXPos = max(gINI.GetValueI("Settings", "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
-   gIniSettings.winYPos = max(gINI.GetValueI("Settings", "WindowYPos", gIniSettings.winYPos), 0);
-   gIniSettings.winSizeFact = (F32) gINI.GetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact);
-   gIniSettings.masterAddress = gINI.GetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress);
-   
-   gIniSettings.name = gINI.GetValue("Settings", "Nickname", gIniSettings.name);
-   gIniSettings.password = gINI.GetValue("Settings", "Password", gIniSettings.password);
-
-   gIniSettings.defaultName = gINI.GetValue("Settings", "DefaultName", gIniSettings.defaultName);
-   gIniSettings.lastName = gINI.GetValue("Settings", "LastName", gIniSettings.lastName);
-   gIniSettings.lastPassword = gINI.GetValue("Settings", "LastPassword", gIniSettings.lastPassword);
-   gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
-
-
-   gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
-
-   gIniSettings.hostname = gINI.GetValue("Host", "ServerName", gIniSettings.hostname);
-   gIniSettings.hostaddr = gINI.GetValue("Host", "ServerAddress", gIniSettings.hostaddr);
-   gIniSettings.hostdescr = gINI.GetValue("Host", "ServerDescription", gIniSettings.hostdescr);
-
-   gIniSettings.serverPassword = gINI.GetValue("Host", "ServerPassword", gIniSettings.serverPassword);
-   gIniSettings.adminPassword = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
-   gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
-   gIniSettings.levelDir = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
-   gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
-
-   gIniSettings.useUpdater = gINI.GetValueB("Updater", "UseUpdater", gIniSettings.useUpdater);
-
-   gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
-
-   gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys",              (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
-
-   gIniSettings.logConnectionProtocol = (lcase(gINI.GetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"))) == "yes");
-   gIniSettings.logNetConnection      = (lcase(gINI.GetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"))) == "yes");
-   gIniSettings.logEventConnection    = (lcase(gINI.GetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"))) == "yes");
-   gIniSettings.logGhostConnection    = (lcase(gINI.GetValue("Diagnostics", "LogGhostConnection",    (gIniSettings.logGhostConnection    ? "Yes" : "No"))) == "yes");
-   gIniSettings.logNetInterface       = (lcase(gINI.GetValue("Diagnostics", "LogNetInterface",       (gIniSettings.logNetInterface       ? "Yes" : "No"))) == "yes");
-   gIniSettings.logPlatform           = (lcase(gINI.GetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"))) == "yes");
-   gIniSettings.logNetBase            = (lcase(gINI.GetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"))) == "yes");
-   gIniSettings.logUDP                = (lcase(gINI.GetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"))) == "yes");
-
-   gIniSettings.logFatalError         = (lcase(gINI.GetValue("Diagnostics", "LogFatalError",          (gIniSettings.logFatalError        ? "Yes" : "No"))) == "yes");
-   gIniSettings.logError              = (lcase(gINI.GetValue("Diagnostics", "LogError",               (gIniSettings.logError             ? "Yes" : "No"))) == "yes");
-   gIniSettings.logWarning            = (lcase(gINI.GetValue("Diagnostics", "LogWarning",             (gIniSettings.logWarning           ? "Yes" : "No"))) == "yes");
-   gIniSettings.logConnection         = (lcase(gINI.GetValue("Diagnostics", "LogConnection",          (gIniSettings.logConnection        ? "Yes" : "No"))) == "yes");
-
-   gIniSettings.logLevelLoaded        = (lcase(gINI.GetValue("Diagnostics", "LogLevelLoaded",          (gIniSettings.logLevelLoaded        ? "Yes" : "No"))) == "yes");
-   gIniSettings.logLuaObjectLifecycle = (lcase(gINI.GetValue("Diagnostics", "LogLuaObjectLifecycle",   (gIniSettings.logLuaObjectLifecycle ? "Yes" : "No"))) == "yes");
-   gIniSettings.luaLevelGenerator     = (lcase(gINI.GetValue("Diagnostics", "LuaLevelGenerator",       (gIniSettings.luaLevelGenerator     ? "Yes" : "No"))) == "yes");
-   gIniSettings.luaBotMessage         = (lcase(gINI.GetValue("Diagnostics", "LuaBotMessage",           (gIniSettings.luaBotMessage         ? "Yes" : "No"))) == "yes");
-   gIniSettings.serverFilter          = (lcase(gINI.GetValue("Diagnostics", "ServerFilter",            (gIniSettings.serverFilter          ? "Yes" : "No"))) == "yes");
-
-
-   gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
+   loadTestSettings();
 
    loadKeyBindings();
+   loadForeignServerInfo();    // Info about other servers
+   loadLevels();               // Read levels, if there are any
+   loadLevelSkipList();        // Read level skipList, if there are any
 
-   // Read levels, if there are any...
-   if(gINI.FindKey("Levels") != gINI.noID)
-   {
-      S32 numLevels = gINI.NumValues("Levels");
-      Vector<string> levelValNames(numLevels);
-
-      for(S32 i = 0; i < numLevels; i++)
-         levelValNames.push_back(gINI.ValueName("Levels", i));
-
-      levelValNames.sort(alphaSort);
-
-      string level;
-      for(S32 i = 0; i < numLevels; i++)
-      {
-         level = gINI.GetValue("Levels", levelValNames[i], "");
-         if (level != "")
-            gIniSettings.levelList.push_back(StringTableEntry(level.c_str()));
-      }
-   }
-
-   // Read level deleteList, if there are any.  This could probably be made more efficient by not reading the
-   // valnames in first, but what the heck...
-   if(gINI.FindKey("LevelSkipList") != gINI.noID)
-   {
-      S32 numLevels = gINI.NumValues("LevelSkipList");
-      Vector<string> levelValNames(numLevels);
-
-      for(S32 i = 0; i < numLevels; i++)
-         levelValNames.push_back(gINI.ValueName("LevelSkipList", i));
-
-      string level;
-      for(S32 i = 0; i < numLevels; i++)
-      {
-         level = gINI.GetValue("LevelSkipList", levelValNames[i], "");
-         if (level != "")
-            gLevelSkipList.push_back(StringTableEntry(level.c_str()));
-      }
-   }
-
-   // Add initial node
-   QuickChatNode emptynode;
-   emptynode.depth = 0;    // This is a beginning or ending node
-   emptynode.keyCode = KEY_UNKNOWN;
-   emptynode.buttonCode = KEY_UNKNOWN;
-   emptynode.teamOnly = false;
-   emptynode.caption = "";
-   emptynode.msg = "";
-   gQuickChatTree.push_back(emptynode);
-   emptynode.isMsgItem = false;
-
-   // Read QuickChat messages -- first search for keys matching "QuickChatMessagesGroup123"
-   S32 keys = gINI.GetNumKeys();
-   Vector<string> groups;
-
-   // Next, read any top-level messages
-   Vector<string> messages;
-   for(S32 i = 0; i < keys; i++)
-   {
-      string keyName = gINI.GetKeyName(i);
-      if(keyName.substr(0, 17) == "QuickChat_Message")   // Found message group
-         messages.push_back(keyName);
-   }
-
-   messages.sort(alphaSort);
-
-   for(S32 i = messages.size()-1; i >= 0; i--)
-   {
-      QuickChatNode node;
-      node.depth = 1;   // This is a top-level message node
-      node.keyCode = stringToKeyCode(gINI.GetValue(messages[i], "Key", "A").c_str());
-      node.buttonCode = stringToKeyCode(gINI.GetValue(messages[i], "Button", "Button 1").c_str());
-      node.teamOnly = lcase(gINI.GetValue(messages[i], "MessageType", "Team")) == "team";          // lcase for case insensitivity
-      node.caption = gINI.GetValue(messages[i], "Caption", "Caption");
-      node.msg = gINI.GetValue(messages[i], "Message", "Message");
-      node.isMsgItem = true;
-      gQuickChatTree.push_back(node);
-   }
-
-
-   for(S32 i = 0; i < keys; i++)
-   {
-      string keyName = gINI.GetKeyName(i);
-      if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)   // Found message group
-         groups.push_back(keyName);
-   }
-
-   groups.sort(alphaSort);
-
-   // Now find all the individual message definitions for each key -- match "QuickChatMessagesGroup123_Message456"
-   // quickChat render functions were designed to work with the messages sorted in reverse.  Rather than
-   // reenigneer those, let's just iterate backwards and leave the render functions alone.
-
-   for(S32 i = groups.size()-1; i >= 0; i--)
-   {
-      Vector<string> messages;
-      for(S32 j = 0; j < keys; j++)
-      {
-         string keyName = gINI.GetKeyName(j);
-         if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
-            messages.push_back(keyName);
-      }
-
-      messages.sort(alphaSort);
-
-      QuickChatNode node;
-      node.depth = 1;      // This is a group node
-      node.keyCode = stringToKeyCode(gINI.GetValue(groups[i], "Key", "A").c_str());
-      node.buttonCode = stringToKeyCode(gINI.GetValue(groups[i], "Button", "Button 1").c_str());
-      node.teamOnly = lcase(gINI.GetValue(groups[i], "MessageType", "Team")) == "team";
-      node.caption = gINI.GetValue(groups[i], "Caption", "Caption");
-      node.msg = "";
-      node.isMsgItem = false;
-      gQuickChatTree.push_back(node);
-
-      for(S32 j = messages.size()-1; j >= 0; j--)
-      {
-         node.depth = 2;   // This is a message node
-         node.keyCode = stringToKeyCode(gINI.GetValue(messages[j], "Key", "A").c_str());
-         node.buttonCode = stringToKeyCode(gINI.GetValue(messages[j], "Button", "Button 1").c_str());
-         node.teamOnly = lcase(gINI.GetValue(messages[j], "MessageType", "Team")) == "team";          // lcase for case insensitivity
-         node.caption = gINI.GetValue(messages[j], "Caption", "Caption");
-         node.msg = gINI.GetValue(messages[j], "Message", "Message");
-         node.isMsgItem = true;
-         gQuickChatTree.push_back(node);
-      }
-   }
-
-   // Add final node.  Last verse, same as the first.
-   gQuickChatTree.push_back(emptynode);
+   loadQuickChatMessages();
 
    saveSettingsToINI();      // Save to fill in any missing settings
 }
@@ -1103,11 +1224,13 @@ static void writeINIHeader()
 
 
 
+// Save more commonly altered settings first to make them easier to find
 void saveSettingsToINI()
 {
    writeINIHeader();
 
    writeHost();
+   writeForeignServerInfo();
    writeEffects();
    writeSounds();
    writeSettings();
@@ -1118,7 +1241,9 @@ void saveSettingsToINI()
    writeTesting();
    writePasswordSection();
    writeKeyBindings();
+   
    writeDefaultQuickChatMessages();    // Does nothing if there are already chat messages in the INI
+   
 
    gINI.WriteFile();
 }

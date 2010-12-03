@@ -523,13 +523,25 @@ bool CIniFile::KeyComment( unsigned const keyID, string const comment)
   return false;
 }
 
-bool CIniFile::KeyComment( string const keyname, string const comment)
+bool CIniFile::KeyComment( string const keyname, string const comment, bool const create)
 {
   long keyID = FindKey( keyname);
-  if ( keyID == noID)
-    return false;
+  if ( keyID == noID) {
+    if ( create)
+      keyID = long( AddKeyName( keyname));
+    else
+      return false;
+
+    if (keyID == noID)
+      keyID = FindKey(keyname);
+
+    if (keyID == noID)     
+       return false;
+  }
+
   return KeyComment( unsigned(keyID), comment);
 }
+
 
 string CIniFile::KeyComment( unsigned const keyID, unsigned const commentID) const
 {

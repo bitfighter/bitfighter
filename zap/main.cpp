@@ -911,11 +911,11 @@ void onExit()
    if(gIniSettings.displayMode == DISPLAY_MODE_WINDOWED)
       saveWindowPosition(glutGet(GLUT_WINDOW_X), glutGet(GLUT_WINDOW_Y));
 
-   gINI.WriteFile();
+   saveSettingsToINI();    // Writes settings to the INI, then saves it to disk
 
    NetClassRep::logBitUsage();
    TNL::logprintf("Bye!");
-
+      
    exitGame();
 }
 

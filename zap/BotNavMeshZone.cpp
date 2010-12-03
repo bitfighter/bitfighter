@@ -42,7 +42,7 @@ Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 BotNavMeshZone::BotNavMeshZone()
 {
    mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
-   mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging
+   //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
    mZoneID = gBotNavMeshZones.size();
 
    // Sending too many zones will overwhelm the client.  Zones should only be send after a /dzones command has been issued.

@@ -181,7 +181,7 @@ public:
   unsigned NumKeyComments( string const keyname) const;
   // Add a key comment.
   bool     KeyComment( unsigned const keyID, string const comment);
-  bool     KeyComment( string const keyname, string const comment);
+  bool     KeyComment( string const keyname, string const comment, bool const create = true);
   // Return a key comment.
   string   KeyComment( unsigned const keyID, unsigned const commentID) const;
   string   KeyComment( string const keyname, unsigned const commentID) const;

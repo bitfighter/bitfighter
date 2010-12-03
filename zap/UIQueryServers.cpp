@@ -178,14 +178,34 @@ void QueryServersUserInterface::onActivate()
 }
 
 
+Vector<string> prevServerListFromMaster;
+Vector<string> alwaysPingList;
+
+static S32 sFailedCount = 0;
+
 // Checks for connection to master, and sets up timer to keep running this until it finds one.  Once a connection is located,
 // it fires off a series of requests to the master asking for servers and chat names.
 void QueryServersUserInterface::contactEveryone()
 {
-   Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
-   broadcastPingSendTime = Platform::getRealMilliseconds();
+   mBroadcastPingSendTime = Platform::getRealMilliseconds();
 
-   gClientGame->getNetInterface()->sendPing(broadcastAddress, mNonce);
+   //Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
+   //gClientGame->getNetInterface()->sendPing(broadcastAddress, mNonce);
+
+   // Always ping these servers -- typically a local server
+   for(S32 i = 0; i < alwaysPingList.size(); i++)
+   {
+      Address address(alwaysPingList[i].c_str());
+      gClientGame->getNetInterface()->sendPing(address, mNonce);
+   } 
+
+   // Try to ping the servers from our fallback list if we're having trouble connecting to the master
+   if(sFailedCount >= 3)
+      for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
+      {
+         Address PingAddress1(prevServerListFromMaster[i].c_str());
+         gClientGame->getNetInterface()->sendPing(PingAddress1, mNonce);
+      }
 
    // If we already have a connection to the Master, start the server query... otherwise, don't
    MasterServerConnection *conn = gClientGame->getConnectionToMaster();
@@ -199,11 +219,13 @@ void QueryServersUserInterface::contactEveryone()
       }
       conn->startServerQuery();
       mWaitingForResponseFromMaster = true;
+      sFailedCount = 0;
    }
-   else
+   else     // Not connected
    {
       mMasterRequeryTimer.reset(CheckMasterServerReady);    // Check back in a second to see if we've established a connection to the master
       mWaitingForResponseFromMaster = false;
+      sFailedCount++;
    }
 }
 
@@ -232,6 +254,10 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
          servers.erase(i);    // ...bye-bye!
    }
 
+   // Save servers from the master
+   if(ipList.size() != 0) 
+      prevServerListFromMaster.clear();    // Don't clear if we have nothing to add...
+
    // Now add any new servers
    for(S32 i = 0; i < ipList.size(); i++)
    {
@@ -247,6 +273,8 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 
       if(isHidden)
          break;
+
+      prevServerListFromMaster.push_back( Address(ipList[i]).toString() );
 
       bool found = false;
       // Is this server already in our list?
@@ -290,7 +318,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
 
       // Yes, it was from a local ping
       ServerRef s;
-      s.pingTime = Platform::getRealMilliseconds() - broadcastPingSendTime;
+      s.pingTime = Platform::getRealMilliseconds() - mBroadcastPingSendTime;
       s.state = ServerRef::ReceivedPing;
       s.id = ++mLastUsedServerId;
       s.sendNonce = theNonce;

@@ -1524,21 +1524,23 @@ void playerSelectedCallback(U32 index)
 }
 
 
-void PlayerMenuUserInterface::playerSelected(U32 index)       
+void PlayerMenuUserInterface::playerSelected(U32 index)    // index is the index of the menu item selected, not necessarily the player index   
 {
-   //// Find selected player, and put that value into index
-   //for(S32 i = 0; i < menuItems.size(); i++)
-   //   if(menuItems[i]->getIndex() == index)
-   //   {
-   //      index = i;
-   //      break;
-   //   }
+   // Find selected player, and put that value into index
+   for(S32 i = 0; i < menuItems.size(); i++)
+      if(menuItems[i]->getIndex() == index)
+      {
+         index = i;
+         break;
+      }
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(action == ChangeTeam)
    {
       gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
       gTeamMenuUserInterface.nameToChange = menuItems[index]->getText();
+
+      logprintf("%s",gTeamMenuUserInterface.nameToChange);
    }
    else if(gc)    // action == Kick
    {
