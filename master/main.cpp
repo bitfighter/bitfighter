@@ -262,9 +262,6 @@ protected:
 
 public:
 
-   static S32 gServerListCount;
-   static S32 gClientListCount;
-
    /// Constructor initializes the linked list info with
    /// "safe" values so we don't explode if we destruct
    /// right away.
@@ -290,15 +287,11 @@ public:
 
       if(mIsGameServer)
       {
-         gServerListCount--;
-
          // SERVER_DISCONNECT | timestamp | player/server name
          logprintf(LogConsumer::LogConnection, "SERVER_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
       }
       else
       {
-         gClientListCount--;
-
          // CLIENT_DISCONNECT | timestamp | player name
          logprintf(LogConsumer::LogConnection, "CLIENT_DISCONNECT\t%s\t%s", getTimeStamp().c_str(), mPlayerOrServerName.getString());
       }
@@ -318,7 +311,6 @@ public:
       mPrev = gServerList.mNext->mPrev;
       mNext->mPrev = this;
       mPrev->mNext = this;
-      gServerListCount++;
 
       gNeedToWriteStatus = true;
 
@@ -333,7 +325,6 @@ public:
       mPrev = gClientList.mNext->mPrev;
       mNext->mPrev = this;
       mPrev->mNext = this;
-      gClientListCount++;
 
       gNeedToWriteStatus = true;
 
@@ -522,6 +513,9 @@ public:
          return;
 
       bool first = true;
+      S32 playerCount = 0;
+      S32 serverCount = 0;
+
       FILE *f = fopen(gJasonOutFile.c_str(), "w");
       if(f)
       {
@@ -533,6 +527,8 @@ public:
                fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
                           first ? "" : ", ", sanitizeForJson(walk->mPlayerOrServerName.getString()), 
                           walk->mCSProtocolVersion, walk->mLevelName.getString(), walk->mLevelType.getString(), walk->mPlayerCount);
+               playerCount +=  walk->mPlayerCount;
+               serverCount++;
                first = false;
             }
 
@@ -547,7 +543,7 @@ public:
             }
 
             // Finally, the player and server counts
-            fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d\n}\n", MasterServerConnection::gServerListCount, MasterServerConnection::gClientListCount);
+            fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d\n}\n", serverCount, playerCount);
 
          fflush(f);
          fclose(f);
@@ -1191,11 +1187,6 @@ Vector< GameConnectRequest* > MasterServerConnection::gConnectList;
 
 MasterServerConnection MasterServerConnection::gServerList;
 MasterServerConnection MasterServerConnection::gClientList;
-
-S32 MasterServerConnection::gServerListCount = 0;
-S32 MasterServerConnection::gClientListCount = 0;
-
-
 
 
 void seedRandomNumberGenerator()
