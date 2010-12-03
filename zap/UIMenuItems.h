@@ -93,6 +93,7 @@ public:
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
    const char *getHelp() { return mHelp.c_str(); }
    const char *getText() { return mText.c_str(); }
+   S32 getIndex() { return mIndex; }
    string getString() { return mText; }
 
    virtual void setSecret(bool secret) { /* Do nothing */ }

@@ -58,7 +58,10 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>Pressing enter now advances to next menu item on most menus
 </ul>
-
+<h4>Bugs</h4>
+<ul>
+<li>Fixed issue of wrong player being selected on change teams/kick menus
+</ul>
 */
 
 //-----------------------------------------------------------------------------------
