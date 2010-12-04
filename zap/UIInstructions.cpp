@@ -56,7 +56,7 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 1;
 }
 
-static const S32 NUM_PAGES = 11;
+static const U32 NUM_PAGES = 11;
 
 static const char *pageHeaders[] = {
    "CONTROLS",

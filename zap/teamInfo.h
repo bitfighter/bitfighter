@@ -99,7 +99,7 @@ class LuaTeamInfo : public LuaObject
 {
 
 private:
-   U32 mTeamIndex;
+   S32 mTeamIndex;                  // Robots could potentially be on neutral or hostile team; maybe observer player could too
    Team mTeam;
 
 public:

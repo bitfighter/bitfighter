@@ -859,7 +859,7 @@ public:
       logprintf(LogConsumer::StatisticsFilter, "GAME\t2\t%s\t%s\t%s\t%d\t%d\t%s", 
                     getTimeStamp().c_str(), gameType.getString(), levelName.getString(), teams.size(), players.value, timestr.c_str() );
 
-      // TEAM | stats version | team name | score
+      // TEAM | stats version | team name | score | R | G |B
       for(S32 i = 0; i < teams.size(); i++)
          logprintf("TEAM\t2\t%s\t%d\t%d\t%d\t%d", teams[i].getString(), teamScores[i], (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
    }

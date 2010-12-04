@@ -107,7 +107,7 @@ void EditorInstructionsUserInterface::onActivate()
    Triangulate::Process(sample5o, sample5f);
 }
 
-static const S32 NUM_PAGES = 5;
+static const U32 NUM_PAGES = 5;
 
 
 const char *pageHeadersEditor[] = {

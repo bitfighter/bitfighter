@@ -51,8 +51,8 @@ private:
    typedef GameObject Parent;
 
 public:
-   static const S32 MAX_TEXT_SIZE = 255;
-   static const S32 MIN_TEXT_SIZE = 10;
+   static const U32 MAX_TEXT_SIZE = 255;
+   static const U32 MIN_TEXT_SIZE = 10;
 
    Point pos;            // Location of text
    Point dir;            // Direction text is "facing"

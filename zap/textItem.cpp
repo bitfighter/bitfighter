@@ -35,8 +35,8 @@ TNL_IMPLEMENT_NETOBJECT(TextItem);
 // RDW - These need storage, I believe VC++ pukes on this,
 // so I'm #ifdeffing them.
 #ifndef TNL_OS_WIN32
-const S32 TextItem::MAX_TEXT_SIZE;
-const S32 TextItem::MIN_TEXT_SIZE;
+const U32 TextItem::MAX_TEXT_SIZE;
+const U32 TextItem::MIN_TEXT_SIZE;
 #endif
 
 // Constructor

@@ -1460,7 +1460,7 @@ void processStartupParams()
       maxplay = gCmdLineSettings.maxplayers;
    else
       maxplay = gIniSettings.maxplayers;
-   if (maxplay < 0 || maxplay > MAX_PLAYERS)
+   if(maxplay > MAX_PLAYERS)
       maxplay = MAX_PLAYERS;
    gMaxPlayers = (U32) maxplay;
 

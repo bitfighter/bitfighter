@@ -1551,7 +1551,7 @@ void EditorUserInterface::renderTextEntryOverlay()
       // Check for duplicate IDs if we're in ID entry mode
       if(entryMode == EntryID)
       {
-         S32 id = atoi(mEntryBox.c_str());
+         U32 id = atoi(mEntryBox.c_str());      // mEntryBox has digits only filter applied; ids can only be positive ints
 
          if(id != 0)    // Check for duplicates
          {
@@ -4053,7 +4053,7 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
          for(S32 i = 0; i < mItems.size(); i++)
             if(mItems[i].selected)          // Should only be one
             {
-               S32 id = atoi(mEntryBox.c_str());
+               U32 id = atoi(mEntryBox.c_str());
                if(mItems[i].id != id)       // Did the id actually change?
                {
                   mItems[i].id = id;
@@ -4699,7 +4699,7 @@ void EditorMenuUserInterface::render()
 
 
 // See if item with specified id is selected
-bool EditorUserInterface::itemIsSelected(S32 id)
+bool EditorUserInterface::itemIsSelected(U32 id)
 {
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].selected && mItems[i].mId == id)
@@ -4722,7 +4722,7 @@ void EditorUserInterface::deleteBorderSegs(S32 zoneId)
 }
 
 
-void EditorUserInterface::rebuildBorderSegs(S32 zoneId)
+void EditorUserInterface::rebuildBorderSegs(U32 zoneId)
 {
    deleteBorderSegs(zoneId);
    S32 i = NONE;

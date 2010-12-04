@@ -1577,7 +1577,7 @@ void GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "suspend")
    {
       U32 players = gClientGame->getPlayerCount();
-      if(players == Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
+      if(players == (U32)Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
       {
          displayMessage(gCmdChatColor, "!!! Can't suspend when others are playing");
          return;

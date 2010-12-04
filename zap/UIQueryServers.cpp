@@ -774,9 +774,9 @@ void QueryServersUserInterface::render()
          else
             glColor(green);     // 1 or more players
 
-         if(s.playerCount < 0)
-            drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? / ??");
-         else
+         //if(s.playerCount < 0)      // U32 will never be < 0...
+         //   drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? / ??");
+         //else
             drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d / %d", s.playerCount, s.botCount);
          glColor(white);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());

@@ -1524,9 +1524,9 @@ void playerSelectedCallback(U32 index)
 }
 
 
-void PlayerMenuUserInterface::playerSelected(U32 index)    // index is the index of the menu item selected, not necessarily the player index   
+void PlayerMenuUserInterface::playerSelected(U32 index)
 {
-   // Find selected player, and put that value into index
+   // Find selected player, and put that value into index; compensates for sorting
    for(S32 i = 0; i < menuItems.size(); i++)
       if(menuItems[i]->getIndex() == index)
       {

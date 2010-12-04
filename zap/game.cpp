@@ -549,7 +549,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
       bool first = true;
       bool found = false;
 
-      S32 currLevel = mCurrentLevelIndex;
+      U32 currLevel = mCurrentLevelIndex;
 
       // Cycle through the levels looking for one that matches our player counts
       while(first || mCurrentLevelIndex != currLevel)

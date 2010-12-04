@@ -27,6 +27,8 @@
 #ifndef _SHARED_CONSTANTS_H_
 #define _SHARED_CONSTANTS_H_
 
+//#include "tnlTypes.h"
+
 // Constants that need to be the same on both the game and the master server
 // This file is shared between both code bases.
 
@@ -34,8 +36,8 @@
 #define MAX_PLAYER_NAME_LENGTH 32      // Max length of a player name
 #define MAX_PLAYER_PASSWORD_LENGTH 32
 
-static const int MOTD_LEN = 256;
-static const int MAX_PLAYERS = 128;    // Absolute maximum players ever allowed in a game
+static const unsigned int MOTD_LEN = 256;
+static const unsigned int MAX_PLAYERS = 128;    // Absolute maximum players ever allowed in a game
 
 enum AuthenticationStatus {
    AuthenticationStatusAuthenticatedName,

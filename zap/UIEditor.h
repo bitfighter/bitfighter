@@ -74,7 +74,7 @@ public:
 
    Vector<Point> edges;    
    Vector<Point> corners;
-   S32 mOwner;
+   U32 mOwner;
 
    bool invalid;              // A flag for marking segments in need of processing
 
@@ -596,13 +596,13 @@ public:
 
    
    void deleteBorderSegs(S32 zoneId);     // Clear any borders associated with the specified zone
-   void rebuildBorderSegs(S32 zoneId);
+   void rebuildBorderSegs(U32 zoneId);
    void rebuildAllBorderSegs();
    void checkZones(S32 i, S32 j);
 
    void deleteItem(S32 itemIndex);
 
-   bool itemIsSelected(S32 id);           // See if item with specified id is selected
+   bool itemIsSelected(U32 id);           // See if item with specified id is selected
 
    void runScript();                      // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
