@@ -5518,7 +5518,7 @@ void WorldItem::onGeomChanged()
       F32 size = 120.0f * lineLen * gEditorUserInterface.getGridSize() / max(strWidth, 80.0f);
 
       // Compute text size subject to min and max defined in TextItem
-      textSize = max(min(static_cast<int>(size), TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
+      textSize = max(min(U32(size), TextItem::MAX_TEXT_SIZE), TextItem::MIN_TEXT_SIZE); 
    }
    
    else if(index == ItemBarrierMaker)
