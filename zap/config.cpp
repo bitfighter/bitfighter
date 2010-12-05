@@ -93,11 +93,11 @@ static void loadForeignServerInfo()
 {
 	// AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-	parseString(gINI.GetValue("Servers", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
+	parseString(gINI.GetValue("ForeignServers", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
 	// In case the master server fails, we can use this list to try to find some game servers. 
-	parseString(gINI.GetValue("Servers", "ListFromMaster").c_str(), prevServerListFromMaster, ',');
+	parseString(gINI.GetValue("ForeignServers", "ListFromMaster").c_str(), prevServerListFromMaster, ',');
 }
 
 
