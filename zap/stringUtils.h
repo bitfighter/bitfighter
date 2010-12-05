@@ -50,6 +50,11 @@ string ucase(string strToConvert);
 // File utils
 bool fileExists(const string &path);         // Does file exist?
 
+// Two different variations on joining file and folder names
+string strictjoindir(const string &part1, const string &part2);
+string strictjoindir(const string &part1, const string &part2, const string &part3);
+
+
 };
 
 #endif

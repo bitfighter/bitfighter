@@ -46,8 +46,54 @@ extern ConfigDirectories gConfigDirs;
 LuaLevelGenerator::LuaLevelGenerator(Vector<string> scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
                                      LevelLoader *caller, OGLCONSOLE_Console console)
 {
-   string path = gConfigDirs.levelDir + "/";
-   mFilename = path + scriptArgs[0];
+   string fileName = scriptArgs[0];
+   string fullName;
+   
+   // Look for scripts in levels dir, then in the lua scripts folder
+   // If script has no extension, try .levelgen then .lua
+
+   if(fileName.find('.') != string::npos)       // Filename has an extension
+   {   
+      // Try our level dir
+      fullName = strictjoindir(gConfigDirs.levelDir, fileName);
+      if(fileExists(fullName))
+         goto found;
+
+      // Try our lua scripts dir
+      fullName = strictjoindir(gConfigDirs.luaDir, fileName);
+      if(fileExists(fullName))
+         goto found;
+   }
+   else                                         // Filename has no extension
+   {
+      // Try .levelgen extension
+      fileName = scriptArgs[0] + ".levelgen";
+      fullName = strictjoindir(gConfigDirs.levelDir, fileName);
+      if(fileExists(fullName))
+         goto found;
+
+      fullName = strictjoindir(gConfigDirs.luaDir, fileName);
+      if(fileExists(fullName))
+         goto found;
+
+      // Try .lua extension
+      fileName = scriptArgs[0] + ".lua";
+      fullName = strictjoindir(gConfigDirs.levelDir, fileName);
+      if(fileExists(fullName))
+         goto found;
+
+      fullName = strictjoindir(gConfigDirs.luaDir, fileName);
+      if(fileExists(fullName))
+         goto found;
+   }
+
+   // Script file could not be found; print an error and bail
+   logError("Could not find lua script %s!", scriptArgs[0].c_str());
+   return;
+
+found:      // Found the script, let's run it!
+
+   mFilename = fullName;
    levelGenFile = mFilename.c_str();
    mConsole = console;
    sGridDatabase = gridDatabase;

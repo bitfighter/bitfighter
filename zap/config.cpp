@@ -1318,25 +1318,6 @@ void ConfigDirectories::resolveDirs()
 }
 
 
-// Join without checking for blank parts
-static string strictjoindir(const string &part1, const string &part2)
-{
-   // Does path already have a trailing delimieter?  If so, we'll use that.
-   if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
-      return part1 + part2;
-
-   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
-   return part1 + "/" + part2;
-}
-
-
-// Three arg version
-static string strictjoindir(const string &part1, const string &part2, const string &part3)
-{
-   return strictjoindir(part1, strictjoindir(part2, part3));
-}
-
-
 static bool assignifexists(const string &path)
 {
    if(fileExists(path))

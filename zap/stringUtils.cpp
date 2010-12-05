@@ -24,9 +24,8 @@
 //------------------------------------------------------------------------------------
 
 #include "tnl.h"           // For Vector, types, and dSprintf
-#include <string>
-#include <sstream>
-#include <iostream>
+#include <string>          // For... everything.  This is stringUtils, after all!
+#include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
 
 using namespace std;
@@ -88,16 +87,6 @@ string ucase(string strToConvert)
 }
 
 
-// Ok, not strictly a string util, but do we really want a fileutils just for this??
-bool fileExists(const string &path)
-{
-   struct stat st;
-   return (stat(path.c_str(), &st) == 0);               // Does path exist?
-}
-
-
-
-
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s
 Vector<string> parseString(const string &line)
@@ -127,21 +116,32 @@ Vector<string> parseString(const string &line)
   return result;
 }
 
-/*
-int main() {
-  vector<string> result = parse("\"foo bar\" baz quux \"wibble\" \"1 2 3\"");
-  for (int i = 0; i < result.size(); i++) {
-    cout << "Item " << i+1 << ": " << result[i] << endl;
-  }
+
+// Ok, not strictly a string util, but do we really want a fileutils just for this??
+bool fileExists(const string &path)
+{
+   struct stat st;
+   return (stat(path.c_str(), &st) == 0);               // Does path exist?
 }
-*/
 
-//Item 1: foo bar
-//Item 2: baz
-//Item 3: quux
-//Item 4: wibble
-//Item 5: 1 2 3
 
+// Join without checking for blank parts
+string strictjoindir(const string &part1, const string &part2)
+{
+   // Does path already have a trailing delimeter?  If so, we'll use that.
+   if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
+      return part1 + part2;
+
+   // Otherwise, join with a delimeter.  This works on Win, OS X, and Linux.
+   return part1 + "/" + part2;
+}
+
+
+// Three arg version
+string strictjoindir(const string &part1, const string &part2, const string &part3)
+{
+   return strictjoindir(part1, strictjoindir(part2, part3));
+}
 
 
 };

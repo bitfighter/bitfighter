@@ -775,8 +775,10 @@ void EditorUserInterface::runLevelGenScript()
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
 void EditorUserInterface::runScript(const Vector<string> &cmdAndArgs)
 {
+   // Do we need this assignment?  The constructor runs the script, so there's nothing we need to with our levelgen object...
+
    // Load the items
-   LuaLevelGenerator levelgen = LuaLevelGenerator(cmdAndArgs, mGridSize, getGridDatabase(), this, gConsole);
+   /*LuaLevelGenerator levelgen = */LuaLevelGenerator(cmdAndArgs, mGridSize, getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -987,7 +989,8 @@ void EditorUserInterface::generateBotZones()
    Vector<WorldItem> zones;
    mLoadTarget = &zones;
 
-   LuaLevelGenerator levelgen = LuaLevelGenerator(scriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+   // Do we need this assignment?  The constructor runs the script, so there's nothing we need to with our levelgen object...
+   /*LuaLevelGenerator levelgen = */LuaLevelGenerator(scriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
 
    for(S32 i = 0; i < zones.size(); i++)
       zones[i].setExtent(Rect(zones[i].getVerts()));

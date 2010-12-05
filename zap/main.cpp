@@ -58,6 +58,13 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>Pressing enter now advances to next menu item on most menus
 </ul>
+
+<h4>Scripting</h4>
+<ul>
+<li>Levelgens can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder
+<li>Scripts can be run from the console with run <script> {args}
+</ul>
+
 <h4>Bugs</h4>
 <ul>
 <li>Fixed issue of wrong player being selected on change teams/kick menus
