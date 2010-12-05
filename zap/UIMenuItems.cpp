@@ -31,24 +31,6 @@
 namespace Zap
 {
 
-//// Convert string to lower case
-//string lcase(string strToConvert)
-//{
-//   for(U32 i = 0; i < strToConvert.length(); i++)
-//      strToConvert[i] = tolower(strToConvert[i]);
-//   return strToConvert;
-//}
-//
-//
-//// Convert string to upper case
-//string ucase(string strToConvert)
-//{
-//   for(U32 i = 0; i < strToConvert.length(); i++)
-//      strToConvert[i] = toupper(strToConvert[i]);
-//   return strToConvert;
-//}
-
-
 extern void glColor(const Color &c, float alpha = 1.0);
 
 void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
