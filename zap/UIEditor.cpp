@@ -291,6 +291,12 @@ EditorUserInterface::~EditorUserInterface()
 }
 
 
+void EditorUserInterface::saveUndoState()
+{
+   saveUndoState(mItems, false);
+}
+
+
 // Save the current state of the editor objects for later undoing
 void EditorUserInterface::saveUndoState(const Vector<WorldItem> &items, bool cameFromRedo)
 {
@@ -744,54 +750,48 @@ void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
 }
 
 
-void EditorUserInterface::runScript()
+void EditorUserInterface::runLevelGenScript()
 {
-   // Parse mScriptLine
-
+   // Parse mScriptLine 
    if(mScriptLine == "")      // No script included!!
       return;
 
-   OGLCONSOLE_Output(gConsole, "Running levelgen script %s\n", mScriptLine.c_str());
+   OGLCONSOLE_Output(gConsole, "Running script %s\n", mScriptLine.c_str());
 
-   Vector<string> scriptArgs;
-
-   string::size_type lastPos = mScriptLine.find_first_not_of(" ", 0);       // Skip leading delimiters
-   string::size_type pos     = mScriptLine.find_first_of(" ", lastPos);     // Find first non-space
-
-   while (string::npos != pos || string::npos != lastPos)
-   {
-      scriptArgs.push_back(mScriptLine.substr(lastPos, pos - lastPos));    // Found a token
-
-      lastPos = mScriptLine.find_first_not_of(" ", pos);      // Skip spaces...  Note the "not_of"
-      pos = mScriptLine.find_first_of(" ", lastPos);          // Find next non-space
-   }
+   Vector<string> scriptArgs = parseString(mScriptLine);
 
    clearLevelGenItems();      // Clear out any items from the last run
 
    // Set the load target to the levelgen list, as that's where we want our items stored
    mLoadTarget = &mLevelGenItems;
 
+   runScript(scriptArgs);
+
+   // Reset the target
+   mLoadTarget = &mItems;
+}
+
+
+// Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
+void EditorUserInterface::runScript(const Vector<string> &cmdAndArgs)
+{
    // Load the items
-   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.levelDir + "/", scriptArgs, mGridSize, getGridDatabase(), this, gConsole);
+   LuaLevelGenerator levelgen = LuaLevelGenerator(cmdAndArgs, mGridSize, getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
    // Bulk-process new items, walls first
    for(S32 i = 0; i < mLoadTarget->size(); i++)
-      if(mLevelGenItems[i].index == ItemBarrierMaker)
+      if((*mLoadTarget)[i].index == ItemBarrierMaker)
       {
-         if(mLevelGenItems[i].vertCount() < 2)      // Invalid item; delete
+         if((*mLoadTarget)[i].vertCount() < 2)      // Invalid item; delete
          {
-            mLevelGenItems.erase_fast(i);
+            (*mLoadTarget).erase_fast(i);
             i--;
          }
 
-         mLevelGenItems[i].processEndPoints();
+         (*mLoadTarget)[i].processEndPoints();
       }
-
-
-   // Reset the target
-   mLoadTarget = &mItems;
 }
 
 
@@ -980,15 +980,14 @@ void EditorUserInterface::generateBotZones()
       }
 
    // For the moment, base zones are generated via Sam's Lua script, now parked in Lua folder
-   Vector<string> ScriptArgs;
-   ScriptArgs.clear();
-   ScriptArgs.push_back("build_navzones.lua");
+   Vector<string> scriptArgs;
+   scriptArgs.clear();
+   scriptArgs.push_back("build_navzones.lua");
 
    Vector<WorldItem> zones;
    mLoadTarget = &zones;
 
-   LuaLevelGenerator levelgen = LuaLevelGenerator(gConfigDirs.luaDir + "/", ScriptArgs, getGridSize(), 
-                                                   getGridDatabase(), this, gConsole);
+   LuaLevelGenerator levelgen = LuaLevelGenerator(scriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
 
    for(S32 i = 0; i < zones.size(); i++)
       zones[i].setExtent(Rect(zones[i].getVerts()));
@@ -1036,7 +1035,6 @@ void EditorUserInterface::generateBotZones()
       }
    }
 
-
    // Initialize the zones
    for(S32 i = 0; i < zones.size(); i++)
       zones[i].initializeGeom();
@@ -1051,9 +1049,9 @@ void EditorUserInterface::generateBotZones()
 
 // Handle console input
 // Valid commands: help, run, clear, quit, exit
-void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
+void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
 {
-   Vector<string> words = parseString(cmd);
+   Vector<string> words = parseString(cmdline);
    string cmd = lcase(words[0]);
 
    if(cmd == "quit" || cmd == "exit") 
@@ -1063,7 +1061,17 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
       OGLCONSOLE_Output(console, "Commands: help; run; clear; genzones; quit\n");
 
    else if(cmd == "run")
-      gEditorUserInterface.runScript();
+   {
+      if(words.size() == 1)      // Too few args
+         OGLCONSOLE_Output(console, "Usage: run <script_name> {args}\n");
+      else
+      {
+         gEditorUserInterface.saveUndoState();
+         words.erase(0);         // Get rid of "run", leaving script name and args
+         gEditorUserInterface.runScript(words);
+         gEditorUserInterface.rebuildEverything();
+      }
+   }   
 
    else if(cmd == "clear")
       gEditorUserInterface.clearLevelGenItems();
@@ -1072,7 +1080,7 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
       gEditorUserInterface.generateBotZones();
 
     else
-      OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd);
+      OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd.c_str());
 }
 
 
@@ -1170,7 +1178,9 @@ void EditorUserInterface::onReactivate()
 
    if(mCurrentTeam >= mTeams.size())
       mCurrentTeam = 0;
-   
+
+   OGLCONSOLE_EnterKey(processEditorConsoleCommand);     // Restore callback for processing console commands
+
    actualizeScreenMode(true);
 }
 
@@ -3912,7 +3922,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       else if(getKeyState(KEY_CTRL))        // Ctrl-R - Run levelgen script, or clear last results
       {
          if(mLevelGenItems.size() == 0)
-            runScript();
+            runLevelGenScript();
          else
             clearLevelGenItems();
       }

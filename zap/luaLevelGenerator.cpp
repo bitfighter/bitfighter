@@ -39,9 +39,14 @@ static LevelLoader *mCaller;
 
 const char *levelGenFile;     // Exists here so exception handler will know what file we were running
 
+
+extern ConfigDirectories gConfigDirs;
+
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(string path, Vector<string> scriptArgs, F32 gridSize, GridDatabase *gridDatabase, LevelLoader *caller, OGLCONSOLE_Console console)
+LuaLevelGenerator::LuaLevelGenerator(Vector<string> scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
+                                     LevelLoader *caller, OGLCONSOLE_Console console)
 {
+   string path = gConfigDirs.levelDir + "/";
    mFilename = path + scriptArgs[0];
    levelGenFile = mFilename.c_str();
    mConsole = console;
@@ -312,7 +317,8 @@ extern string joindir(const string &path, const string &filename);
 // TODO: This is almost identical to the same-named function in robot.cpp, but each call their own logError function.  How can we combine?
 bool LuaLevelGenerator::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
-   // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
+   // Load our standard robot library  
+   // TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
    string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
 

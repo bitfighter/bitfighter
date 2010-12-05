@@ -701,10 +701,8 @@ bool ServerGame::loadLevel(string filename)
    if(getGameType()->mScriptArgs.size() > 0)
    {
       // The script file will be the first argument, subsequent args will be passed on to the script.
-      // We'll assume that the script lives in the same folder as the level file.  Hope we don't need to get too fancy here...
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(getPathFromFilename(filename), getGameType()->mScriptArgs, getGridSize(), 
-                                                     getGridDatabase(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
    }
 
    getGameType()->onLevelLoaded();

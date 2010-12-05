@@ -498,6 +498,8 @@ public:
    bool mNeedToSave;          // Have we modified the level such that we need to save?
    U32 mAllUndoneUndoLevel;   // What undo level reflects everything back just the
 
+   void saveUndoState();
+
    char mGameType[gameTypeLen];
    Vector<S32> mGameTypeArgs;
 
@@ -604,7 +606,8 @@ public:
 
    bool itemIsSelected(U32 id);           // See if item with specified id is selected
 
-   void runScript();                      // Run associated levelgen script
+   void runScript(const Vector<string> &cmdAndArgs);        
+   void runLevelGenScript();              // Run associated levelgen script
    void copyScriptItemsToEditor();        // Insert these items into the editor as first class items that can be manipulated or saved
    void clearLevelGenItems();             // Clear any previously created levelgen items
 
