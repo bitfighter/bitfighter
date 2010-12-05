@@ -41,7 +41,10 @@ std::string itos(S32 i);
 
 Vector<string> parseString(const string &line);
 
-bool caseInsensitiveStringCompare(const string &str1, const string &str2);
+string lcase(string strToConvert);
+string ucase(string strToConvert);
+
+//bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
 };
 

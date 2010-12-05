@@ -49,24 +49,6 @@
 namespace Zap
 {
 
-// Convert string to lower case
-string lcase(string strToConvert)
-{
-   for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = tolower(strToConvert[i]);
-   return strToConvert;
-}
-
-
-// Convert string to upper case
-string ucase(string strToConvert)
-{
-   for(U32 i = 0; i < strToConvert.length(); i++)
-      strToConvert[i] = toupper(strToConvert[i]);
-   return strToConvert;
-}
-
-
 // Sorts alphanumerically by menuItem.value
 S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
 {

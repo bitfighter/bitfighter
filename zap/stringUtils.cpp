@@ -55,18 +55,37 @@ string itos(S32 i)
 }
 
 
-// From http://stackoverflow.com/questions/11635/case-insensitive-string-comparison-in-c
-bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
-    if (str1.size() != str2.size()) {
-        return false;
-    }
-    for (string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
-        if (tolower(*c1) != tolower(*c2)) {
-            return false;
-        }
-    }
-    return true;
+//// From http://stackoverflow.com/questions/11635/case-insensitive-string-comparison-in-c
+//bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
+//    if (str1.size() != str2.size()) {
+//        return false;
+//    }
+//    for (string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
+//        if (tolower(*c1) != tolower(*c2)) {
+//            return false;
+//        }
+//    }
+//    return true;
+//}
+
+
+// Convert string to lower case
+string lcase(string strToConvert)
+{
+   for(U32 i = 0; i < strToConvert.length(); i++)
+      strToConvert[i] = tolower(strToConvert[i]);
+   return strToConvert;
 }
+
+
+// Convert string to upper case
+string ucase(string strToConvert)
+{
+   for(U32 i = 0; i < strToConvert.length(); i++)
+      strToConvert[i] = toupper(strToConvert[i]);
+   return strToConvert;
+}
+
 
 
 

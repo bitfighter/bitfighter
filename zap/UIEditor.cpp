@@ -1054,20 +1054,21 @@ void EditorUserInterface::generateBotZones()
 void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
    Vector<string> words = parseString(cmd);
+   string cmd = lcase(words[0]);
 
-   if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
+   if(cmd == "quit" || cmd == "exit") 
       OGLCONSOLE_HideConsole();
 
-   else if(!strncmp(cmd, "help", 4) || !strncmp(cmd, "?", 1)) 
+   else if(cmd == "help" || cmd == "?") 
       OGLCONSOLE_Output(console, "Commands: help; run; clear; genzones; quit\n");
 
-   else if(!strncmp(cmd, "run", 3))
+   else if(cmd == "run")
       gEditorUserInterface.runScript();
 
-   else if(!strncmp(cmd, "clear", 3))
+   else if(cmd == "clear")
       gEditorUserInterface.clearLevelGenItems();
 
-   else if(!strncmp(cmd, "genzones", 8))
+   else if(cmd == "genzones")
       gEditorUserInterface.generateBotZones();
 
     else
