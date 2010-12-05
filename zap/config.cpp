@@ -97,7 +97,7 @@ static void loadForeignServerInfo()
 
    // These are the servers we found last time we were able to contact the master.
 	// In case the master server fails, we can use this list to try to find some game servers. 
-	parseString(gINI.GetValue("ForeignServers", "ListFromMaster").c_str(), prevServerListFromMaster, ',');
+	parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
 }
 
 
