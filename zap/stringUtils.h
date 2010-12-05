@@ -26,7 +26,7 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
-#include "tnl.h"     // For types and dSprintf
+#include "tnl.h"     // For Vector
 
 namespace Zap
 {
@@ -40,6 +40,8 @@ std::string ExtractFilename(const std::string& path);
 std::string itos(S32 i);
 
 Vector<string> parseString(const string &line);
+
+bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
 };
 

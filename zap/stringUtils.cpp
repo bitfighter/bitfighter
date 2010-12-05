@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "tnl.h"     // For types and dSprintf
+#include "tnl.h"     // For Vector, types, and dSprintf
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -53,6 +53,21 @@ string itos(S32 i)
    dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
+
+
+// From http://stackoverflow.com/questions/11635/case-insensitive-string-comparison-in-c
+bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
+    if (str1.size() != str2.size()) {
+        return false;
+    }
+    for (string::const_iterator c1 = str1.begin(), c2 = str2.begin(); c1 != str1.end(); ++c1, ++c2) {
+        if (tolower(*c1) != tolower(*c2)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
