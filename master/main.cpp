@@ -347,7 +347,7 @@ public:
    // Check username & password against database
    PHPBB3AuthenticationStatus verifyCredentials(string &username, string password)
    {
-      static Authenticator authenticator;
+      Authenticator authenticator;
 
       // Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
       //		    1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
@@ -376,7 +376,7 @@ public:
       // Check name & pw against database
    PHPBB3AuthenticationStatus verifyCredentials(string name, string password)
    {
-      return WrongPassword; //Unsupported;
+      return Unsupported;
    }
 #endif
 
@@ -891,6 +891,30 @@ public:
    }
 
 
+   // From http://www.codeproject.com/KB/stl/stdstringtrim.aspx
+   void trim(string &str)
+   {
+      string::size_type pos = str.find_last_not_of(' ');
+      if(pos != string::npos) 
+      {
+         str.erase(pos + 1);
+         pos = str.find_first_not_of(' ');
+         if(pos != string::npos) str.erase(0, pos);
+      }
+      else str.erase(str.begin(), str.end());
+   }
+
+
+   string cleanName(string name)
+   {
+      trim(name);
+      if(name == "")
+         name = "ChumpChange";
+
+      return name;
+   }
+
+
    bool readConnectRequest(BitStream *bstream, NetConnection::TerminationReason &reason)
    {
       if(!Parent::readConnectRequest(bstream, reason))
@@ -941,7 +965,7 @@ public:
          mLevelType = readstr;
 
          bstream->readString(readstr);
-         mPlayerOrServerName = readstr;
+         mPlayerOrServerName = cleanName(readstr).c_str();
 
          bstream->readString(readstr);
 
@@ -955,7 +979,7 @@ public:
       else     // Not a server? Must be a client
       {
          bstream->readString(readstr);
-         mPlayerOrServerName = readstr;
+         mPlayerOrServerName = cleanName(readstr).c_str();
 
          if(mCMProtocolVersion <= 2)
             linkToClientList();
