@@ -336,6 +336,9 @@ void EditorUserInterface::undo(bool addToRedoStack)
    if(!undoAvailable())
       return;
 
+   mSnapVertex_i = NONE;
+   mSnapVertex_j = NONE;
+
    if(mLastUndoIndex == mLastRedoIndex && !mRedoingAnUndo)
    {
       saveUndoState(mItems);
@@ -357,6 +360,9 @@ void EditorUserInterface::redo()
 {
    if(mLastRedoIndex != mLastUndoIndex)      // If there's a redo state available...
    {
+      mSnapVertex_i = NONE;
+      mSnapVertex_j = NONE;
+
       mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
    
@@ -1073,6 +1079,7 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
          words.erase(0);         // Get rid of "run", leaving script name and args
          gEditorUserInterface.runScript(words);
          gEditorUserInterface.rebuildEverything();
+         gEditorUserInterface.syncUnmovedItems();
       }
    }   
 
@@ -1127,7 +1134,7 @@ void EditorUserInterface::onActivate()
    loadLevel();
    setCurrentTeam(0);
 
-   mUnmovedItems = mItems;
+   syncUnmovedItems();
 
    mSnapDisabled = false;      // Hold [space] to temporarily disable snapping
 
@@ -1157,6 +1164,11 @@ void EditorUserInterface::onActivate()
    actualizeScreenMode(false); 
 }
 
+
+void EditorUserInterface::syncUnmovedItems()
+{
+   mUnmovedItems = mItems;
+}
 
 void EditorUserInterface::onDeactivate()
 {
@@ -3120,7 +3132,7 @@ void EditorUserInterface::onMouseDragged(S32 x, S32 y)
       mItems.push_back(item);      // Add our new item to the master item list
       mItems.sort(geometricSort);  // So things will render in the proper order
       mDraggingDockItem = NONE;    // Because now we're dragging a real item
-      mUnmovedItems = mItems;      // So we know where things were so we know where to render them while being dragged
+      syncUnmovedItems();          // So we know where things were so we know where to render them while being dragged
       validateLevel();             // Check level for errors
 
       // Because we sometimes have trouble finding an item when we drag it off the dock, after it's been sorted,
@@ -3880,7 +3892,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          }
      }     // end mouse not on dock block, doc
 
-     mUnmovedItems = mItems;
+     syncUnmovedItems();
      findSnapVertex();     // Update snap vertex in the event an item was selected
 
    }     // end if keyCode == MOUSE_LEFT

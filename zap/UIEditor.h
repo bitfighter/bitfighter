@@ -503,6 +503,8 @@ public:
    char mGameType[gameTypeLen];
    Vector<S32> mGameTypeArgs;
 
+   void syncUnmovedItems();
+
    Color getTeamColor(S32 team);     // Return a color based on team index (needed by editor instructions)
    bool isFlagGame(char *mGameType);
    bool isTeamFlagGame(char *mGameType);
