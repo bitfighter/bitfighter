@@ -1053,6 +1053,8 @@ void EditorUserInterface::generateBotZones()
 // Valid commands: help, run, clear, quit, exit
 void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {
+   Vector<string> words = parseString(cmd);
+
    if(!strncmp(cmd, "quit", 4) || !strncmp(cmd, "exit", 4)) 
       OGLCONSOLE_HideConsole();
 
