@@ -25,7 +25,10 @@
 
 #include "tnl.h"     // For types and dSprintf
 #include <string>
+#include <sstream>
+#include <iostream>
 
+using namespace std;
 using namespace TNL;
 
 namespace Zap
@@ -33,23 +36,70 @@ namespace Zap
 
 // Collection of useful string things
 
-std::string ExtractDirectory( const std::string& path )
+string ExtractDirectory( const string& path )
 {
   return path.substr( 0, path.find_last_of( '\\' ) + 1 );
 }
 
-std::string ExtractFilename( const std::string& path )
+string ExtractFilename( const string& path )
 {
   return path.substr( path.find_last_of( '\\' ) + 1 );
 }
 
 
-std::string itos(S32 i)
+string itos(S32 i)
 {
    char outString[100];
    dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
+
+
+// Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
+// Parses a string on whitespace, except when inside "s
+Vector<string> parseString(const string &line)
+{
+  Vector<string> result;
+
+  string          item;
+  stringstream    ss(line);
+
+  while(ss >> item){
+      if (item[0]=='"') {
+      int lastItemPosition = item.length() - 1;
+      if (item[lastItemPosition]!='"') {
+        // read the rest of the double-quoted item
+        string restOfItem;
+        getline(ss, restOfItem, '"');
+        item += restOfItem;
+      }
+      // otherwise, we had a single word that was quoted. In any case, we now
+      // have the item in quotes; remove them
+      item = item.substr(1, lastItemPosition-1);
+    }
+    // item is "fully cooked" now
+    result.push_back(item);
+
+  }
+  return result;
+}
+
+/*
+int main() {
+  vector<string> result = parse("\"foo bar\" baz quux \"wibble\" \"1 2 3\"");
+  for (int i = 0; i < result.size(); i++) {
+    cout << "Item " << i+1 << ": " << result[i] << endl;
+  }
+}
+*/
+
+//Item 1: foo bar
+//Item 2: baz
+//Item 3: quux
+//Item 4: wibble
+//Item 5: 1 2 3
+
+
 
 };
 
