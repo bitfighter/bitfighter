@@ -29,8 +29,6 @@
 #include "quickChat.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
 
-#include <sys/stat.h>      // For testing existence of folders
-
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
 #endif
@@ -1339,20 +1337,9 @@ static string strictjoindir(const string &part1, const string &part2, const stri
 }
 
 
-static bool exists(const string &path)
-{
-   struct stat st;
-
-   if(stat(path.c_str(), &st) == 0 )               // Does path exist?
-      return true;                                 // Yes -- return it
-   else
-      return false;
-}
-
-
 static bool assignifexists(const string &path)
 {
-   if(exists(path))
+   if(fileExists(path))
    {
       gConfigDirs.levelDir = path;
       return true;

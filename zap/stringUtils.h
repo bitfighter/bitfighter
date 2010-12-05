@@ -46,6 +46,10 @@ string ucase(string strToConvert);
 
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
+
+// File utils
+bool fileExists(const string &path);         // Does file exist?
+
 };
 
 #endif

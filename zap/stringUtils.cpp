@@ -23,10 +23,11 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "tnl.h"     // For Vector, types, and dSprintf
+#include "tnl.h"           // For Vector, types, and dSprintf
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <sys/stat.h>      // For testing existence of folders
 
 using namespace std;
 using namespace TNL;
@@ -84,6 +85,14 @@ string ucase(string strToConvert)
    for(U32 i = 0; i < strToConvert.length(); i++)
       strToConvert[i] = toupper(strToConvert[i]);
    return strToConvert;
+}
+
+
+// Ok, not strictly a string util, but do we really want a fileutils just for this??
+bool fileExists(const string &path)
+{
+   struct stat st;
+   return (stat(path.c_str(), &st) == 0);               // Does path exist?
 }
 
 
