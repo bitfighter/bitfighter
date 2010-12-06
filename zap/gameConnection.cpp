@@ -407,7 +407,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    {
       msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
       // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
-      if(type == (U32)LevelChangePassword && !strcmp(param.getString(), ""))
+      if(!strcmp(param.getString(), ""))
       {
          for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
             if(!walk->isLevelChanger())
@@ -420,7 +420,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
             if(walk->isLevelChanger() && (! walk->isAdmin()))
             {
                walk->setIsLevelChanger(false);
-               walk->s2cSetIsLevelChanger(false, true);     // not silent
+               walk->s2cSetIsLevelChanger(false, false);
             }
       }
    }
