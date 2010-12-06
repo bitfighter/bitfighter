@@ -181,7 +181,11 @@ void QueryServersUserInterface::onActivate()
 Vector<string> prevServerListFromMaster;
 Vector<string> alwaysPingList;
 
-static S32 sFailedCount = 0;
+static U32 sFailedCount = 100; //start with some errors until connected to server
+//  sFailedCount is unsigned, U32_MAX + 1 overflows to zero
+
+//used for MasterServerConnection::onConnectionEstablished()
+void queryServerResetErrorCount(){ sFailedCount = 0; }
 
 // Checks for connection to master, and sets up timer to keep running this until it finds one.  Once a connection is located,
 // it fires off a series of requests to the master asking for servers and chat names.
@@ -200,12 +204,14 @@ void QueryServersUserInterface::contactEveryone()
    } 
 
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(sFailedCount >= 3)
+   if(sFailedCount >= 2)
       for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
       {
          Address PingAddress1(prevServerListFromMaster[i].c_str());
          gClientGame->getNetInterface()->sendPing(PingAddress1, mNonce);
       }
+
+   if(sFailedCount != U32_MAX) sFailedCount++; //don't overflow
 
    // If we already have a connection to the Master, start the server query... otherwise, don't
    MasterServerConnection *conn = gClientGame->getConnectionToMaster();
@@ -219,13 +225,11 @@ void QueryServersUserInterface::contactEveryone()
       }
       conn->startServerQuery();
       mWaitingForResponseFromMaster = true;
-      sFailedCount = 0;
    }
    else     // Not connected
    {
       mMasterRequeryTimer.reset(CheckMasterServerReady);    // Check back in a second to see if we've established a connection to the master
       mWaitingForResponseFromMaster = false;
-      sFailedCount++;
    }
 }
 
@@ -255,8 +259,10 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
    }
 
    // Save servers from the master
-   if(ipList.size() != 0) 
+   if(ipList.size() != 0) {
       prevServerListFromMaster.clear();    // Don't clear if we have nothing to add...
+      sFailedCount = 0; //we have got non-empty list from master, set error count to zero.
+   }
 
    // Now add any new servers
    for(S32 i = 0; i < ipList.size(); i++)
