@@ -621,7 +621,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
-   if(isLevelChanger && !granted)
+   if(isLevelChanger() && !granted)
       gGameUserInterface.displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    setIsLevelChanger(granted);
