@@ -98,6 +98,7 @@ QueryServersUserInterface::QueryServersUserInterface()
    mSortAscending = true;
    mRecievedListOfServersFromMaster = false;
    mouseScrollTimer.setPeriod(10 * MenuUserInterface::MOUSE_SCROLL_INTERVAL);
+   mNoMasterTimer.setPeriod(5000);     // 5 seconds
 
    mServersPerPage = 8;    // To start with, anyway...
 
@@ -138,6 +139,8 @@ void QueryServersUserInterface::onActivate()
    mJustMovedMouse = false;
    mDraggingDivider = false;
    mAnnounced = false;
+
+   mNoMasterTimer.reset();
 
    mPage = 0;     // Start off showing the first page, as expected
 
@@ -181,8 +184,6 @@ void QueryServersUserInterface::onActivate()
 Vector<string> prevServerListFromMaster;
 Vector<string> alwaysPingList;
 
-static S32 sFailedCount = 0;
-
 // Checks for connection to master, and sets up timer to keep running this until it finds one.  Once a connection is located,
 // it fires off a series of requests to the master asking for servers and chat names.
 void QueryServersUserInterface::contactEveryone()
@@ -199,14 +200,6 @@ void QueryServersUserInterface::contactEveryone()
       gClientGame->getNetInterface()->sendPing(address, mNonce);
    } 
 
-   // Try to ping the servers from our fallback list if we're having trouble connecting to the master
-   if(sFailedCount >= 3)
-      for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
-      {
-         Address PingAddress1(prevServerListFromMaster[i].c_str());
-         gClientGame->getNetInterface()->sendPing(PingAddress1, mNonce);
-      }
-
    // If we already have a connection to the Master, start the server query... otherwise, don't
    MasterServerConnection *conn = gClientGame->getConnectionToMaster();
 
@@ -219,13 +212,11 @@ void QueryServersUserInterface::contactEveryone()
       }
       conn->startServerQuery();
       mWaitingForResponseFromMaster = true;
-      sFailedCount = 0;
    }
    else     // Not connected
    {
       mMasterRequeryTimer.reset(CheckMasterServerReady);    // Check back in a second to see if we've established a connection to the master
       mWaitingForResponseFromMaster = false;
-      sFailedCount++;
    }
 }
 
@@ -385,6 +376,18 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    U32 elapsedTime = Platform::getRealMilliseconds() - time;
    time = Platform::getRealMilliseconds();
    mouseScrollTimer.update(timeDelta);
+
+   bool connectedToMaster = gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished();
+
+   // After 5 seconds, if we are still not connected to the master, we'll load our fallback server list
+   if(mNoMasterTimer.update(timeDelta) && !connectedToMaster)
+   {
+      for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
+      {
+         Address PingAddress1(prevServerListFromMaster[i].c_str());
+         gClientGame->getNetInterface()->sendPing(PingAddress1, mNonce);
+      }
+   }
 
    // Timeout old pings and queries
    for(S32 i = 0; i < servers.size(); i++)

@@ -42,7 +42,7 @@ private:
 public:
    Timer(U32 period = 0) { mCurrentCounter = mPeriod = period; }     // Constructor
 
-   bool update(U32 timeDelta)    // Update timer in idle loop -- returns true if timer has expired, false if there's still time left
+   bool update(U32 timeDelta)    // Update timer in idle loop -- returns true if timer has just expired, false if there's still time left
    {
       if(mCurrentCounter == 0)
          return false;

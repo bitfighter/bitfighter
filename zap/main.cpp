@@ -62,7 +62,9 @@ XXX need to document timers, new luavec stuff XXX
 <h4>Scripting</h4>
 <ul>
 <li>Levelgens can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder
-<li>Scripts can be run from the console with run <script> {args}
+<li>Levelgens style scripts can be run from the console with run <script> {args}.  
+Scripts can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder.<br>
+Specifying the extension is optional.
 </ul>
 
 <h4>Bugs</h4>

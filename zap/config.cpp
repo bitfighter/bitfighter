@@ -106,7 +106,8 @@ static void writeForeignServerInfo()
    if(gINI.NumKeyComments("ForeignServers") == 0)
    {
       gINI.KeyComment("ForeignServers", "----------------");
-      gINI.KeyComment("ForeignServers", " AlwaysPingList - Always try to contact these servers, even if they are not listed by the master");
+      gINI.KeyComment("ForeignServers", " AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
+      gINI.KeyComment("ForeignServers", "                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
       gINI.KeyComment("ForeignServers", " ForeignServerList - Most recent list of servers seen; used as a fallback if we can't reach the master");
       gINI.KeyComment("ForeignServers", "----------------");
    }
