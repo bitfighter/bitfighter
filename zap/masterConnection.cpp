@@ -391,15 +391,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    }
 }
 
-#ifndef ZAP_DEDICATED
-   extern void queryServerResetErrorCount();
-#endif
 void MasterServerConnection::onConnectionEstablished()
 {
    logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
-#ifndef ZAP_DEDICATED
-   if(! mIsGameServer) queryServerResetErrorCount(); //only need to reset on client, but not game server
-#endif
 }
 
 
