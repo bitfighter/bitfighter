@@ -404,13 +404,37 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
    StringTableEntry msg;
 
    if(type == (U32)LevelChangePassword)
+   {
       msg = strcmp(param.getString(), "") ? levelPassChanged : levelPassCleared;
+      // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
+      if(type == (U32)LevelChangePassword && !strcmp(param.getString(), ""))
+      {
+         for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+            if(!walk->isLevelChanger())
+            {
+               walk->setIsLevelChanger(true);
+               walk->s2cSetIsLevelChanger(true, false);     // Silently
+            }
+     }else{ //if setting a password, remove everyone permission (except admin)
+         for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+            if(walk->isLevelChanger() && (! walk->isAdmin()))
+            {
+               walk->setIsLevelChanger(false);
+               walk->s2cSetIsLevelChanger(false, true);     // not silent
+            }
+      }
+   }
    else if(type == (U32)AdminPassword)
       msg = adminPassChanged;
    else if(type == (U32)ServerPassword)
       msg = strcmp(param.getString(), "") ? serverPassChanged : serverPassCleared;
    else if(type == (U32)ServerName)
+   {
       msg = serverNameChanged;
+      // If we've changed the server name, notify all the clients
+      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
+         walk->s2cSetServerName(gServerGame->getHostName());
+   }
    else if(type == (U32)ServerDescr)
       msg = serverDescrChanged;
    else if(type == (U32)DeleteLevel)
@@ -418,21 +442,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
 
    s2cDisplayMessage(ColorRed, SFXNone, msg);      // Notify user their bidding has been done
 
-   // If we're clearning the level change password, quietly grant access to anyone who doesn't already have it
-   if(type == (U32)LevelChangePassword && !strcmp(param.getString(), ""))
-   {
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         if(!walk->isLevelChanger())
-         {
-            walk->setIsLevelChanger(true);
-            walk->s2cSetIsLevelChanger(true, false);     // Silently
-         }
-   }
 
-   // If we've changed the server name, notify all the clients
-   else if(type == (U32)ServerName)
-      for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
-         walk->s2cSetServerName(gServerGame->getHostName());
 }
 
 
