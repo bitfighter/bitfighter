@@ -81,6 +81,8 @@ Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(true))
    mCurrentTime = 0;
    mGameSuspended = false;
 
+   mTimeUnconnectedToMaster = 0;
+
    mNetInterface = new GameNetInterface(theBindAddress, this);
 }
 
@@ -125,9 +127,15 @@ extern bool gReadyToConnectToMaster;
 // If there is no valid connection to master server, perodically try to create one.
 // If user is playing a game they're hosting, they should get one master connection
 // for the client and one for the server.
+// Called from both clientGame and serverGame idle fuctions, so think of this as a kind of idle
 void Game::checkConnectionToMaster(U32 timeDelta)
 {
-   if(!mConnectionToMaster.isValid())
+   if(mConnectionToMaster.isValid() && mConnectionToMaster->isEstablished())
+      mTimeUnconnectedToMaster = 0;
+   else if(mReadyToConnectToMaster)
+      mTimeUnconnectedToMaster += timeDelta;
+
+   if(!mConnectionToMaster.isValid())      // It's valid if it isn't null, so could be disconnected and would still be valid
    {
       if(gMasterAddress == Address())     // Check for a valid address
          return;

@@ -250,7 +250,7 @@ unsigned CIniFile::NumValues( unsigned const keyID)
   return 0;
 }
 
-unsigned CIniFile::NumValues( string const keyname)
+unsigned CIniFile::NumValues( string const &keyname)
 {
   long keyID = FindKey( keyname);
   if ( keyID == noID)
@@ -345,7 +345,7 @@ string CIniFile::GetValue( unsigned const keyID, unsigned const valueID, string 
   return defValue;
 }
 
-string CIniFile::GetValue( string const keyname, string const valuename, string const defValue) const
+string CIniFile::GetValue( string const &keyname, string const &valuename, string const &defValue) const
 {
   long keyID = FindKey( keyname);
   if ( keyID == noID)
@@ -357,6 +357,28 @@ string CIniFile::GetValue( string const keyname, string const valuename, string 
 
   return keys[keyID].values[valueID];
 }
+
+
+void CIniFile::GetValues(string const &section, TNL::Vector<string> &valueList)
+{
+   S32 numVals = gINI.NumValues(section);
+   TNL::Vector<string> keys(numVals);
+
+   for(S32 i = 0; i < numVals; i++)
+      keys.push_back(gINI.ValueName(section, i));
+
+   string val;
+
+   valueList.clear();
+
+   for(S32 i = 0; i < numVals; i++)
+   {
+      val = gINI.GetValue(section, keys[i], "");
+      if(val != "")
+         valueList.push_back(val);
+   }
+}
+
 
 int CIniFile::GetValueI(string const keyname, string const valuename, int const defValue) const
 {

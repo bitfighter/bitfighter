@@ -44,6 +44,9 @@
 namespace Zap
 {
 
+
+static const U32 GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME = 8000;      // 8 seconds should be enough time to connect to the master
+
 // Text sizes and the like
 static const U32 COLUMN_HEADER_TEXTSIZE = 14;     // Size of text in column headers
 static const U32 SERVER_DESCR_TEXTSIZE = 18;    // Size of lower description of selected server
@@ -142,6 +145,8 @@ void QueryServersUserInterface::onActivate()
 
    mNoMasterTimer.reset();
 
+   mGivenUpOnMaster = false;
+
    mPage = 0;     // Start off showing the first page, as expected
 
    
@@ -193,12 +198,13 @@ void QueryServersUserInterface::contactEveryone()
    //Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
    //gClientGame->getNetInterface()->sendPing(broadcastAddress, mNonce);
 
-   // Always ping these servers -- typically a local server
-   for(S32 i = 0; i < alwaysPingList.size(); i++)
+   // Try to ping the servers from our fallback list if we're having trouble connecting to the master
+   if(gClientGame->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
    {
-      Address address(alwaysPingList[i].c_str());
-      gClientGame->getNetInterface()->sendPing(address, mNonce);
-   } 
+      for(S32 i = 0; i < alwaysPingList.size(); i++)
+         gClientGame->getNetInterface()->sendPing(Address(prevServerListFromMaster[i].c_str()), mNonce);
+      mGivenUpOnMaster = true;
+   }
 
    // If we already have a connection to the Master, start the server query... otherwise, don't
    MasterServerConnection *conn = gClientGame->getConnectionToMaster();
@@ -213,7 +219,7 @@ void QueryServersUserInterface::contactEveryone()
       conn->startServerQuery();
       mWaitingForResponseFromMaster = true;
    }
-   else     // Not connected
+   else     // Don't have a valid connection object
    {
       mMasterRequeryTimer.reset(CheckMasterServerReady);    // Check back in a second to see if we've established a connection to the master
       mWaitingForResponseFromMaster = false;
@@ -505,7 +511,9 @@ void QueryServersUserInterface::idle(U32 timeDelta)
       if(time > hidden[i].timeUntilShow)
          hidden.erase(i);
 
-   if(mMasterRequeryTimer.update(elapsedTime) && !mWaitingForResponseFromMaster)
+   // Not sure about the logic in here... maybe this is right...
+   if( (mMasterRequeryTimer.update(elapsedTime) && !mWaitingForResponseFromMaster) ||
+            (!mGivenUpOnMaster && gClientGame->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) )
        contactEveryone();
 
    // Go to previous page if a server has gone away and the last server has disappeared from the current screen
@@ -632,7 +640,7 @@ void QueryServersUserInterface::render()
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
 
    bool connectedToMaster = gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished();
-
+   
    if(connectedToMaster)
    {
       glColor(gMasterServerBlue);
@@ -641,7 +649,10 @@ void QueryServersUserInterface::render()
    else
    {
       glColor(red);
-      drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
+      if(mGivenUpOnMaster)
+         drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
+      else
+         drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
    }
 
    // Show some chat messages

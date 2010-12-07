@@ -87,6 +87,7 @@ private:
    bool mSortAscending;
    bool mShouldSort;
    bool mAnnounced;           // Have we announced to the master that we've joined the chat room?
+   bool mGivenUpOnMaster;     // Gets set to true once we start using our fallback server list
 
    S32 selectedId;
    S32 mSortColumn;

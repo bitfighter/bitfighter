@@ -20,6 +20,8 @@
 #include <string>
 #include <vector>
 
+#include <tnl.h>     // For vector type
+
 // C Includes
 #include <stdlib.h>
 
@@ -103,7 +105,7 @@ public:
   // Returns number of values stored for specified key.
   unsigned NumValues( unsigned const keyID);
   unsigned GetNumValues( unsigned const keyID)   {return NumValues( keyID);}
-  unsigned NumValues( string const keyname);
+  unsigned NumValues( string const &keyname);
   unsigned GetNumValues( string const keyname)   {return NumValues( keyname);}
 
   // Returns value name by index for a given keyname or keyID.
@@ -120,7 +122,11 @@ public:
   // Overloaded to return string, int, and double.
   // Returns defValue if key/value not found.
   string GetValue( unsigned const keyID, unsigned const valueID, string const defValue = "") const;
-  string GetValue(string const keyname, string const valuename, string const defValue = "") const;
+  string GetValue(string const &keyname, string const &valuename, string const &defValue = "") const;
+
+  // Load up valueList with all values from the section
+  void GetValues(string const &keyname, TNL::Vector<string> &valueList);
+
   int    GetValueI(string const keyname, string const valuename, int const defValue = 0) const;
   bool   GetValueB(string const keyname, string const valuename, bool const defValue = false) const {
     return (GetValueI( keyname, valuename, int( defValue)) != 0);

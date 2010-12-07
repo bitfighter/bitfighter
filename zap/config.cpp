@@ -96,6 +96,7 @@ static void loadForeignServerInfo()
    // These are the servers we found last time we were able to contact the master.
 	// In case the master server fails, we can use this list to try to find some game servers. 
 	parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
+   //GetValues("RecentForeignServers", prevServerListFromMaster);
 }
 
 
@@ -155,22 +156,13 @@ extern Vector<StringTableEntry> gLevelSkipList;
 // valnames in first, but what the heck...
 static void loadLevelSkipList()
 {
+   Vector<string> skipList;
+
    if(gINI.FindKey("LevelSkipList") != gINI.noID)
-   {
-      S32 numLevels = gINI.NumValues("LevelSkipList");
-      Vector<string> levelValNames(numLevels);
+      gINI.GetValues("LevelSkipList", skipList);
 
-      for(S32 i = 0; i < numLevels; i++)
-         levelValNames.push_back(gINI.ValueName("LevelSkipList", i));
-
-      string level;
-      for(S32 i = 0; i < numLevels; i++)
-      {
-         level = gINI.GetValue("LevelSkipList", levelValNames[i], "");
-         if (level != "")
-            gLevelSkipList.push_back(StringTableEntry(level.c_str()));
-      }
-   }
+   for(S32 i = 0; i < skipList.size(); i++)
+      gLevelSkipList.push_back(StringTableEntry(skipList[i].c_str()));
 }
 
 
@@ -1190,10 +1182,7 @@ static void writePasswordSection_helper(string section)
    if (gINI.NumKeyComments(section) == 0)
    {
       gINI.KeyComment(section, "----------------");
-      gINI.KeyComment(section, " This section holds passwords you've entered to get access to various servers.  They are hashed,");
-      gINI.KeyComment(section, " so there's not much you can do by modifying these values.  You could, however, copy them to another");
-      gINI.KeyComment(section, " machine and thereby grant another user permissions without revealing the password.  Not sure why");
-      gINI.KeyComment(section, " you'd want to, though.");
+      gINI.KeyComment(section, " This section holds passwords you've entered to gain access to various servers.");
       gINI.KeyComment(section, "----------------");
    }
 }

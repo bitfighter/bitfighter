@@ -67,6 +67,14 @@ Scripts can be names .lua or .levelgen, and can be stored in either the levels f
 Specifying the extension is optional.
 </ul>
 
+<h4>Misc</h4>
+<ul>
+<li>Passwords now stored in plaintext in the ini file; gives increase in convenience with only small decrease in security; still transmitted via hash
+<li>When master server is unreachable, server will remember recent game servers and will try to contact those
+<li>Can define multiple servers in the INI to always try contacting without assistance of the master
+</ul>
+
+
 <h4>Bugs</h4>
 <ul>
 <li>Fixed issue of wrong player being selected on change teams/kick menus

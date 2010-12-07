@@ -1330,9 +1330,9 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
 
       // Save the password so the user need not enter it again the next time they're on this server
       if(type == GameConnection::LevelChangePassword)
-         gINI.SetValue("SavedLevelChangePasswords", gc->getServerName(), md5.getSaltedHashFromString(words[1]), true);
+         gINI.SetValue("SavedLevelChangePasswords", gc->getServerName(), words[1], true);
       else if(type == GameConnection::AdminPassword)
-         gINI.SetValue("SavedAdminPasswords", gc->getServerName(), md5.getSaltedHashFromString(words[1]), true);
+         gINI.SetValue("SavedAdminPasswords", gc->getServerName(), words[1], true);
    }
 }
 

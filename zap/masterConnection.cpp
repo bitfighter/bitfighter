@@ -51,6 +51,17 @@ extern bool gPlayerAuthenticated;
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
 
+// Constructor
+MasterServerConnection::MasterServerConnection(bool isGameServer, U32 infoFlags)   
+{
+   mIsGameServer = isGameServer;
+   mInfoFlags = infoFlags;
+   mCurrentQueryId = 0;
+   setIsConnectionToServer();
+   setIsAdaptive();
+}
+
+
 // Try this...
 void MasterServerConnection::startServerQuery()
 {

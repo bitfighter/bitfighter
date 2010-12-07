@@ -195,7 +195,7 @@ void GameConnection::submitAdminPassword(const char *password)
    string encrypted = md5.getSaltedHashFromString(password);
    c2sAdminPassword(encrypted.c_str());
 
-   mLastEnteredAdminPassword = encrypted;
+   mLastEnteredAdminPassword = password;
 
    setGotPermissionsReply(false);
    setWaitingForPermissionsReply(true);      // Means we'll show a reply from the server
@@ -207,7 +207,7 @@ void GameConnection::submitLevelChangePassword(string password)    // password h
    string encrypted = md5.getSaltedHashFromString(password);
    c2sLevelChangePassword(encrypted.c_str());
 
-   mLastEnteredLevelChangePassword = encrypted;
+   mLastEnteredLevelChangePassword = password;
 
    setGotPermissionsReply(false);
    setWaitingForPermissionsReply(true);      // Means we'll show a reply from the server
@@ -300,6 +300,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPassword, (StringPtr pass), (pass),
 }
 
 
+// pass is our hashed password
 TNL_IMPLEMENT_RPC(GameConnection, c2sLevelChangePassword, (StringPtr pass), (pass), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    // If password is blank, permissions always granted
@@ -328,7 +329,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       return;
 
    // Check for forbidden blank parameters
-   if((type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
+   if( (type == (U32)AdminPassword || type == (U32)ServerName || type == (U32)ServerDescr) &&
                           !strcmp(param.getString(), ""))    // Some params can't be blank
       return;
 
@@ -528,7 +529,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string levelChangePassword = gINI.GetValue("SavedLevelChangePasswords", getServerName());
       if(levelChangePassword != "")
       {
-         c2sLevelChangePassword(levelChangePassword.c_str());
+         c2sLevelChangePassword(md5.getSaltedHashFromString(levelChangePassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -539,7 +540,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetServerName, (StringTableEntry name), (na
       string adminPassword = gINI.GetValue("SavedAdminPasswords", getServerName());
       if(adminPassword != "")
       {
-         c2sAdminPassword(adminPassword.c_str());
+         c2sAdminPassword(md5.getSaltedHashFromString(adminPassword).c_str());
          setWaitingForPermissionsReply(false);     // Want to return silently
       }
    }
@@ -632,10 +633,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
    if(isLevelChanger() && !granted)
-      gGameUserInterface.displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
-
-   // Check for permissions being rescinded by server, will happen if admin changes level change pw
-   if(isLevelChanger && !granted)
       gGameUserInterface.displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    setIsLevelChanger(granted);
@@ -953,9 +950,11 @@ void GameConnection::writeConnectRequest(BitStream *stream)
    // If we're local, just use the password we already know because, you know, we're the server
    if(isLocal)
       serverPW = md5.getSaltedHashFromString(gServerPassword);
+
    // If we have a saved password for this server, use that
    else if(gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName()) != "")
-      serverPW = gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName());  // Saved pws are already hashed
+      serverPW = md5.getSaltedHashFromString(gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName())); 
+
    // Otherwise, use whatever's in the interface entry box
    else 
       serverPW = gServerPasswordEntryUserInterface.getSaltedHashText();
@@ -1125,9 +1124,12 @@ void GameConnection::onConnectionEstablished()
       // If we entered a password, and it worked, let's save it for next time.  If we arrive here and the saved password is empty
       // it means that the user entered a good password.  So we save.
       bool isLocal = gServerGame;
+
       if(!isLocal && gINI.GetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName()) == "")
+      {
          gINI.SetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName(),      
-                       gServerPasswordEntryUserInterface.getSaltedHashText(), true);
+                       gServerPasswordEntryUserInterface.getText(), true);
+      }
    }
    else                 // Runs on server
    {

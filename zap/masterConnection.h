@@ -44,7 +44,7 @@ class MasterServerConnection : public MasterServerInterface
 {
    typedef MasterServerInterface Parent;
 
-   
+private:
    U32 mCurrentQueryId;    // ID of our current query
 
    bool mIsGameServer;
@@ -52,19 +52,13 @@ class MasterServerConnection : public MasterServerInterface
    string mMasterName;
 
 public:
-   MasterServerConnection(bool isGameServer = false, U32 infoFlags = 0)    // Constructor
-   {
-      mIsGameServer = isGameServer;
-      mInfoFlags = infoFlags;
-      mCurrentQueryId = 0;
-      setIsConnectionToServer();
-      setIsAdaptive();
-   }
+   MasterServerConnection(bool isGameServer = false, U32 infoFlags = 0);    // Constructor
 
    void setMasterName(string name);
    string getMasterName();
 
    void startServerQuery();
+
    Vector<IPAddress> mServerList;
 
    void cancelArrangedConnectionAttempt() { mCurrentQueryId++; }

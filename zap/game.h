@@ -98,6 +98,9 @@ class Ship;
 
 class Game
 {
+private:
+      U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
+
 protected:
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
@@ -114,7 +117,6 @@ protected:
 
    GridDatabase mDatabase;
 
-   
    Vector<DeleteRef> mPendingDeleteObjects;
    Vector<SafePtr<GameObject> > mScopeAlwaysList;
    U32 mCurrentTime;
@@ -155,6 +157,9 @@ public:
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship);
+
+
+   U32 getTimeUnconnectedToMaster() { return mTimeUnconnectedToMaster; }
 
 
    void addToDeleteList(GameObject *theObject, U32 delay);
