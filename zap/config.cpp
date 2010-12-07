@@ -91,38 +91,44 @@ static void loadForeignServerInfo()
 {
 	// AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-	parseString(gINI.GetValue("ForeignServers", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
+	parseString(gINI.GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
 	// In case the master server fails, we can use this list to try to find some game servers. 
-	parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
-   //GetValues("RecentForeignServers", prevServerListFromMaster);
+	//parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
+   gINI.GetAllValues("RecentForeignServers", prevServerListFromMaster);
+}
+
+static void writeConnectionsInfo()
+{
+   if(gINI.NumKeyComments("Connections") == 0)
+   {
+      gINI.KeyComment("Connections", "----------------");
+      gINI.KeyComment("Connections", " AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
+      gINI.KeyComment("Connections", "                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
+      gINI.KeyComment("Connections", "----------------");
+   }
+
+   // Creates comma delimited list
+	string str = "";
+   for(S32 i = 0; i < alwaysPingList.size(); i++)
+        str += alwaysPingList[i] + ((i < alwaysPingList.size() - 1) ? "," : "");
+	gINI.SetValue("Connections", "AlwaysPingList", str);
 }
 
 
 static void writeForeignServerInfo()
 {
-   //gINI.AddKeyName("ForeignServers");      <=== Now unneeded!
-
-   if(gINI.NumKeyComments("ForeignServers") == 0)
+   if(gINI.NumKeyComments("RecentForeignServers") == 0)
    {
-      gINI.KeyComment("ForeignServers", "----------------");
-      gINI.KeyComment("ForeignServers", " AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
-      gINI.KeyComment("ForeignServers", "                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
-      gINI.KeyComment("ForeignServers", " ForeignServerList - Most recent list of servers seen; used as a fallback if we can't reach the master");
-      gINI.KeyComment("ForeignServers", "----------------");
+   
+      gINI.KeyComment("RecentForeignServers", "----------------");
+      gINI.KeyComment("RecentForeignServers", " This section contains a list of the most recent servers seen; used as a fallback if we can't reach the master");
+      gINI.KeyComment("RecentForeignServers", " Please be aware that this section will be automatically regenerated, and any changes you make will be overwritten");
+      gINI.KeyComment("RecentForeignServers", "----------------");
    }
 
-	// Creates comma delimited lists
-	string str = "";
-   for(S32 i = 0; i < alwaysPingList.size(); i++)
-        str += alwaysPingList[i] + ((i < alwaysPingList.size() - 1) ? "," : "");
-	gINI.SetValue("ForeignServers", "AlwaysPingList", str);
-
-	str = "";
-   for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
-        str += prevServerListFromMaster[i] + ((i < prevServerListFromMaster.size() - 1) ? "," : "");
-	gINI.SetValue("ForeignServers", "ForeignServerList", str);
+   gINI.SetAllValues("RecentForeignServers", "Server", prevServerListFromMaster);
 }
 
 
@@ -158,8 +164,7 @@ static void loadLevelSkipList()
 {
    Vector<string> skipList;
 
-   if(gINI.FindKey("LevelSkipList") != gINI.noID)
-      gINI.GetAllValues("LevelSkipList", skipList);
+   gINI.GetAllValues("LevelSkipList", skipList);
 
    for(S32 i = 0; i < skipList.size(); i++)
       gLevelSkipList.push_back(StringTableEntry(skipList[i].c_str()));
@@ -1211,7 +1216,6 @@ static void writeINIHeader()
 }
 
 
-
 // Save more commonly altered settings first to make them easier to find
 void saveSettingsToINI()
 {
@@ -1219,6 +1223,7 @@ void saveSettingsToINI()
 
    writeHost();
    writeForeignServerInfo();
+   writeConnectionsInfo();
    writeEffects();
    writeSounds();
    writeSettings();
@@ -1231,7 +1236,6 @@ void saveSettingsToINI()
    writeKeyBindings();
    
    writeDefaultQuickChatMessages();    // Does nothing if there are already chat messages in the INI
-   
 
    gINI.WriteFile();
 }
@@ -1258,18 +1262,19 @@ void writeSkipList()
    gINI.KeyComment("LevelSkipList", " ... etc ...");
    gINI.KeyComment("LevelSkipList", "----------------");
 
-   //char levelIndx[256];
-   //for(S32 i = 0; i < gLevelSkipList.size(); i++)
-   //{
-   //   dSprintf(levelIndx, 255, "Level%d", i);
+   Vector<string> skipList;
 
-   //   // Try to "normalize" the name a little before writing it
-   //   string filename = lcase(gLevelSkipList[i].getString());
-   //   if(filename.find(".level") == string::npos)
-   //      filename += ".level";
+   for(S32 i = 0; i < gLevelSkipList.size(); i++)
+   {
+      // "Normalize" the name a little before writing it
+      string filename = lcase(gLevelSkipList[i].getString());
+      if(filename.find(".level") == string::npos)
+         filename += ".level";
 
-   //   gINI.SetValue("LevelSkipList", levelIndx, filename, true);
-   //}
+      skipList.push_back(filename);
+   }
+
+   gINI.SetAllValues("LevelSkipList", "SkipLevel", skipList);
 }
 
 //////////////////////////////////

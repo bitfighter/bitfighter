@@ -31,6 +31,7 @@
 #include "tnlJournal.h"       // For journaling support
 #include "stringUtils.h"      // for lcase
 #include "zapjournal.h"
+#include "tnlTypes.h"
 
 
 // C Includes
@@ -313,11 +314,14 @@ bool CIniFile::SetValue( string const keyname, string const valuename, string co
 bool CIniFile::SetAllValues( const string &section, const string &prefix, const TNL::Vector<string> &values)
 {
    char keyname[256];
+   bool stat = true;
    for(S32 i = 0; i < values.size(); i++)
    {
       dSprintf(keyname, 255, "%s%d", prefix.c_str(), i);
-      gINI.SetValue(section, keyname, values[i], true);
+      stat &= gINI.SetValue(section, keyname, values[i], true);
    }
+
+   return stat;      // true if all worked, false if any failed
 }
 
 
@@ -373,20 +377,23 @@ string CIniFile::GetValue( string const &keyname, string const &valuename, strin
 void CIniFile::GetAllValues(string const &section, TNL::Vector<string> &valueList)
 {
    S32 numVals = gINI.NumValues(section);
-   TNL::Vector<string> keys(numVals);
-
-   for(S32 i = 0; i < numVals; i++)
-      keys.push_back(gINI.ValueName(section, i));
-
-   string val;
-
-   valueList.clear();
-
-   for(S32 i = 0; i < numVals; i++)
+   if(numVals > 0)
    {
-      val = gINI.GetValue(section, keys[i], "");
-      if(val != "")
-         valueList.push_back(val);
+      TNL::Vector<string> keys(numVals);
+
+      for(S32 i = 0; i < numVals; i++)
+         keys.push_back(gINI.ValueName(section, i));
+
+      string val;
+
+      valueList.clear();
+
+      for(S32 i = 0; i < numVals; i++)
+      {
+         val = gINI.GetValue(section, keys[i], "");
+         if(val != "")
+            valueList.push_back(val);
+      }
    }
 }
 

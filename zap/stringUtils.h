@@ -26,7 +26,8 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
-#include "tnl.h"     // For Vector
+#include "tnlVector.h"     // For Vector
+#include "tnlTypes.h"
 #include <string>
 
 using namespace std;
@@ -40,9 +41,9 @@ string ExtractDirectory(const std::string& path);
 
 string ExtractFilename(const std::string& path);
 
-string itos(S32 i);
+string itos(int i);
 
-Vector<string> parseString(const string &line);
+TNL::Vector<string> parseString(const string &line);
 
 string lcase(string strToConvert);
 string ucase(string strToConvert);
@@ -59,5 +60,7 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 string trim_right(const string &source, const string &t = " ");
 string trim_left(const string &source, const string &t = " ");
 string trim(const string &source, const string &t = " ");
+
+};
 
 #endif

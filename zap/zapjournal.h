@@ -26,8 +26,7 @@
 #ifndef _ZAP_JOURNAL_H_
 #define _ZAP_JOURNAL_H_
 
-#include "../tnl/tnlTypes.h"
-#include "../tnl/tnlJournal.h"
+#include "tnlVector.h"
 
 #include <string>
 
