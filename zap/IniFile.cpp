@@ -29,9 +29,8 @@
 #include <sstream>
 
 #include "tnlJournal.h"       // For journaling support
-
+#include "stringUtils.h"      // for lcase
 #include "zapjournal.h"
-#include "SweptEllipsoid.h"   // For string trimming functions
 
 
 // C Includes
@@ -310,6 +309,18 @@ bool CIniFile::SetValue( string const keyname, string const valuename, string co
   return true;
 }
 
+
+bool CIniFile::SetAllValues( const string &section, const string &prefix, const TNL::Vector<string> &values)
+{
+   char keyname[256];
+   for(S32 i = 0; i < values.size(); i++)
+   {
+      dSprintf(keyname, 255, "%s%d", prefix.c_str(), i);
+      gINI.SetValue(section, keyname, values[i], true);
+   }
+}
+
+
 bool CIniFile::SetValueI( string const keyname, string const valuename, int const value, bool const create)
 {
   char svalue[MAX_VALUEDATA];
@@ -359,7 +370,7 @@ string CIniFile::GetValue( string const &keyname, string const &valuename, strin
 }
 
 
-void CIniFile::GetValues(string const &section, TNL::Vector<string> &valueList)
+void CIniFile::GetAllValues(string const &section, TNL::Vector<string> &valueList)
 {
    S32 numVals = gINI.NumValues(section);
    TNL::Vector<string> keys(numVals);

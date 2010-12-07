@@ -20,7 +20,7 @@
 #include <string>
 #include <vector>
 
-#include <tnl.h>     // For vector type
+//#include <tnl.h>     // For vector type
 
 // C Includes
 #include <stdlib.h>
@@ -125,7 +125,7 @@ public:
   string GetValue(string const &keyname, string const &valuename, string const &defValue = "") const;
 
   // Load up valueList with all values from the section
-  void GetValues(string const &keyname, TNL::Vector<string> &valueList);
+  void GetAllValues(string const &keyname, TNL::Vector<string> &valueList);
 
   int    GetValueI(string const keyname, string const valuename, int const defValue = 0) const;
   bool   GetValueB(string const keyname, string const valuename, bool const defValue = false) const {
@@ -146,6 +146,7 @@ public:
   // the key if it doesn't exist. Returns true if data entered, false otherwise.
   // Overloaded to accept string, int, and double.
   bool SetValue( string const keyname, string const valuename, string const value, bool const create = true);
+  bool SetAllValues( const string &section, const string &prefix, const Vector<string> &values);
   bool SetValueI( string const keyname, string const valuename, int const value, bool const create = true);
   bool SetValueB( string const keyname, string const valuename, bool const value, bool const create = true) {
     return SetValueI( keyname, valuename, int(value), create);

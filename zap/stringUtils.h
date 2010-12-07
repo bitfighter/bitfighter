@@ -27,17 +27,20 @@
 #define STRING_UTILS_H
 
 #include "tnl.h"     // For Vector
+#include <string>
+
+using namespace std;
 
 namespace Zap
 {
 
 // Collection of useful string things
 
-std::string ExtractDirectory(const std::string& path);
+string ExtractDirectory(const std::string& path);
 
-std::string ExtractFilename(const std::string& path);
+string ExtractFilename(const std::string& path);
 
-std::string itos(S32 i);
+string itos(S32 i);
 
 Vector<string> parseString(const string &line);
 
@@ -46,7 +49,6 @@ string ucase(string strToConvert);
 
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
-
 // File utils
 bool fileExists(const string &path);         // Does file exist?
 
@@ -54,7 +56,8 @@ bool fileExists(const string &path);         // Does file exist?
 string strictjoindir(const string &part1, const string &part2);
 string strictjoindir(const string &part1, const string &part2, const string &part3);
 
-
-};
+string trim_right(const string &source, const string &t = " ");
+string trim_left(const string &source, const string &t = " ");
+string trim(const string &source, const string &t = " ");
 
 #endif

@@ -159,7 +159,7 @@ static void loadLevelSkipList()
    Vector<string> skipList;
 
    if(gINI.FindKey("LevelSkipList") != gINI.noID)
-      gINI.GetValues("LevelSkipList", skipList);
+      gINI.GetAllValues("LevelSkipList", skipList);
 
    for(S32 i = 0; i < skipList.size(); i++)
       gLevelSkipList.push_back(StringTableEntry(skipList[i].c_str()));
@@ -1258,18 +1258,18 @@ void writeSkipList()
    gINI.KeyComment("LevelSkipList", " ... etc ...");
    gINI.KeyComment("LevelSkipList", "----------------");
 
-   char levelIndx[256];
-   for(S32 i = 0; i < gLevelSkipList.size(); i++)
-   {
-      dSprintf(levelIndx, 255, "Level%d", i);
+   //char levelIndx[256];
+   //for(S32 i = 0; i < gLevelSkipList.size(); i++)
+   //{
+   //   dSprintf(levelIndx, 255, "Level%d", i);
 
-      // Try to "normalize" the name a little before writing it
-      string filename = lcase(gLevelSkipList[i].getString());
-      if(filename.find(".level") == string::npos)
-         filename += ".level";
+   //   // Try to "normalize" the name a little before writing it
+   //   string filename = lcase(gLevelSkipList[i].getString());
+   //   if(filename.find(".level") == string::npos)
+   //      filename += ".level";
 
-      gINI.SetValue("LevelSkipList", levelIndx, filename, true);
-   }
+   //   gINI.SetValue("LevelSkipList", levelIndx, filename, true);
+   //}
 }
 
 //////////////////////////////////

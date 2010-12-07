@@ -144,5 +144,24 @@ string strictjoindir(const string &part1, const string &part2, const string &par
 }
 
 
+string trim_right(const string &source, const string &t)
+{
+   string str = source;
+   return str.erase(str.find_last_not_of(t) + 1);
+}
+
+
+string trim_left(const string &source, const string &t)
+{
+   string str = source;
+   return str.erase(0, source.find_first_not_of(t));
+}
+
+string trim(const string &source, const string &t)
+{
+   return trim_left(trim_right(source, t), t);
+}
+
+
 };
 
