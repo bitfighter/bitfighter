@@ -267,6 +267,24 @@ void ControlObjectConnection::readCompressedPoint(Point &p, BitStream *stream)
    }
 }
 
+
+void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
+{
+   mMoveTimeCredit += timeAmount;
+   if(mMoveTimeCredit > MaxMoveTimeCredit){
+      //prevent near unlimited shield when client is freezing, slow, or lagging.
+      if(controlObject.isValid()){
+         Move move1 = controlObject->getCurrentMove();
+         move1.time = mMoveTimeCredit - MaxMoveTimeCredit;
+         controlObject->setCurrentMove(move1);
+         controlObject->idle(GameObject::ClientIdleControlReplay);
+      }
+      mMoveTimeCredit = MaxMoveTimeCredit;
+   }
+}
+
+
+
 };
 
 

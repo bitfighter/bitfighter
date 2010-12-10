@@ -86,12 +86,7 @@ public:
    void readPacket(BitStream *bstream);
 
    void packetReceived(PacketNotify *notify);
-   void addToTimeCredit(U32 timeAmount)
-   {
-      mMoveTimeCredit += timeAmount;
-      if(mMoveTimeCredit > MaxMoveTimeCredit)
-         mMoveTimeCredit = MaxMoveTimeCredit;
-   }
+   void addToTimeCredit(U32 timeAmount);
 
    bool isDataToTransmit() { return true; }
 
