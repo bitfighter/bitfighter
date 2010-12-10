@@ -979,6 +979,8 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
 extern void JoystickUpdateMove(Move *theMove);
 extern IniSettings gIniSettings;
 
+U32 prevTimeDelta=0;
+
 void ClientGame::idle(U32 timeDelta)
 {
    mCurrentTime += timeDelta;
@@ -1025,7 +1027,8 @@ void ClientGame::idle(U32 timeDelta)
       JoystickUpdateMove(theMove);
 
 
-   theMove->time = timeDelta;
+   theMove->time = timeDelta + prevTimeDelta;
+   if(theMove->time > Move::MaxMoveTime) theMove->time = Move::MaxMoveTime;
 
    if(mConnectionToServer.isValid())
    {
@@ -1037,7 +1040,14 @@ void ClientGame::idle(U32 timeDelta)
       if(ship && ship->getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
          theMove->left = theMove->right = theMove->up = theMove->down = 0;
 
-      mConnectionToServer->addPendingMove(theMove);
+	  if(theMove->time >= 6){ //too many pending moves when running at 1000 FPS will cause severe problems.
+         mConnectionToServer->addPendingMove(theMove);
+         prevTimeDelta=0;
+      }else{
+         prevTimeDelta=prevTimeDelta+timeDelta;
+	  }
+	  theMove->time = timeDelta;
+         
 
       theMove->prepare();     // Pack and unpack the move for consistent rounding errors
 

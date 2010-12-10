@@ -700,11 +700,12 @@ void idle()
    static F64 unusedFraction = 0;
 
    S64 currentTimer = Platform::getHighPrecisionTimerValue();
+   if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow.
 
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
 
-   if(integerTime >= 10)         // Thus max frame rate = 100 fps
+   if(integerTime >= 1)
    {
       lastTimer = currentTimer;
       unusedFraction = timeElapsed - integerTime;
@@ -750,13 +751,18 @@ void idle()
    // sleep(0) helps reduce the impact of OpenGL on windows.
    U32 sleepTime =  1; //integerTime< 8 ? 8-integerTime : 1;
 
-   if(gClientGame && integerTime >= 10) 
+   if(gClientGame && integerTime >= 1) {
       sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
+      if(integerTime < 6) sleepTime = 6 - integerTime; // sleep a minimum of 6. Make  this "6" a variable?
+   }
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(gDedicatedServer && gServerGame->isSuspended())
-      sleepTime = 40;
+   if(gDedicatedServer){
+      if(integerTime < 5) sleepTime = 5 - integerTime; // sleep a minimum of 5.
+      if(gServerGame->isSuspended())
+          sleepTime = 25;
+   }
 
    Platform::sleep(sleepTime);
 
