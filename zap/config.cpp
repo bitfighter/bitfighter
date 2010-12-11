@@ -195,6 +195,8 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
+extern S32 minimumSleepTimeDedicatedServer;
+extern S32 minimumSleepTimeClient;
 static void loadGeneralSettings()
 {
    gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
@@ -220,6 +222,7 @@ static void loadGeneralSettings()
    gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
 
    gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
+   minimumSleepTimeClient = gINI.GetValueI("Settings", "MinClientDelay", 10);
 }
 
 
@@ -313,6 +316,7 @@ static void loadHostConfiguration()
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
    gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
+   minimumSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
 }
 
 
@@ -1061,6 +1065,7 @@ static void writeSettings()
       gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       gINI.KeyComment("Settings", " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
+      gINI.KeyComment("Settings", " MinClientDelay -  in millisecs, balance between performance and CPU usage (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
       gINI.KeyComment("Settings", "----------------");
    }
    saveWindowMode();
@@ -1082,6 +1087,7 @@ static void writeSettings()
    gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
 
    gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
+   gINI.SetValueI("Settings", "MinClientDelay", minimumSleepTimeClient, true);
 }
 
 
@@ -1119,6 +1125,7 @@ static void writeHost()
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
       gINI.KeyComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       gINI.KeyComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
+      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) in Millisecs, lower means lower ping to everyone and uses more CPU");
 
 //      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
       gINI.KeyComment("Host", "----------------");
@@ -1134,6 +1141,7 @@ static void writeHost()
 //   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay);
    gINI.SetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10));
    gINI.SetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"));
+   gINI.SetValueI("Host", "MinDedicatedDelay", minimumSleepTimeDedicatedServer);
 }
 
 

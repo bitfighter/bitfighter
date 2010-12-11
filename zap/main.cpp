@@ -683,6 +683,12 @@ void hostGame()
 }
 
 
+
+
+//in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
+S32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
+S32 minimumSleepTimeDedicatedServer=10; //lower reduce everyone lag, but uses more CPU.
+
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
@@ -753,15 +759,15 @@ void idle()
 
    if(gClientGame && integerTime >= 1) {
       sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
-      if(integerTime < 6) sleepTime = 6 - integerTime; // sleep a minimum of 6. Make  this "6" a variable?
+      if(integerTime < minimumSleepTimeClient) sleepTime = minimumSleepTimeClient - integerTime; // sleep a minimum of a value
    }
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
    if(gDedicatedServer){
-      if(integerTime < 5) sleepTime = 5 - integerTime; // sleep a minimum of 5.
+      if(integerTime < minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
       if(gServerGame->isSuspended())
-          sleepTime = 25;
+          sleepTime = 25; //the higher this number, the less accurate the ping is on server lobby when empty.
    }
 
    Platform::sleep(sleepTime);
