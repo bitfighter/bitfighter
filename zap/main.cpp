@@ -770,7 +770,17 @@ void idle()
           sleepTime = 25; //the higher this number, the less accurate the ping is on server lobby when empty.
    }
 
-   Platform::sleep(sleepTime);
+   {  //Always sleep long enough, there is a problem with it not sleeping long enough...
+      S64 Timer1 = currentTimer;
+      S64 Timer2;
+      F64 sleeplength = 0.0;
+      while(sleeplength < sleepTime){
+         Platform::sleep(sleepTime-sleeplength);
+         Timer2 = Platform::getHighPrecisionTimerValue();
+         if(Timer1 > Timer2) Timer1 = Timer2;            //just in case Timer overflows
+         sleeplength = Platform::getHighPrecisionMilliseconds(Timer2 - Timer1);
+      }
+  }
 
    gZapJournal.processNextJournalEntry();    // Does nothing unless we're playing back a journal...
 
