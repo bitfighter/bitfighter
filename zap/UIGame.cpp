@@ -1368,6 +1368,33 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 }
 
 
+F32 ConvertCharToFloat(const char * in){
+	F32 out=0;
+	bool negative=false;
+	bool useDecimal=false;
+	F32 decimal=1;
+	S32 i=0;
+	char c = in[0];
+	while(c != 0){
+		if(c >= '0' && c <= '9'){
+			if(! useDecimal){
+				out = out * 10 + (c - '0');
+			}else{
+				decimal *= 0.1f;
+				out = out + ((c - '0') * decimal);
+			}
+		}else if(c == '-')
+			negative=true;
+		else if(c == '.')
+			useDecimal=true;
+		i++;
+		c = in[i];
+	}
+	if(negative) out = -out;
+	return out;
+}
+
+
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
 bool GameUserInterface::processCommand(Vector<string> &words)
@@ -1596,6 +1623,23 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          return true;
       }
       suspendGame();    // Do the deed
+   }
+   else if(words[0] == "linewidth")            // Add time to the game
+   {
+      F32 linewidth;
+      if(words.size() < 2 || words[1] == "")
+      {
+         displayMessage(gCmdChatColor, "!!! Need to supply line width");
+         return true;
+      }
+      linewidth = ConvertCharToFloat(words[1].c_str());
+      if(linewidth < 0.125f) linewidth = 0.125f;
+
+      gDefaultLineWidth = linewidth;
+      gLineWidth1 = linewidth * 0.5f;
+      gLineWidth3 = linewidth * 1.5f;
+      gLineWidth4 = linewidth * 2;
+      glLineWidth(gDefaultLineWidth);    //make this change happen instantly
    }
 
    else if(ENABLE_ENGINEER && words[0] == "engf")

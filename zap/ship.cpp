@@ -1434,7 +1434,7 @@ void Ship::render(S32 layerIndex)
       textAlpha *= 1 - gClientGame->getCommanderZoomFraction();
       textSize = 23;
 #else
-      glLineWidth(1);
+      glLineWidth(gLineWidth1);
 #endif
       glColor4f(1,1,1,textAlpha);
       UserInterface::drawStringc(0, 30, textSize, str.c_str());
@@ -1460,7 +1460,7 @@ void Ship::render(S32 layerIndex)
 
          glEnable(GL_BLEND);
             U32 textSize = 18;
-            glLineWidth(1);
+            glLineWidth(gLineWidth1);
             glColor4f(1,1,1,0.5 * alpha);
 
             UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
@@ -1577,7 +1577,7 @@ if(isRobot())
 
    if(isModuleActive(ModuleRepair))
    {
-      glLineWidth(3);
+      glLineWidth(gLineWidth3);
       glColor3f(1,0,0);
       // render repair rays to all the repairing objects
       Point pos = mMoveState[RenderState].pos;

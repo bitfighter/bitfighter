@@ -531,7 +531,7 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
       }
    glEnd();
 
-   glLineWidth(3);
+   glLineWidth(gLineWidth3);
    glBegin(GL_LINES);
       Point aimDelta(cos(barrelAngle), sin(barrelAngle));
       glVertex(aimCenter + aimDelta * 15);
@@ -993,7 +993,7 @@ void renderMine(Point pos, bool armed, bool visible)
       vis = 1.0;
    }
    else
-      glLineWidth(1);
+      glLineWidth(gLineWidth1);
 
    glEnable(GL_BLEND);
    glColor4f(mod, mod, mod, vis);
@@ -1081,7 +1081,7 @@ void renderGrenade(Point pos, F32 lifeLeft)
    bool inOut = true;
 
       glColor3f(1,1,0);
-      glLineWidth(1);
+      glLineWidth(gLineWidth1);
       F32 off = 0;
       for(S32 j = 0; j < 2; j++)
       {
@@ -1137,7 +1137,7 @@ void renderSpyBug(Point pos, bool visible)
    }
    else
    {
-      glLineWidth(1);
+      glLineWidth(gLineWidth1);
       glColor3f(mod, mod, mod);
       drawCircle(pos, 5);
    }
@@ -1256,7 +1256,7 @@ void renderEnergySymbol(Color overrideColor, F32 alpha)
    glEnd();
 
    // Orangey circle
-   glLineWidth(3);
+   glLineWidth(gLineWidth3);
    glColor(overrideColor == 0 ? Color(1, .67 ,0) : overrideColor, alpha);
    glLineWidth(gDefaultLineWidth);
 }

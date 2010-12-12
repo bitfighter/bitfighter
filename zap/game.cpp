@@ -1197,10 +1197,9 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    lowerRight.y = floor(lowerRight.y) + 0.5;
 
    // Render some stars
-   glPointSize( 1.0f );
+   glPointSize( gLineWidth1 );
    glColor3f(0.8 * alphaFrac, 0.8 * alphaFrac, 1.0 * alphaFrac);
 
-   glPointSize(1);
    glEnableClientState(GL_VERTEX_ARRAY);
    glVertexPointer(2, GL_FLOAT, sizeof(Point), &mStars[0]);    // Each star is a pair of floats between 0 and 1
 

@@ -389,7 +389,7 @@ void InstructionsUserInterface::renderPage2()
                F32 health = (gClientGame->getCurrentTime() & 0x7FF) * 0.0005f;
 
                renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, false, false);
-               glLineWidth(3);
+               glLineWidth(gLineWidth3);
                glColor3f(1,0, 0);
                drawCircle(Point(0, 0), Ship::RepairDisplayRadius);
                glLineWidth(gDefaultLineWidth);

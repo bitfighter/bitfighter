@@ -67,6 +67,14 @@ S32 UserInterface::chatMargin = UserInterface::vertMargin + gLoadoutIndicatorHei
 UserInterface *UserInterface::current = NULL;
 Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displayed UIs
 
+
+float gLineWidth1 = 1.0f;
+//float gLineWidth2 = 2.0f;
+float gDefaultLineWidth = 2.0f;
+float gLineWidth3 = 3.0f;
+float gLineWidth4 = 4.0f;
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

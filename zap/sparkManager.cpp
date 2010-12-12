@@ -198,7 +198,7 @@ void render(S32 renderPass)
    {
       for (S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
-         glPointSize( 2.0f );
+         glPointSize( gDefaultLineWidth );
          glEnable(GL_BLEND);
 
          glEnableClientState(GL_COLOR_ARRAY);

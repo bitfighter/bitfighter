@@ -1492,7 +1492,7 @@ void EditorUserInterface::renderGrid()
    }
 
    glColor3f(0.7 * colorFact, 0.7 * colorFact, 0.7 * colorFact);
-   glLineWidth(3);
+   glLineWidth(gLineWidth3);
    Point origin = convertLevelToCanvasCoord(Point(0,0));
    glBegin(GL_LINES );
       glVertex2f(0, origin.y);
@@ -1729,7 +1729,7 @@ void EditorUserInterface::render()
    if(mCreatingPoly || mCreatingPolyline)    // Draw geomLine features under construction
    {
       mNewItem.addVert(snapPoint(convertCanvasToLevelCoord(mMousePos)));
-      glLineWidth(3);
+      glLineWidth(gLineWidth3);
 
       if(mCreatingPoly) // Wall
          glColor(SELECT_COLOR);
@@ -2046,7 +2046,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                for(S32 i = 1; i >= 0; i--)
                {  
                   // Draw heavy colored line with colored core
-                  glLineWidth(i ? 4 : 2);                
+                  glLineWidth(i ? gLineWidth4 : gDefaultLineWidth);                
 
                   F32 ang = pos.angleTo(dest);
                   const F32 al = 15;                // Length of arrow-head
@@ -2082,7 +2082,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 				     else
 				     {
                      glColor(green);
-                     glLineWidth(3);
+                     glLineWidth(gLineWidth3);
                      drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
                      glLineWidth(gDefaultLineWidth);
                   }
@@ -2225,7 +2225,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                renderTriangulatedPolygonFill(item.fillPoints);
 
                glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-               glLineWidth(3);  
+               glLineWidth(gLineWidth3);  
                renderPolygonOutline(item.getVerts());
                glLineWidth(gDefaultLineWidth);        // Restore line width
             glPopMatrix();
@@ -2260,7 +2260,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                if(!mShowingReferenceShip && (item.selected || item.litUp))
                {        
                   glColor(hideit ? grayedOutColorBright : drawColor, alpha);
-                  glLineWidth(3);  
+                  glLineWidth(gLineWidth3);  
                   renderPolygonOutline(item.getVerts());
                   glLineWidth(gDefaultLineWidth);        // Restore line width
                }

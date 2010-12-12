@@ -151,7 +151,8 @@ enum GeomType {
 
 extern bool isConvex(const Vector<Point> &verts);
 
-const S32 WALL_SPINE_WIDTH = 3;     // Width of line representing centerline of barriers
+// Width of line representing centerline of barriers
+#define WALL_SPINE_WIDTH gLineWidth3
 
 
 class WorldItem : public DatabaseObject

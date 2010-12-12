@@ -46,7 +46,11 @@ namespace Zap
 
 #define ENABLE_ENGINEER 0
 
-static const float gDefaultLineWidth = 2.0f;
+extern float gLineWidth1;
+//float gLineWidth2 = 2.0f;
+extern float gDefaultLineWidth;
+extern float gLineWidth3;
+extern float gLineWidth4;
 
 const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
 const U32 MAX_FILE_NAME_LEN = 32;     // Completely arbitrary
