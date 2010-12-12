@@ -106,6 +106,7 @@ void GoalZone::onAddedToGame(Game *theGame)
    if(!isGhost())
       setScopeAlways();
 
+   if(theGame->getGameType() == NULL) return; //client crash on 50% packet loss
    theGame->getGameType()->addZone(this);
 
   theGame->mObjectsLoaded++;     // N.B.: For some reason this has no effect on the client

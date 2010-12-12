@@ -223,6 +223,12 @@ static void loadGeneralSettings()
 
    gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
    minimumSleepTimeClient = gINI.GetValueI("Settings", "MinClientDelay", 10);
+
+   gDefaultLineWidth = (F32) gINI.GetValueF("Settings", "LineWidth", 2);
+   gLineWidth1 = gDefaultLineWidth * 0.5f;
+   gLineWidth3 = gDefaultLineWidth * 1.5f;
+   gLineWidth4 = gDefaultLineWidth * 2;
+
 }
 
 
@@ -1066,6 +1072,7 @@ static void writeSettings()
       gINI.KeyComment("Settings", " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
       gINI.KeyComment("Settings", " MinClientDelay -  in millisecs, balance between performance and CPU usage (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
+      gINI.KeyComment("Settings", " LineWidth - width in pixels");
       gINI.KeyComment("Settings", "----------------");
    }
    saveWindowMode();
@@ -1088,6 +1095,7 @@ static void writeSettings()
 
    gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
    gINI.SetValueI("Settings", "MinClientDelay", minimumSleepTimeClient, true);
+   gINI.SetValueF("Settings","LineWidth",gDefaultLineWidth,true);
 }
 
 
