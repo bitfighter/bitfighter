@@ -711,7 +711,7 @@ void idle()
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
 
-   if(integerTime >= 1)
+   if((gDedicatedServer &&  integerTime >= (U32)minimumSleepTimeDedicatedServer) || ( (!gDedicatedServer) &&  integerTime >= (U32)minimumSleepTimeClient))
    {
       lastTimer = currentTimer;
       unusedFraction = timeElapsed - integerTime;
@@ -757,30 +757,31 @@ void idle()
    // sleep(0) helps reduce the impact of OpenGL on windows.
    U32 sleepTime =  1; //integerTime< 8 ? 8-integerTime : 1;
 
-   if(gClientGame && integerTime >= 1) {
+   if(gClientGame && integerTime >= minimumSleepTimeClient) {
       sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
-      if(integerTime < minimumSleepTimeClient) sleepTime = minimumSleepTimeClient - integerTime; // sleep a minimum of a value
+	  //if(integerTime < (U32)minimumSleepTimeClient) sleepTime = minimumSleepTimeClient - integerTime; // sleep a minimum of a value
    }
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
    if(gDedicatedServer){
-      if(integerTime < minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
+      //if(integerTime < (U32)minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
       if(gServerGame->isSuspended())
           sleepTime = 25; //the higher this number, the less accurate the ping is on server lobby when empty.
    }
 
-   {  //Always sleep long enough, there is a problem with it not sleeping long enough...
-      S64 Timer1 = currentTimer;
-      S64 Timer2;
-      F64 sleeplength = 0.0;
-      while(sleeplength < sleepTime){
-         Platform::sleep(sleepTime-sleeplength);
-         Timer2 = Platform::getHighPrecisionTimerValue();
-         if(Timer1 > Timer2) Timer1 = Timer2;            //just in case Timer overflows
-         sleeplength = Platform::getHighPrecisionMilliseconds(Timer2 - Timer1);
-      }
-  }
+   Platform::sleep(sleepTime);
+   //{  //Always sleep long enough, there is a problem with it not sleeping long enough...
+      //S64 Timer1 = currentTimer;
+      //S64 Timer2;
+      //F64 sleeplength = 0.0;
+      //while(sleeplength < sleepTime){
+      //   Platform::sleep(sleepTime-sleeplength);
+      //   Timer2 = Platform::getHighPrecisionTimerValue();
+      //   if(Timer1 > Timer2) Timer1 = Timer2;            //just in case Timer overflows
+      //   sleeplength = Platform::getHighPrecisionMilliseconds(Timer2 - Timer1);
+  //    }
+  //}
 
    gZapJournal.processNextJournalEntry();    // Does nothing unless we're playing back a journal...
 
