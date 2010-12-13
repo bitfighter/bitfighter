@@ -37,64 +37,21 @@ static LevelLoader *mCaller;
 //const S32 LevelLoader::MaxArgc;
 #endif
 
-const char *levelGenFile;     // Exists here so exception handler will know what file we were running
+string levelGenFile;     // Exists here so exception handler will know what file we were running
 
-
-extern ConfigDirectories gConfigDirs;
 
 // C++ Constructor
-LuaLevelGenerator::LuaLevelGenerator(Vector<string> scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
+LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize, GridDatabase *gridDatabase, 
                                      LevelLoader *caller, OGLCONSOLE_Console console)
 {
-   string fileName = scriptArgs[0];
-   string fullName;
-   
-   // Look for scripts in levels dir, then in the lua scripts folder
-   // If script has no extension, try .levelgen then .lua
-
-   if(fileName.find('.') != string::npos)       // Filename has an extension
-   {   
-      // Try our level dir
-      fullName = strictjoindir(gConfigDirs.levelDir, fileName);
-      if(fileExists(fullName))
-         goto found;
-
-      // Try our lua scripts dir
-      fullName = strictjoindir(gConfigDirs.luaDir, fileName);
-      if(fileExists(fullName))
-         goto found;
-   }
-   else                                         // Filename has no extension
+   if(!fileExists(scriptName))      // Files should be checked before we get here, so this should never happen
    {
-      // Try .levelgen extension
-      fileName = scriptArgs[0] + ".levelgen";
-      fullName = strictjoindir(gConfigDirs.levelDir, fileName);
-      if(fileExists(fullName))
-         goto found;
-
-      fullName = strictjoindir(gConfigDirs.luaDir, fileName);
-      if(fileExists(fullName))
-         goto found;
-
-      // Try .lua extension
-      fileName = scriptArgs[0] + ".lua";
-      fullName = strictjoindir(gConfigDirs.levelDir, fileName);
-      if(fileExists(fullName))
-         goto found;
-
-      fullName = strictjoindir(gConfigDirs.luaDir, fileName);
-      if(fileExists(fullName))
-         goto found;
+      logError("Got bad input %s!", scriptName);
+      return;
    }
 
-   // Script file could not be found; print an error and bail
-   logError("Could not find lua script %s!", scriptArgs[0].c_str());
-   return;
-
-found:      // Found the script, let's run it!
-
-   mFilename = fullName;
-   levelGenFile = mFilename.c_str();
+   mFilename = scriptName;
+   levelGenFile = mFilename;
    mConsole = console;
    sGridDatabase = gridDatabase;
 
@@ -107,7 +64,7 @@ found:      // Found the script, let's run it!
    }
    sGridSize = gridSize;
    mCaller = caller;
-   runScript(L, scriptArgs, gridSize);
+   runScript(L, scriptName, scriptArgs, gridSize);
    cleanupAndTerminate(L);
 }
 
@@ -148,7 +105,7 @@ void LuaLevelGenerator::logError(const char *format, ...)
    char buffer[2048];
 
    vsnprintf(buffer, sizeof(buffer), format, args);
-   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", levelGenFile, buffer);
+   logprintf(LogConsumer::LogError, "***LEVELGEN ERROR*** in %s ::: %s", levelGenFile.c_str(), buffer);
 
    OGLCONSOLE_Output(gConsole, "%s\n", buffer);    // Print message to the console
 
@@ -406,7 +363,7 @@ bool LuaLevelGenerator::loadLevelGenHelperFunctions(lua_State *L)
 }
 
 
-void LuaLevelGenerator::runScript(lua_State *L, Vector<string> scriptArgs, F32 gridSize)
+void LuaLevelGenerator::runScript(lua_State *L, const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize)
 {
    // Register this class Luna
    Lunar<LuaLevelGenerator>::Register(L);
@@ -424,8 +381,8 @@ void LuaLevelGenerator::runScript(lua_State *L, Vector<string> scriptArgs, F32 g
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "LevelGen");
 
-   setLuaArgs(L, scriptArgs);    // Put our args in to the Lua table "args"
-                                 // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
+   setLuaArgs(L, scriptName, scriptArgs);    // Put our args in to the Lua table "args"
+                                             // MUST BE SET BEFORE LOADING LUA HELPER FNS (WHICH F$%^S WITH GLOBALS IN LUA)
 
    if(!loadLuaHelperFunctions(L, "levelgen script")) return;
    if(!loadLevelGenHelperFunctions(L)) return;

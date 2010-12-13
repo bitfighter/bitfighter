@@ -33,6 +33,9 @@
 #include "timer.h"
 #include "gameLoader.h"
 #include "point.h"
+
+#include "dataConnection.h"
+
 #include "UIChat.h"
 
 #ifdef TNL_OS_WIN32
@@ -303,12 +306,11 @@ public:
    void buildLevelList(Vector<string> &levelList);
    void resetLevelLoadIndex();
    void loadNextLevel();
-   string getLastLevelLoadName();         // For updating the UI
+   string getLastLevelLoadName();             // For updating the UI
 
-   bool loadLevel(string fileName);       // Load a level
+   bool loadLevel(const string &fileName);    // Load a level
 
    void cycleLevel(S32 newLevelIndex = NEXT_LEVEL);
-   string getLevelFileName(string base);     // Joins base and dir, if appropriate
    StringTableEntry getLevelNameFromIndex(S32 indx);
    S32 getAbsoluteLevelIndex(S32 indx);      // Figures out the level index if the input is a relative index
    string getLevelFileNameFromIndex(S32 indx);
@@ -329,6 +331,8 @@ public:
    S32 getCurrentLevelIndex() { return mCurrentLevelIndex; }
    S32 getLevelCount() { return mLevelInfos.size(); }
    bool isTestServer() { return mTestMode; }
+
+   DataSender dataSender;
 
    void suspendGame();
    void suspendGame(GameConnection *requestor);  // Suspend at player's request
@@ -409,9 +413,9 @@ extern void joinGame(Address remoteAddress, bool isFromMaster, bool local);
 extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 3  // Change this when releasing an incompatible cm/sm protocol (must be int)
-#define CS_PROTOCOL_VERSION 31     // Change this when releasing an incompatible cs protocol (must be int)
+#define CS_PROTOCOL_VERSION 32     // Change this when releasing an incompatible cs protocol (must be int)
 #define BUILD_VERSION 1113         // Version of the game according to SVN, will be unique every release (must be int)
-#define ZAP_GAME_RELEASE "014a"     // Change this with every release -- for display purposes only, string, 
+#define ZAP_GAME_RELEASE "015"     // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces
 };
 

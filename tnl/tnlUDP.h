@@ -63,6 +63,10 @@ struct IPAddress;
 /// Representation of a network address.
 struct Address
 {
+private:
+   bool mIsValid;
+
+public:
    /// One of: IPXAddress, IPAddress
    U16 transport;
    U16 port;         ///< <b>For IP:</b> sin_port <b>For IPX:</b> sa_socket
@@ -83,14 +87,16 @@ struct Address
    /// where transport is one of ip, ipx, or (in the future) ipv6
    Address(const char *string)
    {
-      set(string);
+      mIsValid = set(string);
    }
 
    /// Constructs an address from an IP address.
    Address(const IPAddress &theAddress)
    {
-      set(theAddress);
+      mIsValid = set(theAddress);
    }
+
+   bool isValid() { return mIsValid; }
 
    /// Sets the address to the specified string, returning true if
    /// the string was a valid address.  Note that this call may block
@@ -99,7 +105,7 @@ struct Address
    bool set(std::string);                // The same, but with string parameter
 
    /// Sets the address to the specified IPAddress.
-   void set(const IPAddress &address);
+   bool set(const IPAddress &address);
 
    /// returns the formatted string corresponding to the address.
    const char *toString() const;

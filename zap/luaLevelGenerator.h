@@ -49,13 +49,13 @@ private:
 
 public:
 
-   LuaLevelGenerator(Vector<string> scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
+   LuaLevelGenerator(const string &scriptName, const Vector<string> &scriptArgs, F32 gridsize, GridDatabase *gridDatabase, 
                      LevelLoader *caller, OGLCONSOLE_Console console);   // C++ constructor
 
    LuaLevelGenerator(lua_State *L);      // Lua constructor
    ~LuaLevelGenerator();                 // Destructor
 
-   void runScript(lua_State *L, Vector<string> scriptArgs, F32 gridSize);
+   void runScript(lua_State *L, const string &scriptName, const Vector<string> &scriptArgs, F32 gridSize);
    void logError(const char *format, ...);
 
 

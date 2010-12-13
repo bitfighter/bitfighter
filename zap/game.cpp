@@ -395,7 +395,7 @@ void ServerGame::loadNextLevel()
    // How about storing them in memory for rapid recall? People sometimes load hundreds of levels, so it's probably not feasible.
    if(mLevelLoadIndex < mLevelInfos.size())
    {
-      string levelName = getLevelFileName(mLevelInfos[mLevelLoadIndex].levelFileName.getString());
+      string levelName = mLevelInfos[mLevelLoadIndex].levelFileName.getString();
 
       if(loadLevel(levelName))    // loadLevel returns true if the load was successful
       {
@@ -466,20 +466,7 @@ string ServerGame::getLevelFileNameFromIndex(S32 indx)
    if(indx < 0 || indx >= mLevelInfos.size())
       return "";
    else
-      return getLevelFileName(mLevelInfos[indx].levelFileName.getString());
-}
-
-
-extern ConfigDirectories gConfigDirs;
-extern string joindir(const string &path, const string &filename);
-
-string ServerGame::getLevelFileName(string base)
-{
-   #ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
-      return = "d:\\media\\levels\\" + base;
-   #endif
-
-   return joindir(gConfigDirs.levelDir, base);
+      return mLevelInfos[indx].levelFileName.getString();
 }
 
 
@@ -677,24 +664,28 @@ inline string getPathFromFilename( const string& filename )
    return filename.substr( 0, max(pos1, pos2) + 1 );
 }
 
+
 static string origFilename;      // Name of file we're trying to load
 extern OGLCONSOLE_Console gConsole;
 
-bool ServerGame::loadLevel(string filename)
+bool ServerGame::loadLevel(const string &origFilename)
 {
-   origFilename = filename;
    mGridSize = DefaultGridSize;
 
    mObjectsLoaded = 0;
+
+   string filename = ConfigDirectories::findLevelFile(origFilename);
+
+   if(filename == "")
+   {
+      logprintf("Unable to find level file \"%s\".  Skipping...", origFilename.c_str());
+      return false;
+   }
+
    if(!initLevelFromFile(filename.c_str()))
    {
-      // Try appending a ".level" to the filename, and see if that helps
-      filename += ".level";
-      if(!initLevelFromFile(filename.c_str()))
-      {
-         logprintf("Unable to open level file \"%s\".  Skipping...", origFilename.c_str());
-         return false;
-      }
+      logprintf("Unable to process level file \"%s\".  Skipping...", origFilename.c_str());
+      return false;
    }
 
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
@@ -706,11 +697,20 @@ bool ServerGame::loadLevel(string filename)
    }
 
    // If there was a script specified in the level file, now might be a fine time to try running it!
-   if(getGameType()->mScriptArgs.size() > 0)
+   if(getGameType()->mScriptName != "")
    {
+      string name = ConfigDirectories::findLevelGenScript(getGameType()->mScriptName);  // Find full name of levelgen script
+
+      if(name == "")
+      {
+         logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\" in level\"%s\"", 
+                                    getGameType()->mScriptName.c_str(), origFilename.c_str());
+         return false;
+      }
+
       // The script file will be the first argument, subsequent args will be passed on to the script.
       // Now we've crammed all our action into the constructor... is this ok design?
-      LuaLevelGenerator levelgen = LuaLevelGenerator(getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+      LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
    }
 
    getGameType()->onLevelLoaded();
@@ -862,6 +862,11 @@ void ServerGame::idle(U32 timeDelta)
 
    mNetInterface->processConnections();
 
+   // If we have a data transfer going on, process it
+   if(!dataSender.isDone())
+      dataSender.sendNextLine();
+
+
    if(mGameSuspended)     // If game is suspended, we need do nothing more
       return;
 
@@ -901,7 +906,6 @@ void ServerGame::idle(U32 timeDelta)
       getGameType()->updateRatings();
       cycleLevel(NEXT_LEVEL);
    }
-
 
    // Lastly, play any sounds server might have made...
    SFXObject::process();

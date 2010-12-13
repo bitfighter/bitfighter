@@ -35,6 +35,8 @@
 #include "tnlConnectionStringTable.h"
 #endif
 
+#include "tnlHuffmanStringProcessor.h"    // For HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
+
 #include "tnl.h"
 
 namespace TNL {
@@ -240,7 +242,7 @@ public:
    bool read(bool *value) { *value = readFlag(); return !error; }
 
    /// Writes a huffman compressed string into the stream.
-   void writeString(const char *stringBuf, U8 maxLen=255);
+   void writeString(const char *stringBuf, U8 maxLen=HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH);
    /// Reads a huffman compressed string from the stream.
    void readString(char stringBuf[256]);
 

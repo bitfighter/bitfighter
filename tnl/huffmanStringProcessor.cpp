@@ -237,7 +237,7 @@ bool HuffmanStringProcessor::writeHuffBuffer(BitStream* pStream, const char* out
       buildTables();
 
    U32 len = out_pBuffer ? strlen(out_pBuffer) : 0;
-   TNLAssertV(len <= 255, ("String \"%s\" TOO long for writeString", out_pBuffer));
+   TNLAssertV(len <= MAX_SENDABLE_LINE_LENGTH, ("String \"%s\" TOO long for writeString", out_pBuffer));
    if (len > maxLen)
       len = maxLen;
 

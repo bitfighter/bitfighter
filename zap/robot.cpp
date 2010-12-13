@@ -1473,7 +1473,7 @@ bool Robot::startLua()
    lua_pushlightuserdata(L, (void *)this);
    lua_setglobal(L, "Robot");
 
-   LuaObject::setLuaArgs(L, mArgs);    // Put our args in to the Lua table "args"
+   LuaObject::setLuaArgs(L, mFilename, mArgs);    // Put our args in to the Lua table "args"
 
 
    if(!loadLuaHelperFunctions(L, "robot"))
@@ -1631,7 +1631,12 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
    mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
 
-   mFilename = joindir(gConfigDirs.robotDir, argv[1]);
+   mFilename = gConfigDirs.findBotFile(argv[1]);
+   if(mFilename == "")
+   {
+      logprintf("Could not find bot file %s", argv[1]);     // TODO: Better handling here
+      return false;
+   }
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
@@ -1639,7 +1644,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
    // We're using string here as a stupid way to get done what we need to do... perhaps there is a better way.
 
-   for(S32 i = 1; i < argc; i++)
+   for(S32 i = 2; i < argc; i++)
       mArgs.push_back(string(argv[i]));
 
    return true;

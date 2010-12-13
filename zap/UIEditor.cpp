@@ -765,13 +765,16 @@ void EditorUserInterface::runLevelGenScript()
    OGLCONSOLE_Output(gConsole, "Running script %s\n", mScriptLine.c_str());
 
    Vector<string> scriptArgs = parseString(mScriptLine);
+   
+   string scriptName = scriptArgs[0];
+   scriptArgs.erase(0);
 
    clearLevelGenItems();      // Clear out any items from the last run
 
    // Set the load target to the levelgen list, as that's where we want our items stored
    mLoadTarget = &mLevelGenItems;
 
-   runScript(scriptArgs);
+   runScript(scriptName, scriptArgs);
 
    // Reset the target
    mLoadTarget = &mItems;
@@ -779,12 +782,19 @@ void EditorUserInterface::runLevelGenScript()
 
 
 // Runs an arbitrary lua script.  Command is first item in cmdAndArgs, subsequent items are the args, if any
-void EditorUserInterface::runScript(const Vector<string> &cmdAndArgs)
+void EditorUserInterface::runScript(const string &scriptName, const Vector<string> &args)
 {
-   // Do we need this assignment?  The constructor runs the script, so there's nothing we need to with our levelgen object...
+   string name = ConfigDirectories::findLevelGenScript(scriptName);  // Find full name of levelgen script
+
+   if(name == "")
+   {
+      logprintf(LogConsumer::LogWarning, "Warning: Could not find script \"%s\"",  scriptName.c_str());
+      // TODO: Show an error to the user
+      return;
+   }
 
    // Load the items
-   /*LuaLevelGenerator levelgen = */LuaLevelGenerator(cmdAndArgs, mGridSize, getGridDatabase(), this, gConsole);
+   LuaLevelGenerator(name, args, mGridSize, getGridDatabase(), this, gConsole);
    
    // Process new items
    // Not sure about all this... may need to test
@@ -989,14 +999,11 @@ void EditorUserInterface::generateBotZones()
 
    // For the moment, base zones are generated via Sam's Lua script, now parked in Lua folder
    Vector<string> scriptArgs;
-   scriptArgs.clear();
-   scriptArgs.push_back("build_navzones.lua");
 
    Vector<WorldItem> zones;
    mLoadTarget = &zones;
 
-   // Do we need this assignment?  The constructor runs the script, so there's nothing we need to with our levelgen object...
-   /*LuaLevelGenerator levelgen = */LuaLevelGenerator(scriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
+   LuaLevelGenerator("build_navzones.lua", scriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
 
    for(S32 i = 0; i < zones.size(); i++)
       zones[i].setExtent(Rect(zones[i].getVerts()));
@@ -1077,7 +1084,11 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
       {
          gEditorUserInterface.saveUndoState();
          words.erase(0);         // Get rid of "run", leaving script name and args
-         gEditorUserInterface.runScript(words);
+
+         string name = words[0];
+         words.erase(0);
+
+         gEditorUserInterface.runScript(name, words);
          gEditorUserInterface.rebuildEverything();
          gEditorUserInterface.syncUnmovedItems();
       }

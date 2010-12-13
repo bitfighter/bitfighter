@@ -70,6 +70,11 @@ struct ConfigDirectories {
 
    static void resolveDirs();
    static void resolveLevelDir();
+
+   static string findLevelFile(const string &filename);
+   static string findLevelGenScript(const string &fileName);
+   static string findBotFile(const string &filename);
+
 };
 
 
@@ -154,6 +159,8 @@ struct IniSettings      // With defaults specified
 
    bool enableExperimentalAimMode;  // True if we want to show an aim vector in joystick mode
 
+   bool allowDataConnections;       // Specify whether data connections are allowed on this computer
+
    InputMode inputMode;             // Joystick or Keyboard
    string masterAddress;            // Default address of our master server
    string name;                     // Player name (none by default)
@@ -231,6 +238,7 @@ struct IniSettings      // With defaults specified
       showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
       verboseHelpMessages = true;        // If true, we'll show more handholding messages
       showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
+      allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
 
       inputMode = Keyboard;              // Joystick or Keyboard
       masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server

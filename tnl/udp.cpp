@@ -630,14 +630,18 @@ Address::Address(TransportProtocol type, Address::NamedAddress name, U16 aPort)
       for(U32 i = 0; i < 4; i++)
          netNum[i] = 0xFFFFFFFF;
    }
+
+   mIsValid = true;
 }
 
-void Address::set(const IPAddress &address)
+bool Address::set(const IPAddress &address)
 {
    transport = IPProtocol;
    port = address.port;
    netNum[0] = address.netNum;
    netNum[1] = netNum[2] = netNum[3] = 0;
+   return true;
+
 }
 
 IPAddress Address::toIPAddress() const

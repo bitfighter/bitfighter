@@ -312,6 +312,7 @@ static void loadHostConfiguration()
    gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
+   gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
 }
 
 
@@ -1116,20 +1117,23 @@ static void writeHost()
       gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
+      gINI.KeyComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
 
 //      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
       gINI.KeyComment("Host", "----------------");
    }
-   gINI.SetValue("Host", "ServerName", gIniSettings.hostname, true);
-   gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr, true);
-   gINI.SetValue("Host", "ServerDescription", gIniSettings.hostdescr, true);
-   gINI.SetValue("Host", "ServerPassword", gIniSettings.serverPassword, true);
-   gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword, true);
-   gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword, true);
-   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir, true);
-   gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers, true);
-//   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay, true);
-   gINI.SetValueI("Host", "AlertsVolume",   (S32) (gIniSettings.alertsVolLevel * 10), true);
+   gINI.SetValue("Host", "ServerName", gIniSettings.hostname);
+   gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr);
+   gINI.SetValue("Host", "ServerDescription", gIniSettings.hostdescr);
+   gINI.SetValue("Host", "ServerPassword", gIniSettings.serverPassword);
+   gINI.SetValue("Host", "AdminPassword", gIniSettings.adminPassword);
+   gINI.SetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
+   gINI.SetValue("Host", "LevelDir", gIniSettings.levelDir);
+   gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
+//   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay);
+   gINI.SetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10));
+   gINI.SetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"));
 }
 
 
@@ -1257,8 +1261,8 @@ void writeSkipList()
    gINI.KeyComment("LevelSkipList", " for remote server management.  You will experience slightly better load times if you clean");
    gINI.KeyComment("LevelSkipList", " this section out from time to time.  The names of the keys are not important, and may be changed.");
    gINI.KeyComment("LevelSkipList", " Example:");
-   gINI.KeyComment("LevelSkipList", " Level1=skip_me.level");
-   gINI.KeyComment("LevelSkipList", " Level2=dont_load_me_either.level");
+   gINI.KeyComment("LevelSkipList", " SkipLevel1=skip_me.level");
+   gINI.KeyComment("LevelSkipList", " SkipLevel2=dont_load_me_either.level");
    gINI.KeyComment("LevelSkipList", " ... etc ...");
    gINI.KeyComment("LevelSkipList", "----------------");
 
@@ -1442,10 +1446,77 @@ static void testLevelDirResolution()
 }
 #endif
 
+
 void ConfigDirectories::resolveLevelDir()
 {
    //testLevelDirResolution();
    doResolveLevelDir(gCmdLineSettings.dirs.rootDataDir, gCmdLineSettings.dirs.levelDir, gIniSettings.levelDir);
+}
+
+
+static string checkName(const string &filename, const char *folders[], const char *extensions[])
+{
+   string name;
+   if(filename.find('.') != string::npos)       // filename has an extension
+   {
+      S32 i = 0;
+      while(strcmp(folders[i], ""))
+      {
+         name = strictjoindir(folders[i], filename);
+         if(fileExists(name))
+            return name;
+         i++;
+      }
+   }
+   else
+   {
+      S32 i = 0; 
+      while(strcmp(extensions[i], ""))
+      {
+         S32 j = 0;
+         while(strcmp(folders[j], ""))
+         {
+            name = strictjoindir(folders[j], filename + extensions[i]);
+            if(fileExists(name))
+               return name;
+            j++;
+         }
+         i++;
+      }
+   }
+
+   return "";
+}
+
+
+string ConfigDirectories::findLevelFile(const string &filename)         // static
+{
+#ifdef TNL_OS_XBOX         // This logic completely untested for OS_XBOX... basically disables -leveldir param
+   const char *folders[] = { "d:\\media\\levels\\", "" };
+#else
+   const char *folders[] = { gConfigDirs.levelDir.c_str(), "" };
+#endif
+   const char *extensions[] = { ".level", "" };
+
+   return checkName(filename, folders, extensions);
+}
+
+
+string ConfigDirectories::findLevelGenScript(const string &filename)    // static
+{
+   const char *folders[] = { gConfigDirs.levelDir.c_str(), gConfigDirs.luaDir.c_str(), "" };
+   const char *extensions[] = { ".levelgen", ".lua", "" };
+
+   return checkName(filename, folders, extensions);
+}
+
+
+string ConfigDirectories::findBotFile(const string &filename)           // static
+{
+   const char *folders[] = { gConfigDirs.robotDir.c_str(), "" };
+   const char *extensions[] = { ".bot", ".lua", "" };
+
+   return checkName(filename, folders, extensions);
 }
 
 

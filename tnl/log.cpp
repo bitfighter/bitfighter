@@ -118,7 +118,7 @@ void LogConsumer::logprintf(const char *format, ...)
 void LogConsumer::prepareAndLogString(std::string message)
 {
    // Unless string ends with a '\', add a newline char
-   if(message[message.length() - 1] == '\\')
+   if(message.length() > 0 && message[message.length() - 1] == '\\')
       message.erase(message.length() - 1, 1);
    else
       message.append("\n");

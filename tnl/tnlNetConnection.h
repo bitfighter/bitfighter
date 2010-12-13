@@ -236,7 +236,9 @@ public:
       ReasonIncompatibleRPCCounts,  // Incompatible version of the software, should never happen due to our version management
       ReasonServerFull,             // Too many players
       ReasonNeedServerPassword,     // Server requires a password -- either provided none, or an incorrect one
-      
+
+      ReasonConnectionsForbidden,   // Used when rejecting data connections when data connection capability is disabled
+
       TerminationReasons,           // Must be last of enumerated reasons!
       ReasonNone
    };

@@ -36,8 +36,6 @@
 // See current game info by pressing [F2]
 
 
-     
-
 
 // Random point in zone, random zone, isInCaptureZone should return actual capture zone
 // backport player count stuff
@@ -72,6 +70,7 @@ Specifying the extension is optional.
 <li>Passwords now stored in plaintext in the ini file; gives increase in convenience with only small decrease in security; still transmitted via hash
 <li>When master server is unreachable, server will remember recent game servers and will try to contact those
 <li>Can define multiple servers in the INI to always try contacting without assistance of the master
+<li>Max level size bumped up to 256K
 </ul>
 
 
@@ -118,17 +117,15 @@ Specifying the extension is optional.
 #include "tnlNetInterface.h"
 #include "tnlJournal.h"
 
-#include "oglconsole.h"
+#include "dataConnection.h"
 
-#ifdef TNL_OS_MAC_OSX
-#include "Directory.h"
-#endif
+#include "oglconsole.h"
 
 #include "zapjournal.h"
 
 #include "../glut/glutInclude.h"
 #include <stdarg.h>
-#include <stdio.h>      // For logging to console
+//#include <stdio.h>      // For logging to console
 
 using namespace TNL;
 
@@ -152,8 +149,15 @@ using namespace TNL;
 
 #include "screenShooter.h"
 
+// For writeToConsole() functionality
+#ifdef WIN32
+#include <io.h>
+#include <fcntl.h>
+#endif 
+
 
 #ifdef TNL_OS_MAC_OSX
+#include "Directory.h"
 #include <unistd.h>
 #endif
 
@@ -217,9 +221,12 @@ Color EDITOR_WALL_FILL_COLOR(.5, .5, 1);        // Walls filled with this in edi
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.
 
 static const F32 MIN_SCALING_FACT = 0.15;       // Limits minimum window size
+
 string gServerPassword = "";
 string gAdminPassword = "";
 string gLevelChangePassword = "";
+
+DataConnection *dataConn = NULL;
 
 Address gMasterAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
@@ -845,9 +852,10 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
-   if(isFromMaster && gClientGame->getConnectionToMaster())     // Request an arranged connection
+   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
+   if(isFromMaster && conn && conn->getConnectionState() == NetConnection::Connected)     // Request an arranged connection
    {
-      gClientGame->getConnectionToMaster()->requestArrangedConnection(remoteAddress);
+      conn->requestArrangedConnection(remoteAddress);
       gGameUserInterface.activate();
    }
    else                                                         // Try a direct connection
@@ -889,6 +897,8 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
       gGameUserInterface.activate();
    }
 }
+
+
 
 // Disconnect from servers and exit game in an orderly fashion.  But stay connected to the master until we exit the program altogether
 void endGame()
@@ -948,6 +958,132 @@ void setParamsForDedicatedMode()
    gDedicatedServer = true;
 }
 
+
+// Processed params will be removed from argv
+void readFolderLocationParams(Vector<StringPtr> &argv)
+{
+   // Process command line args  --> see http://bitfighter.org/wiki/index.php?title=Command_line_parameters
+   for(S32 i = 0; i < argv.size(); i++)
+   {
+      S32 argc = argv.size();
+
+      // Assume "args" starting with "-" are actually follow-on params
+      bool hasAdditionalArg = (i != argc - 1 && argv[i + 1].getString()[0] != '-');     
+
+      if(!stricmp(argv[i].getString(), "-rootdatadir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify the root data folder with the -rootdatadir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.rootDataDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+
+      else if(!stricmp(argv[i].getString(), "-leveldir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify a levels subfolder with the -leveldir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.levelDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+      else if(!stricmp(argv[i].getString(), "-inidir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify a the folder where your INI file is stored with the -inidir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.iniDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+      else if(!stricmp(argv[i].getString(), "-logdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify your log folder with the -logdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.logDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+      else if(!stricmp(argv[i].getString(), "-scriptsdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify the folder where your Lua scripts are stored with the -scriptsdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.luaDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+      else if(!stricmp(argv[i].getString(), "-robotdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify the robots folder with the -robotdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.robotDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+      else if(!stricmp(argv[i].getString(), "-screenshotdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify your screenshots folder with the -screenshotdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.screenshotDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
+      else if(!stricmp(argv[i].getString(), "-sfxdir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify your sounds folder with the -sfxdir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.sfxDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+   }
+}
 
 
 // Read the command line params... if we're replaying a journal, we'll process those params as if they were actually there, while
@@ -1047,9 +1183,6 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
          }
       }
 
-
-
-
       // Specify password for accessing locked servers
       else if(!stricmp(argv[i], "-serverpassword"))      // additional arg required
       {
@@ -1082,95 +1215,6 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
             logprintf(LogConsumer::LogError, "You must specify an level-change password with the -levelchangepassword option");
             exitGame(1);
          }
-      }
-
-      else if(!stricmp(argv[i], "-rootdatadir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the root data folder with the -rootdatadir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.rootDataDir = argv[i+1].getString();
-      }
-
-
-      else if(!stricmp(argv[i], "-leveldir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify a levels subfolder with the -leveldir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.levelDir = argv[i+1].getString();
-      }
-
-      else if(!stricmp(argv[i], "-inidir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify a the folder where your INI file is stored with the -inidir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.iniDir = argv[i+1].getString();
-      }
-
-      else if(!stricmp(argv[i], "-logdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your log folder with the -logdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.logDir = argv[i+1].getString();
-      }
-
-      else if(!stricmp(argv[i], "-scriptsdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the folder where your Lua scripts are stored with the -scriptsdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.luaDir = argv[i+1].getString();
-      }
-
-      else if(!stricmp(argv[i], "-robotdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify the robots folder with the -robotdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.robotDir = argv[i+1].getString();
-      }
-
-      else if(!stricmp(argv[i], "-screenshotdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your screenshots folder with the -screenshotdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.screenshotDir = argv[i+1].getString();
-      }
-
-      else if(!stricmp(argv[i], "-sfxdir"))      // additional arg required
-      {
-         if(!hasAdditionalArg)
-         {
-            logprintf(LogConsumer::LogError, "You must specify your sounds folder with the -sfxdir option");
-            exitGame(1);
-         }
-
-         gCmdLineSettings.dirs.sfxDir = argv[i+1].getString();
       }
 
       // Specify list of levels...  all remaining params will be taken as level names
@@ -1521,43 +1565,150 @@ void processStartupParams()
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          seedRandomNumberGenerator(gIniSettings.name);
-         gClientId.getRandom();                    // Generate a player ID
+         gClientId.getRandom();                                // Generate a player ID
       }
    }
 }
 
 
-void processCmdLineParams(int argc, char **argv)
+// Call this function when running game in console mode; causes output to be dumped to console, if it was run from one
+// Loosely based on http://www.codeproject.com/KB/dialog/ConsoleAdapter.aspx
+bool writeToConsole()
 {
-   Vector<TNL::StringPtr> theArgv;
 
-   // Process some command line args that need to be handled early, like journaling options
-   for(S32 i = 1; i < argc; i++)
+#ifdef WIN32
+   if(!AttachConsole(-1))
+      return false;
+   
+   try
    {
-      if(!stricmp(argv[i], "-rules"))            // Print current rules and exit
+      int m_nCRTOut= _open_osfhandle((long) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+      if(m_nCRTOut == -1)
+         return false;
+    
+      FILE *m_fpCRTOut = _fdopen( m_nCRTOut, "w" );
+    
+      if( !m_fpCRTOut )
+         return false;
+    
+      *stdout = *m_fpCRTOut;
+    
+      //// If clear is not done, any cout statement before AllocConsole will 
+      //// cause, the cout after AllocConsole to fail, so this is very important
+      // But here, we're not using AllocConsole...
+      //std::cout.clear();
+   }
+   catch ( ... )
+   {
+      return false;
+   } 
+#endif    
+   return true;
+}
+
+
+extern FileType getResourceType(const char *);
+
+// This method may remove args from theArgv
+void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
+{
+   // Process some command line args that need to be handled early, like journaling options
+   for(S32 i = 0; i < theArgv.size(); i++)
+   {
+      bool hasAdditionalArg = (i != theArgv.size() - 1 && theArgv[i + 1].getString()[0] != '-');     
+
+      if(!stricmp(theArgv[i].getString(), "-rules"))            // Print current rules and exit; nothing more to do
       {
+         writeToConsole();
          GameType::printRules();
          exitGame(0);
       }
-      else if(!stricmp(argv[i], "-jsave"))      // Write game to journal
+
+      // -sendres/getres <server> <password> <file> <resource type>
+      if(!stricmp(theArgv[i].getString(), "-sendres") || !stricmp(theArgv[i].getString(), "-getres"))  
       {
-         if(i != argc - 1)
+         writeToConsole();
+         if(theArgv.size() < i + 4)     // Too few arguments
          {
-            gZapJournal.record(argv[i+1]);
-            i++;
+            printf("Usage: bitfighter %s <server address> <password> <file> <resource type>\n", theArgv[i].getString());
+            exitGame(1);
          }
+
+         bool sending = (!stricmp(theArgv[i].getString(), "-sendfile"));
+
+         Address address(theArgv[i+1].getString());
+         if(!address.isValid())
+         {
+            printf("Invalid address: Use format IP:nnn.nnn.nnn.nnn:port\n");
+            exitGame(1);
+         }
+
+         string password = md5.getSaltedHashFromString(theArgv[i+2].getString());
+         const char *fileName = theArgv[i+3].getString();
+
+         FileType fileType = getResourceType(theArgv[i+4].getString());
+         if(fileType == INVALID_RESOURCE_TYPE)
+         {
+            printf("Invalid resource type: Please sepecify BOT, LEVEL, or LEVELGEN\n");
+            exitGame(1);
+         }
+
+         dataConn = new DataConnection(sending ? SEND_FILE : REQUEST_FILE, password, fileName, fileType);
+            
+         NetInterface *netInterface = new NetInterface(Address());
+         dataConn->connect(netInterface, address);
+
+         bool started = false;
+
+         while(!started || dataConn && dataConn->isEstablished())
+         {
+            if(dataConn && dataConn->isEstablished())
+            {
+               if(!dataConn->mDataSender.isDone())
+                  dataConn->mDataSender.sendNextLine();
+
+               started = true;
+            }
+              
+            netInterface->checkIncomingPackets();
+            netInterface->processConnections();
+         }
+
+         delete netInterface;
+         exitGame(0);
       }
-      else if(!stricmp(argv[i], "-jplay"))      // Replay game from journal
+
+      else if(!stricmp(theArgv[i].getString(), "-jsave"))      // Write game to journal
       {
-         if(i != argc - 1)
+         if(hasAdditionalArg)
+            gZapJournal.record(theArgv[i+1].getString());
+         else
          {
-            gZapJournal.load(argv[i+1]);
-            i++;
+            logprintf(LogConsumer::LogError, "You must specify a file with the jsave option");
+            exitGame(1);
          }
+         
+         theArgv.erase(i);
+         theArgv.erase(i);
+         i--;
       }
-      else
-         theArgv.push_back(argv[i]);
-   }  // End processing command line args
+
+      else if(!stricmp(theArgv[i].getString(), "-jplay"))      // Replay game from journal
+      {
+         if(hasAdditionalArg)
+            gZapJournal.load(theArgv[i+1].getString());
+         else
+         {
+            logprintf(LogConsumer::LogError, "You must specify a file with the jload option");
+            exitGame(1);
+         }
+
+         theArgv.erase(i);
+         theArgv.erase(i);
+         i--;
+      }
+
+   }  // End of first pass of processing command line args
 
    gZapJournal.readCmdLineParams(theArgv);   // Process normal command line params, read INI, and start up
 }
@@ -1771,7 +1922,6 @@ void launchUpdater(string bitfighterExecutablePathAndFilename)
 
 using namespace Zap;
 
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 // main()
@@ -1789,13 +1939,19 @@ int main(int argc, char **argv)
    moveToAppPath();
 #endif
 
-   processCmdLineParams(argc, argv);
+   // Put all cmd args into a Vector for easier processing
+   Vector<StringPtr> argVector;
+   for(S32 i = 1; i < argc; i++)
+      argVector.push_back(argv[i]);
 
-   gConfigDirs.resolveDirs();    // Resolve all folders except for levels folder, resolved later
+   readFolderLocationParams(argVector);      // Reads folder location params, and removes them from argVector
+   gConfigDirs.resolveDirs();                // Resolve all folders except for levels folder, resolved later
 
    // Before we go any further, we should get our log files in order.  Now we know where they'll be, as the 
    // only way to specify a non-standard location is via the command line, which we've now read.
    setupLogging();
+
+   processCmdLineParams(argVector);          // Reads remaining params in two passes -- pre-journaling, and post-journaling
 
    // Load the INI file
    gINI.SetPath(joindir(gConfigDirs.iniDir, "bitfighter.ini"));   
@@ -1807,16 +1963,16 @@ int main(int argc, char **argv)
    loadSettingsFromINI();                    // Read INI
 
    processStartupParams();                   // And merge command line params and INI settings
-   Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges
+   Ship::computeMaxFireDelay();              // Look over weapon info and get some ranges, which we'll need before we start sending data
 
-   if(gCmdLineSettings.serverMode)           // Only gets set when compiled as a dedicated server, or when -dedicated param is specified
+
+   if(gCmdLineSettings.serverMode)           // Only set when 1) compiled as a dedicated server; or 2) -dedicated param is specified
    {
       Vector<string> levels = LevelListLoader::buildLevelList();
       initHostGame(gBindAddress, levels, false);     // Start hosting
    }
 
-   SFXObject::init();  // Even dedicated server needs sound
-
+   SFXObject::init();  // Even dedicated server needs sound these days
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server
