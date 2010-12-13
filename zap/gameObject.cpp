@@ -228,10 +228,11 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask
       if(victimOwner && damagerOwner == victimOwner)
          localInfo.damageAmount *= localInfo.damageSelfMultiplier;
 
-      foundObject->damageObject(&localInfo);
 
       if(foundObject->getObjectTypeMask() & (ShipType | RobotType))
          shipsHit++;
+
+      foundObject->damageObject(&localInfo); //damageObject should be last as it might remove this object...
    }
 
    return shipsHit;

@@ -233,8 +233,13 @@ bool Asteroid::getCollisionPoly(Vector<Point> &polyPoints)
 
 void Asteroid::damageObject(DamageInfo *theInfo)
 {
+   if(hasExploded) return; //Avoid index out of range error.
+
    // Compute impulse direction
    mSizeIndex++;
+   
+   TNLAssert((U32)mSizeIndex < asteroidRenderSizes, "Asteroid::damageObject mSizeIndex out of range");
+
    if(asteroidRenderSize[mSizeIndex] == -1)    // Kill small items
    {
       hasExploded = true;

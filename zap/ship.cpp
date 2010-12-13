@@ -676,6 +676,8 @@ void Ship::processEnergy()
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
+   if(mHealth == 0 || hasExploded) return; //Stop multi-kill problem. Might stop robots from getting invincible.
+
    // Deal with grenades and other explody things, even if they cause no damage
    if(theInfo->damageType == DamageTypeArea)
       mImpulseVector += theInfo->impulseVector;
