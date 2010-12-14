@@ -1029,10 +1029,10 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    {
       mScriptArgs.clear();    // Clear out any args from a previous Script line
 
-      if(argc < 1)      // At a minimum, we need a script name
-      {
+      if(argc < 2)      // At a minimum, we need a script name
+      {                 // arg[0]="Script"  arg[1]=script name
          mScriptName = "";
-         return false;
+         return true;    //true to avoid error: Unknown object type "Script" in level ""
       }
 
       mScriptName = argv[1];
