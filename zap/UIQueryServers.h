@@ -78,7 +78,6 @@ private:
    S32 getLastPage() { return (servers.size() - 1) / mServersPerPage; }
 
    Timer mouseScrollTimer;
-   Timer mNoMasterTimer;
    void sortSelected();
 
    void contactEveryone();    // Try contacting master server, and local broadcast servers
