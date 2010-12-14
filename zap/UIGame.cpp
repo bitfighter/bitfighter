@@ -1630,7 +1630,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       if(words.size() < 2 || words[1] == "")
       {
          displayMessage(gCmdChatColor, "!!! Need to supply line width");
-         return true;
+         return;
       }
       linewidth = ConvertCharToFloat(words[1].c_str());
       if(linewidth < 0.125f) linewidth = 0.125f;

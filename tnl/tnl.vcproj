@@ -121,7 +121,7 @@
 				AdditionalIncludeDirectories="../libtomcrypt"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;TNL_ENABLE_LOGGING"
 				StringPooling="true"
-				ExceptionHandling="0"
+				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
