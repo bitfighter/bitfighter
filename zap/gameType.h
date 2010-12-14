@@ -426,6 +426,8 @@ public:
    S32 mGlowingZoneTeam;      // Which team's zones are glowing, -1 for all
 
    virtual void majorScoringEventOcurred(S32 team) { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
+
+   void processServerCommand(ClientRef *clientRef, Vector<string> words);
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \

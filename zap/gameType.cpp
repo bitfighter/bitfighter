@@ -2247,10 +2247,11 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 
 
 
-
+extern F32 ConvertCharToFloat(const char * in);   //from UIGame.cpp: might want to move this?
 
 //runs the server side commands, as long as the client can chat "/example" commands to the server
-void processServerCommand(ClientRef *clientRef, Vector<string> words)
+// This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
+void GameType::processServerCommand(ClientRef *clientRef, Vector<string> words)
 {
    if(words.size() == 0)            // Just in case
       return;
@@ -2261,6 +2262,24 @@ void processServerCommand(ClientRef *clientRef, Vector<string> words)
 	   //do something here to make sure it works.
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "This is an example.");
 
+   }else if(words[0] == "settime"){
+     if(!clientRef->isLevelChanger){                         // Level changers and above
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+         return;
+     }
+     if(words.size() <= 1){                         // Level changers and above
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter minutes");
+         return;
+     }
+
+      mGameTimer.reset( (U32)( 60*1000 * ConvertCharToFloat( words[1].c_str() ) ) );     // Change "official time".
+      s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
+
+      static StringTableEntry msg("%e0 has changed the time limit");
+      Vector<StringTableEntry> e;
+      e.push_back(clientRef->clientConnection->getClientName());
+      for(S32 i = 0; i < mClientList.size(); i++)
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
    }else{
       //server command not found, tell the client.
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid Command");

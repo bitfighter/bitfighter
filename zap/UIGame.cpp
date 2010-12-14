@@ -1397,6 +1397,7 @@ F32 ConvertCharToFloat(const char * in){
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
+// This is client side commands, For server side commands, use gameType.cpp, processServerCommand.
 bool GameUserInterface::processCommand(Vector<string> &words)
 {
    if(words.size() == 0)            // Just in case
