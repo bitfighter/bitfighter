@@ -194,14 +194,14 @@ void PasswordEntryUserInterface::render()
    {
       gGameUserInterface.render();
       glColor4f(0, 0, 0, 0.5);
-      glEnable(GL_BLEND);
+      glEnableBlend
          glBegin(GL_POLYGON);
             glVertex2f(0,           0);
             glVertex2f(canvasWidth, 0);
             glVertex2f(canvasWidth, canvasHeight);
             glVertex2f(0,           canvasHeight);
          glEnd();
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 
    Parent::render();

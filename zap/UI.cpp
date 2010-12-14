@@ -664,8 +664,10 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
 
+   glDisableBlendfromLineSmooth;
    for(S32 i = 1; i >= 0; i--)
    {
+      if(i==0) glEnableBlendfromLineSmooth;
       glColor(i ? Color(.3,0,0) : Color(1,1,1));        // Draw the box
       
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);

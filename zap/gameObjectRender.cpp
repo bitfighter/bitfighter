@@ -170,8 +170,8 @@ void drawCentroidMark(const Point &pos, F32 radius)
 
 void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive)
 {
-   if(alpha != 1.0)
-      glEnable(GL_BLEND);
+   //if(alpha != 1.0)
+   //   glEnable(GL_BLEND);
 
    // First render the thrusters
    if(thrusts[0] > 0) // forward thrust
@@ -317,14 +317,14 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
       glEnd();
    }
 
-   if(alpha != 1.0)
-      glDisable(GL_BLEND);
+   //if(alpha != 1.0)
+      glDisableBlend
 }
 
 // This is a line extending from the ship to give joystick players some idea of where they're aiming
 void renderAimVector()
 {
-   glEnable(GL_BLEND);
+   glEnableBlend;
       glBegin(GL_LINES);
          glColor4f(0,1,0, 0);
          glVertex2f(0, 50);       // Gradient from here...
@@ -336,7 +336,7 @@ void renderAimVector()
          glVertex2f(0, 150);      // Solid from here on out
          glVertex2f(0, 1000);     // 1000 is pretty aribitrary!
       glEnd();
-   glDisable(GL_BLEND);
+   glDisableBlend;
 
 }
 
@@ -398,7 +398,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 
    glPushMatrix();
 
-   glEnable(GL_BLEND);
+   glEnableBlend;
 
    if(gClientGame->getCommanderZoomFraction() > 0 || showDestOverride)
    {
@@ -509,7 +509,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
          }
       glEnd();
    }
-   glDisable(GL_BLEND);
+   glDisableBlend
    glPopMatrix();
 }
 
@@ -651,7 +651,7 @@ void renderFlag(F32 x, F32 y, const Color &flagColor)
 void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
 {
    F32 alpha = 0.75;
-   glEnable(GL_BLEND);
+   glEnableBlend;
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
    glScalef(0.2, 0.2, 1);
@@ -674,7 +674,7 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
       glVertex2f(-15, 15);
    glEnd();
    glPopMatrix();
-   glDisable(GL_BLEND);
+   glDisableBlend
 }
 
 
@@ -728,13 +728,13 @@ void renderPolygonOutline(const Vector<Point> &outline)
 void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, 
                    const Color &fillColor, const Color &outlineColor, F32 alpha = 1)
 {
-   glEnable(GL_BLEND);
+   glEnableBlend;
    glColor(fillColor, alpha);
    renderTriangulatedPolygonFill(fillPoints);
 
    glColor(outlineColor, alpha);
    renderPolygonOutline(outlinePoints);
-   glDisable(GL_BLEND);
+   glDisableBlend
 }
 
 
@@ -771,7 +771,7 @@ void renderNavMeshZone(const Vector<Point> &outline, const Vector<Point> &fill, 
 
 void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color, F32 fillAlpha, F32 width)
 {
-   glEnable(GL_BLEND);
+   glEnableBlend;
 
    for(S32 j = 1; j >= 0; j--)
    {
@@ -779,7 +779,7 @@ void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color
       renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_POLYGON : GL_LINE_LOOP);
    }
 
-   glDisable(GL_BLEND);
+   glDisableBlend
 }
 
 
@@ -995,7 +995,7 @@ void renderMine(Point pos, bool armed, bool visible)
    else
       glLineWidth(gLineWidth1);
 
-   glEnable(GL_BLEND);
+   glEnableBlend;
    glColor4f(mod, mod, mod, vis);
    drawCircle(pos, 10);
 
@@ -1005,7 +1005,7 @@ void renderMine(Point pos, bool armed, bool visible)
       drawCircle(pos, 6);
    }
    glLineWidth(gDefaultLineWidth);
-   glDisable(GL_BLEND);
+   glDisableBlend
 }
 
 #ifndef min
@@ -1073,7 +1073,7 @@ void renderGrenade(Point pos, F32 lifeLeft)
    F32 alpha = 1 - (vel / 500) * (vel / 500);      // TODO: Make 500 come from constant in gameWeapons.cpp
 
    // Color inner circle with a color that gets darker as grenade slows
-   glEnable(GL_BLEND);
+   glEnableBlend;
    glColor4f(1,.5,0,alpha);
    drawFilledCircle(pos, r3);
    glDisable(GL_BLEND);
@@ -1607,7 +1607,7 @@ pixLoc gLogoPoints[LetterLoc1 + LetterLoc2 + LetterLoc3 + LetterLoc4 + LetterLoc
 
 void renderStaticBitfighterLogo()
 {
-   glColor3f(0, 1, 0);
+   glColor4f(0, 1, 0, 1);
    renderBitfighterLogo(73, 1, 0);
    UserInterface::drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
 }

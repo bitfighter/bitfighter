@@ -1429,7 +1429,7 @@ void Ship::render(S32 layerIndex)
       if(isBusy)
          str = "<<" + str + ">>";
 
-      glEnable(GL_BLEND);
+      glEnableBlend
       F32 textAlpha = 0.5 * alpha;
       U32 textSize = 14;
 #ifdef TNL_OS_XBOX
@@ -1451,7 +1451,7 @@ void Ship::render(S32 layerIndex)
          glEnd();
       }
 
-      glDisable(GL_BLEND);
+      glDisableBlend
       glLineWidth(gDefaultLineWidth);
    }
    else
@@ -1460,13 +1460,13 @@ void Ship::render(S32 layerIndex)
       {
          string str = string("@") + itos((S32) getActualPos().x) + "," + itos((S32) getActualPos().y);
 
-         glEnable(GL_BLEND);
+         glEnableBlend
             U32 textSize = 18;
             glLineWidth(gLineWidth1);
             glColor4f(1,1,1,0.5 * alpha);
 
             UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
-         glDisable(GL_BLEND);
+         glDisableBlend
          glLineWidth(gDefaultLineWidth);
       }
    }
@@ -1480,11 +1480,13 @@ void Ship::render(S32 layerIndex)
       // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
       // scrambling thing here as well...
       glColor3f(0,0,0);
+      glDisableBlendfromLineSmooth;
       glBegin(GL_POLYGON);
          glVertex2f(-20, -15);
          glVertex2f(0, 25);
          glVertex2f(20, -15);
       glEnd();
+      glEnableBlendfromLineSmooth;
 
       glPopMatrix();
       return;

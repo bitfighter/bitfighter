@@ -199,7 +199,7 @@ void render(S32 renderPass)
       for (S32 i = SparkTypeCount - 1; i >= 0; i --)     // Loop through our different spark types
       {
          glPointSize( gDefaultLineWidth );
-         glEnable(GL_BLEND);
+         glEnableBlend
 
          glEnableClientState(GL_COLOR_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
@@ -215,7 +215,7 @@ void render(S32 renderPass)
          glDisableClientState(GL_COLOR_ARRAY);
          glDisableClientState(GL_VERTEX_ARRAY);
 
-         glDisable(GL_BLEND);
+         glDisableBlend
       }
    }
 }
@@ -395,7 +395,7 @@ void FXTrail::unregisterTrail()
 
 void FXTrail::renderTrails()
 {
-   glEnable(GL_BLEND);
+   glEnableBlend
 
    FXTrail *w = mHead;
    while(w)
@@ -404,7 +404,7 @@ void FXTrail::renderTrails()
       w = w->mNext;
    }
 
-   glDisable(GL_BLEND);
+   glDisableBlend
 }
 
 };

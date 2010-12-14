@@ -301,14 +301,14 @@ void ChatUserInterface::render()
    {
       prevUIs.last()->render();  // ...render it...
       glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
-      glEnable(GL_BLEND);
+      glEnableBlend
       glBegin(GL_POLYGON);
          glVertex2f(0, 0);
          glVertex2f(gScreenInfo.getGameCanvasWidth(), 0);
          glVertex2f(gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight());
          glVertex2f(0, gScreenInfo.getGameCanvasHeight());
       glEnd();
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 
    // Render header

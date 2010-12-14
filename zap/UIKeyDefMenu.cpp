@@ -170,14 +170,14 @@ void KeyDefMenuUserInterface::render()
    {
       gGameUserInterface.render();
       glColor4f(0, 0, 0, 0.6);
-      glEnable(GL_BLEND);
+      glEnableBlend
       glBegin(GL_POLYGON);
          glVertex2f(0, 0);
          glVertex2f(canvasWidth, 0);
          glVertex2f(canvasWidth, gScreenInfo.getGameCanvasHeight());
          glVertex2f(0, canvasHeight);
       glEnd();
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 
    glColor3f(1, 1, 1);
@@ -257,10 +257,10 @@ void KeyDefMenuUserInterface::render()
       if (errorMsgTimer.getCurrent() < 1000)
          alpha = (F32) errorMsgTimer.getCurrent() / 1000;
 
-      glEnable(GL_BLEND);
+      glEnableBlend
       glColor4f(1, 0, 0, alpha);
       drawCenteredString(canvasHeight - vertMargin - 65, 15, errorMsg.c_str());
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 }
 

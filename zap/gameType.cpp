@@ -442,7 +442,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !gGameUserInterface.mMissionOverlayActive)
          alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
-      glEnable(GL_BLEND);
+      glEnableBlend;
          glColor4f(1, 1, 1, alpha);
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 180, 30, "Level: %s", mLevelName.getString());
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 140, 30, "Game Type: %s", getGameTypeString());
@@ -463,7 +463,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          glColor4f(1, 1, 0, alpha);
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", mWinningScore);
 
-      glDisable(GL_BLEND);
+      glDisableBlend
 
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
@@ -475,10 +475,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       if(mInputModeChangeAlertDisplayTimer.getCurrent() < 1000)
          alpha = mInputModeChangeAlertDisplayTimer.getCurrent() * 0.001f;
 
-      glEnable(GL_BLEND);
+      glEnableBlend;
       glColor4f(1, 0.5 , 0.5, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 
    if((mGameOver || scoreboardVisible) && mTeams.size() > 0)      // Render scoreboard
@@ -524,7 +524,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          S32 xr = xl + teamWidth - 2;
 
          Color c = getTeamColor(i);
-         glEnable(GL_BLEND);
+         glEnableBlend;
 
          glColor4f(c.r, c.g, c.b, 0.6);
          glBegin(GL_POLYGON);
@@ -534,7 +534,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             glVertex2f(xl, yb);
          glEnd();
 
-         glDisable(GL_BLEND);
+         glDisableBlend
 
          glColor3f(1,1,1);
          if(isTeamGame())     // Render team scores
@@ -754,7 +754,7 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
    Point p3 = rp - arrowDir * 23 * scale - crossVec * 8 * scale;
 
 
-   glEnable(GL_BLEND);
+   glEnableBlend;
    glColor(c * 0.7, alpha);
    glBegin(GL_POLYGON);    // Fill
       glVertex(rp);
@@ -767,7 +767,7 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
       glVertex(p2);
       glVertex(p3);
    glEnd();
-   glDisable(GL_BLEND);
+   glDisableBlend
 
    Point cen = rp - arrowDir * 12;
 

@@ -180,6 +180,9 @@ bool gDedicatedServer = true;    // This will allow us to omit the -dedicated pa
 bool gDedicatedServer = false;   // Usually, we just want to play.  If true, we'll be in server-only, no-player mode
 #endif
 
+bool UseGlLineSmooth = true;
+bool UseGlPointSmooth = false;
+
 bool gQuit = false;
 bool gIsServer = false;
 
@@ -2044,6 +2047,20 @@ int main(int argc, char **argv)
 
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glLineWidth(gDefaultLineWidth);
+
+      // game.h line 85
+      if(UseGlLineSmooth){
+	    glEnable(GL_LINE_SMOOTH);
+        //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glEnable(GL_BLEND);
+      }
+      if(UseGlPointSmooth){
+//windows: Radeon 9200: point smoothing makes 1 pixel dots to disappear...
+//windows: intel express GMA 945: point smoothing works, but very slow / poor performance and some lines get wrong color.
+	    glEnable(GL_POINT_SMOOTH);
+        glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
+      }
+
 
       atexit(onExit);
       actualizeScreenMode(false, true);               // Create a display window

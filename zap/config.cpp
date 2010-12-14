@@ -263,10 +263,19 @@ static void loadTestSettings()
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
 }
 
+#ifndef ZAP_DEDICATED
+  extern bool UseGlLineSmooth;
+  extern bool UseGlPointSmooth;
+#endif
 
 static void loadEffectsSettings()
 {
    gIniSettings.starsInDistance = (lcase(gINI.GetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
+
+#ifndef ZAP_DEDICATED
+   UseGlLineSmooth = (lcase(gINI.GetValue("Effects", "LineSmooth", "No")) == "yes");
+   UseGlPointSmooth = (lcase(gINI.GetValue("Effects", "PointSmooth", "No")) == "yes");
+#endif
 }
 
 // Convert a string value to our sfxSets enum
@@ -1008,6 +1017,11 @@ static void writeEffects()
    }
 
    gINI.SetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"), true);
+
+#ifndef ZAP_DEDICATED
+   gINI.SetValue("Effects", "LineSmooth", (UseGlLineSmooth ? "Yes" : "No"), true);
+   gINI.SetValue("Effects", "PointSmooth", (UseGlPointSmooth ? "Yes" : "No"), true);
+#endif
 }
 
 static void writeSounds()

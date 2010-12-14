@@ -326,14 +326,14 @@ void GameUserInterface::render()
    // it fades in jerkily.
 
    //glColor4f(0, 0, 0, mProgressBarFadeTimer.getFraction());  
-   //glEnable(GL_BLEND);
+   //glEnableBlend
    //glBegin(GL_POLYGON);
    //   glVertex2f(0, 0);
    //   glVertex2f(canvasWidth, 0);
    //   glVertex2f(canvasWidth, canvasHeight);
    //   glVertex2f(0, canvasHeight);
    //glEnd();
-   //glDisable(GL_BLEND);
+   //glDisableBlend
 
    // TODO: Can delete these two lines???
    //glMatrixMode(GL_MODELVIEW);
@@ -454,7 +454,7 @@ void GameUserInterface::renderProgressBar()
    GameType *gt = gClientGame->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
-      glEnable(GL_BLEND);
+      glEnableBlend
 
       glColor4f(0, 1, 0, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
@@ -482,7 +482,7 @@ void GameUserInterface::renderProgressBar()
          glEnd();
       }
 
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 }
 
@@ -509,7 +509,7 @@ void GameUserInterface::renderReticle()
 #endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
-      glEnable(GL_BLEND);
+      glEnableBlend
       glColor4f(0,1,0, 0.7);
       glBegin(GL_LINES);
 
@@ -548,7 +548,7 @@ void GameUserInterface::renderReticle()
       }
 
       glEnd();
-      glDisable(GL_BLEND);
+      glDisableBlend
    }
 
    if(mWrongModeMsgDisplay.getCurrent())
@@ -719,7 +719,7 @@ void GameUserInterface::renderCurrentChat()
 
 
    // Render text entry box like thingy
-   glEnable(GL_BLEND);
+   glEnableBlend
 
    for(S32 i = 1; i >= 0; i--)
    {
@@ -732,7 +732,7 @@ void GameUserInterface::renderCurrentChat()
          glVertex2f(xpos, ypos + FONTSIZE + 7);
       glEnd();
    }
-   glDisable(GL_BLEND);
+   glDisableBlend
 
    glColor(baseColor);
 
