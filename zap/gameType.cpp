@@ -2232,8 +2232,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    gClientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
 
    gGameUserInterface.mShowProgressBar = false;
-   gClientGame->setInCommanderMap(false);    // Start game in regular mode
-   gClientGame->clearZoomDelta();            // No in zoom effect
+   gClientGame->setInCommanderMap(false);             // Start game in regular mode
+   gClientGame->clearZoomDelta();                     // No in zoom effect
    
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
@@ -2261,53 +2261,44 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
-
-
-
-
-
-
-//runs the server side commands, as long as the client can chat "/example" commands to the server
-void processServerCommand(ClientRef *clientRef, Vector<string> words)
+// Runs the server side commands, as long as the client can chat "/example" commands to the server
+void processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
-   if(words.size() == 0)            // Just in case
+   if(!stricmp(cmd, ""))               // Just in case
       return;
-   words[0] = lcase(words[0]);   // make the command case insensitive
 
-   if(words[0] == "example"){    // Testing only, will soon add useful commands
-
-	   //do something here to make sure it works.
+   if(!stricmp(cmd, "example"))        // Testing only, will soon add useful commands
+   {  
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "This is an example.");
-
-   }else{
-      //server command not found, tell the client.
+   }
+   else
+   {
+      // Command not found, tell the client
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid Command");
    }
-
 }
 
 
+GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientRef *clientRef = source->getClientRef();
 
-	   extern void parseString(const char *inputString, Vector<string> &words, char seperator);
+   processServerCommand(clientRef, cmd.getString(), args);
+}
+
+
+extern void parseString(const char *inputString, Vector<string> &words, char seperator);
+
 // Client sends chat message to/via game server
 GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientRef *clientRef = source->getClientRef();
 
-   const char * c1 = message.getString();
-     if(c1[0] == '/'){
-       Vector<string> words;
-
-	   //start at char 1 to remove the '/' and seperate by space
-	   parseString( &c1[1], words, ' ');
-
-	   processServerCommand(clientRef, words);
-     }else{
-       RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-          s2cDisplayChatMessage, (global, source->getClientName(), message));
-       sendChatDisplayEvent(clientRef, global, c1, theEvent);
-	 }
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
+                                 s2cDisplayChatMessage, (global, source->getClientName(), message));
+   sendChatDisplayEvent(clientRef, global, message.getString(), theEvent);
 }
 
 

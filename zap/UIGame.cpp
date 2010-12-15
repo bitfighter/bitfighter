@@ -1251,18 +1251,21 @@ void GameUserInterface::issueChat()
       else                          // It's a command
       {
          Vector<string> words = parseString(mLineEditor.c_str());
-         if(! processCommand(words)){
-            //processCommand return false only when the client command is not found
-            //let the server can run any new command
+
+         if(!processCommand(words))    // Try the command locally; if can't be run, send it on to the server
+         {
             const char * c1 = mLineEditor.c_str();
             GameType *gt = gClientGame->getGameType();
             if(gt)
-            if(mCurrentChatType == CmdChat){ //need to insert '/'
-               char c2[1024];
-               dSprintf(c2, sizeof(c2), "/%s", c1);
-               gt->c2sSendChat(false, c2);   // Send command to server
-            }else{
-               gt->c2sSendChat(false, c1);
+            {
+               //char c2[1024];
+               //dSprintf(c2, sizeof(c2), "/%s", c1);
+               //gt->c2sSendChat(false, c2);   // Send command to server
+
+               Vector<StringPtr> args;
+               for(S32 i = 1; i < words.size(); i++)
+                  args.push_back(StringPtr(words[i]));
+               gt->c2sSendCommand(StringTableEntry(words[0], false), args);
             }
          }
       }

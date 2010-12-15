@@ -195,8 +195,9 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
-extern S32 minimumSleepTimeDedicatedServer;
-extern S32 minimumSleepTimeClient;
+extern U32 minimumSleepTimeDedicatedServer;
+extern U32 minimumSleepTimeClient;
+
 static void loadGeneralSettings()
 {
    gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));

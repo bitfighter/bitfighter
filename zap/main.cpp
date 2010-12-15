@@ -689,8 +689,8 @@ void hostGame()
 
 
 //in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
-S32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
-S32 minimumSleepTimeDedicatedServer=10; //lower reduce everyone lag, but uses more CPU.
+U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
+U32 minimumSleepTimeDedicatedServer=10; //lower reduce everyone lag, but uses more CPU.
 
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
