@@ -99,6 +99,10 @@ public:
    {
       mIndex = StringTable::insert(string, caseSensitive);
    }
+   inline StringTableEntry(const std::string &string, bool caseSensitive = true)
+   {
+        mIndex = StringTable::insert(string.c_str(), caseSensitive);
+   }
    inline StringTableEntry(const StringTableEntry &theString)
    {
       mIndex = theString.mIndex;
