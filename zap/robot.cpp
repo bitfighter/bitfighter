@@ -690,8 +690,8 @@ S32 LuaRobot::getCurrLoadout(lua_State *L)
 }
 
 
-extern LoadoutItem gLoadoutModules[];
-extern LoadoutItem gLoadoutWeapons[];
+extern Vector<LoadoutItem> gLoadoutModules;
+extern Vector<LoadoutItem> gLoadoutWeapons;
 
 // Return requested loadout
 S32 LuaRobot::getReqLoadout(lua_State *L)

@@ -1028,7 +1028,8 @@ void ClientGame::idle(U32 timeDelta)
 
 
    theMove->time = timeDelta + prevTimeDelta;
-   if(theMove->time > Move::MaxMoveTime) theMove->time = Move::MaxMoveTime;
+   if(theMove->time > Move::MaxMoveTime) 
+      theMove->time = Move::MaxMoveTime;
 
    if(mConnectionToServer.isValid())
    {
@@ -1040,12 +1041,15 @@ void ClientGame::idle(U32 timeDelta)
       if(ship && ship->getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
          theMove->left = theMove->right = theMove->up = theMove->down = 0;
 
-	  if(theMove->time >= 6){ //too many pending moves when running at 1000 FPS will cause severe problems.
+     // Don't saturate server with moves...
+	  if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
+     { 
          mConnectionToServer->addPendingMove(theMove);
-         prevTimeDelta=0;
-      }else{
-         prevTimeDelta=prevTimeDelta+timeDelta;
-	  }
+         prevTimeDelta = 0;
+      }
+      else
+         prevTimeDelta += timeDelta;
+	  
 	  theMove->time = timeDelta;
          
 
@@ -1209,9 +1213,10 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    S32 fy2 = gIniSettings.starsInDistance ?  1 - ((S32) (cameraPos.y / starDist)) : 0;
 
    if(UseGlPointSmooth) //need blend for point smooth to work correctly.
-     {glEnableBlend;}
+      glEnableBlend;
    else
-     {glDisableBlendfromLineSmooth;}
+     glDisableBlendfromLineSmooth;
+
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
       for(F32 yPage = upperLeft.y + fy1; yPage < lowerRight.y + fy2; yPage++)
@@ -1234,9 +1239,9 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
       }
 
    if(UseGlPointSmooth)
-     {glDisableBlend;}
+     glDisableBlend;
    else
-     {glEnableBlendfromLineSmooth;}
+     glEnableBlendfromLineSmooth;
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }

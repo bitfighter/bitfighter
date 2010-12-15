@@ -1106,18 +1106,19 @@ std::string GameConnection::makeUnique(string name)
 
 void GameConnection::onConnectionEstablished()
 {
-   //Always make sure: PacketPeriod * Bandwidth <= 1015808 
-   //if over the limit, client will get stuck at black loading screen
-   U32 minPacketSendPeriod = 40;//50;
-   U32 minPacketRecvPeriod = 40;//50;
-   U32 maxSendBandwidth = 24576;//2000;
-   U32 maxRecvBandwidth = 24576;//2000;
+   // Always make sure: PacketPeriod * Bandwidth <= 1015808 
+   // If over the limit, client will get stuck at black loading screen
+   U32 minPacketSendPeriod = 40; //50;   <== original zap setting
+   U32 minPacketRecvPeriod = 40; //50;
+   U32 maxSendBandwidth = 24576; //2000;
+   U32 maxRecvBandwidth = 24576; //2000;
 
    Address addr = this->getNetAddress();
-   if(this->isLocalConnection()){  //Local connection don't use network, maximum bandwidth.
+   if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth
+   {  
       minPacketSendPeriod = 15;
       minPacketRecvPeriod = 15;
-      maxSendBandwidth = 65535;   //error if trying to go higher then 65535
+      maxSendBandwidth = 65535;    // Error when higher than 65535
       maxRecvBandwidth = 65535;
    }
    

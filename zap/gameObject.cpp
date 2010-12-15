@@ -232,7 +232,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask
       if(foundObject->getObjectTypeMask() & (ShipType | RobotType))
          shipsHit++;
 
-      foundObject->damageObject(&localInfo); //damageObject should be last as it might remove this object...
+      foundObject->damageObject(&localInfo); 
    }
 
    return shipsHit;

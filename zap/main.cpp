@@ -709,7 +709,7 @@ void idle()
    static F64 unusedFraction = 0;
 
    S64 currentTimer = Platform::getHighPrecisionTimerValue();
-   if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow.
+   if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow -- seems very unlikely
 
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
@@ -770,21 +770,10 @@ void idle()
    if(gDedicatedServer){
       //if(integerTime < (U32)minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
       if(gServerGame->isSuspended())
-          sleepTime = 25; //the higher this number, the less accurate the ping is on server lobby when empty.
+          sleepTime = 40; //the higher this number, the less accurate the ping is on server lobby when empty.
    }
 
    Platform::sleep(sleepTime);
-   //{  //Always sleep long enough, there is a problem with it not sleeping long enough...
-      //S64 Timer1 = currentTimer;
-      //S64 Timer2;
-      //F64 sleeplength = 0.0;
-      //while(sleeplength < sleepTime){
-      //   Platform::sleep(sleepTime-sleeplength);
-      //   Timer2 = Platform::getHighPrecisionTimerValue();
-      //   if(Timer1 > Timer2) Timer1 = Timer2;            //just in case Timer overflows
-      //   sleeplength = Platform::getHighPrecisionMilliseconds(Timer2 - Timer1);
-  //    }
-  //}
 
    gZapJournal.processNextJournalEntry();    // Does nothing unless we're playing back a journal...
 
@@ -2049,15 +2038,18 @@ int main(int argc, char **argv)
       glLineWidth(gDefaultLineWidth);
 
       // game.h line 85
-      if(UseGlLineSmooth){
-	    glEnable(GL_LINE_SMOOTH);
+      if(UseGlLineSmooth)
+      {
+	     glEnable(GL_LINE_SMOOTH);
         //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glEnable(GL_BLEND);
       }
-      if(UseGlPointSmooth){
-//windows: Radeon 9200: point smoothing makes 1 pixel dots to disappear...
-//windows: intel express GMA 945: point smoothing works, but very slow / poor performance and some lines get wrong color.
-	    glEnable(GL_POINT_SMOOTH);
+
+      if(UseGlPointSmooth)
+      {
+         //windows: Radeon 9200: point smoothing makes 1 pixel dots to disappear...
+         //windows: intel express GMA 945: point smoothing works, but very slow / poor performance and some lines get wrong color.
+	     glEnable(GL_POINT_SMOOTH);
         glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
       }
 

@@ -326,14 +326,14 @@ void GameUserInterface::render()
    // it fades in jerkily.
 
    //glColor4f(0, 0, 0, mProgressBarFadeTimer.getFraction());  
-   //glEnableBlend
+   //glEnableBlend;
    //glBegin(GL_POLYGON);
    //   glVertex2f(0, 0);
    //   glVertex2f(canvasWidth, 0);
    //   glVertex2f(canvasWidth, canvasHeight);
    //   glVertex2f(0, canvasHeight);
    //glEnd();
-   //glDisableBlend
+   //glDisableBlend;
 
    // TODO: Can delete these two lines???
    //glMatrixMode(GL_MODELVIEW);
@@ -454,7 +454,7 @@ void GameUserInterface::renderProgressBar()
    GameType *gt = gClientGame->getGameType();
    if((mShowProgressBar || mProgressBarFadeTimer.getCurrent() > 0) && gt && gt->mObjectsExpected > 0)
    {
-      glEnableBlend
+      glEnableBlend;
 
       glColor4f(0, 1, 0, mShowProgressBar ? 1 : mProgressBarFadeTimer.getFraction());
 
@@ -482,7 +482,7 @@ void GameUserInterface::renderProgressBar()
          glEnd();
       }
 
-      glDisableBlend
+      glDisableBlend;
    }
 }
 
@@ -509,7 +509,7 @@ void GameUserInterface::renderReticle()
 #endif
       Point offsetMouse = mMousePoint + Point(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2);
 
-      glEnableBlend
+      glEnableBlend;
       glColor4f(0,1,0, 0.7);
       glBegin(GL_LINES);
 
@@ -548,7 +548,7 @@ void GameUserInterface::renderReticle()
       }
 
       glEnd();
-      glDisableBlend
+      glDisableBlend;
    }
 
    if(mWrongModeMsgDisplay.getCurrent())
@@ -558,8 +558,6 @@ void GameUserInterface::renderReticle()
       drawCenteredString(250, 20, "You can change to Keyboard input with the Options menu.");
    }
 }
-
-extern LoadoutItem gLoadoutModules[];
 
 static const S32 fontSize = 15;
 static const S32 gapSize = 3;       // Gap between text and box
@@ -719,7 +717,7 @@ void GameUserInterface::renderCurrentChat()
 
 
    // Render text entry box like thingy
-   glEnableBlend
+   glEnableBlend;
 
    for(S32 i = 1; i >= 0; i--)
    {
@@ -732,7 +730,7 @@ void GameUserInterface::renderCurrentChat()
          glVertex2f(xpos, ypos + FONTSIZE + 7);
       glEnd();
    }
-   glDisableBlend
+   glDisableBlend;
 
    glColor(baseColor);
 
@@ -1253,20 +1251,20 @@ void GameUserInterface::issueChat()
       else                          // It's a command
       {
          Vector<string> words = parseString(mLineEditor.c_str());
-		 if(! processCommand(words)){
+         if(! processCommand(words)){
             //processCommand return false only when the client command is not found
             //let the server can run any new command
             const char * c1 = mLineEditor.c_str();
             GameType *gt = gClientGame->getGameType();
             if(gt)
-			if(mCurrentChatType == CmdChat){ //need to insert '/'
+            if(mCurrentChatType == CmdChat){ //need to insert '/'
                char c2[1024];
                dSprintf(c2, sizeof(c2), "/%s", c1);
                gt->c2sSendChat(false, c2);   // Send command to server
-			}else{
+            }else{
                gt->c2sSendChat(false, c1);
-			}
-		 }
+            }
+         }
       }
    }
    cancelChat();
@@ -1642,10 +1640,22 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       glLineWidth(gDefaultLineWidth);    //make this change happen instantly
    }
 
-   else if(ENABLE_ENGINEER && words[0] == "engf")
+   else if(words[0] == "engf")
+   {
+      GameType *gt = gClientGame->getGameType();
+      if(gt && gt->engineerIsEnabled())
       gc->c2sEngineerDeployObject(EngineeredForceField);
-   else if(ENABLE_ENGINEER && words[0] == "engt")
+      else
+         displayMessage(gCmdChatColor, "!!! Engf only works on levels where Engineer Module is allowed");
+   }
+   else if(words[0] == "engt")
+   {
+      GameType *gt = gClientGame->getGameType();
+      if(gt && gt->engineerIsEnabled())
       gc->c2sEngineerDeployObject(EngineeredTurret);
+      else
+         displayMessage(gCmdChatColor, "!!! Engt only works on levels where Engineer Module is allowed");
+   }
 
    else
       return false; //no command found on client side, return false to send the command to server.
@@ -1683,11 +1693,9 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/setserverdescr");
    mChatCmds.push_back("/deletecurrentlevel");
 
-   if(ENABLE_ENGINEER)
-   {
-      mChatCmds.push_back("/engf");
-      mChatCmds.push_back("/engt");
-   }
+   // Engineer commands
+   mChatCmds.push_back("/engf");
+   mChatCmds.push_back("/engt");
 }
 
 

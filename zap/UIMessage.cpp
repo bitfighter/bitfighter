@@ -140,7 +140,7 @@ void MessageUserInterface::render()
    if(prevUIs.size())                     // If there is an underlying menu...
       prevUIs.last()->render();           // ...render it
 
-   glEnableBlend
+   glEnableBlend;
 
 
    if(mBox)
@@ -174,7 +174,7 @@ void MessageUserInterface::render()
    if (!mFadeTime)
       drawCenteredString(canvasHeight - vertMargin - hInset - 18 + mVertOffset, 18, "Hit any key to continue");
 
-   glDisableBlend
+   glDisableBlend;
 
 }
 

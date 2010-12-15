@@ -170,8 +170,8 @@ void drawCentroidMark(const Point &pos, F32 radius)
 
 void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive)
 {
-   //if(alpha != 1.0)
-   //   glEnable(GL_BLEND);
+   if(alpha != 1.0)
+      glEnableBlend;
 
    // First render the thrusters
    if(thrusts[0] > 0) // forward thrust
@@ -317,8 +317,8 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
       glEnd();
    }
 
-   //if(alpha != 1.0)
-      glDisableBlend
+   if(alpha != 1.0)
+      glDisableBlend;
 }
 
 // This is a line extending from the ship to give joystick players some idea of where they're aiming
@@ -509,7 +509,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
          }
       glEnd();
    }
-   glDisableBlend
+   glDisableBlend;
    glPopMatrix();
 }
 
@@ -674,7 +674,7 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
       glVertex2f(-15, 15);
    glEnd();
    glPopMatrix();
-   glDisableBlend
+   glDisableBlend;
 }
 
 
@@ -734,7 +734,7 @@ void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outline
 
    glColor(outlineColor, alpha);
    renderPolygonOutline(outlinePoints);
-   glDisableBlend
+   glDisableBlend;
 }
 
 
@@ -779,7 +779,7 @@ void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color
       renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_POLYGON : GL_LINE_LOOP);
    }
 
-   glDisableBlend
+   glDisableBlend;
 }
 
 
@@ -1005,7 +1005,7 @@ void renderMine(Point pos, bool armed, bool visible)
       drawCircle(pos, 6);
    }
    glLineWidth(gDefaultLineWidth);
-   glDisableBlend
+   glDisableBlend;
 }
 
 #ifndef min

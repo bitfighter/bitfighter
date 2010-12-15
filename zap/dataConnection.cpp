@@ -87,7 +87,7 @@ DataSender::SenderStatus DataSender::initialize(DataConnection *dataConnection, 
    }
 
    ifstream file;
-   file.open(fullname);
+   file.open(fullname.c_str());
 
    if(!file.is_open())
       return COULD_NOT_OPEN_FILE;
@@ -225,10 +225,10 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
          return;
       }
 
-      mOutputFile.open(strictjoindir(folder, filename.getString()));
+      mOutputFile.open(strictjoindir(folder, filename.getString()).c_str());
       if(!mOutputFile.is_open())
       {
-         logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()));
+         logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()).c_str());
          disconnect(ReasonError, "Problem writing to file");
          return;
       }
@@ -294,10 +294,10 @@ void DataConnection::onConnectionEstablished()
             disconnect(ReasonError, "done");
          }
 
-         mOutputFile.open(strictjoindir(folder, mFilename));
+         mOutputFile.open(strictjoindir(folder, mFilename).c_str());
          if(!mOutputFile.is_open())
          {
-            logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename));
+            logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename).c_str());
             disconnect(ReasonError, "done");
          }
 

@@ -45,14 +45,25 @@ struct LoadoutItem
    const char *text;       // Longer name used on loadout menu
    const char *help;       // An additional bit of help text, also displayed on loadout menu
    ShipModule requires;    // Item requires this module be part of loadout (used only for spy-bugs)
+
+   LoadoutItem() { };      // Should never be used
+   LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
+   {
+      this->key = key;
+      this->button = button;
+      this->index = index;
+      this->text = text;
+      this->help = help;
+      this->requires = requires;
+   }
 };
 
 class LoadoutHelper
 {
 private:
    bool mFromController;         // Is user using controller or keyboard?
-   U32 mModule[ShipModuleCount]; // Modules selected by user
-   U32 mWeapon[ShipWeaponCount]; // Weapons selected by user
+   U32 mModule[ShipModuleCount]; // Modules selected by user -- 2
+   U32 mWeapon[ShipWeaponCount]; // Weapons selected by user -- 3
    S32 mCurrentIndex;
    Timer mIdleTimer;          
    enum {
@@ -61,10 +72,11 @@ private:
    bool isValidItem(S32 index);  // Do we have the required prerequisites for this item?
 
 public:
-   LoadoutHelper();
+   LoadoutHelper();                          // Constructor
+   void initialize(bool includeEngineer);    // Set things up
 
    void render();                // Draw menu
-   void idle(U32 delta);
+   void idle(U32 delta) { /* Do nothing, at the moment */ }
    void show(bool fromController);
    bool processKeyCode(KeyCode keyCode);
 };

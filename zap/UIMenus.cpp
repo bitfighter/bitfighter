@@ -249,14 +249,14 @@ void MenuUserInterface::render()
       gGameUserInterface.render();
       glColor4f(0, 0, 0, 0.6);
 
-      glEnableBlend
+      glEnableBlend;
          glBegin(GL_POLYGON);
             glVertex2f(0, 0);
             glVertex2f(canvasWidth, 0);
             glVertex2f(canvasWidth, canvasHeight);
             glVertex2f(0, canvasHeight);
          glEnd();
-      glDisableBlend
+      glDisableBlend;
    }
 
    glColor3f(1, 1, 1);     // white
@@ -663,7 +663,7 @@ void MainMenuUserInterface::render()
    // nicely with the splash screen, and make the transition less jarring and sudden
    if(showAnimation)
    {
-      glEnableBlend
+      glEnableBlend;
          glBegin(GL_POLYGON);
             glColor4f(0, 0, 0, (F32) mFadeInTimer.getCurrent() / (F32) FadeInTime);
             glVertex2f(0, 0);
@@ -671,7 +671,7 @@ void MainMenuUserInterface::render()
             glVertex2f(canvasWidth, canvasHeight);
             glVertex2f(0, canvasHeight);
          glEnd();
-      glDisableBlend
+      glDisableBlend;
    }
 
    // Render logo at top, never faded
@@ -1164,7 +1164,7 @@ void HostMenuUserInterface::renderProgressListItems()
 {
    if(levelLoadDisplayDisplay || levelLoadDisplayFadeTimer.getCurrent() > 0)
    {
-      glEnableBlend
+      glEnableBlend;
       for(S32 i = 0; i < mLevelLoadDisplayNames.size(); i++)
       {
          glColor4f(1,1,1, (1.4 - ((F32) (mLevelLoadDisplayNames.size() - i) / 10.0)) * 
@@ -1172,7 +1172,7 @@ void HostMenuUserInterface::renderProgressListItems()
          drawStringf(100, gScreenInfo.getGameCanvasHeight() - vertMargin - (mLevelLoadDisplayNames.size() - i) * 20, 
                      15, "%s", mLevelLoadDisplayNames[i].c_str());
       }
-      glDisableBlend
+      glDisableBlend;
    }
 }
 
