@@ -170,8 +170,8 @@ void drawCentroidMark(const Point &pos, F32 radius)
 
 void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive)
 {
-   //if(alpha != 1.0)
-   //   glEnable(GL_BLEND);
+   if(alpha != 1.0)
+      glEnableBlend;
 
    // First render the thrusters
    if(thrusts[0] > 0) // forward thrust
@@ -317,8 +317,8 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
       glEnd();
    }
 
-   //if(alpha != 1.0)
-      glDisableBlend
+   if(alpha != 1.0)
+      glDisableBlend;
 }
 
 // This is a line extending from the ship to give joystick players some idea of where they're aiming
