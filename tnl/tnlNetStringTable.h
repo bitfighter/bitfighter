@@ -31,6 +31,8 @@
 #include "tnlTypes.h"
 #endif
 
+#include <string>
+
 namespace TNL {
 
 
