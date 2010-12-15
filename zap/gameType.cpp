@@ -1050,6 +1050,12 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       p *= getGame()->getGridSize();
       if(teamIndex >= 0 && teamIndex < mTeams.size())    // Ignore if team is invalid
          mTeams[teamIndex].spawnPoints.push_back(p);
+
+      if(teamIndex == -1)                      //neutral spawn point, add spawn to all teams.
+      {
+         for(S32 i=0; i < mTeams.size(); i++)
+            mTeams[i].spawnPoints.push_back(p);
+      }
    }
    else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
    {
@@ -2248,6 +2254,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 
 
 extern F32 ConvertCharToFloat(const char * in);   //from UIGame.cpp: might want to move this?
+extern S32 ConvertCharToSignedInt(const char * in);
 
 //runs the server side commands, as long as the client can chat "/example" commands to the server
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
@@ -2276,6 +2283,26 @@ void GameType::processServerCommand(ClientRef *clientRef, Vector<string> words)
       s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
 
       static StringTableEntry msg("%e0 has changed the time limit");
+      Vector<StringTableEntry> e;
+      e.push_back(clientRef->clientConnection->getClientName());
+      for(S32 i = 0; i < mClientList.size(); i++)
+         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+   }else if(words[0] == "setscore"){
+     if(!clientRef->isLevelChanger){                         // Level changers and above
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+         return;
+     }
+     if(words.size() <= 1){                         // Level changers and above
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter score limit");
+         return;
+     }
+
+      mWinningScore = ConvertCharToSignedInt( words[1].c_str() );
+
+        // send new score limit to client?
+
+
+      static StringTableEntry msg("%e0 has changed the score limit");
       Vector<StringTableEntry> e;
       e.push_back(clientRef->clientConnection->getClientName());
       for(S32 i = 0; i < mClientList.size(); i++)
