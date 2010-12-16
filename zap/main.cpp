@@ -52,6 +52,11 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>
 </ul>
+<h4>New Features</h4>
+<ul>
+<li>Engineer module -- build turrets and forcefields by grabbing resources; activate with /engf or /engt; only works on levels containing line Specials Engineer
+<li>Upload/download resources (levels, levelgens, and bots) from remote server (if enabled, and you have the password) via cmd line parameters
+</ul>
 <h4>User Interface</h4>
 <ul>
 <li>Pressing enter now advances to next menu item on most menus
@@ -71,6 +76,8 @@ Specifying the extension is optional.
 <li>When master server is unreachable, server will remember recent game servers and will try to contact those
 <li>Can define multiple servers in the INI to always try contacting without assistance of the master
 <li>Max level size bumped up to 256K
+<li>Engineer module can no longer create crossing forcefields
+<li>Smooth lines option available with a setting in the INI
 </ul>
 
 
@@ -684,8 +691,6 @@ void hostGame()
    if(!gDedicatedServer)                  // If this isn't a dedicated server...
       joinGame(Address(), false, true);   // ...then we'll play, too!
 }
-
-
 
 
 //in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
