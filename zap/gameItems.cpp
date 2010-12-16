@@ -238,7 +238,8 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    // Compute impulse direction
    mSizeIndex++;
    
-   TNLAssert((U32)mSizeIndex < asteroidRenderSizes, "Asteroid::damageObject mSizeIndex out of range");
+   //asteroidRenderSizes have one more - the ending -1.
+   TNLAssert((U32)mSizeIndex <= asteroidRenderSizes, "Asteroid::damageObject mSizeIndex out of range");
 
    if(asteroidRenderSize[mSizeIndex] == -1)    // Kill small items
    {
