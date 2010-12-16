@@ -49,6 +49,7 @@ OBJECTS_ZAP=\
    barrier.o\
    config.o\
    controlObjectConnection.o\
+   dataConnection.o\
    engineeredObjects.o\
    flagItem.o\
    keyCode.o\

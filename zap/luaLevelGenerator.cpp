@@ -46,7 +46,7 @@ LuaLevelGenerator::LuaLevelGenerator(const string &scriptName, const Vector<stri
 {
    if(!fileExists(scriptName))      // Files should be checked before we get here, so this should never happen
    {
-      logError("Got bad input %s!", scriptName);
+      logError("Got bad input %s!", scriptName.c_str());
       return;
    }
 
