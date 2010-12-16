@@ -132,6 +132,7 @@ bool HuntersGameType::isCarryingItems(Ship *ship)
       return false;
 
    Item *item = ship->mMountedItems[0];   // Currently, ship always has a NexusFlagItem... this is it
+   if(! item) return false;               // Null when a player drop flag and get destroyed at the same time.
    return ( ((HuntersFlagItem *) item)->getFlagCount() > 0 );    
 }
 
