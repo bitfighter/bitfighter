@@ -1852,7 +1852,11 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
       glutReshapeWindow((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact), 
                         (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));
 
-      glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
+      // prevent re-position when going into editor, when already in windowed mode.
+      // Prevent window's title bar going off-screen because of position (0,0)
+      if(gIniSettings.oldDisplayMode != DISPLAY_MODE_WINDOWED || first)
+         if(gIniSettings.winXPos != 0 || gIniSettings.winYPos != 0)
+            glutPositionWindow(gIniSettings.winXPos, gIniSettings.winYPos);
    }
 
    UserInterface::current->onDisplayModeChange();     // Notify the UI that the screen has changed mode
