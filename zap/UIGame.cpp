@@ -1258,10 +1258,6 @@ void GameUserInterface::issueChat()
             GameType *gt = gClientGame->getGameType();
             if(gt)
             {
-               //char c2[1024];
-               //dSprintf(c2, sizeof(c2), "/%s", c1);
-               //gt->c2sSendChat(false, c2);   // Send command to server
-
                Vector<StringPtr> args;
                for(S32 i = 1; i < words.size(); i++)
                   args.push_back(StringPtr(words[i]));
@@ -1398,6 +1394,8 @@ F32 ConvertCharToFloat(const char * in){
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
+// Returns true if command was handled (even if it was bogus); returning false will cause command to be passed on to the server
+// Runs on client
 bool GameUserInterface::processCommand(Vector<string> &words)
 {
    if(words.size() == 0)            // Just in case
@@ -1407,152 +1405,122 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    if(!gc)
    {
       displayMessage(gCmdChatColor, "!!! Not connected to server");
-      return true;
    }
-
-   if(words[0] == "add")            // Add time to the game
+   else if(words[0] == "add")            // Add time to the game
    {
       if(words.size() < 2 || words[1] == "")
-      {
          displayMessage(gCmdChatColor, "!!! Need to supply a time (in minutes)");
-         return true;
-      }
-
-      U8 mins;    // Use U8 to limit number of mins that can be added, while nominally having no limit!
-      // Parse 2nd arg -- if first digit isn't a number, user probably screwed up.
-      // atoi will return 0, but this probably isn't what the user wanted.
-
-      bool err = false;
-      if(words[1][0] >= '0' && words[1][0] <= '9')
-         mins = atoi(words[1].c_str());
       else
-         err = true;
-
-      if(err || mins == 0)
       {
-         displayMessage(gCmdChatColor, "!!! Invalid value... game time not changed");
-         return true;
+         U8 mins;    // Use U8 to limit number of mins that can be added, while nominally having no limit!
+                     // Parse 2nd arg -- if first digit isn't a number, user probably screwed up.
+                     // atoi will return 0, but this probably isn't what the user wanted.
+
+         bool err = false;
+         if(words[1][0] >= '0' && words[1][0] <= '9')
+            mins = atoi(words[1].c_str());
+         else
+            err = true;
+
+         if(err || mins == 0)
+            displayMessage(gCmdChatColor, "!!! Invalid value... game time not changed");
+         else
+         {
+            displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
+
+            if(gClientGame->getGameType())
+               gClientGame->getGameType()->addTime(mins * 60 * 1000);
+         }
       }
-
-      displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
-
-      if(gClientGame->getGameType())
-         gClientGame->getGameType()->addTime(mins * 60 * 1000);
    }
 
    else if(words[0] == "next")      // Go to next level
    {
       if(!gc->isLevelChanger())
-      {
          displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
-         return true;
-      }
-
-      gc->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
+      else
+         gc->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
    }
-
    else if(words[0] == "prev")      // Go to previous level
    {
       if(!gc->isLevelChanger())
-      {
          displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
-         return true;
-      }
-
-      gc->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
+      else
+         gc->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
    }
-
    else if(words[0] == "restart")      // Restart current level
    {
       if(!gc->isLevelChanger())
-      {
          displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
-         return true;
-      }
-
-      gc->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
+      else
+         gc->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
    }
    else if(words[0] == "shutdown")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to shut the server down"))
-         return true;
-
-      U16 time = 0;
-      bool timefound = true;
-      string reason;
-
-      if(words.size() > 1)
-         time = (U16) atoi(words[1].c_str());
-      if(time <= 0)
+      if(hasAdmin(gc, "!!! You don't have permission to shut the server down"))
       {
-         time = 10;
-         timefound = false;
-      }
+         U16 time = 0;
+         bool timefound = true;
+         string reason;
 
-      S32 first = timefound ? 2 : 1;
-      for(S32 i = first; i < words.size(); i++)
-      {
-         if(i != first)
-            reason = reason + " ";
-         reason = reason + words[i];
-      }
+         if(words.size() > 1)
+            time = (U16) atoi(words[1].c_str());
+         if(time <= 0)
+         {
+            time = 10;
+            timefound = false;
+         }
 
-      gc->c2sRequestShutdown(time, reason.c_str());
+         S32 first = timefound ? 2 : 1;
+         for(S32 i = first; i < words.size(); i++)
+         {
+            if(i != first)
+               reason = reason + " ";
+            reason = reason + words[i];
+         }
+
+         gc->c2sRequestShutdown(time, reason.c_str());
+      }
    }
    else if(words[0] == "kick")      // Kick a player
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to kick players"))
-         return true;
-
-      if(words.size() < 2 || words[1] == "")
+      if(hasAdmin(gc, "!!! You don't have permission to kick players"))
       {
-         displayMessage(gCmdChatColor, "!!! Need to specify who to kick");
-         return true;
+         if(words.size() < 2 || words[1] == "")
+            displayMessage(gCmdChatColor, "!!! Need to specify who to kick");
+         else
+         {
+            // Did user provide a valid, known name?
+            if(gClientGame->getGameType())
+            {
+               ClientRef *clientRef = gClientGame->getGameType()->findClientRef(words[1].c_str());
+               if(!clientRef)
+                  displayMessage(gCmdChatColor, "!!! Could not find player %s", words[1].c_str());
+               else
+                  gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
+            }
+         }
       }
-      // Did user provide a valid, known name?
-      if(!gClientGame->getGameType())
-         return true;
-
-      ClientRef *clientRef = gClientGame->getGameType()->findClientRef(words[1].c_str());
-      if(!clientRef)
-      {
-         displayMessage(gCmdChatColor, "!!! Could not find player %s", words[1].c_str());
-         return true;
-      }
-
-      gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
    }
 
    else if(words[0] == "admin")     // Request admin permissions
    {
       if(words.size() < 2 || words[1] == "")
-      {
          displayMessage(gCmdChatColor, "!!! Need to supply a password");
-         return true;
-      }
-      if(gc->isAdmin())
-      {
+      else if(gc->isAdmin())
          displayMessage(gCmdChatColor, "!!! You are already an admin");
-         return true;
-      }
-
-      gc->submitAdminPassword(words[1].c_str());
+      else
+         gc->submitAdminPassword(words[1].c_str());
    }
 
    else if(words[0] == "levpass" || words[0] == "levelpass" || words[0] == "lvlpass")
    {
       if(words.size() < 2 || words[1] == "")
-      {
          displayMessage(gCmdChatColor, "!!! Need to supply a password");
-         return true;
-      }
-      if(gc->isLevelChanger())
-      {
+      else if(gc->isLevelChanger())
          displayMessage(gCmdChatColor, "!!! You can already change levels");
-         return true;
-      }
-
-      gc->submitLevelChangePassword(words[1].c_str());
+      else
+         gc->submitLevelChangePassword(words[1].c_str());
    }
    else if(words[0] == "dcoords")
       mDebugShowShipCoords = !mDebugShowShipCoords;
@@ -1569,85 +1537,73 @@ bool GameUserInterface::processCommand(Vector<string> &words)
 
    else if(words[0] == "setadminpass")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to set the admin password"))
-         return true;
-
-      changePassword(gc, GameConnection::AdminPassword, words, true);
+      if(hasAdmin(gc, "!!! You don't have permission to set the admin password"))
+         changePassword(gc, GameConnection::AdminPassword, words, true);
    }
 
    else if(words[0] == "setserverpass")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to set the server password"))
-         return true;
-
-      changePassword(gc, GameConnection::ServerPassword, words, false);
+      if(hasAdmin(gc, "!!! You don't have permission to set the server password"))
+         changePassword(gc, GameConnection::ServerPassword, words, false);
    }
 
    else if(words[0] == "setlevpass")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to set the level change password"))
-         return true;
-
-      changePassword(gc, GameConnection::LevelChangePassword, words, false);
+      if(hasAdmin(gc, "!!! You don't have permission to set the level change password"))
+         changePassword(gc, GameConnection::LevelChangePassword, words, false);
    }
 
    else if(words[0] == "setservername")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to set the server name"))
-         return true;
-
-      changeServerNameDescr(gc, GameConnection::ServerName, words);
+      if(hasAdmin(gc, "!!! You don't have permission to set the server name"))
+         changeServerNameDescr(gc, GameConnection::ServerName, words);
    }
 
    else if(words[0] == "setserverdescr")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to set the server description"))
-         return true;
-
-      changeServerNameDescr(gc, GameConnection::ServerDescr, words);
+      if(hasAdmin(gc, "!!! You don't have permission to set the server description"))
+         changeServerNameDescr(gc, GameConnection::ServerDescr, words);
    }
 
    else if(words[0] == "deletecurrentlevel")
    {
-      if(!hasAdmin(gc, "!!! You don't have permission to delete the current level"))
-         return true;
-
-      changeServerNameDescr(gc, GameConnection::DeleteLevel, words);
+      if(hasAdmin(gc, "!!! You don't have permission to delete the current level"))
+         changeServerNameDescr(gc, GameConnection::DeleteLevel, words);
    }
 
    else if(words[0] == "suspend")
    {
       U32 players = gClientGame->getPlayerCount();
       if(players == (U32)Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
-      {
          displayMessage(gCmdChatColor, "!!! Can't suspend when others are playing");
-         return true;
-      }
-      suspendGame();    // Do the deed
+      else
+         suspendGame();    // Do the deed
    }
    else if(words[0] == "linewidth")            // Add time to the game
    {
       F32 linewidth;
       if(words.size() < 2 || words[1] == "")
-      {
          displayMessage(gCmdChatColor, "!!! Need to supply line width");
-         return true;
-      }
-      linewidth = ConvertCharToFloat(words[1].c_str());
-      if(linewidth < 0.125f) linewidth = 0.125f;
+      else
+      {
+         linewidth = ConvertCharToFloat(words[1].c_str());
+         if(linewidth < 0.125f) 
+            linewidth = 0.125f;
 
-      gDefaultLineWidth = linewidth;
-      gLineWidth1 = linewidth * 0.5f;
-      gLineWidth3 = linewidth * 1.5f;
-      gLineWidth4 = linewidth * 2;
-      glLineWidth(gDefaultLineWidth);    //make this change happen instantly
+         gDefaultLineWidth = linewidth;
+         gLineWidth1 = linewidth * 0.5f;
+         gLineWidth3 = linewidth * 1.5f;
+         gLineWidth4 = linewidth * 2;
+
+         glLineWidth(gDefaultLineWidth);    //make this change happen instantly
+      }
    }
 
    else if(words[0] == "engf")
    {
       GameType *gt = gClientGame->getGameType();
       if(gt && gt->engineerIsEnabled())
-      gc->c2sEngineerDeployObject(EngineeredForceField);
+         gc->c2sEngineerDeployObject(EngineeredForceField);
       else
          displayMessage(gCmdChatColor, "!!! Engf only works on levels where Engineer Module is allowed");
    }
@@ -1655,15 +1611,14 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    {
       GameType *gt = gClientGame->getGameType();
       if(gt && gt->engineerIsEnabled())
-      gc->c2sEngineerDeployObject(EngineeredTurret);
+         gc->c2sEngineerDeployObject(EngineeredTurret);
       else
          displayMessage(gCmdChatColor, "!!! Engt only works on levels where Engineer Module is allowed");
    }
-
    else
-      return false; //no command found on client side, return false to send the command to server.
+      return false;     // Command unknown to client, will pass it on to server
 
-   return true;
+   return true;         // Handled
 }
 
 
@@ -1684,7 +1639,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/svol");
    mChatCmds.push_back("/vvol");
    mChatCmds.push_back("/suspend");
-
+   mChatCmds.push_back("/linewidth");
 
    // Administrative commands
    mChatCmds.push_back("/shutdown");

@@ -2261,7 +2261,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
-// Runs the server side commands, as long as the client can chat "/example" commands to the server
+// Runs the server side commands, which the client may or may not know about
 void processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
    if(!stricmp(cmd, ""))               // Just in case
