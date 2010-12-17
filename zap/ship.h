@@ -225,14 +225,7 @@ public:
 
    bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
 
-   bool engineerBuildObject()
-   {
-      if(mEnergy < EnergyEngineerCost)
-         return false;
-
-      mEnergy -= EnergyEngineerCost;
-      return true;
-   }
+   void engineerBuildObject() { mEnergy -= EnergyEngineerCost; }
 
    bool hasModule(ShipModule mod)
    {

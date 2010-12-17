@@ -37,119 +37,156 @@ namespace Zap
 
 static Vector<DatabaseObject *> fillVector;
 
-
-// Runs on server
-bool engClientCreateObject(GameConnection *connection, U32 objectType)
+// Returns "" if location is OK, otherwise returns an error message
+// Runs on client and server
+bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectType)
 {
-   // Do some basic crash-proofing sanity checks first
-   Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());
-   if(!ship)
-      return false;
-
    if(!ship->isCarryingItem(ResourceItemType))    // Ship needs a resource
+   {
+      mErrorMessage = "Need resource item to use Engineer module";
       return false;
+   }
+
+   if(ship->getEnergy() < Ship::EnergyEngineerCost)
+   {
+      mErrorMessage = "Not enough energy to build object.";
+      return false;
+   }
 
    // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
    Point startPoint = ship->getActualPos();
    Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;     // MaxEngineerDistance = 100
 
    F32 collisionTime;
-   Point anchorNormal;
 
    GameObject *hitObject = ship->findObjectLOS(BarrierType, MoveObject::ActualState, startPoint, endPoint, 
-                                               collisionTime, anchorNormal);
+                                               collisionTime, mDeployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
    {
-      static const StringTableEntry message("Could not find a suitable wall for mounting the item.");
-      connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
-
+      mErrorMessage = "Could not find a suitable wall for mounting the item";
       return false;
    }
 
    // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
-   Point deployPosition = startPoint + (endPoint - startPoint) * collisionTime + anchorNormal;
-      
-   // If this is a forcefield, we need to ensure forcefield doesn't cross another; doing so can create an impossible situation
-   if(objectType == EngineeredForceField)
+   mDeployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + mDeployNormal);
+
+   Vector<Point> bounds;
+
+   // Seems inefficient to construct these just for the purpose of bounds checking...
+   switch(objectType)
    {
-      // Forcefield starts at the end of the projector.  Need to know where that is.
-      Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(deployPosition, anchorNormal);
+      case EngineeredTurret:
+         Turret::getGeom(mDeployPosition, mDeployNormal, bounds);   
+         break;
+      case EngineeredForceField:
+         ForceFieldProjector::getGeom(mDeployPosition, mDeployNormal, bounds);
+         break;
+      default:    // will never happen
+         return false;
+   }
 
-      // Now we can find the end point.  Note that endPoint is repurposed here...
-      DatabaseObject *collObj;
-      ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, anchorNormal, 1.0, endPoint, &collObj);
+   if(!EngineeredObject::checkDeploymentPosition(bounds))
+   {
+      mErrorMessage = "Cannot deploy item at this location";
+      return false;
+   }
 
-      // Create a temp forcefield to use for collision testing with other forcefields; this one will be deleted below
-      ForceField *newForceField = new ForceField(-1, forceFieldStart, endPoint);
+   // If this is a turret, then this location is good; we're done
+   if(objectType == EngineeredTurret)
+      return true;
 
-      // Now we can do some actual checking.  We'll do this in two passes, one against existing ffs, another against disabled
-      // projectors that might be enabled in the future.
-      Vector<DatabaseObject *> fillVector;
-      bool collision = false;
 
-      // First test existing forcefields -- these will be faster than checking inactive projectors, which we'll do later
-      Rect queryRect(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 2);
-      ship->getGridDatabase()->findObjects(ForceFieldType, fillVector, queryRect);
+   // Forcefields only from here on down; we've got miles to go before we sleep
+
+   // We need to ensure forcefield doesn't cross another; doing so can create an impossible situation
+   // Forcefield starts at the end of the projector.  Need to know where that is.
+   Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal);
+
+   // Now we can find the end point.  Note that endPoint is repurposed here...
+   DatabaseObject *collObj;
+   ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, 1.0, endPoint, &collObj);
+
+   // Create a temp forcefield to use for collision testing with other forcefields; this one will be deleted below
+   ForceField *newForceField = new ForceField(-1, forceFieldStart, endPoint);
+
+   // Now we can do some actual checking.  We'll do this in two passes, one against existing ffs, another against disabled
+   // projectors that might be enabled in the future.
+   Vector<DatabaseObject *> fillVector;
+   bool collision = false;
+
+   // First test existing forcefields -- these will be faster than checking inactive projectors, which we'll do later
+   Rect queryRect(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 2);
+   ship->getGridDatabase()->findObjects(ForceFieldType, fillVector, queryRect);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      ForceField *ff = dynamic_cast<ForceField *>(fillVector[i]);
+      if(ff && ff->intersects(newForceField))
+      {
+         collision = true;
+         break;
+      }
+   }
+
+   if(!collision)
+   {
+      // First we must find any possibly intersecting forcefield projector and if it's inactive, create a temp forcefield
+      // Projectors up to two forcefield lengths away must be considered because the end of one could intersect the end of the other
+      fillVector.clear();
+      queryRect.set(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 4);
+      ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
-         ForceField *ff = dynamic_cast<ForceField *>(fillVector[i]);
-         if(ff && ff->intersects(newForceField))
+         ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+         if(proj && !proj->isEnabled())      // Enabled projectors handled in forcefield search above
          {
-            collision = true;
-            break;
-         }
-      }
+            Point start, end;
+            proj->getForceFieldStartAndEndPoints(start, end);
 
-      if(!collision)
-      {
-         // First we must find any possibly intersecting forcefield projector and if it's inactive, create a temp forcefield
-         // Projectors up to two forcefield lengths away must be considered because the end of one could intersect the end of the other
-         fillVector.clear();
-         queryRect.set(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 4);
-         ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+            ForceField forceField = ForceField(0, start, end);
 
-         for(S32 i = 0; i < fillVector.size(); i++)
-         {
-            ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-            if(proj && !proj->isEnabled())      // Enabled projectors handled in forcefield search above
+            if(forceField.intersects(newForceField))
             {
-               Point start, end;
-               proj->getForceFieldStartAndEndPoints(start, end);
-
-               ForceField forceField = ForceField(0, start, end);
-
-               if(forceField.intersects(newForceField))
-               {
-                  collision = true;
-                  break;
-               }
+               collision = true;
+               break;
             }
          }
       }
-
-      delete newForceField;
-
-      if(collision)
-      {
-         static const StringTableEntry message("Cannot deply forcefield where it could cross another.");
-         connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
-
-         return false;
-      }
    }
-   
+
+   delete newForceField;
+
+   if(collision)
+   {
+      mErrorMessage = "Cannot deply forcefield where it could cross another.";
+      return false;
+   }
+
+   return true;     // We've run the gammut -- this location is OK
+}
+
+
+// Runs on server
+// Only run after canCreateObjectAtLocation, which checks for errors and sets mDeployPosition
+bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U32 objectType)
+{
+   // Do some basic crash-proofing sanity checks first
+   Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());
+   if(!ship)
+      return false;
+
 
    EngineeredObject *deployedObject = NULL;
 
    switch(objectType)
    {
       case EngineeredTurret:
-         deployedObject = new Turret(ship->getTeam(), deployPosition, anchorNormal);
+         deployedObject = new Turret(ship->getTeam(), mDeployPosition, mDeployNormal);    // Calc'ed in canCreateObjectAtLocation
          break;
       case EngineeredForceField:
-         deployedObject = new ForceFieldProjector(ship->getTeam(), deployPosition, anchorNormal);
+         deployedObject = new ForceFieldProjector(ship->getTeam(), mDeployPosition, mDeployNormal);
          break;
       default:
          return false;
@@ -158,23 +195,14 @@ bool engClientCreateObject(GameConnection *connection, U32 objectType)
    deployedObject->setOwner(connection);
    deployedObject->computeExtent();
 
-   if(!deployedObject || !deployedObject->checkDeploymentPosition())
+   if(!deployedObject)              // Something went wrong
    {
-      static const StringTableEntry message("Unable to deploy in that location.");
-
-      connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
+      connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Error deploying object.");
       delete deployedObject;
       return false;
    }
 
-   if(!ship->engineerBuildObject())
-   {
-      static const StringTableEntry message("Not enough energy to build object.");
-
-      connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
-      delete deployedObject;
-      return false;
-   }
+   ship->engineerBuildObject();     // Deducts energy
 
    deployedObject->addToGame(gServerGame);
    deployedObject->onEnabled();
@@ -455,13 +483,11 @@ bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 
 // Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
 // a wall or another engineered item
-bool EngineeredObject::checkDeploymentPosition()
+// static method
+bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds)
 {
    Vector<DatabaseObject *> foundObjects;
-   Vector<Point> thisBounds;
-   getCollisionPoly(thisBounds);
-
-   Rect queryRect = getExtent();
+   Rect queryRect(thisBounds);
    gServerGame->getGridDatabase()->findObjects(BarrierType | EngineeredType, foundObjects, queryRect);
 
    for(S32 i = 0; i < foundObjects.size(); i++)
@@ -840,13 +866,20 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
 }
 
 
+// static
+void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
+{
+   Point cross(normal.y, -normal.x);
+   polyPoints.push_back(anchor + cross * 25);
+   polyPoints.push_back(anchor + cross * 10 + Point(normal) * 45);
+   polyPoints.push_back(anchor - cross * 10 + Point(normal) * 45);
+   polyPoints.push_back(anchor - cross * 25);
+}
+
+
 bool Turret::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   Point cross(mAnchorNormal.y, -mAnchorNormal.x);
-   polyPoints.push_back(mAnchorPoint + cross * 25);
-   polyPoints.push_back(mAnchorPoint + cross * 10 + mAnchorNormal * 45);
-   polyPoints.push_back(mAnchorPoint - cross * 10 + mAnchorNormal * 45);
-   polyPoints.push_back(mAnchorPoint - cross * 25);
+   getGeom(mAnchorPoint, mAnchorNormal, polyPoints);
    return true;
 }
 

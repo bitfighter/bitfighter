@@ -27,11 +27,13 @@
 #include "game.h"
 #include "gameType.h"
 #include "gameNetInterface.h"
-#include "config.h"        // For gIniSettings support
-#include "IniFile.h"       // For CIniFile def
+#include "config.h"              // For gIniSettings support
+#include "IniFile.h"             // For CIniFile def
 #include "playerInfo.h"
-#include "shipItems.h"     // For EngineerBuildObjects enum
+#include "shipItems.h"           // For EngineerBuildObjects enum
 #include "masterConnection.h"    // For MasterServerConnection def
+#include "engineeredObjects.h"   // For EngineerModuleDeployer
+
 
 #include "UI.h"
 #include "UIEditor.h"
@@ -250,12 +252,19 @@ void GameConnection::changeParam(const char *param, ParamType type)
 }
 
 
-extern bool engClientCreateObject(GameConnection *connection, U32 object);
-
 TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type), (type), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(engClientCreateObject(this, type))
+   Ship *ship = dynamic_cast<Ship *>(getControlObject());
+   if(!ship)
+      return;
+
+   EngineerModuleDeployer deployer;
+
+   if(!deployer.canCreateObjectAtLocation(ship, type))     
+      s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, deployer.getErrorMessage().c_str());
+
+   else if(deployer.deployEngineeredItem(this, type))
    {
       // Announce the build
       StringTableEntry msg( "%e0 has engineered a %e1." );
@@ -266,6 +275,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          walk->s2cDisplayMessageE(ColorAqua, SFXNone, msg, e);
    }
+   // else... fail silently?
 }
 
 

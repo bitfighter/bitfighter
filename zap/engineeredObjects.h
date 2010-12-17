@@ -66,7 +66,7 @@ public:
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
    void setResource(Item *resource);
-   bool checkDeploymentPosition();
+   static bool checkDeploymentPosition(const Vector<Point> &thisBounds);
    void computeExtent();
    virtual void onDestroyed() { /* do nothing */ }  
    virtual void onDisabled() { /* do nothing */ } 
@@ -99,7 +99,6 @@ public:
    S32 isActive(lua_State *L) { return returnInt(L, isEnabled()); }
 
    GameObject *getGameObject() { return this; }
-
 };
 
 
@@ -219,7 +218,9 @@ public:
 
    Turret(S32 team = -1, Point anchorPoint = Point(), Point anchorNormal = Point(1, 0));     // Constructor
 
+   static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints);
    bool getCollisionPoly(Vector<Point> &polyPoints);
+
    void render();
    void idle(IdleCallPath path);
    void onAddedToGame(Game *theGame);
@@ -245,7 +246,23 @@ public:
 };
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+
+class EngineerModuleDeployer
+{
+private:
+   Point mDeployPosition, mDeployNormal;
+   string mErrorMessage;
+
+public:
+   bool canCreateObjectAtLocation(Ship *ship, U32 objectType);           // Check potential deployment position
+   bool deployEngineeredItem(GameConnection *connection, U32 objectType);  // Deploy!
+   string getErrorMessage() { return mErrorMessage; }
 };
 
+
+};
 #endif
 
