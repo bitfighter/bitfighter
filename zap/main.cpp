@@ -78,6 +78,8 @@ Specifying the extension is optional.
 <li>Max level size bumped up to 256K
 <li>Engineer module can no longer create crossing forcefields
 <li>Smooth lines option available with a setting in the INI
+<li>Any team can spawn at a neutral spawn point
+<li>Added /setscore and /settime commands that set the score and game time for the current level
 </ul>
 
 
