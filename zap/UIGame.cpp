@@ -35,17 +35,19 @@
 #include "UIErrorMessage.h"
 #include "gameType.h"
 #include "lpc10.h"
-#include "IniFile.h"    // For access to gINI functions
+#include "IniFile.h"             // For access to gINI functions
+#include "engineeredObjects.h"   // For EngineerModuleDeployer
 
 #include "../tnl/tnlEndian.h"
 
 #include "ship.h"
+#include "shipItems.h"           // For EngineerBuildObjects
 #include "gameObjectRender.h"
 #include "input.h"
 #include "config.h"
 #include "loadoutSelect.h"
 
-#include "md5wrapper.h"    // For submission of passwords
+#include "md5wrapper.h"          // For submission of passwords
 
 #include "../glut/glutInclude.h"
 #include <ctype.h>
@@ -1615,21 +1617,24 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       }
    }
 
-   else if(words[0] == "engf")
+   else if(words[0] == "engf" || words[0] == "engt")
    {
+      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
       GameType *gt = gClientGame->getGameType();
-      if(gt && gt->engineerIsEnabled())
-         gc->c2sEngineerDeployObject(EngineeredForceField);
+      EngineerModuleDeployer deployer;
+
+      if(!(gt && gt->engineerIsEnabled()))
+         displayMessage(gCmdChatColor, "!!! %s only works on levels where Engineer module is allowed", words[0].c_str());
       else
-         displayMessage(gCmdChatColor, "!!! Engf only works on levels where Engineer Module is allowed");
-   } 
-   else if(words[0] == "engt")
-   {
-      GameType *gt = gClientGame->getGameType();
-      if(gt && gt->engineerIsEnabled())
-         gc->c2sEngineerDeployObject(EngineeredTurret);
-      else
-         displayMessage(gCmdChatColor, "!!! Engt only works on levels where Engineer Module is allowed");
+      {
+         EngineerBuildObjects objType = (words[0] == "engf") ? EngineeredForceField : EngineeredTurret;
+
+         // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
+         if(!deployer.canCreateObjectAtLocation(ship, objType))     
+            displayMessage(Color(0,1,1) /* Aqua */, deployer.getErrorMessage().c_str());
+         else
+            gc->c2sEngineerDeployObject(objType);
+      }
    }
    else
       return false;     // Command unknown to client, will pass it on to server

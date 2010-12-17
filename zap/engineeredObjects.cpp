@@ -177,7 +177,6 @@ bool EngineerModuleDeployer::deployEngineeredItem(GameConnection *connection, U3
    if(!ship)
       return false;
 
-
    EngineeredObject *deployedObject = NULL;
 
    switch(objectType)
@@ -866,7 +865,7 @@ Turret::Turret(S32 team, Point anchorPoint, Point anchorNormal) : EngineeredObje
 }
 
 
-// static
+// static method
 void Turret::getGeom(const Point &anchor, const Point &normal, Vector<Point> &polyPoints)
 {
    Point cross(normal.y, -normal.x);

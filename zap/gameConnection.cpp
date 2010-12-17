@@ -256,8 +256,12 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    Ship *ship = dynamic_cast<Ship *>(getControlObject());
-   if(!ship)
-      return;
+   if(!ship)                                          // Not a good sign...
+      return;                                         // ...bail
+
+   GameType *gt = ship->getGame()->getGameType();
+   if(!(gt && gt->engineerIsEnabled()))               // Something fishy going on here...
+      return;                                         // ...bail
 
    EngineerModuleDeployer deployer;
 
