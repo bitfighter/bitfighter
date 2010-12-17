@@ -43,7 +43,7 @@ public:
    void renderPage1();
    void renderPage2();
    void renderPageObjectDesc(U32 index);
-   void renderPageCommands(U32 index);
+   void renderPageCommands(U32 index, const char *msg = "");
    void nextPage();
    void prevPage();
 

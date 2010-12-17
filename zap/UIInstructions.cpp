@@ -56,7 +56,7 @@ void InstructionsUserInterface::onActivate()
    mCurPage = 1;
 }
 
-static const U32 NUM_PAGES = 11;
+static const U32 NUM_PAGES = 12;
 
 static const char *pageHeaders[] = {
    "CONTROLS",
@@ -67,6 +67,7 @@ static const char *pageHeaders[] = {
    "MORE GAME OBJECTS",
    "MORE GAME OBJECTS",
    "ADVANCED COMMANDS",
+   "LEVEL CONTROL COMMANDS",
    "ADMIN COMMANDS",
    "DEBUG COMMANDS",
    "SCRIPING CONSOLE"
@@ -120,12 +121,15 @@ void InstructionsUserInterface::render()
          renderPageCommands(0);
          break;
       case 9:
-         renderPageCommands(1);     // Admin commands
+         renderPageCommands(1, "Level change permissions are required to use these commands");     // Level control commands
          break;
       case 10:
-         renderPageCommands(2);     // Debug commands
+         renderPageCommands(2, "Admin permissions are required to use these commands");            // Admin commands
          break;
       case 11:
+         renderPageCommands(3);     // Debug commands
+         break;
+      case 12:
          renderConsoleCommands("Open the console by pressing [Shift]-[/] in game", consoleCommands1);   // Scripting console
 
 
@@ -607,10 +611,6 @@ static ControlStringsEditor commands[] = {
    { "/admin <password>", "Request admin permissions" },
    { "/levpass <password>", "Request level change permissions" },
    { "-", NULL },       // Horiz. line
-   { "/add <time in minutes>", "Add time to the current game" },
-   { "/next", "Start next level" },
-   { "/prev", "Replay previous level" },
-   { "/restart", "Restart current level" },
    { "/suspend", "Place game on hold while waiting for players" },
    { "-", NULL },       // Horiz. line
    { "/kick <player name>", "Kick a player from the game" },
@@ -621,6 +621,16 @@ static ControlStringsEditor commands[] = {
    { NULL, NULL },      // End of list
 };
 
+static ControlStringsEditor levelControlCommands[] = {
+   { "/add <time in minutes>", "Add time to the current game" },
+   { "/next", "Start next level" },
+   { "/prev", "Replay previous level" },
+   { "/restart", "Restart current level" },
+   { "/settime <time in minutes>", "Set time for level" },
+   { "/setscore <score>", "Set winning score for level" },
+
+   { NULL, NULL },      // End of list
+};
 
 static ControlStringsEditor adminCommands[] = {
    { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
@@ -642,15 +652,17 @@ static ControlStringsEditor debugCommands[] = {
 };
 
 
-void InstructionsUserInterface::renderPageCommands(U32 page)
+void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
    ControlStringsEditor *cmdList;
 
    if(page == 0)
       cmdList = commands;
    else if(page == 1)
-      cmdList = adminCommands;
+      cmdList = levelControlCommands;
    else if(page == 2)
+      cmdList = adminCommands;
+   else if(page == 3)
       cmdList = debugCommands;
 
    S32 ypos = 50;
@@ -667,9 +679,9 @@ void InstructionsUserInterface::renderPageCommands(U32 page)
    drawString(cmdCol, ypos, instrSize, "Use [TAB] to expand a partially typed command");
    ypos += 28;
 
-   if(page == 1)
+   if(strcmp(msg, ""))
    {
-      drawString(cmdCol, ypos, instrSize, "Admin permissions are required to use these commands");
+      drawString(cmdCol, ypos, instrSize, msg);
       ypos += 28;
    }
 
