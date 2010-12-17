@@ -221,6 +221,12 @@ stateLineParseDone:
 bool LevelLoader::initLevelFromFile(const char *file)
 {
    FILE *f = fopen(file, "r");
+
+#ifdef SAM_ONLY
+   //Wanting to know which map the game crashes on.
+   logprintf("Loading %s", file);
+#endif
+
    if(!f)
       return false;
 
