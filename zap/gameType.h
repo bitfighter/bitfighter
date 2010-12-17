@@ -371,6 +371,8 @@ public:
 
    TNL_DECLARE_RPC(s2cSetGameOver, (bool gameOver));
    TNL_DECLARE_RPC(s2cSetTimeRemaining, (U32 timeLeft));
+   TNL_DECLARE_RPC(s2cChangeScoreToWin, (U32 score, StringTableEntry changer));
+   
 
    TNL_DECLARE_RPC(s2cCanSwitchTeams, (bool allowed));
 

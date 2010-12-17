@@ -626,8 +626,8 @@ static ControlStringsEditor levelControlCommands[] = {
    { "/next", "Start next level" },
    { "/prev", "Replay previous level" },
    { "/restart", "Restart current level" },
-   { "/settime <time in minutes>", "Set time for level" },
-   { "/setscore <score>", "Set winning score for level" },
+   { "/settime <time in minutes>", "Set play time for the level" },
+   { "/setscore <score>", "Set score to win the level" },
 
    { NULL, NULL },      // End of list
 };

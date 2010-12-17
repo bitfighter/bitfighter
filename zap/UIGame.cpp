@@ -1367,49 +1367,6 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 }
 
 
-F32 ConvertCharToFloat(const char * in){
-	F32 out=0;
-	bool negative=false;
-	bool useDecimal=false;
-	F32 decimal=1;
-	S32 i=0;
-	char c = in[0];
-	while(c != 0){
-		if(c >= '0' && c <= '9'){
-			if(! useDecimal){
-				out = out * 10 + (c - '0');
-			}else{
-				decimal *= 0.1f;
-				out = out + ((c - '0') * decimal);
-			}
-		}else if(c == '-')
-			negative=true;
-		else if(c == '.')
-			useDecimal=true;
-		i++;
-		c = in[i];
-	}
-	if(negative) out = -out;
-	return out;
-}
-S32 ConvertCharToSignedInt(const char * in){
-	S32 out=0;
-	bool negative=false;
-	S32 i=0;
-	char c = in[0];
-	while(c != 0){
-		if(c >= '0' && c <= '9'){
-				out = out * 10 + (c - '0');
-		}else if(c == '-')
-			negative=true;
-		i++;
-		c = in[i];
-	}
-	if(negative) out = -out;
-	return out;
-}
-
-
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
 // Returns true if command was handled (even if it was bogus); returning false will cause command to be passed on to the server
@@ -1604,7 +1561,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          displayMessage(gCmdChatColor, "!!! Need to supply line width");
       else
       {
-         linewidth = ConvertCharToFloat(words[1].c_str());
+         linewidth = atof(words[1].c_str());
          if(linewidth < 0.125f) 
             linewidth = 0.125f;
 
@@ -1661,6 +1618,8 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/vvol");
    mChatCmds.push_back("/suspend");
    mChatCmds.push_back("/linewidth");
+   mChatCmds.push_back("/settime");
+   mChatCmds.push_back("/setscore");
 
    // Administrative commands
    mChatCmds.push_back("/shutdown");

@@ -1057,13 +1057,12 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          Point p;
          p.read(argv + 2);
          p *= getGame()->getGridSize();
-         if(teamIndex >= 0 && teamIndex < mTeams.size())    // Ignore if team is invalid
+
+         if(teamIndex >= 0 && teamIndex < mTeams.size())    // Normal teams; ignore if invalid
             mTeams[teamIndex].spawnPoints.push_back(p);
-         if(teamIndex == -1)                      //neutral spawn point, add spawn to all teams.
-         {
-            for(S32 i=0; i < mTeams.size(); i++)
+         else if(teamIndex == -1)                           // Neutral spawn point, add to all teams
+            for(S32 i = 0; i < mTeams.size(); i++)
                mTeams[i].spawnPoints.push_back(p);
-         }
       }
    }
    else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
@@ -2124,6 +2123,15 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
 }
 
 
+// Server has sent us (the client) a message telling us the winning score has changed, and who changed it
+GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEntry changer), (winningScore, changer))
+{
+   mWinningScore = winningScore;
+   gGameUserInterface.displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+               "%s changed the winning score to %d.", changer.getString(), mWinningScore);
+}
+
+
 // Announce a new player has joined the team
 GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam, 
                 (StringTableEntry name, RangedU32<0, GameType::gMaxTeams> teamIndex), 
@@ -2267,68 +2275,63 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 
 
 // Runs the server side commands, which the client may or may not know about
-extern F32 ConvertCharToFloat(const char * in);   //from UIGame.cpp: might want to move this?
-extern S32 ConvertCharToSignedInt(const char * in);
+
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
+// When adding new commands, please update GameUserInterface::populateChatCmdList() and also the help screen (UIInstructions.cpp)
 void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
    if(!stricmp(cmd, ""))               // Just in case
       return;
 
-   if(!stricmp(cmd, "example"))        // Testing only, will soon add useful commands
-   {  
-      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "This is an example.");
-   }
-   else if(!stricmp(cmd, "settime"))
+   if(!stricmp(cmd, "settime"))
    {
-     if(!clientRef->isLevelChanger){                         // Level changers and above
+      if(!clientRef->isLevelChanger)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
-         return;
-     }
-     if(args.size() < 1){
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter minutes");
-         return;
-     }
+      else if(args.size() < 1)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter time in minutes");
+      else
+      {
+         F32 time = atof(args[0].getString());
+         if(time <= 0)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
+         else
+         {
+            mGameTimer.reset((U32)(60 * 1000 * time));       // Change "official time"
 
-      mGameTimer.reset( (U32)( 60*1000 * ConvertCharToFloat( args[0].getString() ) ) );     // Change "official time".
-      s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
+            s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
 
-      static StringTableEntry msg("%e0 has changed the time limit");
-      Vector<StringTableEntry> e;
-      e.push_back(clientRef->clientConnection->getClientName());
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+            static StringTableEntry msg("%e0 has changed the amount of time left in the game");
+            Vector<StringTableEntry> e;
+            e.push_back(clientRef->clientConnection->getClientName());
+
+            for(S32 i = 0; i < mClientList.size(); i++)
+               mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+         }
+      }
    }
    else if(!stricmp(cmd, "setscore"))
    {
-     if(!clientRef->isLevelChanger){                         // Level changers and above
+     if(!clientRef->isLevelChanger)                         // Level changers and above
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
-         return;
-     }
-     if(args.size() < 1){
+     else if(args.size() < 1)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter score limit");
-         return;
+     else
+     {
+         S32 score = atoi(args[0].getString());
+         if(score <= 0)    // 0 can come about if user enters invalid input
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid score... winning score not changed");
+         else
+         {
+            mWinningScore = score;
+            s2cChangeScoreToWin(mWinningScore, clientRef->clientConnection->getClientName());
+         }
      }
-
-      mWinningScore = ConvertCharToSignedInt( args[0].getString() );
-
-        // Client will not know the score limit is changed
-        // ToDo : send new score limit to client
-
-
-      static StringTableEntry msg("%e0 has changed the score limit");
-      Vector<StringTableEntry> e;
-      e.push_back(clientRef->clientConnection->getClientName());
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
    }
    else
    {
       // Command not found, tell the client
-
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid Command");
    }
-
 }
 
 GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
