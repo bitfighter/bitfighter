@@ -969,8 +969,13 @@ void Turret::idle(IdleCallPath path)
          if((potential->isModuleActive(ModuleCloak) && !(carryVis && potential->areItemsMounted())) || potential->hasExploded)
             continue;
       }
-      GameObject *potential = dynamic_cast<GameObject *>(fillVector[i]);
 
+      // Don't target mounted items (like resource items & soccer balls)
+      Item *item = dynamic_cast<Item *>(fillVector[i]);
+      if(item && item->isMounted())
+         continue;
+
+      GameObject *potential = dynamic_cast<GameObject *>(fillVector[i]);
       if(potential->getTeam() == mTeam)      // Is target on our team?
          continue;                           // ...if so, skip it!
 

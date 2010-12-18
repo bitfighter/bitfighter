@@ -119,7 +119,7 @@ public:
 
 class ToggleMenuItem : public MenuItem
 {
-private:
+protected:
    string mValue;
    U32 mIndex;
    Vector<string> mOptions;
@@ -148,6 +148,27 @@ public:
 
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class YesNoMenuItem : public ToggleMenuItem
+{
+public:
+   YesNoMenuItem(string title, bool currOption, void (*callback)(U32), string help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+         ToggleMenuItem(title, Vector<string>(), currOption, true, callback, help, k1, k2, color)
+   {
+      mValue = "";
+      mIndex = currOption;       
+      mEnterAdvancesItem = true;
+
+      mOptions.push_back("No");     // 0
+      mOptions.push_back("Yes");    // 1
+   }
+
+   virtual string getValue() { return mIndex ? " Engineer" : ""; }
+   virtual void setValue(S32 val) { mIndex = (val == 0) ? 0 : 1; }
+};
 
 ////////////////////////////////////////
 ////////////////////////////////////////

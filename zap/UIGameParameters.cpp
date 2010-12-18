@@ -44,7 +44,7 @@ namespace Zap
 GameParamUserInterface gGameParamUserInterface;
 
 static S32 OPT_GAMETYPE, OPT_FILENAME, OPT_LEVEL_NAME, OPT_LEVEL_DESCR, OPT_CREDITS, OPT_SCRIPT;
-static S32 OPT_GRIDSIZE, OPT_MIN_PLAYERS, OPT_MAX_PLAYERS;
+static S32 OPT_GRIDSIZE, OPT_MIN_PLAYERS, OPT_MAX_PLAYERS, OPT_ENGINEER;
 
 static const S32 FIRST_GAME_SPECIFIC_PARAM = 6;
 
@@ -271,6 +271,11 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                            "Max. players you would recommend for this level (to help server select the next level)"));
    OPT_MAX_PLAYERS = menuItems.size() - 1;
 
+   menuItems.push_back(new YesNoMenuItem("Allow Engineer Module:",       
+                                          false,
+                                          NULL,
+                                          "Allow players to use the Engineer module?"));
+   OPT_ENGINEER = menuItems.size() - 1;
 
    menuItems.push_back(new MenuItem(0, "RETURN TO EDITOR", backToEditorCallback, ""));
 
@@ -283,28 +288,38 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       const string delimiters = " \t";       // Spaces or tabs will delimit our lines
       for(S32 i = 0; i < gameParams.size(); i++)
       {
-         string str = gameParams[i];
-         string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
-         string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
+         //string str = gameParams[i];
+         //string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
+         //string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
 
-         string token = str.substr(lastPos, pos - lastPos);
-         lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
-         string val = str.substr(lastPos, str.size() - lastPos);
+         //string token = str.substr(lastPos, pos - lastPos);
+         //lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
+         //string val = str.substr(lastPos, str.size() - lastPos);
 
-         if(token == "GridSize")
+         Vector<string> words = parseString(gameParams[i]);
+
+         if(!stricmp(words[0].c_str(), "GridSize"))
          {
-            S32 gridSize = max(min(atoi(val.c_str()), Game::MAX_GRID_SIZE), Game::MIN_GRID_SIZE);
+            S32 gridSize = max(min(atoi(words[1].c_str()), Game::MAX_GRID_SIZE), Game::MIN_GRID_SIZE);
             menuItems[OPT_GRIDSIZE]->setValue(gridSize);
          }
-         else if(token == "MinPlayers")
+         else if(!stricmp(words[0].c_str(), "MinPlayers"))
          {
-            S32 minPlayers = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            S32 minPlayers = max(min(atoi(words[1].c_str()), gMaxPlayers), 0);
             menuItems[OPT_MIN_PLAYERS]->setValue(minPlayers);
          }
-         else if(token == "MaxPlayers")
+         else if(!stricmp(words[0].c_str(), "MaxPlayers"))
          {
-            S32 maxPlayers = max(min(atoi(val.c_str()), gMaxPlayers), 0);
+            S32 maxPlayers = max(min(atoi(words[1].c_str()), gMaxPlayers), 0);
             menuItems[OPT_MAX_PLAYERS]->setValue(maxPlayers);
+         }
+         else if(!stricmp(words[0].c_str(), "Specials"))
+         {
+            for(S32 i = 1; i < words.size(); i++)
+            {
+               if(!stricmp(words[i].c_str(), "Engineer"))
+                  menuItems[OPT_ENGINEER]->setValue(1);
+            }
          }
       }
 
@@ -385,6 +400,7 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back("GridSize "         + menuItems[OPT_GRIDSIZE]->getValue());
    gameParams.push_back("MinPlayers "       + menuItems[OPT_MIN_PLAYERS]->getValue());
    gameParams.push_back("MaxPlayers "       + menuItems[OPT_MAX_PLAYERS]->getValue());
+   gameParams.push_back("Specials"          + menuItems[OPT_ENGINEER]->getValue());
 }
 
 
