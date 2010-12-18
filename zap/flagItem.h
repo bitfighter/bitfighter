@@ -35,15 +35,12 @@ class FlagItem : public Item
 {
 private:
    Point mInitialPos;                   // Where flag was "born"
-   void flagDropped();
    bool mIsAtHome;
 
 protected:
-   typedef Item Parent;                 // RDW - This need to be protected, or child classes can't access it.
+   typedef Item Parent;                
 
    U32 mFlagCount;                      // How many flags does this represet?
-   Timer mDroppedTimer;                 // Make flags have a tiny bit of delay before they can be picked up again
-   static const U32 dropDelay = 500;    // in ms
 
 public:
    FlagItem(Point pos = Point());                                    // C++ constructor
@@ -61,7 +58,6 @@ public:
    virtual void sendHome();
 
    virtual void onMountDestroyed();
-   virtual void onItemDropped();
    virtual bool collide(GameObject *hitObject);
 
    bool isAtHome() { return mIsAtHome; }

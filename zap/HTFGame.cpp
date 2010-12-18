@@ -123,7 +123,7 @@ public:
    }
 
 
-   void flagDropped(Ship *ship, Item *item)
+   void itemDropped(Ship *ship, Item *item)
    {
       FlagItem *flag = dynamic_cast<FlagItem *>(item);
 

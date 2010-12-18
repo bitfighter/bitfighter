@@ -227,6 +227,8 @@ public:
 
 class TestItem : public Item
 {
+   typedef Item Parent;
+
 public:
    TestItem();     // Constructor
 
@@ -256,6 +258,8 @@ public:
 
 class ResourceItem : public Item
 {
+   typedef Item Parent;
+
 public:
    ResourceItem();      // Constructor
 
@@ -264,6 +268,7 @@ public:
    void renderItem(Point pos);
    bool collide(GameObject *hitObject);
    void damageObject(DamageInfo *theInfo);
+   void onItemDropped();
 
    TNL_DECLARE_CLASS(ResourceItem);
 

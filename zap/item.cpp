@@ -112,12 +112,30 @@ void Item::onMountDestroyed()
 }
 
 
+// Runs on client & server?
+void Item::onItemDropped()
+{
+   if(!getGame())    // Can happen on game startup
+      return;
+
+   GameType *gt = getGame()->getGameType();
+   if(!gt || !mMount.isValid())
+      return;
+
+   if(!isGhost())    // Server only
+   {
+      gt->itemDropped(mMount, this);
+      dismount();
+   }
+
+   mDroppedTimer.reset(DROP_DELAY);
+}
+
+
 void Item::dismount()
 {
    if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
    {
-      //logprintf("%s item->dismount, has mount", isGhost()? "Client:" : "Server:");
-
       for(S32 i = 0; i < mMount->mMountedItems.size(); i++)
          if(mMount->mMountedItems[i].getPointer() == this)
          {
@@ -214,6 +232,10 @@ void Item::idle(GameObject::IdleCallPath path)
          updateInterpolation();
    }
    updateExtent();
+
+   // Server only...
+   U32 deltaT = mCurrentMove.time;
+   mDroppedTimer.update(deltaT);
 }
 
 

@@ -134,10 +134,6 @@ void FlagItem::idle(GameObject::IdleCallPath path)
 
    if(isGhost()) 
       return;
-   
-   // Server only...
-   U32 deltaT = mCurrentMove.time;
-   mDroppedTimer.update(deltaT);
 }
 
 void FlagItem::mountToShip(Ship *theShip)
@@ -261,35 +257,9 @@ bool FlagItem::collide(GameObject *hitObject)
 }
 
 
-// Private helper function -- what happens when flag is dropped?
-// Can run on client and server
-void FlagItem::flagDropped()
-{
-   if(!getGame())    // Can happen on game startup
-      return;
-
-   GameType *gt = getGame()->getGameType();
-   if(!gt || !mMount.isValid())
-      return;
-
-   if(!isGhost())    // Server only
-   {
-      gt->itemDropped(mMount, this);
-      dismount();
-   }
-}
-
-
 void FlagItem::onMountDestroyed()
 {
-   flagDropped();
-}
-
-
-void FlagItem::onItemDropped()
-{
-   flagDropped();
-   mDroppedTimer.reset(dropDelay);
+   onItemDropped();
 }
 
 

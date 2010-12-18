@@ -570,6 +570,9 @@ bool ResourceItem::collide(GameObject *hitObject)
    if( ! (hitObject->getObjectTypeMask() & (ShipType | RobotType)))
       return true;
 
+   // Ignore collisions that occur to recently dropped items.  Make sure item is ready to be picked up! 
+   if(mDroppedTimer.getCurrent())    
+      return false;
 
    Ship *ship = dynamic_cast<Ship *>(hitObject);
    if(!ship || ship->hasExploded)
@@ -592,6 +595,18 @@ void ResourceItem::damageObject(DamageInfo *theInfo)
    Point iv = mMoveState[ActualState].pos - theInfo->collisionPoint;
    iv.normalize();
    mMoveState[ActualState].vel += iv * dv.dot(iv) * 0.3;
+}
+
+
+void ResourceItem::onItemDropped()
+{
+   if(mMount.isValid())
+   {
+      this->setActualPos(mMount->getActualPos()); 
+      this->setActualVel(mMount->getActualVel() * 1.5);
+   }   
+   
+   Parent::onItemDropped();
 }
 
 

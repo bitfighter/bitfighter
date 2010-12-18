@@ -310,32 +310,17 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 }
 
 
-static const U32 DROP_DELAY = 500;
-
 // Runs on client & server?
 void SoccerBallItem::onItemDropped()
 {
-   //logprintf("%s SoccerBallItem->onItemDropped\n\n", isGhost()? "Client:" : "Server:");
-   if(!getGame())    // Can happen on first frame of new game
-      return;
 
-   GameType *gt = getGame()->getGameType();
-   if(!gt || !mMount.isValid())
-      return;
-
-   if(!isGhost())    // Server only
-      gt->itemDropped(mMount, this);
-   
    if(mMount.isValid())
    {
       this->setActualPos(mMount->getActualPos()); 
-      this->setActualVel(mMount->getActualVel() * 2);
-   }
-
-   if(!isGhost())    // Server only -- dismount will be run via another codepath on the client
-      dismount();
-
-   mDroppedTimer.reset(DROP_DELAY);
+      this->setActualVel(mMount->getActualVel() * 1.5);
+   }   
+   
+   Parent::onItemDropped();
 }
 
 
@@ -347,8 +332,6 @@ void SoccerBallItem::renderItem(Point pos)
 
 void SoccerBallItem::idle(GameObject::IdleCallPath path)
 {
-   mDroppedTimer.update(mCurrentMove.time);
-
    if(mSendHomeTimer.update(mCurrentMove.time))
       if(!isGhost())
          sendHome();

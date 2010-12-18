@@ -463,7 +463,7 @@ HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : Flag
 
    setActualVel(vel);
    if(useDropDelay)
-      mDroppedTimer.reset(dropDelay);
+      mDroppedTimer.reset(DROP_DELAY);
 }
 
 
@@ -542,7 +542,7 @@ void HuntersFlagItem::onItemDropped()
 
       gameType->itemDropped(mMount, NULL);
    }
-   dropFlags(mFlagCount);        // Only dropping the flags we're carrying, not the "extra" one that comes when we die
+   dropFlags(mFlagCount);          // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
 
 

@@ -94,8 +94,6 @@ private:
    StringTableEntry mLastPlayerTouchName;
    F32 mDragFactor;
 
-   Timer mDroppedTimer;
-
 public:
    SoccerBallItem(Point pos = Point());   // C++ constructor
 

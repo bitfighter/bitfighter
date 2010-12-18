@@ -64,6 +64,9 @@ protected:
 
    U16 mItemId;         // Item ID, shared between client and server
 
+   Timer mDroppedTimer;                   // Make flags have a tiny bit of delay before they can be picked up again
+   static const U32 DROP_DELAY = 500;     // Time until we can pick the item up after it's dropped (in ms)
+
 public:
    Item(Point p = Point(0,0), bool collideable = false, float radius = 1, float mass = 1);   // Constructor
 
@@ -94,7 +97,7 @@ public:
    virtual void renderItem(Point pos) = 0;
 
    virtual void onMountDestroyed();
-   virtual void onItemDropped() { /* do nothing */ };
+   virtual void onItemDropped();
 
    bool collide(GameObject *otherObject);
 
