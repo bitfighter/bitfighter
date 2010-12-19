@@ -229,10 +229,10 @@ public:
 
    bool hasModule(ShipModule mod)
    {
-      bool hasmod = false;
       for(S32 i = 0; i < ShipModuleCount; i++)
-            hasmod = hasmod || (mModule[i] == mod);
-       return hasmod;
+         if(mModule[i] == mod)
+            return true;
+      return false;
     }
 
    bool isDestroyed() { return hasExploded; }
