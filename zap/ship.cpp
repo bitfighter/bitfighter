@@ -244,7 +244,7 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
  {
    findObjectsUnderShip(zoneType);
 
-   if (fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
+   if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
 
    // Extents overlap...  now check for actual overlap
@@ -271,7 +271,7 @@ DatabaseObject *Ship::isOnObject(GameObjectType objectType)
 {
    findObjectsUnderShip(objectType);
 
-   if (fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
+   if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
       return NULL;
 
    // Return first actually overlapping object on our candidate list
