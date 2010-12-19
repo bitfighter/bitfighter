@@ -65,18 +65,17 @@ void MessageUserInterface::reset()
 void MessageUserInterface::setMessage(U32 id, char *message)
 {
    if (id < 1 || id > mNumLines)       // Protect devs from themselves...
-   {
       logprintf(LogConsumer::LogError, "Invalid line number in setMessage: %d", id);
-      return;
-   }
-
-   mMessage[id-1] = message;
+   else
+      mMessage[id-1] = message;
 }
+
 
 void MessageUserInterface::setTitle(char *message)
 {
    mTitle = message;
 }
+
 
 void MessageUserInterface::setSize(U32 width, U32 height)
 {
@@ -84,10 +83,12 @@ void MessageUserInterface::setSize(U32 width, U32 height)
    mHeight = height;
 }
 
+
 void MessageUserInterface::setFadeTime(U32 time)
 {
    mFadeTime = time;
 }
+
 
 void MessageUserInterface::setStyle(U32 style)
 {
@@ -96,8 +97,8 @@ void MessageUserInterface::setStyle(U32 style)
    mMessageColor = gErrorMessageTextColor;
    mVertOffset = 0;
    mTitle = "";
-
 }
+
 
 void MessageUserInterface::quit()
 {
