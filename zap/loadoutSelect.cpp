@@ -44,21 +44,21 @@ namespace Zap
 Vector<LoadoutItem> gLoadoutModules;
 Vector<LoadoutItem> gLoadoutWeapons;
 
-// Gets called at the beginning of every game
+// Gets called at the beginning of every game; available options may change based on level
 void LoadoutHelper::initialize(bool includeEngineer)
 {
    gLoadoutModules.clear();
    gLoadoutWeapons.clear();
 
-   gLoadoutModules.push_back(LoadoutItem(KEY_1, BUTTON_1, ModuleBoost,  "Turbo Boost",           "", ModuleNone));
-   gLoadoutModules.push_back(LoadoutItem(KEY_2, BUTTON_2, ModuleShield, "Shield Generator",      "", ModuleNone));
-   gLoadoutModules.push_back(LoadoutItem(KEY_3, BUTTON_3, ModuleRepair, "Repair Module",         "", ModuleNone));
-   gLoadoutModules.push_back(LoadoutItem(KEY_4, BUTTON_4, ModuleSensor, "Enhanced Sensor",       "(makes Spy Bug Placer available)", ModuleNone));
-   gLoadoutModules.push_back(LoadoutItem(KEY_5, BUTTON_5, ModuleCloak,  "Cloak Field Modulator", "", ModuleNone));
-   gLoadoutModules.push_back(LoadoutItem(KEY_6, BUTTON_6, ModuleArmor,  "Armor", "", ModuleNone));
+   gLoadoutModules.push_back(LoadoutItem(KEY_1, BUTTON_1, ModuleBoost));
+   gLoadoutModules.push_back(LoadoutItem(KEY_2, BUTTON_2, ModuleShield));
+   gLoadoutModules.push_back(LoadoutItem(KEY_3, BUTTON_3, ModuleRepair));
+   gLoadoutModules.push_back(LoadoutItem(KEY_4, BUTTON_4, ModuleSensor));
+   gLoadoutModules.push_back(LoadoutItem(KEY_5, BUTTON_5, ModuleCloak));
+   gLoadoutModules.push_back(LoadoutItem(KEY_6, BUTTON_6, ModuleArmor));
 
    if(includeEngineer)
-      gLoadoutModules.push_back(LoadoutItem(KEY_7, BUTTON_7, ModuleEngineer, "Engineer", "", ModuleNone));
+      gLoadoutModules.push_back(LoadoutItem(KEY_7, BUTTON_7, ModuleEngineer));
 
    gLoadoutWeapons.push_back(LoadoutItem(KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
    gLoadoutWeapons.push_back(LoadoutItem(KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));

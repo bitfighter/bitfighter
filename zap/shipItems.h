@@ -67,6 +67,8 @@ private:
    S32 mEnergyDrain;       // Continuous energy drain while in use
    S32 mUseCost;           // Per use energy drain
    const char *mName;
+   const char *mMenuName;
+   const char *mMenuHelp;
    ModuleUseType mUseType; // How module is activated
 
 public:
@@ -76,6 +78,8 @@ public:
       {
          case ModuleShield:
             mName = "Shield";
+            mMenuName = "Shield Generator";
+            mMenuHelp = "";
             mEnergyDrain = 27000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
@@ -83,6 +87,8 @@ public:
 
          case ModuleBoost:
             mName = "Turbo";
+            mMenuName = "Turbo Boost";
+            mMenuHelp = "";
             mEnergyDrain = 15000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
@@ -90,6 +96,8 @@ public:
 
          case ModuleSensor:
             mName = "Sensor";
+            mMenuName = "Enhanced Sensor";
+            mMenuHelp = "";
             mEnergyDrain = 8000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
@@ -97,6 +105,8 @@ public:
 
          case ModuleRepair:
             mName = "Repair";
+            mMenuName = "Repair Module";
+            mMenuHelp = "";
             mEnergyDrain = 15000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
@@ -104,6 +114,8 @@ public:
 
          case ModuleEngineer:
             mName = "Engineer";
+            mMenuName = "Engineer";
+            mMenuHelp = "";
             mEnergyDrain = 0;
             mUseCost = 75000;
             mUseType = ModuleUseActive;
@@ -111,6 +123,8 @@ public:
 
          case ModuleCloak:
             mName = "Cloak";
+            mMenuName = "Cloak Field Modulator";
+            mMenuHelp = "(makes Spy Bug Placer available)";
             mEnergyDrain = 8000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
@@ -118,10 +132,15 @@ public:
 
          case ModuleArmor:
             mName = "Armor";
+            mMenuName = "Armor";
+            mMenuHelp = "";
             mEnergyDrain = 0;
             mUseCost = 0;
             mUseType = ModuleUsePassive;
             break;
+
+         default:
+            TNLAssert(false, "Something's gone wrong again!");
       }
    };
 
@@ -130,8 +149,9 @@ public:
    S32 getPerUseCost() { return mUseCost; }
    const char *getName() { return mName; }
    ModuleUseType getUseType() { return mUseType; }
+   const char *getMenuName() { return mMenuName; }
+   const char *getMenuHelp() { return mMenuHelp; }
 };
-
 
 
 };
