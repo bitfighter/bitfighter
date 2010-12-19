@@ -131,7 +131,7 @@ void Item::dismount()
 
    mMount = NULL;
    mIsMounted = false;
-   setMaskBits(MountMask);
+   setMaskBits(MountMask | PositionMask);  //Send position to prevent flag lag that cannot be picked up.
 }
 
 
