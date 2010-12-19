@@ -615,9 +615,8 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       if(itemType != ItemInvalid)     
       {
          WorldItem newItem(itemType, id);
-         newItem.processArguments(argc - 1, argv + 1);
-   
-         mLoadTarget->push_back(newItem);
+         if(newItem.processArguments(argc - 1, argv + 1))
+            mLoadTarget->push_back(newItem);           //don't add to editor if not valid...
          return;
       }
    }
