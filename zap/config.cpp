@@ -264,19 +264,10 @@ static void loadTestSettings()
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
 }
 
-#ifndef ZAP_DEDICATED
-  extern bool UseGlLineSmooth;
-  extern bool UseGlPointSmooth;
-#endif
-
 static void loadEffectsSettings()
 {
-   gIniSettings.starsInDistance = (lcase(gINI.GetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
-
-#ifndef ZAP_DEDICATED
-   UseGlLineSmooth = (lcase(gINI.GetValue("Effects", "LineSmooth", "No")) == "yes");
-   UseGlPointSmooth = (lcase(gINI.GetValue("Effects", "PointSmooth", "No")) == "yes");
-#endif
+   gIniSettings.starsInDistance  = (lcase(gINI.GetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"))) == "yes");
+   gIniSettings.useLineSmoothing = (lcase(gINI.GetValue("Effects", "LineSmoothing", "No")) == "yes");
 }
 
 // Convert a string value to our sfxSets enum
@@ -1014,15 +1005,12 @@ static void writeEffects()
       gINI.KeyComment("Effects", "----------------");
       gINI.KeyComment("Effects", " Various visual effects");
       gINI.KeyComment("Effects", " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
+      gINI.KeyComment("Effects", " LineSmoothing - Yes activates anti-aliased rendering.  This may be a little slower on some machines.");
       gINI.KeyComment("Effects", "----------------");
    }
 
    gINI.SetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"), true);
-
-#ifndef ZAP_DEDICATED
-   gINI.SetValue("Effects", "LineSmooth", (UseGlLineSmooth ? "Yes" : "No"), true);
-   gINI.SetValue("Effects", "PointSmooth", (UseGlPointSmooth ? "Yes" : "No"), true);
-#endif
+   gINI.SetValue("Effects", "LineSmoothing", (gIniSettings.useLineSmoothing ? "Yes" : "No"), true);
 }
 
 static void writeSounds()

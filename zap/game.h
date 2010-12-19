@@ -84,22 +84,9 @@
 
 using namespace std;
 
-
-//line smoothing, not sure where else to put this
-
-
-
-
 namespace Zap
 {
 
-extern bool UseGlLineSmooth;
-extern bool UseGlPointSmooth;
-
-#define glEnableBlend { if(!UseGlLineSmooth) glEnable(GL_BLEND); }
-#define glDisableBlend { if(!UseGlLineSmooth) glDisable(GL_BLEND); }
-#define glEnableBlendfromLineSmooth { if(UseGlLineSmooth) glEnable(GL_BLEND); }
-#define glDisableBlendfromLineSmooth { if(UseGlLineSmooth) glDisable(GL_BLEND); }
 
 // Some forward declarations
 class MasterServerConnection;

@@ -1225,14 +1225,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
    S32 fy1 = gIniSettings.starsInDistance ? -1 - ((S32) (cameraPos.y / starDist)) : 0;
    S32 fy2 = gIniSettings.starsInDistance ?  1 - ((S32) (cameraPos.y / starDist)) : 0;
 
-   if(UseGlPointSmooth) //need blend for point smooth to work correctly.
-   {
-      glEnableBlend;
-   }
-   else
-   {
-     glDisableBlendfromLineSmooth;
-   }
+   glDisableBlendfromLineSmooth;
 
 
    for(F32 xPage = upperLeft.x + fx1; xPage < lowerRight.x + fx2; xPage++)
@@ -1255,14 +1248,7 @@ void ClientGame::drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent)
          glPopMatrix();
       }
 
-   if(UseGlPointSmooth)
-   {
-     glDisableBlend;
-   }
-   else
-   {
-     glEnableBlendfromLineSmooth;
-   }
+   glEnableBlendfromLineSmooth;
 
    glDisableClientState(GL_VERTEX_ARRAY);
 }

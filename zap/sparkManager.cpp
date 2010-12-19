@@ -33,8 +33,12 @@ using namespace TNL;
 namespace Zap
 {
 
+extern IniSettings gIniSettings;
+
 namespace FXManager
 {
+
+
 
 struct Spark
 {
@@ -205,7 +209,7 @@ void render(S32 renderPass)
          glEnableClientState(GL_VERTEX_ARRAY);
 
          glVertexPointer(2, GL_FLOAT, sizeof(Spark), &gSparks[i][0].pos);     // Where to find the vertices -- see OpenGL docs
-         glColorPointer(4, GL_FLOAT , sizeof(Spark), &gSparks[i][0].color);   // Where to find the colors -- see OpenGL docs
+         glColorPointer(4, GL_FLOAT, sizeof(Spark), &gSparks[i][0].color);    // Where to find the colors -- see OpenGL docs
 
          if((SparkType) i == SparkTypePoint)
             glDrawArrays(GL_POINTS, 0, firstFreeIndex[i]);

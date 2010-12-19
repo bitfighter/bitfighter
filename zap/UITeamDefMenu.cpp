@@ -40,7 +40,6 @@
 namespace Zap
 {
 
-
 // Note: Do not make any of the following team names longer than MAX_TEAM_NAME_LENGTH, which is currently 32
 // Note: Make sure we have at least 9 presets below...  (instructions are wired for keys 1-9)
 TeamPreset gTeamPresets[] = {

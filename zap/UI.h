@@ -49,6 +49,15 @@ extern float gDefaultLineWidth;
 extern float gLineWidth3;
 extern float gLineWidth4;
 
+extern IniSettings gIniSettings;    // For linesmoothing settings
+
+
+#define glEnableBlend { if(!gIniSettings.useLineSmoothing) glEnable(GL_BLEND); }
+#define glDisableBlend { if(!gIniSettings.useLineSmoothing) glDisable(GL_BLEND); }
+#define glEnableBlendfromLineSmooth { if(gIniSettings.useLineSmoothing) glEnable(GL_BLEND); }
+#define glDisableBlendfromLineSmooth { if(gIniSettings.useLineSmoothing) glDisable(GL_BLEND); }
+
+
 const U32 MAX_GAME_NAME_LEN = 32;     // Any longer, and it won't fit on-screen
 const U32 MAX_FILE_NAME_LEN = 32;     // Completely arbitrary
 const U32 MAX_GAME_DESCR_LEN = 60;    // Any longer, and it won't fit on-screen
