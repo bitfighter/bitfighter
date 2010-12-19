@@ -59,6 +59,7 @@ struct LoadoutItem
       this->help = moduleInfo->getMenuHelp();
       this->requires = ModuleNone;     // Currently, no modules depend on any other
    }
+
    LoadoutItem(KeyCode key, KeyCode button, U32 index, const char *text, const char *help, ShipModule requires) 
    {
       this->key = key;
