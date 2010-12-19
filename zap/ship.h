@@ -140,13 +140,6 @@ public:
       TrailCount = 2,
       EnergyMax = 100000,
       EnergyRechargeRate = 6000,          // How many percent/second
-      EnergyBoostDrain = 15000,
-      EnergyShieldDrain = 27000,
-      EnergyRepairDrain = 15000,
-      EnergySensorDrain = 8000,
-      EnergyCloakDrain = 8000,
-      EnergyEngineerDrain = 0,            // Engineer costs no energy to use
-      EnergyEngineerCost = 75000,         // Energy consumed when using engineer module
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,
       WeaponFireDecloakTime = 350,
@@ -165,7 +158,7 @@ public:
       WarpPositionMask = BIT(3),    // When ship makes a big jump in position
       ExplosionMask = BIT(4),
       HealthMask = BIT(5),
-      PowersMask = BIT(6),          // Which modules are active
+      ModulesMask = BIT(6),          // Which modules are active
       LoadoutMask = BIT(7),
       RespawnMask = BIT(8),         // For when robots respawn
       TeleportMask = BIT(9),        // Ship has just teleported
@@ -225,7 +218,7 @@ public:
 
    bool isModuleActive(ShipModule mod) { return mModuleActive[mod]; }
 
-   void engineerBuildObject() { mEnergy -= EnergyEngineerCost; }
+   void engineerBuildObject() { mEnergy -= getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost(); }
 
    bool hasModule(ShipModule mod)
    {
@@ -252,7 +245,6 @@ public:
    virtual void idle(IdleCallPath path);
 
    virtual void processMove(U32 stateIndex);
-   F32 getMaxVelocity();
 
    WeaponType getSelectedWeapon() { return mWeapon[mActiveWeaponIndx]; }   // Return currently selected weapon
    U32 getSelectedWeaponIndex() { return mActiveWeaponIndx; }              // Return index of currently selected weapon (0, 1, 2)

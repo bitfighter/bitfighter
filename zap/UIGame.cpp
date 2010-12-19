@@ -69,17 +69,6 @@ extern Color gCmdChatColor;
 
 Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 
-// Used to supply names for loutout indicators --> must correspond to enum ShipModule
-const char *gModuleShortName[] = {
-   "Shield",
-   "Turbo",
-   "Sensor",
-   "Repair",
-   "Engineer",
-   "Cloak",
-};
-
-
 
 // Constructor
 GameUserInterface::GameUserInterface()
@@ -618,9 +607,14 @@ void GameUserInterface::renderLoadoutIndicators()
    // Next, loadout modules
    for(U32 i = 0; i < (U32)ShipModuleCount; i++)
    {
-      glColor(localShip->isModuleActive(localShip->getModule(i)) ? INDICATOR_ACTIVE_COLOR : INDICATOR_INACTIVE_COLOR);
+      if(gClientGame->getModuleInfo(localShip->getModule(i))->getUseType() == ModuleUsePassive)
+         glColor3f(1,1,0);      // yellow = passive indicator
+      else if(localShip->isModuleActive(localShip->getModule(i)))
+         glColor(INDICATOR_ACTIVE_COLOR);
+      else 
+         glColor(INDICATOR_INACTIVE_COLOR);
 
-      S32 width = renderIndicator(xPos, gModuleShortName[localShip->getModule(i)]);
+      S32 width = renderIndicator(xPos, gClientGame->getModuleInfo(localShip->getModule(i))->getName());
 
       xPos += UserInterface::vertMargin + width - 2 * gapSize;
    }

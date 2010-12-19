@@ -43,6 +43,7 @@
 #include "UIMenus.h"
 #include "UINameEntry.h"
 #include "luaLevelGenerator.h"
+#include "shipItems.h"           // For moduleInfos
 
 //#include "UIChat.h"
 
@@ -75,6 +76,7 @@ extern ScreenInfo gScreenInfo;
 // Constructor
 Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(true))
 {
+   buildModuleInfos();
    mNextMasterTryTime = 0;
    mReadyToConnectToMaster = false;
 
@@ -84,6 +86,17 @@ Game::Game(const Address &theBindAddress) : mDatabase(GridDatabase(true))
    mTimeUnconnectedToMaster = 0;
 
    mNetInterface = new GameNetInterface(theBindAddress, this);
+}
+
+
+// Info about modules -- access via getModuleInfo()  -- static
+void Game::buildModuleInfos()    
+{
+   if(mModuleInfos.size() > 0)         // Already built?
+      return;
+
+   for(S32 i = 0; i < ModuleCount; i++)
+      mModuleInfos.push_back(ModuleInfo((ShipModule) i));
 }
 
 

@@ -33,6 +33,7 @@
 #include "timer.h"
 #include "gameLoader.h"
 #include "point.h"
+#include "shipItems.h"     // For moduleInfos
 
 #include "dataConnection.h"
 
@@ -116,7 +117,11 @@ class Ship;
 class Game
 {
 private:
-      U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
+   U32 mTimeUnconnectedToMaster;      // Time that we've been unconnected to the master
+
+   // Info about modules -- access via getModuleInfo()
+   Vector<ModuleInfo> mModuleInfos;
+   void buildModuleInfos();
 
 protected:
    U32 mNextMasterTryTime;
@@ -169,6 +174,9 @@ public:
 
    Game(const Address &theBindAddress);      // Constructor
    virtual ~Game() { /* Do nothing */ };     // Destructor
+
+
+   ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }
    
    Rect computeWorldObjectExtents();
    Rect computeBarrierExtents();

@@ -47,7 +47,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
       return false;
    }
 
-   if(ship->getEnergy() < Ship::EnergyEngineerCost)
+   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost())
    {
       mErrorMessage = "Not enough energy to build object.";
       return false;

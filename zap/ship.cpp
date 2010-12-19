@@ -191,18 +191,16 @@ void Ship::setActualPos(Point p, bool warp)
 }
 
 
-F32 Ship::getMaxVelocity()
-{
-   return isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity;
-}
-
-
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
+   const F32 ARMOR_ACCEL_PENALTY_FACT = 0.5;
+   const F32 ARMOR_SPEED_PENALTY_FACT = 0.75;
+
    mMoveState[LastProcessState] = mMoveState[stateIndex];
 
-   F32 maxVel = getMaxVelocity();
+   F32 maxVel = (isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) * 
+                (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
@@ -217,8 +215,11 @@ void Ship::processMove(U32 stateIndex)
    F32 accRequested = velDelta.len();
 
 
-   // Apply turbo-boost if active
-   F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time;
+
+   // Apply turbo-boost if active, reduce accel and max vel when armor is present
+   F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
+                  (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
+
    if(accRequested > maxAccel)
    {
       velDelta *= maxAccel / accRequested;
@@ -554,16 +555,6 @@ void Ship::repairTargets()
 
 void Ship::processEnergy()
 {
-   static U32 energyDrain[ModuleCount] =
-   {
-      Ship::EnergyShieldDrain,
-      Ship::EnergyBoostDrain,
-      Ship::EnergySensorDrain,
-      Ship::EnergyRepairDrain,
-      Ship::EnergyEngineerDrain,    // Engineer costs no energy to use
-      Ship::EnergyCloakDrain,
-   };
-
    bool modActive[ModuleCount];
    for(S32 i = 0; i < ModuleCount; i++)
    {
@@ -577,9 +568,16 @@ void Ship::processEnergy()
    // Make sure we're allowed to use modules
    bool allowed = getGame()->getGameType() && getGame()->getGameType()->okToUseModules(this);
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      if(mCurrentMove.module[i] && !mCooldown && allowed)  // No modules if we're too hot or game has disallowed them
+   // Are these checked on the server side?
+   for(S32 i = 0; i < ShipModuleCount; i++)   
+      // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
+      if(getGame()->getModuleInfo(mModule[i])->getModuleType() == ModuleUsePassive)    
+         mModuleActive[mModule[i]] = false;         
+
+      // No (active) modules if we're too hot or game has disallowed them
+      else if(mCurrentMove.module[i] && !mCooldown && allowed)  
          mModuleActive[mModule[i]] = true;
+
 
    // No boost if we're not moving
     if(mModuleActive[ModuleBoost] &&
@@ -632,7 +630,7 @@ void Ship::processEnergy()
    {
       if(mModuleActive[i])
       {
-         mEnergy -= S32(energyDrain[i] * scaleFactor);
+         mEnergy -= S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
          anyActive = true;
       }
    }
@@ -669,10 +667,12 @@ void Ship::processEnergy()
          }
          else if(i == ModuleCloak)
             mCloakTimer.reset(CloakFadeTime - mCloakTimer.getCurrent(), CloakFadeTime);
-         setMaskBits(PowersMask);
+
+         setMaskBits(ModulesMask);
       }
    }
 }
+
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
@@ -682,8 +682,10 @@ void Ship::damageObject(DamageInfo *theInfo)
    if(theInfo->damageType == DamageTypeArea)
       mImpulseVector += theInfo->impulseVector;
 
-   if (theInfo->damageAmount == 0)
+   if(theInfo->damageAmount == 0)
       return;
+
+   F32 damageAmount = theInfo->damageAmount;
 
    if(theInfo->damageAmount > 0)
    {
@@ -696,13 +698,17 @@ void Ship::damageObject(DamageInfo *theInfo)
          //mEnergy -= EnergyShieldHitDrain;                                       // have been hit.
          return;
       }
+
+      // Having armor halves the damage
+      if(hasModule(ModuleArmor))
+         damageAmount /= 2;
    }
 
    GameConnection *damagerOwner = theInfo->damagingObject->getOwner();
    GameConnection *victimOwner = this->getOwner();
 
-   // Healing things do negative damage
-   mHealth -= theInfo->damageAmount * ((victimOwner && damagerOwner == victimOwner) ? theInfo->damageSelfMultiplier : 1);
+   // Healing things do negative damage, thus adding to health
+   mHealth -= damageAmount * ((victimOwner && damagerOwner == victimOwner) ? theInfo->damageSelfMultiplier : 1);
    setMaskBits(HealthMask);
 
    if(mHealth <= 0)
@@ -893,7 +899,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       if(stream->writeFlag(updateMask & MoveMask))
          mCurrentMove.pack(stream, NULL, false);      // Send current move
 
-      if(stream->writeFlag(updateMask & PowersMask))
+      if(stream->writeFlag(updateMask & ModulesMask))
          for(S32 i = 0; i < ModuleCount; i++)         // Send info about which modules are active
             stream->writeFlag(mModuleActive[i]);
    }
@@ -1009,7 +1015,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mCurrentMove.unpack(stream, false);
    }
 
-   if(stream->readFlag())     // PowersMask
+   if(stream->readFlag())     // ModulesMask
    {
       bool wasActive[ModuleCount];
       for(S32 i = 0; i < ModuleCount; i++)
@@ -1579,6 +1585,16 @@ if(isRobot())
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
 
+   if(hasModule(ModuleArmor))
+   {
+      glLineWidth(gLineWidth3);
+      glColor3f(1,1,0);
+
+      drawPolygon(mMoveState[RenderState].pos, 5, 30, getAimVector().ATAN2());
+
+      glLineWidth(gDefaultLineWidth);
+   }
+
    if(isModuleActive(ModuleRepair))
    {
       glLineWidth(gLineWidth3);
@@ -1594,6 +1610,7 @@ if(isRobot())
          {
             glBegin(GL_LINES);
             glVertex2f(pos.x, pos.y);
+
             Point shipPos = mRepairTargets[i]->getRenderPos();
             glVertex2f(shipPos.x, shipPos.y);
             glEnd();

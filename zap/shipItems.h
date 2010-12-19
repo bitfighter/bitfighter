@@ -39,17 +39,100 @@ enum ShipModule
    ModuleRepair,
    ModuleEngineer,
    ModuleCloak,
+   ModuleArmor,
    ModuleCount,
    ModuleNone,
 };
 
 
+// Things you can build with Engineer 
 enum EngineerBuildObjects
 {
    EngineeredTurret,
    EngineeredForceField,
    EngineeredObjectCount
 };
+
+
+enum ModuleUseType
+{
+   ModuleUseActive,     // Only functional when active
+   ModuleUsePassive     // Always functional
+};
+
+class ModuleInfo
+{
+private:
+   ShipModule mModuleType;
+   S32 mEnergyDrain;       // Continuous energy drain while in use
+   S32 mUseCost;           // Per use energy drain
+   const char *mName;
+   ModuleUseType mUseType; // How module is activated
+
+public:
+   ModuleInfo(ShipModule moduleType)       // Constructor
+   {
+      switch(moduleType)
+      {
+         case ModuleShield:
+            mName = "Shield";
+            mEnergyDrain = 27000;
+            mUseCost = 0;
+            mUseType = ModuleUseActive;
+            break;
+
+         case ModuleBoost:
+            mName = "Turbo";
+            mEnergyDrain = 15000;
+            mUseCost = 0;
+            mUseType = ModuleUseActive;
+            break;
+
+         case ModuleSensor:
+            mName = "Sensor";
+            mEnergyDrain = 8000;
+            mUseCost = 0;
+            mUseType = ModuleUseActive;
+            break;
+
+         case ModuleRepair:
+            mName = "Repair";
+            mEnergyDrain = 15000;
+            mUseCost = 0;
+            mUseType = ModuleUseActive;
+            break;
+
+         case ModuleEngineer:
+            mName = "Engineer";
+            mEnergyDrain = 0;
+            mUseCost = 75000;
+            mUseType = ModuleUseActive;
+            break;
+
+         case ModuleCloak:
+            mName = "Cloak";
+            mEnergyDrain = 8000;
+            mUseCost = 0;
+            mUseType = ModuleUseActive;
+            break;
+
+         case ModuleArmor:
+            mName = "Armor";
+            mEnergyDrain = 0;
+            mUseCost = 0;
+            mUseType = ModuleUsePassive;
+            break;
+      }
+   };
+
+   ShipModule getModuleType() { return mModuleType; }
+   S32 getEnergyDrain() { return mEnergyDrain; }
+   S32 getPerUseCost() { return mUseCost; }
+   const char *getName() { return mName; }
+   ModuleUseType getUseType() { return mUseType; }
+};
+
+
 
 };
 #endif

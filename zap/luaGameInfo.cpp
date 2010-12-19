@@ -236,10 +236,11 @@ Lunar<LuaModuleInfo>::RegType LuaModuleInfo::methods[] =
 };
 
 
-extern const char *gModuleShortName[] ;
+// Name of module ("Shield", "Turbo", etc.) (string)
+S32 LuaModuleInfo::getName(lua_State *L) { return returnString(L, gServerGame->getModuleInfo((ShipModule) mModuleIndex)->getName()); }   
 
-S32 LuaModuleInfo::getName(lua_State *L) { return returnString(L, gModuleShortName[mModuleIndex]); }              // Name of module ("Shield", "Turbo", etc.) (string)
-S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }                                     // ID of module (ModuleShield, ModuleBoost, etc.) (integer)
+// ID of module (ModuleShield, ModuleBoost, etc.) (integer)
+S32 LuaModuleInfo::getID(lua_State *L) { return returnInt(L, mModuleIndex); }                                       
 
 
 ////////////////////////////////////

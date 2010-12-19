@@ -55,9 +55,10 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutModules.push_back(LoadoutItem(KEY_3, BUTTON_3, ModuleRepair, "Repair Module",         "", ModuleNone));
    gLoadoutModules.push_back(LoadoutItem(KEY_4, BUTTON_4, ModuleSensor, "Enhanced Sensor",       "(makes Spy Bug Placer available)", ModuleNone));
    gLoadoutModules.push_back(LoadoutItem(KEY_5, BUTTON_5, ModuleCloak,  "Cloak Field Modulator", "", ModuleNone));
+   gLoadoutModules.push_back(LoadoutItem(KEY_6, BUTTON_6, ModuleArmor,  "Armor", "", ModuleNone));
 
    if(includeEngineer)
-      gLoadoutModules.push_back(LoadoutItem(KEY_6, BUTTON_6, ModuleEngineer, "Engineer", "", ModuleNone));
+      gLoadoutModules.push_back(LoadoutItem(KEY_7, BUTTON_7, ModuleEngineer, "Engineer", "", ModuleNone));
 
    gLoadoutWeapons.push_back(LoadoutItem(KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
    gLoadoutWeapons.push_back(LoadoutItem(KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));
@@ -255,7 +256,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       mCurrentIndex++;
    }
 
-   if(mCurrentIndex == ModuleCount-1)     // All loadout options selected, process complete
+   if(mCurrentIndex == ShipModuleCount + ShipWeaponCount)     // All loadout options selected, process complete
    {
       // Load the loadouts into a vector, and send them off to the GameConnection
       Vector<U32> loadout;
