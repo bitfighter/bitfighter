@@ -172,12 +172,6 @@ bool Ship::processArguments(S32 argc, const char **argv)
    return true;
 }
 
-// May not actually need this one...
-//void Ship::setActualPos(Point p)
-//{
-//   setActualPos(p, false);
-//}
-
 
 void Ship::setActualPos(Point p, bool warp)
 {
@@ -194,13 +188,13 @@ void Ship::setActualPos(Point p, bool warp)
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
-   const F32 ARMOR_ACCEL_PENALTY_FACT = 0.5;
-   const F32 ARMOR_SPEED_PENALTY_FACT = 0.75;
+   const F32 ARMOR_ACCEL_PENALTY_FACT = 0.35;
+   const F32 ARMOR_SPEED_PENALTY_FACT = 1;
 
    mMoveState[LastProcessState] = mMoveState[stateIndex];
 
    F32 maxVel = (isModuleActive(ModuleBoost) ? BoostMaxVelocity : MaxVelocity) * 
-                (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
+                (hasModule(ModuleArmor) ? ARMOR_SPEED_PENALTY_FACT : 1);
 
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
@@ -213,7 +207,6 @@ void Ship::processMove(U32 stateIndex)
 
    Point velDelta = requestVel - mMoveState[stateIndex].vel;
    F32 accRequested = velDelta.len();
-
 
 
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
