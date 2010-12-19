@@ -55,6 +55,7 @@ XXX need to document timers, new luavec stuff XXX
 <h4>New Features</h4>
 <ul>
 <li>Engineer module -- build turrets and forcefields by grabbing resources; activate with /engf or /engt; only works on levels containing line Specials Engineer
+<li>Armor module -- makes ship stronger but slower; always active, uses no energy (Experimental, may be removed in future version)
 <li>Upload/download resources (levels, levelgens, and bots) from remote server (if enabled, and you have the password) via cmd line parameters
 </ul>
 <h4>User Interface</h4>
@@ -86,6 +87,7 @@ Specifying the extension is optional.
 <h4>Bugs</h4>
 <ul>
 <li>Fixed issue of wrong player being selected on change teams/kick menus
+<li>Fixed rare but very annoying problem of flags that can't be picked up
 </ul>
 */
 
