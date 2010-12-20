@@ -112,6 +112,24 @@ GameConnection::~GameConnection()
 }
 
 
+extern string gPlayerName;
+extern bool gPlayerAuthenticated;
+extern F32 gSimulatedPacketLoss;
+extern U32 gSimulatedLag;
+extern Nonce gClientId;
+
+GameConnection *GameConnection::getNewConfiguredConnection()
+{
+   GameConnection *gameConnection = new GameConnection();
+
+   // Configure our new connection
+   gameConnection->setClientNameAndId(gPlayerName, gClientId);
+   gameConnection->setAuthenticated(gPlayerAuthenticated);
+   gameConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
+
+   return gameConnection;
+}
+
 /// Adds this connection to the doubly linked list of clients.
 void GameConnection::linkToClientList()
 {

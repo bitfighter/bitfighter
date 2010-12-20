@@ -129,6 +129,8 @@ public:
    GameConnection();    // Constructor
    ~GameConnection();   // Destructor
 
+   static GameConnection *getNewConfiguredConnection();
+
    S32 mScore;       // Total points scored my this connection
    S32 mTotalScore;  // Total points scored by anyone while this connection is alive
    U32 mGamesPlayed; // Number of games played, obviously

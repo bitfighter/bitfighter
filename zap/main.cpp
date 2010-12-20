@@ -881,23 +881,18 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      GameConnection *theConnection = new GameConnection();
+      GameConnection *gameConnection = GameConnection::getNewConfiguredConnection();
 
-      // Configure our new connection
-      theConnection->setClientNameAndId(gPlayerName, gClientId);
-      theConnection->setAuthenticated(gPlayerAuthenticated);
-      theConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
-
-      gClientGame->setConnectionToServer(theConnection);
+      gClientGame->setConnectionToServer(gameConnection);
 
       if(local)   // We're a local client, running in the same process as the server... connect to that server
       {
          // Stuff on client side, so interface will offer the correct options
-         theConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
-         theConnection->setIsAdmin(true);          // Local connection is always admin
-         theConnection->setIsLevelChanger(true);   // Local connection can always change levels
+         gameConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
+         gameConnection->setIsAdmin(true);          // Local connection is always admin
+         gameConnection->setIsLevelChanger(true);   // Local connection can always change levels
 
-         GameConnection *gc = dynamic_cast<GameConnection *>(theConnection->getRemoteConnectionObject());
+         GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
 
          // Stuff on server side
          if(gc)                              
@@ -913,7 +908,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
          }
       }
       else        // Connect to a remote server, but not via the master server
-         theConnection->connect(gClientGame->getNetInterface(), remoteAddress);  
+         gameConnection->connect(gClientGame->getNetInterface(), remoteAddress);  
 
       gGameUserInterface.activate();
    }

@@ -231,16 +231,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       Nonce serverNonce(connectionData->getBuffer() + Nonce::NonceSize);
 
       // Client is creating new connection to game server
-      GameConnection *conn = new GameConnection();
+      GameConnection *gameConnection = GameConnection::getNewConfiguredConnection();
 
-      conn->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
-      
-      conn->setClientNameAndId(gPlayerName, gClientId);
-      conn->setAuthenticated(gPlayerAuthenticated);
+      gClientGame->setConnectionToServer(gameConnection);
 
-      gClientGame->setConnectionToServer(conn);
-
-      conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
+      gameConnection->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
    }
 }
 
