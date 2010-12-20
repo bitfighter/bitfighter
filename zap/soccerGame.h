@@ -97,7 +97,7 @@ private:
 public:
    SoccerBallItem(Point pos = Point());   // C++ constructor
 
-   static const S32 radius = 30;          // Radius of soccer ball
+   static const S32 SOCCER_BALL_RADIUS = 30;
 
    void renderItem(Point pos);
    void sendHome();

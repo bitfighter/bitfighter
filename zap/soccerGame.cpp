@@ -252,7 +252,7 @@ S32 SoccerGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEve
 TNL_IMPLEMENT_NETOBJECT(SoccerBallItem);
 
 // Constructor
-SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::radius, 4)
+SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::SOCCER_BALL_RADIUS, 4)
 {
    mObjectTypeMask |= CommandMapVisType | TurretTargetType | SoccerBallItemType;
    mNetFlags.set(Ghostable);

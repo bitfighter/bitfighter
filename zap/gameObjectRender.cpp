@@ -1407,7 +1407,7 @@ void renderResourceItem(Point pos, F32 alpha)
 void renderSoccerBall(Point pos, F32 alpha)
 {
    glColor4f(1, 1, 1, alpha);
-   drawCircle(pos, SoccerBallItem::radius);
+   drawCircle(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
 }
 
 
