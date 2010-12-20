@@ -1,16 +1,3 @@
-// Level Info:Game Type:
-/* Done
-
-// Select in entire body of asteroid, ball, testitem
-// Draw selection indicator around entire item
-// Rotate arbitrary amount
-//
-
-*/
-/* test
-Test various junk in level files and see how they load into the editor, and how they play
-*/
-
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
