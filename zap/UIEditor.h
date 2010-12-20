@@ -523,6 +523,9 @@ public:
    void rebuildEverything();        // Does lots of things in undo, redo, and add items from script
    void recomputeAllEngineeredItems();
 
+   void onBeforeRunScriptFromConsole();
+   void onAfterRunScriptFromConsole();
+
    void render();
    void renderItem(WorldItem &item, S32 index, bool isBeingEdited, bool isScriptItem);
    void renderLinePolyVertices(WorldItem &item, F32 alpha = 1.0);

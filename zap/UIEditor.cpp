@@ -1087,9 +1087,9 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
          string name = words[0];
          words.erase(0);
 
+         gEditorUserInterface.onBeforeRunScriptFromConsole();
          gEditorUserInterface.runScript(name, words);
-         gEditorUserInterface.rebuildEverything();
-         gEditorUserInterface.syncUnmovedItems();
+         gEditorUserInterface.onAfterRunScriptFromConsole();
       }
    }   
 
@@ -1101,6 +1101,24 @@ void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
 
     else
       OGLCONSOLE_Output(console, "Unknown command: %s\n", cmd.c_str());
+}
+
+
+void EditorUserInterface::onBeforeRunScriptFromConsole()
+{
+   // Use selection as a marker -- will have to change in future
+   for(S32 i = 0; i < mItems.size(); i++)
+      mItems[i].selected = true;
+}
+
+
+void EditorUserInterface::onAfterRunScriptFromConsole()
+{
+   for(S32 i = 0; i < mItems.size(); i++)
+      mItems[i].selected = !mItems[i].selected;
+
+   rebuildEverything();
+   syncUnmovedItems();
 }
 
 
