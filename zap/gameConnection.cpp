@@ -60,6 +60,28 @@ TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 // Constructor
 GameConnection::GameConnection()
 {
+   initialize();
+}
+
+
+GameConnection::GameConnection(const ClientInfo &clientInfo)
+{
+   initialize();
+
+   if(clientInfo.name == "")
+      mClientName = "Chump";
+   else
+      mClientName = clientInfo.name.c_str();
+
+   mClientId = clientInfo.id;
+
+   setAuthenticated(clientInfo.authenticated);
+   setSimulatedNetParams(clientInfo.simulatedPacketLoss, clientInfo.simulatedLag);
+}
+
+
+void GameConnection::initialize()
+{
    mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
@@ -111,24 +133,6 @@ GameConnection::~GameConnection()
    }
 }
 
-
-extern string gPlayerName;
-extern bool gPlayerAuthenticated;
-extern F32 gSimulatedPacketLoss;
-extern U32 gSimulatedLag;
-extern Nonce gClientId;
-
-GameConnection *GameConnection::getNewConfiguredConnection()
-{
-   GameConnection *gameConnection = new GameConnection();
-
-   // Configure our new connection
-   gameConnection->setClientNameAndId(gPlayerName, gClientId);
-   gameConnection->setAuthenticated(gPlayerAuthenticated);
-   gameConnection->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
-
-   return gameConnection;
-}
 
 /// Adds this connection to the doubly linked list of clients.
 void GameConnection::linkToClientList()

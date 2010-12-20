@@ -933,7 +933,9 @@ void OptionsMenuUserInterface::onEscape()
 ////////////////////////////////////////
 
 NameEntryUserInterface gNameEntryUserInterface;
-extern string gPlayerName, gPlayerPassword;
+extern string gPlayerPassword;
+extern ClientInfo gClientInfo;
+
 
 // Constructor
 NameEntryUserInterface::NameEntryUserInterface()
@@ -959,9 +961,7 @@ void NameEntryUserInterface::onActivate()
 }
 
 
-extern string gPlayerName, gPlayerPassword;
 extern void seedRandomNumberGenerator(string name);
-extern Nonce gClientId;
 
 // User is ready to move on... deal with it
 static void nameAndPasswordAcceptCallback(U32 unused)
@@ -973,14 +973,14 @@ static void nameAndPasswordAcceptCallback(U32 unused)
 
    gClientGame->resetMasterConnectTimer();
 
-   gIniSettings.lastName     = gPlayerName     = gNameEntryUserInterface.menuItems[1]->getValue();
-   gIniSettings.lastPassword = gPlayerPassword = gNameEntryUserInterface.menuItems[2]->getValue();
+   gIniSettings.lastName     = gClientInfo.name = gNameEntryUserInterface.menuItems[1]->getValue();
+   gIniSettings.lastPassword = gPlayerPassword  = gNameEntryUserInterface.menuItems[2]->getValue();
 
    saveSettingsToINI();             // Get that baby into the INI file
 
    gClientGame->setReadyToConnectToMaster(true);
-   seedRandomNumberGenerator(gPlayerName);
-   gClientId.getRandom();                    // Generate a player ID
+   seedRandomNumberGenerator(gClientInfo.name);
+   gClientInfo.id.getRandom();                    // Generate a player ID
 }
 
 
@@ -989,7 +989,7 @@ void NameEntryUserInterface::setupMenu()
    menuItems.deleteAndClear();
 
    menuItems.push_back(new MenuItem(0, "OK", nameAndPasswordAcceptCallback, ""));
-   menuItems.push_back(new EditableMenuItem("NICKNAME:", gPlayerName, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH));
+   menuItems.push_back(new EditableMenuItem("NICKNAME:", gClientInfo.name, "ChumpChange", "", MAX_PLAYER_NAME_LENGTH));
    menuItems.push_back(new EditableMenuItem("PASSWORD:", gPlayerPassword, "", "", MAX_PLAYER_PASSWORD_LENGTH));
    
    menuItems[1]->setFilter(LineEditor::noQuoteFilter);      // quotes are incompatible with PHPBB3 logins

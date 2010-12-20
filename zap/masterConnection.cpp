@@ -41,12 +41,8 @@
 namespace Zap
 {
 
-extern U32 gSimulatedLag;
-extern F32 gSimulatedPacketLoss;
 extern bool gQuit;
-extern string gPlayerName, gPlayerPassword;
-extern Nonce gClientId;
-extern bool gPlayerAuthenticated;
+extern string gPlayerPassword;
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
@@ -210,6 +206,9 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sClientRequestedArrangedCon
             conn->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, false);
          }
 
+
+extern ClientInfo gClientInfo;
+
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted, 
                            (U32 requestId, Vector<IPAddress> possibleAddresses, ByteBufferPtr connectionData))
 {
@@ -231,8 +230,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       Nonce serverNonce(connectionData->getBuffer() + Nonce::NonceSize);
 
       // Client is creating new connection to game server
-      GameConnection *gameConnection = GameConnection::getNewConfiguredConnection();
-
+      GameConnection *gameConnection = new GameConnection(gClientInfo);
       gClientGame->setConnectionToServer(gameConnection);
 
       gameConnection->connectArranged(getInterface(), fullPossibleAddresses, nonce, serverNonce, theSharedData, true);
@@ -264,11 +262,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
 {
    if((AuthenticationStatus)authStatus.value == AuthenticationStatusAuthenticatedName)
    {
-      gPlayerName = correctedName.getString();
-      gPlayerAuthenticated = true;
+      gClientInfo.name = correctedName.getString();
+      gClientInfo.authenticated = true;
    }
    else 
-      gPlayerAuthenticated = false;       
+      gClientInfo.authenticated = false;       
 
    if(gClientGame->getConnectionToServer())
       gClientGame->getConnectionToServer()->c2sSetAuthenticated();
@@ -392,9 +390,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    }
    else     // We're a client
    {
-      bstream->writeString(gPlayerName.c_str());       // User's nickname
-      bstream->writeString(gPlayerPassword.c_str());   // and whatever password they supplied
-      gClientId.write(bstream);  
+      bstream->writeString(gClientInfo.name.c_str());   // User's nickname
+      bstream->writeString(gPlayerPassword.c_str());    // and whatever password they supplied
+      gClientInfo.id.write(bstream);  
    }
 }
 

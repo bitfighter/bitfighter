@@ -55,7 +55,7 @@ XXX need to document timers, new luavec stuff XXX
 <h4>New Features</h4>
 <ul>
 <li>Engineer module -- build turrets and forcefields by grabbing resources; activate with /engf or /engt; only works on levels containing line Specials Engineer
-<li>Armor module -- makes ship stronger but slower; always active, uses no energy (Experimental, may be removed in future version)
+<li>Armor module -- makes ship stronger but harder to control; always active, uses no energy (Experimental, may be removed in future version)
 <li>Upload/download resources (levels, levelgens, and bots) from remote server (if enabled, and you have the password) via cmd line parameters
 </ul>
 <h4>User Interface</h4>
@@ -88,6 +88,7 @@ Specifying the extension is optional.
 <ul>
 <li>Fixed issue of wrong player being selected on change teams/kick menus
 <li>Fixed rare but very annoying problem of flags that can't be picked up
+<li>Fixed bug with verified names not appearing verified with arranged connection (i.e. most of the time)
 </ul>
 */
 
@@ -181,8 +182,6 @@ const char *gWindowTitle = "Bitfighter";
 
 // The following things can be set via command line parameters
 S32 gMaxPlayers;                 // Max players allowed -- can change on cmd line, or INI.  Default value in config.h
-U32 gSimulatedLag;               // Simulate a slow network -- can change on cmd line
-F32 gSimulatedPacketLoss;        // Simulate a bad network -- can change on cmd line
 
 
 #ifdef ZAP_DEDICATED
@@ -279,12 +278,11 @@ Screenshooter gScreenshooter;    // For taking screen shots
 
 ZapJournal gZapJournal;          // Our main journaling object
 
-/////
-// TODO: Put these into some sort of struct?
-string gPlayerName, gPlayerPassword;
-Nonce gClientId;
-bool gPlayerAuthenticated;       // False unless master server approves name
-/////
+string gPlayerPassword;
+
+struct ClientInfo;
+ClientInfo gClientInfo;          // Info about the client used for establishing connection to server
+
 
 // Handler called by GLUT when window is reshaped
 void GLUT_CB_reshape(int nw, int nh)
@@ -633,7 +631,7 @@ void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);
-   gClientId.getRandom();                    // Generate a player ID
+   gClientInfo.id.getRandom();                    // Generate a player ID
 
    // Don't need to build our level list when in test mode because we're only running that one level stored in editor.tmp
    if(!testMode)
@@ -881,7 +879,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    }
    else                                                         // Try a direct connection
    {
-      GameConnection *gameConnection = GameConnection::getNewConfiguredConnection();
+      GameConnection *gameConnection = new GameConnection(gClientInfo);
 
       gClientGame->setConnectionToServer(gameConnection);
 
@@ -904,7 +902,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
             gc->s2cSetIsLevelChanger(true, false);  // Set isLevelChanger on the client
             gc->setServerName(gServerGame->getHostName());     // Server name is whatever we've set locally
 
-            gc->setAuthenticated(gPlayerAuthenticated);        // Tell the local host whether we're authenticated... no need to verify
+            gc->setAuthenticated(gClientInfo.authenticated);   // Tell the local host whether we're authenticated... no need to verify
          }
       }
       else        // Connect to a remote server, but not via the master server
@@ -1436,8 +1434,8 @@ void processStartupParams()
    if(!gCmdLineSettings.dedicated.empty())
       gBindAddress.set(gCmdLineSettings.dedicated);
 
-   gSimulatedPacketLoss = gCmdLineSettings.loss;
-   gSimulatedLag = gCmdLineSettings.lag;
+   gClientInfo.simulatedPacketLoss = gCmdLineSettings.loss;
+   gClientInfo.simulatedLag = gCmdLineSettings.lag;
 
    // Enable some logging...
    gMainLog.setMsgType(LogConsumer::LogConnectionProtocol, gIniSettings.logConnectionProtocol);
@@ -1471,13 +1469,13 @@ void processStartupParams()
 
 
    if(gCmdLineSettings.name != "")
-      gPlayerName = gCmdLineSettings.name;
+      gClientInfo.name = gCmdLineSettings.name;
    else if(gIniSettings.name != "")
-      gPlayerName = gIniSettings.name;
+      gClientInfo.name = gIniSettings.name;
    else
-      gPlayerName = gIniSettings.lastName;
+      gClientInfo.name = gIniSettings.lastName;
 
-   gPlayerAuthenticated = false;
+   gClientInfo.authenticated = false;
    
    if(gCmdLineSettings.password != "")
       gPlayerPassword = gCmdLineSettings.password;
@@ -1581,7 +1579,7 @@ void processStartupParams()
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode
          seedRandomNumberGenerator(gIniSettings.name);
-         gClientId.getRandom();                                // Generate a player ID
+         gClientInfo.id.getRandom();                           // Generate a player ID
       }
    }
 }

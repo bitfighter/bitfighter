@@ -1847,7 +1847,7 @@ S32 GameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S3
 }
 
 
-extern string gPlayerName;
+extern ClientInfo gClientInfo;
 
 static void switchTeamsCallback(U32 unused)
 {
@@ -1868,7 +1868,7 @@ static void switchTeamsCallback(U32 unused)
    else
    {
       gTeamMenuUserInterface.activate();     // Show menu to let player select a new team
-      gTeamMenuUserInterface.nameToChange = gPlayerName.c_str();
+      gTeamMenuUserInterface.nameToChange = gClientInfo.name.c_str();
    }
  }
 

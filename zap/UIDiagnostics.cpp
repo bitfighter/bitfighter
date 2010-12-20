@@ -283,8 +283,8 @@ extern char gJoystickName[gJoystickNameLength];
 extern ControllerTypeType gAutoDetectedJoystickType;
 extern U32 gSticksFound;
 extern string gLevelDir;
-extern string gPlayerName, gPlayerPassword;
-extern bool gPlayerAuthenticated;
+extern string gPlayerPassword;
+extern ClientInfo gClientInfo;
 
 void DiagnosticUserInterface::render()
 {
@@ -366,8 +366,8 @@ void DiagnosticUserInterface::render()
       // If the server modifies a user name to make it unique, this will display the modified version.
       drawCenteredStringPair2Colf(ypos, textsize, true, "Nickname:", "%s (%s)", 
                   /*gClientGame && gClientGame->getGameType() && gClientGame->getGameType()->mClientList.size() ?
-                        gClientGame->getGameType()->mLocalClient->name.getString() : */gPlayerName.c_str(), 
-                        gPlayerAuthenticated ? "Verified" : "Not verified");
+                        gClientGame->getGameType()->mLocalClient->name.getString() : */gClientInfo.name.c_str(), 
+                        gClientInfo.authenticated ? "Verified" : "Not verified");
 
       ypos += textsize + gap;
 
@@ -507,7 +507,8 @@ void DiagnosticUserInterface::render()
 
       ypos += textsize + gap;
 
-      drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms /%2.0f%%", gSimulatedLag, gSimulatedPacketLoss * 100);
+      drawCenteredStringPair2Colf(ypos, textsize, false, "Sim. Lag/Pkt. Loss:", "%dms /%2.0f%%", 
+                                  gClientInfo.simulatedLag, gClientInfo.simulatedPacketLoss * 100);
       ypos += textsize + gap;
       ypos += textsize + gap;
       

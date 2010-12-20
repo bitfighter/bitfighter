@@ -39,6 +39,7 @@
 namespace Zap
 {
 using TNL::StringPtr;
+using std::string;
 
 static const char USED_EXTERNAL *gConnectStatesTable[] = {
       "Not connected...",
@@ -54,6 +55,21 @@ static const char USED_EXTERNAL *gConnectStatesTable[] = {
       ""
 };
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+struct ClientInfo
+{
+   string name;
+   Nonce id;
+   bool authenticated;
+   F32 simulatedPacketLoss;
+   U32 simulatedLag;
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class ClientRef;
 struct LevelInfo;
@@ -62,6 +78,9 @@ class GameConnection: public ControlObjectConnection
 {
 private:
    typedef ControlObjectConnection Parent;
+
+   void initialize();
+
    time_t joinTime;
    bool mAcheivedConnection;
 
@@ -126,10 +145,9 @@ public:
 
    static const S32 BanDuration = 30000;     // Players are banned for 30secs after being kicked
 
-   GameConnection();    // Constructor
-   ~GameConnection();   // Destructor
-
-   static GameConnection *getNewConfiguredConnection();
+   GameConnection();                                  // Constructor
+   GameConnection(const ClientInfo &clientInfo);      // Constructor
+   ~GameConnection();                                 // Destructor
 
    S32 mScore;       // Total points scored my this connection
    S32 mTotalScore;  // Total points scored by anyone while this connection is alive
@@ -137,8 +155,6 @@ public:
    F32 mRating;      // Game-normalized rating
 
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
-
-   void setClientNameAndId(std::string name, Nonce id) { mClientName = name == "" ? "Chump" : name.c_str(); mClientId = id; }
 
    void setClientName(StringTableEntry name) { mClientName = name; }
    void setServerName(StringTableEntry name) { mServerName = name; }
