@@ -873,10 +873,10 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 // Player has selected a game from the QueryServersUserInterface, and is ready to join
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
-   MasterServerConnection *conn = gClientGame->getConnectionToMaster();
-   if(isFromMaster && conn && conn->getConnectionState() == NetConnection::Connected)     // Request an arranged connection
+   MasterServerConnection *connToMaster = gClientGame->getConnectionToMaster();
+   if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request an arranged connection
    {
-      conn->requestArrangedConnection(remoteAddress);
+      connToMaster->requestArrangedConnection(remoteAddress);
       gGameUserInterface.activate();
    }
    else                                                         // Try a direct connection

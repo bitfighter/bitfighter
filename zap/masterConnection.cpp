@@ -236,6 +236,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cArrangedConnectionAccepted
       conn->setSimulatedNetParams(gSimulatedPacketLoss, gSimulatedLag);
       
       conn->setClientNameAndId(gPlayerName, gClientId);
+      conn->setAuthenticated(gPlayerAuthenticated);
 
       gClientGame->setConnectionToServer(conn);
 

@@ -1054,7 +1054,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
          theParams.mPossibleAddresses.push_back(theAddress);
 
       // if this is the initiator of the arranged connection, then
-      // process the punch packet from the remote host by issueing a
+      // process the punch packet from the remote host by issuing a
       // connection request.
       if(theParams.mIsInitiator)
          break;
@@ -1113,6 +1113,7 @@ void NetInterface::handlePunch(const Address &theAddress, BitStream *stream)
    sendArrangedConnectRequest(conn);
 }
 
+// client
 void NetInterface::sendArrangedConnectRequest(NetConnection *conn)
 {
    logprintf(LogConsumer::LogNetInterface, "Sending Arranged Connect Request");
@@ -1153,6 +1154,7 @@ void NetInterface::sendArrangedConnectRequest(NetConnection *conn)
    out.sendto(mSocket, conn->getNetAddress());
 }
 
+// server
 void NetInterface::handleArrangedConnectRequest(const Address &theAddress, BitStream *stream)
 {
    S32 i, j;
