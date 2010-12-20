@@ -1064,6 +1064,9 @@ void EditorUserInterface::generateBotZones()
 void processEditorConsoleCommand(OGLCONSOLE_Console console, char *cmdline)
 {
    Vector<string> words = parseString(cmdline);
+   if(words.size() == 0)
+      return;
+
    string cmd = lcase(words[0]);
 
    if(cmd == "quit" || cmd == "exit") 
