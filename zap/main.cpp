@@ -52,6 +52,11 @@ XXX need to document timers, new luavec stuff XXX
 <ul>
 <li>
 </ul>
+<h4>New Features</h4>
+<ul>
+<li>Engineer module -- build turrets and forcefields by grabbing resources; activate with /engf or /engt; only works on levels containing line Specials Engineer
+<li>Upload/download resources (levels, levelgens, and bots) from remote server (if enabled, and you have the password) via cmd line parameters
+</ul>
 <h4>User Interface</h4>
 <ul>
 <li>Pressing enter now advances to next menu item on most menus
@@ -71,6 +76,8 @@ Specifying the extension is optional.
 <li>When master server is unreachable, server will remember recent game servers and will try to contact those
 <li>Can define multiple servers in the INI to always try contacting without assistance of the master
 <li>Max level size bumped up to 256K
+<li>Engineer module can no longer create crossing forcefields
+<li>Smooth lines option available with a setting in the INI
 </ul>
 
 
@@ -686,11 +693,9 @@ void hostGame()
 }
 
 
-
-
 //in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
-S32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
-S32 minimumSleepTimeDedicatedServer=10; //lower reduce everyone lag, but uses more CPU.
+U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
+U32 minimumSleepTimeDedicatedServer=10; //lower reduce everyone lag, but uses more CPU.
 
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
@@ -709,7 +714,7 @@ void idle()
    static F64 unusedFraction = 0;
 
    S64 currentTimer = Platform::getHighPrecisionTimerValue();
-   if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow.
+   if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow -- seems very unlikely
 
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
@@ -770,21 +775,10 @@ void idle()
    if(gDedicatedServer){
       //if(integerTime < (U32)minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
       if(gServerGame->isSuspended())
-          sleepTime = 25; //the higher this number, the less accurate the ping is on server lobby when empty.
+          sleepTime = 40; //the higher this number, the less accurate the ping is on server lobby when empty.
    }
 
    Platform::sleep(sleepTime);
-   //{  //Always sleep long enough, there is a problem with it not sleeping long enough...
-      //S64 Timer1 = currentTimer;
-      //S64 Timer2;
-      //F64 sleeplength = 0.0;
-      //while(sleeplength < sleepTime){
-      //   Platform::sleep(sleepTime-sleeplength);
-      //   Timer2 = Platform::getHighPrecisionTimerValue();
-      //   if(Timer1 > Timer2) Timer1 = Timer2;            //just in case Timer overflows
-      //   sleeplength = Platform::getHighPrecisionMilliseconds(Timer2 - Timer1);
-  //    }
-  //}
 
    gZapJournal.processNextJournalEntry();    // Does nothing unless we're playing back a journal...
 
@@ -2053,15 +2047,18 @@ int main(int argc, char **argv)
       glLineWidth(gDefaultLineWidth);
 
       // game.h line 85
-      if(UseGlLineSmooth){
-	    glEnable(GL_LINE_SMOOTH);
+      if(UseGlLineSmooth)
+      {
+	     glEnable(GL_LINE_SMOOTH);
         //glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
         glEnable(GL_BLEND);
       }
-      if(UseGlPointSmooth){
-//windows: Radeon 9200: point smoothing makes 1 pixel dots to disappear...
-//windows: intel express GMA 945: point smoothing works, but very slow / poor performance and some lines get wrong color.
-	    glEnable(GL_POINT_SMOOTH);
+
+      if(UseGlPointSmooth)
+      {
+         //windows: Radeon 9200: point smoothing makes 1 pixel dots to disappear...
+         //windows: intel express GMA 945: point smoothing works, but very slow / poor performance and some lines get wrong color.
+	     glEnable(GL_POINT_SMOOTH);
         glHint(GL_POINT_SMOOTH_HINT, GL_FASTEST);
       }
 

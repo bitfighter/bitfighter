@@ -509,7 +509,7 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
          }
       glEnd();
    }
-   glDisableBlend
+   glDisableBlend;
    glPopMatrix();
 }
 
@@ -674,7 +674,7 @@ void renderSmallFlag(const Point &pos, const Color &c, F32 parentAlpha)
       glVertex2f(-15, 15);
    glEnd();
    glPopMatrix();
-   glDisableBlend
+   glDisableBlend;
 }
 
 
@@ -734,7 +734,7 @@ void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outline
 
    glColor(outlineColor, alpha);
    renderPolygonOutline(outlinePoints);
-   glDisableBlend
+   glDisableBlend;
 }
 
 
@@ -779,7 +779,7 @@ void renderNavMeshBorder(const Border &border, F32 scaleFact, const Color &color
       renderTwoPointPolygon(border.borderStart, border.borderEnd, width * scaleFact, j ? GL_POLYGON : GL_LINE_LOOP);
    }
 
-   glDisableBlend
+   glDisableBlend;
 }
 
 
@@ -1005,7 +1005,7 @@ void renderMine(Point pos, bool armed, bool visible)
       drawCircle(pos, 6);
    }
    glLineWidth(gDefaultLineWidth);
-   glDisableBlend
+   glDisableBlend;
 }
 
 #ifndef min

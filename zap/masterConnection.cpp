@@ -402,6 +402,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    }
 }
 
+
 void MasterServerConnection::onConnectionEstablished()
 {
    logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");

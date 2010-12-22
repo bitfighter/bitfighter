@@ -272,11 +272,12 @@ void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
 {
    mMoveTimeCredit += timeAmount;
    if(mMoveTimeCredit > MaxMoveTimeCredit){
-      //prevent near unlimited shield when client is freezing, slow, or lagging.
-      if(controlObject.isValid()){
-         Move move1 = controlObject->getCurrentMove();
-         move1.time = mMoveTimeCredit - MaxMoveTimeCredit;
-         controlObject->setCurrentMove(move1);
+      // Prevent unlimited shield when client is freezing, slow, or lagging (or some cheater has triggered a breakpoint in rabbit!)
+      if(controlObject.isValid())
+      {
+         Move move = controlObject->getCurrentMove();
+         move.time = mMoveTimeCredit - MaxMoveTimeCredit;
+         controlObject->setCurrentMove(move);
          controlObject->idle(GameObject::ClientIdleControlReplay);
       }
       mMoveTimeCredit = MaxMoveTimeCredit;

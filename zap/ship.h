@@ -145,6 +145,7 @@ public:
       EnergyRepairDrain = 15000,
       EnergySensorDrain = 8000,
       EnergyCloakDrain = 8000,
+      EnergyEngineerDrain = 0,            // Engineer costs no energy to use
       EnergyEngineerCost = 75000,         // Energy consumed when using engineer module
       EnergyShieldHitDrain = 20000,       // Energy loss when shields stop a projectile (currently disabled)
       EnergyCooldownThreshold = 15000,

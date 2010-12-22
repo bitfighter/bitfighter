@@ -134,6 +134,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
    mGlowingZoneTeam = -1;     // By default, all zones glow
    mLevelHasLoadoutZone = false;
+   mEngineerEnabled = false;     // Is engineer module allowed?  By default, no
 }
 
 
@@ -463,7 +464,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          glColor4f(1, 1, 0, alpha);
          UserInterface::drawCenteredStringf(canvasHeight / 2 - 50, 20, "Score to Win: %d", mWinningScore);
 
-      glDisableBlend
+      glDisableBlend;
 
       mInputModeChangeAlertDisplayTimer.reset(0);     // Supress mode change alert if this message is displayed...
    }
@@ -478,7 +479,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       glEnableBlend;
       glColor4f(1, 0.5 , 0.5, alpha);
       UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
-      glDisableBlend
+      glDisableBlend;
    }
 
    if((mGameOver || scoreboardVisible) && mTeams.size() > 0)      // Render scoreboard
@@ -534,7 +535,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             glVertex2f(xl, yb);
          glEnd();
 
-         glDisableBlend
+         glDisableBlend;
 
          glColor3f(1,1,1);
          if(isTeamGame())     // Render team scores
@@ -767,7 +768,7 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
       glVertex(p2);
       glVertex(p3);
    glEnd();
-   glDisableBlend
+   glDisableBlend;
 
    Point cen = rp - arrowDir * 12;
 
@@ -1011,122 +1012,134 @@ void GameType::onAddedToGame(Game *theGame)
 
 extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
 
-// Returns true if we ceated an object here, false otherwise
+// Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
+// caller needs to create an object based on the line
 bool GameType::processLevelItem(S32 argc, const char **argv)
 {
    if(!stricmp(argv[0], "Team"))
    {
-      if(mTeams.size() >= gMaxTeams)   // Too many teams?
-         return false;
-
-      Team team;
-      team.readTeamFromLevelLine(argc, argv);
-
-      if(team.numPlayers != -1)
-         mTeams.push_back(team);
+      if(mTeams.size() < gMaxTeams)   // Too many teams?
+      {
+         Team team;
+         team.readTeamFromLevelLine(argc, argv);
+   
+         if(team.numPlayers != -1)
+            mTeams.push_back(team);
+      }
+   }
+   else if(!stricmp(argv[0], "Specials"))
+   {         
+      // Examine items on the specials line
+      for(S32 i = 1; i < argc; i++)
+         if(!stricmp(argv[i], "Engineer" ) )
+            mEngineerEnabled = true;
    }
    else if(!strcmp(argv[0], "Script"))
    {
       mScriptArgs.clear();    // Clear out any args from a previous Script line
 
-      if(argc < 2)      // At a minimum, we need a script name
-      {                 // arg[0]="Script"  arg[1]=script name
+      if(argc <= 1)      // At a minimum, we need a script name
          mScriptName = "";
-         return true;    //true to avoid error: Unknown object type "Script" in level ""
+
+      else
+      {
+         mScriptName = argv[1];
+   
+         for(S32 i = 2; i < argc; i++)
+            mScriptArgs.push_back(string(argv[i]));    // Use string to make a const char copy of the param
       }
-
-      mScriptName = argv[1];
-
-      for(S32 i = 2; i < argc; i++)
-         mScriptArgs.push_back(string(argv[i]));    // Use string to make a const char copy of the param
    }
    else if(!stricmp(argv[0], "Spawn"))
    {
-      if(argc < 4)
-         return false;
-      S32 teamIndex = atoi(argv[1]);
-      Point p;
-      p.read(argv + 2);
-      p *= getGame()->getGridSize();
-      if(teamIndex >= 0 && teamIndex < mTeams.size())    // Ignore if team is invalid
-         mTeams[teamIndex].spawnPoints.push_back(p);
-
-      if(teamIndex == -1)                      //neutral spawn point, add spawn to all teams.
+      if(argc >= 4)
       {
-         for(S32 i=0; i < mTeams.size(); i++)
-            mTeams[i].spawnPoints.push_back(p);
+         S32 teamIndex = atoi(argv[1]);
+         Point p;
+         p.read(argv + 2);
+         p *= getGame()->getGridSize();
+         if(teamIndex >= 0 && teamIndex < mTeams.size())    // Ignore if team is invalid
+            mTeams[teamIndex].spawnPoints.push_back(p);
+         if(teamIndex == -1)                      //neutral spawn point, add spawn to all teams.
+         {
+            for(S32 i=0; i < mTeams.size(); i++)
+               mTeams[i].spawnPoints.push_back(p);
+         }
       }
    }
    else if(!stricmp(argv[0], "FlagSpawn"))      // FlagSpawn <team> <x> <y> [timer]
    {
-      if(argc < 4)
-         return false;
-      S32 teamIndex = atoi(argv[1]);
-      Point p;
-      p.read(argv + 2);
-      p *= getGame()->getGridSize();
-
-      S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::defaultRespawnTime;
-
-      FlagSpawn spawn = FlagSpawn(p, time * 1000);
-
-      // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
-      // TeamFlagGame is CTF.
-
-      if(isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // If we can't find a valid team...
-         mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
-      else
-         mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
+      if(argc >= 4)
+      {
+         S32 teamIndex = atoi(argv[1]);
+         Point p;
+         p.read(argv + 2);
+         p *= getGame()->getGridSize();
+   
+         S32 time = (argc > 4) ? atoi(argv[4]) : FlagSpawn::defaultRespawnTime;
+   
+         FlagSpawn spawn = FlagSpawn(p, time * 1000);
+   
+         // Following works for Nexus & Soccer games because they are not TeamFlagGame.  Currently, the only
+         // TeamFlagGame is CTF.
+   
+         if(isTeamFlagGame() && (teamIndex >= 0 && teamIndex < mTeams.size()) )    // If we can't find a valid team...
+            mTeams[teamIndex].flagSpawnPoints.push_back(spawn);
+         else
+            mFlagSpawnPoints.push_back(spawn);                                     // ...then put it in the non-team list
+      }
    }
    else if(!stricmp(argv[0], "AsteroidSpawn"))      // AsteroidSpawn <x> <y> [timer]
    {
-      if(argc < 3)
-         return false;
-      Point p;
-      p.read(argv + 1);
-      p *= getGame()->getGridSize();
-
-      S32 time = (argc > 3) ? atoi(argv[3]) : AsteroidSpawn::defaultRespawnTime;
-
-      AsteroidSpawn spawn = AsteroidSpawn(p, time * 1000);
-      mAsteroidSpawnPoints.push_back(spawn);
+      if(argc >= 3)
+      {
+         Point p;
+         p.read(argv + 1);
+         p *= getGame()->getGridSize();
+   
+         S32 time = (argc > 3) ? atoi(argv[3]) : AsteroidSpawn::defaultRespawnTime;
+   
+         AsteroidSpawn spawn = AsteroidSpawn(p, time * 1000);
+         mAsteroidSpawnPoints.push_back(spawn);
+      }
    }
    else if(!stricmp(argv[0], "BarrierMaker"))
    {
-      BarrierRec barrier;
-      if(argc < 2)
-         return false;
-      barrier.width = atof(argv[1]);
-
-      if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
-         barrier.width = Barrier::MIN_BARRIER_WIDTH;
-      else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
-         barrier.width = Barrier::MAX_BARRIER_WIDTH;
-
-      for(S32 i = 2; i < argc; i++)
-         barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
-
-      if(barrier.verts.size() > 3)
+      if(argc >= 2)
       {
-         barrier.solid = false;
-         mBarriers.push_back(barrier);
-         constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
+         BarrierRec barrier;
+         barrier.width = atof(argv[1]);
+   
+         if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
+            barrier.width = Barrier::MIN_BARRIER_WIDTH;
+         else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
+            barrier.width = Barrier::MAX_BARRIER_WIDTH;
+   
+         for(S32 i = 2; i < argc; i++)
+            barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
+   
+         if(barrier.verts.size() > 3)
+         {
+            barrier.solid = false;
+            mBarriers.push_back(barrier);
+            constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
+         }
       }
    }
    // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS"))
    {
-      BarrierRec barrier;
       if(argc < 2)
-         return false;
-      barrier.width = atof(argv[1]);
-      for(S32 i = 2; i < argc; i++)
-         barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
-      if(barrier.verts.size() > 3)
       {
-         barrier.solid = true;
-         mBarriers.push_back(barrier);
-         constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
+         BarrierRec barrier;
+         barrier.width = atof(argv[1]);
+         for(S32 i = 2; i < argc; i++)
+            barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
+         if(barrier.verts.size() > 3)
+         {
+            barrier.solid = true;
+            mBarriers.push_back(barrier);
+            constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
+         }
       }
    }
    else if(!stricmp(argv[0], "LevelName"))
@@ -1165,22 +1178,17 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    else if(!stricmp(argv[0], "MinPlayers"))     // Recommend a min numbrt of players for this map
    {
       if(argc > 1)
-	   {
          minRecPlayers = atoi(argv[1]);
-	   }
-   }        
+   }
    else if(!stricmp(argv[0], "MaxPlayers"))     // Recommend a max players for this map
    {
       if(argc > 1)
-	   {
          maxRecPlayers = atoi(argv[1]);
-	   }
-
-   }
+	}
    else
-      return false;     // Line not processed
+      return false;     // Line not processed; perhaps the caller can handle it?
 
-   return true;         // Line processed
+   return true;         // Line processed; caller can ignore it
 }
 
 
@@ -1900,15 +1908,20 @@ void GameType::addAdminGameMenuOptions(Vector<MenuItem *> &menuOptions)
 
 
 // Broadcast info about the current level... code gets run on client, obviously
+// Note that if we add another arg to this, we need to further expand FunctorDecl methods in tnlMethodDispatch.h
 GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, 
-                                                StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone),
-                                            (levelName, levelDesc, teamScoreLimit, levelCreds, objectCount, lx, ly, ux, uy, levelHasLoadoutZone))
+                                                StringTableEntry levelCreds, S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, 
+                                                bool levelHasLoadoutZone, bool engineerEnabled),
+                                            (levelName, levelDesc, teamScoreLimit, 
+                                                levelCreds, objectCount, lx, ly, ux, uy, 
+                                                levelHasLoadoutZone, engineerEnabled))
 {
    mLevelName = levelName;
    mLevelDescription = levelDesc;
    mLevelCredits = levelCreds;
    mWinningScore = teamScoreLimit;
    mObjectsExpected = objectCount;
+   mEngineerEnabled = engineerEnabled;
 
    mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
@@ -1919,6 +1932,9 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    gClientGame->resetZoomDelta();
 
    mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
+
+   // Now we know all we need to initialize our loadout options
+   gGameUserInterface.initializeLoadoutOptions(engineerEnabled);
 }
 
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
@@ -2173,7 +2189,8 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    Rect barrierExtents = gServerGame->computeBarrierExtents();
 
    s2cSetLevelInfo(mLevelName, mLevelDescription, mWinningScore, mLevelCredits, gServerGame->mObjectsLoaded, 
-                   barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, mLevelHasLoadoutZone);
+                   barrierExtents.min.x, barrierExtents.min.y, barrierExtents.max.x, barrierExtents.max.y, 
+                   mLevelHasLoadoutZone, mEngineerEnabled);
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
@@ -2220,8 +2237,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    gClientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
 
    gGameUserInterface.mShowProgressBar = false;
-   gClientGame->setInCommanderMap(false);    // Start game in regular mode
-   gClientGame->clearZoomDelta();            // No in zoom effect
+   gClientGame->setInCommanderMap(false);             // Start game in regular mode
+   gClientGame->clearZoomDelta();                     // No in zoom effect
    
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
@@ -2249,37 +2266,31 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
-
-
-
-
+// Runs the server side commands, which the client may or may not know about
 extern F32 ConvertCharToFloat(const char * in);   //from UIGame.cpp: might want to move this?
 extern S32 ConvertCharToSignedInt(const char * in);
-
-//runs the server side commands, as long as the client can chat "/example" commands to the server
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
-void GameType::processServerCommand(ClientRef *clientRef, Vector<string> words)
+void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
-   if(words.size() == 0)            // Just in case
+   if(!stricmp(cmd, ""))               // Just in case
       return;
-   words[0] = lcase(words[0]);   // make the command case insensitive
 
-   if(words[0] == "example"){    // Testing only, will soon add useful commands
-
-	   //do something here to make sure it works.
+   if(!stricmp(cmd, "example"))        // Testing only, will soon add useful commands
+   {  
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "This is an example.");
-
-   }else if(words[0] == "settime"){
+   }
+   else if(!stricmp(cmd, "settime"))
+   {
      if(!clientRef->isLevelChanger){                         // Level changers and above
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
          return;
      }
-     if(words.size() <= 1){                         // Level changers and above
+     if(args.size() < 1){
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter minutes");
          return;
      }
 
-      mGameTimer.reset( (U32)( 60*1000 * ConvertCharToFloat( words[1].c_str() ) ) );     // Change "official time".
+      mGameTimer.reset( (U32)( 60*1000 * ConvertCharToFloat( args[0].getString() ) ) );     // Change "official time".
       s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
 
       static StringTableEntry msg("%e0 has changed the time limit");
@@ -2287,19 +2298,22 @@ void GameType::processServerCommand(ClientRef *clientRef, Vector<string> words)
       e.push_back(clientRef->clientConnection->getClientName());
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-   }else if(words[0] == "setscore"){
+   }
+   else if(!stricmp(cmd, "setscore"))
+   {
      if(!clientRef->isLevelChanger){                         // Level changers and above
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
          return;
      }
-     if(words.size() <= 1){                         // Level changers and above
+     if(args.size() < 1){
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter score limit");
          return;
      }
 
-      mWinningScore = ConvertCharToSignedInt( words[1].c_str() );
+      mWinningScore = ConvertCharToSignedInt( args[0].getString() );
 
-        // send new score limit to client?
+        // Client will not know the score limit is changed
+        // ToDo : send new score limit to client
 
 
       static StringTableEntry msg("%e0 has changed the score limit");
@@ -2307,35 +2321,36 @@ void GameType::processServerCommand(ClientRef *clientRef, Vector<string> words)
       e.push_back(clientRef->clientConnection->getClientName());
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-   }else{
-      //server command not found, tell the client.
+   }
+   else
+   {
+      // Command not found, tell the client
+
       clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid Command");
    }
 
 }
 
+GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args), (cmd, args))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+   ClientRef *clientRef = source->getClientRef();
+
+   processServerCommand(clientRef, cmd.getString(), args);
+}
 
 
-	   extern void parseString(const char *inputString, Vector<string> &words, char seperator);
+extern void parseString(const char *inputString, Vector<string> &words, char seperator);
+
 // Client sends chat message to/via game server
 GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (global, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientRef *clientRef = source->getClientRef();
 
-   const char * c1 = message.getString();
-     if(c1[0] == '/'){
-       Vector<string> words;
-
-	   //start at char 1 to remove the '/' and seperate by space
-	   parseString( &c1[1], words, ' ');
-
-	   processServerCommand(clientRef, words);
-     }else{
-       RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-          s2cDisplayChatMessage, (global, source->getClientName(), message));
-       sendChatDisplayEvent(clientRef, global, c1, theEvent);
-	 }
+   RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
+                                 s2cDisplayChatMessage, (global, source->getClientName(), message));
+   sendChatDisplayEvent(clientRef, global, message.getString(), theEvent);
 }
 
 

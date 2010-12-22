@@ -43,9 +43,6 @@ using namespace std;
 namespace Zap
 {
 
-
-#define ENABLE_ENGINEER 0
-
 extern float gLineWidth1;
 //float gLineWidth2 = 2.0f;
 extern float gDefaultLineWidth;

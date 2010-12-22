@@ -101,7 +101,6 @@ QueryServersUserInterface::QueryServersUserInterface()
    mSortAscending = true;
    mRecievedListOfServersFromMaster = false;
    mouseScrollTimer.setPeriod(10 * MenuUserInterface::MOUSE_SCROLL_INTERVAL);
-   mNoMasterTimer.setPeriod(5000);     // 5 seconds
 
    mServersPerPage = 8;    // To start with, anyway...
 
@@ -142,8 +141,6 @@ void QueryServersUserInterface::onActivate()
    mJustMovedMouse = false;
    mDraggingDivider = false;
    mAnnounced = false;
-
-   mNoMasterTimer.reset();
 
    mGivenUpOnMaster = false;
 
@@ -198,11 +195,19 @@ void QueryServersUserInterface::contactEveryone()
    //Address broadcastAddress(IPProtocol, Address::Broadcast, 28000);
    //gClientGame->getNetInterface()->sendPing(broadcastAddress, mNonce);
 
+   // Always ping these servers -- typically a local server
+   for(S32 i = 0; i < alwaysPingList.size(); i++)
+   {
+      Address address(alwaysPingList[i].c_str());
+      gClientGame->getNetInterface()->sendPing(address, mNonce);
+   } 
+
    // Try to ping the servers from our fallback list if we're having trouble connecting to the master
    if(gClientGame->getTimeUnconnectedToMaster() > GIVE_UP_ON_MASTER_AND_GO_IT_ALONE_TIME) 
    {
-      for(S32 i = 0; i < alwaysPingList.size(); i++)
+      for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
          gClientGame->getNetInterface()->sendPing(Address(prevServerListFromMaster[i].c_str()), mNonce);
+
       mGivenUpOnMaster = true;
    }
 
@@ -253,7 +258,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 
    // Save servers from the master
    if(ipList.size() != 0) 
-      prevServerListFromMaster.clear();    // Don't clear if we have nothing to add...
+      prevServerListFromMaster.clear();    // Don't clear if we have nothing to add... 
 
    // Now add any new servers
    for(S32 i = 0; i < ipList.size(); i++)
@@ -382,18 +387,6 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    U32 elapsedTime = Platform::getRealMilliseconds() - time;
    time = Platform::getRealMilliseconds();
    mouseScrollTimer.update(timeDelta);
-
-   bool connectedToMaster = gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished();
-
-   // After 5 seconds, if we are still not connected to the master, we'll load our fallback server list
-   if(mNoMasterTimer.update(timeDelta) && !connectedToMaster)
-   {
-      for(S32 i = 0; i < prevServerListFromMaster.size(); i++)
-      {
-         Address PingAddress1(prevServerListFromMaster[i].c_str());
-         gClientGame->getNetInterface()->sendPing(PingAddress1, mNonce);
-      }
-   }
 
    // Timeout old pings and queries
    for(S32 i = 0; i < servers.size(); i++)

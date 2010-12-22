@@ -180,6 +180,8 @@ public:
 
    void displayMessage(Color messageColor, const char *format, ...);
 
+   void initializeLoadoutOptions(bool engineerAllowed) { mLoadout.initialize(engineerAllowed); }
+
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
    void renderProgressBar();        // Render level-load progress bar

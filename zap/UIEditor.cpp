@@ -1608,7 +1608,7 @@ void EditorUserInterface::renderTextEntryOverlay()
           mEntryBox.getMaxLen() * getStringWidth(fontsize, "-") + 25;
 
       // Render entry box    
-      glEnableBlend
+      glEnableBlend;
       S32 xpos = (gScreenInfo.getGameCanvasWidth()  - boxwidth) / 2;
       S32 ypos = (gScreenInfo.getGameCanvasHeight() - boxheight) / 2;
 
@@ -1623,7 +1623,7 @@ void EditorUserInterface::renderTextEntryOverlay()
             glVertex2f(xpos,            ypos + boxheight);
          glEnd();
       }
-      glDisableBlend
+      glDisableBlend;
 
       xpos += inset;
       ypos += inset;
@@ -1651,7 +1651,7 @@ void EditorUserInterface::renderReferenceShip()
       F32 horizDist = Game::PlayerHorizVisDistance;
       F32 vertDist = Game::PlayerVertVisDistance;
 
-      glEnableBlend     // Enable transparency
+      glEnableBlend;     // Enable transparency
       glColor4f(.5, .5, 1, .35);
       glBegin(GL_POLYGON);
          glVertex2f(-horizDist, -vertDist);
@@ -1659,7 +1659,7 @@ void EditorUserInterface::renderReferenceShip()
          glVertex2f(horizDist, vertDist);
          glVertex2f(-horizDist, vertDist);
       glEnd();
-      glDisableBlend
+      glDisableBlend;
 
    glPopMatrix();
 }
@@ -1832,10 +1832,10 @@ void EditorUserInterface::render()
       if (mSaveMsgTimer.getCurrent() < 1000)
          alpha = (F32) mSaveMsgTimer.getCurrent() / 1000;
 
-      glEnableBlend
+      glEnableBlend;
          glColor4f(mSaveMsgColor.r, mSaveMsgColor.g, mSaveMsgColor.b, alpha);
          drawCenteredString(gScreenInfo.getGameCanvasHeight() - vertMargin - 65, 25, mSaveMsg.c_str());
-      glDisableBlend
+      glDisableBlend;
    }
 
    if(mWarnMsgTimer.getCurrent())
@@ -1844,11 +1844,11 @@ void EditorUserInterface::render()
       if (mWarnMsgTimer.getCurrent() < 1000)
          alpha = (F32) mWarnMsgTimer.getCurrent() / 1000;
 
-      glEnableBlend
+      glEnableBlend;
          glColor4f(mWarnMsgColor.r, mWarnMsgColor.g, mWarnMsgColor.b, alpha);
          drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4, 25, mWarnMsg1.c_str());
          drawCenteredString(gScreenInfo.getGameCanvasHeight() / 4 + 30, 25, mWarnMsg2.c_str());
-      glDisableBlend
+      glDisableBlend;
    }
 
    if(mLevelErrorMsgs.size())
@@ -1996,7 +1996,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
    bool showLetter = true;    // In a few cases, we want to disable rendering of letters on objects
 
-   glEnableBlend        // Enable transparency
+   glEnableBlend;        // Enable transparency
 
    // Render snapping vertex; if it is the same as a highlighted vertex, highlight will overwrite this
    if(mSnapVertex_i != NONE && mSnapVertex_j != NONE && mItems[mSnapVertex_i].selected && !mShowingReferenceShip)
@@ -2571,7 +2571,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       drawString(pos.x - getStringWidth(labelSize, itemDef[item.index].onDockName)/2, maxy + 8, labelSize, itemDef[item.index].onDockName);
    }
 
-   glDisableBlend
+   glDisableBlend;
 }
 
 

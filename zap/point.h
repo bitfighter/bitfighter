@@ -146,30 +146,12 @@ struct Rect
    typedef float member_type;
    Point min, max;
 
-   Rect() { set(Point(), Point()); }                          // Constuctor
-   Rect(const Point &p1, const Point &p2) { set(p1, p2); }    // Constuctor
+   Rect() { set(Point(), Point()); }                  // Constuctor
+   Rect(const Point &p1, const Point &p2) { set(p1, p2); }                      // Constuctor
    Rect(F32 x1, F32 y1, F32 x2, F32 y2) { set(Point(x1, y1), Point(x2, y2)); }  // Constuctor
-   Rect(const Point &p, member_type size) {                   // Constuctor, takes point and "radius"
-      min.x = p.x - size/2;
-      max.x = p.x + size/2;
-      min.y = p.y - size/2;
-      max.y = p.y + size/2;
-   }
+   Rect(const Point &p, member_type size) { set(p, size); }                     // Constuctor, takes point and "radius"
 
-   Rect(const TNL::Vector<Point> &p)                          // Construct as a bounding box
-   {
-      if(p.size() == 0) 
-      {
-         set(Point(), Point());
-         return;
-      }
-
-      min = p[0];
-      max = p[0];
-
-      for(int i = 1; i < p.size(); i++)
-         unionPoint(p[i]);
-   }
+   Rect(const TNL::Vector<Point> &p) { set(p); }      // Construct as a bounding box around multiple points
 
    Point getCenter() { return (max + min) * 0.5; }
 
@@ -202,13 +184,20 @@ struct Rect
 
    }
 
-   void set(const TNL::Vector<Point> &p)     // Set to bounding box
+   void set(const TNL::Vector<Point> &p)     // Set to bounding box around multiple points
    {
+      if(p.size() == 0) 
+      {
+         set(Point(), Point());
+         return;
+      }
+
       min = p[0];
       max = p[0];
 
       for(int i = 1; i < p.size(); i++)
          unionPoint(p[i]);
+
    }
 
    void set(const Rect &r)
@@ -219,6 +208,16 @@ struct Rect
       max.x = r.max.x;
       max.y = r.max.y;
    }
+
+   void set(const Point &p, member_type size)   // Takes point and "radius"
+   {                   
+      F32 sizeDiv2 = size / 2;
+      min.x = p.x - sizeDiv2;
+      max.x = p.x + sizeDiv2;
+      min.y = p.y - sizeDiv2;
+      max.y = p.y + sizeDiv2;
+   }
+
 
    bool contains(const Point &p)    // Rect contains the point
    {

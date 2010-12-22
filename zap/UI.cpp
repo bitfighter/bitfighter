@@ -69,7 +69,6 @@ Vector<UserInterface *> UserInterface::prevUIs;    // List of peviously displaye
 
 
 float gLineWidth1 = 1.0f;
-//float gLineWidth2 = 2.0f;
 float gDefaultLineWidth = 2.0f;
 float gLineWidth3 = 3.0f;
 float gLineWidth4 = 4.0f;
@@ -667,7 +666,9 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    glDisableBlendfromLineSmooth;
    for(S32 i = 1; i >= 0; i--)
    {
-      if(i==0) glEnableBlendfromLineSmooth;
+      if(i == 0) 
+         glEnableBlendfromLineSmooth;
+
       glColor(i ? Color(.3,0,0) : Color(1,1,1));        // Draw the box
       
       glBegin(i ? GL_POLYGON : GL_LINE_LOOP);

@@ -39,8 +39,9 @@ static Vector<DatabaseObject *> fillVector;
 
 
 // Runs on server
-bool engClientCreateObject(GameConnection *connection, U32 object)
+bool engClientCreateObject(GameConnection *connection, U32 objectType)
 {
+   // Do some basic crash-proofing sanity checks first
    Ship *ship = dynamic_cast<Ship *>(connection->getControlObject());
    if(!ship)
       return false;
@@ -50,15 +51,15 @@ bool engClientCreateObject(GameConnection *connection, U32 object)
 
    // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
    Point startPoint = ship->getActualPos();
-   Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;
+   Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;     // MaxEngineerDistance = 100
 
    F32 collisionTime;
-   Point collisionNormal;
+   Point anchorNormal;
 
    GameObject *hitObject = ship->findObjectLOS(BarrierType, MoveObject::ActualState, startPoint, endPoint, 
-                                               collisionTime, collisionNormal);
+                                               collisionTime, anchorNormal);
 
-   if(!hitObject)    // No appropriate walls found, sorry!
+   if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
    {
       static const StringTableEntry message("Could not find a suitable wall for mounting the item.");
       connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
@@ -66,20 +67,89 @@ bool engClientCreateObject(GameConnection *connection, U32 object)
       return false;
    }
 
-   Point deployPosition = startPoint + (endPoint - startPoint) * collisionTime;
+   // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
+   Point deployPosition = startPoint + (endPoint - startPoint) * collisionTime + anchorNormal;
+      
+   // If this is a forcefield, we need to ensure forcefield doesn't cross another; doing so can create an impossible situation
+   if(objectType == EngineeredForceField)
+   {
+      // Forcefield starts at the end of the projector.  Need to know where that is.
+      Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(deployPosition, anchorNormal);
 
-   // Move the deploy point away from the wall by one unit...
-   deployPosition += collisionNormal;
+      // Now we can find the end point.  Note that endPoint is repurposed here...
+      DatabaseObject *collObj;
+      ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, anchorNormal, 1.0, endPoint, &collObj);
+
+      // Create a temp forcefield to use for collision testing with other forcefields; this one will be deleted below
+      ForceField *newForceField = new ForceField(-1, forceFieldStart, endPoint);
+
+      // Now we can do some actual checking.  We'll do this in two passes, one against existing ffs, another against disabled
+      // projectors that might be enabled in the future.
+      Vector<DatabaseObject *> fillVector;
+      bool collision = false;
+
+      // First test existing forcefields -- these will be faster than checking inactive projectors, which we'll do later
+      Rect queryRect(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 2);
+      ship->getGridDatabase()->findObjects(ForceFieldType, fillVector, queryRect);
+
+      for(S32 i = 0; i < fillVector.size(); i++)
+      {
+         ForceField *ff = dynamic_cast<ForceField *>(fillVector[i]);
+         if(ff && ff->intersects(newForceField))
+         {
+            collision = true;
+            break;
+         }
+      }
+
+      if(!collision)
+      {
+         // First we must find any possibly intersecting forcefield projector and if it's inactive, create a temp forcefield
+         // Projectors up to two forcefield lengths away must be considered because the end of one could intersect the end of the other
+         fillVector.clear();
+         queryRect.set(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 4);
+         ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+
+         for(S32 i = 0; i < fillVector.size(); i++)
+         {
+            ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+            if(proj && !proj->isEnabled())      // Enabled projectors handled in forcefield search above
+            {
+               Point start, end;
+               proj->getForceFieldStartAndEndPoints(start, end);
+
+               ForceField forceField = ForceField(0, start, end);
+
+               if(forceField.intersects(newForceField))
+               {
+                  collision = true;
+                  break;
+               }
+            }
+         }
+      }
+
+      delete newForceField;
+
+      if(collision)
+      {
+         static const StringTableEntry message("Cannot deply forcefield where it could cross another.");
+         connection->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, message);
+
+         return false;
+      }
+   }
+   
 
    EngineeredObject *deployedObject = NULL;
 
-   switch(object)
+   switch(objectType)
    {
       case EngineeredTurret:
-         deployedObject = new Turret(ship->getTeam(), deployPosition, collisionNormal);
+         deployedObject = new Turret(ship->getTeam(), deployPosition, anchorNormal);
          break;
       case EngineeredForceField:
-         deployedObject = new ForceFieldProjector(ship->getTeam(), deployPosition, collisionNormal);
+         deployedObject = new ForceFieldProjector(ship->getTeam(), deployPosition, anchorNormal);
          break;
       default:
          return false;
@@ -336,7 +406,7 @@ void EngineeredObject::explode()
 }
 
 
-bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2)
+bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
    Point rp1 = p1[p1.size() - 1];
    for(S32 i = 0; i < p1.size(); i++)
@@ -505,7 +575,8 @@ void ForceFieldProjector::idle(GameObject::IdleCallPath path)
 static const S32 PROJECTOR_HALF_WIDTH = 12;  // Half the width of base of the projector, along the wall
 static const S32 PROJECTOR_OFFSET = 15;      // Distance from wall to projector tip; thickness, if you will
 
-void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom)
+// static method
+void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom)      
 {
    Point cross(normal.y, -normal.x);
    cross.normalize(PROJECTOR_HALF_WIDTH);
@@ -516,7 +587,7 @@ void ForceFieldProjector::getGeom(const Point &anchor, const Point &normal, Vect
 }
 
 
-// Get the point where the forcefield actually starts, as it leaves the projector; the tip of the projector
+// Get the point where the forcefield actually starts, as it leaves the projector; i.e. the tip of the projector.  Static method.
 Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact)
 {
    return Point(anchor.x + normal.x * PROJECTOR_OFFSET * scaleFact, 
@@ -524,10 +595,12 @@ Point ForceFieldProjector::getForceFieldStartPoint(const Point &anchor, const Po
 }
 
 
-Point ForceFieldProjector::getForceFieldEndPoint(const Point &anchor, const Point &normal, F32 length, F32 scaleFact)
+void ForceFieldProjector::getForceFieldStartAndEndPoints(Point &start, Point &end)
 {
-   return Point(anchor.x + normal.x * (length + PROJECTOR_OFFSET) * scaleFact, 
-                anchor.y + normal.y * (length + PROJECTOR_OFFSET) * scaleFact );
+   start = getForceFieldStartPoint(mAnchorPoint, mAnchorNormal);
+
+   DatabaseObject *collObj;
+   ForceField::findForceFieldEnd(getGridDatabase(), getForceFieldStartPoint(mAnchorPoint, mAnchorNormal), mAnchorNormal, 1.0, end, &collObj);
 }
 
 
@@ -629,6 +702,19 @@ bool ForceField::collide(GameObject *hitObject)
    return true;
 }
 
+
+// Returns true if two forcefields intersect
+bool ForceField::intersects(ForceField *forceField)
+{
+   Vector<Point> thisGeom, thatGeom;
+
+   getGeom(thisGeom);
+   forceField->getGeom(thatGeom);
+
+   return PolygonsIntersect(thisGeom, thatGeom);
+}
+
+
 void ForceField::idle(GameObject::IdleCallPath path)
 {
    if(path != ServerIdleMainLoop)
@@ -702,13 +788,18 @@ void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &ge
 }
 
 
+// Non-static version
+void ForceField::getGeom(Vector<Point> &geom)
+{
+   getGeom(mStart, mEnd, geom);
+}
+
+
 bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact, 
                                    Point &end, DatabaseObject **collObj)
 {
    F32 time;
    Point n;
-
-   static const S32 MAX_FORCEFIELD_LENGTH = 2500;
 
    end.set(start.x + normal.x * MAX_FORCEFIELD_LENGTH * scaleFact, 
            start.y + normal.y * MAX_FORCEFIELD_LENGTH * scaleFact);
@@ -727,7 +818,7 @@ bool ForceField::findForceFieldEnd(GridDatabase *db, const Point &start, const P
 
 bool ForceField::getCollisionPoly(Vector<Point> &points)
 {
-   getGeom(mStart, mEnd, points);
+   getGeom(points);
    return true;
 }
 

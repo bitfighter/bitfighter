@@ -228,7 +228,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(mMoveState[ActualState].pos, stream);
-      writeCompressedVelocity(mMoveState[ActualState].vel, 511, stream);      // 511? Why?
+      writeCompressedVelocity(mMoveState[ActualState].vel, 511, stream);      // 511 = 2^9 - 1
       stream->writeFlag(updateMask & WarpPositionMask);
    }
    if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  

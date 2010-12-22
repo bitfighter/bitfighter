@@ -105,6 +105,7 @@ private:
                                                                                    // (because games like hunters have more stuff down there we need to look out for)
    Vector<DatabaseObject *> mSpyBugs;    // List of all spybugs in the game
    bool mLevelHasLoadoutZone;
+   bool mEngineerEnabled;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
@@ -169,6 +170,7 @@ public:
    S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); }
    S32 getLeadingScore() { return mLeadingTeamScore; }
    S32 getLeadingTeam() { return mLeadingTeam; }
+   bool engineerIsEnabled() { return mEngineerEnabled; }
 
    void catalogSpybugs();     // Rebuild a list of spybugs in the game
 
@@ -356,7 +358,7 @@ public:
 
    void onGhostAvailable(GhostConnection *theConnection);
    TNL_DECLARE_RPC(s2cSetLevelInfo, (StringTableEntry levelName, StringTableEntry levelDesc, S32 teamScoreLimit, StringTableEntry levelCreds, 
-                                     S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone));
+                                     S32 objectCount, F32 lx, F32 ly, F32 ux, F32 uy, bool levelHasLoadoutZone, bool engineerEnabled));
    TNL_DECLARE_RPC(s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid));
    TNL_DECLARE_RPC(s2cAddTeam, (StringTableEntry teamName, F32 r, F32 g, F32 b));
    TNL_DECLARE_RPC(s2cAddClient, (StringTableEntry clientName, bool isMyClient, bool isAdmin, bool isRobot, bool playAlert));
@@ -406,6 +408,7 @@ public:
 
    TNL_DECLARE_RPC(c2sSendChat, (bool global, StringPtr message));             // In-game chat
    TNL_DECLARE_RPC(c2sSendChatSTE, (bool global, StringTableEntry ste));       // Quick-chat
+   TNL_DECLARE_RPC(c2sSendCommand, (StringTableEntry cmd, Vector<StringPtr> args));
 
    TNL_DECLARE_RPC(s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message));
    TNL_DECLARE_RPC(s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message));
@@ -427,7 +430,7 @@ public:
 
    virtual void majorScoringEventOcurred(S32 team) { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
-   void processServerCommand(ClientRef *clientRef, Vector<string> words);
+   void processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args);
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \

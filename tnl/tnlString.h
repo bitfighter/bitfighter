@@ -69,6 +69,10 @@ public:
       if(mString)
          mString->mRefCount++;
    }
+   StringPtr(const std::string &string)
+   {
+      alloc(string.c_str());
+   }
    ~StringPtr()
    {
       decRef();

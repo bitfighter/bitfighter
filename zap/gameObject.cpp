@@ -232,7 +232,7 @@ S32 GameObject::radiusDamage(Point pos, S32 innerRad, S32 outerRad, U32 typemask
       if(foundObject->getObjectTypeMask() & (ShipType | RobotType))
          shipsHit++;
 
-      foundObject->damageObject(&localInfo); //damageObject should be last as it might remove this object...
+      foundObject->damageObject(&localInfo); 
    }
 
    return shipsHit;
@@ -341,9 +341,8 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 }
 
 
-extern bool PolygonsIntersect(Vector<Point> &p1, Vector<Point> &p2);
+extern bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
 extern bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint);
-
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Vector<Point> points)

@@ -228,7 +228,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
       mOutputFile.open(strictjoindir(folder, filename.getString()).c_str());
       if(!mOutputFile.is_open())
       {
-         logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()));
+         logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()).c_str());
          disconnect(ReasonError, "Problem writing to file");
          return;
       }
@@ -297,7 +297,7 @@ void DataConnection::onConnectionEstablished()
          mOutputFile.open(strictjoindir(folder, mFilename).c_str());
          if(!mOutputFile.is_open())
          {
-            logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename));
+            logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename).c_str());
             disconnect(ReasonError, "done");
          }
 

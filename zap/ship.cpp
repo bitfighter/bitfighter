@@ -554,13 +554,13 @@ void Ship::repairTargets()
 
 void Ship::processEnergy()
 {
-   static U32 gEnergyDrain[ModuleCount] =
+   static U32 energyDrain[ModuleCount] =
    {
       Ship::EnergyShieldDrain,
       Ship::EnergyBoostDrain,
       Ship::EnergySensorDrain,
       Ship::EnergyRepairDrain,
-      0,    // ModuleEngineer, costs no energy to use
+      Ship::EnergyEngineerDrain,    // Engineer costs no energy to use
       Ship::EnergyCloakDrain,
    };
 
@@ -632,7 +632,7 @@ void Ship::processEnergy()
    {
       if(mModuleActive[i])
       {
-         mEnergy -= S32(gEnergyDrain[i] * scaleFactor);
+         mEnergy -= S32(energyDrain[i] * scaleFactor);
          anyActive = true;
       }
    }
@@ -676,7 +676,7 @@ void Ship::processEnergy()
 
 void Ship::damageObject(DamageInfo *theInfo)
 {
-   if(mHealth == 0 || hasExploded) return; //Stop multi-kill problem. Might stop robots from getting invincible.
+   if(mHealth == 0 || hasExploded) return; // Stop multi-kill problem. Might stop robots from getting invincible.
 
    // Deal with grenades and other explody things, even if they cause no damage
    if(theInfo->damageType == DamageTypeArea)
@@ -1429,7 +1429,7 @@ void Ship::render(S32 layerIndex)
       if(isBusy)
          str = "<<" + str + ">>";
 
-      glEnableBlend
+      glEnableBlend;
       F32 textAlpha = 0.5 * alpha;
       U32 textSize = 14;
 #ifdef TNL_OS_XBOX
@@ -1451,7 +1451,7 @@ void Ship::render(S32 layerIndex)
          glEnd();
       }
 
-      glDisableBlend
+      glDisableBlend;
       glLineWidth(gDefaultLineWidth);
    }
    else
@@ -1460,13 +1460,13 @@ void Ship::render(S32 layerIndex)
       {
          string str = string("@") + itos((S32) getActualPos().x) + "," + itos((S32) getActualPos().y);
 
-         glEnableBlend
+         glEnableBlend;
             U32 textSize = 18;
             glLineWidth(gLineWidth1);
             glColor4f(1,1,1,0.5 * alpha);
 
             UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
-         glDisableBlend
+         glDisableBlend;
          glLineWidth(gDefaultLineWidth);
       }
    }

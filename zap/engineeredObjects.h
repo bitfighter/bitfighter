@@ -119,8 +119,12 @@ public:
       FieldDownTime = 250,
    };
 
+   static const S32 MAX_FORCEFIELD_LENGTH = 2500;
+
+
    ForceField(S32 team = -1, Point start = Point(), Point end = Point());
    bool collide(GameObject *hitObject);
+   bool intersects(ForceField *forceField);     // Return true if forcefields intersect
    void idle(GameObject::IdleCallPath path);
 
 
@@ -129,6 +133,7 @@ public:
 
    bool getCollisionPoly(Vector<Point> &polyPoints);
 
+   void getGeom(Vector<Point> &geom);
    static void getGeom(const Point &start, const Point &end, Vector<Point> &points, F32 scaleFact = 1);
    static bool findForceFieldEnd(GridDatabase *db, const Point &start, const Point &normal, F32 scaleFact,
                                  Point &end, DatabaseObject **collObj);
@@ -155,7 +160,9 @@ public:
    bool getCollisionPoly(Vector<Point> &polyPoints);
    static void getGeom(const Point &anchor, const Point &normal, Vector<Point> &geom);
    static Point getForceFieldStartPoint(const Point &anchor, const Point &normal, F32 scaleFact = 1);
-   static Point getForceFieldEndPoint(const Point &anchor, const Point &normal, F32 length, F32 scaleFact = 1);
+
+   // Get info about the forcfield that might be projected from this projector
+   void getForceFieldStartAndEndPoints(Point &start, Point &end);
 
    void onAddedToGame(Game *theGame);
    void idle(GameObject::IdleCallPath path);

@@ -41,28 +41,31 @@
 namespace Zap
 {
 
-LoadoutItem gLoadoutModules[] = {
-   { KEY_1, BUTTON_1, ModuleBoost,   "Turbo Boost",           "", ModuleNone },
-   { KEY_2, BUTTON_2, ModuleShield,  "Shield Generator",      "", ModuleNone },
-   { KEY_3, BUTTON_3, ModuleRepair,  "Repair Module",         "", ModuleNone },
-   { KEY_4, BUTTON_4, ModuleSensor,  "Enhanced Sensor",       "(makes Spy Bug Placer available)", ModuleNone },
-   { KEY_5, BUTTON_5, ModuleCloak,   "Cloak Field Modulator", "", ModuleNone },
-#if ENABLE_ENGINEER == 1
-   { KEY_6, BUTTON_6, ModuleEngineer,   "Engineer", "", ModuleNone },
-#endif
-   { KEY_UNKNOWN, KEY_UNKNOWN, 0, NULL, NULL, ModuleNone },
-};
+Vector<LoadoutItem> gLoadoutModules;
+Vector<LoadoutItem> gLoadoutWeapons;
 
-LoadoutItem gLoadoutWeapons[] = {
-   { KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone },
-   { KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone },
-   { KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone }, 
-   { KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone },
-   { KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone },
+// Gets called at the beginning of every game
+void LoadoutHelper::initialize(bool includeEngineer)
+{
+   gLoadoutModules.clear();
+   gLoadoutWeapons.clear();
+
+   gLoadoutModules.push_back(LoadoutItem(KEY_1, BUTTON_1, ModuleBoost,  "Turbo Boost",           "", ModuleNone));
+   gLoadoutModules.push_back(LoadoutItem(KEY_2, BUTTON_2, ModuleShield, "Shield Generator",      "", ModuleNone));
+   gLoadoutModules.push_back(LoadoutItem(KEY_3, BUTTON_3, ModuleRepair, "Repair Module",         "", ModuleNone));
+   gLoadoutModules.push_back(LoadoutItem(KEY_4, BUTTON_4, ModuleSensor, "Enhanced Sensor",       "(makes Spy Bug Placer available)", ModuleNone));
+   gLoadoutModules.push_back(LoadoutItem(KEY_5, BUTTON_5, ModuleCloak,  "Cloak Field Modulator", "", ModuleNone));
+
+   if(includeEngineer)
+      gLoadoutModules.push_back(LoadoutItem(KEY_6, BUTTON_6, ModuleEngineer, "Engineer", "", ModuleNone));
+
+   gLoadoutWeapons.push_back(LoadoutItem(KEY_1, BUTTON_1, WeaponPhaser,  "Phaser",          "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(KEY_2, BUTTON_2, WeaponBounce,  "Bouncer",         "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(KEY_3, BUTTON_3, WeaponTriple,  "Triple",          "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(KEY_4, BUTTON_4, WeaponBurst,   "Burster",         "", ModuleNone));
+   gLoadoutWeapons.push_back(LoadoutItem(KEY_5, BUTTON_5, WeaponMine,    "Mine Layer",      "", ModuleNone));
 // { KEY_6, 5, WeaponHeatSeeker, "Heat Seeker"},      // Need to make changes below to support this
-   { KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor },    // Only visible when Enhanced Sensor is a selected module
-
-   { KEY_UNKNOWN, KEY_UNKNOWN, 0, NULL, NULL, ModuleNone },
+   gLoadoutWeapons.push_back(LoadoutItem(KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
 };
 
 const char *gLoadoutTitles[] = {
@@ -90,7 +93,7 @@ extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 
 // First, we work with modules, then with weapons
-#define getList(ct)  ((ct < ShipModuleCount) ? gLoadoutModules : gLoadoutWeapons)
+#define getList(ct)  ((ct < ShipModuleCount) ? &gLoadoutModules : &gLoadoutWeapons)
 
 void LoadoutHelper::render()
 {
@@ -108,10 +111,9 @@ void LoadoutHelper::render()
    UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSize, "%s", helpStr);
    yPos += fontSize + 4;
 
-   LoadoutItem *list; 
-   list = getList(mCurrentIndex);
+   Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
-   for(U32 i = 0; list[i].text; i++)
+   for(S32 i = 0; i < list->size(); i++)
    {
       bool selected = false;
 
@@ -139,12 +141,12 @@ void LoadoutHelper::render()
          bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
 
          if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
-            renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list[i].button, false);
+            renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
 
          if(showKeys)
          {
             glColor3f(1, 1, 1);     // Render key in white
-            renderControllerButton(UserInterface::horizMargin + 20, yPos, list[i].key, false);
+            renderControllerButton(UserInterface::horizMargin + 20, yPos, list->get(i).key, false);
          }
 
          if(selected)
@@ -153,11 +155,11 @@ void LoadoutHelper::render()
             glColor3f(0.1, 1.0, 0.1);      // Color of not-yet selected item
 
          S32 xPos = UserInterface::horizMargin + 50;
-         UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list[i].text);      // The loadout entry itself
+         UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list->get(i).text);      // The loadout entry itself
          if(!selected)
             glColor3f(.2, .8, .8);        // Color of help message
-         xPos += UserInterface::getStringWidthf(fontSize, "%s ", list[i].text);
-         UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list[i].help);      // The loadout help string, if there is one
+         xPos += UserInterface::getStringWidthf(fontSize, "%s ", list->get(i).text);
+         UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list->get(i).help);      // The loadout help string, if there is one
 
          yPos += fontSize + 7;
       }
@@ -187,23 +189,17 @@ void LoadoutHelper::render()
 
 bool LoadoutHelper::isValidItem(S32 index)
 {
-   LoadoutItem *list = getList(mCurrentIndex);
+   Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
-   if (list[index].requires != ModuleNone)
+   if(list->get(index).requires != ModuleNone)
    {
       for(S32 i = 0; i < min(mCurrentIndex, ShipModuleCount); i++)
-         if(gLoadoutModules[mModule[i]].index == (U32)list[index].requires)          // Found prerequisite
+         if(gLoadoutModules[mModule[i]].index == (U32)list->get(index).requires)    // Found prerequisite
             return true;
       return false;
    }
    else     // No prerequisites
       return true;
-}
-
-
-void LoadoutHelper::idle(U32 timeDelta)
-{
-   // Do nothing
 }
 
 
@@ -226,16 +222,16 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
    }
 
    U32 index;
-   LoadoutItem *list = getList(mCurrentIndex);
+   Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
-   for(index = 0; list[index].text; index++)
-      if(keyCode == list[index].key || keyCode == list[index].button)
+   for(index = 0; list->get(index).text; index++)
+      if(keyCode == list->get(index).key || keyCode == list->get(index).button)
          break;
 
    if(!isValidItem(index))
       return false;
 
-   if(!list[index].text)
+   if(!list->get(index).text)
       return false;
    mIdleTimer.reset(MenuTimeout);
 

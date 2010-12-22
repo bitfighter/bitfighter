@@ -195,8 +195,9 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
-extern S32 minimumSleepTimeDedicatedServer;
-extern S32 minimumSleepTimeClient;
+extern U32 minimumSleepTimeDedicatedServer;
+extern U32 minimumSleepTimeClient;
+
 static void loadGeneralSettings()
 {
    gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
@@ -1145,9 +1146,9 @@ static void writeHost()
       gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
+      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) in Millisecs, lower means lower ping to everyone and uses more CPU");
       gINI.KeyComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       gINI.KeyComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
-      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) in Millisecs, lower means lower ping to everyone and uses more CPU");
 
 //      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
       gINI.KeyComment("Host", "----------------");
