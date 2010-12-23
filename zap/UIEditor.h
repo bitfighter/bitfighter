@@ -288,7 +288,7 @@ public:
 
    Vector<WallSegment *> wallSegments;
 
-   void deleteSegments(S32 owner);              // Delete all segments owned by specified WorldItem
+   void deleteSegments(U32 owner);              // Delete all segments owned by specified WorldItem
    void deleteAllSegments();
 
    // Recalucate edge geometry for all walls when item has changed

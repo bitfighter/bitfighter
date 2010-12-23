@@ -114,7 +114,7 @@ void LoadoutHelper::render()
 
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
-   for(S32 i = 0; i < list->size(); i++)
+   for(U32 i = 0; i < list->size(); i++)
    {
       bool selected = false;
 
@@ -123,13 +123,13 @@ void LoadoutHelper::render()
 
       if(mCurrentIndex > 0 && mCurrentIndex < ShipModuleCount)    // Picking modules, but not the first one
       {
-         for(S32 j = 0; j < mCurrentIndex; j++)
+         for(U32 j = 0; j < mCurrentIndex; j++)
             if(mModule[j] == i)
                selected = true;
       }
       else if(mCurrentIndex > ShipModuleCount)                    // Picking weapons, but not the first one
       {
-         for(S32 j = 0; j < mCurrentIndex - ShipModuleCount; j++)
+         for(U32 j = 0; j < mCurrentIndex - ShipModuleCount; j++)
             if(mWeapon[j] == i)
                selected = true;
       }

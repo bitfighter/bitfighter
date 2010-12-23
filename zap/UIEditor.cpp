@@ -5027,7 +5027,7 @@ void WallSegmentManager::deleteAllSegments()
 
 
 // Delete all wall segments owned by specified owner.
-void WallSegmentManager::deleteSegments(S32 owner)
+void WallSegmentManager::deleteSegments(U32 owner)
 {
    S32 count = wallSegments.size();
 
