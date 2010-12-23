@@ -173,6 +173,43 @@ void SoccerGameType::shipTouchZone(Ship *ship, GoalZone *zone)
 }
 
 
+// Runs when ship fires, return true or false on whether firing should proceed
+bool SoccerGameType::onFire(Ship *ship) 
+{ 
+   if(!Parent::onFire(ship))
+      return false;
+
+   // If we have the ball, drop it
+   if(ship->isCarryingItem(SoccerBallItemType))
+   {
+      for(S32 i = 0; i < ship->mMountedItems.size(); i++)
+      {
+         if(ship->mMountedItems[i]->getObjectTypeMask() & SoccerBallItemType)
+         {
+            Item *ball = dynamic_cast<SoccerBallItem *>(ship->mMountedItems[i].getPointer());
+
+            Point dir = ship->getAimVector();
+            Point vel = ship->getActualVel();
+
+            dir.normalize();     // needed?
+
+            Point ballVel = dir * 2 + dir * vel.dot(dir);
+
+            ball->setActualPos(ship->getActualPos() + dir * (ship->getRadius()));
+            ball->setActualVel(ballVel);
+
+            ball->onItemDropped();
+         }
+      }
+      
+      return false;
+   }
+
+   return true;
+
+}             
+
+
 // Runs on server only, and only when player deliberately drops ball
 void SoccerGameType::itemDropped(Ship *ship, Item *item)
 {
@@ -354,6 +391,10 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
    }
 
    Parent::idle(path);
+
+   // If crash into something, the ball will hit first, so we want to make sure it has an up-to-date velocity vector
+   if(isMounted())
+      mMoveState[ActualState].vel.set(mMount->getActualVel());
 }
 
 

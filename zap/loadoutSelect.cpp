@@ -134,7 +134,6 @@ void LoadoutHelper::render()
                selected = true;
       }
 
-
       // Draw key controls for selecting loadout items
 
       if(isValidItem(i))

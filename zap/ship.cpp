@@ -342,7 +342,7 @@ void Ship::processWeaponFire()
 
    WeaponType curWeapon = mWeapon[mActiveWeaponIndx];
 
-   if(mCurrentMove.fire && mFireTimer.getCurrent() == 0 && getGame()->getGameType() && getGame()->getGameType()->okToFire(this))
+   if(mCurrentMove.fire && mFireTimer.getCurrent() == 0 && getGame()->getGameType() && getGame()->getGameType()->onFire(this))
    {
       if(mEnergy >= gWeapons[curWeapon].minEnergy)
       {

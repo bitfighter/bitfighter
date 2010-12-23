@@ -181,7 +181,7 @@ public:
    virtual bool isCarryingItems(Ship *ship) { return ship->mMountedItems.size() > 0; }     // Nexus game will override this
 
    // Some games may place restrictions on when players can fire or use modules
-   virtual bool okToFire(Ship *ship) { return true; }
+   virtual bool onFire(Ship *ship) { return true; }
    virtual bool okToUseModules(Ship *ship) { return true; }
 
    virtual bool isSpawnWithLoadoutGame() { return false; }  // We do not spawn with our loadout, but instead need to pass through a loadout zone
