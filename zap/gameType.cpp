@@ -1127,8 +1127,8 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS"))
    {
-      if(argc < 2)
-      {
+      if(argc >= 2)
+      { 
          BarrierRec barrier;
          barrier.width = atof(argv[1]);
          for(S32 i = 2; i < argc; i++)
@@ -1481,7 +1481,8 @@ S32 GameType::getTeam(const char *playerName)
 
 const char *GameType::getTeamName(S32 team)
 {
-   if(team >= 0)
+   
+   if(team >= 0 && team < mTeams.size())
       return mTeams[team].getName().getString();
    else if(team == -2)
       return "Hostile";
@@ -2274,6 +2275,84 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
+S32 GetMapFileSize = 0;
+bool GetMapCheckDone = false;
+extern char sFileData[];  //in GameLoader.cpp
+extern ConfigDirectories gConfigDirs;          //in main.cpp
+extern Color gCmdChatColor;                    //in gameConnection.cpp
+
+
+void GetMapData(S32 FileSize, S32 Position, const char * Data)
+{
+	S32 p = Position;
+	S32 i;
+
+	if(! gClientGame) return;  //Client only.
+
+	if(FileSize+1 >= MAX_LEVEL_FILE_LENGTH || FileSize <= 0) return;   //too big to get map
+	if(Position+1 >= MAX_LEVEL_FILE_LENGTH || Position < 0) return;   //out of range position
+
+	if(FileSize != GetMapFileSize){
+		i=FileSize+1;
+		while(i != 0){
+			//set everything a NULL char, if there is null in the middle, we don't have complete data.
+			sFileData[i]=0;
+			i--;
+		}
+		GetMapFileSize = FileSize;
+		GetMapCheckDone = false;
+	}
+
+	i=0;
+	while(Data[i] != 0 && p < FileSize){
+		sFileData[p] = Data[i];
+		p++;
+		i++;
+	}
+	if(p == FileSize) GetMapCheckDone=true; //for porformance, check only when we got the last part
+
+	if(GetMapCheckDone){
+		i=0;
+		while(sFileData[i] != 0)    //check to see we have all data.
+			i++;
+		if(i == FileSize)
+		{
+			char filename[64];
+			char filename2[256];
+			const char * levelname = "";
+			if(gClientGame->getGameType())
+				levelname = gClientGame->getGameType()->mLevelName.getString();
+			i=0;
+			while(i<30 && levelname[i] != 0)
+			{
+				char c = levelname[i];  //prevent invalid characters in file names.
+				if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+					filename[i]=c;
+				else
+					filename[i]='_';
+				i++;
+			}
+			filename[i]=0;
+				//All maps file names will start with getmap_
+            dSprintf(filename2, sizeof(filename2), "%s/getmap_%s.level", gConfigDirs.levelDir.c_str(), filename);
+
+			FILE *file1 = fopen(filename2, "w");
+			if(file1)
+			{
+				fwrite(sFileData,1, FileSize, file1);
+				fclose(file1);
+				gGameUserInterface.displayMessage(gCmdChatColor, "Saved map %s", filename2);
+			}
+			else
+				gGameUserInterface.displayMessage(gCmdChatColor, "Unable to save map %s", filename2);
+
+			GetMapFileSize = 0;
+		}
+	}
+};
+
+
+
 // Runs the server side commands, which the client may or may not know about
 
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
@@ -2325,6 +2404,33 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             mWinningScore = score;
             s2cChangeScoreToWin(mWinningScore, clientRef->clientConnection->getClientName());
          }
+     }
+   }
+   else if(!stricmp(cmd, "getmap"))
+   {
+     //might want to add an option to prevent /getmap
+     if(clientRef->clientConnection->isLocalConnection())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't Get Map your own host.");
+     else
+     {
+       S32 i=0;
+       S32 s=0;
+       S32 filesize=0;
+       while(sFileData[filesize] != 0)   //find the file size.
+           filesize++;
+       while(sFileData[i] != 0)
+       {
+          if(i-s >= 254)
+          {
+             char c1 = sFileData[i];
+             sFileData[i] = 0;     //so it thinks it is a short string line
+             clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
+             sFileData[i] = c1;
+             s=i;
+          }
+          i++;
+       }
+       if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
    }
    else

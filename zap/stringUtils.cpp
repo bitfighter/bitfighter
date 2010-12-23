@@ -128,6 +128,8 @@ bool fileExists(const string &path)
 // Join without checking for blank parts
 string strictjoindir(const string &part1, const string &part2)
 {
+   if(part1.length() == 0) return part2;      //avoid crash on zero length string.
+
    // Does path already have a trailing delimeter?  If so, we'll use that.
    if(part1[part1.length() - 1] == '\\' || part1[part1.length() - 1] == '/')
       return part1 + part2;

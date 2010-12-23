@@ -970,6 +970,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 }
 
 
+extern void GetMapData(S32 FileSize, S32 Position, const char * Data);  //in gametype.cpp
+
+TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
+                  (S32 FileSize, S32 Position, StringTableEntry Data),
+                  (FileSize, Position, Data)
+				  , NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+{
+	GetMapData(FileSize, Position, Data.getString() );
+}
+
+
+
+
+
 extern IniSettings gIniSettings;
 extern Nonce gClientId;
 
