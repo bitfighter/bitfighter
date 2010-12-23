@@ -113,6 +113,7 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEnum(ModuleRepair);
    setEnum(ModuleEngineer);
    setEnum(ModuleCloak);
+   setEnum(ModuleArmor);
 
    // Weapons
    setEnum(WeaponPhaser);
@@ -1387,7 +1388,7 @@ bool Robot::initialize(Point &pos)
    enableCollision();
 
    // WarpPositionMask triggers the spinny spawning visual effect
-   setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | PowersMask | WarpPositionMask);      // Send lots to the client
+   setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulesMask | WarpPositionMask);      // Send lots to the client
 
    TNLAssert(!isGhost(), "Didn't expect ghost here...");
 

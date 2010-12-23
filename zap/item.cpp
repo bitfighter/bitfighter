@@ -112,7 +112,7 @@ void Item::onMountDestroyed()
 }
 
 
-// Runs on client & server?
+// Runs on client & server, via different code paths
 void Item::onItemDropped()
 {
    if(!getGame())    // Can happen on game startup
@@ -122,7 +122,7 @@ void Item::onItemDropped()
    if(!gt || !mMount.isValid())
       return;
 
-   if(!isGhost())    // Server only
+   if(!isGhost())    // Server only; on client calls onItemDropped from dismount
    {
       gt->itemDropped(mMount, this);
       dismount();
@@ -132,6 +132,7 @@ void Item::onItemDropped()
 }
 
 
+// Client & server, called via different paths
 void Item::dismount()
 {
    if(mMount.isValid())      // Mount could be null if mount is out of scope, but is dropping an always-in-scope item
@@ -144,12 +145,12 @@ void Item::dismount()
          }
    }
 
-   if(isGhost())     // Client only
+   if(isGhost())     // Client only; on server, we came from onItemDropped()
       onItemDropped();
 
    mMount = NULL;
    mIsMounted = false;
-   setMaskBits(MountMask | PositionMask);  //Send position to prevent flag lag that cannot be picked up.
+   setMaskBits(MountMask | PositionMask);    // Sending position fixes the super annoying "flag that can't be picked up" bug
 }
 
 
@@ -206,7 +207,7 @@ void Item::idle(GameObject::IdleCallPath path)
    {
       if(mMount.isNull() || mMount->hasExploded)
       {
-         if(!isGhost())
+         if(!isGhost())    // Server only
             dismount();
       }
       else
@@ -238,6 +239,7 @@ void Item::idle(GameObject::IdleCallPath path)
    mDroppedTimer.update(deltaT);
 }
 
+static const S32 VEL_POINT_SEND_BITS = 511;     // 511 = 2^9 - 1
 
 U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
@@ -250,7 +252,7 @@ U32 Item::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(mMoveState[ActualState].pos, stream);
-      writeCompressedVelocity(mMoveState[ActualState].vel, 511, stream);      // 511 = 2^9 - 1
+      writeCompressedVelocity(mMoveState[ActualState].vel, VEL_POINT_SEND_BITS, stream);      
       stream->writeFlag(updateMask & WarpPositionMask);
    }
    if(stream->writeFlag(updateMask & MountMask) && stream->writeFlag(mIsMounted))      // mIsMounted gets written iff MountMask is set  
@@ -294,7 +296,7 @@ void Item::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())     // PositionMask
    {
       ((GameConnection *) connection)->readCompressedPoint(mMoveState[ActualState].pos, stream);
-      readCompressedVelocity(mMoveState[ActualState].vel, 511, stream);    // 511?  What? Why?
+      readCompressedVelocity(mMoveState[ActualState].vel, VEL_POINT_SEND_BITS, stream);   
       positionChanged = true;
       interpolate = !stream->readFlag();
    }
