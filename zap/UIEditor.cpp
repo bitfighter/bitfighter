@@ -4277,12 +4277,32 @@ void EditorUserInterface::onKeyUp(KeyCode keyCode)
       case MOUSE_RIGHT:    // test
          mMousePos.set(gScreenInfo.getMousePos());
 
-         if(mDragSelecting)      // We were drawing a selection box
+         if(mDragSelecting)      // We were drawing a rubberband selection box
          {
             Rect r(convertCanvasToLevelCoord(mMousePos), mMouseDownPos);
+            S32 j;
+
             for(S32 i = 0; i < mItems.size(); i++)
             {
-               S32 j;
+               // Skip hidden items
+               if(mShowMode == ShowWallsOnly)
+               {
+                  if(mItems[i].index != ItemBarrierMaker)
+                     continue;
+               }
+               else if(mShowMode == ShowAllButNavZones)
+               {
+                  if(mItems[i].index == ItemNavMeshZone)
+                     continue;
+               }
+               else if(mShowMode == NavZoneMode)
+               {
+                  if(mItems[i].index != ItemNavMeshZone)
+                     continue;
+               }
+
+               // Make sure that all vertices of an item are inside the selection box; basically means that the entire 
+               // item needs to be surrounded to be included in the selection
                for(j = 0; j < mItems[i].vertCount(); j++)
                   if(!r.contains(mItems[i].vert(j)))
                      break;
