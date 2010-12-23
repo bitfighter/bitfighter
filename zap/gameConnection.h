@@ -239,6 +239,7 @@ public:
    TNL_DECLARE_RPC(c2sSetIsBusy, (bool busy));
 
    TNL_DECLARE_RPC(c2sSetServerAlertVolume, (S8 vol));
+   TNL_DECLARE_RPC(s2cGetMapData, (S32 FileSize, S32 Position, StringTableEntry Data));
 
    static GameConnection *getClientList();
    static S32 getClientCount();

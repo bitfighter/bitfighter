@@ -291,7 +291,7 @@ void DataConnection::onConnectionEstablished()
          if(folder == "")     // filetype was bogus; should never happen
          {
             logprintf("Error resolving folder!");
-            disconnect(ReasonError, "done");
+                              // we can save files without needing folder
          }
 
          mOutputFile.open(strictjoindir(folder, mFilename).c_str());
@@ -299,6 +299,7 @@ void DataConnection::onConnectionEstablished()
          {
             logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename).c_str());
             disconnect(ReasonError, "done");
+            return;
          }
 
          c2sSendOrRequestFile(mPassword.c_str(), mFileType, true, mFilename.c_str());

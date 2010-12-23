@@ -218,6 +218,7 @@ stateLineParseDone:
 }  // parseArgs
 
 
+char sFileData[MAX_LEVEL_FILE_LENGTH];      // That's really really really big!
 bool LevelLoader::initLevelFromFile(const char *file)
 {
    FILE *f = fopen(file, "r");
@@ -230,12 +231,11 @@ bool LevelLoader::initLevelFromFile(const char *file)
    if(!f)
       return false;
 
-   char fileData[MAX_LEVEL_FILE_LENGTH];      // That's really really really big!
 
-   size_t bytesRead = fread(fileData, 1, sizeof(fileData), f);
-   fileData[bytesRead] = 0;
+   size_t bytesRead = fread(sFileData, 1, sizeof(sFileData) - 1, f);
+   sFileData[bytesRead] = 0;                     //need one more character for null-terminate.
 
-   parseArgs(fileData);
+   parseArgs(sFileData);
 
    fclose(f);
 
