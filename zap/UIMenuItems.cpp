@@ -72,7 +72,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 
    if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
    {
-      mIndex = (mIndex == mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
+      mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
       if(mCallback)
          mCallback(mIndex);
@@ -94,7 +94,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
 
    else if(keyCode == KEY_ENTER)
    {
-      mIndex = (mIndex == mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
+      mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
       if(mCallback)
          mCallback(mIndex);

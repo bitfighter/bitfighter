@@ -2507,6 +2507,8 @@ void GameType::updateClientScoreboard(ClientRef *cl)
       GameConnection *conn = mClientList[i]->clientConnection;
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
+      // Note that max(xxx, minRating) is meaningless with U32 types when minRating is 0, but leaving it in seems
+      // clearer and more future proof somehow...
       mRatings.push_back(max(min((U32)(getCurrentRating(conn) * 100.0) + 100, maxRating), minRating));
    }
 
