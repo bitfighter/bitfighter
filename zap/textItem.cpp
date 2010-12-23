@@ -89,13 +89,6 @@ bool TextItem::processArguments(S32 argc, const char **argv)
 
    mText = mText.substr(0, MAX_TEXTITEM_LEN-1);      // Limit length to MAX_TEXTITEM_LEN chars (leaving room for a trailing null)
 
-   // Correction for the Bitfighter logo
-   if(mText == "Bitfighter")
-   {
-      F32 adjFact = 48 * getGame()->getGridSize() / 255;
-      pos.x -= adjFact;
-      dir.x -= adjFact;
-   }
 
    computeExtent();
 

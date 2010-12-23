@@ -1413,18 +1413,22 @@ void renderSoccerBall(Point pos, F32 alpha)
 
 void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 {
-   Color c;
-   GameType *gt = gClientGame->getGameType();
-
    if(text == "Bitfighter")
    {
-      F32 scaleFactor = size / 133.0f;
+      glColor3f(0,1,0);
+      // All factors in here determined experimentally, seem to work at a variety of sizes and approximate the width and height
+      // of ordinary text in cases tested.  What should happen is the Bitfighter logo should, as closely as possible, match the 
+      // size and extent of the text "Bitfighter".
+      F32 scaleFactor = size / 129.0f;
       glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
+         glScalef(scaleFactor, scaleFactor, 1);
+                  
       glRotatef(pos.angleTo(dir) * radiansToDegreesConversion, 0, 0, 1);
-      glScalef(scaleFactor, scaleFactor, 1);
-      glColor3f(0, 1, 0);
-      renderBitfighterLogo(73, 1, 0);
+
+         glTranslatef(-119, -45, 0);      // Determined experimentally
+         renderBitfighterLogo(0, 1);
+
       glPopMatrix();
 
       return;
@@ -1436,6 +1440,10 @@ void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
 
    Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
    if( (!ship && team != -1) || (ship && ship->getTeam() != team && team != -1) )
+      return;
+
+   GameType *gt = gClientGame->getGameType();
+   if(!gt) 
       return;
 
    glColor(gt->getTeamColor(team));       // Handles teams -1  and -2 properly
@@ -1610,28 +1618,17 @@ pixLoc gLogoPoints[LetterLoc1 + LetterLoc2 + LetterLoc3 + LetterLoc4 + LetterLoc
 void renderStaticBitfighterLogo()
 {
    glColor4f(0, 1, 0, 1);
-   renderBitfighterLogo(73, 1, 0);
+   renderBitfighterLogo(73, 1);
    UserInterface::drawCenteredStringf(120, 10, "Release %s", ZAP_GAME_RELEASE);
 }
 
 
-// Draw logo centered on screen horzontally, and on yPos vertically, scaled and rotated according to parameters
-void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask)
+// Render logo at 0,0
+void renderBitfighterLogo(U32 mask)
 {
-   const F32 fact = 0.15;                    // Scaling factor to make the coordinates below fit nicely on the screen (derived by trial and error)
-
    glEnableClientState(GL_VERTEX_ARRAY);
 
    glVertexPointer(2, GL_SHORT, sizeof(pixLoc), &gLogoPoints[0]);
-
-   glPushMatrix();
-
-   glScalef(scale * fact, scale * fact, 0);  // Scale it down...
-
-   // 3609 is the diff btwn the min and max x coords below, 594 is same for y
-   glTranslatef( (gScreenInfo.getGameCanvasWidth() / (fact * scale) - 3609) / 2, yPos / (fact * scale) - 594 / 2, 0);      
-   
-   glRotatef(angle, 0, 0, 1);
 
    U32 pos = 0;
 
@@ -1674,8 +1671,22 @@ void renderBitfighterLogo(S32 yPos, F32 scale, F32 angle, U32 mask)
    if(mask & 1 << 1)
       glDrawArrays(GL_LINE_LOOP, pos, LetterLoc13);
 
-   glPopMatrix();
    glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+
+// Draw logo centered on screen horzontally, and on yPos vertically, scaled and rotated according to parameters
+void renderBitfighterLogo(S32 yPos, F32 scale, U32 mask)
+{
+   const F32 fact = 0.15 * scale;   // Scaling factor to make the coordinates below fit nicely on the screen (derived by trial and error)
+   
+   // 3609 is the diff btwn the min and max x coords below, 594 is same for y
+
+   glPushMatrix();
+      glTranslatef((gScreenInfo.getGameCanvasWidth() - 3609 * fact) / 2, yPos - 594 * fact / 2, 0);
+      glScalef(fact, fact, 0);                   // Scale it down...
+      renderBitfighterLogo(mask);
+   glPopMatrix();
 }
 
 

@@ -564,7 +564,7 @@ void Ship::processEnergy()
    // Are these checked on the server side?
    for(S32 i = 0; i < ShipModuleCount; i++)   
       // If you have passive module, it's always active, no restrictions, but is off for energy consumption purposes
-      if(getGame()->getModuleInfo(mModule[i])->getModuleType() == ModuleUsePassive)    
+      if(getGame()->getModuleInfo(mModule[i])->getUseType() == ModuleUsePassive)    
          mModuleActive[mModule[i]] = false;         
 
       // No (active) modules if we're too hot or game has disallowed them

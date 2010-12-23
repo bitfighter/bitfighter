@@ -186,7 +186,7 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    // Are data connections allowed?
    if(!gIniSettings.allowDataConnections)
    {
-      logprintf("User tried to connect");
+      logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
       disconnect(ReasonConnectionsForbidden, "");
       return;
    }
@@ -264,7 +264,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
 }
 
 
-// When client has finished sending its data, it sends a commandComplete message, that triggers the server to disconnect the client
+// When client has finished sending its data, it sends a commandComplete message, which triggers the server to disconnect the client
 TNL_IMPLEMENT_RPC(DataConnection, c2sCommandComplete, (), (), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {

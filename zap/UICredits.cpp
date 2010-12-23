@@ -294,27 +294,27 @@ void SplashUserInterface::render()
 
          S32 ctr = gScreenInfo.getGameCanvasHeight() / 2;
 
-         renderBitfighterLogo(ctr, fr * 20.0f + 1, 0, 1 << 0);
-         renderBitfighterLogo(ctr, fr * 50.0f + 1, 0, 1 << 1);
-         renderBitfighterLogo(ctr, fr * 10.0f + 1, 0, 1 << 2);
-         renderBitfighterLogo(ctr, fr *  2.0f + 1, 0, 1 << 3);
-         renderBitfighterLogo(ctr, fr * 14.0f + 1, 0, 1 << 4);
-         renderBitfighterLogo(ctr, fr *  6.0f + 1, 0, 1 << 5);
-         renderBitfighterLogo(ctr, fr * 33.0f + 1, 0, 1 << 6);
-         renderBitfighterLogo(ctr, fr *  9.0f + 1, 0, 1 << 7);
-         renderBitfighterLogo(ctr, fr * 25.0f + 1, 0, 1 << 8);
-         renderBitfighterLogo(ctr, fr * 15.0f + 1, 0, 1 << 9);
+         renderBitfighterLogo(ctr, fr * 20.0f + 1, 1 << 0);
+         renderBitfighterLogo(ctr, fr * 50.0f + 1, 1 << 1);
+         renderBitfighterLogo(ctr, fr * 10.0f + 1, 1 << 2);
+         renderBitfighterLogo(ctr, fr *  2.0f + 1, 1 << 3);
+         renderBitfighterLogo(ctr, fr * 14.0f + 1, 1 << 4);
+         renderBitfighterLogo(ctr, fr *  6.0f + 1, 1 << 5);
+         renderBitfighterLogo(ctr, fr * 33.0f + 1, 1 << 6);
+         renderBitfighterLogo(ctr, fr *  9.0f + 1, 1 << 7);
+         renderBitfighterLogo(ctr, fr * 25.0f + 1, 1 << 8);
+         renderBitfighterLogo(ctr, fr * 15.0f + 1, 1 << 9);
       }
    }
    else if(mPhase == 2)           // Resting phase
    {
       glColor3f(0, 0, 1);
-      renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 1, 0);
+      renderBitfighterLogo(gScreenInfo.getGameCanvasHeight() / 2, 1);
    }
    else if(mPhase == 3)           // Rising phase
    {
       glColor3f(0, sqrt(1 - mSplashTimer.getFraction()), 1 - pow(1 - mSplashTimer.getFraction(), 2));
-      renderBitfighterLogo((S32)(73.0f + ((F32) gScreenInfo.getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1, 0);
+      renderBitfighterLogo((S32)(73.0f + ((F32) gScreenInfo.getGameCanvasHeight() / 2.0f - 73.0f) * mSplashTimer.getFraction()), 1);
    }
 }
 
