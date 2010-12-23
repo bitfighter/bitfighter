@@ -2022,7 +2022,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                    NO_NUMBER, alpha);   
 
    // Draw "two-point" items
-   if(item.geomType() == geomSimpleLine && ((mShowMode != ShowWallsOnly) || item.mDockItem || mShowingReferenceShip))    
+   if(item.geomType() == geomSimpleLine && (mShowMode != ShowWallsOnly || item.mDockItem || mShowingReferenceShip))    
    {
       if(item.mDockItem)
          dest = item.vert(1);
@@ -2287,11 +2287,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       // NavMeshZone verts will be drawn elsewhere
-      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && !item.mDockItem && item.index != ItemNavMeshZone)  
+      if((item.geomType() == geomLine || mShowMode != ShowWallsOnly) && 
+                  !item.mDockItem && item.index != ItemNavMeshZone)  
          renderLinePolyVertices(item, alpha);                               
    }
  
-   else if(mShowMode != ShowWallsOnly || item.mDockItem || mShowingReferenceShip)   // Draw the various point items
+   else if(mShowMode != ShowWallsOnly || 
+                        item.mDockItem || mShowingReferenceShip)   // Draw the various point items
    {
       Color c = hideit ? grayedOutColorDim : getTeamColor(item.team);           // And a color (based on team affiliation)
 
@@ -2486,7 +2488,8 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       // If this is an item that has a repop attribute, and the item is selected, draw the text
       if(!item.mDockItem && itemDef[item.index].hasRepop)
       {
-         if(mShowMode != ShowWallsOnly && ((item.selected || item.litUp) && mEditingSpecialAttrItem == NONE) &&
+         if(mShowMode != ShowWallsOnly && 
+            ((item.selected || item.litUp) &&  mEditingSpecialAttrItem == NONE) &&
             (item.index != ItemFlagSpawn || !strcmp(mGameType, "HuntersGameType")) || isBeingEdited)
          {
             glColor(white);
@@ -2530,7 +2533,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       // Draw highlighted border around item if selected
-      if((mShowMode != ShowWallsOnly) && (item.selected || item.litUp))  
+      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp))  
       {
          // Dock items are never selected, but they can be highlighted
          Point pos = item.mDockItem ? item.vert(0) : convertLevelToCanvasCoord(item.vert(0));   
@@ -2563,8 +2566,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       // Add a label if we're hovering over it (or not, unless it's on the dock, where we've already labeled our items)
       // For the moment, we need special handling for turrets & forcefields :-(
-      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && itemDef[item.index].onScreenName && !item.mDockItem 
-            && !((item.index == ItemTurret || item.index == ItemForceField) && item.renderFull(mCurrentScale)))
+      if(mShowMode != ShowWallsOnly && (item.selected || item.litUp) && 
+            itemDef[item.index].onScreenName && !item.mDockItem &&
+            !((item.index == ItemTurret || item.index == ItemForceField) && item.renderFull(mCurrentScale)))
       {
          glColor(drawColor);
          drawStringc(pos.x, pos.y - labelSize * 2 - 5, labelSize, itemDef[item.index].onScreenName); // Label on top
@@ -2922,7 +2926,8 @@ void EditorUserInterface::findHitVertex(Point canvasPos, S32 &hitItem, S32 &hitV
          if(x && !mItems[i].selected && !mItems[i].anyVertsSelected())
             continue;
 
-         if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)  // Only select walls in CTRL-A mode
+         if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker ||
+            mShowMode == NavZoneMode && mItems[i].index != ItemNavMeshZone )        // Only select walls in CTRL-A mode
             continue;
 
          if(mItems[i].geomType() <= geomPoint)
@@ -2967,6 +2972,8 @@ void EditorUserInterface::findHitItemAndEdge()
          if(mShowMode == ShowWallsOnly && mItems[i].index != ItemBarrierMaker)     // Only select walls in CTRL-A mode...
             continue;                                                              // ...so if it's not a wall, proceed to next item
 
+         if(mShowMode == NavZoneMode && mItems[i].index != ItemNavMeshZone)        // Only select zones in CTRL-A mode...
+            continue;                                                              // ...so if it's not a bot nav zone, proceed to next item
 
          if(mItems[i].geomType() == geomPoint)
          {
@@ -3019,6 +3026,8 @@ void EditorUserInterface::findHitItemAndEdge()
    for(S32 i = 0; i < mItems.size(); i++)
    {
       if(mShowMode == ShowAllButNavZones && mItems[i].index == ItemNavMeshZone)     // Don't select NavMeshZones while they're hidden
+         continue;
+      if(mShowMode == NavZoneMode && mItems[i].index != ItemNavMeshZone)
          continue;
 
       if(mItems[i].geomType() == geomPoly)
@@ -3808,21 +3817,24 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
       else     // Start creating a new poly or new polyline (tilda key + right-click ==> start polyline)
       {
-         GameItems type;
-
-         if(getKeyState(KEY_TILDE))
+         if(mShowMode != NavZoneMode)     // Unless we're in navZoneMode, that is
          {
-            mCreatingPolyline = true;
-            type = ItemLineItem;
-         }
-         else
-         {
-            mCreatingPoly = true;
-            type = ItemBarrierMaker;
-         }
+            GameItems type;
 
-         mNewItem = WorldItem(type, snapPoint(convertCanvasToLevelCoord(mMousePos)), TEAM_NEUTRAL, false,
-                              type == ItemBarrierMaker ? Barrier::BarrierWidth : 2);
+            if(getKeyState(KEY_TILDE))
+            {
+               mCreatingPolyline = true;
+               type = ItemLineItem;
+            }
+            else
+            {
+               mCreatingPoly = true;
+               type = ItemBarrierMaker;
+            }
+
+            mNewItem = WorldItem(type, snapPoint(convertCanvasToLevelCoord(mMousePos)), TEAM_NEUTRAL, false,
+                                 type == ItemBarrierMaker ? Barrier::BarrierWidth : 2);
+         }
       }
    }
    else if(keyCode == MOUSE_LEFT)
