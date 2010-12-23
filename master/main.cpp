@@ -532,18 +532,26 @@ public:
                first = false;
             }
 
-         // Next the player names
+         // Next the player names      // "players": [ "chris", "colin", "fred", "george", "Peter99" ],
          fprintf(f, "\n\t],\n\t\"players\": [");
+         first = true;
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         {
+            fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
+            first = false;
+         }
 
-            first = true;
-            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
-            {
-               fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
-               first = false;
-            }
+         // Authentication status      // "authenticated": [ true, false, false, true, true ],
+         fprintf(f, "],\n\t\"authenticated\": [");
+         first = true;
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         {
+            fprintf(f, "%s%s", first ? "":", ", walk->mAuthenticated ? "true" : "false");
+            first = false;
+         }
 
-            // Finally, the player and server counts
-            fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d\n}\n", serverCount, playerCount);
+         // Finally, the player and server counts
+         fprintf(f, "],\n\t\"serverCount\": %d,\n\t\"playerCount\": %d\n}\n", serverCount, playerCount);
 
          fflush(f);
          fclose(f);
@@ -571,6 +579,7 @@ public:
          }
       ],
       "players": [ "chris", "colin", "fred", "george", "Peter99" ],
+      "authenticated": [ true, false, false, true, true ],
       "serverCount": 2,
       "playerCount": 5
    }
