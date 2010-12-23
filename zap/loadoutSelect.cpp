@@ -114,7 +114,7 @@ void LoadoutHelper::render()
 
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
-   for(U32 i = 0; i < list->size(); i++)
+   for(U32 i = 0; i < (U32)list->size(); i++)
    {
       bool selected = false;
 
