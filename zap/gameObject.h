@@ -193,9 +193,9 @@ public:
    enum IdleCallPath {
       ServerIdleMainLoop,              // Idle called from top-level idle loop on server
       ServerIdleControlFromClient,
-      ClientIdleMainRemote,            // Idle run on the client --???--
+      ClientIdleMainRemote,            // On client, when object is not our control object
       ClientIdleControlMain,           // On client, when object is our control object
-      ClientIdleControlReplay,         // On client, when object is not our control object
+      ClientIdleControlReplay,
    };
 
    virtual void idle(IdleCallPath path);

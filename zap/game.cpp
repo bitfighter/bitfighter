@@ -1057,6 +1057,10 @@ void ClientGame::idle(U32 timeDelta)
      // Don't saturate server with moves...
 	  if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
      { 
+         // Limited MaxPendingMoves only allows sending a few moves at a time. changing MaxPendingMoves may break compatibility with old version server/client.
+         // If running at 1000 FPS and 300 ping it will try to add more then MaxPendingMoves, losing control horribly.
+         // Without the unlimited shield fix, the ship would also go super slow motion with over the limit MaxPendingMoves.
+         // With 100 FPS limit, time is never less then 10 milliseconds. (1000 / millisecs = FPS), may be changed in .INI [Settings] MinClientDelay
          mConnectionToServer->addPendingMove(theMove);
          prevTimeDelta = 0;
       }

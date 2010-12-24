@@ -278,7 +278,8 @@ void ControlObjectConnection::addToTimeCredit(U32 timeAmount)
          Move move = controlObject->getCurrentMove();
          move.time = mMoveTimeCredit - MaxMoveTimeCredit;
          controlObject->setCurrentMove(move);
-         controlObject->idle(GameObject::ClientIdleControlReplay);
+         controlObject->idle(GameObject::ServerIdleControlFromClient);
+
       }
       mMoveTimeCredit = MaxMoveTimeCredit;
    }
