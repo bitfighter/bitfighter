@@ -1689,6 +1689,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
               
             netInterface->checkIncomingPackets();
             netInterface->processConnections();
+		    Sleep(5);              //don't eat CPU power
          }
 
          delete netInterface;
