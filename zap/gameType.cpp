@@ -2371,7 +2371,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       else
       {
          F32 time = atof(args[0].getString());
-         if(time <= 0)
+         if(time < 0)  //allow zero minutes, to turn off time limit
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
          else
          {

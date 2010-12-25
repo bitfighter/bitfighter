@@ -1689,7 +1689,12 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
               
             netInterface->checkIncomingPackets();
             netInterface->processConnections();
-		    Sleep(5);              //don't eat CPU power
+            Sleep(1);              //don't eat CPU power
+            if((!started) && (!dataConn))
+            {
+               printf("Failed to connect");
+               started=true;  //to get out of this loop.
+            }
          }
 
          delete netInterface;

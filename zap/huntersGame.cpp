@@ -514,6 +514,9 @@ void HuntersFlagItem::dropFlags(U32 flags)
    if(!mMount.isValid())
       return;
 
+   if(isGhost())  //avoid problem with adding flag to client, when it doesn't really exist on server.
+      return;
+
    for(U32 i = 0; i < flags; i++)
       releaseFlag(getGame(), mMount->getActualPos(), mMount->getActualVel());
 
