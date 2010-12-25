@@ -55,10 +55,10 @@ string itos(S32 i)
 }
 
 
-string ftos(F32 f)
+string ftos(F32 f, S32 digits)
 {
    char outString[100];
-   dSprintf(outString, sizeof(outString), "%f", f);
+   dSprintf(outString, sizeof(outString), (string("%2.") + itos(digits) + "f").c_str(), f);
    return outString;
 }
 

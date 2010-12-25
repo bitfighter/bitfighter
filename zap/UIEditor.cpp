@@ -3714,7 +3714,7 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 
    
 extern string itos(S32);
-extern string ftos(F32);
+extern string ftos(F32, S32);
 
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)

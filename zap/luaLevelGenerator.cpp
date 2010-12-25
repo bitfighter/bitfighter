@@ -180,7 +180,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
    try
    {
       F32 width = getFloat(L, 1, methodName);      // Width is first arg
-      line += " " + ftos(width);
+      line += " " + ftos(width, 1);
       //barrier.solid = getBool(L, 2, methodName);       // Solid param is second arg
 
       // Third arg is a table of coordinate values in "editor space" (i.e. these will be multiplied by gridsize before being used)
@@ -189,7 +189,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       for(S32 i = 1; i <= points; i++)       // Remember, Lua tables start with index 1
       {
          Point p = getPointFromTable(L, 3, i);
-         line = line + " " + ftos(p.x) + " " + ftos(p.y);
+         line = line + " " + ftos(p.x, 2) + " " + ftos(p.y, 2);
       }
    }
 

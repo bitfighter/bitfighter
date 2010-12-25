@@ -240,7 +240,7 @@ public:
    virtual MenuItemTypes getItemType() { return TimeCounterMenuItemType; }
    virtual void setValue (const string &val) { mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5 ; }
    virtual string getValueForDisplayingInMenu() { return itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60); }
-   virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f); }
+   virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f, 3); }
 };
 
 
