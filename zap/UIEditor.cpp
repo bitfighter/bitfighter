@@ -554,7 +554,7 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
 
       // Save the args (which we already have split out) for easier handling in the Game Parameter Editor
       for(U32 i = 1; i < argc; i++)
-         gEditorUserInterface.mGameTypeArgs.push_back(atoi(argv[i]));
+         gEditorUserInterface.mGameTypeArgs.push_back(argv[i]);
    }
 
    else if(!strcmp(argv[0], "GridSize"))
@@ -3714,6 +3714,7 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 
    
 extern string itos(S32);
+extern string ftos(F32, S32);
 
 // Handle key presses
 void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)

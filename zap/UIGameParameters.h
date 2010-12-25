@@ -47,17 +47,16 @@ class SavedMenuItem
 private:
    string mParamName;
    string mParamVal;
-   S32 mParamIVal;
+
 public:
    SavedMenuItem() { /* Unused */ }    // Default constructor
 
    SavedMenuItem(MenuItem *menuItem) { mParamName = menuItem->getText(); setValues(menuItem); }
 
-   void setValues(MenuItem *menuItem) { mParamVal = menuItem->getValue(); mParamIVal = menuItem->getIntValue(); }
+   void setValues(MenuItem *menuItem) { mParamVal = menuItem->getValueForWritingToLevelFile(); }
 
    string getParamName() { return mParamName; }
    string getParamVal() { return mParamVal; }
-   S32 getParamIVal() { return mParamIVal; }
 };
 
 ////////////////////////////////////

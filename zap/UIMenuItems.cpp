@@ -131,7 +131,8 @@ void CounterMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
    if(mValue == mMinValue && mMinMsg != "")
       UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mMinMsg.c_str());
    else
-      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), (itos(mValue) + " " + mUnits).c_str());
+      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), 
+                                           (getValueForDisplayingInMenu() + " " + mUnits).c_str());
 }
 
 
@@ -139,12 +140,12 @@ bool CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)  
    {
-      increment(getKeyState(KEY_SHIFT) ? 10 : 1);
+      increment(getKeyState(KEY_SHIFT) ? getBigIncrement() : 1);
       return true;
    }
    else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
    {
-      decrement(getKeyState(KEY_SHIFT) ? 10 : 1);
+      decrement(getKeyState(KEY_SHIFT) ? getBigIncrement() : 1);
       return true;
    }
 
@@ -168,6 +169,19 @@ void CounterMenuItem::decrement(S32 fact)
    if(mValue < mMinValue) 
       mValue = mMinValue; 
 }
+
+
+////////////////////////////////////
+////////////////////////////////////
+
+//void TimeCounterMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
+//{
+//   if(mValue == mMinValue && mMinMsg != "")
+//      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), mMinMsg.c_str());
+//   else
+//      UserInterface::drawCenteredStringPair(ypos, textsize, color, Color(0,1,1), getText(), (itos(mValue) + " " + mUnits).c_str());
+//
+//}
 
 
 ////////////////////////////////////

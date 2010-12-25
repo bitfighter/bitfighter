@@ -502,7 +502,7 @@ public:
    void saveUndoState();
 
    char mGameType[gameTypeLen];
-   Vector<S32> mGameTypeArgs;
+   Vector<string> mGameTypeArgs;
 
    void syncUnmovedItems();
 

@@ -301,24 +301,24 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          if(!stricmp(words[0].c_str(), "GridSize"))
          {
             S32 gridSize = max(min(atoi(words[1].c_str()), Game::MAX_GRID_SIZE), Game::MIN_GRID_SIZE);
-            menuItems[OPT_GRIDSIZE]->setValue(gridSize);
+            menuItems[OPT_GRIDSIZE]->setIntValue(gridSize);
          }
          else if(!stricmp(words[0].c_str(), "MinPlayers"))
          {
             S32 minPlayers = max(min(atoi(words[1].c_str()), gMaxPlayers), 0);
-            menuItems[OPT_MIN_PLAYERS]->setValue(minPlayers);
+            menuItems[OPT_MIN_PLAYERS]->setIntValue(minPlayers);
          }
          else if(!stricmp(words[0].c_str(), "MaxPlayers"))
          {
             S32 maxPlayers = max(min(atoi(words[1].c_str()), gMaxPlayers), 0);
-            menuItems[OPT_MAX_PLAYERS]->setValue(maxPlayers);
+            menuItems[OPT_MAX_PLAYERS]->setIntValue(maxPlayers);
          }
          else if(!stricmp(words[0].c_str(), "Specials"))
          {
             for(S32 i = 1; i < words.size(); i++)
             {
                if(!stricmp(words[i].c_str(), "Engineer"))
-                  menuItems[OPT_ENGINEER]->setValue(1);
+                  menuItems[OPT_ENGINEER]->setValue("yes");
             }
          }
       }
@@ -335,7 +335,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          for(S32 j = 0; j < savedMenuItems.size(); j++)
             if(menuItems[i]->getString() == savedMenuItems[j].getParamName())    // Found a match
             {
-               menuItems[i]->setValue(savedMenuItems[j].getParamIVal());
+               menuItems[i]->setValue(savedMenuItems[j].getParamVal());
                break;
             }
 }
@@ -349,8 +349,9 @@ void GameParamUserInterface::onEscape()
    strcpy(gEditorUserInterface.mGameType, gGameTypeNames[gameTypeIndex]);   // Save current game type
 
    // Compose GameType string from GameType and level-specific params
-   gEditorUserInterface.setLevelFileName(menuItems[OPT_FILENAME]->getValue());   // Save level file name if it changed. Or hell, even if it didn't
-   gEditorUserInterface.setLevelGenScriptName(menuItems[OPT_SCRIPT]->getValue());
+   // Save level file name if it changed. Or hell, even if it didn't
+   gEditorUserInterface.setLevelFileName(menuItems[OPT_FILENAME]->getValueForWritingToLevelFile());  
+   gEditorUserInterface.setLevelGenScriptName(menuItems[OPT_SCRIPT]->getValueForWritingToLevelFile());
 
    gEditorUserInterface.setGridSize(menuItems[OPT_GRIDSIZE]->getIntValue()); 
    buildGameParamList();
@@ -385,22 +386,22 @@ void GameParamUserInterface::buildGameParamList()
    for(S32 i = FIRST_GAME_SPECIFIC_PARAM; i < FIRST_GAME_SPECIFIC_PARAM + mGameSpecificParams; i++)
    {
       // Add the game type parameters to the header one by one, separated by a space
-      gameTypeHeader += " " + itos(menuItems[i]->getIntValue());
+      gameTypeHeader += " " + menuItems[i]->getValueForWritingToLevelFile();
 
       // Save the already-parsed GameType args in a vector for use if we re-enter this interface
-      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getIntValue());  
+      gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getValueForWritingToLevelFile());  
    }
 
    // Compose other game description strings
    gameParams.push_back(gameTypeHeader);
-   gameParams.push_back("LevelName "        + menuItems[OPT_LEVEL_NAME]->getValue());
-   gameParams.push_back("LevelDescription " + menuItems[OPT_LEVEL_DESCR]->getValue());
-   gameParams.push_back("LevelCredits "     + menuItems[OPT_CREDITS]->getValue());
-   gameParams.push_back("Script "           + menuItems[OPT_SCRIPT]->getValue());
-   gameParams.push_back("GridSize "         + menuItems[OPT_GRIDSIZE]->getValue());
-   gameParams.push_back("MinPlayers "       + menuItems[OPT_MIN_PLAYERS]->getValue());
-   gameParams.push_back("MaxPlayers "       + menuItems[OPT_MAX_PLAYERS]->getValue());
-   gameParams.push_back("Specials"          + menuItems[OPT_ENGINEER]->getValue());
+   gameParams.push_back("LevelName "        + menuItems[OPT_LEVEL_NAME]->getValueForWritingToLevelFile());
+   gameParams.push_back("LevelDescription " + menuItems[OPT_LEVEL_DESCR]->getValueForWritingToLevelFile());
+   gameParams.push_back("LevelCredits "     + menuItems[OPT_CREDITS]->getValueForWritingToLevelFile());
+   gameParams.push_back("Script "           + menuItems[OPT_SCRIPT]->getValueForWritingToLevelFile());
+   gameParams.push_back("GridSize "         + menuItems[OPT_GRIDSIZE]->getValueForWritingToLevelFile());
+   gameParams.push_back("MinPlayers "       + menuItems[OPT_MIN_PLAYERS]->getValueForWritingToLevelFile());
+   gameParams.push_back("MaxPlayers "       + menuItems[OPT_MAX_PLAYERS]->getValueForWritingToLevelFile());
+   gameParams.push_back("Specials"          + menuItems[OPT_ENGINEER]->getValueForWritingToLevelFile() == "yes" ? " Engineer" : "");
 }
 
 

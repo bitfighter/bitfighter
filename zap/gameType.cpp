@@ -155,7 +155,7 @@ bool GameType::processArguments(S32 argc, const char **argv)
 // Create some game-specific menu items for the GameParameters menu
 void GameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   menuItems.push_back(new CounterMenuItem("Game Time:", 8, 1, 1, 99, "mins", "", "Time game will last"));
+   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 30, 99*60, "", "Time game will last"));
    menuItems.push_back(new CounterMenuItem("Score to Win:", 10, 1, 1, 99, "points", "", "Game ends when one team gets this score"));
 }
 
