@@ -42,6 +42,7 @@ enum MenuItemTypes {
    MenuItemType,
    ToggleMenuItemType,
    CounterMenuItemType,
+   TimeCounterMenuItemType,
    EditableMenuItemType,   
    PlayerMenuItemType,
    TeamMenuItemType
@@ -95,16 +96,17 @@ public:
    const char *getText() { return mText.c_str(); }
    S32 getIndex() { return mIndex; }
    string getString() { return mText; }
-
    virtual void setSecret(bool secret) { /* Do nothing */ }
 
    // When enter is pressed, should selection advance to the next item?
    virtual void setEnterAdvancesItem(bool enterAdvancesItem) { mEnterAdvancesItem = enterAdvancesItem; }
    
    virtual const char *getSpecialEditingInstructions() { return ""; }
-   virtual string getValue() { return ""; }
+   virtual string getValueForDisplayingInMenu() { return ""; }
    virtual S32 getIntValue() { return 0; }
-   virtual void setValue(S32 val) { /* Do nothing */ }
+   virtual string getValueForWritingToLevelFile() { return itos(getIntValue()); }
+   virtual void setValue(const string &val) { /* Do nothing */ }
+   virtual void setIntValue(S32 val) { /* Do nothing */ }
 
    virtual bool handleKey(KeyCode keyCode, char ascii);
    virtual void setFilter(LineEditor::LineEditorFilter filter) { /* Do nothing */ }
@@ -137,7 +139,7 @@ public:
    }
 
    virtual MenuItemTypes getItemType() { return ToggleMenuItemType; }
-   virtual string getValue() { return mValue; }
+   virtual string getValueForDisplayingInMenu() { return mValue; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
    virtual S32 getValueIndex() { return mIndex; }
 
@@ -166,8 +168,9 @@ public:
       mOptions.push_back("Yes");    // 1
    }
 
-   virtual string getValue() { return mIndex ? " Engineer" : ""; }
-   virtual void setValue(S32 val) { mIndex = (val == 0) ? 0 : 1; }
+   virtual string getValueForDisplayingInMenu() { return mIndex ? " Engineer" : ""; }
+   virtual string getValueForWritingToLevelFile() { return mIndex ? "yes" : "no"; }
+   virtual void setValue(const string &val) { mIndex = (val == "yes") ? 1 : 0; }
 };
 
 ////////////////////////////////////////
@@ -175,7 +178,7 @@ public:
 
 class CounterMenuItem : public MenuItem
 {
-private:
+protected:
    S32 mValue;
    S32 mStep;
    S32 mMinValue;
@@ -185,6 +188,7 @@ private:
 
    virtual void increment(S32 fact = 1); 
    virtual void decrement(S32 fact = 1);
+   virtual S32 getBigIncrement() { return 10; }    // How much our counter is incremented when shift is down (multiplier)
 
 public:
    CounterMenuItem(string title, S32 value, S32 step, S32 minVal, S32 maxVal, string units, string minMsg, string help, 
@@ -203,14 +207,40 @@ public:
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
 
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
-   virtual string getValue() { return itos(mValue); }
+   virtual string getValueForDisplayingInMenu() { return itos(mValue); }
    const char *getUnits() { return mUnits.c_str(); }
    virtual S32 getIntValue() { return mValue; }
-   virtual void setValue(S32 value) { mValue = value; }
+   virtual void setValue(const string &val) { mValue = atoi(val.c_str()); }
+   virtual void setIntValue(S32 val) { mValue = val; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(KeyCode keyCode, char ascii);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class TimeCounterMenuItem : public CounterMenuItem
+{
+protected:
+   virtual S32 getBigIncrement() { return 12; }    // 12 * 5sec = 1 minute
+
+public:
+   TimeCounterMenuItem(string title, S32 value, S32 minVal, S32 maxVal, string minMsg, string help, 
+                   KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+      CounterMenuItem(title, value, 5, minVal, maxVal, "mins", minMsg, help, k1, k2, color)
+   {
+      // Do nothing
+   }
+
+   //virtual void render(S32 ypos, S32 textsize, bool isSelected);
+
+   virtual MenuItemTypes getItemType() { return TimeCounterMenuItemType; }
+   virtual void setValue (const string &val) { mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5 ; }
+   virtual string getValueForDisplayingInMenu() { return itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60); }
+   virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f); }
 };
 
 
@@ -243,7 +273,8 @@ public:
    LineEditor getLineEditor() { return mLineEditor; }
    void setLineEditor(LineEditor editor) { mLineEditor = editor; }
 
-   virtual string getValue() { return mLineEditor.getString(); }
+   virtual string getValueForWritingToLevelFile() { return mLineEditor.getString(); }
+   virtual string getValueForDisplayingInMenu() { return mLineEditor.getString(); }
    virtual void setFilter(LineEditor::LineEditorFilter filter) { mLineEditor.setFilter(filter); }
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }

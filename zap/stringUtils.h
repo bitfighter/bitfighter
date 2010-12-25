@@ -42,6 +42,7 @@ string ExtractDirectory(const std::string& path);
 string ExtractFilename(const std::string& path);
 
 string itos(int i);
+string ftos(float f);
 
 TNL::Vector<string> parseString(const string &line);
 

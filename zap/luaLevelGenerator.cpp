@@ -162,12 +162,12 @@ Point getPointFromTable(lua_State *L, int tableIndex, int key)
 }
 
 
-string ftos(F32 i) // convert float to string
-{
-   char outString[100];
-   dSprintf(outString, sizeof(outString), "%2.2f", i);
-   return outString;
-}
+//string ftos(F32 i) // convert float to string
+//{
+//   char outString[100];
+//   dSprintf(outString, sizeof(outString), "%2.2f", i);
+//   return outString;
+//}
 
 
 S32 LuaLevelGenerator::addWall(lua_State *L)

@@ -55,6 +55,14 @@ string itos(S32 i)
 }
 
 
+string ftos(F32 f)
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), "%f", f);
+   return outString;
+}
+
+
 //// From http://stackoverflow.com/questions/11635/case-insensitive-string-comparison-in-c
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2) {
 //    if (str1.size() != str2.size()) {

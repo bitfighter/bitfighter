@@ -188,7 +188,7 @@ void HuntersGameType::itemDropped(Ship *ship, Item *item)
 // Create some game-specific menu items for the GameParameters menu from the arguments processed above...
 void HuntersGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   menuItems.push_back(new CounterMenuItem("Game Time:", 8, 1, 1, 99, "mins", "", "Time game will last"));
+   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 30, 99*60, "", "Time game will last"));
    menuItems.push_back(new CounterMenuItem("Time for Nexus to Open:", 1, 1, 1, 99, "mins", "", "Time it takes for the Nexus to open"));
    menuItems.push_back(new CounterMenuItem("Time Nexus Remains Open:", 30, 1, 1, 99, "secs", "", "Time that the Nexus will remain open"));
    menuItems.push_back(new CounterMenuItem("Score to Win:", 5000, 100, 100, 20000, "points", "", "Game ends when one player or team gets this score"));

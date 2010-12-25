@@ -973,8 +973,8 @@ static void nameAndPasswordAcceptCallback(U32 unused)
 
    gClientGame->resetMasterConnectTimer();
 
-   gIniSettings.lastName     = gClientInfo.name = gNameEntryUserInterface.menuItems[1]->getValue();
-   gIniSettings.lastPassword = gPlayerPassword  = gNameEntryUserInterface.menuItems[2]->getValue();
+   gIniSettings.lastName     = gClientInfo.name = gNameEntryUserInterface.menuItems[1]->getValueForWritingToLevelFile();
+   gIniSettings.lastPassword = gPlayerPassword  = gNameEntryUserInterface.menuItems[2]->getValueForWritingToLevelFile();
 
    saveSettingsToINI();             // Get that baby into the INI file
 
@@ -1115,11 +1115,11 @@ void HostMenuUserInterface::onEscape()
 // Save parameters in INI file
 void HostMenuUserInterface::saveSettings()
 {
-   gHostName            = gIniSettings.hostname            = menuItems[OPT_NAME]->getValue();
-   gHostDescr           = gIniSettings.hostdescr           = menuItems[OPT_DESCR]->getValue();
-   gLevelChangePassword = gIniSettings.levelChangePassword = menuItems[OPT_LVL_PASS]->getValue();
-   gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValue();    
-   gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValue();
+   gHostName            = gIniSettings.hostname            = menuItems[OPT_NAME]->getValueForWritingToLevelFile();
+   gHostDescr           = gIniSettings.hostdescr           = menuItems[OPT_DESCR]->getValueForWritingToLevelFile();
+   gLevelChangePassword = gIniSettings.levelChangePassword = menuItems[OPT_LVL_PASS]->getValueForWritingToLevelFile();
+   gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValueForWritingToLevelFile();    
+   gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValueForWritingToLevelFile();
 
    saveSettingsToINI();
 }
