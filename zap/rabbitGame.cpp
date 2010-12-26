@@ -104,7 +104,7 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv)
 // Create some game-specific menu items for the GameParameters menu from the arguments processed above...
 void RabbitGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuItems)
 {
-   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 30, 99*60, "", "Time game will last"));
+   menuItems.push_back(new TimeCounterMenuItem("Game Time:", 8 * 60, 99*60, "Time game will last"));
    menuItems.push_back(new CounterMenuItem("Score to Win:", 60, 5, 5, 500, "points", "", "Game ends when one player or team gets this score"));
    menuItems.push_back(new CounterMenuItem("Flag Return Timer:", 10, 1, 1, 99, "secs", "", "Time it takes for an uncaptured flag to return home"));
    menuItems.push_back(new CounterMenuItem("Point Earn Rate:", 30, 1, 1, 99, "points per minute", "", "Rate player holding the flag accrues points"));

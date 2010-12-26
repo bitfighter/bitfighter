@@ -228,12 +228,13 @@ protected:
    virtual S32 getBigIncrement() { return 12; }    // 12 * 5sec = 1 minute
 
 public:
-   TimeCounterMenuItem(string title, S32 value, S32 minVal, S32 maxVal, string minMsg, string help, 
+   TimeCounterMenuItem(string title, S32 value, S32 maxVal, string help, 
                    KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
-      CounterMenuItem(title, value, 5, minVal, maxVal, "mins", minMsg, help, k1, k2, color)
+      CounterMenuItem(title, value, 5, 0, maxVal, "mins", "Unlimited", help, k1, k2, color)
    {
       // Do nothing
    }
+
 
    //virtual void render(S32 ypos, S32 textsize, bool isSelected);
 
