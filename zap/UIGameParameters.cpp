@@ -163,6 +163,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
       {
          bool found = false;
 
+         // Would be more efficient with a dictionary
          if(savedMenuItems.size())
             for(S32 j = 0; j < savedMenuItems.size(); j++)
                if(savedMenuItems[j].getParamName() == menuItems[i]->getString())   // Overwrite already saved parameters
@@ -282,20 +283,12 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    mQuitItemIndex = menuItems.size() - 1;
 
    // Now populate the menu with values derived from our saved values
-
    if(gameParams.size())
    {
       const string delimiters = " \t";       // Spaces or tabs will delimit our lines
+
       for(S32 i = 0; i < gameParams.size(); i++)
       {
-         //string str = gameParams[i];
-         //string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
-         //string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
-
-         //string token = str.substr(lastPos, pos - lastPos);
-         //lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"
-         //string val = str.substr(lastPos, str.size() - lastPos);
-
          Vector<string> words = parseString(gameParams[i]);
 
          if(!stricmp(words[0].c_str(), "GridSize"))
@@ -341,7 +334,6 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 }
 
 
-
 // Runs as we're exiting the menu
 void GameParamUserInterface::onEscape()
 {
@@ -381,7 +373,7 @@ void GameParamUserInterface::buildGameParamList()
 
    // GameType string -- value stored in the LineEditor is a "pretty name".  This looks up the "official" value.
    gameTypeHeader += gGameTypeNames[gameTypeIndex];
-
+   
    // Build up GameType string parameter by parameter... all game specific params go on the GameType line
    for(S32 i = FIRST_GAME_SPECIFIC_PARAM; i < FIRST_GAME_SPECIFIC_PARAM + mGameSpecificParams; i++)
    {
@@ -392,6 +384,7 @@ void GameParamUserInterface::buildGameParamList()
       gEditorUserInterface.mGameTypeArgs.push_back(menuItems[i]->getValueForWritingToLevelFile());  
    }
 
+   for(S32 i = 0; i < gameParams.size(); i++)  logprintf("GP %d = %s", i, gameParams[i].c_str());     // XXXXX
    // Compose other game description strings
    gameParams.push_back(gameTypeHeader);
    gameParams.push_back("LevelName "        + menuItems[OPT_LEVEL_NAME]->getValueForWritingToLevelFile());
@@ -401,7 +394,7 @@ void GameParamUserInterface::buildGameParamList()
    gameParams.push_back("GridSize "         + menuItems[OPT_GRIDSIZE]->getValueForWritingToLevelFile());
    gameParams.push_back("MinPlayers "       + menuItems[OPT_MIN_PLAYERS]->getValueForWritingToLevelFile());
    gameParams.push_back("MaxPlayers "       + menuItems[OPT_MAX_PLAYERS]->getValueForWritingToLevelFile());
-   gameParams.push_back("Specials"          + menuItems[OPT_ENGINEER]->getValueForWritingToLevelFile() == "yes" ? " Engineer" : "");
+   gameParams.push_back("Specials"          + string(menuItems[OPT_ENGINEER]->getValueForWritingToLevelFile() == "yes" ? " Engineer" : ""));
 }
 
 

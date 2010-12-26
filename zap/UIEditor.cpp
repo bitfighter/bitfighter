@@ -621,6 +621,7 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       if(i < argc - 1)
          temp += " ";
    }
+
    gGameParamUserInterface.gameParams.push_back(temp);
 }    
 
