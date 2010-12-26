@@ -82,6 +82,7 @@ Specifying the extension is optional.
 <li>Any team can spawn at a neutral spawn point
 <li>Added /setscore and /settime commands that set the score and game time for the current level
 <li>When running command from console (run <script>) any created items are now selected
+<li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
 </ul>
 
 
