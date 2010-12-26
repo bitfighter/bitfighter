@@ -67,7 +67,7 @@ private:
    S32 mIndex;
 
 protected:
-   Color color;      // Color in which item should be displayed
+   Color mColor;      // Color in which item should be displayed
    bool mEnterAdvancesItem;
    void (*mCallback)(U32);
 
@@ -80,7 +80,7 @@ public:
       mText = text;
       key1 = k1;
       key2 = k2;
-      color = c;
+      mColor = c;
       mCallback = callback;
       mHelp = help;
       mIndex = (U32)index;
@@ -289,7 +289,8 @@ public:
 
 class MaskedEditableMenuItem : public EditableMenuItem
 {
-     MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN,                             Color c = Color(1, 1, 1) ) : 
+     MaskedEditableMenuItem(string title, string val, string emptyVal, string help, U32 maxLen, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN,
+                            Color c = Color(1, 1, 1) ) : 
          EditableMenuItem(title, val, emptyVal, help, maxLen, k1, k2, c)
      {
         mLineEditor.setSecret(true);
