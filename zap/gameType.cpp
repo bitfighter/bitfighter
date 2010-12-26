@@ -786,9 +786,7 @@ void GameType::renderTimeLeft()
 
    const S32 size = 20;       // Size of time
    const S32 gtsize = 12;     // Size of game type/score indicator
-
-   U32 minsRemaining = timeLeft / (60000);
-   U32 secsRemaining = (timeLeft - (minsRemaining * 60000)) / 1000;
+   
    S32 len = UserInterface::getStringWidthf(gtsize, "[%s/%d]", getShortName(), mWinningScore);
 
    glColor3f(0,1,1);
@@ -796,10 +794,21 @@ void GameType::renderTimeLeft()
                               gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20 + ((size - gtsize) / 2) + 2, 
                               gtsize, "[%s/%d]", getShortName(), mWinningScore);
 
+   S32 x = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65;
+   S32 y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20;
    glColor3f(1,1,1);
-   UserInterface::drawStringf(gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - 65,
-                              gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - 20, 
-                              size, "%02d:%02d", minsRemaining, secsRemaining);
+
+   if(mGameTimer.getPeriod() == 0)
+   {
+      UserInterface::drawString(x, y, size, "Unlim.");
+   }
+   else
+   {
+      U32 minsRemaining = timeLeft / (60000);
+      U32 secsRemaining = (timeLeft - (minsRemaining * 60000)) / 1000;
+
+      UserInterface::drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
+   }
 }
 
 
