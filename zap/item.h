@@ -84,6 +84,7 @@ public:
 
    virtual void mountToShip(Ship *theShip);
    void setMountedMask() { setMaskBits(MountMask); }
+   void setPositionMask() { setMaskBits(PositionMask); }
 
    bool isMounted() { return mIsMounted; }
    void setZone(GoalZone *theZone);

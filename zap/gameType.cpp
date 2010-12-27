@@ -2585,6 +2585,23 @@ GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (U16 itemId), (itemId))
 
 }
 
+
+GAMETYPE_RPC_C2S(GameType, c2sResendItemStatus, (U16 itemId), (itemId))
+{
+   GameConnection *source = (GameConnection *) getRPCSourceConnection();
+
+   for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)
+   {
+      Item *item = dynamic_cast<Item *>(gServerGame->mGameObjects[i]);
+      if(item && item->getItemId() == itemId)
+      {
+         item->setPositionMask();
+         break;
+      }
+   }
+}
+
+
 // Client tells server that they chose the specified weapon
 GAMETYPE_RPC_C2S(GameType, c2sSelectWeapon, (RangedU32<0, ShipWeaponCount> indx), (indx))
 {

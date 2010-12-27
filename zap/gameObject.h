@@ -49,7 +49,7 @@ enum GameObjectType
    ShipType            = BIT(1),
    BarrierType         = BIT(2),
    MoveableType        = BIT(3),
-   ItemType            = BIT(4),    // Not made available to Lua... could we get rid of this altogether?
+   ItemType            = BIT(4),    // Not made available to Lua... could we get rid of this altogether?  Or make it a aggregate of other masks?
    ResourceItemType    = BIT(5),
          // slot available
    ForceFieldType      = BIT(7),

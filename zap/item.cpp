@@ -73,8 +73,7 @@ bool Item::processArguments(S32 argc, const char **argv)
 
 void Item::render()
 {
-   // if the item is mounted, renderItem will be called from the
-   // ship it is mounted to
+   // If the item is mounted, renderItem will be called from the ship it is mounted to
    if(mIsMounted)
       return;
 
@@ -89,7 +88,6 @@ void Item::render()
 void Item::mountToShip(Ship *theShip)     
 {
    TNLAssert(isGhost() || isInDatabase(), "Error, mount item not in database.");
-      //logprintf("%s item->mountToShip", isGhost()? "Client:" : "Server:");
 
    if(mMount.isValid() && mMount == theShip)    // Already mounted on ship!  Nothing to do!
       return;

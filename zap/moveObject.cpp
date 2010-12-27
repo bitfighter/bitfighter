@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "moveObject.h"
+#include "gameType.h"
 #include "gameItems.h"
 #include "SweptEllipsoid.h"
 #include "sparkManager.h"
@@ -178,18 +179,18 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
 
       if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
       {
-         MoveObject *moveObjectHit = (MoveObject *) objectHit;    
-         Point velDelta = moveObjectHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
-         Point posDelta = moveObjectHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
+         MoveObject *moveObjectThatWasHit = (MoveObject *) objectHit;    
+         Point velDelta = moveObjectThatWasHit->mMoveState[stateIndex].vel - mMoveState[stateIndex].vel;
+         Point posDelta = moveObjectThatWasHit->mMoveState[stateIndex].pos - mMoveState[stateIndex].pos;
 
          // Prevent infinite loops with a series of objects trying to displace each other forever
          for(S32 i = 0; i < displacerList.size(); i++)
-            if(isBeingDisplaced && (moveObjectHit == displacerList[i]))
+            if(isBeingDisplaced && (moveObjectThatWasHit == displacerList[i]))
               return;
  
-         if(posDelta.dot(velDelta) < 0)   // moveObjectHit is closing faster than we are ???
+         if(posDelta.dot(velDelta) < 0)   // moveObjectThatWasHit is closing faster than we are ???
          {
-            computeCollisionResponseMoveObject(stateIndex, moveObjectHit);
+            computeCollisionResponseMoveObject(stateIndex, moveObjectThatWasHit);
             if(isBeingDisplaced)
                return;
          }
@@ -198,7 +199,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             Point intendedPos = mMoveState[stateIndex].pos + mMoveState[stateIndex].vel * moveTime;
 
             F32 displaceEpsilon = 0.002f;
-            F32 t = computeMinSeperationTime(stateIndex, moveObjectHit, intendedPos);
+            F32 t = computeMinSeperationTime(stateIndex, moveObjectThatWasHit, intendedPos);
             if(t <= 0)
                return;   // Some kind of math error, couldn't find result: stop simulating this ship
 
@@ -211,7 +212,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
             if(mHitLimit > 0) 
             {
                // Move the displaced object a tiny bit, true -> isBeingDisplaced
-               moveObjectHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
+               moveObjectThatWasHit->move(t + displaceEpsilon, stateIndex, true, displacerList); 
                mHitLimit--;
             }
          }
@@ -371,18 +372,20 @@ void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisio
 
 
 // Runs on both client and server side...
-void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *moveObjectHit)
+void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *moveObjectThatWasHit)
 {
-   // collisionVector is simply a line from the center of moveObjectHit to the center of this
-   Point collisionVector = moveObjectHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
+   // collisionVector is simply a line from the center of moveObjectThatWasHit to the center of this
+   Point collisionVector = moveObjectThatWasHit->mMoveState[stateIndex].pos -mMoveState[stateIndex].pos;
 
    collisionVector.normalize();
    // F32 m1 = getMass();             <-- May be useful in future
-   // F32 m2 = moveObjectHit->getMass();
+   // F32 m2 = moveObjectThatWasHit->getMass();
 
+   bool moveObjectThatWasHitWasNotMoving = (moveObjectThatWasHit->mMoveState[stateIndex].vel.lenSquared() == 0.0f);
+      
    // Initial velocities projected onto collisionVector
    F32 v1i = mMoveState[stateIndex].vel.dot(collisionVector);
-   F32 v2i = moveObjectHit->mMoveState[stateIndex].vel.dot(collisionVector);
+   F32 v2i = moveObjectThatWasHit->mMoveState[stateIndex].vel.dot(collisionVector);
 
    F32 v1f, v2f;     // Final velocities
 
@@ -393,19 +396,19 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    v1f = ( v1i + v2i - v2f);
 
    mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
-   moveObjectHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
+   moveObjectThatWasHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
 
    if(!isGhost())    // Server only
    {
       // Check for asteroids hitting a ship
-      Ship *ship = dynamic_cast<Ship *>(moveObjectHit);
+      Ship *ship = dynamic_cast<Ship *>(moveObjectThatWasHit);
       Asteroid *asteroid = dynamic_cast<Asteroid *>(this);
  
       if(!ship)
       {
          // Since asteroids and ships are both MoveObjects, we'll also check to see if ship hit an asteroid
          ship = dynamic_cast<Ship *>(this);
-         asteroid = dynamic_cast<Asteroid *>(moveObjectHit);
+         asteroid = dynamic_cast<Asteroid *>(moveObjectThatWasHit);
       }
 
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
@@ -423,7 +426,16 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    else     // Client only
    {
       if(v1i > 0.25)    // Only make sound if the objects are moving fast enough
-         SFXObject::play(SFXBounceObject, moveObjectHit->mMoveState[stateIndex].pos, Point());
+         SFXObject::play(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
+
+      if(moveObjectThatWasHit->getObjectTypeMask() & ItemType)
+      {
+         Item *item = dynamic_cast<Item *>(moveObjectThatWasHit);
+         GameType *gameType = gClientGame->getGameType();
+
+         if(item && gameType)
+            gameType->c2sResendItemStatus(item->getItemId());
+      }
    }
 }
 
