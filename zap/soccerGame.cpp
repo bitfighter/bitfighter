@@ -465,7 +465,7 @@ bool SoccerBallItem::collide(GameObject *hitObject)
     if(!isGhost())  //Server side
     {
       if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
-         return true;
+         return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
 
 
       mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);

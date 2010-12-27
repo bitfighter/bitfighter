@@ -93,6 +93,7 @@ Specifying the extension is optional.
 <li>Fixed bug with verified names not appearing verified with arranged connection (i.e. most of the time)
 <li>Ingame Bitfighter logo display issues corrected.  
 <li>Bitfighter logo now positioned almost exactly where the generating text is located, at all zooms and rotations <b>Note that if you have levels with the Bitfighter logo, it's position may have shifted!</b>
+<li>Fixed soccer sync problems
 </ul>
 */
 
