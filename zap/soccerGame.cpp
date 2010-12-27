@@ -459,27 +459,29 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
+     if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
+        return false;  //false = don't hit self
+
+    if(!isGhost())  //Server side
+    {
       if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
          return true;
 
-      if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
-         return true;
 
       mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
       mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
       mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
       mDroppedTimer.clear();
 
-      if(!isGhost())  //Avoid fast pickup and drop on client side, when the server side didn't see the ship pickup.
-      {
-         Ship *ship = dynamic_cast<Ship *>(hitObject);
-         this->mountToShip(ship);
-      }
-
-      // Not needed when not allowing mounting to ship on client side
-      // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
-      //if(isGhost() && getGame()->getGameType())
-      //   getGame()->getGameType()->c2sReaffirmMountItem(mItemId);
+      Ship *ship = dynamic_cast<Ship *>(hitObject);
+      this->mountToShip(ship);
+    }else{ //client side
+         // Not needed when not allowing mounting to ship on client side
+         // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
+         if(getGame()->getGameType())
+            getGame()->getGameType()->c2sResendItemStatus(mItemId);
+         return false; //let server do the collision.
+    }
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {
