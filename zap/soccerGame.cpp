@@ -351,7 +351,7 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 void SoccerBallItem::onItemDropped()
 {
 
-   if(mMount.isValid())
+   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
    {
       this->setActualPos(mMount->getActualPos()); 
       this->setActualVel(mMount->getActualVel() * 1.5);
@@ -476,10 +476,9 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       Ship *ship = dynamic_cast<Ship *>(hitObject);
       this->mountToShip(ship);
     }else{ //client side
-         // Not needed when not allowing mounting to ship on client side
-         // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
-         if(getGame()->getGameType())
-            getGame()->getGameType()->c2sResendItemStatus(mItemId);
+         // Not needed
+         //if(getGame()->getGameType())
+         //   getGame()->getGameType()->c2sResendItemStatus(mItemId);
          return false; //let server do the collision.
     }
    }
