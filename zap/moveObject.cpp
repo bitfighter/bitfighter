@@ -461,17 +461,17 @@ void MoveObject::updateInterpolation()
             goto interpDone;
 
          deltaP.normalize();
-         F32 vel = deltaP.dot(mMoveState[RenderState].vel);
+         F32 rvel = deltaP.dot(mMoveState[RenderState].vel);
          F32 avel = deltaP.dot(mMoveState[ActualState].vel);
 
-         if(vel < avel)
-            vel = avel;
-         if(vel < 0)
-            vel = 0;
+         if(rvel < avel)
+            rvel = avel;
+         if(rvel < 0)
+            rvel = 0;
 
          bool hit = true;
          float time = deltaT * 0.001f;
-         if(vel * time > distance)
+         if(rvel * time > distance)
             goto interpDone;
 
          float requestVel = distance / time;
@@ -484,7 +484,7 @@ void MoveObject::updateInterpolation()
             hit = false;
             requestVel = interpMaxVel;
          }
-         F32 a = (requestVel - vel) / time;
+         F32 a = (requestVel - rvel) / time;
          if(a > InterpAcceleration)
          {
             a = InterpAcceleration;
@@ -494,8 +494,8 @@ void MoveObject::updateInterpolation()
          if(hit)
             goto interpDone;
 
-         vel += a * time;
-         mMoveState[RenderState].vel = deltaP * vel;
+         rvel += a * time;
+         mMoveState[RenderState].vel = deltaP * rvel;
          mMoveState[RenderState].pos += mMoveState[RenderState].vel * time;
       }
       else
