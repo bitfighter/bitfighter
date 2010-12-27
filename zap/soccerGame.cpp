@@ -470,12 +470,16 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
       mDroppedTimer.clear();
 
-      Ship *ship = dynamic_cast<Ship *>(hitObject);
-      this->mountToShip(ship);
+      if(!isGhost())  //Avoid fast pickup and drop on client side, when the server side didn't see the ship pickup.
+      {
+         Ship *ship = dynamic_cast<Ship *>(hitObject);
+         this->mountToShip(ship);
+      }
 
+      // Not needed when not allowing mounting to ship on client side
       // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
-      if(isGhost() && getGame()->getGameType())
-         getGame()->getGameType()->c2sReaffirmMountItem(mItemId);
+      //if(isGhost() && getGame()->getGameType())
+      //   getGame()->getGameType()->c2sReaffirmMountItem(mItemId);
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {

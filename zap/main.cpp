@@ -1646,7 +1646,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
       if(!stricmp(theArgv[i].getString(), "-sendres") || !stricmp(theArgv[i].getString(), "-getres"))  
       {
          writeToConsole();
-         if(theArgv.size() < i + 4)     // Too few arguments
+         if(theArgv.size() <= i + 4)     // Too few arguments
          {
             printf("Usage: bitfighter %s <server address> <password> <file> <resource type>\n", theArgv[i].getString());
             exitGame(1);
