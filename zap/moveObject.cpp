@@ -425,7 +425,7 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    }
    else     // Client only
    {
-      if(v1i > 0.25)    // Only make sound if the objects are moving fast enough
+      if(v1i > 0.25)    // Make sound if the objects are moving fast enough
          SFXObject::play(SFXBounceObject, moveObjectThatWasHit->mMoveState[stateIndex].pos, Point());
 
       if(moveObjectThatWasHit->getObjectTypeMask() & ItemType)
@@ -464,7 +464,7 @@ void MoveObject::updateInterpolation()
          F32 vel = deltaP.dot(mMoveState[RenderState].vel);
          F32 avel = deltaP.dot(mMoveState[ActualState].vel);
 
-         if(avel > vel)
+         if(vel < avel)
             vel = avel;
          if(vel < 0)
             vel = 0;
