@@ -1,5 +1,5 @@
 #include "gameLoader.h"                   // For MAX_LEVEL_FILE_LENGTH def  <-- there has to be a better way!
-
+//#include "gameType.h" // For now
 #include "dataConnection.h"
 #include "tnlEventConnection.h"
 #include "game.h"                         // For ServerGame def
@@ -42,8 +42,6 @@ FileType getResourceType(const char *fileType)
 }
    
 
-
-
 static string getFullFilename(string filename, FileType fileType)
 {
    if(fileType == BOT_TYPE)
@@ -78,7 +76,7 @@ static string getOutputFolder(FileType filetype)
 // For readability
 #define MAX_LINE_LEN  HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
-DataSender::SenderStatus DataSender::initialize(DataConnection *dataConnection, string filename, FileType fileType)
+DataSender::SenderStatus DataSender::initialize(DataConnection *connection, string filename, FileType fileType)
 {
    string fullname = getFullFilename(filename, fileType);
    if(fullname == "")
@@ -92,7 +90,7 @@ DataSender::SenderStatus DataSender::initialize(DataConnection *dataConnection, 
    if(!file.is_open())
       return COULD_NOT_OPEN_FILE;
 
-   mDataConnection = dataConnection;
+   mConnection = connection;
    mFileType = fileType;
 
    mDone = false;
@@ -138,14 +136,14 @@ void DataSender::sendNextLine()
 
    if(mLineCtr < mLines.size())
    {
-      mDataConnection->s2rSendLine(mLines[mLineCtr].c_str());
+      mConnection->s2rSendLine(mLines[mLineCtr].c_str());
       mLineCtr++;
    }
    else
    {
-      mDataConnection->c2sCommandComplete();
+      mConnection->c2sCommandComplete();
       mDone = true;
-      mLines.clear();      // Free up some memory
+      mLines.clear();      // Liberate some memory
    }
 }
 
@@ -153,7 +151,8 @@ void DataSender::sendNextLine()
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-static string  getErrorMessage(DataSender::SenderStatus stat, const string &filename)
+// static method
+string DataConnection::getErrorMessage(DataSender::SenderStatus stat, const string &filename)
 {
    if(stat == DataSender::COULD_NOT_OPEN_FILE)
       return "Could not open file " + filename;
@@ -183,13 +182,9 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
                   (password, filetype, isRequest, filename), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   // Are data connections allowed?
-   if(!gIniSettings.allowDataConnections)
-   {
-      logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
-      disconnect(ReasonConnectionsForbidden, "");
+   if(connectionsAllowed())     // Are data connections allowed?
       return;
-   }
+
    // Check password
    if(gAdminPassword == "" || strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), password))
    {
@@ -197,7 +192,6 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
       disconnect(ReasonBadLogin, "Incorrect pasword");
       return;
    }
-
 
    // Process request
    if(isRequest)     // Client wants to get a file from us... they should have a file open and waiting for this data
@@ -207,10 +201,10 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
 
       if(stat != DataSender::OK)
       {
-         string msg = getErrorMessage(stat, filename.getString());
+         const char *msg = getErrorMessage(stat, filename.getString()).c_str();
 
-         logprintf("%s", msg.c_str());
-         disconnect(ReasonError, msg.c_str());
+         logprintf(LogConsumer::LogError, "%s", msg);
+         disconnect(ReasonError, msg);
          return;
       }
    }
@@ -238,6 +232,18 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
 }
 
 
+// Runs on server
+bool DataConnection::connectionsAllowed()
+{
+   if(gIniSettings.allowDataConnections)
+      return true;
+
+   logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
+   disconnect(ReasonConnectionsForbidden, "");
+   return false;
+}
+
+
 // Server tells us it's ok to send... so start sending!
 TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
@@ -254,7 +260,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 }
 
 
-// Send a chunk of the file
+// Send a chunk of the file -- this gets run on the receiving end
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
@@ -284,7 +290,7 @@ void DataConnection::onConnectionEstablished()
          c2sSendOrRequestFile(mPassword.c_str(), mFileType, false, mFilename.c_str());
       }
 
-      else if(mAction = REQUEST_FILE)
+      else if(mAction == REQUEST_FILE)
       {
          string folder = getOutputFolder(mFileType);
 
