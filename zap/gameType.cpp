@@ -2368,9 +2368,6 @@ void GetMapData(S32 FileSize, S32 Position, const char * Data)
 // When adding new commands, please update GameUserInterface::populateChatCmdList() and also the help screen (UIInstructions.cpp)
 void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
-   if(!stricmp(cmd, ""))               // Just in case
-      return;
-
    if(!stricmp(cmd, "settime"))
    {
       if(!clientRef->isLevelChanger)
@@ -2417,8 +2414,9 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "getmap"))
    {
-     //might want to add an option to prevent /getmap
-     if(clientRef->clientConnection->isLocalConnection())
+     if(! gIniSettings.allowGetMap)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
+     else if(clientRef->clientConnection->isLocalConnection())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't Get Map your own host.");
      else
      {

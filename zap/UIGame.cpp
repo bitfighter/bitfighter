@@ -1551,7 +1551,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       else
          suspendGame();    // Do the deed
    }
-   else if(words[0] == "linewidth")            // Add time to the game
+   else if(words[0] == "linewidth")
    {
       F32 linewidth;
       if(words.size() < 2 || words[1] == "")
@@ -1570,7 +1570,19 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          glLineWidth(gDefaultLineWidth);    //make this change happen instantly
       }
    }
-
+   else if(words[0] == "linesmooth")
+   {
+      gIniSettings.useLineSmoothing = !gIniSettings.useLineSmoothing;
+      if(gIniSettings.useLineSmoothing)
+      {
+         glEnable(GL_LINE_SMOOTH);
+         glEnable(GL_BLEND);
+      }else
+      {
+         glDisable(GL_LINE_SMOOTH);
+         glDisable(GL_BLEND);
+      }
+   }
    else if(words[0] == "engf" || words[0] == "engt")
    {
       Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
@@ -1605,7 +1617,6 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/admin");
    mChatCmds.push_back("/dcoords");
    mChatCmds.push_back("/dzones");
-   mChatCmds.push_back("/kick");
    mChatCmds.push_back("/levpass");
    mChatCmds.push_back("/mvol");
    mChatCmds.push_back("/next");
@@ -1615,10 +1626,15 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/vvol");
    mChatCmds.push_back("/suspend");
    mChatCmds.push_back("/linewidth");
+   mChatCmds.push_back("/linesmooth");
+
+   // Server commands
    mChatCmds.push_back("/settime");
    mChatCmds.push_back("/setscore");
+   mChatCmds.push_back("/getmap");
 
    // Administrative commands
+   mChatCmds.push_back("/kick");
    mChatCmds.push_back("/shutdown");
    mChatCmds.push_back("/servvol");
    mChatCmds.push_back("/setlevpass");

@@ -613,7 +613,7 @@ static ControlStringsEditor commands[] = {
    { "-", NULL },       // Horiz. line
    { "/suspend", "Place game on hold while waiting for players" },
    { "-", NULL },       // Horiz. line
-   { "/kick <player name>", "Kick a player from the game" },
+   { "/getmap", "Get currently playing level map, if allowed" },
    { "-", NULL },       // Horiz. line
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
@@ -633,6 +633,7 @@ static ControlStringsEditor levelControlCommands[] = {
 };
 
 static ControlStringsEditor adminCommands[] = {
+   { "/kick <player name>",        "Kick a player from the game" },
    { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
    { "/setlevpass [passwd]",       "Set level change password (use blank to clear)" },
    { "/setadminpass <passwd>",     "Set admin password" },
@@ -648,6 +649,9 @@ static ControlStringsEditor adminCommands[] = {
 static ControlStringsEditor debugCommands[] = {
    { "/dcoords", "Show ship coordinates" },
    { "/dzones", "Show bot nav mesh zones" },
+   { "-", NULL },       // Horiz. line
+   { "/linewidth <number>", "default 2, Changes width of all lines" },
+   { "/linewsmooth", "Enable line smoothing, might look better" },
    { NULL, NULL },      // End of list
 };
 

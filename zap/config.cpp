@@ -322,6 +322,7 @@ static void loadHostConfiguration()
    gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
+   gIniSettings.allowGetMap = (lcase(gINI.GetValue("Host", "AllowGetMap", "No")) == "yes");
    gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
    minimumSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
 }
@@ -1074,8 +1075,8 @@ static void writeSettings()
       gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       gINI.KeyComment("Settings", " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
-      gINI.KeyComment("Settings", " MinClientDelay -  in millisecs, balance between performance and CPU usage (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
-      gINI.KeyComment("Settings", " LineWidth - width in pixels");
+      gINI.KeyComment("Settings", " MinClientDelay -  in millisecs, lower use more CPU, higher will lose performance/reduce FPS (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
+      gINI.KeyComment("Settings", " LineWidth - default 2, width in pixels, use /LineWidth in game");
       gINI.KeyComment("Settings", "----------------");
    }
    saveWindowMode();
@@ -1097,8 +1098,8 @@ static void writeSettings()
    gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
 
    gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
-   gINI.SetValueI("Settings", "MinClientDelay", minimumSleepTimeClient, true);
-   gINI.SetValueF("Settings","LineWidth",gDefaultLineWidth,true);
+   if(minimumSleepTimeClient<100) gINI.SetValueI("Settings", "MinClientDelay", minimumSleepTimeClient, true);  //don't save if too high
+   //gINI.SetValueF("Settings","LineWidth",gDefaultLineWidth,true);     //Allow load, but not save, a user can screw up with /LineWidth command
 }
 
 
@@ -1134,7 +1135,8 @@ static void writeHost()
       gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
       gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) in Millisecs, lower means lower ping to everyone and uses more CPU");
+      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) default 10, in Millisecs, lower use more CPU, higher may increase LAG");
+      gINI.KeyComment("Host", " AllowGetMap - (yes/no) Allow anyone to '/getmap' currently playing level map");
       gINI.KeyComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       gINI.KeyComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
 
@@ -1151,6 +1153,7 @@ static void writeHost()
    gINI.SetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
 //   gINI.SetValueI("Host", "TeamChangeDelay", gIniSettings.teamChangeDelay);
    gINI.SetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10));
+   gINI.SetValue("Host", "AllowGetMap", (gIniSettings.allowGetMap ? "Yes" : "No"));
    gINI.SetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"));
    gINI.SetValueI("Host", "MinDedicatedDelay", minimumSleepTimeDedicatedServer);
 }

@@ -172,6 +172,7 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_LVL_PASS,
       OPT_ADMIN_PASS,
       OPT_PASS,
+      OPT_GETMAP,
       OPT_PORT,
       OPT_COUNT
    };
