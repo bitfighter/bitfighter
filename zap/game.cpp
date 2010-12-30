@@ -964,7 +964,7 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
    //}
 
 
-   mScreenSaverTimer.reset(59000);         // Fire screen saver supression every 59 seconds
+   mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 }
 
 bool ClientGame::hasValidControlObject()
