@@ -351,7 +351,7 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
 void SoccerBallItem::onItemDropped()
 {
 
-   if(mMount.isValid())
+   if(mMount.isValid() && !isGhost())   //Server only, to prevent desync
    {
       this->setActualPos(mMount->getActualPos()); 
       this->setActualVel(mMount->getActualVel() * 1.5);
@@ -459,11 +459,14 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))
    {
-      if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
-         return true;
+     if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
+        return false;  //false = don't hit self
 
-      if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
-         return true;
+    if(!isGhost())  //Server side
+    {
+      if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
+         return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
+
 
       mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
       mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
@@ -472,10 +475,12 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
       Ship *ship = dynamic_cast<Ship *>(hitObject);
       this->mountToShip(ship);
-
-      // If we're the client, and we just saw a ball pickup, we want to ask the server to confirm that.
-      if(isGhost() && getGame()->getGameType())
-         getGame()->getGameType()->c2sReaffirmMountItem(mItemId);
+    }else{ //client side
+         // Not needed
+         //if(getGame()->getGameType())
+         //   getGame()->getGameType()->c2sResendItemStatus(mItemId);
+         return false; //let server do the collision.
+    }
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {

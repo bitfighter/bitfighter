@@ -93,6 +93,8 @@ Specifying the extension is optional.
 <li>Fixed bug with verified names not appearing verified with arranged connection (i.e. most of the time)
 <li>Ingame Bitfighter logo display issues corrected.  
 <li>Bitfighter logo now positioned almost exactly where the generating text is located, at all zooms and rotations <b>Note that if you have levels with the Bitfighter logo, it's position may have shifted!</b>
+<li>Fixed soccer sync problems
+<li>Fix long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
 </ul>
 */
 
@@ -1646,7 +1648,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
       if(!stricmp(theArgv[i].getString(), "-sendres") || !stricmp(theArgv[i].getString(), "-getres"))  
       {
          writeToConsole();
-         if(theArgv.size() < i + 4)     // Too few arguments
+         if(theArgv.size() <= i + 4)     // Too few arguments
          {
             printf("Usage: bitfighter %s <server address> <password> <file> <resource type>\n", theArgv[i].getString());
             exitGame(1);

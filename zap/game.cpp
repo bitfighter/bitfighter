@@ -1380,6 +1380,8 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects
    rawRenderObjects.clear();
    mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
+   if(gServerGame && gGameUserInterface.mDebugShowMeshZones)
+       gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,rawRenderObjects,mWorldBounds);
    
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -1580,6 +1582,8 @@ void ClientGame::renderNormal()
 
    rawRenderObjects.clear();
    mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+   if(gServerGame && gGameUserInterface.mDebugShowMeshZones)
+       gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)

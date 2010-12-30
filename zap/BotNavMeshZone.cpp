@@ -42,11 +42,10 @@ Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 BotNavMeshZone::BotNavMeshZone()
 {
    mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
+   //  The Zones is now rendered without the network interface, if client is hosting.
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
    mZoneID = gBotNavMeshZones.size();
 
-   // Sending too many zones will overwhelm the client.  Zones should only be send after a /dzones command has been issued.
-   //if(gBotNavMeshZones.size() < 900) mNetFlags.set(Ghostable);       //<<< TODO: Get rid of this line!!!!  only 900 zones will load
    gBotNavMeshZones.push_back(this);
 }
 
@@ -74,6 +73,9 @@ void BotNavMeshZone::render(S32 layerIndex)
 {
    if(!gGameUserInterface.mDebugShowMeshZones)
       return;
+
+   if(mPolyFill.size() == 0)    //Need to process PolyFill here, rendering server objects into client.
+         Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
       renderNavMeshZone(mPolyBounds, mPolyFill, mCentroid, mZoneID, mConvex);
@@ -119,11 +121,12 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
 
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
-   if(!isGhost())     // For now, so we can see them on the client to help with debugging
-      if(gBotNavMeshZones.size() < 50) // avoid start-up very long black screen.    // Causes items to stream in 
-      setScopeAlways();
+   //if(!isGhost())     // For now, so we can see them on the client to help with debugging
+   //   if(gBotNavMeshZones.size() < 50) // avoid start-up very long black screen.    // Causes items to stream in 
+   //   setScopeAlways();
 
    // Don't need to increment our objectloaded counter, as this object resides only on the server
+
 }
 
 

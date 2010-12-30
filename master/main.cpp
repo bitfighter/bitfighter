@@ -462,6 +462,8 @@ public:
       }
       else if(mStrikeCount > 0)
          mStrikeCount--;
+
+      mLastActivityTime = currentTime;
    }
 
    void removeConnectRequest(GameConnectRequest *gcr)
