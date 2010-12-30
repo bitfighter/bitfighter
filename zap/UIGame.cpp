@@ -1495,6 +1495,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       mDebugShowShipCoords = !mDebugShowShipCoords;
    else if(words[0] == "dzones")
        mDebugShowMeshZones = !mDebugShowMeshZones;
+       if(!gServerGame) displayMessage(gCmdChatColor, "!!! only available if you are hosting");
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);
    else if(words[0] == "mvol")      // Music volume

@@ -94,6 +94,7 @@ Specifying the extension is optional.
 <li>Ingame Bitfighter logo display issues corrected.  
 <li>Bitfighter logo now positioned almost exactly where the generating text is located, at all zooms and rotations <b>Note that if you have levels with the Bitfighter logo, it's position may have shifted!</b>
 <li>Fixed soccer sync problems
+<li>Fix long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
 </ul>
 */
 
