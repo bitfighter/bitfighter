@@ -147,6 +147,7 @@ void NetInterface::addPendingConnection(NetConnection *connection)
    // connection's Address
    findAndRemovePendingConnection(connection->getNetAddress());
    NetConnection *temp = findConnection(connection->getNetAddress());
+
    if(temp)
       disconnect(temp, NetConnection::ReasonSelfDisconnect, "Reconnecting");
 

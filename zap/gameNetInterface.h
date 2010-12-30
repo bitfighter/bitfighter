@@ -61,7 +61,6 @@ public:
    void banHost(const Address &bannedAddress, U32 bannedMilliseconds);
    void checkBanlistTimeouts(U32 timeElapsed);
    bool isAddressBanned(const Address &theAddress);
-
 };
 
 };
