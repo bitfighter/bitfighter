@@ -1324,9 +1324,9 @@ void QueryServersUserInterface::issueChat()
 	   }
 	   if(a == 9)
       {
-		   Address addr1(&str1[9]);
+		   Address address(&str1[9]);
          //endGame(); // avoid error when in game, F5 and type "/Connect"  <== shouldn't be needed when this is in UIQueryServers.cpp
-		   joinGame(addr1, false, false);
+		   joinGame(address, false, false);
 		   return;
 	   }
    }
