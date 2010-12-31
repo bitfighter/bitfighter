@@ -7,12 +7,12 @@
 # Configuration
 #
 
-# The following lines can be commented out if you are not using PHP or PHPBB3 integration
-PHPBB_INCLUDES=-I/usr/include/mysql -Imysql++
-PHPBB_CFLAGS=-DMYSQLPP_MYSQL_HEADERS_BURIED -DVERIFY_PHPBB3
+# The following lines can be commented out if you are not using PHP or #PHPBB3 integration
+#PHPBB_INCLUDES=-I/usr/include/mysql -Imysql++
+#PHPBB_CFLAGS= -DVERIFY_PHPBB3 -MYSQLPP_MYSQL_HEADERS_BURIED
 
 # Note, if you install the correct development package you don't need this
-PHPBB_LDFLAGS=../mysql++/libmysqlpp.so 
+#PHPBB_LDFLAGS=../mysql++/libmysqlpp.so 
 
 CC=g++ -g -I../tnl -I../libtomcrypt #-O2
 

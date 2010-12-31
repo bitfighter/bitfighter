@@ -6,7 +6,25 @@
 	objectVersion = 45;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 03AD17D912CE2BC700274A25 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Game Release" */;
+			buildPhases = (
+				03AD18B512CE2C6F00274A25 /* ShellScript */,
+			);
+			dependencies = (
+				03AD188F12CE2BED00274A25 /* PBXTargetDependency */,
+			);
+			name = "Create Bitfighter Game Release";
+			productName = "Create Bitfighter Game Release";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
+		031A0B9412C46D91000BE0F6 /* dataConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 031A0B9212C46D91000BE0F6 /* dataConnection.cpp */; };
+		03EF60B912C4BB7E004B311A /* server.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03EF60B812C4BB7E004B311A /* server.xib */; };
+		03EF60C812C4BBAB004B311A /* server.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03EF60B812C4BB7E004B311A /* server.xib */; };
 		6D8E517612111FDC00C6D883 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D8E517412111FDC00C6D883 /* statistics.cpp */; };
 		7364076C1297C36F00F8C095 /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5E11D7CCD600E2DBB2 /* Directory.mm */; };
 		73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73710091129623C6000FE4FE /* ConsoleFont.c */; };
@@ -414,6 +432,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		03AD188E12CE2BED00274A25 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Bitfighter */;
+			remoteInfo = Bitfighter;
+		};
 		7378261912960DDF007333BE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -501,6 +526,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		031A0B9212C46D91000BE0F6 /* dataConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dataConnection.cpp; sourceTree = "<group>"; };
+		031A0B9312C46D91000BE0F6 /* dataConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dataConnection.h; sourceTree = "<group>"; };
+		03EF60B812C4BB7E004B311A /* server.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = server.xib; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bitfighter_Prefix.pch; sourceTree = "<group>"; };
@@ -959,6 +987,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
+				03EF60B812C4BB7E004B311A /* server.xib */,
 				256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */,
 			);
 			name = "Other Sources";
@@ -1003,6 +1032,8 @@
 		737CE2FC1290468300D732B7 /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				031A0B9212C46D91000BE0F6 /* dataConnection.cpp */,
+				031A0B9312C46D91000BE0F6 /* dataConnection.h */,
 				73710091129623C6000FE4FE /* ConsoleFont.c */,
 				73FD79A81295E78700143CE9 /* barrier.h */,
 				73FD79A91295E78700143CE9 /* BotNavMeshZone.h */,
@@ -1511,7 +1542,14 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */;
 			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Bitfighter */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1520,6 +1558,7 @@
 				737CE46B12904E9E00D732B7 /* libtomcrypt */,
 				737CE61C1290553D00D732B7 /* tnl */,
 				7378261712960DDF007333BE /* Bitfighterd */,
+				03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */,
 			);
 		};
 /* End PBXProject section */
@@ -1536,6 +1575,7 @@
 				7378262112960DDF007333BE /* screenshots in Resources */,
 				7378262212960DDF007333BE /* sfx in Resources */,
 				7378262312960DDF007333BE /* bitfighter.sh in Resources */,
+				03EF60B912C4BB7E004B311A /* server.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1564,10 +1604,27 @@
 				737CE44F12904D7D00D732B7 /* screenshots in Resources */,
 				737CE45012904D7D00D732B7 /* sfx in Resources */,
 				736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */,
+				03EF60C812C4BBAB004B311A /* server.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		03AD18B512CE2C6F00274A25 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt Bitfighter)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../MacOSX/macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighter.app\" \"${to_package_dir}\"\n\nif [ -n \"${AA_RECORDER_APP}\" ]\nthen\n\tcp -R \"${AA_RECORDER_APP}\" \"${to_package_dir}\"\nfi\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Bitfighter\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		7378262412960DDF007333BE /* Sources */ = {
@@ -1912,12 +1969,18 @@
 				73FD7A011295E78800143CE9 /* Makefile in Sources */,
 				73FD7A021295E78800143CE9 /* UIAbstractInstructions.cpp in Sources */,
 				73710092129623C6000FE4FE /* ConsoleFont.c in Sources */,
+				031A0B9412C46D91000BE0F6 /* dataConnection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		03AD188F12CE2BED00274A25 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1107260486CEB800E47090 /* Bitfighter */;
+			targetProxy = 03AD188E12CE2BED00274A25 /* PBXContainerItemProxy */;
+		};
 		7378261812960DDF007333BE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 737CE61C1290553D00D732B7 /* tnl */;
@@ -1946,6 +2009,28 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		03AD17D012CE2BBF00274A25 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Bitfighter Game Release";
+			};
+			name = Debug;
+		};
+		03AD17D112CE2BBF00274A25 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Create Bitfighter Game Release";
+				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		737826AF12960DDF007333BE /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2165,6 +2250,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PRODUCT_NAME = Bitfighter;
+				SYMROOT = build/;
 			};
 			name = Release;
 		};
@@ -2201,6 +2287,7 @@
 					../glut,
 					../tnl,
 				);
+				OTHER_CFLAGS = "-DTNL_ENABLE_LOGGING";
 				PREBINDING = NO;
 				SDKROOT = macosx10.4;
 			};
@@ -2209,6 +2296,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		03AD17D912CE2BC700274A25 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Game Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03AD17D012CE2BBF00274A25 /* Debug */,
+				03AD17D112CE2BBF00274A25 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		737826AE12960DDF007333BE /* Build configuration list for PBXNativeTarget "Bitfighterd" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
