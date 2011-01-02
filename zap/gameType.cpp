@@ -2370,7 +2370,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
 {
    if(!stricmp(cmd, "settime"))
    {
-      if(!clientRef->isLevelChanger)
+      if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
       else if(args.size() < 1)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter time in minutes");
@@ -2396,7 +2396,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "setscore"))
    {
-     if(!clientRef->isLevelChanger)                         // Level changers and above
+     if(!clientRef->clientConnection->isLevelChanger())                         // Level changers and above
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
      else if(args.size() < 1)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter score limit");
