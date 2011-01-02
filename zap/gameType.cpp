@@ -549,7 +549,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
                glVertex2f(xr, yt + teamAreaHeight);
             glEnd();
 
-            UserInterface::drawString(xl + 40, yt + 2, 30, getTeamName(i));
+            UserInterface::drawString(xl + 40, yt + 2, 30, getTeamName(i).getString());
             UserInterface::drawStringf(xr - 140, yt + 2, 30, "%d", mTeams[i].getScore());
          }
 
@@ -1462,13 +1462,35 @@ void GameType::queryItemsOfInterest()
 }
 
 
+// Team in range?    Currently not used.
+// Could use it for processArguments, but out of range will be UNKNOWN name and should not cause any errors.
+bool GameType::checkTeamRange(S32 team){
+	return (team < mTeams.size() && team >= -2);
+}
+
+// Zero teams will crash.
+bool GameType::makeSureTeamCountIsNotZero()
+{
+	if(mTeams.size() == 0) {
+		Team team;
+		team.setName("Missing Team");
+		team.color.r = 0;
+		team.color.g = 0;
+		team.color.b = 1;
+		mTeams.push_back(team);
+		return true;
+	}
+	return false;
+}
+
+
 extern Color gNeutralTeamColor;
 extern Color gHostileTeamColor;
 
 // This method can be overridden by other game types that handle colors differently
 Color GameType::getTeamColor(S32 team)
 {
-   if(team == -1 || team >= mTeams.size())
+   if(team == -1 || team >= mTeams.size() || team < -2)
       return gNeutralTeamColor;
    else if(team == -2)
       return gHostileTeamColor;
@@ -1488,17 +1510,19 @@ S32 GameType::getTeam(const char *playerName)
 }
 
 
-const char *GameType::getTeamName(S32 team)
+//There is a bigger need to use StringTableEntry and not const char *
+//    mainly to prevent errors on CTF neutral flag and out of range team number.
+StringTableEntry GameType::getTeamName(S32 team)
 {
    
    if(team >= 0 && team < mTeams.size())
-      return mTeams[team].getName().getString();
+      return mTeams[team].getName();
    else if(team == -2)
-      return "Hostile";
+      return StringTableEntry("Hostile");
    else if(team == -1)
-      return "Neutral";
+      return StringTableEntry("Neutral");
    else
-      return "UNKNOWN";
+      return StringTableEntry("UNKNOWN");
 }
 
 
@@ -1729,7 +1753,7 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
    if(isTeamGame())
    {
       // Just in case...  completely superfluous, gratuitous check
-      if(team < 0)
+      if(team < 0 || team >= mTeams.size())
          return;
 
       S32 points = getEventScore(TeamScore, scoringEvent, data);
@@ -2154,9 +2178,9 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
    // been corrected by the server.
    if(gClientGame->getGameType()->mLocalClient && name == gClientGame->getGameType()->mLocalClient->name)      
-      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex));
+      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex).getString());
    else
-      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex));
+      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex).getString());
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can

@@ -94,6 +94,7 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
       return false;
 
    mTeam = atoi(argv[0]);
+   //if(! getGame()->getGameType()->checkTeamRange(mTeam)) mTeam = -1;
    
    if(!Parent::processArguments(argc-1, argv+1))
       return false;
@@ -103,10 +104,14 @@ bool FlagItem::processArguments(S32 argc, const char **argv)
    mInitialPos = mMoveState[ActualState].pos;
 
    // Now add the flag starting point to the list of flag spawn points
-   if(!gServerGame->getGameType()->isTeamFlagGame() || mTeam < 0)
-      gServerGame->getGameType()->mFlagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
+   GameType *gt = gServerGame->getGameType();
+   if(gt)
+   {
+   if(!gt->isTeamFlagGame() || mTeam < 0 || mTeam >= gt->mTeams.size())
+      gt->mFlagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
    else
-      gServerGame->getGameType()->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
+      gt->mTeams[mTeam].flagSpawnPoints.push_back(FlagSpawn(mInitialPos, time));
+   }
 
    return true;
 }
@@ -156,7 +161,7 @@ void FlagItem::sendHome()
    Vector<FlagSpawn> spawnPoints;
    GameType *gt = getGame()->getGameType();
 
-   if(!gt->isTeamFlagGame() || mTeam < 0)     // Neutral or hostile flag in a team game
+   if(!gt->isTeamFlagGame() || mTeam < 0 || mTeam >= gt->mTeams.size())     // Neutral or hostile flag in a team game
       spawnPoints = gt->mFlagSpawnPoints;
    else              // Team flag
       spawnPoints = gt->mTeams[mTeam].flagSpawnPoints;
