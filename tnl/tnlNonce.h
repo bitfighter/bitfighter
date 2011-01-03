@@ -40,25 +40,30 @@ namespace TNL
 
 struct Nonce
 {
+private:
+   bool mValid;
+
+public:
    enum {
       NonceSize = 8,
    };
 
    U8 data[NonceSize];  // 8 bytes, 2^64 possibilities
 
-   Nonce() { for(S32 i = 0; i < NonceSize; i++) data[i] = 0; }    // Constructor, initialize data to all 0s.
-   Nonce(const U8 *ptr) { memcpy(data, ptr, NonceSize); }
-   Nonce(Vector<U8> bytes) { for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
+   Nonce() { for(S32 i = 0; i < NonceSize; i++) data[i] = 0; mValid = false; }    // Constructor, initialize data to all 0s.
+   Nonce(const U8 *ptr) { memcpy(data, ptr, NonceSize); mValid = true; }
+   Nonce(Vector<U8> bytes) { mValid =(bytes.size() != NonceSize); if(mValid) for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
 
    bool operator==(const Nonce &theOtherNonce) const { return !memcmp(data, theOtherNonce.data, NonceSize); }
    bool operator!=(const Nonce &theOtherNonce) const { return memcmp(data, theOtherNonce.data, NonceSize) != 0; }
 
-   void operator=(const Nonce &theNonce) { memcpy(data, theNonce.data, NonceSize); }
+   void operator=(const Nonce &theNonce) { memcpy(data, theNonce.data, NonceSize); mValid = theNonce.mValid; }
    
    void read(BitStream *stream) { stream->read(NonceSize, data); }
    void write(BitStream *stream) const { stream->write(NonceSize, data); }
    void getRandom() { Random::read(data, NonceSize); }
    Vector<U8> toVector() { Vector<U8> v; for(S32 i = 0; i < NonceSize; i++) v.push_back(data[i]); return v; }
+   bool isValid() { return mValid; }
 };
 
 };
