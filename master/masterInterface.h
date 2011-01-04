@@ -192,6 +192,10 @@ public:
                                              Vector<RangedU32<0,256> > colorB, 
                                              RangedU32<0,MAX_PLAYERS> players, S16 time) );
 
+   // Version 4 RPCs
+   TNL_DECLARE_RPC(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, StringTableEntry teamName, 
+                                               S32 score, U16 kills, U16 deaths, U16 suicides, 
+                                               Vector<U16> shots, Vector<U16> hits) );
 
    TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
    TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));

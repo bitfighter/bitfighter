@@ -505,6 +505,19 @@ public:
    }
 
 
+   MasterServerConnection *findClient(Nonce clientId)
+   {
+      if(!clientId.isValid())
+         return NULL;
+
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         if(walk->mPlayerId == clientId)
+            return walk;
+
+      return NULL;
+   }
+
+
    // Write a current count of clients/servers for display on a website, using JSON format
    // This gets updated whenver we gain or lose a server, at most every REWRITE_TIME ms
    static void writeClientServerList_JSON()
@@ -585,6 +598,7 @@ public:
    }
    */
 
+   bool isAuthenticated() { return mAuthenticated; }
 
    // This is called when a client wishes to arrange a connection with a server
    TNL_DECLARE_RPC_OVERRIDE(c2mRequestArrangedConnection, (U32 requestId, IPAddress remoteAddress, IPAddress internalAddress,
@@ -842,6 +856,31 @@ public:
       logprintf(LogConsumer::StatisticsFilter, "PLAYER\t2\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
+   // Send player statistics to the master server
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, StringTableEntry teamName, 
+                                                        S32 score,
+                                                        U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
+   {
+      Nonce clientId(id);
+      MasterServerConnection *client = findClient(clientId);
+
+      bool authenticated = (client && client->isAuthenticated());
+
+      S32 totalShots = 0;
+      S32 totalHits = 0;
+
+      for(S32 i = 0; i < shots.size(); i++)
+      {
+         totalShots += shots[i];
+         totalHits += hits[i];
+      }
+
+      // PLAYER | stats version | name | authenticated | team | score | kills | deaths | suicides | shots | hits 
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
+               playerName.getString(), authenticated ? "true" : "false", teamName.getString(), score, kills, deaths, suicides, 
+               totalShots, totalHits);
+   }
+
    // Send game statistics to the master server
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
                                                     RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
@@ -889,7 +928,7 @@ public:
 
             // If server just restarted, clients will need to reauthenticate, and that may take some time.
             // We'll give them 90 seconds.
-            else if(Platform::getRealMilliseconds() - gServerStartTime < 90000)      
+            else if(Platform::getRealMilliseconds() - gServerStartTime < 90 * 1000)      
                status = AuthenticationStatusTryAgainLater;             
             else
                status = AuthenticationStatusUnauthenticatedName;
