@@ -7,6 +7,31 @@
 	objects = {
 
 /* Begin PBXAggregateTarget section */
+		033F6AE312D190F20023D4C6 /* Create Bitfighter Dedicated Server Release */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 033F6AEA12D191360023D4C6 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Dedicated Server Release" */;
+			buildPhases = (
+				033F6AE212D190F20023D4C6 /* ShellScript */,
+			);
+			dependencies = (
+				033F6AE912D1910A0023D4C6 /* PBXTargetDependency */,
+			);
+			name = "Create Bitfighter Dedicated Server Release";
+			productName = "Create Bitfighter Dedicated Server Release";
+		};
+		033F6AF912D191B40023D4C6 /* Compile Frameworks Only */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 033F6B0512D192160023D4C6 /* Build configuration list for PBXAggregateTarget "Compile Frameworks Only" */;
+			buildPhases = (
+				033F6AF812D191B40023D4C6 /* ShellScript */,
+			);
+			dependencies = (
+				033F6AFF12D191C70023D4C6 /* PBXTargetDependency */,
+				033F6AFD12D191C20023D4C6 /* PBXTargetDependency */,
+			);
+			name = "Compile Frameworks Only";
+			productName = "Compile Frameworks";
+		};
 		03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */ = {
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 03AD17D912CE2BC700274A25 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Game Release" */;
@@ -432,11 +457,32 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		033F6AE812D1910A0023D4C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7378261712960DDF007333BE;
+			remoteInfo = Bitfighterd;
+		};
+		033F6AFC12D191C20023D4C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 737CE46B12904E9E00D732B7;
+			remoteInfo = libtomcrypt;
+		};
+		033F6AFE12D191C70023D4C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 737CE61C1290553D00D732B7;
+			remoteInfo = tnl;
+		};
 		03AD188E12CE2BED00274A25 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Bitfighter */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = Bitfighter;
 		};
 		7378261912960DDF007333BE /* PBXContainerItemProxy */ = {
@@ -540,7 +586,7 @@
 		736DE97F129066D500C3CB73 /* stringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringUtils.cpp; sourceTree = "<group>"; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
 		73710091129623C6000FE4FE /* ConsoleFont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConsoleFont.c; sourceTree = "<group>"; };
-		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Bitfighterd.app; path = build/Release/Bitfighterd.app; sourceTree = "<group>"; };
 		737CE3001290483200D732B7 /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../openal/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		737CE3041290486800D732B7 /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../openal/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
@@ -764,7 +810,7 @@
 		73FD79FF1295E78800143CE9 /* voiceCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = voiceCodec.h; sourceTree = "<group>"; };
 		73FD7A001295E78800143CE9 /* zapjournal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zapjournal.h; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Bitfighter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info.plist"; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Bitfighter.app; path = build/Release/Bitfighter.app; sourceTree = "<group>"; };
 		94010D5311D7CCD600E2DBB2 /* barrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = barrier.cpp; sourceTree = "<group>"; };
 		94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BotNavMeshZone.cpp; sourceTree = "<group>"; };
 		94010D5711D7CCD600E2DBB2 /* config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = config.cpp; sourceTree = "<group>"; };
@@ -935,7 +981,278 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+		036FEE6A12D1CF6D00C14EE2 /* User Interface */ = {
+			isa = PBXGroup;
+			children = (
+				736DE9741290662300C3CB73 /* UIMenuItems.cpp */,
+				73FD79EB1295E78800143CE9 /* UI.h */,
+				73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */,
+				73FD79ED1295E78800143CE9 /* UIAbstractInstructions.h */,
+				73FD79EE1295E78800143CE9 /* UIChat.h */,
+				73FD79EF1295E78800143CE9 /* UICredits.h */,
+				73FD79F01295E78800143CE9 /* UIDiagnostics.h */,
+				73FD79F11295E78800143CE9 /* UIEditor.h */,
+				73FD79F21295E78800143CE9 /* UIErrorMessage.h */,
+				73FD79F31295E78800143CE9 /* UIGame.h */,
+				73FD79F41295E78800143CE9 /* UIGameParameters.h */,
+				73FD79F51295E78800143CE9 /* UIInstructions.h */,
+				73FD79F61295E78800143CE9 /* UIKeyDefMenu.h */,
+				73FD79F71295E78800143CE9 /* UIMenuItems.h */,
+				73FD79F81295E78800143CE9 /* UIMenus.h */,
+				73FD79F91295E78800143CE9 /* UIMessage.h */,
+				73FD79FA1295E78800143CE9 /* UINameEntry.h */,
+				73FD79FB1295E78800143CE9 /* UIQueryServers.h */,
+				73FD79FC1295E78800143CE9 /* UIRebindKeys.h */,
+				73FD79FD1295E78800143CE9 /* UITeamDefMenu.h */,
+				73FD79FE1295E78800143CE9 /* UIYesNo.h */,
+				94010DC811D7CCD600E2DBB2 /* UI.cpp */,
+				94010DCA11D7CCD600E2DBB2 /* UIChat.cpp */,
+				94010DCC11D7CCD600E2DBB2 /* UICredits.cpp */,
+				94010DCE11D7CCD600E2DBB2 /* UIDiagnostics.cpp */,
+				94010DD011D7CCD600E2DBB2 /* UIEditor.cpp */,
+				94010DD211D7CCD600E2DBB2 /* UIEditorInstructions.cpp */,
+				94010DD411D7CCD600E2DBB2 /* UIErrorMessage.cpp */,
+				94010DD611D7CCD600E2DBB2 /* UIGame.cpp */,
+				94010DD811D7CCD600E2DBB2 /* UIGameParameters.cpp */,
+				94010DDA11D7CCD600E2DBB2 /* UIInstructions.cpp */,
+				94010DDC11D7CCD600E2DBB2 /* UIKeyDefMenu.cpp */,
+				94010DDE11D7CCD600E2DBB2 /* UIMenus.cpp */,
+				94010DE011D7CCD600E2DBB2 /* UIMessage.cpp */,
+				94010DE211D7CCD600E2DBB2 /* UINameEntry.cpp */,
+				94010DE411D7CCD600E2DBB2 /* UIQueryServers.cpp */,
+				94010DE611D7CCD600E2DBB2 /* UIRebindKeys.cpp */,
+				94010DE811D7CCD600E2DBB2 /* UITeamDefMenu.cpp */,
+				94010DEA11D7CCD600E2DBB2 /* UIYesNo.cpp */,
+			);
+			name = "User Interface";
+			sourceTree = "<group>";
+		};
+		036FEE6B12D1D00100C14EE2 /* Game Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79EA1295E78800143CE9 /* timer.h */,
+				73FD79B11295E78700143CE9 /* ftol.h */,
+				73FD79B21295E78700143CE9 /* game.h */,
+				73FD79B41295E78700143CE9 /* gameItems.h */,
+				73FD79B51295E78700143CE9 /* gameLoader.h */,
+				73FD79B61295E78700143CE9 /* gameNetInterface.h */,
+				73FD79B71295E78700143CE9 /* gameObject.h */,
+				73FD79B81295E78700143CE9 /* gameObjectRender.h */,
+				73FD79B91295E78700143CE9 /* gameType.h */,
+				73FD79BA1295E78700143CE9 /* gameWeapons.h */,
+				94010D6511D7CCD600E2DBB2 /* game.cpp */,
+				94010D6911D7CCD600E2DBB2 /* gameItems.cpp */,
+				94010D6B11D7CCD600E2DBB2 /* gameLoader.cpp */,
+				94010D6D11D7CCD600E2DBB2 /* gameNetInterface.cpp */,
+				94010D6F11D7CCD600E2DBB2 /* gameObject.cpp */,
+				94010D7111D7CCD600E2DBB2 /* gameObjectRender.cpp */,
+				94010D7311D7CCD600E2DBB2 /* gameType.cpp */,
+				94010D7511D7CCD600E2DBB2 /* gameWeapons.cpp */,
+			);
+			name = "Game Rendering";
+			sourceTree = "<group>";
+		};
+		036FEE6F12D1D01B00C14EE2 /* Connection Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79DF1295E78800143CE9 /* SharedConstants.h */,
+				73FD79C21295E78800143CE9 /* keyCode.h */,
+				73FD79C31295E78800143CE9 /* keyCodeEnum.h */,
+				94010D8411D7CCD600E2DBB2 /* keyCode.cpp */,
+				94010D5911D7CCD600E2DBB2 /* controlObjectConnection.cpp */,
+				73FD79AB1295E78700143CE9 /* controlObjectConnection.h */,
+				031A0B9212C46D91000BE0F6 /* dataConnection.cpp */,
+				031A0B9312C46D91000BE0F6 /* dataConnection.h */,
+				94010D6711D7CCD600E2DBB2 /* gameConnection.cpp */,
+				73FD79B31295E78700143CE9 /* gameConnection.h */,
+				94010D9611D7CCD600E2DBB2 /* masterConnection.cpp */,
+				73FD79CE1295E78800143CE9 /* masterConnection.h */,
+			);
+			name = "Connection Rendering";
+			sourceTree = "<group>";
+		};
+		036FEE7412D1D04300C14EE2 /* Ogl Console Engine */ = {
+			isa = PBXGroup;
+			children = (
+				73710091129623C6000FE4FE /* ConsoleFont.c */,
+				737CE7C212905F6400D732B7 /* oglconsole.c */,
+				73FD79D31295E78800143CE9 /* oglconsole.h */,
+			);
+			name = "Ogl Console Engine";
+			sourceTree = "<group>";
+		};
+		036FEE7912D1D06500C14EE2 /* Bots and Lua Coding */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79C81295E78800143CE9 /* lua.h */,
+				94010D8D11D7CCD600E2DBB2 /* luaGameInfo.cpp */,
+				73FD79C91295E78800143CE9 /* luaGameInfo.h */,
+				94010D8F11D7CCD600E2DBB2 /* luaLevelGenerator.cpp */,
+				73FD79CA1295E78800143CE9 /* luaLevelGenerator.h */,
+				94010D9111D7CCD600E2DBB2 /* luaObject.cpp */,
+				73FD79CB1295E78800143CE9 /* luaObject.h */,
+				94010D9311D7CCD600E2DBB2 /* luaUtil.cpp */,
+				73FD79CC1295E78800143CE9 /* luaUtil.h */,
+				94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */,
+				73FD79A91295E78700143CE9 /* BotNavMeshZone.h */,
+				94010DAD11D7CCD600E2DBB2 /* robot.cpp */,
+				73FD79DC1295E78800143CE9 /* robot.h */,
+			);
+			name = "Bots and Lua Coding";
+			sourceTree = "<group>";
+		};
+		036FEE8412D1D0C000C14EE2 /* Current Game Types */ = {
+			isa = PBXGroup;
+			children = (
+				94010D5B11D7CCD600E2DBB2 /* CTFGame.cpp */,
+				73FD79AC1295E78700143CE9 /* CTFGame.h */,
+				94010D7B11D7CCD600E2DBB2 /* HTFGame.cpp */,
+				94010D7C11D7CCD600E2DBB2 /* huntersGame.cpp */,
+				73FD79BE1295E78700143CE9 /* huntersGame.h */,
+				94010DAA11D7CCD600E2DBB2 /* rabbitGame.cpp */,
+				73FD79DA1295E78800143CE9 /* rabbitGame.h */,
+				94010DAC11D7CCD600E2DBB2 /* retrieveGame.cpp */,
+				94010DB811D7CCD600E2DBB2 /* soccerGame.cpp */,
+				73FD79E11295E78800143CE9 /* soccerGame.h */,
+				94010DEF11D7CCD600E2DBB2 /* zoneControlGame.cpp */,
+			);
+			name = "Current Game Types";
+			sourceTree = "<group>";
+		};
+		036FEE8D12D1D0DF00C14EE2 /* Voice Chat Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79D71295E78800143CE9 /* private.h */,
+				73FD79BD1295E78700143CE9 /* gsm.h */,
+				9462C3DE11D7D6D500791A0B /* gsm_decode.c */,
+				9462C3DF11D7D6D500791A0B /* gsm_encode.c */,
+				9462C3E011D7D6D500791A0B /* gsm_state.c */,
+				73FD79C71295E78800143CE9 /* lpc10.h */,
+				9462C3F611D7D7C700791A0B /* lpc10dec.c */,
+				9462C3F711D7D7C700791A0B /* lpc10enc.c */,
+				94010DEC11D7CCD600E2DBB2 /* voiceCodec.cpp */,
+				73FD79FF1295E78800143CE9 /* voiceCodec.h */,
+			);
+			name = "Voice Chat Rendering";
+			sourceTree = "<group>";
+		};
+		036FEE9312D1D1C900C14EE2 /* Items Included */ = {
+			isa = PBXGroup;
+			children = (
+				94010DB711D7CCD600E2DBB2 /* SlipZone.cpp */,
+				94010D8A11D7CCD600E2DBB2 /* loadoutZone.cpp */,
+				73FD79C61295E78800143CE9 /* loadoutZone.h */,
+				73FD79E01295E78800143CE9 /* shipItems.h */,
+				94010DB411D7CCD600E2DBB2 /* ship.cpp */,
+				94010D5F11D7CCD600E2DBB2 /* engineeredObjects.cpp */,
+				73FD79AF1295E78700143CE9 /* engineeredObjects.h */,
+				94010D5311D7CCD600E2DBB2 /* barrier.cpp */,
+				94010D6111D7CCD600E2DBB2 /* flagItem.cpp */,
+				94010D7711D7CCD600E2DBB2 /* goalZone.cpp */,
+				94010D8211D7CCD600E2DBB2 /* item.cpp */,
+				94010DA611D7CCD600E2DBB2 /* projectile.cpp */,
+				94010DBE11D7CCD600E2DBB2 /* speedZone.cpp */,
+				94010DC411D7CCD600E2DBB2 /* teleporter.cpp */,
+				9462C40811D7D84000791A0B /* textItem.cpp */,
+				73FD79A81295E78700143CE9 /* barrier.h */,
+				73FD79B01295E78700143CE9 /* flagItem.h */,
+				73FD79BB1295E78700143CE9 /* goalZone.h */,
+				73FD79C11295E78800143CE9 /* item.h */,
+				73FD79D81295E78800143CE9 /* projectile.h */,
+				73FD79E31295E78800143CE9 /* speedZone.h */,
+				73FD79E81295E78800143CE9 /* teleporter.h */,
+				73FD79E91295E78800143CE9 /* textItem.h */,
+			);
+			name = "Items Included";
+			sourceTree = "<group>";
+		};
+		036FEE9412D1D27A00C14EE2 /* Player Controll */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79C51295E78800143CE9 /* loadoutSelect.h */,
+				73FD79D11295E78800143CE9 /* move.h */,
+				73FD79D21295E78800143CE9 /* moveObject.h */,
+				73FD79D41295E78800143CE9 /* playerInfo.h */,
+				73FD79E41295E78800143CE9 /* statistics.h */,
+				73FD79E71295E78800143CE9 /* teamInfo.h */,
+				94010D8811D7CCD600E2DBB2 /* loadoutSelect.cpp */,
+				94010D9C11D7CCD600E2DBB2 /* move.cpp */,
+				94010D9E11D7CCD600E2DBB2 /* moveObject.cpp */,
+				94010DA111D7CCD600E2DBB2 /* playerInfo.cpp */,
+				6D8E517412111FDC00C6D883 /* statistics.cpp */,
+				94010DC211D7CCD600E2DBB2 /* teamInfo.cpp */,
+			);
+			name = "Player Controll";
+			sourceTree = "<group>";
+		};
+		036FEE9512D1D32F00C14EE2 /* Input and Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79AA1295E78700143CE9 /* config.h */,
+				73FD79BF1295E78700143CE9 /* IniFile.h */,
+				73FD79C01295E78700143CE9 /* input.h */,
+				73FD79D91295E78800143CE9 /* quickChat.h */,
+				73FD79DE1295E78800143CE9 /* sfx.h */,
+				73FD7A001295E78800143CE9 /* zapjournal.h */,
+				94010D5711D7CCD600E2DBB2 /* config.cpp */,
+				94010D7E11D7CCD600E2DBB2 /* IniFile.cpp */,
+				94010D8011D7CCD600E2DBB2 /* input.cpp */,
+				94010DA011D7CCD600E2DBB2 /* osxInput.cpp */,
+				94010DA811D7CCD600E2DBB2 /* quickChat.cpp */,
+				94010DB111D7CCD600E2DBB2 /* sfx.cpp */,
+			);
+			name = "Input and Configuration";
+			sourceTree = "<group>";
+		};
+		036FEE9612D1D52C00C14EE2 /* OpenGL and other Screen Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79E61295E78800143CE9 /* SweptEllipsoid.h */,
+				94010DC011D7CCD600E2DBB2 /* SweptEllipsoid.cpp */,
+				73FD79E21295E78800143CE9 /* sparkManager.h */,
+				94010DBC11D7CCD600E2DBB2 /* sparkManager.cpp */,
+				73FD79E51295E78800143CE9 /* stringUtils.h */,
+				736DE97F129066D500C3CB73 /* stringUtils.cpp */,
+				73FD79BC1295E78700143CE9 /* gridDB.h */,
+				73FD79C41295E78800143CE9 /* lineEditor.h */,
+				73FD79CF1295E78800143CE9 /* md5.h */,
+				73FD79D01295E78800143CE9 /* md5wrapper.h */,
+				73FD79D51295E78800143CE9 /* point.h */,
+				73FD79D61295E78800143CE9 /* polygon.h */,
+				73FD79DD1295E78800143CE9 /* screenShooter.h */,
+				94010D7911D7CCD600E2DBB2 /* gridDB.cpp */,
+				94010D8611D7CCD600E2DBB2 /* lineEditor.cpp */,
+				94010D9811D7CCD600E2DBB2 /* md5.cpp */,
+				94010D9A11D7CCD600E2DBB2 /* md5wrapper.cpp */,
+				94010DAF11D7CCD600E2DBB2 /* screenShooter.cpp */,
+			);
+			name = "OpenGL and other Screen Rendering";
+			sourceTree = "<group>";
+		};
+		036FEEDB12D1D6B400C14EE2 /* Uncatagorized */ = {
+			isa = PBXGroup;
+			children = (
+				73FD79DB1295E78800143CE9 /* resource.h */,
+				73FD79AD1295E78700143CE9 /* Directory.h */,
+				73FD79AE1295E78700143CE9 /* dirent.h */,
+				73FD79CD1295E78800143CE9 /* Makefile */,
+				94010D5E11D7CCD600E2DBB2 /* Directory.mm */,
+				9462C3FE11D7D80400791A0B /* masterInterface.cpp */,
+			);
+			name = Uncatagorized;
+			sourceTree = "<group>";
+		};
+		036FEEDC12D1D70500C14EE2 /* Post Compiled */ = {
+			isa = PBXGroup;
+			children = (
+				737CE2FF1290469B00D732B7 /* libtomcrypt */,
+				737CE2FE1290469500D732B7 /* tnl */,
+				737CE2FD1290469000D732B7 /* lua */,
+			);
+			name = "Post Compiled";
+			sourceTree = "<group>";
+		};
+		036FF04E12D1D79500C14EE2 /* Pre Compiled */ = {
 			isa = PBXGroup;
 			children = (
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
@@ -943,6 +1260,33 @@
 				94010E8411D7CF0200E2DBB2 /* OpenGL.framework */,
 				9462C40211D7D82700791A0B /* IOKit.framework */,
 				9462C41611D7D95600791A0B /* Carbon.framework */,
+			);
+			name = "Pre Compiled";
+			sourceTree = "<group>";
+		};
+		036FF08212D1D7EA00C14EE2 /* Applications */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* Bitfighter.app */,
+				737826B112960DDF007333BE /* Bitfighterd.app */,
+			);
+			name = Applications;
+			sourceTree = "<group>";
+		};
+		036FF0B612D1D7EF00C14EE2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				737CE46C12904E9E00D732B7 /* libtomcrypt.framework */,
+				737CE61D1290553D00D732B7 /* tnl.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				036FEEDC12D1D70500C14EE2 /* Post Compiled */,
+				036FF04E12D1D79500C14EE2 /* Pre Compiled */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -960,10 +1304,8 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* Bitfighter.app */,
-				737CE46C12904E9E00D732B7 /* libtomcrypt.framework */,
-				737CE61D1290553D00D732B7 /* tnl.framework */,
-				737826B112960DDF007333BE /* Bitfighterd.app */,
+				036FF08212D1D7EA00C14EE2 /* Applications */,
+				036FF0B612D1D7EF00C14EE2 /* Frameworks */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -971,12 +1313,7 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
-				736DE9A01290699A00C3CB73 /* script */,
-				737CE2FF1290469B00D732B7 /* libtomcrypt */,
-				737CE2FE1290469500D732B7 /* tnl */,
-				737CE2FD1290469000D732B7 /* lua */,
-				737CE2FC1290468300D732B7 /* zap */,
-				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				737CE2FC1290468300D732B7 /* Bitfighter */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
@@ -984,13 +1321,14 @@
 			name = Bitfighter;
 			sourceTree = "<group>";
 		};
-		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+		29B97315FDCFA39411CA2CEA /*  Zap Main and Prefix */ = {
 			isa = PBXGroup;
 			children = (
+				94010D9511D7CCD600E2DBB2 /* main.cpp */,
 				03EF60B812C4BB7E004B311A /* server.xib */,
 				256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */,
 			);
-			name = "Other Sources";
+			name = " Zap Main and Prefix";
 			sourceTree = "<group>";
 		};
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
@@ -1021,197 +1359,33 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		736DE9A01290699A00C3CB73 /* script */ = {
+		736DE9A01290699A00C3CB73 /* Standalone Shell Script */ = {
 			isa = PBXGroup;
 			children = (
 				736DE9A512906AA400C3CB73 /* bitfighter.sh */,
 			);
-			name = script;
+			name = "Standalone Shell Script";
 			sourceTree = "<group>";
 		};
-		737CE2FC1290468300D732B7 /* zap */ = {
+		737CE2FC1290468300D732B7 /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
-				031A0B9212C46D91000BE0F6 /* dataConnection.cpp */,
-				031A0B9312C46D91000BE0F6 /* dataConnection.h */,
-				73710091129623C6000FE4FE /* ConsoleFont.c */,
-				73FD79A81295E78700143CE9 /* barrier.h */,
-				73FD79A91295E78700143CE9 /* BotNavMeshZone.h */,
-				73FD79AA1295E78700143CE9 /* config.h */,
-				73FD79AB1295E78700143CE9 /* controlObjectConnection.h */,
-				73FD79AC1295E78700143CE9 /* CTFGame.h */,
-				73FD79AD1295E78700143CE9 /* Directory.h */,
-				73FD79AE1295E78700143CE9 /* dirent.h */,
-				73FD79AF1295E78700143CE9 /* engineeredObjects.h */,
-				73FD79B01295E78700143CE9 /* flagItem.h */,
-				73FD79B11295E78700143CE9 /* ftol.h */,
-				73FD79B21295E78700143CE9 /* game.h */,
-				73FD79B31295E78700143CE9 /* gameConnection.h */,
-				73FD79B41295E78700143CE9 /* gameItems.h */,
-				73FD79B51295E78700143CE9 /* gameLoader.h */,
-				73FD79B61295E78700143CE9 /* gameNetInterface.h */,
-				73FD79B71295E78700143CE9 /* gameObject.h */,
-				73FD79B81295E78700143CE9 /* gameObjectRender.h */,
-				73FD79B91295E78700143CE9 /* gameType.h */,
-				73FD79BA1295E78700143CE9 /* gameWeapons.h */,
-				73FD79BB1295E78700143CE9 /* goalZone.h */,
-				73FD79BC1295E78700143CE9 /* gridDB.h */,
-				73FD79BD1295E78700143CE9 /* gsm.h */,
-				73FD79BE1295E78700143CE9 /* huntersGame.h */,
-				73FD79BF1295E78700143CE9 /* IniFile.h */,
-				73FD79C01295E78700143CE9 /* input.h */,
-				73FD79C11295E78800143CE9 /* item.h */,
-				73FD79C21295E78800143CE9 /* keyCode.h */,
-				73FD79C31295E78800143CE9 /* keyCodeEnum.h */,
-				73FD79C41295E78800143CE9 /* lineEditor.h */,
-				73FD79C51295E78800143CE9 /* loadoutSelect.h */,
-				73FD79C61295E78800143CE9 /* loadoutZone.h */,
-				73FD79C71295E78800143CE9 /* lpc10.h */,
-				73FD79C81295E78800143CE9 /* lua.h */,
-				73FD79C91295E78800143CE9 /* luaGameInfo.h */,
-				73FD79CA1295E78800143CE9 /* luaLevelGenerator.h */,
-				73FD79CB1295E78800143CE9 /* luaObject.h */,
-				73FD79CC1295E78800143CE9 /* luaUtil.h */,
-				73FD79CD1295E78800143CE9 /* Makefile */,
-				73FD79CE1295E78800143CE9 /* masterConnection.h */,
-				73FD79CF1295E78800143CE9 /* md5.h */,
-				73FD79D01295E78800143CE9 /* md5wrapper.h */,
-				73FD79D11295E78800143CE9 /* move.h */,
-				73FD79D21295E78800143CE9 /* moveObject.h */,
-				73FD79D31295E78800143CE9 /* oglconsole.h */,
-				73FD79D41295E78800143CE9 /* playerInfo.h */,
-				73FD79D51295E78800143CE9 /* point.h */,
-				73FD79D61295E78800143CE9 /* polygon.h */,
-				73FD79D71295E78800143CE9 /* private.h */,
-				73FD79D81295E78800143CE9 /* projectile.h */,
-				73FD79D91295E78800143CE9 /* quickChat.h */,
-				73FD79DA1295E78800143CE9 /* rabbitGame.h */,
-				73FD79DB1295E78800143CE9 /* resource.h */,
-				73FD79DC1295E78800143CE9 /* robot.h */,
-				73FD79DD1295E78800143CE9 /* screenShooter.h */,
-				73FD79DE1295E78800143CE9 /* sfx.h */,
-				73FD79DF1295E78800143CE9 /* SharedConstants.h */,
-				73FD79E01295E78800143CE9 /* shipItems.h */,
-				73FD79E11295E78800143CE9 /* soccerGame.h */,
-				73FD79E21295E78800143CE9 /* sparkManager.h */,
-				73FD79E31295E78800143CE9 /* speedZone.h */,
-				73FD79E41295E78800143CE9 /* statistics.h */,
-				73FD79E51295E78800143CE9 /* stringUtils.h */,
-				73FD79E61295E78800143CE9 /* SweptEllipsoid.h */,
-				73FD79E71295E78800143CE9 /* teamInfo.h */,
-				73FD79E81295E78800143CE9 /* teleporter.h */,
-				73FD79E91295E78800143CE9 /* textItem.h */,
-				73FD79EA1295E78800143CE9 /* timer.h */,
-				73FD79EB1295E78800143CE9 /* UI.h */,
-				73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */,
-				73FD79ED1295E78800143CE9 /* UIAbstractInstructions.h */,
-				73FD79EE1295E78800143CE9 /* UIChat.h */,
-				73FD79EF1295E78800143CE9 /* UICredits.h */,
-				73FD79F01295E78800143CE9 /* UIDiagnostics.h */,
-				73FD79F11295E78800143CE9 /* UIEditor.h */,
-				73FD79F21295E78800143CE9 /* UIErrorMessage.h */,
-				73FD79F31295E78800143CE9 /* UIGame.h */,
-				73FD79F41295E78800143CE9 /* UIGameParameters.h */,
-				73FD79F51295E78800143CE9 /* UIInstructions.h */,
-				73FD79F61295E78800143CE9 /* UIKeyDefMenu.h */,
-				73FD79F71295E78800143CE9 /* UIMenuItems.h */,
-				73FD79F81295E78800143CE9 /* UIMenus.h */,
-				73FD79F91295E78800143CE9 /* UIMessage.h */,
-				73FD79FA1295E78800143CE9 /* UINameEntry.h */,
-				73FD79FB1295E78800143CE9 /* UIQueryServers.h */,
-				73FD79FC1295E78800143CE9 /* UIRebindKeys.h */,
-				73FD79FD1295E78800143CE9 /* UITeamDefMenu.h */,
-				73FD79FE1295E78800143CE9 /* UIYesNo.h */,
-				73FD79FF1295E78800143CE9 /* voiceCodec.h */,
-				73FD7A001295E78800143CE9 /* zapjournal.h */,
-				736DE97F129066D500C3CB73 /* stringUtils.cpp */,
-				736DE9741290662300C3CB73 /* UIMenuItems.cpp */,
-				94010D5311D7CCD600E2DBB2 /* barrier.cpp */,
-				94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */,
-				94010D5711D7CCD600E2DBB2 /* config.cpp */,
-				94010D5911D7CCD600E2DBB2 /* controlObjectConnection.cpp */,
-				737CE7C212905F6400D732B7 /* oglconsole.c */,
-				94010D5B11D7CCD600E2DBB2 /* CTFGame.cpp */,
-				94010D5E11D7CCD600E2DBB2 /* Directory.mm */,
-				94010D5F11D7CCD600E2DBB2 /* engineeredObjects.cpp */,
-				94010D6111D7CCD600E2DBB2 /* flagItem.cpp */,
-				94010D6511D7CCD600E2DBB2 /* game.cpp */,
-				94010D6711D7CCD600E2DBB2 /* gameConnection.cpp */,
-				94010D6911D7CCD600E2DBB2 /* gameItems.cpp */,
-				94010D6B11D7CCD600E2DBB2 /* gameLoader.cpp */,
-				94010D6D11D7CCD600E2DBB2 /* gameNetInterface.cpp */,
-				94010D6F11D7CCD600E2DBB2 /* gameObject.cpp */,
-				94010D7111D7CCD600E2DBB2 /* gameObjectRender.cpp */,
-				94010D7311D7CCD600E2DBB2 /* gameType.cpp */,
-				94010D7511D7CCD600E2DBB2 /* gameWeapons.cpp */,
-				94010D7711D7CCD600E2DBB2 /* goalZone.cpp */,
-				94010D7911D7CCD600E2DBB2 /* gridDB.cpp */,
-				9462C3DE11D7D6D500791A0B /* gsm_decode.c */,
-				9462C3DF11D7D6D500791A0B /* gsm_encode.c */,
-				9462C3E011D7D6D500791A0B /* gsm_state.c */,
-				94010D7B11D7CCD600E2DBB2 /* HTFGame.cpp */,
-				94010D7C11D7CCD600E2DBB2 /* huntersGame.cpp */,
-				94010D7E11D7CCD600E2DBB2 /* IniFile.cpp */,
-				94010D8011D7CCD600E2DBB2 /* input.cpp */,
-				94010D8211D7CCD600E2DBB2 /* item.cpp */,
-				94010D8411D7CCD600E2DBB2 /* keyCode.cpp */,
-				94010D8611D7CCD600E2DBB2 /* lineEditor.cpp */,
-				94010D8811D7CCD600E2DBB2 /* loadoutSelect.cpp */,
-				94010D8A11D7CCD600E2DBB2 /* loadoutZone.cpp */,
-				9462C3F611D7D7C700791A0B /* lpc10dec.c */,
-				9462C3F711D7D7C700791A0B /* lpc10enc.c */,
-				94010D8D11D7CCD600E2DBB2 /* luaGameInfo.cpp */,
-				94010D8F11D7CCD600E2DBB2 /* luaLevelGenerator.cpp */,
-				94010D9111D7CCD600E2DBB2 /* luaObject.cpp */,
-				94010D9311D7CCD600E2DBB2 /* luaUtil.cpp */,
-				94010D9511D7CCD600E2DBB2 /* main.cpp */,
-				94010D9611D7CCD600E2DBB2 /* masterConnection.cpp */,
-				9462C3FE11D7D80400791A0B /* masterInterface.cpp */,
-				94010D9811D7CCD600E2DBB2 /* md5.cpp */,
-				94010D9A11D7CCD600E2DBB2 /* md5wrapper.cpp */,
-				94010D9C11D7CCD600E2DBB2 /* move.cpp */,
-				94010D9E11D7CCD600E2DBB2 /* moveObject.cpp */,
-				94010DA011D7CCD600E2DBB2 /* osxInput.cpp */,
-				94010DA111D7CCD600E2DBB2 /* playerInfo.cpp */,
-				94010DA611D7CCD600E2DBB2 /* projectile.cpp */,
-				94010DA811D7CCD600E2DBB2 /* quickChat.cpp */,
-				94010DAA11D7CCD600E2DBB2 /* rabbitGame.cpp */,
-				94010DAC11D7CCD600E2DBB2 /* retrieveGame.cpp */,
-				94010DAD11D7CCD600E2DBB2 /* robot.cpp */,
-				94010DAF11D7CCD600E2DBB2 /* screenShooter.cpp */,
-				94010DB111D7CCD600E2DBB2 /* sfx.cpp */,
-				94010DB411D7CCD600E2DBB2 /* ship.cpp */,
-				94010DB711D7CCD600E2DBB2 /* SlipZone.cpp */,
-				94010DB811D7CCD600E2DBB2 /* soccerGame.cpp */,
-				94010DBC11D7CCD600E2DBB2 /* sparkManager.cpp */,
-				94010DBE11D7CCD600E2DBB2 /* speedZone.cpp */,
-				6D8E517412111FDC00C6D883 /* statistics.cpp */,
-				94010DC011D7CCD600E2DBB2 /* SweptEllipsoid.cpp */,
-				94010DC211D7CCD600E2DBB2 /* teamInfo.cpp */,
-				94010DC411D7CCD600E2DBB2 /* teleporter.cpp */,
-				9462C40811D7D84000791A0B /* textItem.cpp */,
-				94010DC811D7CCD600E2DBB2 /* UI.cpp */,
-				94010DCA11D7CCD600E2DBB2 /* UIChat.cpp */,
-				94010DCC11D7CCD600E2DBB2 /* UICredits.cpp */,
-				94010DCE11D7CCD600E2DBB2 /* UIDiagnostics.cpp */,
-				94010DD011D7CCD600E2DBB2 /* UIEditor.cpp */,
-				94010DD211D7CCD600E2DBB2 /* UIEditorInstructions.cpp */,
-				94010DD411D7CCD600E2DBB2 /* UIErrorMessage.cpp */,
-				94010DD611D7CCD600E2DBB2 /* UIGame.cpp */,
-				94010DD811D7CCD600E2DBB2 /* UIGameParameters.cpp */,
-				94010DDA11D7CCD600E2DBB2 /* UIInstructions.cpp */,
-				94010DDC11D7CCD600E2DBB2 /* UIKeyDefMenu.cpp */,
-				94010DDE11D7CCD600E2DBB2 /* UIMenus.cpp */,
-				94010DE011D7CCD600E2DBB2 /* UIMessage.cpp */,
-				94010DE211D7CCD600E2DBB2 /* UINameEntry.cpp */,
-				94010DE411D7CCD600E2DBB2 /* UIQueryServers.cpp */,
-				94010DE611D7CCD600E2DBB2 /* UIRebindKeys.cpp */,
-				94010DE811D7CCD600E2DBB2 /* UITeamDefMenu.cpp */,
-				94010DEA11D7CCD600E2DBB2 /* UIYesNo.cpp */,
-				94010DEC11D7CCD600E2DBB2 /* voiceCodec.cpp */,
-				94010DEF11D7CCD600E2DBB2 /* zoneControlGame.cpp */,
+				736DE9A01290699A00C3CB73 /* Standalone Shell Script */,
+				036FEEDB12D1D6B400C14EE2 /* Uncatagorized */,
+				036FEE7412D1D04300C14EE2 /* Ogl Console Engine */,
+				036FEE9312D1D1C900C14EE2 /* Items Included */,
+				036FEE9512D1D32F00C14EE2 /* Input and Configuration */,
+				036FEE6B12D1D00100C14EE2 /* Game Rendering */,
+				036FEE9612D1D52C00C14EE2 /* OpenGL and other Screen Rendering */,
+				036FEE9412D1D27A00C14EE2 /* Player Controll */,
+				036FEE6A12D1CF6D00C14EE2 /* User Interface */,
+				036FEE7912D1D06500C14EE2 /* Bots and Lua Coding */,
+				036FEE6F12D1D01B00C14EE2 /* Connection Rendering */,
+				036FEE8412D1D0C000C14EE2 /* Current Game Types */,
+				29B97315FDCFA39411CA2CEA /*  Zap Main and Prefix */,
+				036FEE8D12D1D0DF00C14EE2 /* Voice Chat Rendering */,
 			);
-			name = zap;
+			name = Bitfighter;
 			sourceTree = "<group>";
 		};
 		737CE2FD1290469000D732B7 /* lua */ = {
@@ -1559,6 +1733,8 @@
 				737CE61C1290553D00D732B7 /* tnl */,
 				7378261712960DDF007333BE /* Bitfighterd */,
 				03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */,
+				033F6AE312D190F20023D4C6 /* Create Bitfighter Dedicated Server Release */,
+				033F6AF912D191B40023D4C6 /* Compile Frameworks Only */,
 			);
 		};
 /* End PBXProject section */
@@ -1611,6 +1787,32 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		033F6AE212D190F20023D4C6 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt Bitfighterd)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../MacOSX/macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighterd.app\" \"${to_package_dir}\"\n\nif [ -n \"${AA_RECORDER_APP}\" ]\nthen\n\tcp -R \"${AA_RECORDER_APP}\" \"${to_package_dir}\"\nfi\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Bitfighterd\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+		};
+		033F6AF812D191B40023D4C6 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# shell script goes here\nexit 0";
+		};
 		03AD18B512CE2C6F00274A25 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -1976,6 +2178,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		033F6AE912D1910A0023D4C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7378261712960DDF007333BE /* Bitfighterd */;
+			targetProxy = 033F6AE812D1910A0023D4C6 /* PBXContainerItemProxy */;
+		};
+		033F6AFD12D191C20023D4C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 737CE46B12904E9E00D732B7 /* libtomcrypt */;
+			targetProxy = 033F6AFC12D191C20023D4C6 /* PBXContainerItemProxy */;
+		};
+		033F6AFF12D191C70023D4C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 737CE61C1290553D00D732B7 /* tnl */;
+			targetProxy = 033F6AFE12D191C70023D4C6 /* PBXContainerItemProxy */;
+		};
 		03AD188F12CE2BED00274A25 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8D1107260486CEB800E47090 /* Bitfighter */;
@@ -2009,6 +2226,52 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		033F6AE412D190F30023D4C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Create Bitfighter Dedicated Server Release";
+			};
+			name = Debug;
+		};
+		033F6AE512D190F30023D4C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = "Create Bitfighter Dedicated Server Release";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		033F6AFA12D191B40023D4C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Compile Frameworks";
+			};
+			name = Debug;
+		};
+		033F6AFB12D191B40023D4C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				OTHER_CFLAGS = (
+					"-DTNL_ENABLE_LOGGING",
+					"-TNL_ENABLE_LOGGING",
+				);
+				PRODUCT_NAME = "Compile Frameworks";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		03AD17D012CE2BBF00274A25 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2296,6 +2559,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		033F6AEA12D191360023D4C6 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Dedicated Server Release" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				033F6AE412D190F30023D4C6 /* Debug */,
+				033F6AE512D190F30023D4C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		033F6B0512D192160023D4C6 /* Build configuration list for PBXAggregateTarget "Compile Frameworks Only" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				033F6AFA12D191B40023D4C6 /* Debug */,
+				033F6AFB12D191B40023D4C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		03AD17D912CE2BC700274A25 /* Build configuration list for PBXAggregateTarget "Create Bitfighter Game Release" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
