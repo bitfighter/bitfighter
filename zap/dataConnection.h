@@ -8,10 +8,10 @@
 using namespace TNL;
 using namespace std;
 
-#include <iosfwd>
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
+//#include <iosfwd>
+//#include <iostream>
+//#include <fstream>    // linux complains about missing fprintf, fputc, vscanf, ...
+//#include <stdlib.h>
 
 
 namespace Zap {
@@ -70,7 +70,7 @@ private:
    FileType mFileType;
    string mFilename;          
    string mPassword;          // Password supplied by user
-   ofstream mOutputFile;      // Where we'll save any incoming data
+   void * mOutputFile;      // Where we'll save any incoming data
 
 public:
    // Quickie Constructor
@@ -80,6 +80,7 @@ public:
       mFilename = filename; 
       mFileType = fileType;
       mPassword = password;
+      mOutputFile = NULL;
    }     
 
    DataSender mDataSender;

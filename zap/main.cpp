@@ -1657,7 +1657,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
             exitGame(1);
          }
 
-         bool sending = (!stricmp(theArgv[i].getString(), "-sendfile"));
+         bool sending = (!stricmp(theArgv[i].getString(), "-sendres"));
 
          Address address(theArgv[i+1].getString());
          if(!address.isValid())
