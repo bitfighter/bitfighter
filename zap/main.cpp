@@ -1695,7 +1695,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
               
             netInterface->checkIncomingPackets();
             netInterface->processConnections();
-            Sleep(1);              //don't eat CPU power
+            Platform::sleep(1);              //don't eat CPU power
             if((!started) && (!dataConn))
             {
                printf("Failed to connect");
