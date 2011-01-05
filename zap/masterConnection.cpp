@@ -278,8 +278,6 @@ void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
 	GameType *gt = gServerGame->getGameType();
 	ClientRef *cr = gc->getClientRef();
 	logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
-	gc->setClientName(newName);
-	cr->name = newName;
 	if(gt)
 	{
 		//Currently, changing name may make the client's scoreboard wrong on which player is which.
@@ -288,6 +286,8 @@ void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
 		gt->s2cAddClient(newName, false, cr->isAdmin, false, false);    // new name added
 		gt->s2cClientJoinedTeam(newName, cr->getTeam());
 	}
+	gc->setClientName(newName);
+	cr->name = newName;
 	Ship *ship = dynamic_cast<Ship *>(gc->getControlObject());
 	if(ship)
 	{
