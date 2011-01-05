@@ -2392,6 +2392,7 @@ void GetMapData(S32 FileSize, S32 Position, const char * Data)
 	}
 };
 
+extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
 
 
 // Runs the server side commands, which the client may or may not know about
@@ -2471,6 +2472,17 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
        }
        if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
+   }
+   else if(!stricmp(cmd, "rename") && args.size() >= 1)
+   {
+		//for testing, might want to remove this once it is fully working.
+		StringTableEntry oldName = clientRef->clientConnection->getClientName();
+		clientRef->clientConnection->setClientName(StringTableEntry(""));       //avoid unique self
+		StringTableEntry uniqueName = GameConnection::makeUnique(args[0].getString()).c_str();  //new name
+		clientRef->clientConnection->setClientName(oldName);                   //restore name to properly get it updated to clients.
+
+		clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
+		updateClientChangedName(clientRef->clientConnection,uniqueName);
    }
    else
    {

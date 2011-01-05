@@ -174,6 +174,7 @@ public:
    Point mImpulseVector;
 
    StringTableEntry getName() { return mPlayerName; }
+   void setName(StringTableEntry name) { mPlayerName = name; }
    void setIsAuthenticated(bool isAuthenticated, StringTableEntry name) { mIsAuthenticated = isAuthenticated; mPlayerName = name;
                            setMaskBits(AuthenticationMask); }
 
