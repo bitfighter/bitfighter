@@ -505,7 +505,7 @@ public:
    }
 
 
-   MasterServerConnection *findClient(Nonce clientId)
+   MasterServerConnection *findClient(Nonce &clientId)   // Should be const, but that won't compile for reasons not yet determined!!
    {
       if(!clientId.isValid())
          return NULL;
@@ -856,12 +856,15 @@ public:
       logprintf(LogConsumer::StatisticsFilter, "PLAYER\t2\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
+
    // Send player statistics to the master server
    TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, StringTableEntry teamName, 
                                                         S32 score,
                                                         U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
    {
+
       Nonce clientId(id);
+
       MasterServerConnection *client = findClient(clientId);
 
       bool authenticated = (client && client->isAuthenticated());
@@ -879,7 +882,9 @@ public:
       logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
                playerName.getString(), authenticated ? "true" : "false", teamName.getString(), score, kills, deaths, suicides, 
                totalShots, totalHits);
+
    }
+
 
    // Send game statistics to the master server
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 

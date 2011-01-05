@@ -2417,33 +2417,34 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
-   else if(!stricmp(cmd, "getmap"))
-   {
-     //might want to add an option to prevent /getmap
-     if(clientRef->clientConnection->isLocalConnection())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't Get Map your own host.");
-     else
-     {
-       S32 i=0;
-       S32 s=0;
-       S32 filesize=0;
-       while(sFileData[filesize] != 0)   //find the file size.
-           filesize++;
-       while(sFileData[i] != 0)
-       {
-          if(i-s >= 254)
-          {
-             char c1 = sFileData[i];
-             sFileData[i] = 0;     //so it thinks it is a short string line
-             clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
-             sFileData[i] = c1;
-             s=i;
-          }
-          i++;
-       }
-       if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
-     }
-   }
+   //else if(!stricmp(cmd, "getmap"))
+   //{
+   //  // Might want to add an option to prevent /getmap
+   //  if(clientRef->clientConnection->isLocalConnection())
+   //      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't use /getmap on a local connection");
+   //  else
+   //  {
+     //  S32 i = 0;
+     //  S32 s = 0;
+     //  S32 filesize = 0;
+
+     //  while(sFileData[filesize] != 0)   // Find the file size
+     //      filesize++;
+     //  while(sFileData[i] != 0)
+     //  {
+     //     if(i-s >= 254)
+     //     {
+     //        char c1 = sFileData[i];
+     //        sFileData[i] = 0;     //so it thinks it is a short string line
+     //        clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
+     //        sFileData[i] = c1;
+     //        s=i;
+     //     }
+     //     i++;
+     //  }
+     //  if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
+     //}
+   //}
    else
    {
       // Command not found, tell the client

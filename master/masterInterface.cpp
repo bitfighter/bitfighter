@@ -162,7 +162,7 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_3,
    (StringTableEntry playerName, Vector<U8> id, StringTableEntry teamName, S32 score, U16 kills, U16 deaths, U16 suicides, 
          Vector<U16> shots, Vector<U16> hits),
    (playerName, id, teamName, score, kills, deaths, suicides, shots, hits),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 5) {}
+   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
 
 // Send game statistics to the master server
