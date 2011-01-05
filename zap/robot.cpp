@@ -1320,6 +1320,7 @@ Vector<Robot *> Robot::robots;
 // Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
+	gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
    L = NULL;
@@ -1347,6 +1348,17 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 // Destructor, runs on client and server
 Robot::~Robot()
 {
+	if(gameConnectionInitalized)
+	{
+		GameConnection *gc = getOwner();
+		if(getGame()->getGameType())
+		{
+			getGame()->getGameType()->serverRemoveClient(gc);
+		}
+		setOwner(NULL);
+		delete gc->getClientRef();
+		delete gc;
+	}
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
 
@@ -1368,7 +1380,8 @@ Robot::~Robot()
 
    mPlayerInfo->setDefunct();
    eventManager.fireEvent(L, EventManager::PlayerLeftEvent, getPlayerInfo());
-   delete mPlayerInfo;     
+   delete mPlayerInfo;
+
 
    logprintf(LogConsumer::LogLuaObjectLifecycle, "Robot terminated [%s] (%d)", mFilename.c_str(), robots.size());
 }
@@ -1376,25 +1389,34 @@ Robot::~Robot()
 
 // Reset everything on the robot back to the factory settings
 // Only runs on server!
+// return false if failed
 bool Robot::initialize(Point &pos)
 {
-   respawnTimer.clear();
-   flightPlan.clear();
+   try
+   {
+      respawnTimer.clear();
+      flightPlan.clear();
 
-   mCurrentZone = -1;   // Correct value will be calculated upon first request
+      mCurrentZone = -1;   // Correct value will be calculated upon first request
 
-   Parent::initialize(pos);
+      Parent::initialize(pos);
 
-   enableCollision();
+      enableCollision();
 
-   // WarpPositionMask triggers the spinny spawning visual effect
-   setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulesMask | WarpPositionMask);      // Send lots to the client
+      // WarpPositionMask triggers the spinny spawning visual effect
+      setMaskBits(RespawnMask | HealthMask | LoadoutMask | PositionMask | MoveMask | ModulesMask | WarpPositionMask);      // Send lots to the client
 
-   TNLAssert(!isGhost(), "Didn't expect ghost here...");
+      TNLAssert(!isGhost(), "Didn't expect ghost here...");
 
-   runMain();
-   eventManager.update();       // Ensure registrations made during bot initialization are ready to go
+      if(! runMain()) return false;      //try to run, can fail on script error.
+      eventManager.update();       // Ensure registrations made during bot initialization are ready to go
 
+   }catch(LuaException &e)
+   {
+      logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
+      //delete this;         //can't delete here, that can cause memory errors
+		return false;          //return false have an effect of disconnecting the robot.
+   }
    return true;
 } 
 
@@ -1559,7 +1581,8 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 
 
 // Don't forget to update the eventManager after running a robot's main function!
-void Robot::runMain()
+// return false if failed
+bool Robot::runMain()
 {
    try
    {
@@ -1570,8 +1593,10 @@ void Robot::runMain()
    catch(LuaException &e)
    {
       logError("Robot error running main(): %s.  Shutting robot down.", e.what());
-      delete this;
+      //delete this;  //might cause memory errors.
+		return false;
    }
+	return true;
 }
 
 
@@ -1599,6 +1624,7 @@ void Robot::onAddedToGame(Game *game)
 
 
 // Basically exists to override Ship::kill(info)
+/*
  void Robot::kill(DamageInfo *theInfo)
 {
    GameConnection *killer = theInfo->damagingObject ? theInfo->damagingObject->getOwner() : NULL;
@@ -1609,6 +1635,7 @@ void Robot::onAddedToGame(Game *game)
 
    kill();
 }
+*/
 
 
 void Robot::kill()
@@ -1744,37 +1771,46 @@ bool Robot::canSeePoint(Point point)
       gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
 }
 
-
 void Robot::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT;
 
    if(path == GameObject::ServerIdleMainLoop)      // Running on server... but then, aren't we always??
    {
-      U32 ms = Platform::getRealMilliseconds();
-      deltaT = (ms - mLastMoveTime);
+      //Better deltaT timing?
+		//U32 ms = Platform::getRealMilliseconds();
+      deltaT = getCurrentMove().time;   //(ms - mLastMoveTime);
 
       if(deltaT == 0)      // If deltaT is 0, this may cause problems down the line.  Best thing is just to skip this round.
          return;
 
-      mLastMoveTime = ms;
+      //mLastMoveTime = ms;
       mCurrentMove.time = deltaT;
 
       // Check to see if we need to respawn this robot
       if(hasExploded)
       {
-         if(respawnTimer.update(mCurrentMove.time))
-         {
-            try
-            {
-               gServerGame->getGameType()->spawnRobot(this);
-            }
-            catch(LuaException &e)
-            {
-               logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
-               delete this;
-            }
-         }
+			if(!gameConnectionInitalized)  //after gameConnection is initalized, it should rspawn.
+			{
+				//  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
+				GameConnection *gc = new GameConnection(); // Need GameConnection and ClientRef to keep track of score
+				ClientRef *cr = new ClientRef();
+				gc->setClientName(getName());
+				cr->name = getName();
+				cr->setTeam(getTeam());
+				cr->clientConnection = gc;
+				gc->setClientRef(cr);
+				setOwner(gc);
+				gc->linkToClientList();
+				gc->setControlObject(this);
+				gc->setIsRobot(true);
+				getGame()->getGameType()->serverAddClient(gc);
+				gameConnectionInitalized = true;
+			}
+         //if(respawnTimer.update(mCurrentMove.time))  //not needed anymore
+         //{
+            //gServerGame->getGameType()->spawnRobot(this);
+         //}
          return;
       }
    }

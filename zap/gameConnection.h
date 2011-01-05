@@ -94,6 +94,7 @@ private:
    static GameConnection gClientList;
 
    bool mInCommanderMap;
+	bool mIsRobot;
    bool mIsAdmin;
    bool mIsLevelChanger;
    bool mWaitingForPermissionsReply;
@@ -113,9 +114,9 @@ private:
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;
 
-   void linkToClientList();
 
 public:
+   void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 
    static const S32 MASTER_SERVER_FAILURE_RETRY = 10000;   // 10 secs
@@ -173,7 +174,10 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   bool isAdmin() { return mIsAdmin; }
+   bool isRobot() { return mIsRobot; }
+   void setIsRobot(bool robot) { mIsRobot = robot; }
+
+	bool isAdmin() { return mIsAdmin; }
    void setIsAdmin(bool admin) { mIsAdmin = admin; }
 
    bool isBusy() { if(!this) return false; else return mIsBusy; }

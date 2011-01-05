@@ -85,6 +85,7 @@ void GameConnection::initialize()
    mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
+	mIsRobot = false;
    mIsAdmin = false;
    mIsLevelChanger = false;
    mIsBusy = false;
@@ -527,12 +528,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
             s2cDisplayMessage(ColorAqua, SFXNone, nokick);
             return;
          }
-         ConnectionParameters &p = theClient->getConnectionParameters();
-         if(p.mIsArranged)
-            gServerGame->getNetInterface()->banHost(p.mPossibleAddresses[0], BanDuration);      // Banned for 30 seconds
-         gServerGame->getNetInterface()->banHost(theClient->getNetAddress(), BanDuration);      // Banned for 30 seconds
+			if(theClient->isEstablished())     //Robot don't have established connections.
+			{
+            ConnectionParameters &p = theClient->getConnectionParameters();
+            if(p.mIsArranged)
+               gServerGame->getNetInterface()->banHost(p.mPossibleAddresses[0], BanDuration);      // Banned for 30 seconds
+            gServerGame->getNetInterface()->banHost(theClient->getNetAddress(), BanDuration);      // Banned for 30 seconds
+            theClient->disconnect(ReasonKickedByAdmin, "");
+			}
 
-         theClient->disconnect(ReasonKickedByAdmin, "");
+			for(S32 i = 0; i < Robot::robots.size(); i++)
+			{
+				if(Robot::robots[i]->getName() == theClient->getClientName())
+					delete Robot::robots[i];
+			}	
          break;
       }
    default:

@@ -1218,12 +1218,20 @@ void GameType::spawnShip(GameConnection *theClient)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
+	if(theClient->isRobot())
+	{
+		Robot *robot = (Robot *) theClient->getControlObject();
+      robot->setOwner(theClient);
+		robot->setTeam(teamIndex);
+		spawnRobot(robot);
+	}else
+	{
    //                     Player's name, team, and spawning location
-   Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
-
-   theClient->setControlObject(newShip);
-   newShip->setOwner(theClient);
-   newShip->addToGame(getGame());
+      Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
+      theClient->setControlObject(newShip);
+      newShip->setOwner(theClient);
+      newShip->addToGame(getGame());
+	}
 
    if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
       setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
@@ -1715,7 +1723,7 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 
    TNLAssert(ship, "Ship is null in updateScore!!");
 
-   if(!ship->isRobot() && ship->getControllingClient())
+   if(ship->getControllingClient())
       cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
 
    updateScore(cl, ship->getTeam(), scoringEvent, data);
@@ -2251,9 +2259,9 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    for(S32 i = 0; i < Robot::robots.size(); i++)
    {
-      s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
-      s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
-   }
+   //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
+   //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
+   }	
 
    // An empty list clears the barriers
    Vector<F32> v;

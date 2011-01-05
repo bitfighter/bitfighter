@@ -1,3 +1,5 @@
+-- SAM686 Version 4
+
 -- place this script at the bottom of level lines,
 -- to make sure script runs last, after loading all wall barriers.
 -- it is not perfect, uses too much bot zones (2000+), but it works
@@ -5,14 +7,10 @@
 
 --   Script BotZones.levelgen
 --or Script BotZones.levelgen [totalSize=16] [minZoneSize=0.8]
--- the Gridsize needs to be equal to the level "Gridsize"
 
 -- to test a robot in Capture the Flag.
 -- Robot 0 quickbotv2.bot .5 1 0 1 .25
 -- get quickbotv2 from bitfighter.org forum
-
-
--- SAM686
 
 
 
