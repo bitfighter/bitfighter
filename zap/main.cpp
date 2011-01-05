@@ -98,6 +98,7 @@ Specifying the extension is optional.
 <li>Fixed soccer sync problems
 <li>Fixed long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
 <li>Fixed crash on maps with: missing GameType, missing Team; FlagItem, Soccer and HuntersNexusObject on wrong GameType; out of range team number, Neutral flag in CTF.
+<li>Fixed Robots problems. Robots can now score, hold nexus and rabbit flags, and allow admin to kick robots or change robots team.
 </ul>
 */
 

@@ -273,6 +273,18 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
 }
 
 
+//  Tell all clients name is changed, and update server side name
+void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
+	GameType *gt = gServerGame->getGameType();
+	ClientRef *cr = gc->getClientRef();
+	logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
+   if(gt) gt->s2cRemoveClient(gc->getClientName());   // old name removed
+	gc->setClientName(newName);
+	cr->name = newName;
+	if(gt) gt->s2cAddClient(newName, false, cr->isAdmin, false, false);    // new name added
+	if(gt) gt->s2cClientJoinedTeam(newName, cr->getTeam());
+}
+
 // Now we know that player with specified id has an approved name
 TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name,
          RangedU32<0,AuthenticationStatusCount> status))
@@ -285,17 +297,23 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2sSetAuthenticated, (Vector<
          if(status == AuthenticationStatusAuthenticatedName)
          {
             walk->setAuthenticated(true);
-			//auto-rename other non-Authenticated clients to avoid stealing the authenticated name.
+            //auto-rename other non-Authenticated clients to avoid stealing the authenticated name.
             for(GameConnection *walk2 = GameConnection::getClientList(); walk2; walk2 = walk2->getNextClient())
             {
                if(walk2->getClientName() == name && !walk2->isAuthenticated() )
-                   walk2->setClientName(GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
+					{
+                  //walk2->setClientName(GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
+						updateClientChangedName(walk2, GameConnection::makeUnique(walk2->getClientName().getString()).c_str());
                           //makeUnique will think the name is in use by self, and rename it.
+
+					}
             }
-                //ToDo: tell all the clients a player name is changed.
-                //Currently, any changed name will update only when the level map have changed / restarted.
-            walk->setClientName("");       //prevent renaming self.
-            walk->setClientName(GameConnection::makeUnique(name.getString()).c_str());  //same name authenticated clients is OK to rename.
+				StringTableEntry oldName = walk->getClientName();
+				walk->setClientName(StringTableEntry(""));       //avoid unique self
+				StringTableEntry uniqueName = GameConnection::makeUnique(name.getString()).c_str();  //new name
+				walk->setClientName(oldName);                   //restore name to properly get it updated to clients.
+            if(walk->getClientName() != uniqueName)
+					updateClientChangedName(walk, uniqueName);
          }
          else if(status == AuthenticationStatusUnauthenticatedName)
          {  // braces needed
