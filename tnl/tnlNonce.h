@@ -52,7 +52,7 @@ public:
 
    Nonce() { for(S32 i = 0; i < NonceSize; i++) data[i] = 0; mValid = false; }    // Constructor, initialize data to all 0s.
    Nonce(const U8 *ptr) { memcpy(data, ptr, NonceSize); mValid = true; }
-   Nonce(Vector<U8> bytes) { mValid =(bytes.size() != NonceSize); if(mValid) for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
+   Nonce(const Vector<U8> &bytes) { mValid = (bytes.size() == NonceSize); if(mValid) for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
 
    bool operator==(const Nonce &theOtherNonce) const { return !memcmp(data, theOtherNonce.data, NonceSize); }
    bool operator!=(const Nonce &theOtherNonce) const { return memcmp(data, theOtherNonce.data, NonceSize) != 0; }
