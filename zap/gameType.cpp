@@ -886,7 +886,9 @@ void GameType::saveGameStats()
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
          Statistics *statistics = &gameType->mClientList[i]->mStatistics;
-         masterConn->s2mSendPlayerStatistics_2(gameType->mClientList[i]->name, gameType->getTeamName(gameType->mClientList[i]->getTeam()), 
+         masterConn->s2mSendPlayerStatistics_3(gameType->mClientList[i]->name, gameType->mClientList[i]->clientConnection->getClientId()->toVector(), 
+                                               gameType->getTeamName(gameType->mClientList[i]->getTeam()), 
+                                               gameType->getScore(),
                                              statistics->getKills(), statistics->getDeaths(), 
                                              statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
       }
