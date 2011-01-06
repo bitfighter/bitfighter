@@ -178,11 +178,11 @@ public:
    TNL_DECLARE_RPC(m2cPlayerLeftGlobalChat, (StringTableEntry playerNick) );
    TNL_DECLARE_RPC(m2cPlayersInGlobalChat, (Vector<StringTableEntry> playerNicks));
 
-   // Version 2 RPCs
+   // Version 2 RPCs  ==> These are deprecated
    TNL_DECLARE_RPC(s2mSendPlayerStatistics, (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits) );
    TNL_DECLARE_RPC(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, RangedU32<0,MAX_PLAYERS> players, S16 time) );
 
-   // Version 3 RPCs
+   // Version 3 RPCs   ==> These will be deprecated as of 015
    TNL_DECLARE_RPC(s2mSendPlayerStatistics_2, (StringTableEntry playerName, StringTableEntry teamName, U16 kills, U16 deaths, U16 suicides, 
                                                Vector<U16> shots, Vector<U16> hits) );
    TNL_DECLARE_RPC(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, Vector<StringTableEntry> teams, 
@@ -192,15 +192,24 @@ public:
                                              Vector<RangedU32<0,256> > colorB, 
                                              RangedU32<0,MAX_PLAYERS> players, S16 time) );
 
-   // Version 4 RPCs
 
-   TNL_DECLARE_RPC(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, StringTableEntry teamName, 
+   // Version 5 RPCs
+   TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
+   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
+
+
+
+   // Version 6 RPCs
+   TNL_DECLARE_RPC(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, StringTableEntry teamName, 
                                                S32 score, U16 kills, U16 deaths, U16 suicides, 
                                                Vector<U16> shots, Vector<U16> hits) );
 
-
-   TNL_DECLARE_RPC(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name));
-   TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
+   TNL_DECLARE_RPC(s2mSendGameStatistics_3, (U32 gameVersion, StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
+                                             Vector<StringTableEntry> teams, Vector<S32> teamScores, 
+                                             Vector<RangedU32<0,256> > colorR, 
+                                             Vector<RangedU32<0,256> > colorG, 
+                                             Vector<RangedU32<0,256> > colorB, 
+                                             RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, S16 time) );
 };
 
 
