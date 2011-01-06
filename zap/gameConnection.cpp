@@ -1075,7 +1075,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    name[len] = 0;    // Terminate string properly
 
-   mClientName = name;
+   mClientName = makeUnique(name).c_str();  // Unique name
+	mClientNameNonUnique = name;             // For authentication non-unique name
 
    mClientId.read(stream);
    mIsVerified = false;
@@ -1083,10 +1084,6 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    requestAuthenticationVerificationFromMaster();
 
-   // Not sure, but I think uniquing should happen after verification; if player connects twice, we want
-   // to ensure their name is legit both times, but want to show the altered name so as to distinguish the two.
-   // Probably need to test this scenario to make sure it works as it should.
-   mClientName = makeUnique(mClientName.getString()).c_str();
    return true;
 }
 
@@ -1103,7 +1100,7 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
    if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
-      masterConn->requestAuthentication(mClientName, mClientId);              // Ask master if client name/id match and are authenticated
+      masterConn->requestAuthentication(mClientNameNonUnique, mClientId);              // Ask master if client name/id match and are authenticated
 }
 
 

@@ -274,17 +274,14 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
 
 
 //  Tell all clients name is changed, and update server side name
+// Game Server only
 void updateClientChangedName(GameConnection *gc, StringTableEntry newName){
 	GameType *gt = gServerGame->getGameType();
 	ClientRef *cr = gc->getClientRef();
 	logprintf(LogConsumer::LogConnection, "Name changed from %s to %s",gc->getClientName().getString(),newName.getString());
 	if(gt)
 	{
-		//Currently, changing name may make the client's scoreboard wrong on which player is which.
-		//Will need a better way to update the client of a new name.
-		gt->s2cRemoveClient(gc->getClientName());   // old name removed
-		gt->s2cAddClient(newName, false, cr->isAdmin, false, false);    // new name added
-		gt->s2cClientJoinedTeam(newName, cr->getTeam());
+		gt->s2cRenameClient(gc->getClientName(), newName);
 	}
 	gc->setClientName(newName);
 	cr->name = newName;
@@ -455,7 +452,10 @@ void MasterServerConnection::onConnectTerminated(TerminationReason reason, const
          gErrorMsgUserInterface.setMessage(6, "speaking, you should never see this message again!");
          gErrorMsgUserInterface.activate();
 
-         gClientGame->setReadyToConnectToMaster(false);
+         if(gClientGame->getConnectionToServer())
+            gClientGame->setReadyToConnectToMaster(false);  //New ID might cause Authentication (underline name) problems if connected to game server...
+         else
+            gClientInfo.id.getRandom();                     //get another ID, if not connected to game server
          break;
 
       case NetConnection::ReasonBadLogin:

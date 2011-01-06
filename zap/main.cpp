@@ -1582,8 +1582,11 @@ void processStartupParams()
    if(!gDedicatedServer)
    {
       if(gIniSettings.name == "")
+      {
          gNameEntryUserInterface.activate();
-      else
+         seedRandomNumberGenerator(gIniSettings.lastName);
+         gClientInfo.id.getRandom();                           // Generate a player ID
+      }else
       {
          gMainMenuUserInterface.activate();
 

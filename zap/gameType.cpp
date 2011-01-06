@@ -2126,6 +2126,38 @@ void GameType::serverRemoveClient(GameConnection *theClient)
    s2cRemoveClient(theClient->getClientName());
 }
 
+extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+
+// Client send server a new name
+GAMETYPE_RPC_C2S(GameType, c2sRenameClient, (StringTableEntry newName), (newName))
+{
+	GameConnection *source = (GameConnection *) getRPCSourceConnection();
+	StringTableEntry oldName = source->getClientName();
+	source->setClientName(StringTableEntry(""));       //avoid unique self
+	StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
+	source->setClientName(oldName);                   //restore name to properly get it updated to clients.
+	source->setClientNameNonUnique(newName);          //for correct authentication
+
+	if(oldName != uniqueName)  //different?
+	{
+		source->setAuthenticated(false);         //don't underline anymore because of rename
+		updateClientChangedName(source,uniqueName);
+	}
+}
+// Server notifies clients that a player has changed name
+GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName), (oldName, newName))
+{
+   for(S32 i = 0; i < mClientList.size(); i++)
+   {
+      if(mClientList[i]->name == oldName)
+      {
+         mClientList[i]->name = newName;
+         break;
+      }
+   }
+   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+}
+
 // Server notifies clients that a player has left the game
 GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 {
@@ -2392,7 +2424,6 @@ void GetMapData(S32 FileSize, S32 Position, const char * Data)
 	}
 };
 
-extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
 
 
 // Runs the server side commands, which the client may or may not know about
@@ -2473,6 +2504,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
        if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
    }
+	/* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
    {
 		//for testing, might want to remove this once it is fully working.
@@ -2484,6 +2516,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
 		clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
 		updateClientChangedName(clientRef->clientConnection,uniqueName);
    }
+	*/
    else
    {
       // Command not found, tell the client

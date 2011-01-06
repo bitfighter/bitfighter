@@ -118,12 +118,12 @@ DataSender::SenderStatus DataSender::initialize(DataConnection *dataConnection, 
    file.close();
    */
 
-   size = fread(buffer, 1, MAX_LINE_LEN, file);
+   size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
 
    while(size > 0 && mLines.size() * MAX_LINE_LEN < MAX_LEVEL_FILE_LENGTH){
        buffer[size]=0; //Null terminate
        mLines.push_back(buffer);
-       size = fread(buffer, 1, MAX_LINE_LEN, file);
+       size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
    }
    
    fclose(file);

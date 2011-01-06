@@ -102,6 +102,7 @@ private:
    bool mIsBusy;              // True when the player is off chatting or futzing with options or whatever, false when they are "active"
 
    StringTableEntry mClientName;
+   StringTableEntry mClientNameNonUnique;    // For authentication, not unique name.
    Nonce mClientId;
    bool mClientClaimsToBeVerified;
    bool mClientNeedsToBeVerified;
@@ -158,6 +159,7 @@ public:
    Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
 
    void setClientName(StringTableEntry name) { mClientName = name; }
+   void setClientNameNonUnique(StringTableEntry name) { mClientNameNonUnique = name; }
    void setServerName(StringTableEntry name) { mServerName = name; }
 
    std::string getServerName() { return mServerName.getString(); }
