@@ -264,12 +264,11 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    {
       gClientInfo.name = correctedName.getString();
       gClientInfo.authenticated = true;
+      if(gClientGame->getConnectionToServer())
+         gClientGame->getConnectionToServer()->c2sSetAuthenticated();
    }
    else 
       gClientInfo.authenticated = false;       
-
-   if(gClientGame->getConnectionToServer())
-      gClientGame->getConnectionToServer()->c2sSetAuthenticated();
 }
 
 

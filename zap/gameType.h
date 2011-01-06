@@ -378,7 +378,6 @@ public:
 
    TNL_DECLARE_RPC(s2cCanSwitchTeams, (bool allowed));
 
-   TNL_DECLARE_RPC(c2sRenameClient, (StringTableEntry newName));
    TNL_DECLARE_RPC(s2cRenameClient, (StringTableEntry oldName,StringTableEntry newName));
    TNL_DECLARE_RPC(s2cRemoveClient, (StringTableEntry clientName));
 

@@ -2126,24 +2126,8 @@ void GameType::serverRemoveClient(GameConnection *theClient)
    s2cRemoveClient(theClient->getClientName());
 }
 
-extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+//extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
 
-// Client send server a new name
-GAMETYPE_RPC_C2S(GameType, c2sRenameClient, (StringTableEntry newName), (newName))
-{
-	GameConnection *source = (GameConnection *) getRPCSourceConnection();
-	StringTableEntry oldName = source->getClientName();
-	source->setClientName(StringTableEntry(""));       //avoid unique self
-	StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
-	source->setClientName(oldName);                   //restore name to properly get it updated to clients.
-	source->setClientNameNonUnique(newName);          //for correct authentication
-
-	if(oldName != uniqueName)  //different?
-	{
-		source->setAuthenticated(false);         //don't underline anymore because of rename
-		updateClientChangedName(source,uniqueName);
-	}
-}
 // Server notifies clients that a player has changed name
 GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName), (oldName, newName))
 {

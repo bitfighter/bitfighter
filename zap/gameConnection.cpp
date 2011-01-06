@@ -979,6 +979,29 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 }
 
 
+extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+
+// Client connect to master after joining game server, get authentication fail,
+// then client have changed name to non-reserved, or entered password.
+TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+{
+	StringTableEntry oldName = getClientName();
+	setClientName(StringTableEntry(""));       //avoid unique self
+	StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
+	setClientName(oldName);                   //restore name to properly get it updated to clients.
+	setClientNameNonUnique(newName);          //for correct authentication
+	setAuthenticated(false);         //don't underline anymore because of rename
+   mIsVerified = false;             //Reset all verified to false.
+   mClientNeedsToBeVerified = false;
+   mClientClaimsToBeVerified = false;
+
+	if(oldName != uniqueName)  //different?
+	{
+		updateClientChangedName(this,uniqueName);
+	}
+}
+
+
 extern void GetMapData(S32 FileSize, S32 Position, const char * Data);  //in gametype.cpp
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
