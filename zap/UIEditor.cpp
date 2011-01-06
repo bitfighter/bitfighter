@@ -4627,6 +4627,12 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
 extern CmdLineSettings gCmdLineSettings;
 
+
+//Some function to allow YesNoUserInterface to work with testLevel
+void testLevelStart2(){
+	gEditorUserInterface.testLevelStart();
+}
+
 void EditorUserInterface::testLevel()
 {
    bool gameTypeError = false;
@@ -4634,30 +4640,30 @@ void EditorUserInterface::testLevel()
    if(strcmp(mGameType, GameType::validateGameType(mGameType)))
       gameTypeError = true;
 
-/*
 // With all the map loading error fix, it should never crash the game.
-#ifndef SAM_ONLY
    validateLevel();
    if(mLevelErrorMsgs.size() || gameTypeError)
    {
       S32 i;
-      gErrorMsgUserInterface.reset();
-      gErrorMsgUserInterface.setTitle("LEVEL HAS CRITICAL PROBLEMS");
+      gYesNoUserInterface.reset();
+      gYesNoUserInterface.setTitle("LEVEL HAS PROBLEMS");
 
       for(i = 0; i < mLevelErrorMsgs.size(); i++)
-         gErrorMsgUserInterface.setMessage(i + 1, mLevelErrorMsgs[i].c_str());
+         gYesNoUserInterface.setMessage(i + 1, mLevelErrorMsgs[i].c_str());
       if(gameTypeError)
       {
-         gErrorMsgUserInterface.setMessage(i + 1, "ERROR: GameType is invalid.");
-         gErrorMsgUserInterface.setMessage(i + 2, "(Fix in Level Parameters screen [F3])");
+         gYesNoUserInterface.setMessage(i + 1, "ERROR: GameType is invalid.");
+         gYesNoUserInterface.setMessage(i + 2, "(Fix in Level Parameters screen [F3])");
          i+=2;
       }
-      gErrorMsgUserInterface.setMessage(i + 3, "Loading this level may cause the game to crash.");
-      gErrorMsgUserInterface.activate();
+      gYesNoUserInterface.setInstr("Press [Y] to start, [ESC] to cancel");
+		gYesNoUserInterface.registerYesFunction(testLevelStart2);   //tried (gEditorUserInterface.testLevelStart) but compiler doesn't like that.
+      gYesNoUserInterface.activate();
       return;
    }
-#endif
-*/
+	testLevelStart();
+}
+void EditorUserInterface::testLevelStart(){
 
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
