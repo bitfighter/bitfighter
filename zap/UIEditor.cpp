@@ -4634,6 +4634,9 @@ void EditorUserInterface::testLevel()
    if(strcmp(mGameType, GameType::validateGameType(mGameType)))
       gameTypeError = true;
 
+/*
+// With all the map loading error fix, it should never crash the game.
+#ifndef SAM_ONLY
    validateLevel();
    if(mLevelErrorMsgs.size() || gameTypeError)
    {
@@ -4653,6 +4656,8 @@ void EditorUserInterface::testLevel()
       gErrorMsgUserInterface.activate();
       return;
    }
+#endif
+*/
 
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";

@@ -635,7 +635,8 @@ void HuntersNexusObject::onAddedToGame(Game *theGame)
    if(!isGhost())
       setScopeAlways();    // Always visible!
 
-   dynamic_cast<HuntersGameType *>( getGame()->getGameType() )->addNexus(this);
+   HuntersGameType *gt = dynamic_cast<HuntersGameType *>( getGame()->getGameType() );
+   if(gt) gt->addNexus(this);
    getGame()->mObjectsLoaded++;
 }
 
@@ -647,8 +648,9 @@ void HuntersNexusObject::idle(GameObject::IdleCallPath path)
 
 void HuntersNexusObject::render()
 {
-   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(getGame()->getGameType());
-   renderNexus(mPolyBounds, mPolyFill, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), theGameType->mZoneGlowTimer.getFraction());
+   GameType *gt = getGame()->getGameType();
+   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gt);
+   renderNexus(mPolyBounds, mPolyFill, mCentroid, mLabelAngle, (theGameType && theGameType->mNexusIsOpen), gt ? gt->mZoneGlowTimer.getFraction() : 0);
 }
 
 

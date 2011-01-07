@@ -57,6 +57,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Engineer module -- build turrets and forcefields by grabbing resources; activate with /engf or /engt; only works on levels containing line Specials Engineer
 <li>Armor module -- makes ship stronger but harder to control; always active, uses no energy (Experimental, may be removed in future version)
 <li>Upload/download resources (levels, levelgens, and bots) from remote server (if enabled, and you have the password) via cmd line parameters
+<li>Added /getmap command to allow anyone get a currently playing map, if server enabled it.
 </ul>
 <h4>User Interface</h4>
 <ul>
@@ -79,6 +80,7 @@ Specifying the extension is optional.
 <li>Max level size bumped up to 256K
 <li>Engineer module can no longer create crossing forcefields
 <li>Smooth lines option available with a setting in the INI
+<li>Added /linesmooth /linewidth command
 <li>Any team can spawn at a neutral spawn point
 <li>Added /setscore and /settime commands that set the score and game time for the current level
 <li>When running command from console (run <script>) any created items are now selected
@@ -94,7 +96,8 @@ Specifying the extension is optional.
 <li>Ingame Bitfighter logo display issues corrected.  
 <li>Bitfighter logo now positioned almost exactly where the generating text is located, at all zooms and rotations <b>Note that if you have levels with the Bitfighter logo, it's position may have shifted!</b>
 <li>Fixed soccer sync problems
-<li>Fix long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
+<li>Fixed long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
+<li>Fixed crash on maps with: missing GameType, missing Team; FlagItem, Soccer and HuntersNexusObject on wrong GameType; out of range team number, Neutral flag in CTF.
 </ul>
 */
 

@@ -160,6 +160,7 @@ struct IniSettings      // With defaults specified
 
    bool enableExperimentalAimMode;  // True if we want to show an aim vector in joystick mode
 
+   bool allowGetMap;                // allow '/GetMap' command
    bool allowDataConnections;       // Specify whether data connections are allowed on this computer
 
    InputMode inputMode;             // Joystick or Keyboard

@@ -332,13 +332,15 @@ public:
    virtual void updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
    void setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout);
 
+   bool checkTeamRange(S32 team);               // Team in range? Used for processing arguments.
+   bool makeSureTeamCountIsNotZero();           // Zero teams will crash.
    virtual Color getShipColor(Ship *s);         // Get the color of a ship
    virtual Color getTeamColor(S32 team);        // Get the color of a team, based on index
    Color getTeamColor(GameObject *theObject);   // Get the color of a team, based on object
 
    S32 getTeam(const char *playerName);         // Given a player, return their team
 
-   const char *getTeamName(S32 team);           // Return the name of the team
+   StringTableEntry getTeamName(S32 team);      // Return the name of the team
 
 
    // gameType flag methods for CTF, Rabbit, Football

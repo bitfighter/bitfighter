@@ -681,8 +681,9 @@ inline string getPathFromFilename( const string& filename )
 static string origFilename;      // Name of file we're trying to load
 extern OGLCONSOLE_Console gConsole;
 
-bool ServerGame::loadLevel(const string &origFilename)
+bool ServerGame::loadLevel(const string &origFilename2)
 {
+   origFilename = origFilename2;
    mGridSize = DefaultGridSize;
 
    mObjectsLoaded = 0;
@@ -709,6 +710,7 @@ bool ServerGame::loadLevel(const string &origFilename)
       g->addToGame(this);
    }
 
+
    // If there was a script specified in the level file, now might be a fine time to try running it!
    if(getGameType()->mScriptName != "")
    {
@@ -726,6 +728,10 @@ bool ServerGame::loadLevel(const string &origFilename)
       LuaLevelGenerator levelgen = LuaLevelGenerator(name, getGameType()->mScriptArgs, getGridSize(), getGridDatabase(), this, gConsole);
    }
 
+   //  Check after script, script might add Teams
+   if(getGameType()->makeSureTeamCountIsNotZero())
+      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", origFilename.c_str());
+
    getGameType()->onLevelLoaded();
 
    return true;
@@ -739,6 +745,7 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
    // This is a legacy from the old Zap! days... we do bots differently in Bitfighter, so we'll just ignore this line if we find it.
    if(!stricmp(argv[0], "BotsPerTeam"))
       return;
+
 
    if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int
    {                                      //    specifiying how many pixels in a grid cell)
@@ -766,6 +773,21 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
          strncpy(obj, argv[0], LevelLoader::MaxArgLen);
          obj[LevelLoader::MaxArgLen] = '\0';
       }
+
+		S32 objlen = (S32) strlen(obj);
+		// All game types are of form XXXXGameType
+		if(objlen >= 8 && !strcmp(obj + objlen - 8, "GameType"))
+		{	if(mGameType)
+			{	logprintf(LogConsumer::LogWarning, "Duplicate GameType in level \"%s\"", origFilename.c_str());
+				return;
+			}
+		}else
+		{	if(!mGameType)
+			{	logprintf(LogConsumer::LogWarning, "Missing GameType in level \"%s\"", origFilename.c_str());
+				return;
+			}
+		}
+
 
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
       GameObject *object = dynamic_cast<GameObject*>(theObject);  // Force our new object to be a GameObject
