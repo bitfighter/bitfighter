@@ -86,6 +86,7 @@ Specifying the extension is optional.
 <li>Added /getLevel command to download current level to local machine (currently requires admin access)
 <li>When running command from console (run <script>) any created items are now selected
 <li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
+<li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
 </ul>
 
 
