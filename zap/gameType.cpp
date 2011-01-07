@@ -2492,6 +2492,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
+/*    //See client command of /getmap
    else if(!stricmp(cmd, "getmap"))
    {
      if(! gIniSettings.allowGetMap)
@@ -2520,6 +2521,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
        if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
    }
+/*
 	/* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
    {

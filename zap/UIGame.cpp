@@ -57,8 +57,11 @@
 
 #include "oglconsole.h"          // Our console object
 
+#include "config.h"              // for Getmap level dir
+
 namespace Zap
 {
+extern ConfigDirectories gConfigDirs;          //in main.cpp for Getmap
 
 GameUserInterface gGameUserInterface;
 
@@ -1363,6 +1366,30 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 }
 
 
+
+static const char * getMapFileNameFromTitle(S32 MaxLength = 40)
+{
+	static char filename[64];
+	const char * levelname = "";
+	S32 i;
+	if(MaxLength > 63) MaxLength = 63;
+	if(gClientGame->getGameType())
+		levelname = gClientGame->getGameType()->mLevelName.getString();
+	i=0;
+	while(i<63 && levelname[i] != 0)
+	{
+		char c = levelname[i];  //prevent invalid characters in file names.
+		if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
+			filename[i]=c;
+		else
+			filename[i]='_';
+		i++;
+	}
+	filename[i]=0;    //Null terminate
+	return filename;
+}
+
+
 extern ClientInfo gClientInfo;
 
 // Process a command entered at the chat prompt
@@ -1589,17 +1616,27 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    }
    else if(words[0] == "getmap")
    {
-      if(gClientGame->getConnectionToServer()->isLocalConnection())   
+      if(gClientGame->getConnectionToServer()->isLocalConnection())
          displayMessage(gCmdChatColor, "!!! Can't get download levels from a local server");
       else
       {
-         mOutputFile = fopen(remoteLevelDownloadFilename, "w");
-
+         string filename;
+         if(words.size() > 1 && words[1] != "")
+            filename = words[1];
+			else
+            filename = getMapFileNameFromTitle();
+         filename = strictjoindir(gConfigDirs.levelDir, "Downloaded_" + filename + ".level");
+         mOutputFile = fopen(filename.c_str(), "w");    //write empty file when server does not allow getmap ?
          if(!mOutputFile)
-            logprintf("Problem opening file %s for writing", remoteLevelDownloadFilename);
-         else
          {
-            Address addr = gClientGame->getConnectionToServer()->getNetAddress();
+            logprintf("Problem opening file %s for writing", filename);
+            displayMessage(gCmdChatColor, "!!! Problem opening file %s for writing", filename);
+         }else
+         {
+            // Address addr = gClientGame->getConnectionToServer()->getNetAddress();  //not needed ?
+            static char some_static_char_data[256];
+            filename.copy(some_static_char_data,255);                          //Tried filename.c_str(), doesn't work
+            remoteLevelDownloadFilename = some_static_char_data;                //for output message when done.
             gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
          }
       }

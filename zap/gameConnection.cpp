@@ -225,10 +225,23 @@ ClientRef *GameConnection::getClientRef()
 }
 
 
+// Old server side /getmap command
+// 1. client send /getmap command
+// 2. server send map if allowed
+// 3. When client get all the level map data parts, it create file and save the map
+
+// This new client side /getmap command
+// 1. client create file to write
+// 2. client requent current level
+// 3. server send data and client writes to file, What if sendmap not allowed?
+// 4. server send CommandComplete
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(!isAdmin())  // Should have been checked on client; should never get here
+   //if(!isAdmin())  // Should have been checked on client; should never get here
+   if(! gIniSettings.allowGetMap)
    {
+      s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
+      s2rCommandComplete();        //what to do here? Client doesn't know getmap is not allowed in some servers.
       return;
    }
 
@@ -1068,7 +1081,7 @@ extern void GetMapData(S32 FileSize, S32 Position, const char * Data);  //in gam
 TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
                   (S32 FileSize, S32 Position, StringTableEntry Data),
                   (FileSize, Position, Data)
-				  , NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
+				  , NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 1)
 {
 	GetMapData(FileSize, Position, Data.getString() );
 }
