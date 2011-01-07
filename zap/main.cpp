@@ -292,7 +292,7 @@ ClientInfo gClientInfo;          // Info about the client used for establishing 
 void GLUT_CB_reshape(int nw, int nh)
 {
    gZapJournal.reshape(nw, nh);
-}
+}                                            
 
 TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeight), (newWidth, newHeight))
 {
@@ -876,7 +876,7 @@ FileLogConsumer gServerLog;       // We'll apply a filter later on, in main()
 void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 {
    MasterServerConnection *connToMaster = gClientGame->getConnectionToMaster();
-   if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request an arranged connection
+   if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
       gGameUserInterface.activate();
@@ -889,10 +889,11 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
 
       if(local)   // We're a local client, running in the same process as the server... connect to that server
       {
-         // Stuff on client side, so interface will offer the correct options
+         // Stuff on client side, so interface will offer the correct options.
+         // Note that if we're local, the passed address is probably a dummy; check caller if important.
          gameConnection->connectLocal(gClientGame->getNetInterface(), gServerGame->getNetInterface());
-         gameConnection->setIsAdmin(true);          // Local connection is always admin
-         gameConnection->setIsLevelChanger(true);   // Local connection can always change levels
+         gameConnection->setIsAdmin(true);              // Local connection is always admin
+         gameConnection->setIsLevelChanger(true);       // Local connection can always change levels
 
          GameConnection *gc = dynamic_cast<GameConnection *>(gameConnection->getRemoteConnectionObject());
 
@@ -1690,15 +1691,19 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
               
             netInterface->checkIncomingPackets();
             netInterface->processConnections();
-            Sleep(1);              //don't eat CPU power
+            
+            Sleep(1);               // Don't eat CPU power
+
             if((!started) && (!dataConn))
             {
                printf("Failed to connect");
-               started=true;  //to get out of this loop.
+               started = true;      // Get out of this loop
             }
          }
 
          delete netInterface;
+         delete dataConn;
+
          exitGame(0);
       }
 
