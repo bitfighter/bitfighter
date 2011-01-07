@@ -29,7 +29,8 @@
 
 #include "sfx.h"
 #include "controlObjectConnection.h"
-#include "shipItems.h"     // For EngineerBuildObjects enum
+#include "shipItems.h"           // For EngineerBuildObjects enum
+#include "dataConnection.h"      // For DataSendable interface
 #include "tnlNetConnection.h"
 #include "timer.h"
 #include <time.h>
@@ -74,7 +75,7 @@ struct ClientInfo
 class ClientRef;
 struct LevelInfo;
 
-class GameConnection: public ControlObjectConnection
+class GameConnection: public ControlObjectConnection, public DataSendable
 {
 private:
    typedef ControlObjectConnection Parent;
@@ -148,6 +149,12 @@ public:
    GameConnection();                                  // Constructor
    GameConnection(const ClientInfo &clientInfo);      // Constructor
    ~GameConnection();                                 // Destructor
+
+
+   // These from the DataSendable interface class
+   TNL_DECLARE_RPC(s2rSendLine, (StringPtr line));
+   TNL_DECLARE_RPC(s2rCommandComplete, ());
+
 
    S32 mScore;       // Total points scored my this connection
    S32 mTotalScore;  // Total points scored by anyone while this connection is alive
@@ -241,9 +248,12 @@ public:
    TNL_DECLARE_RPC(c2sSetServerAlertVolume, (S8 vol));
    TNL_DECLARE_RPC(s2cGetMapData, (S32 FileSize, S32 Position, StringTableEntry Data));
 
+   TNL_DECLARE_RPC(c2sRequestCurrentLevel, ());
+
    static GameConnection *getClientList();
    static S32 getClientCount();
    static bool onlyClientIs(GameConnection *client);
+   //static GameConnection *findClient(const Nonce &clientId);   // Loop through the client list, return first match
 
    Nonce *getClientId() { return &mClientId; }
 

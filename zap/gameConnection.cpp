@@ -189,6 +189,18 @@ bool GameConnection::onlyClientIs(GameConnection *client)
 }
 
 
+// Loop through the client list, return first (and hopefully only!) match
+// runs on server
+//GameConnection *GameConnection::findClient(const Nonce &clientId)
+//{
+//   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+//      if(*walk->getClientId() == clientId)
+//         return walk;
+//
+//   return NULL;
+//}
+
+
 GameConnection *GameConnection::getNextClient()
 {
    if(mNext == &gClientList)
@@ -209,6 +221,52 @@ void GameConnection::setClientRef(ClientRef *theRef)
 ClientRef *GameConnection::getClientRef()
 {
    return mClientRef;
+}
+
+
+TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
+{
+   if(!isAdmin())  // Should have been checked on client; should never get here
+   {
+      return;
+   }
+
+   const char *filename = gServerGame->getCurrentLevelFileName().getString();
+   
+   // Initialize on the server to start sending requested file -- will return OK if everything is set up right
+   DataSender::SenderStatus stat = gServerGame->dataSender.initialize(this, filename, LEVEL_TYPE);
+
+   if(stat != DataSender::OK)
+   {
+      const char *msg = DataConnection::getErrorMessage(stat, filename).c_str();
+
+      logprintf(LogConsumer::LogError, "%s", msg);
+      s2rCommandComplete();
+      return;
+   }
+}
+
+// << DataSendable >>
+// Send a chunk of the file -- this gets run on the receiving end       
+TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+{
+   if(gGameUserInterface.mOutputFile.is_open())
+      gGameUserInterface.mOutputFile.write(line.getString(), strlen(line.getString()));
+   // else... what?
+}
+
+
+// << DataSendable >>
+// When sender is finished, it sends a commandComplete message
+TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (), (), 
+                  NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
+{
+   if(gGameUserInterface.mOutputFile.is_open())
+   {
+      gGameUserInterface.mOutputFile.close();
+      gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download complete.");
+   }
 }
 
 
@@ -379,7 +437,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetParam, (StringPtr param, RangedU32<0, Ga
       logprintf(LogConsumer::ServerFilter, "User [%s] %s %s", mClientRef->name.getString(), 
                                                 strcmp(param.getString(), "") ? "set" : "cleared", types[type]);
    }
-
 
    // Update our in-memory copies of the param
    if(type == (U32)LevelChangePassword)

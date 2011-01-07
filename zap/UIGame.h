@@ -212,6 +212,7 @@ public:
    void onActivate();               // Gets run when interface is first activated
    void onReactivate();             // Gets run when interface is subsequently reactivated
 
+   ofstream mOutputFile;            // For saving downloaded levels
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);

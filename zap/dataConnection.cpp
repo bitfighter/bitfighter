@@ -76,7 +76,7 @@ static string getOutputFolder(FileType filetype)
 // For readability
 #define MAX_LINE_LEN  HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
-DataSender::SenderStatus DataSender::initialize(DataConnection *connection, string filename, FileType fileType)
+DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string filename, FileType fileType)
 {
    string fullname = getFullFilename(filename, fileType);
    if(fullname == "")
@@ -141,7 +141,7 @@ void DataSender::sendNextLine()
    }
    else
    {
-      mConnection->c2sCommandComplete();
+      mConnection->s2rCommandComplete();
       mDone = true;
       mLines.clear();      // Liberate some memory
    }
@@ -260,7 +260,8 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 }
 
 
-// Send a chunk of the file -- this gets run on the receiving end
+// << DataSendable >>
+// Send a chunk of the file -- this gets run on the receiving end       
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
@@ -270,8 +271,9 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
 }
 
 
+// << DataSendable >>
 // When client has finished sending its data, it sends a commandComplete message, which triggers the server to disconnect the client
-TNL_IMPLEMENT_RPC(DataConnection, c2sCommandComplete, (), (), 
+TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (), (), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
    disconnect(ReasonNone, "done");     // Terminate connection
