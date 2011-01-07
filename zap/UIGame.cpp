@@ -1496,7 +1496,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "dzones")
    {
        mDebugShowMeshZones = !mDebugShowMeshZones;
-       if(!gServerGame) displayMessage(gCmdChatColor, "!!! only available if you are hosting");
+       if(!gServerGame) displayMessage(gCmdChatColor, "!!! Zones can only be displayed on a local host");
    }
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);

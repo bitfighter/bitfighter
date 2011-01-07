@@ -83,6 +83,7 @@ Specifying the extension is optional.
 <li>Added /setscore and /settime commands that set the score and game time for the current level
 <li>When running command from console (run <script>) any created items are now selected
 <li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
+<li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
 </ul>
 
 
@@ -94,7 +95,6 @@ Specifying the extension is optional.
 <li>Ingame Bitfighter logo display issues corrected.  
 <li>Bitfighter logo now positioned almost exactly where the generating text is located, at all zooms and rotations <b>Note that if you have levels with the Bitfighter logo, it's position may have shifted!</b>
 <li>Fixed soccer sync problems
-<li>Fix long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
 </ul>
 */
 
