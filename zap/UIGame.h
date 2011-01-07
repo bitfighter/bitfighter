@@ -212,13 +212,15 @@ public:
    void onActivate();               // Gets run when interface is first activated
    void onReactivate();             // Gets run when interface is subsequently reactivated
 
-   ofstream mOutputFile;            // For saving downloaded levels
+   const char *remoteLevelDownloadFilename;
+   //ofstream mOutputFile;            // For saving downloaded levels
+   FILE *mOutputFile;               // For saving downloaded levels
 
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
 
-   void advanceWeapon();         // Choose next weapon
-   void selectWeapon(U32 index); // Choose weapon by its index
+   void advanceWeapon();            // Choose next weapon
+   void selectWeapon(U32 index);    // Choose weapon by its index
 
    void suspendGame();
    void unsuspendGame();

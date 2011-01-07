@@ -252,8 +252,9 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(gGameUserInterface.mOutputFile.is_open())
-      gGameUserInterface.mOutputFile.write(line.getString(), strlen(line.getString()));
+   if(gGameUserInterface.mOutputFile)
+      fwrite(line.getString(), 1, strlen(line.getString()), gGameUserInterface.mOutputFile);
+      //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
 }
 
@@ -263,10 +264,13 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (), (), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(gGameUserInterface.mOutputFile.is_open())
+   if(gGameUserInterface.mOutputFile)
    {
-      gGameUserInterface.mOutputFile.close();
-      gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download complete.");
+      fclose(gGameUserInterface.mOutputFile);
+      gGameUserInterface.mOutputFile = NULL;
+
+      gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download complete. Level is in %s", 
+                                                            gGameUserInterface.remoteLevelDownloadFilename);
    }
 }
 
@@ -862,7 +866,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cDisplayMessageE,
 }
 
 
-
 TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
                   (U32 sfx, S32 team, StringTableEntry formatString, Vector<StringTableEntry> e),
                   (sfx, team, formatString, e),
@@ -871,6 +874,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
    displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
    gClientGame->getGameType()->majorScoringEventOcurred(team);
 }
+
 
 void GameConnection::displayMessageE(U32 color, U32 sfx, StringTableEntry formatString, Vector<StringTableEntry> e)
 {

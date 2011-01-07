@@ -122,7 +122,7 @@ DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string
    size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
 
    while(size > 0 && mLines.size() * MAX_LINE_LEN < MAX_LEVEL_FILE_LENGTH){
-       buffer[size]=0; //Null terminate
+       buffer[size]=0;           // Null terminate
        mLines.push_back(buffer);
        size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
    }
@@ -141,7 +141,7 @@ DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string
    if(mLines.size() == 0)          // Read nothing
       return COULD_NOT_OPEN_FILE;
 
-   mDataConnection = dataConnection;
+   mConnection = connection;
    mFileType = fileType;
    mDone = false;
    mLineCtr = 0;
@@ -284,7 +284,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
    if(mOutputFile)
-      fwrite(line.getString(),1,strlen(line.getString()),(FILE*)mOutputFile);
+      fwrite(line.getString(), 1, strlen(line.getString()), mOutputFile);
       //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
 }
@@ -299,7 +299,7 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (), (),
 
    if(mOutputFile)
    {
-      fclose((FILE*)mOutputFile);
+      fclose(mOutputFile);
       mOutputFile = NULL;
    }
 }
@@ -326,7 +326,7 @@ void DataConnection::onConnectionEstablished()
 
          //mOutputFile.open(strictjoindir(folder, mFilename).c_str());
          if(mOutputFile) 
-            fclose((FILE*)mOutputFile);
+            fclose(mOutputFile);
          mOutputFile = fopen(strictjoindir(folder, mFilename).c_str(), "w");
          if(!mOutputFile)
          {

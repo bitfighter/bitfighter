@@ -112,8 +112,9 @@ GameUserInterface::GameUserInterface()
    mDisplayMessageTimer.setPeriod(DisplayMessageTimeout);    // Set the period of our message timeout timer
 
    populateChatCmdList();
-}
 
+   remoteLevelDownloadFilename = "downloaded.level";
+}
 
 
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
@@ -1592,11 +1593,10 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          displayMessage(gCmdChatColor, "!!! Can't get download levels from a local server");
       else
       {
-         const char *filename = "downloaded.level";
-         mOutputFile.open(filename);
+         mOutputFile = fopen(remoteLevelDownloadFilename, "w");
 
-         if(!mOutputFile.is_open())
-            logprintf("Problem opening file %s for writing", filename);
+         if(!mOutputFile)
+            logprintf("Problem opening file %s for writing", remoteLevelDownloadFilename);
          else
          {
             Address addr = gClientGame->getConnectionToServer()->getNetAddress();
