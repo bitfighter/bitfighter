@@ -1053,6 +1053,18 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
             mTeams.push_back(team);
       }
    }
+   else if(!stricmp(argv[0], "TeamChange"))
+   {
+      if(argc >= 2)   // Enough arguments?
+      {
+         Team team;
+         S32 teamNumber = atoi(argv[1]);   //Team number to change
+         team.readTeamFromLevelLine(argc-1, argv+1);    //skip one arg
+   
+         if(team.numPlayers != -1 && teamNumber < mTeams.size() && teamNumber >= 0)
+            mTeams[teamNumber] = team;
+      }
+   }
    else if(!stricmp(argv[0], "Specials"))
    {         
       // Examine items on the specials line

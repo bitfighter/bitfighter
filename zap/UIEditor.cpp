@@ -342,6 +342,7 @@ void EditorUserInterface::undo(bool addToRedoStack)
    rebuildEverything();
 
    mLastUndoStateWasBarrierWidthChange = false;
+   validateLevel();
 }
    
 
@@ -355,7 +356,8 @@ void EditorUserInterface::redo()
       mLastUndoIndex++;
       mItems = mUndoItems[mLastUndoIndex % UNDO_STATES];      // Restore state from undo buffer
    
-     rebuildEverything();
+      rebuildEverything();
+      validateLevel();
    }
 }
 
