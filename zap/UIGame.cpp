@@ -46,6 +46,7 @@
 #include "input.h"
 #include "config.h"
 #include "loadoutSelect.h"
+#include "gameNetInterface.h"
 
 #include "md5wrapper.h"          // For submission of passwords
 
@@ -1361,6 +1362,8 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 }
 
 
+extern ClientInfo gClientInfo;
+
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
 // Returns true if command was handled (even if it was bogus); returning false will cause command to be passed on to the server
@@ -1581,6 +1584,24 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       {
          glDisable(GL_LINE_SMOOTH);
          glDisable(GL_BLEND);
+      }
+   }
+   else if(words[0] == "getmap")
+   {
+      if(gClientGame->getConnectionToServer()->isLocalConnection())   
+         displayMessage(gCmdChatColor, "!!! Can't get download levels from a local server");
+      else
+      {
+         const char *filename = "downloaded.level";
+         mOutputFile.open(filename);
+
+         if(!mOutputFile.is_open())
+            logprintf("Problem opening file %s for writing", filename);
+         else
+         {
+            Address addr = gClientGame->getConnectionToServer()->getNetAddress();
+            gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
+         }
       }
    }
    else if(words[0] == "engf" || words[0] == "engt")

@@ -4,6 +4,7 @@
 
 #include "tnlEventConnection.h"
 #include "tnlRPC.h"
+#include "tnlString.h"
 
 using namespace TNL;
 using namespace std;
@@ -21,6 +22,7 @@ class DataConnection;
 enum ActionType {
    SEND_FILE,
    REQUEST_FILE,
+   REQUEST_CURRENT_LEVEL,
    NO_ACTION
 };
 
@@ -33,13 +35,28 @@ enum FileType {
 };
 
 
+////////////////////////////////////
+////////////////////////////////////
+
+// Interface class
+class DataSendable
+{
+public:
+   TNL_DECLARE_RPC_INTERFACE(s2rSendLine, (StringPtr line));      // Send a chunk of data
+   TNL_DECLARE_RPC_INTERFACE(s2rCommandComplete, ());             // Signal that data has been sent
+};
+
+
+////////////////////////////////////
+////////////////////////////////////
+
 class DataSender 
 {
 private:
    bool mDone;
    S32 mLineCtr;
    Vector<std::string> mLines;              // Store strings because storing char * will cause problems when source string is gone
-   DataConnection *mConnection;
+   DataSendable *mConnection;
    FileType mFileType;
 
 public:
@@ -51,18 +68,19 @@ public:
    };
 
    DataSender() { mDone = true; }        // Constructor 
-   SenderStatus initialize(DataConnection *connection, string filename, FileType fileType);   
+   SenderStatus initialize(DataSendable *connection, string filename, FileType fileType);   
 
    bool isDone() { return mDone; }
    void sendNextLine();
-
-   
 };
 
+
+extern enum TerminationReason;
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class DataConnection : public EventConnection
+class DataConnection : public EventConnection, public DataSendable
 {
 
 private:
@@ -87,15 +105,23 @@ public:
       mPassword = password;
    }     
 
+   DataConnection(const Nonce &clientId)
+   {
+      mClientId = clientId;
+      mAction = REQUEST_CURRENT_LEVEL;
+   }
+
    DataSender mDataSender;
    void onConnectionEstablished();
    void onConnectionTerminated(TerminationReason, const char *);
 
    static string getErrorMessage(DataSender::SenderStatus stat, const string &filename);
 
+   // These from the DataSendable interface class
    TNL_DECLARE_RPC(s2rSendLine, (StringPtr line));
+   TNL_DECLARE_RPC(s2rCommandComplete, ());
+
    TNL_DECLARE_RPC(s2cOkToSend, ());
-   TNL_DECLARE_RPC(c2sCommandComplete, ());
 
    TNL_DECLARE_RPC(c2sSendOrRequestFile, (StringPtr password, RangedU32<0,U32(FILE_TYPES)> filetype, bool isRequest, StringPtr name));
    TNL_DECLARE_NETCONNECTION(DataConnection);
