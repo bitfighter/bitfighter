@@ -35,7 +35,7 @@
 #include "point.h"
 #include "shipItems.h"     // For moduleInfos
 
-#include "dataConnection.h"
+#include "dataConnection.h"      // For DataSender
 
 #include "UIChat.h"
 
@@ -380,14 +380,15 @@ public:
 
    bool hasValidControlObject();
    bool isConnectedToServer();
+
    GameConnection *getConnectionToServer();
+   void setConnectionToServer(GameConnection *connection);
 
    bool getInCommanderMap() { return mInCommanderMap; }
    void setInCommanderMap(bool inCommanderMap) { mInCommanderMap = inCommanderMap; }
 
    F32 getCommanderZoomFraction() { return mCommanderZoomDelta / F32(CommanderMapZoomTime); }
    Point worldToScreenPoint(Point p);
-   void setConnectionToServer(GameConnection *connection);
    void drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent);
    void render();
    
@@ -423,7 +424,8 @@ extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 3  // Change this when releasing an incompatible cm/sm protocol (must be int)
 #define CS_PROTOCOL_VERSION 32     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 1113         // Version of the game according to SVN, will be unique every release (must be int)
+#define BUILD_VERSION 1113         // Version of the game according to hg, will be unique every release (must be int)
+                                   // Get from "hg summary", make sure no collisions with old SVN numbers (highest was 1113)
 #define ZAP_GAME_RELEASE "015"     // Change this with every release -- for display purposes only, string, 
                                    // will also be used for name of installer on windows, so be careful with spaces
 };
