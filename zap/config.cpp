@@ -195,9 +195,6 @@ static string displayModeToString(DisplayMode mode)
 }
 
 
-extern U32 minimumSleepTimeDedicatedServer;
-extern U32 minimumSleepTimeClient;
-
 static void loadGeneralSettings()
 {
    gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
@@ -223,13 +220,12 @@ static void loadGeneralSettings()
    gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
 
    gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
-   minimumSleepTimeClient = gINI.GetValueI("Settings", "MinClientDelay", 10);
+   gIniSettings.minSleepTimeClient = gINI.GetValueI("Settings", "MinClientDelay", gIniSettings.minSleepTimeClient);
 
    gDefaultLineWidth = (F32) gINI.GetValueF("Settings", "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;
-
 }
 
 
@@ -324,7 +320,7 @@ static void loadHostConfiguration()
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
    gIniSettings.allowGetMap = (lcase(gINI.GetValue("Host", "AllowGetMap", "No")) == "yes");
    gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
-   minimumSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
+   gIniSettings.minSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
 }
 
 
@@ -1082,23 +1078,24 @@ static void writeSettings()
    saveWindowMode();
    saveWindowPosition(gIniSettings.winXPos, gIniSettings.winYPos);
 
-   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact, true);
-   gINI.SetValue("Settings",  "VoiceEcho", (gIniSettings.echoVoice ? "Yes" : "No"), true);
-   gINI.SetValue("Settings",  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"), true);
+   gINI.SetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact);
+   gINI.SetValue("Settings",  "VoiceEcho", (gIniSettings.echoVoice ? "Yes" : "No"));
+   gINI.SetValue("Settings",  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"));
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 
-   gINI.SetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"), true);
-   gINI.SetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"), true);
-   gINI.SetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"), true);
-   gINI.SetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType), true);
-   gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress, true);
-   gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName, true);
-   gINI.SetValue("Settings", "LastName", gIniSettings.lastName, true);
-   gINI.SetValue("Settings", "LastPassword", gIniSettings.lastPassword, true);
-   gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName, true);
+   gINI.SetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"));
+   gINI.SetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"));
+   gINI.SetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"));
+   gINI.SetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType));
+   gINI.SetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress);
+   gINI.SetValue("Settings", "DefaultName", gIniSettings.defaultName);
+   gINI.SetValue("Settings", "LastName", gIniSettings.lastName);
+   gINI.SetValue("Settings", "LastPassword", gIniSettings.lastPassword);
+   gINI.SetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
 
-   gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"), true);
-   if(minimumSleepTimeClient<100) gINI.SetValueI("Settings", "MinClientDelay", minimumSleepTimeClient, true);  //don't save if too high
+   gINI.SetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"));
+   if(gIniSettings.minSleepTimeClient < 100)    // Don't save if too high
+      gINI.SetValueI("Settings", "MinClientDelay", gIniSettings.minSleepTimeClient);  
    //gINI.SetValueF("Settings","LineWidth",gDefaultLineWidth,true);     //Allow load, but not save, a user can screw up with /LineWidth command
 }
 
@@ -1133,10 +1130,15 @@ static void writeHost()
       gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.");
       gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
       gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
-      gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server");
-      gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) default 10, in Millisecs, lower use more CPU, higher may increase LAG");
-      gINI.KeyComment("Host", " AllowGetMap - (yes/no) Allow anyone to '/getmap' currently playing level map");
+      gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server.");
+      gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
+      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) default 10, in milliseconds, lower use more CPU, higher may increase lag.");
+
+      //in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
+U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
+
+
+      gINI.KeyComment("Host", " AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
       gINI.KeyComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       gINI.KeyComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
 
@@ -1155,7 +1157,7 @@ static void writeHost()
    gINI.SetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10));
    gINI.SetValue("Host", "AllowGetMap", (gIniSettings.allowGetMap ? "Yes" : "No"));
    gINI.SetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"));
-   gINI.SetValueI("Host", "MinDedicatedDelay", minimumSleepTimeDedicatedServer);
+   gINI.SetValueI("Host", "MinDedicatedDelay", gIniSettings.minSleepTimeDedicatedServer);
 }
 
 

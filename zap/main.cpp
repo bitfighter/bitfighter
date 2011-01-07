@@ -701,10 +701,6 @@ void hostGame()
 }
 
 
-//in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
-U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
-U32 minimumSleepTimeDedicatedServer=10; //lower reduce everyone lag, but uses more CPU.
-
 // This is the master idle loop that gets registered with GLUT and is called on every game tick.
 // This in turn calls the idle functions for all other objects in the game.
 void idle()
@@ -727,7 +723,8 @@ void idle()
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
 
-   if((gDedicatedServer &&  integerTime >= (U32)minimumSleepTimeDedicatedServer) || ( (!gDedicatedServer) &&  integerTime >= (U32)minimumSleepTimeClient))
+   if((gDedicatedServer && integerTime >= gIniSettings.minSleepTimeDedicatedServer) || 
+            (!gDedicatedServer &&  integerTime >=(U32)gIniSettings.minSleepTimeClient))
    {
       lastTimer = currentTimer;
       unusedFraction = timeElapsed - integerTime;
@@ -773,17 +770,19 @@ void idle()
    // sleep(0) helps reduce the impact of OpenGL on windows.
    U32 sleepTime =  1; //integerTime< 8 ? 8-integerTime : 1;
 
-   if(gClientGame && integerTime >= minimumSleepTimeClient) {
-      sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can affort a nap
-	  //if(integerTime < (U32)minimumSleepTimeClient) sleepTime = minimumSleepTimeClient - integerTime; // sleep a minimum of a value
+   if(gClientGame && integerTime >= gIniSettings.minSleepTimeClient) 
+   {
+      sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
+	  //if(integerTime < gIniSettings.minSleepTimeClient) sleepTime = minimumSleepTimeClient - integerTime; // sleep a minimum of a value
    }
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(gDedicatedServer){
+   if(gDedicatedServer)
+   {
       //if(integerTime < (U32)minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
       if(gServerGame->isSuspended())
-          sleepTime = 40; //the higher this number, the less accurate the ping is on server lobby when empty.
+          sleepTime = 40;     // The higher this number, the less accurate the ping is on server lobby when empty, but the less power consumed.
    }
 
    Platform::sleep(sleepTime);
