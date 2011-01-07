@@ -879,10 +879,22 @@ void GameType::saveGameStats()
          colorB.push_back(RangedU32<0,256>(U32(sortTeams[i].color.b * 255)));
       }
 
+      // Count the players and bots
+      S32 players = 0;
+      S32 bots = 0;
+
+      for(S32 i = 0; i < gameType->mClientList.size(); i++)
+      {
+         if(gameType->mClientList[i]->isRobot)
+            bots++;
+         else
+            players++;
+      }
+
       S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
       masterConn->s2mSendGameStatistics_3(BUILD_VERSION, gameType->getGameTypeString(), gameType->isTeamGame(),
                                           gameType->mLevelName, teams, scores, 
-                                          colorR, colorG, colorB, gameType->mClientList.size(), timeInSecs);
+                                          colorR, colorG, colorB, players, bots, timeInSecs);
 
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
