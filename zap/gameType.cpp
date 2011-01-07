@@ -880,17 +880,20 @@ void GameType::saveGameStats()
       }
 
       S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
-      masterConn->s2mSendGameStatistics_2(gameType->getGameTypeString(), gameType->mLevelName, teams, scores, 
+      masterConn->s2mSendGameStatistics_3(BUILD_VERSION, gameType->getGameTypeString(), gameType->isTeamGame(),
+                                          gameType->mLevelName, teams, scores, 
                                           colorR, colorG, colorB, gameType->mClientList.size(), timeInSecs);
 
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
          Statistics *statistics = &gameType->mClientList[i]->mStatistics;
+        
          masterConn->s2mSendPlayerStatistics_3(gameType->mClientList[i]->name, gameType->mClientList[i]->clientConnection->getClientId()->toVector(), 
+                                               gameType->mClientList[i]->isRobot,
                                                gameType->getTeamName(gameType->mClientList[i]->getTeam()), 
                                                gameType->getScore(),
-                                             statistics->getKills(), statistics->getDeaths(), 
-                                             statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
+                                               statistics->getKills(), statistics->getDeaths(), 
+                                               statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
       }
    }
 }
