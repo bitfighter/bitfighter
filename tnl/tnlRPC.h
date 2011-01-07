@@ -180,6 +180,9 @@ public:
    void process(EventConnection *ps);
 };
 
+/// Declares an RPC method within a class declaration, which can be used for declaring methods in a superclass that will be implemented in a subclass using TNL_DECLARE_RPC and friends.
+#define TNL_DECLARE_RPC_INTERFACE(name, args) virtual void name args = 0; virtual void name##_test args = 0; virtual TNL::NetEvent * name##_construct args = 0; virtual void name##_remote args = 0
+
 /// Declares an RPC method within a class declaration.  Creates two method prototypes - one for the host side of the RPC call, and one for the receiver, which performs the actual method.
 #define TNL_DECLARE_RPC(name, args) void name args; void name##_test args; virtual TNL::NetEvent * name##_construct args; virtual void name##_remote args
 
