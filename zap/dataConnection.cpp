@@ -1,5 +1,5 @@
 #include "gameLoader.h"                   // For MAX_LEVEL_FILE_LENGTH def  <-- there has to be a better way!
-//#include "gameType.h" // For now
+
 #include "dataConnection.h"
 #include "tnlEventConnection.h"
 #include "game.h"                         // For ServerGame def
@@ -17,7 +17,7 @@
 #include "md5wrapper.h"                   // For password verification
 
 using namespace TNL;
-using namespace std;
+//using namespace std;
 
 namespace Zap {
 
@@ -44,17 +44,21 @@ FileType getResourceType(const char *fileType)
 
 static string getFullFilename(string filename, FileType fileType)
 {
+   // Don't return "" if empty directory, allow client load the file if on the same directory as EXE.
+   string name;
    if(fileType == BOT_TYPE)
-      return ConfigDirectories::findBotFile(filename);
+      name = ConfigDirectories::findBotFile(filename);
 
    else if(fileType == LEVEL_TYPE)
-      return ConfigDirectories::findLevelFile(filename);
+      name = ConfigDirectories::findLevelFile(filename);
 
    else if(fileType == LEVELGEN_TYPE)
-      return ConfigDirectories::findLevelGenScript(filename);
+      name = ConfigDirectories::findLevelGenScript(filename);
 
    else
-      return "";
+      name = "";
+
+   return (name == "") ? filename : name;
 }
 
 
@@ -84,24 +88,25 @@ DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string
       return COULD_NOT_FIND_FILE;
    }
 
-   ifstream file;
-   file.open(fullname.c_str());
+   //ifstream file;
+   //file.open(fullname.c_str());
+   FILE *file = fopen(fullname.c_str(), "r");
 
-   if(!file.is_open())
+   //if(!file.is_open())
+   if(!file)
       return COULD_NOT_OPEN_FILE;
 
-   mConnection = connection;
-   mFileType = fileType;
 
-   mDone = false;
-   mLineCtr = 0;
 
 
    // Allocate a buffer
-   char *buffer = new char[MAX_LINE_LEN + 1];      // 255 for data, + 1 for terminator
+   //char *buffer = new char[MAX_LINE_LEN + 1];      // 255 for data, + 1 for terminator
+   char buffer[MAX_LINE_LEN + 1];      // 255 for data, + 1 for terminator
+   S32 size;
 
    // We'll read the file in 255 char chunks; this is the largest string we can send, and we want to be as large as possible to get
    // maximum benefit of the string compression that occurs during the transmission process.
+   /*
    while(!file.eof() && mLines.size() * MAX_LINE_LEN < MAX_LEVEL_FILE_LENGTH)
    {
       file.read(buffer, MAX_LINE_LEN);
@@ -112,8 +117,19 @@ DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string
       }
    }
    file.close();
+   */
 
-   delete[] buffer;
+   size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
+
+   while(size > 0 && mLines.size() * MAX_LINE_LEN < MAX_LEVEL_FILE_LENGTH){
+       buffer[size]=0; //Null terminate
+       mLines.push_back(buffer);
+       size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
+   }
+
+   fclose(file);
+
+   //delete[] buffer;
 
    // Not exactly accurate -- if final line is only a few bytes, this will count it as being the full 255.
    if(mLines.size() * MAX_LINE_LEN >= MAX_LEVEL_FILE_LENGTH)
@@ -122,6 +138,13 @@ DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string
       return FILE_TOO_LONG;
    }
 
+   if(mLines.size() == 0)          // Read nothing
+      return COULD_NOT_OPEN_FILE;
+
+   mDataConnection = dataConnection;
+   mFileType = fileType;
+   mDone = false;
+   mLineCtr = 0;
    return OK;
 }
 
@@ -182,9 +205,13 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
                   (password, filetype, isRequest, filename), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   if(connectionsAllowed())     // Are data connections allowed?
+   // Check if data connections are allowed
+   if(!gIniSettings.allowDataConnections)
+   {
+      logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
+      disconnect(ReasonConnectionsForbidden, "");
       return;
-
+   }
    // Check password
    if(gAdminPassword == "" || strcmp(md5.getSaltedHashFromString(gAdminPassword).c_str(), password))
    {
@@ -201,10 +228,10 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
 
       if(stat != DataSender::OK)
       {
-         const char *msg = getErrorMessage(stat, filename.getString()).c_str();
+         string msg = getErrorMessage(stat, filename.getString());
 
-         logprintf(LogConsumer::LogError, "%s", msg);
-         disconnect(ReasonError, msg);
+         logprintf("%s", msg.c_str());
+         disconnect(ReasonError, msg.c_str());
          return;
       }
    }
@@ -219,8 +246,11 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
          return;
       }
 
-      mOutputFile.open(strictjoindir(folder, filename.getString()).c_str());
-      if(!mOutputFile.is_open())
+      if(mOutputFile) 
+         fclose((FILE*)mOutputFile);
+
+      mOutputFile = fopen(strictjoindir(folder, filename.getString()).c_str(), "w");
+      if(!mOutputFile)
       {
          logprintf("Problem opening file %s for writing", strictjoindir(folder, filename.getString()).c_str());
          disconnect(ReasonError, "Problem writing to file");
@@ -229,18 +259,6 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
 
       s2cOkToSend();
    }
-}
-
-
-// Runs on server
-bool DataConnection::connectionsAllowed()
-{
-   if(gIniSettings.allowDataConnections)
-      return true;
-
-   logprintf("This server does not allow remote access to resources.  It can be enabled in the server's INI file.");
-   disconnect(ReasonConnectionsForbidden, "");
-   return false;
 }
 
 
@@ -265,8 +283,9 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
 TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(mOutputFile.is_open())
-      mOutputFile.write(line.getString(), strlen(line.getString()));
+   if(mOutputFile)
+      fwrite(line.getString(),1,strlen(line.getString()),(FILE*)mOutputFile);
+      //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
 }
 
@@ -278,8 +297,11 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (), (),
 {
    disconnect(ReasonNone, "done");     // Terminate connection
 
-   if(mOutputFile.is_open())
-      mOutputFile.close();
+   if(mOutputFile)
+   {
+      fclose((FILE*)mOutputFile);
+      mOutputFile = NULL;
+   }
 }
 
 
@@ -302,8 +324,11 @@ void DataConnection::onConnectionEstablished()
                               // we can save files without needing folder
          }
 
-         mOutputFile.open(strictjoindir(folder, mFilename).c_str());
-         if(!mOutputFile.is_open())
+         //mOutputFile.open(strictjoindir(folder, mFilename).c_str());
+         if(mOutputFile) 
+            fclose((FILE*)mOutputFile);
+         mOutputFile = fopen(strictjoindir(folder, mFilename).c_str(), "w");
+         if(!mOutputFile)
          {
             logprintf("Problem opening file %s for writing", strictjoindir(folder, mFilename).c_str());
             disconnect(ReasonError, "done");
@@ -321,8 +346,11 @@ extern void exitGame(S32);
 // Make sure things are cleaned up -- will run on both client and server
 void DataConnection::onConnectionTerminated(TerminationReason reason, const char *reasonMsg)
 {
-   if(mOutputFile.is_open())
-      mOutputFile.close();
+   if(mOutputFile)
+   {
+      fclose((FILE*)mOutputFile);
+      mOutputFile = NULL;
+   }
 
    if(isInitiator())    // i.e. client
    {

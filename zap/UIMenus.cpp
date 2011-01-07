@@ -980,7 +980,9 @@ static void nameAndPasswordAcceptCallback(U32 unused)
 
    gClientGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gClientInfo.name);
-   gClientInfo.id.getRandom();                    // Generate a player ID
+   //gClientInfo.id.getRandom();          // Generate a player ID - messes up with the rename and Authentication
+	if(gClientGame->getConnectionToServer())                 // Rename while in game server, if connected
+		gClientGame->getConnectionToServer()->c2sRenameClient(gClientInfo.name);
 }
 
 

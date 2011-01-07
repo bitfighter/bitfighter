@@ -125,6 +125,7 @@ private:
 
    static const S32 RobotRespawnDelay = 1500;
    Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
+	bool gameConnectionInitalized;
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
@@ -133,7 +134,7 @@ public:
 
    bool initialize(Point &pos);
 
-   void kill(DamageInfo *theInfo);
+   //void kill(DamageInfo *theInfo);
    void kill();
 
    lua_State *getL() { return L; }
@@ -173,7 +174,7 @@ public:
    static Vector<Robot *> robots;      // Grand master list of all robots in the current game
    static void startBots();            // Loop through all our bots and run thier main() functions
    bool startLua();                    // Fire up bot's Lua processor
-   void runMain();                     // Run a robot's main() function
+   bool runMain();                     // Run a robot's main() function
 
    S32 getScore() { return mScore; }   // Return robot's score
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score

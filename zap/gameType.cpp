@@ -1235,12 +1235,20 @@ void GameType::spawnShip(GameConnection *theClient)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
+	if(theClient->isRobot())
+	{
+		Robot *robot = (Robot *) theClient->getControlObject();
+      robot->setOwner(theClient);
+		robot->setTeam(teamIndex);
+		spawnRobot(robot);
+	}else
+	{
    //                     Player's name, team, and spawning location
-   Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
-
-   theClient->setControlObject(newShip);
-   newShip->setOwner(theClient);
-   newShip->addToGame(getGame());
+      Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
+      theClient->setControlObject(newShip);
+      newShip->setOwner(theClient);
+      newShip->addToGame(getGame());
+	}
 
    if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
       setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
@@ -1732,7 +1740,7 @@ void GameType::updateScore(Ship *ship, ScoringEvent scoringEvent, S32 data)
 
    TNLAssert(ship, "Ship is null in updateScore!!");
 
-   if(!ship->isRobot() && ship->getControllingClient())
+   if(ship->getControllingClient())
       cl = ship->getControllingClient()->getClientRef();  // Get client reference for ships...
 
    updateScore(cl, ship->getTeam(), scoringEvent, data);
@@ -2135,6 +2143,22 @@ void GameType::serverRemoveClient(GameConnection *theClient)
    s2cRemoveClient(theClient->getClientName());
 }
 
+//extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+
+// Server notifies clients that a player has changed name
+GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTableEntry newName), (oldName, newName))
+{
+   for(S32 i = 0; i < mClientList.size(); i++)
+   {
+      if(mClientList[i]->name == oldName)
+      {
+         mClientList[i]->name = newName;
+         break;
+      }
+   }
+   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+}
+
 // Server notifies clients that a player has left the game
 GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
 {
@@ -2268,9 +2292,9 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
 
    for(S32 i = 0; i < Robot::robots.size(); i++)
    {
-      s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
-      s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
-   }
+   //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
+   //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
+   }	
 
    // An empty list clears the barriers
    Vector<F32> v;
@@ -2484,6 +2508,19 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
        if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
    }
+	/* /// Remove this command
+   else if(!stricmp(cmd, "rename") && args.size() >= 1)
+   {
+		//for testing, might want to remove this once it is fully working.
+		StringTableEntry oldName = clientRef->clientConnection->getClientName();
+		clientRef->clientConnection->setClientName(StringTableEntry(""));       //avoid unique self
+		StringTableEntry uniqueName = GameConnection::makeUnique(args[0].getString()).c_str();  //new name
+		clientRef->clientConnection->setClientName(oldName);                   //restore name to properly get it updated to clients.
+
+		clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
+		updateClientChangedName(clientRef->clientConnection,uniqueName);
+   }
+	*/
    else
    {
       // Command not found, tell the client

@@ -155,6 +155,7 @@ public:
    
    StringTableEntry getKillString() { return mKillString; }
    S32 getTeam() { return mTeam; }
+   void setTeam(S32 team) { mTeam = team; }    //needed for robot change team
    F32 getRating() { return 0; }    // TODO: Fix this
    S32 getScore() { return 0; }     // TODO: Fix this
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);

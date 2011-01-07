@@ -9,10 +9,10 @@
 using namespace TNL;
 using namespace std;
 
-#include <iosfwd>
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
+//#include <iosfwd>
+//#include <iostream>
+//#include <fstream>    // linux complains about missing fprintf, fputc, vscanf, ...
+//#include <stdlib.h>
 
 
 namespace Zap {
@@ -88,7 +88,7 @@ private:
    FileType mFileType;
    string mFilename;          
    string mPassword;          // Password supplied by user
-   ofstream mOutputFile;      // Where we'll save any incoming data
+   void * mOutputFile;      // Where we'll save any incoming data
 
    Nonce mClientId;           // When called from an active connection, client ID can be used to deterimine if player
                               // has sufficient permissions
@@ -103,6 +103,7 @@ public:
       mFilename = filename; 
       mFileType = fileType;
       mPassword = password;
+      mOutputFile = NULL;
    }     
 
    DataConnection(const Nonce &clientId)

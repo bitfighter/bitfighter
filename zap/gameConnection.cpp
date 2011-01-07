@@ -85,6 +85,7 @@ void GameConnection::initialize()
    mNext = mPrev = this;
    setTranslatesStrings();
    mInCommanderMap = false;
+	mIsRobot = false;
    mIsAdmin = false;
    mIsLevelChanger = false;
    mIsBusy = false;
@@ -584,12 +585,20 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
             s2cDisplayMessage(ColorAqua, SFXNone, nokick);
             return;
          }
-         ConnectionParameters &p = theClient->getConnectionParameters();
-         if(p.mIsArranged)
-            gServerGame->getNetInterface()->banHost(p.mPossibleAddresses[0], BanDuration);      // Banned for 30 seconds
-         gServerGame->getNetInterface()->banHost(theClient->getNetAddress(), BanDuration);      // Banned for 30 seconds
+			if(theClient->isEstablished())     //Robot don't have established connections.
+			{
+            ConnectionParameters &p = theClient->getConnectionParameters();
+            if(p.mIsArranged)
+               gServerGame->getNetInterface()->banHost(p.mPossibleAddresses[0], BanDuration);      // Banned for 30 seconds
+            gServerGame->getNetInterface()->banHost(theClient->getNetAddress(), BanDuration);      // Banned for 30 seconds
+            theClient->disconnect(ReasonKickedByAdmin, "");
+			}
 
-         theClient->disconnect(ReasonKickedByAdmin, "");
+			for(S32 i = 0; i < Robot::robots.size(); i++)
+			{
+				if(Robot::robots[i]->getName() == theClient->getClientName())
+					delete Robot::robots[i];
+			}	
          break;
       }
    default:
@@ -1027,6 +1036,29 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSetServerAlertVolume, (S8 vol), (vol), NetC
 }
 
 
+extern void updateClientChangedName(GameConnection *,StringTableEntry);  //in masterConnection.cpp
+
+// Client connect to master after joining game server, get authentication fail,
+// then client have changed name to non-reserved, or entered password.
+TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (newName), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 2)
+{
+	StringTableEntry oldName = getClientName();
+	setClientName(StringTableEntry(""));       //avoid unique self
+	StringTableEntry uniqueName = GameConnection::makeUnique(newName.getString()).c_str();  //new name
+	setClientName(oldName);                   //restore name to properly get it updated to clients.
+	setClientNameNonUnique(newName);          //for correct authentication
+	setAuthenticated(false);         //don't underline anymore because of rename
+   mIsVerified = false;             //Reset all verified to false.
+   mClientNeedsToBeVerified = false;
+   mClientClaimsToBeVerified = false;
+
+	if(oldName != uniqueName)  //different?
+	{
+		updateClientChangedName(this,uniqueName);
+	}
+}
+
+
 extern void GetMapData(S32 FileSize, S32 Position, const char * Data);  //in gametype.cpp
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
@@ -1123,7 +1155,8 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    name[len] = 0;    // Terminate string properly
 
-   mClientName = name;
+   mClientName = makeUnique(name).c_str();  // Unique name
+	mClientNameNonUnique = name;             // For authentication non-unique name
 
    mClientId.read(stream);
    mIsVerified = false;
@@ -1131,10 +1164,6 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
 
    requestAuthenticationVerificationFromMaster();
 
-   // Not sure, but I think uniquing should happen after verification; if player connects twice, we want
-   // to ensure their name is legit both times, but want to show the altered name so as to distinguish the two.
-   // Probably need to test this scenario to make sure it works as it should.
-   mClientName = makeUnique(mClientName.getString()).c_str();
    return true;
 }
 
@@ -1151,7 +1180,7 @@ void GameConnection::requestAuthenticationVerificationFromMaster()
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
    if(masterConn && masterConn->isEstablished() && mClientClaimsToBeVerified)
-      masterConn->requestAuthentication(mClientName, mClientId);              // Ask master if client name/id match and are authenticated
+      masterConn->requestAuthentication(mClientNameNonUnique, mClientId);              // Ask master if client name/id match and are authenticated
 }
 
 

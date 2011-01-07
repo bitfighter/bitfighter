@@ -99,6 +99,7 @@ Specifying the extension is optional.
 <li>Fixed soccer sync problems
 <li>Fixed long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
 <li>Fixed crash on maps with: missing GameType, missing Team; FlagItem, Soccer and HuntersNexusObject on wrong GameType; out of range team number, Neutral flag in CTF.
+<li>Fixed Robots problems. Robots can now score, hold nexus and rabbit flags, and allow admin to kick robots or change robots team.
 </ul>
 */
 
@@ -1583,7 +1584,11 @@ void processStartupParams()
    if(!gDedicatedServer)
    {
       if(gIniSettings.name == "")
+      {
          gNameEntryUserInterface.activate();
+         seedRandomNumberGenerator(gIniSettings.lastName);
+         gClientInfo.id.getRandom();                           // Generate a player ID
+      }
       else
       {
          gMainMenuUserInterface.activate();
@@ -1659,7 +1664,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
             exitGame(1);
          }
 
-         bool sending = (!stricmp(theArgv[i].getString(), "-sendfile"));
+         bool sending = (!stricmp(theArgv[i].getString(), "-sendres"));
 
          Address address(theArgv[i+1].getString());
          if(!address.isValid())
@@ -1697,9 +1702,7 @@ void processCmdLineParams(Vector<TNL::StringPtr> &theArgv)
               
             netInterface->checkIncomingPackets();
             netInterface->processConnections();
-            
-            Sleep(1);               // Don't eat CPU power
-
+            Platform::sleep(1);              // Don't eat CPU power
             if((!started) && (!dataConn))
             {
                printf("Failed to connect");
