@@ -650,8 +650,8 @@ static ControlStringsEditor debugCommands[] = {
    { "/dcoords", "Show ship coordinates" },
    { "/dzones", "Show bot nav mesh zones" },
    { "-", NULL },       // Horiz. line
-   { "/linewidth <number>", "default 2, Changes width of all lines" },
-   { "/linewsmooth", "Enable line smoothing, might look better" },
+   { "/linewidth <number>", "Default = 2, Changes width of all lines" },
+   { "/linesmooth", "Enable line smoothing, might look better" },
    { NULL, NULL },      // End of list
 };
 
