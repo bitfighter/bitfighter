@@ -970,7 +970,7 @@ void Turret::idle(IdleCallPath path)
             continue;
       }
 
-      // Don't target mounted items (like resource items & HealthItem & FlagItem)
+      // Don't target mounted items (like resourceItems and flagItems)
       Item *item = dynamic_cast<Item *>(fillVector[i]);
       if(item && item->isMounted())
          continue;

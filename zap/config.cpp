@@ -101,12 +101,12 @@ static void loadForeignServerInfo()
 
 static void writeConnectionsInfo()
 {
-   if(gINI.NumKeyComments("Connections") == 0)
+   if(gINI.numSectionComments("Connections") == 0)
    {
-      gINI.KeyComment("Connections", "----------------");
-      gINI.KeyComment("Connections", " AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
-      gINI.KeyComment("Connections", "                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
-      gINI.KeyComment("Connections", "----------------");
+      gINI.sectionComment("Connections", "----------------");
+      gINI.sectionComment("Connections", " AlwaysPingList - Always try to contact these servers (comma separated list); Format: IP:IPAddress:Port");
+      gINI.sectionComment("Connections", "                  Include 'IP:Broadcast:28000' to search LAN for local servers on default port");
+      gINI.sectionComment("Connections", "----------------");
    }
 
    // Creates comma delimited list
@@ -119,13 +119,13 @@ static void writeConnectionsInfo()
 
 static void writeForeignServerInfo()
 {
-   if(gINI.NumKeyComments("RecentForeignServers") == 0)
+   if(gINI.numSectionComments("RecentForeignServers") == 0)
    {
    
-      gINI.KeyComment("RecentForeignServers", "----------------");
-      gINI.KeyComment("RecentForeignServers", " This section contains a list of the most recent servers seen; used as a fallback if we can't reach the master");
-      gINI.KeyComment("RecentForeignServers", " Please be aware that this section will be automatically regenerated, and any changes you make will be overwritten");
-      gINI.KeyComment("RecentForeignServers", "----------------");
+      gINI.sectionComment("RecentForeignServers", "----------------");
+      gINI.sectionComment("RecentForeignServers", " This section contains a list of the most recent servers seen; used as a fallback if we can't reach the master");
+      gINI.sectionComment("RecentForeignServers", " Please be aware that this section will be automatically regenerated, and any changes you make will be overwritten");
+      gINI.sectionComment("RecentForeignServers", "----------------");
    }
 
    gINI.SetAllValues("RecentForeignServers", "Server", prevServerListFromMaster);
@@ -135,7 +135,7 @@ static void writeForeignServerInfo()
 // Read levels, if there are any...
  void loadLevels()
 {
-   if(gINI.FindKey("Levels") != gINI.noID)
+   if(gINI.findSection("Levels") != gINI.noID)
    {
       S32 numLevels = gINI.NumValues("Levels");
       Vector<string> levelValNames(numLevels);
@@ -476,7 +476,7 @@ static void loadQuickChatMessages()
    Vector<string> messages;
    for(S32 i = 0; i < keys; i++)
    {
-      string keyName = gINI.GetKeyName(i);
+      string keyName = gINI.getSectionName(i);
       if(keyName.substr(0, 17) == "QuickChat_Message")   // Found message group
          messages.push_back(keyName);
    }
@@ -498,7 +498,7 @@ static void loadQuickChatMessages()
 
    for(S32 i = 0; i < keys; i++)
    {
-      string keyName = gINI.GetKeyName(i);
+      string keyName = gINI.getSectionName(i);
       if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)   // Found message group
          groups.push_back(keyName);
    }
@@ -514,7 +514,7 @@ static void loadQuickChatMessages()
       Vector<string> messages;
       for(S32 j = 0; j < keys; j++)
       {
-         string keyName = gINI.GetKeyName(j);
+         string keyName = gINI.getSectionName(j);
          if(keyName.substr(0, groups[i].length() + 1) == groups[i] + "_")
             messages.push_back(keyName);
       }
@@ -556,36 +556,36 @@ static void writeDefaultQuickChatMessages()
 
    for(S32 i = 0; i < keys; i++)
    {
-      string keyName = gINI.GetKeyName(i);
+      string keyName = gINI.getSectionName(i);
       if(keyName.substr(0, 22) == "QuickChatMessagesGroup" && keyName.find("_") == string::npos)
          return;
    }
 
-   gINI.AddKeyName("QuickChatMessages");
-   if(gINI.NumKeyComments("QuickChatMessages") == 0)
+   gINI.addSection("QuickChatMessages");
+   if(gINI.numSectionComments("QuickChatMessages") == 0)
    {
-      gINI.KeyComment("QuickChatMessages", "----------------");
-      gINI.KeyComment("QuickChatMessages", " The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the way the messages are");
-      gINI.KeyComment("QuickChatMessages", " displayed in the QuickChat menu, so make sure you are familiar with that before you start modifying these items.");
-      gINI.KeyComment("QuickChatMessages", " Messages are grouped, and each group has a Caption (short name shown on screen), a Key (the shortcut key used to select");
-      gINI.KeyComment("QuickChatMessages", " the group), and a Button (a shortcut button used when in joystick mode).  If the Button is \"Undefined key\", then that");
-      gINI.KeyComment("QuickChatMessages", " item will not be shown in joystick mode, unless the ShowKeyboardKeysInStickMode setting is true.  Groups can be defined ");
-      gINI.KeyComment("QuickChatMessages", " in any order, but will be displayed sorted by [section] name.  Groups are designated by the [QuickChatMessagesGroupXXX]");
-      gINI.KeyComment("QuickChatMessages", " sections, where XXX is a unique suffix, usually a number.");
-      gINI.KeyComment("QuickChatMessages", " ");
-      gINI.KeyComment("QuickChatMessages", " Each group can have one or more messages, as specified by the [QuickChatMessagesGroupXXX_MessageYYY] sections, where XXX");
-      gINI.KeyComment("QuickChatMessages", " is the unique group suffix, and YYY is a unique message suffix.  Again, messages can be defined in any order, and will");
-      gINI.KeyComment("QuickChatMessages", " appear sorted by their [section] name.  Key, Button, and Caption serve the same purposes as in the group definitions.");
-      gINI.KeyComment("QuickChatMessages", " Message is the actual message text that is sent, and MessageType should be either \"Team\" or \"Global\", depending on which");
-      gINI.KeyComment("QuickChatMessages", " users the message should be sent to.  You can mix Team and Global messages in the same section, but it may be less");
-      gINI.KeyComment("QuickChatMessages", " confusing not to do so.");
-      gINI.KeyComment("QuickChatMessages", " ");
-      gINI.KeyComment("QuickChatMessages", " Messages can also be added to the top-tier of items, by specifying a section like [QuickChat_MessageZZZ].");
-      gINI.KeyComment("QuickChatMessages", " ");
-      gINI.KeyComment("QuickChatMessages", " Note that no quotes are required around Messages or Captions, and if included, they will be sent as part");
-      gINI.KeyComment("QuickChatMessages", " of the message.  Also, if you bullocks things up too badly, simply delete all QuickChatMessage sections,");
-      gINI.KeyComment("QuickChatMessages", " and they will be regenerated the next time you run the game (though your modifications will be lost).");
-      gINI.KeyComment("QuickChatMessages", "----------------");
+      gINI.sectionComment("QuickChatMessages", "----------------");
+      gINI.sectionComment("QuickChatMessages", " The structure of the QuickChatMessages sections is a bit complicated.  The structure reflects the way the messages are");
+      gINI.sectionComment("QuickChatMessages", " displayed in the QuickChat menu, so make sure you are familiar with that before you start modifying these items.");
+      gINI.sectionComment("QuickChatMessages", " Messages are grouped, and each group has a Caption (short name shown on screen), a Key (the shortcut key used to select");
+      gINI.sectionComment("QuickChatMessages", " the group), and a Button (a shortcut button used when in joystick mode).  If the Button is \"Undefined key\", then that");
+      gINI.sectionComment("QuickChatMessages", " item will not be shown in joystick mode, unless the ShowKeyboardKeysInStickMode setting is true.  Groups can be defined ");
+      gINI.sectionComment("QuickChatMessages", " in any order, but will be displayed sorted by [section] name.  Groups are designated by the [QuickChatMessagesGroupXXX]");
+      gINI.sectionComment("QuickChatMessages", " sections, where XXX is a unique suffix, usually a number.");
+      gINI.sectionComment("QuickChatMessages", " ");
+      gINI.sectionComment("QuickChatMessages", " Each group can have one or more messages, as specified by the [QuickChatMessagesGroupXXX_MessageYYY] sections, where XXX");
+      gINI.sectionComment("QuickChatMessages", " is the unique group suffix, and YYY is a unique message suffix.  Again, messages can be defined in any order, and will");
+      gINI.sectionComment("QuickChatMessages", " appear sorted by their [section] name.  Key, Button, and Caption serve the same purposes as in the group definitions.");
+      gINI.sectionComment("QuickChatMessages", " Message is the actual message text that is sent, and MessageType should be either \"Team\" or \"Global\", depending on which");
+      gINI.sectionComment("QuickChatMessages", " users the message should be sent to.  You can mix Team and Global messages in the same section, but it may be less");
+      gINI.sectionComment("QuickChatMessages", " confusing not to do so.");
+      gINI.sectionComment("QuickChatMessages", " ");
+      gINI.sectionComment("QuickChatMessages", " Messages can also be added to the top-tier of items, by specifying a section like [QuickChat_MessageZZZ].");
+      gINI.sectionComment("QuickChatMessages", " ");
+      gINI.sectionComment("QuickChatMessages", " Note that no quotes are required around Messages or Captions, and if included, they will be sent as part");
+      gINI.sectionComment("QuickChatMessages", " of the message.  Also, if you bullocks things up too badly, simply delete all QuickChatMessage sections,");
+      gINI.sectionComment("QuickChatMessages", " and they will be regenerated the next time you run the game (though your modifications will be lost).");
+      gINI.sectionComment("QuickChatMessages", "----------------");
    }
 
    gINI.SetValue("QuickChatMessagesGroup1", "Key", keyCodeToString(KEY_G), true);
@@ -941,34 +941,34 @@ void loadSettingsFromINI()
 
 static void writeDiagnostics()
 {
-   gINI.AddKeyName("Diagnostics");
+   gINI.addSection("Diagnostics");
 
-   if (gINI.NumKeyComments("Diagnostics") == 0)
+   if (gINI.numSectionComments("Diagnostics") == 0)
    {
-      gINI.KeyComment("Diagnostics", "----------------");
-      gINI.KeyComment("Diagnostics", " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
-      gINI.KeyComment("Diagnostics", " You probably can't use any of these settings to enhance your gameplay experience!");
-      gINI.KeyComment("Diagnostics", " DumpKeys - Enable this to dump raw input to the screen (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogConnectionProtocol - Log ConnectionProtocol events (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogNetConnection - Log NetConnectionEvents (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogEventConnection - Log EventConnection events (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogGhostConnection - Log GhostConnection events (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogNetInterface - Log NetInterface events (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogPlatform - Log Platform events (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogNetBase - Log NetBase events (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogUDP - Log UDP events (Yes/No)");
+      gINI.sectionComment("Diagnostics", "----------------");
+      gINI.sectionComment("Diagnostics", " Diagnostic entries can be used to enable or disable particular actions for debugging purposes.");
+      gINI.sectionComment("Diagnostics", " You probably can't use any of these settings to enhance your gameplay experience!");
+      gINI.sectionComment("Diagnostics", " DumpKeys - Enable this to dump raw input to the screen (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogConnectionProtocol - Log ConnectionProtocol events (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogNetConnection - Log NetConnectionEvents (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogEventConnection - Log EventConnection events (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogGhostConnection - Log GhostConnection events (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogNetInterface - Log NetInterface events (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogPlatform - Log Platform events (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogNetBase - Log NetBase events (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogUDP - Log UDP events (Yes/No)");
 
-      gINI.KeyComment("Diagnostics", " LogFatalError - Log fatal errors; should be left on (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogError - Log serious errors; should be left on (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogWarning - Log less serious errors (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogConnection - High level logging connections with remote machines (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
-      gINI.KeyComment("Diagnostics", " LuaBotMessage - Message from a bot (Yes/No)");
-      gINI.KeyComment("Diagnostics", " ServerFilter - For logging messages specific to hosting games (Yes/No)");
-      gINI.KeyComment("Diagnostics", "                (Note: these messages will go to bitfighter_server.log regardless of this setting) ");
-      gINI.KeyComment("Diagnostics", "----------------");
+      gINI.sectionComment("Diagnostics", " LogFatalError - Log fatal errors; should be left on (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogError - Log serious errors; should be left on (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogWarning - Log less serious errors (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogConnection - High level logging connections with remote machines (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogLevelLoaded - Write a log entry when a level is loaded (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LogLuaObjectLifecycle - Creation and destruciton of lua objects (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LuaLevelGenerator - Messages from the LuaLevelGenerator (Yes/No)");
+      gINI.sectionComment("Diagnostics", " LuaBotMessage - Message from a bot (Yes/No)");
+      gINI.sectionComment("Diagnostics", " ServerFilter - For logging messages specific to hosting games (Yes/No)");
+      gINI.sectionComment("Diagnostics", "                (Note: these messages will go to bitfighter_server.log regardless of this setting) ");
+      gINI.sectionComment("Diagnostics", "----------------");
    }
 
    gINI.SetValue("Diagnostics", "DumpKeys", (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"), true);
@@ -995,15 +995,15 @@ static void writeDiagnostics()
 
 static void writeEffects()
 {
-   gINI.AddKeyName("Effects");
+   gINI.addSection("Effects");
 
-   if (gINI.NumKeyComments("Effects") == 0)
+   if (gINI.numSectionComments("Effects") == 0)
    {
-      gINI.KeyComment("Effects", "----------------");
-      gINI.KeyComment("Effects", " Various visual effects");
-      gINI.KeyComment("Effects", " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
-      gINI.KeyComment("Effects", " LineSmoothing - Yes activates anti-aliased rendering.  This may be a little slower on some machines.");
-      gINI.KeyComment("Effects", "----------------");
+      gINI.sectionComment("Effects", "----------------");
+      gINI.sectionComment("Effects", " Various visual effects");
+      gINI.sectionComment("Effects", " StarsInDistance - Yes gives the game a floating, 3-D effect.  No gives the flat 'classic zap' mode.");
+      gINI.sectionComment("Effects", " LineSmoothing - Yes activates anti-aliased rendering.  This may be a little slower on some machines.");
+      gINI.sectionComment("Effects", "----------------");
    }
 
    gINI.SetValue("Effects", "StarsInDistance", (gIniSettings.starsInDistance ? "Yes" : "No"), true);
@@ -1012,17 +1012,17 @@ static void writeEffects()
 
 static void writeSounds()
 {
-   gINI.AddKeyName("Sounds");
+   gINI.addSection("Sounds");
 
-   if (gINI.NumKeyComments("Sounds") == 0)
+   if (gINI.numSectionComments("Sounds") == 0)
    {
-      gINI.KeyComment("Sounds", "----------------");
-      gINI.KeyComment("Sounds", " Sound settings");
-      gINI.KeyComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
-      gINI.KeyComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
-      gINI.KeyComment("Sounds", "----------------");
+      gINI.sectionComment("Sounds", "----------------");
+      gINI.sectionComment("Sounds", " Sound settings");
+      gINI.sectionComment("Sounds", " EffectsVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
+      gINI.sectionComment("Sounds", " MusicVolume - Volume of sound effects from 0 (mute) to 10 (full bore)");
+      gINI.sectionComment("Sounds", " VoiceChatVolume - Volume of incoming voice chat messages from 0 (mute) to 10 (full bore)");
+      gINI.sectionComment("Sounds", " SFXSet - Select which set of sounds you want: Classic or Modern");
+      gINI.sectionComment("Sounds", "----------------");
    }
 
    gINI.SetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10), true);
@@ -1048,32 +1048,32 @@ void saveWindowPosition(S32 x, S32 y)
 
 static void writeSettings()
 {
-   gINI.AddKeyName("Settings");
+   gINI.addSection("Settings");
 
-   if (gINI.NumKeyComments("Settings") == 0)
+   if (gINI.numSectionComments("Settings") == 0)
    {
-      gINI.KeyComment("Settings", "----------------");
-      gINI.KeyComment("Settings", " Settings entries contain a number of different options");
-      gINI.KeyComment("Settings", " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
-      gINI.KeyComment("Settings", " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
-      gINI.KeyComment("Settings", " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
-      gINI.KeyComment("Settings", " VoiceEcho - Play echo when recording a voice message? Yes/No");
-      gINI.KeyComment("Settings", " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
-      gINI.KeyComment("Settings", " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
-      gINI.KeyComment("Settings", " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
-      gINI.KeyComment("Settings", " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
-      gINI.KeyComment("Settings", " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
-      gINI.KeyComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
-      gINI.KeyComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
-      gINI.KeyComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
-      gINI.KeyComment("Settings", " Password - Password to use if your nickname has been reserved in the forums");
-      gINI.KeyComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
-      gINI.KeyComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
-      gINI.KeyComment("Settings", " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
-      gINI.KeyComment("Settings", " LastEditorName - Last edited file name");
-      gINI.KeyComment("Settings", " MinClientDelay -  in millisecs, lower use more CPU, higher will lose performance/reduce FPS (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
-      gINI.KeyComment("Settings", " LineWidth - default 2, width in pixels, use /LineWidth in game");
-      gINI.KeyComment("Settings", "----------------");
+      gINI.sectionComment("Settings", "----------------");
+      gINI.sectionComment("Settings", " Settings entries contain a number of different options");
+      gINI.sectionComment("Settings", " WindowMode - Fullscreen, Fullscreen-Stretch or Window");
+      gINI.sectionComment("Settings", " WindowXPos, WindowYPos - Position of window in window mode (will overwritten if you move your window)");
+      gINI.sectionComment("Settings", " WindowScalingFactor - Used to set size of window.  1.0 = 800x600. Best to let the program manage this setting.");
+      gINI.sectionComment("Settings", " VoiceEcho - Play echo when recording a voice message? Yes/No");
+      gINI.sectionComment("Settings", " ControlMode - Use Relative or Absolute controls (Relative means left is ship's left, Absolute means left is screen left)");
+      gINI.sectionComment("Settings", " LoadoutIndicators - Display indicators showing current weapon?  Yes/No");
+      gINI.sectionComment("Settings", " VerboseHelpMessages - Display additional on-screen messages while learning the game?  Yes/No");
+      gINI.sectionComment("Settings", " ShowKeyboardKeysInStickMode - If you are using a joystick, also show keyboard shortcuts in Loadout and QuickChat menus");
+      gINI.sectionComment("Settings", " JoystickType - Type of joystick to use if auto-detect doesn't recognize your controller");
+      gINI.sectionComment("Settings", " MasterServerAddress - Address of master server, in form: IP:67.18.11.66:25955 or IP:myMaster.org:25955");
+      gINI.sectionComment("Settings", " DefaultName - Name that will be used if user hits <enter> on name entry screen without entering one");
+      gINI.sectionComment("Settings", " Nickname - Specify your nickname to bypass the name entry screen altogether");
+      gINI.sectionComment("Settings", " Password - Password to use if your nickname has been reserved in the forums");
+      gINI.sectionComment("Settings", " EnableExperimentalAimMode - Use experimental aiming system (works only with controller) Yes/No");
+      gINI.sectionComment("Settings", " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
+      gINI.sectionComment("Settings", " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
+      gINI.sectionComment("Settings", " LastEditorName - Last edited file name");
+      gINI.sectionComment("Settings", " MinClientDelay -  in millisecs, lower use more CPU, higher will lose performance/reduce FPS (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
+      gINI.sectionComment("Settings", " LineWidth - default 2, width in pixels, use /LineWidth in game");
+      gINI.sectionComment("Settings", "----------------");
    }
    saveWindowMode();
    saveWindowPosition(gIniSettings.winXPos, gIniSettings.winYPos);
@@ -1102,14 +1102,14 @@ static void writeSettings()
 
 static void writeUpdater()
 {
-   gINI.AddKeyName("Updater");
+   gINI.addSection("Updater");
 
-   if(gINI.NumKeyComments("Updater") == 0)
+   if(gINI.numSectionComments("Updater") == 0)
    {
-      gINI.KeyComment("Updater", "----------------");
-      gINI.KeyComment("Updater", " The Updater section contains entries that control how game updates are handled");
-      gINI.KeyComment("Updater", " UseUpdater - Enable or disable process that installs updates (WINDOWS ONLY)");
-      gINI.KeyComment("Updater", "----------------");
+      gINI.sectionComment("Updater", "----------------");
+      gINI.sectionComment("Updater", " The Updater section contains entries that control how game updates are handled");
+      gINI.sectionComment("Updater", " UseUpdater - Enable or disable process that installs updates (WINDOWS ONLY)");
+      gINI.sectionComment("Updater", "----------------");
 
       gINI.SetValueB("Updater", "UseUpdater", gIniSettings.useUpdater, true);
    }
@@ -1117,33 +1117,33 @@ static void writeUpdater()
 
 static void writeHost()
 {
-   gINI.AddKeyName("Host");
+   gINI.addSection("Host");
 
-   if(gINI.NumKeyComments("Host") == 0)
+   if(gINI.numSectionComments("Host") == 0)
    {
-      gINI.KeyComment("Host", "----------------");
-      gINI.KeyComment("Host", " The Host section contains entries that configure the game when you are hosting");
-      gINI.KeyComment("Host", " ServerName - The name others will see when they are browsing for servers (max 20 chars)");
-      gINI.KeyComment("Host", " ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
-      gINI.KeyComment("Host", " ServerDescription - A one line description of your server.  Please include nickname and physical location!");
-      gINI.KeyComment("Host", " ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
-      gINI.KeyComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.");
-      gINI.KeyComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
-      gINI.KeyComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
-      gINI.KeyComment("Host", " MaxPlayers - The max number of players that can play on your server.");
-      gINI.KeyComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
-      gINI.KeyComment("Host", " MinDedicatedDelay - (Dedicated only) default 10, in milliseconds, lower use more CPU, higher may increase lag.");
+      gINI.sectionComment("Host", "----------------");
+      gINI.sectionComment("Host", " The Host section contains entries that configure the game when you are hosting");
+      gINI.sectionComment("Host", " ServerName - The name others will see when they are browsing for servers (max 20 chars)");
+      gINI.sectionComment("Host", " ServerAddress - The address of your server, e.g. IP:localhost:1234 or IP:54.35.110.99:8000 or IP:bitfighter.org:8888 (leave blank to let the system decide)");
+      gINI.sectionComment("Host", " ServerDescription - A one line description of your server.  Please include nickname and physical location!");
+      gINI.sectionComment("Host", " ServerPassword - You can require players to use a password to play on your server.  Leave blank to grant access to all.");
+      gINI.sectionComment("Host", " AdminPassword - Use this password to manage players & change levels on your server.");
+      gINI.sectionComment("Host", " LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
+      gINI.sectionComment("Host", " LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
+      gINI.sectionComment("Host", " MaxPlayers - The max number of players that can play on your server.");
+      gINI.sectionComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
+      gINI.sectionComment("Host", " MinDedicatedDelay - (Dedicated only) default 10, in milliseconds, lower use more CPU, higher may increase lag.");
 
       //in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
 U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
 
 
-      gINI.KeyComment("Host", " AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
-      gINI.KeyComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
-      gINI.KeyComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
+      gINI.sectionComment("Host", " AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
+      gINI.sectionComment("Host", " AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
+      gINI.sectionComment("Host", "                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
 
-//      gINI.KeyComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
-      gINI.KeyComment("Host", "----------------");
+//      gINI.sectionComment("Host", " TeamChangeDelay - The time (in mins) a player needs to wait after changing teams before changing again. (0 = no delay, -1 = no changing teams)");
+      gINI.sectionComment("Host", "----------------");
    }
    gINI.SetValue("Host", "ServerName", gIniSettings.hostname);
    gINI.SetValue("Host", "ServerAddress", gIniSettings.hostaddr);
@@ -1165,21 +1165,21 @@ static void writeLevels()
 {
    // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
-   if(gINI.FindKey("Levels") == gINI.noID)    // Key doesn't exist... let's write one
-      gINI.AddKeyName("Levels");              
+   if(gINI.findSection("Levels") == gINI.noID)    // Key doesn't exist... let's write one
+      gINI.addSection("Levels");              
 
-   if(gINI.NumKeyComments("Levels") == 0)
+   if(gINI.numSectionComments("Levels") == 0)
    {
-      gINI.KeyComment("Levels", "----------------");
-      gINI.KeyComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
-      gINI.KeyComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
-      gINI.KeyComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
-      gINI.KeyComment("Levels", " Example:");
-      gINI.KeyComment("Levels", " Level1=ctf.level");
-      gINI.KeyComment("Levels", " Level2=zonecontrol.level");
-      gINI.KeyComment("Levels", " ... etc ...");
-      gINI.KeyComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
-      gINI.KeyComment("Levels", "----------------");
+      gINI.sectionComment("Levels", "----------------");
+      gINI.sectionComment("Levels", " All levels in this section will be loaded when you host a game in Server mode.");
+      gINI.sectionComment("Levels", " You can call the level keys anything you want (within reason), and the levels will be sorted");
+      gINI.sectionComment("Levels", " by key name and will appear in that order, regardless of the order the items are listed in.");
+      gINI.sectionComment("Levels", " Example:");
+      gINI.sectionComment("Levels", " Level1=ctf.level");
+      gINI.sectionComment("Levels", " Level2=zonecontrol.level");
+      gINI.sectionComment("Levels", " ... etc ...");
+      gINI.sectionComment("Levels", "This list can be overidden on the command line with the -leveldir, -rootdatadir, or -levels parameters.");
+      gINI.sectionComment("Levels", "----------------");
 
       /*
       char levelName[256];
@@ -1196,14 +1196,14 @@ static void writeLevels()
 
 static void writeTesting()
 {
-   gINI.AddKeyName("Testing");
-   if (gINI.NumKeyComments("Testing") == 0)
+   gINI.addSection("Testing");
+   if (gINI.numSectionComments("Testing") == 0)
    {
-      gINI.KeyComment("Testing", "----------------");
-      gINI.KeyComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
-      gINI.KeyComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
-      gINI.KeyComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
-      gINI.KeyComment("Testing", "----------------");
+      gINI.sectionComment("Testing", "----------------");
+      gINI.sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
+      gINI.sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
+      gINI.sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
+      gINI.sectionComment("Testing", "----------------");
    }
    gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
 }
@@ -1211,12 +1211,12 @@ static void writeTesting()
 
 static void writePasswordSection_helper(string section)
 {
-   gINI.AddKeyName(section);
-   if (gINI.NumKeyComments(section) == 0)
+   gINI.addSection(section);
+   if (gINI.numSectionComments(section) == 0)
    {
-      gINI.KeyComment(section, "----------------");
-      gINI.KeyComment(section, " This section holds passwords you've entered to gain access to various servers.");
-      gINI.KeyComment(section, "----------------");
+      gINI.sectionComment(section, "----------------");
+      gINI.sectionComment(section, " This section holds passwords you've entered to gain access to various servers.");
+      gINI.sectionComment(section, "----------------");
    }
 }
 
@@ -1274,21 +1274,21 @@ void writeSkipList()
    // If there is no LevelSkipList key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write our current skip list (which may have been specified via remote server management tools)
 
-   gINI.DeleteKey("LevelSkipList");       // Delete all current entries to prevent user renumberings to be corrected from tripping us up
+   gINI.deleteSection("LevelSkipList");   // Delete all current entries to prevent user renumberings to be corrected from tripping us up
                                           // This may the unfortunate side-effect of pushing this section to the bottom of the INI file
 
-   gINI.AddKeyName("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
+   gINI.addSection("LevelSkipList");      // Create the key, then provide some comments for documentation purposes
 
-   gINI.KeyComment("LevelSkipList", "----------------");
-   gINI.KeyComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
-   gINI.KeyComment("LevelSkipList", " another section or on the command line.  You can edit this section, but it is really intended");
-   gINI.KeyComment("LevelSkipList", " for remote server management.  You will experience slightly better load times if you clean");
-   gINI.KeyComment("LevelSkipList", " this section out from time to time.  The names of the keys are not important, and may be changed.");
-   gINI.KeyComment("LevelSkipList", " Example:");
-   gINI.KeyComment("LevelSkipList", " SkipLevel1=skip_me.level");
-   gINI.KeyComment("LevelSkipList", " SkipLevel2=dont_load_me_either.level");
-   gINI.KeyComment("LevelSkipList", " ... etc ...");
-   gINI.KeyComment("LevelSkipList", "----------------");
+   gINI.sectionComment("LevelSkipList", "----------------");
+   gINI.sectionComment("LevelSkipList", " Levels listed here will be skipped and will NOT be loaded, even when they are specified in");
+   gINI.sectionComment("LevelSkipList", " another section or on the command line.  You can edit this section, but it is really intended");
+   gINI.sectionComment("LevelSkipList", " for remote server management.  You will experience slightly better load times if you clean");
+   gINI.sectionComment("LevelSkipList", " this section out from time to time.  The names of the keys are not important, and may be changed.");
+   gINI.sectionComment("LevelSkipList", " Example:");
+   gINI.sectionComment("LevelSkipList", " SkipLevel1=skip_me.level");
+   gINI.sectionComment("LevelSkipList", " SkipLevel2=dont_load_me_either.level");
+   gINI.sectionComment("LevelSkipList", " ... etc ...");
+   gINI.sectionComment("LevelSkipList", "----------------");
 
    Vector<string> skipList;
 

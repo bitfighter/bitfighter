@@ -44,12 +44,12 @@ private:
     vector<string> values;
     vector<string> comments;
   };
-  vector<key>    keys;
-  vector<string> names;
+  vector<key>    keys;     // <== should be sections
+  vector<string> names;    // <== should be keys
   vector<string> comments;
   string CheckCase( string s) const;
 
-  string keyname;
+  string keyname;    // <== should be section
 
 public:
    enum errors{ noID = -1};
@@ -86,32 +86,32 @@ public:
   void Reset()                                   {Erase();}
 
   // Returns index of specified key, or noID if not found.
-  long FindKey( string const keyname) const;
+  long findSection( string const keyname) const;
 
   // Returns index of specified value, in the specified key, or noID if not found.
-  long FindValue( unsigned const keyID, string const valuename) const;
+  long FindValue( unsigned const sectionId, string const valuename) const;
 
   // Returns number of keys currently in the ini.
   int NumKeys() const                        {return (unsigned) names.size();}
   unsigned GetNumKeys() const                {return (unsigned) NumKeys();}
 
   // Add a key name.
-  unsigned AddKeyName( string const keyname);
+  unsigned addSection( string const keyname);
 
   // Returns key names by index.
-  string KeyName( unsigned const keyID) const;
-  string GetKeyName( unsigned const keyID) const {return KeyName(keyID);}
+  string sectionName( unsigned const sectionId) const;
+  string getSectionName( unsigned const sectionId) const {return sectionName(sectionId);}
 
   // Returns number of values stored for specified key.
-  unsigned NumValues( unsigned const keyID);
-  unsigned GetNumValues( unsigned const keyID)   {return NumValues( keyID);}
+  unsigned NumValues( unsigned const sectionId);
+  unsigned GetNumValues( unsigned const sectionId)   {return NumValues( sectionId);}
   unsigned NumValues( string const &keyname);
   unsigned GetNumValues( string const keyname)   {return NumValues( keyname);}
 
-  // Returns value name by index for a given keyname or keyID.
-  string ValueName( unsigned const keyID, unsigned const valueID) const;
-  string GetValueName( unsigned const keyID, unsigned const valueID) const {
-    return ValueName( keyID, valueID);
+  // Returns value name by index for a given keyname or sectionId.
+  string ValueName( unsigned const sectionId, unsigned const valueID) const;
+  string GetValueName( unsigned const sectionId, unsigned const valueID) const {
+    return ValueName( sectionId, valueID);
   }
   string ValueName( string const keyname, unsigned const valueID) const;
   string GetValueName( string const keyname, unsigned const valueID) const {
@@ -121,7 +121,7 @@ public:
   // Gets value of [keyname] valuename =.
   // Overloaded to return string, int, and double.
   // Returns defValue if key/value not found.
-  string GetValue( unsigned const keyID, unsigned const valueID, string const defValue = "") const;
+  string GetValue( unsigned const sectionId, unsigned const valueID, string const defValue = "") const;
   string GetValue(string const &keyname, string const &valuename, string const &defValue = "") const;
 
   // Load up valueList with all values from the section
@@ -153,7 +153,7 @@ public:
   }
   bool SetValueF( string const keyname, string const valuename, double const value, bool const create = true);
   bool SetValueV( string const keyname, string const valuename, char *format, ...);
-  bool SetValue( unsigned const keyID, unsigned const valueID, string const value);
+  bool SetValue( unsigned const sectionId, unsigned const valueID, string const value);
 
   // Deletes specified value.
   // Returns true if value existed and deleted, false otherwise.
@@ -161,7 +161,7 @@ public:
 
   // Deletes specified key and all values contained within.
   // Returns true if key existed and deleted, false otherwise.
-  bool DeleteKey(string keyname);
+  bool deleteSection(string keyname);
 
   // Header comment functions.
   // Header comments are those comments before the first key.
@@ -184,20 +184,20 @@ public:
   // the CIniFile::WriteFile() is called.
   //
   // Number of key comments.
-  unsigned NumKeyComments( unsigned const keyID) const;
-  unsigned NumKeyComments( string const keyname) const;
+  unsigned numSectionComments( unsigned const sectionId) const;
+  unsigned numSectionComments( string const keyname) const;
   // Add a key comment.
-  bool     KeyComment( unsigned const keyID, string const comment);
-  bool     KeyComment( string const keyname, string const comment, bool const create = true);
+  bool     sectionComment( unsigned const sectionId, string const comment);
+  bool     sectionComment( string const keyname, string const comment, bool const create = true);
   // Return a key comment.
-  string   KeyComment( unsigned const keyID, unsigned const commentID) const;
-  string   KeyComment( string const keyname, unsigned const commentID) const;
+  string   sectionComment( unsigned const sectionId, unsigned const commentID) const;
+  string   sectionComment( string const keyname, unsigned const commentID) const;
   // Delete a key comment.
-  bool     DeleteKeyComment( unsigned const keyID, unsigned const commentID);
-  bool     DeleteKeyComment( string const keyname, unsigned const commentID);
+  bool     deleteSectionComment( unsigned const sectionId, unsigned const commentID);
+  bool     deleteSectionComment( string const keyname, unsigned const commentID);
   // Delete all comments for a key.
-  bool     DeleteKeyComments( unsigned const keyID);
-  bool     DeleteKeyComments( string const keyname);
+  bool     deleteSectionComments( unsigned const sectionId);
+  bool     deleteSectionComments( string const keyname);
 };
 
 
