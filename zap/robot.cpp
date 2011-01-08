@@ -1794,17 +1794,12 @@ void Robot::idle(GameObject::IdleCallPath path)
 			{
 				//  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
 				GameConnection *gc = new GameConnection(); // Need GameConnection and ClientRef to keep track of score
-				ClientRef *cr = new ClientRef();
 				gc->setClientName(getName());
-				cr->name = getName();
-				cr->setTeam(getTeam());
-				cr->clientConnection = gc;
-				gc->setClientRef(cr);
 				setOwner(gc);
 				gc->linkToClientList();
 				gc->setControlObject(this);
 				gc->setIsRobot(true);
-				getGame()->getGameType()->serverAddClient(gc);
+				getGame()->getGameType()->serverAddClient(gc);  //ClientRef is created in serverAddClient
 				gameConnectionInitalized = true;
 			}
          //if(respawnTimer.update(mCurrentMove.time))  //not needed anymore

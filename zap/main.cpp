@@ -1757,7 +1757,7 @@ void setupLogging()
    // Specify which events each logfile will listen for
    S32 events = LogConsumer::AllErrorTypes | LogConsumer::LogConnection | LogConsumer::LuaLevelGenerator | LogConsumer::LuaBotMessage;
 
-   gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");     
+   gMainLog.init(joindir(gConfigDirs.logDir, "bitfighter.log"), "w");
    //gMainLog.setMsgTypes(events);  ==> set from INI settings     
    gMainLog.logprintf("------ Bitfighter Log File ------");
 
