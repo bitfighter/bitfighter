@@ -130,7 +130,7 @@ void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
       if(stream->readFlag())
          mShooter = dynamic_cast<Ship *>(connection->resolveGhost(stream->readInt(GhostConnection::GhostIdBitSize)));
-      //pos -= velocity * 0.020f; // What's this about?? -CE  // Removed to fix turrets hit self
+
       Rect newExtent(pos,pos);
       setExtent(newExtent);
       initial = true;
