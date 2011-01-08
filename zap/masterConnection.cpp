@@ -264,7 +264,7 @@ TNL_IMPLEMENT_RPC_OVERRIDE(MasterServerConnection, m2cSetAuthenticated,
    {
       // Hmmm.... same info in two places...
       gClientInfo.name = correctedName.getString();
-      gIniSettings.name = correctedName.getString();
+      gIniSettings.name = correctedName.getString();  
 
       gClientInfo.authenticated = true;
       if(gClientGame->getConnectionToServer())
