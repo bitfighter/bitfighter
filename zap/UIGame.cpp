@@ -1366,26 +1366,24 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
 }
 
 
-
-static const char * getMapFileNameFromTitle(S32 MaxLength = 40)
+static string makeFilenameFromString(const char *levelname)
 {
-	static char filename[64];
-	const char * levelname = "";
-	S32 i;
-	if(MaxLength > 63) MaxLength = 63;
-	if(gClientGame->getGameType())
-		levelname = gClientGame->getGameType()->mLevelName.getString();
-	i=0;
-	while(i<63 && levelname[i] != 0)
+	static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
+
+	S32 i = 0;
+
+	while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
 	{
-		char c = levelname[i];  //prevent invalid characters in file names.
+      // Prevent invalid characters in file names
+		char c = levelname[i];     
 		if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'))
 			filename[i]=c;
 		else
 			filename[i]='_';
 		i++;
 	}
-	filename[i]=0;    //Null terminate
+
+	filename[i] = 0;    // Null terminate
 	return filename;
 }
 
@@ -1620,25 +1618,28 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          displayMessage(gCmdChatColor, "!!! Can't get download levels from a local server");
       else
       {
-         string filename;
          if(words.size() > 1 && words[1] != "")
-            filename = words[1];
+            remoteLevelDownloadFilename = words[1];
 			else
-            filename = getMapFileNameFromTitle();
-         filename = strictjoindir(gConfigDirs.levelDir, "Downloaded_" + filename + ".level");
-         mOutputFile = fopen(filename.c_str(), "w");    //write empty file when server does not allow getmap ?
+            remoteLevelDownloadFilename = "Downloaded_" + makeFilenameFromString(gClientGame->getGameType() ? 
+                                                                        gClientGame->getGameType()->mLevelName.getString() : "Level");
+         // Add an extension if needed
+         if(remoteLevelDownloadFilename.find(".") == string::npos)
+            remoteLevelDownloadFilename += ".level";
+
+         // Make into a fully qualified file name
+         string fullFile = strictjoindir(gConfigDirs.levelDir, remoteLevelDownloadFilename);
+
+         // Prepare for writing
+         mOutputFile = fopen(fullFile.c_str(), "w");    // TODO: Writes empty file when server does not allow getmap.  Shouldn't.
+
          if(!mOutputFile)
          {
-            logprintf("Problem opening file %s for writing", filename);
-            displayMessage(gCmdChatColor, "!!! Problem opening file %s for writing", filename);
-         }else
-         {
-            // Address addr = gClientGame->getConnectionToServer()->getNetAddress();  //not needed ?
-            static char some_static_char_data[256];
-            filename.copy(some_static_char_data,255);                          //Tried filename.c_str(), doesn't work
-            remoteLevelDownloadFilename = some_static_char_data;                //for output message when done.
-            gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
+            logprintf("Problem opening file %s for writing", fullFile.c_str());
+            displayMessage(gCmdChatColor, "!!! Problem opening file %s for writing", fullFile.c_str());
          }
+         else
+            gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
       }
    }
    else if(words[0] == "engf" || words[0] == "engt")

@@ -282,8 +282,8 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (), (),
       fclose(gGameUserInterface.mOutputFile);
       gGameUserInterface.mOutputFile = NULL;
 
-      gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download complete. Level is in %s", 
-                                                            gGameUserInterface.remoteLevelDownloadFilename);
+      gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download to %s", 
+                                                            gGameUserInterface.remoteLevelDownloadFilename.c_str());
    }
 }
 

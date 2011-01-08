@@ -212,7 +212,7 @@ public:
    void onActivate();               // Gets run when interface is first activated
    void onReactivate();             // Gets run when interface is subsequently reactivated
 
-   const char *remoteLevelDownloadFilename;
+   string remoteLevelDownloadFilename;
    //ofstream mOutputFile;            // For saving downloaded levels
    FILE *mOutputFile;               // For saving downloaded levels
 
