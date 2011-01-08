@@ -2492,36 +2492,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
-/*    //See client command of /getmap
-   else if(!stricmp(cmd, "getmap"))
-   {
-     if(! gIniSettings.allowGetMap)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
-     else if(clientRef->clientConnection->isLocalConnection())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't Get Map your own host.");
-     else
-     {
-       S32 i=0;
-       S32 s=0;
-       S32 filesize=0;
-       while(sFileData[filesize] != 0)   //find the file size.
-           filesize++;
-       while(sFileData[i] != 0)
-       {
-          if(i-s >= 254)
-          {
-             char c1 = sFileData[i];
-             sFileData[i] = 0;     //so it thinks it is a short string line
-             clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
-             sFileData[i] = c1;
-             s=i;
-          }
-          i++;
-       }
-       if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
-     }
-   }
-/*
+
 	/* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
    {
@@ -2609,12 +2580,14 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
    gGameUserInterface.displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
+
 // Server sends message to the client for display using StringTableEntry
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
 {
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
    gGameUserInterface.displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
+
 
 // Client requests start/stop of streaming pings and scores from server to client
 GAMETYPE_RPC_C2S(GameType, c2sRequestScoreboardUpdates, (bool updates), (updates))
@@ -2625,6 +2598,7 @@ GAMETYPE_RPC_C2S(GameType, c2sRequestScoreboardUpdates, (bool updates), (updates
    if(updates)
       updateClientScoreboard(cl);
 }
+
 
 // Client tells server that they chose the next weapon
 GAMETYPE_RPC_C2S(GameType, c2sAdvanceWeapon, (), ())
@@ -2652,9 +2626,9 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
+// Is this needed in 015?
 GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (U16 itemId), (itemId))
 {
-   //logprintf("%s GameType->c2sReaffirmMountItem", isGhost()? "Client:" : "Server:");
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
 
    for(S32 i = 0; i < gServerGame->mGameObjects.size(); i++)

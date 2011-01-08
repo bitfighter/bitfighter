@@ -289,7 +289,6 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
          gGameUserInterface.displayMessage(ColorRed, "!!! Getmap command is disabled on this server");
       else
          gGameUserInterface.displayMessage(ColorRed, "Error downloading level");
-
    }
 }
 
@@ -1080,20 +1079,6 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
 		updateClientChangedName(this,uniqueName);
 	}
 }
-
-
-extern void GetMapData(S32 FileSize, S32 Position, const char * Data);  //in gametype.cpp
-
-TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
-                  (S32 FileSize, S32 Position, StringTableEntry Data),
-                  (FileSize, Position, Data)
-				  , NetClassGroupGameMask, RPCGuaranteed, RPCDirServerToClient, 1)
-{
-	GetMapData(FileSize, Position, Data.getString() );
-}
-
-
-
 
 
 extern IniSettings gIniSettings;
