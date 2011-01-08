@@ -986,7 +986,7 @@ public:
    {
       trim(name);
       if(name == "")
-         name = "ChumpChange";
+         return "ChumpChange";
 
       return name;
    }
