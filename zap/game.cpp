@@ -890,9 +890,31 @@ void ServerGame::idle(U32 timeDelta)
    if(mMasterUpdateTimer.update(timeDelta))
    {
       MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+      static StringTableEntry prevCurrentLevelName;   // Using static, so it holds the value when it comes back here.
+      static StringTableEntry prevCurrentLevelType;
+      static S32 prevRobotCount;
+      static S32 prevPlayerCount;
       if(masterConn && masterConn->isEstablished())
-         masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
-      mMasterUpdateTimer.reset(UpdateServerStatusTime);
+      {
+         // Only update if something is different.
+         if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || prevRobotCount != getRobotCount() || prevPlayerCount != mPlayerCount)
+			{
+				//logprintf("UPDATE");
+				prevCurrentLevelName = getCurrentLevelName();
+				prevCurrentLevelType = getCurrentLevelType();
+				prevRobotCount = getRobotCount();
+				prevPlayerCount = mPlayerCount;
+            masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
+				mMasterUpdateTimer.reset(UpdateServerStatusTime);
+			}
+			else
+				mMasterUpdateTimer.reset(CheckServerStatusTime);
+      }
+      else
+		{
+         prevPlayerCount = -1;   //Not sure if needed, but if disconnected, we need to update to master.
+			mMasterUpdateTimer.reset(CheckServerStatusTime);
+		}
    }
 
    mNetInterface->processConnections();
