@@ -224,7 +224,7 @@ bool LevelLoader::initLevelFromFile(const char *filename)
    FILE *file = fopen(filename, "r");
 
 #ifdef SAM_ONLY
-   //Wanting to know which map the game crashes on.
+   // Wanting to know which map the game crashes on.
    logprintf("Loading %s", filename);
 #endif
 
@@ -232,7 +232,7 @@ bool LevelLoader::initLevelFromFile(const char *filename)
       return false;
 
    size_t bytesRead = fread(sFileData, 1, sizeof(sFileData) - 1, file);
-   sFileData[bytesRead] = 0;                     //need one more character for null-terminate.
+   sFileData[bytesRead] = 0;           // Need one more character for null-termination
 
    parseArgs(sFileData);
 
