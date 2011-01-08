@@ -219,25 +219,24 @@ stateLineParseDone:
 
 
 char sFileData[MAX_LEVEL_FILE_LENGTH];      // That's really really really big!
-bool LevelLoader::initLevelFromFile(const char *file)
+bool LevelLoader::initLevelFromFile(const char *filename)
 {
-   FILE *f = fopen(file, "r");
+   FILE *file = fopen(filename, "r");
 
 #ifdef SAM_ONLY
    //Wanting to know which map the game crashes on.
-   logprintf("Loading %s", file);
+   logprintf("Loading %s", filename);
 #endif
 
-   if(!f)
+   if(!file)      // Can't open file
       return false;
 
-
-   size_t bytesRead = fread(sFileData, 1, sizeof(sFileData) - 1, f);
+   size_t bytesRead = fread(sFileData, 1, sizeof(sFileData) - 1, file);
    sFileData[bytesRead] = 0;                     //need one more character for null-terminate.
 
    parseArgs(sFileData);
 
-   fclose(f);
+   fclose(file);
 
    return true;
 }
