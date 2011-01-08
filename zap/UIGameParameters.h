@@ -76,7 +76,7 @@ private:
    S32 mQuitItemIndex;               // Index of our quit item -- will vary depending on how many game-specific parameters there are
    S32 mGameSpecificParams;          // How many game specific parameters do we have?
 
-   string getParamVal(string paramName);      // Find value in our list of params
+   //string getParamVal(string paramName);      // Find value in our list of params
 
    virtual S32 getTextSize() { return 18; }
    virtual S32 getGap() { return 12; }

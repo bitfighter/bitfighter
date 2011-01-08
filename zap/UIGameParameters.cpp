@@ -88,29 +88,6 @@ void GameParamUserInterface::updateMenuItems(const char *gt)
 }
 
 
-// It would be more efficient to simply parse our list and create a lookup table
-string GameParamUserInterface::getParamVal(string paramName)
-{
-   const string delimiters = " \t";       // Spaces or tabs delimit our lines
-
-   for(S32 i = 0; i < gameParams.size(); i++)
-   {
-      string str = gameParams[i];
-      string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
-      string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
-
-      string token = str.substr(lastPos, pos - lastPos);
-      lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"!
-      string val = str.substr(lastPos, str.size() - lastPos);
-
-      if(token == paramName)
-         return val;
-   }
-
-   return "";
-}
-
-
 static void changeGameTypeCallback(U32 gtIndex)
 {
    gGameParamUserInterface.updateMenuItems(gtIndex);
@@ -142,6 +119,31 @@ static string stripExtension(string filename)
 }
 
 
+// Simply breaks down gameParams into a map that looks like paramName, paramValue
+// First word is assumed to be the name, rest of the line is the value
+static map<string,string> makeParamMap(const Vector<string> &gameParams)
+{
+   map<string,string> params;
+
+   const string delimiters = " \t";       // Spaces or tabs delimit our lines
+
+   for(S32 i = 0; i < gameParams.size(); i++)
+   {
+      string str = gameParams[i];
+      string::size_type lastPos = str.find_first_not_of(delimiters, 0);    // Skip any leading delimiters
+      string::size_type pos     = str.find_first_of(delimiters, lastPos);  // Find first "non-delimiter"
+
+      string key = str.substr(lastPos, pos - lastPos);
+      lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"!
+      string val = str.substr(lastPos, str.size() - lastPos);
+
+      params[key] = val;
+   }
+
+   return params;
+}
+
+
 #ifndef WIN32
 extern const S32 Game::MIN_GRID_SIZE;     // Needed by gcc, cause errors in VC++... and for Mac?
 extern const S32 Game::MAX_GRID_SIZE;
@@ -150,6 +152,8 @@ extern const S32 Game::MAX_GRID_SIZE;
 // Does the actual work of updating the menu items!
 void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 {
+   map<string, string> paramMap = makeParamMap(gameParams);
+
    TNL::Object *theObject = TNL::Object::create(gGameTypeNames[gtIndex]);          // Instantiate our gameType object
    GameType *gameType = dynamic_cast<GameType*>(theObject);                        // and cast it to GameType
 
@@ -200,7 +204,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
 
    MenuItem *item = new EditableMenuItem("Level Name:", 
-                                         getParamVal("LevelName"), 
+                                         paramMap["LevelName"],
                                          "", 
                                          "The level's name -- pick a good one!",  
                                          MAX_GAME_NAME_LEN);
@@ -210,7 +214,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    
 
    menuItems.push_back(new EditableMenuItem("Level Descr:", 
-                                            getParamVal("LevelDescription"), 
+                                            paramMap["LevelDescription"], 
                                             "", 
                                             "A brief description of the level",                     
                                             MAX_GAME_DESCR_LEN));
@@ -218,7 +222,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    
 
    menuItems.push_back(new EditableMenuItem("Level By:", 
-                                            getParamVal("LevelCredits"), 
+                                            paramMap["LevelCredits"], 
                                             "", 
                                             "Who created this level",                                  
                                             MAX_GAME_DESCR_LEN));
@@ -226,7 +230,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
 
 
    menuItems.push_back(new EditableMenuItem("Levelgen Script:", 
-                                            getParamVal("Script"), 
+                                            paramMap["Script"], 
                                             "<None>", 
                                             "Levelgen script & args to be run when level is loaded",  
                                             255));
