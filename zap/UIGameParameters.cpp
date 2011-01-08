@@ -123,7 +123,7 @@ static string stripExtension(string filename)
 // First word is assumed to be the name, rest of the line is the value
 static map<string,string> makeParamMap(const Vector<string> &gameParams)
 {
-   map<string,string> params;
+   map<string,string> paramMap;
 
    const string delimiters = " \t";       // Spaces or tabs delimit our lines
 
@@ -137,10 +137,10 @@ static map<string,string> makeParamMap(const Vector<string> &gameParams)
       lastPos = min(str.find_first_not_of(delimiters, pos), str.size());   // Skip delimiters.  Note the "not_of"!
       string val = str.substr(lastPos, str.size() - lastPos);
 
-      params[key] = val;
+      paramMap[key] = val;
    }
 
-   return params;
+   return paramMap;
 }
 
 
