@@ -52,6 +52,7 @@
 
 namespace Zap
 {
+extern  F32 getCurrentRating(GameConnection *conn);      //in game.cpp
 
 //RDW GCC needs this to be properly defined.  -- isn't this defined in gameType.h? -CE
 //GCC can't link without this definition.  One of the calls to min in
@@ -845,14 +846,21 @@ void GameType::gameOverManGameOver()
 }
 
 
-// Transmit statistics to the master server
+#ifdef SAM_ONLY
+   const bool LogStats=true;
+   const bool SendStatsToMaster=true;
+#else
+   const bool LogStats=false;
+   const bool SendStatsToMaster=true;
+#endif
+
+// Transmit statistics to the master server, LogStats to game server
 void GameType::saveGameStats()
 {
-   // Currently, only transmits statistics to the master server
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
    GameType *gameType = gServerGame->getGameType();
 
-   if(masterConn && gameType)
+   if(gameType)
    {
       // Build a list of teams, so we can sort by score
       Vector<Team> sortTeams(mTeams.size());
@@ -892,20 +900,50 @@ void GameType::saveGameStats()
       }
 
       S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
-      masterConn->s2mSendGameStatistics_3(BUILD_VERSION, gameType->getGameTypeString(), gameType->isTeamGame(),
+      if(masterConn && SendStatsToMaster)
+         masterConn->s2mSendGameStatistics_3(BUILD_VERSION, gameType->getGameTypeString(), gameType->isTeamGame(),
                                           gameType->mLevelName, teams, scores, 
                                           colorR, colorG, colorB, players, bots, timeInSecs);
+		if(LogStats)
+		{
+			logprintf("Version=%i %s %i:%02i",BUILD_VERSION,gameType->getGameTypeString(), timeInSecs/60, timeInSecs%60);
+			logprintf("%s Level=%s", gameType->isTeamGame() ? "Team" : "NoTeam", gameType->mLevelName.getString());
+			for(S32 i=0; i < mTeams.size(); i++)
+				logprintf("Team=%i Score=%i Color=%i,%i,%i Name=%s"
+					, i                   //Using unsorted, to correctly use index as team ID. Teams can have same name.
+					, mTeams[i].getScore()
+					, (S32) mTeams[i].color.r*9   //Don't need accuracy, will use one digit number.
+					, (S32) mTeams[i].color.g*9
+					, (S32) mTeams[i].color.b*9
+					, mTeams[i].getName().getString()
+					);
+		}
 
       for(S32 i = 0; i < gameType->mClientList.size(); i++)
       {
          Statistics *statistics = &gameType->mClientList[i]->mStatistics;
+			gameType->mClientList[i]->getScore();
         
-         masterConn->s2mSendPlayerStatistics_3(gameType->mClientList[i]->name, gameType->mClientList[i]->clientConnection->getClientId()->toVector(), 
+         if(masterConn && SendStatsToMaster)
+            masterConn->s2mSendPlayerStatistics_3(gameType->mClientList[i]->name, gameType->mClientList[i]->clientConnection->getClientId()->toVector(), 
                                                gameType->mClientList[i]->isRobot,
-                                               gameType->getTeamName(gameType->mClientList[i]->getTeam()), 
-                                               gameType->getScore(),
+                                               gameType->getTeamName(gameType->mClientList[i]->getTeam()),  //Both teams might have same name...
+                                               gameType->mClientList[i]->getScore(), //non-zero cause master to reset? Keep getting disconnected after the end of game.
                                                statistics->getKills(), statistics->getDeaths(), 
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
+			if(LogStats)
+			{
+				logprintf("%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i"
+					, gameType->mClientList[i]->isRobot ? "Robot" : "Player"
+					, gameType->mClientList[i]->name.getString()
+					, gameType->mClientList[i]->getTeam()
+					, gameType->mClientList[i]->getScore()
+					, getCurrentRating(gameType->mClientList[i]->clientConnection)
+					, statistics->getKills()
+					, statistics->getDeaths() 
+               , statistics->getSuicides()
+					);
+			}
       }
    }
 }
@@ -1575,8 +1613,6 @@ Color GameType::getShipColor(Ship *s)
 }
 
 
-extern  F32 getCurrentRating(GameConnection *conn);
-
 
 // Make sure that the mTeams[] structure has the proper player counts
 // Needs to be called manually before accessing the structure
@@ -1640,10 +1676,11 @@ void GameType::serverAddClient(GameConnection *theClient)
 
    // ...and add new player to that team
    cref->setTeam(minTeamIndex);
+	cref->isRobot = cref->clientConnection->isRobot();
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
 
-   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), false, true);    // Tell other clients about the new guy, who is never us...
+   s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), cref->isRobot, true);    // Tell other clients about the new guy, who is never us...
    s2cClientJoinedTeam(cref->name, cref->getTeam());
 
    spawnShip(theClient);
@@ -2298,15 +2335,15 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    {
       bool localClient = mClientList[i]->clientConnection == theConnection;
 
-      s2cAddClient(mClientList[i]->name, localClient, mClientList[i]->clientConnection->isAdmin(), false, false);
+      s2cAddClient(mClientList[i]->name, localClient, mClientList[i]->clientConnection->isAdmin(), mClientList[i]->isRobot, false);
       s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
    }
 
-   for(S32 i = 0; i < Robot::robots.size(); i++)
-   {
+   //for(S32 i = 0; i < Robot::robots.size(); i++)  //Robot is part of mClientList
+   //{
    //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
-   }	
+   //}	
 
    // An empty list clears the barriers
    Vector<F32> v;
@@ -2492,7 +2529,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
-/*    //See client command of /getmap
+    //See client command of /getmap
    else if(!stricmp(cmd, "getmap"))
    {
      if(! gIniSettings.allowGetMap)
@@ -2521,7 +2558,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
        if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
    }
-/*
+
 	/* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
    {
@@ -2737,13 +2774,13 @@ void GameType::updateClientScoreboard(ClientRef *cl)
       mRatings.push_back(max(min((U32)(getCurrentRating(conn) * 100.0) + 100, maxRating), minRating));
    }
 
-   // Next come the robots
-   for(S32 i = 0; i < Robot::robots.size(); i++)
-   {
-      mPingTimes.push_back(0);
-      mScores.push_back(Robot::robots[i]->getScore());
-      mRatings.push_back(max(min((U32)(Robot::robots[i]->getRating() * 100.0) + 100, maxRating), minRating));
-   }
+   // Next come the robots ... Robots is part of mClientList
+   //for(S32 i = 0; i < Robot::robots.size(); i++)
+   //{
+   //   mPingTimes.push_back(0);
+   //   mScores.push_back(Robot::robots[i]->getScore());
+   //   mRatings.push_back(max(min((U32)(Robot::robots[i]->getRating() * 100.0) + 100, maxRating), minRating));
+   //}
 
    NetObject::setRPCDestConnection(cl->clientConnection);
    s2cScoreboardUpdate(mPingTimes, mScores, mRatings);
