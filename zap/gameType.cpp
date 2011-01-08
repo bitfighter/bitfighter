@@ -2398,12 +2398,12 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
+/* //May be removed, See client command of /getmap, this server side /getmap goes unused.
 S32 GetMapFileSize = 0;
 bool GetMapCheckDone = false;
 extern char sFileData[];  //in GameLoader.cpp
 extern ConfigDirectories gConfigDirs;          //in main.cpp
 extern Color gCmdChatColor;                    //in gameConnection.cpp
-
 
 void GetMapData(S32 FileSize, S32 Position, const char * Data)
 {
@@ -2473,7 +2473,7 @@ void GetMapData(S32 FileSize, S32 Position, const char * Data)
 		}
 	}
 };
-
+*/
 
 
 // Runs the server side commands, which the client may or may not know about
@@ -2529,8 +2529,9 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
-    //See client command of /getmap
-   else if(!stricmp(cmd, "getmap"))
+//May be removed, See client command of /getmap, this server side /getmap goes unused.
+/*
+else if(!stricmp(cmd, "getmap"))
    {
      if(! gIniSettings.allowGetMap)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
@@ -2558,7 +2559,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
        if(s < filesize) clientRef->clientConnection->s2cGetMapData(filesize, s, StringTableEntry(&sFileData[s]) );
      }
    }
-
+*/
 	/* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
    {

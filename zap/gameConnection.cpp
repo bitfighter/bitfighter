@@ -225,7 +225,7 @@ ClientRef *GameConnection::getClientRef()
 }
 
 
-// Old server side /getmap command
+// Old server side /getmap command, now unused, may be removed
 // 1. client send /getmap command
 // 2. server send map if allowed
 // 3. When client get all the level map data parts, it create file and save the map
@@ -1081,7 +1081,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
 	}
 }
 
-
+/* //May be removed, See client command of /getmap, this server side /getmap goes unused.
 extern void GetMapData(S32 FileSize, S32 Position, const char * Data);  //in gametype.cpp
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
@@ -1091,7 +1091,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cGetMapData,
 {
 	GetMapData(FileSize, Position, Data.getString() );
 }
-
+*/
 
 
 
