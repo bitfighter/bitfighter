@@ -2626,7 +2626,7 @@ GAMETYPE_RPC_C2S(GameType, c2sDropItem, (), ())
 }
 
 
-// Is this needed in 015?
+// Is this needed in 015?  ==> no, keep this around for a bit until we determine if Sam's new way of doing soccer pickups works better
 GAMETYPE_RPC_C2S(GameType, c2sReaffirmMountItem, (U16 itemId), (itemId))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
