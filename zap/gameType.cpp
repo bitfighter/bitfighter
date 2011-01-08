@@ -846,13 +846,6 @@ void GameType::gameOverManGameOver()
 }
 
 
-#ifdef SAM_ONLY
-   const bool LogStats=true;
-   const bool SendStatsToMaster=true;
-#else
-   const bool LogStats=false;
-   const bool SendStatsToMaster=true;
-#endif
 
 // Transmit statistics to the master server, LogStats to game server
 void GameType::saveGameStats()
@@ -900,11 +893,11 @@ void GameType::saveGameStats()
       }
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
-      if(masterConn && SendStatsToMaster)
+      if(masterConn && gIniSettings.SendStatsToMaster)
          masterConn->s2mSendGameStatistics_3(BUILD_VERSION, getGameTypeString(), isTeamGame(),
                                           mLevelName, teams, scores, 
                                           colorR, colorG, colorB, players, bots, timeInSecs);
-		if(LogStats)
+		if(gIniSettings.LogStats)
 		{
 			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i",BUILD_VERSION,getGameTypeString(), timeInSecs/60, timeInSecs%60);
 			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
@@ -924,14 +917,14 @@ void GameType::saveGameStats()
          Statistics *statistics = &mClientList[i]->mStatistics;
 			mClientList[i]->getScore();
         
-         if(masterConn && SendStatsToMaster)
+         if(masterConn && gIniSettings.SendStatsToMaster)
             masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
                                                mClientList[i]->isRobot,
                                                getTeamName(mClientList[i]->getTeam()),  //Both teams might have same name...
                                                mClientList[i]->getScore(), //non-zero cause master to reset? Keep getting disconnected after the end of game.
                                                statistics->getKills(), statistics->getDeaths(), 
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
-			if(LogStats)
+			if(gIniSettings.LogStats)
 			{
 				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i"
 					, mClientList[i]->isRobot ? "Robot" : "Player"

@@ -321,6 +321,9 @@ static void loadHostConfiguration()
    gIniSettings.allowGetMap = (lcase(gINI.GetValue("Host", "AllowGetMap", "No")) == "yes");
    gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
    gIniSettings.minSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
+
+	gIniSettings.LogStats = (lcase(gINI.GetValue("Host", "LogStats", "no")) == "yes");
+	gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) == "yes");
 }
 
 
@@ -1133,6 +1136,8 @@ static void writeHost()
       gINI.sectionComment("Host", " MaxPlayers - The max number of players that can play on your server.");
       gINI.sectionComment("Host", " AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       gINI.sectionComment("Host", " MinDedicatedDelay - (Dedicated only) default 10, in milliseconds, lower use more CPU, higher may increase lag.");
+      gINI.sectionComment("Host", " LogStats - Write ending game score statistics into server log file");
+      //gINI.sectionComment("Host", " SendStatsToMaster - Send statistics to master, Default Yes");
 
       //in millisecs (10 millisecs = 100 fps) (using 1000 / delay = fps)
 U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, but uses more CPU
@@ -1158,6 +1163,8 @@ U32 minimumSleepTimeClient=10; //lower means smoother and slightly reduce lag, b
    gINI.SetValue("Host", "AllowGetMap", (gIniSettings.allowGetMap ? "Yes" : "No"));
    gINI.SetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"));
    gINI.SetValueI("Host", "MinDedicatedDelay", gIniSettings.minSleepTimeDedicatedServer);
+   gINI.SetValue("Host", "LogStats", (gIniSettings.LogStats ? "Yes" : "No"));
+   //gINI.SetValue("Host", "SendStatsToMaster", (gIniSettings.SendStatsToMaster ? "Yes" : "No"));  //Maybe not allow this option to user?
 }
 
 

@@ -213,6 +213,8 @@ struct IniSettings      // With defaults specified
    bool luaLevelGenerator;    
    bool luaBotMessage;        
    bool serverFilter;  
+   bool LogStats;
+   bool SendStatsToMaster;
 
    Vector<StringTableEntry> levelList;
 
@@ -292,6 +294,9 @@ struct IniSettings      // With defaults specified
       luaLevelGenerator = true;   
       luaBotMessage = true;       
       serverFilter = false; 
+
+      LogStats=false;         //Log statistics into ServerFilter log files
+      SendStatsToMaster=true; //Transmit statistics to the master server
    }
 };
 
