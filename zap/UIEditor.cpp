@@ -494,17 +494,23 @@ void EditorUserInterface::loadLevel()
 
    if(initLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
+      // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
       validateTeams();                 // Make sure every item has a valid team
       validateLevel();                 // Check level for errors (like too few spawns)
       mItems.sort(geometricSort);
       gGameParamUserInterface.ignoreGameParams = false;
    }
-   else
+   else     
    {
+      // New level!
       makeSureThereIsAtLeastOneTeam();                               // Make sure we at least have one team, like the man said.
       strcpy(mGameType, gGameTypeNames[gDefaultGameTypeIndex]);
       gGameParamUserInterface.gameParams.push_back("GameType 10 8"); // A nice, generic game type that we can default to
+
+      if(gIniSettings.name != gIniSettings.defaultName)
+         gGameParamUserInterface.gameParams.push_back("LevelCredits " + gIniSettings.name);  // Prepoluate level credits
+
       gGameParamUserInterface.ignoreGameParams = true;               // Don't rely on the above for populating GameParameters menus... only to make sure something is there if we save
    }
    clearUndoHistory();                 // Clean out undo/redo buffers
