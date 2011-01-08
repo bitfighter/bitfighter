@@ -72,20 +72,25 @@ Scripts can be names .lua or .levelgen, and can be stored in either the levels f
 Specifying the extension is optional.
 </ul>
 
+<h4>Editor</h4>
+<ul>
+<li>When creating a new level, credits line is prepoluated with current player name (unless it's ChumpChange)
+<li>Max level size bumped up to 256K
+<li>Can place neutral spawnpoints: Any team can spawn at these
+<li>When running command from console (run <script>) any created items are now selected
+<li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
+</ul>
+
 <h4>Misc</h4>
 <ul>
 <li>Passwords now stored in plaintext in the ini file; gives increase in convenience with only small decrease in security; still transmitted via hash
 <li>When master server is unreachable, server will remember recent game servers and will try to contact those
 <li>Can define multiple servers in the INI to always try contacting without assistance of the master
-<li>Max level size bumped up to 256K
 <li>Engineer module can no longer create crossing forcefields
 <li>Smooth lines option available with a setting in the INI
 <li>Added /linesmooth /linewidth command
-<li>Any team can spawn at a neutral spawn point
 <li>Added /setscore and /settime commands that set the score and game time for the current level
 <li>Added /getLevel command to download current level to local machine (currently requires admin access)
-<li>When running command from console (run <script>) any created items are now selected
-<li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
 <li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
 </ul>
 
