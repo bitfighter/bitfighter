@@ -241,21 +241,21 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
    if(! gIniSettings.allowGetMap)
    {
       s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
-      s2rCommandComplete();        //what to do here? Client doesn't know getmap is not allowed in some servers.
+      s2rCommandComplete(COMMAND_NOT_ALLOWED);  
       return;
    }
 
    const char *filename = gServerGame->getCurrentLevelFileName().getString();
    
    // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-   DataSender::SenderStatus stat = gServerGame->dataSender.initialize(this, filename, LEVEL_TYPE);
+   SenderStatus stat = gServerGame->dataSender.initialize(this, filename, LEVEL_TYPE);
 
-   if(stat != DataSender::OK)
+   if(stat != STATUS_OK)
    {
       const char *msg = DataConnection::getErrorMessage(stat, filename).c_str();
 
       logprintf(LogConsumer::LogError, "%s", msg);
-      s2rCommandComplete();
+      s2rCommandComplete(COULD_NOT_OPEN_FILE);
       return;
    }
 }
@@ -274,7 +274,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 
 // << DataSendable >>
 // When sender is finished, it sends a commandComplete message
-TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (), (), 
+TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
    if(gGameUserInterface.mOutputFile)
@@ -282,8 +282,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (), (),
       fclose(gGameUserInterface.mOutputFile);
       gGameUserInterface.mOutputFile = NULL;
 
-      gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download to %s", 
-                                                            gGameUserInterface.remoteLevelDownloadFilename.c_str());
+      if(status.value == STATUS_OK)
+         gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download to %s", 
+                                                               gGameUserInterface.remoteLevelDownloadFilename.c_str());
+      else if(status.value == COMMAND_NOT_ALLOWED)
+         gGameUserInterface.displayMessage(ColorRed, "!!! Getmap command is disabled on this server");
+      else
+         gGameUserInterface.displayMessage(ColorRed, "Error downloading level");
+
    }
 }
 

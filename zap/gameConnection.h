@@ -155,7 +155,7 @@ public:
 
    // These from the DataSendable interface class
    TNL_DECLARE_RPC(s2rSendLine, (StringPtr line));
-   TNL_DECLARE_RPC(s2rCommandComplete, ());
+   TNL_DECLARE_RPC(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));
 
 
    S32 mScore;       // Total points scored my this connection

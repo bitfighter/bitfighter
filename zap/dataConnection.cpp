@@ -80,7 +80,7 @@ static string getOutputFolder(FileType filetype)
 // For readability
 #define MAX_LINE_LEN  HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
-DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string filename, FileType fileType)
+SenderStatus DataSender::initialize(DataSendable *connection, string filename, FileType fileType)
 {
    string fullname = getFullFilename(filename, fileType);
    if(fullname == "")
@@ -145,7 +145,7 @@ DataSender::SenderStatus DataSender::initialize(DataSendable *connection, string
    mFileType = fileType;
    mDone = false;
    mLineCtr = 0;
-   return OK;
+   return STATUS_OK;
 }
 
 #undef MAX_LINE_LEN
@@ -164,7 +164,7 @@ void DataSender::sendNextLine()
    }
    else
    {
-      mConnection->s2rCommandComplete();
+      mConnection->s2rCommandComplete(STATUS_OK);
       mDone = true;
       mLines.clear();      // Liberate some memory
    }
@@ -175,15 +175,15 @@ void DataSender::sendNextLine()
 ////////////////////////////////////////
 
 // static method
-string DataConnection::getErrorMessage(DataSender::SenderStatus stat, const string &filename)
+string DataConnection::getErrorMessage(SenderStatus stat, const string &filename)
 {
-   if(stat == DataSender::COULD_NOT_OPEN_FILE)
+   if(stat == COULD_NOT_OPEN_FILE)
       return "Could not open file " + filename;
 
-   else if(stat == DataSender::COULD_NOT_FIND_FILE)
+   else if(stat == COULD_NOT_FIND_FILE)
       return "Could not find file " + filename;
 
-   else if(stat == DataSender::FILE_TOO_LONG)
+   else if(stat == FILE_TOO_LONG)
       return "File " + filename + " is too big to send";
 
    else
@@ -224,9 +224,9 @@ TNL_IMPLEMENT_RPC(DataConnection, c2sSendOrRequestFile,
    if(isRequest)     // Client wants to get a file from us... they should have a file open and waiting for this data
    {
       // Initialize on the server to start sending requested file -- will return OK if everything is set up right
-      DataSender::SenderStatus stat = gServerGame->dataSender.initialize(this, filename.getString(), (FileType)(U32)filetype);
+      SenderStatus stat = gServerGame->dataSender.initialize(this, filename.getString(), (FileType)(U32)filetype);
 
-      if(stat != DataSender::OK)
+      if(stat != STATUS_OK)
       {
          string msg = getErrorMessage(stat, filename.getString());
 
@@ -267,8 +267,8 @@ TNL_IMPLEMENT_RPC(DataConnection, s2cOkToSend, (), (),
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
    // Initialize on the client to start sending file we want to send
-   DataSender::SenderStatus stat = mDataSender.initialize(this, mFilename.c_str(), mFileType);
-   if(stat != DataSender::OK)
+   SenderStatus stat = mDataSender.initialize(this, mFilename.c_str(), mFileType);
+   if(stat != STATUS_OK)
    {
       string msg = getErrorMessage(stat, mFilename);
 
@@ -292,10 +292,10 @@ TNL_IMPLEMENT_RPC(DataConnection, s2rSendLine, (StringPtr line), (line),
 
 // << DataSendable >>
 // When client has finished sending its data, it sends a commandComplete message, which triggers the server to disconnect the client
-TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (), (), 
+TNL_IMPLEMENT_RPC(DataConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   disconnect(ReasonNone, "done");     // Terminate connection
+   disconnect(ReasonNone, "done");     // Terminate connection... should probably send different message depending on status
 
    if(mOutputFile)
    {

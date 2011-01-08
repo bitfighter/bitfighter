@@ -34,6 +34,14 @@ enum FileType {
    INVALID_RESOURCE_TYPE
 };
 
+enum SenderStatus {
+   STATUS_OK,
+   COULD_NOT_OPEN_FILE,
+   COULD_NOT_FIND_FILE,
+   FILE_TOO_LONG,
+   COMMAND_NOT_ALLOWED,
+   SENDER_STATUS_COUNT
+   };
 
 ////////////////////////////////////
 ////////////////////////////////////
@@ -43,7 +51,7 @@ class DataSendable
 {
 public:
    TNL_DECLARE_RPC_INTERFACE(s2rSendLine, (StringPtr line));      // Send a chunk of data
-   TNL_DECLARE_RPC_INTERFACE(s2rCommandComplete, ());             // Signal that data has been sent
+   TNL_DECLARE_RPC_INTERFACE(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));   // Signal that data has been sent
 };
 
 
@@ -60,13 +68,6 @@ private:
    FileType mFileType;
 
 public:
-   enum SenderStatus {
-      OK,
-      COULD_NOT_OPEN_FILE,
-      COULD_NOT_FIND_FILE,
-      FILE_TOO_LONG,
-   };
-
    DataSender() { mDone = true; }        // Constructor 
    SenderStatus initialize(DataSendable *connection, string filename, FileType fileType);   
 
@@ -116,19 +117,17 @@ public:
    void onConnectionEstablished();
    void onConnectionTerminated(TerminationReason, const char *);
 
-   static string getErrorMessage(DataSender::SenderStatus stat, const string &filename);
+   static string getErrorMessage(SenderStatus stat, const string &filename);
 
    // These from the DataSendable interface class
    TNL_DECLARE_RPC(s2rSendLine, (StringPtr line));
-   TNL_DECLARE_RPC(s2rCommandComplete, ());
+   TNL_DECLARE_RPC(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));
 
    TNL_DECLARE_RPC(s2cOkToSend, ());
 
    TNL_DECLARE_RPC(c2sSendOrRequestFile, (StringPtr password, RangedU32<0,U32(FILE_TYPES)> filetype, bool isRequest, StringPtr name));
    TNL_DECLARE_NETCONNECTION(DataConnection);
-
 };
-
 
 
 };
