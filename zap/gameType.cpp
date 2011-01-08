@@ -858,9 +858,9 @@ void GameType::gameOverManGameOver()
 void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
-   GameType *gameType = gServerGame->getGameType();
+   //GameType *gameType = this; //gServerGame->getGameType();
 
-   if(gameType)
+   //if(gameType)   // is this check needed ?
    {
       // Build a list of teams, so we can sort by score
       Vector<Team> sortTeams(mTeams.size());
@@ -891,25 +891,25 @@ void GameType::saveGameStats()
       S32 players = 0;
       S32 bots = 0;
 
-      for(S32 i = 0; i < gameType->mClientList.size(); i++)
+      for(S32 i = 0; i < mClientList.size(); i++)
       {
-         if(gameType->mClientList[i]->isRobot)
+         if(mClientList[i]->isRobot)
             bots++;
          else
             players++;
       }
 
-      S16 timeInSecs = (gameType->mGameTimer.getPeriod() - gameType->mGameTimer.getCurrent()) / 1000;      // Total time game was played
+      S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
       if(masterConn && SendStatsToMaster)
-         masterConn->s2mSendGameStatistics_3(BUILD_VERSION, gameType->getGameTypeString(), gameType->isTeamGame(),
-                                          gameType->mLevelName, teams, scores, 
+         masterConn->s2mSendGameStatistics_3(BUILD_VERSION, getGameTypeString(), isTeamGame(),
+                                          mLevelName, teams, scores, 
                                           colorR, colorG, colorB, players, bots, timeInSecs);
 		if(LogStats)
 		{
-			logprintf("Version=%i %s %i:%02i",BUILD_VERSION,gameType->getGameTypeString(), timeInSecs/60, timeInSecs%60);
-			logprintf("%s Level=%s", gameType->isTeamGame() ? "Team" : "NoTeam", gameType->mLevelName.getString());
+			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i",BUILD_VERSION,getGameTypeString(), timeInSecs/60, timeInSecs%60);
+			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
 			for(S32 i=0; i < mTeams.size(); i++)
-				logprintf("Team=%i Score=%i Color=%i,%i,%i Name=%s"
+				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%i,%i,%i Name=%s"
 					, i                   //Using unsorted, to correctly use index as team ID. Teams can have same name.
 					, mTeams[i].getScore()
 					, (S32) mTeams[i].color.r*9   //Don't need accuracy, will use one digit number.
@@ -919,26 +919,26 @@ void GameType::saveGameStats()
 					);
 		}
 
-      for(S32 i = 0; i < gameType->mClientList.size(); i++)
+      for(S32 i = 0; i < mClientList.size(); i++)
       {
-         Statistics *statistics = &gameType->mClientList[i]->mStatistics;
-			gameType->mClientList[i]->getScore();
+         Statistics *statistics = &mClientList[i]->mStatistics;
+			mClientList[i]->getScore();
         
          if(masterConn && SendStatsToMaster)
-            masterConn->s2mSendPlayerStatistics_3(gameType->mClientList[i]->name, gameType->mClientList[i]->clientConnection->getClientId()->toVector(), 
-                                               gameType->mClientList[i]->isRobot,
-                                               gameType->getTeamName(gameType->mClientList[i]->getTeam()),  //Both teams might have same name...
-                                               gameType->mClientList[i]->getScore(), //non-zero cause master to reset? Keep getting disconnected after the end of game.
+            masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
+                                               mClientList[i]->isRobot,
+                                               getTeamName(mClientList[i]->getTeam()),  //Both teams might have same name...
+                                               mClientList[i]->getScore(), //non-zero cause master to reset? Keep getting disconnected after the end of game.
                                                statistics->getKills(), statistics->getDeaths(), 
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
 			if(LogStats)
 			{
-				logprintf("%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i"
-					, gameType->mClientList[i]->isRobot ? "Robot" : "Player"
-					, gameType->mClientList[i]->name.getString()
-					, gameType->mClientList[i]->getTeam()
-					, gameType->mClientList[i]->getScore()
-					, getCurrentRating(gameType->mClientList[i]->clientConnection)
+				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i"
+					, mClientList[i]->isRobot ? "Robot" : "Player"
+					, mClientList[i]->name.getString()
+					, mClientList[i]->getTeam()
+					, mClientList[i]->getScore()
+					, getCurrentRating(mClientList[i]->clientConnection)
 					, statistics->getKills()
 					, statistics->getDeaths() 
                , statistics->getSuicides()
