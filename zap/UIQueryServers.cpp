@@ -1318,7 +1318,7 @@ void QueryServersUserInterface::sort()
 // Look for /commands in chat message before handing off to parent
 void QueryServersUserInterface::issueChat()
 {
-   if(mLineEditor.length() > 10)
+   if(mLineEditor.length() >= 9)
    {
 	   const char *str1 = mLineEditor.c_str();
 	   S32 a = 0;
@@ -1334,9 +1334,13 @@ void QueryServersUserInterface::issueChat()
       {
 		   Address address(&str1[9]);
 			if(address.isValid())
+			{
+				if(address.port == 0)
+					address.port = 28000;   //default port number, if user did not enter port number
 				joinGame(address, false, false);
+			}
 			else
-				newMessage("CONNECT","invalid address",false,true);
+				newMessage("","INVALID ADDRESS",false,true);
 		   return;
 	   }
    }
