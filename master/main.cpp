@@ -819,17 +819,17 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mUpdateServerStatus, (StringTableEntry levelName, StringTableEntry levelType,
                                                     U32 botCount, U32 playerCount, U32 maxPlayers, U32 infoFlags))
    {
-      // If we didn't know we were a game server, don't accept updates
+      // Only accept updates from game servers
       if(!mIsGameServer)
          return;
 
-      //Update only if anything is different
-		if(mLevelName != levelName
-			|| mLevelType != levelType
-			|| mNumBots != botCount
-			|| mPlayerCount != playerCount
-			|| mMaxPlayers != maxPlayers
-			|| mInfoFlags != infoFlags )
+      // Update only if anything is different
+		if(mLevelName   != levelName ||
+			mLevelType   != levelType ||
+			mNumBots     != botCount ||
+		   mPlayerCount != playerCount ||
+		   mMaxPlayers  != maxPlayers ||
+			mInfoFlags   != infoFlags )
 		{
 			mLevelName = levelName;
 			mLevelType = levelType;
@@ -876,7 +876,8 @@ public:
       }
 
       // PLAYER | stats version (2) | name | team | kills | deaths | suicides | shots | hits 
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t2\t%s\t%s\t%d\t%d\t%d\t%d\t%d", playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t2\t%s\t%s\t%d\t%d\t%d\t%d\t%d", 
+                                                playerName.getString(), teamName.getString(), kills, deaths, suicides, totalShots, totalHits);
    }
 
 
@@ -913,7 +914,7 @@ public:
 
    // Send game statistics to the master server  ==> Deprecated
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
-                                                    RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
+                                                    RangedU32<0,128> players, S16 timeInSecs))
    {
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
@@ -928,7 +929,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, Vector<RangedU32<0,256> > colorB, 
-                                                      RangedU32<0,MAX_PLAYERS> players, S16 timeInSecs))
+                                                      RangedU32<0,128> players, S16 timeInSecs))
    {
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
@@ -954,7 +955,7 @@ public:
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
-      // GAME | stats version (3) | GameVersion | GameType | teamGame (true/false) | time | level name | teams | players | bots | time
+      // GAME | stats version (3) | GameVersion | timestamp | GameType | teamGame (true/false) | level name | teams | players | bots | time
       logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 
                      gameVersion, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
                      teams.size(), players.value, bots.value, timestr.c_str() );
