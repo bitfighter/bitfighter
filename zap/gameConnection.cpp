@@ -237,10 +237,8 @@ ClientRef *GameConnection::getClientRef()
 // 4. server send CommandComplete
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   //if(!isAdmin())  // Should have been checked on client; should never get here
    if(! gIniSettings.allowGetMap)
    {
-      s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
       s2rCommandComplete(COMMAND_NOT_ALLOWED);  
       return;
    }
@@ -1248,6 +1246,7 @@ std::string GameConnection::makeUnique(string name)
 }
 
 
+extern Vector<string> prevServerListFromMaster;    // in UIQueryServers.cpp
 void GameConnection::onConnectionEstablished()
 {
    // Always make sure: PacketPeriod * Bandwidth <= 1015808 
@@ -1285,6 +1284,16 @@ void GameConnection::onConnectionEstablished()
       {
          gINI.SetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName(),      
                        gServerPasswordEntryUserInterface.getText(), true);
+      }
+
+      if(!isLocalConnection()){          // might use /connect , want to add to list after successfully connected. Does nothing while connected to master.
+         string addr = getNetAddressString();
+         bool found = false;
+         for(S32 i=0; i<prevServerListFromMaster.size(); i++)
+         {
+            if(prevServerListFromMaster[i].compare(addr) == 0) found = true;
+         }
+         if(!found) prevServerListFromMaster.push_back(addr);
       }
    }
    else                 // Runs on server

@@ -406,9 +406,9 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    }
 
    // Send new pings
-   if(pendingPings < MaxPendingPings)
+   for(S32 i = 0; i < servers.size() ; i++)
    {
-      for(S32 i = 0; i < servers.size() ; i++)
+      if(pendingPings < MaxPendingPings)   // IF goes inside FOR, so it won't send 100 pings at the same time.
       {
          ServerRef &s = servers[i];
          if(s.state == ServerRef::Start)     // This server is at the beginning of the process
@@ -442,10 +442,11 @@ void QueryServersUserInterface::idle(U32 timeDelta)
       }
    }
 
-   // When all pings have been answered or have timed out, send out server status queries
-   if(pendingPings == 0 && (pendingQueries < MaxPendingQueries))
+   // When all pings have been answered or have timed out, send out server status queries ... too slow
+   // Want to start query immediately, to display server name / current players faster
+   for(S32 i = 0; i < servers.size(); i++)
    {
-      for(S32 i = 0; i < servers.size(); i++)
+      if(pendingQueries < MaxPendingQueries)
       {
          ServerRef &s = servers[i];
          if(s.state == ServerRef::ReceivedPing)
@@ -642,7 +643,7 @@ void QueryServersUserInterface::render()
    else
    {
       glColor(red);
-      if(mGivenUpOnMaster)
+      if(mGivenUpOnMaster && prevServerListFromMaster.size() != 0) //can't use empty server list.
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Using server list from last successful connect.");
       else
          drawCenteredString(vertMargin - 8, 12, "Couldn't connect to Master Server - Firewall issues? Do you have the latest version?");
@@ -912,6 +913,12 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
       msg2 = "Why don't you host one?";
       lines = 2;
    }
+   else if(mGivenUpOnMaster)
+   {
+      msg1 = "Unable to connect to master";
+		msg2 = "";
+      lines = 1;
+   }
    else
    {
       msg1 = "Contacting master server...";
@@ -1007,7 +1014,8 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
                leaveGlobalChat();
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
-               joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster, false);
+               // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
+               joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && !servers[currentIndex].everGotQueryResponse, false);
                mLastSelectedServer = servers[currentIndex];    // Save this because we'll need the server name when connecting.  Kind of a hack.
 
                // ...and clear out the server list so we don't do any more pinging
@@ -1310,7 +1318,7 @@ void QueryServersUserInterface::sort()
 // Look for /commands in chat message before handing off to parent
 void QueryServersUserInterface::issueChat()
 {
-   if(mLineEditor.length() > 10)
+   if(mLineEditor.length() >= 9)
    {
 	   const char *str1 = mLineEditor.c_str();
 	   S32 a = 0;
@@ -1325,8 +1333,14 @@ void QueryServersUserInterface::issueChat()
 	   if(a == 9)
       {
 		   Address address(&str1[9]);
-         //endGame(); // avoid error when in game, F5 and type "/Connect"  <== shouldn't be needed when this is in UIQueryServers.cpp
-		   joinGame(address, false, false);
+			if(address.isValid())
+			{
+				if(address.port == 0)
+					address.port = 28000;   //default port number, if user did not enter port number
+				joinGame(address, false, false);
+			}
+			else
+				newMessage("","INVALID ADDRESS",false,true);
 		   return;
 	   }
    }
