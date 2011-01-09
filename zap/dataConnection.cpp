@@ -1,4 +1,4 @@
-#include "gameLoader.h"                   // For MAX_LEVEL_FILE_LENGTH def  <-- there has to be a better way!
+//#include "gameLoader.h"                   // For MAX_LEVEL_FILE_LENGTH def  <-- there has to be a better way!
 
 #include "dataConnection.h"
 #include "tnlEventConnection.h"
@@ -78,7 +78,7 @@ static string getOutputFolder(FileType filetype)
 ////////////////////////////////////////
 
 // For readability
-#define MAX_LINE_LEN  HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
+#define MAX_CHUNK_LEN HuffmanStringProcessor::MAX_SENDABLE_LINE_LENGTH
 
 SenderStatus DataSender::initialize(DataSendable *connection, string filename, FileType fileType)
 {
@@ -100,16 +100,16 @@ SenderStatus DataSender::initialize(DataSendable *connection, string filename, F
 
 
    // Allocate a buffer
-   //char *buffer = new char[MAX_LINE_LEN + 1];      // 255 for data, + 1 for terminator
-   char buffer[MAX_LINE_LEN + 1];      // 255 for data, + 1 for terminator
+   //char *buffer = new char[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
+   char buffer[MAX_CHUNK_LEN + 1];      // 255 for data, + 1 for terminator
    S32 size;
 
    // We'll read the file in 255 char chunks; this is the largest string we can send, and we want to be as large as possible to get
    // maximum benefit of the string compression that occurs during the transmission process.
    /*
-   while(!file.eof() && mLines.size() * MAX_LINE_LEN < MAX_LEVEL_FILE_LENGTH)
+   while(!file.eof() && mLines.size() * MAX_CHUNK_LEN < MAX_LEVEL_FILE_LENGTH)
    {
-      file.read(buffer, MAX_LINE_LEN);
+      file.read(buffer, MAX_CHUNK_LEN);
       if(file.gcount() > 0)
       {
          buffer[file.gcount()] = '\0';     // Null terminate
@@ -119,20 +119,23 @@ SenderStatus DataSender::initialize(DataSendable *connection, string filename, F
    file.close();
    */
 
-   size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
+   const S32 MAX_LEVEL_FILE_LENGTH = 256 * 1024;     // 256K -- Need some limit to avoid overflowing server; arbitrary value
 
-   while(size > 0 && mLines.size() * MAX_LINE_LEN < MAX_LEVEL_FILE_LENGTH){
-       buffer[size]=0;           // Null terminate
+   size = (S32) fread(buffer, 1, MAX_CHUNK_LEN, file);
+
+   while(size > 0 && mLines.size() * MAX_CHUNK_LEN < MAX_LEVEL_FILE_LENGTH)
+   {
+       buffer[size] = 0;           // Null terminate
        mLines.push_back(buffer);
-       size = (S32) fread(buffer, 1, MAX_LINE_LEN, file);
+       size = (S32) fread(buffer, 1, MAX_CHUNK_LEN, file);
    }
 
    fclose(file);
 
    //delete[] buffer;
 
-   // Not exactly accurate -- if final line is only a few bytes, this will count it as being the full 255.
-   if(mLines.size() * MAX_LINE_LEN >= MAX_LEVEL_FILE_LENGTH)
+   // Not exactly accurate -- if final line is only a few bytes, it will count as 255; but since our limit is arbitrary, it matters not
+   if(mLines.size() * MAX_CHUNK_LEN >= MAX_LEVEL_FILE_LENGTH)
    {
       mLines.clear();
       return FILE_TOO_LONG;
@@ -148,7 +151,7 @@ SenderStatus DataSender::initialize(DataSendable *connection, string filename, F
    return STATUS_OK;
 }
 
-#undef MAX_LINE_LEN
+#undef MAX_CHUNK_LEN
 
 
 // Send next line of our file

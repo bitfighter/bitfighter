@@ -35,8 +35,6 @@ using namespace TNL;
 namespace Zap
 {
 
-const S32 MAX_LEVEL_FILE_LENGTH = 256 * 1024;     // 256K -- Should be enough for anyone
-
 class LevelLoader
 {
 public:

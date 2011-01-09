@@ -221,8 +221,8 @@ stateLineParseDone:
 bool LevelLoader::initLevelFromFile(const char *filename)
 {
    //MAX_LEVEL_FILE_LENGTH goes unused, unlimited level file size, only limited by line length.
-   char sFileData[4096];      // Data buffer size for loading
-   S32 minCur = 50;          // Line could be too long, (sizeof(sFileData) - minCur) is the max length per line
+   char levelLine[4096];      // Data buffer size for loading
+   S32 minCur = 50;           // Line could be too long, (sizeof(levelLine) - minCur) is the max length per line
    FILE *file = fopen(filename, "r");
 
 #ifdef SAM_ONLY
@@ -238,26 +238,26 @@ bool LevelLoader::initLevelFromFile(const char *filename)
    S32 curEnding = -1;
    while(curEnding != 0)
    {
-      size_t bytesRead = fread(&sFileData[cur], 1, sizeof(sFileData) - 1 - cur, file);
+      size_t bytesRead = fread(&levelLine[cur], 1, sizeof(levelLine) - 1 - cur, file);
       curEnding = cur + bytesRead;
       cur = curEnding - 1;
-      if(cur == sizeof(sFileData)-2)       // If not the end of file.
+      if(cur == sizeof(levelLine)-2)       // If not the end of file.
       {
-         while(sFileData[cur] != '\n' && cur > minCur)  // line could be too long, which may cause invalid arguments.
+         while(levelLine[cur] != '\n' && cur > minCur)  // line could be too long, which may cause invalid arguments.
             cur--;
          if(cur == minCur) logprintf(LogConsumer::LogWarning,"Load level, Some lines too long, %s", filename);
       }
       cur++;
-      TNLAssert(cur >= 0 && cur < sizeof(sFileData), "Load level from file, Cur out of range");
-      c = sFileData[cur];
-      sFileData[cur] = 0;
+      TNLAssert(cur >= 0 && cur < sizeof(levelLine), "Load level from file, Cur out of range");
+      c = levelLine[cur];
+      levelLine[cur] = 0;
 
-      parseArgs(sFileData);
-      sFileData[cur] = c;
+      parseArgs(levelLine);
+      levelLine[cur] = c;
       S32 cur2 = 0;
       while(cur + cur2 != curEnding)
       {
-         sFileData[cur2]=sFileData[cur + cur2];
+         levelLine[cur2]=levelLine[cur + cur2];
          cur2++;
       }
       cur = cur2;
