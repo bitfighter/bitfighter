@@ -189,7 +189,7 @@ public:
                                              Vector<RangedU32<0,256> > colorR, 
                                              Vector<RangedU32<0,256> > colorG, 
                                              Vector<RangedU32<0,256> > colorB, 
-                                             RangedU32<0,MAX_PLAYERS> players, S16 time) );
+                                             RangedU32<0,128> players, S16 time) );
 
 
    // Version 5 RPCs
