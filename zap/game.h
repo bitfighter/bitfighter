@@ -260,7 +260,8 @@ class ServerGame : public Game, public LevelLoader
 private:
    enum {
       LevelSwitchTime = 5000,
-      UpdateServerStatusTime = 5000,      // How often we update our status on the master server (ms)
+      UpdateServerStatusTime = 20000,      // How often we update our status on the master server (ms)
+      CheckServerStatusTime = 5000,      // If it did not send updates, recheck after ms
    };
 
    U32 mMaxPlayers;

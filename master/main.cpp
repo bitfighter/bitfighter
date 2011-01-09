@@ -458,7 +458,10 @@ public:
       {
          mStrikeCount++;
          if(mStrikeCount == 3)
+			{
+            logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds", mPlayerOrServerName.getString(), timeDeltaMinimum);
             disconnect(ReasonFloodControl, "");
+			}
       }
       else if(mStrikeCount > 0)
          mStrikeCount--;
@@ -786,18 +789,27 @@ public:
       if(!mIsGameServer)
          return;
 
-      mLevelName = levelName;
-      mLevelType = levelType;
+      //Update only if anything is different
+		if(mLevelName != levelName
+			|| mLevelType != levelType
+			|| mNumBots != botCount
+			|| mPlayerCount != playerCount
+			|| mMaxPlayers != maxPlayers
+			|| mInfoFlags != infoFlags )
+		{
+			mLevelName = levelName;
+			mLevelType = levelType;
 
-      mNumBots = botCount;
-      mPlayerCount = playerCount;
-      mMaxPlayers = maxPlayers;
-      mInfoFlags = infoFlags;
+			mNumBots = botCount;
+			mPlayerCount = playerCount;
+			mMaxPlayers = maxPlayers;
+			mInfoFlags = infoFlags;
 
-      // Check to ensure we're not getting flooded with these requests
-      checkActivityTime(15000);      // 15 secs
+			// Check to ensure we're not getting flooded with these requests
+			checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
 
-      gNeedToWriteStatus = true;
+			gNeedToWriteStatus = true;
+		}
    }
 
 
@@ -811,18 +823,27 @@ public:
       if(!mIsGameServer)
          return;
 
-      mLevelName = levelName;
-      mLevelType = levelType;
+      //Update only if anything is different
+		if(mLevelName != levelName
+			|| mLevelType != levelType
+			|| mNumBots != botCount
+			|| mPlayerCount != playerCount
+			|| mMaxPlayers != maxPlayers
+			|| mInfoFlags != infoFlags )
+		{
+			mLevelName = levelName;
+			mLevelType = levelType;
 
-      mNumBots = botCount;
-      mPlayerCount = playerCount;
-      mMaxPlayers = maxPlayers;
-      mInfoFlags = infoFlags;
+			mNumBots = botCount;
+			mPlayerCount = playerCount;
+			mMaxPlayers = maxPlayers;
+			mInfoFlags = infoFlags;
 
-      // Check to ensure we're not getting flooded with these requests
-      checkActivityTime(15000);      // 15 secs
+			// Check to ensure we're not getting flooded with these requests
+			checkActivityTime(15000);      // 15 secs
 
-      gNeedToWriteStatus = true;
+			gNeedToWriteStatus = true;
+		}
    }
 
 
@@ -934,7 +955,7 @@ public:
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
       // GAME | stats version (3) | GameVersion | GameType | teamGame (true/false) | time | level name | teams | players | bots | time
-      logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%s", 
+      logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 
                      gameVersion, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
                      teams.size(), players.value, bots.value, timestr.c_str() );
 

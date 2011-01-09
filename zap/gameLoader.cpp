@@ -218,6 +218,7 @@ stateLineParseDone:
 }  // parseArgs
 
 
+// char sFileData[] can be moved back inside the initLevelFromFile(), used to be needed for old method of /getmap
 char sFileData[MAX_LEVEL_FILE_LENGTH];      // That's really really really big!
 bool LevelLoader::initLevelFromFile(const char *filename)
 {

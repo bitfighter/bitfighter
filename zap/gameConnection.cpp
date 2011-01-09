@@ -225,7 +225,7 @@ ClientRef *GameConnection::getClientRef()
 }
 
 
-// Old server side /getmap command
+// Old server side /getmap command, now unused, may be removed
 // 1. client send /getmap command
 // 2. server send map if allowed
 // 3. When client get all the level map data parts, it create file and save the map

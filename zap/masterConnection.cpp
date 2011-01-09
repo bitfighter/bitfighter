@@ -437,7 +437,10 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
 
 void MasterServerConnection::onConnectionEstablished()
 {
-   logprintf(LogConsumer::LogConnection, "%s established connection with Master Server", mIsGameServer ? "Server" : "Client");
+   if(mIsGameServer)        // Might want ServerFilter ?
+      logprintf(LogConsumer::ServerFilter, "Server established connection with Master Server");
+   else
+      logprintf(LogConsumer::LogConnection, "Client established connection with Master Server");
 }
 
 
