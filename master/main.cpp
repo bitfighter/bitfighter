@@ -880,9 +880,12 @@ public:
       }
 
       // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
-               playerName.getString(), authenticated ? "true" : "false", isBot ? "true" : "false", 
-               teamName.getString(), score, kills, deaths, suicides, 
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\%d\t%d\t%d\t%d\t%d\t%d", 
+               playerName.getString(), 
+               authenticated ? "true" : "false", 
+               isBot ? "true" : "false", 
+               teamName.getString(), 
+               score, kills, deaths, suicides, 
                totalShots, totalHits);
    }
 
