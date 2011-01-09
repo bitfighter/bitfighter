@@ -975,7 +975,7 @@ public:
          {
             AuthenticationStatus status;
 
-            if(!stricmp(name.getString(), walk->mPlayerOrServerName.getString()))      // Need case insensitive comparison here
+            if(!stricmp(name.getString(), walk->mPlayerOrServerName.getString()) && walk->isAuthenticated())      // Need case insensitive comparison here
                status = AuthenticationStatusAuthenticatedName;
 
             // If server just restarted, clients will need to reauthenticate, and that may take some time.
