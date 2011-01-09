@@ -1246,6 +1246,7 @@ std::string GameConnection::makeUnique(string name)
 }
 
 
+extern Vector<string> prevServerListFromMaster;    // in UIQueryServers.cpp
 void GameConnection::onConnectionEstablished()
 {
    // Always make sure: PacketPeriod * Bandwidth <= 1015808 
@@ -1283,6 +1284,16 @@ void GameConnection::onConnectionEstablished()
       {
          gINI.SetValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName(),      
                        gServerPasswordEntryUserInterface.getText(), true);
+      }
+
+      if(!isLocalConnection()){          // might use /connect , want to add to list after successfully connected. Does nothing while connected to master.
+         string addr = getNetAddressString();
+         bool found = false;
+         for(S32 i=0; i<prevServerListFromMaster.size(); i++)
+         {
+            if(prevServerListFromMaster[i].compare(addr) == 0) found = true;
+         }
+         if(!found) prevServerListFromMaster.push_back(addr);
       }
    }
    else                 // Runs on server
