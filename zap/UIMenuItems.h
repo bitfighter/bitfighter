@@ -75,7 +75,7 @@ public:
    MenuItem() { TNLAssert(false, "Do not use this constructor!"); }    // Default constructor
 
    // Constructor
-   MenuItem(S32 index, string text, void (*callback)(U32), string help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1,1,1))
+   MenuItem(S32 index, const string &text, void (*callback)(U32), const string &help, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color c = Color(1,1,1))
    {
       mText = text;
       key1 = k1;
@@ -191,7 +191,7 @@ protected:
    virtual S32 getBigIncrement() { return 10; }    // How much our counter is incremented when shift is down (multiplier)
 
 public:
-   CounterMenuItem(string title, S32 value, S32 step, S32 minVal, S32 maxVal, string units, string minMsg, string help, 
+   CounterMenuItem(const string &title, S32 value, S32 step, S32 minVal, S32 maxVal, const string &units, const string &minMsg, const string &help, 
                    KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
       MenuItem(-1, title, NULL, help, k1, k2,  color)
    {
@@ -208,12 +208,14 @@ public:
 
    virtual MenuItemTypes getItemType() { return CounterMenuItemType; }
    virtual string getValueForDisplayingInMenu() { return itos(mValue); }
-   const char *getUnits() { return mUnits.c_str(); }
+   virtual const char *getUnits() { return mUnits.c_str(); }
    virtual S32 getIntValue() { return mValue; }
    virtual void setValue(const string &val) { mValue = atoi(val.c_str()); }
    virtual void setIntValue(S32 val) { mValue = val; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value.  Use [Shift] for bigger change."; }
    virtual bool handleKey(KeyCode keyCode, char ascii);
+
+   virtual void snap() { /* Do nothing */ }
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 };
@@ -228,22 +230,45 @@ protected:
    virtual S32 getBigIncrement() { return 12; }    // 12 * 5sec = 1 minute
 
 public:
-   TimeCounterMenuItem(string title, S32 value, S32 maxVal, string help, 
-                   KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
-      CounterMenuItem(title, value, 5, 0, maxVal, "mins", "Unlimited", help, k1, k2, color)
+   TimeCounterMenuItem(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+                       S32 step = 5, KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+      CounterMenuItem(title, value, step, 0, maxVal, "", zeroMsg, help, k1, k2, color)
    {
       // Do nothing
    }
 
-
-   //virtual void render(S32 ypos, S32 textsize, bool isSelected);
+   virtual const char *getUnits() { return mValue >= 60 ? "mins" : "secs"; }
 
    virtual MenuItemTypes getItemType() { return TimeCounterMenuItemType; }
-   virtual void setValue (const string &val) { mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5 ; }
-   virtual string getValueForDisplayingInMenu() { return itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60); }
+   virtual void setValue (const string &val) { mValue = S32((atof(val.c_str()) * 60 + 2.5) / 5) * 5 ; }     // Snap to nearest 5 second interval
+   virtual string getValueForDisplayingInMenu() { return (mValue < 60) ? itos(mValue) : 
+                                                   itos(mValue / 60) + ":" + ((mValue % 60) < 10 ? "0" : "") + itos(mValue % 60); }
    virtual string getValueForWritingToLevelFile() { return ftos((F32)mValue / 60.0f, 3); }
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+// As TimeCounterMenuItem, but reporting time in seconds, and with increments of 1 second, rather than 5
+class TimeCounterMenuItemSeconds : public TimeCounterMenuItem
+{
+protected:
+   virtual S32 getBigIncrement() { return 5; }
+
+public:
+   TimeCounterMenuItemSeconds(const string &title, S32 value, S32 maxVal, const string &zeroMsg, const string &help, 
+                   KeyCode k1 = KEY_UNKNOWN, KeyCode k2 = KEY_UNKNOWN, Color color = Color(1,1,1)) :
+      TimeCounterMenuItem(title, value, maxVal, zeroMsg, help, 1, k1, k2, color)
+   {
+      // Do nothing
+   }
+
+   virtual void setValue (const string &val) { mValue = atoi(val.c_str()); } 
+   virtual string getValueForWritingToLevelFile() { return itos(mValue); }
+
+   virtual void snap() { mValue = S32((mValue / getBigIncrement()) * getBigIncrement()); }
+};
 
 ////////////////////////////////////
 ////////////////////////////////////

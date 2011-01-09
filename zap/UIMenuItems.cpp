@@ -132,7 +132,7 @@ void CounterMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
       UserInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), mMinMsg.c_str());
    else
       UserInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), 
-                                           (getValueForDisplayingInMenu() + " " + mUnits).c_str());
+                                           (getValueForDisplayingInMenu() + " " + getUnits()).c_str());
 }
 
 
@@ -140,12 +140,26 @@ bool CounterMenuItem::handleKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)  
    {
-      increment(getKeyState(KEY_SHIFT) ? getBigIncrement() : 1);
+      if(getKeyState(KEY_SHIFT))
+      {
+         increment(getBigIncrement());
+         snap();
+      }
+      else
+         increment(1);
+
       return true;
    }
    else if(keyCode == KEY_LEFT || keyCode == MOUSE_RIGHT)
    {
-      decrement(getKeyState(KEY_SHIFT) ? getBigIncrement() : 1);
+      if(getKeyState(KEY_SHIFT))
+      {
+         decrement(getBigIncrement());
+         snap();
+      }
+      else
+         decrement(1);
+
       return true;
    }
 
