@@ -237,10 +237,8 @@ ClientRef *GameConnection::getClientRef()
 // 4. server send CommandComplete
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
-   //if(!isAdmin())  // Should have been checked on client; should never get here
    if(! gIniSettings.allowGetMap)
    {
-      s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server does not allow GetMap");
       s2rCommandComplete(COMMAND_NOT_ALLOWED);  
       return;
    }
