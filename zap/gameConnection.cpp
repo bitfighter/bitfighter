@@ -703,7 +703,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
 
    // We have the wrong password, let's make sure it's not saved
    if(!granted)
-      gINI.DeleteValue("SavedAdminPasswords", getServerName());
+      gINI.deleteKey("SavedAdminPasswords", getServerName());
 
    setGotPermissionsReply(true);
 
@@ -752,7 +752,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // We have the wrong password, let's make sure it's not saved
    if(!granted)
-      gINI.DeleteValue("SavedLevelChangePasswords", getServerName());
+      gINI.deleteKey("SavedLevelChangePasswords", getServerName());
 
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
@@ -1411,7 +1411,7 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
       if(reason == ReasonNeedServerPassword)
       {
          // We have the wrong password, let's make sure it's not saved
-         gINI.DeleteValue("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName());
+         gINI.deleteKey("SavedServerPasswords", gQueryServersUserInterface.getLastSelectedServerName());
 
          gServerPasswordEntryUserInterface.setConnectServer(getNetAddress());
          gServerPasswordEntryUserInterface.activate();

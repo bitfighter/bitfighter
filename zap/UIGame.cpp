@@ -1331,9 +1331,9 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
    {
       // Clear any saved password for this server
       if(type == GameConnection::LevelChangePassword)
-         gINI.DeleteValue("SavedLevelChangePasswords", gc->getServerName());
+         gINI.deleteKey("SavedLevelChangePasswords", gc->getServerName());
       else if(type == GameConnection::AdminPassword)
-         gINI.DeleteValue("SavedAdminPasswords", gc->getServerName());
+         gINI.deleteKey("SavedAdminPasswords", gc->getServerName());
    }
    else                    // Non-empty password
    {
