@@ -50,12 +50,8 @@ class QuickChatHelper
 {
 
 private:
-   bool mFromController;
+   bool mFromController;      // Is user using controller or keyboard?
    S32 mCurNode;
-   Timer mIdleTimer;
-   enum {
-      MenuTimeout = 5000,
-   };
 
 public:
    QuickChatHelper();      // Constructor

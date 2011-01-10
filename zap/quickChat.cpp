@@ -149,14 +149,11 @@ bool QuickChatHelper::render()
 void QuickChatHelper::show(bool fromController)
 {
    mCurNode = 0;
-   mIdleTimer.reset(MenuTimeout);
 }
 
 void QuickChatHelper::idle(U32 timeDelta)
 {
-   // Let people take as long as they'd like with this menu...
-   //if(mIdleTimer.update(timeDelta))
-   //   gGameUserInterface.setPlayMode();
+   // Do nothing
 }
 
 // Returns true if key was used, false if not
@@ -182,13 +179,12 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
    // Iterate over anything at our desired depth or lower
    while(gQuickChatTree[walk].depth >= matchLevel)
    {
-      // If it has the same key
+      // If it has the same key...
       bool match = (keyCode == gQuickChatTree[walk].keyCode) || (keyCode == gQuickChatTree[walk].buttonCode);
 
       if(match && gQuickChatTree[walk].depth == matchLevel)
       {
-         mIdleTimer.reset(MenuTimeout);
-         //    ...then select it
+         // ...then select it
          mCurNode = walk;
 
          UserInterface::playBoop();

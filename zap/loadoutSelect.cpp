@@ -71,7 +71,6 @@ void LoadoutHelper::show(bool fromController)
 {
    mFromController = fromController;
    mCurrentIndex = 0;
-   mIdleTimer.reset(MenuTimeout);
 }
 
 
@@ -218,7 +217,6 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 
    if(!list->get(index).text)
       return false;
-   mIdleTimer.reset(MenuTimeout);
 
    // Make sure user doesn't select the same loadout item twice
    bool alreadyUsed = false;
