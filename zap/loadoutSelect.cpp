@@ -69,17 +69,12 @@ void LoadoutHelper::initialize(bool includeEngineer)
    gLoadoutWeapons.push_back(LoadoutItem(KEY_6, BUTTON_6, WeaponSpyBug,  "Spy Bug Placer",  "", ModuleSensor));  // Only visible when Enhanced Sensor is a selected module
 };
 
-const char *gLoadoutTitles[] = {
-   "First:",
-   "Second:",
-   "First:",
-   "Second:",
-   "Third:",
-};
 
 LoadoutHelper::LoadoutHelper()
 {
+   // Do nothing
 }
+
 
 void LoadoutHelper::show(bool fromController)
 {
@@ -88,10 +83,10 @@ void LoadoutHelper::show(bool fromController)
    mIdleTimer.reset(MenuTimeout);
 }
 
+
 extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern IniSettings gIniSettings;
 extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
-
 
 // First, we work with modules, then with weapons
 #define getList(ct)  ((ct < ShipModuleCount) ? &gLoadoutModules : &gLoadoutWeapons)
@@ -171,9 +166,7 @@ void LoadoutHelper::render()
 
    // RenderedSize will be -1 if the button is not defined
    if(gIniSettings.inputMode == Keyboard || butSize == -1)
-   {
       UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE) );
-   }
    else
    {
       S32 xPos = UserInterface::horizMargin;
@@ -187,19 +180,21 @@ void LoadoutHelper::render()
 }
 
 
+// Checks if there are prerequisites for item, and returns true if there are none, or they are satisfied, false if they are unsatisified
 bool LoadoutHelper::isValidItem(S32 index)
 {
-   Vector<LoadoutItem> *list = getList(mCurrentIndex);
+   Vector<LoadoutItem> *list = getList(mCurrentIndex);   // Gets list of modules or weapons, whichever is active
 
-   if(list->get(index).requires != ModuleNone)
-   {
-      for(S32 i = 0; i < min(mCurrentIndex, ShipModuleCount); i++)
-         if(gLoadoutModules[mModule[i]].index == (U32)list->get(index).requires)    // Found prerequisite
-            return true;
-      return false;
-   }
-   else     // No prerequisites
+   if(list->get(index).requires == ModuleNone)           // Selection has no prerequisites
       return true;
+
+   // There are prerequsities... check to make sure user has already selected them
+   for(S32 i = 0; i < min(mCurrentIndex, ShipModuleCount); i++)
+      if(gLoadoutModules[mModule[i]].index == (U32)list->get(index).requires)    // They have
+         return true;
+
+   // There are prerequisites, but the user doesn't have them
+   return false;
 }
 
 
