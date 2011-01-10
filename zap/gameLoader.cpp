@@ -222,11 +222,10 @@ stateLineParseDone:
 bool LevelLoader::initLevelFromFile(const char *filename)
 {
    char levelChunk[4096];     // Data buffer for reading in chunks of our level file
-   const S32 minCur = 50;     // Provide a little breathing room for this file reading algorithm to work; arbitrary value, works well
    FILE *file = fopen(filename, "r");
 
 #ifdef SAM_ONLY
-   // Wanting to know which map the game crashes on.
+   // In case the level crash the game trying to load, want to know which file is the problem. 
    logprintf("Loading %s", filename);
 #endif
 
@@ -239,22 +238,26 @@ bool LevelLoader::initLevelFromFile(const char *filename)
    while(lastByteRead != 0)
    {
       // Read a chunk of the level file, filling any space in levelChunk buffer after cur
-      lastByteRead = cur + fread(&levelChunk[cur], 1, sizeof(levelChunk) - 1 - cur, file);
+      lastByteRead = cur + fread(&levelChunk[cur], 1, sizeof(levelChunk) - 1 - cur, file);   // using -1 to make room for a NULL character
 
       // Advance cursor to end of chunk
       cur = lastByteRead - 1;
 
       if(cur == sizeof(levelChunk) - 2)       // Haven't finished the file yet
       {
-         while(levelChunk[cur] != '\n' && cur > minCur)  // cur > minCur indicates the line is too long
+         while(levelChunk[cur] != '\n' && cur != 0)  // cur == 0 indicates the line is too long
             cur--;      // Back cursor up, looking for final \n in our chunk
 
-         if(cur == minCur) 
-            logprintf(LogConsumer::LogWarning, "Load level ==> Some lines too long in file %s (max len = %d)", filename, sizeof(levelChunk) - minCur);
+         if(cur == 0)
+         {
+            logprintf(LogConsumer::LogWarning, "Load level ==> Some lines too long in file %s (max len = %d)", filename, sizeof(levelChunk) - 2);  // -2 : need room for NULL and \n character
+				cur = lastByteRead - 1; // Did not find \n, go back to end of chunk. Without this line, it will freeze in endless loop.
+         }
+                     // small cur number (cur > 0) is OK, as cur will then have to be a big number on next pass.
       }
       cur++;   // Advance cursor past that last \n, now points to first char of second line in chunk
 
-      TNLAssert(cur >= 0 && cur < sizeof(levelChunk), "Load level from file, Cur out of range");
+      TNLAssert(cur >= 0 && cur < sizeof(levelChunk), "LevelLoader::initLevelFromFile, Cur out of range");
 
       char c = levelChunk[cur];     // Read a char, hold onto it for a second
       levelChunk[cur] = 0;          // Replace it with null
@@ -269,7 +272,7 @@ bool LevelLoader::initLevelFromFile(const char *filename)
          levelChunk[cur2] = levelChunk[cur + cur2];      // Copy
          cur2++;                                         // Advance
       }
-      cur = cur2;                            // Move cur back to cur2
+      cur = cur2;                            // Move cur back from cur2
    }
 
    fclose(file);

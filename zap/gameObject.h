@@ -227,8 +227,8 @@ public:
    virtual void damageObject(DamageInfo *damageInfo);
 
    bool onGhostAdd(GhostConnection *theConnection);
-   void disableCollision() { mDisableCollisionCount++; }
-   void enableCollision() { mDisableCollisionCount--; }
+   void disableCollision() { TNLAssert(mDisableCollisionCount < 10, "Too many disabled collision"); mDisableCollisionCount++; }
+   void enableCollision() { TNLAssert(mDisableCollisionCount != 0, "Trying to enable collision, already enabled"); mDisableCollisionCount--; }
    bool isCollisionEnabled() { return mDisableCollisionCount == 0; }
 
    bool collisionPolyPointIntersect(Point point);

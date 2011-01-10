@@ -877,7 +877,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    stream->writeFlag(hasExploded);
    stream->writeFlag(getControllingClient()->isBusy());
 
-   stream->writeFlag(updateMask & WarpPositionMask/* && updateMask != -1*/);   // Commented out caused U32/S32 comparison warning
+   stream->writeFlag(updateMask & WarpPositionMask/* && updateMask != -1*/);   // Commented out caused U32/S32 comparison warning  -- may use 0xFFFFFFFF instead of -1 for unsigned
 
    // Don't show warp effect when all mask flags are set, as happens when ship comes into scope
    stream->writeFlag(updateMask & TeleportMask && !(updateMask & InitialMask));      
