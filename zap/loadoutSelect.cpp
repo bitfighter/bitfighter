@@ -170,8 +170,7 @@ void LoadoutHelper::render()
    else
    {
       S32 xPos = UserInterface::horizMargin;
-      UserInterface::drawString( xPos, yPos, fontSizeSm, "Press ");
-      xPos += UserInterface::getStringWidth(fontSizeSm, "Press ");
+      xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
       renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
       xPos += butSize;
       glColor(loadoutMenuHeaderColor);
