@@ -74,7 +74,9 @@ struct LoadoutItem
 class LoadoutHelper
 {
 private:
-   bool mFromController;         // Is user using controller or keyboard?
+   bool mFromController;         // Is user using controller or keyboard?  x
+
+
    U32 mModule[ShipModuleCount]; // Modules selected by user -- 2
    U32 mWeapon[ShipWeaponCount]; // Weapons selected by user -- 3
    S32 mCurrentIndex;
@@ -85,10 +87,10 @@ public:
    LoadoutHelper();                          // Constructor
    void initialize(bool includeEngineer);    // Set things up
 
-   void render();                // Draw menu
-   void idle(U32 delta) { /* Do nothing, at the moment */ }
-   void show(bool fromController);
-   bool processKeyCode(KeyCode keyCode);
+   void render();                // Draw menu      x
+   void idle(U32 delta) { /* Do nothing, at the moment */ }    // x
+   void show(bool fromController);  // x
+   bool processKeyCode(KeyCode keyCode);     // x
 };
 
 };

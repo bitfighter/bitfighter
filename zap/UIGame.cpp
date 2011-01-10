@@ -269,6 +269,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
    if(mCurrentMode == ChatMode)
       LineEditor::updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
+
    else if(mCurrentMode == QuickChatMode)
       mQuickChat.idle(timeDelta);
    else if(mCurrentMode == LoadoutMode)
@@ -357,10 +358,7 @@ void GameUserInterface::render()
 
       // Render QuickChat / Loadout menus
       if(mCurrentMode == QuickChatMode)
-      {     // (braces required)
-         if(!mQuickChat.render())      // Render QuickChat msgs if there are any, otherwise switch back into PlayMode
-            setPlayMode();
-      }
+         mQuickChat.render();
       else if(mCurrentMode == LoadoutMode)
          mLoadout.render();
 

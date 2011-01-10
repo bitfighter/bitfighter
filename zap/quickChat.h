@@ -50,14 +50,14 @@ class QuickChatHelper
 {
 
 private:
-   bool mFromController;      // Is user using controller or keyboard?
+   bool mFromController;      // Is user using controller or keyboard?  x
    S32 mCurNode;
 
 public:
    QuickChatHelper();      // Constructor
 
    void idle(U32 delta);
-   bool render();
+   void render();
    void show(bool fromController);
    bool processKeyCode(KeyCode keyCode);
 };
