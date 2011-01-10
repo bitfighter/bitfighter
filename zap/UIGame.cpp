@@ -45,7 +45,7 @@
 #include "gameObjectRender.h"
 #include "input.h"
 #include "config.h"
-#include "loadoutSelect.h"
+#include "loadoutHelper.h"
 #include "gameNetInterface.h"
 
 #include "md5wrapper.h"          // For submission of passwords

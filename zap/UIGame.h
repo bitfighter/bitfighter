@@ -28,8 +28,8 @@
 
 #include "UI.h"
 #include "gameConnection.h"
-#include "quickChat.h"
-#include "loadoutSelect.h"
+#include "quickChatHelper.h"
+#include "loadoutHelper.h"
 #include "timer.h"
 #include "sfx.h"
 #include "voiceCodec.h"
