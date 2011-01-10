@@ -290,8 +290,6 @@ public:
 
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item
 
-	S32 freezeCount;
-
    TNL_DECLARE_CLASS(Ship);
 };
 

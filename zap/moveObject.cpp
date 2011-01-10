@@ -395,8 +395,11 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
    v2f = ( e * (v1i - v2i) + v1i + v2i) / 2;
    v1f = ( v1i + v2i - v2f);
 
+   mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
+   moveObjectThatWasHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
 
-   {      //Server and client
+   if(!isGhost())    // Server only
+   {
       // Check for asteroids hitting a ship
       Ship *ship = dynamic_cast<Ship *>(moveObjectThatWasHit);
       Asteroid *asteroid = dynamic_cast<Asteroid *>(this);
@@ -410,28 +413,15 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
 
       if(ship && asteroid)      // Collided!  Do some damage!  Bring it on!
       {
-         if(isGhost())
-         {
-            if(! ship->isModuleActive(ShipModule::ModuleShield))
-            {
-               ship->freezeCount = 2;    //For client, freeze here. (Number of unpacks to wait)
-               return;
-            }
-         }else
-         {
-            DamageInfo theInfo;
-            theInfo.collisionPoint = mMoveState[ActualState].pos;
-            theInfo.damageAmount = 1.0f;     // Kill ship
-            theInfo.damageType = DamageTypePoint;
-            theInfo.damagingObject = asteroid;
-            theInfo.impulseVector = mMoveState[ActualState].vel;
+         DamageInfo theInfo;
+         theInfo.collisionPoint = mMoveState[ActualState].pos;
+         theInfo.damageAmount = 1.0f;     // Kill ship
+         theInfo.damageType = DamageTypePoint;
+         theInfo.damagingObject = asteroid;
+         theInfo.impulseVector = mMoveState[ActualState].vel;
 
-            ship->damageObject(&theInfo);
-         }
+         ship->damageObject(&theInfo);
       }
-   }
-   if(!isGhost())    // Server only
-   {
    }
    else     // Client only
    {
@@ -447,8 +437,6 @@ void MoveObject::computeCollisionResponseMoveObject(U32 stateIndex, MoveObject *
             gameType->c2sResendItemStatus(item->getItemId());
       }
    }
-   mMoveState[stateIndex].vel += collisionVector * (v1f - v1i);
-   moveObjectThatWasHit->mMoveState[stateIndex].vel += collisionVector * (v2f - v2i);
 }
 
 
