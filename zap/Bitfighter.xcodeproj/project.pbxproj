@@ -23,7 +23,6 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 033F6B0512D192160023D4C6 /* Build configuration list for PBXAggregateTarget "Compile Frameworks Only" */;
 			buildPhases = (
-				033F6AF812D191B40023D4C6 /* ShellScript */,
 			);
 			dependencies = (
 				033F6AFF12D191C70023D4C6 /* PBXTargetDependency */,
@@ -48,8 +47,6 @@
 
 /* Begin PBXBuildFile section */
 		031A0B9412C46D91000BE0F6 /* dataConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 031A0B9212C46D91000BE0F6 /* dataConnection.cpp */; };
-		03EF60B912C4BB7E004B311A /* server.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03EF60B812C4BB7E004B311A /* server.xib */; };
-		03EF60C812C4BBAB004B311A /* server.xib in Resources */ = {isa = PBXBuildFile; fileRef = 03EF60B812C4BB7E004B311A /* server.xib */; };
 		6D8E517612111FDC00C6D883 /* statistics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6D8E517412111FDC00C6D883 /* statistics.cpp */; };
 		7364076C1297C36F00F8C095 /* Directory.mm in Sources */ = {isa = PBXBuildFile; fileRef = 94010D5E11D7CCD600E2DBB2 /* Directory.mm */; };
 		73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */ = {isa = PBXBuildFile; fileRef = 73710091129623C6000FE4FE /* ConsoleFont.c */; };
@@ -332,6 +329,7 @@
 		737CE6B4129055FF00D732B7 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 737CE678129055FF00D732B7 /* vector.cpp */; };
 		737CE7A012905E6500D732B7 /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737CE7C312905F6400D732B7 /* oglconsole.c in Sources */ = {isa = PBXBuildFile; fileRef = 737CE7C212905F6400D732B7 /* oglconsole.c */; };
+		738103E312DAD09700AE5D48 /* dataConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 031A0B9212C46D91000BE0F6 /* dataConnection.cpp */; };
 		73FD7A011295E78800143CE9 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = 73FD79CD1295E78800143CE9 /* Makefile */; };
 		73FD7A021295E78800143CE9 /* UIAbstractInstructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73FD79EC1295E78800143CE9 /* UIAbstractInstructions.cpp */; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
@@ -574,7 +572,6 @@
 /* Begin PBXFileReference section */
 		031A0B9212C46D91000BE0F6 /* dataConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dataConnection.cpp; sourceTree = "<group>"; };
 		031A0B9312C46D91000BE0F6 /* dataConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = dataConnection.h; sourceTree = "<group>"; };
-		03EF60B812C4BB7E004B311A /* server.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = server.xib; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Bitfighter_Prefix.pch; sourceTree = "<group>"; };
@@ -586,7 +583,7 @@
 		736DE97F129066D500C3CB73 /* stringUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringUtils.cpp; sourceTree = "<group>"; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
 		73710091129623C6000FE4FE /* ConsoleFont.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ConsoleFont.c; sourceTree = "<group>"; };
-		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Bitfighterd.app; path = build/Release/Bitfighterd.app; sourceTree = "<group>"; };
+		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE3001290483200D732B7 /* OpenAL-Soft.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = "OpenAL-Soft.framework"; path = "../openal/OpenAL-Soft.framework"; sourceTree = SOURCE_ROOT; };
 		737CE3041290486800D732B7 /* FreeALUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FreeALUT.framework; path = ../openal/FreeALUT.framework; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
@@ -810,7 +807,7 @@
 		73FD79FF1295E78800143CE9 /* voiceCodec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = voiceCodec.h; sourceTree = "<group>"; };
 		73FD7A001295E78800143CE9 /* zapjournal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zapjournal.h; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Bitfighter-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighter-Info.plist"; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Bitfighter.app; path = build/Release/Bitfighter.app; sourceTree = "<group>"; };
+		8D1107320486CEB800E47090 /* Bitfighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		94010D5311D7CCD600E2DBB2 /* barrier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = barrier.cpp; sourceTree = "<group>"; };
 		94010D5511D7CCD600E2DBB2 /* BotNavMeshZone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BotNavMeshZone.cpp; sourceTree = "<group>"; };
 		94010D5711D7CCD600E2DBB2 /* config.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = config.cpp; sourceTree = "<group>"; };
@@ -1325,7 +1322,6 @@
 			isa = PBXGroup;
 			children = (
 				94010D9511D7CCD600E2DBB2 /* main.cpp */,
-				03EF60B812C4BB7E004B311A /* server.xib */,
 				256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */,
 			);
 			name = " Zap Main and Prefix";
@@ -1716,7 +1712,6 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -1751,7 +1746,6 @@
 				7378262112960DDF007333BE /* screenshots in Resources */,
 				7378262212960DDF007333BE /* sfx in Resources */,
 				7378262312960DDF007333BE /* bitfighter.sh in Resources */,
-				03EF60B912C4BB7E004B311A /* server.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1780,7 +1774,6 @@
 				737CE44F12904D7D00D732B7 /* screenshots in Resources */,
 				737CE45012904D7D00D732B7 /* sfx in Resources */,
 				736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */,
-				03EF60C812C4BBAB004B311A /* server.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1798,20 +1791,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt Bitfighterd)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../MacOSX/macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighterd.app\" \"${to_package_dir}\"\n\nif [ -n \"${AA_RECORDER_APP}\" ]\nthen\n\tcp -R \"${AA_RECORDER_APP}\" \"${to_package_dir}\"\nfi\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Bitfighterd\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
-		};
-		033F6AF812D191B40023D4C6 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# shell script goes here\nexit 0";
+			shellScript = "to_package_dir=$(mktemp -dt Bitfighterd)\ntools_dir=\"../build/osx/tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighterd.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"Bitfighterd\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
 		};
 		03AD18B512CE2C6F00274A25 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1824,7 +1804,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "TMPDIR=\"${TEMP_FILES_DIR}\"\nto_package_dir=$(mktemp -dt Bitfighter)\nversion=$(ruby -ryaml -e \"print YAML.load_file('../MacOSX/macosx_build_information.yml')[:version]\")\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighter.app\" \"${to_package_dir}\"\n\nif [ -n \"${AA_RECORDER_APP}\" ]\nthen\n\tcp -R \"${AA_RECORDER_APP}\" \"${to_package_dir}\"\nfi\n\nuncompressed_dmg=$(./build_tools/dmg-create \"${to_package_dir}\" \"Bitfighter\")\n\n./build_tools/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+			shellScript = "to_package_dir=$(mktemp -dt Bitfighter)\ntools_dir=\"../build/osx/tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighter.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"Bitfighter\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1954,6 +1934,7 @@
 				73649ABC129761A1004366A3 /* ConsoleFont.c in Sources */,
 				73649ABD129761A8004366A3 /* oglconsole.c in Sources */,
 				7364076C1297C36F00F8C095 /* Directory.mm in Sources */,
+				738103E312DAD09700AE5D48 /* dataConnection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
