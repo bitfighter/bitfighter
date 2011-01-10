@@ -93,6 +93,7 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    // Create our proxy object for Lua access
    luaProxy = LuaShip(this);
+	freezeCount = 0;
 }
 
 // Destructor
@@ -394,6 +395,8 @@ void Ship::idle(GameObject::IdleCallPath path)
    // Don't process exploded ships
    if(hasExploded)
       return;
+
+	if(freezeCount != 0) return;   // Don't process if frozen (client only), Decrements on updatePacket
 
    Parent::idle(path);
 
@@ -916,6 +919,8 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
+   if(freezeCount != 0) freezeCount--;
+
 
 
    if(isInitialUpdate())

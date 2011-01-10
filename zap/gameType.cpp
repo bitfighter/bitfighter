@@ -1505,7 +1505,12 @@ void GameType::queryItemsOfInterest()
 {
    for(S32 i = 0; i < mItemsOfInterest.size(); i++)
    {
-      ItemOfInterest &ioi = mItemsOfInterest[i];
+     ItemOfInterest &ioi = mItemsOfInterest[i];
+     if(! ioi.theItem.isValid())       // item could have been deleted.
+         //TNLAssert(false,"GameType::queryItemsOfInterest item is NULL");
+         mItemsOfInterest.erase(i);
+     else
+     {
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
       Point pos = ioi.theItem->getActualPos();
       Point scopeRange(Game::PlayerSensorHorizVisDistance, Game::PlayerSensorVertVisDistance);
@@ -1526,6 +1531,7 @@ void GameType::queryItemsOfInterest()
                (delta.x < Game::PlayerHorizVisDistance && delta.y < Game::PlayerVertVisDistance) )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
+     }
    }
 }
 
