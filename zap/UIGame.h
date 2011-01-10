@@ -122,8 +122,11 @@ private:
    U32 mPing[FPSAvgCount];
    U32 mFrameIndex;
 
+   // Various helper objects
+   HelperMenu *mHelper;       // Current helper
    QuickChatHelper mQuickChat;
    LoadoutHelper mLoadout;
+
 
    struct VoiceRecorder
    {
@@ -150,9 +153,6 @@ private:
       void render();
 
    } mVoiceRecorder;
-
-   void enterQuickChat();
-   void enterLoadout();
 
    void dropItem();                       // User presses drop item key
 
@@ -232,6 +232,8 @@ public:
       QuickChatMode,          // In quick-chat menu
       LoadoutMode,            // In loadout menu
    };
+
+   void enterMode(GameUserInterface::Mode mode);      // Enter QuickChat, Loadout, or Engineer mode
 
    Mode mCurrentMode;              // Current game mode
    void setPlayMode();             // Set mode to PlayMode

@@ -270,10 +270,8 @@ void GameUserInterface::idle(U32 timeDelta)
    if(mCurrentMode == ChatMode)
       LineEditor::updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
 
-   else if(mCurrentMode == QuickChatMode)
-      mQuickChat.idle(timeDelta);
-   else if(mCurrentMode == LoadoutMode)
-      mLoadout.idle(timeDelta);
+   else if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode)
+      mHelper->idle(timeDelta);
 
    mVoiceRecorder.idle(timeDelta);
 
@@ -357,10 +355,8 @@ void GameUserInterface::render()
       }
 
       // Render QuickChat / Loadout menus
-      if(mCurrentMode == QuickChatMode)
-         mQuickChat.render();
-      else if(mCurrentMode == LoadoutMode)
-         mLoadout.render();
+      if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode)
+         mHelper->render();
 
       GameType *theGameType = gClientGame->getGameType();
 
@@ -782,23 +778,21 @@ void GameUserInterface::onMouseMoved()
 }
 
 
-// Enter quick chat mode
-void GameUserInterface::enterQuickChat()
+// Enter QuickChat, Loadout, or Engineer mode
+void GameUserInterface::enterMode(GameUserInterface::Mode mode)
 {
-   bool fromController = (gIniSettings.inputMode == Joystick);
-   UserInterface::playBoop();
-   mQuickChat.show(fromController);
-   mCurrentMode = QuickChatMode;
-}
+   TNLAssert(mode == QuickChatMode || mode == LoadoutMode, "Invalid mode!");
 
-
-// Enter loadout mode
-void GameUserInterface::enterLoadout()
-{
-   bool fromController = (gIniSettings.inputMode == Joystick);
    UserInterface::playBoop();
-   mLoadout.show(fromController);
-   mCurrentMode = LoadoutMode;
+   mCurrentMode = mode;
+
+   if(mode == QuickChatMode)
+      mHelper = &mQuickChat;
+   else if(mode == LoadoutMode)
+      mHelper = &mLoadout;
+
+   bool fromController = (gIniSettings.inputMode == Joystick);
+   mHelper->show(fromController);
 }
 
 
@@ -929,21 +923,14 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // it does something with the loadout menu.  If not, we'll
    // further process it below.
 
-   if(mCurrentMode == LoadoutMode)
+   if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode)
    {  // (braces required)
-      if(mLoadout.processKeyCode(keyCode))   // Will return true if key was processed
+      if(mHelper->processKeyCode(keyCode))   // Will return true if key was processed
       {
          disableMovementKey(keyCode);
          return;                             // Leave if key did something, so we don't get "dual" effect
       }
    }
-   else if(mCurrentMode == QuickChatMode)
-      if(mQuickChat.processKeyCode(keyCode))     // Hand off key handling to the quick chat object
-      {
-         disableMovementKey(keyCode);
-         return;
-      }
-
 
    if(mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode)
    {
@@ -1040,9 +1027,9 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
             setBusyChatting(true);
          }
          else if(keyCode == keyQUICKCHAT[inputMode])
-            enterQuickChat();
+            enterMode(QuickChatMode);
          else if(keyCode == keyLOADOUT[inputMode])
-            enterLoadout();
+            enterMode(LoadoutMode);
          else if(keyCode == keyDROPITEM[inputMode])
             dropItem();
 
