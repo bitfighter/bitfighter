@@ -25,17 +25,8 @@
 
 #include "loadoutSelect.h"
 #include "UIGame.h"
-#include "gameConnection.h"
-#include "game.h"
-#include "shipItems.h"
-#include "gameWeapons.h"
-#include "gameObjectRender.h"
 #include "UIMenus.h"
-#include "config.h"
 #include "gameType.h"
-
-#include "../glut/glutInclude.h"
-#include <ctype.h>
 
 
 namespace Zap
