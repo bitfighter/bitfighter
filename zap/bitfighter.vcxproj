@@ -123,6 +123,7 @@
     <ClCompile Include="..\zap\item.cpp" />
     <ClCompile Include="..\zap\keyCode.cpp" />
     <ClCompile Include="..\zap\lineEditor.cpp" />
+    <ClCompile Include="engineerHelper.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
     <ClCompile Include="..\zap\lpc10dec.c" />
@@ -213,6 +214,7 @@
     <ClInclude Include="..\zap\item.h" />
     <ClInclude Include="..\zap\keyCode.h" />
     <ClInclude Include="..\zap\lineEditor.h" />
+    <ClInclude Include="engineerHelper.h" />
     <ClInclude Include="loadoutHelper.h" />
     <ClInclude Include="..\zap\loadoutZone.h" />
     <ClInclude Include="..\zap\lpc10.h" />

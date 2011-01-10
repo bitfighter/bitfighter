@@ -90,6 +90,7 @@ GameUserInterface::GameUserInterface()
    mFPSAvg = 0;
    mPingAvg = 0;
    mFrameIndex = 0;
+
    for(U32 i = 0; i < FPSAvgCount; i++)
    {
       mIdleTimeDelta[i] = 50;
@@ -191,9 +192,23 @@ void GameUserInterface::onReactivate()
 }
 
 
+static char sErrorMsg[256];
+
+void GameUserInterface::displayErrorMessage(const char *format, ...)
+{
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(sErrorMsg, sizeof(sErrorMsg), format, args);
+   va_end(args);
+
+   displayMessage(gCmdChatColor, sErrorMsg);
+}
+
+
 // A new chat message is here!  We don't actually display anything here, despite the name...
 // just add it to the list, will be displayed in render()
-void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
+void GameUserInterface::displayMessage(const Color &msgColor, const char *format, ...)
 {
    // Ignore empty message
    if(strlen(format) == 0)
@@ -218,13 +233,13 @@ void GameUserInterface::displayMessage(Color theColor, const char *format, ...)
    va_start(args, format);
    vsnprintf(mDisplayMessage[0], sizeof(mDisplayMessage[0]), format, args);
    va_end(args);
-   mDisplayMessageColor[0] = theColor;
+   mDisplayMessageColor[0] = msgColor;
 
    va_start(args, format);
    vsnprintf(mStoreMessage[0], sizeof(mStoreMessage[0]), format, args);
    va_end(args);
 
-   mStoreMessageColor[0] = theColor;
+   mStoreMessageColor[0] = msgColor;
 
    mDisplayMessageTimer.reset();
 }
@@ -270,7 +285,7 @@ void GameUserInterface::idle(U32 timeDelta)
    if(mCurrentMode == ChatMode)
       LineEditor::updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
 
-   else if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode)
+   else if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
       mHelper->idle(timeDelta);
 
    mVoiceRecorder.idle(timeDelta);
@@ -355,7 +370,7 @@ void GameUserInterface::render()
       }
 
       // Render QuickChat / Loadout menus
-      if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode)
+      if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
          mHelper->render();
 
       GameType *theGameType = gClientGame->getGameType();
@@ -781,15 +796,17 @@ void GameUserInterface::onMouseMoved()
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(GameUserInterface::Mode mode)
 {
-   TNLAssert(mode == QuickChatMode || mode == LoadoutMode, "Invalid mode!");
+   TNLAssert(mode == LoadoutMode || mode == QuickChatMode || mode == EngineerMode, "Invalid mode!");
 
    UserInterface::playBoop();
    mCurrentMode = mode;
 
    if(mode == QuickChatMode)
-      mHelper = &mQuickChat;
+      mHelper = &mQuickChatHelper;
    else if(mode == LoadoutMode)
-      mHelper = &mLoadout;
+      mHelper = &mLoadoutHelper;
+   else if(mode == EngineerMode)
+      mHelper = &mEngineerHelper;
 
    bool fromController = (gIniSettings.inputMode == Joystick);
    mHelper->show(fromController);
@@ -923,7 +940,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // it does something with the loadout menu.  If not, we'll
    // further process it below.
 
-   if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode)
+   if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
    {  // (braces required)
       if(mHelper->processKeyCode(keyCode))   // Will return true if key was processed
       {
@@ -932,17 +949,38 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       }
    }
 
+   // If we're in play mode, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
+   if(mCurrentMode == PlayMode)
+   {
+      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      if(ship)
+      {
+         if(keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer || 
+            keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)
+         {
+            if(!ship->isCarryingItem(ResourceItemType))
+            {
+               displayErrorMessage("!!! Need to be carrying a resource item to use Engineer module");
+               return;
+            }
+
+            enterMode(EngineerMode);
+         }
+      }
+   }
+
+
    if(mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode)
    {
       // The following keys are allowed in both play mode and in
       // loadout or engineering menu modes if not used in the loadout
       // menu above
 
-      if (keyCode == keyMOD1[inputMode])
+      if(keyCode == keyMOD1[inputMode])
          mModActivated[0] = true;
-      else if (keyCode == keyMOD2[inputMode])
+      else if(keyCode == keyMOD2[inputMode])
          mModActivated[1] = true;
-      else if (keyCode == keyFIRE[inputMode])
+      else if(keyCode == keyFIRE[inputMode])
          mFiring = true;
       else if(keyCode == keySELWEAP1[inputMode])
          selectWeapon(0);
@@ -1005,7 +1043,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
             mVoiceRecorder.start();
       }
-      else if(mCurrentMode != LoadoutMode && mCurrentMode != QuickChatMode)
+      else if(mCurrentMode != LoadoutMode && mCurrentMode != QuickChatMode && mCurrentMode != EngineerMode)
       {
          // The following keys are only allowed in PlayMode, and never work in LoadoutMode
          if(keyCode == keyTEAMCHAT[inputMode])
@@ -1101,7 +1139,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
 void GameUserInterface::onKeyUp(KeyCode keyCode)
 {
-      S32 inputMode = gIniSettings.inputMode;
+   S32 inputMode = gIniSettings.inputMode;
 
    // These keys works in any mode!  And why not??
 
@@ -1285,7 +1323,7 @@ static bool hasAdmin(GameConnection *gc, const char *failureMessage)
 {
    if(!gc->isAdmin())
    {
-      gGameUserInterface.displayMessage(gCmdChatColor, failureMessage);
+      gGameUserInterface.displayErrorMessage(failureMessage);
       return false;
    }
    return true;
@@ -1301,7 +1339,7 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
    {
       if(words.size() < 2 || words[1] == "")
       {
-         gGameUserInterface.displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         gGameUserInterface.displayErrorMessage("!!! Need to supply a password");
          return;
       }
 
@@ -1343,7 +1381,7 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
    // Did the user provide a name/description?
    if(type != GameConnection::DeleteLevel && allWords == "")
    { 
-      gGameUserInterface.displayMessage(gCmdChatColor, type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      gGameUserInterface.displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
       return;
    }
 
@@ -1387,12 +1425,12 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc)
    {
-      displayMessage(gCmdChatColor, "!!! Not connected to server");
+      displayErrorMessage("!!! Not connected to server");
    }
    else if(words[0] == "add")            // Add time to the game
    {
       if(words.size() < 2 || words[1] == "")
-         displayMessage(gCmdChatColor, "!!! Need to supply a time (in minutes)");
+         displayErrorMessage("!!! Need to supply a time (in minutes)");
       else
       {
          U8 mins;    // Use U8 to limit number of mins that can be added, while nominally having no limit!
@@ -1406,7 +1444,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
             err = true;
 
          if(err || mins == 0)
-            displayMessage(gCmdChatColor, "!!! Invalid value... game time not changed");
+            displayErrorMessage("!!! Invalid value... game time not changed");
          else
          {
             displayMessage(gCmdChatColor, "Extended game by %d minute%s", mins, (mins == 1) ? "" : "s");
@@ -1420,21 +1458,21 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "next")      // Go to next level
    {
       if(!gc->isLevelChanger())
-         displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
+         displayErrorMessage("!!! You don't have permission to change levels");
       else
          gc->c2sRequestLevelChange(ServerGame::NEXT_LEVEL, false);
    }
    else if(words[0] == "prev")      // Go to previous level
    {
       if(!gc->isLevelChanger())
-         displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
+         displayErrorMessage("!!! You don't have permission to change levels");
       else
          gc->c2sRequestLevelChange(ServerGame::PREVIOUS_LEVEL, false);
    }
    else if(words[0] == "restart")      // Restart current level
    {
       if(!gc->isLevelChanger())
-         displayMessage(gCmdChatColor, "!!! You don't have permission to change levels");
+         displayErrorMessage("!!! You don't have permission to change levels");
       else
          gc->c2sRequestLevelChange(ServerGame::REPLAY_LEVEL, false);
    }
@@ -1470,7 +1508,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       if(hasAdmin(gc, "!!! You don't have permission to kick players"))
       {
          if(words.size() < 2 || words[1] == "")
-            displayMessage(gCmdChatColor, "!!! Need to specify who to kick");
+            displayErrorMessage("!!! Need to specify who to kick");
          else
          {
             // Did user provide a valid, known name?
@@ -1478,7 +1516,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
             {
                ClientRef *clientRef = gClientGame->getGameType()->findClientRef(words[1].c_str());
                if(!clientRef)
-                  displayMessage(gCmdChatColor, "!!! Could not find player %s", words[1].c_str());
+                  displayErrorMessage("!!! Could not find player %s", words[1].c_str());
                else
                   gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
             }
@@ -1489,9 +1527,9 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "admin")     // Request admin permissions
    {
       if(words.size() < 2 || words[1] == "")
-         displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         displayErrorMessage("!!! Need to supply a password");
       else if(gc->isAdmin())
-         displayMessage(gCmdChatColor, "!!! You are already an admin");
+         displayErrorMessage("!!! You are already an admin");
       else
          gc->submitAdminPassword(words[1].c_str());
    }
@@ -1499,9 +1537,9 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "levpass" || words[0] == "levelpass" || words[0] == "lvlpass")
    {
       if(words.size() < 2 || words[1] == "")
-         displayMessage(gCmdChatColor, "!!! Need to supply a password");
+         displayErrorMessage("!!! Need to supply a password");
       else if(gc->isLevelChanger())
-         displayMessage(gCmdChatColor, "!!! You can already change levels");
+         displayErrorMessage("!!! You can already change levels");
       else
          gc->submitLevelChangePassword(words[1].c_str());
    }
@@ -1510,7 +1548,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "dzones")
    {
        mDebugShowMeshZones = !mDebugShowMeshZones;
-       if(!gServerGame) displayMessage(gCmdChatColor, "!!! Zones can only be displayed on a local host");
+       if(!gServerGame) displayErrorMessage("!!! Zones can only be displayed on a local host");
    }
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);
@@ -1561,7 +1599,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    {
       U32 players = gClientGame->getPlayerCount();
       if(players == (U32)Game::PLAYER_COUNT_UNAVAILABLE || players > 1)
-         displayMessage(gCmdChatColor, "!!! Can't suspend when others are playing");
+         displayErrorMessage("!!! Can't suspend when others are playing");
       else
          suspendGame();    // Do the deed
    }
@@ -1569,7 +1607,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    {
       F32 linewidth;
       if(words.size() < 2 || words[1] == "")
-         displayMessage(gCmdChatColor, "!!! Need to supply line width");
+         displayErrorMessage("!!! Need to supply line width");
       else
       {
          linewidth = atof(words[1].c_str());
@@ -1600,7 +1638,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "getmap")
    {
       if(gClientGame->getConnectionToServer()->isLocalConnection())
-         displayMessage(gCmdChatColor, "!!! Can't get download levels from a local server");
+         displayErrorMessage("!!! Can't get download levels from a local server");
       else
       {
          if(words.size() > 1 && words[1] != "")
@@ -1621,7 +1659,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          if(!mOutputFile)
          {
             logprintf("Problem opening file %s for writing", fullFile.c_str());
-            displayMessage(gCmdChatColor, "!!! Problem opening file %s for writing", fullFile.c_str());
+            displayErrorMessage("!!! Problem opening file %s for writing", fullFile.c_str());
          }
          else
             gClientGame->getConnectionToServer()->c2sRequestCurrentLevel();
@@ -1634,7 +1672,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       EngineerModuleDeployer deployer;
 
       if(!(gt && gt->engineerIsEnabled()))
-         displayMessage(gCmdChatColor, "!!! %s only works on levels where Engineer module is allowed", words[0].c_str());
+         displayErrorMessage("!!! %s only works on levels where Engineer module is allowed", words[0].c_str());
       else
       {
          EngineerBuildObjects objType = (words[0] == "engf") ? EngineeredForceField : EngineeredTurret;
@@ -1701,7 +1739,7 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> &words)
 
    if(words.size() < 2)
    {
-      displayMessage(gCmdChatColor, "!!! Need to specify volume");
+      displayErrorMessage("!!! Need to specify volume");
       return;
    }
 
@@ -1713,7 +1751,7 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> &words)
       vol = max(min(atoi(volstr.c_str()), 10), 0);
    else
    {
-      displayMessage(gCmdChatColor, "!!! Invalid value... volume not changed");
+      displayErrorMessage("!!! Invalid value... volume not changed");
       return;
    }
 

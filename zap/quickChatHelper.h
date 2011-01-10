@@ -23,33 +23,55 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _HELPERMENU_H_
-#define _HELPERMENU_H_
+#ifndef _UIQUICKCHAT_H_
+#define _UIQUICKCHAT_H_
 
+
+#include "helperMenu.h"
+
+#include "../tnl/tnlNetBase.h"
+#include "../tnl/tnlNetStringTable.h"
+
+
+
+#include "UI.h"
+#include "timer.h"
 #include "keyCode.h"
-#include "tnl.h"
-
-using namespace TNL; 
-
 
 namespace Zap
 {
 
-class HelperMenu
+struct QuickChatNode
 {
-protected:
-   bool mFromController;         // Is user using controller or keyboard?
-
-public:
-   virtual void render() = 0;                
-   virtual void idle(U32 delta) { /* Do nothing */ }    
-   virtual void show(bool fromController) = 0;  
-   virtual bool processKeyCode(KeyCode keyCode) = 0;     
+   U32 depth;
+   KeyCode keyCode;
+   KeyCode buttonCode;
+   bool teamOnly;
+   string caption;
+   string msg;
+   bool isMsgItem;         // False for groups, true for messages
 };
 
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class QuickChatHelper : public HelperMenu
+{
+private:
+   S32 mCurNode;
+
+public:
+   QuickChatHelper();      // Constructor
+
+   virtual void render();                
+   virtual void show(bool fromController);  
+   virtual bool processKeyCode(KeyCode keyCode);    
+};
+
+extern Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file
 
 };
 
 #endif
-
 

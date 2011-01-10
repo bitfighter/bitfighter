@@ -494,14 +494,6 @@ void Ship::idle(GameObject::IdleCallPath path)
          mTrail[i].tick(mCurrentMove.time);
       updateModuleSounds();
    }
-
-   // This is for using Engineer Module, but only for forcefield. It may need more work.
-   if(path == GameObject::ClientIdleControlMain && isModuleActive(ModuleEngineer))
-	{
-      Vector<string> words;
-		words.push_back("engf");
-		gGameUserInterface.processCommand(words);
-	}
 }
 
 static Vector<DatabaseObject *> foundObjects;

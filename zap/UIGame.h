@@ -30,6 +30,7 @@
 #include "gameConnection.h"
 #include "quickChatHelper.h"
 #include "loadoutHelper.h"
+#include "engineerHelper.h"
 #include "timer.h"
 #include "sfx.h"
 #include "voiceCodec.h"
@@ -124,8 +125,9 @@ private:
 
    // Various helper objects
    HelperMenu *mHelper;       // Current helper
-   QuickChatHelper mQuickChat;
-   LoadoutHelper mLoadout;
+   QuickChatHelper mQuickChatHelper;
+   LoadoutHelper mLoadoutHelper;
+   EngineerHelper mEngineerHelper;
 
 
    struct VoiceRecorder
@@ -171,16 +173,18 @@ private:
    Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
 
 public:
+   GameUserInterface();             // Constructor
+
    bool displayInputModeChangeAlert;
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?
    bool mDebugShowShipCoords;       // Show coords on ship?
    bool mDebugShowMeshZones;        // Show bot nav mesh zones?
 
-   GameUserInterface();
+   void displayErrorMessage(const char *format, ...);
+   void displayMessage(const Color &msgColor, const char *format, ...);
 
-   void displayMessage(Color messageColor, const char *format, ...);
 
-   void initializeLoadoutOptions(bool engineerAllowed) { mLoadout.initialize(engineerAllowed); }
+   void initializeLoadoutOptions(bool engineerAllowed) { mLoadoutHelper.initialize(engineerAllowed); }
 
    void render();                   // Render game screen
    void renderReticle();            // Render crosshairs
@@ -231,6 +235,7 @@ public:
       ChatMode,               // Composing chat message
       QuickChatMode,          // In quick-chat menu
       LoadoutMode,            // In loadout menu
+      EngineerMode,           // In engineer overlay mode
    };
 
    void enterMode(GameUserInterface::Mode mode);      // Enter QuickChat, Loadout, or Engineer mode

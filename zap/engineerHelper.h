@@ -23,30 +23,25 @@
 //
 //------------------------------------------------------------------------------------
 
-#ifndef _HELPERMENU_H_
-#define _HELPERMENU_H_
+#ifndef _ENGINEERHELPER_H_
+#define _ENGINEERHELPER_H_
 
-#include "keyCode.h"
-#include "tnl.h"
+#include "helperMenu.h"
 
-using namespace TNL; 
-
+using namespace TNL;
 
 namespace Zap
 {
 
-class HelperMenu
+class EngineerHelper : public HelperMenu
 {
-protected:
-   bool mFromController;         // Is user using controller or keyboard?
-
 public:
-   virtual void render() = 0;                
-   virtual void idle(U32 delta) { /* Do nothing */ }    
-   virtual void show(bool fromController) = 0;  
-   virtual bool processKeyCode(KeyCode keyCode) = 0;     
-};
+   EngineerHelper();                          // Constructor
 
+   void render();                
+   void show(bool fromController);  
+   bool processKeyCode(KeyCode keyCode);   
+};
 
 };
 
