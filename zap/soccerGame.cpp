@@ -186,19 +186,20 @@ bool SoccerGameType::onFire(Ship *ship)
       {
          if(ship->mMountedItems[i]->getObjectTypeMask() & SoccerBallItemType)
          {
-            Item *ball = dynamic_cast<SoccerBallItem *>(ship->mMountedItems[i].getPointer());
+            SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->mMountedItems[i].getPointer());
+            TNLAssert(ball != NULL, "SoccerGameType::onFire NULL ball");
 
-            Point dir = ship->getAimVector();
-            Point vel = ship->getActualVel();
+            //Point dir = ship->getAimVector();
+            //Point vel = ship->getActualVel();
 
-            dir.normalize();     // needed?
+            //dir.normalize();     // needed?
 
-            Point ballVel = dir * 2 + dir * vel.dot(dir);
+            //Point ballVel = dir * 2 + dir * vel.dot(dir);
 
-            ball->setActualPos(ship->getActualPos() + dir * (ship->getRadius()));
-            ball->setActualVel(ballVel);
+            // ball->setActualPos(ship->getActualPos() + dir * (ship->getRadius())); //get set in onItemDropped
 
             ball->onItemDropped();
+            ball->setActualVel(ship->getAimVector() * 200 + ship->getActualVel());
          }
       }
       
