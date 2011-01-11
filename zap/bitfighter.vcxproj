@@ -124,6 +124,7 @@
     <ClCompile Include="..\zap\keyCode.cpp" />
     <ClCompile Include="..\zap\lineEditor.cpp" />
     <ClCompile Include="engineerHelper.cpp" />
+    <ClCompile Include="helperMenu.cpp" />
     <ClCompile Include="loadoutHelper.cpp" />
     <ClCompile Include="..\zap\loadoutZone.cpp" />
     <ClCompile Include="..\zap\lpc10dec.c" />

@@ -44,7 +44,7 @@ struct LoadoutItem
    const char *help;       // An additional bit of help text, also displayed on loadout menu
    ShipModule requires;    // Item requires this module be part of loadout (used only for spy-bugs)
 
-   LoadoutItem() { };      // Should never be used
+   LoadoutItem() { /* Do nothing */ };      // Should never be used
 
    LoadoutItem(KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
    {
@@ -75,10 +75,15 @@ struct LoadoutItem
 
 class LoadoutHelper : public HelperMenu
 {
+   typedef HelperMenu Parent;
+
 private:
    U32 mModule[ShipModuleCount];   // Modules selected by user -- 2
    U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
    S32 mCurrentIndex;
+
+   virtual const char *getCancelMessage() { return "Modifications canceled -- ship design unchanged."; }
+   virtual KeyCode getActivationKey() { return keyLOADOUT[gIniSettings.inputMode]; }
 
    bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 

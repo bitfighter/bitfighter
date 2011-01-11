@@ -191,19 +191,9 @@ bool LoadoutHelper::isValidItem(S32 index)
 // Runs on client
 bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 {
-   // First, check navigation keys.  When in keyboard mode, we allow the loadout key to toggle menu on and off...
-   // we can't do this in joystick mode because it is likely that the loadout key is also used to select items
-   // from the loadout menu.
-   if(keyCode == KEY_ESCAPE || keyCode == KEY_BACKSPACE ||
-      keyCode == KEY_LEFT   || keyCode == BUTTON_DPAD_LEFT ||
-      keyCode == BUTTON_BACK || (gIniSettings.inputMode == Keyboard && keyCode == keyLOADOUT[gIniSettings.inputMode]) )
-   {
-      gGameUserInterface.setPlayMode();      // Return to play mode, ship design unchanged
-      if(gIniSettings.verboseHelpMessages)
-         gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- ship design unchanged.");
-
+   if(Parent::processKeyCode(keyCode))    // Check for cancel keys
       return true;
-   }
+   
 
    U32 index;
    Vector<LoadoutItem> *list = getList(mCurrentIndex);

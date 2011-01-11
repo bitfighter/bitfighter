@@ -153,6 +153,8 @@ void QuickChatHelper::render()
 
    return;
 }
+
+
 void QuickChatHelper::show(bool fromController)
 {
    mCurNode = 0;
@@ -162,12 +164,16 @@ void QuickChatHelper::show(bool fromController)
 // Returns true if key was used, false if not
 bool QuickChatHelper::processKeyCode(KeyCode keyCode)
 {
-   if(keyCode == KEY_BACKSPACE || keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
-   {
-      UserInterface::playBoop();
-      gGameUserInterface.setPlayMode();
+   //if(keyCode == KEY_BACKSPACE || keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
+   //{
+   //   UserInterface::playBoop();
+   //   gGameUserInterface.setPlayMode();
+   //   return true;
+   //}
+
+   if(Parent::processKeyCode(keyCode))
       return true;
-   }
+
 
    if(!gQuickChatTree.size())       // We'll crash if we go any further!
       return false;

@@ -35,6 +35,11 @@ namespace Zap
 
 class EngineerHelper : public HelperMenu
 {
+   typedef HelperMenu Parent;
+
+private:
+   const char *getCancelMessage() { return "Engineered item not deployed"; }
+
 public:
    EngineerHelper();                          // Constructor
 
