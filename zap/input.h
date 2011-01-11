@@ -90,7 +90,7 @@ const char *GetJoystickName();
 ControllerTypeType autodetectJoystickType();
 void ShutdownJoystick();
 bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask);
-void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset = 0);
+void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated = false, S32 offset = 0);
 
 extern ControllerTypeType stringToJoystickType(string strJoystick);
 extern string joystickTypeToString(S32 controllerType);
