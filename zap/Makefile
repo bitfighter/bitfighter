@@ -17,7 +17,7 @@
 #
 #######################################
 
-CC=gcc -g  -I../tnl -I../glut -I../openal -DTNL_ENABLE_LOGGING #-O2
+CC=gcc -g  -I../tnl -I../glut -I../openal -DTNL_ENABLE_LOGGING -W #-O2
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
 INPUT=linuxInput.o 
