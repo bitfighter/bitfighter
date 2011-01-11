@@ -809,7 +809,7 @@ void GameUserInterface::enterMode(GameUserInterface::Mode mode)
       mHelper = &mEngineerHelper;
 
    bool fromController = (gIniSettings.inputMode == Joystick);
-   mHelper->show(fromController);
+   mHelper->onMenuShow(fromController);
 }
 
 

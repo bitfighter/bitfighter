@@ -67,9 +67,9 @@ LoadoutHelper::LoadoutHelper()
 }
 
 
-void LoadoutHelper::show(bool fromController)
+void LoadoutHelper::onMenuShow(bool fromController)
 {
-   mFromController = fromController;
+   Parent::onMenuShow(fromController);
    mCurrentIndex = 0;
 }
 
@@ -83,9 +83,10 @@ extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 void LoadoutHelper::render()
 {
-   const Color loadoutMenuHeaderColor (1, 0, 0);
-   S32 yPos = 300;
+   S32 yPos = MENU_TOP;
    const S32 fontSize = 15;
+
+   const Color loadoutMenuHeaderColor (1, 0, 0);
    char helpStr[100];
 
    if(mCurrentIndex < ShipModuleCount)
@@ -94,7 +95,7 @@ void LoadoutHelper::render()
       dSprintf (helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
 
    glColor(loadoutMenuHeaderColor);
-   UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSize, "%s", helpStr);
+   UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, helpStr);
    yPos += fontSize + 4;
 
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
@@ -121,10 +122,10 @@ void LoadoutHelper::render()
 
       // Draw key controls for selecting loadout items
 
+      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
+
       if(isValidItem(i))
       {
-         bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
-
          if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
             renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
 
@@ -140,11 +141,11 @@ void LoadoutHelper::render()
             glColor3f(0.1, 1.0, 0.1);      // Color of not-yet selected item
 
          S32 xPos = UserInterface::horizMargin + 50;
-         UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list->get(i).text);      // The loadout entry itself
+         xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text);      // The loadout entry itself
          if(!selected)
             glColor3f(.2, .8, .8);        // Color of help message
-         xPos += UserInterface::getStringWidthf(fontSize, "%s ", list->get(i).text);
-         UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list->get(i).help);      // The loadout help string, if there is one
+
+         UserInterface::drawString(xPos, yPos, fontSize, list->get(i).help);      // The loadout help string, if there is one
 
          yPos += fontSize + 7;
       }
@@ -194,7 +195,6 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
    if(Parent::processKeyCode(keyCode))    // Check for cancel keys
       return true;
    
-
    U32 index;
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
@@ -275,7 +275,8 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       // We've done a lot of work to get this message just right!  I hope players appreciate it!
       if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneType)) )          
          gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), 
-                                           "Ship design changed -- %s%s", spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
+                                           "Ship design changed -- %s%s", 
+                                           spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
                                            spawnWithLoadout && gt->levelHasLoadoutZone() ? " or enter Loadout Zone." : ".");
    }
 

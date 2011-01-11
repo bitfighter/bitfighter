@@ -27,11 +27,37 @@
 #define _ENGINEERHELPER_H_
 
 #include "helperMenu.h"
+#include "shipItems.h"     // For EngineerBuildObjects enum
 
 using namespace TNL;
 
 namespace Zap
 {
+
+struct EngineerConstructionItemInfo
+{
+   EngineerBuildObjects mObjectId;
+   KeyCode mKey;            // Keyboard key used to select in menu
+   KeyCode mButton;         // Controller button used to select in menu
+   const char *mName;       // Name used on menu
+   const char *mHelp;       // An additional bit of help text, also displayed on menu
+
+
+   EngineerConstructionItemInfo() { /* Do nothing */ };      // Default constructor, should never be used
+
+   EngineerConstructionItemInfo(EngineerBuildObjects objId, const char *name, KeyCode key, KeyCode button, const char *help = "")    
+   {
+      mObjectId = objId;
+      mKey = key;
+      mButton = button;
+      mName = name;
+      mHelp = help;
+   }
+};
+
+
+////////////////////////////////////////
+////////////////////////////////////////
 
 class EngineerHelper : public HelperMenu
 {
@@ -39,12 +65,12 @@ class EngineerHelper : public HelperMenu
 
 private:
    const char *getCancelMessage() { return "Engineered item not deployed"; }
+   Vector<EngineerConstructionItemInfo> mEngineerCostructionItemInfos;
 
 public:
    EngineerHelper();                          // Constructor
 
    void render();                
-   void show(bool fromController);  
    bool processKeyCode(KeyCode keyCode);   
 };
 

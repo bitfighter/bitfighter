@@ -92,7 +92,7 @@ public:
    void initialize(bool includeEngineer);    // Set things up
 
    void render();                
-   void show(bool fromController);  
+   void onMenuShow(bool fromController);  
    bool processKeyCode(KeyCode keyCode);   
 };
 

@@ -23,114 +23,55 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "UIGame.h"
 #include "engineerHelper.h"
+#include "UIGame.h"
 #include "point.h"      // For Color def
 
 namespace Zap
 {
 
-
 // Constructor
 EngineerHelper::EngineerHelper()
 {
-   // Do nothing
+   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Turret", KEY_1, BUTTON_1));
+   mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredTurret, "Force Field", KEY_2, BUTTON_2));
 }
-
-
-void EngineerHelper::show(bool fromController)
-{
-   mFromController = fromController;
-}
-
 
 
 void EngineerHelper::render()
 {
-   UserInterface::drawStringf(UserInterface::horizMargin, 300, 15, "In engineer mode!!");
-   //const Color loadoutMenuHeaderColor (1, 0, 0);
-   //S32 yPos = 300;
-   //const S32 fontSize = 15;
-   //char helpStr[100];
+   S32 yPos = MENU_TOP;
+   const S32 fontSize = 15;
 
-   //if(mCurrentIndex < ShipModuleCount)
-   //   dSprintf (helpStr, sizeof(helpStr), "Pick %d power modules for your ship:", ShipModuleCount);
-   //else
-   //   dSprintf (helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
+   glColor3f(1,1,0);
+   UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
+   yPos += fontSize + 4;
 
-   //glColor(loadoutMenuHeaderColor);
-   //UserInterface::drawStringf(UserInterface::horizMargin, yPos, fontSize, "%s", helpStr);
-   //yPos += fontSize + 4;
+   bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
 
-   //Vector<LoadoutItem> *list = getList(mCurrentIndex);
+   for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
+   {
+      // Draw key controls for selecting the object to be created
 
-   //for(U32 i = 0; i < (U32)list->size(); i++)
-   //{
-   //   bool selected = false;
+      if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
+         renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
 
-   //   // Cases of mCurrentIndex == 0 and mCurrentIndex == ShipModuleCount should both fall through the if/else if
-   //   // These are instances when a fresh new menu with nothing selected is displayed.
+      if(showKeys)
+      {
+         glColor3f(1, 1, 1);     // Render key in white
+         renderControllerButton(UserInterface::horizMargin + 20, yPos, mEngineerCostructionItemInfos[i].mKey, false);
+      }
 
-   //   if(mCurrentIndex > 0 && mCurrentIndex < ShipModuleCount)    // Picking modules, but not the first one
-   //   {
-   //      for(S32 j = 0; j < mCurrentIndex; j++)
-   //         if(mModule[j] == i)
-   //            selected = true;
-   //   }
-   //   else if(mCurrentIndex > ShipModuleCount)                    // Picking weapons, but not the first one
-   //   {
-   //      for(S32 j = 0; j < mCurrentIndex - ShipModuleCount; j++)
-   //         if(mWeapon[j] == i)
-   //            selected = true;
-   //   }
+      glColor3f(0.1, 1.0, 0.1);     
 
-   //   // Draw key controls for selecting loadout items
+      S32 xPos = UserInterface::horizMargin + 50;
+      xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
 
-   //   if(isValidItem(i))
-   //   {
-   //      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
+      glColor3f(.2, .8, .8);    
+      UserInterface::drawStringf(xPos, yPos, fontSize,  mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
 
-   //      if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
-   //         renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, list->get(i).button, false);
-
-   //      if(showKeys)
-   //      {
-   //         glColor3f(1, 1, 1);     // Render key in white
-   //         renderControllerButton(UserInterface::horizMargin + 20, yPos, list->get(i).key, false);
-   //      }
-
-   //      if(selected)
-   //         glColor3f(1.0, 0.1, 0.1);      // Color of already selected item
-   //      else
-   //         glColor3f(0.1, 1.0, 0.1);      // Color of not-yet selected item
-
-   //      S32 xPos = UserInterface::horizMargin + 50;
-   //      UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list->get(i).text);      // The loadout entry itself
-   //      if(!selected)
-   //         glColor3f(.2, .8, .8);        // Color of help message
-   //      xPos += UserInterface::getStringWidthf(fontSize, "%s ", list->get(i).text);
-   //      UserInterface::drawStringf(xPos, yPos, fontSize, "%s", list->get(i).help);      // The loadout help string, if there is one
-
-   //      yPos += fontSize + 7;
-   //   }
-   //}
-   //// Add some help text
-   //glColor(loadoutMenuHeaderColor);
-   //S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
-   //const S32 fontSizeSm = fontSize - 4;
-
-   //// RenderedSize will be -1 if the button is not defined
-   //if(gIniSettings.inputMode == Keyboard || butSize == -1)
-   //   UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE) );
-   //else
-   //{
-   //   S32 xPos = UserInterface::horizMargin;
-   //   xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
-   //   renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
-   //   xPos += butSize;
-   //   glColor(loadoutMenuHeaderColor);
-   //   UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");
-   //}
+      yPos += fontSize + 7;
+   }
 }
 
 

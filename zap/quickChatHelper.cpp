@@ -58,7 +58,7 @@ extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 // in remaining in QuickChat mode, is there?
 void QuickChatHelper::render()
 {
-   S32 yPos = 300;
+   S32 yPos = MENU_TOP;
    const U32 fontSize = 15;
 
    if(!gQuickChatTree.size())
@@ -89,8 +89,6 @@ void QuickChatHelper::render()
 
    const S32 indent = 20;
 
-   bool showKeys = gIniSettings.showKeyboardKeys || (inputMode == Keyboard);
-
    if(!renderNodes.size())    // Nothing to render, let's go home
    {
       glColor3f(1,0,0); 
@@ -99,6 +97,8 @@ void QuickChatHelper::render()
    }
    else
    {
+      bool showKeys = gIniSettings.showKeyboardKeys || (inputMode == Keyboard);
+
       S32 xPosBase = UserInterface::horizMargin + (showKeys ? 0 : indent);
       S32 messageIndent = (matchLevel == 1) ? indent : 0;    // No indenting on submenus
 
@@ -118,7 +118,7 @@ void QuickChatHelper::render()
          }
  
          glColor(color);
-         UserInterface::drawStringf(UserInterface::horizMargin + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), yPos, fontSize, "%s", renderNodes[i].caption.c_str());
+         UserInterface::drawString(UserInterface::horizMargin + 50 + (renderNodes[i].isMsgItem ? messageIndent : 0), yPos, fontSize, renderNodes[i].caption.c_str());
          yPos += fontSize + 7;
       }
    }
@@ -130,8 +130,8 @@ void QuickChatHelper::render()
    glColor(gGlobalChatColor);
    UserInterface::drawString(UserInterface::horizMargin + indent + UserInterface::getStringWidth(fontSizeSm, "Team Message "), yPos, fontSizeSm, "Global Message");
 
-   S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
    yPos += 20;
+   S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
 
    // RenderedSize will be -1 if the button is not defined
    if(gIniSettings.inputMode == Keyboard || butSize == -1)
@@ -142,10 +142,11 @@ void QuickChatHelper::render()
    else
    {
       S32 xPos = UserInterface::horizMargin + indent;
+
       glColor3f(1,0,0);
-      UserInterface::drawString( xPos, yPos, fontSizeSm, "Press ");
-      xPos += UserInterface::getStringWidth(fontSizeSm, "Press ");
+      xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
       renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
+
       xPos += butSize;
       glColor3f(1,0,0);
       UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");
@@ -155,8 +156,9 @@ void QuickChatHelper::render()
 }
 
 
-void QuickChatHelper::show(bool fromController)
+void QuickChatHelper::onMenuShow(bool fromController)
 {
+   Parent::onMenuShow(fromController);
    mCurNode = 0;
 }
 
@@ -164,12 +166,12 @@ void QuickChatHelper::show(bool fromController)
 // Returns true if key was used, false if not
 bool QuickChatHelper::processKeyCode(KeyCode keyCode)
 {
-   //if(keyCode == KEY_BACKSPACE || keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
-   //{
-   //   UserInterface::playBoop();
-   //   gGameUserInterface.setPlayMode();
-   //   return true;
-   //}
+  /* if(keyCode == KEY_BACKSPACE || keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
+   {
+      UserInterface::playBoop();
+      gGameUserInterface.setPlayMode();
+      return true;
+   }*/
 
    if(Parent::processKeyCode(keyCode))
       return true;

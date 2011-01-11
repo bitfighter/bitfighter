@@ -44,10 +44,12 @@ private:
 protected:
    bool mFromController;         // Is user using controller or keyboard?
 
+   static const S32 MENU_TOP = 300;     // Location of top of overlay menu
+
 public:
    virtual void render() = 0;                
    virtual void idle(U32 delta) { /* Do nothing */ }    
-   virtual void show(bool fromController) = 0;  
+   virtual void onMenuShow(bool fromController);  
 
    virtual bool processKeyCode(KeyCode keyCode);     
 };
