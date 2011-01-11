@@ -1867,9 +1867,11 @@ void Robot::idle(GameObject::IdleCallPath path)
    }
    else if(path == GameObject::ClientIdleMainRemote)  // Running on client (but not replaying saved game)
    {
+		Ship::idle(path);    // On client, we can use Ship::idle
+		return;
       // On the client, update the interpolation of this object, unless we are replaying control moves
-      mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
-      updateInterpolation();
+      //mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
+      //updateInterpolation();
    }
 
    updateExtent();            // Update the object in the game's extents database
