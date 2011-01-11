@@ -332,7 +332,7 @@ bool Asteroid::collide(GameObject *otherObject)
 		{
 			// Client does not know if we actually get destroyed from asteroids
 			// prevents bouncing off asteroids, then LAG puts back to position.
-			if(! ship->isModuleActive(ShipModule::ModuleShield)) return false;
+			if(! ship->isModuleActive(ModuleShield)) return false;
 		}
 	}
    // Asteroids don't collide with one another!

@@ -2136,6 +2136,9 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
             obj->setOwner(NULL);
       }
 
+      if(ship->isRobot())           // Players get a new ship object, Robots use the same ship object.
+         ship->setMaskBits(Ship::ChangeTeamMask);
+
       ship->kill();                 // Destroy the old ship
 
       cl->respawnTimer.clear();     // If we've just died, this will keep a second copy of ourselves from appearing

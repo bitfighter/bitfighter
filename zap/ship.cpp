@@ -76,7 +76,7 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
 
    mTeam = team;
-   mass = m;            // Ship's mass
+   mass = m;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
    mPlayerName = playerName;  
@@ -820,8 +820,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
-      stream->write(mass);
-      stream->write(mTeam);
+      updateMask |= ChangeTeamMask;  // make this bit true to write team.
 
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
@@ -838,12 +837,17 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       }
       stream->writeFlag(false);
    }  // End initial update
-
    if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
    {
       stream->writeStringTableEntry(mPlayerName);
       stream->writeFlag(mIsAuthenticated);
    }
+
+   if(stream->writeFlag(updateMask & ChangeTeamMask))   // A player with admin can change robots teams.
+   {
+      stream->write(mTeam);
+   }
+
 
 //if(isRobot())
 //{
@@ -928,9 +932,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       shipwarped = true;
       playSpawnEffect = stream->readFlag();
 
-      stream->read(&mass);
-      stream->read(&mTeam);
-
       // Read mounted items:
       while(stream->readFlag())
       {
@@ -948,6 +949,10 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mIsAuthenticated = stream->readFlag();
    }
 
+   if(stream->readFlag())     // Team changed
+   {
+      stream->read(&mTeam);
+   }
 
 //if(isRobot())
 //{
