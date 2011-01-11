@@ -107,6 +107,7 @@ private:
    bool isBusy;
    bool mIsRobot;
 
+   U32 mRespawnTime;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(GameObjectType type); 

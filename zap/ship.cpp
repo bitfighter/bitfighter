@@ -106,6 +106,8 @@ Ship::~Ship()
 // and also after a bot respawns and needs to reset itself
 void Ship::initialize(Point &pos)
 {
+   if(getGame())
+         mRespawnTime = getGame()->getCurrentTime();
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;
@@ -497,11 +499,11 @@ void Ship::idle(GameObject::IdleCallPath path)
 
    // This is for using Engineer Module, but only for forcefield. It may need more work.
    if(path == GameObject::ClientIdleControlMain && isModuleActive(ModuleEngineer))
-	{
+   {
       Vector<string> words;
-		words.push_back("engf");
-		gGameUserInterface.processCommand(words);
-	}
+      words.push_back("engf");
+      gGameUserInterface.processCommand(words);
+   }
 }
 
 static Vector<DatabaseObject *> foundObjects;
@@ -817,7 +819,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
-      stream->writeFlag(getGame()->getCurrentTime() - getCreationTime() < 300);  // If true, ship will appear to spawn on client
+      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
       stream->write(mass);
       stream->write(mTeam);
 
@@ -858,9 +860,11 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 //}
 
 
-   stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits
-                                                               // are set (as happens when a ship comes into scope).  Therefore, we'll force
-                                                               // this to be robot only.
+   // Respawn --> only used by robots, but will be set on ships if all mask bits
+   // are set (as happens when a ship comes into scope).  Therefore, we'll force
+   // this to be robot only.
+   if(stream->writeFlag(updateMask & RespawnMask && isRobot()))
+      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);
@@ -974,9 +978,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())        // Respawn <--- will only occur on robots, will always be false with ships
    {
       hasExploded = false;
-      playSpawnEffect = true;
+      playSpawnEffect = stream->readFlag();    // prevent spawn effect every time the robot goes into scope.
       shipwarped = true;
-      enableCollision();
+      if(! isCollisionEnabled()) enableCollision();
    }
 
    if(stream->readFlag())        // Health

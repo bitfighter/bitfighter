@@ -853,7 +853,7 @@ void GameType::saveGameStats()
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
    //GameType *gameType = this; //gServerGame->getGameType();
 
-   //if(gameType)   // is this check needed ?
+   //if(gameType)   // is this check needed? Can't call this function without GameType.
    {
       // Build a list of teams, so we can sort by score
       Vector<Team> sortTeams(mTeams.size());
@@ -921,7 +921,7 @@ void GameType::saveGameStats()
             masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
                                                mClientList[i]->isRobot,
                                                getTeamName(mClientList[i]->getTeam()),  //Both teams might have same name...
-                                               mClientList[i]->getScore(), //non-zero cause master to reset? Keep getting disconnected after the end of game.
+                                               mClientList[i]->getScore(),
                                                statistics->getKills(), statistics->getDeaths(), 
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
 			if(gIniSettings.LogStats)

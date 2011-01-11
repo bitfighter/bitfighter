@@ -114,7 +114,6 @@ private:
    string mFilename;            // Name of file script was loaded from
 
    S32 mCurrentZone;            // Zone robot is currently in
-   U32 mLastMoveTime;           // Keep track of how long it's been since robot's last move was processed
 
    S32 mScore;
    S32 mTotalScore;
@@ -125,7 +124,7 @@ private:
 
    static const S32 RobotRespawnDelay = 1500;
    Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
-	bool gameConnectionInitalized;
+   bool gameConnectionInitalized;
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
@@ -161,7 +160,7 @@ public:
    // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
-   Timer respawnTimer;
+   //Timer respawnTimer;  //Not needed anymore
 
    bool isRobot() { return true; }
    static S32 getRobotCount() { return robots.size(); }
