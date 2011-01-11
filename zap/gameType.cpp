@@ -1458,6 +1458,7 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
    {
       TNLAssert(connection->getClientRef(), "ClientRef should never be NULL!");
       S32 teamId = connection->getClientRef()->getTeam();
+      fillVector.clear();
 
       for(S32 i = 0; i < mClientList.size(); i++)
       {
@@ -1474,7 +1475,6 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
          Rect queryRect(pos, pos);
          queryRect.expand( Game::getScopeRange(ship->isModuleActive(ModuleSensor)) );
 
-         fillVector.clear();
          findObjects(( (scopeObject == ship) ? AllObjectTypes : CommandMapVisType), fillVector, queryRect);
       }
    }
