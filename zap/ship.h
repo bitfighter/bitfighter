@@ -107,6 +107,7 @@ private:
    bool isBusy;
    bool mIsRobot;
 
+   U32 mRespawnTime;
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(GameObjectType type); 
@@ -163,6 +164,7 @@ public:
       RespawnMask = BIT(8),         // For when robots respawn
       TeleportMask = BIT(9),        // Ship has just teleported
       AuthenticationMask = BIT(10), // Player authentication status changed
+      ChangeTeamMask = BIT(11),     // Used for when robots change teams
    };
 
    Timer mFireTimer;
@@ -196,7 +198,7 @@ public:
    S32 mLastTrailPoint[TrailCount];  // TrailCount = 2
    FXTrail mTrail[TrailCount];
 
-   F32 mass;            // Mass of ship
+   F32 mass;            // Mass of ship, not used
    bool hasExploded;
 
    Vector<SafePtr<Item> > mMountedItems;

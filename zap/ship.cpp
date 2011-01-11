@@ -76,7 +76,7 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
       mLastTrailPoint[i] = -1;   // Or something... doesn't really matter what
 
    mTeam = team;
-   mass = m;            // Ship's mass
+   mass = m;            // Ship's mass, not used
 
    // Name will be unique across all clients, but client and server may disagree on this name if the server has modified it to make it unique
    mPlayerName = playerName;  
@@ -106,6 +106,8 @@ Ship::~Ship()
 // and also after a bot respawns and needs to reset itself
 void Ship::initialize(Point &pos)
 {
+   if(getGame())
+         mRespawnTime = getGame()->getCurrentTime();
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;
@@ -809,9 +811,8 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
-      stream->writeFlag(getGame()->getCurrentTime() - getCreationTime() < 300);  // If true, ship will appear to spawn on client
-      stream->write(mass);
-      stream->write(mTeam);
+      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
+      updateMask |= ChangeTeamMask;  // make this bit true to write team.
 
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
@@ -828,12 +829,17 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       }
       stream->writeFlag(false);
    }  // End initial update
-
    if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
    {
       stream->writeStringTableEntry(mPlayerName);
       stream->writeFlag(mIsAuthenticated);
    }
+
+   if(stream->writeFlag(updateMask & ChangeTeamMask))   // A player with admin can change robots teams.
+   {
+      stream->write(mTeam);
+   }
+
 
 //if(isRobot())
 //{
@@ -850,9 +856,11 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 //}
 
 
-   stream->writeFlag(updateMask & RespawnMask && isRobot());   // Respawn --> only used by robots, but will be set on ships if all mask bits
-                                                               // are set (as happens when a ship comes into scope).  Therefore, we'll force
-                                                               // this to be robot only.
+   // Respawn --> only used by robots, but will be set on ships if all mask bits
+   // are set (as happens when a ship comes into scope).  Therefore, we'll force
+   // this to be robot only.
+   if(stream->writeFlag(updateMask & RespawnMask && isRobot()))
+      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);
@@ -916,9 +924,6 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       shipwarped = true;
       playSpawnEffect = stream->readFlag();
 
-      stream->read(&mass);
-      stream->read(&mTeam);
-
       // Read mounted items:
       while(stream->readFlag())
       {
@@ -936,6 +941,10 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
       mIsAuthenticated = stream->readFlag();
    }
 
+   if(stream->readFlag())     // Team changed
+   {
+      stream->read(&mTeam);
+   }
 
 //if(isRobot())
 //{
@@ -966,9 +975,9 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    if(stream->readFlag())        // Respawn <--- will only occur on robots, will always be false with ships
    {
       hasExploded = false;
-      playSpawnEffect = true;
+      playSpawnEffect = stream->readFlag();    // prevent spawn effect every time the robot goes into scope.
       shipwarped = true;
-      enableCollision();
+      if(! isCollisionEnabled()) enableCollision();
    }
 
    if(stream->readFlag())        // Health

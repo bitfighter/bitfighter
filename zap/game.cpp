@@ -929,8 +929,11 @@ void ServerGame::idle(U32 timeDelta)
 
    for(GameConnection *walk = GameConnection::getClientList(); walk ; walk = walk->getNextClient())
    {
-      walk->addToTimeCredit(timeDelta);
-      walk->updateAuthenticationTimer(timeDelta);
+      if(! walk->isRobot())
+      {
+         walk->addToTimeCredit(timeDelta);
+         walk->updateAuthenticationTimer(timeDelta);
+      }
    }
 
    // Compute new world extents -- these might change if a ship flies far away, for example...
