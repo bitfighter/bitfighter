@@ -82,6 +82,22 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
    if(Parent::processKeyCode(keyCode))    // Check for cancel keys
       return true;
 
+   if(keyCode == BUTTON_1 || keyCode == KEY_1)
+   {
+      Vector<string> words;
+      words.push_back("engt");
+      gGameUserInterface.processCommand(words);
+      gGameUserInterface.setPlayMode();
+   }
+   if(keyCode == BUTTON_2 || keyCode == KEY_2)
+   {
+      Vector<string> words;
+      words.push_back("engf");
+      gGameUserInterface.processCommand(words);
+      gGameUserInterface.setPlayMode();
+   }
+
+
    return true;
 }
 
