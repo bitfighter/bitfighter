@@ -211,7 +211,7 @@ void GameUserInterface::displayErrorMessage(const char *format, ...)
 void GameUserInterface::displayMessage(const Color &msgColor, const char *format, ...)
 {
    // Ignore empty message
-   if(strlen(format) == 0)
+   if(!strcmp(format, ""))
       return;
 
    // Create a slot for our new message
