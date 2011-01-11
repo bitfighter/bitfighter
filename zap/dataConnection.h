@@ -76,8 +76,6 @@ public:
 };
 
 
-extern enum TerminationReason;
-
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -115,7 +113,7 @@ public:
 
    DataSender mDataSender;
    void onConnectionEstablished();
-   void onConnectionTerminated(TerminationReason, const char *);
+   void onConnectionTerminated(NetConnection::TerminationReason, const char *);
 
    static string getErrorMessage(SenderStatus stat, const string &filename);
 
