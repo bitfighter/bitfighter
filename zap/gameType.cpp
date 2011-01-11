@@ -897,8 +897,9 @@ void GameType::saveGameStats()
          masterConn->s2mSendGameStatistics_3(BUILD_VERSION, getGameTypeString(), isTeamGame(),
                                           mLevelName, teams, scores, 
                                           colorR, colorG, colorB, players, bots, timeInSecs);
-		if(gIniSettings.LogStats)
+		switch(gIniSettings.LogStats)
 		{
+		case 1:
 			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i",BUILD_VERSION,getGameTypeString(), timeInSecs/60, timeInSecs%60);
 			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
 			for(S32 i=0; i < mTeams.size(); i++)
@@ -910,6 +911,10 @@ void GameType::saveGameStats()
 					, (S32) mTeams[i].color.b*9
 					, mTeams[i].getName().getString()
 					);
+			break;
+		// case 2: // For using other formats
+		default:
+			logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
 		}
 
       for(S32 i = 0; i < mClientList.size(); i++)
@@ -924,8 +929,9 @@ void GameType::saveGameStats()
                                                mClientList[i]->getScore(),
                                                statistics->getKills(), statistics->getDeaths(), 
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
-			if(gIniSettings.LogStats)
+			switch(gIniSettings.LogStats)
 			{
+			case 1:
 				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i"
 					, mClientList[i]->isRobot ? "Robot" : "Player"
 					, mClientList[i]->name.getString()
@@ -936,6 +942,8 @@ void GameType::saveGameStats()
 					, statistics->getDeaths() 
                , statistics->getSuicides()
 					);
+				break;
+			// case 2: // For using other formats
 			}
       }
    }
@@ -1492,6 +1500,10 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
 
 void GameType::addItemOfInterest(Item *theItem)
 {
+#ifdef TNL_DEBUG
+   for(S32 i = 0; i < mItemsOfInterest.size(); i++)
+      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != theItem, "item in ItemOfInterest already exist.");
+#endif
    ItemOfInterest i;
    i.theItem = theItem;
    i.teamVisMask = 0;
@@ -1506,6 +1518,13 @@ void GameType::queryItemsOfInterest()
    for(S32 i = 0; i < mItemsOfInterest.size(); i++)
    {
       ItemOfInterest &ioi = mItemsOfInterest[i];
+      if(ioi.theItem.isNull())
+      {
+         // Currently can happen when dropping HuntersFlagItem in ZoneControlGameType.
+         TNLAssert(false,"item in ItemOfInterest is NULL. This can happen when an item got deleted.");
+         mItemsOfInterest.erase(i);    // non-debug mode will skip TNLAssert, do this to fix this error.
+         break;
+      }
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
       Point pos = ioi.theItem->getActualPos();
       Point scopeRange(Game::PlayerSensorHorizVisDistance, Game::PlayerSensorVertVisDistance);
@@ -1667,9 +1686,18 @@ void GameType::serverAddClient(GameConnection *theClient)
       }
    }
 
+   cref->isRobot = theClient->isRobot();
+   if(cref->isRobot)                     // Robots use their own team number, if in range.
+   {
+      Ship *ship = dynamic_cast<Ship *>(theClient->getControlObject());
+      if(ship)
+      {
+         if(ship->getTeam() >= -2 && ship->getTeam() < mTeams.size())
+            minTeamIndex = ship->getTeam();
+      }
+   }
    // ...and add new player to that team
    cref->setTeam(minTeamIndex);
-	cref->isRobot = cref->clientConnection->isRobot();
    mClientList.push_back(cref);
    theClient->setClientRef(cref);
 
@@ -2336,7 +2364,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    //{
    //   s2cAddClient(Robot::robots[i]->getName(), false, false, true, false);
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
-   //}	
+   //}
 
    // An empty list clears the barriers
    Vector<F32> v;

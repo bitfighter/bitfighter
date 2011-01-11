@@ -819,6 +819,7 @@ void EditorUserInterface::validateLevel()
    bool foundTeamFlags = false;
    bool foundTeamFlagSpawns = false;
    bool foundFlags = false;
+   S32 foundFlagCount = 0;
    bool foundNeutralSpawn = false;
 
    Vector<bool> foundSpawn;
@@ -843,6 +844,7 @@ void EditorUserInterface::validateLevel()
       else if(mItems[i].index == ItemFlag)
       {
          foundFlags = true;
+         foundFlagCount++;
          if(mItems[i].team >= 0)
             foundTeamFlags = true;
       }
@@ -856,13 +858,13 @@ void EditorUserInterface::validateLevel()
 
    // "Unversal errors" -- levelgens can't (yet) change gametype
 
-   // The other thing that can cause a crash is a soccer ball in a a game other than SoccerGameType
+   // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
    if(foundSoccerBall && strcmp(mGameType, "SoccerGameType"))
-      mLevelErrorMsgs.push_back("ERROR: Soccer ball can only be used in soccer game.");
+      mLevelErrorMsgs.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
-   // Check for the nexus object in a non-hunter game.  This cause endless grief too!
+   // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
    if(foundNexus && strcmp(mGameType, "HuntersGameType"))
-      mLevelErrorMsgs.push_back("ERROR: Nexus object can only be used in Hunters game.");
+      mLevelErrorMsgs.push_back("WARNING: Nexus object can only be used in Hunters game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
    if(!foundNexus && !strcmp(mGameType, "HuntersGameType"))
@@ -877,6 +879,9 @@ void EditorUserInterface::validateLevel()
    if(foundTeamFlagSpawns && !foundTeamFlags)
       mLevelErrorMsgs.push_back("WARNING: Found team flag spawns but no team flags.");
 
+   // Multiple flags in rabbit, problem is carrying multiple flags, and only one of the player score while time goes by.
+   if(foundFlagCount >= 2 && !strcmp(mGameType, "RabbitGameType"))
+      mLevelErrorMsgs.push_back("WARNING: Multiple flags in rabbit game type.");
 
    // Errors that may be corrected by levelgen -- script could add spawns
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams

@@ -322,8 +322,12 @@ static void loadHostConfiguration()
    gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
    gIniSettings.minSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
 
-	gIniSettings.LogStats = (lcase(gINI.GetValue("Host", "LogStats", "no")) == "yes");
-	gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) == "yes");
+   // allow "Yes" to enable logging
+   string str = gINI.GetValue("Host", "LogStats", "1");
+   gIniSettings.LogStats = atoi(str.c_str());
+   if(lcase(str) == "yes") gIniSettings.LogStats = 1;
+
+   gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) == "yes");
 }
 
 
@@ -1155,6 +1159,7 @@ static void writeHost()
       addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
       addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
+      addComment(" LogStats - Write ending game score statistics into server log, 0 = don't write, 1 = write ending scores, other numbers to adjust formats might be added in the future");
       addComment("----------------");
    }
    gINI.SetValue  (section, "ServerName", gIniSettings.hostname);
@@ -1169,6 +1174,7 @@ static void writeHost()
    gINI.setValueYN(section, "AllowGetMap", gIniSettings.allowGetMap);
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);
    gINI.SetValueI (section, "MinDedicatedDelay", gIniSettings.minSleepTimeDedicatedServer);
+   gINI.SetValueI (section, "LogStats", gIniSettings.LogStats);
 }
 
 
