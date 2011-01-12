@@ -519,7 +519,7 @@ F32 getCurrentRating(GameConnection *conn)
 // Highest ratings first
 static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 {
-   return getCurrentRating(*a) < getCurrentRating(*b);
+   return getCurrentRating(*b) - getCurrentRating(*a);
 }
 
 

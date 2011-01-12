@@ -421,14 +421,14 @@ void GameType::idle(GameObject::IdleCallPath path)
 // Sorts players by score
 S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 {
-   return a->getPointer()->getScore() < b->getPointer()->getScore();
+   return b->getPointer()->getScore() - a->getPointer()->getScore();
 }
 
 
 // Sorts teams by score
 S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 {
-   return a->getScore() > b->getScore();
+   return a->getScore() - b->getScore();
 }
 
 

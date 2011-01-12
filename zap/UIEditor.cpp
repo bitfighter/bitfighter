@@ -459,11 +459,11 @@ void EditorUserInterface::makeSureThereIsAtLeastOneTeam()
 S32 QSORT_CALLBACK geometricSort(WorldItem *a, WorldItem *b)
 {
    if(a->index == ItemBarrierMaker)
-      return false;
+      return -1;
    if(b->index == ItemBarrierMaker)
-      return true;
+      return 1;
 
-   return( (a->geomType() < b->geomType() ) );
+   return( (b->geomType() - a->geomType() ) );
 }
 
 
