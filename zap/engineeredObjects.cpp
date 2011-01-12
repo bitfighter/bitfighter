@@ -37,39 +37,56 @@ namespace Zap
 
 static Vector<DatabaseObject *> fillVector;
 
-// Returns "" if location is OK, otherwise returns an error message
-// Runs on client and server
-bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectType)
+// Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
+bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal)
 {
-   if(!ship->isCarryingItem(ResourceItemType))    // Ship needs a resource
-   {
-      mErrorMessage = "Need resource item to use Engineer module";
-      return false;
-   }
-
-   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost())
-   {
-      mErrorMessage = "Not enough energy to build object.";
-      return false;
-   }
-
    // Ship must be within Ship::MaxEngineerDistance of a wall, pointing at where the object should be placed
    Point startPoint = ship->getActualPos();
-   Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;     // MaxEngineerDistance = 100
+   Point endPoint = startPoint + ship->getAimVector() * Ship::MaxEngineerDistance;     
 
    F32 collisionTime;
 
    GameObject *hitObject = ship->findObjectLOS(BarrierType, MoveObject::ActualState, startPoint, endPoint, 
-                                               collisionTime, mDeployNormal);
+                                               collisionTime, deployNormal);
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
-   {
-      mErrorMessage = "Could not find a suitable wall for mounting the item";
       return false;
-   }
 
    // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
-   mDeployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + mDeployNormal);
+   deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
+
+   return true;
+}
+
+
+// Check for sufficient energy and resources; return empty string if everything is ok
+string EngineerModuleDeployer::checkResourcesAndEnergy(Ship *ship)
+{
+   if(!ship->isCarryingItem(ResourceItemType)) 
+      return "!!! Need resource item to use Engineer module";
+
+   if(ship->getEnergy() < ship->getGame()->getModuleInfo(ModuleEngineer)->getPerUseCost())
+      return "!!! Not enough energy to engineer an object";
+
+   return "";
+}
+
+
+// Returns "" if location is OK, otherwise returns an error message
+// Runs on client and server
+bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectType)
+{
+   string msg;
+
+   mErrorMessage = checkResourcesAndEnergy(ship);
+   if(mErrorMessage != "")
+      return false;
+
+   if(!findDeployPoint(ship, mDeployPosition, mDeployNormal))
+   {
+      mErrorMessage = "!!! Could not find a suitable wall for mounting the item";
+      return false;
+   }
 
    Vector<Point> bounds;
 
@@ -88,7 +105,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
 
    if(!EngineeredObject::checkDeploymentPosition(bounds))
    {
-      mErrorMessage = "Cannot deploy item at this location";
+      mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
    }
 
@@ -103,7 +120,8 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    // Forcefield starts at the end of the projector.  Need to know where that is.
    Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal);
 
-   // Now we can find the end point.  Note that endPoint is repurposed here...
+   // Now we can find the end point...
+   Point endPoint;
    DatabaseObject *collObj;
    ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, 1.0, endPoint, &collObj);
 
@@ -160,7 +178,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
 
    if(collision)
    {
-      mErrorMessage = "Cannot deply forcefield where it could cross another.";
+      mErrorMessage = "!!! Cannot deply forcefield where it could cross another.";
       return false;
    }
 

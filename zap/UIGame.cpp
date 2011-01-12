@@ -813,6 +813,13 @@ void GameUserInterface::enterMode(GameUserInterface::Mode mode)
 }
 
 
+void GameUserInterface::renderEngineeredItemDeploymentMarker(Ship *ship)
+{
+   if(mCurrentMode == EngineerMode)
+      mEngineerHelper.renderDeploymentMarker(ship);
+}
+
+
 // Runs on client
 void GameUserInterface::dropItem()
 {
@@ -958,9 +965,12 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
          if(keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer || 
             keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)
          {
-            if(!ship->isCarryingItem(ResourceItemType))
+            string msg;
+
+            msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);
+            if(msg != "")
             {
-               displayErrorMessage("!!! Need to be carrying a resource item to use Engineer module");
+               displayErrorMessage(msg.c_str());
                return;
             }
 
@@ -1679,7 +1689,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
 
          // Check deployment status on client; will be checked again on server, but server will only handle likely valid placements
          if(!deployer.canCreateObjectAtLocation(ship, objType))     
-            displayMessage(Color(0,1,1) /* Aqua */, deployer.getErrorMessage().c_str());
+            displayErrorMessage(deployer.getErrorMessage().c_str());
          else
             gc->c2sEngineerDeployObject(objType);
       }

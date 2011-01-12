@@ -243,6 +243,8 @@ public:
    Mode mCurrentMode;              // Current game mode
    void setPlayMode();             // Set mode to PlayMode
 
+   void renderEngineeredItemDeploymentMarker(Ship *ship);
+
    void receivedControlUpdate(bool recvd) { mGotControlUpdate = recvd; }
 
    bool isInScoreboardMode() { return mInScoreboardMode; }

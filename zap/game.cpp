@@ -25,6 +25,7 @@
 
 #include "barrier.h"
 #include "config.h"
+#include "engineeredObjects.h"    // For EngineerModuleDeployer
 #include "game.h"
 #include "gameLoader.h"
 #include "gameNetInterface.h"
@@ -1594,10 +1595,13 @@ void ClientGame::renderOverlayMap()
 ////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 
+// ==> should move render to UIGame?
+
+static Point screenSize, position;
 
 void ClientGame::renderNormal()
 {
-    if(!hasValidControlObject())
+   if(!hasValidControlObject())
       return;
 
    GameObject *controlObject = mConnectionToServer->getControlObject();
@@ -1605,7 +1609,7 @@ void ClientGame::renderNormal()
    if(!u)
       return;
 
-   Point position = u->getRenderPos();
+   position.set(u->getRenderPos());
 
    glPushMatrix();
 
@@ -1621,7 +1625,7 @@ void ClientGame::renderNormal()
    drawStars(1.0, position, visExt * 2);
 
    // Render all the objects the player can see
-   Point screenSize = visExt;
+   screenSize.set(visExt);
    Rect extentRect(position - screenSize, position + screenSize);
 
    rawRenderObjects.clear();
@@ -1645,15 +1649,21 @@ void ClientGame::renderNormal()
 
    FXTrail::renderTrails();
 
+   Ship *ship = NULL;
+   if(mConnectionToServer.isValid())
+      ship = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());
+
+   if(ship)
+      gGameUserInterface.renderEngineeredItemDeploymentMarker(ship);
+
    glPopMatrix();
 
    // Render current ship's energy
-   if(mConnectionToServer.isValid())
+   if(ship)
    {
-      Ship *s = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());
-      if(s)
-         renderEnergyGuage(s->mEnergy, Ship::EnergyMax, Ship::EnergyCooldownThreshold);
+      renderEnergyGuage(ship->mEnergy, Ship::EnergyMax, Ship::EnergyCooldownThreshold);
    }
+
 
    //renderOverlayMap();     // Draw a floating overlay map
 }
