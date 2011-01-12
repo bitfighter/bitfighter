@@ -54,10 +54,31 @@
 #include "luaUtil.h"
 #include "glutInclude.h"
 
+
 #define hypot _hypot    // Kill some warnings
 
 namespace Zap
 {
+
+// To use this RobotController, add Robot without any parameters in level file.
+// I would like to keep this class here, to speed up compiler.
+// If this class is in Robot.h, it will have to recompile everything when we change anything in this class
+class RobotController
+{
+	Robot *ship;
+	GameType *gametype;
+	void gotoPoint(Point pos);
+	Point prevEnemyPosition;
+
+public:
+	RobotController()
+	{
+		// nothing
+	}
+	void run(Robot *newship, GameType *newgametype);
+};
+
+
 
 static Vector<DatabaseObject *> fillVector;      // Reusable workspace for writing lists of objects
 
@@ -1320,6 +1341,7 @@ Vector<Robot *> Robot::robots;
 // Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
+	robotController = new RobotController();
    gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
@@ -1337,12 +1359,16 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
       mModuleActive[i] = false;
+
+	isRunningScript = false;
+
 }
 
 
 // Destructor, runs on client and server
 Robot::~Robot()
 {
+	delete (RobotController *)robotController;
    if(gameConnectionInitalized)
    {
       GameConnection *gc = getOwner();
@@ -1434,6 +1460,7 @@ extern string joindir(const string &path, const string &filename);
 
 bool Robot::startLua()
 {
+	if(! isRunningScript) return true;
    LuaObject::cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
@@ -1554,6 +1581,7 @@ bool Robot::startLua()
 // TODO: This is almost identical to the same-named function in luaLevelGenerator.cpp, but each call their own logError function.  How can we combine?
 bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
+	if(! isRunningScript) return true;
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
    string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
@@ -1579,6 +1607,7 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 // return false if failed
 bool Robot::runMain()
 {
+	if(! isRunningScript) return true;
    try
    {
       lua_getglobal(L, "_main");
@@ -1653,17 +1682,25 @@ void Robot::kill()
 
 bool Robot::processArguments(S32 argc, const char **argv)
 {
-   if(argc < 2)               // Two required: team and bot file
-      return false;
+   //if(argc < 2)               // Two required: team and bot file
+   //   return false;
 
-   mTeam = atoi(argv[0]);     // Need some sort of bounds check here??
+	if(argc >= 1)
+      mTeam = atoi(argv[0]);
+	else
+		mTeam = -10;   // The Gametype serverAddClient will take care of out of bound checking
 
-   mFilename = gConfigDirs.findBotFile(argv[1]);
-   if(mFilename == "")
-   {
-      logprintf("Could not find bot file %s", argv[1]);     // TODO: Better handling here
-      return false;
-   }
+	if(argc >= 2)
+	{
+		mFilename = gConfigDirs.findBotFile(argv[1]);
+		if(mFilename == "")
+		{
+			logprintf("Could not find bot file %s", argv[1]);     // TODO: Better handling here
+			return true;  // we can run built-in robot
+		}
+		else
+			isRunningScript = true;
+	}
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
@@ -1671,7 +1708,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
    // We're using string here as a stupid way to get done what we need to do... perhaps there is a better way.
 
-   for(S32 i = 2; i < argc; i++)
+   for(S32 i = 2; i < argc; i++)        // Does nothing if we have no args.
       mArgs.push_back(string(argv[i]));
 
    return true;
@@ -1789,6 +1826,8 @@ void Robot::idle(GameObject::IdleCallPath path)
          {
             //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
             GameConnection *gc = new GameConnection(); // Need GameConnection and ClientRef to keep track of score
+				if(getName() == StringTableEntry(""))       // Might not have a name.
+					setName(GameConnection::makeUnique("Robot").c_str());
             gc->setClientName(getName());
             setOwner(gc);
             gc->linkToClientList();
@@ -1811,6 +1850,8 @@ void Robot::idle(GameObject::IdleCallPath path)
 
    if(path == GameObject::ServerIdleMainLoop)      // Running on server
    {
+		if(isRunningScript)
+		{
       // Clear out current move.  It will get set just below with the lua call, but if that function
       // doesn't set the various move components, we want to make sure that they default to 0.
       mCurrentMove.fire = false;
@@ -1838,12 +1879,72 @@ void Robot::idle(GameObject::IdleCallPath path)
          delete this;
          return;
       }
+		}
+		else
+		{
+			((RobotController *)robotController)->run(this,getGame()->getGameType());
+		}
 
-      Ship::idle(GameObject::ServerIdleControlFromClient);   // Script is controlling the ship.
+      Ship::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client.
       return;
    }
    TNLAssert(path != GameObject::ServerIdleControlFromClient, "Robot::idle, Should not have ServerIdleControlFromClient");
    Ship::idle(path);     // All client paths can use this idle.
+}
+
+void RobotController::run(Robot *newship, GameType *newgametype)
+{
+	ship = newship;
+	gametype = newgametype;
+
+
+
+	F32 minDistance = F32_MAX;
+	Ship *enemyship = NULL;
+	Vector<DatabaseObject *> objects;
+   Point pos = ship->getActualPos();
+   Rect queryRect(pos, pos);
+   queryRect.expand(gServerGame->computePlayerVisArea(ship));
+	gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
+	for(S32 i=0; i<objects.size(); i++)
+	{
+		Ship *foundship = dynamic_cast<Ship *>(objects[i]);
+		if(foundship != NULL)
+		if(!gametype->isTeamGame() || enemyship->getTeam() != ship->getTeam())
+		{
+			F32 newDist = pos.distanceTo(foundship->getActualPos());
+			if(newDist < minDistance)
+			{
+				if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
+				{
+					minDistance = newDist;
+					enemyship = foundship;
+				}
+			}
+		}
+	}
+	if(enemyship != NULL)
+	{
+		Move move = ship->getCurrentMove();
+		//move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
+		WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
+		F32 interceptAngle;
+		move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
+		if(move.fire)
+			move.angle = interceptAngle;
+		ship->setCurrentMove(move);
+	}
+	else
+	{
+		Move move = ship->getCurrentMove();
+		move.fire = false;
+		ship->setCurrentMove(move);
+	}
+}
+
+void RobotController::gotoPoint(Point point)
+{
+	//ship->getCurrentMove();
 }
 
 };

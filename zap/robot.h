@@ -106,6 +106,7 @@ class LuaRobot;
  * Notice that I kept the function names the same for simplicity.
  */
 
+
 class Robot : public Ship
 {
    typedef Ship Parent;
@@ -125,6 +126,8 @@ private:
    static const S32 RobotRespawnDelay = 1500;
    Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
    bool gameConnectionInitalized;
+	bool isRunningScript;
+	void *robotController;       // A pointer of RobotController, for speeding up compiler, it is (void *) here.
 
 public:
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
