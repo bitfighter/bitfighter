@@ -114,7 +114,8 @@ GameConnection::~GameConnection()
    mNext->mPrev = mPrev;
 
    // Log the disconnect...
-   logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
+   if(! mIsRobot)  //Logging Robot disconnect appears useless. "IP:any:0 - client quickbot disconnected."
+      logprintf(LogConsumer::LogConnection, "%s - client \"%s\" disconnected.", getNetAddressString(), mClientName.getString());
 
    if(isConnectionToClient() && gServerGame->getSuspendor() == this)     // isConnectionToClient only true if we're the server
       gServerGame->suspenderLeftGame();

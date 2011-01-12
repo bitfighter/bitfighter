@@ -520,7 +520,7 @@ F32 getCurrentRating(GameConnection *conn)
 // Highest ratings first
 static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
 {
-   return getCurrentRating(*a) < getCurrentRating(*b);
+   return getCurrentRating(*b) - getCurrentRating(*a);
 }
 
 
@@ -930,8 +930,11 @@ void ServerGame::idle(U32 timeDelta)
 
    for(GameConnection *walk = GameConnection::getClientList(); walk ; walk = walk->getNextClient())
    {
-      walk->addToTimeCredit(timeDelta);
-      walk->updateAuthenticationTimer(timeDelta);
+      if(! walk->isRobot())
+      {
+         walk->addToTimeCredit(timeDelta);
+         walk->updateAuthenticationTimer(timeDelta);
+      }
    }
 
    // Compute new world extents -- these might change if a ship flies far away, for example...

@@ -995,7 +995,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 // Another helper function: finds closest zone to a given point
 S32 LuaRobot::findClosestZone(Point point)
 {
-	// Make two passes, first with a short distance, second with a longer one.  Hope we find it in the first pass because
+   // Make two passes, first with a short distance, second with a longer one.  Hope we find it in the first pass because
    // the second pass checks all zones, and that could take a while.
    F32 distsq = 262144;     // 512^2
    S32 closest = -3;
@@ -1320,21 +1320,16 @@ Vector<Robot *> Robot::robots;
 // Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
-	gameConnectionInitalized = false;
+   gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
    L = NULL;
    mCurrentZone = -1;
    flightPlanTo = -1;
 
-   mLastMoveTime = 0;
-
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
-   respawnTimer.reset(100, RobotRespawnDelay);
+   // respawnTimer.reset(100, RobotRespawnDelay);
 
-   hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
-
-   disableCollision();
 
    mPlayerInfo = new RobotPlayerInfo(this);
    mScore = 0;
@@ -1348,17 +1343,17 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-	if(gameConnectionInitalized)
-	{
-		GameConnection *gc = getOwner();
-		if(getGame()->getGameType())
-		{
-			getGame()->getGameType()->serverRemoveClient(gc);
-		}
-		setOwner(NULL);
-		delete gc->getClientRef();
-		delete gc;
-	}
+   if(gameConnectionInitalized)
+   {
+      GameConnection *gc = getOwner();
+      if(getGame()->getGameType())
+      {
+         getGame()->getGameType()->serverRemoveClient(gc);
+      }
+      setOwner(NULL);
+      delete gc->getClientRef();
+      delete gc;
+   }
    // Close down our Lua interpreter
    LuaObject::cleanupAndTerminate(L);
 
@@ -1394,7 +1389,7 @@ bool Robot::initialize(Point &pos)
 {
    try
    {
-      respawnTimer.clear();
+      //respawnTimer.clear();
       flightPlan.clear();
 
       mCurrentZone = -1;   // Correct value will be calculated upon first request
@@ -1415,7 +1410,7 @@ bool Robot::initialize(Point &pos)
    {
       logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
       //delete this;         //can't delete here, that can cause memory errors
-		return false;          //return false have an effect of disconnecting the robot.
+      return false;          //return false have an effect of disconnecting the robot.
    }
    return true;
 } 
@@ -1594,9 +1589,9 @@ bool Robot::runMain()
    {
       logError("Robot error running main(): %s.  Shutting robot down.", e.what());
       //delete this;  //might cause memory errors.
-		return false;
+      return false;
    }
-	return true;
+   return true;
 }
 
 
@@ -1616,6 +1611,9 @@ void Robot::onAddedToGame(Game *game)
       return;
 
    // Server only from here on out
+
+   hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
+   disableCollision();
 
    //setScopeAlways();          // Make them always visible on cmdr map --> del
    robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
@@ -1640,8 +1638,9 @@ void Robot::onAddedToGame(Game *game)
 
 void Robot::kill()
 {
+   if(hasExploded) return;
    hasExploded = true;
-   respawnTimer.reset();
+   //respawnTimer.reset();
    setMaskBits(ExplosionMask);
 
    disableCollision();
@@ -1775,33 +1774,29 @@ void Robot::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT;
 
-   if(path == GameObject::ServerIdleMainLoop)      // Running on server... but then, aren't we always??
+   if(path == GameObject::ServerIdleMainLoop)      // Running on server
    {
-      //Better deltaT timing?
-		//U32 ms = Platform::getRealMilliseconds();
-      deltaT = getCurrentMove().time;   //(ms - mLastMoveTime);
+      deltaT = mCurrentMove.time;
 
-      if(deltaT == 0)      // If deltaT is 0, this may cause problems down the line.  Best thing is just to skip this round.
-         return;
-
-      //mLastMoveTime = ms;
-      mCurrentMove.time = deltaT;
+      TNLAssert(deltaT != 0, "Robot::idle Time is zero")   // Time should never be zero anymore
+      //if(deltaT == 0)      // If deltaT is 0, this may cause problems down the line.  Best thing is just to skip this round.
+      //   return;
 
       // Check to see if we need to respawn this robot
       if(hasExploded)
       {
-			if(!gameConnectionInitalized)  //after gameConnection is initalized, it should rspawn.
-			{
-				//  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
-				GameConnection *gc = new GameConnection(); // Need GameConnection and ClientRef to keep track of score
-				gc->setClientName(getName());
-				setOwner(gc);
-				gc->linkToClientList();
-				gc->setControlObject(this);
-				gc->setIsRobot(true);
-				getGame()->getGameType()->serverAddClient(gc);  //ClientRef is created in serverAddClient
-				gameConnectionInitalized = true;
-			}
+         if(!gameConnectionInitalized)  //after gameConnection is initalized, it should rspawn.
+         {
+            //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
+            GameConnection *gc = new GameConnection(); // Need GameConnection and ClientRef to keep track of score
+            gc->setClientName(getName());
+            setOwner(gc);
+            gc->linkToClientList();
+            gc->setControlObject(this);
+            gc->setIsRobot(true);
+            getGame()->getGameType()->serverAddClient(gc);  //ClientRef is created in serverAddClient
+            gameConnectionInitalized = true;
+         }
          //if(respawnTimer.update(mCurrentMove.time))  //not needed anymore
          //{
             //gServerGame->getGameType()->spawnRobot(this);
@@ -1844,69 +1839,11 @@ void Robot::idle(GameObject::IdleCallPath path)
          return;
       }
 
-
-      // If we've changed the mCurrentMove, then we need to set
-      // the MoveMask to ensure that it is sent to the clients
-      if(!mCurrentMove.isEqualMove(&mLastMove))
-         setMaskBits(MoveMask);
-
-      processMove(ActualState);
-
-      // Apply impulse vector and reset it
-      mMoveState[ActualState].vel += mImpulseVector;
-      mImpulseVector.set(0,0);
-
-      // Update the render state on the server to match
-      // the actual updated state, and mark the object
-      // as having changed Position state.  An optimization
-      // here would check the before and after positions
-      // so as to not update unmoving ships.
-
-      mMoveState[RenderState] = mMoveState[ActualState];
-      setMaskBits(PositionMask);
+      Ship::idle(GameObject::ServerIdleControlFromClient);   // Script is controlling the ship.
+      return;
    }
-   else if(path == GameObject::ClientIdleMainRemote)  // Running on client (but not replaying saved game)
-   {
-      // On the client, update the interpolation of this object, unless we are replaying control moves
-      mInterpolating = (getActualVel().lenSquared() < MoveObject::InterpMaxVelocity*MoveObject::InterpMaxVelocity);
-      updateInterpolation();
-   }
-
-   updateExtent();            // Update the object in the game's extents database
-   mLastMove = mCurrentMove;  // Save current move
-
-   // Update module timers
-   mSensorZoomTimer.update(mCurrentMove.time);
-   mCloakTimer.update(mCurrentMove.time);
-
-   if(path == GameObject::ServerIdleMainLoop)    // Was ClientIdleControlReplay
-   {
-      // Process weapons and energy on controlled object objects
-      processWeaponFire();
-      processEnergy();
-   }
-
-   if(path == GameObject::ClientIdleMainRemote)       // Probably should be server
-   {
-      // For ghosts, find some repair targets for rendering the repair effect
-      if(isModuleActive(ModuleRepair))
-         findRepairTargets();
-   }
-
-   if(false && isModuleActive(ModuleRepair))     // Probably should be server
-      repairTargets();
-
-   // If we're on the client, do some effects
-   if(path == GameObject::ClientIdleControlMain ||
-      path == GameObject::ClientIdleMainRemote)
-   {
-      mWarpInTimer.update(mCurrentMove.time);
-      // Emit some particles, trail sections and update the turbo noise
-      emitMovementSparks();
-      for(U32 i=0; i<TrailCount; i++)
-         mTrail[i].tick(mCurrentMove.time);
-      updateModuleSounds();
-   }
+   TNLAssert(path != GameObject::ServerIdleControlFromClient, "Robot::idle, Should not have ServerIdleControlFromClient");
+   Ship::idle(path);     // All client paths can use this idle.
 }
 
 };
