@@ -4693,8 +4693,11 @@ void EditorUserInterface::testLevel()
       gYesNoUserInterface.setInstr("Press [Y] to start, [ESC] to cancel");
 		gYesNoUserInterface.registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
       gYesNoUserInterface.activate();
+
       return;
    }
+
+   testLevelStart();
 }
 
 
