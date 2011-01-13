@@ -899,22 +899,21 @@ void GameType::saveGameStats()
                                           colorR, colorG, colorB, players, bots, timeInSecs);
 		switch(gIniSettings.LogStats)
 		{
-		case 1:
-			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i",BUILD_VERSION,getGameTypeString(), timeInSecs/60, timeInSecs%60);
-			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
-			for(S32 i=0; i < mTeams.size(); i++)
-				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%i,%i,%i Name=%s"
-					, i                   //Using unsorted, to correctly use index as team ID. Teams can have same name.
-					, mTeams[i].getScore()
-					, (S32) mTeams[i].color.r*9   //Don't need accuracy, will use one digit number.
-					, (S32) mTeams[i].color.g*9
-					, (S32) mTeams[i].color.b*9
-					, mTeams[i].getName().getString()
-					);
-			break;
-		// case 2: // For using other formats
-		default:
-			logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
+		   case 1:
+			   logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
+			   logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
+			   for(S32 i = 0; i < mTeams.size(); i++)
+				   logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%i,%i,%i Name=%s",
+					   i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
+					   mTeams[i].getScore(),
+					   (S32) mTeams[i].color.r*9,   // Don't need accuracy, will use one digit number.
+					   (S32) mTeams[i].color.g*9,
+					   (S32) mTeams[i].color.b*9,
+					   mTeams[i].getName().getString());
+			   break;
+		   // case 2: // For using other formats
+		   default:
+			   logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
 		}
 
       for(S32 i = 0; i < mClientList.size(); i++)
@@ -931,19 +930,18 @@ void GameType::saveGameStats()
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
 			switch(gIniSettings.LogStats)
 			{
-			case 1:
-				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i"
-					, mClientList[i]->isRobot ? "Robot" : "Player"
-					, mClientList[i]->name.getString()
-					, mClientList[i]->getTeam()
-					, mClientList[i]->getScore()
-					, getCurrentRating(mClientList[i]->clientConnection)
-					, statistics->getKills()
-					, statistics->getDeaths() 
-               , statistics->getSuicides()
-					);
-				break;
-			// case 2: // For using other formats
+			   case 1:
+				   logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
+					   mClientList[i]->isRobot ? "Robot" : "Player",
+					   mClientList[i]->name.getString(),
+					   mClientList[i]->getTeam(),
+					   mClientList[i]->getScore(),
+				      getCurrentRating(mClientList[i]->clientConnection),
+					   statistics->getKills(),
+					   statistics->getDeaths(),
+                  statistics->getSuicides());
+				   break;
+			   // case 2: // For using other formats
 			}
       }
    }
