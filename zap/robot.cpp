@@ -54,6 +54,9 @@
 #include "luaUtil.h"
 #include "glutInclude.h"
 
+#include "oglconsole.h"
+
+
 
 #define hypot _hypot    // Kill some warnings
 
@@ -1434,7 +1437,7 @@ bool Robot::initialize(Point &pos)
 
    }catch(LuaException &e)
    {
-      logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
+		logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
       //delete this;         //can't delete here, that can cause memory errors
       return false;          //return false have an effect of disconnecting the robot.
    }
@@ -1716,6 +1719,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 }
 
 
+extern OGLCONSOLE_Console gConsole;     //  main.cpp
 // Some rudimentary robot error logging.  Perhaps, someday, will become a sort of in-game error console.
 // For now, though, pass all errors through here.
 void Robot::logError(const char *format, ...)
@@ -1726,6 +1730,7 @@ void Robot::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
    logprintf(LogConsumer::LuaBotMessage, "***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
+   if(gClientGame) OGLCONSOLE_Print("***ROBOT ERROR*** in %s ::: %s\n", mFilename.c_str(), buffer);
 
    va_end(args);
 }

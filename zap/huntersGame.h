@@ -61,6 +61,7 @@ public:
    bool processArguments(S32 argc, const char **argv);
 
    bool mNexusIsOpen;      // Is the nexus open?
+	S32 getNexusTimeLeft() {return mNexusIsOpen ? mNexusCapTimer.getCurrent() : mNexusReturnTimer.getCurrent(); }
 
    // Info about this game type:
    bool isTeamGame() { return mTeams.size() > 1; }

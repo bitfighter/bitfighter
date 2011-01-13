@@ -67,6 +67,7 @@ Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
    method(LuaGameInfo, getEventScore),
    method(LuaGameInfo, getPlayers),
    method(LuaGameInfo, isNexusOpen),
+   method(LuaGameInfo, getNexusTimeLeft),
 
    {0,0}    // End method list
 };
@@ -99,6 +100,11 @@ S32 LuaGameInfo::isNexusOpen(lua_State *L)
 {
    HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
 	return theGameType ? returnBool(L, theGameType->mNexusIsOpen) : returnNil(L);;
+}
+S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
+{
+   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
+	return theGameType ? returnInt(L, theGameType->getNexusTimeLeft()) : returnNil(L);;
 }
 
 
