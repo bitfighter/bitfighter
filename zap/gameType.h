@@ -106,6 +106,7 @@ private:
    Vector<DatabaseObject *> mSpyBugs;    // List of all spybugs in the game
    bool mLevelHasLoadoutZone;
    bool mEngineerEnabled;
+   bool mShowAllBots;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 

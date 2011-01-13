@@ -25,6 +25,7 @@
 
 #include "gameType.h"
 #include "ship.h"
+#include "robot.h"
 #include "UIGame.h"
 #include "UINameEntry.h"
 #include "UIMenus.h"
@@ -136,6 +137,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mGlowingZoneTeam = -1;     // By default, all zones glow
    mLevelHasLoadoutZone = false;
    mEngineerEnabled = false;     // Is engineer module allowed?  By default, no
+   mShowAllBots = false;
 }
 
 
@@ -1432,6 +1434,7 @@ void GameType::performScopeQuery(GhostConnection *connection)
 }
 
 
+
 // Here is where we determine which objects are visible from player's ships.  Only runs on server.
 void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection)
 {
@@ -1495,6 +1498,12 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
    // Set object-in-scope for all objects found above
    for(S32 i = 0; i < fillVector.size(); i++)
       connection->objectInScope(dynamic_cast<GameObject *>(fillVector[i]));
+   
+   if(mShowAllBots && connection->isInCommanderMap())
+   {
+      for(S32 i = 0; i < Robot::robots.size(); i++)
+         connection->objectInScope(Robot::robots[i]);
+   }
 }
 
 
@@ -2429,8 +2438,7 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 // When adding new commands, please update GameUserInterface::populateChatCmdList() and also the help screen (UIInstructions.cpp)
 void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
-   if(!stricmp(cmd, ""))               // Just in case
-      return;
+   //if(!stricmp(cmd, ""))  return;     // removed, it will not cause any errors, we simply not going to find "" command
 
    if(!stricmp(cmd, "settime"))
    {
@@ -2475,6 +2483,20 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             s2cChangeScoreToWin(mWinningScore, clientRef->clientConnection->getClientName());
          }
      }
+   }
+   else if(!stricmp(cmd, "showBots"))
+   {
+      mShowAllBots = !mShowAllBots;  // Show all robots affects all players.
+      if(Robot::robots.size() == 0)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! There is no robots");
+      else
+      {
+         StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots is enabled by %e0") : StringTableEntry("Show all robots is disabled by %e0");
+         Vector<StringTableEntry> e;
+         e.push_back(clientRef->clientConnection->getClientName());
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+      }
    }
 	/* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
