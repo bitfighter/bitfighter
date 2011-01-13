@@ -1076,7 +1076,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }  // unpackUpdate
 
 
-F32 getAngleDiff(F32 a, F32 b)
+static F32 getAngleDiff(F32 a, F32 b)
 {
    // Figure out the shortest path from a to b...
    // Restrict them to the range 0-360
