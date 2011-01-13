@@ -257,9 +257,12 @@ private:
    string mErrorMessage;
 
 public:
-   bool canCreateObjectAtLocation(Ship *ship, U32 objectType);           // Check potential deployment position
+   bool canCreateObjectAtLocation(Ship *ship, U32 objectType);             // Check potential deployment position
    bool deployEngineeredItem(GameConnection *connection, U32 objectType);  // Deploy!
    string getErrorMessage() { return mErrorMessage; }
+
+   static bool findDeployPoint(Ship *ship, Point &deployPosition, Point &deployNormal);
+   static string checkResourcesAndEnergy(Ship *ship);
 };
 
 

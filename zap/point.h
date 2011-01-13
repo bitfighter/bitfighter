@@ -69,6 +69,7 @@ struct Point
    Point &operator-=(const Point &pt) { x -= pt.x; y -= pt.y; return *this; }
 
    Point operator*(const F32 f) { return Point (x * f, y * f); }
+
    Point &operator*=(const F32 f) { x *= f; y *= f; return *this; }
    Point &operator/=(const F32 f) { x /= f; y /= f; return *this; }
 

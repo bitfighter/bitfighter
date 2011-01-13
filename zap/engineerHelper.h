@@ -36,7 +36,7 @@ namespace Zap
 
 struct EngineerConstructionItemInfo
 {
-   EngineerBuildObjects mObjectId;
+   EngineerBuildObjects mObjectType;
    KeyCode mKey;            // Keyboard key used to select in menu
    KeyCode mButton;         // Controller button used to select in menu
    const char *mName;       // Name used on menu
@@ -45,9 +45,9 @@ struct EngineerConstructionItemInfo
 
    EngineerConstructionItemInfo() { /* Do nothing */ };      // Default constructor, should never be used
 
-   EngineerConstructionItemInfo(EngineerBuildObjects objId, const char *name, KeyCode key, KeyCode button, const char *help = "")    
+   EngineerConstructionItemInfo(EngineerBuildObjects objectType, const char *name, KeyCode key, KeyCode button, const char *help = "")    
    {
-      mObjectId = objId;
+      mObjectType = objectType;
       mKey = key;
       mButton = button;
       mName = name;
@@ -59,6 +59,8 @@ struct EngineerConstructionItemInfo
 ////////////////////////////////////////
 ////////////////////////////////////////
 
+class Ship;
+
 class EngineerHelper : public HelperMenu
 {
    typedef HelperMenu Parent;
@@ -67,11 +69,15 @@ private:
    const char *getCancelMessage() { return "Engineered item not deployed"; }
    Vector<EngineerConstructionItemInfo> mEngineerCostructionItemInfos;
 
+   S32 mSelectedItem;
+
 public:
    EngineerHelper();                          // Constructor
 
-   void render();                
+   void onMenuShow(bool fromController);
    bool processKeyCode(KeyCode keyCode);   
+   void render();                
+   void renderDeploymentMarker(Ship *ship);
 };
 
 };
