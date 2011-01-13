@@ -829,6 +829,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
       }
       stream->writeFlag(false);
    }  // End initial update
+
    if(stream->writeFlag(updateMask & AuthenticationMask))     // Player authentication status changed
    {
       stream->writeStringTableEntry(mPlayerName);
