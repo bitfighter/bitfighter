@@ -247,6 +247,7 @@ struct IniSettings      // With defaults specified
       verboseHelpMessages = true;        // If true, we'll show more handholding messages
       showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
       allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
+      allowGetMap = false;               // Disabled by default -- many admins won't want this
 
       minSleepTimeDedicatedServer = 10;
       minSleepTimeClient = 10;

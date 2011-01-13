@@ -197,32 +197,38 @@ static string displayModeToString(DisplayMode mode)
 
 static void loadGeneralSettings()
 {
-   gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue("Settings", "WindowMode", displayModeToString(gIniSettings.displayMode)));
+   string section = "Settings";
+
+   gIniSettings.displayMode = stringToDisplayMode( gINI.GetValue(section, "WindowMode", displayModeToString(gIniSettings.displayMode)));
    gIniSettings.oldDisplayMode = gIniSettings.displayMode;
 
-   gIniSettings.controlsRelative = (lcase(gINI.GetValue("Settings", "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
-   gIniSettings.echoVoice = (lcase(gINI.GetValue("Settings", "VoiceEcho",(gIniSettings.echoVoice ? "Yes" : "No"))) == "yes");
-   gIniSettings.showWeaponIndicators = (lcase(gINI.GetValue("Settings", "LoadoutIndicators", (gIniSettings.showWeaponIndicators ? "Yes" : "No"))) == "yes");
-   gIniSettings.verboseHelpMessages = (lcase(gINI.GetValue("Settings", "VerboseHelpMessages", (gIniSettings.verboseHelpMessages ? "Yes" : "No"))) == "yes");
-   gIniSettings.showKeyboardKeys = (lcase(gINI.GetValue("Settings", "ShowKeyboardKeysInStickMode", (gIniSettings.showKeyboardKeys ? "Yes" : "No"))) == "yes");
-   gIniSettings.joystickType = stringToJoystickType(gINI.GetValue("Settings", "JoystickType", joystickTypeToString(gIniSettings.joystickType)));
-   gIniSettings.winXPos = max(gINI.GetValueI("Settings", "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
-   gIniSettings.winYPos = max(gINI.GetValueI("Settings", "WindowYPos", gIniSettings.winYPos), 0);
-   gIniSettings.winSizeFact = (F32) gINI.GetValueF("Settings", "WindowScalingFactor", gIniSettings.winSizeFact);
-   gIniSettings.masterAddress = gINI.GetValue("Settings", "MasterServerAddress", gIniSettings.masterAddress);
+   gIniSettings.controlsRelative = (lcase(gINI.GetValue(section, "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"))) == "relative");
+
+   gIniSettings.echoVoice            = gINI.GetValueYN(section, "VoiceEcho", gIniSettings.echoVoice);
+   gIniSettings.showWeaponIndicators = gINI.GetValueYN(section, "LoadoutIndicators", gIniSettings.showWeaponIndicators);
+   gIniSettings.verboseHelpMessages  = gINI.GetValueYN(section, "VerboseHelpMessages", gIniSettings.verboseHelpMessages);
+   gIniSettings.showKeyboardKeys     = gINI.GetValueYN(section, "ShowKeyboardKeysInStickMode", gIniSettings.showKeyboardKeys);
+
+   gIniSettings.joystickType = stringToJoystickType(gINI.GetValue(section, "JoystickType", joystickTypeToString(gIniSettings.joystickType)));
+
+   gIniSettings.winXPos = max(gINI.GetValueI(section, "WindowXPos", gIniSettings.winXPos), 0);    // Restore window location
+   gIniSettings.winYPos = max(gINI.GetValueI(section, "WindowYPos", gIniSettings.winYPos), 0);
+
+   gIniSettings.winSizeFact = (F32) gINI.GetValueF(section, "WindowScalingFactor", gIniSettings.winSizeFact);
+   gIniSettings.masterAddress = gINI.GetValue(section, "MasterServerAddress", gIniSettings.masterAddress);
    
-   gIniSettings.name = gINI.GetValue("Settings", "Nickname", gIniSettings.name);
-   gIniSettings.password = gINI.GetValue("Settings", "Password", gIniSettings.password);
+   gIniSettings.name           = gINI.GetValue(section, "Nickname", gIniSettings.name);
+   gIniSettings.password       = gINI.GetValue(section, "Password", gIniSettings.password);
 
-   gIniSettings.defaultName = gINI.GetValue("Settings", "DefaultName", gIniSettings.defaultName);
-   gIniSettings.lastName = gINI.GetValue("Settings", "LastName", gIniSettings.lastName);
-   gIniSettings.lastPassword = gINI.GetValue("Settings", "LastPassword", gIniSettings.lastPassword);
-   gIniSettings.lastEditorName = gINI.GetValue("Settings", "LastEditorName", gIniSettings.lastEditorName);
+   gIniSettings.defaultName    = gINI.GetValue(section, "DefaultName", gIniSettings.defaultName);
+   gIniSettings.lastName       = gINI.GetValue(section, "LastName", gIniSettings.lastName);
+   gIniSettings.lastPassword   = gINI.GetValue(section, "LastPassword", gIniSettings.lastPassword);
+   gIniSettings.lastEditorName = gINI.GetValue(section, "LastEditorName", gIniSettings.lastEditorName);
 
-   gIniSettings.enableExperimentalAimMode = (lcase(gINI.GetValue("Settings", "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"))) == "yes");
-   gIniSettings.minSleepTimeClient = gINI.GetValueI("Settings", "MinClientDelay", gIniSettings.minSleepTimeClient);
+   gIniSettings.enableExperimentalAimMode = gINI.GetValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
+   gIniSettings.minSleepTimeClient = gINI.GetValueI(section, "MinClientDelay", gIniSettings.minSleepTimeClient);
 
-   gDefaultLineWidth = (F32) gINI.GetValueF("Settings", "LineWidth", 2);
+   gDefaultLineWidth = (F32) gINI.GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
    gLineWidth3 = gDefaultLineWidth * 1.5f;
    gLineWidth4 = gDefaultLineWidth * 2;
@@ -231,27 +237,29 @@ static void loadGeneralSettings()
 
 static void loadDiagnostics()
 {
-   gIniSettings.diagnosticKeyDumpMode = (lcase(gINI.GetValue("Diagnostics", "DumpKeys",              (gIniSettings.diagnosticKeyDumpMode ? "Yes" : "No"))) == "yes");
+   string section = "Diagnostics";
 
-   gIniSettings.logConnectionProtocol = (lcase(gINI.GetValue("Diagnostics", "LogConnectionProtocol", (gIniSettings.logConnectionProtocol ? "Yes" : "No"))) == "yes");
-   gIniSettings.logNetConnection      = (lcase(gINI.GetValue("Diagnostics", "LogNetConnection",      (gIniSettings.logNetConnection      ? "Yes" : "No"))) == "yes");
-   gIniSettings.logEventConnection    = (lcase(gINI.GetValue("Diagnostics", "LogEventConnection",    (gIniSettings.logEventConnection    ? "Yes" : "No"))) == "yes");
-   gIniSettings.logGhostConnection    = (lcase(gINI.GetValue("Diagnostics", "LogGhostConnection",    (gIniSettings.logGhostConnection    ? "Yes" : "No"))) == "yes");
-   gIniSettings.logNetInterface       = (lcase(gINI.GetValue("Diagnostics", "LogNetInterface",       (gIniSettings.logNetInterface       ? "Yes" : "No"))) == "yes");
-   gIniSettings.logPlatform           = (lcase(gINI.GetValue("Diagnostics", "LogPlatform",           (gIniSettings.logPlatform           ? "Yes" : "No"))) == "yes");
-   gIniSettings.logNetBase            = (lcase(gINI.GetValue("Diagnostics", "LogNetBase",            (gIniSettings.logNetBase            ? "Yes" : "No"))) == "yes");
-   gIniSettings.logUDP                = (lcase(gINI.GetValue("Diagnostics", "LogUDP",                (gIniSettings.logUDP                ? "Yes" : "No"))) == "yes");
+   gIniSettings.diagnosticKeyDumpMode = gINI.GetValueYN(section, "DumpKeys",              gIniSettings.diagnosticKeyDumpMode);
 
-   gIniSettings.logFatalError         = (lcase(gINI.GetValue("Diagnostics", "LogFatalError",          (gIniSettings.logFatalError        ? "Yes" : "No"))) == "yes");
-   gIniSettings.logError              = (lcase(gINI.GetValue("Diagnostics", "LogError",               (gIniSettings.logError             ? "Yes" : "No"))) == "yes");
-   gIniSettings.logWarning            = (lcase(gINI.GetValue("Diagnostics", "LogWarning",             (gIniSettings.logWarning           ? "Yes" : "No"))) == "yes");
-   gIniSettings.logConnection         = (lcase(gINI.GetValue("Diagnostics", "LogConnection",          (gIniSettings.logConnection        ? "Yes" : "No"))) == "yes");
+   gIniSettings.logConnectionProtocol = gINI.GetValueYN(section, "LogConnectionProtocol", gIniSettings.logConnectionProtocol);
+   gIniSettings.logNetConnection      = gINI.GetValueYN(section, "LogNetConnection",      gIniSettings.logNetConnection);
+   gIniSettings.logEventConnection    = gINI.GetValueYN(section, "LogEventConnection",    gIniSettings.logEventConnection);
+   gIniSettings.logGhostConnection    = gINI.GetValueYN(section, "LogGhostConnection",    gIniSettings.logGhostConnection);
+   gIniSettings.logNetInterface       = gINI.GetValueYN(section, "LogNetInterface",       gIniSettings.logNetInterface);
+   gIniSettings.logPlatform           = gINI.GetValueYN(section, "LogPlatform",           gIniSettings.logPlatform);
+   gIniSettings.logNetBase            = gINI.GetValueYN(section, "LogNetBase",            gIniSettings.logNetBase);
+   gIniSettings.logUDP                = gINI.GetValueYN(section, "LogUDP",                gIniSettings.logUDP);
 
-   gIniSettings.logLevelLoaded        = (lcase(gINI.GetValue("Diagnostics", "LogLevelLoaded",          (gIniSettings.logLevelLoaded        ? "Yes" : "No"))) == "yes");
-   gIniSettings.logLuaObjectLifecycle = (lcase(gINI.GetValue("Diagnostics", "LogLuaObjectLifecycle",   (gIniSettings.logLuaObjectLifecycle ? "Yes" : "No"))) == "yes");
-   gIniSettings.luaLevelGenerator     = (lcase(gINI.GetValue("Diagnostics", "LuaLevelGenerator",       (gIniSettings.luaLevelGenerator     ? "Yes" : "No"))) == "yes");
-   gIniSettings.luaBotMessage         = (lcase(gINI.GetValue("Diagnostics", "LuaBotMessage",           (gIniSettings.luaBotMessage         ? "Yes" : "No"))) == "yes");
-   gIniSettings.serverFilter          = (lcase(gINI.GetValue("Diagnostics", "ServerFilter",            (gIniSettings.serverFilter          ? "Yes" : "No"))) == "yes");
+   gIniSettings.logFatalError         = gINI.GetValueYN(section, "LogFatalError",         gIniSettings.logFatalError);
+   gIniSettings.logError              = gINI.GetValueYN(section, "LogError",              gIniSettings.logError);
+   gIniSettings.logWarning            = gINI.GetValueYN(section, "LogWarning",            gIniSettings.logWarning);
+   gIniSettings.logConnection         = gINI.GetValueYN(section, "LogConnection",         gIniSettings.logConnection);
+
+   gIniSettings.logLevelLoaded        = gINI.GetValueYN(section, "LogLevelLoaded",        gIniSettings.logLevelLoaded);
+   gIniSettings.logLuaObjectLifecycle = gINI.GetValueYN(section, "LogLuaObjectLifecycle", gIniSettings.logLuaObjectLifecycle);
+   gIniSettings.luaLevelGenerator     = gINI.GetValueYN(section, "LuaLevelGenerator",     gIniSettings.luaLevelGenerator);
+   gIniSettings.luaBotMessage         = gINI.GetValueYN(section, "LuaBotMessage",         gIniSettings.luaBotMessage);
+   gIniSettings.serverFilter          = gINI.GetValueYN(section, "ServerFilter",          gIniSettings.serverFilter);
 }
 
 
@@ -273,6 +281,18 @@ static sfxSets stringToSFXSet(string sfxSet)
 }
 
 
+static F32 checkVol(F32 vol)
+{
+   if(vol > 1.0) 
+      return 1.0;
+
+   if(vol < 0)   
+      return 0;
+
+   return vol;
+}
+
+
 static void loadSoundSettings()
 {
    gIniSettings.sfxVolLevel = (float) gINI.GetValueI("Sounds", "EffectsVolume", (S32) (gIniSettings.sfxVolLevel * 10)) / 10.0f;
@@ -283,43 +303,28 @@ static void loadSoundSettings()
    gIniSettings.sfxSet = stringToSFXSet(sfxSet);
 
    // Bounds checking
-   if(gIniSettings.sfxVolLevel > 1.0)
-      gIniSettings.sfxVolLevel = 1.0;
-   else if(gIniSettings.sfxVolLevel < 0)
-      gIniSettings.sfxVolLevel = 0;
-
-   if(gIniSettings.musicVolLevel > 1.0)
-      gIniSettings.musicVolLevel = 1.0;
-   else if(gIniSettings.musicVolLevel < 0)
-      gIniSettings.musicVolLevel = 0;
-
-   if(gIniSettings.voiceChatVolLevel > 1.0)
-      gIniSettings.voiceChatVolLevel = 1.0;
-   else if(gIniSettings.voiceChatVolLevel < 0)
-      gIniSettings.voiceChatVolLevel = 0;
-
-   if(gIniSettings.alertsVolLevel > 1.0)
-      gIniSettings.alertsVolLevel = 1.0;
-   else if(gIniSettings.alertsVolLevel < 0)
-      gIniSettings.alertsVolLevel = 0;
+   gIniSettings.sfxVolLevel       = checkVol(gIniSettings.sfxVolLevel);
+   gIniSettings.musicVolLevel     = checkVol(gIniSettings.musicVolLevel);
+   gIniSettings.voiceChatVolLevel = checkVol(gIniSettings.voiceChatVolLevel);
 }
 
 
 static void loadHostConfiguration()
 {
-   gIniSettings.hostname = gINI.GetValue("Host", "ServerName", gIniSettings.hostname);
-   gIniSettings.hostaddr = gINI.GetValue("Host", "ServerAddress", gIniSettings.hostaddr);
+   gIniSettings.hostname  = gINI.GetValue("Host", "ServerName", gIniSettings.hostname);
+   gIniSettings.hostaddr  = gINI.GetValue("Host", "ServerAddress", gIniSettings.hostaddr);
    gIniSettings.hostdescr = gINI.GetValue("Host", "ServerDescription", gIniSettings.hostdescr);
 
-   gIniSettings.serverPassword = gINI.GetValue("Host", "ServerPassword", gIniSettings.serverPassword);
-   gIniSettings.adminPassword = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
+   gIniSettings.serverPassword      = gINI.GetValue("Host", "ServerPassword", gIniSettings.serverPassword);
+   gIniSettings.adminPassword       = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
    gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
-   gIniSettings.levelDir = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
-   gIniSettings.maxplayers = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
+   gIniSettings.levelDir            = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
+   gIniSettings.maxplayers          = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
-   gIniSettings.allowGetMap = (lcase(gINI.GetValue("Host", "AllowGetMap", "No")) == "yes");
-   gIniSettings.allowDataConnections = (lcase(gINI.GetValue("Host", "AllowDataConnections", (gIniSettings.allowDataConnections ? "Yes" : "No"))) == "yes");
+   gIniSettings.allowGetMap          = gINI.GetValueYN("Host", "AllowGetMap", gIniSettings.allowGetMap);
+   gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "AllowDataConnections", gIniSettings.allowDataConnections);
+
    gIniSettings.minSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
 
    // allow "Yes" to enable logging
@@ -328,6 +333,8 @@ static void loadHostConfiguration()
    if(lcase(str) == "yes") gIniSettings.LogStats = 1;
 
    gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) == "yes");
+
+   gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
 }
 
 

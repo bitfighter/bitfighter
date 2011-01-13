@@ -399,13 +399,13 @@ void CIniFile::GetAllValues(const string &section, TNL::Vector<string> &valueLis
 }
 
 
-int CIniFile::GetValueI(const string keyname, const string valuename, int const defValue) const
+int CIniFile::GetValueI(const string &section, const string &key, int const defValue) const
 {
   char svalue[MAX_VALUEDATA];
 
   dSprintf(svalue, sizeof(svalue), "%d", defValue);
 
-  string val = GetValue(keyname, valuename, string(svalue));
+  string val = GetValue(section, key, string(svalue));
 
   size_t len = val.size();
   string s;
@@ -415,16 +415,23 @@ int CIniFile::GetValueI(const string keyname, const string valuename, int const 
   int i = atoi(s.c_str());
 
   return i;
-
 }
 
-double CIniFile::GetValueF(const string keyname, const string valuename, double const defValue) const
+
+// Returns true for "Yes" (case insensitive), false otherwise
+bool CIniFile::GetValueYN(const string &section, const string &key, bool defValue) const
+{
+   return lcase(GetValue(section, key, defValue ? "Yes" : "No")) == "yes";
+}
+
+
+double CIniFile::GetValueF(const string &section, const string &key, double const defValue) const
 {
   char svalue[MAX_VALUEDATA];
 
   dSprintf(svalue, sizeof(svalue), "%f", defValue);
 
-  string val = GetValue(keyname, valuename, string(svalue));
+  string val = GetValue(section, key, string(svalue));
   size_t len = val.size();
   string s;
   s.resize(len);

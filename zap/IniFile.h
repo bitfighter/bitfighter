@@ -86,17 +86,17 @@ public:
   void Reset()                                   {Erase();}
 
   // Returns index of specified key, or noID if not found.
-  long findSection( const string keyname) const;
+  long findSection( const string section) const;
 
   // Returns index of specified value, in the specified key, or noID if not found.
-  long FindValue( unsigned const sectionId, const string valuename) const;
+  long FindValue( unsigned const sectionID, const string key) const;
 
   // Returns number of keys currently in the ini.
   int NumKeys() const                        {return (unsigned) names.size();}
   unsigned GetNumKeys() const                {return (unsigned) NumKeys();}
 
   // Add a key name.
-  unsigned addSection( const string keyname);
+  unsigned addSection( const string section);
 
   // Returns key names by index.
   string sectionName( unsigned const sectionId) const;
@@ -109,29 +109,31 @@ public:
   unsigned GetNumValues( const string keyname)   {return NumValues( keyname);}
 
   // Returns value name by index for a given keyname or sectionId.
-  string ValueName( unsigned const sectionId, unsigned const valueID) const;
-  string GetValueName( unsigned const sectionId, unsigned const valueID) const {
-    return ValueName( sectionId, valueID);
+  string ValueName( unsigned const sectionID, unsigned const keyID) const;
+  string GetValueName( unsigned const sectionID, unsigned const keyID) const {
+    return ValueName( sectionID, keyID);
   }
-  string ValueName( const string keyname, unsigned const valueID) const;
-  string GetValueName( const string keyname, unsigned const valueID) const {
-    return ValueName( keyname, valueID);
+  string ValueName( const string section, unsigned const keyID) const;
+  string GetValueName( const string section, unsigned const keyID) const {
+    return ValueName( section, keyID);
   }
 
   // Gets value of [keyname] valuename =.
   // Overloaded to return string, int, and double.
   // Returns defValue if key/value not found.
-  string GetValue( unsigned const sectionId, unsigned const valueID, const string defValue = "") const;
-  string GetValue(const string &keyname, const string &valuename, const string &defValue = "") const;
+  string GetValue( unsigned const sectionID, unsigned const keyID, const string defValue = "") const;
+  string GetValue(const string &section, const string &key, const string &defValue = "") const;
 
   // Load up valueList with all values from the section
-  void GetAllValues(const string &keyname, TNL::Vector<string> &valueList);
+  void GetAllValues(const string &section, TNL::Vector<string> &valueList);
 
-  int    GetValueI(const string keyname, const string valuename, int const defValue = 0) const;
-  bool   GetValueB(const string keyname, const string valuename, bool const defValue = false) const {
-    return (GetValueI( keyname, valuename, int( defValue)) != 0);
+  int    GetValueI(const string &section, const string &key, int const defValue = 0) const;
+  bool   GetValueB(const string &section, const string &key, bool const defValue = false) const {
+    return (GetValueI( section, key, int( defValue)) != 0);
   }
-  double   GetValueF(const string keyname, const string valuename, double const defValue = 0.0) const;
+  double   GetValueF(const string &section, const string& key, double const defValue = 0.0) const;
+  bool     GetValueYN(const string &section, const string &key, bool defValue) const;
+
   // This is a variable length formatted GetValue routine. All these voids
   // are required because there is no vsscanf() like there is a vsprintf().
   // Only a maximum of 8 variable can be read.
