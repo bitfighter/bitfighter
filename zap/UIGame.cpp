@@ -1429,7 +1429,7 @@ extern ClientInfo gClientInfo;
 // Runs on client
 bool GameUserInterface::processCommand(Vector<string> &words)
 {
-   if(words.size() == 0)            // Just in case
+   if(words.size() == 0)            // Just in case, words size must be 1 or more to check the first word as command.
       return true;
 
    GameConnection *gc = gClientGame->getConnectionToServer();
@@ -1719,11 +1719,12 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/suspend");
    mChatCmds.push_back("/linewidth");
    mChatCmds.push_back("/linesmooth");
+   mChatCmds.push_back("/getmap");
 
-   // Server commands
+   // commands that runs in game server, in processServerCommand
    mChatCmds.push_back("/settime");
    mChatCmds.push_back("/setscore");
-   mChatCmds.push_back("/getmap");
+   mChatCmds.push_back("/showBots");
 
    // Administrative commands
    mChatCmds.push_back("/kick");
