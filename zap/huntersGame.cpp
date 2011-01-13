@@ -41,6 +41,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(HuntersGameType);
 
 
+
 TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cSetNexusTimer, (U32 nexusTime, bool isOpen), (nexusTime, isOpen), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mNexusReturnTimer.reset(nexusTime);
@@ -506,9 +507,9 @@ void HuntersFlagItem::renderItem(Point pos)
    {
       if(mFlagCount)
       {
-         if(mFlagCount > 20)
+         if(mFlagCount >= 20)
             glColor3f(1, 0.5, 0.5);
-         else if(mFlagCount > 10)
+         else if(mFlagCount >= 10)
             glColor3f(1, 1, 0);
          else
             glColor3f(1, 1, 1);
@@ -713,6 +714,20 @@ void HuntersNexusObject::unpackUpdate(GhostConnection *connection, BitStream *st
       computeExtent();
 }
 
+const char HuntersNexusObject::className[] = "HuntersNexusObject";      // Class name as it appears to Lua scripts
+
+// Define the methods we will expose to Lua
+Lunar<HuntersNexusObject>::RegType HuntersNexusObject::methods[] =
+{
+   // Standard gameItem methods
+   method(HuntersNexusObject, getClassID),
+   method(HuntersNexusObject, getLoc),
+   method(HuntersNexusObject, getRad),
+   method(HuntersNexusObject, getVel),
+   method(HuntersNexusObject, getTeamIndx),
+
+   {0,0}    // End method list
+};
 
 };
 
