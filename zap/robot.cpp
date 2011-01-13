@@ -1825,9 +1825,11 @@ void Robot::idle(GameObject::IdleCallPath path)
          if(!gameConnectionInitalized)  //after gameConnection is initalized, it should rspawn.
          {
             //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
-            GameConnection *gc = new GameConnection(); // Need GameConnection and ClientRef to keep track of score
-				if(getName() == StringTableEntry(""))       // Might not have a name.
+            GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score
+
+				if(getName() == "")                          // Make sure bots have a name
 					setName(GameConnection::makeUnique("Robot").c_str());
+
             gc->setClientName(getName());
             setOwner(gc);
             gc->linkToClientList();
