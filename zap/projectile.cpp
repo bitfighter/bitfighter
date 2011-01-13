@@ -405,32 +405,33 @@ GrenadeProjectile::GrenadeProjectile(Point pos, Point vel, GameObject *shooter):
    mMass = 1;
 }
 
+
+// Runs on client and server
 void GrenadeProjectile::idle(IdleCallPath path)
 {
 
    U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
-   // collisionDisabled = true to fix burst LAG
-   bool collisionDisabled = (isGhost() && gClientGame != NULL && aliveTime < 250);
-   if(collisionDisabled) collisionDisabled = (gClientGame->getConnectionToServer() != NULL);
-   if(collisionDisabled) collisionDisabled = (gClientGame->getConnectionToServer()->getControlObject() != NULL);
-   if(collisionDisabled) gClientGame->getConnectionToServer()->getControlObject()->disableCollision();
+   // Fix effect of ship getting ahead of burst on laggy client      (gClientGame is never NULL)
+   bool collisionDisabled = isGhost() && aliveTime < 250 &&
+                            gClientGame->getConnectionToServer() && gClientGame->getConnectionToServer()->getControlObject();
+
+   if(collisionDisabled) 
+      gClientGame->getConnectionToServer()->getControlObject()->disableCollision();
 
    Parent::idle(path);
 
-   if(collisionDisabled) gClientGame->getConnectionToServer()->getControlObject()->enableCollision();
+   if(collisionDisabled) 
+      gClientGame->getConnectionToServer()->getControlObject()->enableCollision();
 
    // Do some drag...  no, not that kind of drag!
    mMoveState[ActualState].vel -= mMoveState[ActualState].vel * (((F32)mCurrentMove.time) / 1000.f);
 
-
-   if(isGhost()) return;
-   // Here on down is server only
+   if(isGhost()) return;      // Here on down is server only
 
    if(!exploded)
       if(getActualVel().len() < 4.0)
          explode(getActualPos(), WeaponBurst);
-
 
    // Update TTL
    S32 deltaT = mCurrentMove.time;
