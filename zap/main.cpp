@@ -731,8 +731,8 @@ void idle()
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
    U32 integerTime = U32(timeElapsed);
 
-   if((gDedicatedServer && integerTime >= gIniSettings.minSleepTimeDedicatedServer) || 
-            (!gDedicatedServer &&  integerTime >=(U32)gIniSettings.minSleepTimeClient))
+   if( (gDedicatedServer  && integerTime >= 1000 / gIniSettings.maxDedicatedFPS) || 
+       (!gDedicatedServer && integerTime >= 1000 / gIniSettings.maxFPS) )
    {
       lastTimer = currentTimer;
       unusedFraction = timeElapsed - integerTime;
@@ -778,20 +778,13 @@ void idle()
    // sleep(0) helps reduce the impact of OpenGL on windows.
    U32 sleepTime =  1; //integerTime< 8 ? 8-integerTime : 1;
 
-   if(gClientGame && integerTime >= gIniSettings.minSleepTimeClient) 
-   {
+   if(gClientGame && integerTime >= 1000 / gIniSettings.maxFPS) 
       sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
-	  //if(integerTime < gIniSettings.minSleepTimeClient) sleepTime = minimumSleepTimeClient - integerTime; // sleep a minimum of a value
-   }
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
-   if(gDedicatedServer)
-   {
-      //if(integerTime < (U32)minimumSleepTimeDedicatedServer) sleepTime = minimumSleepTimeDedicatedServer - integerTime; // sleep a minimum of 5.
-      if(gServerGame->isSuspended())
+   if(gDedicatedServer && gServerGame->isSuspended())
           sleepTime = 40;     // The higher this number, the less accurate the ping is on server lobby when empty, but the less power consumed.
-   }
 
    Platform::sleep(sleepTime);
 

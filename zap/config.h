@@ -163,8 +163,8 @@ struct IniSettings      // With defaults specified
    bool allowGetMap;                // allow '/GetMap' command
    bool allowDataConnections;       // Specify whether data connections are allowed on this computer
 
-   U32 minSleepTimeDedicatedServer;
-   U32 minSleepTimeClient;
+   U32 maxDedicatedFPS;
+   U32 maxFPS;
 
    InputMode inputMode;             // Joystick or Keyboard
    string masterAddress;            // Default address of our master server
@@ -249,8 +249,8 @@ struct IniSettings      // With defaults specified
       allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
       allowGetMap = false;               // Disabled by default -- many admins won't want this
 
-      minSleepTimeDedicatedServer = 10;
-      minSleepTimeClient = 10;
+      maxDedicatedFPS = 100;             // Max FPS on dedicated server
+      maxFPS = 100;                      // Max FPS on client/non-dedicated server
 
       inputMode = Keyboard;              // Joystick or Keyboard
       masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server

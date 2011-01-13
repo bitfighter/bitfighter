@@ -226,7 +226,7 @@ static void loadGeneralSettings()
    gIniSettings.lastEditorName = gINI.GetValue(section, "LastEditorName", gIniSettings.lastEditorName);
 
    gIniSettings.enableExperimentalAimMode = gINI.GetValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
-   gIniSettings.minSleepTimeClient = gINI.GetValueI(section, "MinClientDelay", gIniSettings.minSleepTimeClient);
+   gIniSettings.maxFPS = gINI.GetValueI(section, "MaxFPS", gIniSettings.maxFPS);
 
    gDefaultLineWidth = (F32) gINI.GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
@@ -325,7 +325,7 @@ static void loadHostConfiguration()
    gIniSettings.allowGetMap          = gINI.GetValueYN("Host", "AllowGetMap", gIniSettings.allowGetMap);
    gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "AllowDataConnections", gIniSettings.allowDataConnections);
 
-   gIniSettings.minSleepTimeDedicatedServer = gINI.GetValueI("Host", "MinDedicatedDelay", 10);
+   gIniSettings.maxDedicatedFPS = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
 
    // allow "Yes" to enable logging
    string str = gINI.GetValue("Host", "LogStats", "1");
@@ -476,9 +476,7 @@ static void writeKeyBindings()
    Button=Button 1
    Caption=Hello
    MessageType=Hello there!
-
 */
-
 static void loadQuickChatMessages()
 {
    // Add initial node
@@ -1098,16 +1096,17 @@ static void writeSettings()
       gINI.sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       gINI.sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.sectionComment(section, " LastEditorName - Last edited file name");
-      gINI.sectionComment(section, " MinClientDelay -  in millisecs, lower use more CPU, higher will lose performance/reduce FPS (delay 10 = max 100 FPS) (using 1000 / delay = fps)");
+      gINI.sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
+
       gINI.sectionComment(section, " LineWidth - default 2, width in pixels, use /LineWidth in game");
       gINI.sectionComment(section, "----------------");
    }
    saveWindowMode();
    saveWindowPosition(gIniSettings.winXPos, gIniSettings.winYPos);
 
-   gINI.SetValueF(section, "WindowScalingFactor", gIniSettings.winSizeFact);
+   gINI.SetValueF (section, "WindowScalingFactor", gIniSettings.winSizeFact);
    gINI.setValueYN(section, "VoiceEcho", gIniSettings.echoVoice );
-   gINI.SetValue(section,  "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"));
+   gINI.SetValue  (section, "ControlMode", (gIniSettings.controlsRelative ? "Relative" : "Absolute"));
 
    // inputMode is not saved, but rather determined at runtime by whether a joystick is attached
 
@@ -1122,9 +1121,9 @@ static void writeSettings()
    gINI.SetValue  (section, "LastPassword", gIniSettings.lastPassword);
    gINI.SetValue  (section, "LastEditorName", gIniSettings.lastEditorName);
 
-   gINI.SetValue(section, "EnableExperimentalAimMode", (gIniSettings.enableExperimentalAimMode ? "Yes" : "No"));
-   if(gIniSettings.minSleepTimeClient < 100)    // Don't save if too high
-      gINI.SetValueI(section, "MinClientDelay", gIniSettings.minSleepTimeClient);  
+   gINI.setValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
+   gINI.SetValueI (section, "MaxFPS", gIniSettings.maxFPS);  
+
    //gINI.SetValueF(section,"LineWidth",gDefaultLineWidth,true);     //Allow load, but not save, a user can screw up with /LineWidth command
 }
 
@@ -1166,7 +1165,7 @@ static void writeHost()
       addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       addComment(" MaxPlayers - The max number of players that can play on your server.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
-      addComment(" MinDedicatedDelay - (Dedicated only) default 10, in milliseconds, lower use more CPU, higher may increase lag.");
+      addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
       addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
       addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
@@ -1184,7 +1183,7 @@ static void writeHost()
    gINI.SetValueI (section, "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10));
    gINI.setValueYN(section, "AllowGetMap", gIniSettings.allowGetMap);
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);
-   gINI.SetValueI (section, "MinDedicatedDelay", gIniSettings.minSleepTimeDedicatedServer);
+   gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.SetValueI (section, "LogStats", gIniSettings.LogStats);
 }
 
