@@ -2484,7 +2484,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
-   else if(!stricmp(cmd, "showBots"))
+   else if(!stricmp(cmd, "showbots") || !stricmp(cmd, "showbot"))    // Maybe there is only one bot to show
    {
       mShowAllBots = !mShowAllBots;  // Show all robots affects all players.
       if(Robot::robots.size() == 0)
