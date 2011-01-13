@@ -26,8 +26,13 @@
 #ifndef _UIQUICKCHAT_H_
 #define _UIQUICKCHAT_H_
 
+
+#include "helperMenu.h"
+
 #include "../tnl/tnlNetBase.h"
 #include "../tnl/tnlNetStringTable.h"
+
+
 
 #include "UI.h"
 #include "timer.h"
@@ -35,6 +40,7 @@
 
 namespace Zap
 {
+
 struct QuickChatNode
 {
    U32 depth;
@@ -46,24 +52,24 @@ struct QuickChatNode
    bool isMsgItem;         // False for groups, true for messages
 };
 
-class QuickChatHelper
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class QuickChatHelper : public HelperMenu
 {
+   typedef HelperMenu Parent;
 
 private:
-   bool mFromController;
    S32 mCurNode;
-   Timer mIdleTimer;
-   enum {
-      MenuTimeout = 5000,
-   };
+   //virtual KeyCode getActivationKey() { return keyQUICKCHAT[gIniSettings.inputMode]; } <=== don't supply a keycode to avoid canceling when pressed
 
 public:
    QuickChatHelper();      // Constructor
 
-   void idle(U32 delta);
-   bool render();
-   void show(bool fromController);
-   bool processKeyCode(KeyCode keyCode);
+   virtual void render();                
+   virtual void onMenuShow(bool fromController);  
+   virtual bool processKeyCode(KeyCode keyCode);    
 };
 
 extern Vector<QuickChatNode> gQuickChatTree;      // Holds our tree of QuickChat groups and messages, as defined in the INI file

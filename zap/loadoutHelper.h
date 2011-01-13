@@ -26,11 +26,9 @@
 #ifndef _LOADOUTSELECT_H_
 #define _LOADOUTSELECT_H_
 
-#include "tnlTypes.h"
+#include "helperMenu.h"
 
 using namespace TNL;
-#include "timer.h"
-#include "keyCode.h"
 #include "ship.h"
 
 
@@ -46,7 +44,7 @@ struct LoadoutItem
    const char *help;       // An additional bit of help text, also displayed on loadout menu
    ShipModule requires;    // Item requires this module be part of loadout (used only for spy-bugs)
 
-   LoadoutItem() { };      // Should never be used
+   LoadoutItem() { /* Do nothing */ };      // Should never be used
 
    LoadoutItem(KeyCode key, KeyCode button, U32 index)      // Shortcut for modules -- use info from ModuleInfos
    {
@@ -71,27 +69,31 @@ struct LoadoutItem
    }
 };
 
-class LoadoutHelper
+
+////////////////////////////////////////
+////////////////////////////////////////
+
+class LoadoutHelper : public HelperMenu
 {
+   typedef HelperMenu Parent;
+
 private:
-   bool mFromController;         // Is user using controller or keyboard?
-   U32 mModule[ShipModuleCount]; // Modules selected by user -- 2
-   U32 mWeapon[ShipWeaponCount]; // Weapons selected by user -- 3
+   U32 mModule[ShipModuleCount];   // Modules selected by user -- 2
+   U32 mWeapon[ShipWeaponCount];   // Weapons selected by user -- 3
    S32 mCurrentIndex;
-   Timer mIdleTimer;          
-   enum {
-      MenuTimeout = 8000,        // Time loadout menu is shown before it times out
-   };
-   bool isValidItem(S32 index);  // Do we have the required prerequisites for this item?
+
+   virtual const char *getCancelMessage() { return "Modifications canceled -- ship design unchanged."; }
+   virtual KeyCode getActivationKey() { return keyLOADOUT[gIniSettings.inputMode]; }
+
+   bool isValidItem(S32 index);    // Do we have the required prerequisites for this item?
 
 public:
    LoadoutHelper();                          // Constructor
    void initialize(bool includeEngineer);    // Set things up
 
-   void render();                // Draw menu
-   void idle(U32 delta) { /* Do nothing, at the moment */ }
-   void show(bool fromController);
-   bool processKeyCode(KeyCode keyCode);
+   void render();                
+   void onMenuShow(bool fromController);  
+   bool processKeyCode(KeyCode keyCode);   
 };
 
 };

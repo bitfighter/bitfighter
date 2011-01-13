@@ -322,10 +322,7 @@ void DataConnection::onConnectionEstablished()
          string folder = getOutputFolder(mFileType);
 
          if(folder == "")     // filetype was bogus; should never happen
-         {
-            logprintf("Error resolving folder!");
-                              // we can save files without needing folder
-         }
+            logprintf("Error resolving folder!");      // But... we can save files without needing folder, so log and cary on
 
          //mOutputFile.open(strictjoindir(folder, mFilename).c_str());
          if(mOutputFile) 
@@ -347,7 +344,7 @@ void DataConnection::onConnectionEstablished()
 extern void exitGame(S32);
 
 // Make sure things are cleaned up -- will run on both client and server
-void DataConnection::onConnectionTerminated(TerminationReason reason, const char *reasonMsg)
+void DataConnection::onConnectionTerminated(NetConnection::TerminationReason reason, const char *reasonMsg)
 {
    if(mOutputFile)
    {

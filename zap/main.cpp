@@ -75,7 +75,7 @@ Specifying the extension is optional.
 <h4>Editor</h4>
 <ul>
 <li>When creating a new level, credits line is prepoluated with current player name (unless it's ChumpChange)
-<li>Max level size bumped up to 256K
+<li>Max level size now unlimited, individual lines limited to c. 4000 characters, which is plenty
 <li>Can place neutral spawnpoints: Any team can spawn at these
 <li>When running command from console (run <script>) any created items are now selected
 <li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!

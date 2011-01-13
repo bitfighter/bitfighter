@@ -26,7 +26,7 @@
 #include "input.h"
 #include "IniFile.h"
 #include "config.h"
-#include "quickChat.h"
+#include "quickChatHelper.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
 
 #ifdef _MSC_VER
