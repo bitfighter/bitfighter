@@ -56,64 +56,41 @@ void EngineerHelper::render()
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
       const S32 xPos = UserInterface::horizMargin + 50;
-   glColor3f(1,1,0);
-   UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
-   yPos += fontSize + 4;
+      glColor3f(1,1,0);
+      UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
+      yPos += fontSize + 4;
 
-   bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
+      bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
 
-   for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
-   {
-      // Draw key controls for selecting the object to be created
-
-      if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
-         renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
-
-      if(showKeys)
+      for(S32 i = 0; i < mEngineerCostructionItemInfos.size(); i++)
       {
-         glColor3f(1, 1, 1);     // Render key in white
-         renderControllerButton(UserInterface::horizMargin + 20, yPos, mEngineerCostructionItemInfos[i].mKey, false);
+         // Draw key controls for selecting the object to be created
+
+         if(gIniSettings.inputMode == Joystick)     // Only draw joystick buttons when in joystick mode
+            renderControllerButton(UserInterface::horizMargin + (showKeys ? 0 : 20), yPos, mEngineerCostructionItemInfos[i].mButton, false);
+
+         if(showKeys)
+         {
+            glColor3f(1, 1, 1);     // Render key in white
+            renderControllerButton(UserInterface::horizMargin + 20, yPos, mEngineerCostructionItemInfos[i].mKey, false);
+         }
+
+         glColor3f(0.1, 1.0, 0.1);     
+
+            S32 x = UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
+
+         glColor3f(.2, .8, .8);    
+            UserInterface::drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
+
+         yPos += fontSize + 7;
       }
-
-      glColor3f(0.1, 1.0, 0.1);     
-
-         S32 x = UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
-
-      glColor3f(.2, .8, .8);    
-         UserInterface::drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
-
-      yPos += fontSize + 7;
    }
-}
    else     // Have selected a module, need to indicate where to deploy
    {
       S32 xPos = UserInterface::horizMargin;
       UserInterface::drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
       yPos += fontSize + 7;
       UserInterface::drawString(xPos, yPos, fontSize, "Aim at a spot on the wall, and activate the module again.");
-
-      //Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-      //if(ship)
-      //{
-      //   glPushMatrix();
-
-      //   // Draw deployment location marker
-      //   glTranslatef(gScreenInfo.getGameCanvasWidth() / 2, gScreenInfo.getGameCanvasHeight() / 2, 0);       
-
-      //   Point visExt = gClientGame->computePlayerVisArea(dynamic_cast<Ship *>(ship));
-      //   glScalef((gScreenInfo.getGameCanvasWidth()  / 2) / visExt.x, 
-      //            (gScreenInfo.getGameCanvasHeight() / 2) / visExt.y, 1);
-
-      //   glTranslatef(ship->getRenderPos().x * -1, ship->getRenderPos().y * -1, 0);
-
-      //   if(EngineerModuleDeployer::findDeployPoint(ship, deployPosition, deployNormal))
-      //   {
-      //      glColor3f(1,0,0);  // red
-      //      drawSquare(deployPosition, 5);
-      //   }
-
-      //   glPopMatrix();
-      //}
    }
 }
 
@@ -153,10 +130,9 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
          else
             gGameUserInterface.displayErrorMessage(deployer.getErrorMessage().c_str());
             
-      gGameUserInterface.setPlayMode();
-   }
-
-      return true;
+         gGameUserInterface.setPlayMode();
+         return true;
+      }
    }
 
    return false;

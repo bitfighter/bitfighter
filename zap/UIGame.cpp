@@ -980,7 +980,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    }
 
 
-   if(mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode)
+   if(mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
    {
       // The following keys are allowed in both play mode and in
       // loadout or engineering menu modes if not used in the loadout
@@ -1193,10 +1193,9 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
 // Runs only on client
 Move *GameUserInterface::getCurrentMove()
 {
-   // (Possible modes = PlayMode, ChatMode, QuickChatMode, LoadoutMode)
+   // (Possible modes = PlayMode, ChatMode, QuickChatMode, LoadoutMode, EngineerMode)
 
-   if((mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode ) && 
-         !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
+   if((mCurrentMode != ChatMode) && !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
       mCurrentMove.up = !mUpDisabled && getKeyState(keyUP[inputMode]) ? 1 : 0;
