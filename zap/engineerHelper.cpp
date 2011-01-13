@@ -133,6 +133,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
             mSelectedItem = i;
             return true;
          }
+      gGameUserInterface.setPlayMode();
    }
    else                       // Placing item
    {
