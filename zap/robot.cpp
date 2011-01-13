@@ -1503,6 +1503,7 @@ bool Robot::startLua()
 
    Lunar<GoalZone>::Register(L);
    Lunar<LoadoutZone>::Register(L);
+   Lunar<HuntersNexusObject>::Register(L);
 
 #ifdef USE_PROFILER
    init_profiler(L);
