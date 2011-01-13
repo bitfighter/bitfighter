@@ -446,7 +446,7 @@ private:
    LineEditor mEntryBox;
 
    S32 mDraggingDockItem;
-   Vector<string> mLevelErrorMsgs;
+   Vector<string> mLevelErrorMsgs, mLevelWarnings;
 
    bool mUp, mDown, mLeft, mRight, mIn, mOut;
 

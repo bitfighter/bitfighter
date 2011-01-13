@@ -814,6 +814,8 @@ void EditorUserInterface::validateLevel()
 {
    bool hasError = false;
    mLevelErrorMsgs.clear();
+   mLevelWarnings.clear();
+
    bool foundSoccerBall = false;
    bool foundNexus = false;
    bool foundTeamFlags = false;
@@ -860,28 +862,28 @@ void EditorUserInterface::validateLevel()
 
    // Check for soccer ball in a a game other than SoccerGameType. Doesn't crash no more.
    if(foundSoccerBall && strcmp(mGameType, "SoccerGameType"))
-      mLevelErrorMsgs.push_back("WARNING: Soccer ball can only be used in soccer game.");
+      mLevelWarnings.push_back("WARNING: Soccer ball can only be used in soccer game.");
 
    // Check for the nexus object in a non-hunter game. Does not affect gameplay in non-hunter game.
    if(foundNexus && strcmp(mGameType, "HuntersGameType"))
-      mLevelErrorMsgs.push_back("WARNING: Nexus object can only be used in Hunters game.");
+      mLevelWarnings.push_back("WARNING: Nexus object can only be used in Hunters game.");
 
    // Check for missing nexus object in a hunter game.  This cause mucho dolor!
    if(!foundNexus && !strcmp(mGameType, "HuntersGameType"))
       mLevelErrorMsgs.push_back("ERROR: Nexus game must have a Nexus.");
 
    if(foundFlags && !isFlagGame(mGameType))
-      mLevelErrorMsgs.push_back("WARNING: This game type does not use flags.");
+      mLevelWarnings.push_back("WARNING: This game type does not use flags.");
    else if(foundTeamFlags && !isTeamFlagGame(mGameType))
-      mLevelErrorMsgs.push_back("WARNING: This game type does not use team flags.");
+      mLevelWarnings.push_back("WARNING: This game type does not use team flags.");
 
    // Check for team flag spawns on games with no team flags
    if(foundTeamFlagSpawns && !foundTeamFlags)
-      mLevelErrorMsgs.push_back("WARNING: Found team flag spawns but no team flags.");
+      mLevelWarnings.push_back("WARNING: Found team flag spawns but no team flags.");
 
    // Multiple flags in rabbit, problem is carrying multiple flags, and only one of the player score while time goes by.
    if(foundFlagCount >= 2 && !strcmp(mGameType, "RabbitGameType"))
-      mLevelErrorMsgs.push_back("WARNING: Multiple flags in rabbit game type.");
+      mLevelWarnings.push_back("WARNING: Multiple flags in rabbit game type.");
 
    // Errors that may be corrected by levelgen -- script could add spawns
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams
@@ -1167,6 +1169,8 @@ void EditorUserInterface::onActivate()
    }
 
    mLevelErrorMsgs.clear();
+   mLevelWarnings.clear();
+
    mSaveMsgTimer.clear();
 
    mGameTypeArgs.clear();
@@ -1882,14 +1886,24 @@ void EditorUserInterface::render()
       glDisableBlend;
    }
 
-   if(mLevelErrorMsgs.size())
+
+   if(mLevelErrorMsgs.size() || mLevelWarnings.size())
    {
-      glColor(gErrorMessageTextColor);
       S32 ypos = vertMargin + 50;
+
+      glColor(gErrorMessageTextColor);
 
       for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
       {
          drawCenteredString(ypos, 20, mLevelErrorMsgs[i].c_str());
+         ypos += 25;
+      }
+
+      glColor(Color(1,1,0));
+
+      for(S32 i = 0; i < mLevelWarnings.size(); i++)
+      {
+         drawCenteredString(ypos, 20, mLevelWarnings[i].c_str());
          ypos += 25;
       }
    }
@@ -3373,7 +3387,6 @@ void EditorUserInterface::deleteSelection(bool objectsOnly)
    if(deleted)
    {
       saveUndoState(items);
-      validateLevel();
       mNeedToSave = true;
       autoSave();
 
@@ -3564,6 +3577,8 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
    mSnapVertex_j = NONE;
    itemToLightUp = NONE;
    mUnmovedItems.erase(itemIndex);
+
+   validateLevel();
 
    onMouseMoved();   // Reset cursor  
 }
@@ -4637,14 +4652,15 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
 }
 
 
+// We need some local hook into the testLevelStart() below.  Ugly but apparently necessary.
+void testLevelStart_local()
+{
+   gEditorUserInterface.testLevelStart();
+}
+
+
 extern void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode);
 extern CmdLineSettings gCmdLineSettings;
-
-
-//Some function to allow YesNoUserInterface to work with testLevel
-void testLevelStart2(){
-	gEditorUserInterface.testLevelStart();
-}
 
 void EditorUserInterface::testLevel()
 {
@@ -4653,16 +4669,21 @@ void EditorUserInterface::testLevel()
    if(strcmp(mGameType, GameType::validateGameType(mGameType)))
       gameTypeError = true;
 
-// With all the map loading error fix, it should never crash the game.
+   // With all the map loading error fixes, game should never crash!
    validateLevel();
-   if(mLevelErrorMsgs.size() || gameTypeError)
+   if(mLevelErrorMsgs.size() || mLevelWarnings.size() || gameTypeError)
    {
-      S32 i;
       gYesNoUserInterface.reset();
       gYesNoUserInterface.setTitle("LEVEL HAS PROBLEMS");
 
-      for(i = 0; i < mLevelErrorMsgs.size(); i++)
+      for(S32 i = 0; i < mLevelErrorMsgs.size(); i++)
          gYesNoUserInterface.setMessage(i + 1, mLevelErrorMsgs[i].c_str());
+
+      for(S32 i = 0; i < mLevelWarnings.size(); i++)
+         gYesNoUserInterface.setMessage(i + 1, mLevelWarnings[i].c_str());
+
+      S32 i = mLevelErrorMsgs.size() + mLevelWarnings.size() - 2;
+
       if(gameTypeError)
       {
          gYesNoUserInterface.setMessage(i + 1, "ERROR: GameType is invalid.");
@@ -4670,14 +4691,15 @@ void EditorUserInterface::testLevel()
          i+=2;
       }
       gYesNoUserInterface.setInstr("Press [Y] to start, [ESC] to cancel");
-		gYesNoUserInterface.registerYesFunction(testLevelStart2);   //tried (gEditorUserInterface.testLevelStart) but compiler doesn't like that.
+		gYesNoUserInterface.registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
       gYesNoUserInterface.activate();
       return;
    }
-	testLevelStart();
 }
-void EditorUserInterface::testLevelStart(){
 
+
+void EditorUserInterface::testLevelStart()
+{
    string tmpFileName = mEditFileName;
    mEditFileName = "editor.tmp";
 
