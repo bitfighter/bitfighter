@@ -247,9 +247,64 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 }
 
 
+//F32 gridsize1;
+static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766)
+S32 makeZonesCount = 0;  // -1 wnen new level loads and need to auto generate on findPath
+
+void makeBotMeshZone2(F32 x1,F32 y1,F32 x2,F32 y2)
+{
+	if(makeZonesCount >= MAX_ZONES) return;   // don't add too many zones...
+	GridDatabase *gb = gServerGame->getGridDatabase();
+	bool canseeX = gb->pointCanSeePoint(Point(x1,y1),Point(x2,y1)) && gb->pointCanSeePoint(Point(x1,y2),Point(x2,y2));
+	bool canseeY = gb->pointCanSeePoint(Point(x1,y1),Point(x1,y2)) && gb->pointCanSeePoint(Point(x2,y1),Point(x2,y2));
+	if(canseeX && canseeY
+		&& gb->pointCanSeePoint(Point(x1,y1),Point(x2,y2))
+		&& gb->pointCanSeePoint(Point(x1,y2),Point(x2,y1))
+		)
+	{
+		BotNavMeshZone *botzone = new BotNavMeshZone();
+		botzone->addToGame(gServerGame);
+		botzone->mPolyBounds.push_back(Point(x1,y1));
+		botzone->mPolyBounds.push_back(Point(x2,y1));
+		botzone->mPolyBounds.push_back(Point(x2,y2));
+		botzone->mPolyBounds.push_back(Point(x1,y2));
+		botzone->mCentroid = Point((x1+x2)/2,(y1+y2)/2);
+		botzone->computeExtent();
+		makeZonesCount++;
+	}
+	else
+	{
+		if(canseeX && canseeY) { canseeX = false; canseeY = false; };
+		if(x2-x1 >= 35 && (x2-x1 > y2-y1 || canseeY) && !canseeX)
+		{
+			F32 x3 = (x1+x2)/2;
+			makeBotMeshZone2(x1,y1,x3,y2);
+			makeBotMeshZone2(x3,y1,x2,y2);
+		}
+		else if(y2-y1 >= 35 && !canseeY)
+		{
+			F32 y3 = (y1+y2)/2;
+			makeBotMeshZone2(x1,y1,x2,y3);
+			makeBotMeshZone2(x1,y3,x2,y2);
+		}
+	}
+}
+
+//extern Rect gServerWorldBounds;  // in main.cpp
+
+void makeBotMeshZone()
+{
+	makeZonesCount = 0;
+	Rect rect = gServerGame->computeWorldObjectExtents();
+	makeBotMeshZone2(rect.min.x,rect.min.y,rect.max.x,rect.max.y);
+	//gServerGame->computeWorldObjectExtents();
+}
+
+
 // Only runs on server
 void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
+	makeZonesCount = -1;
    if(gBotNavMeshZones.size() == 0)
       return;
 
@@ -303,11 +358,10 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
 }
 
 
-static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766)
 
 // Returns a path, including the startZone and targetZone 
 Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target)
-{   
+{
    // Because of these variables...
    static U16 onClosedList = 0;
    static U16 onOpenList;
@@ -328,6 +382,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
 	S32 newOpenListItemID = 0;         // Used for creating new IDs for zones to make heap work
 
    Vector<Point> path;
+
 
    // This block here lets us repeatedly reuse the whichList array without resetting it or recreating it
    // which, for larger numbers of zones should be a real time saver.  It's not clear if it is particularly

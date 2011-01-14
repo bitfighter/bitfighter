@@ -108,7 +108,7 @@ Ship::~Ship()
 void Ship::initialize(Point &pos)
 {
    if(getGame())
-         mRespawnTime = getGame()->getCurrentTime();
+      mRespawnTime = getGame()->getCurrentTime();
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;
@@ -729,7 +729,10 @@ void Ship::onAddedToGame(Game *game)
 
    // From here on down, server only
    if(!isGhost())
+   {
+      mRespawnTime = getGame()->getCurrentTime();
       Robot::getEventManager().fireEvent(EventManager::ShipSpawnedEvent, this);
+   }
 }
 
 
