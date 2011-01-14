@@ -1072,6 +1072,8 @@ void GameType::onLevelLoaded()
 void GameType::onAddedToGame(Game *theGame)
 {
    theGame->setGameType(this);
+   if(getGame()->isServer())
+      mShowAllBots = gServerGame->mTestMode;  //Default to true to show all bots if on testing mode.
 }
 
 
@@ -1092,7 +1094,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
             mTeams.push_back(team);
       }
    }
-   else if(!stricmp(argv[0], "TeamChange"))
+   else if(!stricmp(argv[0], "TeamChange"))   // For level script. Could be removed when there is a better way to change team names and colors.
    {
       if(argc >= 2)   // Enough arguments?
       {
