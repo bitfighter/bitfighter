@@ -68,7 +68,7 @@ public:
    QuickChatHelper();      // Constructor
 
    virtual void render();                
-   virtual void onMenuShow(bool fromController);  
+   virtual void onMenuShow();  
    virtual bool processKeyCode(KeyCode keyCode);    
 };
 

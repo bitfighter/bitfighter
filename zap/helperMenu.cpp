@@ -52,11 +52,4 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    return false;
 }
 
-
-void HelperMenu::onMenuShow(bool fromController)
-{
-   mFromController = fromController;
-}
-
-
 };

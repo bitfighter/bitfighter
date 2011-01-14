@@ -38,9 +38,8 @@ EngineerHelper::EngineerHelper()
    mEngineerCostructionItemInfos.push_back(EngineerConstructionItemInfo(EngineeredForceField, "Force Field", KEY_2, BUTTON_2));
 }
 
-void EngineerHelper::onMenuShow(bool fromController)
+void EngineerHelper::onMenuShow()
 {
-   Parent::onMenuShow(fromController);
    mSelectedItem = -1;
 }
 

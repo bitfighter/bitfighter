@@ -67,9 +67,8 @@ LoadoutHelper::LoadoutHelper()
 }
 
 
-void LoadoutHelper::onMenuShow(bool fromController)
+void LoadoutHelper::onMenuShow()
 {
-   Parent::onMenuShow(fromController);
    mCurrentIndex = 0;
 }
 

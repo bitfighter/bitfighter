@@ -42,14 +42,12 @@ private:
    virtual KeyCode getActivationKey() { return KEY_NONE; }
 
 protected:
-   bool mFromController;         // Is user using controller or keyboard?
-
    static const S32 MENU_TOP = 300;     // Location of top of overlay menu
 
 public:
    virtual void render() = 0;                
    virtual void idle(U32 delta) { /* Do nothing */ }    
-   virtual void onMenuShow(bool fromController);  
+   virtual void onMenuShow() { /* Do nothing */  }
 
    virtual bool processKeyCode(KeyCode keyCode);     
 };

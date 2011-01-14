@@ -156,9 +156,8 @@ void QuickChatHelper::render()
 }
 
 
-void QuickChatHelper::onMenuShow(bool fromController)
+void QuickChatHelper::onMenuShow()
 {
-   Parent::onMenuShow(fromController);
    mCurNode = 0;
 }
 

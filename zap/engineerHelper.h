@@ -74,7 +74,7 @@ private:
 public:
    EngineerHelper();                          // Constructor
 
-   void onMenuShow(bool fromController);
+   void onMenuShow();
    bool processKeyCode(KeyCode keyCode);   
    void render();                
    void renderDeploymentMarker(Ship *ship);

@@ -810,8 +810,8 @@ void GameUserInterface::enterMode(GameUserInterface::Mode mode)
    else 
       mHelper = NULL;
 
-   bool fromController = (gIniSettings.inputMode == Joystick);
-   mHelper->onMenuShow(fromController);
+   if(mHelper)
+      mHelper->onMenuShow();
 }
 
 
@@ -968,7 +968,7 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(mCurrentMode == ChatMode)
          processChatModeKey(keyCode, ascii);
       else   
-         processPlayModeKey(keyCode, ascii);
+         processPlayModeKey(keyCode, ascii);    // A non-chat key, really
    }
 }
 
@@ -1209,7 +1209,6 @@ Move *GameUserInterface::getCurrentMove()
       for(U32 i = 0; i < (U32)ShipModuleCount; i++)
          mCurrentMove.module[i] = false;
    }
-
 
    if(!gIniSettings.controlsRelative)
       return &mCurrentMove;
