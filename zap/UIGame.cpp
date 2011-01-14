@@ -285,7 +285,7 @@ void GameUserInterface::idle(U32 timeDelta)
    if(mCurrentMode == ChatMode)
       LineEditor::updateCursorBlink(timeDelta);    // Blink the cursor if in ChatMode
 
-   else if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
+   else if(mHelper)
       mHelper->idle(timeDelta);
 
    mVoiceRecorder.idle(timeDelta);
@@ -370,7 +370,7 @@ void GameUserInterface::render()
       }
 
       // Render QuickChat / Loadout menus
-      if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
+      if(mHelper)
          mHelper->render();
 
       GameType *theGameType = gClientGame->getGameType();
@@ -807,6 +807,8 @@ void GameUserInterface::enterMode(GameUserInterface::Mode mode)
       mHelper = &mLoadoutHelper;
    else if(mode == EngineerMode)
       mHelper = &mEngineerHelper;
+   else 
+      mHelper = NULL;
 
    bool fromController = (gIniSettings.inputMode == Joystick);
    mHelper->onMenuShow(fromController);
@@ -853,6 +855,7 @@ void GameUserInterface::setPlayMode()
    mDownDisabled = false;
    mLeftDisabled = false;
    mRightDisabled = false;
+   mHelper = NULL;
 }
 
 
@@ -900,29 +903,25 @@ void GameUserInterface::disableMovementKey(KeyCode keyCode)
 // Handles all keypress events, including mouse clicks and controller button presses
 void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 {
-   S32 inputMode = gIniSettings.inputMode;
-
    if(OGLCONSOLE_ProcessBitfighterKeyEvent(keyCode, ascii))   // Pass the key on to the console for processing
-      return;
-
-   if(keyCode == keyHELP)          // Turn on help screen
+   {
+      // Do nothing... key processed
+   }
+   else if(keyCode == keyHELP)          // Turn on help screen
    {
       UserInterface::playBoop();
       gInstructionsUserInterface.activate();
-      return;
    }
    // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
    // Don't want to open console while chatting, do we?  Only open when not in any special mode.
    else if(mCurrentMode == PlayMode && keyCode == KEY_SLASH && getKeyState(KEY_SHIFT))   
    {
       OGLCONSOLE_ShowConsole();
-      return;
    }
    else if(keyCode == keyOUTGAMECHAT)
    {
       setBusyChatting(true);
       gChatInterface.activate();
-      return;
    }
    else if(keyCode == keyMISSION)
    {
@@ -932,220 +931,212 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
       if(gt)
          gt->mLevelInfoDisplayTimer.clear();    // Clear level-start display if user hits F2
    }
-   else if(keyCode == KEY_M && getKeyState(KEY_CTRL))    //Ctrl-M, for now, to cycle through message dispaly modes
+   else if(keyCode == KEY_M && getKeyState(KEY_CTRL))    // Ctrl-M, for now, to cycle through message dispaly modes
    {
       S32 m = mMessageDisplayMode + 1;
       if(m >= MessageDisplayModes)
          m = 0;
       mMessageDisplayMode = MessageDisplayMode(m);
-
-      return;
    }
-
-
-   // First, if we are in loadout mode, check the key to see if
-   // it does something with the loadout menu.  If not, we'll
-   // further process it below.
-
-   if(mCurrentMode == LoadoutMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
-   {  // (braces required)
-      if(mHelper->processKeyCode(keyCode))   // Will return true if key was processed
-      {
-         disableMovementKey(keyCode);
-         return;                             // Leave if key did something, so we don't get "dual" effect
-      }
-   }
-
-   // If we're in play mode, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
-   if(mCurrentMode == PlayMode)
+   else if(mHelper && mHelper->processKeyCode(keyCode))   // Will return true if key was processed
    {
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-      if(ship)
+      disableMovementKey(keyCode);
+   }
+   else 
+   {
+      // If we're in play mode, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
+      if(mCurrentMode == PlayMode)
       {
-         if(keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer || 
-            keyCode == keyMOD2[inputMode] && ship->getModule(1) == ModuleEngineer)
+         Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+         if(ship)
          {
-            string msg;
-
-            msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);
-            if(msg != "")
+            if(keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer || 
+               keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer)
             {
-               displayErrorMessage(msg.c_str());
+               string msg = EngineerModuleDeployer::checkResourcesAndEnergy(ship);      // Returns "" if ok, error message otherwise
+
+               if(msg != "")
+                  displayErrorMessage(msg.c_str());
+               else
+                  enterMode(EngineerMode);
+
                return;
             }
-
-            enterMode(EngineerMode);
          }
       }
+
+      if(mCurrentMode == ChatMode)
+         processChatModeKey(keyCode, ascii);
+      else   
+         processPlayModeKey(keyCode, ascii);
    }
-
-
-   if(mCurrentMode == LoadoutMode || mCurrentMode == PlayMode || mCurrentMode == QuickChatMode || mCurrentMode == EngineerMode)
-   {
-      // The following keys are allowed in both play mode and in
-      // loadout or engineering menu modes if not used in the loadout
-      // menu above
-
-      if(keyCode == keyMOD1[inputMode])
-         mModActivated[0] = true;
-      else if(keyCode == keyMOD2[inputMode])
-         mModActivated[1] = true;
-      else if(keyCode == keyFIRE[inputMode])
-         mFiring = true;
-      else if(keyCode == keySELWEAP1[inputMode])
-         selectWeapon(0);
-      else if(keyCode == keySELWEAP2[inputMode])
-         selectWeapon(1);
-      else if(keyCode == keySELWEAP3[inputMode])
-         selectWeapon(2);
-      else if(keyCode == keyFPS)
-         mFPSVisible = !mFPSVisible;
-      else if(keyCode == keyADVWEAP[inputMode])
-         advanceWeapon();
-      else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
-      {
-         if(mShutdownMode == ShuttingDown)
-         {
-            if(mShutdownInitiator)
-            {
-               gClientGame->getConnectionToServer()->c2sRequestCancelShutdown();
-               mShutdownMode = Canceled;
-            }
-            else
-               mShutdownMode = None;
-
-            return;
-         }
-         else if(mShutdownMode == Canceled)
-         {
-            mShutdownMode = None;
-            return;
-         }
-
-         UserInterface::playBoop();
-
-         if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
-         {
-            endGame();
-            gMainMenuUserInterface.activate();
-         }
-         else
-         {
-            setBusyChatting(true);
-            gGameMenuUserInterface.activate();
-         }
-      }
-      else if(keyCode == keyCMDRMAP[inputMode])
-         gClientGame->zoomCommanderMap();
-
-      else if(keyCode == keySCRBRD[inputMode])
-      {     // (braces needed)
-         if(!mInScoreboardMode)    // We're activating the scoreboard
-         {
-            mInScoreboardMode = true;
-            GameType *g = gClientGame->getGameType();
-            if(g)
-               g->c2sRequestScoreboardUpdates(true);
-         }
-      }
-      else if(keyCode == keyTOGVOICE[inputMode])
-      {     // (braces needed)
-         if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
-            mVoiceRecorder.start();
-      }
-      else if(mCurrentMode != LoadoutMode && mCurrentMode != QuickChatMode && mCurrentMode != EngineerMode)
-      {
-         // The following keys are only allowed in PlayMode, and never work in LoadoutMode
-         if(keyCode == keyTEAMCHAT[inputMode])
-         {
-            mCurrentChatType = TeamChat;
-            mCurrentMode = ChatMode;
-            setBusyChatting(true);
-         }
-         else if(keyCode == keyGLOBCHAT[inputMode])
-         {
-            mCurrentChatType = GlobalChat;
-            mCurrentMode = ChatMode;
-            setBusyChatting(true);
-         }
-         else if(keyCode == keyCMDCHAT[inputMode])
-         {
-            mCurrentChatType = CmdChat;
-            mCurrentMode = ChatMode;
-            setBusyChatting(true);
-         }
-         else if(keyCode == keyQUICKCHAT[inputMode])
-            enterMode(QuickChatMode);
-         else if(keyCode == keyLOADOUT[inputMode])
-            enterMode(LoadoutMode);
-         else if(keyCode == keyDROPITEM[inputMode])
-            dropItem();
-
-         else if(inputMode == Joystick)      // Check if the user is trying to use keyboard to move when in joystick mode
-            if(keyCode == keyUP[Keyboard] || keyCode == keyDOWN[Keyboard] || keyCode == keyLEFT[Keyboard] || keyCode == keyRIGHT[Keyboard])
-               mWrongModeMsgDisplay.reset(WrongModeMsgDisplayTime);
-      }
-   }     // End if in LoadoutMode or PlayMode
-
-   else if(mCurrentMode == ChatMode)   // Player is entering a chat message
-   {
-      if(keyCode == KEY_ENTER)
-         issueChat();
-      else if(keyCode == KEY_BACKSPACE)
-         mLineEditor.backspacePressed();
-      else if(keyCode == KEY_DELETE)
-         mLineEditor.deletePressed();
-      else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
-         cancelChat();
-      else if(keyCode == KEY_TAB)      // Auto complete any commands
-      {
-         if(isCmdChat())     // It's a command!
-         {
-            S32 found = -1;
-            S32 start = mCurrentChatType == CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
-
-            size_t len = mLineEditor.length();
-            for(S32 i = 0; i < mChatCmds.size(); i++)
-               if(mChatCmds[i].substr(start, len) == mLineEditor.getString())
-               {
-                  if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete.
-                     return;
-                  found = i;
-               }
-
-            if(found == -1)         // Found no match... no expansion possible
-               return;
-
-            mLineEditor.clear();
-            mLineEditor.setString(mChatCmds[found].substr(start));    // Add the command
-            mLineEditor.addChar(' ');                                 // Add a space
-         }
-      }
-      else if(ascii)     // Append any other keys to the chat message
-      {
-         // Protect against crashes while game is initializing (because we look at the ship for the player's name)
-         if(gClientGame && gClientGame->getConnectionToServer())
-         {
-            S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
-
-            Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-            if(!ship)
-               return;
-
-            S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
-            S32 nameWidth = max(nameSize, promptSize);
-            // Above block repeated above
-
-            if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) < 
-                                                gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - 3)
-               mLineEditor.addChar(ascii);
-         }
-      }
-   }     // End if in ChatMode
 }
 
-#undef FONTSIZE
 
+void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
+{
+   InputMode inputMode = gIniSettings.inputMode;
+   // The following keys are allowed in both play mode and in
+   // loadout or engineering menu modes if not used in the loadout
+   // menu above
+
+   if(keyCode == keyMOD1[inputMode])
+      mModActivated[0] = true;
+   else if(keyCode == keyMOD2[inputMode])
+      mModActivated[1] = true;
+   else if(keyCode == keyFIRE[inputMode])
+      mFiring = true;
+   else if(keyCode == keySELWEAP1[inputMode])
+      selectWeapon(0);
+   else if(keyCode == keySELWEAP2[inputMode])
+      selectWeapon(1);
+   else if(keyCode == keySELWEAP3[inputMode])
+      selectWeapon(2);
+   else if(keyCode == keyFPS)
+      mFPSVisible = !mFPSVisible;
+   else if(keyCode == keyADVWEAP[inputMode])
+      advanceWeapon();
+   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
+   {
+      if(mShutdownMode == ShuttingDown)
+      {
+         if(mShutdownInitiator)
+         {
+            gClientGame->getConnectionToServer()->c2sRequestCancelShutdown();
+            mShutdownMode = Canceled;
+         }
+         else
+            mShutdownMode = None;
+
+         return;
+      }
+      else if(mShutdownMode == Canceled)
+      {
+         mShutdownMode = None;
+         return;
+      }
+
+      UserInterface::playBoop();
+
+      if(!gClientGame->isConnectedToServer())      // Perhaps we're still joining?
+      {
+         endGame();
+         gMainMenuUserInterface.activate();
+      }
+      else
+      {
+         setBusyChatting(true);
+         gGameMenuUserInterface.activate();
+      }
+   }     
+   else if(keyCode == keyCMDRMAP[inputMode])
+      gClientGame->zoomCommanderMap();
+
+   else if(keyCode == keySCRBRD[inputMode])
+   {     // (braces needed)
+      if(!mInScoreboardMode)    // We're activating the scoreboard
+      {
+         mInScoreboardMode = true;
+         GameType *gameType = gClientGame->getGameType();
+         if(gameType)
+            gameType->c2sRequestScoreboardUpdates(true);
+      }
+   }
+   else if(keyCode == keyTOGVOICE[inputMode])
+   {     // (braces needed)
+      if(!mVoiceRecorder.mRecordingAudio)  // Turning recorder on
+         mVoiceRecorder.start();
+   }
+   else if(mCurrentMode != LoadoutMode && mCurrentMode != QuickChatMode && mCurrentMode != EngineerMode)
+   {
+      // The following keys are only allowed in PlayMode, and never work in LoadoutMode
+      if(keyCode == keyTEAMCHAT[inputMode])
+      {
+         mCurrentChatType = TeamChat;
+         mCurrentMode = ChatMode;
+         setBusyChatting(true);
+      }
+      else if(keyCode == keyGLOBCHAT[inputMode])
+      {
+         mCurrentChatType = GlobalChat;
+         mCurrentMode = ChatMode;
+         setBusyChatting(true);
+      }
+      else if(keyCode == keyCMDCHAT[inputMode])
+      {
+         mCurrentChatType = CmdChat;
+         mCurrentMode = ChatMode;
+         setBusyChatting(true);
+      }
+      else if(keyCode == keyQUICKCHAT[inputMode])
+         enterMode(QuickChatMode);
+      else if(keyCode == keyLOADOUT[inputMode])
+         enterMode(LoadoutMode);
+      else if(keyCode == keyDROPITEM[inputMode])
+         dropItem();
+
+      else if(inputMode == Joystick)      // Check if the user is trying to use keyboard to move when in joystick mode
+         if(keyCode == keyUP[Keyboard] || keyCode == keyDOWN[Keyboard] || keyCode == keyLEFT[Keyboard] || keyCode == keyRIGHT[Keyboard])
+            mWrongModeMsgDisplay.reset(WrongModeMsgDisplayTime);
+   }
+}
+
+
+void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
+{
+   if(keyCode == KEY_ENTER)
+      issueChat();
+   else if(keyCode == KEY_BACKSPACE)
+      mLineEditor.backspacePressed();
+   else if(keyCode == KEY_DELETE)
+      mLineEditor.deletePressed();
+   else if(keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
+      cancelChat();
+   else if(keyCode == KEY_TAB)      // Auto complete any commands
+   {
+      if(isCmdChat())     // It's a command!
+      {
+         S32 found = -1;
+         S32 start = mCurrentChatType == CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
+
+         size_t len = mLineEditor.length();
+         for(S32 i = 0; i < mChatCmds.size(); i++)
+            if(mChatCmds[i].substr(start, len) == mLineEditor.getString())
+            {
+               if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete.
+                  return;
+               found = i;
+            }
+
+         if(found == -1)         // Found no match... no expansion possible
+            return;
+
+         mLineEditor.clear();
+         mLineEditor.setString(mChatCmds[found].substr(start));    // Add the command
+         mLineEditor.addChar(' ');                                 // Add a space
+      }
+   }
+   else if(ascii)     // Append any other keys to the chat message
+   {
+      // Protect against crashes while game is initializing (because we look at the ship for the player's name)
+      if(gClientGame && gClientGame->getConnectionToServer())
+      {
+         S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
+
+         Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+         if(!ship)
+            return;
+
+         S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
+         S32 nameWidth = max(nameSize, promptSize);
+         // Above block repeated above
+
+         if(nameWidth + (S32) getStringWidthf(FONTSIZE, "%s%c", mLineEditor.c_str(), ascii) < 
+                                             gScreenInfo.getGameCanvasWidth() - 2 * horizMargin - 3)
+            mLineEditor.addChar(ascii);
+      }
+   }
+}
 
 void GameUserInterface::onKeyUp(KeyCode keyCode)
 {
@@ -1193,8 +1184,6 @@ void GameUserInterface::onKeyUp(KeyCode keyCode)
 // Runs only on client
 Move *GameUserInterface::getCurrentMove()
 {
-   // (Possible modes = PlayMode, ChatMode, QuickChatMode, LoadoutMode, EngineerMode)
-
    if((mCurrentMode != ChatMode) && !gDisableShipKeyboardInput && !OGLCONSOLE_GetVisibility())
    {
       InputMode inputMode = gIniSettings.inputMode;
@@ -1281,7 +1270,7 @@ void GameUserInterface::issueChat()
          if(gt)
             gt->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
       }
-      else                          // It's a command
+      else                             // It's a command
       {
          Vector<string> words = parseString(mLineEditor.c_str());
 

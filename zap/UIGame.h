@@ -223,6 +223,10 @@ public:
    void onKeyDown(KeyCode keyCode, char ascii);
    void onKeyUp(KeyCode keyCode);
 
+   void processPlayModeKey(KeyCode keyCode, char ascii);
+   void processChatModeKey(KeyCode keyCode, char ascii);
+
+
    void advanceWeapon();            // Choose next weapon
    void selectWeapon(U32 index);    // Choose weapon by its index
 
