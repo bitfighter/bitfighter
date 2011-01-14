@@ -1644,6 +1644,14 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          glDisable(GL_BLEND);
       }
    }
+   else if(words[0] == "maxfps")
+   {
+		S32 number = words.size() > 1 ? atoi(words[1].c_str()) : 0;
+      if(number < 1)                              // don't allow zero or negative numbers.
+			displayErrorMessage("!!! Need to supply FPS number, default = 100");
+      else
+         gIniSettings.maxFPS = number;
+   }
    else if(words[0] == "getmap")
    {
       if(gClientGame->getConnectionToServer()->isLocalConnection())
@@ -1718,12 +1726,14 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/suspend");
    mChatCmds.push_back("/linewidth");
    mChatCmds.push_back("/linesmooth");
+   mChatCmds.push_back("/maxfps");
    mChatCmds.push_back("/getmap");
 
    // commands that runs in game server, in processServerCommand
    mChatCmds.push_back("/settime");
    mChatCmds.push_back("/setscore");
    mChatCmds.push_back("/showBots");
+   mChatCmds.push_back("/pm");
 
    // Administrative commands
    mChatCmds.push_back("/kick");

@@ -605,15 +605,14 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 }
 
 
-// Note that the menu is now full.  Need to add new page or go to 2 cols if we need a new option.
-// Actually, room for 1 more
+// Have room for up to 16 total lines
 static ControlStringsEditor commands[] = {
    { "/admin <password>", "Request admin permissions" },
    { "/levpass <password>", "Request level change permissions" },
    { "-", NULL },       // Horiz. line
    { "/suspend", "Place game on hold while waiting for players" },
-   { "-", NULL },       // Horiz. line
    { "/getmap [file]", "Save currently playing level in <file>, if allowed" },
+   { "/pm <name> [message]", "Send provate message to one player name" },
    { "-", NULL },       // Horiz. line
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
@@ -653,6 +652,7 @@ static ControlStringsEditor debugCommands[] = {
    { "-", NULL },       // Horiz. line
    { "/linewidth <number>", "Default = 2, Changes width of all lines" },
    { "/linesmooth", "Enable line smoothing, might look better" },
+   { "/maxfps <number>", "Adjust maximum speed of frames per second" },
    { NULL, NULL },      // End of list
 };
 

@@ -105,6 +105,7 @@ void AbstractChat::playerJoinedGlobalChat(const StringTableEntry &playerNick)
 
    // Make the following be from us, so it will be colored white
    newMessage(gClientInfo.name, "----- Player " + string(playerNick.getString()) + " joined the conversation -----", false, true);
+   SFXObject::play(SFXPlayerJoined, gIniSettings.sfxVolLevel);   // Make sound?
 }
 
 
@@ -115,6 +116,7 @@ void AbstractChat::playerLeftGlobalChat(const StringTableEntry &playerNick)
       {
          gChatInterface.mPlayersInGlobalChat.erase_fast(i);
          newMessage(gClientInfo.name, "----- Player " + string(playerNick.getString()) + " left the conversation -----", false, true);
+         SFXObject::play(SFXPlayerLeft, gIniSettings.sfxVolLevel);   // Make sound?
          break;
       }
 }

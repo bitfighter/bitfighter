@@ -1073,7 +1073,7 @@ void GameType::onAddedToGame(Game *theGame)
 {
    theGame->setGameType(this);
    if(getGame()->isServer())
-      mShowAllBots = gServerGame->mTestMode;  //Default to true to show all bots if on testing mode.
+      mShowAllBots = gServerGame->isTestServer();  //Default to true to show all bots if on testing mode.
 }
 
 
@@ -2496,6 +2496,52 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          e.push_back(clientRef->clientConnection->getClientName());
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+      }
+   }
+   else if(!stricmp(cmd, "pm"))    // Private Message while in game server
+   {
+      mShowAllBots = !mShowAllBots;  // Show all robots affects all players.
+      if(args.size() < 1)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter player name to PM then the message");
+      else
+      {
+         Vector<StringTableEntry> e;
+         e.push_back(clientRef->clientConnection->getClientName());
+         char message[256];
+         S32 messageCur = 0;
+         S32 argnum = 1;
+         while(argnum < args.size())
+         {
+            const char * newmsg = args[argnum].getString();
+            S32 newmsgCur = 0;
+            while(messageCur < sizeof(message)-1 && newmsg[newmsgCur] != 0)
+            {
+               message[messageCur]=newmsg[newmsgCur];
+               messageCur++;
+               newmsgCur++;
+            }
+            argnum++;
+            if(argnum < args.size() && messageCur < sizeof(message)-1)
+            {
+               message[messageCur] = ' ';
+               messageCur++;
+            }
+         }
+         message[messageCur]=0; //Null terminate
+         e.push_back(StringTableEntry(message));
+         const StringTableEntry msg = StringTableEntry("%e0 [pm]: %e1");
+         const char *toplayername = args[0].getString();
+         bool found = false;
+         for(S32 i = 0; i < mClientList.size(); i++)
+         {
+            if(!stricmp(mClientList[i]->name.getString(), toplayername))
+            {
+               mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorAqua, SFXNone, msg, e);
+               found = true;
+            }
+         }
+         if(! found)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player not found");
       }
    }
 	/* /// Remove this command
