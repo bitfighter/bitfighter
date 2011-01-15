@@ -267,6 +267,7 @@ static void loadDiagnostics()
 static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
+	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", false);
 }
 
 static void loadEffectsSettings()
@@ -1234,9 +1235,11 @@ static void writeTesting()
       gINI.sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
       gINI.sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
       gINI.sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
+      gINI.sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly");
       gINI.sectionComment("Testing", "----------------");
    }
    gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
+   gINI.setValueYN("Testing", "NeverConnectDirect",gIniSettings.neverConnectDirect);
 }
 
 

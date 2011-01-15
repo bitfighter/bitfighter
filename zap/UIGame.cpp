@@ -959,7 +959,9 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    // If we're in play mode, and we apply the engineer module, then we can handle that locally by throwing up a menu or message
    if(mCurrentMode == PlayMode)
    {
-      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      Ship *ship = NULL;
+      if(gClientGame && gClientGame->getConnectionToServer())
+         ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
       if(ship)
       {
          if(keyCode == keyMOD1[inputMode] && ship->getModule(0) == ModuleEngineer || 
