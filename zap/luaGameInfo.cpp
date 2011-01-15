@@ -27,6 +27,7 @@
 #include "luaGameInfo.h"
 #include "playerInfo.h"
 #include "gameType.h"
+#include "huntersGame.h"
 
 
 namespace Zap
@@ -65,6 +66,8 @@ Lunar<LuaGameInfo>::RegType LuaGameInfo::methods[] =
    method(LuaGameInfo, isTeamGame),
    method(LuaGameInfo, getEventScore),
    method(LuaGameInfo, getPlayers),
+   method(LuaGameInfo, isNexusOpen),
+   method(LuaGameInfo, getNexusTimeLeft),
 
    {0,0}    // End method list
 };
@@ -93,6 +96,16 @@ S32 LuaGameInfo::getTeamCount(lua_State *L)         { return returnInt(L, gServe
 S32 LuaGameInfo::getLevelName(lua_State *L)         { return returnString(L, gServerGame->getGameType()->mLevelName.getString()); }
 S32 LuaGameInfo::getGridSize(lua_State *L)          { return returnFloat(L, gServerGame->getGridSize()); }
 S32 LuaGameInfo::isTeamGame(lua_State *L)        { return returnBool(L, gServerGame->getGameType()->isTeamGame()); }
+S32 LuaGameInfo::isNexusOpen(lua_State *L)
+{
+   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
+	return theGameType ? returnBool(L, theGameType->mNexusIsOpen) : returnNil(L);;
+}
+S32 LuaGameInfo::getNexusTimeLeft(lua_State *L)
+{
+   HuntersGameType *theGameType = dynamic_cast<HuntersGameType *>(gServerGame->getGameType());
+	return theGameType ? returnInt(L, theGameType->getNexusTimeLeft()) : returnNil(L);;
+}
 
 
 

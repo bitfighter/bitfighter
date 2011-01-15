@@ -227,6 +227,7 @@ static void loadGeneralSettings()
 
    gIniSettings.enableExperimentalAimMode = gINI.GetValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
    gIniSettings.maxFPS = gINI.GetValueI(section, "MaxFPS", gIniSettings.maxFPS);
+   if(gIniSettings.maxFPS < 1) gIniSettings.maxFPS = 100;  // FPS invalid, Too low
 
    gDefaultLineWidth = (F32) gINI.GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
@@ -266,6 +267,7 @@ static void loadDiagnostics()
 static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
+	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", false);
 }
 
 static void loadEffectsSettings()
@@ -326,6 +328,7 @@ static void loadHostConfiguration()
    gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "AllowDataConnections", gIniSettings.allowDataConnections);
 
    gIniSettings.maxDedicatedFPS = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
+	if(gIniSettings.maxDedicatedFPS < 1) gIniSettings.maxDedicatedFPS = 100; // FPS invalid, Too low
 
    // allow "Yes" to enable logging
    string str = gINI.GetValue("Host", "LogStats", "1");
@@ -1124,7 +1127,9 @@ static void writeSettings()
    gINI.setValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxFPS);  
 
-   //gINI.SetValueF(section,"LineWidth",gDefaultLineWidth,true);     //Allow load, but not save, a user can screw up with /LineWidth command
+   // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
+	if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
+      gINI.SetValueF (section, "LineWidth", gDefaultLineWidth);
 }
 
 
@@ -1230,9 +1235,11 @@ static void writeTesting()
       gINI.sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
       gINI.sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
       gINI.sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
+      gINI.sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly");
       gINI.sectionComment("Testing", "----------------");
    }
    gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
+   gINI.setValueYN("Testing", "NeverConnectDirect",gIniSettings.neverConnectDirect);
 }
 
 

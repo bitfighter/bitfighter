@@ -61,6 +61,7 @@ public:
    bool processArguments(S32 argc, const char **argv);
 
    bool mNexusIsOpen;      // Is the nexus open?
+	S32 getNexusTimeLeft() {return mNexusIsOpen ? mNexusCapTimer.getCurrent() : mNexusReturnTimer.getCurrent(); }
 
    // Info about this game type:
    bool isTeamGame() { return mTeams.size() > 1; }
@@ -151,7 +152,7 @@ public:
 };
 
 
-class HuntersNexusObject : public GameObject, public Polygon
+class HuntersNexusObject : public LuaPolygonalGameObject
 {
 private:
    typedef GameObject Parent;
@@ -176,6 +177,14 @@ public:
    TNL_DECLARE_RPC(s2cFlagsReturned, ());    // Alert the Nexus object that flags have been returned to it
 
    TNL_DECLARE_CLASS(HuntersNexusObject);
+
+   HuntersNexusObject(lua_State *L) { /* Do nothing */ };   //  Lua constructor
+   static const char className[];                 // Class name as it appears to Lua scripts
+   static Lunar<HuntersNexusObject>::RegType methods[];
+   GameObject *getGameObject() { return this; }   // Return the underlying GameObject
+   S32 getClassID(lua_State *L) { return returnInt(L, NexusType); }
+private:
+   void push(lua_State *L) {  Lunar<HuntersNexusObject>::push(L, this); }
 };
 
 };

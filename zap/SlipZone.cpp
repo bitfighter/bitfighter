@@ -32,6 +32,7 @@
 #include "gameObjectRender.h"
 #include "../glut/glutInclude.h"
 #include "polygon.h"
+#include "ship.h"
 
 namespace Zap
 {
@@ -108,9 +109,13 @@ public:
 
    bool collide(GameObject *hitObject) ////////////////////////////////////////////////////////////////////
    {
-      if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))
+      if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType))
+      {
          //getGame()->getGameType()->updateShipLoadout(hitObject);
-         logprintf("IN A SLIP ZONE!!");
+         //logprintf("IN A SLIP ZONE!!");
+         Ship *ship = dynamic_cast<Ship *>(hitObject);
+         ship->SlipZoneObject = this;
+      }
       return false;
    }
 

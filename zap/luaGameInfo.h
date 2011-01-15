@@ -62,6 +62,8 @@ public:
    S32 getEventScore(lua_State *L);
 
    S32 getPlayers(lua_State *L);       // Return table of all players/bots in game
+   S32 isNexusOpen(lua_State *L);
+   S32 getNexusTimeLeft(lua_State *L);
 };
 
 

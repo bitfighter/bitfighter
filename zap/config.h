@@ -193,6 +193,7 @@ struct IniSettings      // With defaults specified
 
    // Testing values
    S32 burstGraphicsMode;           // Choose a burst graphic representation
+   bool neverConnectDirect;
 
    // Logging options   --   true will enable logging these events, false will disable
    bool logConnectionProtocol;
@@ -275,6 +276,7 @@ struct IniSettings      // With defaults specified
       winSizeFact = 1.0;
 
       burstGraphicsMode = 1;
+		neverConnectDirect = false;
 
       // Specify which events to log
       logConnectionProtocol = false;

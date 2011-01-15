@@ -1015,7 +1015,7 @@ void QueryServersUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
                // Join the selected game...   (what if we select a local server from the list...  wouldn't 2nd param be true?)
                // Second param, false when we can ping that server, allows faster connect. If we can ping, we can connect without master help.
-               joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && !servers[currentIndex].everGotQueryResponse, false);
+               joinGame(servers[currentIndex].serverAddress, servers[currentIndex].isFromMaster && (gIniSettings.neverConnectDirect || !servers[currentIndex].everGotQueryResponse), false);
                mLastSelectedServer = servers[currentIndex];    // Save this because we'll need the server name when connecting.  Kind of a hack.
 
                // ...and clear out the server list so we don't do any more pinging

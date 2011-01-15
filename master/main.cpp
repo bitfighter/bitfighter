@@ -200,8 +200,9 @@ protected:
    ///
    static MasterServerConnection             gServerList;      // List of servers we know about
    static MasterServerConnection             gClientList;      // List of clients who are connected
-
+public:
    static Vector<GameConnectRequest *>       gConnectList;
+protected:
 
    /// @}
 
@@ -614,7 +615,8 @@ public:
       if(!conn)
       {
          ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterNoSuchHost, (U32) strlen(MasterNoSuchHost) + 1);
-            s2mRejectArrangedConnection(requestId, ptr);
+             (requestId, ptr);
+            //s2mRejectArrangedConnection(requestId, ptr);  // client randomly get "Invalid Packet -- event direction wrong"...
          return;
       }
 
@@ -661,7 +663,11 @@ public:
          possibleAddresses.push_back(internalAddress);
 
       // And inform the other part of the request
-      conn->m2sClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
+		// version 013? and earlier use m2c, don't want to break compatibility.
+		if(conn->mCSProtocolVersion >= 31)
+         conn->m2sClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
+		else
+         conn->m2cClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
    }
 
 
@@ -902,7 +908,7 @@ public:
       }
 
       // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\%d\t%d\t%d\t%d\t%d\t%d", 
+      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
                playerName.getString(), 
                authenticated ? "true" : "false", 
                isBot ? "true" : "false", 
@@ -1416,6 +1422,25 @@ int main(int argc, const char **argv)
          MasterServerConnection::writeClientServerList_JSON();
          gNeedToWriteStatus = false;
       }
+
+		for(S32 i=MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
+		{
+			GameConnectRequest *request = MasterServerConnection::gConnectList[i];
+			if(currentTime - request->requestTime > 5000) // 5 seconds
+			{
+				if(request->initiator.isValid())
+				{
+               ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterRequestTimedOut, (U32) strlen(MasterRequestTimedOut) + 1);
+                  //s2mRejectArrangedConnection(requestId, ptr);
+					request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
+					request->initiator->removeConnectRequest(request);
+				}
+				if(request->host.isValid())
+					request->host->removeConnectRequest(request);
+				MasterServerConnection::gConnectList.erase_fast(i);
+				delete request;
+			}
+		}
 
       Platform::sleep(1);
    }

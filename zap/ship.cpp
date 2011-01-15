@@ -34,6 +34,7 @@
 #include "UIMenus.h"
 #include "UIGame.h"
 #include "gameType.h"
+#include "huntersGame.h"
 #include "gameConnection.h"
 #include "shipItems.h"
 #include "speedZone.h"
@@ -93,6 +94,7 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    // Create our proxy object for Lua access
    luaProxy = LuaShip(this);
+   SlipZoneObject = NULL;
 }
 
 // Destructor
@@ -107,7 +109,7 @@ Ship::~Ship()
 void Ship::initialize(Point &pos)
 {
    if(getGame())
-         mRespawnTime = getGame()->getCurrentTime();
+      mRespawnTime = getGame()->getCurrentTime();
    for(U32 i = 0; i < MoveStateCount; i++)
    {
       mMoveState[i].pos = pos;
@@ -214,6 +216,7 @@ void Ship::processMove(U32 stateIndex)
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
    F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
+	if(onSlipZone()) maxAccel *= 0.1;
 
    if(accRequested > maxAccel)
    {
@@ -243,7 +246,7 @@ extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const P
 
 // Returns the zone in question if this ship is in a zone of type zoneType
 GameObject *Ship::isInZone(GameObjectType zoneType)
- {
+{
    findObjectsUnderShip(zoneType);
 
    if(fillVector.size() == 0)  // Ship isn't in extent of any objectType objects, can bail here
@@ -265,7 +268,25 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
          return zone;
    }
    return NULL;
- }
+}
+GameObject *Ship::isInZone(GameObject *zone)
+{
+   // Get points that define the zone boundaries
+   Vector<Point> polyPoints;
+   polyPoints.clear();
+   zone->getCollisionPoly(polyPoints);
+
+   if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
+      return zone;
+   return NULL;
+}
+
+bool Ship::onSlipZone()
+{
+   return isInZone(SlipZoneType) != NULL;  // 2 options, use this line, or use 2 lines below this...
+	//if(SlipZoneObject == NULL) return false;
+	//return isInZone(SlipZoneObject) != NULL;  // Problem is you spawn on top of slipZone won't make you slippery here...
+}
 
 
 // Returns the object in question if this ship is on an object of type objectType
@@ -728,7 +749,10 @@ void Ship::onAddedToGame(Game *game)
 
    // From here on down, server only
    if(!isGhost())
+   {
+      mRespawnTime = getGame()->getCurrentTime();
       Robot::getEventManager().fireEvent(EventManager::ShipSpawnedEvent, this);
+   }
 }
 
 
@@ -1105,7 +1129,13 @@ S32 Ship::getFlagCount()
    S32 count = 0;
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid() && (mMountedItems[i]->getObjectTypeMask() & FlagType))
-         count++;
+      {
+         HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(mMountedItems[i].getPointer());
+         if(flag != NULL)   // Nexus flag have multiple flags as one item.
+            count += flag->getFlagCount();
+         else
+            count++;
+      }
    return count;
 }
 
