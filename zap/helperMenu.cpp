@@ -42,7 +42,7 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
       keyCode == KEY_LEFT   || keyCode == BUTTON_DPAD_LEFT ||
       keyCode == BUTTON_BACK || (gIniSettings.inputMode == Keyboard && keyCode == getActivationKey()) )
    {
-      gGameUserInterface.setPlayMode();      // Return to play mode, ship design unchanged
+      exitHelper();      // Return to play mode, ship design unchanged
       if(gIniSettings.verboseHelpMessages)
          gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), getCancelMessage());
 

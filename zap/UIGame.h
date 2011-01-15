@@ -172,6 +172,17 @@ private:
 
    Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
 
+   // Modes we could be in during the game
+   enum Mode {
+      PlayMode,               // Playing
+      ChatMode,               // Composing chat message
+      QuickChatMode,          // Showing quick-chat menu
+      LoadoutMode,            // Showing loadout menu
+      EngineerMode,           // Showing engineer overlay mode
+   };
+
+   Mode mCurrentMode;         // Current game mode
+
 public:
    GameUserInterface();             // Constructor
 
@@ -233,19 +244,7 @@ public:
    void suspendGame();
    void unsuspendGame();
 
-   // Modes we could be in during the game
-   enum Mode {
-      PlayMode,               // Playing
-      ChatMode,               // Composing chat message
-      QuickChatMode,          // In quick-chat menu
-      LoadoutMode,            // In loadout menu
-      EngineerMode,           // In engineer overlay mode
-   };
-
    void enterMode(GameUserInterface::Mode mode);      // Enter QuickChat, Loadout, or Engineer mode
-
-   Mode mCurrentMode;              // Current game mode
-   void setPlayMode();             // Set mode to PlayMode
 
    void renderEngineeredItemDeploymentMarker(Ship *ship);
 

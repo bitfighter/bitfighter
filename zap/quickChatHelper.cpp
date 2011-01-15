@@ -165,13 +165,6 @@ void QuickChatHelper::onMenuShow()
 // Returns true if key was used, false if not
 bool QuickChatHelper::processKeyCode(KeyCode keyCode)
 {
-  /* if(keyCode == KEY_BACKSPACE || keyCode == KEY_ESCAPE || keyCode == BUTTON_BACK)
-   {
-      UserInterface::playBoop();
-      gGameUserInterface.setPlayMode();
-      return true;
-   }*/
-
    if(Parent::processKeyCode(keyCode))
       return true;
 
@@ -204,7 +197,7 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
          if(gQuickChatTree[mCurNode].depth >= gQuickChatTree[walk].depth)
          {
             GameType *gt = gClientGame->getGameType();
-            gGameUserInterface.setPlayMode();
+            exitHelper();
 
             StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
             if(gt)

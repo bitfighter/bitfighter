@@ -109,7 +109,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
             mSelectedItem = i;
             return true;
          }
-      gGameUserInterface.setPlayMode();
+      exitHelper();
    }
    else                       // Placing item
    {
@@ -129,7 +129,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
          else
             gGameUserInterface.displayErrorMessage(deployer.getErrorMessage().c_str());
             
-         gGameUserInterface.setPlayMode();
+         exitHelper();
          return true;
       }
    }

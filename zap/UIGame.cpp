@@ -78,7 +78,7 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 GameUserInterface::GameUserInterface()
 {
    setMenuID(GameUI);
-   setPlayMode();
+   enterMode(PlayMode);
    mInScoreboardMode = false;
 
 #if 0 //defined(TNL_OS_XBOX)
@@ -162,8 +162,8 @@ void GameUserInterface::onActivate()
    for(S32 i = 0; i < MessageDisplayCount; i++)
       mStoreMessage[i][0] = 0;
 
-   mMessageDisplayMode = ShortTimeout;                    // Start with normal chat msg display
-   setPlayMode();                                         // Make sure we're not in chat or loadout-select mode
+   mMessageDisplayMode = ShortTimeout;          // Start with normal chat msg display
+   enterMode(PlayMode);                         // Make sure we're not in chat or loadout-select mode
 
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModActivated[i] = false;
@@ -183,7 +183,7 @@ void GameUserInterface::onReactivate()
 
    gDisableShipKeyboardInput = false;
    glutSetCursor(GLUT_CURSOR_NONE);    // Turn off cursor
-   setPlayMode();
+   enterMode(PlayMode);
 
    for(S32 i = 0; i < ShipModuleCount; i++)
       mModActivated[i] = false;
@@ -796,8 +796,6 @@ void GameUserInterface::onMouseMoved()
 // Enter QuickChat, Loadout, or Engineer mode
 void GameUserInterface::enterMode(GameUserInterface::Mode mode)
 {
-   TNLAssert(mode == LoadoutMode || mode == QuickChatMode || mode == EngineerMode, "Invalid mode!");
-
    UserInterface::playBoop();
    mCurrentMode = mode;
 
@@ -808,7 +806,18 @@ void GameUserInterface::enterMode(GameUserInterface::Mode mode)
    else if(mode == EngineerMode)
       mHelper = &mEngineerHelper;
    else 
+   {
+      if(mode == PlayMode)
+      {
+         setBusyChatting(false);
+         mUpDisabled = false;
+         mDownDisabled = false;
+         mLeftDisabled = false;
+         mRightDisabled = false;
+      }
+
       mHelper = NULL;
+   }
 
    if(mHelper)
       mHelper->onMenuShow();
@@ -843,19 +852,6 @@ void GameUserInterface::dropItem()
    }
 
    gt->c2sDropItem();
-}
-
-
-// Set current mode to playout, duh!
-void GameUserInterface::setPlayMode()
-{
-   mCurrentMode = PlayMode;
-   setBusyChatting(false);
-   mUpDisabled = false;
-   mDownDisabled = false;
-   mLeftDisabled = false;
-   mRightDisabled = false;
-   mHelper = NULL;
 }
 
 
@@ -1778,7 +1774,7 @@ void GameUserInterface::setVolume(VolumeType volType, Vector<string> &words)
 void GameUserInterface::cancelChat()
 {
    mLineEditor.clear();
-   setPlayMode();
+   enterMode(PlayMode);
 }
 
 

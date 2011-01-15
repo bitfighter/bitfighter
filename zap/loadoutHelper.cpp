@@ -238,7 +238,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       for(S32 i = 0; i < ShipWeaponCount; i++)
          loadout.push_back(gLoadoutWeapons[mWeapon[i]].index);
 
-      gGameUserInterface.setPlayMode();                     // Exit loadout menu and resume play, however we leave this routine
+      exitHelper();                     // Exit loadout menu and resume play, however we leave this routine
 
       GameConnection *gc = gClientGame->getConnectionToServer();
       if(!gc)
