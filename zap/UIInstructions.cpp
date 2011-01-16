@@ -605,7 +605,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 }
 
 
-// Have room for up to 16 total lines
+// Have room on the screen for up to 16 total lines
 static ControlStringsEditor commands[][20] = { {                  // NO MORE THAN 20 COMMANDS PER PAGE!!!!!
    { "/admin <password>", "Request admin permissions" },
    { "/levpass <password>", "Request level change permissions" },
