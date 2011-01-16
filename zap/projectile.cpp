@@ -183,12 +183,18 @@ void Projectile::handleCollision(GameObject *hitObject, Point collisionPoint)
 
 void Projectile::idle(GameObject::IdleCallPath path)
 {
-   U32 deltaT = mCurrentMove.time; 
+   U32 deltaT = mCurrentMove.time;
 
    if(!collided && alive)
    {
+    U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
+    F32 timeLeft = deltaT;
+    S32 loopcount1 = 32;
+    while(timeLeft > 0.001 && loopcount1 != 0)    // This loop is to prevent slow bounce on low frame rate / high time left.
+    {
+      loopcount1--;
       // Calculate where projectile will be at the end of the current interval
-      Point endPos = pos + velocity * (F32)deltaT * 0.001;
+      Point endPos = pos + velocity * timeLeft * 0.001;
 
       // Check for collision along projected route of movement
       static Vector<GameObject *> disabledList;
@@ -197,7 +203,6 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
       disabledList.clear();
 
-      U32 aliveTime = getGame()->getCurrentTime() - getCreationTime();  // Age of object, in ms
 
       // Don't collide with shooter during first 500ms of life
       if(mShooter.isValid() && aliveTime < 500)
@@ -253,6 +258,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
             velocity -= surfNormal * surfNormal.dot(velocity) * 2;
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
+            timeLeft = timeLeft * (0.99 - collisionTime);
 
             if(isGhost())
                SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);
@@ -262,11 +268,13 @@ void Projectile::idle(GameObject::IdleCallPath path)
             // Not bouncing, so advance to location of collision
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             handleCollision(hitObject, collisionPoint);     // What we hit, and where we hit it
+            timeLeft = 0;
          }
 
       }
       else        // Hit nothing, advance projectile to endPos
       {
+         timeLeft = 0;
          //// Steer towards a nearby testitem
          //static Vector<DatabaseObject *> targetItems;
          //targetItems.clear();
@@ -308,6 +316,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
       Rect newExtent(pos,pos);
       setExtent(newExtent);
+    }
    }
 
 

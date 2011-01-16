@@ -73,8 +73,8 @@ void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, P
       case WeaponTurret:
          (new Projectile(weapon, firePos, projVel, shooter))->addToGame(shooter->getGame());
          break;
-      case WeaponBurst:
-         (new GrenadeProjectile(firePos, projVel, shooter))->addToGame(shooter->getGame());
+      case WeaponBurst:                                         // 0.9 to fix firing through barriers
+         (new GrenadeProjectile(shooterPos + dir * shooterRadius * 0.9, projVel, shooter))->addToGame(shooter->getGame());
          break;
       case WeaponMine:
          (new Mine(firePos, dynamic_cast<Ship *>(shooter)))->addToGame(shooter->getGame());
