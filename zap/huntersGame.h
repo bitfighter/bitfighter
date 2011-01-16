@@ -42,8 +42,8 @@ class HuntersGameType : public GameType
 private:
    typedef GameType Parent;
 
-   S32 mNexusReturnDelay;
-   S32 mNexusCapDelay;
+   S32 mNexusClosedTime;      // Time Nexus remains closed
+   S32 mNexusOpenTime;        // Time Nexus remains open
    Timer mNexusTimer;
 
    struct YardSaleWaypoint
@@ -51,6 +51,7 @@ private:
       Timer timeLeft;
       Point pos;
    };
+
    Vector<YardSaleWaypoint> mYardSaleWaypoints;
    Vector<SafePtr<HuntersNexusObject> > mNexus;
    U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 88; }

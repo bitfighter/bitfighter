@@ -89,9 +89,9 @@ TNL_IMPLEMENT_NETOBJECT_RPC(HuntersGameType, s2cHuntersMessage,
 // Constructor
 HuntersGameType::HuntersGameType() : GameType()
 {
-   mNexusReturnDelay = 60 * 1000;
-   mNexusCapDelay = 15 * 1000;
-   mNexusTimer.reset(mNexusReturnDelay);
+   mNexusClosedTime = 60 * 1000;
+   mNexusOpenTime = 15 * 1000;
+   mNexusTimer.reset(mNexusClosedTime);
    mNexusIsOpen = false;
 }
 
@@ -104,16 +104,16 @@ bool HuntersGameType::processArguments(S32 argc, const char **argv)
       mGameTimer.reset(U32(atof(argv[0]) * 60 * 1000));       // Game time
       if(argc > 1)
       {
-         mNexusReturnDelay = S32(atof(argv[1]) * 60 * 1000);  // Time until nexus opens
+         mNexusClosedTime = S32(atof(argv[1]) * 60 * 1000);  // Time until nexus opens, specified in minutes
          if(argc > 2)
          {
-            mNexusCapDelay = S32(atof(argv[2]) * 1000);       // Time nexus remains open
+            mNexusOpenTime = S32(atof(argv[2]) * 1000);       // Time nexus remains open, specified in seconds
             if(argc > 3)
                mWinningScore = atoi(argv[3]);                 // Winning score
          }
       }
    }
-   mNexusTimer.reset(mNexusReturnDelay);
+   mNexusTimer.reset(mNexusClosedTime);
 
    return true;
 }
@@ -261,9 +261,9 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
    }
 
    // The following only runs on the server
-   if(!mNexusIsOpen && mNexusTimer.update(deltaT))         // Nexus has opened
+   if(!mNexusIsOpen && mNexusTimer.update(deltaT))         // Nexus has just opened
    {
-      mNexusTimer.reset(mNexusCapDelay);
+      mNexusTimer.reset(mNexusOpenTime);
       mNexusIsOpen = true;
       s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
       static StringTableEntry msg("The Nexus is now OPEN!");
@@ -285,11 +285,12 @@ void HuntersGameType::idle(GameObject::IdleCallPath path)
             shipTouchNexus(client_ship, nexus);
       }
    }
-   else if(mNexusIsOpen && mNexusTimer.update(deltaT))       // Nexus has closed
+   else if(mNexusIsOpen && mNexusTimer.update(deltaT))       // Nexus has just closed
    {
-      mNexusTimer.reset(mNexusReturnDelay);
+      mNexusTimer.reset(mNexusClosedTime);
       mNexusIsOpen = false;
       s2cSetNexusTimer(mNexusTimer.getCurrent(), mNexusIsOpen);
+
       static StringTableEntry msg("The Nexus is now CLOSED.");
       for(S32 i = 0; i < mClientList.size(); i++)
          mClientList[i]->clientConnection->s2cDisplayMessage(GameConnection::ColorNuclearGreen, SFXFlagDrop, msg);
