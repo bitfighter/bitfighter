@@ -51,6 +51,7 @@ OBJECTS_ZAP=\
    controlObjectConnection.o\
    dataConnection.o\
    engineeredObjects.o\
+   engineerHelper.o\
    flagItem.o\
    keyCode.o\
    game.o\
@@ -64,12 +65,13 @@ OBJECTS_ZAP=\
    gameWeapons.o\
    goalZone.o\
    gridDB.o\
+   helperMenu.o\
    huntersGame.o\
    input.o\
    item.o\
    lineEditor.o\
    $(INPUT)\
-   loadoutSelect.o\
+   loadoutHelper.o\
    luaGameInfo.o\
    luaLevelGenerator.o\
    luaObject.o\
@@ -81,7 +83,7 @@ OBJECTS_ZAP=\
    oglconsole.o\
    playerInfo.o\
    projectile.o\
-   quickChat.o\
+   quickChatHelper.o\
    rabbitGame.o\
    retrieveGame.o\
    robot.o\
