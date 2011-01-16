@@ -855,7 +855,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 extern S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p);
 
 extern S32 makeZonesCount;  // in BotNaxMeshZone.cpp
-extern void makeBotMeshZone();
+extern void makeBotMeshZones();
 
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
@@ -870,9 +870,10 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))
       return returnPoint(L, target);
 
-   if(makeZonesCount == -1 && gBotNavMeshZones.size() == 0)  // Create some zones if empty.
+   // Create some zones if we need them and have none -- could be called in mid-game if admin adds a robot
+   if(makeZonesCount == -1 && gBotNavMeshZones.size() == 0)  
 	{
-      makeBotMeshZone();
+      makeBotMeshZones();
 		BotNavMeshZone::buildBotNavMeshZoneConnections();
 	}
 
