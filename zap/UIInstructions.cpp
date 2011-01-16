@@ -617,6 +617,7 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
    { "/vvol <0-10>", "Set voice chat volume" },
+
    { NULL, NULL },      // End of list
 },{
    { "/add <time in minutes>", "Add time to the current game" },
@@ -645,7 +646,8 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "-", NULL },       // Horiz. line
    { "/linewidth <number>", "Default = 2, Changes width of all lines" },
    { "/linesmooth", "Enable line smoothing, might look better" },
-   { "/maxfps <number>", "Adjust maximum speed of frames per second" },
+   { "/maxfps <number>", "Set maximum speed of game in frames per second" },
+   
    { NULL, NULL },      // End of list
    } };
 
