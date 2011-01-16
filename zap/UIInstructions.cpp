@@ -661,14 +661,23 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
    ControlStringsEditor *cmdList;
 
-   if(page == 0)
-      cmdList = commands;
-   else if(page == 1)
-      cmdList = levelControlCommands;
-   else if(page == 2)
-      cmdList = adminCommands;
-   else if(page == 3)
-      cmdList = debugCommands;
+   switch(page)
+   { 
+      case 0:
+         cmdList = commands;
+         break;
+      case 1:
+         cmdList = levelControlCommands;
+         break;
+      case 3:
+         cmdList = adminCommands;
+         break;
+      case 3:
+         cmdList = debugCommands;
+         break;
+      default:
+         TNLAssert(false, "How'd we get here?!?");
+   }
 
    S32 ypos = 50;
 
