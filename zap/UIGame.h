@@ -42,7 +42,7 @@ namespace Zap
 class GameUserInterface : public UserInterface
 {
 public:
-   // Modes we could be in during the game
+   // Modes we could be in during the game   
    enum Mode {
       PlayMode,               // Playing
       ChatMode,               // Composing chat message

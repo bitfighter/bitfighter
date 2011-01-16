@@ -26,11 +26,11 @@
 
 #include "helperMenu.h"
 #include "point.h"      // For Color def
-#include "UIGame.h"     // For gGameUserInterface
+#include "UIGame.h"     // For gGameUserInterface   
 
 namespace Zap
 {
-
+ 
 void HelperMenu::exitHelper() { gGameUserInterface.enterMode(GameUserInterface::PlayMode); }
 
 // Returns true if key was handled, false if it should be further processed

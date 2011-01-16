@@ -35,7 +35,7 @@ using namespace TNL;
 namespace Zap
 {
 
-class HelperMenu
+class HelperMenu   
 {
 private:
    virtual const char *getCancelMessage() { return ""; }
