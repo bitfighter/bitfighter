@@ -23,7 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-// Modeled on LoadoutZone.cpp
 
 #include "gameObject.h"
 #include "gameType.h"
@@ -33,40 +32,44 @@
 #include "../glut/glutInclude.h"
 #include "polygon.h"
 #include "ship.h"
+#include "SlipZone.h"
 
 namespace Zap
 {
 
 extern S32 gMaxPolygonPoints;
 
-class SlipZone : public GameObject, public Polygon
-{
-   typedef GameObject Parent;
-
-public:
-   SlipZone()     // Constructor
+   SlipZone::SlipZone()     // Constructor
    {
       mTeam = 0;
       mNetFlags.set(Ghostable);
       mObjectTypeMask = SlipZoneType | CommandMapVisType;
+		slipAmount = 0.1;
    }
 
-   void render()
+   void SlipZone::render()
    {
       renderSlipZone(mPolyBounds, getExtent());
    }
 
-   S32 getRenderSortValue()
+   S32 SlipZone::getRenderSortValue()
    {
       return -1;
    }
 
-   bool processArguments(S32 argc, const char **argv)
+   bool SlipZone::processArguments(S32 argc, const char **argv)
    {
       if(argc < 6)
          return false;
 
-      processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+		if(argc & 1) // odd number of arg count (7,9,11) to allow optional slipAmount arg
+		{
+			slipAmount = atof(argv[0]);
+         processPolyBounds(argc-1, argv+1, 0, getGame()->getGridSize());
+		}else // even number of arg count (6,8,10)
+		{
+         processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+		}
       computeExtent();
 
       /*for(S32 i = 1; i < argc; i += 2)
@@ -84,7 +87,7 @@ public:
       return true;
    }
 
-   void onAddedToGame(Game *theGame)
+   void SlipZone::onAddedToGame(Game *theGame)
    {
       if(!isGhost())
          setScopeAlways();
@@ -92,7 +95,7 @@ public:
       getGame()->mObjectsLoaded++;
    }
 
-   void computeExtent()
+   void SlipZone::computeExtent()
    {
       Rect extent(mPolyBounds[0], mPolyBounds[0]);
       for(S32 i = 1; i < mPolyBounds.size(); i++)
@@ -100,42 +103,37 @@ public:
       setExtent(extent);
    }
 
-   bool getCollisionPoly(Vector<Point> &polyPoints)
+   bool SlipZone::getCollisionPoly(Vector<Point> &polyPoints)
    {
       for(S32 i = 0; i < mPolyBounds.size(); i++)
          polyPoints.push_back(mPolyBounds[i]);
       return true;
    }
 
-   bool collide(GameObject *hitObject) ////////////////////////////////////////////////////////////////////
+   bool SlipZone::collide(GameObject *hitObject) ////////////////////////////////////////////////////////////////////
    {
       if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType))
       {
-         //getGame()->getGameType()->updateShipLoadout(hitObject);
          //logprintf("IN A SLIP ZONE!!");
-         Ship *ship = dynamic_cast<Ship *>(hitObject);
-         ship->SlipZoneObject = this;
       }
       return false;
    }
 
 
-   U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
+   U32 SlipZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
    {
       Polygon::packUpdate(connection, stream);
-
+      stream->write(slipAmount);
       return 0;
    }
 
 
-   void unpackUpdate(GhostConnection *connection, BitStream *stream)
+   void SlipZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
    {
       if(Polygon::unpackUpdate(connection, stream))
          computeExtent();
+      stream->read(&slipAmount);
    }
-
-   TNL_DECLARE_CLASS(SlipZone);
-};
 
 TNL_IMPLEMENT_NETOBJECT(SlipZone);
 

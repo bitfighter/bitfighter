@@ -1260,6 +1260,7 @@ void EventManager::fireEvent(EventType eventType)
       catch(LuaException &e)
       {
          logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
+         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1282,6 +1283,7 @@ void EventManager::fireEvent(EventType eventType, Ship *ship)
       catch(LuaException &e)
       {
          logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
+         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1310,6 +1312,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, const cha
       catch(LuaException &e)
       {
          logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
+         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1337,6 +1340,7 @@ void EventManager::fireEvent(lua_State *caller_L, EventType eventType, LuaPlayer
       catch(LuaException &e)
       {
          logprintf(LogConsumer::LogError, "Robot error firing event %d: %s.", eventType, e.what());
+         OGLCONSOLE_Print("Robot error firing event %d: %s.", eventType, e.what());
          return;
       }
    }
@@ -1710,7 +1714,8 @@ bool Robot::processArguments(S32 argc, const char **argv)
 		if(mFilename == "")
 		{
 			logprintf("Could not find bot file %s", argv[1]);     // TODO: Better handling here
-			return true;  // we can run built-in robot
+         OGLCONSOLE_Print("Could not find bot file %s", argv[1]);
+			return true;  // we can run built-in robot, not fully working yet...
 		}
 		else
 			isRunningScript = true;
@@ -1740,7 +1745,7 @@ void Robot::logError(const char *format, ...)
 
    vsnprintf(buffer, sizeof(buffer), format, args);
    logprintf(LogConsumer::LuaBotMessage, "***ROBOT ERROR*** in %s ::: %s", mFilename.c_str(), buffer);
-   if(gClientGame) OGLCONSOLE_Print("***ROBOT ERROR*** in %s ::: %s\n", mFilename.c_str(), buffer);
+   OGLCONSOLE_Print("***ROBOT ERROR*** in %s ::: %s\n", mFilename.c_str(), buffer);
 
    va_end(args);
 }
@@ -1928,7 +1933,7 @@ void RobotController::run(Robot *newship, GameType *newgametype)
 	{
 		Ship *foundship = dynamic_cast<Ship *>(objects[i]);
 		if(foundship != NULL)
-		if(!gametype->isTeamGame() || enemyship->getTeam() != ship->getTeam())
+		if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
 		{
 			F32 newDist = pos.distanceTo(foundship->getActualPos());
 			if(newDist < minDistance)
