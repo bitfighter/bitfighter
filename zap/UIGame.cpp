@@ -1430,7 +1430,7 @@ extern ClientInfo gClientInfo;
 // Runs on client
 bool GameUserInterface::processCommand(Vector<string> &words)
 {
-   if(words.size() == 0)            // Just in case, words size must be 1 or more to check the first word as command.
+   if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command.
       return true;
 
    GameConnection *gc = gClientGame->getConnectionToServer();
@@ -1654,6 +1654,28 @@ bool GameUserInterface::processCommand(Vector<string> &words)
       else
          gIniSettings.maxFPS = number;
    }
+   else if(words[0] == "pm")
+   {
+      if(words.size() < 2)
+         displayErrorMessage("!!! Enter player name, and the message.");
+      else
+      {
+         const char *char1 = mLineEditor.c_str();
+         S32 spacecount = 0;
+         S32 cur = 2;         // the first 2 character is always "pm" or "/pm"
+
+         // Message need to include everything including spaces. Use full message after 2 spaces.
+         while(char1[cur]!=0 && spacecount != 2)
+         {
+            if(char1[cur]==' ' && char1[cur-1]!=' ') spacecount++;  // double space does not count as a seperate parameter
+            cur++;
+         }
+         char1 = &char1[cur]; // Set new pointer.
+         GameType *gt = gClientGame->getGameType();
+         if(gt)
+            gt->c2sSendChatPM(words[1],char1);
+      }
+   }
    else if(words[0] == "getmap")
    {
       if(gClientGame->getConnectionToServer()->isLocalConnection())
@@ -1729,13 +1751,13 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/linewidth");
    mChatCmds.push_back("/linesmooth");
    mChatCmds.push_back("/maxfps");
+   mChatCmds.push_back("/pm");
    mChatCmds.push_back("/getmap");
 
    // commands that runs in game server, in processServerCommand
    mChatCmds.push_back("/settime");
    mChatCmds.push_back("/setscore");
    mChatCmds.push_back("/showBots");
-   mChatCmds.push_back("/pm");
 
    // Administrative commands
    mChatCmds.push_back("/kick");
