@@ -41,6 +41,16 @@ namespace Zap
 
 class GameUserInterface : public UserInterface
 {
+public:
+   // Modes we could be in during the game
+   enum Mode {
+      PlayMode,               // Playing
+      ChatMode,               // Composing chat message
+      QuickChatMode,          // Showing quick-chat menu
+      LoadoutMode,            // Showing loadout menu
+      EngineerMode,           // Showing engineer overlay mode
+   };
+
 private:
    Move mCurrentMove;
    Move mTransformedMove;
@@ -171,15 +181,6 @@ private:
    };
 
    Vector<string> mChatCmds;        // List of all commands we can type at chat prompt, for <tab> completion
-
-   // Modes we could be in during the game
-   enum Mode {
-      PlayMode,               // Playing
-      ChatMode,               // Composing chat message
-      QuickChatMode,          // Showing quick-chat menu
-      LoadoutMode,            // Showing loadout menu
-      EngineerMode,           // Showing engineer overlay mode
-   };
 
    Mode mCurrentMode;         // Current game mode
 

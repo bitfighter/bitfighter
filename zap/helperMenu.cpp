@@ -31,6 +31,7 @@
 namespace Zap
 {
 
+void HelperMenu::exitHelper() { gGameUserInterface.enterMode(GameUserInterface::PlayMode); }
 
 // Returns true if key was handled, false if it should be further processed
 bool HelperMenu::processKeyCode(KeyCode keyCode)

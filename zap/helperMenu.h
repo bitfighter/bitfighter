@@ -45,7 +45,7 @@ protected:
    static const S32 MENU_TOP = 300;     // Location of top of overlay menu
 
    // Shortcut helper function
-   void exitHelper() { gGameUserInterface.enterMode(GameUserInterface::PlayMode); }
+   void exitHelper();
 
 public:
    virtual void render() = 0;                
