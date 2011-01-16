@@ -255,7 +255,10 @@ void Projectile::idle(GameObject::IdleCallPath path)
          if(bounce)
          { 
             // We hit something that we should bounce from, so bounce!
-            velocity -= surfNormal * surfNormal.dot(velocity) * 2;
+            F32 dot1 = surfNormal.dot(velocity) * 2;
+            velocity -= surfNormal * dot1;
+            if(dot1 > 0)
+               surfNormal = -surfNormal;      // This is to fix going through polygon barriers
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
             timeLeft = timeLeft * (0.99 - collisionTime);
