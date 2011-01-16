@@ -255,49 +255,55 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
       return;   
 
 	GridDatabase *gb = gServerGame->getGridDatabase();
-	bool canseeX = gb->pointCanSeePoint(Point(x1,y1),Point(x2,y1)) && gb->pointCanSeePoint(Point(x1,y2),Point(x2,y2));
-	bool canseeY = gb->pointCanSeePoint(Point(x1,y1),Point(x1,y2)) && gb->pointCanSeePoint(Point(x2,y1),Point(x2,y2));
-	if(canseeX && canseeY
-		&& gb->pointCanSeePoint(Point(x1,y1),Point(x2,y2))
-		&& gb->pointCanSeePoint(Point(x1,y2),Point(x2,y1))
-		)
+
+	bool canseeX = gb->pointCanSeePoint(Point(x1, y1), Point(x2, y1)) && gb->pointCanSeePoint(Point(x1, y2), Point(x2, y2));
+	bool canseeY = gb->pointCanSeePoint(Point(x1, y1), Point(x1, y2)) && gb->pointCanSeePoint(Point(x2, y1), Point(x2, y2));
+
+	if(canseeX && canseeY &&
+		   gb->pointCanSeePoint(Point(x1, y1), Point(x2, y2)) &&
+		   gb->pointCanSeePoint(Point(x1, y2), Point(x2, y1)) )
 	{
 		BotNavMeshZone *botzone = new BotNavMeshZone();
+
 		botzone->addToGame(gServerGame);
-		botzone->mPolyBounds.push_back(Point(x1,y1));
-		botzone->mPolyBounds.push_back(Point(x2,y1));
-		botzone->mPolyBounds.push_back(Point(x2,y2));
-		botzone->mPolyBounds.push_back(Point(x1,y2));
-		botzone->mCentroid = Point((x1+x2)/2,(y1+y2)/2);
+		botzone->mPolyBounds.push_back(Point(x1, y1));
+		botzone->mPolyBounds.push_back(Point(x2, y1));
+		botzone->mPolyBounds.push_back(Point(x2, y2));
+		botzone->mPolyBounds.push_back(Point(x1, y2));
+		botzone->mCentroid = Point((x1 + x2) / 2, (y1 + y2) / 2);
 		botzone->computeExtent();
+
 		makeZonesCount++;
 	}
 	else
 	{
-		if(canseeX && canseeY) { canseeX = false; canseeY = false; };
-		if(x2-x1 >= 35 && (x2-x1 > y2-y1 || canseeY) && !canseeX)
+		if(canseeX && canseeY) 
+      { 
+         canseeX = false; 
+         canseeY = false; 
+      };
+
+		if(!canseeX && x2 - x1 >= 35 && (canseeY || x2 - x1 > y2 - y1))
 		{
-			F32 x3 = (x1+x2)/2;
+			F32 x3 = (x1 + x2) / 2;
 			makeBotMeshZone(x1, y1, x3, y2);
 			makeBotMeshZone(x3, y1, x2, y2);
 		}
-		else if(y2-y1 >= 35 && !canseeY)
+		else if(!canseeY && y2 - y1 >= 35)
 		{
-			F32 y3 = (y1+y2)/2;
+			F32 y3 = (y1 + y2)/2;
 			makeBotMeshZone(x1, y1, x2, y3);
 			makeBotMeshZone(x1, y3, x2, y2);
 		}
 	}
 }
 
-//extern Rect gServerWorldBounds;  // in main.cpp
 
 void makeBotMeshZones()
 {
 	makeZonesCount = 0;
 	Rect rect = gServerGame->computeWorldObjectExtents();
 	makeBotMeshZone(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
-	//gServerGame->computeWorldObjectExtents();
 }
 
 

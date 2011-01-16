@@ -261,7 +261,7 @@ GameObject *GameObject::findObjectLOS(U32 typeMask, U32 stateIndex, Point raySta
 
 void GameObject::addToGame(Game *theGame)
 {
-   TNLAssert(mGame == NULL,      "Error: Object already in a game in GameObject::addToGame.");
+   TNLAssert(mGame == NULL,   "Error: Object already in a game in GameObject::addToGame.");
    TNLAssert(theGame != NULL, "Error: theGame is NULL in GameObject::addToGame.");
 
    theGame->addToGameObjectList(this);
