@@ -226,8 +226,8 @@ static void loadGeneralSettings()
    gIniSettings.lastEditorName = gINI.GetValue(section, "LastEditorName", gIniSettings.lastEditorName);
 
    gIniSettings.enableExperimentalAimMode = gINI.GetValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
-   gIniSettings.maxFPS = gINI.GetValueI(section, "MaxFPS", gIniSettings.maxFPS);
-   if(gIniSettings.maxFPS < 1) gIniSettings.maxFPS = 100;  // FPS invalid, Too low
+   S32 fps = gINI.GetValueI(section, "MaxFPS", gIniSettings.maxFPS);
+   if(fps >= 1) gIniSettings.maxFPS = fps;   // Otherwise, leave it at the default value
 
    gDefaultLineWidth = (F32) gINI.GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
