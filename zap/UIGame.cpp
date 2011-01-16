@@ -1676,7 +1676,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
             gt->c2sSendChatPM(words[1],char1);
       }
    }
-   else if(words[0] == "getmap")
+   else if(words[0] == "getmap" || words[0] == "getlevel")    // getmap or getlevel? Allow either one..
    {
       if(gClientGame->getConnectionToServer()->isLocalConnection())
          displayErrorMessage("!!! Can't get download levels from a local server");
