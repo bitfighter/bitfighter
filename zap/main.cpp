@@ -70,6 +70,9 @@ XXX need to document timers, new luavec stuff XXX
 <li>Levelgens style scripts can be run from the console with run <script> {args}.  
 Scripts can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder.<br>
 Specifying the extension is optional.
+<li>Robots, added game:isNexusOpen() and game:getNexusTimeLeft()
+<li>Robot errors now appears in game console when hosting.
+<li>Added /showbots to show all robots.
 </ul>
 
 <h4>Editor</h4>
@@ -79,6 +82,7 @@ Specifying the extension is optional.
 <li>Can place neutral spawnpoints: Any team can spawn at these
 <li>When running command from console (run <script>) any created items are now selected
 <li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
+<li>Allow bypass level warnings and errors when trying to test level.
 </ul>
 
 <h4>Misc</h4>
@@ -88,10 +92,11 @@ Specifying the extension is optional.
 <li>Can define multiple servers in the INI to always try contacting without assistance of the master
 <li>Engineer module can no longer create crossing forcefields
 <li>Smooth lines option available with a setting in the INI
-<li>Added /linesmooth /linewidth command
+<li>Added /linesmooth /linewidth /maxfps commands
 <li>Added /setscore and /settime commands that set the score and game time for the current level
-<li>Added /getLevel command to download current level to local machine (currently requires admin access)
+<li>Added /getLevel (/getmap ?) command to download current level to local machine (only some game servers will allow this)
 <li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
+<li>Bot nav zones automatically generates when there is no nav zones and robots is asking for "getWaypoint".
 </ul>
 
 
@@ -105,7 +110,12 @@ Specifying the extension is optional.
 <li>Fixed soccer sync problems
 <li>Fixed long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
 <li>Fixed crash on maps with: missing GameType, missing Team; FlagItem, Soccer and HuntersNexusObject on wrong GameType; out of range team number, Neutral flag in CTF.
-<li>Fixed Robots problems. Robots can now score, hold nexus and rabbit flags, and allow admin to kick robots or change robots team.
+<li>Fixed lots of Robots problems. Robots can now score, hold nexus and rabbit flags, and allow admin to kick robots or change robots team.
+<li>Fixed rare nexus problem with extra flag appearing that doesn't exist on server or other clients.
+<li>Fixed burst and lag while going forward, bouncing off your own ship.
+<li>Fixed some turret shooting randomly hits self while hosting or have zero ping.
+<li>Fixed score board not sorting with lots of players.
+<li>Fixed problem with unable to see all ships in your teams in full map view.
 </ul>
 */
 

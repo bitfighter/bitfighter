@@ -42,6 +42,7 @@
 #include "gameObjectRender.h"
 #include "config.h"
 #include "statistics.h"
+#include "SlipZone.h"
 
 #include "stringUtils.h"      // For itos
 
@@ -94,7 +95,7 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    // Create our proxy object for Lua access
    luaProxy = LuaShip(this);
-   SlipZoneObject = NULL;
+   //SlipZoneObject = NULL;
 }
 
 // Destructor
@@ -216,7 +217,7 @@ void Ship::processMove(U32 stateIndex)
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
    F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
-	if(onSlipZone()) maxAccel *= 0.1;
+	maxAccel *= slipZoneMultiply();
 
    if(accRequested > maxAccel)
    {
@@ -281,11 +282,10 @@ GameObject *Ship::isInZone(GameObject *zone)
    return NULL;
 }
 
-bool Ship::onSlipZone()
+F32 Ship::slipZoneMultiply()
 {
-   return isInZone(SlipZoneType) != NULL;  // 2 options, use this line, or use 2 lines below this...
-	//if(SlipZoneObject == NULL) return false;
-	//return isInZone(SlipZoneObject) != NULL;  // Problem is you spawn on top of slipZone won't make you slippery here...
+   SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneType));
+   return slipzone ? slipzone->slipAmount : 1.0;
 }
 
 
