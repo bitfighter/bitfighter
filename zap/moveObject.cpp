@@ -165,7 +165,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
          return;
 
       F32 collisionTime = moveTime;
-      Point collisionPoint;
+      Point collisionPoint = mMoveState[stateIndex].pos;
 
       GameObject *objectHit = findFirstCollision(stateIndex, collisionTime, collisionPoint);
       if(!objectHit)    // No collision (or if isBeingDisplaced is true, we haven't been pushed into another object)
@@ -175,7 +175,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       }
 
       // Collision!  Advance to the point of collision
-      mMoveState[stateIndex].pos += mMoveState[stateIndex].vel * collisionTime;
+      mMoveState[stateIndex].pos = mMoveState[stateIndex].pos * 1.01 + mMoveState[stateIndex].vel * collisionTime - collisionPoint * 0.01;
 
       if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
       {
@@ -220,6 +220,7 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       else if(objectHit->getObjectTypeMask() & (BarrierType | EngineeredType | ForceFieldType))
       {
          computeCollisionResponseBarrier(stateIndex, collisionPoint);
+			//moveTime = 0;
       }
       moveTime -= collisionTime;
    }
@@ -258,11 +259,12 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
       poly.clear();
       if(foundObject->getCollisionPoly(poly))
       {
-         Point cp;
+         Point cp = mMoveState[stateIndex].pos;
          if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,
                delta, mRadius, cp, collisionFraction))
          {
-            if((cp - mMoveState[stateIndex].pos).dot(mMoveState[stateIndex].vel) > velocityEpsilon)
+            //if((cp - mMoveState[stateIndex].pos).dot(mMoveState[stateIndex].vel) > velocityEpsilon)
+            if(cp.distanceTo(mMoveState[stateIndex].pos) > mRadius * 0.5)
             {
                bool collide1 = collide(foundObject);
                bool collide2 = foundObject->collide(this);

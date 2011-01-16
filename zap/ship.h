@@ -174,8 +174,7 @@ public:
    bool mCooldown;
    U32 mSensorStartTime;
    Point mImpulseVector;
-	GameObject *SlipZoneObject;
-	bool onSlipZone();
+	F32 slipZoneMultiply();
 
    StringTableEntry getName() { return mPlayerName; }
    void setName(StringTableEntry name) { mPlayerName = name; }

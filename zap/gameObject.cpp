@@ -321,7 +321,7 @@ Rect GameObject::getBounds(U32 stateIndex)
 }
 
 
-extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint);
+extern bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
 // Find if the specified point is in theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Point point)
@@ -333,7 +333,7 @@ bool GameObject::collisionPolyPointIntersect(Point point)
    polyPoints.clear();
 
    if(getCollisionPoly(polyPoints))
-      return PolygonContains(polyPoints.address(), polyPoints.size(), point);
+      return PolygonContains2(polyPoints.address(), polyPoints.size(), point);
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
       return(center.distanceTo(point) <= radius);
    else

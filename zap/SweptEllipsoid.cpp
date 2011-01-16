@@ -57,6 +57,7 @@ namespace Zap
 // (is that CW or CCW??)
 
 // To use with a Vector of points, pass in vector.address() and vector.size()
+/*
 bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint)
 {
    // Loop through edges
@@ -71,7 +72,7 @@ bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &in
 
    return true;
 }
-
+*/
 
 #define MIN(x,y) (((x) < (y)) ? (x) : (y))
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
@@ -88,9 +89,9 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
    double xinters;
    Point p1, p2;
 
-   p1 = inVertices[0];
-   for(i = 1; i <= inNumVertices; i++) {
-      p2 = inVertices[i % inNumVertices];
+   p1 = inVertices[inNumVertices-1];
+   for(i = 0; i < inNumVertices; i++) {
+      p2 = inVertices[i];
       if (inPoint.y > MIN(p1.y, p2.y)) {
          if (inPoint.y <= MAX(p1.y, p2.y)) {
             if (inPoint.x <= MAX(p1.x, p2.x)) {
@@ -105,10 +106,11 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
       p1 = p2;
    }
 
-   if (counter % 2 == 0)
-      return false;
-   else
-      return true;
+   return (counter & 1) != 0; // True when number is odd, False when number is even
+   //if (counter % 2 == 0)    // using % is slower
+   //   return false;
+   //else
+   //   return true;
 }
 
 

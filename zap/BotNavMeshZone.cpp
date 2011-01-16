@@ -202,7 +202,6 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 }
 
 
-extern bool PolygonContains(const Point *inVertices, int inNumVertices, const Point &inPoint);
 
 S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p)
 {
