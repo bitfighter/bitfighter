@@ -44,8 +44,7 @@ private:
 
    S32 mNexusReturnDelay;
    S32 mNexusCapDelay;
-   Timer mNexusReturnTimer;
-   Timer mNexusCapTimer;
+   Timer mNexusTimer;
 
    struct YardSaleWaypoint
    {
@@ -61,7 +60,7 @@ public:
    bool processArguments(S32 argc, const char **argv);
 
    bool mNexusIsOpen;      // Is the nexus open?
-	S32 getNexusTimeLeft() {return mNexusIsOpen ? mNexusCapTimer.getCurrent() : mNexusReturnTimer.getCurrent(); }
+	S32 getNexusTimeLeft() {return mNexusTimer.getCurrent(); }
 
    // Info about this game type:
    bool isTeamGame() { return mTeams.size() > 1; }
