@@ -669,7 +669,7 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
       case 1:
          cmdList = levelControlCommands;
          break;
-      case 3:
+      case 2:
          cmdList = adminCommands;
          break;
       case 3:
