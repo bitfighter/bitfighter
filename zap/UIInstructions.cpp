@@ -67,7 +67,7 @@ static const char *pageHeaders[] = {
    "MORE GAME OBJECTS",
    "MORE GAME OBJECTS",
    "ADVANCED COMMANDS",
-   "LEVEL CONTROL COMMANDS",
+   "LEVEL COMMANDS",
    "ADMIN COMMANDS",
    "DEBUG COMMANDS",
    "SCRIPING CONSOLE"
@@ -606,7 +606,7 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 
 
 // Have room for up to 16 total lines
-static ControlStringsEditor commands[] = {
+static ControlStringsEditor commands[][20] = { {                  // NO MORE THAN 20 COMMANDS PER PAGE!!!!!
    { "/admin <password>", "Request admin permissions" },
    { "/levpass <password>", "Request level change permissions" },
    { "-", NULL },       // Horiz. line
@@ -618,9 +618,7 @@ static ControlStringsEditor commands[] = {
    { "/svol <0-10>", "Set SFX volume" },
    { "/vvol <0-10>", "Set voice chat volume" },
    { NULL, NULL },      // End of list
-};
-
-static ControlStringsEditor levelControlCommands[] = {
+},{
    { "/add <time in minutes>", "Add time to the current game" },
    { "/next", "Start next level" },
    { "/prev", "Replay previous level" },
@@ -629,9 +627,7 @@ static ControlStringsEditor levelControlCommands[] = {
    { "/setscore <score>", "Set score to win the level" },
 
    { NULL, NULL },      // End of list
-};
-
-static ControlStringsEditor adminCommands[] = {
+}, {
    { "/kick <player name>",        "Kick a player from the game" },
    { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
    { "/setlevpass [passwd]",       "Set level change password (use blank to clear)" },
@@ -642,10 +638,7 @@ static ControlStringsEditor adminCommands[] = {
    { "/deletecurrentlevel",        "Remove current level from server" },
 
    { NULL, NULL },      // End of list
-};
-
-
-static ControlStringsEditor debugCommands[] = {
+}, {
    { "/dcoords", "Show ship coordinates" },
    { "/dzones", "Show bot nav mesh zones" },
    { "/showbots", "Show all robots" },
@@ -654,30 +647,16 @@ static ControlStringsEditor debugCommands[] = {
    { "/linesmooth", "Enable line smoothing, might look better" },
    { "/maxfps <number>", "Adjust maximum speed of frames per second" },
    { NULL, NULL },      // End of list
-};
+   } };
 
 
 void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
    ControlStringsEditor *cmdList;
 
-   switch(page)
-   { 
-      case 0:
-         cmdList = commands;
-         break;
-      case 1:
-         cmdList = levelControlCommands;
-         break;
-      case 2:
-         cmdList = adminCommands;
-         break;
-      case 3:
-         cmdList = debugCommands;
-         break;
-      default:
-         TNLAssert(false, "How'd we get here?!?");
-   }
+   TNLAssert(page < ARRAYSIZE(commands), "Page too high!");
+
+   cmdList = commands[page];
 
    S32 ypos = 50;
 
