@@ -650,8 +650,9 @@ void Ship::processEnergy()
    {
       if(mModuleActive[i])
       {
-         mEnergy -= S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
-         anyActive = true;
+         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
+         mEnergy -= EnergyUsed;
+         anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge.
       }
    }
 
@@ -1206,9 +1207,11 @@ void Ship::setLoadout(const Vector<U32> &loadout)
       selectWeapon(0);        // ... so select first weapon
 
    if(!hasModule(ModuleEngineer))        // We don't, so drop any resources we may be carrying
+   {
       for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
          if(mMountedItems[i]->getObjectTypeMask() & ResourceItemType)
             mMountedItems[i]->dismount();
+   }
 
    // And notifiy user
    GameConnection *cc = getControllingClient();

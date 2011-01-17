@@ -229,7 +229,6 @@ void Item::idle(GameObject::IdleCallPath path)
             UpdateTimer1 = UpdateTimer1 - (mMoveState[ActualState].vel.len() + 20) * time;
             if(UpdateTimer1 < 0 || mMoveState[ActualState].vel.distSquared(prevMoveVelocity) > 100)
             {
-               logprintf("%f",UpdateTimer1);
                setMaskBits(PositionMask);
                UpdateTimer1 = 100;
                prevMoveVelocity = mMoveState[ActualState].vel;

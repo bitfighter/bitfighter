@@ -368,7 +368,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
    EngineerModuleDeployer deployer;
 
    if(!deployer.canCreateObjectAtLocation(ship, type))     
-      s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, deployer.getErrorMessage().c_str());
+      s2cDisplayMessage(GameConnection::ColorRed, SFXNone, deployer.getErrorMessage().c_str());
 
    else if(deployer.deployEngineeredItem(this, type))
    {
