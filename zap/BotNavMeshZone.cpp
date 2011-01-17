@@ -303,9 +303,11 @@ void makeBotMeshZone()
 // Only runs on server
 void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
-	makeZonesCount = -1;
    if(gBotNavMeshZones.size() == 0)
+   {
+      makeZonesCount = -1;
       return;
+   }
 
    // Figure out which zones are adjacent to which, and find the "gateway" between them
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)

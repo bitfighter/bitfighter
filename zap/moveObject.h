@@ -40,8 +40,8 @@ private:
    S32 mHitLimit;
 
 protected:
-   float mRadius;
-   float mMass;
+   F32 mRadius;
+   F32 mMass;
 
 public:
    enum {
@@ -72,12 +72,14 @@ public:
    void idle(GameObject::IdleCallPath path);    // Called from child object idle methods
    void updateInterpolation();
    void updateExtent();
-   void setRadius(F32 radius) {   mRadius = radius;   }
 
+   F32 getRadius() { return mRadius; }
+   F32 getMass() { return mMass; }
+   void setRadius(F32 radius) {   mRadius = radius;   }
+   void setMass(F32 mass) {   mMass = mass;   }
 
    Point getRenderPos() { return mMoveState[RenderState].pos; }
    Point getActualPos() { return mMoveState[ActualState].pos; }
-   float getMass() { return mMass; }
    Point getRenderVel() { return mMoveState[RenderState].vel; }
    Point getActualVel() { return mMoveState[ActualState].vel; }
    void setActualVel(Point vel) { mMoveState[ActualState].vel = vel; }
@@ -97,7 +99,6 @@ public:
       return true;
    }
 
-   F32 getRadius() { return mRadius; }
 };
 
 
