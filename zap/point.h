@@ -48,8 +48,8 @@ struct Point
 
    // Thanks, Ben & Mike!
    template<class T, class U>
-   Point(T in_x, U in_y) { x = static_cast<F32>(in_x); y = static_cast<F32>(in_y); }
-   //Point(T in_x, U in_y) { x = (F32)in_x; y = (F32)in_y; }
+   //Point(T in_x, U in_y) { x = static_cast<F32>(in_x); y = static_cast<F32>(in_y); }
+   Point(T in_x, U in_y) { x = (F32)in_x; y = (F32)in_y; }
 
    template<class T, class U>
    void set(T ix, U iy) { x = (F32)ix; y = (F32)iy; }
