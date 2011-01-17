@@ -81,6 +81,10 @@ public:
       if(theShip->carryingFlag() != NO_FLAG)
          return;
 
+      // Can only pick up flags on your team or neutral
+      if(theFlag->getTeam() != -1 && theShip->getTeam() != theFlag->getTeam())
+         return;
+
       S32 flagIndex;
 
       for(flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)

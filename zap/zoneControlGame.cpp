@@ -106,6 +106,10 @@ void ZoneControlGameType::shipTouchFlag(Ship *theShip, FlagItem *theFlag)
    if(theShip->carryingFlag() != NO_FLAG)
       return;
 
+   // Can only pick up flags on your team or neutral
+   if(theFlag->getTeam() != -1 && theShip->getTeam() != theFlag->getTeam())
+      return;
+
    Vector<StringTableEntry> e;
    e.push_back(theShip->getName());
    e.push_back(getTeamName(theShip->getTeam()));

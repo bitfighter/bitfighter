@@ -157,12 +157,15 @@ HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 }
 
 
-// The ship will come from flag->mount.  *item will be NULL.
+// The flag will come from ship->mount.  *item is used as it is posssible to carry and drop multiple items
 void HuntersGameType::itemDropped(Ship *ship, Item *item)
 {
-   HuntersFlagItem *flag = findFirstNexusFlag(ship);
-   U32 flagCount = flag ? flag->getFlagCount() : 0;
+   //HuntersFlagItem *flag = findFirstNexusFlag(ship);  //  This line causes multiple "Drop Flag" messages when ship carry multiple items.
+   HuntersFlagItem *flag = dynamic_cast<HuntersFlagItem *>(item);
+   if(! flag)
+      return;
 
+   U32 flagCount = flag ? flag->getFlagCount() : 0;
    if(flagCount == 0)
       return;
 
@@ -553,7 +556,7 @@ void HuntersFlagItem::onItemDropped()
       if(!gameType)                 // Crashed here once, don't know why, so I added the check
          return;
 
-      gameType->itemDropped(mMount, NULL);
+      gameType->itemDropped(mMount, this);
    }
    dropFlags(mFlagCount);          // Only dropping the flags we're carrying, not the "extra" one that comes when we die
 }
