@@ -466,8 +466,7 @@ void Ship::idle(GameObject::IdleCallPath path)
          // so as to not update unmoving ships.
          if(    mMoveState[RenderState].angle != mMoveState[ActualState].angle
              || mMoveState[RenderState].pos != mMoveState[ActualState].pos
-             || mMoveState[ActualState].vel.lenSquared() != 0
-             || mMoveState[RenderState].vel.lenSquared() != 0 )
+             || mMoveState[RenderState].vel != mMoveState[ActualState].vel )
             setMaskBits(PositionMask);
 
          mMoveState[RenderState] = mMoveState[ActualState];

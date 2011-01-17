@@ -110,8 +110,11 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
        Triangulate::Process(mPoints, mRenderFillGeometry);
-   else
-       getCollisionPoly(mRenderFillGeometry);   // Fill mRenderFillGeometry
+   else if(mPoints.size() == 2 && mWidth > 0)   // It's a regular segment, so apply width
+   {
+      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
+      mPoints = mRenderFillGeometry;
+   }
 
    getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries
 }
@@ -126,11 +129,7 @@ void Barrier::onAddedToGame(Game *theGame)
 // Processes mPoints and fills polyPoints 
 bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 {
-   if(mPoints.size() == 2)    // It's a regular segment, so apply width
-      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, polyPoints);     // Fills polyPoints with 4 points
-   else                       // Otherwise, our collisionPoly is just our points!
-      polyPoints = mPoints;
-
+   polyPoints = mPoints;
    return true;
 }
 
@@ -324,23 +323,11 @@ void Barrier::render(S32 layerIndex)
    if(layerIndex == 0)           // First pass: draw the fill
    {
       glColor(GAME_WALL_FILL_COLOR);
-      if(mSolid)                 // Rendering is a bit different for solid polys
-      {
-         for(S32 i = 0; i < mRenderFillGeometry.size(); i+=3)
-         {
-            glBegin(GL_POLYGON);
-               for(S32 j = i; j < i+3; j++)
-                  glVertex(mRenderFillGeometry[j]);
-            glEnd();
-         }
-      }
-      else                       // Normal wall
-      {
-         glBegin(GL_POLYGON);
-            for(S32 i = 0; i < mRenderFillGeometry.size(); i++)
-               glVertex(mRenderFillGeometry[i]);
-         glEnd();
-      }
+
+      glBegin(mSolid ? GL_TRIANGLES : GL_POLYGON);   // Rendering is a bit different for solid polys
+         for(S32 i = 0; i < mRenderFillGeometry.size(); i++)
+            glVertex(mRenderFillGeometry[i]);
+      glEnd();
 
    }
    else if(layerIndex == 1)      // Second pass: draw the outlines
