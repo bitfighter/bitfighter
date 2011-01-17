@@ -464,8 +464,13 @@ void Ship::idle(GameObject::IdleCallPath path)
          // as having changed Position state.  An optimization
          // here would check the before and after positions
          // so as to not update unmoving ships.
+         if(    mMoveState[RenderState].angle != mMoveState[ActualState].angle
+             || mMoveState[RenderState].pos != mMoveState[ActualState].pos
+             || mMoveState[ActualState].vel.lenSquared() != 0
+             || mMoveState[RenderState].vel.lenSquared() != 0 )
+            setMaskBits(PositionMask);
+
          mMoveState[RenderState] = mMoveState[ActualState];
-         setMaskBits(PositionMask);
       }
       else if(path == GameObject::ClientIdleControlMain || path == GameObject::ClientIdleMainRemote)
       {
@@ -836,7 +841,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
-      updateMask |= ChangeTeamMask;  // make this bit true to write team.
+      //updateMask |= ChangeTeamMask;  // make this bit true to write team.
 
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)

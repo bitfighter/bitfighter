@@ -90,11 +90,14 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 
 U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   if(stream->writeFlag(updateMask & InitialMask))
+   if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
       writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
+   }
 
+   if(stream->writeFlag(updateMask & InitialMask))
+   {
       stream->writeEnum(mType, ProjectileTypeCount);
 
       S32 index = -1;
@@ -103,6 +106,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       if(stream->writeFlag(index != -1))
          stream->writeInt(index, GhostConnection::GhostIdBitSize);
    }
+
    stream->writeFlag(collided);
    if(collided)
       stream->writeFlag(hitShip);
@@ -115,11 +119,14 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
-
-   if(stream->readFlag())         // Initial chunk of data, sent once for this object
+   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SFXObject::play
    {
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
       readCompressedVelocity(velocity, CompressedVelocityMax, stream);
+   }
+
+   if(stream->readFlag())         // Initial chunk of data, sent once for this object
+   {
 
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
@@ -266,6 +273,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
 				MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
 				if(obj)
 				{
+					setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
 					float1 = pos.distanceTo(obj->getRenderPos());
 					if(float1 < obj->getRadius())
 					{
