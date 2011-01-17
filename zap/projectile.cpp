@@ -221,7 +221,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          hitObject = findObjectLOS(MoveableType | BarrierType | EngineeredType | ForceFieldType,
                                    MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);
 
-         if(!hitObject || hitObject->collide(this))
+         if((!hitObject || hitObject->collide(this)))
             break;
 
          // Disable collisions with things that don't want to be
@@ -255,13 +255,24 @@ void Projectile::idle(GameObject::IdleCallPath path)
          if(bounce)
          { 
             // We hit something that we should bounce from, so bounce!
-            F32 dot1 = surfNormal.dot(velocity) * 2;
-            velocity -= surfNormal * dot1;
-            if(dot1 > 0)
+            F32 float1 = surfNormal.dot(velocity) * 2;
+            velocity -= surfNormal * float1;
+            if(float1 > 0)
                surfNormal = -surfNormal;      // This is to fix going through polygon barriers
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
             timeLeft = timeLeft * (0.99 - collisionTime);
+
+				MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
+				if(obj)
+				{
+					float1 = pos.distanceTo(obj->getRenderPos());
+					if(float1 < obj->getRadius())
+					{
+						float1 = obj->getRadius() * 1.01 / float1;
+						pos = pos * float1 + obj->getRenderPos() * (1.0 - float1);  // to fix bouncy stuck inside shielded ship
+					}
+				}
 
             if(isGhost())
                SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);

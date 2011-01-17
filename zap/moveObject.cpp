@@ -42,8 +42,8 @@ MoveObject::MoveObject(Point pos, float radius, float mass)    // Constructor
       mMoveState[i].angle = 0;
    }
 
-   mRadius = radius;
    mMass = mass;
+   mRadius = radius;
    mInterpolating = false;
    mHitLimit = 16;
 }
