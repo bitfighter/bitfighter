@@ -202,7 +202,6 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 }
 
 
-
 S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p)
 {
    for(S32 i = 0; i < zones.size(); i++)
@@ -246,12 +245,11 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 }
 
 
-static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766)
-S32 makeZonesCount = 0;                 // -1 when new level loads and need to auto generate on findPath
+static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766) ==> why not?
 
 static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 {
-	if(makeZonesCount >= MAX_ZONES)      // Don't add too many zones...
+	if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
       return;   
 
 	GridDatabase *gb = gServerGame->getGridDatabase();
@@ -272,8 +270,6 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 		botzone->mPolyBounds.push_back(Point(x1, y2));
 		botzone->mCentroid = Point((x1 + x2) / 2, (y1 + y2) / 2);
 		botzone->computeExtent();
-
-		makeZonesCount++;
 	}
 	else
 	{
@@ -299,18 +295,19 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 }
 
 
-void makeBotMeshZones()
+// In future, this function will store generated zones in a cache... but not yet; now it's just buildBotMeshZones!
+void BotNavMeshZone::buildOrLoadBotMeshZones()
 {
-	makeZonesCount = 0;
-	Rect rect = gServerGame->computeWorldObjectExtents();
-	makeBotMeshZone(rect.min.x, rect.min.y, rect.max.x, rect.max.y);
+	Rect bounds = gServerGame->computeWorldObjectExtents();
+	makeBotMeshZone(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+
+   buildBotNavMeshZoneConnections();      // Create the connections between zones
 }
 
 
 // Only runs on server
 void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
-	makeZonesCount = -1;
    if(gBotNavMeshZones.size() == 0)
       return;
 

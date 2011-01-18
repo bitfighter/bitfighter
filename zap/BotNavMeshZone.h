@@ -113,6 +113,7 @@ public:
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
 
+   static void buildOrLoadBotMeshZones();
    static void buildBotNavMeshZoneConnections();
 
    TNL_DECLARE_CLASS(BotNavMeshZone);

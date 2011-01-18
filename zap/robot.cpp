@@ -76,7 +76,7 @@ class RobotController
 public:
 	RobotController()
 	{
-		// nothing
+		// Do nothing
 	}
 	void run(Robot *newship, GameType *newgametype);
 };
@@ -854,9 +854,6 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 
 extern S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p);
 
-extern S32 makeZonesCount;  // in BotNaxMeshZone.cpp
-extern void makeBotMeshZones();
-
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
@@ -869,14 +866,6 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // If we can see the target, go there directly
    if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))
       return returnPoint(L, target);
-
-   // Create some zones if we need them and have none -- could be called in mid-game if admin adds a robot
-   if(makeZonesCount == -1 && gBotNavMeshZones.size() == 0)  
-	{
-      makeBotMeshZones();
-		BotNavMeshZone::buildBotNavMeshZoneConnections();
-	}
-
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
@@ -1650,7 +1639,7 @@ EventManager Robot::getEventManager()
 
 
 // This only runs the very first time the robot is added to the level
-// Runs on client and server
+// Runs on client and server     --> is this ever actually called on the client????
 void Robot::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
@@ -1663,25 +1652,10 @@ void Robot::onAddedToGame(Game *game)
    hasExploded = true;     // Becase we start off "dead", but will respawn real soon now...
    disableCollision();
 
-   //setScopeAlways();          // Make them always visible on cmdr map --> del
+   //setScopeAlways();        // Make them always visible on cmdr map --> del
    robots.push_back(this);    // Add this robot to the list of all robots (can't do this in constructor or else it gets run on client side too...)
    eventManager.fireEvent(L, EventManager::PlayerJoinedEvent, getPlayerInfo());
 }
-
-
-// Basically exists to override Ship::kill(info)
-/*
- void Robot::kill(DamageInfo *theInfo)
-{
-   GameConnection *killer = theInfo->damagingObject ? theInfo->damagingObject->getOwner() : NULL;
-   ClientRef *killerRef = killer ? killer->getClientRef() : NULL;
-
-   if(killerRef)
-      killerRef->mStatistics.addKill();
-
-   kill();
-}
-*/
 
 
 void Robot::kill()
