@@ -612,7 +612,7 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "-", NULL },       // Horiz. line
    { "/suspend", "Place game on hold while waiting for players" },
    { "/getmap [file]", "Save currently playing level in <file>, if allowed" },
-   { "/pm <name> [message]", "Send provate message to one player name" },
+   { "/pm <name> <message>", "Send private message to player" },
    { "-", NULL },       // Horiz. line
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
