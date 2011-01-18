@@ -270,6 +270,8 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
    }
    return NULL;
 }
+
+
 GameObject *Ship::isInZone(GameObject *zone)
 {
    // Get points that define the zone boundaries
@@ -281,6 +283,7 @@ GameObject *Ship::isInZone(GameObject *zone)
       return zone;
    return NULL;
 }
+
 
 F32 Ship::slipZoneMultiply()
 {
