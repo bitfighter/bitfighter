@@ -131,10 +131,10 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mLeadingTeamScore = 0;
    minRecPlayers = -1;
    maxRecPlayers = -1;
-   mCanSwitchTeams = true;    // Players can switch right away
-   mLocalClient = NULL;       // Will be assigned by the server after a connection is made
+   mCanSwitchTeams = true;       // Players can switch right away
+   mLocalClient = NULL;          // Will be assigned by the server after a connection is made
    mZoneGlowTimer.setPeriod(mZoneGlowTime);
-   mGlowingZoneTeam = -1;     // By default, all zones glow
+   mGlowingZoneTeam = -1;        // By default, all zones glow
    mLevelHasLoadoutZone = false;
    mEngineerEnabled = false;     // Is engineer module allowed?  By default, no
    mShowAllBots = false;
@@ -2484,14 +2484,14 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          }
      }
    }
-   else if(!stricmp(cmd, "showbots") || !stricmp(cmd, "showbot"))    // Maybe there is only one bot to show
+   else if(!stricmp(cmd, "showbots") || !stricmp(cmd, "showbot"))    // Maybe there is only one bot to show :-)
    {
-      mShowAllBots = !mShowAllBots;  // Show all robots affects all players.
+      mShowAllBots = !mShowAllBots;  // Show all robots affects all players
       if(Robot::robots.size() == 0)
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! There is no robots");
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! There are no robots to show");
       else
       {
-         StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots is enabled by %e0") : StringTableEntry("Show all robots is disabled by %e0");
+         StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option ENABLED by %e0") : StringTableEntry("Show all robots option DISABLED by %e0");
          Vector<StringTableEntry> e;
          e.push_back(clientRef->clientConnection->getClientName());
          for(S32 i = 0; i < mClientList.size(); i++)
