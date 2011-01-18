@@ -95,6 +95,17 @@ string ucase(string strToConvert)
 }
 
 
+// Concatenate all strings in words into one
+string concatenate(const Vector<string> &words, S32 startingWith = 0)
+{
+   string concatenated = "";
+   for(S32 i = startingWith; i < words.size(); i++)
+      concatenated += (i == startingWith ? "" : " ") + words[i];
+
+   return concatenated;
+}
+
+
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s
 Vector<string> parseString(const string &line)

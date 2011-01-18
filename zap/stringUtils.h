@@ -45,9 +45,12 @@ string itos(int i);
 string ftos(float f, int digits);
 
 TNL::Vector<string> parseString(const string &line);
+string concatenate(const TNL::Vector<string> &words, TNL::S32 startingWith = 0);
 
 string lcase(string strToConvert);
 string ucase(string strToConvert);
+
+
 
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
