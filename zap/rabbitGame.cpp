@@ -94,8 +94,8 @@ bool RabbitGameType::processArguments(S32 argc, const char **argv)
    if(!Parent::processArguments(argc, argv))
       return false;
 
-   mFlagReturnTimer = Timer(atoi(argv[2]) * 1000);
-   mFlagScoreTimer = Timer((U32)(1.0f / atoi(argv[3]) * 60 * 1000)); //secs per point
+   mFlagReturnTimer = U32(atof(argv[2]) * 1000);
+   mFlagScoreTimer = U32(1.0f / atof(argv[3]) * 60 * 1000); //secs per point
 
    return true;
 }
@@ -113,6 +113,9 @@ void RabbitGameType::addGameSpecificParameterMenuItems(Vector<MenuItem *> &menuI
 
 bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *victim)
 {
+   if(mTeams.size() != 1)
+	   return Parent::objectCanDamageObject(damager, victim);
+
    if(!damager)
       return true;
 
@@ -128,20 +131,23 @@ bool RabbitGameType::objectCanDamageObject(GameObject *damager, GameObject *vict
    if(!attackShip || !victimShip)
       return true;
 
-   // Hunters can only hurt rabbits and only rabbits can hurt hunters -- no "friendly fire"
-   return shipHasFlag(attackShip) != shipHasFlag(victimShip);
+   // Hunters can only hurt rabbits -- no "friendly fire"
+   return shipHasFlag(attackShip) || shipHasFlag(victimShip);
 }
 
 
 // Works for ships and robots!  --> or does it?  Was a template, but it wasn't working for regular ships, haven't tested with robots
 Color RabbitGameType::getShipColor(Ship *s)
 {
+   if(mTeams.size() != 1)
+	   return Parent::getShipColor(s);
+
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc)
       return Color();
    Ship *co = dynamic_cast<Ship *>(gc->getControlObject());
 
-   if(s == co || shipHasFlag(s) == shipHasFlag(co))
+   if(s == co || (!shipHasFlag(s) && !shipHasFlag(co)))
       return Color(0,1,0);
    // else
    return Color(1,0,0);
@@ -150,7 +156,10 @@ Color RabbitGameType::getShipColor(Ship *s)
 
 Color RabbitGameType::getTeamColor(S32 team)
 {
-   return Color(1, 0.5, 0);      // Orange
+   //if(team != 0 || mTeams.size() != 1)
+	   return Parent::getTeamColor(team);
+
+   //return Color(1, 0.5, 0);      // Orange? can allow any map specific team color
 }
 
 
@@ -171,30 +180,33 @@ bool RabbitGameType::shipHasFlag(Ship *ship)
 void RabbitGameType::idle(GameObject::IdleCallPath path)
 {
    Parent::idle(path);
-   if(path != GameObject::ServerIdleMainLoop || !mRabbitFlag)
+   if(path != GameObject::ServerIdleMainLoop)
       return;
 
    U32 deltaT = mCurrentMove.time;
 
+for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
+{
+   FlagItem *mRabbitFlag = mFlags[flagIndex];
    if (mRabbitFlag->isMounted())
    {
-      if (mFlagScoreTimer.update(deltaT))
+      if (mRabbitFlag->mTimer.update(deltaT))
       {
          onFlagHeld(mRabbitFlag->getMount());
-         mFlagScoreTimer.reset();
+         mRabbitFlag->mTimer.reset(mFlagScoreTimer);
       }
    }
    else
    {
-      if (!mRabbitFlag->isAtHome() && mFlagReturnTimer.update(deltaT))
+      if (!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
       {
-         mFlagReturnTimer.reset();
          mRabbitFlag->sendHome();
          static StringTableEntry returnString("The carrot has been returned!");
          for (S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
       }
    }
+}
 }
 
 void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
@@ -226,7 +238,15 @@ void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, Gam
 
 void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 {
+   // See if the ship is already carrying a flag - can only carry one at a time
+   if(ship->carryingFlag() != NO_FLAG)
+      return;
+
+   if(flag->getTeam() != ship->getTeam() && flag->getTeam() != -1)
+      return;
+
    s2cRabbitMessage(RabbitMsgGrab, ship->getName());
+   flag->mTimer.reset(mFlagScoreTimer);
 
    flag->mountToShip(ship);
 }
@@ -238,8 +258,7 @@ void RabbitGameType::itemDropped(Ship *ship, Item *item)
 
    if(flag)
    {
-      mFlagScoreTimer.reset();
-      mFlagReturnTimer.reset();
+      flag->mTimer.reset(mFlagReturnTimer);
       s2cRabbitMessage(RabbitMsgDrop, ship->getName());
 
       Point vel = ship->getActualVel();
@@ -263,7 +282,8 @@ void RabbitGameType::onFlagHeld(Ship *ship)
 
 void RabbitGameType::addFlag(FlagItem *theFlag)
 {
-   mRabbitFlag = theFlag;
+   //mRabbitFlag = theFlag;
+   mFlags.push_back(theFlag);
    theFlag->setScopeAlways();
 }
 
@@ -284,12 +304,12 @@ void RabbitGameType::onFlaggerDead(Ship *killerShip)
 // What does a particular scoring event score?
 S32 RabbitGameType::getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data)
 {
-   // In general, there are no team scores in Rabbit games...
-   if(scoreGroup == TeamScore)
-   {
-      return naScore;
-   }
-   else  // scoreGroup == IndividualScore
+   // In general, there are no team scores in Rabbit games... Teams is now allowed.
+   //if(scoreGroup == TeamScore)
+   //{
+   //   return naScore;
+   //}
+   //else  // scoreGroup == IndividualScore
    {
       switch(scoreEvent)
       {

@@ -1363,6 +1363,8 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout)
 {
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
       return;
+   if(!engineerIsEnabled() && (loadout[0] == ModuleEngineer || loadout[1] == ModuleEngineer))  // Reject engineer if disabled.
+      return;
 
    Ship *theShip = dynamic_cast<Ship *>(cl->clientConnection->getControlObject());
    if(theShip)

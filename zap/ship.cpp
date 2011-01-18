@@ -464,8 +464,12 @@ void Ship::idle(GameObject::IdleCallPath path)
          // as having changed Position state.  An optimization
          // here would check the before and after positions
          // so as to not update unmoving ships.
+         if(    mMoveState[RenderState].angle != mMoveState[ActualState].angle
+             || mMoveState[RenderState].pos != mMoveState[ActualState].pos
+             || mMoveState[RenderState].vel != mMoveState[ActualState].vel )
+            setMaskBits(PositionMask);
+
          mMoveState[RenderState] = mMoveState[ActualState];
-         setMaskBits(PositionMask);
       }
       else if(path == GameObject::ClientIdleControlMain || path == GameObject::ClientIdleMainRemote)
       {
@@ -646,8 +650,9 @@ void Ship::processEnergy()
    {
       if(mModuleActive[i])
       {
-         mEnergy -= S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
-         anyActive = true;
+         S32 EnergyUsed = S32(getGame()->getModuleInfo((ShipModule) i)->getEnergyDrain() * scaleFactor);
+         mEnergy -= EnergyUsed;
+         anyActive = anyActive || (EnergyUsed != 0);   // to prevent armor and engineer stop energy recharge.
       }
    }
 
@@ -836,7 +841,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
       stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
-      updateMask |= ChangeTeamMask;  // make this bit true to write team.
+      //updateMask |= ChangeTeamMask;  // make this bit true to write team.
 
       // Now write all the mounts:
       for(S32 i = 0; i < mMountedItems.size(); i++)
@@ -1202,9 +1207,11 @@ void Ship::setLoadout(const Vector<U32> &loadout)
       selectWeapon(0);        // ... so select first weapon
 
    if(!hasModule(ModuleEngineer))        // We don't, so drop any resources we may be carrying
+   {
       for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
          if(mMountedItems[i]->getObjectTypeMask() & ResourceItemType)
             mMountedItems[i]->dismount();
+   }
 
    // And notifiy user
    GameConnection *cc = getControllingClient();

@@ -223,8 +223,9 @@ void ControlObjectConnection::writeCompressedPoint(Point &p, BitStream *stream)
    }
 
    Point delta = p - mServerPosition;
-   S32 dx = S32(delta.x + Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL + Game::PLAYER_SCOPE_MARGIN);
-   S32 dy = S32(delta.y + Game::PLAYER_VISUAL_DISTANCE_VERTICAL + Game::PLAYER_SCOPE_MARGIN);
+    // floor(number + 0.5) fix rounding problems (was 5 = (U32)5.95)
+   S32 dx = (S32) floor((delta.x + Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL + Game::PLAYER_SCOPE_MARGIN) + 0.5f);
+   S32 dy = (S32) floor((delta.y + Game::PLAYER_VISUAL_DISTANCE_VERTICAL + Game::PLAYER_SCOPE_MARGIN) + 0.5f);
 
    S32 maxx = (Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL + Game::PLAYER_SCOPE_MARGIN) * 2;
    S32 maxy = (Game::PLAYER_VISUAL_DISTANCE_VERTICAL + Game::PLAYER_SCOPE_MARGIN) * 2;

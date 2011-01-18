@@ -130,8 +130,6 @@ private:
    SafePtr<GameConnection> mOwner;
    U32 mDisableCollisionCount;                     // No collisions when > 0, use of counter allows "nested" collision disabling
 
-   F32 mRadius;
-   F32 mMass;
 
 protected:
    Move mLastMove;      // The move for the previous update
@@ -140,6 +138,7 @@ protected:
    StringTableEntry mKillString;     // Alternate descr of what shot projectile (e.g. "Red turret"), used when shooter is not a ship or robot
 
 public:
+
    GameObject();                          // Constructor
    ~GameObject() { removeFromGame(); }    // Destructor
 
@@ -210,9 +209,6 @@ public:
 
    void writeCompressedVelocity(Point &vel, U32 max, BitStream *stream);
    void readCompressedVelocity(Point &vel, U32 max, BitStream *stream);
-
-   F32 getRadius() { return mRadius; }
-   F32 getMass() { return mMass; }
 
    virtual Point getRenderPos();
    virtual Point getActualPos();

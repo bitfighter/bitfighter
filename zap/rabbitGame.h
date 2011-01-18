@@ -39,9 +39,8 @@ class RabbitGameType : public GameType
 {
    typedef GameType Parent;
 
-   FlagItem *mRabbitFlag;
-   Timer mFlagReturnTimer;
-   Timer mFlagScoreTimer;
+   U32 mFlagReturnTimer;
+   U32 mFlagScoreTimer;
 
 public:
 
@@ -59,7 +58,8 @@ public:
    RabbitGameType()
    {
       mWinningScore = 100;
-      mRabbitFlag = NULL;
+      mFlagReturnTimer = 30 * 1000;
+      mFlagScoreTimer = 5 * 1000;
    }
 
    bool processArguments(S32 argc, const char **argv);
@@ -73,7 +73,7 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
    bool isFlagGame() { return true; }
-   S32 getFlagCount() { return 1; }
+   S32 getFlagCount() { return mFlags.size(); }
 
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
@@ -91,8 +91,8 @@ public:
    const char *getGameTypeString() { return "Rabbit"; }
    const char *getShortName() { return "Rab"; }
    const char *getInstructionString() { return "Grab the flag and hold it for as long as you can!"; }
-   bool isTeamGame() { return false; }
-   bool canBeTeamGame() { return false; }
+   bool isTeamGame() { return mTeams.size() != 1; }
+   bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return true; }
 
    bool isSpawnWithLoadoutGame() { return true; }

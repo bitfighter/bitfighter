@@ -72,6 +72,7 @@ public:
       CompressedVelocityMax = 2047,
       InitialMask = BIT(0),
       ExplodedMask = BIT(1),
+      PositionMask = BIT(2),
    };
 
    Point pos;

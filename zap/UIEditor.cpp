@@ -881,10 +881,6 @@ void EditorUserInterface::validateLevel()
    if(foundTeamFlagSpawns && !foundTeamFlags)
       mLevelWarnings.push_back("WARNING: Found team flag spawns but no team flags.");
 
-   // Multiple flags in rabbit, problem is carrying multiple flags, and only one of the player score while time goes by.
-   if(foundFlagCount >= 2 && !strcmp(mGameType, "RabbitGameType"))
-      mLevelWarnings.push_back("WARNING: Multiple flags in rabbit game type.");
-
    // Errors that may be corrected by levelgen -- script could add spawns
    // Neutral spawns work for all; if there's one, then that will satisfy our need for spawns for all teams
    if(mScriptLine == "" && !foundNeutralSpawn)
