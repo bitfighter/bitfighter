@@ -1367,9 +1367,7 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
 static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, Vector<string> &words)
 {
    // Concatenate all params into a single string
-   string allWords = "";
-   for(S32 i = 1; i < words.size(); i++)
-      allWords += (i == 1 ? "" : " ") + words[i];
+   string allWords = concatenate(words, 1);
 
    // Did the user provide a name/description?
    if(type != GameConnection::DeleteLevel && allWords == "")
@@ -1631,31 +1629,35 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "maxfps")
    {
       S32 number = words.size() > 1 ? atoi(words[1].c_str()) : 0;
-      if(number < 1)                              // don't allow zero or negative numbers.
-         displayErrorMessage("!!! Need to supply FPS number, default = 100");
+      if(number < 1)                              // Don't allow zero or negative numbers
+         displayErrorMessage("!!! Usage: /maxfps <frame rate>, default = 100");
       else
          gIniSettings.maxFPS = number;
    }
    else if(words[0] == "pm")
    {
       if(words.size() < 2)
-         displayErrorMessage("!!! Enter player name, and the message.");
+         displayErrorMessage("!!! Usage: /pm <player name> <message>");
       else
       {
-         const char *char1 = mLineEditor.c_str();
-         S32 spacecount = 0;
-         S32 cur = 2;         // the first 2 character is always "pm" or "/pm"
+         //const char *message = mLineEditor.c_str();
+         //S32 spacecount = 0;
+         //S32 cur = 2;         // We already know the first 2 characters are always "pm" or "/pm"
 
-         // Message need to include everything including spaces. Use full message after 2 spaces.
-         while(char1[cur]!=0 && spacecount != 2)
-         {
-            if(char1[cur]==' ' && char1[cur-1]!=' ') spacecount++;  // double space does not count as a seperate parameter
-            cur++;
-         }
-         char1 = &char1[cur]; // Set new pointer.
+         //// Message needs to include everything including spaces.  Message starts following second space.
+         //while(message[cur] != '\0' && spacecount != 2)
+         //{
+         //   if(message[cur] == ' ' && message[cur-1]!=' ') 
+         //      spacecount++;  // Double space does not count as a seperate parameter
+         //   cur++;
+         //}
+         //message = &message[cur]; // Set new pointer
+
+         string message = concatenate(words, 2);
+
          GameType *gt = gClientGame->getGameType();
          if(gt)
-            gt->c2sSendChatPM(words[1],char1);
+            gt->c2sSendChatPM(words[1], message.c_str());
       }
    }
    else if(words[0] == "getmap" || words[0] == "getlevel")    // getmap or getlevel? Allow either one..
