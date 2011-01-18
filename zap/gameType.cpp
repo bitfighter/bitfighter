@@ -1536,7 +1536,7 @@ void GameType::queryItemsOfInterest()
       }
       ioi.teamVisMask = 0;                         // Reset mask, object becomes invisible to all teams
       Point pos = ioi.theItem->getActualPos();
-      Point scopeRange(Game::PlayerSensorHorizVisDistance, Game::PlayerSensorVertVisDistance);
+      Point scopeRange(Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL, Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL);
       Rect queryRect(pos, pos);
 
       queryRect.expand(scopeRange);
@@ -1550,8 +1550,8 @@ void GameType::queryItemsOfInterest()
          delta.x = fabs(delta.x);
          delta.y = fabs(delta.y);
 
-         if( (theShip->isModuleActive(ModuleSensor) && delta.x < Game::PlayerSensorHorizVisDistance && delta.y < Game::PlayerSensorVertVisDistance) ||
-               (delta.x < Game::PlayerHorizVisDistance && delta.y < Game::PlayerVertVisDistance) )
+         if( (theShip->isModuleActive(ModuleSensor) && delta.x < Game::PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL) ||
+               (delta.x < Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL && delta.y < Game::PLAYER_VISUAL_DISTANCE_VERTICAL) )
             ioi.teamVisMask |= (1 << theShip->getTeam());      // Mark object as visible to theShip's team
       }
    }

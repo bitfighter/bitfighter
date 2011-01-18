@@ -125,15 +125,16 @@ protected:
    Point mSpawnPoint;                     // Where ship or robot spawned.  Will only be valid on server, client doesn't currently get this.
 
 public:
+   static const S32 CollisionRadius = 24;
+   static const S32 RepairRadius = 65;
+
    enum {
       MaxVelocity = 450,        // points per second
       Acceleration = 2500,      // points per second per second
       BoostMaxVelocity = 700,   // points per second
       BoostAcceleration = 5000, // points per second per second
 
-      RepairRadius = 65,
       RepairDisplayRadius = 18,
-      CollisionRadius = 24,
       VisibilityRadius = 30,
       KillDeleteDelay = 1500,
       ExplosionFadeTime = 300,
