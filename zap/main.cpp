@@ -70,7 +70,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Levelgens style scripts can be run from the console with run <script> {args}.  
 Scripts can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder.<br>
 Specifying the extension is optional.
-<li>Robots, added game:isNexusOpen() and game:getNexusTimeLeft()
+<li>added game:isNexusOpen() game:getNexusTimeLeft() GoalZone:hasFlag() FlagItem:getCaptureZone() FlagItem:getShip() Ship:getMountedItems() bot:engineerDeployObject(EngineeredTurret or EngineeredForceField)
 <li>Robot errors now appears in game console when hosting.
 <li>Added /showbots to show all robots.
 </ul>
@@ -97,6 +97,7 @@ Specifying the extension is optional.
 <li>Added /getLevel (/getmap ?) command to download current level to local machine (only some game servers will allow this)
 <li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
 <li>Bot nav zones automatically generates when there is no nav zones and robots is asking for "getWaypoint".
+<li>Bot nav zones now links teleporters.
 </ul>
 
 
@@ -113,7 +114,7 @@ Specifying the extension is optional.
 <li>Fixed lots of Robots problems. Robots can now score, hold nexus and rabbit flags, and allow admin to kick robots or change robots team.
 <li>Fixed rare nexus problem with extra flag appearing that doesn't exist on server or other clients.
 <li>Fixed burst and lag while going forward, bouncing off your own ship.
-<li>Fixed some turret shooting randomly hits self while hosting or have zero ping.
+<li>Fixed some random turret hits self.
 <li>Fixed score board not sorting with lots of players.
 <li>Fixed problem with unable to see all ships in your teams in full map view.
 </ul>
