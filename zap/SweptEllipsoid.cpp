@@ -90,27 +90,21 @@ bool PolygonContains2(const Point *inVertices, int inNumVertices, const Point &i
    Point p1, p2;
 
    p1 = inVertices[inNumVertices-1];
-   for(i = 0; i < inNumVertices; i++) {
+
+   for(i = 0; i < inNumVertices; i++) 
+   {
       p2 = inVertices[i];
-      if (inPoint.y > MIN(p1.y, p2.y)) {
-         if (inPoint.y <= MAX(p1.y, p2.y)) {
-            if (inPoint.x <= MAX(p1.x, p2.x)) {
-               if (p1.y != p2.y) {
-                  xinters = (inPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-                  if (p1.x == p2.x || inPoint.x <= xinters)
-                     counter++;
-               }
-            }
-         }
+      if(inPoint.y > MIN(p1.y, p2.y) && inPoint.y <= MAX(p1.y, p2.y) && inPoint.x <= MAX(p1.x, p2.x) && (p1.y != p2.y))
+      {
+         xinters = (inPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+         if(p1.x == p2.x || inPoint.x <= xinters)
+            counter++;
       }
+
       p1 = p2;
    }
 
-   return (counter & 1) != 0; // True when number is odd, False when number is even
-   //if (counter % 2 == 0)    // using % is slower
-   //   return false;
-   //else
-   //   return true;
+   return (counter & 1) != 0;   // True when number is odd, false when number is even ==> essentially replaces (counter % 2 == 0)
 }
 
 

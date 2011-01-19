@@ -298,8 +298,8 @@ struct IniSettings      // With defaults specified
       luaBotMessage = true;       
       serverFilter = false; 
 
-      LogStats=1;         //Log statistics into ServerFilter log files
-      SendStatsToMaster=true; //Transmit statistics to the master server
+      LogStats = 1;             // Log statistics into ServerFilter log files
+      SendStatsToMaster = true; // Transmit statistics to the master server
    }
 };
 

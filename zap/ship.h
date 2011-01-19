@@ -174,7 +174,7 @@ public:
    bool mCooldown;
    U32 mSensorStartTime;
    Point mImpulseVector;
-	F32 slipZoneMultiply();
+	F32 getSlipzoneSpeedMoficationFactor();
 
    StringTableEntry getName() { return mPlayerName; }
    void setName(StringTableEntry name) { mPlayerName = name; }
@@ -289,7 +289,7 @@ public:
    void push(lua_State *L);                           // Push a LuaShip proxy object onto the stack
 
    GameObject *isInZone(GameObjectType zoneType);     // Return whether the ship is currently in a zone of the specified type, and which one
-   GameObject *isInZone(GameObject *zone);
+   //GameObject *isInZone(GameObject *zone);
    DatabaseObject *isOnObject(GameObjectType objectType); // Returns the object in question if this ship is on an object of type objectType
 
    bool isOnObject(GameObject *object);               // Return whether or not ship is sitting on a particular item

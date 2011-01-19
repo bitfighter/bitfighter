@@ -2491,7 +2491,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! There are no robots to show");
       else
       {
-         StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option ENABLED by %e0") : StringTableEntry("Show all robots option DISABLED by %e0");
+         StringTableEntry msg = mShowAllBots ? StringTableEntry("Show all robots option enabled by %e0") : StringTableEntry("Show all robots option disabled by %e0");
          Vector<StringTableEntry> e;
          e.push_back(clientRef->clientConnection->getClientName());
          for(S32 i = 0; i < mClientList.size(); i++)
@@ -2529,30 +2529,32 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 
 extern void parseString(const char *inputString, Vector<string> &words, char seperator);
 
-// private message
+// Send a private message
 GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr message), (toName, message))
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
-   ClientRef *clientRef = source->getClientRef();
+   ClientRef *sourceClientRef = source->getClientRef();
 
    bool found = false;
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      if(mClientList[i]->clientConnection)
-         if(mClientList[i]->name == toName)
-         {
-            RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
-                                 s2cDisplayChatPM, (source->getClientName(), toName, message));
-            clientRef->clientConnection->postNetEvent(theEvent);
-            if(clientRef != mClientList[i])      // A user might send a message to it self.
-               mClientList[i]->clientConnection->postNetEvent(theEvent);
-            found = true;
-            break;
-         }
+      if(mClientList[i]->clientConnection && mClientList[i]->name == toName)     // Do we want a case insensitive search?
+      {
+         RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this, s2cDisplayChatPM, (source->getClientName(), toName, message));
+         sourceClientRef->clientConnection->postNetEvent(theEvent);
+
+         if(sourceClientRef != mClientList[i])      // A user might send a message to themselves
+            mClientList[i]->clientConnection->postNetEvent(theEvent);
+
+         found = true;
+         break;
+      }
    }
+
    if(!found)
-      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+      sourceClientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
 }
+
 
 // Client sends chat message to/via game server
 GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (global, message))
@@ -2604,18 +2606,23 @@ extern Color gGlobalChatColor;
 extern Color gTeamChatColor;
 
 // Server sends message to the client for display using StringPtr
-GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry clientName, StringTableEntry toName, StringPtr message), (clientName, toName, message))
+GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
 {
    Color theColor = Color(1,1,0);
-   if(mLocalClient->name == toName && toName == clientName)
-      gGameUserInterface.displayMessage(theColor, "%s: %s", toName.getString(), message.getString());  // Send a message to yourself.
-   else if(mLocalClient->name == toName)
-      gGameUserInterface.displayMessage(theColor, "from %s: %s", clientName.getString(), message.getString());
-   else if(mLocalClient->name == clientName)
+   if(mLocalClient->name == toName && toName == fromName)      // Message sent to self
+      gGameUserInterface.displayMessage(theColor, "%s: %s", toName.getString(), message.getString());  
+
+   else if(mLocalClient->name == toName)                       // To this player
+      gGameUserInterface.displayMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
+
+   else if(mLocalClient->name == fromName)                     // From this player
       gGameUserInterface.displayMessage(theColor, "to %s: %s", toName.getString(), message.getString());
-   else                                   // Shouldn't be able to see PM that is not from or not to you.
-      gGameUserInterface.displayMessage(theColor, "from %s to %s: %s", clientName.getString(), toName.getString(), message.getString());
+
+   else                // Should never get here... shouldn't be able to see PM that is not from or not to you
+      gGameUserInterface.displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
 }
+
+
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message), (global, clientName, message))
 {
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;

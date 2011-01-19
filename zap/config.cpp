@@ -227,7 +227,9 @@ static void loadGeneralSettings()
 
    gIniSettings.enableExperimentalAimMode = gINI.GetValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
    S32 fps = gINI.GetValueI(section, "MaxFPS", gIniSettings.maxFPS);
-   if(fps >= 1) gIniSettings.maxFPS = fps;   // Otherwise, leave it at the default value
+   if(fps >= 1) 
+      gIniSettings.maxFPS = fps;   // Otherwise, leave it at the default value
+   // else warn?
 
    gDefaultLineWidth = (F32) gINI.GetValueF(section, "LineWidth", 2);
    gLineWidth1 = gDefaultLineWidth * 0.5f;
@@ -267,7 +269,7 @@ static void loadDiagnostics()
 static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
-	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", false);
+	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
 }
 
 static void loadEffectsSettings()
@@ -327,8 +329,11 @@ static void loadHostConfiguration()
    gIniSettings.allowGetMap          = gINI.GetValueYN("Host", "AllowGetMap", gIniSettings.allowGetMap);
    gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "AllowDataConnections", gIniSettings.allowDataConnections);
 
-   gIniSettings.maxDedicatedFPS = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
-	if(gIniSettings.maxDedicatedFPS < 1) gIniSettings.maxDedicatedFPS = 100; // FPS invalid, Too low
+   S32 fps = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
+	if(fps >= 1) 
+      gIniSettings.maxDedicatedFPS = fps; 
+   // else warn?
+
 
    // allow "Yes" to enable logging
    string str = gINI.GetValue("Host", "LogStats", "1");
@@ -1235,11 +1240,11 @@ static void writeTesting()
       gINI.sectionComment("Testing", " These settings are here to enable/disable certain items for testing.  They are by their nature");
       gINI.sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
       gINI.sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
-      gINI.sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly");
+      gINI.sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly; forces arranged connections via master");
       gINI.sectionComment("Testing", "----------------");
    }
-   gINI.SetValueI("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
-   gINI.setValueYN("Testing", "NeverConnectDirect",gIniSettings.neverConnectDirect);
+   gINI.SetValueI ("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
+   gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
 }
 
 

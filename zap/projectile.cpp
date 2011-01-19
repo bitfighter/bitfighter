@@ -212,7 +212,8 @@ void Projectile::idle(GameObject::IdleCallPath path)
       }
 
       GameObject *hitObject;
-      float collisionTime;
+
+      F32 collisionTime;
       Point surfNormal;
 
       // Do the search
@@ -255,10 +256,11 @@ void Projectile::idle(GameObject::IdleCallPath path)
          if(bounce)
          { 
             // We hit something that we should bounce from, so bounce!
-            F32 dot1 = surfNormal.dot(velocity) * 2;
-            velocity -= surfNormal * dot1;
-            if(dot1 > 0)
+            F32 dot = surfNormal.dot(velocity) * 2;
+            velocity -= surfNormal * dot;
+            if(dot > 0)
                surfNormal = -surfNormal;      // This is to fix going through polygon barriers
+
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
             timeLeft = timeLeft * (0.99 - collisionTime);
@@ -270,7 +272,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          {
             // Not bouncing, so advance to location of collision
             Point collisionPoint = pos + (endPos - pos) * collisionTime;
-            handleCollision(hitObject, collisionPoint);     // What we hit, and where we hit it
+            handleCollision(hitObject, collisionPoint);     // What we hit, where we hit it
             timeLeft = 0;
          }
 

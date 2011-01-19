@@ -275,6 +275,7 @@
     <ClInclude Include="dataConnection.h" />
     <ClInclude Include="helperMenu.h" />
     <ClInclude Include="oglconsole.h" />
+    <ClInclude Include="SlipZone.h" />
     <ClInclude Include="stringUtils.h" />
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIMenuItems.h" />

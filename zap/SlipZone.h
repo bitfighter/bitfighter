@@ -37,17 +37,22 @@ class SlipZone : public GameObject, public Polygon
    typedef GameObject Parent;
 
 public:
-	F32 slipAmount;   // 0.0 to 1.0 , the lower, the more slipply
-   SlipZone();     // Constructor
+	F32 slipAmount;   // 0.0 to 1.0 , lower = more slippy
+
+   SlipZone();       // Constructor
+   bool processArguments(S32 argc, const char **argv);
+
    void render();
    S32 getRenderSortValue();
-   bool processArguments(S32 argc, const char **argv);
+
    void onAddedToGame(Game *theGame);
    void computeExtent();
    bool getCollisionPoly(Vector<Point> &polyPoints);
    bool collide(GameObject *hitObject);
+
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
    TNL_DECLARE_CLASS(SlipZone);
 };
 

@@ -244,9 +244,10 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
    fillVector.clear();
    findObjects(AllObjectTypes, fillVector, queryRect);
 
-   float collisionFraction;
+   F32 collisionFraction;
 
    GameObject *collisionObject = NULL;
+   Vector<Point> poly;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -255,13 +256,14 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
       if(!foundObject->isCollisionEnabled())
          continue;
 
-      Vector<Point> poly;
       poly.clear();
+
       if(foundObject->getCollisionPoly(poly))
       {
-         Point cp = mMoveState[stateIndex].pos;
+         Point cp(mMoveState[stateIndex].pos);
+
          if(PolygonSweptCircleIntersect(&poly[0], poly.size(), mMoveState[stateIndex].pos,
-               delta, mRadius, cp, collisionFraction))
+                                        delta, mRadius, cp, collisionFraction))
          {
             //if((cp - mMoveState[stateIndex].pos).dot(mMoveState[stateIndex].vel) > velocityEpsilon)
             if(cp.distanceTo(mMoveState[stateIndex].pos) > mRadius * 0.5)
@@ -276,6 +278,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
                delta *= collisionFraction;
                collisionTime *= collisionFraction;
                collisionObject = foundObject;
+
                if(!collisionTime)
                   break;
             }
@@ -340,7 +343,7 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 // Collided with BarrierType, EngineeredType, or ForceFieldType.  What's the response?
 void MoveObject::computeCollisionResponseBarrier(U32 stateIndex, Point &collisionPoint)
 {
-   // reflect the velocity along the collision point
+   // Reflect the velocity along the collision point
    Point normal = mMoveState[stateIndex].pos - collisionPoint;
    normal.normalize();
 

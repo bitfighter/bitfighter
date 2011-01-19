@@ -1115,7 +1115,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
    else if(ascii)     // Append any other keys to the chat message
    {
       // Protect against crashes while game is initializing (because we look at the ship for the player's name)
-      if(gClientGame && gClientGame->getConnectionToServer())
+      if(gClientGame->getConnectionToServer())     // gClientGame cannot be NULL here
       {
          S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
@@ -1660,16 +1660,16 @@ bool GameUserInterface::processCommand(Vector<string> &words)
             gt->c2sSendChatPM(words[1], message.c_str());
       }
    }
-   else if(words[0] == "getmap" || words[0] == "getlevel")    // getmap or getlevel? Allow either one..
+   else if(words[0] == "getmap" || words[0] == "getlevel")    // Getmap or getlevel?  Allow either...
    {
       if(gClientGame->getConnectionToServer()->isLocalConnection())
-         displayErrorMessage("!!! Can't get download levels from a local server");
+         displayErrorMessage("!!! Can't download levels from a local server");
       else
       {
          if(words.size() > 1 && words[1] != "")
             remoteLevelDownloadFilename = words[1];
 			else
-            remoteLevelDownloadFilename = "Downloaded_" + makeFilenameFromString(gClientGame->getGameType() ? 
+            remoteLevelDownloadFilename = "downloaded_" + makeFilenameFromString(gClientGame->getGameType() ? 
                                                                         gClientGame->getGameType()->mLevelName.getString() : "Level");
          // Add an extension if needed
          if(remoteLevelDownloadFilename.find(".") == string::npos)

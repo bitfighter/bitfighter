@@ -217,7 +217,7 @@ void Ship::processMove(U32 stateIndex)
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
    F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
-	maxAccel *= slipZoneMultiply();
+	maxAccel *= getSlipzoneSpeedMoficationFactor();
 
    if(accRequested > maxAccel)
    {
@@ -272,20 +272,20 @@ GameObject *Ship::isInZone(GameObjectType zoneType)
 }
 
 
-GameObject *Ship::isInZone(GameObject *zone)
-{
-   // Get points that define the zone boundaries
-   Vector<Point> polyPoints;
-   polyPoints.clear();
-   zone->getCollisionPoly(polyPoints);
+//GameObject *Ship::isInZone(GameObject *zone)
+//{
+//   // Get points that define the zone boundaries
+//   Vector<Point> polyPoints;
+//   polyPoints.clear();
+//   zone->getCollisionPoly(polyPoints);
+//
+//   if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
+//      return zone;
+//   return NULL;
+//}
 
-   if( PolygonContains2(polyPoints.address(), polyPoints.size(), getActualPos()) )
-      return zone;
-   return NULL;
-}
 
-
-F32 Ship::slipZoneMultiply()
+F32 Ship::getSlipzoneSpeedMoficationFactor()
 {
    SlipZone *slipzone = dynamic_cast<SlipZone *>(isInZone(SlipZoneType));
    return slipzone ? slipzone->slipAmount : 1.0;
