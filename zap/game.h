@@ -142,18 +142,15 @@ public:
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
    static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
 
-   enum
-   {
-      PlayerHorizVisDistance = 600,    // How far player can see normally horizontally...
-      PlayerVertVisDistance = 450,     // ...and vertically
+   static const S32 PLAYER_VISUAL_DISTANCE_HORIZONTAL = 600;    // How far player can see normally horizontally...
+   static const S32 PLAYER_VISUAL_DISTANCE_VERTICAL = 450;     // ...and vertically
 
-      PlayerScopeMargin = 150,
+   static const S32 PLAYER_SCOPE_MARGIN = 150;
 
-      PlayerSensorHorizVisDistance = 1060,   // How far player can see with sensor activated horizontally...
-      PlayerSensorVertVisDistance = 795,     // ...and vertically
+   static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL = 1060;   // How far player can see with sensor activated horizontally...
+   static const S32 PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL = 795;     // ...and vertically
 
-      PLAYER_COUNT_UNAVAILABLE = -1,
-   };
+   static const S32 PLAYER_COUNT_UNAVAILABLE = -1;
 
    Vector<GameObject *> mGameObjects;
 
@@ -182,10 +179,10 @@ public:
 
    void setGridSize(F32 gridSize) { mGridSize = gridSize; }
 
-   static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PlayerSensorHorizVisDistance + PlayerScopeMargin,
-                                                                                   PlayerSensorVertVisDistance  + PlayerScopeMargin)
-                                                                           : Point(PlayerHorizVisDistance + PlayerScopeMargin,
-                                                                                   PlayerVertVisDistance  + PlayerScopeMargin); }
+   static Point getScopeRange(bool sensorIsActive) { return sensorIsActive ? Point(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                                                                   PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN)
+                                                                           : Point(PLAYER_VISUAL_DISTANCE_HORIZONTAL + PLAYER_SCOPE_MARGIN,
+                                                                                   PLAYER_VISUAL_DISTANCE_VERTICAL  + PLAYER_SCOPE_MARGIN); }
    F32 getGridSize() { return mGridSize; }
    U32 getCurrentTime() { return mCurrentTime; }
    virtual bool isServer() = 0;              // Will be overridden by either clientGame (return false) or serverGame (return true)

@@ -1683,8 +1683,8 @@ void EditorUserInterface::renderReferenceShip()
       glRotatef(-90, 0, 0, 1);
 
       // And show how far it can see
-      F32 horizDist = Game::PlayerHorizVisDistance;
-      F32 vertDist = Game::PlayerVertVisDistance;
+      F32 horizDist = Game::PLAYER_VISUAL_DISTANCE_HORIZONTAL;
+      F32 vertDist = Game::PLAYER_VISUAL_DISTANCE_VERTICAL;
 
       glEnableBlend;     // Enable transparency
       glColor4f(.5, .5, 1, .35);

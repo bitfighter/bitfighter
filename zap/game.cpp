@@ -279,8 +279,8 @@ Point Game::computePlayerVisArea(Ship *ship)
 {
    F32 fraction = ship->getSensorZoomFraction();
 
-   Point regVis(PlayerHorizVisDistance, PlayerVertVisDistance);
-   Point sensVis(PlayerSensorHorizVisDistance, PlayerSensorVertVisDistance);
+   Point regVis(PLAYER_VISUAL_DISTANCE_HORIZONTAL, PLAYER_VISUAL_DISTANCE_VERTICAL);
+   Point sensVis(PLAYER_SENSOR_VISUAL_DISTANCE_HORIZONTAL, PLAYER_SENSOR_VISUAL_DISTANCE_VERTICAL);
 
    if(ship->isModuleActive(ModuleSensor))
       return regVis + (sensVis - regVis) * fraction;
