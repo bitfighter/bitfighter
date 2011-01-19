@@ -268,7 +268,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
             if(float1 > 0)
                surfNormal = -surfNormal;      // This is to fix going through polygon barriers
 
-            Point collisionPoint = pos + (endPos - pos) * collisionTime;ve8dH3tS5gX3
+            Point collisionPoint = pos + (endPos - pos) * collisionTime;
             pos = collisionPoint + surfNormal;
             timeLeft = timeLeft * (0.99 - collisionTime);
 

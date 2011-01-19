@@ -2529,8 +2529,6 @@ GAMETYPE_RPC_C2S(GameType, c2sSendCommand, (StringTableEntry cmd, Vector<StringP
 }
 
 
-extern void parseString(const char *inputString, Vector<string> &words, char seperator);
-
 // Send a private message
 GAMETYPE_RPC_C2S(GameType, c2sSendChatPM, (StringTableEntry toName, StringPtr message), (toName, message))
 {

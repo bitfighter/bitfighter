@@ -312,7 +312,6 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 {
    if(gBotNavMeshZones.size() == 0)
    {
-      makeZonesCount = -1;
       return;
    }
 
