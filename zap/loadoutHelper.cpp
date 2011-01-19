@@ -93,9 +93,16 @@ void LoadoutHelper::render()
    else
       dSprintf (helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
 
+   glBegin(GL_LINES);
+      glColor(loadoutMenuHeaderColor);
+      glVertex2f(UserInterface::horizMargin, yPos + 20);
+      glColor3f(0,0,0);    // Fade to black...
+      glVertex2f(400, yPos + 20);
+   glEnd();
+
    glColor(loadoutMenuHeaderColor);
    UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, helpStr);
-   yPos += fontSize + 4;
+   yPos += fontSize + 10;
 
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
@@ -140,7 +147,7 @@ void LoadoutHelper::render()
             glColor3f(0.1, 1.0, 0.1);      // Color of not-yet selected item
 
          S32 xPos = UserInterface::horizMargin + 50;
-         xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text);      // The loadout entry itself
+         xPos += UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, list->get(i).text) + 8;      // The loadout entry itself
          if(!selected)
             glColor3f(.2, .8, .8);        // Color of help message
 
@@ -150,9 +157,22 @@ void LoadoutHelper::render()
       }
    }
    // Add some help text
-   glColor(loadoutMenuHeaderColor);
+   
    S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
    const S32 fontSizeSm = fontSize - 4;
+
+   yPos += 2;
+
+   glBegin(GL_LINES);
+      glColor(loadoutMenuHeaderColor);
+      glVertex2f(UserInterface::horizMargin, yPos);
+      glColor3f(0,0,0);    // Fade to black...
+      glVertex2f(400, yPos);
+   glEnd();
+
+   yPos += 4;
+
+   glColor(loadoutMenuHeaderColor);
 
    // RenderedSize will be -1 if the button is not defined
    if(gIniSettings.inputMode == Keyboard || butSize == -1)

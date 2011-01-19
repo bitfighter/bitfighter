@@ -30,8 +30,13 @@
 
 namespace Zap
 {
- 
-void HelperMenu::exitHelper() { gGameUserInterface.enterMode(GameUserInterface::PlayMode); }
+
+// Exit helper mode by entering play mode.  Only one mode is active at a time.
+void HelperMenu::exitHelper() 
+{ 
+   gGameUserInterface.enterMode(GameUserInterface::PlayMode); 
+}
+
 
 // Returns true if key was handled, false if it should be further processed
 bool HelperMenu::processKeyCode(KeyCode keyCode)
