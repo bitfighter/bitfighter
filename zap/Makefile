@@ -116,7 +116,7 @@ DFLAGS=
 EXEFILE=bitfighter
 OPENAL=-lopenal -lalut
 WFLAGS=
-
+LFLAGS=-lstdc++ -lm -ldl -lX11
 
 .c.o:
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
@@ -128,6 +128,7 @@ default: bitfighter
 
 
 dedicated: CFLAGS=-DZAP_DEDICATED 
+dedicated: LFLAGS=-lstdc++ -lm -ldl
 dedicated: GLUT=
 dedicated: OPENAL=
 dedicated: EXEFILE=bitfighterd
@@ -135,7 +136,7 @@ dedicated: bitfighter
 
 
 bitfighter: $(OBJECTS_ZAP)
-	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) -lstdc++  -lm -ldl -lX11
+	$(CC) -o ../exe/$(EXEFILE) $(OBJECTS_ZAP) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a ../lua/lua-vec/src/liblua.a $(OPENAL) $(GLUT) $(THREADLIB) $(LFLAGS)
 
 
 # We need one file in the master folder to be compiled to make this all work.  This
