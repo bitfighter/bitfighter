@@ -238,6 +238,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
 
    method(LuaRobot, getAngle),
    method(LuaRobot, getActiveWeapon),
+   method(LuaRobot, getMountedItems),
    // End inherited methods
 
    method(LuaRobot, getZoneCenter),
@@ -840,6 +841,8 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
       if(fillVector[i]->getObjectTypeMask() & (ShipType | RobotType))      // Skip cloaked ships & robots!
       {
          Ship *ship = dynamic_cast<Ship *>(fillVector[i]);
+         if(ship)
+         {
 
          if(dynamic_cast<Robot *>(fillVector[i]) == thisRobot)             // Do not find self
             continue;
@@ -847,6 +850,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
          // Ignore ship/robot if it's dead or cloaked
          if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
             continue;
+         }
       }
 
       GameObject *obj = dynamic_cast<GameObject *>(fillVector[i]);

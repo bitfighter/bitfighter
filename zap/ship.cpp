@@ -1682,6 +1682,7 @@ Lunar<LuaShip>::RegType LuaShip::methods[] = {
 
    method(LuaShip, getAngle),
    method(LuaShip, getActiveWeapon),
+   method(LuaShip, getMountedItems),
 
    {0,0}    // End method list
 };
@@ -1728,6 +1729,41 @@ S32 LuaShip::getEnergy(lua_State *L) { return thisShip ? returnFloat(L, thisShip
 S32 LuaShip::getHealth(lua_State *L) { return thisShip ? returnFloat(L, thisShip->getHealth()) : returnNil(L); }                // Return ship's health as a fraction between 0 and 1
 
 
+S32 LuaShip::getMountedItems(lua_State *L)
+{
+   // objectType is a bitmask of all the different object types we might want to find.  We need to build it up here because
+   // lua can't do the bitwise or'ing itself.
+   U32 objectType = 0;
+
+   S32 index = 1;
+   S32 pushed = 0;      // Count of items actually pushed onto the stack
+
+   while(lua_isnumber(L, index))
+   {
+      objectType |= (U32) lua_tointeger(L, index);
+      index++;
+   }
+   if(objectType == 0) objectType = 0xFFFFFFFF;  // find everything if type is none.
+
+   clearStack(L);
+
+   if(!thisShip) return 0;  // if NULL, what to do here?
+   lua_createtable(L, thisShip->mMountedItems.size(), 0);    // Create a table, with enough slots pre-allocated for our data
+
+   for(S32 i = 0; i < thisShip->mMountedItems.size(); i++)
+   {
+      if(thisShip->mMountedItems[i]->getObjectTypeMask() & objectType)
+      {
+         dynamic_cast<GameObject *>(thisShip->mMountedItems[i].getPointer())->push(L);
+         pushed++;      // Increment pushed before using it because Lua uses 1-based arrays
+         lua_rawseti(L, 1, pushed);
+      }
+   }
+
+   return 1;
+}
+
+
 GameObject *LuaShip::getGameObject()
 {
    if(thisShip.isNull())    // This will only happen when thisShip is dead, and therefore developer has made a mistake.  So let's throw up a scolding error message!
@@ -1738,6 +1774,7 @@ GameObject *LuaShip::getGameObject()
    else
       return getObj();
 }
+
 
 };
 
