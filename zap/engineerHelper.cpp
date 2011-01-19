@@ -75,11 +75,10 @@ void EngineerHelper::render()
          }
 
          glColor3f(0.1, 1.0, 0.1);     
-
-            S32 x = UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
+         S32 x = UserInterface::drawStringAndGetWidth(xPos, yPos, fontSize, mEngineerCostructionItemInfos[i].mName); 
 
          glColor3f(.2, .8, .8);    
-            UserInterface::drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
+         UserInterface::drawString(xPos + x, yPos, fontSize, mEngineerCostructionItemInfos[i].mHelp);      // The help string, if there is one
 
          yPos += fontSize + 7;
       }
@@ -109,7 +108,7 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
             mSelectedItem = i;
             return true;
          }
-      exitHelper();
+      //exitHelper();
    }
    else                       // Placing item
    {
