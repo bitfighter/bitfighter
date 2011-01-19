@@ -76,9 +76,9 @@ class BotNavMeshZone : public GameObject, public Polygon
 
 private:   
    typedef GameObject Parent;
-   bool mConvex;                 // Stores wheter zone is convex or not
 
 public:
+   bool mConvex;                 // Stores wheter zone is convex or not
    U16 mZoneID;
 
    BotNavMeshZone();       // Constructor

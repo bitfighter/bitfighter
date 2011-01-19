@@ -272,6 +272,7 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 		botzone->mPolyBounds.push_back(Point(x2, y2));
 		botzone->mPolyBounds.push_back(Point(x1, y2));
 		botzone->mCentroid = Point((x1 + x2) / 2, (y1 + y2) / 2);
+		botzone->mConvex = true;             // avoid random red and green on /dzones, was uninitalized.
 		botzone->computeExtent();
 
 		makeZonesCount++;

@@ -91,13 +91,13 @@ Specifying the extension is optional.
 <li>When master server is unreachable, server will remember recent game servers and will try to contact those
 <li>Can define multiple servers in the INI to always try contacting without assistance of the master
 <li>Engineer module can no longer create crossing forcefields
-<li>Smooth lines option available with a setting in the INI
-<li>Added /linesmooth /linewidth /maxfps commands
+<li>Added /linesmooth /linewidth /maxfps commands, and they are available in INI
 <li>Added /setscore and /settime commands that set the score and game time for the current level
 <li>Added /getLevel (/getmap ?) command to download current level to local machine (only some game servers will allow this)
 <li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
 <li>Bot nav zones automatically generates when there is no nav zones and robots is asking for "getWaypoint".
-<li>Bot nav zones now links teleporters.
+<li>Bot nav zones can now link both nav zones with teleporters, this allows robots to use teleporters.
+<li>Some bandwidth saving by sending updates less often on slow moving objects.
 </ul>
 
 
