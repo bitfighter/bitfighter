@@ -45,6 +45,7 @@ Lunar<GoalZone>::RegType GoalZone::methods[] =
    method(GoalZone, getVel),
    method(GoalZone, getTeamIndx),
 
+   method(GoalZone, hasFlag),
    {0,0}    // End method list
 };
 

@@ -126,10 +126,11 @@ private:
    static const S32 RobotRespawnDelay = 1500;
    Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
    bool gameConnectionInitalized;
-	bool isRunningScript;
 	void *robotController;       // A pointer of RobotController, for speeding up compiler, it is (void *) here.
 
 public:
+   bool isRunningScript;
+   bool wasRunningScript;
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
    ~Robot();          // Destructor
    lua_State *L;                // Main Lua state variable
@@ -274,6 +275,8 @@ public:
 
    //// Ship info
    //S32 getActiveWeapon(lua_State *L);
+
+   S32 engineerDeployObject(lua_State *L);
 
    S32 getGame(lua_State *L);             // Get a pointer to a game object, where we can run game-info oriented methods
    Ship *getObj() { return thisRobot; }   // This handles delegation properly when we're dealing with methods inherited from LuaShip

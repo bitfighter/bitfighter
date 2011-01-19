@@ -83,6 +83,7 @@ public:
    S32 getTeamIndx(lua_State *L);
    S32 getPlayerInfo(lua_State *L);
    S32 isModActive(lua_State *L);
+   S32 getMountedItems(lua_State *L);
 
    GameObject *getGameObject();
    static const char *getClassName() { return "LuaShip"; }

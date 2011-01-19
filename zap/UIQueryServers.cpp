@@ -237,7 +237,7 @@ void QueryServersUserInterface::contactEveryone()
 void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
 {
    // First check our list for dead servers -- if it's on our local list, but not on the master server's list, it's dead
-   for(S32 i = 0; i < servers.size(); i++)
+   for(S32 i = servers.size()-1; i >= 0 ; i--)
    {
       if(!servers[i].isFromMaster)     // Skip servers that we didn't learn about from the master
          continue;
@@ -253,7 +253,7 @@ void QueryServersUserInterface::addPingServers(const Vector<IPAddress> &ipList)
       }
 
       if(!found)              // It's a defunct server...
-         servers.erase(i);    // ...bye-bye!
+         servers.erase_fast(i);    // ...bye-bye!
    }
 
    // Save servers from the master
@@ -444,7 +444,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
 
    // When all pings have been answered or have timed out, send out server status queries ... too slow
    // Want to start query immediately, to display server name / current players faster
-   for(S32 i = 0; i < servers.size(); i++)
+   for(S32 i = servers.size()-1; i >= 0 ; i--)
    {
       if(pendingQueries < MaxPendingQueries)
       {
@@ -458,7 +458,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                // We don't have another mechanism for culling dead local servers
                if(!s.isFromMaster)
                {
-                  servers.erase(i);
+                  servers.erase_fast(i);
                   continue;
                }
                // Otherwise, we can deal with timeouts on remote servers
@@ -501,9 +501,9 @@ void QueryServersUserInterface::idle(U32 timeDelta)
    }
 
    // Clear out our hidden server list
-   for(S32 i = 0; i < hidden.size(); i++)
+   for(S32 i = hidden.size()-1; i >= 0; i--)
       if(time > hidden[i].timeUntilShow)
-         hidden.erase(i);
+         hidden.erase_fast(i);
 
    // Not sure about the logic in here... maybe this is right...
    if( (mMasterRequeryTimer.update(elapsedTime) && !mWaitingForResponseFromMaster) ||

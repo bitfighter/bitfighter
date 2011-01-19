@@ -29,6 +29,7 @@
 #include "UIMenus.h"
 #include "UIGame.h"           // for access to gGameUserInterface.mDebugShowMeshZones
 #include "gameObjectRender.h"
+#include "teleporter.h"
 
 namespace Zap
 {
@@ -269,6 +270,7 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 		botzone->mPolyBounds.push_back(Point(x2, y2));
 		botzone->mPolyBounds.push_back(Point(x1, y2));
 		botzone->mCentroid = Point((x1 + x2) / 2, (y1 + y2) / 2);
+		botzone->mConvex = true;             // avoid random red and green on /dzones, was uninitalized.
 		botzone->computeExtent();
 	}
 	else
@@ -309,7 +311,10 @@ void BotNavMeshZone::buildOrLoadBotMeshZones()
 void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
    if(gBotNavMeshZones.size() == 0)
+   {
+      makeZonesCount = -1;
       return;
+   }
 
    // Figure out which zones are adjacent to which, and find the "gateway" between them
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
@@ -350,6 +355,39 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             gBotNavMeshZones[j]->mNeighbors.push_back(n2);
          }
       }
+		Vector<DatabaseObject *> objects;
+		gServerGame->getGridDatabase()->findObjects(TeleportType,objects,gBotNavMeshZones[i]->getExtent());
+		for(S32 k=0; k<objects.size(); k++)
+		{
+			Teleporter *obj = dynamic_cast<Teleporter *>(objects[k]);
+			if(obj && PolygonContains2(gBotNavMeshZones[i]->mPolyBounds.address(), gBotNavMeshZones[i]->mPolyBounds.size(), obj->getActualPos()))
+			{
+				for(S32 l=0; l<obj->mDest.size(); l++)  // Go through each teleporter destination.
+				{
+					Vector<DatabaseObject *> objects2;
+					gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,objects2,Rect(obj->mDest[l]+obj->getActualPos(),obj->mDest[l]));
+					for(S32 m=0; m<objects2.size(); m++)
+					{
+						BotNavMeshZone *destZone = dynamic_cast<BotNavMeshZone *>(objects2[m]);
+						if(destZone)
+						{
+						 	if(PolygonContains2(destZone->mPolyBounds.address(), gBotNavMeshZones[m]->mPolyBounds.size(), obj->mDest[l]))
+							{
+								NeighboringZone n1;         // Teleporter is one way path.
+								n1.zoneID = destZone->mZoneID;
+								n1.borderStart.set(obj->getActualPos());
+								n1.borderEnd.set(obj->mDest[l]);
+								n1.borderCenter.set(obj->getActualPos());  // use teleporter position as center, but not destination.
+
+								n1.distTo = 0; //obj->mDest[l].len();  //teleport instantly, don't want it to count as long distance.
+								n1.center.set(obj->getActualPos());
+								gBotNavMeshZones[i]->mNeighbors.push_back(n1);
+							}
+						}
+					}
+				}
+			}
+		}
    }
 }
 
@@ -591,7 +629,7 @@ Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target
 
 	   while(zone != startZone)
 	   {
-		   path.push_back(findGateway(zone, parentZones[zone]));
+		   path.push_back(findGateway(parentZones[zone], zone));   // don't switch findGateway arguments, some path is one way (teleporters).
 
 		   zone = parentZones[zone];		// Find the parent of the current cell	
 

@@ -90,11 +90,14 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
 
 U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   if(stream->writeFlag(updateMask & InitialMask))
+   if(stream->writeFlag(updateMask & PositionMask))
    {
       ((GameConnection *) connection)->writeCompressedPoint(pos, stream);
       writeCompressedVelocity(velocity, CompressedVelocityMax, stream);
+   }
 
+   if(stream->writeFlag(updateMask & InitialMask))
+   {
       stream->writeEnum(mType, ProjectileTypeCount);
 
       S32 index = -1;
@@ -103,6 +106,7 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
       if(stream->writeFlag(index != -1))
          stream->writeInt(index, GhostConnection::GhostIdBitSize);
    }
+
    stream->writeFlag(collided);
    if(collided)
       stream->writeFlag(hitShip);
@@ -115,11 +119,14 @@ U32 Projectile::packUpdate(GhostConnection *connection, U32 updateMask, BitStrea
 void Projectile::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    bool initial = false;
-
-   if(stream->readFlag())         // Initial chunk of data, sent once for this object
+   if(stream->readFlag())  // Read position, for correcting bouncers, needs to be before inital for SFXObject::play
    {
       ((GameConnection *) connection)->readCompressedPoint(pos, stream);
       readCompressedVelocity(velocity, CompressedVelocityMax, stream);
+   }
+
+   if(stream->readFlag())         // Initial chunk of data, sent once for this object
+   {
 
       mType = (ProjectileType) stream->readEnum(ProjectileTypeCount);
 
@@ -222,7 +229,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
          hitObject = findObjectLOS(MoveableType | BarrierType | EngineeredType | ForceFieldType,
                                    MoveObject::RenderState, pos, endPos, collisionTime, surfNormal);
 
-         if(!hitObject || hitObject->collide(this))
+         if((!hitObject || hitObject->collide(this)))
             break;
 
          // Disable collisions with things that don't want to be
@@ -256,14 +263,26 @@ void Projectile::idle(GameObject::IdleCallPath path)
          if(bounce)
          { 
             // We hit something that we should bounce from, so bounce!
-            F32 dot = surfNormal.dot(velocity) * 2;
-            velocity -= surfNormal * dot;
-            if(dot > 0)
+            F32 float1 = surfNormal.dot(velocity) * 2;
+            velocity -= surfNormal * float1;
+            if(float1 > 0)
                surfNormal = -surfNormal;      // This is to fix going through polygon barriers
 
-            Point collisionPoint = pos + (endPos - pos) * collisionTime;
+            Point collisionPoint = pos + (endPos - pos) * collisionTime;ve8dH3tS5gX3
             pos = collisionPoint + surfNormal;
             timeLeft = timeLeft * (0.99 - collisionTime);
+
+				MoveObject *obj = dynamic_cast<MoveObject *>(hitObject);
+				if(obj)
+				{
+					setMaskBits(PositionMask);  // Bouncing off a moving objects can easily get desync.
+					float1 = pos.distanceTo(obj->getRenderPos());
+					if(float1 < obj->getRadius())
+					{
+						float1 = obj->getRadius() * 1.01 / float1;
+						pos = pos * float1 + obj->getRenderPos() * (1.0 - float1);  // to fix bouncy stuck inside shielded ship
+					}
+				}
 
             if(isGhost())
                SFXObject::play(SFXBounceShield, collisionPoint, surfNormal * surfNormal.dot(velocity) * 2);

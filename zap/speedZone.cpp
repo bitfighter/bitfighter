@@ -230,9 +230,9 @@ bool SpeedZone::collide(GameObject *hitObject)
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
    // Check for old exclusions that no longer apply
-   for(S32 i = 0; i < mExclusions.size(); i++)
+   for(S32 i = mExclusions.size()-1; i >= 0; i--)
       if(mExclusions[i].time < gServerGame->getCurrentTime())     // Exclusion has expired
-         mExclusions.erase(i);
+         mExclusions.erase_fast(i);
 }
 
 

@@ -38,9 +38,10 @@ class Teleporter : public GameObject, public LuaItem
 private:
    S32 mLastDest;    // Destination of last ship through
    Point mPos;
-   Vector<Point> mDest;
 
 public:
+   Vector<Point> mDest;   // need public for BotNavMeshZones
+
    bool doSplash;
    U32 timeout;
    U32 mTime;

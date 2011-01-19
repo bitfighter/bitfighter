@@ -52,6 +52,7 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
    //}
    //else  // is client
    //   mItemId = 0;
+   UpdateTimer1 = 0;
 }
 
 bool Item::processArguments(S32 argc, const char **argv)
@@ -221,8 +222,18 @@ void Item::idle(GameObject::IdleCallPath path)
       if(path == GameObject::ServerIdleMainLoop)
       {
          // Only update if it's actually moving...
-         if(mMoveState[ActualState].vel.len() > 0.001f)
-            setMaskBits(PositionMask);
+         if(mMoveState[ActualState].vel.lenSquared() != 0)
+         {
+            // Update less often on slow moving item, more often on fast moving item, and update when we change velocity.
+            // Update at most every 5 seconds.
+            UpdateTimer1 = UpdateTimer1 - (mMoveState[ActualState].vel.len() + 20) * time;
+            if(UpdateTimer1 < 0 || mMoveState[ActualState].vel.distSquared(prevMoveVelocity) > 100)
+            {
+               setMaskBits(PositionMask);
+               UpdateTimer1 = 100;
+               prevMoveVelocity = mMoveState[ActualState].vel;
+            }
+         }
 
          mMoveState[RenderState] = mMoveState[ActualState];
 

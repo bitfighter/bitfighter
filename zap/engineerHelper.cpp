@@ -86,6 +86,7 @@ void EngineerHelper::render()
    else     // Have selected a module, need to indicate where to deploy
    {
       S32 xPos = UserInterface::horizMargin;
+      glColor3f(0, 1, 0);
       UserInterface::drawStringf(xPos, yPos, fontSize, "Placing %s.", mEngineerCostructionItemInfos[mSelectedItem].mName);
       yPos += fontSize + 7;
       UserInterface::drawString(xPos, yPos, fontSize, "Aim at a spot on the wall, and activate the module again.");
@@ -108,7 +109,13 @@ bool EngineerHelper::processKeyCode(KeyCode keyCode)
             mSelectedItem = i;
             return true;
          }
-      //exitHelper();
+      Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+      if(!ship || (keyCode == keyMOD1[gIniSettings.inputMode] && ship->getModule(0) == ModuleEngineer)
+         || (keyCode == keyMOD2[gIniSettings.inputMode] && ship->getModule(1) == ModuleEngineer))
+      {
+         exitHelper();
+         return true;
+      }
    }
    else                       // Placing item
    {

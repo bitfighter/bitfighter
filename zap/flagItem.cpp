@@ -74,6 +74,7 @@ Lunar<FlagItem>::RegType FlagItem::methods[] =
    // Flag specific methods
    method(FlagItem, isInInitLoc),
    method(FlagItem, isInCaptureZone),
+   method(FlagItem, getCaptureZone),
    method(FlagItem, isOnShip),
 
    {0,0}    // End method list
@@ -83,7 +84,8 @@ Lunar<FlagItem>::RegType FlagItem::methods[] =
 
 void FlagItem::onAddedToGame(Game *theGame)
 {
-   theGame->getGameType()->addFlag(this);    // Does nothing for Nexus game
+   if(! isGhost())
+      theGame->getGameType()->addFlag(this);    // Does nothing for Nexus game
    getGame()->mObjectsLoaded++;
 }
 
