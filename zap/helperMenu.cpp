@@ -58,4 +58,18 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    return false;
 }
 
+
+extern void glColor(const Color &c, float alpha = 1.0);
+
+void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
+{
+   glBegin(GL_LINES);
+      glColor(color);
+      glVertex2f(UserInterface::horizMargin, yPos + 20);
+      glColor3f(0,0,0);    // Fade to black...
+      glVertex2f(400, yPos + 20);
+   glEnd();
+}
+
+
 };

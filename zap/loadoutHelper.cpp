@@ -93,12 +93,8 @@ void LoadoutHelper::render()
    else
       dSprintf (helpStr, sizeof(helpStr), "Pick %d weapons for your ship:", ShipWeaponCount);
 
-   glBegin(GL_LINES);
-      glColor(loadoutMenuHeaderColor);
-      glVertex2f(UserInterface::horizMargin, yPos + 20);
-      glColor3f(0,0,0);    // Fade to black...
-      glVertex2f(400, yPos + 20);
-   glEnd();
+
+   drawMenuBorderLine(yPos, loadoutMenuHeaderColor);
 
    glColor(loadoutMenuHeaderColor);
    UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, helpStr);
@@ -163,12 +159,7 @@ void LoadoutHelper::render()
 
    yPos += 2;
 
-   glBegin(GL_LINES);
-      glColor(loadoutMenuHeaderColor);
-      glVertex2f(UserInterface::horizMargin, yPos);
-      glColor3f(0,0,0);    // Fade to black...
-      glVertex2f(400, yPos);
-   glEnd();
+   drawMenuBorderLine(yPos, loadoutMenuHeaderColor);
 
    yPos += 4;
 

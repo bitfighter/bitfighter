@@ -35,6 +35,8 @@ using namespace TNL;
 namespace Zap
 {
 
+struct Color;
+
 class HelperMenu   
 {
 private:
@@ -46,6 +48,8 @@ protected:
 
    // Shortcut helper function
    void exitHelper();
+
+   void drawMenuBorderLine(S32 yPos, const Color &color);
 
 public:
    virtual void render() = 0;                
