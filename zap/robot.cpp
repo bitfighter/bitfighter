@@ -63,6 +63,9 @@
 namespace Zap
 {
 
+const bool QUIT_ON_SCRIPT_ERROR = true;
+
+
 // To use this RobotController, add Robot without any parameters in level file.
 // I would like to keep this class here, to speed up compiler.
 // If this class is in Robot.h, it will have to recompile everything when we change anything in this class
@@ -189,6 +192,8 @@ LuaRobot::LuaRobot(lua_State *L) : LuaShip((Robot *)lua_touserdata(L, 1))
    setEventEnum(PlayerJoinedEvent);
    setEventEnum(PlayerLeftEvent);
 
+   setEnum(EngineeredTurret);
+   setEnum(EngineeredForceField);
 
    // A few misc constants -- in Lua, we reference the teams as first team == 1, so neutral will be 0 and hostile -1
    lua_pushinteger(L, 0); lua_setglobal(L, "NeutralTeamIndx");
@@ -274,6 +279,8 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, findGlobalItems),
    method(LuaRobot, getFiringSolution),
    method(LuaRobot, getInterceptCourse),     // Doesn't work well...
+
+   method(LuaRobot, engineerDeployObject),
 
    {0,0}    // End method list
 };
@@ -1104,6 +1111,16 @@ S32 LuaRobot::unsubscribe(lua_State *L)
    return 0;
 }
 
+S32 LuaRobot::engineerDeployObject(lua_State *L)
+{
+   static const char *methodName = "Robot:engineerDeployObject()";
+   checkArgCount(L, 1, methodName);
+   S32 type = getInt(L, 0, methodName);
+
+   if(! thisRobot->getOwner())
+      return returnBool(L, false);
+   return returnBool(L, thisRobot->getOwner()->sEngineerDeployObject(type));
+}
 
 const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
 
@@ -1378,8 +1395,8 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
    for(S32 i = 0; i < ModuleCount; i++)         // Here so valgrind won't complain if robot updates before initialize is run
       mModuleActive[i] = false;
 
-	isRunningScript = false;
-
+   isRunningScript = false;
+   wasRunningScript = false;
 }
 
 
@@ -1454,7 +1471,8 @@ bool Robot::initialize(Point &pos)
    {
 		logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
       //delete this;         //can't delete here, that can cause memory errors
-      return false;          //return false have an effect of disconnecting the robot.
+      isRunningScript = false;
+      //return false;          //return false have an effect of disconnecting the robot.
    }
    return true;
 } 
@@ -1464,7 +1482,10 @@ bool Robot::initialize(Point &pos)
 void Robot::startBots()
 {
    for(S32 i = 0; i < robots.size(); i++)
-      robots[i]->startLua();     
+   {
+      if(! robots[i]->startLua())
+         robots[i]->isRunningScript = false;
+   }
 
    //for(S32 i = 0; i < robots.size(); i++)
    //   robots[i]->runMain();
@@ -1637,6 +1658,7 @@ bool Robot::runMain()
    {
       logError("Robot error running main(): %s.  Shutting robot down.", e.what());
       //delete this;  //might cause memory errors.
+      isRunningScript = false;
       return false;
    }
    return true;
@@ -1711,6 +1733,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 
 	if(argc >= 2)
 	{
+      wasRunningScript = true;
 		mFilename = gConfigDirs.findBotFile(argv[1]);
 		if(mFilename == "")
 		{
@@ -1900,13 +1923,25 @@ void Robot::idle(GameObject::IdleCallPath path)
       catch(LuaException &e)
       {
          logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
-         delete this;
+         //delete this;
+         isRunningScript = false;
          return;
       }
 		}
 		else
 		{
-			((RobotController *)robotController)->run(this,getGame()->getGameType());
+			if(wasRunningScript){
+				if(QUIT_ON_SCRIPT_ERROR)
+				{
+					getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!! Shutting down.");
+					delete this;
+					return;
+				}
+				getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
+				wasRunningScript = false;
+			}
+
+			((RobotController *)robotController)->run(this,getGame()->getGameType());    // built-in robot might soon be fully programmed without using script file.
 		}
 
       Ship::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client.
@@ -1920,7 +1955,6 @@ void RobotController::run(Robot *newship, GameType *newgametype)
 {
 	ship = newship;
 	gametype = newgametype;
-
 
 
 	F32 minDistance = F32_MAX;

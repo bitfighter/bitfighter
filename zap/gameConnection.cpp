@@ -357,13 +357,18 @@ void GameConnection::changeParam(const char *param, ParamType type)
 TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,EngineeredObjectCount> type), (type), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
+   sEngineerDeployObject(type);
+}
+// Server only, robots can run this, bypassing the net interface. Return True if successful deploy.
+bool GameConnection::sEngineerDeployObject(U32 type)
+{
    Ship *ship = dynamic_cast<Ship *>(getControlObject());
    if(!ship)                                          // Not a good sign...
-      return;                                         // ...bail
+      return false;                                   // ...bail
 
    GameType *gt = ship->getGame()->getGameType();
    if(!(gt && gt->engineerIsEnabled()))               // Something fishy going on here...
-      return;                                         // ...bail
+      return false;                                   // ...bail
 
    EngineerModuleDeployer deployer;
 
@@ -380,8 +385,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sEngineerDeployObject, (RangedU32<0,Engineer
    
       for(GameConnection *walk = getClientList(); walk; walk = walk->getNextClient())
          walk->s2cDisplayMessageE(ColorAqua, SFXNone, msg, e);
+      return true;
    }
    // else... fail silently?
+   return false;
 }
 
 

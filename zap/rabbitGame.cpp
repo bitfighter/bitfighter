@@ -156,10 +156,10 @@ Color RabbitGameType::getShipColor(Ship *s)
 
 Color RabbitGameType::getTeamColor(S32 team)
 {
-   //if(team != 0 || mTeams.size() != 1)
+   if(team != -1 || mTeams.size() != 1)
 	   return Parent::getTeamColor(team);
 
-   //return Color(1, 0.5, 0);      // Orange? can allow any map specific team color
+   return Color(1, 0.5, 0);      // orange neutral team, so the neutral flag is orange.
 }
 
 
@@ -185,28 +185,36 @@ void RabbitGameType::idle(GameObject::IdleCallPath path)
 
    U32 deltaT = mCurrentMove.time;
 
-for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
-{
-   FlagItem *mRabbitFlag = mFlags[flagIndex];
-   if (mRabbitFlag->isMounted())
+   for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
    {
-      if (mRabbitFlag->mTimer.update(deltaT))
+      FlagItem *mRabbitFlag = mFlags[flagIndex];
+      if(! mRabbitFlag)
+		{
+         TNLAssert(false, "RabbitGameType::idle NULL mFlags");
+         mFlags.erase_fast(flagIndex);
+		}
+      else
       {
-         onFlagHeld(mRabbitFlag->getMount());
-         mRabbitFlag->mTimer.reset(mFlagScoreTimer);
+         if (mRabbitFlag->isMounted())
+         {
+            if (mRabbitFlag->mTimer.update(deltaT))
+            {
+               onFlagHeld(mRabbitFlag->getMount());
+               mRabbitFlag->mTimer.reset(mFlagScoreTimer);
+            }
+         }
+         else
+         {
+            if (!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
+            {
+               mRabbitFlag->sendHome();
+               static StringTableEntry returnString("The carrot has been returned!");
+               for (S32 i = 0; i < mClientList.size(); i++)
+                  mClientList[i]->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
+            }
+         }
       }
    }
-   else
-   {
-      if (!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
-      {
-         mRabbitFlag->sendHome();
-         static StringTableEntry returnString("The carrot has been returned!");
-         for (S32 i = 0; i < mClientList.size(); i++)
-            mClientList[i]->clientConnection->s2cDisplayMessageE( GameConnection::ColorNuclearGreen, SFXFlagReturn, returnString, Vector<StringTableEntry>() );
-      }
-   }
-}
 }
 
 void RabbitGameType::controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject)
