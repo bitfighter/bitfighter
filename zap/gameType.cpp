@@ -868,18 +868,18 @@ void GameType::saveGameStats()
       // Push team names and scores into a structure we can pass via rpc; these will be sorted by score
       Vector<StringTableEntry> teams(sortTeams.size());
       Vector<S32> scores(sortTeams.size());
-      Vector<RangedU32<0,256> > colorR(mTeams.size());
-      Vector<RangedU32<0,256> > colorG(mTeams.size());
-      Vector<RangedU32<0,256> > colorB(mTeams.size());
+      Vector<RangedU32<0,100> > colorR(mTeams.size());
+      Vector<RangedU32<0,100> > colorG(mTeams.size());
+      Vector<RangedU32<0,100> > colorB(mTeams.size());
 
       for(S32 i = 0; i < sortTeams.size(); i++)
       {
          teams.push_back(sortTeams[i].getName());
          scores.push_back(sortTeams[i].getScore());
 
-         colorR.push_back(RangedU32<0,256>(U32(sortTeams[i].color.r * 255)));
-         colorG.push_back(RangedU32<0,256>(U32(sortTeams[i].color.g * 255)));
-         colorB.push_back(RangedU32<0,256>(U32(sortTeams[i].color.b * 255)));
+         colorR.push_back(RangedU32<0,100>(U32(sortTeams[i].color.r * 100)));
+         colorG.push_back(RangedU32<0,100>(U32(sortTeams[i].color.g * 100)));
+         colorB.push_back(RangedU32<0,100>(U32(sortTeams[i].color.b * 100)));
       }
 
       // Count the players and bots
@@ -1294,9 +1294,10 @@ void GameType::spawnShip(GameConnection *theClient)
       robot->setOwner(theClient);
 		robot->setTeam(teamIndex);
 		spawnRobot(robot);
-	}else
+	}
+   else
 	{
-   //                     Player's name, team, and spawning location
+      // Player's name, team, and spawn location
       Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
       theClient->setControlObject(newShip);
       newShip->setOwner(theClient);
@@ -1363,7 +1364,8 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout)
 {
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
       return;
-   if(!engineerIsEnabled() && (loadout[0] == ModuleEngineer || loadout[1] == ModuleEngineer))  // Reject engineer if disabled.
+
+   if(!engineerIsEnabled() && (loadout[0] == ModuleEngineer || loadout[1] == ModuleEngineer))  // Reject engineer if it is not enabled
       return;
 
    Ship *theShip = dynamic_cast<Ship *>(cl->clientConnection->getControlObject());

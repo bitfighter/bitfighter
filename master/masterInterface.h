@@ -205,9 +205,9 @@ public:
 
    TNL_DECLARE_RPC(s2mSendGameStatistics_3, (U32 gameVersion, StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                              Vector<StringTableEntry> teams, Vector<S32> teamScores, 
-                                             Vector<RangedU32<0,256> > colorR, 
-                                             Vector<RangedU32<0,256> > colorG, 
-                                             Vector<RangedU32<0,256> > colorB, 
+                                             Vector<RangedU32<0,100> > colorR, 
+                                             Vector<RangedU32<0,100> > colorG, 
+                                             Vector<RangedU32<0,100> > colorB, 
                                              RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, S16 time) );
 };
 
