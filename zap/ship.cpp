@@ -95,8 +95,8 @@ Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p,
 
    // Create our proxy object for Lua access
    luaProxy = LuaShip(this);
-   //SlipZoneObject = NULL;
 }
+
 
 // Destructor
 Ship::~Ship()
