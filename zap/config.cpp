@@ -235,8 +235,8 @@ static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
 	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
-   gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "BarrierColorFill", gIniSettings.wallFillColor.toString()));
-   gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "BarrierColorOutline", gIniSettings.wallOutlineColor.toString()));
+   gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toString()));
+   gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toString()));
 }
 
 static void loadEffectsSettings()
@@ -1207,12 +1207,15 @@ static void writeTesting()
       gINI.sectionComment("Testing", " short lived, and may well be removed in the next version of Bitfighter.");
       gINI.sectionComment("Testing", " BurstGraphics - Select which graphic to use for bursts (1-5)");
       gINI.sectionComment("Testing", " NeverConnectDirect - Never connect to pingable internet server directly; forces arranged connections via master");
+      gINI.sectionComment("Testing", " WallOutlineColor - Color used locally for rendering wall outlines (r,g,b), (values between 0 and 1)");
+      gINI.sectionComment("Testing", " WallFillColor - Color used locally for rendering wall fill (r,g,b), (values between 0 and 1)");
       gINI.sectionComment("Testing", "----------------");
    }
+
    gINI.SetValueI ("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
    gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
-   gINI.SetValue  ("Testing", "BarrierColorFill",   gIniSettings.wallFillColor.toString());
-   gINI.SetValue  ("Testing", "BarrierColorOutline", gIniSettings.wallOutlineColor.toString());
+   gINI.SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toString());
+   gINI.SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toString());
 }
 
 

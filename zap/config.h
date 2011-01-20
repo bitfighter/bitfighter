@@ -271,8 +271,8 @@ struct IniSettings      // With defaults specified
       levelChangePassword = "";
       levelDir = "";
 
-      wallFillColor.set(0,0,1);
-      wallOutlineColor.set(0,0,.15);
+      wallFillColor.set(0,0,.15);
+      wallOutlineColor.set(0,0,1);
 
       useUpdater = true;
 
