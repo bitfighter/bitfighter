@@ -142,7 +142,7 @@ public:
    GameObject();                          // Constructor
    ~GameObject() { removeFromGame(); }    // Destructor
 
-   void addToGame(Game *theGame);
+   virtual void addToGame(Game *theGame);     // BotNavMeshZone have their own addToGame
    virtual void onAddedToGame(Game *theGame);
    void removeFromGame();
 
@@ -169,7 +169,7 @@ public:
    void setControllingClient(GameConnection *c) { mControllingClient = c; }         // This only gets run on the server
 
    GameConnection *getOwner();
-   GridDatabase *getGridDatabase();
+   virtual GridDatabase *getGridDatabase();    // BotNavMeshZone have their own GridDatabase
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
