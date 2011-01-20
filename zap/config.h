@@ -34,6 +34,7 @@
 
 #include "tnlTypes.h"
 #include "tnlNetStringTable.h"
+#include "point.h"      // For Color def
 
 #include "input.h"
 #include <string>
@@ -194,6 +195,8 @@ struct IniSettings      // With defaults specified
    // Testing values
    S32 burstGraphicsMode;           // Choose a burst graphic representation
    bool neverConnectDirect;
+   Color wallFillColor;
+   Color wallOutlineColor;
 
    // Logging options   --   true will enable logging these events, false will disable
    bool logConnectionProtocol;
@@ -267,6 +270,9 @@ struct IniSettings      // With defaults specified
       adminPassword = "";
       levelChangePassword = "";
       levelDir = "";
+
+      wallFillColor.set(0,0,1);
+      wallOutlineColor.set(0,0,.15);
 
       useUpdater = true;
 

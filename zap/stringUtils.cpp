@@ -106,6 +106,7 @@ string concatenate(const Vector<string> &words, S32 startingWith = 0)
 }
 
 
+// TODO: Merge this with the one following
 // Based on http://www.gamedev.net/community/forums/topic.asp?topic_id=320087
 // Parses a string on whitespace, except when inside "s
 Vector<string> parseString(const string &line)
@@ -133,6 +134,40 @@ Vector<string> parseString(const string &line)
 
   }
   return result;
+}
+
+
+// Splits inputString into a series of words using the specified separator
+void parseString(const char *inputString, Vector<string> &words, char seperator)
+{
+	char word[128];
+	S32 wn = 0;       // Where we are in the word we're creating
+	S32 isn = 0;      // Where we are in the inputString we're parsing
+
+	words.clear();
+
+	while(inputString[isn] != 0)
+   {
+		if(inputString[isn] == seperator) 
+      {
+			word[wn] = 0;    // Add terminating NULL
+			if(wn > 0) 
+            words.push_back(word);
+			wn = 0;
+		}
+      else
+      {
+			if(wn < 126)   // Avoid overflows
+         {
+            word[wn] = inputString[isn]; 
+            wn++; 
+         }
+		}
+		isn++;
+	}
+    word[wn] = 0;
+    if(wn > 0) 
+       words.push_back(word);
 }
 
 

@@ -49,41 +49,6 @@ extern string lcase(string strToConvert);
 // Sorts alphanumerically
 extern S32 QSORT_CALLBACK alphaSort(string *a, string *b);
 
-
-// Splits inputString into a series of words using the specified separator
-void parseString(const char *inputString, Vector<string> &words, char seperator)
-{
-	char word[128];
-	S32 wn = 0;       // Where we are in the word we're creating
-	S32 isn = 0;      // Where we are in the inputString we're parsing
-
-	words.clear();
-
-	while(inputString[isn] != 0)
-   {
-		if(inputString[isn] == seperator) 
-      {
-			word[wn] = 0;    // Add terminating NULL
-			if(wn > 0) 
-            words.push_back(word);
-			wn = 0;
-		}
-      else
-      {
-			if(wn < 126)   // Avoid overflows
-         {
-            word[wn] = inputString[isn]; 
-            wn++; 
-         }
-		}
-		isn++;
-	}
-    word[wn] = 0;
-    if(wn > 0) 
-       words.push_back(word);
-}
-
-
 extern Vector<string> prevServerListFromMaster;
 extern Vector<string> alwaysPingList;
 
@@ -266,26 +231,12 @@ static void loadDiagnostics()
 }
 
 
-
-static void getColorFromString(Color &color, const string in){
-   Vector<string> list;
-   parseString(in.c_str(), list, ',');
-	if(list.size() >= 3)
-	{
-		color.r = atof(list[0].c_str());
-		color.g = atof(list[1].c_str());
-		color.b = atof(list[2].c_str());
-	}
-}
-
-extern Color GAME_WALL_FILL_COLOR;
-extern Color WALL_OUTLINE_COLOR;
 static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
 	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
-   getColorFromString(GAME_WALL_FILL_COLOR, gINI.GetValue("Testing", "BarrierColorFill"));
-   getColorFromString(WALL_OUTLINE_COLOR, gINI.GetValue("Testing", "BarrierColorOutline"));
+   gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "BarrierColorFill", gIniSettings.wallFillColor.toString()));
+   gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "BarrierColorOutline", gIniSettings.wallOutlineColor.toString()));
 }
 
 static void loadEffectsSettings()
@@ -1260,8 +1211,8 @@ static void writeTesting()
    }
    gINI.SetValueI ("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
    gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
-   gINI.SetValue  ("Testing", "BarrierColorFill", string(ftos(GAME_WALL_FILL_COLOR.r,3)) + "," + string(ftos(GAME_WALL_FILL_COLOR.g,3)) + "," + string(ftos(GAME_WALL_FILL_COLOR.b,3)));
-   gINI.SetValue  ("Testing", "BarrierColorOutline", string(ftos(WALL_OUTLINE_COLOR.r,3)) + "," + string(ftos(WALL_OUTLINE_COLOR.g,3)) + "," + string(ftos(WALL_OUTLINE_COLOR.b,3)));
+   gINI.SetValue  ("Testing", "BarrierColorFill",   gIniSettings.wallFillColor.toString());
+   gINI.SetValue  ("Testing", "BarrierColorOutline", gIniSettings.wallOutlineColor.toString());
 }
 
 

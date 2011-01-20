@@ -316,13 +316,11 @@ void Barrier::prepareRenderingGeometry()
 }
 
 
-extern Color GAME_WALL_FILL_COLOR;
-
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
    {
-      glColor(GAME_WALL_FILL_COLOR);
+      glColor(gIniSettings.wallFillColor);
 
       glBegin(mSolid ? GL_TRIANGLES : GL_POLYGON);   // Rendering is a bit different for solid polys
          for(S32 i = 0; i < mRenderFillGeometry.size(); i++)

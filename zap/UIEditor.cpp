@@ -63,7 +63,6 @@ const S32 MAX_SCALE = 10;     // Most zoomed-out scale
 // Some colors
 
 extern Color gNexusOpenColor;
-extern Color GAME_WALL_FILL_COLOR;
 extern Color EDITOR_WALL_FILL_COLOR;
 
 
@@ -5820,7 +5819,7 @@ void WallSegment::renderFill(bool renderLight)
    bool useGameColor = UserInterface::current && UserInterface::current->getMenuID() == EditorUI && 
                        gEditorUserInterface.isShowingReferenceShip();
 
-   glColor((useGameColor ? GAME_WALL_FILL_COLOR : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));
+   glColor((useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));
    
    glDisableBlendfromLineSmooth;
    glBegin(GL_POLYGON);

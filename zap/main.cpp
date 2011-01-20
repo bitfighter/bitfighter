@@ -252,8 +252,6 @@ Color gNeutralTeamColor(0.8, 0.8, 0.8);         // Objects that are neutral (on 
 Color gHostileTeamColor(0.5, 0.5, 0.5);         // Objects that are "hostile-to-all" (on team -2)
 Color gMasterServerBlue(0.8, 0.8, 1);           // Messages about successful master server statii
 Color gHelpTextColor(0, 1, 0);
-Color WALL_OUTLINE_COLOR(0, 0, 1);              // Wall fill and Outline can be changed in ini [testing]
-Color GAME_WALL_FILL_COLOR(0, 0, 0.15);         // Walls filled with this in game
 Color EDITOR_WALL_FILL_COLOR(.5, .5, 1);        // Walls filled with this in editor
 
 S32 gMaxPolygonPoints = 32;                     // Max number of points we can have in Nexuses, LoadoutZones, etc.

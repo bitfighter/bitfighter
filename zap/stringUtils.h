@@ -44,7 +44,10 @@ string ExtractFilename(const std::string& path);
 string itos(int i);
 string ftos(float f, int digits);
 
+// TODO: Merge these methods
 TNL::Vector<string> parseString(const string &line);
+void parseString(const char *inputString, TNL::Vector<string> &words, char seperator);
+
 string concatenate(const TNL::Vector<string> &words, TNL::S32 startingWith = 0);
 
 string lcase(string strToConvert);

@@ -1024,8 +1024,6 @@ void renderMine(Point pos, bool armed, bool visible)
 // 3 = color change only
 // 4 = normal rendering, filled circle
 // 5 = normal rendering
-extern IniSettings gIniSettings;
-
 void renderGrenade(Point pos, F32 lifeLeft)
 {
    glColor3f(1,1,1);
@@ -1295,11 +1293,9 @@ void renderEnergyItem(const Point &pos)
 }
 
 
-extern Color WALL_OUTLINE_COLOR;
-
 void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 {
-   glColor(WALL_OUTLINE_COLOR, alpha);
+   glColor(gIniSettings.wallOutlineColor, alpha);
    glBegin(GL_LINES);
       for(S32 i = 0; i < edges.size(); i++)
          glVertex(edges[i]);

@@ -28,6 +28,7 @@
 
 #include "tnlTypes.h"
 #include "tnlVector.h"
+#include "stringUtils.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -49,7 +50,6 @@ struct Point
    // Thanks, Ben & Mike!
    template<class T, class U>
    Point(T in_x, U in_y) { x = static_cast<F32>(in_x); y = static_cast<F32>(in_y); }
-   //Point(T in_x, U in_y) { x = (F32)in_x; y = (F32)in_y; }
 
    template<class T, class U>
    void set(T ix, U iy) { x = (F32)ix; y = (F32)iy; }
@@ -118,8 +118,26 @@ struct Color
       g = c1.g * t + c2.g * oneMinusT;
       b = c1.b * t + c2.b * oneMinusT;
    }
-   void set(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
+
+   template<class T, class U, class V>
+   void set(T in_r, U in_g, V in_b) { r = static_cast<F32>(in_r); g = static_cast<F32>(in_g); b = static_cast<F32>(in_b); }
+
+   //void set(float _r, float _g, float _b) { r = _r; g = _g; b = _b; }
    void set(const Color &c) { r = c.r; g = c.g; b = c.b; }
+   void set(const string &s) 
+   {  
+      Vector<string> list;
+      parseString(s.c_str(), list, ',');
+
+	   if(list.size() >= 3)
+	   {
+		   r = (F32)atof(list[0].c_str());
+		   g = (F32)atof(list[1].c_str());
+		   b = (F32)atof(list[2].c_str());
+	   }
+   }
+
+   string toString() { string s = ftos(r, 3) + "," + ftos(g, 3) + "," + ftos(b, 3); return s; }
 
    Color operator+(const Color &c) const { return Color (r + c.r, g + c.g, b + c.b); }
    Color operator-(const Color &c) const { return Color (r - c.r, g - c.g, b - c.b); }

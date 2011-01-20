@@ -361,6 +361,7 @@ string CIniFile::GetValue(unsigned const sectionId, unsigned const valueID, cons
    return defValue;
 }
 
+
 string CIniFile::GetValue(const string &keyname, const string &valuename, const string &defValue) const
 {
   unsigned sectionId = findSection(keyname);
