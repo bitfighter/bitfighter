@@ -42,6 +42,7 @@ Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 // Constructor
 BotNavMeshZone::BotNavMeshZone()
 {
+   mGame2 = NULL;
    mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    //  The Zones is now rendered without the network interface, if client is hosting.
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
@@ -57,8 +58,13 @@ BotNavMeshZone::~BotNavMeshZone()
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    if(gBotNavMeshZones[i] == this)
    {
-      gBotNavMeshZones.erase(i);
+      gBotNavMeshZones.erase_fast(i);
       break;
+   }
+   if(mGame2)
+   {
+      removeFromDatabase();
+      mGame2 = NULL;
    }
 }
 
@@ -103,6 +109,11 @@ S32 BotNavMeshZone::getRenderSortValue()
    return -2;
 }
 
+GridDatabase * BotNavMeshZone::getGridDatabase()
+{
+   return &mGame2->mDatabaseForBotZones;
+}
+
 
 extern bool isConvex(const Vector<Point> &verts);
 
@@ -112,14 +123,20 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   processPolyBounds(argc, argv, 0, getGame()->getGridSize());
+   processPolyBounds(argc, argv, 0, mGame2->getGridSize());
    computeExtent();  // Not needed?
    mConvex = isConvex(mPolyBounds);
 
    return true;
 }
 
-
+void BotNavMeshZone::addToGame(Game *theGame)
+{
+   // don't add to game.
+   mGame2 = theGame;
+   addToDatabase();
+	
+}
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
    //if(!isGhost())     // For now, so we can see them on the client to help with debugging
@@ -127,6 +144,7 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
    //   setScopeAlways();
 
    // Don't need to increment our objectloaded counter, as this object resides only on the server
+   TNLAssert(false,"Should not be added to game");
 
 }
 
@@ -203,16 +221,20 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 }
 
 
-S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p)
+S32 findZoneContaining(const Point &p)
 {
-   for(S32 i = 0; i < zones.size(); i++)
+   Vector<DatabaseObject *> fillVector;
+   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, fillVector, Rect(p,p));
+   for(S32 i = 0; i < fillVector.size(); i++)
    {
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
       // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
-      if( zones[i]->getExtent().contains(p) 
-                        && (PolygonContains2(zones[i]->mPolyBounds.address(), zones[i]->mPolyBounds.size(), p)) )
-         return i;
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(fillVector[i]);
+      TNLAssert(zone, "NULL zone in findZoneContaining");
+      if( zone->getExtent().contains(p) 
+                        && (PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), p)) )
+         return zone->mZoneID;
    }
    return -1;
 }
@@ -364,7 +386,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 				for(S32 l=0; l<obj->mDest.size(); l++)  // Go through each teleporter destination.
 				{
 					Vector<DatabaseObject *> objects2;
-					gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,objects2,Rect(obj->mDest[l]+obj->getActualPos(),obj->mDest[l]));
+					gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,objects2,Rect(obj->mDest[l]-Point(-0.1f,-0.1f),obj->mDest[l]+Point(-0.1f,-0.1f)));  // need to extend the rect slightly, in case it is on between of the edge of bot zones.
 					for(S32 m=0; m<objects2.size(); m++)
 					{
 						BotNavMeshZone *destZone = dynamic_cast<BotNavMeshZone *>(objects2[m]);

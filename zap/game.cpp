@@ -327,12 +327,20 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
 // Destructor
 ServerGame::~ServerGame()
 {
+   cleanUp();
+}
+
+void Game::cleanUp()
+{
    // Delete any objects on the delete list
    processDeleteList(0xFFFFFFFF);
 
    // Delete any game objects that may exist
    while(mGameObjects.size())
-      delete mGameObjects[0];
+      delete mGameObjects.last();
+
+   while(gBotNavMeshZones.size())
+      delete gBotNavMeshZones.last();
 }
 
 
@@ -532,13 +540,7 @@ extern void testBotNavMeshZoneConnections();
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
-   // Delete any objects on the delete list
-   processDeleteList(0xFFFFFFFF);
-
-   // Delete any game objects that may exist
-   while(mGameObjects.size())
-      delete mGameObjects[0];
-
+   cleanUp();
    mScopeAlwaysList.clear();
 
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -1017,6 +1019,11 @@ ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
    mScreenSaverTimer.reset(59 * 1000);         // Fire screen saver supression every 59 seconds
 }
 
+ClientGame::~ClientGame()
+{
+   cleanUp();
+}
+
 bool ClientGame::hasValidControlObject()
 {
    return mConnectionToServer.isValid() && mConnectionToServer->getControlObject();
@@ -1431,7 +1438,7 @@ void ClientGame::renderCommander()
    rawRenderObjects.clear();
    mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
    if(gServerGame && gGameUserInterface.mDebugShowMeshZones)
-       gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,rawRenderObjects,mWorldBounds);
+       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,mWorldBounds);
 
    
    renderObjects.clear();
@@ -1642,7 +1649,7 @@ void ClientGame::renderNormal()
    rawRenderObjects.clear();
    mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
    if(gServerGame && gGameUserInterface.mDebugShowMeshZones)
-       gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
+       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)

@@ -863,7 +863,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 }
 
 
-extern S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p);
+extern S32 findZoneContaining(const Point &p);
 
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
@@ -880,7 +880,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   S32 targetZone = findZoneContaining(gBotNavMeshZones, target);       // Where we're going
+   S32 targetZone = findZoneContaining(target);       // Where we're going
 
    if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -1051,11 +1051,11 @@ S32 LuaRobot::findClosestZone(Point point)
             }
          }
       }
-      if(closest < 0) // Didn't find any matches on the first pass, let's expand our radius and try again
-      {
+      //if(closest < 0) // Didn't find any matches on the first pass, let's expand our radius and try again
+      //{
          closest++;
          distsq=F32_MAX;
-      }
+      //}
    }
  
    return closest;
@@ -1695,7 +1695,8 @@ void Robot::kill()
 
    // Dump mounted items
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      mMountedItems[i]->onMountDestroyed();
+      if(mMountedItems[i].isValid())  // server quitting can make an object invalid.
+         mMountedItems[i]->onMountDestroyed();
 }
 
 
@@ -1756,10 +1757,10 @@ void Robot::logError(const char *format, ...)
 S32 Robot::getCurrentZone()
 {
    // We're in uncharted territory -- try to get the current zone
-   if(mCurrentZone == -1)
-   {
-      mCurrentZone = findZoneContaining(gBotNavMeshZones, getActualPos());
-   }
+   //if(mCurrentZone == -1)
+   //{
+      mCurrentZone = findZoneContaining(getActualPos());
+   //}
    return mCurrentZone;
 }
 
@@ -1834,9 +1835,8 @@ void Robot::render(S32 layerIndex)
 {
    if(isGhost())             // client rendering client's objects
       Ship::render(layerIndex);
-   else if(layerIndex = 1)   // a client hosting is rendering server objects
+   else if(layerIndex = 1 && flightPlan.size() != 0)   // a client hosting is rendering server objects
    {
-      Robot *robot = dynamic_cast<Robot *>(this);
       glColor3f(0,1,1);
       glBegin(GL_LINE_STRIP);
       glVertex2f(getActualPos().x,getActualPos().y);

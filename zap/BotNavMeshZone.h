@@ -76,6 +76,7 @@ class BotNavMeshZone : public GameObject, public Polygon
 
 private:   
    typedef GameObject Parent;
+   Game *mGame2;
 
 public:
    bool mConvex;                 // Stores wheter zone is convex or not
@@ -91,6 +92,8 @@ public:
    // Create objects from parameters stored in level file
    bool processArguments(S32 argc, const char **argv);
 
+   GridDatabase *getGridDatabase();
+   void addToGame(Game *theGame);
    void onAddedToGame(Game *theGame);
    Point getCenter();      // Return center of zone
 
