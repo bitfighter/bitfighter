@@ -1402,6 +1402,28 @@ static string makeFilenameFromString(const char *levelname)
 }
 
 
+
+// returns a pointer of string of chars, after "count" number of args
+const char * findPointerOfArg(const char *message, S32 count)
+{
+   S32 spacecount = 0;
+   S32 cur = 1;
+	char prevchar = 0;
+
+   // Message needs to include everything including multiple spaces.  Message starts after second space.
+   while(message[cur] != '\0' && spacecount != count)
+   {
+      if(message[cur] == ' ' && prevchar!=' ') 
+         spacecount++;  // Double space does not count as a seperate parameter
+      prevchar = message[cur];
+      cur++;
+   }
+	return &message[cur];
+}
+
+
+
+
 extern ClientInfo gClientInfo;
 extern bool showDebugBots;  // in game.cpp
 
@@ -1646,24 +1668,15 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          displayErrorMessage("!!! Usage: /pm <player name> <message>");
       else
       {
-         //const char *message = mLineEditor.c_str();
-         //S32 spacecount = 0;
-         //S32 cur = 2;         // We already know the first 2 characters are always "pm" or "/pm"
+         const char *message = mLineEditor.c_str();  // Get the original line.
+         message = findPointerOfArg(message,2); // Set pointer after 2 args
 
-         //// Message needs to include everything including spaces.  Message starts following second space.
-         //while(message[cur] != '\0' && spacecount != 2)
-         //{
-         //   if(message[cur] == ' ' && message[cur-1]!=' ') 
-         //      spacecount++;  // Double space does not count as a seperate parameter
-         //   cur++;
-         //}
-         //message = &message[cur]; // Set new pointer
-
-         string message = concatenate(words, 2);
+         // The above keeps multiple space, but not the one below.
+         //string message = concatenate(words, 2);  // in this line, multi space converts to single space; "1   2      3" becomes "1 2 3"
 
          GameType *gt = gClientGame->getGameType();
          if(gt)
-            gt->c2sSendChatPM(words[1], message.c_str());
+            gt->c2sSendChatPM(words[1], message); //.c_str()
       }
    }
    else if(words[0] == "getmap" || words[0] == "getlevel")    // Getmap or getlevel?  Allow either...
