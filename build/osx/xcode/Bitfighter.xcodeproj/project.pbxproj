@@ -48,6 +48,8 @@
 /* Begin PBXBuildFile section */
 		73657A0612E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
 		73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
+		7367D2AB12E807E400861430 /* FreeALUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60212E2E0A500EA5EBE /* FreeALUT.framework */; };
+		7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		7378261D12960DDF007333BE /* zap_mac_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */; };
@@ -562,6 +564,8 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */,
+				7367D2AB12E807E400861430 /* FreeALUT.framework in CopyFiles */,
 				737CE639129055C500D732B7 /* tnl.framework in CopyFiles */,
 				737CE5CA129051CB00D732B7 /* libtomcrypt.framework in CopyFiles */,
 			);
@@ -2465,6 +2469,7 @@
 					"$(inherited)",
 					../../../openal,
 					"\"$(SRCROOT)/../../../openal\"",
+					"\"$(SRCROOT)/../tools\"",
 				);
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -2493,6 +2498,7 @@
 					"$(inherited)",
 					../../../openal,
 					"\"$(SRCROOT)/../../../openal\"",
+					"\"$(SRCROOT)/../tools\"",
 				);
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;

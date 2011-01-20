@@ -9,16 +9,8 @@
 	03AD17CF12CE2BBF00274A25 /* Create Bitfighter Game Release */ = {
 		activeExec = 0;
 	};
-	256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */ = {
-		isa = PBXFileReference;
-		fileEncoding = 4;
-		lastKnownFileType = sourcecode.c.h;
-		name = Bitfighter_Prefix.pch;
-		path = "/Users/geeko/temp/hg/buckyballreaction-bf2/build/osx/xcode/Bitfighter_Prefix.pch";
-		sourceTree = "<absolute>";
-	};
 	29B97313FDCFA39411CA2CEA /* Project object */ = {
-		activeBuildConfigurationName = Debug;
+		activeBuildConfigurationName = Release;
 		activeExecutable = 737CE2E71290462D00D732B7 /* Bitfighter */;
 		activeTarget = 8D1107260486CEB800E47090 /* Bitfighter */;
 		addToTargets = (
@@ -103,20 +95,19 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 316859164;
-			PBXWorkspaceStateSaveDate = 316859164;
+			PBXPerProjectTemplateStateSaveDate = 317191948;
+			PBXWorkspaceStateSaveDate = 317191948;
 		};
 		perUserProjectItems = {
 			73649C71129796B2004366A3 /* PlistBookmark */ = 73649C71129796B2004366A3 /* PlistBookmark */;
 			73649C72129796B2004366A3 /* PlistBookmark */ = 73649C72129796B2004366A3 /* PlistBookmark */;
-			73657A1D12E2E52800BED56F /* PBXTextBookmark */ = 73657A1D12E2E52800BED56F /* PBXTextBookmark */;
+			7367D2CD12E8080900861430 /* PBXTextBookmark */ = 7367D2CD12E8080900861430 /* PBXTextBookmark */;
+			7367D2CE12E8080900861430 /* PBXTextBookmark */ = 7367D2CE12E8080900861430 /* PBXTextBookmark */;
+			7367D2CF12E8080900861430 /* PBXTextBookmark */ = 7367D2CF12E8080900861430 /* PBXTextBookmark */;
+			7367D2D012E8080900861430 /* PBXTextBookmark */ = 7367D2D012E8080900861430 /* PBXTextBookmark */;
+			7367D2E712E80B2200861430 /* PBXTextBookmark */ = 7367D2E712E80B2200861430 /* PBXTextBookmark */;
 			737CE7DB12905F9F00D732B7 /* PBXTextBookmark */ = 737CE7DB12905F9F00D732B7 /* PBXTextBookmark */;
-			738103EC12DAD25300AE5D48 /* PBXTextBookmark */ = 738103EC12DAD25300AE5D48 /* PBXTextBookmark */;
-			73D2F5BF12E2DC3900EA5EBE /* PBXTextBookmark */ = 73D2F5BF12E2DC3900EA5EBE /* PBXTextBookmark */;
-			73D2F70612E2E2CF00EA5EBE /* PBXTextBookmark */ = 73D2F70612E2E2CF00EA5EBE /* PBXTextBookmark */;
-			73D2F70712E2E2CF00EA5EBE /* PBXTextBookmark */ = 73D2F70712E2E2CF00EA5EBE /* PBXTextBookmark */;
 			73D2F70812E2E2CF00EA5EBE /* PBXTextBookmark */ = 73D2F70812E2E2CF00EA5EBE /* PBXTextBookmark */;
-			73D2F70912E2E2CF00EA5EBE /* PBXTextBookmark */ = 73D2F70912E2E2CF00EA5EBE /* PBXTextBookmark */;
 		};
 		sourceControlManager = 737CE2F91290467000D732B7 /* Source Control */;
 		userBuildSettings = {
@@ -144,21 +135,61 @@
 		rLen = 0;
 		rLoc = 9223372036854775808;
 	};
-	73657A1D12E2E52800BED56F /* PBXTextBookmark */ = {
+	7367D2CD12E8080900861430 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
 		fRef = 73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */;
 		name = "sfx.cpp: 1";
 		rLen = 0;
 		rLoc = 0;
 		rType = 0;
-		vrLen = 627;
+		vrLen = 519;
+		vrLoc = 0;
+	};
+	7367D2CE12E8080900861430 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */;
+		name = "bitfighter.sh: 38";
+		rLen = 0;
+		rLoc = 879;
+		rType = 0;
+		vrLen = 309;
+		vrLoc = 755;
+	};
+	7367D2CF12E8080900861430 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73D2F29212E2D7E700EA5EBE /* Directory.mm */;
+		name = "Directory.mm: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 372;
+		vrLoc = 1369;
+	};
+	7367D2D012E8080900861430 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */;
+		name = "dataConnection.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 323;
+		vrLoc = 0;
+	};
+	7367D2E712E80B2200861430 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */;
+		name = "dataConnection.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 323;
 		vrLoc = 0;
 	};
 	736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {894, 585}}";
+			sepNavIntBoundsRect = "{{0, 0}, {894, 598}}";
 			sepNavSelRange = "{879, 0}";
-			sepNavVisRange = "{745, 324}";
+			sepNavVisRange = "{755, 309}";
 			sepNavVisRect = "{{0, 0}, {630, 291}}";
 			sepNavWindowFrame = "{{15, 183}, {750, 558}}";
 		};
@@ -296,16 +327,6 @@
 		vrLen = 551;
 		vrLoc = 1262;
 	};
-	738103EC12DAD25300AE5D48 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 256AC3F00F4B6AF500CF3369 /* Bitfighter_Prefix.pch */;
-		name = "Bitfighter_Prefix.pch: 3";
-		rLen = 0;
-		rLoc = 98;
-		rType = 0;
-		vrLen = 99;
-		vrLoc = 0;
-	};
 	73D2F28112E2D7E700EA5EBE /* barrier.cpp */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {628, 4498}}";
@@ -313,56 +334,27 @@
 			sepNavVisRange = "{1102, 352}";
 		};
 	};
+	73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {789, 4771}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 323}";
+		};
+	};
 	73D2F29212E2D7E700EA5EBE /* Directory.mm */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {607, 572}}";
-			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 630}";
+			sepNavIntBoundsRect = "{{0, 0}, {761, 624}}";
+			sepNavSelRange = "{1367, 0}";
+			sepNavVisRange = "{630, 1111}";
+			sepNavWindowFrame = "{{38, 162}, {750, 558}}";
 		};
 	};
 	73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {607, 11869}}";
+			sepNavIntBoundsRect = "{{0, 0}, {607, 11895}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 627}";
+			sepNavVisRange = "{0, 519}";
 		};
-	};
-	73D2F5BF12E2DC3900EA5EBE /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */;
-		name = "bitfighter.sh: 38";
-		rLen = 0;
-		rLoc = 879;
-		rType = 0;
-		vrLen = 324;
-		vrLoc = 745;
-	};
-	73D2F5CB12E2DC9800EA5EBE /* main-dummy.cpp */ = {
-		isa = PBXFileReference;
-		lastKnownFileType = sourcecode.cpp.cpp;
-		name = "main-dummy.cpp";
-		path = "/Users/geeko/temp/hg/buckyballreaction-bf2/build/osx/xcode/../../../tnl/main-dummy.cpp";
-		sourceTree = "<absolute>";
-	};
-	73D2F70612E2E2CF00EA5EBE /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 73D2F5CB12E2DC9800EA5EBE /* main-dummy.cpp */;
-		name = "main-dummy.cpp: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 16;
-		vrLoc = 0;
-	};
-	73D2F70712E2E2CF00EA5EBE /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 73D2F29212E2D7E700EA5EBE /* Directory.mm */;
-		name = "Directory.mm: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 630;
-		vrLoc = 0;
 	};
 	73D2F70812E2E2CF00EA5EBE /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -373,16 +365,6 @@
 		rType = 0;
 		vrLen = 352;
 		vrLoc = 1102;
-	};
-	73D2F70912E2E2CF00EA5EBE /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 73D2F2FE12E2D7E800EA5EBE /* sfx.cpp */;
-		name = "sfx.cpp: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 630;
-		vrLoc = 0;
 	};
 	8D1107260486CEB800E47090 /* Bitfighter */ = {
 		activeExec = 0;
