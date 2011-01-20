@@ -144,9 +144,10 @@ public:
 
    void logError(const char *format, ...);   // In case of error...
 
+   void render(S32 layerIndex);
    void idle(IdleCallPath path);
 
-   Point mTarget;     // TODO: Get rid of this!!  why?
+   // Point mTarget;     // TODO: Get rid of this!!  why?   not used anymore
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);

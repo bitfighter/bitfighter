@@ -1403,6 +1403,7 @@ static string makeFilenameFromString(const char *levelname)
 
 
 extern ClientInfo gClientInfo;
+extern bool showDebugBots;  // in game.cpp
 
 // Process a command entered at the chat prompt
 // Make sure any commands listed here are also included in mChatCmds for auto-completion purposes...
@@ -1540,6 +1541,11 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    {
        mDebugShowMeshZones = !mDebugShowMeshZones;
        if(!gServerGame) displayErrorMessage("!!! Zones can only be displayed on a local host");
+   }
+   else if(words[0] == "drobot")
+   {
+       showDebugBots = !showDebugBots;
+       if(!gServerGame) displayErrorMessage("!!! d-robot can only be displayed on a local host");
    }
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);

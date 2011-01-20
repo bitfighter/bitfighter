@@ -1600,19 +1600,6 @@ void Ship::render(S32 layerIndex)
    if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
       renderAimVector();
 
-if(isRobot())
-{
-   Robot *robot = dynamic_cast<Robot *>(this);
-   if(robot)
-   {
-      glColor3f(0,1,1);
-      glBegin(GL_LINES);
-      Point shipPos = getRenderPos();
-      glVertex2f(robot->mTarget.x , robot->mTarget.y );
-      glVertex2f(0 ,0 );
-      glEnd();
-   }
-}
 
    // Now render some "addons"  --> should these be in renderShip?
    glColor3f(1,1,1);
