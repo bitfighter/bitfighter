@@ -1407,8 +1407,8 @@ static string makeFilenameFromString(const char *levelname)
 const char * findPointerOfArg(const char *message, S32 count)
 {
    S32 spacecount = 0;
-   S32 cur = 1;
-	char prevchar = 0;
+   S32 cur = 0;
+   char prevchar = 0;
 
    // Message needs to include everything including multiple spaces.  Message starts after second space.
    while(message[cur] != '\0' && spacecount != count)
@@ -1418,7 +1418,7 @@ const char * findPointerOfArg(const char *message, S32 count)
       prevchar = message[cur];
       cur++;
    }
-	return &message[cur];
+   return &message[cur];
 }
 
 

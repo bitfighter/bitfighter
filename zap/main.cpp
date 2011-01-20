@@ -98,6 +98,7 @@ Specifying the extension is optional.
 <li>Bot nav zones automatically generates when there is no nav zones and robots is asking for "getWaypoint".
 <li>Bot nav zones can now link both nav zones with teleporters, this allows robots to use teleporters.
 <li>Some bandwidth saving by sending updates less often on slow moving objects.
+<li>Added /pm to send private message in a game server.
 </ul>
 
 
