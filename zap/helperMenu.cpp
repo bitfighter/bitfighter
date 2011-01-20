@@ -26,7 +26,7 @@
 
 #include "helperMenu.h"
 #include "point.h"      // For Color def
-#include "UIGame.h"     // For gGameUserInterface   
+#include "UIGame.h"     // For gGameUserInterface
 
 namespace Zap
 {
@@ -60,6 +60,9 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
 
 
 extern void glColor(const Color &c, float alpha = 1.0);
+extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
+extern IniSettings gIniSettings;
+extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
 {
@@ -73,5 +76,26 @@ void HelperMenu::drawMenuBorderLine(S32 yPos, const Color &color)
    glDisableBlend;
 }
 
+void HelperMenu::drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize)
+{
+
+   S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
+   const S32 fontSizeSm = fontSize - 4;
+
+   glColor(color);
+
+   // RenderedSize will be -1 if the button is not defined
+   if(gIniSettings.inputMode == Keyboard || butSize == -1)
+      UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE) );
+   else
+   {
+      S32 xPos = UserInterface::horizMargin;
+      xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
+      renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
+      xPos += butSize;
+      glColor(color);
+      UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");
+   }
+}
 
 };

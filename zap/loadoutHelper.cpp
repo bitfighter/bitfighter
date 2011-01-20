@@ -73,9 +73,7 @@ void LoadoutHelper::onMenuShow()
 }
 
 
-extern void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 offset);
 extern IniSettings gIniSettings;
-extern S32 getControllerButtonRenderedSize(KeyCode keyCode);
 
 // First, we work with modules, then with weapons
 #define getList(ct)  ((ct < ShipModuleCount) ? &gLoadoutModules : &gLoadoutWeapons)
@@ -154,29 +152,13 @@ void LoadoutHelper::render()
    }
    // Add some help text
    
-   S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
-   const S32 fontSizeSm = fontSize - 4;
-
    yPos += 2;
 
    drawMenuBorderLine(yPos, loadoutMenuHeaderColor);
 
    yPos += 4;
 
-   glColor(loadoutMenuHeaderColor);
-
-   // RenderedSize will be -1 if the button is not defined
-   if(gIniSettings.inputMode == Keyboard || butSize == -1)
-      UserInterface::drawStringf( UserInterface::horizMargin, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE) );
-   else
-   {
-      S32 xPos = UserInterface::horizMargin;
-      xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
-      renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
-      xPos += butSize;
-      glColor(loadoutMenuHeaderColor);
-      UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");
-   }
+   drawMenuCancelText(yPos, loadoutMenuHeaderColor, fontSize);
 }
 
 

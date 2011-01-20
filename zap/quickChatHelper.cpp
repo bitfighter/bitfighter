@@ -88,6 +88,13 @@ void QuickChatHelper::render()
    }
 
    const S32 indent = 20;
+   const Color quickChatMenuHeaderColor(1, 0, 0);
+
+   drawMenuBorderLine(yPos, quickChatMenuHeaderColor);
+
+   glColor(quickChatMenuHeaderColor);
+   UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "QuickChat menu");
+   yPos += fontSize + 10;
 
    if(!renderNodes.size())    // Nothing to render, let's go home
    {
@@ -130,27 +137,13 @@ void QuickChatHelper::render()
    glColor(gGlobalChatColor);
    UserInterface::drawString(UserInterface::horizMargin + indent + UserInterface::getStringWidth(fontSizeSm, "Team Message "), yPos, fontSizeSm, "Global Message");
 
-   yPos += 20;
-   S32 butSize = getControllerButtonRenderedSize(BUTTON_BACK);
+   yPos += 16;
 
-   // RenderedSize will be -1 if the button is not defined
-   if(gIniSettings.inputMode == Keyboard || butSize == -1)
-   {
-      glColor3f(1,0,0); 
-      UserInterface::drawStringf(UserInterface::horizMargin + indent, yPos, fontSizeSm, "Press [%s] to cancel", keyCodeToString(KEY_ESCAPE));
-   }
-   else
-   {
-      S32 xPos = UserInterface::horizMargin + indent;
+   drawMenuBorderLine(yPos, quickChatMenuHeaderColor);
 
-      glColor3f(1,0,0);
-      xPos += UserInterface::drawStringAndGetWidth( xPos, yPos, fontSizeSm, "Press ");
-      renderControllerButton(xPos, yPos, BUTTON_BACK, false, butSize / 2);
+   yPos += 4;
 
-      xPos += butSize;
-      glColor3f(1,0,0);
-      UserInterface::drawString( xPos, yPos, fontSizeSm, " to cancel");
-   }
+   drawMenuCancelText(yPos, quickChatMenuHeaderColor, fontSize);
 
    return;
 }

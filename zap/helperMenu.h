@@ -50,6 +50,7 @@ protected:
    void exitHelper();
 
    void drawMenuBorderLine(S32 yPos, const Color &color);
+   void drawMenuCancelText(S32 yPos, const Color &color, S32 fontSize);
 
 public:
    virtual void render() = 0;                

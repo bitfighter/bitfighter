@@ -46,18 +46,23 @@ void EngineerHelper::onMenuShow()
 
 extern void drawSquare(const Point &pos, S32 size);
 static Point deployPosition, deployNormal;
+extern void glColor(const Color &c, float alpha = 1.0);
 
 void EngineerHelper::render()
 {
    S32 yPos = MENU_TOP;
    const S32 fontSize = 15;
+   const Color engineerMenuHeaderColor (1, 0, 0);
 
    if(mSelectedItem == -1)    // Haven't selected an item yet
    {
       const S32 xPos = UserInterface::horizMargin + 50;
-      glColor3f(1,1,0);
+
+      drawMenuBorderLine(yPos, engineerMenuHeaderColor);
+
+      glColor(engineerMenuHeaderColor);
       UserInterface::drawString(UserInterface::horizMargin, yPos, fontSize, "What do you want to Engineer?");
-      yPos += fontSize + 4;
+      yPos += fontSize + 10;
 
       bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
 
@@ -82,6 +87,14 @@ void EngineerHelper::render()
 
          yPos += fontSize + 7;
       }
+
+      yPos += 2;
+
+      drawMenuBorderLine(yPos, engineerMenuHeaderColor);
+
+      yPos += 4;
+
+      drawMenuCancelText(yPos, engineerMenuHeaderColor, fontSize);
    }
    else     // Have selected a module, need to indicate where to deploy
    {
