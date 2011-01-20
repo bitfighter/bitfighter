@@ -45,6 +45,7 @@
 #include "UINameEntry.h"
 #include "luaLevelGenerator.h"
 #include "shipItems.h"           // For moduleInfos
+#include "robot.h"
 
 //#include "UIChat.h"
 
@@ -62,6 +63,8 @@ using namespace TNL;
 
 namespace Zap
 {
+bool showDebugBots = false;
+
 
 // Global Game objects
 ServerGame *gServerGame = NULL;
@@ -1429,10 +1432,15 @@ void ClientGame::renderCommander()
    mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
    if(gServerGame && gGameUserInterface.mDebugShowMeshZones)
        gServerGame->getGridDatabase()->findObjects(BotNavMeshZoneType,rawRenderObjects,mWorldBounds);
+
    
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
+
+   if(gServerGame && showDebugBots)
+      for(S32 i = 0; i<Robot::robots.size(); i++)
+         renderObjects.push_back(Robot::robots[i]);
 
    if(u)
    {
@@ -1601,6 +1609,7 @@ void ClientGame::renderOverlayMap()
 
 static Point screenSize, position;
 
+
 void ClientGame::renderNormal()
 {
    if(!hasValidControlObject())
@@ -1638,6 +1647,11 @@ void ClientGame::renderNormal()
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
+
+   if(gServerGame && showDebugBots)
+      for(S32 i = 0; i<Robot::robots.size(); i++)
+         renderObjects.push_back(Robot::robots[i]);
+
 
    renderObjects.sort(renderSortCompare);
 

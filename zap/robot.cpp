@@ -1830,6 +1830,24 @@ bool Robot::canSeePoint(Point point)
       gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
 }
 
+void Robot::render(S32 layerIndex)
+{
+   if(isGhost())             // client rendering client's objects
+      Ship::render(layerIndex);
+   else if(layerIndex = 1)   // a client hosting is rendering server objects
+   {
+      Robot *robot = dynamic_cast<Robot *>(this);
+      glColor3f(0,1,1);
+      glBegin(GL_LINE_STRIP);
+      glVertex2f(getActualPos().x,getActualPos().y);
+      for(S32 i=flightPlan.size()-1; i >= 0; i--)
+		{
+         glVertex2f(flightPlan[i].x, flightPlan[i].y);
+		}
+      glEnd();
+   }
+}
+
 void Robot::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT;
@@ -1845,7 +1863,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       // Check to see if we need to respawn this robot
       if(hasExploded)
       {
-         if(!gameConnectionInitalized)  //after gameConnection is initalized, it should rspawn.
+         if(!gameConnectionInitalized)  //after gameConnection is initalized, it should spawn.
          {
             //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
             GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score
@@ -1929,6 +1947,7 @@ void Robot::idle(GameObject::IdleCallPath path)
    Ship::idle(path);     // All client paths can use this idle.
 }
 
+// Currently does not go anywhere, all it does is fire at enemies.
 void RobotController::run(Robot *newship, GameType *newgametype)
 {
 	ship = newship;
