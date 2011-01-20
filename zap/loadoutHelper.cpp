@@ -121,7 +121,6 @@ void LoadoutHelper::render()
       }
 
       // Draw key controls for selecting loadout items
-
       bool showKeys = gIniSettings.showKeyboardKeys || gIniSettings.inputMode == Keyboard;
 
       if(isValidItem(i))
@@ -150,14 +149,10 @@ void LoadoutHelper::render()
          yPos += fontSize + 7;
       }
    }
+
    // Add some help text
-   
-   yPos += 2;
-
-   drawMenuBorderLine(yPos, loadoutMenuHeaderColor);
-
-   yPos += 4;
-
+   drawMenuBorderLine(yPos - fontSize - 2, loadoutMenuHeaderColor);
+   yPos += 8;
    drawMenuCancelText(yPos, loadoutMenuHeaderColor, fontSize);
 }
 

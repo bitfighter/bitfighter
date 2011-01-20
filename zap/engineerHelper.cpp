@@ -90,10 +90,8 @@ void EngineerHelper::render()
 
       yPos += 2;
 
-      drawMenuBorderLine(yPos, engineerMenuHeaderColor);
-
-      yPos += 4;
-
+      drawMenuBorderLine(yPos - fontSize - 2, engineerMenuHeaderColor);
+      yPos += 8;
       drawMenuCancelText(yPos, engineerMenuHeaderColor, fontSize);
    }
    else     // Have selected a module, need to indicate where to deploy

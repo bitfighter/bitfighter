@@ -137,12 +137,11 @@ void QuickChatHelper::render()
    glColor(gGlobalChatColor);
    UserInterface::drawString(UserInterface::horizMargin + indent + UserInterface::getStringWidth(fontSizeSm, "Team Message "), yPos, fontSizeSm, "Global Message");
 
-   yPos += 16;
+   yPos += 12;
 
-   drawMenuBorderLine(yPos, quickChatMenuHeaderColor);
-
-   yPos += 4;
-
+   // Add some help text
+   drawMenuBorderLine(yPos - fontSize - 2, quickChatMenuHeaderColor);
+   yPos += 8;
    drawMenuCancelText(yPos, quickChatMenuHeaderColor, fontSize);
 
    return;
