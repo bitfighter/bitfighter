@@ -435,6 +435,15 @@ void Ship::idle(GameObject::IdleCallPath path)
    }
    else
    {
+      if((path == GameObject::ClientIdleControlMain || path == GameObject::ClientIdleMainRemote) && mMoveState[ActualState].vel.lenSquared() != 0)
+      {
+         // Check if we are lagging when we don't get anymore ship updates from server.
+         // Note that the server don't send updates to non-moving ships.
+         if(laggingFreezeTimer.update(mCurrentMove.time) && path == GameObject::ClientIdleControlMain)
+            gGameUserInterface.displayMessage(Color(1,0,0), "WARNING - LAGGING");
+         if(laggingFreezeTimer.getCurrent() == 0) // if lagging, freeze the ship.
+            return;
+      }
       // For all other cases, advance the actual state of the
       // object with the current move.
       processMove(ActualState);
@@ -950,6 +959,7 @@ void Ship::unpackUpdate(GhostConnection *connection, BitStream *stream)
    bool wasInitialUpdate = false;
    bool playSpawnEffect = false;
 
+   laggingFreezeTimer.reset(laggingfreeze);
 
    if(isInitialUpdate())
    {
