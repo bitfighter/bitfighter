@@ -208,8 +208,8 @@ static size_t setProgress(HWND hProgress,	double t, /* dltotal */
 	SendMessage(hProgressBar, PBM_SETSTEP, (WPARAM)step, 0);
 	SendMessage(hProgressBar, PBM_STEPIT, 0, 0);
 
-	char percentage[8];
-	sprintf(percentage, "%d %% Downloaded", ratio);
+	char percentage[20];
+   _snprintf(percentage, sizeof(percentage), "%d %% Downloaded", ratio);
 	::SetWindowTextA(hProgressDlg, percentage);
 	return 0;
 };
