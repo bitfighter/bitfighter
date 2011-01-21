@@ -71,6 +71,7 @@ Projectile::Projectile(WeaponType type, Point p, Point v, GameObject *shooter)
    collided = false;
    hitShip = false;
    alive = true;
+   hasBounced = false;
    mShooter = shooter;
 
    // Copy some attributes from the shooter
@@ -212,7 +213,7 @@ void Projectile::idle(GameObject::IdleCallPath path)
 
 
       // Don't collide with shooter during first 500ms of life
-      if(mShooter.isValid() && aliveTime < 500)
+      if(mShooter.isValid() && aliveTime < 500 && !hasBounced)
       {
          disabledList.push_back(mShooter);
          mShooter->disableCollision();
@@ -261,7 +262,8 @@ void Projectile::idle(GameObject::IdleCallPath path)
          }
 
          if(bounce)
-         { 
+         {
+            hasBounced = true;
             // We hit something that we should bounce from, so bounce!
             F32 float1 = surfNormal.dot(velocity) * 2;
             velocity -= surfNormal * float1;

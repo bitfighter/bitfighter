@@ -83,6 +83,7 @@ public:
    bool collided;
    bool hitShip;
    bool alive;
+   bool hasBounced;
    SafePtr<GameObject> mShooter;
 
    // Constructor
