@@ -340,7 +340,7 @@ void Game::cleanUp()
       delete mGameObjects.last();
 
    while(gBotNavMeshZones.size())
-      delete gBotNavMeshZones.last();
+      delete gBotNavMeshZones.last().getPointer();
 }
 
 
