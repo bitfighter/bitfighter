@@ -1046,16 +1046,16 @@ S32 LuaRobot::findClosestZone(Point point)
          {
             if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))     // This is an expensive test
             {
-               closest = i;
+               closest = i;  // closest is now >= 0
                distsq = d;
             }
          }
       }
-      //if(closest < 0) // Didn't find any matches on the first pass, let's expand our radius and try again
-      //{
+      if(closest < 0) // Didn't find any matches on the first pass, let's expand our radius and try again
+      {
          closest++;
          distsq=F32_MAX;
-      //}
+      }
    }
  
    return closest;

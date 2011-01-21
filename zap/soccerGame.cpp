@@ -202,7 +202,9 @@ bool SoccerGameType::onFire(Ship *ship)
             // ball->setActualPos(ship->getActualPos() + dir * (ship->getRadius())); //get set in onItemDropped
 
             ball->onItemDropped();
-            ball->setActualVel(ship->getAimVector() * 200 + ship->getActualVel());
+            //ball->setActualVel(ship->getAimVector() * 200 + ship->getActualVel()); 
+				//dir * F32(wi->projVelocity) + dir * shooterVel.dot(dir);
+            ball->setActualVel(ship->getAimVector() * 200 + ship->getAimVector() * ship->getActualVel().dot(ship->getAimVector()));
          }
       }
       

@@ -95,6 +95,7 @@ void BotNavMeshZone::render(S32 layerIndex)
 // Only gets run on the server, never on client, obviously, because that's where the bots are!!!
 bool BotNavMeshZone::collide(GameObject *hitObject)
 {
+   // This does not get run anymore, it is in a seperate database.
    if(hitObject->getObjectTypeMask() & RobotType)     // Only care about robots...
    {
       Robot *r = (Robot *) hitObject;
@@ -224,7 +225,7 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 S32 findZoneContaining(const Point &p)
 {
    Vector<DatabaseObject *> fillVector;
-   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, fillVector, Rect(p,p));
+   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, fillVector, Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // slightly extend Rect, it can be on the edge of zone.
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       // First a quick, crude elimination check then more comprehensive one
