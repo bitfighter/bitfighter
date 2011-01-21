@@ -1743,6 +1743,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/admin");
    mChatCmds.push_back("/dcoords");
    mChatCmds.push_back("/dzones");
+   mChatCmds.push_back("/drobot");
    mChatCmds.push_back("/levpass");
    mChatCmds.push_back("/mvol");
    mChatCmds.push_back("/next");
