@@ -863,7 +863,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 }
 
 
-extern S32 findZoneContaining(const Vector<SafePtr<BotNavMeshZone> > &zones, const Point &p);
+extern S32 findZoneContaining(const Point &p);
 
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
@@ -880,7 +880,7 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   S32 targetZone = findZoneContaining(gBotNavMeshZones, target);       // Where we're going
+   S32 targetZone = findZoneContaining(target);       // Where we're going
 
    if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
@@ -1046,7 +1046,7 @@ S32 LuaRobot::findClosestZone(Point point)
          {
             if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))     // This is an expensive test
             {
-               closest = i;
+               closest = i;  // closest is now >= 0
                distsq = d;
             }
          }
@@ -1695,7 +1695,8 @@ void Robot::kill()
 
    // Dump mounted items
    for(S32 i = mMountedItems.size() - 1; i >= 0; i--)
-      mMountedItems[i]->onMountDestroyed();
+      if(mMountedItems[i].isValid())  // server quitting can make an object invalid.
+         mMountedItems[i]->onMountDestroyed();
 }
 
 
@@ -1756,10 +1757,10 @@ void Robot::logError(const char *format, ...)
 S32 Robot::getCurrentZone()
 {
    // We're in uncharted territory -- try to get the current zone
-   if(mCurrentZone == -1)
-   {
-      mCurrentZone = findZoneContaining(gBotNavMeshZones, getActualPos());
-   }
+   //if(mCurrentZone == -1)
+   //{
+      mCurrentZone = findZoneContaining(getActualPos());
+   //}
    return mCurrentZone;
 }
 
@@ -1830,6 +1831,23 @@ bool Robot::canSeePoint(Point point)
       gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
 }
 
+void Robot::render(S32 layerIndex)
+{
+   if(isGhost())             // client rendering client's objects
+      Ship::render(layerIndex);
+   else if(layerIndex = 1 && flightPlan.size() != 0)   // a client hosting is rendering server objects
+   {
+      glColor3f(0,1,1);
+      glBegin(GL_LINE_STRIP);
+      glVertex2f(getActualPos().x,getActualPos().y);
+      for(S32 i=flightPlan.size()-1; i >= 0; i--)
+		{
+         glVertex2f(flightPlan[i].x, flightPlan[i].y);
+		}
+      glEnd();
+   }
+}
+
 void Robot::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT;
@@ -1845,7 +1863,7 @@ void Robot::idle(GameObject::IdleCallPath path)
       // Check to see if we need to respawn this robot
       if(hasExploded)
       {
-         if(!gameConnectionInitalized)  //after gameConnection is initalized, it should rspawn.
+         if(!gameConnectionInitalized)  //after gameConnection is initalized, it should spawn.
          {
             //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
             GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score
@@ -1929,6 +1947,7 @@ void Robot::idle(GameObject::IdleCallPath path)
    Ship::idle(path);     // All client paths can use this idle.
 }
 
+// Currently does not go anywhere, all it does is fire at enemies.
 void RobotController::run(Robot *newship, GameType *newgametype)
 {
 	ship = newship;

@@ -111,6 +111,7 @@ private:
    void buildModuleInfos();
 
 protected:
+   void cleanUp();
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
 
@@ -138,6 +139,7 @@ protected:
    bool mGameSuspended;                   // True if we're in "suspended animation" mode
 
 public:
+   GridDatabase mDatabaseForBotZones;
    static const S32 DefaultGridSize = 255;   // Size of "pages", represented by floats for intrapage locations (i.e. pixels per integer)
    static const S32 MIN_GRID_SIZE = 5;       // Ridiculous, it's true, but we step by our minimum value, so we can't make this too high
    static const S32 MAX_GRID_SIZE = 1000;    // A bit ridiculous too...  250-300 seems about right for normal use.  But we'll let folks experiment.
@@ -375,6 +377,7 @@ private:
 
 public:
    ClientGame(const Address &bindAddress);
+   ~ClientGame();
 
    bool hasValidControlObject();
    bool isConnectedToServer();
