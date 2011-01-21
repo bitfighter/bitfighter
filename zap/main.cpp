@@ -72,7 +72,7 @@ Scripts can be names .lua or .levelgen, and can be stored in either the levels f
 Specifying the extension is optional.
 <li>added game:isNexusOpen() game:getNexusTimeLeft() GoalZone:hasFlag() FlagItem:getCaptureZone() FlagItem:getShip() Ship:getMountedItems() bot:engineerDeployObject(EngineeredTurret or EngineeredForceField)
 <li>Robot errors now appears in game console when hosting.
-<li>Added /showbots to show all robots.
+<li>Added /showbots to show all robots, /drobot to show robot paths.
 </ul>
 
 <h4>Editor</h4>
@@ -118,6 +118,7 @@ Specifying the extension is optional.
 <li>Fixed some random turret hits self.
 <li>Fixed score board not sorting with lots of players.
 <li>Fixed problem with unable to see all ships in your teams in full map view.
+<li>Fixed bouncer going through ship when too close to the wall.
 </ul>
 */
 

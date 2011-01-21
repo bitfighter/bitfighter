@@ -269,7 +269,7 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 }
 
 
-static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766) ==> why not?
+static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited.
 
 static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 {

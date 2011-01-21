@@ -642,6 +642,7 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
 }, {
    { "/dcoords", "Show ship coordinates" },
    { "/dzones", "Show bot nav mesh zones" },
+   { "/drobot", "Show robot paths" },
    { "/showbots", "Show all robots" },
    { "-", NULL },       // Horiz. line
    { "/linewidth <number>", "Default = 2, Changes width of all lines" },
