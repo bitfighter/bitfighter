@@ -211,7 +211,7 @@ Section "Install"
   File /r "..\exe\scripts\*.lua"
   
   SetOutPath "$INSTDIR\updater"
-  File /r "..\exe\updater\BFUP.exe"
+  File /r "..\exe\updater\bfup.exe"
   File /r "..\exe\updater\bfup.xml"
   File /r "..\exe\updater\libcurl.dll"
   File /r "..\exe\updater\License.txt"

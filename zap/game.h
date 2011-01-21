@@ -425,7 +425,7 @@ extern void endGame();
 
 #define MASTER_PROTOCOL_VERSION 3  // Change this when releasing an incompatible cm/sm protocol (must be int)
 #define CS_PROTOCOL_VERSION 32     // Change this when releasing an incompatible cs protocol (must be int)
-#define BUILD_VERSION 1113         // Version of the game according to hg, will be unique every release (must be int)
+#define BUILD_VERSION 9999         // Version of the game according to hg, will be unique every release (must be int)
                                    // Get from "hg summary", make sure no collisions with old SVN numbers (highest was 1113)
 #define ZAP_GAME_NAME "Bitfighter"
 #define ZAP_GAME_RELEASE "015"     // Change this with every release -- for display purposes only, string, 

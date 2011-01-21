@@ -31,7 +31,7 @@
 	-->
 	
 	<!-- http://bitfighter.org/files/getDownloadUrl.php -->
-	<InfoUrl>http://bitfighter.org/files/getDownloadUrl2.php</InfoUrl>
+	<InfoUrl>http://bitfighter.org/files/getDownloadUrl.php</InfoUrl>
 
 	<!-- optional. 
 	The window class name of program that you want to update.

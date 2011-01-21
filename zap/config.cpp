@@ -315,7 +315,7 @@ static void loadHostConfiguration()
 
 void loadUpdaterSettings()
 {
-   gIniSettings.useUpdater = gINI.GetValueB("Updater", "UseUpdater", gIniSettings.useUpdater);
+   gIniSettings.useUpdater = gINI.GetValueYN("Updater", "UseUpdater", gIniSettings.useUpdater);
 }
 
 
