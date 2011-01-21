@@ -90,11 +90,13 @@ private:
    Point initialPos;
    Timer mSendHomeTimer;
    SafePtr<Ship> mLastPlayerTouch;
+   SafePtr<Ship> mLastPlayerMounted;
    S32 mLastPlayerTouchTeam;
    StringTableEntry mLastPlayerTouchName;
    F32 mDragFactor;
 
 public:
+   U32 mPickupTime;
    SoccerBallItem(Point pos = Point());   // C++ constructor
 
    static const S32 SOCCER_BALL_RADIUS = 30;

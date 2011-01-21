@@ -179,6 +179,7 @@ bool SoccerGameType::onFire(Ship *ship)
    if(!Parent::onFire(ship))
       return false;
 
+
    // If we have the ball, drop it
    if(ship->isCarryingItem(SoccerBallItemType))
    {
@@ -189,6 +190,8 @@ bool SoccerGameType::onFire(Ship *ship)
             SoccerBallItem *ball = dynamic_cast<SoccerBallItem *>(ship->mMountedItems[i].getPointer());
             TNLAssert(ball != NULL, "SoccerGameType::onFire NULL ball");
 
+            if(getGame()->getCurrentTime() - ball->mPickupTime < 1000)
+               return false;
             //Point dir = ship->getAimVector();
             //Point vel = ship->getActualVel();
 
@@ -296,6 +299,7 @@ SoccerBallItem::SoccerBallItem(Point pos) : Item(pos, true, SoccerBallItem::SOCC
    mNetFlags.set(Ghostable);
    initialPos = pos;
    mLastPlayerTouch = NULL;
+   mLastPlayerMounted = NULL;
    mLastPlayerTouchTeam = Item::NO_TEAM;
    mLastPlayerTouchName = StringTableEntry(NULL);
    mDragFactor = 1.0;     // 1.0 for no drag
@@ -405,7 +409,7 @@ void SoccerBallItem::idle(GameObject::IdleCallPath path)
 void SoccerBallItem::damageObject(DamageInfo *theInfo)
 {
    if(mMount != NULL)
-      dismount();
+      onItemDropped();
   
    // Compute impulse direction
    Point dv = theInfo->impulseVector - mMoveState[ActualState].vel;
@@ -427,7 +431,7 @@ void SoccerBallItem::damageObject(DamageInfo *theInfo)
          Projectile *p = dynamic_cast<Projectile *>(theInfo->damagingObject);
          Ship *ship = dynamic_cast<Ship *>(p->mShooter.getPointer());
          mLastPlayerTouch = ship ? ship : NULL;    // If shooter was a turret, say, we'd expect s to be NULL.
-         mLastPlayerTouchTeam = ship ? ship->getTeam() : Item::NO_TEAM;
+         mLastPlayerTouchTeam = p->mShooter->getTeam(); // no more NO_TEAM. Turret is in a team, and can be used to credit a team.
          mLastPlayerTouchName = ship ? ship->getName() : StringTableEntry(NULL);
       }
       else
@@ -467,17 +471,19 @@ bool SoccerBallItem::collide(GameObject *hitObject)
 
     if(!isGhost())  //Server side
     {
-      if(mLastPlayerTouch == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
+      if(mLastPlayerMounted == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
          return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
 
 
-      mLastPlayerTouch = dynamic_cast<Ship *>(hitObject);
+      Ship *ship = dynamic_cast<Ship *>(hitObject);
+      mLastPlayerTouch = ship;
       mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
       mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
       mDroppedTimer.clear();
 
-      Ship *ship = dynamic_cast<Ship *>(hitObject);
       this->mountToShip(ship);
+      mLastPlayerMounted = ship;
+      mPickupTime = getGame()->getCurrentTime();
     }else{ //client side
          // Not needed
          //if(getGame()->getGameType())
