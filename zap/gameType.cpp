@@ -2069,8 +2069,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 
    gClientGame->mObjectsLoaded = 0;                      // Reset item counter
    gGameUserInterface.mShowProgressBar = true;           // Show progress bar
-   gClientGame->setInCommanderMap(true);
-   gClientGame->resetZoomDelta();
+   //gClientGame->setInCommanderMap(true);               // If we change here, need to tell the server we are in this mode.
+   //gClientGame->resetZoomDelta();
 
    mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
 
@@ -2406,8 +2406,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    gClientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
 
    gGameUserInterface.mShowProgressBar = false;
-   gClientGame->setInCommanderMap(false);             // Start game in regular mode
-   gClientGame->clearZoomDelta();                     // No in zoom effect
+   //gClientGame->setInCommanderMap(false);             // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
+   //gClientGame->clearZoomDelta();                     // No in zoom effect
    
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }

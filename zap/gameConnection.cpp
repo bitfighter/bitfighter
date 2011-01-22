@@ -1278,6 +1278,8 @@ void GameConnection::onConnectionEstablished()
 
    if(isInitiator())    // Runs on client
    {
+      gClientGame->setInCommanderMap(false);       // Start game in regular mode.
+      gClientGame->clearZoomDelta();               // No in zoom effect
       setGhostFrom(false);
       setGhostTo(true);
       logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
