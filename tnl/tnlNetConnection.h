@@ -465,6 +465,9 @@ public:
    void setInterface(NetInterface *myInterface); ///< Sets the NetInterface this NetConnection will communicate through.
    NetInterface *getInterface();                 ///< Returns the NetInterface this connection communicates through.
 
+   /// Return time since we received our last packet
+   U32 getTimeSinceLastPacketReceived();
+
 protected:
    RefPtr<SymmetricCipher> mSymmetricCipher;    ///< The helper object that performs symmetric encryption on packets
 public:

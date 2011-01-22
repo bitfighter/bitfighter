@@ -292,8 +292,8 @@ void NetConnection::writePacketHeader(BitStream *stream, NetPacketType packetTyp
    for(U32 i = 0; i < wordCount; i++)
       stream->writeInt(mAckMask[i], i == wordCount - 1 ?
          (ackByteCount - (i * 4)) * 8 : 32);
-
-   U32 sendDelay = mInterface->getCurrentTime() - mLastPacketRecvTime;
+   
+   U32 sendDelay = getTimeSinceLastPacketReceived();
    if(sendDelay > 2047)
       sendDelay = 2047;
    stream->writeInt(sendDelay >> 3, 8);
@@ -776,15 +776,24 @@ void NetConnection::setTranslatesStrings()
       mStringTable = new ConnectionStringTable(this);
 }
 
+
 void NetConnection::setInterface(NetInterface *myInterface)
 {
    mInterface = myInterface;
 }
 
+
 NetInterface *NetConnection::getInterface()
 {
    return mInterface;
 }
+
+
+U32 NetConnection::getTimeSinceLastPacketReceived() 
+{ 
+   return mInterface->getCurrentTime() - mLastPacketRecvTime; 
+}
+
 
 void NetConnection::setSymmetricCipher(SymmetricCipher *theCipher)
 {
