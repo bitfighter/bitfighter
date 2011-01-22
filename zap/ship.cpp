@@ -71,6 +71,7 @@ TNL_IMPLEMENT_NETOBJECT(Ship);
 Ship::Ship(StringTableEntry playerName, bool isAuthenticated, S32 team, Point p, F32 m, bool isRobot) : MoveObject(p, CollisionRadius), mSpawnPoint(p)
 {
    mObjectTypeMask = ShipType | MoveableType | CommandMapVisType | TurretTargetType;
+   mFireTimer = 0;
 
    mNetFlags.set(Ghostable);
 
@@ -363,17 +364,18 @@ void Ship::selectWeapon(U32 weaponIdx)
 
 void Ship::processWeaponFire()
 {
-   mFireTimer.update(mCurrentMove.time);
+   if(mFireTimer > 0)
+      mFireTimer -= S32(mCurrentMove.time);
    mWeaponFireDecloakTimer.update(mCurrentMove.time);
 
    WeaponType curWeapon = mWeapon[mActiveWeaponIndx];
 
-   if(mCurrentMove.fire && mFireTimer.getCurrent() == 0 && getGame()->getGameType() && getGame()->getGameType()->onFire(this))
+   //  in a while loop, to catch up the firing rate for low Frame Per Second
+   while(mCurrentMove.fire && mFireTimer <= 0 && getGame()->getGameType() && getGame()->getGameType()->onFire(this) && mEnergy >= gWeapons[curWeapon].minEnergy)
    {
-      if(mEnergy >= gWeapons[curWeapon].minEnergy)
       {
          mEnergy -= gWeapons[curWeapon].drainEnergy;
-         mFireTimer.reset(gWeapons[curWeapon].fireDelay);
+         mFireTimer += S32(gWeapons[curWeapon].fireDelay);
          mWeaponFireDecloakTimer.reset(WeaponFireDecloakTime);
 
          if(getControllingClient().isValid())
@@ -818,6 +820,9 @@ void Ship::computeMaxFireDelay()
    }
 }
 
+const U32 negativeFireDelay = 123;  // how far into negative we are allowed to send.
+// MaxFireDelay + negativeFireDelay, 900 + 123 = 1023, so writeRangedU32 are sending full range of 10 bits of information.
+
 void Ship::writeControlState(BitStream *stream)
 {
    stream->write(mMoveState[ActualState].pos.x);
@@ -826,7 +831,10 @@ void Ship::writeControlState(BitStream *stream)
    stream->write(mMoveState[ActualState].vel.y);
    stream->writeRangedU32(mEnergy, 0, EnergyMax);
    stream->writeFlag(mCooldown);
-   stream->writeRangedU32(mFireTimer.getCurrent(), 0, MaxFireDelay);
+   if(mFireTimer < 0)   // mFireTimer could be negative.
+      stream->writeRangedU32(MaxFireDelay + (mFireTimer < -S32(negativeFireDelay) ? negativeFireDelay : U32(-mFireTimer)),0, MaxFireDelay + negativeFireDelay);
+   else
+      stream->writeRangedU32(U32(mFireTimer), 0, MaxFireDelay + negativeFireDelay);
    stream->writeRangedU32(mActiveWeaponIndx, 0, WeaponCount);
 }
 
@@ -838,8 +846,9 @@ void Ship::readControlState(BitStream *stream)
    stream->read(&mMoveState[ActualState].vel.y);
    mEnergy = stream->readRangedU32(0, EnergyMax);
    mCooldown = stream->readFlag();
-   U32 fireTimer = stream->readRangedU32(0, MaxFireDelay);
-   mFireTimer.reset(fireTimer);
+   mFireTimer = S32(stream->readRangedU32(0, MaxFireDelay + negativeFireDelay));
+   if(mFireTimer > S32(MaxFireDelay))
+      mFireTimer =  S32(MaxFireDelay) - mFireTimer;
    mActiveWeaponIndx = stream->readRangedU32(0, WeaponCount);
 }
 

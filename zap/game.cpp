@@ -884,6 +884,8 @@ void ServerGame::idle(U32 timeDelta)
    else if( mGameSuspended && ((mPlayerCount > 0 && !mSuspendor) || mPlayerCount > 1) )
       unsuspendGame(false);
 
+   if(timeDelta > 2000)   // prevents timeDelta from going too high, usually when after the server was frozen.
+      timeDelta = 1000;
    mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected

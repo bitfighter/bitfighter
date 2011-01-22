@@ -171,7 +171,7 @@ public:
       ChangeTeamMask = BIT(11),     // Used for when robots change teams
    };
 
-   Timer mFireTimer;
+   S32 mFireTimer;
    Timer mWarpInTimer;
    F32 mHealth;
    S32 mEnergy;
