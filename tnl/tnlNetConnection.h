@@ -175,7 +175,7 @@ class NetConnection : public Object
 
       MessageSignatureBytes = 5, ///< Special data bytes written into the end of the packet to guarantee data consistency
    };
-   U32 mLastPacketRecvTime; ///< Time of the receipt of the last data packet.
+
    U32 mLastSeqRecvdAtSend[MaxPacketWindowSize]; ///< The sequence number of the last packet received from the remote host when we sent the packet with sequence X & PacketWindowMask.
    U32 mLastSeqRecvd;                            ///< The sequence number of the most recently received packet from the remote host.
    U32 mHighestAckedSeq;                         ///< The highest sequence number the remote side has acknowledged.
@@ -209,6 +209,10 @@ class NetConnection : public Object
 
    /// Returns true if this connection has sent packets that have not yet been acked by the remote host.
    bool hasUnackedSentPackets() { return mLastSendSeq != mHighestAckedSeq; }
+
+protected:
+      U32 mLastPacketRecvTime; ///< Time of the receipt of the last data packet.
+
 public:
    struct PacketNotify;
 
