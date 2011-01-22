@@ -205,6 +205,7 @@ public:
    void renderCurrentChat();        // Render chat msg user is composing
    void renderLoadoutIndicators();  // Render indicators for the various loadout items
    void renderShutdownMessage();    // Render an alert if server is shutting down
+   void renderLostConnectionMessage(); 
 
    void idle(U32 timeDelta);
 

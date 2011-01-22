@@ -377,6 +377,8 @@ void GameUserInterface::render()
 
       if(theGameType)
          theGameType->renderInterfaceOverlay(mInScoreboardMode);
+
+      renderLostConnectionMessage();      // Renders message overlay if we're losing our connection to the server
    }
 
    renderShutdownMessage();
@@ -403,6 +405,17 @@ if(mGotControlUpdate)
 }
 
 
+void GameUserInterface::renderLostConnectionMessage()
+{
+   GameConnection *connection = gClientGame->getConnectionToServer();
+   if(!connection || connection->lostContact())
+   {
+      static const char *msg[] = { "", "We haven't heard from the server in a while...", "" };
+      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 3);
+   }
+}
+
+
 void GameUserInterface::renderShutdownMessage()
 {
    if(mShutdownMode == None)
@@ -415,7 +428,7 @@ void GameUserInterface::renderShutdownMessage()
 
       if(mShutdownInitiator)     // Local client intitiated the shutdown
       {
-         const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
+         static const char *msg[] = { "", timemsg, "", "Shutdown sequence intitated by you.", "", mShutdownReason.getString(), "" };
          renderMessageBox("SERVER SHUTDOWN INITIATED", "Press <ESC> to cancel shutdown", msg, 7);
       }
       else                       // Remote user intiated the shutdown
@@ -423,14 +436,14 @@ void GameUserInterface::renderShutdownMessage()
          char whomsg[255];
          dSprintf(whomsg, sizeof(whomsg), "Shutdown sequence initiated by %s.", mShutdownName.getString());
 
-         const char *msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
+         static const char *msg[] = { "", timemsg, "", whomsg, "", mShutdownReason.getString(), "" };
          renderMessageBox("SHUTDOWN INITIATED", "Press <ESC> to dismiss", msg, 7);
       }
    }
    else if(mShutdownMode == Canceled)
    {
       // Keep same number of messages as above, so if message changes, it will be a smooth transition
-      const char *msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
+      static const char *msg[] = { "", "", "Server shutdown sequence canceled.", "", "Play on!", "", "" };     
 
       renderMessageBox("SHUTDOWN CANCELED", "Press <ESC> to dismiss", msg, 7);
    }
