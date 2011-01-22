@@ -26,8 +26,6 @@
 #ifndef _GAMEWEAPONS_H_
 #define _GAMEWEAPONS_H_
 
-#include "../tnl/tnlPlatform.h"
-
 #include "point.h"
 #include "gameObject.h"
 
