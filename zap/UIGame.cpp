@@ -1384,7 +1384,7 @@ static string makeFilenameFromString(const char *levelname)
 {
 	static char filename[MAX_FILE_NAME_LEN + 1];    // Leave room for terminating null
 
-	S32 i = 0;
+	U32 i = 0;
 
 	while(i < MAX_FILE_NAME_LEN && levelname[i] != 0)
 	{

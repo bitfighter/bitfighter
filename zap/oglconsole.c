@@ -941,7 +941,7 @@ void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...)
 
 /* Mono-Console Users: print text to the console; multi-console users use
  * Output() */
-void OGLCONSOLE_Print(char *s, ...)
+void OGLCONSOLE_Print(const char *s, ...)
 {
     va_list argument;
     char output[4096];

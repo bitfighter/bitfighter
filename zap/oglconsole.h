@@ -33,7 +33,7 @@ void OGLCONSOLE_Render(OGLCONSOLE_Console console);
 void OGLCONSOLE_Reshape();
 
 /* Print to the console */
-void OGLCONSOLE_Print(char *s, ...);
+void OGLCONSOLE_Print(const char *s, ...);
 void OGLCONSOLE_Output(OGLCONSOLE_Console console, const char *s, ...);
 
 /* Register a callback with the console */

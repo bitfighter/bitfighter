@@ -898,7 +898,7 @@ void ServerGame::idle(U32 timeDelta)
       static StringTableEntry prevCurrentLevelName;   // Using static, so it holds the value when it comes back here.
       static StringTableEntry prevCurrentLevelType;
       static S32 prevRobotCount;
-      static S32 prevPlayerCount;
+      static U32 prevPlayerCount;
       if(masterConn && masterConn->isEstablished())
       {
          // Only update if something is different.
