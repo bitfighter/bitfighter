@@ -649,7 +649,7 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   const S32 inset = 100;        // Inset for left and right edges of box
+   S32 inset = 100;              // Inset for left and right edges of box
    const S32 titleSize = 30;     // Size of title
    const S32 titleGap = 10;      // Spacing between title and first line of text
    const S32 textSize = 18;      // Size of text and instructions
@@ -662,6 +662,17 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
       boxHeight -= (instrGap + textSize);
 
    S32 boxTop = (canvasHeight - boxHeight) / 2 + vertOffset;
+
+   S32 maxLen = 0;
+   for(S32 i = 0; i < msgLines; i++)
+   {
+      S32 len = getStringWidth(textSize, message[i]) + 20;     // 20 gives a little breathing room on the edges
+      if(len > maxLen)
+         maxLen = len;
+   }
+
+   if(canvasWidth - 2 * inset < maxLen)
+      inset = (canvasWidth - maxLen) / 2;
 
    glDisableBlendfromLineSmooth;
    for(S32 i = 1; i >= 0; i--)
