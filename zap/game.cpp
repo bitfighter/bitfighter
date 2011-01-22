@@ -884,6 +884,8 @@ void ServerGame::idle(U32 timeDelta)
    else if( mGameSuspended && ((mPlayerCount > 0 && !mSuspendor) || mPlayerCount > 1) )
       unsuspendGame(false);
 
+   if(timeDelta > 2000)   // prevents timeDelta from going too high, usually when after the server was frozen.
+      timeDelta = 1000;
    mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected
@@ -898,7 +900,7 @@ void ServerGame::idle(U32 timeDelta)
       static StringTableEntry prevCurrentLevelName;   // Using static, so it holds the value when it comes back here.
       static StringTableEntry prevCurrentLevelType;
       static S32 prevRobotCount;
-      static S32 prevPlayerCount;
+      static U32 prevPlayerCount;
       if(masterConn && masterConn->isEstablished())
       {
          // Only update if something is different.

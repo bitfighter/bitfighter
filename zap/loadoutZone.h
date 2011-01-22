@@ -66,6 +66,8 @@ public:
    S32 getClassID(lua_State *L) { return returnInt(L, LoadoutZoneType); }
 
    TNL_DECLARE_CLASS(LoadoutZone);
+private:
+   void push(lua_State *L) {  Lunar<LoadoutZone>::push(L, this); }
 };
 
 };

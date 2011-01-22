@@ -2069,8 +2069,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
 
    gClientGame->mObjectsLoaded = 0;                      // Reset item counter
    gGameUserInterface.mShowProgressBar = true;           // Show progress bar
-   gClientGame->setInCommanderMap(true);
-   gClientGame->resetZoomDelta();
+   //gClientGame->setInCommanderMap(true);               // If we change here, need to tell the server we are in this mode.
+   //gClientGame->resetZoomDelta();
 
    mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
 
@@ -2406,8 +2406,8 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    gClientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
 
    gGameUserInterface.mShowProgressBar = false;
-   gClientGame->setInCommanderMap(false);             // Start game in regular mode
-   gClientGame->clearZoomDelta();                     // No in zoom effect
+   //gClientGame->setInCommanderMap(false);             // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
+   //gClientGame->clearZoomDelta();                     // No in zoom effect
    
    gGameUserInterface.mProgressBarFadeTimer.reset(1000);
 }
@@ -2757,9 +2757,7 @@ void GameType::updateClientScoreboard(ClientRef *cl)
       GameConnection *conn = mClientList[i]->clientConnection;
 
       // Players rating = cumulative score / total score played while this player was playing, ranks from 0 to 1
-      // Note that max(xxx, minRating) is meaningless with U32 types when minRating is 0, but leaving it in seems
-      // clearer and more future proof somehow...
-      mRatings.push_back(max(min((U32)(getCurrentRating(conn) * 100.0) + 100, maxRating), minRating));
+      mRatings.push_back(min((U32)(getCurrentRating(conn) * 100.0) + 100, maxRating));
    }
 
    // Next come the robots ... Robots is part of mClientList

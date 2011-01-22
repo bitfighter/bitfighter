@@ -335,8 +335,8 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, reshape, (S32 newWidth, S32 newHeig
      else
         gIniSettings.winSizeFact = max((F32) newWidth / (F32)canvasWidth, MIN_SCALING_FACT);
   
-     S32 width  = (S32)(canvasWidth  * gIniSettings.winSizeFact);   // virtual * (physical/virtual) = physical
-     S32 height = (S32)(canvasHeight * gIniSettings.winSizeFact);    
+     S32 width  = (S32)floor(canvasWidth  * gIniSettings.winSizeFact + 0.5f);   // virtual * (physical/virtual) = physical, fix rounding problem
+     S32 height = (S32)floor(canvasHeight * gIniSettings.winSizeFact + 0.5f);    
   
      glutReshapeWindow(width, height);
      gScreenInfo.setWindowSize(width, height);        
@@ -1870,8 +1870,8 @@ void actualizeScreenMode(bool changingInterfaces, bool first = false)
       setOrtho(0, gScreenInfo.getGameCanvasWidth(), gScreenInfo.getGameCanvasHeight(), 0);   
       glDisable(GL_SCISSOR_TEST);
 
-      glutReshapeWindow((S32) ((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact), 
-                        (S32) ((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact));
+      glutReshapeWindow((S32) floor((F32)gScreenInfo.getGameCanvasWidth()  * gIniSettings.winSizeFact + 0.5f), 
+                        (S32) floor((F32)gScreenInfo.getGameCanvasHeight() * gIniSettings.winSizeFact + 0.5f));
 
       // prevent re-position when going into editor, when already in windowed mode.
       // Prevent window's title bar going off-screen because of position (0,0)
