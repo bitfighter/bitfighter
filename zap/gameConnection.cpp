@@ -806,6 +806,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sReleaseCommanderMap, (), (),
 // Client has changed his loadout configuration.  This gets run on the server as soon as the loadout is entered.
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLoadout, (Vector<U32> loadout), (loadout), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
+   sRequestLoadout(loadout);
+}
+void GameConnection::sRequestLoadout(Vector<U32> &loadout)
+{
    mLoadout = loadout;
    GameType *gt = gServerGame->getGameType();
    if(gt)
