@@ -355,6 +355,10 @@ bool Item::collide(GameObject *otherObject)
    return mIsCollideable && !mIsMounted;
 }
 
+S32 Item::getCaptureZone(lua_State *L) { if(mZone.isValid()) {mZone->push(L); return 1;} else return returnNil(L); }
+S32 Item::getShip(lua_State *L) { if(mMount.isValid()) {mMount->push(L); return 1;} else return returnNil(L); }
+
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

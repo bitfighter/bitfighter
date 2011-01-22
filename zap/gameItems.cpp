@@ -629,6 +629,12 @@ Lunar<ResourceItem>::RegType ResourceItem::methods[] =
    method(ResourceItem, getVel),
    method(ResourceItem, getTeamIndx),
 
+   // item methods
+   method(ResourceItem, isInCaptureZone),
+   method(ResourceItem, getCaptureZone),
+   method(ResourceItem, isOnShip),
+   method(ResourceItem, getShip),
+
    {0,0}    // End method list
 };
 

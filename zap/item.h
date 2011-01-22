@@ -114,6 +114,10 @@ public:
    S32 getRad(lua_State *L) { return LuaObject::returnFloat(L, getRadius()); }
    S32 getVel(lua_State *L) { return LuaObject::returnPoint(L, getActualVel()); }
    virtual S32 getTeamIndx(lua_State *L) { return TEAM_NEUTRAL + 1; }     // Can be overridden for team items
+   S32 isInCaptureZone(lua_State *L) { return returnBool(L, mZone.isValid()); }    // Is flag in a team's capture zone?
+   S32 isOnShip(lua_State *L) { return returnBool(L, mIsMounted); }           // Is flag being carried by a ship?
+	S32 getCaptureZone(lua_State *L);
+	S32 getShip(lua_State *L);
 
    GameObject *getGameObject() { return this; }
 };
