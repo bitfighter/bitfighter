@@ -315,7 +315,9 @@ static void loadHostConfiguration()
 
 void loadUpdaterSettings()
 {
-   gIniSettings.useUpdater = gINI.GetValueYN("Updater", "UseUpdater", gIniSettings.useUpdater);
+   gIniSettings.useUpdater = lcase(gINI.GetValue("Updater", "UseUpdater", "Yes")) != "no";
+   //if(! gIniSettings.useUpdater) logprintf("useUpdater is OFF");
+   //if(gIniSettings.useUpdater) logprintf("useUpdater is ON");
 }
 
 
@@ -1116,8 +1118,8 @@ static void writeUpdater()
       gINI.sectionComment("Updater", " UseUpdater - Enable or disable process that installs updates (WINDOWS ONLY)");
       gINI.sectionComment("Updater", "----------------");
 
-      gINI.SetValueB("Updater", "UseUpdater", gIniSettings.useUpdater, true);
    }
+   gINI.setValueYN("Updater", "UseUpdater", gIniSettings.useUpdater, true);
 }
 
 // TEST!!
