@@ -274,8 +274,9 @@ void GameObject::addToGame(Game *theGame)
 
 void GameObject::onAddedToGame(Game *)
 {
-   // Note --> will be overridden
+   // Do nothing; overridden by child classes
 }
+
 
 void GameObject::removeFromGame()
 {

@@ -139,11 +139,11 @@ protected:
 
 public:
 
-   GameObject();                          // Constructor
-   ~GameObject() { removeFromGame(); }    // Destructor
+   GameObject();                             // Constructor
+   ~GameObject() { removeFromGame(); }       // Destructor
 
-   virtual void addToGame(Game *theGame);     // BotNavMeshZone have their own addToGame
-   virtual void onAddedToGame(Game *theGame);
+   virtual void addToGame(Game *game);       // BotNavMeshZone has its own addToGame
+   virtual void onAddedToGame(Game *game);
    void removeFromGame();
 
    Game *getGame() { return mGame; }
