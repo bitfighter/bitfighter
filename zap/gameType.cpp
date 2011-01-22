@@ -920,7 +920,7 @@ void GameType::saveGameStats()
 
       for(S32 i = 0; i < mClientList.size(); i++)
       {
-         Statistics *statistics = &mClientList[i]->mStatistics;
+         Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
 			mClientList[i]->getScore();
         
          if(masterConn && gIniSettings.SendStatsToMaster)
@@ -1768,28 +1768,28 @@ void GameType::controlObjectForClientKilled(GameConnection *theClient, GameObjec
    ClientRef *killerRef = killer ? killer->getClientRef() : NULL;
    ClientRef *clientRef = theClient->getClientRef();
 
-   clientRef->mStatistics.addDeath();
+   theClient->mStatistics.addDeath();
 
    StringTableEntry killerDescr = killerObject->getKillString();
 
-   if(killerRef)     // Known killer
+   if(killer)     // Known killer
    {
-      if(killerRef == clientRef)    // We killed ourselves -- should have gone easy with the bouncers!
+      if(killer == theClient)    // We killed ourselves -- should have gone easy with the bouncers!
       {
-         killerRef->mStatistics.addSuicide();
+         killer->mStatistics.addSuicide();
          updateScore(killerRef, KillSelf);
       }
 
       // Should do nothing with friendly fire disabled
       else if(isTeamGame() && killerRef->getTeam() == clientRef->getTeam())   // Same team in a team game
       {
-         killerRef->mStatistics.addFratricide();
+         killer->mStatistics.addFratricide();
          updateScore(killerRef, KillTeammate);
       }
 
       else                                                                    // Different team, or not a team game
       {
-         killerRef->mStatistics.addKill();
+         killer->mStatistics.addKill();
          updateScore(killerRef, KillEnemy);
       }
 

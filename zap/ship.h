@@ -112,8 +112,6 @@ private:
 
    // Find objects of specified type that may be under the ship, and put them in fillVector
    void findObjectsUnderShip(GameObjectType type); 
-   static const U32 laggingfreeze = 2000; // 2 seconds
-   Timer laggingFreezeTimer;
 
 protected:
    StringTableEntry mPlayerName;
@@ -265,7 +263,7 @@ public:
    void repairTargets();
 
    void controlMoveReplayComplete();
-   void onAddedToGame(Game *);
+   void onAddedToGame(Game *game);
 
    void emitShipExplosion(Point pos);
    //void setActualPos(Point p);

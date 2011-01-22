@@ -26,7 +26,7 @@
 #ifndef _STATISTICS_H_
 #define _STATISTICS_H_
 
-#include "gameWeapons.h"      // For WeaponType enum
+//#include "gameWeapons.h"      // For WeaponType enum
 #include "tnl.h"
 
 
@@ -50,17 +50,17 @@ private:
 public:
    Statistics();        // Constructor
 
-   void countShot(WeaponType weaponType);    // Record a shot
-   void countHit(WeaponType weaponType);     // Record a hit
+   void countShot(S32 weaponType);    // Record a shot      // --> S32 should be WeaponType
+   void countHit(S32 weaponType);     // Record a hit       // --> S32 should be WeaponType
 
    S32 getShots();
-   S32 getShots(WeaponType weaponType);
+   S32 getShots(S32 weaponType);    // --> S32 should be WeaponType
 
    S32 getHits();
-   S32 getHits(WeaponType weaponType);
+   S32 getHits(S32 weaponType);     // --> S32 should be WeaponType
 
    F32 getHitRate();                         // Report overall hit rate
-   F32 getHitRate(WeaponType weaponType);    // Report hit rate for specified weapon
+   F32 getHitRate(S32 weaponType);    // Report hit rate for specified weapon      // --> S32 should be WeaponType
 
    void addKill();      // Player killed another player
    U16 getKills();      // Report cumulated kills

@@ -31,6 +31,8 @@
 #include "controlObjectConnection.h"
 #include "shipItems.h"           // For EngineerBuildObjects enum
 #include "dataConnection.h"      // For DataSendable interface
+#include "statistics.h"
+
 #include "tnlNetConnection.h"
 #include "timer.h"
 #include <time.h>
@@ -69,11 +71,13 @@ struct ClientInfo
 };
 
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
 class ClientRef;
 struct LevelInfo;
+
 
 class GameConnection: public ControlObjectConnection, public DataSendable
 {
@@ -111,7 +115,6 @@ private:
    Timer mAuthenticationTimer;
    S32 mAuthenticationCounter;
 
-   
    StringTableEntry mServerName;
    Vector<U32> mLoadout;
    SafePtr<ClientRef> mClientRef;
@@ -158,16 +161,19 @@ public:
    TNL_DECLARE_RPC(s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status));
 
 
-   S32 mScore;       // Total points scored my this connection
-   S32 mTotalScore;  // Total points scored by anyone while this connection is alive
-   U32 mGamesPlayed; // Number of games played, obviously
-   F32 mRating;      // Game-normalized rating
+   S32 mScore;                // Total points scored my this connection
+   S32 mTotalScore;           // Total points scored by anyone while this connection is alive
+   U32 mGamesPlayed;          // Number of games played, obviously
+   F32 mRating;               // Game-normalized rating
+   Statistics mStatistics;    // Player statistics tracker
 
-   Timer mSwitchTimer;     // Timer controlling when player can switch teams after an initial switch
+   Timer mSwitchTimer;        // Timer controlling when player can switch teams after an initial switch
 
    void setClientName(StringTableEntry name) { mClientName = name; }
    void setClientNameNonUnique(StringTableEntry name) { mClientNameNonUnique = name; }
    void setServerName(StringTableEntry name) { mServerName = name; }
+
+   bool lostContact() { return getTimeSinceLastPacketReceived() > 2000 && mLastPacketRecvTime != 0; }     // No contact in 2000ms?  That's bad!
 
    std::string getServerName() { return mServerName.getString(); }
    static std::string makeUnique(std::string name);    // Make sure a given name is unique across all clients & bots
