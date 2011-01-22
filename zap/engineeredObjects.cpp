@@ -100,10 +100,11 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
          ForceFieldProjector::getGeom(mDeployPosition, mDeployNormal, bounds);
          break;
       default:    // will never happen
+         TNLAssert(false, "Bad objectType");
          return false;
    }
 
-   if(!EngineeredObject::checkDeploymentPosition(bounds))
+   if(!EngineeredObject::checkDeploymentPosition(bounds, ship->getGridDatabase()))
    {
       mErrorMessage = "!!! Cannot deploy item at this location";
       return false;
@@ -501,11 +502,11 @@ bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 // Make sure position looks good when player deploys item with Engineer module -- make sure we're not deploying on top of
 // a wall or another engineered item
 // static method
-bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds)
+bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb)
 {
    Vector<DatabaseObject *> foundObjects;
    Rect queryRect(thisBounds);
-   gServerGame->getGridDatabase()->findObjects(BarrierType | EngineeredType, foundObjects, queryRect);
+   gb->findObjects(BarrierType | EngineeredType, foundObjects, queryRect);
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {

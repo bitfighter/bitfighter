@@ -66,7 +66,7 @@ public:
    static const S32 MAX_SNAP_DISTANCE = 100;    // Max distance to look for a mount point
 
    void setResource(Item *resource);
-   static bool checkDeploymentPosition(const Vector<Point> &thisBounds);
+   static bool checkDeploymentPosition(const Vector<Point> &thisBounds, GridDatabase *gb);
    void computeExtent();
    virtual void onDestroyed() { /* do nothing */ }  
    virtual void onDisabled() { /* do nothing */ } 
