@@ -26,8 +26,9 @@
 #ifndef _STATISTICS_H_
 #define _STATISTICS_H_
 
-//#include "gameWeapons.h"      // For WeaponType enum
-#include "tnl.h"
+//#include "gameWeapons.h"      // For WeaponType enum      ==> including this makes things puke
+#include "tnlTypes.h"
+#include "tnlVector.h"
 
 
 using namespace TNL;

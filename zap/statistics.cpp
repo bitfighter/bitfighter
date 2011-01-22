@@ -29,7 +29,6 @@
 namespace Zap
 {
 
-//static const S32 WeaponCount = 8;      // ==> Should come from gameWeapons.h
 // Constructor
 Statistics::Statistics() : mShots(WeaponCount), mHits(WeaponCount)
 {
@@ -44,7 +43,6 @@ Statistics::Statistics() : mShots(WeaponCount), mHits(WeaponCount)
    mSuicides = 0;
    mFratricides = 0;
 }
-
 
 void Statistics::countShot(S32 weaponType)      // --> S32 should be WeaponType
 {

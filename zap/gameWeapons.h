@@ -26,10 +26,11 @@
 #ifndef _GAMEWEAPONS_H_
 #define _GAMEWEAPONS_H_
 
-#include "point.h"
 #include "gameObject.h"
+//#include "point.h"
 
 using namespace TNL;
+
 namespace Zap
 {
 

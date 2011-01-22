@@ -26,16 +26,10 @@
 #ifndef _GAMEOBJECT_H_
 #define _GAMEOBJECT_H_
 
-#include "tnlTypes.h"
-#include "tnlNetObject.h"
-
-#include "gameConnection.h"
 #include "gridDB.h"        // For DatabaseObject
 #include "game.h"
-#include "move.h"
-#include "point.h"
 
-#include "luaObject.h"     // For returnInt method
+#include "luaObject.h"     // For LuaObject def and returnInt method
 #include "lua.h"           // For push prototype
 
 namespace Zap
