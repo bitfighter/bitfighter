@@ -699,7 +699,8 @@ S32 LuaRobot::setReqLoadout(lua_State *L)
    for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       vec.push_back(loadout->getLoadoutItem(i));
 
-   thisRobot->setLoadout(vec);
+   //thisRobot->setLoadout(vec); Robots cheat with this line, skipping loadout zone.
+   thisRobot->getOwner()->sRequestLoadout(vec);
 
    return 0;
 }
@@ -717,7 +718,7 @@ S32 LuaRobot::getCurrLoadout(lua_State *L)
       loadoutItems[i + ShipModuleCount] = (U32) thisRobot->getWeapon(i);
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
-   Lunar<LuaLoadout>::push(L, loadout, false);     // true will allow Lua to delete this object when it goes out of scope
+   Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
 
    return 1;
 }
@@ -730,12 +731,12 @@ extern Vector<LoadoutItem> gLoadoutWeapons;
 S32 LuaRobot::getReqLoadout(lua_State *L)
 {
    U32 loadoutItems[ShipModuleCount + ShipWeaponCount];
+   const Vector<U32> requestedLoadout = thisRobot->getOwner()->getLoadout();
+   if(requestedLoadout.size() == 0)    // Robots and clients starts at zero size requested loadout.
+      return getCurrLoadout(L);
 
-   for(S32 i = 0; i < ShipModuleCount; i++)
-      loadoutItems[i] = (U32) gLoadoutModules[thisRobot->getModule(i)].index;
-
-   for(S32 i = 0; i < ShipWeaponCount; i++)
-      loadoutItems[i + ShipModuleCount] = (U32) gLoadoutWeapons[thisRobot->getWeapon(i)].index;
+   for(S32 i = 0; i < ShipModuleCount + ShipModuleCount; i++)
+      loadoutItems[i] = requestedLoadout[i];
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
    Lunar<LuaLoadout>::push(L, loadout, true);     // true will allow Lua to delete this object when it goes out of scope
