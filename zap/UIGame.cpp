@@ -408,10 +408,14 @@ if(mGotControlUpdate)
 void GameUserInterface::renderLostConnectionMessage()
 {
    GameConnection *connection = gClientGame->getConnectionToServer();
-   if(!connection || connection->lostContact())
+   if(connection && connection->lostContact())
    {
-      static const char *msg[] = { "", "We haven't heard from the server in a while...", "" };
-      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 3);
+      static const char *msg[] = { "", 
+                                   "We may have lost contact with the server...", 
+                                   "",
+                                   " You can't play until the connection has been re-established ", 
+                                   "" };
+      renderMessageBox("SERVER CONNECTION PROBLEMS", "", msg, 5, -30);
    }
 }
 
