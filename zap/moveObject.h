@@ -36,6 +36,8 @@ namespace Zap
 
 class MoveObject : public GameObject
 {
+   typedef GameObject Parent;
+
 private:
    S32 mHitLimit;
 
@@ -69,6 +71,7 @@ protected:
 public:
    MoveObject(Point pos = Point(0,0), float radius = 1, float mass = 1);
 
+   void onAddedToGame(Game *game);
    void idle(GameObject::IdleCallPath path);    // Called from child object idle methods
    void updateInterpolation();
    void updateExtent();

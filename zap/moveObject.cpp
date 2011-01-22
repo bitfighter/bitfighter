@@ -55,6 +55,14 @@ void MoveObject::idle(GameObject::IdleCallPath path)
 }
 
 
+void MoveObject::onAddedToGame(Game *game)
+{
+   Parent::onAddedToGame(game);
+
+   if(isGhost())     // Client only
+      this->setControllingClient(dynamic_cast<ClientGame *>(game)->getConnectionToServer());
+}
+
 static const float MoveObjectCollisionElasticity = 1.7f;
 
 
