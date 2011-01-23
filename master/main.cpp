@@ -24,12 +24,13 @@
 
 
 #include "masterInterface.h"
-#include "../tnl/tnlNetInterface.h"
-#include "../tnl/tnlVector.h"
-#include "../tnl/tnlAsymmetricKey.h"
+#include "tnlNetInterface.h"
+#include "tnlVector.h"
+#include "tnlAsymmetricKey.h"
 #include "../zap/SharedConstants.h"
 //#include "../zap/stringUtils.h"   // For itos
-#include "authenticator.h"   // For authenticating users against the PHPBB3 database
+#include "authenticator.h"    // For authenticating users against the PHPBB3 database
+#include "database.h"         // For writing to the database
 #include <stdio.h>
 #include <string>
 #include <stdarg.h>     // For va_args
@@ -915,6 +916,9 @@ public:
                teamName.getString(), 
                score, kills, deaths, suicides, 
                totalShots, totalHits);
+
+      Database::DatabaseWriter dbWriter("127.0.0.1", "test", "eykamp", "thinner");
+      dbWriter.insertStats();
    }
 
 
