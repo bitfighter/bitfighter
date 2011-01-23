@@ -23,8 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-
-
 #ifndef DATABASE_H
 #define DATABASE_H
 
@@ -34,7 +32,68 @@
 namespace mysqlpp
 {
 	class TCPConnection;
-}
+};
+
+
+struct WeaponStats
+{
+   WeaponType weaponType;
+   S32 shots;
+   S32 hits;
+};
+
+
+struct PlayerStats
+{
+   string playerName;
+   bool isAuthenticated;
+   string gameResult;
+   S32 points;
+   S32 kills;
+   S32 suicides;
+   bool switchedTeams;     // do we currently track this?  is it meaningful?
+   Vector<WeaponStats> weaponStats;
+};
+
+
+struct TeamStats
+{
+   S32 playerCount;
+   string result;     // 'W', 'L', 'T'
+   Vector<PlayerStats> playerStats;    // Info about all players on this team
+};
+
+struct GameStats
+{
+   string gameType;
+   bool isOfficial;
+   S32 playerCount;
+   S32 duration;     // game length in seconds
+   bool isTeamGame;
+   S32 teamCount;
+   bool isTied;
+   Vector<TeamStats> teamStats;     // for team games
+};
+
+
+class DatabaseWriter 
+{
+private:
+   bool mIsValid;
+   const char *mServer;
+   const char *mDb;
+   const char *mUser;
+   const char *mPassword;
+
+   void initialize(const char *server, const char *db, const char *user, const char *password);
+
+public:
+   DatabaseWriter();
+   DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
+   DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
+
+   void insertStats();
+};
 
 /*
 Create connection, lifetime is lifetime of app

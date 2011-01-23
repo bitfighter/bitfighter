@@ -24,31 +24,192 @@
 //------------------------------------------------------------------------------------
 
 
-#include "../mysql++/mysql++.h"
+#include "database.h"
+#include "tnlTypes.h"
+#include "tnlLog.h"
+#include "../zap/stringUtils.h"            // For replaceString()
+#include "../mysql++/lib/mysql++.h"
 
 using namespace std;
 using namespace mysqlpp;
+using namespace TNL;
 
 namespace Database 
 {
 
-class Sample 
+// Default constructor -- don't use this one!
+DatabaseWriter::DatabaseWriter()
 {
-   void doit(const char *db, const char *server, const char *user, const char *password) 
-   {
-      mysqlpp::Connection conn(false);    // Connect to the database, do not throw exceptions
+   mIsValid = false;
+}
 
-      if(conn.connect(db, server, user, password)) 
-      {
-         mysqlpp::Query query = conn.query("insert into stats values(1,2,3)");
-      }
-      else 
-      {
-         TNL::logprintf(LogConsumer::DatabaseFilter, "Unable to create database connection: db: %s, server: %s, user: %s, pw: %s", 
-                        database, server, user, password);
-      }
+
+// Constructor
+DatabaseWriter::DatabaseWriter(const char *server, const char *db, const char *user, const char *password)
+{
+   initialize(server, db, user, password);
+}
+
+
+// Constructor -- defaults to local machine for db server
+DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *password)
+{
+   initialize("127.0.0.1", db, user, password);
+}
+
+
+void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
+{
+   mServer = server;
+   mDb = db;
+   mUser = user;
+   mPassword = password;
+   mIsValid = true;
+}
+
+
+static string sanitize(const string &value)     
+{
+   return replaceString(replaceString(value, "\\", "\\\\"), "'", "''");
+}
+
+
+static void doInsertStatsShots(Connection conn, const string &playerId, const string &weapon, S32 shots, S32 hits)
+{
+   string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck) " + 
+                  "VALUES(" + playerId + ", '" + weapon + "', " + itos(shots) + ", " + itos(hits) + ");";
+
+   Query query = conn.query(query);
+   SimpleResult result = query.execute();
+}
+
+
+static void insertStatsShots(Connection conn, const string &playerId, const Vector<WeaponStats> weaponStats)
+{
+   TNLAssert(weaponStats.size() == WeaponCount);      // Probably wrong
+
+   for(S32 i = 0; i < weaponStats.size(); i++)
+   {
+      doInsertStatsShots(conn, playerId, WeaponInfo::getWeaponName(i), weaponStats[i].shots, weaponStats[i].hits);
    }
-};
+}
+
+
+
+#define btos(value) (value ? "1" : "0")
+
+void DatabaseWriter::insertStats(const string &serverName, const string &serverIP, GameStats gameStats) 
+{
+   Connection conn;    // Connect to the database
+
+   try
+   {
+      if(!mIsValid)
+      {
+         logprintf("Invalid DatabaseWriter!");
+         return;
+      }
+
+      conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
+      
+      string sql;
+      Query query;
+      SimpleResult result;
+
+      sql = "INSERT INTO server(server_name, ip_address) VALUES('" + sanitize(serverName) + "', '" + serverIP + "');";
+      query = conn.query(query);
+      result = query.execute();
+      string serverId = itos(result.insert_id());
+
+      if(teamGame)
+      {
+         sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, " +
+                     "duration_seconds, level_name, is_team_game, " +
+                     "team_count, is_tied) " +
+               "VALUES( " + serverid + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " +
+                       itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
+                       itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
+
+         query = conn.query(query);
+         result = query.execute();
+         string gameId = itos(result.insert_id());
+
+
+         // ===>>> Do we really need team number? <<<===
+         for(S32 i = 0; i < gameStats.teamStats.size(); i++)
+         {
+            TeamStats *teamStats = &gameStats.teamStats[i];
+            sql = "INSERT INTO stats_team(stats_game_id, team_number, player_count, result) " + 
+                  "VALUES(" + gameId + ", " + itos(i) + ", + " + itos(teamStats->playerCount) + ", '" + teamStats->gameResult + "')";
+
+            query = conn.query(query);
+            result = query.execute();
+            string teamId = itos(result.insert_id());
+            
+            for(S32 j = 0; j < teamStats->playerStats.size(); j++)
+            {
+               PlayerStats *playerStats = teamStats->playerStats[j];
+               sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, is_authenticated, " +
+                                              "result, points, kill_count, " + 
+                                              "suicide_count, switched_team) " +
+                     "VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", '" + 
+                                 playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
+                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ")";
+
+               query = conn.query(query);
+               result = query.execute();
+               string playerId = itos(result.insert_id());
+
+               insertStatsShot(conn, playerId, playerStats->weaponStats);
+            }
+         }
+      }
+      else     // Not team game
+      {
+
+         sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, " + 
+                                      "duration_seconds, level_name, is_team_game, team_count, is_tied) " +
+               "VALUES(" + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " + 
+                           itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 0, NULL, " +  btos(gameStats.isTied) + ");";
+
+         query = conn.query(query);
+         result = query.execute();
+         string gameId = itos(result.insert_id());
+
+         for(S32 i = 0; i < gameStats.teamStats[0].playerStats())
+         {
+            PlayerStats *playerStats = teamStats->playerStats[j];
+            sql = "INSERT INTO stats_player(stats_game_id, player_name, is_authenticated, " +
+                                           "result, points, " +
+                                           "kill_count, suicide_count) " +
+                  "VALUES(" + gameId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", '" + 
+                              playerStats->gameResult + "', " + itos(playerStats->points) + ", " + 
+                              itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ")";
+
+            query = conn.query(query);
+            result = query.execute();
+            string playerId = itos(result.insert_id());
+
+            insertStatsShot(conn, playerId, playerStats->weaponStats);
+         }
+      }
+  
+   }
+
+   catch (const BadOption &ex) {
+      logprintf("Bad connection option: %s", ex.what());
+      return;
+   }
+   catch (const ConnectionFailed &ex) {
+      logprintf("Connection failed: %s", ex.what());        
+      return;
+   }
+   catch (const Exception &ex) {
+      // Catch-all for any other MySQL++ exceptions
+      logprintf("General connection failure: %s", ex.what());
+      return;
+    }
+}
 
 };
 
