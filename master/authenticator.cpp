@@ -24,6 +24,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "authenticator.h"
 #include "phpbbhash.h"
+#include "../zap/stringUtils.h"     // For replaceString()
 #include <string.h>
 #include <ctype.h>
 #include "../mysql++/lib/mysql++.h"
@@ -66,17 +67,17 @@ bool Authenticator::authenticate(string &username, string password){
 }
 
 
-// From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
-std::string& replacestring( std::string& strString, const std::string& strOld, const std::string& strNew )
-{
-    for ( int nReplace = strString.rfind( strOld ); nReplace != std::string::npos; nReplace = strString.rfind( strOld, nReplace - 1 ) )
-    {
-        strString.replace( nReplace, strOld.length(), strNew );
-        if ( nReplace == 0 )
-            break;
-    }
-    return strString;
-}
+//// From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
+//std::string& replaceString( std::string& strString, const std::string& strOld, const std::string& strNew )
+//{
+//    for ( int nReplace = strString.rfind( strOld ); nReplace != std::string::npos; nReplace = strString.rfind( strOld, nReplace - 1 ) )
+//    {
+//        strString.replace( nReplace, strOld.length(), strNew );
+//        if ( nReplace == 0 )
+//            break;
+//    }
+//    return strString;
+//}
 
 
 bool Authenticator::authenticate(string &username, string password, int &errorCode){
@@ -96,7 +97,7 @@ bool Authenticator::authenticate(string &username, string password, int &errorCo
 		Query qry = connection->query("");
 
       // Provide some protection against injection attacks
-      string safeUsername = replacestring(replacestring(username, "\\", "\\\\"), "'", "''");      
+      string safeUsername = replaceString(replaceString(username, "\\", "\\\\"), "'", "''");      
 
 		string qryText = "SELECT username, user_password FROM " + prefix + "users WHERE UPPER(username) = UPPER('" + safeUsername + "')";
 		StoreQueryResult results = qry.store(qryText.c_str(),qryText.length());
