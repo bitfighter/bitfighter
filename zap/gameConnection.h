@@ -121,6 +121,7 @@ private:
 
 
 public:
+   Vector<U32> mOldLoadout;
    void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 

@@ -1185,8 +1185,17 @@ Item *Ship::unmountItem(GameObjectType objectType)
    return NULL;
 }
 
+void Ship::getLoadout(Vector<U32> &loadout)
+{
+   loadout.clear();
+   for(S32 i = 0; i < ShipModuleCount; i++)
+      loadout.push_back(mModule[i]);
 
-void Ship::setLoadout(const Vector<U32> &loadout)
+   for(S32 i = 0; i < ShipWeaponCount; i++)
+      loadout.push_back(mWeapon[i]);
+}
+
+void Ship::setLoadout(const Vector<U32> &loadout, bool silent)
 {
    // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
    bool theSame = true;
@@ -1209,6 +1218,8 @@ void Ship::setLoadout(const Vector<U32> &loadout)
       mWeapon[i - ShipModuleCount] = (WeaponType) loadout[i];
 
    setMaskBits(LoadoutMask);
+
+   if(silent) return;
 
    // Try to see if we can maintain the same weapon we had before.
    S32 i;
@@ -1262,9 +1273,13 @@ void Ship::kill(DamageInfo *theInfo)
 void Ship::kill()
 {
    if(!isGhost())
+   {
       Robot::getEventManager().fireEvent(EventManager::ShipKilledEvent, this);
-   else
-      S32 x = 0;     // TODO: Delete this
+      if(getOwner())
+         getLoadout(getOwner()->mOldLoadout);
+   }
+   //else
+   //   S32 x = 0;     // TODO: Delete this
 
    deleteObject(KillDeleteDelay);
    hasExploded = true;

@@ -185,7 +185,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
    U32 index;
    Vector<LoadoutItem> *list = getList(mCurrentIndex);
 
-   for(index = 0; index < list->size(); index++)
+   for(index = 0; index < (U32)list->size(); index++)
       if(keyCode == list->get(index).key || keyCode == list->get(index).button)
          break;
 

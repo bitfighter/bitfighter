@@ -331,7 +331,7 @@ public:
 
    virtual void clientRequestLoadout(GameConnection *client, const Vector<U32> &loadout);
    virtual void updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
-   void setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout);
+   void setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, bool silent = false);
 
    bool checkTeamRange(S32 team);               // Team in range? Used for processing arguments.
    bool makeSureTeamCountIsNotZero();           // Zero teams will crash.
