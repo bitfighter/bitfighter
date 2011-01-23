@@ -15,7 +15,6 @@
 		activeTarget = 8D1107260486CEB800E47090 /* Bitfighter */;
 		addToTargets = (
 			7378261712960DDF007333BE /* Bitfighterd */,
-			8D1107260486CEB800E47090 /* Bitfighter */,
 		);
 		codeSenseManager = 737CE2FA1290467000D732B7 /* Code sense */;
 		executables = (
@@ -73,6 +72,22 @@
 					PBXFileDataSource_Target_ColumnID,
 				);
 			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXSymbolsDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXSymbolsDataSource_SymbolNameID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					16,
+					200,
+					50,
+					354.20849609375,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXSymbolsDataSource_SymbolTypeIconID,
+					PBXSymbolsDataSource_SymbolNameID,
+					PBXSymbolsDataSource_SymbolTypeID,
+					PBXSymbolsDataSource_ReferenceNameID,
+				);
+			};
 			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
 				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
 				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
@@ -95,17 +110,22 @@
 					PBXFileDataSource_Warnings_ColumnID,
 				);
 			};
-			PBXPerProjectTemplateStateSaveDate = 317191948;
-			PBXWorkspaceStateSaveDate = 317191948;
+			PBXPerProjectTemplateStateSaveDate = 317434459;
+			PBXWorkspaceStateSaveDate = 317434459;
 		};
 		perUserProjectItems = {
-			73649C71129796B2004366A3 /* PlistBookmark */ = 73649C71129796B2004366A3 /* PlistBookmark */;
-			73649C72129796B2004366A3 /* PlistBookmark */ = 73649C72129796B2004366A3 /* PlistBookmark */;
+			7364B17612EBAA7B001993A7 /* PlistBookmark */ = 7364B17612EBAA7B001993A7 /* PlistBookmark */;
+			7364B19212EBC422001993A7 /* PlistBookmark */ = 7364B19212EBC422001993A7 /* PlistBookmark */;
+			7364B19412EBC422001993A7 /* PBXBookmark */ = 7364B19412EBC422001993A7 /* PBXBookmark */;
+			7364B19512EBC422001993A7 /* PBXBookmark */ = 7364B19512EBC422001993A7 /* PBXBookmark */;
+			7364B19612EBC422001993A7 /* PBXTextBookmark */ = 7364B19612EBC422001993A7 /* PBXTextBookmark */;
+			7364B1B412EBC8C3001993A7 /* PBXTextBookmark */ = 7364B1B412EBC8C3001993A7 /* PBXTextBookmark */;
+			7364B1B512EBC8C3001993A7 /* PlistBookmark */ = 7364B1B512EBC8C3001993A7 /* PlistBookmark */;
+			7364B1B612EBC8C3001993A7 /* PlistBookmark */ = 7364B1B612EBC8C3001993A7 /* PlistBookmark */;
 			7367D2CD12E8080900861430 /* PBXTextBookmark */ = 7367D2CD12E8080900861430 /* PBXTextBookmark */;
 			7367D2CE12E8080900861430 /* PBXTextBookmark */ = 7367D2CE12E8080900861430 /* PBXTextBookmark */;
 			7367D2CF12E8080900861430 /* PBXTextBookmark */ = 7367D2CF12E8080900861430 /* PBXTextBookmark */;
-			7367D2D012E8080900861430 /* PBXTextBookmark */ = 7367D2D012E8080900861430 /* PBXTextBookmark */;
-			7367D2E712E80B2200861430 /* PBXTextBookmark */ = 7367D2E712E80B2200861430 /* PBXTextBookmark */;
+			736F4C8812EBA0B900FC6D6A /* PBXTextBookmark */ = 736F4C8812EBA0B900FC6D6A /* PBXTextBookmark */;
 			737CE7DB12905F9F00D732B7 /* PBXTextBookmark */ = 737CE7DB12905F9F00D732B7 /* PBXTextBookmark */;
 			73D2F70812E2E2CF00EA5EBE /* PBXTextBookmark */ = 73D2F70812E2E2CF00EA5EBE /* PBXTextBookmark */;
 		};
@@ -113,27 +133,80 @@
 		userBuildSettings = {
 		};
 	};
-	73649C71129796B2004366A3 /* PlistBookmark */ = {
+	7364B17612EBAA7B001993A7 /* PlistBookmark */ = {
 		isa = PlistBookmark;
-		fRef = 73649AEB12976345004366A3 /* Bitfighterd-Info.plist */;
+		fRef = 737CE312129048B900D732B7 /* libtomcrypt-Info.plist */;
 		fallbackIsa = PBXBookmark;
 		isK = 0;
 		kPath = (
 		);
-		name = "/Users/geeko/temp/svn/bitfighter-trunk/zap/Bitfighterd-Info.plist";
+		name = "/Users/geeko/temp/hg/bf015/build/osx/xcode/libtomcrypt-Info.plist";
 		rLen = 0;
-		rLoc = 9223372036854775808;
+		rLoc = 9223372036854775807;
 	};
-	73649C72129796B2004366A3 /* PlistBookmark */ = {
+	7364B19212EBC422001993A7 /* PlistBookmark */ = {
 		isa = PlistBookmark;
 		fRef = 8D1107310486CEB800E47090 /* Bitfighter-Info.plist */;
 		fallbackIsa = PBXBookmark;
 		isK = 0;
 		kPath = (
+			CFBundleIconFile,
 		);
-		name = "/Users/geeko/temp/svn/bitfighter-trunk/zap/Bitfighter-Info.plist";
+		name = "/Users/geeko/temp/hg/bf015/build/osx/xcode/Bitfighter-Info.plist";
 		rLen = 0;
-		rLoc = 9223372036854775808;
+		rLoc = 9223372036854775807;
+	};
+	7364B19412EBC422001993A7 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */;
+	};
+	7364B19512EBC422001993A7 /* PBXBookmark */ = {
+		isa = PBXBookmark;
+		fRef = 7364B18112EBC1E9001993A7 /* Bitfighterd.icns */;
+	};
+	7364B19612EBC422001993A7 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73D2F33B12E2D7E800EA5EBE /* UIQueryServers.cpp */;
+		name = "UIQueryServers.cpp: 614";
+		rLen = 0;
+		rLoc = 20702;
+		rType = 0;
+		vrLen = 518;
+		vrLoc = 20371;
+	};
+	7364B1B412EBC8C3001993A7 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73D2F47812E2D9C500EA5EBE /* thread.cpp */;
+		name = "thread.cpp: 211";
+		rLen = 0;
+		rLoc = 3908;
+		rType = 0;
+		vrLen = 301;
+		vrLoc = 3724;
+	};
+	7364B1B512EBC8C3001993A7 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 73649AEB12976345004366A3 /* Bitfighterd-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			CFBundleIdentifier,
+		);
+		name = "/Users/geeko/temp/hg/bf015/build/osx/xcode/Bitfighterd-Info.plist";
+		rLen = 49;
+		rLoc = 0;
+	};
+	7364B1B612EBC8C3001993A7 /* PlistBookmark */ = {
+		isa = PlistBookmark;
+		fRef = 73649AEB12976345004366A3 /* Bitfighterd-Info.plist */;
+		fallbackIsa = PBXBookmark;
+		isK = 0;
+		kPath = (
+			CFBundleIdentifier,
+		);
+		name = "/Users/geeko/temp/hg/bf015/build/osx/xcode/Bitfighterd-Info.plist";
+		rLen = 49;
+		rLoc = 0;
 	};
 	7367D2CD12E8080900861430 /* PBXTextBookmark */ = {
 		isa = PBXTextBookmark;
@@ -165,26 +238,6 @@
 		vrLen = 372;
 		vrLoc = 1369;
 	};
-	7367D2D012E8080900861430 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */;
-		name = "dataConnection.cpp: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 323;
-		vrLoc = 0;
-	};
-	7367D2E712E80B2200861430 /* PBXTextBookmark */ = {
-		isa = PBXTextBookmark;
-		fRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */;
-		name = "dataConnection.cpp: 1";
-		rLen = 0;
-		rLoc = 0;
-		rType = 0;
-		vrLen = 323;
-		vrLoc = 0;
-	};
 	736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {
 		uiCtxt = {
 			sepNavIntBoundsRect = "{{0, 0}, {894, 598}}";
@@ -193,6 +246,16 @@
 			sepNavVisRect = "{{0, 0}, {630, 291}}";
 			sepNavWindowFrame = "{{15, 183}, {750, 558}}";
 		};
+	};
+	736F4C8812EBA0B900FC6D6A /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */;
+		name = "dataConnection.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 322;
+		vrLoc = 0;
 	};
 	7378261712960DDF007333BE /* Bitfighterd */ = {
 		activeExec = 0;
@@ -336,9 +399,9 @@
 	};
 	73D2F28F12E2D7E700EA5EBE /* dataConnection.cpp */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {789, 4771}}";
+			sepNavIntBoundsRect = "{{0, 0}, {789, 4784}}";
 			sepNavSelRange = "{0, 0}";
-			sepNavVisRange = "{0, 323}";
+			sepNavVisRange = "{0, 322}";
 		};
 	};
 	73D2F29212E2D7E700EA5EBE /* Directory.mm */ = {
@@ -354,6 +417,20 @@
 			sepNavIntBoundsRect = "{{0, 0}, {607, 11895}}";
 			sepNavSelRange = "{0, 0}";
 			sepNavVisRange = "{0, 519}";
+		};
+	};
+	73D2F33B12E2D7E800EA5EBE /* UIQueryServers.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {866, 18681}}";
+			sepNavSelRange = "{20702, 0}";
+			sepNavVisRange = "{20371, 518}";
+		};
+	};
+	73D2F47812E2D9C500EA5EBE /* thread.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {729, 3705}}";
+			sepNavSelRange = "{3908, 0}";
+			sepNavVisRange = "{3770, 224}";
 		};
 	};
 	73D2F70812E2E2CF00EA5EBE /* PBXTextBookmark */ = {
@@ -375,6 +452,11 @@
 	8D1107310486CEB800E47090 /* Bitfighter-Info.plist */ = {
 		uiCtxt = {
 			sepNavWindowFrame = "{{61, 141}, {750, 558}}";
+		};
+	};
+	94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */ = {
+		uiCtxt = {
+			sepNavWindowFrame = "{{15, 183}, {750, 558}}";
 		};
 	};
 }

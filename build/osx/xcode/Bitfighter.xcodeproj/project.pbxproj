@@ -46,13 +46,14 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		7364B18212EBC1E9001993A7 /* Bitfighterd.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7364B18112EBC1E9001993A7 /* Bitfighterd.icns */; };
 		73657A0612E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
 		73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73657A0412E2E3FB00BED56F /* masterInterface.cpp */; };
 		7367D2AB12E807E400861430 /* FreeALUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60212E2E0A500EA5EBE /* FreeALUT.framework */; };
 		7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
-		7378261D12960DDF007333BE /* zap_mac_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */; };
+		7378261D12960DDF007333BE /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
 		7378261E12960DDF007333BE /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		7378261F12960DDF007333BE /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
 		7378262012960DDF007333BE /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
@@ -457,7 +458,7 @@
 		94010E8511D7CF0200E2DBB2 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 94010E8411D7CF0200E2DBB2 /* OpenGL.framework */; };
 		9462C40311D7D82700791A0B /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C40211D7D82700791A0B /* IOKit.framework */; };
 		9462C41711D7D95600791A0B /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9462C41611D7D95600791A0B /* Carbon.framework */; };
-		94B7EAC011D7DABC0083AEAF /* zap_mac_icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */; };
+		94B7EAC011D7DABC0083AEAF /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -579,6 +580,7 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		73649AEB12976345004366A3 /* Bitfighterd-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Bitfighterd-Info.plist"; sourceTree = "<group>"; };
+		7364B18112EBC1E9001993A7 /* Bitfighterd.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighterd.icns; sourceTree = "<group>"; };
 		73657A0412E2E3FB00BED56F /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../../../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73657A0512E2E3FB00BED56F /* masterInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterInterface.h; path = ../../../master/masterInterface.h; sourceTree = SOURCE_ROOT; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
@@ -962,7 +964,7 @@
 		94010E8411D7CF0200E2DBB2 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		9462C40211D7D82700791A0B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		9462C41611D7D95600791A0B /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
-		94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = zap_mac_icon.icns; path = ../../../zap/zap_mac_icon.icns; sourceTree = "<group>"; };
+		94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Bitfighter.icns; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1099,6 +1101,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				7364B18112EBC1E9001993A7 /* Bitfighterd.icns */,
 				73649AEB12976345004366A3 /* Bitfighterd-Info.plist */,
 				737CE312129048B900D732B7 /* libtomcrypt-Info.plist */,
 				737CE61E1290553D00D732B7 /* tnl-Info.plist */,
@@ -1107,7 +1110,7 @@
 				737CE42212904D7D00D732B7 /* sfx */,
 				737CE3F412904D5300D732B7 /* robots */,
 				737CE3FC12904D5300D732B7 /* scripts */,
-				94B7EABF11D7DABC0083AEAF /* zap_mac_icon.icns */,
+				94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */,
 				8D1107310486CEB800E47090 /* Bitfighter-Info.plist */,
 			);
 			name = Resources;
@@ -1735,7 +1738,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7378261D12960DDF007333BE /* zap_mac_icon.icns in Resources */,
+				7378261D12960DDF007333BE /* Bitfighter.icns in Resources */,
 				7378261E12960DDF007333BE /* robots in Resources */,
 				7378261F12960DDF007333BE /* scripts in Resources */,
 				7378262012960DDF007333BE /* levels in Resources */,
@@ -1744,6 +1747,7 @@
 				7378262312960DDF007333BE /* bitfighter.sh in Resources */,
 				73D2F37412E2D7E800EA5EBE /* Info.plist in Resources */,
 				73D2F37912E2D7E800EA5EBE /* keymap.txt in Resources */,
+				7364B18212EBC1E9001993A7 /* Bitfighterd.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1765,7 +1769,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				94B7EAC011D7DABC0083AEAF /* zap_mac_icon.icns in Resources */,
+				94B7EAC011D7DABC0083AEAF /* Bitfighter.icns in Resources */,
 				737CE40512904D5300D732B7 /* robots in Resources */,
 				737CE40612904D5300D732B7 /* scripts in Resources */,
 				737CE44E12904D7D00D732B7 /* levels in Resources */,
@@ -1791,7 +1795,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "to_package_dir=$(mktemp -dt Bitfighterd)\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighterd.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"Bitfighterd\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+			shellScript = "app_name=\"Bitfighterd\"\nto_package_dir=$( mktemp -dt ${app_name} )\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"${app_name}\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
 		};
 		03AD18B512CE2C6F00274A25 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1804,7 +1808,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "to_package_dir=$(mktemp -dt Bitfighter)\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/Bitfighter-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/bitfighter.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"Bitfighter\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"${app_name}\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2284,10 +2288,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../openal\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
@@ -2314,10 +2315,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../../../openal\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Bitfighter_Prefix.pch;
@@ -2343,10 +2341,7 @@
 				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../openal\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -2377,10 +2372,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../openal\"",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				FRAMEWORK_VERSION = A;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
