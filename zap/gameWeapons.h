@@ -27,7 +27,6 @@
 #define _GAMEWEAPONS_H_
 
 #include "gameObject.h"
-//#include "point.h"
 
 using namespace TNL;
 
@@ -78,6 +77,29 @@ struct WeaponInfo
       damageSelfMultiplier = _damageSelfMultiplier;
       canDamageTeammate = _canDamageTeammate;
       projectileType = _projectileType;
+   }
+
+   static const char *getWeaponName(WeaponType weaponType)
+   {
+      switch((S32)weaponType)
+      {
+         case WeaponPhaser:
+            return "Phaser";
+         case WeaponBounce:
+            return "Bouncer";
+         case WeaponTriple:
+            return "Triple";
+         case WeaponBurst:
+            return "Burst";
+         case WeaponHeatSeeker:
+            return "Heat Seeker";
+         case WeaponMine:
+            return "Mine";
+         case WeaponTurret:
+            return "Turret";
+         case WeaponSpyBug:
+            return "Spy Bug";
+      }
    }
 
 
