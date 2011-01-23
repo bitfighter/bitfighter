@@ -325,6 +325,17 @@ void Asteroid::unpackUpdate(GhostConnection *connection, BitStream *stream)
 
 bool Asteroid::collide(GameObject *otherObject)
 {
+   if(isGhost())   //client only, to try to prevent asteroids desync...
+   {
+      Ship *ship = dynamic_cast<Ship *>(otherObject);
+      if(ship)
+      {
+         // Client does not know if we actually get destroyed from asteroids
+         // prevents bouncing off asteroids, then LAG puts back to position.
+         if(! ship->isModuleActive(ModuleShield)) return false;
+      }
+   }
+
    // Asteroids don't collide with one another!
    return dynamic_cast<Asteroid *>(otherObject) ? false : true;
 }
