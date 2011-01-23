@@ -1691,6 +1691,8 @@ void Robot::kill()
    hasExploded = true;
    //respawnTimer.reset();
    setMaskBits(ExplosionMask);
+   if(!isGhost() && getOwner())
+      getLoadout(getOwner()->mOldLoadout);
 
    disableCollision();
 

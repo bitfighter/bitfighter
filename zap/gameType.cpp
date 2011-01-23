@@ -1288,24 +1288,27 @@ void GameType::spawnShip(GameConnection *theClient)
 
    Point spawnPoint = getSpawnPoint(teamIndex);
 
-	if(theClient->isRobot())
-	{
+   if(theClient->isRobot())
+   {
 		Robot *robot = (Robot *) theClient->getControlObject();
       robot->setOwner(theClient);
 		robot->setTeam(teamIndex);
 		spawnRobot(robot);
-	}
+   }
    else
-	{
+   {
       // Player's name, team, and spawn location
       Ship *newShip = new Ship(cl->name, theClient->isAuthenticated(), teamIndex, spawnPoint);
       theClient->setControlObject(newShip);
       newShip->setOwner(theClient);
       newShip->addToGame(getGame());
-	}
+   }
 
    if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
       setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
+   else
+      setClientShipLoadout(cl, theClient->mOldLoadout, true);     // old loadout
+   theClient->mOldLoadout.clear();
 }
 
 
@@ -1360,7 +1363,7 @@ void GameType::updateShipLoadout(GameObject *shipObject)
 }
 
 
-void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout)
+void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, bool silent)
 {
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
       return;
@@ -1370,7 +1373,7 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout)
 
    Ship *theShip = dynamic_cast<Ship *>(cl->clientConnection->getControlObject());
    if(theShip)
-      theShip->setLoadout(loadout);
+      theShip->setLoadout(loadout, silent);
 }
 
 

@@ -246,7 +246,8 @@ public:
    F32 getSensorZoomFraction() { return 1 - mSensorZoomTimer.getFraction(); }
    Point getAimVector();
 
-   void setLoadout(const Vector<U32> &loadout);
+   void getLoadout(Vector<U32> &loadout);
+   void setLoadout(const Vector<U32> &loadout, bool silent = false);
 
    virtual void idle(IdleCallPath path);
 

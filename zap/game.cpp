@@ -544,7 +544,10 @@ void ServerGame::cycleLevel(S32 nextLevel)
    mScopeAlwaysList.clear();
 
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+   {
       walk->resetGhosting();
+      walk->mOldLoadout.clear();
+   }
 
    if(nextLevel >= FIRST_LEVEL)          // Go to specified level
       mCurrentLevelIndex = (nextLevel < mLevelInfos.size()) ? nextLevel : FIRST_LEVEL;
