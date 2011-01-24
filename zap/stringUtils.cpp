@@ -55,6 +55,22 @@ string itos(S32 i)
 }
 
 
+string itos(U32 i)
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), "%d", i);
+   return outString;
+}
+
+
+string itos(U64 i)
+{
+   char outString[100];
+   dSprintf(outString, sizeof(outString), "%d", i);
+   return outString;
+}
+
+
 string ftos(F32 f, S32 digits)
 {
    char outString[100];
@@ -64,15 +80,17 @@ string ftos(F32 f, S32 digits)
 
 
 // From http://stackoverflow.com/questions/1087088/single-quote-issues-with-c-find-and-replace-function
-string &replaceString( string &strString, const string &strOld, const string &strNew )
+string replaceString( const string &strString, const string &strOld, const string &strNew )
 {
-    for( int nReplace = strString.rfind( strOld ); nReplace != string::npos; nReplace = strString.rfind( strOld, nReplace - 1 ) )
+   string str = strString;    // Make working copy
+
+    for( int nReplace = str.rfind( strOld ); nReplace != string::npos; nReplace = str.rfind( strOld, nReplace - 1 ) )
     {
-        strString.replace( nReplace, strOld.length(), strNew );
+        str.replace( nReplace, strOld.length(), strNew );
         if( nReplace == 0 )
             break;
     }
-    return strString;
+    return str;
 }
 
 

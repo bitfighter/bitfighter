@@ -45,7 +45,7 @@ string itos(int i);
 string ftos(float f, int digits);
 
 
-string &replaceString(string &strString, const string &strOld, const string &strNew);
+string replaceString(const string &strString, const string &strOld, const string &strNew);
 
 // TODO: Merge these methods
 TNL::Vector<string> parseString(const string &line);
