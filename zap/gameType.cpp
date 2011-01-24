@@ -502,10 +502,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          if(isTeamGame())
          {     // (braces required)
             if(mTeams[i].numPlayers > maxTeamPlayers)
-               maxTeamPlayers = mTeams[i].numPlayers;
+               maxTeamPlayers = mTeams[i].numPlayers + mTeams[i].numBots;
          }
          else
-            maxTeamPlayers += mTeams[i].numPlayers;
+            maxTeamPlayers += mTeams[i].numPlayers + mTeams[i].numBots;
       }
       // ...if not, then go home!
       if(!maxTeamPlayers)
@@ -1102,7 +1102,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          S32 teamNumber = atoi(argv[1]);   //Team number to change
          team.readTeamFromLevelLine(argc-1, argv+1);    //skip one arg
    
-         if(team.numPlayers != -1 && teamNumber < mTeams.size() && teamNumber >= 0)
+         if(team.numPlayers + team.numBots != -1 && teamNumber < mTeams.size() && teamNumber >= 0)
             mTeams[teamNumber] = team;
       }
    }
@@ -1650,12 +1650,16 @@ void GameType::countTeamPlayers()
    for(S32 i = 0; i < mTeams.size(); i++)
    {
       mTeams[i].numPlayers = 0;
+      mTeams[i].numBots = 0;
       mTeams[i].rating = 0;
    }
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      mTeams[mClientList[i]->getTeam()].numPlayers++;
+      if(mClientList[i]->isRobot)
+         mTeams[mClientList[i]->getTeam()].numBots++;
+      else
+         mTeams[mClientList[i]->getTeam()].numPlayers++;
 
       GameConnection *cc = mClientList[i]->clientConnection;
       if(cc)
@@ -1681,12 +1685,12 @@ void GameType::serverAddClient(GameConnection *theClient)
    countTeamPlayers();     // Also calcs team ratings
 
    // Figure out how many players the team with the fewest players has
-   S32 minPlayers = mTeams[0].numPlayers;
+   S32 minPlayers = mTeams[0].numPlayers + mTeams[0].numBots ;
 
    for(S32 i = 1; i < mTeams.size(); i++)
    {
-      if(mTeams[i].numPlayers < minPlayers)
-         minPlayers = mTeams[i].numPlayers;
+      if(mTeams[i].numPlayers + mTeams[i].numBots < minPlayers)
+         minPlayers = mTeams[i].numPlayers + mTeams[i].numBots;
    }
 
    // Of the teams with minPlayers, find the one with the lowest total rating...
@@ -1695,7 +1699,7 @@ void GameType::serverAddClient(GameConnection *theClient)
 
    for(S32 i = 0; i < mTeams.size(); i++)
    {
-      if(mTeams[i].numPlayers == minPlayers && mTeams[i].rating < minRating)
+      if(mTeams[i].numPlayers + mTeams[i].numBots == minPlayers && mTeams[i].rating < minRating)
       {
          minTeamIndex = i;
          minRating = mTeams[i].rating;

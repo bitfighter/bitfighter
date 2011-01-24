@@ -40,6 +40,7 @@ void AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
    }
 
    numPlayers = 0;
+   numBots = 0;
 
    setName(argv[1]);
    color.read(argv + 2);
@@ -111,7 +112,7 @@ S32 LuaTeamInfo::getScore(lua_State *L) { return returnInt(L, mTeam.getScore());
 S32 LuaTeamInfo::getPlayerCount(lua_State *L)         // number getPlayerCount() ==> return player count
 {
    gServerGame->getGameType()->countTeamPlayers();    // Make sure player counts are up-to-date
-   return returnInt(L, mTeam.numPlayers);
+   return returnInt(L, mTeam.numPlayers + mTeam.numBots);
 }
 
 

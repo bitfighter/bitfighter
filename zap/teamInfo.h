@@ -44,7 +44,8 @@ public:
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
    Color color;
-   S32 numPlayers;                      // Needs to be computed before use, not dynamically tracked
+   S32 numPlayers;      // Number of human players --> Needs to be computed before use, not dynamically tracked
+   S32 numBots;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
 
    virtual void setName(const char *name) { _name.setString(name); }
    virtual StringTableEntry getName() { return StringTableEntry(_name.c_str()); }  // Wrap in STE to make signatures match... lame.
@@ -69,7 +70,7 @@ public:
 
    F32 rating; 
 
-   Team() {numPlayers = 0; mScore = 0; rating = 0; }     // Quickie constructor
+   Team() { numPlayers = 0; numBots = 0; mScore = 0; rating = 0; }     // Quickie constructor
 
    void setName(const char *name) { _name = name; }
    void setName(StringTableEntry name) { _name = name; }
