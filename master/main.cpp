@@ -945,8 +945,7 @@ public:
 
 
    // Send game statistics to the master server   ==> Current as of 015
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (U32 gameVersion, StringTableEntry gameType, bool teamGame, 
-                                                      StringTableEntry levelName, 
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,100> > colorR, Vector<RangedU32<0,100> > colorG, Vector<RangedU32<0,100> > colorB, 
                                                       RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, S16 timeInSecs))
@@ -957,13 +956,45 @@ public:
 
       // GAME | stats version (3) | GameVersion | timestamp | GameType | teamGame (true/false) | level name | teams | players | bots | time
       logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 
-                     gameVersion, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
+                     mClientBuild, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
                      teams.size(), players.value, bots.value, timestr.c_str() );
 
-      // TEAM | stats version (3) | team name | score | R | G |B
+      // TEAM | stats version (3) | team name | players | bots | score | R | G |B
       for(S32 i = 0; i < teams.size(); i++)
          logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%d\t%d\t%d\t%d", 
-                     teams[i].getString(), teamScores[i], (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
+                  teams[i].getString(), (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
+
+
+      // TODO: Make put this in a constructor?
+      GameStats gameStats;
+      gameStats.duration = timeInSecs;
+      gameStats.gameType = gameType.getString();
+      gameStats.isOfficial = false;
+      gameStats.isTeamGame = teamGame;
+      gameStats.levelName = levelName.getString();
+      gameStats.playerCount = players.value;
+      gameStats.serverIP = getNetAddressString();
+      gameStats.serverName = mServerDescr;   
+      gameStats.serverVersion = this->mClientBuild;
+      gameStats.teamCount = teams.size();
+      //gameStats.teamStats
+
+      for(S32 i = 0; i < teams.size(); i++)
+      {
+         TeamStats teamStats;
+
+         teamStats.name = teams[i].getString();
+         teamStats.color = "LLL";
+         teamStats.gameResult = "K";
+         teamStats.score = teamScores[i];
+         //teamStats.playerStats
+
+         gameStats.teamStats.push_back(teamStats);
+      }
+
+      //      DatabaseWriter dbWriter("127.0.0.1", "test", "user", "pw");
+      //dbWriter.insertStats(gameStats);
+
    }
 
    // Game server wants to know if user name has been verified
@@ -992,19 +1023,19 @@ public:
    }
 
 
-   // TODO: Replace this with the ones in stringUtils
-   // From http://www.codeproject.com/KB/stl/stdstringtrim.aspx
-   void trim(string &str)
-   {
-      string::size_type pos = str.find_last_not_of(' ');
-      if(pos != string::npos) 
-      {
-         str.erase(pos + 1);
-         pos = str.find_first_not_of(' ');
-         if(pos != string::npos) str.erase(0, pos);
-      }
-      else str.erase(str.begin(), str.end());
-   }
+   //// TODO: Replace this with the ones in stringUtils
+   //// From http://www.codeproject.com/KB/stl/stdstringtrim.aspx
+   //void trim(string &str)
+   //{
+   //   string::size_type pos = str.find_last_not_of(' ');
+   //   if(pos != string::npos) 
+   //   {
+   //      str.erase(pos + 1);
+   //      pos = str.find_first_not_of(' ');
+   //      if(pos != string::npos) str.erase(0, pos);
+   //   }
+   //   else str.erase(str.begin(), str.end());
+   //}
 
 
    string cleanName(string name)

@@ -68,8 +68,7 @@ struct TeamStats
 {
    string color;
    string name;
-   S32 playerCount;
-   S32 botCount;
+   S32 score;
    string gameResult;     // 'W', 'L', 'T'
    Vector<PlayerStats> playerStats;    // Info about all players on this team
 };

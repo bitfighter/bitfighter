@@ -868,6 +868,8 @@ void GameType::saveGameStats()
       // Push team names and scores into a structure we can pass via rpc; these will be sorted by score
       Vector<StringTableEntry> teams(sortTeams.size());
       Vector<S32> scores(sortTeams.size());
+      Vector<RangedU32<0,MAX_PLAYERS> > teamPlayers;
+      Vector<RangedU32<0,MAX_PLAYERS> > teamBots;
       Vector<RangedU32<0,100> > colorR(mTeams.size());
       Vector<RangedU32<0,100> > colorG(mTeams.size());
       Vector<RangedU32<0,100> > colorB(mTeams.size());
@@ -880,6 +882,9 @@ void GameType::saveGameStats()
          colorR.push_back(RangedU32<0,100>(U32(sortTeams[i].color.r * 100)));
          colorG.push_back(RangedU32<0,100>(U32(sortTeams[i].color.g * 100)));
          colorB.push_back(RangedU32<0,100>(U32(sortTeams[i].color.b * 100)));
+
+         teamPlayers.push_back(sortTeams[i].numPlayers);
+         teamBots.push_back(sortTeams[i].numPlayers);
       }
 
       // Count the players and bots
@@ -896,9 +901,8 @@ void GameType::saveGameStats()
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
       if(masterConn && gIniSettings.SendStatsToMaster)
-         masterConn->s2mSendGameStatistics_3(BUILD_VERSION, getGameTypeString(), isTeamGame(),
-                                          mLevelName, teams, scores, 
-                                          colorR, colorG, colorB, players, bots, timeInSecs);
+         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, 
+                                             colorR, colorG, colorB, timeInSecs);
 		switch(gIniSettings.LogStats)
 		{
 		   case 1:
