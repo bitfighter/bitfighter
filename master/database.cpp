@@ -96,8 +96,8 @@ static void insertStatsShots(Connection conn, const string &playerId, const Vect
 }
 
 
-
 #define btos(value) (value ? "1" : "0")
+
 
 void DatabaseWriter::insertStats(const string &serverName, const string &serverIP, S32 serverVersion, const GameStats &gameStats) 
 {
@@ -137,7 +137,6 @@ void DatabaseWriter::insertStats(const string &serverName, const string &serverI
          string gameId = itos(result.insert_id());
 
 
-         // ===>>> Do we really need team number? <<<===
          for(S32 i = 0; i < gameStats.teamStats.size(); i++)
          {
             const TeamStats *teamStats = &gameStats.teamStats[i];
@@ -153,13 +152,13 @@ void DatabaseWriter::insertStats(const string &serverName, const string &serverI
             for(S32 j = 0; j < teamStats->playerStats.size(); j++)
             {
                const PlayerStats *playerStats = &teamStats->playerStats[j];
-               sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, is_authenticated, \
-                                               is_robot, \
+               sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, \
+                                               is_authenticated, is_robot, \
                                                result, points, kill_count, \
                                                death_count, \
                                                suicide_count, switched_team) \
-                      VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", '" + 
-                                 btos(playerStats->isRobot), 
+                      VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " + 
+                                 btos(playerStats->isAuthenticated) + ", '" + btos(playerStats->isRobot), 
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
                                  itos(playerStats->deaths),
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ")";

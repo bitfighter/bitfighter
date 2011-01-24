@@ -797,12 +797,8 @@ public:
          return;
 
       //Update only if anything is different
-		if(mLevelName != levelName
-			|| mLevelType != levelType
-			|| mNumBots != botCount
-			|| mPlayerCount != playerCount
-			|| mMaxPlayers != maxPlayers
-			|| mInfoFlags != infoFlags )
+		if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount ||
+			mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
 		{
 			mLevelName = levelName;
 			mLevelType = levelType;
@@ -831,12 +827,8 @@ public:
          return;
 
       // Update only if anything is different
-		if(mLevelName   != levelName ||
-			mLevelType   != levelType ||
-			mNumBots     != botCount ||
-		   mPlayerCount != playerCount ||
-		   mMaxPlayers  != maxPlayers ||
-			mInfoFlags   != infoFlags )
+		if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   || 
+		   mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
 		{
 			mLevelName = levelName;
 			mLevelType = levelType;
