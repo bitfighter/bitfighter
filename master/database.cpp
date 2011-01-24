@@ -99,7 +99,7 @@ static void insertStatsShots(Connection conn, const string &playerId, const Vect
 
 
 #define btos(value) (value ? "1" : "0")
-
+const U64 U64_MAX=0xFFFFFFFFFFFFFFFF;
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
@@ -118,12 +118,21 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       string sql;
       Query query(&conn);
       SimpleResult result;
+      U64 serverId_int = U64_MAX;
+      // if(not fount in cachedServers) //TODO, find server in cachedServers
+      {
+         sql = "INSERT INTO server(server_name, ip_address, build_version) \
+               VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
+         result = query.execute(sql);
+         if(result.rows() >= 1)
+            serverId_int = result.insert_id();  // server might not exist in the list
 
-      sql = "INSERT INTO server(server_name, ip_address, build_version) \
-            VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
-      query = conn.query(sql);
-      result = query.execute();
-      string serverId = itos(result.insert_id());
+         // TODO: if(serverId_int = U64_MAX) add new server to list
+
+         if(cachedServers.size() > 20) cachedServers.erase(0);
+         cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName,gameStats.serverIP,gameStats.serverVersion));
+      }
+      string serverId = itos(serverId_int);
 
       if(gameStats.isTeamGame)
       {
@@ -134,8 +143,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                        itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
                        itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
 
-         query = conn.query(sql);
-         result = query.execute();
+         result = query.execute(sql);
          string gameId = itos(result.insert_id());
 
 
@@ -163,8 +171,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                                  itos(playerStats->deaths),
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ")";
 
-               query = conn.query(sql);
-               result = query.execute();
+               result = query.execute(sql);
                string playerId = itos(result.insert_id());
 
                insertStatsShots(conn, playerId, playerStats->weaponStats);
@@ -193,8 +200,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                               playerStats->gameResult + "', " + itos(playerStats->points) + ", " + 
                               itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ")";
 
-            query = conn.query(sql);
-            result = query.execute();
+            result = query.execute(sql);
             string playerId = itos(result.insert_id());
 
             insertStatsShots(conn, playerId, playerStats->weaponStats);
