@@ -307,7 +307,7 @@ static void loadHostConfiguration()
    gIniSettings.LogStats = atoi(str.c_str());
    if(lcase(str) == "yes") gIniSettings.LogStats = 1;
 
-   gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) == "yes");
+   //gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) != "no");
 
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
 }

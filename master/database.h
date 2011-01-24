@@ -100,15 +100,26 @@ private:
    const char *mUser;
    const char *mPassword;
 
+#ifdef VERIFY_PHPBB3
    void initialize(const char *server, const char *db, const char *user, const char *password);
+#else
+   void initialize(const char *server, const char *db, const char *user, const char *password) {};
+#endif
 
 public:
+#ifdef VERIFY_PHPBB3
    DatabaseWriter();
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
-
    void insertStats(const GameStats &gameStats);
+#else
+	DatabaseWriter() {};
+	DatabaseWriter(const char *server, const char *db, const char *user, const char *password) {};     // Constructor
+	DatabaseWriter(const char *db, const char *user, const char *password) {};                        // Constructor
+	void insertStats(const GameStats &gameStats) {};
+#endif
 };
+
 
 /*
 Create connection, lifetime is lifetime of app

@@ -218,7 +218,7 @@ struct IniSettings      // With defaults specified
    bool luaBotMessage;        
    bool serverFilter;  
    S32 LogStats;
-   bool SendStatsToMaster;
+   //bool SendStatsToMaster;
 
    Vector<StringTableEntry> levelList;
 
@@ -305,7 +305,7 @@ struct IniSettings      // With defaults specified
       serverFilter = false; 
 
       LogStats = 1;             // Log statistics into ServerFilter log files
-      SendStatsToMaster = true; // Transmit statistics to the master server
+      //SendStatsToMaster = true; // Transmit statistics to the master server
    }
 };
 

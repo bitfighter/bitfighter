@@ -23,7 +23,8 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "tnl.h"           // For Vector, types, and dSprintf
+#include "tnlPlatform.h"   // For Vector, types, and dSprintf
+#include "tnlVector.h"
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
@@ -49,7 +50,7 @@ string ExtractFilename( const string& path )
 
 string itos(S32 i)
 {
-   char outString[100];
+   char outString[12];  // 11 chars plus a null char, -2147483648
    dSprintf(outString, sizeof(outString), "%d", i);
    return outString;
 }
@@ -57,16 +58,16 @@ string itos(S32 i)
 
 string itos(U32 i)
 {
-   char outString[100];
-   dSprintf(outString, sizeof(outString), "%d", i);
+   char outString[11];  // 10 chars plus a null char, 4294967295
+   dSprintf(outString, sizeof(outString), "%u", i);
    return outString;
 }
 
 
 string itos(U64 i)
 {
-   char outString[100];
-   dSprintf(outString, sizeof(outString), "%d", i);
+   char outString[21];  // 20 chars plus a null char, 18446744073709551615
+   dSprintf(outString, sizeof(outString), "%u", i);
    return outString;
 }
 
@@ -126,8 +127,8 @@ string ucase(string strToConvert)
 }
 
 
-// Concatenate all strings in words into one
-string concatenate(const Vector<string> &words, S32 startingWith = 0)
+// Concatenate all strings in words into one, startingWith default to zero
+string concatenate(const Vector<string> &words, S32 startingWith)
 {
    string concatenated = "";
    for(S32 i = startingWith; i < words.size(); i++)
@@ -148,8 +149,9 @@ Vector<string> parseString(const string &line)
   stringstream    ss(line);
 
   while(ss >> item){
-      if (item[0]=='"') {
-      int lastItemPosition = item.length() - 1;
+    if (item[0]=='"')
+    {
+      S32 lastItemPosition = item.length() - 1;
       if (item[lastItemPosition]!='"') {
         // read the rest of the double-quoted item
         string restOfItem;

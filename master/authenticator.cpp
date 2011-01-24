@@ -24,13 +24,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "authenticator.h"
 #include "phpbbhash.h"
-#include "../zap/stringUtils.h"     // For replaceString()
+//#include "../zap/stringUtils.h"     // For replaceString()
+#include "../zap/stringUtils.cpp"     // For replaceString(), only include this cpp file once in the master project, duplicate or no cpp will get link errors.
 #include <string.h>
 #include <ctype.h>
+#ifdef SAM_ONLY
+#include "mysql++.h"
+#else
 #include "../mysql++/lib/mysql++.h"
+#endif
 
 using namespace mysqlpp;
 using namespace std;
+using namespace Zap;  // for Zap::replaceString()
 
 Authenticator::Authenticator(){
 	connection = NULL;

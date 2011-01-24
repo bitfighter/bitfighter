@@ -789,10 +789,6 @@
 			>
 		</File>
 		<File
-			RelativePath=".\packedfont.c"
-			>
-		</File>
-		<File
 			RelativePath=".\playerInfo.cpp"
 			>
 		</File>

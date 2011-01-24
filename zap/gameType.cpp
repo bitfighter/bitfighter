@@ -900,7 +900,7 @@ void GameType::saveGameStats()
       }
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
-      if(masterConn && gIniSettings.SendStatsToMaster)
+      if(masterConn) //&& gIniSettings.SendStatsToMaster)
          masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, 
                                              colorR, colorG, colorB, timeInSecs);
 		switch(gIniSettings.LogStats)
@@ -927,7 +927,7 @@ void GameType::saveGameStats()
          Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
 			mClientList[i]->getScore();
         
-         if(masterConn && gIniSettings.SendStatsToMaster)
+         if(masterConn) //&& gIniSettings.SendStatsToMaster)
             masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
                                                mClientList[i]->isRobot,
                                                getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...

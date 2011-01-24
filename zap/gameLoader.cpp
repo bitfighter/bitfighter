@@ -238,7 +238,10 @@ bool LevelLoader::initLevelFromFile(const char *filename)
    while(lastByteRead != 0)
    {
       // Read a chunk of the level file, filling any space in levelChunk buffer after cur
-      lastByteRead = cur + fread(&levelChunk[cur], 1, sizeof(levelChunk) - 1 - cur, file);   // using -1 to make room for a NULL character
+      lastByteRead = (S32)fread(&levelChunk[cur], 1, sizeof(levelChunk) - 1 - cur, file);   // using -1 to make room for a NULL character
+      TNLAssert(lastByteRead >= 0, "lastByteRead is negative while reading level");
+      if(lastByteRead < 0) lastByteRead = 0;  // makes sure there is no errors if somehow it is negative.
+      lastByteRead += cur;
 
       // Advance cursor to end of chunk
       cur = lastByteRead - 1;

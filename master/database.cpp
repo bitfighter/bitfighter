@@ -31,6 +31,8 @@
 
 #ifdef CHRIS
 #include "../mysql++/mysql++.h"
+#elif SAM_ONLY
+#include "mysql++.h"
 #else
 #include "../mysql++/lib/mysql++.h"
 #endif
