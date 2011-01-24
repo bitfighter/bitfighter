@@ -26,6 +26,10 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include "../zap/gameWeapons.h"     // For WeaponType enum
+#include "tnlTypes.h"
+#include "tnlVector.h"
+
 #include <string>
 
 // Forward declaration
@@ -34,8 +38,10 @@ namespace mysqlpp
 	class TCPConnection;
 };
 
+using namespace TNL;
+using namespace std;
 
-struct WeaponStats
+struct WeaponStats 
 {
    WeaponType weaponType;
    S32 shots;
@@ -45,27 +51,33 @@ struct WeaponStats
 
 struct PlayerStats
 {
-   string playerName;
+   string name;
    bool isAuthenticated;
+   bool isRobot;
    string gameResult;
    S32 points;
    S32 kills;
+   S32 deaths;
    S32 suicides;
    bool switchedTeams;     // do we currently track this?  is it meaningful?
    Vector<WeaponStats> weaponStats;
 };
 
 
-struct TeamStats
+struct TeamStats 
 {
+   string color;
+   string name;
    S32 playerCount;
-   string result;     // 'W', 'L', 'T'
+   S32 botCount;
+   string gameResult;     // 'W', 'L', 'T'
    Vector<PlayerStats> playerStats;    // Info about all players on this team
 };
 
 struct GameStats
 {
    string gameType;
+   string levelName;
    bool isOfficial;
    S32 playerCount;
    S32 duration;     // game length in seconds
@@ -92,7 +104,7 @@ public:
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
 
-   void insertStats();
+   void insertStats(const string &serverName, const string &serverIP, S32 serverVersion, const GameStats &gameStats);
 };
 
 /*

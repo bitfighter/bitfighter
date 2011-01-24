@@ -926,7 +926,7 @@ void GameType::saveGameStats()
          if(masterConn && gIniSettings.SendStatsToMaster)
             masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
                                                mClientList[i]->isRobot,
-                                               getTeamName(mClientList[i]->getTeam()),  //Both teams might have same name...
+                                               getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
                                                mClientList[i]->getScore(),
                                                statistics->getKills(), statistics->getDeaths(), 
                                                statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
