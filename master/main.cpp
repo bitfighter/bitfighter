@@ -908,9 +908,6 @@ public:
                teamName.getString(), 
                score, kills, deaths, suicides, 
                totalShots, totalHits);
-
-      DatabaseWriter dbWriter("127.0.0.1", "test", "user", "pw");
-      dbWriter.insertStats(serverName, serverIP, serverBuildVersion, gameStats);
    }
 
 
@@ -956,6 +953,7 @@ public:
    {
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
+
 
       // GAME | stats version (3) | GameVersion | timestamp | GameType | teamGame (true/false) | level name | teams | players | bots | time
       logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 

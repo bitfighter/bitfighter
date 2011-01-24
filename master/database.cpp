@@ -99,7 +99,7 @@ static void insertStatsShots(Connection conn, const string &playerId, const Vect
 #define btos(value) (value ? "1" : "0")
 
 
-void DatabaseWriter::insertStats(const string &serverName, const string &serverIP, S32 serverVersion, const GameStats &gameStats) 
+void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
    Connection conn;    // Connect to the database
 
@@ -118,7 +118,7 @@ void DatabaseWriter::insertStats(const string &serverName, const string &serverI
       SimpleResult result;
 
       sql = "INSERT INTO server(server_name, ip_address, build_version) \
-             VALUES('" + sanitize(serverName) + "', '" + serverIP + "', " + itos(serverVersion) + ");";
+            VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
       query = conn.query(sql);
       result = query.execute();
       string serverId = itos(result.insert_id());

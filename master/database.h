@@ -76,6 +76,10 @@ struct TeamStats
 
 struct GameStats
 {
+   string serverName;
+   string serverIP;
+   U32 serverVersion;
+
    string gameType;
    string levelName;
    bool isOfficial;
@@ -104,7 +108,7 @@ public:
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
 
-   void insertStats(const string &serverName, const string &serverIP, S32 serverVersion, const GameStats &gameStats);
+   void insertStats(const GameStats &gameStats);
 };
 
 /*
