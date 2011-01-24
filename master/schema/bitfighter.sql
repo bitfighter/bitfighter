@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 23, 2011 at 10:59 PM
+-- Generation Time: Jan 24, 2011 at 01:13 AM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -148,14 +148,14 @@ CREATE TABLE IF NOT EXISTS `stats_player_shots` (
 CREATE TABLE IF NOT EXISTS `stats_team` (
   `stats_team_id` int(11) NOT NULL AUTO_INCREMENT,
   `stats_game_id` int(11) NOT NULL,
-  `team_number` tinyint(3) unsigned NOT NULL,
+  `team_name` text COLLATE utf8_unicode_ci NOT NULL,
   `color_hex` text COLLATE utf8_unicode_ci NOT NULL,
   `player_count` smallint(5) unsigned NOT NULL,
   `bot_count` smallint(5) unsigned NOT NULL,
   `result` char(1) COLLATE utf8_unicode_ci NOT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_team_id`),
-  UNIQUE KEY `game_team` (`stats_game_id`,`team_number`),
+  UNIQUE KEY `game_team_name_unique` (`stats_game_id`,`team_name`(50)),
   KEY `stats_game_id` (`stats_game_id`),
   KEY `result` (`result`),
   KEY `insertion_date` (`insertion_date`)
