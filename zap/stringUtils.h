@@ -42,6 +42,8 @@ string ExtractDirectory(const std::string& path);
 string ExtractFilename(const std::string& path);
 
 string itos(int i);
+string itos(U32);
+string itos(U64);
 string ftos(float f, int digits);
 
 
