@@ -3738,6 +3738,9 @@ void EditorUserInterface::doneEditingSpecialItem(bool saveChanges)
 
    
 extern string itos(S32);
+extern string itos(U32);
+extern string itos(U64);
+
 extern string ftos(F32, S32);
 
 // Handle key presses
