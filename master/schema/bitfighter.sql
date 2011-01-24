@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 22, 2011 at 11:48 PM
+-- Generation Time: Jan 23, 2011 at 10:59 PM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -26,26 +26,27 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 --
 
 CREATE TABLE IF NOT EXISTS `server` (
-  `server_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `server_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
-  `ip_address` varchar(15) COLLATE utf8_unicode_ci NOT NULL,
+  `server_id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_name` text COLLATE utf8_unicode_ci NOT NULL,
+  `ip_address` text COLLATE utf8_unicode_ci NOT NULL,
+  `build_version` int(11) DEFAULT NULL,
   PRIMARY KEY (`server_id`),
-  UNIQUE KEY `name_ip_unique` (`server_name`,`ip_address`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
+  UNIQUE KEY `name_ip_unique` (`server_name`(50),`ip_address`(15))
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
 
 --
 -- Dumping data for table `server`
 --
 
-INSERT INTO `server` (`server_id`, `server_name`, `ip_address`) VALUES
-(1, 'Bitfighter sam686', '96.2.123.136'),
-(6, 'Bobdaduck Collection', '65.49.81.67'),
-(2, 'Classic Levels', '65.49.81.67'),
-(3, 'Edshin Collection', '65.49.81.67'),
-(4, 'InvaderAlex Collection', '65.49.81.67'),
-(5, 'New Player?', '65.49.81.67'),
-(7, 'Robots', '65.49.81.67'),
-(8, 'User levels', '65.49.81.67');
+INSERT INTO `server` (`server_id`, `server_name`, `ip_address`, `build_version`) VALUES
+(1, 'Bitfighter sam686', '96.2.123.136', NULL),
+(2, 'Classic Levels', '65.49.81.67', NULL),
+(3, 'Edshin Collection', '65.49.81.67', NULL),
+(4, 'InvaderAlex Collection', '65.49.81.67', NULL),
+(5, 'New Player?', '65.49.81.67', NULL),
+(6, 'Bobdaduck Collection', '65.49.81.67', NULL),
+(7, 'Robots', '65.49.81.67', NULL),
+(8, 'User levels', '65.49.81.67', NULL);
 
 -- --------------------------------------------------------
 
@@ -54,27 +55,27 @@ INSERT INTO `server` (`server_id`, `server_name`, `ip_address`) VALUES
 --
 
 CREATE TABLE IF NOT EXISTS `stats_game` (
-  `stats_game_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `server_id` int(10) unsigned NOT NULL,
-  `game_type` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
+  `stats_game_id` int(11) NOT NULL AUTO_INCREMENT,
+  `server_id` int(11) NOT NULL,
+  `game_type` text COLLATE utf8_unicode_ci NOT NULL,
   `is_official` tinyint(1) NOT NULL,
   `player_count` smallint(5) unsigned NOT NULL,
   `duration_seconds` smallint(5) unsigned NOT NULL,
-  `level_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `level_name` text COLLATE utf8_unicode_ci NOT NULL,
   `is_team_game` tinyint(1) NOT NULL,
   `team_count` tinyint(3) unsigned DEFAULT NULL,
   `is_tied` tinyint(1) NOT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_game_id`),
+  UNIQUE KEY `game_type` (`game_type`(20)),
   KEY `server_id` (`server_id`),
   KEY `is_official` (`is_official`),
   KEY `player_count` (`player_count`),
   KEY `is_team_game` (`is_team_game`),
   KEY `team_count` (`team_count`),
   KEY `is_tied` (`is_tied`),
-  KEY `insertion_date` (`insertion_date`),
-  KEY `game_type` (`game_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  KEY `insertion_date` (`insertion_date`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_game`
@@ -88,26 +89,28 @@ CREATE TABLE IF NOT EXISTS `stats_game` (
 --
 
 CREATE TABLE IF NOT EXISTS `stats_player` (
-  `stats_player_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `stats_game_id` int(10) unsigned NOT NULL,
-  `player_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `stats_player_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stats_game_id` int(11) NOT NULL,
+  `player_name` text COLLATE utf8_unicode_ci NOT NULL,
   `is_authenticated` tinyint(1) NOT NULL,
+  `is_robot` tinyint(1) NOT NULL,
   `result` char(1) COLLATE utf8_unicode_ci NOT NULL,
-  `points` int(10) unsigned NOT NULL,
+  `points` int(11) NOT NULL,
   `kill_count` smallint(5) unsigned NOT NULL,
+  `death_count` smallint(5) unsigned NOT NULL,
   `suicide_count` smallint(5) unsigned NOT NULL,
   `switched_team` tinyint(1) DEFAULT NULL,
-  `stats_team_id` int(10) unsigned DEFAULT NULL,
+  `stats_team_id` int(11) DEFAULT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_player_id`),
-  UNIQUE KEY `game_player` (`stats_game_id`,`player_name`),
-  KEY `player_name` (`player_name`),
+  UNIQUE KEY `game_player_name_unique` (`stats_game_id`,`player_name`(50)),
   KEY `is_authenticated` (`is_authenticated`),
   KEY `result` (`result`),
   KEY `stats_team_id` (`stats_team_id`),
   KEY `insertion_date` (`insertion_date`),
-  KEY `stats_game_id` (`stats_game_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  KEY `player_name` (`player_name`(50)),
+  KEY `is_robot` (`is_robot`)
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_player`
@@ -121,16 +124,15 @@ CREATE TABLE IF NOT EXISTS `stats_player` (
 --
 
 CREATE TABLE IF NOT EXISTS `stats_player_shots` (
-  `stats_player_shots_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `stats_player_id` int(10) unsigned NOT NULL,
-  `weapon` varchar(10) COLLATE utf8_unicode_ci NOT NULL,
-  `shots` int(10) unsigned NOT NULL,
-  `shots_struck` int(10) unsigned NOT NULL,
+  `stats_player_shots_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stats_player_id` int(11) NOT NULL,
+  `weapon` text COLLATE utf8_unicode_ci NOT NULL,
+  `shots` int(11) NOT NULL,
+  `shots_struck` int(11) NOT NULL,
   PRIMARY KEY (`stats_player_shots_id`),
-  UNIQUE KEY `stats_player_weapon` (`stats_player_id`,`weapon`),
-  KEY `stats_player_id` (`stats_player_id`),
-  KEY `weapon` (`weapon`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+  UNIQUE KEY `stats_player_id` (`stats_player_id`,`weapon`(10)),
+  KEY `weapon` (`weapon`(10))
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_player_shots`
@@ -144,10 +146,12 @@ CREATE TABLE IF NOT EXISTS `stats_player_shots` (
 --
 
 CREATE TABLE IF NOT EXISTS `stats_team` (
-  `stats_team_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `stats_game_id` int(10) unsigned NOT NULL,
+  `stats_team_id` int(11) NOT NULL AUTO_INCREMENT,
+  `stats_game_id` int(11) NOT NULL,
   `team_number` tinyint(3) unsigned NOT NULL,
+  `color_hex` text COLLATE utf8_unicode_ci NOT NULL,
   `player_count` smallint(5) unsigned NOT NULL,
+  `bot_count` smallint(5) unsigned NOT NULL,
   `result` char(1) COLLATE utf8_unicode_ci NOT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_team_id`),
@@ -155,7 +159,7 @@ CREATE TABLE IF NOT EXISTS `stats_team` (
   KEY `stats_game_id` (`stats_game_id`),
   KEY `result` (`result`),
   KEY `insertion_date` (`insertion_date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_team`
@@ -176,8 +180,8 @@ ALTER TABLE `stats_game`
 -- Constraints for table `stats_player`
 --
 ALTER TABLE `stats_player`
-  ADD CONSTRAINT `stats_player_ibfk_2` FOREIGN KEY (`stats_team_id`) REFERENCES `stats_team` (`stats_team_id`),
-  ADD CONSTRAINT `stats_player_ibfk_3` FOREIGN KEY (`stats_game_id`) REFERENCES `stats_game` (`stats_game_id`);
+  ADD CONSTRAINT `stats_player_ibfk_3` FOREIGN KEY (`stats_game_id`) REFERENCES `stats_game` (`stats_game_id`),
+  ADD CONSTRAINT `stats_player_ibfk_2` FOREIGN KEY (`stats_team_id`) REFERENCES `stats_team` (`stats_team_id`);
 
 --
 -- Constraints for table `stats_player_shots`
