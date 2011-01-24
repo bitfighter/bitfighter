@@ -84,7 +84,7 @@ string replaceString( const string &strString, const string &strOld, const strin
 {
    string str = strString;    // Make working copy
 
-    for( int nReplace = str.rfind( strOld ); nReplace != string::npos; nReplace = str.rfind( strOld, nReplace - 1 ) )
+    for( string::size_type nReplace = str.rfind( strOld ); nReplace != string::npos; nReplace = str.rfind( strOld, nReplace - 1 ) )
     {
         str.replace( nReplace, strOld.length(), strNew );
         if( nReplace == 0 )
