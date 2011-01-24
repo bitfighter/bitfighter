@@ -100,6 +100,7 @@ struct WeaponInfo
          case WeaponSpyBug:
             return "Spy Bug";
       }
+      return "INVALID WEAPON!";
    }
 
 

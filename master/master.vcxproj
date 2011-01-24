@@ -52,6 +52,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CHRIS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
