@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `server` (
   `build_version` int(11) DEFAULT NULL,
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `name_ip_unique` (`server_name`(50),`ip_address`(15))
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
 
 --
 -- Dumping data for table `server`
@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `stats_game` (
   KEY `team_count` (`team_count`),
   KEY `is_tied` (`is_tied`),
   KEY `insertion_date` (`insertion_date`)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_game`
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS `stats_player` (
   KEY `insertion_date` (`insertion_date`),
   KEY `player_name` (`player_name`(50)),
   KEY `is_robot` (`is_robot`)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_player`
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `stats_player_shots` (
   PRIMARY KEY (`stats_player_shots_id`),
   UNIQUE KEY `stats_player_id` (`stats_player_id`,`weapon`(10)),
   KEY `weapon` (`weapon`(10))
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_player_shots`
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `stats_team` (
   KEY `stats_game_id` (`stats_game_id`),
   KEY `result` (`result`),
   KEY `insertion_date` (`insertion_date`)
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `stats_team`
