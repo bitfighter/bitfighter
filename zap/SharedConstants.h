@@ -39,7 +39,7 @@
 #define MAX_PLAYER_PASSWORD_LENGTH 32
 
 static const unsigned int MOTD_LEN = 256;
-static const unsigned int MAX_PLAYERS = 127;    // Absolute maximum players ever allowed in a game
+static const unsigned int MAX_PLAYERS = 127;    // Absolute maximum players ever allowed in a game  --> should not be more than U8_MAX
 
 enum AuthenticationStatus {
    AuthenticationStatusAuthenticatedName,
