@@ -111,6 +111,7 @@ OBJECTS_ZAP=\
    BotNavMeshZone.o\
    ../master/masterInterface.o
 
+
 CFLAGS=
 DFLAGS=
 EXEFILE=bitfighter
@@ -147,7 +148,7 @@ bitfighter: $(OBJECTS_ZAP)
 # Note also that this rule needs to be below the bitfighter rule above.
 #
 ../master/masterInterface.o:
-	make -C ../master nophpbb
+	make -C ../master interface 
 
 clean: 
 	rm -f $(OBJECTS_ZAP) ../exe/bitfighter ../exe/bitfightered
