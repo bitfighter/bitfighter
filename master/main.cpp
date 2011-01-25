@@ -946,12 +946,18 @@ public:
                      teams[i].getString(), teamScores[i], (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
    }
 
+   /////////////////////////////////////////////////////////////////////////////////////
+
 
    // Send game statistics to the master server   ==> Current as of 015
+   // Note that teams are sent in descending order, high score to low  
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,0xFFFFFF> > color, 
-                                                      RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, S16 timeInSecs))
+                                                      RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, U16 timeInSecs,
+                                                      Vector<bool> onTeamBoundary, Vector<S32> playerScores, 
+                                                      Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
+                                                      Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
    {
       string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
@@ -971,8 +977,11 @@ public:
       }
 
 
+      S32 lastClient = 0;     // Track last player who's info was written
+
       // TODO: Make put this in a constructor?
       GameStats gameStats;
+
       gameStats.duration = timeInSecs;
       gameStats.gameType = gameType.getString();
       gameStats.isOfficial = false;
@@ -983,17 +992,28 @@ public:
       gameStats.serverName = mServerDescr;   
       gameStats.serverVersion = this->mClientBuild;
       gameStats.teamCount = teams.size();
-      //gameStats.teamStats
+
+      gameStats.teamStats.setSize(teams.size());
 
       for(S32 i = 0; i < teams.size(); i++)
       {
          TeamStats teamStats;
+         Color teamColor(color[i]);
 
          teamStats.name = teams[i].getString();
-         teamStats.color = "LLL";
-         teamStats.gameResult = "K";
+         teamStats.color = teamColor.toHexString();
+
+         // Remember that teamScores are sent in order of descending score...  Can we really trust that?  Does it matter if we do?
+         if(teams.size() == 1)      // Only one team, assign it win, arbitrary
+            teamStats.gameResult = "W";
+         else if(teamScores[0] == teamScores[1] && teamScores[i] == teamScores[0])     // Tie -- everyone with high score gets tie
+            teamStats.gameResult = "T";
+         else if(i == 0)            // No tie -- first team gets the win...
+            teamStats.gameResult = "W";
+         else                       // ...and everyone else gets the loss
+            teamStats.gameResult = "L";
+
          teamStats.score = teamScores[i];
-         //teamStats.playerStats
 
          gameStats.teamStats.push_back(teamStats);
       }
@@ -1028,21 +1048,6 @@ public:
             break;
          }
    }
-
-
-   //// TODO: Replace this with the ones in stringUtils
-   //// From http://www.codeproject.com/KB/stl/stdstringtrim.aspx
-   //void trim(string &str)
-   //{
-   //   string::size_type pos = str.find_last_not_of(' ');
-   //   if(pos != string::npos) 
-   //   {
-   //      str.erase(pos + 1);
-   //      pos = str.find_first_not_of(' ');
-   //      if(pos != string::npos) str.erase(0, pos);
-   //   }
-   //   else str.erase(str.begin(), str.end());
-   //}
 
 
    string cleanName(string name)

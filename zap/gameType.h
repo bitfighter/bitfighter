@@ -153,7 +153,7 @@ public:
       ScoringEventsCount
    };
 
-   static const S32 gMaxTeams = 9;                                   // Max teams allowed
+   static const S32 gMaxTeams = 9;                                   // Max teams allowed -- careful changing this; used for RPC ranges
    static const S32 gFirstTeamNumber = -2;                           // First team is "Hostile to All" with index -2
    static const U32 gMaxTeamCount = gMaxTeams - gFirstTeamNumber;    // Number of possible teams, including Neutral and Hostile to All
    static const char *validateGameType(const char *gtype);           // Returns a valid gameType, defaulting to gDefaultGameTypeIndex if needed

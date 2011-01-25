@@ -60,6 +60,9 @@ public:
 // Class for managing teams in the game
 class Team : public AbstractTeam
 {  
+private:
+   S32 mId;
+
 protected:
    S32 mScore;
 
@@ -70,13 +73,14 @@ public:
 
    F32 rating; 
 
-   Team() { numPlayers = 0; numBots = 0; mScore = 0; rating = 0; }     // Quickie constructor
+   Team(S32 id = -1) { numPlayers = 0; numBots = 0; mScore = 0; rating = 0; mId = id;}     // Quickie constructor
 
    void setName(const char *name) { _name = name; }
    void setName(StringTableEntry name) { _name = name; }
    StringTableEntry getName() { return _name.getString(); }
 
    S32 getScore() { return mScore; }
+   S32 getId() { return mId; }
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
 };

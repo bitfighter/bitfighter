@@ -420,8 +420,8 @@ void GameType::idle(GameObject::IdleCallPath path)
 }
 
 
-// Sorts players by score, low to high?
-S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
+// Sorts players by score, high to low
+S32 QSORT_CALLBACK playerScoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 {
    return b->getPointer()->getScore() - a->getPointer()->getScore();
 }
@@ -430,8 +430,28 @@ S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 // Sorts teams by score, high to low
 S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 {
-   return a->getScore() - b->getScore();
+   return b->getScore() - a->getScore();  
 }
+
+
+// Sorts players by their teams (in turn sorted by scores), then by scores
+// This MUST return teams in the same order as teamScoreSort
+// ==> We just don't have enough info to do this here and now...
+//S32 QSORT_CALLBACK playersByTeamAndScoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
+//{
+//   ClientRef *aClientRef = a->getPointer();
+//   ClientRef *bClientRef = b->getPointer();
+//
+//   if(aClientRef->getTeamScore() == bClientRef->getTeamScore())
+//   {
+//      if(aClientRef->getTeamId() == bClientRef->getTeamId())
+//         return aClientRef->getScore() - bClientRef->getScore();
+//      else
+//         return aClientRef->getTeamId() - bClientRef->getTeamId();
+//   }
+//   else
+//      return aClientRef->getTeamScore() - bClientRef->getTeamScore();
+//}
 
 
 extern IniSettings gIniSettings;
@@ -567,7 +587,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
                playerScores.push_back(mClientList[j]);
          }
 
-         playerScores.sort(scoreSort);
+         playerScores.sort(playerScoreSort);
 
          S32 curRowY = yt + teamAreaHeight + 1;
          S32 fontSize = U32(maxHeight * 0.8f);
@@ -607,7 +627,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       for(S32 i = 0; i < mTeams.size(); i++)
          teams.push_back(mTeams[i]);
 
-      teams.sort(teamScoreSort);
+      teams.sort(teamScoreSort);    
 
       S32 maxScore = getLeadingScore();
       S32 digits;
@@ -624,7 +644,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       for(S32 i = 0; i < teams.size(); i++)
       {
-         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - i * 38;
+         S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - (teams.size() - i - 1) * 38;
 
          renderFlag(xpos - 20, ypos + 18, teams[i].color);
          glColor3f(1,1,1);
@@ -848,7 +868,6 @@ void GameType::gameOverManGameOver()
 }
 
 
-
 // Transmit statistics to the master server, LogStats to game server
 void GameType::saveGameStats()
 {
@@ -862,7 +881,7 @@ void GameType::saveGameStats()
 
       sortTeams.sort(teamScoreSort);
 
-      // Push team names and scores into a structure we can pass via rpc; these will be sorted by score
+      // Push team names and scores into a structure we can pass via rpc; these will be sorted by score, high to low
       Vector<StringTableEntry> teams(sortTeams.size());
       Vector<S32> scores(sortTeams.size());
       Vector<RangedU32<0,MAX_PLAYERS> > teamPlayers;
@@ -880,21 +899,59 @@ void GameType::saveGameStats()
          teamBots.push_back(sortTeams[i].numPlayers);
       }
 
+      // And now the player data
+      Vector<bool> onTeamBoundary;
+      Vector<S32> playerScores;
+      Vector<U16> playerKills;
+      Vector<U16> playerDeaths;
+      Vector<U16> playerSuicides;
+      Vector<Vector<U16> > shots; 
+      Vector<Vector<U16> > hits;
+
       // Count the players and bots
       S32 players = 0;
       S32 bots = 0;
 
-      for(S32 i = 0; i < mClientList.size(); i++)
+      
+      // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
+      Vector<RefPtr<ClientRef> > mSortedClientList = mClientList;   
+      mSortedClientList.sort(playerScoreSort);
+
+      S32 currentTeam = mSortedClientList[0]->getTeam();
+
+      for(S32 i = 0; i < sortTeams.size(); i++)
       {
-         if(mClientList[i]->isRobot)
-            bots++;
-         else
-            players++;
+         for(S32 j = 0; j < mSortedClientList.size(); j++)
+         {
+            //if(mSortedClientList[j]->getTeam() != sortTeams[i].
+
+            Statistics *statistics = &mSortedClientList[j]->clientConnection->mStatistics;
+            if(mSortedClientList[j]->getTeam() != currentTeam)
+            {
+               currentTeam =  mSortedClientList[j]->getTeam();
+               onTeamBoundary.push_back(true);
+            }
+            else
+               onTeamBoundary.push_back(false);
+
+            playerScores.push_back(mSortedClientList[j]->getScore());
+            playerKills.push_back(statistics->getKills());
+            playerDeaths.push_back(statistics->getDeaths());
+            playerSuicides.push_back(statistics->getSuicides());
+            shots.push_back(statistics->getShotsVector());
+            hits.push_back(statistics->getHitsVector());
+
+            if(mSortedClientList[j]->isRobot)
+               bots++;
+            else
+               players++;
+         }
       }
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
       if(masterConn) // && gIniSettings.SendStatsToMaster)
-         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, timeInSecs);
+         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, timeInSecs,
+                                             onTeamBoundary, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
 
 		switch(gIniSettings.LogStats)
 		{
@@ -918,7 +975,6 @@ void GameType::saveGameStats()
       for(S32 i = 0; i < mClientList.size(); i++)
       {
          Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
-			mClientList[i]->getScore();
         
          if(masterConn) //&& gIniSettings.SendStatsToMaster)
             masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
