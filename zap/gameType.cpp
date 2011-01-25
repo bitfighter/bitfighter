@@ -420,14 +420,14 @@ void GameType::idle(GameObject::IdleCallPath path)
 }
 
 
-// Sorts players by score
+// Sorts players by score, low to high?
 S32 QSORT_CALLBACK scoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
 {
    return b->getPointer()->getScore() - a->getPointer()->getScore();
 }
 
 
-// Sorts teams by score
+// Sorts teams by score, high to low
 S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 {
    return a->getScore() - b->getScore();
@@ -853,9 +853,6 @@ void GameType::gameOverManGameOver()
 void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
-   //GameType *gameType = this; //gServerGame->getGameType();
-
-   //if(gameType)   // is this check needed? Can't call this function without GameType.
    {
       // Build a list of teams, so we can sort by score
       Vector<Team> sortTeams(mTeams.size());
@@ -898,6 +895,7 @@ void GameType::saveGameStats()
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
       if(masterConn) // && gIniSettings.SendStatsToMaster)
          masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, timeInSecs);
+
 		switch(gIniSettings.LogStats)
 		{
 		   case 1:
