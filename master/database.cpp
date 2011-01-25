@@ -140,8 +140,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          for(S32 i = 0; i < gameStats.teamStats.size(); i++)
          {
             const TeamStats *teamStats = &gameStats.teamStats[i];
-            sql = "INSERT INTO stats_team(stats_game_id, team_name, color, result) \
-                   VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', '" + teamStats->gameResult + "' ," + teamStats->color + "')";
+            sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color) \
+                   VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
+                              teamStats->gameResult + "' ," + teamStats->color + "')";
 
             query = conn.query(sql);
             result = query.execute();
