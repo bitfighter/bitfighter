@@ -73,6 +73,16 @@ struct TeamStats
    Vector<PlayerStats> playerStats;    // Info about all players on this team
 };
 
+struct ServerInformation
+{
+   U64 ID;
+   string Name;
+   string IP;
+   U32 Version;
+	ServerInformation(U64 id,const string name,const string ip,U32 version){ID=id;Name=name;IP=ip;Version=version;}
+};
+
+
 struct GameStats
 {
    string serverName;
@@ -99,6 +109,7 @@ private:
    const char *mDb;
    const char *mUser;
    const char *mPassword;
+	Vector<ServerInformation> cachedServers;
 
 #ifdef VERIFY_PHPBB3
    void initialize(const char *server, const char *db, const char *user, const char *password);
