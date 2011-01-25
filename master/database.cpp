@@ -130,13 +130,21 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 		}
       if(serverId_int == U64_MAX)  // not found in cache.
       {
-         sql = "INSERT INTO server(server_name, ip_address, build_version) \
-               VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
-         result = query.execute(sql);
-         if(result.rows() >= 1)
-            serverId_int = result.insert_id();  // server might not exist in the list
+         // find server in database
+			sql = "SELECT server_id FROM test.server AS server WHERE server_name = '" + sanitize(gameStats.serverName)
+				+ " AND ip_address = '" + gameStats.serverIP + " AND build_version = " + itos(gameStats.serverVersion);
+         StoreQueryResult results = query.store(sql.c_str(),sql.length());
+         if(results.num_rows() >= 1)
+            serverId_int = results[0][0];
+         if(serverId_int == U64_MAX) // not found in database
+         {
+            sql = "INSERT INTO server(server_name, ip_address, build_version) \
+                  VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
+            result = query.execute(sql);
+            if(result.rows() >= 1)
+               serverId_int = result.insert_id();
+         }
 
-         // TODO: if(serverId_int == U64_MAX) add new server to list
 
          if(cachedServers.size() > 20) cachedServers.erase(0);
          cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName,gameStats.serverIP,gameStats.serverVersion));
