@@ -40,6 +40,7 @@ namespace mysqlpp
 
 using namespace TNL;
 using namespace std;
+using namespace Zap;
 
 struct WeaponStats 
 {

@@ -26,7 +26,10 @@
 #ifndef _GAMEWEAPONS_H_
 #define _GAMEWEAPONS_H_
 
-#include "gameObject.h"
+//#include "gameObject.h"  // this file is included from master's database.h
+#include "tnlVector.h"
+#include "tnlNetStringTable.h"
+#include "point.h"
 
 using namespace TNL;
 
@@ -117,12 +120,14 @@ struct WeaponInfo
 };
 
 extern WeaponInfo gWeapons[WeaponCount];
+class GameObject;
 extern void createWeaponProjectiles(WeaponType weapon, Point &dir, Point &shooterPos, Point &shooterVel, F32 shooterRadius, GameObject *shooter);
 
 enum {
    NumSparkColors = 4,
 };
 
+enum SFXProfiles;
 
 struct ProjectileInfo
 {

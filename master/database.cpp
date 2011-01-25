@@ -119,7 +119,17 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       Query query(&conn);
       SimpleResult result;
       U64 serverId_int = U64_MAX;
-      // if(not fount in cachedServers) //TODO, find server in cachedServers
+      for(S32 i=cachedServers.size()-1; i>=0; i--)
+		{
+			if(cachedServers[i].Version == gameStats.serverVersion
+				&& cachedServers[i].IP == gameStats.serverIP
+				&& cachedServers[i].Name == gameStats.serverName )
+			{
+				serverId_int = cachedServers[i].ID;
+				break;
+			}
+		}
+      if(serverId_int == U64_MAX)  // not found in cache.
       {
          sql = "INSERT INTO server(server_name, ip_address, build_version) \
                VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
@@ -127,7 +137,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          if(result.rows() >= 1)
             serverId_int = result.insert_id();  // server might not exist in the list
 
-         // TODO: if(serverId_int = U64_MAX) add new server to list
+         // TODO: if(serverId_int == U64_MAX) add new server to list
 
          if(cachedServers.size() > 20) cachedServers.erase(0);
          cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName,gameStats.serverIP,gameStats.serverVersion));

@@ -23,6 +23,9 @@
 //------------------------------------------------------------------------------------
 
 
+// !!! sam: client can't connect to master when renaming MasterServerConnection to ClientServerConnection
+
+
 #include "masterInterface.h"
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
@@ -63,15 +66,15 @@ U32 gServerStartTime;
 string gPhpbb3Database;
 string gPhpbb3TablePrefix;
 
+//DatabaseWriter *databaseWriter;
 
-
-class ClientServerConnection;
+class MasterServerConnection;
 
 class GameConnectRequest
 {
 public:
-   SafePtr<ClientServerConnection> initiator;
-   SafePtr<ClientServerConnection> host;
+   SafePtr<MasterServerConnection> initiator;
+   SafePtr<MasterServerConnection> host;
 
    U32 initiatorQueryId;
    U32 hostQueryId;
@@ -176,7 +179,7 @@ static const char *sanitizeForJson(const char *value)
 
 
 
-class ClientServerConnection : public MasterServerInterface
+class MasterServerConnection : public MasterServerInterface
 {
 private:
    typedef MasterServerInterface Parent;
@@ -190,8 +193,8 @@ protected:
    /// @{
 
    ///
-   ClientServerConnection *mNext;
-   ClientServerConnection *mPrev;
+   MasterServerConnection *mNext;
+   MasterServerConnection *mPrev;
 
    /// @}
 
@@ -199,8 +202,8 @@ protected:
    /// @{
 
    ///
-   static ClientServerConnection             gServerList;      // List of servers we know about
-   static ClientServerConnection             gClientList;      // List of clients who are connected
+   static MasterServerConnection             gServerList;      // List of servers we know about
+   static MasterServerConnection             gClientList;      // List of clients who are connected
 public:
    static Vector<GameConnectRequest *>       gConnectList;
 protected:
@@ -267,7 +270,7 @@ public:
    /// Constructor initializes the linked list info with
    /// "safe" values so we don't explode if we destruct
    /// right away.
-   ClientServerConnection()
+   MasterServerConnection()
    {
       mStrikeCount = 0; 
       mLastActivityTime = 0;
@@ -281,7 +284,7 @@ public:
 
    /// Destructor removes the connection from the doubly linked list of
    /// server connections.
-   ~ClientServerConnection()
+   ~MasterServerConnection()
    {
       // unlink it if it's in the list
       mPrev->mNext = mNext;
@@ -299,7 +302,7 @@ public:
       }
 
       if(isInGlobalChat)
-         for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
             if(walk->isInGlobalChat)
                walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
 
@@ -398,7 +401,7 @@ public:
       Vector<IPAddress> theVector(IP_MESSAGE_ADDRESS_COUNT);
       theVector.reserve(IP_MESSAGE_ADDRESS_COUNT);
 
-      for(ClientServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
+      for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
       {
          // First check the version -- we only want to match potential players that agree on which protocol to use
          if(mCMProtocolVersion == 0)      // CM Protocol 0 uses strings for version numbers
@@ -512,12 +515,12 @@ public:
    }
 
 
-   ClientServerConnection *findClient(Nonce &clientId)   // Should be const, but that won't compile for reasons not yet determined!!
+   MasterServerConnection *findClient(Nonce &clientId)   // Should be const, but that won't compile for reasons not yet determined!!
    {
       if(!clientId.isValid())
          return NULL;
 
-      for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if(walk->mPlayerId == clientId)
             return walk;
 
@@ -542,7 +545,7 @@ public:
          // First the servers
          fprintf(f, "{\n\t\"servers\": [");
 
-            for(ClientServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
+            for(MasterServerConnection *walk = gServerList.mNext; walk != &gServerList; walk = walk->mNext)
             {
                fprintf(f, "%s\n\t\t{\n\t\t\t\"serverName\": \"%s\",\n\t\t\t\"protocolVersion\": %d,\n\t\t\t\"currentLevelName\": \"%s\",\n\t\t\t\"currentLevelType\": \"%s\",\n\t\t\t\"playerCount\": %d\n\t\t}",
                           first ? "" : ", ", sanitizeForJson(walk->mPlayerOrServerName.getString()), 
@@ -555,7 +558,7 @@ public:
          // Next the player names      // "players": [ "chris", "colin", "fred", "george", "Peter99" ],
          fprintf(f, "\n\t],\n\t\"players\": [");
          first = true;
-         for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
             fprintf(f, "%s\"%s\"", first ? "":", ", sanitizeForJson(walk->mPlayerOrServerName.getString()));
             first = false;
@@ -564,7 +567,7 @@ public:
          // Authentication status      // "authenticated": [ true, false, false, true, true ],
          fprintf(f, "],\n\t\"authenticated\": [");
          first = true;
-         for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+         for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          {
             fprintf(f, "%s%s", first ? "":", ", walk->mAuthenticated ? "true" : "false");
             first = false;
@@ -612,7 +615,7 @@ public:
                                                            ByteBufferPtr connectionParameters) )
    {
       // First, make sure that we're connected with the server that they're requesting a connection with
-      ClientServerConnection *conn = (ClientServerConnection *) gNetInterface->findConnection(remoteAddress);
+      MasterServerConnection *conn = (MasterServerConnection *) gNetInterface->findConnection(remoteAddress);
       if(!conn)
       {
          ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterNoSuchHost, (U32) strlen(MasterNoSuchHost) + 1);
@@ -887,7 +890,7 @@ public:
    {
       Nonce clientId(id);
 
-      ClientServerConnection *client = findClient(clientId);
+      MasterServerConnection *client = findClient(clientId);
 
       bool authenticated = (client && client->isAuthenticated());
 
@@ -994,6 +997,7 @@ public:
 
       //      DatabaseWriter dbWriter("127.0.0.1", "test", "user", "pw");
       //dbWriter.insertStats(gameStats);
+      //databaseWriter->insertStats(gameStats);
 
    }
 
@@ -1002,7 +1006,7 @@ public:
    {
       Nonce clientId(id);     // Reconstitute our id
 
-      for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if(walk->mPlayerId == clientId)
          {
             AuthenticationStatus status;
@@ -1126,7 +1130,7 @@ public:
 
             // Probably redundant, but let's cycle through all our clients and make sure the playerId is unique.  With 2^64
             // possibilities, it most likely will be.
-            for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+            for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
                if(walk != this && walk->mCMProtocolVersion >= 3 && walk->mPlayerId == mPlayerId)
                {
                   logprintf(LogConsumer::LogConnection, "User %s provided duplicate id to %s", mPlayerOrServerName.getString(), 
@@ -1248,7 +1252,7 @@ public:
       
       Vector<StringTableEntry> names;
 
-      for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if (walk != this && walk->isInGlobalChat)
          {
             walk->m2cPlayerJoinedGlobalChat(mPlayerOrServerName);
@@ -1264,7 +1268,7 @@ public:
    {
       isInGlobalChat = false;
 
-      for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
          if (walk != this && walk->isInGlobalChat)
             walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
    }
@@ -1311,7 +1315,7 @@ public:
       }
 
 
-      for(ClientServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
+      for(MasterServerConnection *walk = gClientList.mNext; walk != &gClientList; walk = walk->mNext)
       {
          if(isPrivate)
          {
@@ -1334,16 +1338,16 @@ public:
          }
    }
 
-   TNL_DECLARE_NETCONNECTION(ClientServerConnection);
+   TNL_DECLARE_NETCONNECTION(MasterServerConnection);
 
 };
 
-TNL_IMPLEMENT_NETCONNECTION(ClientServerConnection, NetClassGroupMaster, true);
+TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, true);
 
-Vector< GameConnectRequest* > ClientServerConnection::gConnectList;
+Vector< GameConnectRequest* > MasterServerConnection::gConnectList;
 
-ClientServerConnection ClientServerConnection::gServerList;
-ClientServerConnection ClientServerConnection::gClientList;
+MasterServerConnection MasterServerConnection::gServerList;
+MasterServerConnection MasterServerConnection::gClientList;
 
 
 void seedRandomNumberGenerator()
@@ -1427,6 +1431,9 @@ int main(int argc, const char **argv)
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
 
+
+   //databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
+
     // And until infinity, process whatever comes our way.
   for(;;)     // To infinity and beyond!!
    {
@@ -1444,13 +1451,13 @@ int main(int argc, const char **argv)
       if(gNeedToWriteStatus && currentTime - lastWroteStatusTime > REWRITE_TIME)  
       {
          lastWroteStatusTime = currentTime;
-         ClientServerConnection::writeClientServerList_JSON();
+         MasterServerConnection::writeClientServerList_JSON();
          gNeedToWriteStatus = false;
       }
 
-		for(S32 i=ClientServerConnection::gConnectList.size()-1; i >= 0; i--)
+		for(S32 i=MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
 		{
-			GameConnectRequest *request = ClientServerConnection::gConnectList[i];
+			GameConnectRequest *request = MasterServerConnection::gConnectList[i];
 			if(currentTime - request->requestTime > 5000) // 5 seconds
 			{
 				if(request->initiator.isValid())
@@ -1462,7 +1469,7 @@ int main(int argc, const char **argv)
 				}
 				if(request->host.isValid())
 					request->host->removeConnectRequest(request);
-				ClientServerConnection::gConnectList.erase_fast(i);
+				MasterServerConnection::gConnectList.erase_fast(i);
 				delete request;
 			}
 		}
