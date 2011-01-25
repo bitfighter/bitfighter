@@ -950,7 +950,7 @@ void GameType::saveGameStats()
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
       if(masterConn) // && gIniSettings.SendStatsToMaster)
-         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, timeInSecs,
+         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, /*gServerGame->getPlayerCount(), gServerGame->getRobotCount(),*/ timeInSecs,
                                              onTeamBoundary, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
 
 		switch(gIniSettings.LogStats)

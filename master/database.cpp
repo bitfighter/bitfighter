@@ -79,21 +79,20 @@ static string sanitize(const string &value)
 }
 
 
-static void doInsertStatsShots(Connection conn, const string &playerId, const string &weapon, S32 shots, S32 hits)
+static void doInsertStatsShots(Query query, const string &playerId, const string &weapon, S32 shots, S32 hits)
 {
    string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck)  \
                  VALUES(" + playerId + ", '" + weapon + "', " + itos(shots) + ", " + itos(hits) + ");";
 
-   Query query = conn.query(sql);
-   SimpleResult result = query.execute();
+   SimpleResult result = query.execute(sql);
 }
 
 
-static void insertStatsShots(Connection conn, const string &playerId, const Vector<WeaponStats> weaponStats)
+static void insertStatsShots(Query query, const string &playerId, const Vector<WeaponStats> weaponStats)
 {
    for(S32 i = 0; i < weaponStats.size(); i++)
    {
-      doInsertStatsShots(conn, playerId, WeaponInfo::getWeaponName(weaponStats[i].weaponType), weaponStats[i].shots, weaponStats[i].hits);
+      doInsertStatsShots(query, playerId, WeaponInfo::getWeaponName(weaponStats[i].weaponType), weaponStats[i].shots, weaponStats[i].hits);
    }
 }
 
@@ -132,7 +131,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       {
          // find server in database
 			sql = "SELECT server_id FROM test.server AS server WHERE server_name = '" + sanitize(gameStats.serverName)
-				+ " AND ip_address = '" + gameStats.serverIP + " AND build_version = " + itos(gameStats.serverVersion);
+				+ "' AND ip_address = '" + gameStats.serverIP + "' AND build_version = " + itos(gameStats.serverVersion);
          StoreQueryResult results = query.store(sql.c_str(),sql.length());
          if(results.num_rows() >= 1)
             serverId_int = results[0][0];
@@ -141,8 +140,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
             sql = "INSERT INTO server(server_name, ip_address, build_version) \
                   VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
             result = query.execute(sql);
-            if(result.rows() >= 1)
-               serverId_int = result.insert_id();
+            serverId_int = result.insert_id();
          }
 
 
@@ -161,7 +159,10 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                        itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
 
          result = query.execute(sql);
-         string gameId = itos(result.insert_id());
+			U64 gameID = result.insert_id();
+         if(gameID <= lastGameID) while(cachedServers.size() != 0) cachedServers.erase_fast(0);  // ID should only go bigger, if not, database might have changed.
+         lastGameID = gameID;
+         string gameId = itos(gameID);
 
 
          for(S32 i = 0; i < gameStats.teamStats.size(); i++)
@@ -192,7 +193,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                result = query.execute(sql);
                string playerId = itos(result.insert_id());
 
-               insertStatsShots(conn, playerId, playerStats->weaponStats);
+               insertStatsShots(query, playerId, playerStats->weaponStats);
             }
          }
       }
@@ -206,7 +207,10 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
          query = conn.query(sql);
          result = query.execute();
-         string gameId = itos(result.insert_id());
+			U64 gameID = result.insert_id();
+         if(gameID <= lastGameID) while(cachedServers.size() != 0) cachedServers.erase_fast(0);  // ID should only go bigger, if not, database might have changed.
+         lastGameID = gameID;
+         string gameId = itos(gameID);
 
          for(S32 i = 0; i < gameStats.teamStats[0].playerStats.size(); i++)
          {
@@ -221,7 +225,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
             result = query.execute(sql);
             string playerId = itos(result.insert_id());
 
-            insertStatsShots(conn, playerId, playerStats->weaponStats);
+            insertStatsShots(query, playerId, playerStats->weaponStats);
          }
       }
   

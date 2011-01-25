@@ -110,7 +110,8 @@ private:
    const char *mDb;
    const char *mUser;
    const char *mPassword;
-	Vector<ServerInformation> cachedServers;
+   Vector<ServerInformation> cachedServers;
+   U64 lastGameID;
 
 #ifdef VERIFY_PHPBB3
    void initialize(const char *server, const char *db, const char *user, const char *password);
@@ -125,10 +126,10 @@ public:
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
    void insertStats(const GameStats &gameStats);
 #else
-	DatabaseWriter() {};
-	DatabaseWriter(const char *server, const char *db, const char *user, const char *password) {};     // Constructor
-	DatabaseWriter(const char *db, const char *user, const char *password) {};                        // Constructor
-	void insertStats(const GameStats &gameStats) {};
+   DatabaseWriter() {};
+   DatabaseWriter(const char *server, const char *db, const char *user, const char *password) {};     // Constructor
+   DatabaseWriter(const char *db, const char *user, const char *password) {};                        // Constructor
+   void insertStats(const GameStats &gameStats) {};
 #endif
 };
 

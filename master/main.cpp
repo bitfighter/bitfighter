@@ -31,7 +31,6 @@
 #include "tnlVector.h"
 #include "tnlAsymmetricKey.h"
 #include "../zap/SharedConstants.h"
-//#include "../zap/stringUtils.h"   // For itos
 #include "authenticator.h"    // For authenticating users against the PHPBB3 database
 #include "database.h"         // For writing to the database
 #include <stdio.h>
@@ -39,8 +38,13 @@
 #include <stdarg.h>     // For va_args
 #include <time.h>
 
+//#include "../zap/stringUtils.h"     // For itos, replaceString
+#include "../zap/stringUtils.cpp"     // For itos, replaceString, only include this cpp file once in the master project, duplicate or no cpp include will get link errors.
+
+
 using namespace TNL;
 using namespace std;
+using namespace Zap;
 
 NetInterface *gNetInterface = NULL;
 
@@ -66,7 +70,7 @@ U32 gServerStartTime;
 string gPhpbb3Database;
 string gPhpbb3TablePrefix;
 
-//DatabaseWriter *databaseWriter;
+DatabaseWriter *databaseWriter;
 
 class MasterServerConnection;
 
@@ -954,12 +958,14 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,0xFFFFFF> > color, 
-                                                      RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, U16 timeInSecs,
+                                                      /*RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots,*/ U16 timeInSecs, 
                                                       Vector<bool> onTeamBoundary, Vector<S32> playerScores, 
                                                       Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                                       Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
    {
-      string timestr = itos(timeInSecs / 60) + ":";
+      RangedU32<0,MAX_PLAYERS> players; RangedU32<0,MAX_PLAYERS> bots;  // remove this when this is added in masterinterface.h masterinterface.cpp
+
+		string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
 
@@ -972,7 +978,7 @@ public:
       for(S32 i = 0; i < teams.size(); i++)
       {
          Color teamColor(color[i]);
-         logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%d\t%s", 
+         logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%s", 
                   teams[i].getString(), teamColor.toHexString());
       }
 
@@ -989,7 +995,7 @@ public:
       gameStats.levelName = levelName.getString();
       gameStats.playerCount = players.value;
       gameStats.serverIP = getNetAddressString();
-      gameStats.serverName = mServerDescr;   
+      gameStats.serverName = mPlayerOrServerName;//mServerDescr;   
       gameStats.serverVersion = this->mClientBuild;
       gameStats.teamCount = teams.size();
 
@@ -1020,7 +1026,7 @@ public:
 
       //      DatabaseWriter dbWriter("127.0.0.1", "test", "user", "pw");
       //dbWriter.insertStats(gameStats);
-      //databaseWriter->insertStats(gameStats);
+      databaseWriter->insertStats(gameStats);
 
    }
 
@@ -1440,7 +1446,7 @@ int main(int argc, const char **argv)
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
 
 
-   //databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
+   databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
 
     // And until infinity, process whatever comes our way.
   for(;;)     // To infinity and beyond!!
