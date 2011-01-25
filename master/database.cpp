@@ -99,7 +99,6 @@ static void insertStatsShots(Connection conn, const string &playerId, const Vect
 
 
 #define btos(value) (value ? "1" : "0")
-const U64 U64_MAX=0xFFFFFFFFFFFFFFFF;
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
