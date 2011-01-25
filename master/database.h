@@ -133,18 +133,6 @@ public:
 };
 
 
-/*
-Create connection, lifetime is lifetime of app
-Create query object
-Run insert query
-   --> will return SimpleResult object
-   */
-
-
-
-
-
-
 #endif
 
 

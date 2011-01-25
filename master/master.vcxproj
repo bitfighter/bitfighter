@@ -52,7 +52,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CHRIS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CHRIS;VERIFY_PHPBB3</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
