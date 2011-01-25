@@ -947,7 +947,7 @@ public:
    // Send game statistics to the master server   ==> Current as of 015
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
-                                                      Vector<RangedU32<0,100> > colorR, Vector<RangedU32<0,100> > colorG, Vector<RangedU32<0,100> > colorB, 
+                                                      Vector<RangedU32<0,0xFFFFFF> > color, 
                                                       RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots, S16 timeInSecs))
    {
       string timestr = itos(timeInSecs / 60) + ":";
@@ -959,10 +959,13 @@ public:
                      mClientBuild, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
                      teams.size(), players.value, bots.value, timestr.c_str() );
 
-      // TEAM | stats version (3) | team name | players | bots | score | R | G |B
+      // TEAM | stats version (3) | team name | players | bots | score | hexColor
       for(S32 i = 0; i < teams.size(); i++)
-         logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%d\t%d\t%d\t%d", 
-                  teams[i].getString(), (U32)colorR[i], (U32)colorG[i], (U32)colorB[i]);
+      {
+         Color teamColor(color[i]);
+         logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%d\t%s", 
+                  teams[i].getString(), teamColor.toHexString());
+      }
 
 
       // TODO: Make put this in a constructor?

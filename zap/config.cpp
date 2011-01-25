@@ -235,8 +235,8 @@ static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
 	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
-   gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toString()));
-   gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toString()));
+   gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
+   gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
 }
 
 static void loadEffectsSettings()
@@ -1216,8 +1216,8 @@ static void writeTesting()
 
    gINI.SetValueI ("Testing", "BurstGraphics",  (S32) (gIniSettings.burstGraphicsMode), true);
    gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
-   gINI.SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toString());
-   gINI.SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toString());
+   gINI.SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toRGBString());
+   gINI.SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString());
 }
 
 

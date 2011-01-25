@@ -1988,6 +1988,7 @@ int main(int argc, char **argv)
    moveToAppPath();
 #endif
 
+
    // Put all cmd args into a Vector for easier processing
    Vector<StringPtr> argVector;
    for(S32 i = 1; i < argc; i++)
