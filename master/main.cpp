@@ -1024,7 +1024,7 @@ public:
       {
          Color teamColor(color[i]);
          logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%s", 
-                  teams[i].getString(), teamColor.toHexString());
+                  teams[i].getString(), teamColor.toHexString().c_str());
       }
 
       

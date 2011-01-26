@@ -116,12 +116,12 @@ bool Authenticator::authenticate(string &username, string password, int &errorCo
 
 		if (!hasher.check_hash(password, results[0]["user_password"].c_str()))
       {
-         username = results[0]["username"];     // Normalize username
+         username = results[0]["username"].c_str();     // Normalize username
 			errorCode = 2;                         // invalid password
 			return false;                          // validation failure
 		}
       // else
-      username = results[0]["username"];        // Normalize username
+      username = results[0]["username"].c_str();        // Normalize username
 		return true;                              // password is correct
 	}
 	catch(mysqlpp::ConnectionFailed e){
