@@ -902,6 +902,7 @@ void GameType::saveGameStats()
       // And now the player data, presized to fit the number of clients; avoids dynamic resizing
       Vector<bool> lastOnTeam             (mClientList.size());
       Vector<StringTableEntry> playerNames(mClientList.size());
+      Vector<Vector<U8> > playerIDs       (mClientList.size());
       Vector<bool> isBot                  (mClientList.size());
       Vector<S32> playerScores            (mClientList.size());
       Vector<U16> playerKills             (mClientList.size());
@@ -926,14 +927,15 @@ void GameType::saveGameStats()
             
             lastOnTeam.push_back(false);
 
-            playerNames.push_back(mSortedClientList[j]->name);    // What if this is a bot??  What should go here??
-            isBot.push_back(mSortedClientList[j]->isRobot);
-            playerScores.push_back(mSortedClientList[j]->getScore());
-            playerKills.push_back(statistics->getKills());
-            playerDeaths.push_back(statistics->getDeaths());
+            playerNames   .push_back(mSortedClientList[j]->name);    // What if this is a bot??  What should go here??
+            playerIDs     .push_back(mSortedClientList[j]->clientConnection->getClientId()->toVector());
+            isBot         .push_back(mSortedClientList[j]->isRobot);
+            playerScores  .push_back(mSortedClientList[j]->getScore());
+            playerKills   .push_back(statistics->getKills());
+            playerDeaths  .push_back(statistics->getDeaths());
             playerSuicides.push_back(statistics->getSuicides());
-            shots.push_back(statistics->getShotsVector());
-            hits.push_back(statistics->getHitsVector());
+            shots         .push_back(statistics->getShotsVector());
+            hits          .push_back(statistics->getHitsVector());
          }
 
          lastOnTeam[lastOnTeam.size()] = true;
@@ -942,7 +944,7 @@ void GameType::saveGameStats()
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin
       if(masterConn) // && gIniSettings.SendStatsToMaster)
          masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
-                                             timeInSecs, playerNames, isBot,
+                                             timeInSecs, playerNames, playerIDs, isBot,
                                              lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
 
 
