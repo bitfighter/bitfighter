@@ -91,9 +91,7 @@ static void doInsertStatsShots(Query query, const string &playerId, const string
 static void insertStatsShots(Query query, const string &playerId, const Vector<WeaponStats> weaponStats)
 {
    for(S32 i = 0; i < weaponStats.size(); i++)
-   {
       doInsertStatsShots(query, playerId, WeaponInfo::getWeaponName(weaponStats[i].weaponType), weaponStats[i].shots, weaponStats[i].hits);
-   }
 }
 
 
@@ -134,9 +132,11 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 			sql = "SELECT server_id FROM test.server AS server WHERE server_name = '" + sanitize(gameStats.serverName)
 				+ "' AND ip_address = '" + gameStats.serverIP + "'";
          StoreQueryResult results = query.store(sql.c_str(),sql.length());
+
          if(results.num_rows() >= 1)
             serverId_int = results[0][0];
-         if(serverId_int == U64_MAX) // not found in database
+
+         if(serverId_int == U64_MAX)      // Not in database
          {
             sql = "INSERT INTO server(server_name, ip_address) \
                   VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
@@ -144,10 +144,13 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
             serverId_int = result.insert_id();
          }
 
+         // Limit cache growth
+         if(cachedServers.size() > 20) 
+            cachedServers.erase(0);
 
-         if(cachedServers.size() > 20) cachedServers.erase(0);
-         cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName,gameStats.serverIP));
+         cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
       }
+
       string serverId = itos(serverId_int);
 
       if(gameStats.isTeamGame)
@@ -204,7 +207,6 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       }
       else     // Not team game
       {
-
          sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
                                        duration_seconds, level_name, is_team_game, team_count, is_tied) \
                 VALUES(" + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " + 
@@ -237,7 +239,6 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
             insertStatsShots(query, playerId, playerStats->weaponStats);
          }
       }
-  
    }
 
    catch (const BadOption &ex) {
