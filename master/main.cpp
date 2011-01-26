@@ -887,35 +887,35 @@ public:
    }
 
 
-   // Send player statistics to the master server
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, 
-                                                        StringTableEntry teamName, S32 score,
-                                                        U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
-   {
-      Nonce clientId(id);
+   //// Send player statistics to the master server
+   //TNL_DECLARE_RPC_OVERRIDE(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, 
+   //                                                     StringTableEntry teamName, S32 score,
+   //                                                     U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits))
+   //{
+   //   Nonce clientId(id);
 
-      MasterServerConnection *client = findClient(clientId);
+   //   MasterServerConnection *client = findClient(clientId);
 
-      bool authenticated = (client && client->isAuthenticated());
+   //   bool authenticated = (client && client->isAuthenticated());
 
-      S32 totalShots = 0;
-      S32 totalHits = 0;
+   //   S32 totalShots = 0;
+   //   S32 totalHits = 0;
 
-      for(S32 i = 0; i < shots.size(); i++)
-      {
-         totalShots += shots[i];
-         totalHits += hits[i];
-      }
+   //   for(S32 i = 0; i < shots.size(); i++)
+   //   {
+   //      totalShots += shots[i];
+   //      totalHits += hits[i];
+   //   }
 
-      // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
-      logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
-               playerName.getString(), 
-               authenticated ? "true" : "false", 
-               isBot ? "true" : "false", 
-               teamName.getString(), 
-               score, kills, deaths, suicides, 
-               totalShots, totalHits);
-   }
+   //   // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
+   //   logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
+   //            playerName.getString(), 
+   //            authenticated ? "true" : "false", 
+   //            isBot ? "true" : "false", 
+   //            teamName.getString(), 
+   //            score, kills, deaths, suicides, 
+   //            totalShots, totalHits);
+   //}
 
 
    // Send game statistics to the master server  ==> Deprecated
@@ -953,26 +953,70 @@ public:
    /////////////////////////////////////////////////////////////////////////////////////
 
 
+   // This relies on teamScores being sent sorted in order of descending score...  Can we really trust that?  Does it matter if we do?
+   static string getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst)
+   {
+      if(scores == 1)      // Only one player/team, assign win, arbitrary
+         return "W";
+      else if(score1 == score2 && currScore == score1)     // Tie -- everyone with high score gets tie
+         return "T";
+      else if(isFirst)     // No tie -- first one gets the win...
+         return "W";
+      else                 // ...and everyone else gets the loss
+         return "L";
+   }
+
+
    // Send game statistics to the master server   ==> Current as of 015
    // Note that teams are sent in descending order, high score to low  
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,0xFFFFFF> > color, 
-                                                      /*RangedU32<0,MAX_PLAYERS> players, RangedU32<0,MAX_PLAYERS> bots,*/ U16 timeInSecs, 
-                                                      Vector<bool> onTeamBoundary, Vector<S32> playerScores, 
+                                                      U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<bool> isBot, 
+                                                      Vector<bool> lastOnTeam, Vector<S32> playerScores, 
                                                       Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                                       Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
    {
-      RangedU32<0,MAX_PLAYERS> players; RangedU32<0,MAX_PLAYERS> bots;  // remove this when this is added in masterinterface.h masterinterface.cpp
+      // Some integrity checks to protect agains bad data
+      // TODO: Expand
+      bool error = false;
+
+      if(shots.size() != hits.size())
+      {
+         error = true;
+      }
+      if(!error)
+      {
+         for(S32 i = 0; i < shots.size(); i++)
+            if(shots[i].size() != hits[i].size())
+            {
+               error = true;
+               break;
+            }
+      }
+
+      if(error)
+      {
+         // TODO: Log the error, and the client that sent it
+         return;
+      }
 
 		string timestr = itos(timeInSecs / 60) + ":";
       timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
+      S32 players = 0, bots = 0;
+      for(S32 i = 0; i < isBot.size(); i++)
+      {
+         if(isBot[i])
+            bots++;
+         else
+            players++;
+      }
 
       // GAME | stats version (3) | GameVersion | timestamp | GameType | teamGame (true/false) | level name | teams | players | bots | time
       logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 
                      mClientBuild, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
-                     teams.size(), players.value, bots.value, timestr.c_str() );
+                     teams.size(), players, bots, timestr.c_str() );
 
       // TEAM | stats version (3) | team name | players | bots | score | hexColor
       for(S32 i = 0; i < teams.size(); i++)
@@ -982,10 +1026,21 @@ public:
                   teams[i].getString(), teamColor.toHexString());
       }
 
+      
+      // TODO: Make this work, integrate with statistics being logged on server
+       //   // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
+   //   logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
+   //            playerName.getString(), 
+   //            authenticated ? "true" : "false", 
+   //            isBot ? "true" : "false", 
+   //            teamName.getString(), 
+   //            score, kills, deaths, suicides, 
+   //            totalShots, totalHits);
+
 
       S32 lastClient = 0;     // Track last player who's info was written
 
-      // TODO: Make put this in a constructor?
+      // TODO: Make put this in a constructor
       GameStats gameStats;
 
       gameStats.duration = timeInSecs;
@@ -993,13 +1048,15 @@ public:
       gameStats.isOfficial = false;
       gameStats.isTeamGame = teamGame;
       gameStats.levelName = levelName.getString();
-      gameStats.playerCount = players.value;
+      gameStats.playerCount = playerNames.size();     // Humans + bots
       gameStats.serverIP = getNetAddressString();
-      gameStats.serverName = mPlayerOrServerName;//mServerDescr;   
+      gameStats.serverName = mPlayerOrServerName; 
       gameStats.serverVersion = this->mClientBuild;
       gameStats.teamCount = teams.size();
 
       gameStats.teamStats.setSize(teams.size());
+
+      S32 lastPlayerProcessed = 0;
 
       for(S32 i = 0; i < teams.size(); i++)
       {
@@ -1009,23 +1066,53 @@ public:
          teamStats.name = teams[i].getString();
          teamStats.color = teamColor.toHexString();
 
-         // Remember that teamScores are sent in order of descending score...  Can we really trust that?  Does it matter if we do?
-         if(teams.size() == 1)      // Only one team, assign it win, arbitrary
-            teamStats.gameResult = "W";
-         else if(teamScores[0] == teamScores[1] && teamScores[i] == teamScores[0])     // Tie -- everyone with high score gets tie
-            teamStats.gameResult = "T";
-         else if(i == 0)            // No tie -- first team gets the win...
-            teamStats.gameResult = "W";
-         else                       // ...and everyone else gets the loss
-            teamStats.gameResult = "L";
+         teamStats.gameResult = getResult(teams.size(), teamScores[0], teamScores[1], teamScores[i], i == 0);
 
          teamStats.score = teamScores[i];
 
          gameStats.teamStats.push_back(teamStats);
+
+         for(S32 j = lastPlayerProcessed; j < playerNames.size(); j++)
+         {
+            PlayerStats playerStats;
+
+            // TODO: Put these into a constuctor
+            playerStats.deaths = playerDeaths[j];
+            if(teamGame)      // Team games players get team's win/loss/tie status
+               playerStats.gameResult = teamStats.gameResult;
+            else
+               playerStats.gameResult = getResult(playerScores.size(), playerScores[0], playerScores[1], playerScores[j], j == 0);
+
+            playerStats.isAuthenticated = false;     // TODO: Look at list of authetnciated players, determine if name is on it... good enough?  Or pass ID as well?
+            playerStats.isRobot = isBot[j];
+            playerStats.kills = playerKills[j];
+            playerStats.name = playerNames[j].getString();
+            playerStats.points = playerScores[j];
+            playerStats.suicides = playerSuicides[j];
+            playerStats.switchedTeams = false;     // TODO: How do we track this?  What should it mean?
+
+            
+            for(S32 k = 0; k < shots.size(); k++)
+            {
+               WeaponStats weaponStats;
+               //TODO: But the follwing into a constructor
+               weaponStats.hits = hits[j][k];
+               weaponStats.shots = shots[j][k];
+               weaponStats.weaponType = InvalidWeapon;      // TODO: Need enum of "stats-tracked-weapons" or something to provide weaponType
+            }
+
+            teamStats.playerStats.push_back(playerStats);
+
+            if(lastOnTeam[j])
+            {
+               lastPlayerProcessed = j;
+               break;
+            }
+         }
       }
 
-      //      DatabaseWriter dbWriter("127.0.0.1", "test", "user", "pw");
-      //dbWriter.insertStats(gameStats);
+      DatabaseWriter dbWriter("127.0.0.1", "bitfighter", "user", "pw");  // TODO: Get these vals from the config file
+      dbWriter.insertStats(gameStats);
       databaseWriter->insertStats(gameStats);
 
    }

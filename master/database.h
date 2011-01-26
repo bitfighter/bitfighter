@@ -45,8 +45,8 @@ using namespace Zap;
 struct WeaponStats 
 {
    WeaponType weaponType;
-   S32 shots;
-   S32 hits;
+   U16 shots;
+   U16 hits;
 };
 
 

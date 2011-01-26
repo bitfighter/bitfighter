@@ -899,60 +899,56 @@ void GameType::saveGameStats()
          teamBots.push_back(sortTeams[i].numPlayers);
       }
 
-      // And now the player data
-      Vector<bool> onTeamBoundary;
-      Vector<S32> playerScores;
-      Vector<U16> playerKills;
-      Vector<U16> playerDeaths;
-      Vector<U16> playerSuicides;
-      Vector<Vector<U16> > shots; 
-      Vector<Vector<U16> > hits;
+      // And now the player data, presized to fit the number of clients; avoids dynamic resizing
+      Vector<bool> lastOnTeam             (mClientList.size());
+      Vector<StringTableEntry> playerNames(mClientList.size());
+      Vector<bool> isBot                  (mClientList.size());
+      Vector<S32> playerScores            (mClientList.size());
+      Vector<U16> playerKills             (mClientList.size());
+      Vector<U16> playerDeaths            (mClientList.size());
+      Vector<U16> playerSuicides          (mClientList.size());
+      Vector<Vector<U16> > shots          (mClientList.size()); 
+      Vector<Vector<U16> > hits           (mClientList.size());
 
-      // Count the players and bots
-      S32 players = 0;
-      S32 bots = 0;
-
-      
       // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
       Vector<RefPtr<ClientRef> > mSortedClientList = mClientList;   
       mSortedClientList.sort(playerScoreSort);
-
-      S32 currentTeam = mSortedClientList[0]->getTeam();
 
       for(S32 i = 0; i < sortTeams.size(); i++)
       {
          for(S32 j = 0; j < mSortedClientList.size(); j++)
          {
-            //if(mSortedClientList[j]->getTeam() != sortTeams[i].
+            // Only looking for players on the current team
+            if(mSortedClientList[j]->getTeam() != sortTeams[i].getId())
+               continue;
 
             Statistics *statistics = &mSortedClientList[j]->clientConnection->mStatistics;
-            if(mSortedClientList[j]->getTeam() != currentTeam)
-            {
-               currentTeam =  mSortedClientList[j]->getTeam();
-               onTeamBoundary.push_back(true);
-            }
-            else
-               onTeamBoundary.push_back(false);
+            
+            lastOnTeam.push_back(false);
 
+            playerNames.push_back(mSortedClientList[j]->name);    // What if this is a bot??  What should go here??
+            isBot.push_back(mSortedClientList[j]->isRobot);
             playerScores.push_back(mSortedClientList[j]->getScore());
             playerKills.push_back(statistics->getKills());
             playerDeaths.push_back(statistics->getDeaths());
             playerSuicides.push_back(statistics->getSuicides());
             shots.push_back(statistics->getShotsVector());
             hits.push_back(statistics->getHitsVector());
-
-            if(mSortedClientList[j]->isRobot)
-               bots++;
-            else
-               players++;
          }
+
+         lastOnTeam[lastOnTeam.size()] = true;
       }
 
-      S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played
+      S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin
       if(masterConn) // && gIniSettings.SendStatsToMaster)
-         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, /*gServerGame->getPlayerCount(), gServerGame->getRobotCount(),*/ timeInSecs,
-                                             onTeamBoundary, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
+         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
+                                             timeInSecs, playerNames, isBot,
+                                             lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
 
+
+      // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code
+      // in the master, which will have these structs as well, to produce a consnstent text logfile format.
+      // We could also have the stats be written to a local mysql database if one were available using the same code.
 		switch(gIniSettings.LogStats)
 		{
 		   case 1:
@@ -976,13 +972,13 @@ void GameType::saveGameStats()
       {
          Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
         
-         if(masterConn) //&& gIniSettings.SendStatsToMaster)
-            masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
-                                               mClientList[i]->isRobot,
-                                               getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
-                                               mClientList[i]->getScore(),
-                                               statistics->getKills(), statistics->getDeaths(), 
-                                               statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
+         //if(masterConn) //&& gIniSettings.SendStatsToMaster)
+         //   masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
+         //                                      mClientList[i]->isRobot,
+         //                                      getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
+         //                                      mClientList[i]->getScore(),
+         //                                      statistics->getKills(), statistics->getDeaths(), 
+         //                                      statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
 			switch(gIniSettings.LogStats)
 			{
 			   case 1:
