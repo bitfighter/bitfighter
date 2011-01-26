@@ -270,9 +270,8 @@ protected:
 
 public:
 
-   /// Constructor initializes the linked list info with
-   /// "safe" values so we don't explode if we destruct
-   /// right away.
+   /// Constructor initializes the linked list info with "safe" values
+   /// so we don't explode if we destruct right away.
    MasterServerConnection()
    {
       mStrikeCount = 0; 
@@ -285,11 +284,10 @@ public:
       mAuthenticated = false;
    }
 
-   /// Destructor removes the connection from the doubly linked list of
-   /// server connections.
+   /// Destructor removes the connection from the doubly linked list of server connections
    ~MasterServerConnection()
    {
-      // unlink it if it's in the list
+      // Unlink it if it's in the list
       mPrev->mNext = mNext;
       mNext->mPrev = mPrev;
 
@@ -467,7 +465,8 @@ public:
          mStrikeCount++;
          if(mStrikeCount == 3)
 			{
-            logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds", mPlayerOrServerName.getString(), timeDeltaMinimum);
+            logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds", 
+                                                  mPlayerOrServerName.getString(), timeDeltaMinimum);
             disconnect(ReasonFloodControl, "");
 			}
       }
@@ -1561,7 +1560,7 @@ int main(int argc, const char **argv)
          gNeedToWriteStatus = false;
       }
 
-		for(S32 i=MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
+		for(S32 i = MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
 		{
 			GameConnectRequest *request = MasterServerConnection::gConnectList[i];
 			if(currentTime - request->requestTime > 5000) // 5 seconds
