@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.9
+-- version 3.3.5
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 25, 2011 at 11:01 PM
+-- Generation Time: Jan 26, 2011 at 01:26 PM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -27,7 +27,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 
 CREATE TABLE IF NOT EXISTS `server` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
-  `server_name` text COLLATE utf8_unicode_ci NOT NULL,
+  `server_name` text COLLATE utf8_unicode_ci,
   `ip_address` text COLLATE utf8_unicode_ci NOT NULL,
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `name_ip_unique` (`server_name`(50),`ip_address`(15))
@@ -147,13 +147,12 @@ CREATE TABLE IF NOT EXISTS `stats_player_shots` (
 CREATE TABLE IF NOT EXISTS `stats_team` (
   `stats_team_id` int(11) NOT NULL AUTO_INCREMENT,
   `stats_game_id` int(11) NOT NULL,
-  `team_name` text COLLATE utf8_unicode_ci NOT NULL,
+  `team_name` text COLLATE utf8_unicode_ci,
   `color_hex` text COLLATE utf8_unicode_ci NOT NULL,
   `team_score` int(11) NOT NULL,
   `result` char(1) COLLATE utf8_unicode_ci NOT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_team_id`),
-  UNIQUE KEY `game_team_name_unique` (`stats_game_id`,`team_name`(50)),
   KEY `stats_game_id` (`stats_game_id`),
   KEY `result` (`result`),
   KEY `insertion_date` (`insertion_date`)
