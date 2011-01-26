@@ -22,17 +22,16 @@
 //
 //------------------------------------------------------------------------------------
 
-
-// !!! sam: client can't connect to master when renaming MasterServerConnection to ClientServerConnection
-
+#include "../zap/SharedConstants.h"
 
 #include "masterInterface.h"
+#include "authenticator.h"    // For authenticating users against the PHPBB3 database
+#include "database.h"         // For writing to the database
+
 #include "tnlNetInterface.h"
 #include "tnlVector.h"
 #include "tnlAsymmetricKey.h"
-#include "../zap/SharedConstants.h"
-#include "authenticator.h"    // For authenticating users against the PHPBB3 database
-#include "database.h"         // For writing to the database
+
 #include <stdio.h>
 #include <string>
 #include <stdarg.h>     // For va_args
@@ -978,6 +977,9 @@ public:
                                                       Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                                       Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
    {
+      if(mInfoFlags & TestModeFlag)       // Ignore stats from server in test mode
+         return;  
+
       // Some integrity checks to protect agains bad data
       // TODO: Expand
       bool error = false;

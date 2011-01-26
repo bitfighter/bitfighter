@@ -29,10 +29,10 @@
 #include "../master/masterInterface.h"
 
 #include "gameType.h"
-
-#include "../tnl/tnlNetObject.h"
-
 #include "gameConnection.h"
+
+#include "tnlNetObject.h"
+
 #include <string>
 
 using namespace std;
