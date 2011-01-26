@@ -240,7 +240,7 @@ static const U32 U32_MAX = U32(0xFFFFFFFF);                       ///< Constant 
 static const F32 F32_MIN = F32(1.175494351e-38F);                 ///< Constant Min Limit F32
 static const F32 F32_MAX = F32(3.402823466e+38F);                 ///< Constant Max Limit F32
 
-static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFF);               ///< Constant Max Limit U64
+static const U64 U64_MAX = U64(0xFFFFFFFFFFFFFFFFULL);               ///< Constant Max Limit U64
 
 
 
