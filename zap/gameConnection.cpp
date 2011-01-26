@@ -120,7 +120,6 @@ GameConnection::~GameConnection()
    if(isConnectionToClient() && gServerGame->getSuspendor() == this)     // isConnectionToClient only true if we're the server
       gServerGame->suspenderLeftGame();
 
-
    if(isConnectionToClient() && mAcheivedConnection)    // isConnectionToClient only true if we're the server
    {
      // Compute time we were connected
