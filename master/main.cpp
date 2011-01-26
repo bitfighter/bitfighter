@@ -1099,10 +1099,10 @@ public:
             for(S32 k = 0; k < shots.size(); k++)
             {
                WeaponStats weaponStats;
-               //TODO: Put the follwing into a constructor
+               //TODO: Put the following into a constructor
                weaponStats.hits = hits[j][k];
                weaponStats.shots = shots[j][k];
-               weaponStats.weaponType = InvalidWeapon;      // TODO: Need enum of "stats-tracked-weapons" or something to provide weaponType
+               weaponStats.weaponType = (WeaponType) k;
             }
 
             teamStats.playerStats.push_back(playerStats);
