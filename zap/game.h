@@ -264,7 +264,6 @@ private:
    };
 
    U32 mMaxPlayers;
-   U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    bool mTestMode;           // True if being tested from editor
    string mHostName;
    string mHostDescr;
@@ -286,6 +285,7 @@ private:
    U32 mPlayerCount;    
 
 public:
+   U32 mInfoFlags;           // Not used for much at the moment, but who knows? --> propagates to master
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
    ~ServerGame();   // Destructor
 

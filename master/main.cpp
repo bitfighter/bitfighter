@@ -1115,9 +1115,9 @@ public:
          }
       }
 
-      DatabaseWriter dbWriter("127.0.0.1", "bitfighter", "user", "pw");  // TODO: Get these vals from the config file
-      dbWriter.insertStats(gameStats);
-      databaseWriter->insertStats(gameStats);
+      //DatabaseWriter dbWriter("127.0.0.1", "bitfighter", "user", "pw");  // TODO: Get these vals from the config file
+      //dbWriter.insertStats(gameStats);
+      databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
 
    }
 
