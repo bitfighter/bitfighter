@@ -60,7 +60,7 @@ public:
    S32 getHits();
    S32 getHits(S32 weaponType);     // --> S32 should be WeaponType
 
-   F32 getHitRate();                         // Report overall hit rate
+   F32 getHitRate();                  // Report overall hit rate
    F32 getHitRate(S32 weaponType);    // Report hit rate for specified weapon      // --> S32 should be WeaponType
 
    void addKill();      // Player killed another player
@@ -72,8 +72,8 @@ public:
    void addSuicide();   // Player killed self
    U16 getSuicides();   // Report cumulated suicides
 
-   void addFratricide();   // Player killed self
-   U16 getFratricides();   // Report cumulated suicides
+   void addFratricide();   // Player killed teammate
+   U16 getFratricides();   // Report cumulated fratricides
 
 
    Vector<U16> getShotsVector();
