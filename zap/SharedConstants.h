@@ -27,6 +27,9 @@
 #ifndef _SHARED_CONSTANTS_H_
 #define _SHARED_CONSTANTS_H_
 
+#include "tnlTypes.h"      // for BIT macro
+
+
 // Constants that need to be the same on both the game and the master server
 // This file is shared between both code bases.
 
@@ -47,6 +50,10 @@ enum AuthenticationStatus {
    AuthenticationStatusTryAgainLater,
    AuthenticationStatusFailed,
    AuthenticationStatusCount
+};
+
+enum ServerInfoFlags {
+   TestModeFlag = BIT(0),
 };
 
 #endif

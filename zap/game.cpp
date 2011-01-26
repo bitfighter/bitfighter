@@ -37,6 +37,7 @@
 #include "moveObject.h"
 #include "projectile.h"          // For SpyBug class
 #include "sfx.h"
+#include "SharedConstants.h"     // For ServerInfoFlags enum
 #include "ship.h"
 #include "sparkManager.h"
 #include "SweptEllipsoid.h"
@@ -309,11 +310,11 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
 
    hostingModePhase = ServerGame::NotHosting;
 
-   mInfoFlags = 0;                  // Not used for much at the moment, but who knows --> propagates to master
+   mInfoFlags = 0;                  // Currently only used to specify test mode
    mCurrentLevelIndex = 0;
 
    if(testMode)
-      mInfoFlags = 1;
+      mInfoFlags = TestModeFlag;
 
    mTestMode = testMode;
 
