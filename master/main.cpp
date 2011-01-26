@@ -967,6 +967,7 @@ public:
 
    // Send game statistics to the master server   ==> Current as of 015
    // Note that teams are sent in descending order, high score to low  
+	/*
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,0xFFFFFF> > color, 
@@ -976,6 +977,28 @@ public:
                                                       Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                                       Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
    {
+	}*/
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
+	{
+StringTableEntry gameType = gameStat.gameType;
+bool teamGame = gameStat.teamGame;
+StringTableEntry levelName = gameStat.levelName;
+Vector<StringTableEntry> teams = gameStat.teams;
+Vector<S32> teamScores = gameStat.teamScores;
+Vector<RangedU32<0,0xFFFFFF> > color = gameStat.color;
+U16 timeInSecs = gameStat.timeInSecs;
+Vector<StringTableEntry> playerNames = gameStat.playerNames;
+Vector<Vector<U8> > playerIds = gameStat.playerIDs;
+Vector<bool> isBot = gameStat.isBot;
+Vector<bool> lastOnTeam = gameStat.lastOnTeam;
+Vector<S32> playerScores = gameStat.playerScores;
+Vector<U16> playerKills = gameStat.playerKills;
+Vector<U16> playerDeaths = gameStat.playerDeaths;
+Vector<U16> playerSuicides = gameStat.playerSuicides;
+Vector<Vector<U16> > shots = gameStat.shots;
+Vector<Vector<U16> > hits = gameStat.hits;
+
+
       if(mInfoFlags & TestModeFlag)       // Ignore stats from server in test mode
          return;  
 
