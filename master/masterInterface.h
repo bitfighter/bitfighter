@@ -144,6 +144,8 @@ namespace Types
       write(s, val.hits);
    }
 }
+inline void read(TNL::BitStream &s, GameStatistics3 *val) {Types::read(s, val);}
+inline void write(TNL::BitStream &s, GameStatistics3 &val) {Types::write(s, &val);}
 
 
 class MasterServerInterface : public EventConnection
