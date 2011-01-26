@@ -971,7 +971,7 @@ public:
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,0xFFFFFF> > color, 
-                                                      U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
+                                                      U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIds,
                                                       Vector<bool> isBot, 
                                                       Vector<bool> lastOnTeam, Vector<S32> playerScores, 
                                                       Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
@@ -1085,7 +1085,10 @@ public:
             else
                playerStats.gameResult = getResult(playerScores.size(), playerScores[0], playerScores[1], playerScores[j], j == 0);
 
-            playerStats.isAuthenticated = false;     // TODO: Look at list of authetnciated players, determine if name is on it... good enough?  Or pass ID as well?
+            Nonce playerId(playerIds[j]);
+            MasterServerConnection *client = findClient(playerId);
+            playerStats.isAuthenticated = (client && client->isAuthenticated());
+
             playerStats.isRobot = isBot[j];
             playerStats.kills = playerKills[j];
             playerStats.name = playerNames[j].getString();
