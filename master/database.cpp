@@ -117,18 +117,20 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       Query query(&conn);
       SimpleResult result;
       U64 serverId_int = U64_MAX;
-      for(S32 i=cachedServers.size()-1; i>=0; i--)
+
+      for(S32 i = cachedServers.size() - 1; i >= 0; i--)
 		{
-			if(cachedServers[i].IP == gameStats.serverIP
-				&& cachedServers[i].Name == gameStats.serverName )
+			if(cachedServers[i].ip == gameStats.serverIP	&&
+			   cachedServers[i].name == gameStats.serverName )
 			{
-				serverId_int = cachedServers[i].ID;
+				serverId_int = cachedServers[i].id;
 				break;
 			}
 		}
-      if(serverId_int == U64_MAX)  // not found in cache.
+
+      if(serverId_int == U64_MAX)  // Not in cache
       {
-         // find server in database
+         // Find server in database
 			sql = "SELECT server_id FROM test.server AS server WHERE server_name = '" + sanitize(gameStats.serverName)
 				+ "' AND ip_address = '" + gameStats.serverIP + "'";
          StoreQueryResult results = query.store(sql.c_str(),sql.length());
@@ -159,7 +161,11 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
          result = query.execute(sql);
 			U64 gameID = result.insert_id();
-         if(gameID <= lastGameID) while(cachedServers.size() != 0) cachedServers.erase_fast(0);  // ID should only go bigger, if not, database might have changed.
+
+         if(gameID <= lastGameID)      // ID should only go bigger, if not, database might have changed        
+            while(cachedServers.size() != 0) 
+               cachedServers.erase_fast(0);  
+
          lastGameID = gameID;
          string gameId = itos(gameID);
 
@@ -207,7 +213,11 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          query = conn.query(sql);
          result = query.execute();
 			U64 gameID = result.insert_id();
-         if(gameID <= lastGameID) while(cachedServers.size() != 0) cachedServers.erase_fast(0);  // ID should only go bigger, if not, database might have changed.
+
+         if(gameID <= lastGameID)         // ID should only go bigger, if not, database might have changed
+            while(cachedServers.size() != 0) 
+               cachedServers.erase_fast(0);  
+
          lastGameID = gameID;
          string gameId = itos(gameID);
 

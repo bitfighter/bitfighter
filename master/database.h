@@ -76,10 +76,10 @@ struct TeamStats
 
 struct ServerInformation
 {
-   U64 ID;
-   string Name;
-   string IP;
-	ServerInformation(U64 id,const string name,const string ip){ID=id;Name=name;IP=ip;}
+   U64 id;
+   string name;
+   string ip;
+	ServerInformation(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
 };
 
 
