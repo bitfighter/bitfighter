@@ -163,7 +163,7 @@ void Game::checkConnectionToMaster(U32 timeDelta)
           logprintf(LogConsumer::LogConnection, "%s connecting to master [%s]", isServer() ? "Server" : "Client", 
                     gMasterAddress.toString());
 
-          mConnectionToMaster = new MasterServerConnection(isServer(), 0);
+          mConnectionToMaster = new MasterServerConnection(isServer());
           mConnectionToMaster->connect(mNetInterface, gMasterAddress);
 
          mNextMasterTryTime = GameConnection::MASTER_SERVER_FAILURE_RETRY;     // 10 secs, just in case this attempt fails

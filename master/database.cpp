@@ -101,6 +101,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 {
    Connection conn;    // Connect to the database
 
+   string sql;
    try
    {
       if(!mIsValid)
@@ -111,7 +112,6 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
       conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
       
-      string sql;
       Query query(&conn);
       SimpleResult result;
       U64 serverId_int = U64_MAX;
@@ -176,9 +176,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          for(S32 i = 0; i < gameStats.teamStats.size(); i++)
          {
             const TeamStats *teamStats = &gameStats.teamStats[i];
-            sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color) \
+            sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) \
                    VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
-                              teamStats->gameResult + "' ," + teamStats->color + "')";
+                              teamStats->gameResult + "' ,'" + teamStats->color + "');";
 
             query = conn.query(sql);
             result = query.execute();
@@ -196,7 +196,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                                  btos(playerStats->isAuthenticated) + ", '" + btos(playerStats->isRobot), 
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
                                  itos(playerStats->deaths),
-                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ")";
+                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
 
                result = query.execute(sql);
                string playerId = itos(result.insert_id());
@@ -231,7 +231,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                                             kill_count, suicide_count) \
                    VALUES(" + gameId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", '" + 
                               playerStats->gameResult + "', " + itos(playerStats->points) + ", " + 
-                              itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ")";
+                              itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ");";
 
             result = query.execute(sql);
             string playerId = itos(result.insert_id());
@@ -251,7 +251,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
    }
    catch (const Exception &ex) {
       // Catch-all for any other MySQL++ exceptions
-      logprintf("General connection failure: %s", ex.what());
+		logprintf("General connection failure: %s Query: %s", ex.what(), sql.c_str());
       return;
     }
 }

@@ -942,10 +942,30 @@ void GameType::saveGameStats()
       }
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin
+
+      GameStatistics3 gameStat;
+      gameStat.gameType = getGameTypeString();
+      gameStat.teamGame = isTeamGame();
+      gameStat.levelName = mLevelName;
+      gameStat.teams = teams;
+      gameStat.teamScores = scores;
+      gameStat.color = colors;
+      gameStat.timeInSecs = timeInSecs;
+      gameStat.playerNames = playerNames;
+      gameStat.playerIDs = playerIDs;
+      gameStat.isBot = isBot;
+      gameStat.lastOnTeam = lastOnTeam;
+      gameStat.playerScores = playerScores;
+      gameStat.playerKills = playerKills;
+      gameStat.playerDeaths = playerDeaths;
+      gameStat.playerSuicides = playerSuicides;
+      gameStat.shots = shots;
+      gameStat.hits = hits;
       if(masterConn) // && gIniSettings.SendStatsToMaster)
-         masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
-                                             timeInSecs, playerNames, playerIDs, isBot,
-                                             lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
+			masterConn->s2mSendGameStatistics_3(gameStat);
+      //   masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
+      //                                       timeInSecs, playerNames, playerIDs, isBot,
+      //                                       lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
 
 
       // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code

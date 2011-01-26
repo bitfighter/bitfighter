@@ -48,10 +48,9 @@ TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);
 
 
 // Constructor
-MasterServerConnection::MasterServerConnection(bool isGameServer, U32 infoFlags)   
+MasterServerConnection::MasterServerConnection(bool isGameServer)   
 {
    mIsGameServer = isGameServer;
-   mInfoFlags = infoFlags;
    mCurrentQueryId = 0;
    setIsConnectionToServer();
    setIsAdaptive();
@@ -381,7 +380,7 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
       bstream->write((U32) gServerGame->getRobotCount());      // number of bots
       bstream->write((U32) gServerGame->getPlayerCount());     // num players       --> will always be 0 or 1?
       bstream->write((U32) gServerGame->getMaxPlayers());      // max players
-      bstream->write((U32) mInfoFlags);                        // info flags (1=>test host, i.e. from editor)
+      bstream->write((U32) gServerGame->mInfoFlags);           // info flags (1=>test host, i.e. from editor)
 
       bstream->writeString(gServerGame->getCurrentLevelName().getString());      // Level name
       bstream->writeString(gServerGame->getCurrentLevelType().getString());      // Level type

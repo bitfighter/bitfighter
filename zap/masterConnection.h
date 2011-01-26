@@ -48,11 +48,10 @@ private:
    U32 mCurrentQueryId;    // ID of our current query
 
    bool mIsGameServer;
-   U32 mInfoFlags;
    string mMasterName;
 
 public:
-   MasterServerConnection(bool isGameServer = false, U32 infoFlags = 0);    // Constructor
+   MasterServerConnection(bool isGameServer = false);    // Constructor
 
    void setMasterName(string name);
    string getMasterName();
