@@ -62,7 +62,7 @@ public:
    void read(BitStream *stream) { stream->read(NonceSize, data); }
    void write(BitStream *stream) const { stream->write(NonceSize, data); }
    void getRandom() { Random::read(data, NonceSize); }
-   Vector<U8> toVector() { Vector<U8> v; for(S32 i = 0; i < NonceSize; i++) v.push_back(data[i]); return v; }
+   Vector<U8> toVector() { Vector<U8> v; if(mValid) for(S32 i = 0; i < NonceSize; i++) v.push_back(data[i]); return v; }
    bool isValid() { return mValid; }
 };
 
