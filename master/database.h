@@ -79,8 +79,7 @@ struct ServerInformation
    U64 ID;
    string Name;
    string IP;
-   U32 Version;
-	ServerInformation(U64 id,const string name,const string ip,U32 version){ID=id;Name=name;IP=ip;Version=version;}
+	ServerInformation(U64 id,const string name,const string ip){ID=id;Name=name;IP=ip;}
 };
 
 
@@ -88,7 +87,6 @@ struct GameStats
 {
    string serverName;
    string serverIP;
-   U32 serverVersion;
 
    string gameType;
    string levelName;

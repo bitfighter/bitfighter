@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.5
+-- version 3.3.9
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 24, 2011 at 12:42 PM
+-- Generation Time: Jan 25, 2011 at 11:01 PM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -29,24 +29,23 @@ CREATE TABLE IF NOT EXISTS `server` (
   `server_id` int(11) NOT NULL AUTO_INCREMENT,
   `server_name` text COLLATE utf8_unicode_ci NOT NULL,
   `ip_address` text COLLATE utf8_unicode_ci NOT NULL,
-  `build_version` int(11) DEFAULT NULL,
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `name_ip_unique` (`server_name`(50),`ip_address`(15))
-) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
+)  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
 
 --
 -- Dumping data for table `server`
 --
 
-INSERT INTO `server` (`server_id`, `server_name`, `ip_address`, `build_version`) VALUES
-(1, 'Bitfighter sam686', '96.2.123.136', NULL),
-(2, 'Classic Levels', '65.49.81.67', NULL),
-(3, 'Edshin Collection', '65.49.81.67', NULL),
-(4, 'InvaderAlex Collection', '65.49.81.67', NULL),
-(5, 'New Player?', '65.49.81.67', NULL),
-(6, 'Bobdaduck Collection', '65.49.81.67', NULL),
-(7, 'Robots', '65.49.81.67', NULL),
-(8, 'User levels', '65.49.81.67', NULL);
+INSERT INTO `server` (`server_id`, `server_name`, `ip_address`) VALUES
+(1, 'Bitfighter sam686', '96.2.123.136'),
+(2, 'Classic Levels', '65.49.81.67'),
+(3, 'Edshin Collection', '65.49.81.67'),
+(4, 'InvaderAlex Collection', '65.49.81.67'),
+(5, 'New Player?', '65.49.81.67'),
+(6, 'Bobdaduck Collection', '65.49.81.67'),
+(7, 'Robots', '65.49.81.67'),
+(8, 'User levels', '65.49.81.67');
 
 -- --------------------------------------------------------
 
@@ -67,14 +66,14 @@ CREATE TABLE IF NOT EXISTS `stats_game` (
   `is_tied` tinyint(1) NOT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_game_id`),
-  UNIQUE KEY `game_type` (`game_type`(20)),
   KEY `server_id` (`server_id`),
   KEY `is_official` (`is_official`),
   KEY `player_count` (`player_count`),
   KEY `is_team_game` (`is_team_game`),
   KEY `team_count` (`team_count`),
   KEY `is_tied` (`is_tied`),
-  KEY `insertion_date` (`insertion_date`)
+  KEY `insertion_date` (`insertion_date`),
+  KEY `game_type` (`game_type`(20))
 ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --

@@ -119,8 +119,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       U64 serverId_int = U64_MAX;
       for(S32 i=cachedServers.size()-1; i>=0; i--)
 		{
-			if(cachedServers[i].Version == gameStats.serverVersion
-				&& cachedServers[i].IP == gameStats.serverIP
+			if(cachedServers[i].IP == gameStats.serverIP
 				&& cachedServers[i].Name == gameStats.serverName )
 			{
 				serverId_int = cachedServers[i].ID;
@@ -131,21 +130,21 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       {
          // find server in database
 			sql = "SELECT server_id FROM test.server AS server WHERE server_name = '" + sanitize(gameStats.serverName)
-				+ "' AND ip_address = '" + gameStats.serverIP + "' AND build_version = " + itos(gameStats.serverVersion);
+				+ "' AND ip_address = '" + gameStats.serverIP + "'";
          StoreQueryResult results = query.store(sql.c_str(),sql.length());
          if(results.num_rows() >= 1)
             serverId_int = results[0][0];
          if(serverId_int == U64_MAX) // not found in database
          {
-            sql = "INSERT INTO server(server_name, ip_address, build_version) \
-                  VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "', " + itos(gameStats.serverVersion) + ");";
+            sql = "INSERT INTO server(server_name, ip_address) \
+                  VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
             result = query.execute(sql);
             serverId_int = result.insert_id();
          }
 
 
          if(cachedServers.size() > 20) cachedServers.erase(0);
-         cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName,gameStats.serverIP,gameStats.serverVersion));
+         cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName,gameStats.serverIP));
       }
       string serverId = itos(serverId_int);
 

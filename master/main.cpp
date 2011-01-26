@@ -1051,8 +1051,7 @@ public:
       gameStats.levelName = levelName.getString();
       gameStats.playerCount = playerNames.size();     // Humans + bots
       gameStats.serverIP = getNetAddressString();
-      gameStats.serverName = mPlayerOrServerName; 
-      gameStats.serverVersion = this->mClientBuild;
+      gameStats.serverName = mPlayerOrServerName;
       gameStats.teamCount = teams.size();
 
       gameStats.teamStats.setSize(teams.size());
