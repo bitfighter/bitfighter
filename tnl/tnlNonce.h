@@ -54,8 +54,8 @@ public:
    Nonce(const U8 *ptr) { memcpy(data, ptr, NonceSize); mValid = true; }
    Nonce(const Vector<U8> &bytes) { mValid = (bytes.size() == NonceSize); if(mValid) for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
 
-   bool operator==(const Nonce &theOtherNonce) const { return !memcmp(data, theOtherNonce.data, NonceSize); }
-   bool operator!=(const Nonce &theOtherNonce) const { return memcmp(data, theOtherNonce.data, NonceSize) != 0; }
+   bool operator==(const Nonce &theOtherNonce) const { return isValid() && theOtherNonce.isValid() && !memcmp(data, theOtherNonce.data, NonceSize); }
+   bool operator!=(const Nonce &theOtherNonce) const { return isValid() && theOtherNonce.isValid() && memcmp(data, theOtherNonce.data, NonceSize) != 0; }
 
    void operator=(const Nonce &theNonce) { memcpy(data, theNonce.data, NonceSize); mValid = theNonce.mValid; }
    
