@@ -65,6 +65,7 @@ Vector<U16> playerDeaths;
 Vector<U16> playerSuicides;
 Vector<Vector<U16> > shots;
 Vector<Vector<U16> > hits;
+Vector<S16> playerSwitchedTeamCount;
 };
 
 // If above struct is added, be sure to change masterInterface.cpp read and write so it can actually send data.
