@@ -27,25 +27,11 @@
 #ifndef _TNL_METHODDISPATCH_H_
 #define _TNL_METHODDISPATCH_H_
 
-#ifndef _TNL_TYPES_H_
 #include "tnlTypes.h"
-#endif
-
-#ifndef _TNL_VECTOR_H_
 #include "tnlVector.h"
-#endif
-
-#ifndef _TNL_BITSTREAM_H_
 #include "tnlBitStream.h"
-#endif
-
-#ifndef _TNL_NETSTRINGTABLE_H_
 #include "tnlNetStringTable.h"
-#endif
-
-#ifndef _TNL_STRING_H_
 #include "tnlString.h"
-#endif
 
 #include <string>
 
