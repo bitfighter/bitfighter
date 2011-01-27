@@ -1560,8 +1560,6 @@ int main(int argc, const char **argv)
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
 
 
-   databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
-
     // And until infinity, process whatever comes our way.
   for(;;)     // To infinity and beyond!!
    {

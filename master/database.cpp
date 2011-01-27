@@ -79,12 +79,19 @@ static string sanitize(const string &value)
 }
 
 
+// Create wrapper function to make logging easier
+static SimpleResult runQuery(Query query, const string &sql)      // TODO: Pass query as a Query *?
+{
+   return query.execute(sql);
+}
+
+
 static void doInsertStatsShots(Query query, const string &playerId, const string &weapon, S32 shots, S32 hits)
 {
    string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck)  \
                  VALUES(" + playerId + ", '" + weapon + "', " + itos(shots) + ", " + itos(hits) + ");";
 
-   SimpleResult result = query.execute(sql);
+   runQuery(query, sql);
 }
 
 
@@ -129,9 +136,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       if(serverId_int == U64_MAX)  // Not in cache
       {
          // Find server in database
-			sql = "SELECT server_id FROM test.server AS server WHERE server_name = '" + sanitize(gameStats.serverName)
-				+ "' AND ip_address = '" + gameStats.serverIP + "'";
-         StoreQueryResult results = query.store(sql.c_str(),sql.length());
+			sql = "SELECT server_id FROM server AS server \
+                WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
+         StoreQueryResult results = query.store(sql.c_str(), sql.length());
 
          if(results.num_rows() >= 1)
             serverId_int = results[0][0];
@@ -139,8 +146,8 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          if(serverId_int == U64_MAX)      // Not in database
          {
             sql = "INSERT INTO server(server_name, ip_address) \
-                  VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
-            result = query.execute(sql);
+                   VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
+            result = runQuery(query, sql);
             serverId_int = result.insert_id();
          }
 
@@ -162,7 +169,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                        itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
                        itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
 
-         result = query.execute(sql);
+         result = runQuery(query, sql);
 			U64 gameID = result.insert_id();
 
          if(gameID <= lastGameID)      // ID should only go bigger, if not, database might have changed        
@@ -180,8 +187,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                    VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
                               teamStats->gameResult + "' ,'" + teamStats->color + "');";
 
-            query = conn.query(sql);
-            result = query.execute();
+            result = runQuery(query, sql);
             string teamId = itos(result.insert_id());
             
             for(S32 j = 0; j < teamStats->playerStats.size(); j++)
@@ -198,7 +204,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                                  itos(playerStats->deaths),
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
 
-               result = query.execute(sql);
+               result = runQuery(query, sql);
                string playerId = itos(result.insert_id());
 
                insertStatsShots(query, playerId, playerStats->weaponStats);
@@ -212,8 +218,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                 VALUES(" + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " + 
                            itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 0, NULL, " +  btos(gameStats.isTied) + ");";
 
-         query = conn.query(sql);
-         result = query.execute();
+         result = runQuery(query, sql);
 			U64 gameID = result.insert_id();
 
          if(gameID <= lastGameID)         // ID should only go bigger, if not, database might have changed
@@ -233,7 +238,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                               playerStats->gameResult + "', " + itos(playerStats->points) + ", " + 
                               itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ");";
 
-            result = query.execute(sql);
+            result = runQuery(query, sql);
             string playerId = itos(result.insert_id());
 
             insertStatsShots(query, playerId, playerStats->weaponStats);
