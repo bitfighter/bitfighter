@@ -29,6 +29,61 @@
 // client, server, or master end as needed.  This interface will be compiled into both the
 // master and the individual clients.
 
+
+namespace Types
+{
+   const U8 GameStatistics4_CurrentVersion = 0;    // keep this the same U8 size.
+   /// Reads objects from a BitStream.
+   void read(TNL::BitStream &s, GameStatistics3 *val)
+   {
+      U8 version;
+      read(s, &version);    // version number, in the future, we add more things to read/write and want to keep compatible to old version 
+      //if(version > GameStatistics4_CurrentVersion) return; // can't read future version and unsupported version.
+
+      read(s, &val->gameType);
+      read(s, &val->teamGame);
+      read(s, &val->levelName);
+      read(s, &val->teams);
+      read(s, &val->teamScores);
+      read(s, &val->color);
+      read(s, &val->timeInSecs);
+      read(s, &val->playerNames);
+      read(s, &val->playerIDs);
+      read(s, &val->isBot);
+      read(s, &val->lastOnTeam);
+      read(s, &val->playerScores);
+      read(s, &val->playerKills);
+      read(s, &val->playerDeaths);
+      read(s, &val->playerSuicides);
+      read(s, &val->shots);
+      read(s, &val->hits);
+   }
+   /// Writes objects into a BitStream. Server write and send to master.
+   void write(TNL::BitStream &s, GameStatistics3 &val)
+   {
+      write(s, GameStatistics4_CurrentVersion);       // send current version
+      write(s, val.gameType);
+      write(s, val.teamGame);
+      write(s, val.levelName);
+      write(s, val.teams);
+      write(s, val.teamScores);
+      write(s, val.color);
+      write(s, val.timeInSecs);
+      write(s, val.playerNames);
+      write(s, val.playerIDs);
+      write(s, val.isBot);
+      write(s, val.lastOnTeam);
+      write(s, val.playerScores);
+      write(s, val.playerKills);
+      write(s, val.playerDeaths);
+      write(s, val.playerSuicides);
+      write(s, val.shots);
+      write(s, val.hits);
+   }
+}
+
+
+
 //
 //   IMPORTANT NOTE!!!
 //
