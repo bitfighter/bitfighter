@@ -110,7 +110,7 @@ namespace Types
    }
 
 
-/*  // Linux complains after trying to use this template when there is read(TNL::BitStream &s, GameStatistics3 *val)
+/*          // Using template<typename> makes it harder to read errors about missing read() / write().
    /// Reads a generic object from a BitStream.  This can be used for any
    /// type supported by BitStream::read.
    template <typename T> inline void read(TNL::BitStream &s, T *val)
@@ -126,30 +126,30 @@ namespace Types
    }
 */
    inline void read(TNL::BitStream &s, bool *val) {s.read(val);}
-   inline void read(TNL::BitStream &s, TNL::U8 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S8 *val) {s.read(val);}
-   inline void read(TNL::BitStream &s, TNL::U16 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S16 *val) {s.read(val);}
-   inline void read(TNL::BitStream &s, TNL::U32 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S32 *val) {s.read(val);}
-   inline void read(TNL::BitStream &s, TNL::U64 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::S64 *val) {s.read(val);}
+   inline void read(TNL::BitStream &s, TNL::U8 *val) {s.read(val);}
+   inline void read(TNL::BitStream &s, TNL::U16 *val) {s.read(val);}
+   inline void read(TNL::BitStream &s, TNL::U32 *val) {s.read(val);}
+   inline void read(TNL::BitStream &s, TNL::U64 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::F32 *val) {s.read(val);}
    inline void read(TNL::BitStream &s, TNL::F64 *val) {s.read(val);}
 
    inline void write(TNL::BitStream &s, bool val) {s.write(val);}
-   inline void write(TNL::BitStream &s, TNL::U8 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S8 val) {s.write(val);}
-   inline void write(TNL::BitStream &s, TNL::U16 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S16 val) {s.write(val);}
-   inline void write(TNL::BitStream &s, TNL::U32 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S32 val) {s.write(val);}
-   inline void write(TNL::BitStream &s, TNL::U64 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::S64 val) {s.write(val);}
+   inline void write(TNL::BitStream &s, TNL::U8 val) {s.write(val);}
+   inline void write(TNL::BitStream &s, TNL::U16 val) {s.write(val);}
+   inline void write(TNL::BitStream &s, TNL::U32 val) {s.write(val);}
+   inline void write(TNL::BitStream &s, TNL::U64 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::F32 val) {s.write(val);}
    inline void write(TNL::BitStream &s, TNL::F64 val) {s.write(val);}
 
-
+/*      // Read and Write string not used?
    /// Read a string object from a BitStream.  (CE)
    inline void read(TNL::BitStream &s, std::string *val)
    {
@@ -170,7 +170,7 @@ namespace Types
       s.writeString(cstrLine);      // Max length = 255 bytes
 
       //delete cstrLine;
-   }
+   }*/
 
 
    /// Reads a Vector of objects from a BitStream.

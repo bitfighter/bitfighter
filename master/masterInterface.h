@@ -27,7 +27,7 @@
 #ifndef _MASTERINTERFACE_H_
 #define _MASTERINTERFACE_H_
 
-#include "gameStats.h"
+#include "gameStats.h"    // Must be included before tnlRPC.h to prevent fail to compile in linux.
 #include "../zap/SharedConstants.h"
 #include "tnlEventConnection.h"
 #include "tnlRPC.h"
@@ -71,13 +71,6 @@ const S32 IP_MESSAGE_ADDRESS_COUNT = 30;
 // masterConnection.cpp.
 
 
-
-
-namespace Types
-{
-   extern void read(TNL::BitStream &s, GameStatistics3 *val);
-   extern void write(TNL::BitStream &s, GameStatistics3 &val);
-}
 
 
 class MasterServerInterface : public EventConnection

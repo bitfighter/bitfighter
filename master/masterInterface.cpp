@@ -32,6 +32,7 @@
 
 namespace Types
 {
+   // GameStatistics3 is in gameStats.h
    const U8 GameStatistics4_CurrentVersion = 0;    // keep this the same U8 size.
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, GameStatistics3 *val)
