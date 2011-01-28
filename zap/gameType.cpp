@@ -932,7 +932,7 @@ void GameType::saveGameStats()
             
             lastOnTeam.push_back(false);
 
-            playerNames   .push_back(mSortedClientList[j]->name);    // What if this is a bot??  What should go here??
+            playerNames   .push_back(mSortedClientList[j]->name);    // TODO: What if this is a bot??  What should go here??
             playerIDs     .push_back(mSortedClientList[j]->clientConnection->getClientId()->toVector());
             isBot         .push_back(mSortedClientList[j]->isRobot);
             playerScores  .push_back(mSortedClientList[j]->getScore());
@@ -944,7 +944,7 @@ void GameType::saveGameStats()
             playerSwitchedTeamCount.push_back(mSortedClientList[j]->clientConnection->switchedTeamCount);
          }
 
-         lastOnTeam[lastOnTeam.size()] = true;
+         lastOnTeam[lastOnTeam.size() - 1] = true;
       }
 
       S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin

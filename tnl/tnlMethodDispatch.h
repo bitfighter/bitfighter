@@ -37,14 +37,14 @@
 
 namespace Types
 {
-   const TNL::U8 VectorSizeBitSize = 8;     // CE: Was 8 --> Controls number of bits used to write the length of arrays to
+   const TNL::U8 VectorSizeBitSize8 = 8;     // CE: Was 8 --> Controls number of bits used to write the length of arrays to
                                  // bitStreams (such as the journal).  Was 8, which allowed for a max array size of 255.  12 bits
                                  // seems to be enough for our local journaling requirements (up to 4096 lines).  Our main constraint on this is that we  
                                  // need enough bits to store the length of a vector containing all the lines from our INI file
                                  // Unfortunately, changing this requires an upgrade of the master server, which will
                                  // basically screw any clients out there at the moment, which I don't want to do right now...
                                  // We'll have to find a way to make the journaling work for us without changing this value!
-   const TNL::U8 VectorSizeBitSize2 = 16;   // Vector can send more then 255, and keep compatible to clients that send size of 254 or less.
+   const TNL::U8 VectorSizeBitSize16 = 16;   // Vector can send more then 255, and keep compatible to clients that send size of 254 or less.
    const TNL::U8 ByteBufferSizeBitSize = 10;
 
    /// Reads a string from a BitStream.
@@ -159,44 +159,57 @@ namespace Types
 
 
    /// Reads a Vector of objects from a BitStream.
-   const TNL::U32 VectorSizeNumberSize = (1 << VectorSizeBitSize) - 1;
+   const TNL::U32 VectorSizeNumberSize = (1 << VectorSizeBitSize8) - 1;       // 255
+
    template <typename T> inline void read(TNL::BitStream &s, TNL::Vector<T> *val)
    {
-      TNL::U32 size = s.readInt(VectorSizeBitSize);
-      if(size == VectorSizeNumberSize)             // Vector can send more then 255, and keep compatible to clients that send size of 254 or less.
-         size = s.readInt(VectorSizeBitSize2) + VectorSizeNumberSize;
+      TNL::U32 size = s.readInt(VectorSizeBitSize8);    // Max 254 -- sending 255 signals that we'll be sending another 2 bytes with larger size
+      if(size == VectorSizeNumberSize)                  // Older clients were limited to 255 elements, so we resort to this scheme to remain compatible
+         size = s.readInt(VectorSizeBitSize16) + VectorSizeNumberSize;
+
       val->setSize(size);
       for(TNL::S32 i = 0; i < val->size(); i++)
       {
          TNLAssert(s.isValid(), "Error reading vector");
-         if(!s.isValid()) break;  // error, don't read any more.
+         if(!s.isValid())      // Error, don't read any more!
+            break;        
+
          read(s, &((*val)[i]));
       }
    }
+
    /// Writes a Vector of objects into a BitStream.
    template <typename T> void write(TNL::BitStream &s, TNL::Vector<T> &val)
    {
-      if(val.size() >= VectorSizeNumberSize)
+      if(val.size() >= VectorSizeNumberSize)  // Large vector, more than 255 elements
       {
-         TNLAssert((val.size() - VectorSizeNumberSize) < (1 << VectorSizeBitSize2), "Vector too big");
-         s.writeInt(VectorSizeNumberSize, VectorSizeBitSize);
-         s.writeInt(val.size() - VectorSizeNumberSize, VectorSizeBitSize2);
+         // Note that if we enter this block, this function will not work with older versions.  If we stay out, it will be compatible.
+         TNLAssert((val.size() - VectorSizeNumberSize) < (1 << VectorSizeBitSize16), "Vector too big");
+
+         s.writeInt(VectorSizeNumberSize, VectorSizeBitSize8);
+         s.writeInt(val.size() - VectorSizeNumberSize, VectorSizeBitSize16);
       }
       else
-         s.writeInt(val.size(), VectorSizeBitSize);
+         s.writeInt(val.size(), VectorSizeBitSize8);
+
       for(TNL::S32 i = 0; i < val.size(); i++)
          write(s, val[i]);
    }
-   /// Reads a bit-compressed integer from a BitStream.
+
+
+   /// Reads a bit-compressed integer from a BitStream
    template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::Int<BitCount> *val)
    {
       val->value = s.readInt(BitCount);
    }
-   /// Writes a bit-compressed integer into a BitStream.
+
+
+   /// Writes a bit-compressed integer into a BitStream
    template <TNL::U32 BitCount> inline void write(TNL::BitStream &s,TNL::Int<BitCount> &val)
    {
       s.writeInt(val.value, BitCount);
    }
+
 
    /// Reads a bit-compressed SignedFloat (-1 to 1) from a BitStream.
    template <TNL::U32 BitCount> inline void read(TNL::BitStream &s, TNL::Float<BitCount> *val)
