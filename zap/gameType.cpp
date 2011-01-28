@@ -910,7 +910,7 @@ void GameType::saveGameStats()
       Vector<U16> playerSuicides          (mClientList.size());
       Vector<Vector<U16> > shots          (mClientList.size()); 
       Vector<Vector<U16> > hits           (mClientList.size());
-      Vector<Vector<U16> > playerSwitchedTeamCount(mClientList.size());
+      Vector<U16> playerSwitchedTeamCount(mClientList.size());
 
       // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
       Vector<RefPtr<ClientRef> > mSortedClientList = mClientList;   
