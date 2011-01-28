@@ -974,7 +974,7 @@ void GameType::saveGameStats()
 				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%s Name=%s",
 					i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
 					mTeams[i].getScore(),
-               mTeams[i].color.toHexString(),
+               mTeams[i].color.toHexString().c_str(),
 					mTeams[i].getName().getString());
 			break;
 		// case 2: // For using other formats
