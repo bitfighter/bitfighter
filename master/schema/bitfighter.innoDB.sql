@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 26, 2011 at 01:26 PM
+-- Generation Time: Jan 28, 2011 at 10:59 AM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -102,13 +102,13 @@ CREATE TABLE IF NOT EXISTS `stats_player` (
   `stats_team_id` int(11) DEFAULT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_player_id`),
-  UNIQUE KEY `game_player_name_unique` (`stats_game_id`,`player_name`(50)),
   KEY `is_authenticated` (`is_authenticated`),
   KEY `result` (`result`),
   KEY `stats_team_id` (`stats_team_id`),
   KEY `insertion_date` (`insertion_date`),
   KEY `player_name` (`player_name`(50)),
-  KEY `is_robot` (`is_robot`)
+  KEY `is_robot` (`is_robot`),
+  KEY `stats_game_id` (`stats_game_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
 
 --
@@ -177,8 +177,8 @@ ALTER TABLE `stats_game`
 -- Constraints for table `stats_player`
 --
 ALTER TABLE `stats_player`
-  ADD CONSTRAINT `stats_player_ibfk_3` FOREIGN KEY (`stats_game_id`) REFERENCES `stats_game` (`stats_game_id`),
-  ADD CONSTRAINT `stats_player_ibfk_2` FOREIGN KEY (`stats_team_id`) REFERENCES `stats_team` (`stats_team_id`);
+  ADD CONSTRAINT `stats_player_ibfk_2` FOREIGN KEY (`stats_team_id`) REFERENCES `stats_team` (`stats_team_id`),
+  ADD CONSTRAINT `stats_player_ibfk_3` FOREIGN KEY (`stats_game_id`) REFERENCES `stats_game` (`stats_game_id`);
 
 --
 -- Constraints for table `stats_player_shots`
