@@ -548,6 +548,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    {
       walk->resetGhosting();
       walk->mOldLoadout.clear();
+      walk->switchedTeamCount = 0;
    }
 
    if(nextLevel >= FIRST_LEVEL)          // Go to specified level

@@ -104,6 +104,7 @@ void GameConnection::initialize()
    mClientNeedsToBeVerified = false;      // If so, do we still need to verify that claim?
    mAuthenticationCounter = 0;            // Counts number of retries
    mIsVerified = false;                   // Final conclusion... client is or is not verified
+   switchedTeamCount = 0;
 }
 
 // Destructor

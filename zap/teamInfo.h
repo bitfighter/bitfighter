@@ -81,6 +81,7 @@ public:
 
    S32 getScore() { return mScore; }
    S32 getId() { return mId; }
+   void setId(S32 id) { mId = id; }
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
 };
