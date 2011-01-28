@@ -198,10 +198,10 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                                                result, points, kill_count, \
                                                death_count, \
                                                suicide_count, switched_team) \
-                      VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " + 
-                                 btos(playerStats->isAuthenticated) + ", '" + btos(playerStats->isRobot), 
+                      VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
+                                 btos(playerStats->isAuthenticated) + ", '" + btos(playerStats->isRobot) + "', '" +
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
-                                 itos(playerStats->deaths),
+                                 itos(playerStats->deaths) + ", " +
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
 
                result = runQuery(query, sql);
