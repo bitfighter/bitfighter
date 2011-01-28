@@ -122,6 +122,8 @@ private:
 
 public:
    Vector<U32> mOldLoadout;
+   U16 switchedTeamCount;
+
    void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 

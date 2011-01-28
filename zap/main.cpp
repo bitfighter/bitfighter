@@ -1621,7 +1621,7 @@ bool writeToConsole()
    
    try
    {
-      int m_nCRTOut= _open_osfhandle((long) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
+      int m_nCRTOut= _open_osfhandle((intptr_t) GetStdHandle(STD_OUTPUT_HANDLE), _O_TEXT);
       if(m_nCRTOut == -1)
          return false;
     

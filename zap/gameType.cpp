@@ -937,7 +937,7 @@ void GameType::saveGameStats()
             playerSuicides.push_back(statistics->getSuicides());
             shots         .push_back(statistics->getShotsVector());
             hits          .push_back(statistics->getHitsVector());
-				playerSwitchedTeamCount.push_back(0); // TODO: count the number of times a player has changed teams.
+            playerSwitchedTeamCount.push_back(mSortedClientList[j]->clientConnection->switchedTeamCount);
          }
 
          lastOnTeam[lastOnTeam.size()] = true;
@@ -1933,8 +1933,8 @@ void GameType::updateScore(ClientRef *player, S32 team, ScoringEvent scoringEven
          {
             mClientList[i]->clientConnection->mTotalScore += max(points, 0);
 
-            if(mClientList[i]->clientConnection->mScore > newScore)
-               newScore = mClientList[i]->clientConnection->mScore;
+            if(mClientList[i]->getScore() > newScore)
+               newScore = mClientList[i]->getScore();
          }
       }
    }
@@ -2211,6 +2211,8 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
       return;
 
    ClientRef *cl = source->getClientRef();
+   if(cl->getTeam() == team)     // Don't explode if not switching team.
+      return;
 
    Ship *ship = dynamic_cast<Ship *>(source->getControlObject());    // Get the ship that's switching
 
@@ -2245,6 +2247,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
 
    s2cClientJoinedTeam(cl->name, cl->getTeam());         // Announce the change
    spawnShip(source);                                    // Create a new ship
+   cl->clientConnection->switchedTeamCount++;            // Count number of times team is switched.
 }
 
 
