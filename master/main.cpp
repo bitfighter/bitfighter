@@ -1078,7 +1078,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
       gameStats.serverName = mPlayerOrServerName.getString();
       gameStats.teamCount = teams.size();
 
-      gameStats.teamStats.setSize(teams.size());
+      //gameStats.teamStats.setSize(teams.size());
 
       S32 lastPlayerProcessed = 0;
 
@@ -1094,7 +1094,6 @@ Vector<Vector<U16> > hits = gameStat.hits;
 
          teamStats.score = teamScores[i];
 
-         gameStats.teamStats.push_back(teamStats);
 
          for(S32 j = lastPlayerProcessed; j < playerNames.size(); j++)
          {
@@ -1136,11 +1135,14 @@ Vector<Vector<U16> > hits = gameStat.hits;
                break;
             }
          }
+         gameStats.teamStats.push_back(teamStats);
       }
 
       //DatabaseWriter dbWriter("127.0.0.1", "bitfighter", "user", "pw");  // TODO: Get these vals from the config file
       //dbWriter.insertStats(gameStats);
-      databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
+
+		if(! databaseWriter) databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
+      if(databaseWriter) databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
 
    }
 

@@ -877,7 +877,10 @@ void GameType::saveGameStats()
       Vector<Team> sortTeams(mTeams.size());
 
       for(S32 i = 0; i < mTeams.size(); i++)
+      {
+         mTeams[i].setId(i);
          sortTeams.push_back(mTeams[i]);
+      };
 
       sortTeams.sort(teamScoreSort);
 
