@@ -33,7 +33,7 @@
 namespace Types
 {
    // GameStatistics3 is in gameStats.h
-   const U8 GameStatistics4_CurrentVersion = 0;    // keep this the same U8 size.
+   const U8 GameStatistics3_CurrentVersion = 1;    // keep this the same U8 size.
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, GameStatistics3 *val)
    {
@@ -58,11 +58,16 @@ namespace Types
       read(s, &val->playerSuicides);
       read(s, &val->shots);
       read(s, &val->hits);
+      if(version >= 1)
+         read(s, &val->playerSwitchedTeamCount);
+      else
+         val->playerSwitchedTeamCount.setSize(val->playerNames.size());
+
    }
    /// Writes objects into a BitStream. Server write and send to master.
    void write(TNL::BitStream &s, GameStatistics3 &val)
    {
-      write(s, GameStatistics4_CurrentVersion);       // send current version
+      write(s, GameStatistics3_CurrentVersion);       // send current version
       write(s, val.gameType);
       write(s, val.teamGame);
       write(s, val.levelName);
@@ -80,6 +85,9 @@ namespace Types
       write(s, val.playerSuicides);
       write(s, val.shots);
       write(s, val.hits);
+
+      if(GameStatistics3_CurrentVersion >= 1)
+         write(s, val.playerSwitchedTeamCount);
    }
 }
 

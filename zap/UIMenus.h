@@ -66,7 +66,8 @@ protected:
    
 
 public:
-   MenuUserInterface();                // Constructor
+   MenuUserInterface();                                     // Constructor
+   ~MenuUserInterface() { menuItems.deleteAndClear(); }     // Destructor -- will this make valgrind happy???
 
    bool itemSelectedWithMouse;
    Vector<MenuItem *> menuItems;

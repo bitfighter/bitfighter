@@ -951,11 +951,11 @@ public:
    /////////////////////////////////////////////////////////////////////////////////////
 
 
-   // This relies on teamScores being sent sorted in order of descending score...  Can we really trust that?  Does it matter if we do?
+   // This relies on team and player scores being sent sorted in order of descending score...  Can we really trust that?  Does it matter if we do?
    static string getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst)
    {
-      if(scores == 1)      // Only one player/team, assign win, arbitrary
-         return "W";
+      if(scores == 1)      // Only one player/team, winner/loser makes no sense
+         return "X";
       else if(score1 == score2 && currScore == score1)     // Tie -- everyone with high score gets tie
          return "T";
       else if(isFirst)     // No tie -- first one gets the win...
@@ -1075,7 +1075,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
       gameStats.levelName = levelName.getString();
       gameStats.playerCount = playerNames.size();     // Humans + bots
       gameStats.serverIP = getNetAddressString();
-      gameStats.serverName = mPlayerOrServerName;
+      gameStats.serverName = mPlayerOrServerName.getString();
       gameStats.teamCount = teams.size();
 
       gameStats.teamStats.setSize(teams.size());
@@ -1090,7 +1090,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
          teamStats.name = teams[i].getString();
          teamStats.color = teamColor.toHexString();
 
-         teamStats.gameResult = getResult(teams.size(), teamScores[0], teamScores[1], teamScores[i], i == 0);
+         teamStats.gameResult = getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
 
          teamStats.score = teamScores[i];
 
@@ -1105,7 +1105,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
             if(teamGame)      // Team games players get team's win/loss/tie status
                playerStats.gameResult = teamStats.gameResult;
             else
-               playerStats.gameResult = getResult(playerScores.size(), playerScores[0], playerScores[1], playerScores[j], j == 0);
+               playerStats.gameResult = getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[j], j == 0);
 
             Nonce playerId(playerIds[j]);
             MasterServerConnection *client = findClient(playerId);
@@ -1116,7 +1116,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
             playerStats.name = playerNames[j].getString();
             playerStats.points = playerScores[j];
             playerStats.suicides = playerSuicides[j];
-            playerStats.switchedTeams = false;     // TODO: How do we track this?  What should it mean?
+            playerStats.switchedTeams = gameStat.playerSwitchedTeamCount[j];     // TODO: How do we track this?  What should it mean?
 
             
             for(S32 k = 0; k < shots.size(); k++)

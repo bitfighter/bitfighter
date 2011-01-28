@@ -55,7 +55,7 @@ public:
    Nonce(const Vector<U8> &bytes) { mValid = (bytes.size() == NonceSize); if(mValid) for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
 
    bool operator==(const Nonce &theOtherNonce) const { return isValid() && theOtherNonce.isValid() && !memcmp(data, theOtherNonce.data, NonceSize); }
-   bool operator!=(const Nonce &theOtherNonce) const { return isValid() && theOtherNonce.isValid() && memcmp(data, theOtherNonce.data, NonceSize) != 0; }
+   bool operator!=(const Nonce &theOtherNonce) const { return !isValid() || !theOtherNonce.isValid() || memcmp(data, theOtherNonce.data, NonceSize); }
 
    void operator=(const Nonce &theNonce) { memcpy(data, theNonce.data, NonceSize); mValid = theNonce.mValid; }
    
@@ -63,7 +63,7 @@ public:
    void write(BitStream *stream) const { stream->write(NonceSize, data); }
    void getRandom() { Random::read(data, NonceSize); }
    Vector<U8> toVector() { Vector<U8> v; if(mValid) for(S32 i = 0; i < NonceSize; i++) v.push_back(data[i]); return v; }
-   bool isValid() { return mValid; }
+   bool isValid() const { return mValid; }
 };
 
 };

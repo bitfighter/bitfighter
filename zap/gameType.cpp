@@ -908,8 +908,10 @@ void GameType::saveGameStats()
       Vector<U16> playerKills             (mClientList.size());
       Vector<U16> playerDeaths            (mClientList.size());
       Vector<U16> playerSuicides          (mClientList.size());
+      Vector<U16> playerSwitchedTeamCount (mClientList.size());
       Vector<Vector<U16> > shots          (mClientList.size()); 
       Vector<Vector<U16> > hits           (mClientList.size());
+      
 
       // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
       Vector<RefPtr<ClientRef> > mSortedClientList = mClientList;   
@@ -936,6 +938,7 @@ void GameType::saveGameStats()
             playerSuicides.push_back(statistics->getSuicides());
             shots         .push_back(statistics->getShotsVector());
             hits          .push_back(statistics->getHitsVector());
+				playerSwitchedTeamCount.push_back(0); // TODO: count the number of times a player has changed teams.
          }
 
          lastOnTeam[lastOnTeam.size()] = true;
@@ -961,6 +964,7 @@ void GameType::saveGameStats()
       gameStat.playerSuicides = playerSuicides;
       gameStat.shots = shots;
       gameStat.hits = hits;
+      gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;
       if(masterConn) // && gIniSettings.SendStatsToMaster)
 			masterConn->s2mSendGameStatistics_3(gameStat);
       //   masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
