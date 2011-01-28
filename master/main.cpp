@@ -181,6 +181,18 @@ static const char *sanitizeForJson(const char *value)
 }
 
 
+// Sorts player stats by score, high to low
+S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b)
+{
+   return b->points - a->points;
+}
+
+
+// Sorts team stats by score, high to low
+S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
+{
+   return b->score - a->score;  
+}
 
 class MasterServerConnection : public MasterServerInterface
 {
@@ -966,37 +978,35 @@ public:
 
 
    // Send game statistics to the master server   ==> Current as of 015
-   // Note that teams are sent in descending order, high score to low  
-	/*
+   // Note that teams are sent in descending order, most players to fewest  
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                                       Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                       Vector<RangedU32<0,0xFFFFFF> > color, 
                                                       U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIds,
-                                                      Vector<bool> isBot, 
-                                                      Vector<bool> lastOnTeam, Vector<S32> playerScores, 
+                                                      Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
                                                       Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
-                                                      Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
+                                                      Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
    {
-	}*/
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
-	{
-StringTableEntry gameType = gameStat.gameType;
-bool teamGame = gameStat.teamGame;
-StringTableEntry levelName = gameStat.levelName;
-Vector<StringTableEntry> teams = gameStat.teams;
-Vector<S32> teamScores = gameStat.teamScores;
-Vector<RangedU32<0,0xFFFFFF> > color = gameStat.color;
-U16 timeInSecs = gameStat.timeInSecs;
-Vector<StringTableEntry> playerNames = gameStat.playerNames;
-Vector<Vector<U8> > playerIds = gameStat.playerIDs;
-Vector<bool> isBot = gameStat.isBot;
-Vector<bool> lastOnTeam = gameStat.lastOnTeam;
-Vector<S32> playerScores = gameStat.playerScores;
-Vector<U16> playerKills = gameStat.playerKills;
-Vector<U16> playerDeaths = gameStat.playerDeaths;
-Vector<U16> playerSuicides = gameStat.playerSuicides;
-Vector<Vector<U16> > shots = gameStat.shots;
-Vector<Vector<U16> > hits = gameStat.hits;
+	
+ //  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
+	//{
+ //     StringTableEntry gameType = gameStat.gameType;
+ //     bool teamGame = gameStat.teamGame;
+ //     StringTableEntry levelName = gameStat.levelName;
+ //     Vector<StringTableEntry> teams = gameStat.teams;
+ //     Vector<S32> teamScores = gameStat.teamScores;
+ //     Vector<RangedU32<0,0xFFFFFF> > color = gameStat.color;
+ //     U16 timeInSecs = gameStat.timeInSecs;
+ //     Vector<StringTableEntry> playerNames = gameStat.playerNames;
+ //     Vector<Vector<U8> > playerIds = gameStat.playerIDs;
+ //     Vector<bool> isBot = gameStat.isBot;
+ //     Vector<bool> lastOnTeam = gameStat.lastOnTeam;
+ //     Vector<S32> playerScores = gameStat.playerScores;
+ //     Vector<U16> playerKills = gameStat.playerKills;
+ //     Vector<U16> playerDeaths = gameStat.playerDeaths;
+ //     Vector<U16> playerSuicides = gameStat.playerSuicides;
+ //     Vector<Vector<U16> > shots = gameStat.shots;
+ //     Vector<Vector<U16> > hits = gameStat.hits;
 
 
       if(mInfoFlags & TestModeFlag)       // Ignore stats from server in test mode
@@ -1090,10 +1100,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
          teamStats.name = teams[i].getString();
          teamStats.color = teamColor.toHexString();
 
-         teamStats.gameResult = getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
-
          teamStats.score = teamScores[i];
-
 
          for(S32 j = lastPlayerProcessed; j < playerNames.size(); j++)
          {
@@ -1101,10 +1108,10 @@ Vector<Vector<U16> > hits = gameStat.hits;
 
             // TODO: Put these into a constuctor
             playerStats.deaths = playerDeaths[j];
+
             if(teamGame)      // Team games players get team's win/loss/tie status
                playerStats.gameResult = teamStats.gameResult;
-            else
-               playerStats.gameResult = getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[j], j == 0);
+            // else gameResult will be computed below
 
             Nonce playerId(playerIds[j]);
             MasterServerConnection *client = findClient(playerId);
@@ -1115,7 +1122,7 @@ Vector<Vector<U16> > hits = gameStat.hits;
             playerStats.name = playerNames[j].getString();
             playerStats.points = playerScores[j];
             playerStats.suicides = playerSuicides[j];
-            playerStats.switchedTeams = gameStat.playerSwitchedTeamCount[j];     // TODO: How do we track this?  What should it mean?
+            playerStats.switchedTeams = teamSwitchCount[j];    
 
             
             for(S32 k = 0; k < shots.size(); k++)
@@ -1135,8 +1142,25 @@ Vector<Vector<U16> > hits = gameStat.hits;
                break;
             }
          }
+
+         // Now compute winning player(s) based on score; but must sort first
+         if(!teamGame)
+         {
+            teamStats.playerStats.sort(playerScoreSort);
+
+            for(S32 i = 0; i < teams.size(); i++)
+               teamStats.playerStats[i].gameResult = 
+                        getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[i], i == 0);
+         }
+
          gameStats.teamStats.push_back(teamStats);
       }
+
+      gameStats.teamStats.sort(teamScoreSort);
+      for(S32 i = 0; i < teams.size(); i++)
+         gameStats.teamStats[i].gameResult = 
+                     getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
+
 
       //DatabaseWriter dbWriter("127.0.0.1", "bitfighter", "user", "pw");  // TODO: Get these vals from the config file
       //dbWriter.insertStats(gameStats);

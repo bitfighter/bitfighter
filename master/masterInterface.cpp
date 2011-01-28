@@ -29,68 +29,68 @@
 // client, server, or master end as needed.  This interface will be compiled into both the
 // master and the individual clients.
 
-
-namespace Types
-{
-   // GameStatistics3 is in gameStats.h
-   const U8 GameStatistics3_CurrentVersion = 1;    // keep this the same U8 size.
-   /// Reads objects from a BitStream.
-   void read(TNL::BitStream &s, GameStatistics3 *val)
-   {
-      U8 version;
-      read(s, &version);    // version number, in the future, we add more things to read/write and want to keep compatible to old version 
-      //if(version > GameStatistics4_CurrentVersion) return; // can't read future version and unsupported version.
-
-      read(s, &val->gameType);
-      read(s, &val->teamGame);
-      read(s, &val->levelName);
-      read(s, &val->teams);
-      read(s, &val->teamScores);
-      read(s, &val->color);
-      read(s, &val->timeInSecs);
-      read(s, &val->playerNames);
-      read(s, &val->playerIDs);
-      read(s, &val->isBot);
-      read(s, &val->lastOnTeam);
-      read(s, &val->playerScores);
-      read(s, &val->playerKills);
-      read(s, &val->playerDeaths);
-      read(s, &val->playerSuicides);
-      read(s, &val->shots);
-      read(s, &val->hits);
-      if(version >= 1)
-         read(s, &val->playerSwitchedTeamCount);
-      else
-         val->playerSwitchedTeamCount.setSize(val->playerNames.size());
-
-   }
-   /// Writes objects into a BitStream. Server write and send to master.
-   void write(TNL::BitStream &s, GameStatistics3 &val)
-   {
-      write(s, GameStatistics3_CurrentVersion);       // send current version
-      write(s, val.gameType);
-      write(s, val.teamGame);
-      write(s, val.levelName);
-      write(s, val.teams);
-      write(s, val.teamScores);
-      write(s, val.color);
-      write(s, val.timeInSecs);
-      write(s, val.playerNames);
-      write(s, val.playerIDs);
-      write(s, val.isBot);
-      write(s, val.lastOnTeam);
-      write(s, val.playerScores);
-      write(s, val.playerKills);
-      write(s, val.playerDeaths);
-      write(s, val.playerSuicides);
-      write(s, val.shots);
-      write(s, val.hits);
-
-      if(GameStatistics3_CurrentVersion >= 1)
-         write(s, val.playerSwitchedTeamCount);
-   }
-}
-
+//
+//namespace Types
+//{
+//   // GameStatistics3 is in gameStats.h
+//   const U8 GameStatistics3_CurrentVersion = 1;    // keep this the same U8 size.
+//   /// Reads objects from a BitStream.
+//   void read(TNL::BitStream &s, GameStatistics3 *val)
+//   {
+//      U8 version;
+//      read(s, &version);    // version number, in the future, we add more things to read/write and want to keep compatible to old version 
+//      //if(version > GameStatistics4_CurrentVersion) return; // can't read future version and unsupported version.
+//
+//      read(s, &val->gameType);
+//      read(s, &val->teamGame);
+//      read(s, &val->levelName);
+//      read(s, &val->teams);
+//      read(s, &val->teamScores);
+//      read(s, &val->color);
+//      read(s, &val->timeInSecs);
+//      read(s, &val->playerNames);
+//      read(s, &val->playerIDs);
+//      read(s, &val->isBot);
+//      read(s, &val->lastOnTeam);
+//      read(s, &val->playerScores);
+//      read(s, &val->playerKills);
+//      read(s, &val->playerDeaths);
+//      read(s, &val->playerSuicides);
+//      read(s, &val->shots);
+//      read(s, &val->hits);
+//      if(version >= 1)
+//         read(s, &val->playerSwitchedTeamCount);
+//      else
+//         val->playerSwitchedTeamCount.setSize(val->playerNames.size());
+//   }
+//
+//
+//   /// Writes objects into a BitStream. Server write and send to master.
+//   void write(TNL::BitStream &s, GameStatistics3 &val)
+//   {
+//      write(s, GameStatistics3_CurrentVersion);       // send current version
+//      write(s, val.gameType);
+//      write(s, val.teamGame);
+//      write(s, val.levelName);
+//      write(s, val.teams);
+//      write(s, val.teamScores);
+//      write(s, val.color);
+//      write(s, val.timeInSecs);
+//      write(s, val.playerNames);
+//      write(s, val.playerIDs);
+//      write(s, val.isBot);
+//      write(s, val.lastOnTeam);
+//      write(s, val.playerScores);
+//      write(s, val.playerKills);
+//      write(s, val.playerDeaths);
+//      write(s, val.playerSuicides);
+//      write(s, val.shots);
+//      write(s, val.hits);
+//
+//      if(GameStatistics3_CurrentVersion >= 1)
+//         write(s, val.playerSwitchedTeamCount);
+//   }
+//}
 
 
 //
@@ -244,22 +244,21 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEn
    (gameType, levelName, teams, teamScores, colorR, colorG, colorB, players, time),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 
-/*
+
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, 
                                                                    StringTableEntry levelName,
                                                                    Vector<StringTableEntry> teams, 
-                                                                   Vector<S32> teamScores,
-                                                                   Vector<RangedU32<0,0xFFFFFF> > color, 
+                                                                   Vector<S32> teamScores, Vector<RangedU32<0,0xFFFFFF> > color, 
                                                                    U16 time, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
                                                                    Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
-                                                                   Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
-                                                                   Vector<Vector<U16> > shots, Vector<Vector<U16> > hits),
+                                                                   Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides,
+                                                                   Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits),
    (gameType, teamGame, levelName, teams, teamScores, color, time, playerNames, playerIDs, isBot, lastOnTeam, 
-    playerScores, playerKills, playerDeaths, playerSuicides, shots, hits),
+    playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
-*/
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (GameStatistics3 gameStats),
-   (gameStats), NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
+
+//TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (GameStatistics3 gameStats),
+//   (gameStats), NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
 
 

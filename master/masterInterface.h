@@ -205,17 +205,16 @@ public:
    //TNL_DECLARE_RPC(s2mSendPlayerStatistics_3, (StringTableEntry playerName, Vector<U8> id, bool isBot, StringTableEntry teamName, 
    //                                            S32 score, U16 kills, U16 deaths, U16 suicides, 
    //                                            Vector<U16> shots, Vector<U16> hits) );
-/*
+
    TNL_DECLARE_RPC(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                              Vector<StringTableEntry> teams, Vector<S32> teamScores, 
                                              Vector<RangedU32<0,0xFFFFFF> > color, 
                                              U16 time, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
-                                             Vector<bool> isBot, 
-                                             Vector<bool> lastOnTeam, Vector<S32> playerScores, 
-                                                      Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
-                                                      Vector<Vector<U16> > shots, Vector<Vector<U16> > hits) );
-*/
-   TNL_DECLARE_RPC(s2mSendGameStatistics_3, (GameStatistics3 gameStats));
+                                             Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
+                                             Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
+                                             Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits) );
+
+   //TNL_DECLARE_RPC(s2mSendGameStatistics_3, (GameStatistics3 gameStats));
 };
 
 

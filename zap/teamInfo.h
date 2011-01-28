@@ -44,7 +44,7 @@ public:
    static const S32 MAX_TEAM_NAME_LENGTH = 32;
 
    Color color;
-   S32 numPlayers;      // Number of human players --> Needs to be computed before use, not dynamically tracked
+   S32 numPlayers;      // Number of human players --> Needs to be computed before use, not dynamically tracked (see countTeamPlayers())
    S32 numBots;         // Number of robot players --> Needs to be computed before use, not dynamically tracked
 
    virtual void setName(const char *name) { _name.setString(name); }

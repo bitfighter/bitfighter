@@ -434,24 +434,11 @@ S32 QSORT_CALLBACK teamScoreSort(Team *a, Team *b)
 }
 
 
-// Sorts players by their teams (in turn sorted by scores), then by scores
-// This MUST return teams in the same order as teamScoreSort
-// ==> We just don't have enough info to do this here and now...
-//S32 QSORT_CALLBACK playersByTeamAndScoreSort(RefPtr<ClientRef> *a, RefPtr<ClientRef> *b)
-//{
-//   ClientRef *aClientRef = a->getPointer();
-//   ClientRef *bClientRef = b->getPointer();
-//
-//   if(aClientRef->getTeamScore() == bClientRef->getTeamScore())
-//   {
-//      if(aClientRef->getTeamId() == bClientRef->getTeamId())
-//         return aClientRef->getScore() - bClientRef->getScore();
-//      else
-//         return aClientRef->getTeamId() - bClientRef->getTeamId();
-//   }
-//   else
-//      return aClientRef->getTeamScore() - bClientRef->getTeamScore();
-//}
+// Sorts teams by player counts, high to low
+S32 QSORT_CALLBACK teamSizeSort(Team *a, Team *b)
+{
+   return (b->numPlayers + b->numBots) - (a->numPlayers + a->numBots);
+}
 
 
 extern IniSettings gIniSettings;
@@ -872,158 +859,155 @@ void GameType::gameOverManGameOver()
 void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+
+   countTeamPlayers();     // Make sure all team sizes are up to date
+
+   // Assign some ids so we can find these teams later, post sorting...
+   for(S32 i = 0; i < mTeams.size(); i++)
+      mTeams[i].setId(i);
+
+   Vector<Team> sortTeams(mTeams);
+   sortTeams.sort(teamScoreSort);
+
+   // Push team names and scores into a structure we can pass via rpc; these will be sorted by player counts, high to low
+   Vector<StringTableEntry>          teams      (sortTeams.size());
+   Vector<S32>                       scores     (sortTeams.size());
+   //Vector<RangedU32<0,MAX_PLAYERS> > teamPlayers(sortTeams.size());
+   //Vector<RangedU32<0,MAX_PLAYERS> > teamBots   (sortTeams.size());
+   Vector<RangedU32<0,0xFFFFFF> >    colors     (sortTeams.size());
+
+   for(S32 i = 0; i < sortTeams.size(); i++)
    {
-      // Build a list of teams, so we can sort by score
-      Vector<Team> sortTeams(mTeams.size());
+      teams.push_back(sortTeams[i].getName());
+      scores.push_back(sortTeams[i].getScore());
 
-      for(S32 i = 0; i < mTeams.size(); i++)
-      {
-         mTeams[i].setId(i);
-         sortTeams.push_back(mTeams[i]);
-      };
+      colors.push_back(sortTeams[i].color.toRangedU32());
 
-      sortTeams.sort(teamScoreSort);
+      //teamPlayers.push_back(sortTeams[i].numPlayers);
+      //teamBots.push_back(sortTeams[i].numPlayers);
+   }
 
-      // Push team names and scores into a structure we can pass via rpc; these will be sorted by score, high to low
-      Vector<StringTableEntry> teams(sortTeams.size());
-      Vector<S32> scores(sortTeams.size());
-      Vector<RangedU32<0,MAX_PLAYERS> > teamPlayers;
-      Vector<RangedU32<0,MAX_PLAYERS> > teamBots;
-      Vector<RangedU32<0,0xFFFFFF> > colors(mTeams.size());
-
-      for(S32 i = 0; i < sortTeams.size(); i++)
-      {
-         teams.push_back(sortTeams[i].getName());
-         scores.push_back(sortTeams[i].getScore());
-
-         colors.push_back(sortTeams[i].color.toRangedU32());
-
-         teamPlayers.push_back(sortTeams[i].numPlayers);
-         teamBots.push_back(sortTeams[i].numPlayers);
-      }
-
-      // And now the player data, presized to fit the number of clients; avoids dynamic resizing
-      Vector<bool> lastOnTeam             (mClientList.size());
-      Vector<StringTableEntry> playerNames(mClientList.size());
-      Vector<Vector<U8> > playerIDs       (mClientList.size());
-      Vector<bool> isBot                  (mClientList.size());
-      Vector<S32> playerScores            (mClientList.size());
-      Vector<U16> playerKills             (mClientList.size());
-      Vector<U16> playerDeaths            (mClientList.size());
-      Vector<U16> playerSuicides          (mClientList.size());
-      Vector<U16> playerSwitchedTeamCount (mClientList.size());
-      Vector<Vector<U16> > shots          (mClientList.size()); 
-      Vector<Vector<U16> > hits           (mClientList.size());
+   // And now the player data, presized to fit the number of clients; avoids dynamic resizing
+   Vector<bool> lastOnTeam             (mClientList.size());
+   Vector<StringTableEntry> playerNames(mClientList.size());
+   Vector<Vector<U8> > playerIDs       (mClientList.size());
+   Vector<bool> isBot                  (mClientList.size());
+   Vector<S32> playerScores            (mClientList.size());
+   Vector<U16> playerKills             (mClientList.size());
+   Vector<U16> playerDeaths            (mClientList.size());
+   Vector<U16> playerSuicides          (mClientList.size());
+   Vector<U16> teamSwitchCount         (mClientList.size());
+   Vector<Vector<U16> > shots          (mClientList.size()); 
+   Vector<Vector<U16> > hits           (mClientList.size());
       
 
-      // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
-      Vector<RefPtr<ClientRef> > mSortedClientList = mClientList;   
-      mSortedClientList.sort(playerScoreSort);
+   // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
+   //Vector<RefPtr<ClientRef> > mSortedClientList(mClientList);   
+   //mSortedClientList.sort(playerScoreSort);
 
-      for(S32 i = 0; i < sortTeams.size(); i++)
+   for(S32 i = 0; i < sortTeams.size(); i++)
+   {
+      for(S32 j = 0; j < mClientList.size(); j++)
       {
-         for(S32 j = 0; j < mSortedClientList.size(); j++)
-         {
-            // Only looking for players on the current team
-            if(mSortedClientList[j]->getTeam() != sortTeams[i].getId())
-               continue;
+         // Only looking for players on the current team
+         if(mClientList[j]->getTeam() != sortTeams[i].getId())
+            continue;
 
-            Statistics *statistics = &mSortedClientList[j]->clientConnection->mStatistics;
+         Statistics *statistics = &mClientList[j]->clientConnection->mStatistics;
             
-            lastOnTeam.push_back(false);
+         lastOnTeam.push_back(false);
 
-            playerNames   .push_back(mSortedClientList[j]->name);    // TODO: What if this is a bot??  What should go here??
-            playerIDs     .push_back(mSortedClientList[j]->clientConnection->getClientId()->toVector());
-            isBot         .push_back(mSortedClientList[j]->isRobot);
-            playerScores  .push_back(mSortedClientList[j]->getScore());
-            playerKills   .push_back(statistics->getKills());
-            playerDeaths  .push_back(statistics->getDeaths());
-            playerSuicides.push_back(statistics->getSuicides());
-            shots         .push_back(statistics->getShotsVector());
-            hits          .push_back(statistics->getHitsVector());
-            playerSwitchedTeamCount.push_back(mSortedClientList[j]->clientConnection->switchedTeamCount);
-         }
-
-         lastOnTeam[lastOnTeam.size() - 1] = true;
+         playerNames    .push_back(mClientList[j]->name);    // TODO: What if this is a bot??  What should go here??
+         playerIDs      .push_back(mClientList[j]->clientConnection->getClientId()->toVector());
+         isBot          .push_back(mClientList[j]->isRobot);
+         playerScores   .push_back(mClientList[j]->getScore());
+         playerKills    .push_back(statistics->getKills());
+         playerDeaths   .push_back(statistics->getDeaths());
+         playerSuicides .push_back(statistics->getSuicides());
+         shots          .push_back(statistics->getShotsVector());
+         hits           .push_back(statistics->getHitsVector());
+         teamSwitchCount.push_back(mClientList[j]->clientConnection->switchedTeamCount);
       }
 
-      S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin
+      lastOnTeam[lastOnTeam.size() - 1] = true;
+   }
 
-      GameStatistics3 gameStat;
-      gameStat.gameType = getGameTypeString();
-      gameStat.teamGame = isTeamGame();
-      gameStat.levelName = mLevelName;
-      gameStat.teams = teams;
-      gameStat.teamScores = scores;
-      gameStat.color = colors;
-      gameStat.timeInSecs = timeInSecs;
-      gameStat.playerNames = playerNames;
-      gameStat.playerIDs = playerIDs;
-      gameStat.isBot = isBot;
-      gameStat.lastOnTeam = lastOnTeam;
-      gameStat.playerScores = playerScores;
-      gameStat.playerKills = playerKills;
-      gameStat.playerDeaths = playerDeaths;
-      gameStat.playerSuicides = playerSuicides;
-      gameStat.shots = shots;
-      gameStat.hits = hits;
-      gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;
-      if(masterConn) // && gIniSettings.SendStatsToMaster)
-			masterConn->s2mSendGameStatistics_3(gameStat);
-      //   masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
-      //                                       timeInSecs, playerNames, playerIDs, isBot,
-      //                                       lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, shots, hits);
+   S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin
+
+   /*GameStatistics3 gameStat;
+   gameStat.gameType = getGameTypeString();
+   gameStat.teamGame = isTeamGame();
+   gameStat.levelName = mLevelName;
+   gameStat.teams = teams;
+   gameStat.teamScores = scores;
+   gameStat.color = colors;
+   gameStat.timeInSecs = timeInSecs;
+   gameStat.playerNames = playerNames;
+   gameStat.playerIDs = playerIDs;
+   gameStat.isBot = isBot;
+   gameStat.lastOnTeam = lastOnTeam;
+   gameStat.playerScores = playerScores;    
+   gameStat.playerKills = playerKills;
+   gameStat.playerDeaths = playerDeaths;
+   gameStat.playerSuicides = playerSuicides;
+   gameStat.shots = shots;
+   gameStat.hits = hits;
+   gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;*/
+
+   if(masterConn)                                        // && gIniSettings.SendStatsToMaster)
+		//masterConn->s2mSendGameStatistics_3(gameStat);
+
+      masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
+                                          timeInSecs, playerNames, playerIDs, isBot,
+                                          lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits);
 
 
-      // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code
-      // in the master, which will have these structs as well, to produce a consnstent text logfile format.
-      // We could also have the stats be written to a local mysql database if one were available using the same code.
+   // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code
+   // in the master, which will have these structs as well, to produce a consnstent text logfile format.
+   // We could also have the stats be written to a local mysql database if one were available using the same code.
+	switch(gIniSettings.LogStats)
+	{
+		case 1:
+			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
+			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
+			for(S32 i = 0; i < mTeams.size(); i++)
+				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%s Name=%s",
+					i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
+					mTeams[i].getScore(),
+               mTeams[i].color.toHexString(),
+					mTeams[i].getName().getString());
+			break;
+		// case 2: // For using other formats
+		default:
+			logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
+	}
+
+   for(S32 i = 0; i < mClientList.size(); i++)
+   {
+      Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
+        
+      //if(masterConn) //&& gIniSettings.SendStatsToMaster)
+      //   masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
+      //                                      mClientList[i]->isRobot,
+      //                                      getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
+      //                                      mClientList[i]->getScore(),
+      //                                      statistics->getKills(), statistics->getDeaths(), 
+      //                                      statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
 		switch(gIniSettings.LogStats)
 		{
-		   case 1:
-			   logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
-			   logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
-			   for(S32 i = 0; i < mTeams.size(); i++)
-				   logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%i,%i,%i Name=%s",
-					   i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
-					   mTeams[i].getScore(),
-					   (S32) mTeams[i].color.r*9,   // Don't need accuracy, will use one digit number.
-					   (S32) mTeams[i].color.g*9,
-					   (S32) mTeams[i].color.b*9,
-					   mTeams[i].getName().getString());
-			   break;
-		   // case 2: // For using other formats
-		   default:
-			   logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
+			case 1:
+				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
+					mClientList[i]->isRobot ? "Robot" : "Player",
+					mClientList[i]->name.getString(),
+					mClientList[i]->getTeam(),
+					mClientList[i]->getScore(),
+				   getCurrentRating(mClientList[i]->clientConnection),
+					statistics->getKills(),
+					statistics->getDeaths(),
+               statistics->getSuicides());
+				break;
+			// case 2: // For using other formats
 		}
-
-      for(S32 i = 0; i < mClientList.size(); i++)
-      {
-         Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
-        
-         //if(masterConn) //&& gIniSettings.SendStatsToMaster)
-         //   masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
-         //                                      mClientList[i]->isRobot,
-         //                                      getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
-         //                                      mClientList[i]->getScore(),
-         //                                      statistics->getKills(), statistics->getDeaths(), 
-         //                                      statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
-			switch(gIniSettings.LogStats)
-			{
-			   case 1:
-				   logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
-					   mClientList[i]->isRobot ? "Robot" : "Player",
-					   mClientList[i]->name.getString(),
-					   mClientList[i]->getTeam(),
-					   mClientList[i]->getScore(),
-				      getCurrentRating(mClientList[i]->clientConnection),
-					   statistics->getKills(),
-					   statistics->getDeaths(),
-                  statistics->getSuicides());
-				   break;
-			   // case 2: // For using other formats
-			}
-      }
    }
 }
 
@@ -1719,7 +1703,6 @@ Color GameType::getShipColor(Ship *s)
 }
 
 
-
 // Make sure that the mTeams[] structure has the proper player counts
 // Needs to be called manually before accessing the structure
 // Rating may only work on server... not tested on client
@@ -1744,6 +1727,7 @@ void GameType::countTeamPlayers()
          mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1);
    }
 }
+
 
 // Adds a new client to the game when a player joins, or when a level cycles.
 // Runs on the server, can be overridden.
