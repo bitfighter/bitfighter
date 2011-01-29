@@ -218,7 +218,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
    }
    catch (const Exception &ex) {
       // Catch-all for any other MySQL++ exceptions
-		logprintf("General connection failure: %s Query: %s", ex.what(), sql.c_str());
+		logprintf("General connection failure: %s", ex.what());
       return;
     }
 }

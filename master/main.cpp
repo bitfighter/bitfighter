@@ -1149,7 +1149,7 @@ public:
          {
             teamStats.playerStats.sort(playerScoreSort);
 
-            for(S32 i = 0; i < teams.size(); i++)
+            for(S32 i = 0; i < teamStats.playerStats.size(); i++)
                teamStats.playerStats[i].gameResult = 
                         getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[i], i == 0);
          }
