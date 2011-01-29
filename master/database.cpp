@@ -22,8 +22,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
-
-
 #include "database.h"
 #include "tnlTypes.h"
 #include "tnlLog.h"
@@ -115,8 +113,7 @@ static string insertStatsPlayer(Query query, const PlayerStats *playerStats, con
                                  itos(playerStats->deaths) + ", " +
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
 
-   SimpleResult result = runQuery(query, sql);
-   string playerId = itos(result.insert_id());
+   string playerId = itos(runQuery(query, sql).insert_id());
 
    insertStatsShots(query, playerId, playerStats->weaponStats);
 
@@ -131,8 +128,7 @@ static string insertStatsTeam(Query query, const TeamStats *teamStats, const str
             VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
                      teamStats->gameResult + "' ,'" + teamStats->color + "');";
 
-   SimpleResult result = runQuery(query, sql);
-   string teamId = itos(result.insert_id());
+   string teamId = itos(runQuery(query, sql).insert_id());
 
    for(S32 i = 0; i < teamStats->playerStats.size(); i++)
       insertStatsPlayer(query, &teamStats->playerStats[i], gameId, teamId);
@@ -149,17 +145,7 @@ static string insertStatsGame(Query query, const GameStats *gameStats, const str
                      itos(gameStats->duration) + ", '" + sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
                      itos(gameStats->teamCount)  + ");";
 
-   SimpleResult result = runQuery(query, sql);
-
-	//U64 gameID = result.insert_id();
-
-   //if(gameID <= lastGameID)      // ID should only go bigger, if not, database might have changed        
-   //   while(cachedServers.size() != 0) 
-   //      cachedServers.erase_fast(0);  
-
-   //lastGameID = gameID;
-
-   string gameId = itos(result.insert_id());
+   string gameId = itos(runQuery(query, sql).insert_id());
 
    for(S32 i = 0; i < gameStats->teamStats.size(); i++)
       insertStatsTeam(query, &gameStats->teamStats[i], gameId);
@@ -170,9 +156,6 @@ static string insertStatsGame(Query query, const GameStats *gameStats, const str
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
-   Connection conn;    // Connect to the database
-
-   string sql;
    try
    {
       if(!mIsValid)
@@ -181,27 +164,26 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          return;
       }
 
+      Connection conn;                                 // Connect to the database
       conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
       
       Query query(&conn);
       SimpleResult result;
       U64 serverId_int = U64_MAX;
 
+      // Check cache first
       for(S32 i = cachedServers.size() - 1; i >= 0; i--)
-		{
-			if(cachedServers[i].ip == gameStats.serverIP	&&
-			   cachedServers[i].name == gameStats.serverName )
+			if(cachedServers[i].ip == gameStats.serverIP	&& cachedServers[i].name == gameStats.serverName )
 			{
 				serverId_int = cachedServers[i].id;
 				break;
 			}
-		}
 
       if(serverId_int == U64_MAX)  // Not in cache
       {
          // Find server in database
-			sql = "SELECT server_id FROM server AS server \
-                WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
+			string sql = "SELECT server_id FROM server AS server \
+                       WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
          StoreQueryResult results = query.store(sql.c_str(), sql.length());
 
          if(results.num_rows() >= 1)
@@ -209,8 +191,8 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
          if(serverId_int == U64_MAX)      // Not in database
          {
-            sql = "INSERT INTO server(server_name, ip_address) \
-                   VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
+            string sql = "INSERT INTO server(server_name, ip_address) \
+                          VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
             result = runQuery(query, sql);
             serverId_int = result.insert_id();
          }
