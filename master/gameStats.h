@@ -22,6 +22,32 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
+#include "tnlTypes.h"
+#include "tnlVector.h"
+#include "tnlBitStream.h"
+#include "tnlNetStringTable.h"
+#include "tnlString.h"
+#include "database.h"     // For GameStats
+
+
+using namespace TNL;
+
+
+
+struct GameStatistics3
+{
+   U8 version;
+   GameStats gameStats ;
+};
+
+
+namespace Types
+{
+   extern void read(TNL::BitStream &s, GameStatistics3 *val);
+   extern void write(TNL::BitStream &s, GameStatistics3 &val);
+}
+
+/*
 #ifndef _TNL_TYPES_H_
 #include "tnlTypes.h"
 #endif
@@ -43,7 +69,6 @@
 #endif
 
 using namespace TNL;
-
 
 
 struct GameStatistics3
@@ -74,4 +99,4 @@ namespace Types
    extern void read(TNL::BitStream &s, GameStatistics3 *val);
    extern void write(TNL::BitStream &s, GameStatistics3 &val);
 }
-
+*/

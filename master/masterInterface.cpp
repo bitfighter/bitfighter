@@ -29,6 +29,142 @@
 // client, server, or master end as needed.  This interface will be compiled into both the
 // master and the individual clients.
 
+
+
+namespace Types
+{
+   // GameStatistics3 is in gameStats.h
+   const U8 GameStatistics3_CurrentVersion = 0;
+
+   U8 readU8(TNL::BitStream &s) {U8 val; read(s, &val); return val;}
+   S8 readS8(TNL::BitStream &s) {S8 val; read(s, &val); return val;}
+   U16 readU16(TNL::BitStream &s) {U16 val; read(s, &val); return val;}
+   S16 readS16(TNL::BitStream &s) {S16 val; read(s, &val); return val;}
+   U32 readU32(TNL::BitStream &s) {U32 val; read(s, &val); return val;}
+   S32 readS32(TNL::BitStream &s) {S32 val; read(s, &val); return val;}
+   // for bool, use   s.readFlag();
+   string readString(TNL::BitStream &s) {StringTableEntry val; read(s, &val); return val.getString();}
+   void writeString(TNL::BitStream &s, const string &val) {write(s, StringTableEntry(val));}
+
+
+
+   /// Reads objects from a BitStream.
+   void read(TNL::BitStream &s, GameStatistics3 *val)
+   {
+      U8 version = readU8(s);  // Read version number.
+      val->version = version;
+      GameStats *g = &val->gameStats;
+
+      g->gameType = readString(s);
+      g->levelName = readString(s);
+      g->isOfficial = s.readFlag();
+      g->playerCount = readU16(s);
+      g->duration = readU16(s);     // game length in seconds
+      g->isTeamGame = s.readFlag();
+      g->teamCount = readU8(s);
+      g->isTied = s.readFlag();
+   
+      if(!s.isValid()) return;
+      g->teamStats.setSize(g->teamCount);
+      for(S32 i = 0; i < g->teamCount; i++)
+      {
+         TeamStats *gt = &g->teamStats[i];
+         gt->name = readString(s);
+         gt->score = readS32(s);
+         gt->color_bin = s.readInt(24); // 24 bit color
+         gt->color = Color(gt->color_bin).toHexString(); // TODO: fix conversion from int to float
+         gt->gameResult = "?";
+         if(!s.isValid()) return;
+
+         U32 size = readU8(s);
+         gt->playerStats.setSize(size);
+         for(U32 j = 0; j < size; j++)
+         {
+            PlayerStats *gp = &gt->playerStats[j];
+            gp->name = readString(s);
+            gp->points = readS32(s);
+            gp->kills = readU16(s);
+            gp->deaths = readU16(s);
+            gp->suicides = readU16(s);
+            gp->switchedTeamCount = readU8(s);
+            gp->switchedTeams = (gp->switchedTeamCount != 0);
+            gp->isRobot = s.readFlag();
+            gp->isAdmin = s.readFlag();
+            gp->isLevelChanger = s.readFlag();
+            gp->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
+            gp->nonce.read(&s);
+            gp->gameResult = "?";
+
+            U32 weaponSize = readU8(s);
+            gp->weaponStats.setSize(weaponSize);
+            for(U32 k = 0; k < size; k++)
+            {
+               WeaponStats *gw = &gp->weaponStats[k];
+               gw->weaponType = WeaponType(readU8(s));
+               gw->shots = readU16(s);
+               gw->hits = readU16(s);
+            }
+         }
+      }
+   }
+
+
+   /// Writes objects into a BitStream. Server write and send to master.
+   void write(TNL::BitStream &s, GameStatistics3 &val)
+   {
+      write(s, U8(GameStatistics3_CurrentVersion));       // send current version
+      GameStats *g = &val.gameStats;
+
+      writeString(s, g->gameType);
+      writeString(s, g->levelName);
+      s.writeFlag(g->isOfficial);
+      write(s, U16(g->playerCount));
+      write(s, U16(g->duration));     // game length in seconds
+      s.writeFlag(g->isTeamGame);
+      write(s, U8(g->teamStats.size())); //(g->teamCount)
+      s.writeFlag(g->isTied);
+
+      for(S32 i = 0; i < g->teamCount; i++)
+      {
+         TeamStats *gt = &g->teamStats[i];
+         writeString(s, gt->name);
+         write(s, S32(gt->score));
+         s.writeInt(gt->color_bin,24); // 24 bit color
+
+         write(s, U8(gt->playerStats.size()));
+         for(S32 j = 0; j < gt->playerStats.size(); j++)
+         {
+            PlayerStats *gp = &gt->playerStats[j];
+            writeString(s, gp->name);
+            write(s, S32(gp->points));
+            write(s, U16(gp->kills));
+            write(s, U16(gp->deaths));
+            write(s, U16(gp->suicides));
+            write(s, U8(gp->switchedTeamCount));
+            //gp->switchedTeams
+            s.writeFlag(gp->isRobot);
+            s.writeFlag(gp->isAdmin);
+            s.writeFlag(gp->isLevelChanger);
+            //gp->isAuthenticated;;  // we may set this by comparing Nonce id.
+            gp->nonce.write(&s);
+
+            write(s, U8(gp->weaponStats.size()));
+            for(S32 k = 0; k < gp->weaponStats.size(); k++)
+            {
+               WeaponStats *gw = &gp->weaponStats[k];
+               write(s, U8(gw->weaponType));
+               write(s, U16(gw->shots));
+               write(s, U16(gw->hits));
+            }
+         }
+      }
+   }
+}
+
+
+
+
+
 //
 //namespace Types
 //{

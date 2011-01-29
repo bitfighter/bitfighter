@@ -29,6 +29,7 @@
 #include "../zap/gameWeapons.h"     // For WeaponType enum
 #include "tnlTypes.h"
 #include "tnlVector.h"
+#include "tnlNonce.h"
 
 #include <string>
 
@@ -54,19 +55,25 @@ struct PlayerStats
 {
    string name;
    bool isAuthenticated;
+   Nonce nonce;
    bool isRobot;
    string gameResult;
    S32 points;
    S32 kills;
    S32 deaths;
    S32 suicides;
-   bool switchedTeams;     // do we currently track this?  is it meaningful?
+   bool switchedTeams;
+   S32 switchedTeamCount;
    Vector<WeaponStats> weaponStats;
+
+   bool isAdmin;
+   bool isLevelChanger;
 };
 
 
 struct TeamStats 
 {
+   U32 color_bin; // The game server needs to send in number, not string
    string color;
    string name;
    S32 score;
