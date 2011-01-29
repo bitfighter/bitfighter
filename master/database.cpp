@@ -207,18 +207,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
       insertStatsGame(query, &gameStats, itos(serverId_int));
    }
-
-   catch (const BadOption &ex) {
-      logprintf("Bad connection option: %s", ex.what());
-      return;
-   }
-   catch (const ConnectionFailed &ex) {
-      logprintf("Connection failed: %s", ex.what());        
-      return;
-   }
-   catch (const Exception &ex) {
-      // Catch-all for any other MySQL++ exceptions
-		logprintf("General connection failure: %s", ex.what());
+   catch (const Exception &ex) 
+   {
+		logprintf("Failure writing stats to database: %s", ex.what());
       return;
     }
 }
