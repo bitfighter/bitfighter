@@ -79,6 +79,9 @@ static string sanitize(const string &value)
 }
 
 
+#define btos(value) (value ? "1" : "0")
+
+
 // Create wrapper function to make logging easier
 static SimpleResult runQuery(Query query, const string &sql)      // TODO: Pass query as a Query *?
 {
@@ -142,22 +145,32 @@ static string insertStatsTeam(Query query, const TeamStats *teamStats, const str
 }
 
 
-static string insertStatsGame(Query query, const GameStats *gameStats)
+static string insertStatsGame(Query query, const GameStats *gameStats, const string &serverId)
 {
-           /* sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
-                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
-                VALUES( " + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " +
-                       itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
-                       itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
+   string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
+                                        duration_seconds, level_name, is_team_game, team_count) \
+         VALUES( " + serverId + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + itos(gameStats->playerCount) + ", " +
+                     itos(gameStats->duration) + ", '" + sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
+                     itos(gameStats->teamCount)  + ");";
 
-                     sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
-                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
-                VALUES(" + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " + 
-                           itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 0, NULL, " +  btos(gameStats.isTied) + ");";*/
+   SimpleResult result = runQuery(query, sql);
+
+	//U64 gameID = result.insert_id();
+
+   //if(gameID <= lastGameID)      // ID should only go bigger, if not, database might have changed        
+   //   while(cachedServers.size() != 0) 
+   //      cachedServers.erase_fast(0);  
+
+   //lastGameID = gameID;
+
+   string gameId = itos(result.insert_id());
+
+   for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+      insertStatsTeam(query, &gameStats->teamStats[i], gameId);
+
+   return gameId;
 }
 
-
-#define btos(value) (value ? "1" : "0")
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
@@ -207,7 +220,8 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          }
 
          // Limit cache growth
-         if(cachedServers.size() > 20) 
+         static const S32 SERVER_CACHE_SIZE = 20;
+         if(cachedServers.size() > SERVER_CACHE_SIZE) 
             cachedServers.erase(0);
 
          cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
@@ -216,45 +230,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       string serverId = itos(serverId_int);
 
       if(gameStats.isTeamGame)
-      {
-         sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
-                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
-                VALUES( " + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " +
-                       itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
-                       itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
-
-         result = runQuery(query, sql);
-			U64 gameID = result.insert_id();
-
-         if(gameID <= lastGameID)      // ID should only go bigger, if not, database might have changed        
-            while(cachedServers.size() != 0) 
-               cachedServers.erase_fast(0);  
-
-         lastGameID = gameID;
-
-         for(S32 i = 0; i < gameStats.teamStats.size(); i++)
-            string teamId = insertStatsTeam(query, &gameStats.teamStats[i], itos(gameID));
-      }
-      else     // Not team game
-      {
-         sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
-                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
-                VALUES(" + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " + 
-                           itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 0, NULL, " +  btos(gameStats.isTied) + ");";
-
-         result = runQuery(query, sql);
-			U64 gameID = result.insert_id();
-
-         if(gameID <= lastGameID)         // ID should only go bigger, if not, database might have changed
-            while(cachedServers.size() != 0) 
-               cachedServers.erase_fast(0);  
-
-         lastGameID = gameID;
-         string gameId = itos(gameID);
-
-         const TeamStats *teamStats = &gameStats.teamStats[0];
-         string teamId = insertStatsTeam(query, teamStats, gameId);
-      }
+         insertStatsGame(query, &gameStats, serverId);
    }
 
    catch (const BadOption &ex) {
