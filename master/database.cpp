@@ -89,19 +89,15 @@ static SimpleResult runQuery(Query query, const string &sql)      // TODO: Pass 
 }
 
 
-static void doInsertStatsShots(Query query, const string &playerId, const string &weapon, S32 shots, S32 hits)
-{
-   string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck)  \
-                 VALUES(" + playerId + ", '" + weapon + "', " + itos(shots) + ", " + itos(hits) + ");";
-
-   runQuery(query, sql);
-}
-
-
 static void insertStatsShots(Query query, const string &playerId, const Vector<WeaponStats> weaponStats)
 {
    for(S32 i = 0; i < weaponStats.size(); i++)
-      doInsertStatsShots(query, playerId, WeaponInfo::getWeaponName(weaponStats[i].weaponType), weaponStats[i].shots, weaponStats[i].hits);
+   {
+      string sql = "INSERT INTO stats_player_shots(stats_player_id, weapon, shots, shots_struck)  \
+                    VALUES(" + playerId + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " + 
+                               itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
+      runQuery(query, sql);
+   }
 }
 
 
@@ -227,10 +223,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
       }
 
-      string serverId = itos(serverId_int);
-
-      if(gameStats.isTeamGame)
-         insertStatsGame(query, &gameStats, serverId);
+      insertStatsGame(query, &gameStats, itos(serverId_int));
    }
 
    catch (const BadOption &ex) {
