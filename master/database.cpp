@@ -102,6 +102,61 @@ static void insertStatsShots(Query query, const string &playerId, const Vector<W
 }
 
 
+// Inserts player and all associated weapon stats
+static string insertStatsPlayer(Query query, const PlayerStats *playerStats, const string gameId, const string &teamId)
+{
+   string sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, \
+                                               is_authenticated, is_robot, \
+                                               result, points, kill_count, \
+                                               death_count, \
+                                               suicide_count, switched_team) \
+                      VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
+                                 btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
+                                 playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
+                                 itos(playerStats->deaths) + ", " +
+                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
+
+   SimpleResult result = runQuery(query, sql);
+   string playerId = itos(result.insert_id());
+
+   insertStatsShots(query, playerId, playerStats->weaponStats);
+
+   return playerId;
+}
+
+
+// Inserts stats of team and all players
+static string insertStatsTeam(Query query, const TeamStats *teamStats, const string &gameId)
+{
+   string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) \
+            VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
+                     teamStats->gameResult + "' ,'" + teamStats->color + "');";
+
+   SimpleResult result = runQuery(query, sql);
+   string teamId = itos(result.insert_id());
+
+   for(S32 i = 0; i < teamStats->playerStats.size(); i++)
+      insertStatsPlayer(query, &teamStats->playerStats[i], gameId, teamId);
+
+   return teamId;
+}
+
+
+static string insertStatsGame(Query query, const GameStats *gameStats)
+{
+           /* sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
+                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
+                VALUES( " + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " +
+                       itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
+                       itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
+
+                     sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
+                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
+                VALUES(" + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " + 
+                           itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 0, NULL, " +  btos(gameStats.isTied) + ");";*/
+}
+
+
 #define btos(value) (value ? "1" : "0")
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
@@ -163,8 +218,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       if(gameStats.isTeamGame)
       {
          sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
-                     duration_seconds, level_name, is_team_game, \
-                     team_count, is_tied) \
+                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
                 VALUES( " + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " +
                        itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
                        itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
@@ -177,39 +231,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                cachedServers.erase_fast(0);  
 
          lastGameID = gameID;
-         string gameId = itos(gameID);
-
 
          for(S32 i = 0; i < gameStats.teamStats.size(); i++)
-         {
-            const TeamStats *teamStats = &gameStats.teamStats[i];
-            sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) \
-                   VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
-                              teamStats->gameResult + "' ,'" + teamStats->color + "');";
-
-            result = runQuery(query, sql);
-            string teamId = itos(result.insert_id());
-            
-            for(S32 j = 0; j < teamStats->playerStats.size(); j++)
-            {
-               const PlayerStats *playerStats = &teamStats->playerStats[j];
-               sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, \
-                                               is_authenticated, is_robot, \
-                                               result, points, kill_count, \
-                                               death_count, \
-                                               suicide_count, switched_team) \
-                      VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
-                                 btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
-                                 playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
-                                 itos(playerStats->deaths) + ", " +
-                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
-
-               result = runQuery(query, sql);
-               string playerId = itos(result.insert_id());
-
-               insertStatsShots(query, playerId, playerStats->weaponStats);
-            }
-         }
+            string teamId = insertStatsTeam(query, &gameStats.teamStats[i], itos(gameID));
       }
       else     // Not team game
       {
@@ -228,21 +252,8 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          lastGameID = gameID;
          string gameId = itos(gameID);
 
-         for(S32 i = 0; i < gameStats.teamStats[0].playerStats.size(); i++)
-         {
-            const PlayerStats *playerStats = &gameStats.teamStats[0].playerStats[i];
-            sql = "INSERT INTO stats_player(stats_game_id, player_name, is_authenticated, is_robot, \
-                                            result, points, \
-                                            kill_count, suicide_count, death_count) \
-                   VALUES(" + gameId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" + 
-                              playerStats->gameResult + "', " + itos(playerStats->points) + ", " + 
-                              itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ", " + itos(playerStats->deaths) + ");";
-
-            result = runQuery(query, sql);
-            string playerId = itos(result.insert_id());
-
-            insertStatsShots(query, playerId, playerStats->weaponStats);
-         }
+         const TeamStats *teamStats = &gameStats.teamStats[0];
+         string teamId = insertStatsTeam(query, teamStats, gameId);
       }
    }
 
