@@ -41,6 +41,7 @@ using namespace std;
 using namespace mysqlpp;
 using namespace TNL;
 
+#define btos(value) (value ? "1" : "0")
 
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
@@ -157,7 +158,6 @@ static string insertStatsGame(Query query, const GameStats *gameStats)
 }
 
 
-#define btos(value) (value ? "1" : "0")
 
 void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
@@ -218,10 +218,10 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       if(gameStats.isTeamGame)
       {
          sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, \
-                                       duration_seconds, level_name, is_team_game, team_count, is_tied) \
+                                       duration_seconds, level_name, is_team_game, team_count) \
                 VALUES( " + serverId + ", '" + gameStats.gameType + "', " + btos(gameStats.isOfficial) + ", " + itos(gameStats.playerCount) + ", " +
                        itos(gameStats.duration) + ", '" + sanitize(gameStats.levelName) + "', 1, " + 
-                       itos(gameStats.teamCount) + ", " + btos(gameStats.isTied) + ");";
+                       itos(gameStats.teamCount) + ");";
 
          result = runQuery(query, sql);
 			U64 gameID = result.insert_id();
