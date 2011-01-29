@@ -30,8 +30,8 @@
 
 #include "../zap/SharedConstants.h"
 
-#include "../tnl/tnl.h"
-#include "../tnl/tnlLog.h"
+#include "tnl.h"
+#include "tnlLog.h"
 #include <stdio.h>
 #include <string>
 
@@ -51,6 +51,10 @@ extern string gDbPassword;
 extern string gPhpbb3Database;
 extern string gPhpbb3TablePrefix;
 
+extern const char *gStatsDatabaseAddress;
+extern const char *gStatsDatabaseName;
+extern const char *gStatsDatabaseUsername;
+extern const char *gStatsDatabasePassword;
 
 
 extern U32 gLatestReleasedCSProtocol;
@@ -132,8 +136,19 @@ void processConfigLine(int argc, string argv[])
       gPhpbb3Database = argv[1].c_str(); 
 
    else if(argv[0] == "phpbb3_table_prefix" && argc > 1) // Prefix used for phpbb3 tables
-      gPhpbb3TablePrefix = argv[1].c_str();        
+      gPhpbb3TablePrefix = argv[1].c_str();  
 
+   else if(argv[0] == "stats_database_addr" && argc > 1)
+      gStatsDatabaseAddress = argv[1].c_str();
+
+   else if(argv[0] == "stats_database_name" && argc > 1)
+      gStatsDatabaseName = argv[1].c_str();
+
+   else if(argv[0] == "stats_database_username" && argc > 1)
+      gStatsDatabaseUsername = argv[1].c_str();
+
+   else if(argv[0] == "stats_database_password" && argc > 1)
+      gStatsDatabasePassword = argv[1].c_str();
 }
 
 enum {
