@@ -199,7 +199,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
                                                death_count, \
                                                suicide_count, switched_team) \
                       VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
-                                 btos(playerStats->isAuthenticated) + ", '" + btos(playerStats->isRobot) + "', '" +
+                                 btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
                                  itos(playerStats->deaths) + ", " +
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
@@ -231,12 +231,12 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
          for(S32 i = 0; i < gameStats.teamStats[0].playerStats.size(); i++)
          {
             const PlayerStats *playerStats = &gameStats.teamStats[0].playerStats[i];
-            sql = "INSERT INTO stats_player(stats_game_id, player_name, is_authenticated, \
+            sql = "INSERT INTO stats_player(stats_game_id, player_name, is_authenticated, is_robot, \
                                             result, points, \
-                                            kill_count, suicide_count) \
-                   VALUES(" + gameId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", '" + 
+                                            kill_count, suicide_count, death_count) \
+                   VALUES(" + gameId + ", '" + sanitize(playerStats->name) + "', " + btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" + 
                               playerStats->gameResult + "', " + itos(playerStats->points) + ", " + 
-                              itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ");";
+                              itos(playerStats->kills) + ", " + itos(playerStats->suicides) + ", " + itos(playerStats->deaths) + ");";
 
             result = runQuery(query, sql);
             string playerId = itos(result.insert_id());
