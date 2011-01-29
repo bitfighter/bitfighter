@@ -51,10 +51,10 @@ extern string gDbPassword;
 extern string gPhpbb3Database;
 extern string gPhpbb3TablePrefix;
 
-extern const char *gStatsDatabaseAddress;
-extern const char *gStatsDatabaseName;
-extern const char *gStatsDatabaseUsername;
-extern const char *gStatsDatabasePassword;
+extern string gStatsDatabaseAddress;
+extern string gStatsDatabaseName;
+extern string gStatsDatabaseUsername;
+extern string gStatsDatabasePassword;
 
 
 extern U32 gLatestReleasedCSProtocol;
@@ -121,34 +121,34 @@ void processConfigLine(int argc, string argv[])
       gLatestReleasedCSProtocol = atoi(argv[1].c_str());
 
    else if(argv[0] == "json_file" && argc > 1)   // json file
-      gJasonOutFile = argv[1].c_str();
+      gJasonOutFile = argv[1];
 
    else if(argv[0] == "my_sql_address" && argc > 1)      // DB address
-      gMySqlAddress = argv[1].c_str();      
+      gMySqlAddress = argv[1];      
 
    else if(argv[0] == "db_username" && argc > 1)         // Username needed to access db
-      gDbUsername = argv[1].c_str();    
+      gDbUsername = argv[1];    
 
    else if(argv[0] == "db_password" && argc > 1)         // Password needed to access db
-      gDbPassword = argv[1].c_str();   
+      gDbPassword = argv[1];   
 
    else if(argv[0] == "phpbb3_database" && argc > 1)     // Name of phpbb3 database
-      gPhpbb3Database = argv[1].c_str(); 
+      gPhpbb3Database = argv[1]; 
 
    else if(argv[0] == "phpbb3_table_prefix" && argc > 1) // Prefix used for phpbb3 tables
-      gPhpbb3TablePrefix = argv[1].c_str();  
+      gPhpbb3TablePrefix = argv[1];  
 
    else if(argv[0] == "stats_database_addr" && argc > 1)
-      gStatsDatabaseAddress = argv[1].c_str();
+      gStatsDatabaseAddress = argv[1];
 
    else if(argv[0] == "stats_database_name" && argc > 1)
-      gStatsDatabaseName = argv[1].c_str();
+      gStatsDatabaseName = argv[1];
 
    else if(argv[0] == "stats_database_username" && argc > 1)
-      gStatsDatabaseUsername = argv[1].c_str();
+      gStatsDatabaseUsername = argv[1];
 
    else if(argv[0] == "stats_database_password" && argc > 1)
-      gStatsDatabasePassword = argv[1].c_str();
+      gStatsDatabasePassword = argv[1];
 }
 
 enum {

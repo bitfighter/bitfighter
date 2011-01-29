@@ -70,10 +70,10 @@ string gPhpbb3Database;
 string gPhpbb3TablePrefix;
 
 // Variables for writing stats
-const char *gStatsDatabaseAddress;
-const char *gStatsDatabaseName;
-const char *gStatsDatabaseUsername;
-const char *gStatsDatabasePassword;
+string gStatsDatabaseAddress;
+string gStatsDatabaseName;
+string gStatsDatabaseUsername;
+string gStatsDatabasePassword;
 
 DatabaseWriter *databaseWriter;
 
@@ -1168,11 +1168,12 @@ public:
          gameStats.teamStats[i].gameResult = 
                      getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
 
-      DatabaseWriter dbWriter(gStatsDatabaseAddress, gStatsDatabaseName, gStatsDatabaseUsername, gStatsDatabasePassword);  
+      DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
       dbWriter.insertStats(gameStats);
 
 		if(! databaseWriter) databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
-      if(databaseWriter) databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
+      if(databaseWriter) 
+         databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
 
    }
 
