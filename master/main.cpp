@@ -1115,9 +1115,7 @@ public:
             // TODO: Put these into a constuctor
             playerStats.deaths = playerDeaths[j];
 
-            if(teamGame)      // In team games, players get team's win/loss/tie status
-               playerStats.gameResult = teamStats.gameResult;
-            // else gameResult will be computed below
+            // Note: Have to wait until team result is computed to set it on the players
 
             Nonce playerId(playerIds[j]);
             MasterServerConnection *client = findClient(playerId);
@@ -1150,23 +1148,50 @@ public:
             }
          }
 
-         // Now compute winning player(s) based on score; but must sort first
-         if(!teamGame)
-         {
-            teamStats.playerStats.sort(playerScoreSort);
-
-            for(S32 i = 0; i < teamStats.playerStats.size(); i++)
-               teamStats.playerStats[i].gameResult = 
-                        getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[i], i == 0);
-         }
-
          gameStats.teamStats.push_back(teamStats);
       }
 
       gameStats.teamStats.sort(teamScoreSort);
-      for(S32 i = 0; i < teams.size(); i++)
+
+      // Compute win/loss/tie for teams
+      for(S32 i = 0; i < gameStats.teamStats.size(); i++)
          gameStats.teamStats[i].gameResult = 
-                     getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
+                     getResult(gameStats.teamStats.size(), teamScores[0], gameStats.teamStats.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
+
+      // Now that we have the win/loss/tie results for the teams, we can also assign those same results to the players.
+      if(gameStats.isTeamGame)
+      {
+         for(S32 i = 0; i < gameStats.teamStats.size(); i++)
+            for(S32 j = 0; j < gameStats.teamStats[i].playerStats.size(); j++)
+               gameStats.teamStats[i].playerStats[j].gameResult = gameStats.teamStats[i].gameResult;
+      }
+      else
+      {
+         // Non-team games: compute winning player(s) based on score; but must sort first
+         if(!teamGame)
+         {
+            for(S32 i = 0; i < gameStats.teamStats.size(); i++)
+            {
+               gameStats.teamStats[i].playerStats.sort(playerScoreSort);
+
+               for(S32 j = 0; j < gameStats.teamStats[i].playerStats.size(); j++)
+               {
+                  gameStats.teamStats[i].playerStats[j].gameResult = 
+                     getResult(gameStats.teamStats[i].playerStats.size(), 
+                               gameStats.teamStats[i].playerStats[0].points, 
+                               gameStats.teamStats[i].playerStats.size() == 1 ? 0 : gameStats.teamStats[i].playerStats[1].points, 
+                               gameStats.teamStats[i].playerStats[j].points, 
+                               j == 0);
+               }
+            }
+         }
+
+
+
+      }
+
+
+
 
       DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
