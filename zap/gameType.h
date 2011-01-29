@@ -36,6 +36,8 @@
 #include "statistics.h"
 #include <string>
 
+struct GameStatistics3;    // or include masterInterface.h
+
 namespace Zap
 {
 
@@ -304,6 +306,7 @@ public:
    void idle(GameObject::IdleCallPath path);
 
    void gameOverManGameOver();
+   GameStatistics3 getGameStats();
    void saveGameStats();                     // Transmit statistics to the master server
 
    void checkForWinningScore(S32 score);     // Check if player or team has reachede the winning score

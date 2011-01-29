@@ -265,10 +265,10 @@ protected:
    U32              mCSProtocolVersion; ///< Protocol version client will use to talk to server (client can only play with others 
                                         ///     using this same version)
    U32              mClientBuild;       ///< Build number of the client (different builds may use same protocols)
+   U32              mInfoFlags;         ///< Info flags describing this server.  1 = server is testing from map editor
 
    // The following are mostly dummy values at the moment... we may use them later.
    U32              mCPUSpeed;          ///< The CPU speed of this server.
-   U32              mInfoFlags;         ///< Info flags describing this server.
    U32              mPlayerCount;       ///< Current number of players on this server.
    U32              mMaxPlayers;        ///< Maximum number of players on this server.
    U32              mNumBots;           ///< Current number of bots on this server.
@@ -1155,9 +1155,9 @@ public:
          {
             teamStats.playerStats.sort(playerScoreSort);
 
-            for(S32 i = 0; i < teamStats.playerStats.size(); i++)
-               teamStats.playerStats[i].gameResult = 
-                        getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[i], i == 0);
+            for(S32 j = 0; j < teamStats.playerStats.size(); j++)
+               teamStats.playerStats[j].gameResult = 
+                        getResult(playerScores.size(), playerScores[0], playerScores.size() == 1 ? 0 : playerScores[1], playerScores[j], j == 0);
          }
 
          gameStats.teamStats.push_back(teamStats);
@@ -1168,13 +1168,57 @@ public:
          gameStats.teamStats[i].gameResult = 
                      getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
 
-      DatabaseWriter dbWriter(gStatsDatabaseAddress, gStatsDatabaseName, gStatsDatabaseUsername, gStatsDatabasePassword);  
-      dbWriter.insertStats(gameStats);
+      //DatabaseWriter dbWriter(gStatsDatabaseAddress, gStatsDatabaseName, gStatsDatabaseUsername, gStatsDatabasePassword);  
+      //dbWriter.insertStats(gameStats);
 
-		if(! databaseWriter) databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
-      if(databaseWriter) databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
+		// the below 2 lines keeps the same connection going, above 2 lines always makes new connection.
+
+		if(! databaseWriter) databaseWriter = new DatabaseWriter(gStatsDatabaseAddress, gStatsDatabaseName, gStatsDatabaseUsername, gStatsDatabasePassword);
+      if(databaseWriter) databaseWriter->insertStats(gameStats);
 
    }
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (GameStatistics3 stats))
+	{
+		if(! stats.valid)
+		{
+         logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
+			return;
+		}
+		GameStats *gameStats = &stats.gameStats;
+
+      gameStats->serverIP = getNetAddressString();
+      gameStats->serverName = mPlayerOrServerName.getString();
+		gameStats->cs_protocol_version = mCSProtocolVersion;
+
+		for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+		{
+			Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
+
+			Nonce playerId = playerStats->get(i).nonce;
+			MasterServerConnection *client = findClient(playerId);
+			playerStats->get(i).isAuthenticated = (client && client->isAuthenticated());
+
+			// Now compute winning player(s) based on score or points; but must sort first
+			if(! gameStats->isTeamGame)
+			{
+				playerStats->sort(playerScoreSort);
+				for(S32 j = 0; j < playerStats->size(); j++)
+					playerStats->get(j).gameResult = 
+						getResult(playerStats->size(), playerStats->get(0).points, playerStats->size() == 1 ? 0 : playerStats->get(1).points, playerStats->get(j).points, j == 0);
+			}
+		}
+		if(gameStats->isTeamGame)
+		{
+			Vector<TeamStats> *teams = &gameStats->teamStats;
+			teams->sort(teamScoreSort);
+			for(S32 i = 0; i < teams->size(); i++)
+				teams->get(i).gameResult = 
+					getResult(teams->size(), teams->get(0).score, teams->size() == 1 ? 0 : teams->get(1).score, teams->get(i).score, i == 0);
+		}
+
+		if(! databaseWriter) databaseWriter = new DatabaseWriter(gStatsDatabaseAddress, gStatsDatabaseName, gStatsDatabaseUsername, gStatsDatabasePassword);
+      if(databaseWriter) databaseWriter->insertStats(*gameStats);
+	}
 
    // Game server wants to know if user name has been verified
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))

@@ -37,6 +37,7 @@ using namespace TNL;
 struct GameStatistics3
 {
    U8 version;
+   bool valid;
    GameStats gameStats ;
 };
 

@@ -94,6 +94,9 @@ struct GameStats
 {
    string serverName;
    string serverIP;
+	S32 cs_protocol_version;
+
+	S32 build_version;
 
    string gameType;
    string levelName;

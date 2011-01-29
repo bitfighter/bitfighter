@@ -43,42 +43,46 @@ namespace Types
    U32 readU32(TNL::BitStream &s) {U32 val; read(s, &val); return val;}
    S32 readS32(TNL::BitStream &s) {S32 val; read(s, &val); return val;}
    // for bool, use   s.readFlag();
-   string readString(TNL::BitStream &s) {StringTableEntry val; read(s, &val); return val.getString();}
-   void writeString(TNL::BitStream &s, const string &val) {write(s, StringTableEntry(val));}
+   string readString(TNL::BitStream &s) {char val[256]; s.readString(val); return val;}
+   void writeString(TNL::BitStream &s, const string &val) {s.writeString(val.c_str());}
 
 
 
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, GameStatistics3 *val)
    {
+		U32 position = s.getBitPosition();
+      val->valid = false;
       U8 version = readU8(s);  // Read version number.
       val->version = version;
       GameStats *g = &val->gameStats;
+      S32 playerCount = 0;
 
-      g->gameType = readString(s);
-      g->levelName = readString(s);
       g->isOfficial = s.readFlag();
-      g->playerCount = readU16(s);
+      g->playerCount = readU16(s);  // players + robots
       g->duration = readU16(s);     // game length in seconds
       g->isTeamGame = s.readFlag();
-      g->teamCount = readU8(s);
-      g->isTied = s.readFlag();
+      //g->isTied = s.readFlag();
+      S32 teamCount = readU8(s);
+		g->teamCount = teamCount; // is this needed?
+      g->gameType = readString(s);
+      g->levelName = readString(s);
    
       if(!s.isValid()) return;
-      g->teamStats.setSize(g->teamCount);
-      for(S32 i = 0; i < g->teamCount; i++)
+      g->teamStats.setSize(teamCount);
+      for(S32 i = 0; i < teamCount; i++)
       {
          TeamStats *gt = &g->teamStats[i];
          gt->name = readString(s);
          gt->score = readS32(s);
          gt->color_bin = s.readInt(24); // 24 bit color
-         gt->color = Color(gt->color_bin).toHexString(); // TODO: fix conversion from int to float
+         gt->color = "000000";//Color(gt->color_bin).toHexString(); // TODO: fix conversion from int to float
          gt->gameResult = "?";
          if(!s.isValid()) return;
 
-         U32 size = readU8(s);
-         gt->playerStats.setSize(size);
-         for(U32 j = 0; j < size; j++)
+         U32 playerSize = readU8(s);
+         gt->playerStats.setSize(playerSize);
+         for(U32 j = 0; j < playerSize; j++)
          {
             PlayerStats *gp = &gt->playerStats[j];
             gp->name = readString(s);
@@ -88,43 +92,48 @@ namespace Types
             gp->suicides = readU16(s);
             gp->switchedTeamCount = readU8(s);
             gp->switchedTeams = (gp->switchedTeamCount != 0);
-            gp->isRobot = s.readFlag();
-            gp->isAdmin = s.readFlag();
             gp->isLevelChanger = s.readFlag();
+            gp->isAdmin = s.readFlag();
+            gp->isRobot = s.readFlag();
             gp->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
             gp->nonce.read(&s);
             gp->gameResult = "?";
 
             U32 weaponSize = readU8(s);
             gp->weaponStats.setSize(weaponSize);
-            for(U32 k = 0; k < size; k++)
+            for(U32 k = 0; k < weaponSize; k++)
             {
                WeaponStats *gw = &gp->weaponStats[k];
                gw->weaponType = WeaponType(readU8(s));
                gw->shots = readU16(s);
                gw->hits = readU16(s);
             }
+            playerCount++;
          }
       }
+      if(playerCount == g->playerCount)  // make sure server don't lie to master.
+         val->valid = true;
+		position = s.getBitPosition() - position;
+		logprintf(LogConsumer::LogError, "read %d", position);
    }
 
 
    /// Writes objects into a BitStream. Server write and send to master.
    void write(TNL::BitStream &s, GameStatistics3 &val)
    {
+		U32 position = s.getBitPosition();
       write(s, U8(GameStatistics3_CurrentVersion));       // send current version
       GameStats *g = &val.gameStats;
 
-      writeString(s, g->gameType);
-      writeString(s, g->levelName);
       s.writeFlag(g->isOfficial);
       write(s, U16(g->playerCount));
       write(s, U16(g->duration));     // game length in seconds
       s.writeFlag(g->isTeamGame);
-      write(s, U8(g->teamStats.size())); //(g->teamCount)
-      s.writeFlag(g->isTied);
-
-      for(S32 i = 0; i < g->teamCount; i++)
+      //s.writeFlag(g->isTied);
+      write(s, U8(g->teamCount)); //g->teamStats.size()
+      writeString(s, g->gameType);
+      writeString(s, g->levelName);
+      for(S32 i = 0; i < g->teamStats.size(); i++)
       {
          TeamStats *gt = &g->teamStats[i];
          writeString(s, gt->name);
@@ -132,6 +141,7 @@ namespace Types
          s.writeInt(gt->color_bin,24); // 24 bit color
 
          write(s, U8(gt->playerStats.size()));
+
          for(S32 j = 0; j < gt->playerStats.size(); j++)
          {
             PlayerStats *gp = &gt->playerStats[j];
@@ -142,9 +152,9 @@ namespace Types
             write(s, U16(gp->suicides));
             write(s, U8(gp->switchedTeamCount));
             //gp->switchedTeams
-            s.writeFlag(gp->isRobot);
-            s.writeFlag(gp->isAdmin);
             s.writeFlag(gp->isLevelChanger);
+            s.writeFlag(gp->isAdmin);
+            s.writeFlag(gp->isRobot);
             //gp->isAuthenticated;;  // we may set this by comparing Nonce id.
             gp->nonce.write(&s);
 
@@ -158,6 +168,8 @@ namespace Types
             }
          }
       }
+		position = s.getBitPosition() - position;
+		logprintf(LogConsumer::LogError, "write %d", position);
    }
 }
 
@@ -393,8 +405,8 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (StringTableEn
     playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
-//TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (GameStatistics3 gameStats),
-//   (gameStats), NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3_1, (GameStatistics3 stats),
+   (stats), NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
 
 
 

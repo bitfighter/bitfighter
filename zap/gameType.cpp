@@ -856,11 +856,89 @@ void GameType::gameOverManGameOver()
    saveGameStats();
 }
 
+GameStatistics3 GameType::getGameStats()
+{
+   GameStatistics3 stats;
+	GameStats *gameStats = &stats.gameStats;
+
+
+	gameStats->isOfficial = false;
+	gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
+	gameStats->duration = mTotalGamePlay / 1000;
+	gameStats->isTeamGame = isTeamGame();
+	gameStats->levelName = mLevelName.getString();
+	gameStats->gameType = getGameTypeString();
+	gameStats->teamCount = mTeams.size(); // is this needed, currently Not sent, instead, can use gameStats->teamStats.size()
+	gameStats->build_version = BUILD_VERSION;
+	gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
+
+	gameStats->teamStats.setSize(mTeams.size());
+   for(S32 i = 0; i < mTeams.size(); i++)
+	{
+		TeamStats *teamStats = &gameStats->teamStats[i];
+		teamStats->color_bin = mTeams[i].color.toRangedU32().value;
+		teamStats->name = mTeams[i].getName().getString();
+		teamStats->score = mTeams[i].getScore();
+      for(S32 j = 0; j < mClientList.size(); j++)
+      {
+         // Only looking for players on the current team
+         if(mClientList[j]->getTeam() != i)  // this is not sorted... mTeams[i].getId()
+            continue;
+
+			teamStats->playerStats.push_back(PlayerStats());
+			PlayerStats *playerStats = &teamStats->playerStats.last();
+
+         Statistics *statistics = &mClientList[j]->clientConnection->mStatistics;
+            
+         //lastOnTeam.push_back(false);
+
+         playerStats->name           = mClientList[j]->name.getString();    // TODO: What if this is a bot??  What should go here??
+         playerStats->nonce          = *mClientList[j]->clientConnection->getClientId();
+         playerStats->isRobot        = mClientList[j]->isRobot;
+         playerStats->points         = mClientList[j]->getScore();
+         playerStats->kills          = statistics->getKills();
+         playerStats->deaths         = statistics->getDeaths();
+         playerStats->suicides       = statistics->getSuicides();
+         playerStats->switchedTeamCount = mClientList[j]->clientConnection->switchedTeamCount;
+         playerStats->isAdmin        = mClientList[j]->isAdmin;
+         playerStats->isLevelChanger = mClientList[j]->isLevelChanger;
+
+         Vector<U16> shots = statistics->getShotsVector();
+         Vector<U16> hits = statistics->getHitsVector();
+			playerStats->weaponStats.setSize(shots.size());
+			for(S32 k = 0; k < shots.size(); k++)
+			{
+				WeaponStats *weaponStats = &playerStats->weaponStats.last();
+				weaponStats->weaponType = WeaponType(k);
+				weaponStats->shots = shots[k];
+				weaponStats->hits = hits[k];
+			}
+			gameStats->playerCount++;
+      }
+	}
+	return stats;
+}
+
+// logGameStats(GameStatistics3 stats, S32 format = 1)  // TODO: log game stats
+
 
 // Transmit statistics to the master server, LogStats to game server
 void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
+
+	//GameStatistics3 stats = getGameStats();
+	//if(masterConn)
+	//{
+	//	masterConn->s2mSendGameStatistics_3_1(stats);
+	//}
+	return;
+// // may use the above code, and remove most of below code (Need to rewrite logging)
+
+
+
+
+
 
    countTeamPlayers();     // Make sure all team sizes are up to date
 
@@ -931,7 +1009,7 @@ void GameType::saveGameStats()
          teamSwitchCount.push_back(mClientList[j]->clientConnection->switchedTeamCount);
       }
 
-      if(lastOnTeam.size() != 0)  // TODO: fix zero players in first team and some players in the next team
+      if(lastOnTeam.size() != 0)
          lastOnTeam[lastOnTeam.size() - 1] = true;
    }
 
