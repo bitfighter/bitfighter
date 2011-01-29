@@ -1125,13 +1125,14 @@ public:
             playerStats.switchedTeams = teamSwitchCount[j];    
 
             
-            for(S32 k = 0; k < shots.size(); k++)
+            for(S32 k = 0; k < shots[j].size(); k++)
             {
                WeaponStats weaponStats;
                //TODO: Put the following into a constructor
                weaponStats.hits = hits[j][k];
                weaponStats.shots = shots[j][k];
                weaponStats.weaponType = (WeaponType) k;
+               playerStats.weaponStats.push_back(weaponStats);
             }
 
             teamStats.playerStats.push_back(playerStats);
