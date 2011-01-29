@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.5
+-- version 3.3.9
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 28, 2011 at 10:59 AM
+-- Generation Time: Jan 29, 2011 at 12:05 AM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -149,8 +149,8 @@ CREATE TABLE IF NOT EXISTS `stats_team` (
   `stats_game_id` int(11) NOT NULL,
   `team_name` text COLLATE utf8_unicode_ci,
   `color_hex` text COLLATE utf8_unicode_ci NOT NULL,
-  `team_score` int(11) NOT NULL,
-  `result` char(1) COLLATE utf8_unicode_ci NOT NULL,
+  `team_score` int(11) DEFAULT NULL,
+  `result` char(1) COLLATE utf8_unicode_ci DEFAULT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_team_id`),
   KEY `stats_game_id` (`stats_game_id`),
