@@ -867,7 +867,7 @@ void GameType::saveGameStats()
       mTeams[i].setId(i);
 
    Vector<Team> sortTeams(mTeams);
-   sortTeams.sort(teamScoreSort);
+   sortTeams.sort(teamSizeSort);
 
    // Push team names and scores into a structure we can pass via rpc; these will be sorted by player counts, high to low
    Vector<StringTableEntry>          teams      (sortTeams.size());
