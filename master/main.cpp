@@ -1096,7 +1096,7 @@ public:
 
       //gameStats.teamStats.setSize(teams.size());
 
-      S32 lastPlayerProcessed = 0;
+      S32 nextPlayerToProcess = 0;
 
       for(S32 i = 0; i < teams.size(); i++)
       {
@@ -1108,14 +1108,14 @@ public:
 
          teamStats.score = teamScores[i];
 
-         for(S32 j = lastPlayerProcessed; j < playerNames.size(); j++)
+         for(S32 j = nextPlayerToProcess; j < playerNames.size(); j++)
          {
             PlayerStats playerStats;
 
             // TODO: Put these into a constuctor
             playerStats.deaths = playerDeaths[j];
 
-            if(teamGame)      // Team games players get team's win/loss/tie status
+            if(teamGame)      // In team games, players get team's win/loss/tie status
                playerStats.gameResult = teamStats.gameResult;
             // else gameResult will be computed below
 
@@ -1145,7 +1145,7 @@ public:
 
             if(lastOnTeam[j])
             {
-               lastPlayerProcessed = j;
+               nextPlayerToProcess = j + 1;
                break;
             }
          }
@@ -1168,13 +1168,9 @@ public:
          gameStats.teamStats[i].gameResult = 
                      getResult(teams.size(), teamScores[0], teams.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
 
-      DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
+      DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
+                              gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
       dbWriter.insertStats(gameStats);
-
-		if(! databaseWriter) databaseWriter = new DatabaseWriter(gMySqlAddress.c_str(),"test",gDbUsername.c_str(),gDbPassword.c_str());
-      if(databaseWriter) 
-         databaseWriter->insertStats(gameStats);  // uses same address, "test" database, same user, same password
-
    }
 
    // Game server wants to know if user name has been verified
