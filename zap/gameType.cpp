@@ -138,6 +138,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mLevelHasLoadoutZone = false;
    mEngineerEnabled = false;     // Is engineer module allowed?  By default, no
    mShowAllBots = false;
+   mTotalGamePlay = 0;
 }
 
 
@@ -312,6 +313,7 @@ const char *GameType::validateGameType(const char *gtype)
 void GameType::idle(GameObject::IdleCallPath path)
 {
    U32 deltaT = mCurrentMove.time;
+   mTotalGamePlay += deltaT;
 
    if(isGhost())     // i.e. client only
    {
@@ -929,10 +931,11 @@ void GameType::saveGameStats()
          teamSwitchCount.push_back(mClientList[j]->clientConnection->switchedTeamCount);
       }
 
-      lastOnTeam[lastOnTeam.size() - 1] = true;
+      if(lastOnTeam.size() != 0)  // TODO: fix zero players in first team and some players in the next team
+         lastOnTeam[lastOnTeam.size() - 1] = true;
    }
 
-   S16 timeInSecs = (mGameTimer.getPeriod() - mGameTimer.getCurrent()) / 1000;      // Total time game was played --> TODO: how is this affected by the various set time commands?  We want this to report total game time, even if that's been changed by admin
+   U16 timeInSecs = U16(mTotalGamePlay / 1000);
 
    /*GameStatistics3 gameStat;
    gameStat.gameType = getGameTypeString();

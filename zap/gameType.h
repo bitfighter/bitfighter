@@ -107,6 +107,7 @@ private:
    bool mLevelHasLoadoutZone;
    bool mEngineerEnabled;
    bool mShowAllBots;
+   U32 mTotalGamePlay;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
