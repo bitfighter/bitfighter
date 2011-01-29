@@ -54,14 +54,14 @@ public:
    Nonce(const U8 *ptr) { memcpy(data, ptr, NonceSize); mValid = true; }
    Nonce(const Vector<U8> &bytes) { mValid = (bytes.size() == NonceSize); if(mValid) for(S32 i = 0; i < NonceSize; i++) data[i] = bytes[i]; }
 
-   bool operator==(const Nonce &theOtherNonce) const { return isValid() && theOtherNonce.isValid() && !memcmp(data, theOtherNonce.data, NonceSize); }
-   bool operator!=(const Nonce &theOtherNonce) const { return !isValid() || !theOtherNonce.isValid() || memcmp(data, theOtherNonce.data, NonceSize); }
+   bool operator==(const Nonce &theOtherNonce) const { TNLAssert(mValid && theOtherNonce.mValid, "Nonce not valid"); return mValid && theOtherNonce.mValid && !memcmp(data, theOtherNonce.data, NonceSize); }
+   bool operator!=(const Nonce &theOtherNonce) const { TNLAssert(mValid && theOtherNonce.mValid, "Nonce not valid"); return !mValid || !theOtherNonce.mValid || memcmp(data, theOtherNonce.data, NonceSize); }
 
    void operator=(const Nonce &theNonce) { memcpy(data, theNonce.data, NonceSize); mValid = theNonce.mValid; }
    
-   void read(BitStream *stream) { stream->read(NonceSize, data); }
+   void read(BitStream *stream) { stream->read(NonceSize, data); mValid = true; }
    void write(BitStream *stream) const { stream->write(NonceSize, data); }
-   void getRandom() { Random::read(data, NonceSize); }
+   void getRandom() { Random::read(data, NonceSize); mValid = true; }
    Vector<U8> toVector() { Vector<U8> v; if(mValid) for(S32 i = 0; i < NonceSize; i++) v.push_back(data[i]); return v; }
    bool isValid() const { return mValid; }
 };

@@ -181,7 +181,7 @@ namespace Types
    /// Writes a Vector of objects into a BitStream.
    template <typename T> void write(TNL::BitStream &s, TNL::Vector<T> &val)
    {
-      if(val.size() >= VectorSizeNumberSize)  // Large vector, more than 255 elements
+      if(val.size() >= (TNL::S32)VectorSizeNumberSize)  // Large vector, more than 255 elements
       {
          // Note that if we enter this block, this function will not work with older versions.  If we stay out, it will be compatible.
          TNLAssert((val.size() - VectorSizeNumberSize) < (1 << VectorSizeBitSize16), "Vector too big");
