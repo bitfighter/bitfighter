@@ -64,8 +64,10 @@ ClientPuzzleManager::ClientPuzzleManager()
    mCurrentDifficulty = InitialPuzzleDifficulty;
    mLastUpdateTime = 0;
    mLastTickTime = 0;
-   Random::read(mCurrentNonce.data, Nonce::NonceSize);
-   Random::read(mLastNonce.data, Nonce::NonceSize);
+   //Random::read(mCurrentNonce.data, Nonce::NonceSize);
+   //Random::read(mLastNonce.data, Nonce::NonceSize);
+   mCurrentNonce.getRandom();
+   mLastNonce.getRandom();
 
    mCurrentNonceTable = new NonceTable;
    mLastNonceTable = new NonceTable;
@@ -100,7 +102,8 @@ void ClientPuzzleManager::tick(U32 currentTime)
 
       mLastNonce = mCurrentNonce;
       mCurrentNonceTable->reset();
-      Random::read(mCurrentNonce.data, Nonce::NonceSize);
+      //Random::read(mCurrentNonce.data, Nonce::NonceSize);
+      mCurrentNonce.getRandom();
    }
 }
 
