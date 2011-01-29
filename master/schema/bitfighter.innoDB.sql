@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 29, 2011 at 12:05 AM
+-- Generation Time: Jan 29, 2011 at 12:29 AM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -63,7 +63,6 @@ CREATE TABLE IF NOT EXISTS `stats_game` (
   `level_name` text COLLATE utf8_unicode_ci NOT NULL,
   `is_team_game` tinyint(1) NOT NULL,
   `team_count` tinyint(3) unsigned DEFAULT NULL,
-  `is_tied` tinyint(1) NOT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_game_id`),
   KEY `server_id` (`server_id`),
@@ -71,7 +70,6 @@ CREATE TABLE IF NOT EXISTS `stats_game` (
   KEY `player_count` (`player_count`),
   KEY `is_team_game` (`is_team_game`),
   KEY `team_count` (`team_count`),
-  KEY `is_tied` (`is_tied`),
   KEY `insertion_date` (`insertion_date`),
   KEY `game_type` (`game_type`(20))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1 ;
