@@ -106,8 +106,16 @@ struct VersionedGameStats
    GameStats gameStats;
 };
 
+extern void logGameStats(VersionedGameStats *stats, S32 format = 1);
+
 
 };    // end namespace Zap
+
+
+// TNL_DEBUG will enable TNL_ENABLE_ASSERTS in tnlTypes.h
+#ifdef TNL_ENABLE_ASSERTS
+extern bool VersionedGameStats_testing;
+#endif
 
 
 namespace Types

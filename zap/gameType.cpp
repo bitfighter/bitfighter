@@ -870,7 +870,7 @@ VersionedGameStats GameType::getGameStats()
 	gameStats->isTeamGame = isTeamGame();
 	gameStats->levelName = mLevelName.getString();
 	gameStats->gameType = getGameTypeString();
-	gameStats->teamCount = mTeams.size(); // is this needed, currently Not sent, instead, can use gameStats->teamStats.size()
+	gameStats->teamCount = mTeams.size(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
 	gameStats->build_version = BUILD_VERSION;
 	gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
 
@@ -884,7 +884,7 @@ VersionedGameStats GameType::getGameStats()
       for(S32 j = 0; j < mClientList.size(); j++)
       {
          // Only looking for players on the current team
-         if(mClientList[j]->getTeam() != i || (U32(mClientList[j]->getTeam()) >= U32(mTeams.size()) && i == 0) )  // this is not sorted... mTeams[i].getId()
+         if(mClientList[j]->getTeam() != i)  // this is not sorted... mTeams[i].getId()
             continue;
 
 			teamStats->playerStats.push_back(PlayerStats());
@@ -902,8 +902,9 @@ VersionedGameStats GameType::getGameStats()
          playerStats->deaths         = statistics->getDeaths();
          playerStats->suicides       = statistics->getSuicides();
          playerStats->switchedTeamCount = mClientList[j]->clientConnection->switchedTeamCount;
-         playerStats->isAdmin        = mClientList[j]->isAdmin;
-         playerStats->isLevelChanger = mClientList[j]->isLevelChanger;
+         playerStats->isAdmin        = mClientList[j]->clientConnection->isAdmin();
+         playerStats->isLevelChanger = mClientList[j]->clientConnection->isLevelChanger();
+         playerStats->isAuthenticated = mClientList[j]->clientConnection->isAuthenticated();  // not sent, but may be used for logging stats
 
          Vector<U16> shots = statistics->getShotsVector();
          Vector<U16> hits = statistics->getHitsVector();
@@ -920,9 +921,6 @@ VersionedGameStats GameType::getGameStats()
 	}
 	return stats;
 }
-// logGameStats(VersionedGameStats stats, S32 format = 1)  // TODO: log game stats
-
-
 
 
 // Transmit statistics to the master server, LogStats to game server
@@ -931,6 +929,14 @@ void GameType::saveGameStats()
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
 	VersionedGameStats stats = getGameStats();
+
+#ifdef TNL_ENABLE_ASSERTS
+   MasterServerConnection masterConnTest;
+   VersionedGameStats_testing = true;
+   masterConnTest.s2mSendGameStatistics_3_1_test(stats);
+   VersionedGameStats_testing = false;
+#endif
+
 	if(masterConn)
 		masterConn->s2mSendGameStatistics_3_1(stats);
 }

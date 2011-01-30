@@ -27,6 +27,8 @@
 #include "gameWeapons.h"         // For WeaponType enum
 
 #include "tnlMethodDispatch.h"
+#include "tnlAssert.h"
+
 
 // This is shared in both client and master.
 // this read/write is usually the hardest part about struct, but this allows custom version handling.
@@ -34,9 +36,48 @@
 using namespace TNL;
 using namespace Zap;
 
+namespace Zap
+{
+void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stats
+	{
+	GameStats *g = &stats->gameStats;
+      for(S32 i = 0; i < g->teamStats.size(); i++)
+      {
+         TeamStats *gt = &g->teamStats[i];
+         for(U32 j = 0; j < gt->playerStats.size(); j++)
+         {
+            PlayerStats *gp = &gt->playerStats[j];
+            for(U32 k = 0; k < gp->weaponStats.size(); k++)
+            {
+               WeaponStats *gw = &gp->weaponStats[k];
+            }
+			}
+		}
+	}
+}
+
+
+#ifdef TNL_ENABLE_ASSERTS
+bool VersionedGameStats_testing = false;
+U32 VersionedGameStats_ReadSize;
+U32 VersionedGameStats_WriteSize;
+#define VersionedGameStats_write_start(s) {VersionedGameStats_WriteSize = s.getBitPosition();}
+#define VersionedGameStats_write_end(s) {VersionedGameStats_WriteSize = s.getBitPosition() - VersionedGameStats_WriteSize;}
+#define VersionedGameStats_read_start(s) {VersionedGameStats_ReadSize = s.getBitPosition();}
+#define VersionedGameStats_read_end(s) {VersionedGameStats_ReadSize = s.getBitPosition() - VersionedGameStats_ReadSize; \
+	TNLAssert((!VersionedGameStats_testing) || VersionedGameStats_WriteSize == VersionedGameStats_ReadSize, "VersionedGameStats Read and write size is not equal. They must be equal size to prevent network errors.")}
+#else
+#define VersionedGameStats_write_start(s)
+#define VersionedGameStats_write_end(s)
+#define VersionedGameStats_read_start(s)
+#define VersionedGameStats_read_end(s)
+#endif
+
+
+
 namespace Types
 {
-   const U8 GameStatistics3_CurrentVersion = 0;
+   const U8 VersionedGameStats_CurrentVersion = 0;
 
    U8 readU8(TNL::BitStream &s)   { U8 val; read(s, &val); return val; }
    S8 readS8(TNL::BitStream &s)   { S8 val; read(s, &val); return val; }
@@ -51,7 +92,7 @@ namespace Types
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, VersionedGameStats *val)
    {
-		//U32 position = s.getBitPosition();
+		VersionedGameStats_read_start(s);
       val->valid = false;
       U8 version = readU8(s);  // Read version number.
       val->version = version;
@@ -62,11 +103,12 @@ namespace Types
       g->playerCount = readU16(s);  // players + robots
       g->duration = readU16(s);     // game length in seconds
       g->isTeamGame = s.readFlag();
-      S32 teamCount = readU8(s);
-		g->teamCount = teamCount; // is this needed?
+      //g->isTied = s.readFlag();
       g->gameType = readString(s);
       g->levelName = readString(s);
    
+      S32 teamCount = readU8(s);
+		g->teamCount = teamCount; // is this needed?
       if(!s.isValid()) return;
       g->teamStats.setSize(teamCount);
       for(S32 i = 0; i < teamCount; i++)
@@ -78,7 +120,7 @@ namespace Types
 			char c[24];
 			dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32((gt->color_bin >> 16) & 0xFF), U32((gt->color_bin >> 8) & 0xFF), U32(gt->color_bin & 0xFF));
          gt->color = string(c);
-
+         //gt->gameResult = "?";
          if(!s.isValid()) return;
 
          U32 playerSize = readU8(s);
@@ -98,6 +140,7 @@ namespace Types
             gp->isLevelChanger = s.readFlag();
             gp->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
             gp->nonce.read(&s);
+            //gp->gameResult = "?";
 
             U32 weaponSize = readU8(s);
             gp->weaponStats.setSize(weaponSize);
@@ -113,31 +156,37 @@ namespace Types
       }
       if(playerCount == g->playerCount)  // make sure server don't lie to master.
          val->valid = true;
-		//position = s.getBitPosition() - position;
-		//logprintf(LogConsumer::LogError, "read %d", position);
+
+         // Stops here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched.
+      VersionedGameStats_read_end(s);
    }
 
 
    /// Writes objects into a BitStream. Server write and send to master.
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
-		//U32 position = s.getBitPosition();
-      write(s, GameStatistics3_CurrentVersion);       // send current version
+		VersionedGameStats_write_start(s);
+      write(s, U8(VersionedGameStats_CurrentVersion));       // send current version
       GameStats *g = &val.gameStats;
 
+      // write(number) write 32 bit when number is S32
+      // write(number) write 8 bit when number is U8
+      // write(U16(number)) always write 16 bit when number is U8, S32, or any type.
+
       s.writeFlag(g->isOfficial);
-      write(s, g->playerCount);
-      write(s, g->duration);     // game length in seconds
+      write(s, U16(g->playerCount));
+      write(s, U16(g->duration));     // game length in seconds
       s.writeFlag(g->isTeamGame);
       //s.writeFlag(g->isTied);
-      write(s, g->teamCount); //g->teamStats.size()
       writeString(s, g->gameType);
       writeString(s, g->levelName);
+
+      write(s, U8(g->teamStats.size())); // g->teamCount might not be needed
       for(S32 i = 0; i < g->teamStats.size(); i++)
       {
          TeamStats *gt = &g->teamStats[i];
          writeString(s, gt->name);
-         write(s, gt->score);
+         write(s, S32(gt->score));
          s.writeInt(gt->color_bin,24); // 24 bit color
 
          write(s, U8(gt->playerStats.size()));
@@ -146,11 +195,11 @@ namespace Types
          {
             PlayerStats *gp = &gt->playerStats[j];
             writeString(s, gp->name);
-            write(s, gp->points);
-            write(s, gp->kills);
-            write(s, gp->deaths);
-            write(s, gp->suicides);
-            write(s, gp->switchedTeamCount);
+            write(s, S32(gp->points));
+            write(s, U16(gp->kills));
+            write(s, U16(gp->deaths));
+            write(s, U16(gp->suicides));
+            write(s, U8(gp->switchedTeamCount));
             //gp->switchedTeams
             s.writeFlag(gp->isRobot);
             s.writeFlag(gp->isAdmin);
@@ -163,12 +212,11 @@ namespace Types
             {
                WeaponStats *gw = &gp->weaponStats[k];
                write(s, U8(gw->weaponType));
-               write(s, gw->shots);
-               write(s, gw->hits);
+               write(s, U16(gw->shots));
+               write(s, U16(gw->hits));
             }
          }
       }
-		//position = s.getBitPosition() - position;
-		//logprintf(LogConsumer::LogError, "write %d", position);
+		VersionedGameStats_write_end(s);
    }
 }

@@ -673,6 +673,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\gameStats.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\glut\glDedicated.h"
 			>
 		</File>
