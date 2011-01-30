@@ -16,7 +16,7 @@ CFLAGS_MYSQL=-DMYSQLPP_MYSQL_HEADERS_BURIED
 CFLAGS_PHPBB=-DVERIFY_PHPBB3
 
 
-CC=g++ -g -I../tnl -I../libtomcrypt #-O2
+CC=g++ -g -I../tnl -I../libtomcrypt -W #-O2
 
 OBJECTS_MASTER=\
    main.o\

@@ -61,6 +61,7 @@ OBJECTS_ZAP=\
    gameNetInterface.o\
    gameObject.o\
    gameObjectRender.o\
+   gameStats.o\
    gameType.o\
    gameWeapons.o\
    goalZone.o\
