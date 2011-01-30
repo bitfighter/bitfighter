@@ -22,6 +22,12 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
+
+// #define USE_GAMESTATS_STRUCT      // If enabled here, Be sure to enable it in gameType.cpp
+
+#if defined(USE_GAMESTATS_STRUCT) && !defined(_GAMESTATS_H__)
+#define _GAMESTATS_H__
+
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlBitStream.h"
@@ -30,14 +36,9 @@
 #include "database.h"     // For GameStats
 
 
-using namespace TNL;
-
-// #define USE_GAMESTATS_STRUCT      // If enabled here, Be sure to enable it in gameType.cpp
-#ifdef USE_GAMESTATS_STRUCT
-
 struct GameStatistics3
 {
-   U8 version;
+   TNL::U8 version;
    bool valid;
    GameStats gameStats ;
 };
