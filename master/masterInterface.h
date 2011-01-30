@@ -27,7 +27,7 @@
 #ifndef _MASTERINTERFACE_H_
 #define _MASTERINTERFACE_H_
 
-#include "gameStats.h"    // Must be included before tnlRPC.h to prevent fail to compile in linux.
+#include "../zap/gameStats.h"    // Must be included before tnlRPC.h to prevent fail to compile in linux.
 #include "../zap/SharedConstants.h"
 #include "tnlEventConnection.h"
 #include "tnlRPC.h"

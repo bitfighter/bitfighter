@@ -22,26 +22,32 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
-#include "gamestats.h"
+
+#include "gameStats.h"
+#include "gameWeapons.h"         // For WeaponType enum
+
+#include "tnlMethodDispatch.h"
+
 // This is shared in both client and master.
 // this read/write is usually the hardest part about struct, but this allows custom version handling.
+
+using namespace TNL;
+using namespace Zap;
 
 namespace Types
 {
    // GameStatistics3 is in gameStats.h
    const U8 GameStatistics3_CurrentVersion = 0;
 
-   U8 readU8(TNL::BitStream &s) {U8 val; read(s, &val); return val;}
-   S8 readS8(TNL::BitStream &s) {S8 val; read(s, &val); return val;}
-   U16 readU16(TNL::BitStream &s) {U16 val; read(s, &val); return val;}
-   S16 readS16(TNL::BitStream &s) {S16 val; read(s, &val); return val;}
-   U32 readU32(TNL::BitStream &s) {U32 val; read(s, &val); return val;}
-   S32 readS32(TNL::BitStream &s) {S32 val; read(s, &val); return val;}
+   U8 readU8(TNL::BitStream &s)   { U8 val; read(s, &val); return val; }
+   S8 readS8(TNL::BitStream &s)   { S8 val; read(s, &val); return val; }
+   U16 readU16(TNL::BitStream &s) { U16 val; read(s, &val); return val; }
+   S16 readS16(TNL::BitStream &s) { S16 val; read(s, &val); return val; }
+   U32 readU32(TNL::BitStream &s) { U32 val; read(s, &val); return val; }
+   S32 readS32(TNL::BitStream &s) { S32 val; read(s, &val); return val; }
    // for bool, use   s.readFlag();
-   string readString(TNL::BitStream &s) {char val[256]; s.readString(val); return val;}
-   void writeString(TNL::BitStream &s, const string &val) {s.writeString(val.c_str());}
-
-
+   string readString(TNL::BitStream &s) { char val[256]; s.readString(val); return val; }
+   void writeString(TNL::BitStream &s, const string &val) { s.writeString(val.c_str()); }
 
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, GameStatistics3 *val)
@@ -57,7 +63,6 @@ namespace Types
       g->playerCount = readU16(s);  // players + robots
       g->duration = readU16(s);     // game length in seconds
       g->isTeamGame = s.readFlag();
-      //g->isTied = s.readFlag();
       S32 teamCount = readU8(s);
 		g->teamCount = teamCount; // is this needed?
       g->gameType = readString(s);
@@ -74,7 +79,7 @@ namespace Types
 			char c[24];
 			dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32((gt->color_bin >> 16) & 0xFF), U32((gt->color_bin >> 8) & 0xFF), U32(gt->color_bin & 0xFF));
          gt->color = string(c);
-         //gt->gameResult = "?";
+
          if(!s.isValid()) return;
 
          U32 playerSize = readU8(s);
@@ -94,7 +99,6 @@ namespace Types
             gp->isLevelChanger = s.readFlag();
             gp->isAuthenticated = false; //s.readFlag();  // we may set this by comparing Nonce id.
             gp->nonce.read(&s);
-            //gp->gameResult = "?";
 
             U32 weaponSize = readU8(s);
             gp->weaponStats.setSize(weaponSize);
@@ -119,22 +123,22 @@ namespace Types
    void write(TNL::BitStream &s, GameStatistics3 &val)
    {
 		//U32 position = s.getBitPosition();
-      write(s, U8(GameStatistics3_CurrentVersion));       // send current version
+      write(s, GameStatistics3_CurrentVersion);       // send current version
       GameStats *g = &val.gameStats;
 
       s.writeFlag(g->isOfficial);
-      write(s, U16(g->playerCount));
-      write(s, U16(g->duration));     // game length in seconds
+      write(s, g->playerCount);
+      write(s, g->duration);     // game length in seconds
       s.writeFlag(g->isTeamGame);
       //s.writeFlag(g->isTied);
-      write(s, U8(g->teamCount)); //g->teamStats.size()
+      write(s, g->teamCount); //g->teamStats.size()
       writeString(s, g->gameType);
       writeString(s, g->levelName);
       for(S32 i = 0; i < g->teamStats.size(); i++)
       {
          TeamStats *gt = &g->teamStats[i];
          writeString(s, gt->name);
-         write(s, S32(gt->score));
+         write(s, gt->score);
          s.writeInt(gt->color_bin,24); // 24 bit color
 
          write(s, U8(gt->playerStats.size()));
@@ -143,11 +147,11 @@ namespace Types
          {
             PlayerStats *gp = &gt->playerStats[j];
             writeString(s, gp->name);
-            write(s, S32(gp->points));
-            write(s, U16(gp->kills));
-            write(s, U16(gp->deaths));
-            write(s, U16(gp->suicides));
-            write(s, U8(gp->switchedTeamCount));
+            write(s, gp->points);
+            write(s, gp->kills);
+            write(s, gp->deaths);
+            write(s, gp->suicides);
+            write(s, gp->switchedTeamCount);
             //gp->switchedTeams
             s.writeFlag(gp->isRobot);
             s.writeFlag(gp->isAdmin);
@@ -160,8 +164,8 @@ namespace Types
             {
                WeaponStats *gw = &gp->weaponStats[k];
                write(s, U8(gw->weaponType));
-               write(s, U16(gw->shots));
-               write(s, U16(gw->hits));
+               write(s, gw->shots);
+               write(s, gw->hits);
             }
          }
       }

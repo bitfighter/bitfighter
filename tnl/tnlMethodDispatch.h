@@ -30,6 +30,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlBitStream.h"
+#include "tnlMethodDispatch.h"
 #include "tnlNetStringTable.h"
 #include "tnlString.h"
 

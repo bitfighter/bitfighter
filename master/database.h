@@ -27,6 +27,7 @@
 #define DATABASE_H
 
 #include "../zap/gameWeapons.h"     // For WeaponType enum
+#include "../zap/gameStats.h"
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlNonce.h"
@@ -43,43 +44,6 @@ using namespace TNL;
 using namespace std;
 using namespace Zap;
 
-struct WeaponStats 
-{
-   WeaponType weaponType;
-   U16 shots;
-   U16 hits;
-};
-
-
-struct PlayerStats
-{
-   string name;
-   bool isAuthenticated;
-   Nonce nonce;  // used for authentication
-   bool isRobot;
-   string gameResult;
-   S32 points;
-   S32 kills;
-   S32 deaths;
-   S32 suicides;
-   bool switchedTeams;
-   S32 switchedTeamCount;
-   Vector<WeaponStats> weaponStats;
-
-   bool isAdmin;
-   bool isLevelChanger; // might not be needed...
-};
-
-
-struct TeamStats 
-{
-   U32 color_bin; // To send as number, not string
-   string color;
-   string name;
-   S32 score;
-   string gameResult;     // 'W', 'L', 'T'
-   Vector<PlayerStats> playerStats;    // Info about all players on this team
-};
 
 struct ServerInformation
 {
@@ -87,26 +51,6 @@ struct ServerInformation
    string name;
    string ip;
 	ServerInformation(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
-};
-
-
-struct GameStats
-{
-   string serverName;
-   string serverIP;
-	S32 cs_protocol_version;
-
-	S32 build_version;
-
-   string gameType;
-   string levelName;
-   bool isOfficial;
-   S32 playerCount;
-   S32 duration;     // game length in seconds
-   bool isTeamGame;
-   S32 teamCount;
-   bool isTied;
-   Vector<TeamStats> teamStats;     // for team games
 };
 
 
