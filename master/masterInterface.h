@@ -213,8 +213,9 @@ public:
                                              Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
                                              Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                              Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits) );
-
-   //TNL_DECLARE_RPC(s2mSendGameStatistics_3, (GameStatistics3 gameStats));
+#ifdef USE_GAMESTATS_STRUCT
+   TNL_DECLARE_RPC(s2mSendGameStatistics_3_1, (GameStatistics3 stats));
+#endif
 };
 
 

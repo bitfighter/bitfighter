@@ -22,56 +22,32 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 //------------------------------------------------------------------------------------
-#ifndef _TNL_TYPES_H_
+
+// #define USE_GAMESTATS_STRUCT      // If enabled here, Be sure to enable it in gameType.cpp
+
+#if defined(USE_GAMESTATS_STRUCT) && !defined(_GAMESTATS_H__)
+#define _GAMESTATS_H__
+
 #include "tnlTypes.h"
-#endif
-
-#ifndef _TNL_VECTOR_H_
 #include "tnlVector.h"
-#endif
-
-#ifndef _TNL_BITSTREAM_H_
 #include "tnlBitStream.h"
-#endif
-
-#ifndef _TNL_NETSTRINGTABLE_H_
 #include "tnlNetStringTable.h"
-#endif
-
-#ifndef _TNL_STRING_H_
 #include "tnlString.h"
-#endif
-
-using namespace TNL;
-
+#include "database.h"     // For GameStats
 
 
 struct GameStatistics3
 {
-StringTableEntry gameType;
-bool teamGame;
-StringTableEntry levelName;
-Vector<StringTableEntry> teams;
-Vector<S32> teamScores;
-Vector<RangedU32<0,0xFFFFFF> > color;
-U16 timeInSecs;
-Vector<StringTableEntry> playerNames;
-Vector<Vector<U8> > playerIDs;
-Vector<bool> isBot;
-Vector<bool> lastOnTeam;
-Vector<S32> playerScores;
-Vector<U16> playerKills;
-Vector<U16> playerDeaths;
-Vector<U16> playerSuicides;
-Vector<Vector<U16> > shots;
-Vector<Vector<U16> > hits;
-Vector<U16> playerSwitchedTeamCount;
+   TNL::U8 version;
+   bool valid;
+   GameStats gameStats ;
 };
 
-// If above struct is added, be sure to change masterInterface.cpp read and write so it can actually send data.
+
 namespace Types
 {
    extern void read(TNL::BitStream &s, GameStatistics3 *val);
    extern void write(TNL::BitStream &s, GameStatistics3 &val);
 }
 
+#endif
