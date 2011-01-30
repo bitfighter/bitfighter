@@ -37,7 +37,7 @@
 // Forward declaration
 namespace mysqlpp
 {
-	class TCPConnection;
+   class TCPConnection;
 };
 
 using namespace TNL;
@@ -50,7 +50,7 @@ struct ServerInformation
    U64 id;
    string name;
    string ip;
-	ServerInformation(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
+   ServerInformation(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
 };
 
 

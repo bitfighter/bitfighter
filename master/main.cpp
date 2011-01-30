@@ -40,8 +40,8 @@
 #include "../zap/stringUtils.h"     // For itos, replaceString
 
 
-// only include cpp file once, in here or in this project, duplicate or no cpp include will get link errors.
-// including here makes it easier, but might soon be removed from here and added into project.
+// only include cpp file once, in here or in the build system (makefile), duplicate or no cpp include will get link errors.
+// This may be removed from here and added into build system.
 #include "../zap/stringUtils.cpp"     // For itos, replaceString
 #include "../zap/gameStats.cpp"     // For read/write VersionedGameStats
 

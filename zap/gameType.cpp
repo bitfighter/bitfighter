@@ -861,38 +861,38 @@ void GameType::gameOverManGameOver()
 VersionedGameStats GameType::getGameStats()
 {
    VersionedGameStats stats;
-	GameStats *gameStats = &stats.gameStats;
+   GameStats *gameStats = &stats.gameStats;
 
 
-	gameStats->isOfficial = false;
-	gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
-	gameStats->duration = mTotalGamePlay / 1000;
-	gameStats->isTeamGame = isTeamGame();
-	gameStats->levelName = mLevelName.getString();
-	gameStats->gameType = getGameTypeString();
-	gameStats->teamCount = mTeams.size(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
-	gameStats->build_version = BUILD_VERSION;
-	gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
+   gameStats->isOfficial = false;
+   gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
+   gameStats->duration = mTotalGamePlay / 1000;
+   gameStats->isTeamGame = isTeamGame();
+   gameStats->levelName = mLevelName.getString();
+   gameStats->gameType = getGameTypeString();
+   gameStats->teamCount = mTeams.size(); // is this needed?, currently Not sent, instead, can use gameStats->teamStats.size()
+   gameStats->build_version = BUILD_VERSION;
+   gameStats->build_version = CS_PROTOCOL_VERSION; // This is not send, but may be used for logging
 
-	gameStats->teamStats.setSize(mTeams.size());
+   gameStats->teamStats.setSize(mTeams.size());
    for(S32 i = 0; i < mTeams.size(); i++)
-	{
-		TeamStats *teamStats = &gameStats->teamStats[i];
-		teamStats->color_bin = U32(mTeams[i].color.r * 0xFF)<<16 | U32(mTeams[i].color.g * 0xFF)<<8 | U32(mTeams[i].color.b * 0xFF);
-		teamStats->name = mTeams[i].getName().getString();
-		teamStats->score = mTeams[i].getScore();
+   {
+      TeamStats *teamStats = &gameStats->teamStats[i];
+      teamStats->color_bin = U32(mTeams[i].color.r * 0xFF)<<16 | U32(mTeams[i].color.g * 0xFF)<<8 | U32(mTeams[i].color.b * 0xFF);
+      teamStats->name = mTeams[i].getName().getString();
+      teamStats->score = mTeams[i].getScore();
       for(S32 j = 0; j < mClientList.size(); j++)
       {
          // Only looking for players on the current team
          if(mClientList[j]->getTeam() != i)  // this is not sorted... mTeams[i].getId()
             continue;
 
-			teamStats->playerStats.push_back(PlayerStats());
-			PlayerStats *playerStats = &teamStats->playerStats.last();
+         teamStats->playerStats.push_back(PlayerStats());
+         PlayerStats *playerStats = &teamStats->playerStats.last();
 
          Statistics *statistics = &mClientList[j]->clientConnection->mStatistics;
             
-         //lastOnTeam.push_back(false);
+            //lastOnTeam.push_back(false);
 
          playerStats->name           = mClientList[j]->name.getString();    // TODO: What if this is a bot??  What should go here??
          playerStats->nonce          = *mClientList[j]->clientConnection->getClientId();
@@ -908,18 +908,18 @@ VersionedGameStats GameType::getGameStats()
 
          Vector<U16> shots = statistics->getShotsVector();
          Vector<U16> hits = statistics->getHitsVector();
-			playerStats->weaponStats.setSize(shots.size());
-			for(S32 k = 0; k < shots.size(); k++)
-			{
-				WeaponStats *weaponStats = &playerStats->weaponStats[k];
-				weaponStats->weaponType = WeaponType(k);
-				weaponStats->shots = shots[k];
-				weaponStats->hits = hits[k];
-			}
-			gameStats->playerCount++;
+         playerStats->weaponStats.setSize(shots.size());
+         for(S32 k = 0; k < shots.size(); k++)
+         {
+            WeaponStats *weaponStats = &playerStats->weaponStats[k];
+            weaponStats->weaponType = WeaponType(k);
+            weaponStats->shots = shots[k];
+            weaponStats->hits = hits[k];
+         }
+         gameStats->playerCount++;
       }
-	}
-	return stats;
+   }
+   return stats;
 }
 
 
@@ -928,17 +928,18 @@ void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
-	VersionedGameStats stats = getGameStats();
+   VersionedGameStats stats = getGameStats();
 
 #ifdef TNL_ENABLE_ASSERTS
    MasterServerConnection masterConnTest;
    VersionedGameStats_testing = true;
+      // to find any errors with write/read, works without connection to master.
    masterConnTest.s2mSendGameStatistics_3_1_test(stats);
    VersionedGameStats_testing = false;
 #endif
 
-	if(masterConn)
-		masterConn->s2mSendGameStatistics_3_1(stats);
+   if(masterConn)
+      masterConn->s2mSendGameStatistics_3_1(stats);
 }
 
 
@@ -1038,7 +1039,7 @@ void GameType::saveGameStats()
 //   gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;*/
 //
 //   if(masterConn)                                        // && gIniSettings.SendStatsToMaster)
-//		//masterConn->s2mSendGameStatistics_3(gameStat);
+//      //masterConn->s2mSendGameStatistics_3(gameStat);
 //
 //      masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
 //                                          timeInSecs, playerNames, playerIDs, isBot,
@@ -1048,22 +1049,22 @@ void GameType::saveGameStats()
 //   // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code
 //   // in the master, which will have these structs as well, to produce a consnstent text logfile format.
 //   // We could also have the stats be written to a local mysql database if one were available using the same code.
-//	switch(gIniSettings.LogStats)
-//	{
-//		case 1:
-//			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
-//			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
-//			for(S32 i = 0; i < mTeams.size(); i++)
-//				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%s Name=%s",
-//					i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
-//					mTeams[i].getScore(),
+//   switch(gIniSettings.LogStats)
+//   {
+//      case 1:
+//         logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
+//         logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
+//         for(S32 i = 0; i < mTeams.size(); i++)
+//            logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%s Name=%s",
+//               i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
+//               mTeams[i].getScore(),
 //               mTeams[i].color.toHexString().c_str(),
-//					mTeams[i].getName().getString());
-//			break;
-//		// case 2: // For using other formats
-//		default:
-//			logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
-//	}
+//               mTeams[i].getName().getString());
+//         break;
+//      // case 2: // For using other formats
+//      default:
+//         logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
+//   }
 //
 //   for(S32 i = 0; i < mClientList.size(); i++)
 //   {
@@ -1076,21 +1077,21 @@ void GameType::saveGameStats()
 //      //                                      mClientList[i]->getScore(),
 //      //                                      statistics->getKills(), statistics->getDeaths(), 
 //      //                                      statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
-//		switch(gIniSettings.LogStats)
-//		{
-//			case 1:
-//				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
-//					mClientList[i]->isRobot ? "Robot" : "Player",
-//					mClientList[i]->name.getString(),
-//					mClientList[i]->getTeam(),
-//					mClientList[i]->getScore(),
-//				   getCurrentRating(mClientList[i]->clientConnection),
-//					statistics->getKills(),
-//					statistics->getDeaths(),
+//      switch(gIniSettings.LogStats)
+//      {
+//         case 1:
+//            logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
+//               mClientList[i]->isRobot ? "Robot" : "Player",
+//               mClientList[i]->name.getString(),
+//               mClientList[i]->getTeam(),
+//               mClientList[i]->getScore(),
+//               getCurrentRating(mClientList[i]->clientConnection),
+//               statistics->getKills(),
+//               statistics->getDeaths(),
 //               statistics->getSuicides());
-//				break;
-//			// case 2: // For using other formats
-//		}
+//            break;
+//         // case 2: // For using other formats
+//      }
 //   }
 //}
 
@@ -1407,7 +1408,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    {
       if(argc > 1)
          maxRecPlayers = atoi(argv[1]);
-	}
+   }
    else
       return false;     // Line not processed; perhaps the caller can handle it?
 
@@ -1435,10 +1436,10 @@ void GameType::spawnShip(GameConnection *theClient)
 
    if(theClient->isRobot())
    {
-		Robot *robot = (Robot *) theClient->getControlObject();
+      Robot *robot = (Robot *) theClient->getControlObject();
       robot->setOwner(theClient);
-		robot->setTeam(teamIndex);
-		spawnRobot(robot);
+      robot->setTeam(teamIndex);
+      spawnRobot(robot);
    }
    else
    {
@@ -1713,22 +1714,22 @@ void GameType::queryItemsOfInterest()
 // Team in range?    Currently not used.
 // Could use it for processArguments, but out of range will be UNKNOWN name and should not cause any errors.
 bool GameType::checkTeamRange(S32 team){
-	return (team < mTeams.size() && team >= -2);
+   return (team < mTeams.size() && team >= -2);
 }
 
 // Zero teams will crash.
 bool GameType::makeSureTeamCountIsNotZero()
 {
-	if(mTeams.size() == 0) {
-		Team team;
-		team.setName("Missing Team");
-		team.color.r = 0;
-		team.color.g = 0;
-		team.color.b = 1;
-		mTeams.push_back(team);
-		return true;
-	}
-	return false;
+   if(mTeams.size() == 0) {
+      Team team;
+      team.setName("Missing Team");
+      team.color.r = 0;
+      team.color.g = 0;
+      team.color.b = 1;
+      mTeams.push_back(team);
+      return true;
+   }
+   return false;
 }
 
 
@@ -2657,19 +2658,19 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
    }
-	/* /// Remove this command
+   /* /// Remove this command
    else if(!stricmp(cmd, "rename") && args.size() >= 1)
    {
-		//for testing, might want to remove this once it is fully working.
-		StringTableEntry oldName = clientRef->clientConnection->getClientName();
-		clientRef->clientConnection->setClientName(StringTableEntry(""));       //avoid unique self
-		StringTableEntry uniqueName = GameConnection::makeUnique(args[0].getString()).c_str();  //new name
-		clientRef->clientConnection->setClientName(oldName);                   //restore name to properly get it updated to clients.
+      //for testing, might want to remove this once it is fully working.
+      StringTableEntry oldName = clientRef->clientConnection->getClientName();
+      clientRef->clientConnection->setClientName(StringTableEntry(""));       //avoid unique self
+      StringTableEntry uniqueName = GameConnection::makeUnique(args[0].getString()).c_str();  //new name
+      clientRef->clientConnection->setClientName(oldName);                   //restore name to properly get it updated to clients.
 
-		clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
-		updateClientChangedName(clientRef->clientConnection,uniqueName);
+      clientRef->clientConnection->setAuthenticated(false);         //don't underline anymore because of rename
+      updateClientChangedName(clientRef->clientConnection,uniqueName);
    }
-	*/
+   */
    else
    {
       // Command not found, tell the client

@@ -44,10 +44,10 @@ void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stat
       for(S32 i = 0; i < g->teamStats.size(); i++)
       {
          TeamStats *gt = &g->teamStats[i];
-         for(U32 j = 0; j < gt->playerStats.size(); j++)
+         for(S32 j = 0; j < gt->playerStats.size(); j++)
          {
             PlayerStats *gp = &gt->playerStats[j];
-            for(U32 k = 0; k < gp->weaponStats.size(); k++)
+            for(S32 k = 0; k < gp->weaponStats.size(); k++)
             {
                WeaponStats *gw = &gp->weaponStats[k];
             }
