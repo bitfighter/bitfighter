@@ -983,6 +983,7 @@ public:
    }
 
 
+
    // Send game statistics to the master server   ==> Current as of 015
    // Note that teams are sent in descending order, most players to fewest  
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
@@ -1198,19 +1199,8 @@ public:
       dbWriter.insertStats(gameStats);
    }
 
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (GameStatistics3 stats))
-   {
-      if(! stats.valid)
-      {
-         logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
-         return;
-      }
-      GameStats *gameStats = &stats.gameStats;
-
-      gameStats->serverIP = getNetAddressString();
-      gameStats->serverName = mPlayerOrServerName.getString();
-      gameStats->cs_protocol_version = mCSProtocolVersion;
-
+	void processIsAuthenticated(GameStats *gameStats)
+	{
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
       {
          Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
@@ -1221,6 +1211,14 @@ public:
             MasterServerConnection *client = findClient(playerId);
             playerStats->get(j).isAuthenticated = (client && client->isAuthenticated());
          }
+		}
+	}
+
+	static void processStatsResults(GameStats *gameStats)
+	{
+      for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+      {
+         Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
 
          // Now compute winning player(s) based on score or points; but must sort first
          if(! gameStats->isTeamGame)
@@ -1243,6 +1241,23 @@ public:
 					(*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
 			}
       }
+	}
+
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (GameStatistics3 stats))
+   {
+      if(! stats.valid)
+      {
+         logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
+         return;
+      }
+      GameStats *gameStats = &stats.gameStats;
+
+      gameStats->serverIP = getNetAddressString();
+      gameStats->serverName = mPlayerOrServerName.getString();
+      gameStats->cs_protocol_version = mCSProtocolVersion;
+
+		processIsAuthenticated(gameStats);
+		processStatsResults(gameStats);
 
       DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
