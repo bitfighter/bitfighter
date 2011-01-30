@@ -379,9 +379,9 @@ public:
       Authenticator authenticator;
 
       // Security levels: 0 = no security (no checking for sql-injection attempts, not recommended unless you add your own security)
-      //		    1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
+      //          1 = basic security (prevents the use of any of these characters in the username: "(\"*^';&></) " including the space)
       //        1 = very basic security (prevents the use of double quote character)
-      //		    2 = alphanumeric (only allows alphanumeric characters in the username)
+      //          2 = alphanumeric (only allows alphanumeric characters in the username)
       //
       // We'll use level 1 for now, so users can put special characters in their username
       authenticator.initialize(gMySqlAddress, gDbUsername, gDbPassword, gPhpbb3Database, gPhpbb3TablePrefix, 1);
@@ -487,11 +487,11 @@ public:
       {
          mStrikeCount++;
          if(mStrikeCount == 3)
-			{
+         {
             logprintf(LogConsumer::LogConnection, "User %s Disconnect due to flood control set at %i milliseconds", 
                                                   mPlayerOrServerName.getString(), timeDeltaMinimum);
             disconnect(ReasonFloodControl, "");
-			}
+         }
       }
       else if(mStrikeCount > 0)
          mStrikeCount--;
@@ -692,10 +692,10 @@ public:
          possibleAddresses.push_back(internalAddress);
 
       // And inform the other part of the request
-		// version 013? and earlier use m2c, don't want to break compatibility.
-		if(conn->mCSProtocolVersion >= 31)
+      // version 013? and earlier use m2c, don't want to break compatibility.
+      if(conn->mCSProtocolVersion >= 31)
          conn->m2sClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
-		else
+      else
          conn->m2cClientRequestedArrangedConnection(req->hostQueryId, possibleAddresses, connectionParameters);
    }
 
@@ -825,22 +825,22 @@ public:
          return;
 
       //Update only if anything is different
-		if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount ||
-			mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
-		{
-			mLevelName = levelName;
-			mLevelType = levelType;
+      if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount ||
+         mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
+      {
+         mLevelName = levelName;
+         mLevelType = levelType;
 
-			mNumBots = botCount;
-			mPlayerCount = playerCount;
-			mMaxPlayers = maxPlayers;
-			mInfoFlags = infoFlags;
+         mNumBots = botCount;
+         mPlayerCount = playerCount;
+         mMaxPlayers = maxPlayers;
+         mInfoFlags = infoFlags;
 
-			// Check to ensure we're not getting flooded with these requests
-			checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
+         // Check to ensure we're not getting flooded with these requests
+         checkActivityTime(4000);      // 4 secs     version 014 send status every 5 seconds
 
-			gNeedToWriteStatus = true;
-		}
+         gNeedToWriteStatus = true;
+      }
    }
 
 
@@ -855,22 +855,22 @@ public:
          return;
 
       // Update only if anything is different
-		if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   || 
-		   mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
-		{
-			mLevelName = levelName;
-			mLevelType = levelType;
+      if(mLevelName   != levelName   || mLevelType  != levelType  || mNumBots   != botCount   || 
+         mPlayerCount != playerCount || mMaxPlayers != maxPlayers || mInfoFlags != infoFlags )
+      {
+         mLevelName = levelName;
+         mLevelType = levelType;
 
-			mNumBots = botCount;
-			mPlayerCount = playerCount;
-			mMaxPlayers = maxPlayers;
-			mInfoFlags = infoFlags;
+         mNumBots = botCount;
+         mPlayerCount = playerCount;
+         mMaxPlayers = maxPlayers;
+         mInfoFlags = infoFlags;
 
-			// Check to ensure we're not getting flooded with these requests
-			checkActivityTime(15000);      // 15 secs
+         // Check to ensure we're not getting flooded with these requests
+         checkActivityTime(15000);      // 15 secs
 
-			gNeedToWriteStatus = true;
-		}
+         gNeedToWriteStatus = true;
+      }
    }
 
 
@@ -999,9 +999,9 @@ public:
  //                                                     Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
  //                                                     Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
  //  {
-	//
+   //
  ////  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
-	////{
+   ////{
  ////     StringTableEntry gameType = gameStat.gameType;
  ////     bool teamGame = gameStat.teamGame;
  ////     StringTableEntry levelName = gameStat.levelName;
@@ -1048,7 +1048,7 @@ public:
  //        return;
  //     }
 
-	//	string timestr = itos(timeInSecs / 60) + ":";
+   //   string timestr = itos(timeInSecs / 60) + ":";
  //     timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
  //     S32 players = 0, bots = 0;
@@ -1198,8 +1198,8 @@ public:
  //     dbWriter.insertStats(gameStats);
  //  }
 
-	void processIsAuthenticated(GameStats *gameStats)
-	{
+   void processIsAuthenticated(GameStats *gameStats)
+   {
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
       {
          Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
@@ -1210,11 +1210,11 @@ public:
             MasterServerConnection *client = findClient(playerId);
             playerStats->get(j).isAuthenticated = (client && client->isAuthenticated());
          }
-		}
-	}
+      }
+   }
 
-	static void processStatsResults(GameStats *gameStats)
-	{
+   static void processStatsResults(GameStats *gameStats)
+   {
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
       {
          Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
@@ -1224,7 +1224,7 @@ public:
          {
             playerStats->sort(playerScoreSort);
             for(S32 j = 0; j < playerStats->size(); j++)
-					(*playerStats)[j].gameResult = 
+               (*playerStats)[j].gameResult = 
                   getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
          }
       }
@@ -1233,14 +1233,14 @@ public:
          Vector<TeamStats> *teams = &gameStats->teamStats;
          teams->sort(teamScoreSort);
          for(S32 i = 0; i < teams->size(); i++)
-			{
+         {
             (*teams)[i].gameResult = 
                getResult(teams->size(), (*teams)[0].score, teams->size() == 1 ? 0 : (*teams)[1].score, (*teams)[i].score, i == 0);
             for(S32 j = 0; j < (*teams)[i].playerStats.size(); j++) // make all players in a team same gameResults
-					(*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
-			}
+               (*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
+         }
       }
-	}
+   }
 
    TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (VersionedGameStats stats))
    {
@@ -1255,8 +1255,8 @@ public:
       gameStats->serverName = mPlayerOrServerName.getString();
       gameStats->cs_protocol_version = mCSProtocolVersion;
 
-		processIsAuthenticated(gameStats);
-		processStatsResults(gameStats);
+      processIsAuthenticated(gameStats);
+      processStatsResults(gameStats);
 
       DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
@@ -1701,24 +1701,24 @@ int main(int argc, const char **argv)
          gNeedToWriteStatus = false;
       }
 
-		for(S32 i = MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
-		{
-			GameConnectRequest *request = MasterServerConnection::gConnectList[i];
-			if(currentTime - request->requestTime > 5000) // 5 seconds
-			{
-				if(request->initiator.isValid())
-				{
+      for(S32 i = MasterServerConnection::gConnectList.size()-1; i >= 0; i--)
+      {
+         GameConnectRequest *request = MasterServerConnection::gConnectList[i];
+         if(currentTime - request->requestTime > 5000) // 5 seconds
+         {
+            if(request->initiator.isValid())
+            {
                ByteBufferPtr ptr = new ByteBuffer((U8 *) MasterRequestTimedOut, (U32) strlen(MasterRequestTimedOut) + 1);
                   //s2mRejectArrangedConnection(requestId, ptr);
-					request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
-					request->initiator->removeConnectRequest(request);
-				}
-				if(request->host.isValid())
-					request->host->removeConnectRequest(request);
-				MasterServerConnection::gConnectList.erase_fast(i);
-				delete request;
-			}
-		}
+               request->initiator->m2cArrangedConnectionRejected(request->initiatorQueryId, ptr);   // 0 = ReasonTimedOut
+               request->initiator->removeConnectRequest(request);
+            }
+            if(request->host.isValid())
+               request->host->removeConnectRequest(request);
+            MasterServerConnection::gConnectList.erase_fast(i);
+            delete request;
+         }
+      }
 
       Platform::sleep(1);
    }

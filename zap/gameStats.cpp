@@ -39,8 +39,8 @@ using namespace Zap;
 namespace Zap
 {
 void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stats
-	{
-	GameStats *g = &stats->gameStats;
+   {
+   GameStats *g = &stats->gameStats;
       for(S32 i = 0; i < g->teamStats.size(); i++)
       {
          TeamStats *gt = &g->teamStats[i];
@@ -51,9 +51,9 @@ void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stat
             {
                WeaponStats *gw = &gp->weaponStats[k];
             }
-			}
-		}
-	}
+         }
+      }
+   }
 }
 
 
@@ -65,7 +65,7 @@ U32 VersionedGameStats_WriteSize;
 #define VersionedGameStats_write_end(s) {VersionedGameStats_WriteSize = s.getBitPosition() - VersionedGameStats_WriteSize;}
 #define VersionedGameStats_read_start(s) {VersionedGameStats_ReadSize = s.getBitPosition();}
 #define VersionedGameStats_read_end(s) {VersionedGameStats_ReadSize = s.getBitPosition() - VersionedGameStats_ReadSize; \
-	TNLAssert((!VersionedGameStats_testing) || VersionedGameStats_WriteSize == VersionedGameStats_ReadSize, "VersionedGameStats Read and write size is not equal. They must be equal size to prevent network errors.")}
+   TNLAssert((!VersionedGameStats_testing) || VersionedGameStats_WriteSize == VersionedGameStats_ReadSize, "VersionedGameStats Read and write size is not equal. They must be equal size to prevent network errors.")}
 #else
 #define VersionedGameStats_write_start(s)
 #define VersionedGameStats_write_end(s)
@@ -92,7 +92,7 @@ namespace Types
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, VersionedGameStats *val)
    {
-		VersionedGameStats_read_start(s);
+      VersionedGameStats_read_start(s);
       val->valid = false;
       U8 version = readU8(s);  // Read version number.
       val->version = version;
@@ -108,7 +108,7 @@ namespace Types
       g->levelName = readString(s);
    
       S32 teamCount = readU8(s);
-		g->teamCount = teamCount; // is this needed?
+      g->teamCount = teamCount; // is this needed?
       if(!s.isValid()) return;
       g->teamStats.setSize(teamCount);
       for(S32 i = 0; i < teamCount; i++)
@@ -117,8 +117,8 @@ namespace Types
          gt->name = readString(s);
          gt->score = readS32(s);
          gt->color_bin = s.readInt(24); // 24 bit color
-			char c[24];
-			dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32((gt->color_bin >> 16) & 0xFF), U32((gt->color_bin >> 8) & 0xFF), U32(gt->color_bin & 0xFF));
+         char c[24];
+         dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32((gt->color_bin >> 16) & 0xFF), U32((gt->color_bin >> 8) & 0xFF), U32(gt->color_bin & 0xFF));
          gt->color = string(c);
          //gt->gameResult = "?";
          if(!s.isValid()) return;
@@ -165,7 +165,7 @@ namespace Types
    /// Writes objects into a BitStream. Server write and send to master.
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
-		VersionedGameStats_write_start(s);
+      VersionedGameStats_write_start(s);
       write(s, U8(VersionedGameStats_CurrentVersion));       // send current version
       GameStats *g = &val.gameStats;
 
@@ -217,6 +217,6 @@ namespace Types
             }
          }
       }
-		VersionedGameStats_write_end(s);
+      VersionedGameStats_write_end(s);
    }
 }

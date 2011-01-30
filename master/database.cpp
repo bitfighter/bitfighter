@@ -176,16 +176,16 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
 
       // Check cache first
       for(S32 i = cachedServers.size() - 1; i >= 0; i--)
-			if(cachedServers[i].ip == gameStats.serverIP	&& cachedServers[i].name == gameStats.serverName )
-			{
-				serverId_int = cachedServers[i].id;
-				break;
-			}
+         if(cachedServers[i].ip == gameStats.serverIP   && cachedServers[i].name == gameStats.serverName )
+         {
+            serverId_int = cachedServers[i].id;
+            break;
+         }
 
       if(serverId_int == U64_MAX)  // Not in cache
       {
          // Find server in database
-			string sql = "SELECT server_id FROM server AS server "
+         string sql = "SELECT server_id FROM server AS server "
                       "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
          StoreQueryResult results = query.store(sql.c_str(), sql.length());
 
@@ -212,7 +212,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
    }
    catch (const Exception &ex) 
    {
-		logprintf("Failure writing stats to database: %s", ex.what());
+      logprintf("Failure writing stats to database: %s", ex.what());
       return;
     }
 }
