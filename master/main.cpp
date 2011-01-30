@@ -37,8 +37,13 @@
 #include <stdarg.h>     // For va_args
 #include <time.h>
 
-//#include "../zap/stringUtils.h"     // For itos, replaceString
-#include "../zap/stringUtils.cpp"     // For itos, replaceString, only include this cpp file once in the master project, duplicate or no cpp include will get link errors.
+#include "../zap/stringUtils.h"     // For itos, replaceString
+
+
+// only include cpp file once, in here or in this project, duplicate or no cpp include will get link errors.
+// including here makes it easier, but might soon be removed from here and added into project.
+#include "../zap/stringUtils.cpp"     // For itos, replaceString
+#include "../zap/gameStats.cpp"     // For read/write VersionedGameStats
 
 
 using namespace TNL;
