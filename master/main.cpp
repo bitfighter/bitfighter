@@ -75,7 +75,7 @@ string gStatsDatabaseName;
 string gStatsDatabaseUsername;
 string gStatsDatabasePassword;
 
-DatabaseWriter *databaseWriter;
+//DatabaseWriter *databaseWriter;
 
 class MasterServerConnection;
 
@@ -1197,6 +1197,58 @@ public:
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
       dbWriter.insertStats(gameStats);
    }
+
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (GameStatistics3 stats))
+   {
+      if(! stats.valid)
+      {
+         logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
+         return;
+      }
+      GameStats *gameStats = &stats.gameStats;
+
+      gameStats->serverIP = getNetAddressString();
+      gameStats->serverName = mPlayerOrServerName.getString();
+      gameStats->cs_protocol_version = mCSProtocolVersion;
+
+      for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+      {
+         Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
+
+         for(S32 j=0; j < playerStats->size(); j++)
+         {
+            Nonce playerId = playerStats->get(j).nonce;
+            MasterServerConnection *client = findClient(playerId);
+            playerStats->get(j).isAuthenticated = (client && client->isAuthenticated());
+         }
+
+         // Now compute winning player(s) based on score or points; but must sort first
+         if(! gameStats->isTeamGame)
+         {
+            playerStats->sort(playerScoreSort);
+            for(S32 j = 0; j < playerStats->size(); j++)
+					(*playerStats)[j].gameResult = 
+                  getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
+         }
+      }
+      if(gameStats->isTeamGame)
+      {
+         Vector<TeamStats> *teams = &gameStats->teamStats;
+         teams->sort(teamScoreSort);
+         for(S32 i = 0; i < teams->size(); i++)
+			{
+            (*teams)[i].gameResult = 
+               getResult(teams->size(), (*teams)[0].score, teams->size() == 1 ? 0 : (*teams)[1].score, (*teams)[i].score, i == 0);
+            for(S32 j = 0; j < (*teams)[i].playerStats.size(); j++) // make all players in a team same gameResults
+					(*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
+			}
+      }
+
+      DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
+                              gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
+      dbWriter.insertStats(*gameStats);
+   }
+
 
    // Game server wants to know if user name has been verified
    TNL_DECLARE_RPC_OVERRIDE(s2mRequestAuthentication, (Vector<U8> id, StringTableEntry name))
