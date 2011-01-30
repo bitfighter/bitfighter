@@ -55,7 +55,7 @@ struct PlayerStats
 {
    string name;
    bool isAuthenticated;
-   Nonce nonce;
+   Nonce nonce;  // used for authentication
    bool isRobot;
    string gameResult;
    S32 points;
@@ -67,13 +67,13 @@ struct PlayerStats
    Vector<WeaponStats> weaponStats;
 
    bool isAdmin;
-   bool isLevelChanger;
+   bool isLevelChanger; // might not be needed...
 };
 
 
 struct TeamStats 
 {
-   U32 color_bin; // The game server needs to send in number, not string
+   U32 color_bin; // To send as number, not string
    string color;
    string name;
    S32 score;

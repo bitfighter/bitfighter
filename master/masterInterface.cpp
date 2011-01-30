@@ -30,6 +30,10 @@
 // master and the individual clients.
 
 
+#ifdef USE_GAMESTATS_STRUCT
+
+// This is shared in both client and master.
+// this read/write is usually the hardest part about struct, but this allows custom version handling.
 
 namespace Types
 {
@@ -175,72 +179,8 @@ namespace Types
    }
 }
 
+#endif
 
-
-
-
-//
-//namespace Types
-//{
-//   // GameStatistics3 is in gameStats.h
-//   const U8 GameStatistics3_CurrentVersion = 1;    // keep this the same U8 size.
-//   /// Reads objects from a BitStream.
-//   void read(TNL::BitStream &s, GameStatistics3 *val)
-//   {
-//      U8 version;
-//      read(s, &version);    // version number, in the future, we add more things to read/write and want to keep compatible to old version 
-//      //if(version > GameStatistics4_CurrentVersion) return; // can't read future version and unsupported version.
-//
-//      read(s, &val->gameType);
-//      read(s, &val->teamGame);
-//      read(s, &val->levelName);
-//      read(s, &val->teams);
-//      read(s, &val->teamScores);
-//      read(s, &val->color);
-//      read(s, &val->timeInSecs);
-//      read(s, &val->playerNames);
-//      read(s, &val->playerIDs);
-//      read(s, &val->isBot);
-//      read(s, &val->lastOnTeam);
-//      read(s, &val->playerScores);
-//      read(s, &val->playerKills);
-//      read(s, &val->playerDeaths);
-//      read(s, &val->playerSuicides);
-//      read(s, &val->shots);
-//      read(s, &val->hits);
-//      if(version >= 1)
-//         read(s, &val->playerSwitchedTeamCount);
-//      else
-//         val->playerSwitchedTeamCount.setSize(val->playerNames.size());
-//   }
-//
-//
-//   /// Writes objects into a BitStream. Server write and send to master.
-//   void write(TNL::BitStream &s, GameStatistics3 &val)
-//   {
-//      write(s, GameStatistics3_CurrentVersion);       // send current version
-//      write(s, val.gameType);
-//      write(s, val.teamGame);
-//      write(s, val.levelName);
-//      write(s, val.teams);
-//      write(s, val.teamScores);
-//      write(s, val.color);
-//      write(s, val.timeInSecs);
-//      write(s, val.playerNames);
-//      write(s, val.playerIDs);
-//      write(s, val.isBot);
-//      write(s, val.lastOnTeam);
-//      write(s, val.playerScores);
-//      write(s, val.playerKills);
-//      write(s, val.playerDeaths);
-//      write(s, val.playerSuicides);
-//      write(s, val.shots);
-//      write(s, val.hits);
-//
-//      if(GameStatistics3_CurrentVersion >= 1)
-//         write(s, val.playerSwitchedTeamCount);
-//   }
-//}
 
 
 //
@@ -407,8 +347,10 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (StringTableEn
     playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
+#ifdef USE_GAMESTATS_STRUCT
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3_1, (GameStatistics3 stats),
    (stats), NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
+#endif
 
 
 

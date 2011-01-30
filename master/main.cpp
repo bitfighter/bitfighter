@@ -1199,6 +1199,7 @@ public:
       dbWriter.insertStats(gameStats);
    }
 
+#ifdef USE_GAMESTATS_STRUCT
 	void processIsAuthenticated(GameStats *gameStats)
 	{
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
@@ -1263,6 +1264,7 @@ public:
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
       dbWriter.insertStats(*gameStats);
    }
+#endif
 
 
    // Game server wants to know if user name has been verified

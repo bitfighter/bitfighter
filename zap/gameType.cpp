@@ -856,6 +856,8 @@ void GameType::gameOverManGameOver()
    saveGameStats();
 }
 
+
+#ifdef USE_GAMESTATS_STRUCT
 GameStatistics3 GameType::getGameStats()
 {
    GameStatistics3 stats;
@@ -918,8 +920,9 @@ GameStatistics3 GameType::getGameStats()
 	}
 	return stats;
 }
-
 // logGameStats(GameStatistics3 stats, S32 format = 1)  // TODO: log game stats
+#endif
+
 
 
 // Transmit statistics to the master server, LogStats to game server
@@ -927,14 +930,15 @@ void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
+#ifdef USE_GAMESTATS_STRUCT
 	GameStatistics3 stats = getGameStats();
 	if(masterConn)
 	{
 		masterConn->s2mSendGameStatistics_3_1(stats);
 	}
 	return;
+#endif
 // // may use the above code, and remove most of below code (Need to rewrite logging)
-
 
 
 
