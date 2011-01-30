@@ -24,17 +24,13 @@
 //------------------------------------------------------------------------------------
 
 #include "masterInterface.h"
+#include "../zap/gameStats.h"
+
+//struct VersionedGameStats;
 
 // Since this is an interface, we implement a bunch of stubs.  These will be overridden on the
 // client, server, or master end as needed.  This interface will be compiled into both the
 // master and the individual clients.
-
-
-#ifdef USE_GAMESTATS_STRUCT
-#include "gameStats.cpp"
-#endif
-
-
 
 //
 //   IMPORTANT NOTE!!!
@@ -188,22 +184,20 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEn
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 
 
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, 
-                                                                   StringTableEntry levelName,
-                                                                   Vector<StringTableEntry> teams, 
-                                                                   Vector<S32> teamScores, Vector<RangedU32<0,0xFFFFFF> > color, 
-                                                                   U16 time, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
-                                                                   Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
-                                                                   Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides,
-                                                                   Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits),
-   (gameType, teamGame, levelName, teams, teamScores, color, time, playerNames, playerIDs, isBot, lastOnTeam, 
-    playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits),
-   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
+//TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, 
+//                                                                   StringTableEntry levelName,
+//                                                                   Vector<StringTableEntry> teams, 
+//                                                                   Vector<S32> teamScores, Vector<RangedU32<0,0xFFFFFF> > color, 
+//                                                                   U16 time, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
+//                                                                   Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
+//                                                                   Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides,
+//                                                                   Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits),
+//   (gameType, teamGame, levelName, teams, teamScores, color, time, playerNames, playerIDs, isBot, lastOnTeam, 
+//    playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits),
+//   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
-#ifdef USE_GAMESTATS_STRUCT
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3_1, (GameStatistics3 stats),
-   (stats), NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
-#endif
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3_1, (Zap::VersionedGameStats stats), (stats),
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
 
 
 

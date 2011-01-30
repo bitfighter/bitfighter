@@ -36,7 +36,6 @@ using namespace Zap;
 
 namespace Types
 {
-   // GameStatistics3 is in gameStats.h
    const U8 GameStatistics3_CurrentVersion = 0;
 
    U8 readU8(TNL::BitStream &s)   { U8 val; read(s, &val); return val; }
@@ -50,7 +49,7 @@ namespace Types
    void writeString(TNL::BitStream &s, const string &val) { s.writeString(val.c_str()); }
 
    /// Reads objects from a BitStream.
-   void read(TNL::BitStream &s, GameStatistics3 *val)
+   void read(TNL::BitStream &s, VersionedGameStats *val)
    {
 		//U32 position = s.getBitPosition();
       val->valid = false;
@@ -120,7 +119,7 @@ namespace Types
 
 
    /// Writes objects into a BitStream. Server write and send to master.
-   void write(TNL::BitStream &s, GameStatistics3 &val)
+   void write(TNL::BitStream &s, VersionedGameStats &val)
    {
 		//U32 position = s.getBitPosition();
       write(s, GameStatistics3_CurrentVersion);       // send current version

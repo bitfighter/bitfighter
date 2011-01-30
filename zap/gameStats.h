@@ -23,8 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-// #define USE_GAMESTATS_STRUCT      // If enabled here, Be sure to enable it in gameType.cpp
-
 #ifndef _GAMESTATS_H_
 #define _GAMESTATS_H_
 
@@ -101,7 +99,7 @@ struct GameStats
 };
 
 
-struct GameStatistics3
+struct VersionedGameStats
 {
    U8 version;
    bool valid;
@@ -114,8 +112,8 @@ struct GameStatistics3
 
 namespace Types
 {
-   extern void read(TNL::BitStream &s, Zap::GameStatistics3 *val);
-   extern void write(TNL::BitStream &s, Zap::GameStatistics3 &val);
+   extern void read(TNL::BitStream &s, Zap::VersionedGameStats *val);
+   extern void write(TNL::BitStream &s, Zap::VersionedGameStats &val);
 };
 
 

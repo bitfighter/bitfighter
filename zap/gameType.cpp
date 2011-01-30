@@ -38,6 +38,7 @@
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 #include "stringUtils.h"    // For itos
+#include "gameStats.h"      // For VersionedGameStats def.
 
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
@@ -857,10 +858,9 @@ void GameType::gameOverManGameOver()
 }
 
 
-#ifdef USE_GAMESTATS_STRUCT
-GameStatistics3 GameType::getGameStats()
+VersionedGameStats GameType::getGameStats()
 {
-   GameStatistics3 stats;
+   VersionedGameStats stats;
 	GameStats *gameStats = &stats.gameStats;
 
 
@@ -920,8 +920,8 @@ GameStatistics3 GameType::getGameStats()
 	}
 	return stats;
 }
-// logGameStats(GameStatistics3 stats, S32 format = 1)  // TODO: log game stats
-#endif
+// logGameStats(VersionedGameStats stats, S32 format = 1)  // TODO: log game stats
+
 
 
 
@@ -930,171 +930,163 @@ void GameType::saveGameStats()
 {
    MasterServerConnection *masterConn = gServerGame->getConnectionToMaster();
 
-#ifdef USE_GAMESTATS_STRUCT
-	GameStatistics3 stats = getGameStats();
+	VersionedGameStats stats = getGameStats();
 	if(masterConn)
-	{
 		masterConn->s2mSendGameStatistics_3_1(stats);
-	}
-	return;
-#endif
-// // may use the above code, and remove most of below code (Need to rewrite logging)
-
-
-
-
-
-   countTeamPlayers();     // Make sure all team sizes are up to date
-
-   // Assign some ids so we can find these teams later, post sorting...
-   for(S32 i = 0; i < mTeams.size(); i++)
-      mTeams[i].setId(i);
-
-   Vector<Team> sortTeams(mTeams);
-   sortTeams.sort(teamSizeSort);
-
-   // Push team names and scores into a structure we can pass via rpc; these will be sorted by player counts, high to low
-   Vector<StringTableEntry>          teams      (sortTeams.size());
-   Vector<S32>                       scores     (sortTeams.size());
-   //Vector<RangedU32<0,MAX_PLAYERS> > teamPlayers(sortTeams.size());
-   //Vector<RangedU32<0,MAX_PLAYERS> > teamBots   (sortTeams.size());
-   Vector<RangedU32<0,0xFFFFFF> >    colors     (sortTeams.size());
-
-   for(S32 i = 0; i < sortTeams.size(); i++)
-   {
-      teams.push_back(sortTeams[i].getName());
-      scores.push_back(sortTeams[i].getScore());
-
-      colors.push_back(sortTeams[i].color.toRangedU32());
-
-      //teamPlayers.push_back(sortTeams[i].numPlayers);
-      //teamBots.push_back(sortTeams[i].numPlayers);
-   }
-
-   // And now the player data, presized to fit the number of clients; avoids dynamic resizing
-   Vector<bool> lastOnTeam             (mClientList.size());
-   Vector<StringTableEntry> playerNames(mClientList.size());
-   Vector<Vector<U8> > playerIDs       (mClientList.size());
-   Vector<bool> isBot                  (mClientList.size());
-   Vector<S32> playerScores            (mClientList.size());
-   Vector<U16> playerKills             (mClientList.size());
-   Vector<U16> playerDeaths            (mClientList.size());
-   Vector<U16> playerSuicides          (mClientList.size());
-   Vector<U16> teamSwitchCount         (mClientList.size());
-   Vector<Vector<U16> > shots          (mClientList.size()); 
-   Vector<Vector<U16> > hits           (mClientList.size());
-      
-
-   // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
-   //Vector<RefPtr<ClientRef> > mSortedClientList(mClientList);   
-   //mSortedClientList.sort(playerScoreSort);
-
-   for(S32 i = 0; i < sortTeams.size(); i++)
-   {
-      for(S32 j = 0; j < mClientList.size(); j++)
-      {
-         // Only looking for players on the current team
-         if(mClientList[j]->getTeam() != sortTeams[i].getId())
-            continue;
-
-         Statistics *statistics = &mClientList[j]->clientConnection->mStatistics;
-            
-         lastOnTeam.push_back(false);
-
-         playerNames    .push_back(mClientList[j]->name);    // TODO: What if this is a bot??  What should go here??
-         playerIDs      .push_back(mClientList[j]->clientConnection->getClientId()->toVector());
-         isBot          .push_back(mClientList[j]->isRobot);
-         playerScores   .push_back(mClientList[j]->getScore());
-         playerKills    .push_back(statistics->getKills());
-         playerDeaths   .push_back(statistics->getDeaths());
-         playerSuicides .push_back(statistics->getSuicides());
-         shots          .push_back(statistics->getShotsVector());
-         hits           .push_back(statistics->getHitsVector());
-         teamSwitchCount.push_back(mClientList[j]->clientConnection->switchedTeamCount);
-      }
-
-      if(lastOnTeam.size() != 0)
-         lastOnTeam[lastOnTeam.size() - 1] = true;
-   }
-
-   U16 timeInSecs = U16(mTotalGamePlay / 1000);
-
-   /*GameStatistics3 gameStat;
-   gameStat.gameType = getGameTypeString();
-   gameStat.teamGame = isTeamGame();
-   gameStat.levelName = mLevelName;
-   gameStat.teams = teams;
-   gameStat.teamScores = scores;
-   gameStat.color = colors;
-   gameStat.timeInSecs = timeInSecs;
-   gameStat.playerNames = playerNames;
-   gameStat.playerIDs = playerIDs;
-   gameStat.isBot = isBot;
-   gameStat.lastOnTeam = lastOnTeam;
-   gameStat.playerScores = playerScores;    
-   gameStat.playerKills = playerKills;
-   gameStat.playerDeaths = playerDeaths;
-   gameStat.playerSuicides = playerSuicides;
-   gameStat.shots = shots;
-   gameStat.hits = hits;
-   gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;*/
-
-   if(masterConn)                                        // && gIniSettings.SendStatsToMaster)
-		//masterConn->s2mSendGameStatistics_3(gameStat);
-
-      masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
-                                          timeInSecs, playerNames, playerIDs, isBot,
-                                          lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits);
-
-
-   // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code
-   // in the master, which will have these structs as well, to produce a consnstent text logfile format.
-   // We could also have the stats be written to a local mysql database if one were available using the same code.
-	switch(gIniSettings.LogStats)
-	{
-		case 1:
-			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
-			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
-			for(S32 i = 0; i < mTeams.size(); i++)
-				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%s Name=%s",
-					i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
-					mTeams[i].getScore(),
-               mTeams[i].color.toHexString().c_str(),
-					mTeams[i].getName().getString());
-			break;
-		// case 2: // For using other formats
-		default:
-			logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
-	}
-
-   for(S32 i = 0; i < mClientList.size(); i++)
-   {
-      Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
-        
-      //if(masterConn) //&& gIniSettings.SendStatsToMaster)
-      //   masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
-      //                                      mClientList[i]->isRobot,
-      //                                      getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
-      //                                      mClientList[i]->getScore(),
-      //                                      statistics->getKills(), statistics->getDeaths(), 
-      //                                      statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
-		switch(gIniSettings.LogStats)
-		{
-			case 1:
-				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
-					mClientList[i]->isRobot ? "Robot" : "Player",
-					mClientList[i]->name.getString(),
-					mClientList[i]->getTeam(),
-					mClientList[i]->getScore(),
-				   getCurrentRating(mClientList[i]->clientConnection),
-					statistics->getKills(),
-					statistics->getDeaths(),
-               statistics->getSuicides());
-				break;
-			// case 2: // For using other formats
-		}
-   }
 }
+
+
+//   countTeamPlayers();     // Make sure all team sizes are up to date
+//
+//   // Assign some ids so we can find these teams later, post sorting...
+//   for(S32 i = 0; i < mTeams.size(); i++)
+//      mTeams[i].setId(i);
+//
+//   Vector<Team> sortTeams(mTeams);
+//   sortTeams.sort(teamSizeSort);
+//
+//   // Push team names and scores into a structure we can pass via rpc; these will be sorted by player counts, high to low
+//   Vector<StringTableEntry>          teams      (sortTeams.size());
+//   Vector<S32>                       scores     (sortTeams.size());
+//   //Vector<RangedU32<0,MAX_PLAYERS> > teamPlayers(sortTeams.size());
+//   //Vector<RangedU32<0,MAX_PLAYERS> > teamBots   (sortTeams.size());
+//   Vector<RangedU32<0,0xFFFFFF> >    colors     (sortTeams.size());
+//
+//   for(S32 i = 0; i < sortTeams.size(); i++)
+//   {
+//      teams.push_back(sortTeams[i].getName());
+//      scores.push_back(sortTeams[i].getScore());
+//
+//      colors.push_back(sortTeams[i].color.toRangedU32());
+//
+//      //teamPlayers.push_back(sortTeams[i].numPlayers);
+//      //teamBots.push_back(sortTeams[i].numPlayers);
+//   }
+//
+//   // And now the player data, presized to fit the number of clients; avoids dynamic resizing
+//   Vector<bool> lastOnTeam             (mClientList.size());
+//   Vector<StringTableEntry> playerNames(mClientList.size());
+//   Vector<Vector<U8> > playerIDs       (mClientList.size());
+//   Vector<bool> isBot                  (mClientList.size());
+//   Vector<S32> playerScores            (mClientList.size());
+//   Vector<U16> playerKills             (mClientList.size());
+//   Vector<U16> playerDeaths            (mClientList.size());
+//   Vector<U16> playerSuicides          (mClientList.size());
+//   Vector<U16> teamSwitchCount         (mClientList.size());
+//   Vector<Vector<U16> > shots          (mClientList.size()); 
+//   Vector<Vector<U16> > hits           (mClientList.size());
+//      
+//
+//   // mSortedClientList is list of players sorted by player score; may not matter in team game, but it does in solo games
+//   //Vector<RefPtr<ClientRef> > mSortedClientList(mClientList);   
+//   //mSortedClientList.sort(playerScoreSort);
+//
+//   for(S32 i = 0; i < sortTeams.size(); i++)
+//   {
+//      for(S32 j = 0; j < mClientList.size(); j++)
+//      {
+//         // Only looking for players on the current team
+//         if(mClientList[j]->getTeam() != sortTeams[i].getId())
+//            continue;
+//
+//         Statistics *statistics = &mClientList[j]->clientConnection->mStatistics;
+//            
+//         lastOnTeam.push_back(false);
+//
+//         playerNames    .push_back(mClientList[j]->name);    // TODO: What if this is a bot??  What should go here??
+//         playerIDs      .push_back(mClientList[j]->clientConnection->getClientId()->toVector());
+//         isBot          .push_back(mClientList[j]->isRobot);
+//         playerScores   .push_back(mClientList[j]->getScore());
+//         playerKills    .push_back(statistics->getKills());
+//         playerDeaths   .push_back(statistics->getDeaths());
+//         playerSuicides .push_back(statistics->getSuicides());
+//         shots          .push_back(statistics->getShotsVector());
+//         hits           .push_back(statistics->getHitsVector());
+//         teamSwitchCount.push_back(mClientList[j]->clientConnection->switchedTeamCount);
+//      }
+//
+//      if(lastOnTeam.size() != 0)
+//         lastOnTeam[lastOnTeam.size() - 1] = true;
+//   }
+//
+//   U16 timeInSecs = U16(mTotalGamePlay / 1000);
+//
+//   /*VersionedGameStats gameStat;
+//   gameStat.gameType = getGameTypeString();
+//   gameStat.teamGame = isTeamGame();
+//   gameStat.levelName = mLevelName;
+//   gameStat.teams = teams;
+//   gameStat.teamScores = scores;
+//   gameStat.color = colors;
+//   gameStat.timeInSecs = timeInSecs;
+//   gameStat.playerNames = playerNames;
+//   gameStat.playerIDs = playerIDs;
+//   gameStat.isBot = isBot;
+//   gameStat.lastOnTeam = lastOnTeam;
+//   gameStat.playerScores = playerScores;    
+//   gameStat.playerKills = playerKills;
+//   gameStat.playerDeaths = playerDeaths;
+//   gameStat.playerSuicides = playerSuicides;
+//   gameStat.shots = shots;
+//   gameStat.hits = hits;
+//   gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;*/
+//
+//   if(masterConn)                                        // && gIniSettings.SendStatsToMaster)
+//		//masterConn->s2mSendGameStatistics_3(gameStat);
+//
+//      masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
+//                                          timeInSecs, playerNames, playerIDs, isBot,
+//                                          lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits);
+//
+//
+//   // TODO: We shoud create a method that reads the structures we just created and writes stats from them; we can use the same code
+//   // in the master, which will have these structs as well, to produce a consnstent text logfile format.
+//   // We could also have the stats be written to a local mysql database if one were available using the same code.
+//	switch(gIniSettings.LogStats)
+//	{
+//		case 1:
+//			logprintf(LogConsumer::ServerFilter, "Version=%i %s %i:%02i", BUILD_VERSION, getGameTypeString(), timeInSecs / 60, timeInSecs % 60);
+//			logprintf(LogConsumer::ServerFilter, "%s Level=%s", isTeamGame() ? "Team" : "NoTeam", mLevelName.getString());
+//			for(S32 i = 0; i < mTeams.size(); i++)
+//				logprintf(LogConsumer::ServerFilter, "Team=%i Score=%i Color=%s Name=%s",
+//					i,                           // Using unsorted, to correctly use index as team ID. Teams can have same name
+//					mTeams[i].getScore(),
+//               mTeams[i].color.toHexString().c_str(),
+//					mTeams[i].getName().getString());
+//			break;
+//		// case 2: // For using other formats
+//		default:
+//			logprintf(LogConsumer::LogWarning, "Format unsupported, in INI file, use LogStats = 1");
+//	}
+//
+//   for(S32 i = 0; i < mClientList.size(); i++)
+//   {
+//      Statistics *statistics = &mClientList[i]->clientConnection->mStatistics;
+//        
+//      //if(masterConn) //&& gIniSettings.SendStatsToMaster)
+//      //   masterConn->s2mSendPlayerStatistics_3(mClientList[i]->name, mClientList[i]->clientConnection->getClientId()->toVector(), 
+//      //                                      mClientList[i]->isRobot,
+//      //                                      getTeamName(mClientList[i]->getTeam()),  // Both teams might have same name...
+//      //                                      mClientList[i]->getScore(),
+//      //                                      statistics->getKills(), statistics->getDeaths(), 
+//      //                                      statistics->getSuicides(), statistics->getShotsVector(), statistics->getHitsVector());
+//		switch(gIniSettings.LogStats)
+//		{
+//			case 1:
+//				logprintf(LogConsumer::ServerFilter, "%s=%s Team=%i Score=%i Rating=%f kill=%i death=%i suicide=%i",
+//					mClientList[i]->isRobot ? "Robot" : "Player",
+//					mClientList[i]->name.getString(),
+//					mClientList[i]->getTeam(),
+//					mClientList[i]->getScore(),
+//				   getCurrentRating(mClientList[i]->clientConnection),
+//					statistics->getKills(),
+//					statistics->getDeaths(),
+//               statistics->getSuicides());
+//				break;
+//			// case 2: // For using other formats
+//		}
+//   }
+//}
 
 
 // Handle the end-of-game...  handles all games... not in any subclasses

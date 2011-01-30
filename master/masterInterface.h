@@ -27,7 +27,7 @@
 #ifndef _MASTERINTERFACE_H_
 #define _MASTERINTERFACE_H_
 
-#include "../zap/gameStats.h"    // Must be included before tnlRPC.h to prevent fail to compile in linux.
+#include "../zap/gameStats.h"    // Must be included before tnlRPC.h to compile in gcc
 #include "../zap/SharedConstants.h"
 #include "tnlEventConnection.h"
 #include "tnlRPC.h"
@@ -72,6 +72,7 @@ const S32 IP_MESSAGE_ADDRESS_COUNT = 30;
 
 
 
+//struct VersionedGameStats;
 
 class MasterServerInterface : public EventConnection
 {
@@ -206,16 +207,15 @@ public:
    //                                            S32 score, U16 kills, U16 deaths, U16 suicides, 
    //                                            Vector<U16> shots, Vector<U16> hits) );
 
-   TNL_DECLARE_RPC(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
+   /*TNL_DECLARE_RPC(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
                                              Vector<StringTableEntry> teams, Vector<S32> teamScores, 
                                              Vector<RangedU32<0,0xFFFFFF> > color, 
                                              U16 time, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
                                              Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
                                              Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                              Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits) );
-#ifdef USE_GAMESTATS_STRUCT
-   TNL_DECLARE_RPC(s2mSendGameStatistics_3_1, (GameStatistics3 stats));
-#endif
+                                             */
+   TNL_DECLARE_RPC(s2mSendGameStatistics_3_1, (Zap::VersionedGameStats stats));
 };
 
 

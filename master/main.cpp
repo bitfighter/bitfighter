@@ -986,214 +986,213 @@ public:
 
    // Send game statistics to the master server   ==> Current as of 015
    // Note that teams are sent in descending order, most players to fewest  
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
-                                                      Vector<StringTableEntry> teams, Vector<S32> teamScores,
-                                                      Vector<RangedU32<0,0xFFFFFF> > color, 
-                                                      U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIds,
-                                                      Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
-                                                      Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
-                                                      Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
-   {
-	
- //  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
-	//{
- //     StringTableEntry gameType = gameStat.gameType;
- //     bool teamGame = gameStat.teamGame;
- //     StringTableEntry levelName = gameStat.levelName;
- //     Vector<StringTableEntry> teams = gameStat.teams;
- //     Vector<S32> teamScores = gameStat.teamScores;
- //     Vector<RangedU32<0,0xFFFFFF> > color = gameStat.color;
- //     U16 timeInSecs = gameStat.timeInSecs;
- //     Vector<StringTableEntry> playerNames = gameStat.playerNames;
- //     Vector<Vector<U8> > playerIds = gameStat.playerIDs;
- //     Vector<bool> isBot = gameStat.isBot;
- //     Vector<bool> lastOnTeam = gameStat.lastOnTeam;
- //     Vector<S32> playerScores = gameStat.playerScores;
- //     Vector<U16> playerKills = gameStat.playerKills;
- //     Vector<U16> playerDeaths = gameStat.playerDeaths;
- //     Vector<U16> playerSuicides = gameStat.playerSuicides;
- //     Vector<Vector<U16> > shots = gameStat.shots;
- //     Vector<Vector<U16> > hits = gameStat.hits;
+ //  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, StringTableEntry levelName, 
+ //                                                     Vector<StringTableEntry> teams, Vector<S32> teamScores,
+ //                                                     Vector<RangedU32<0,0xFFFFFF> > color, 
+ //                                                     U16 timeInSecs, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIds,
+ //                                                     Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
+ //                                                     Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
+ //                                                     Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits))
+ //  {
+	//
+ ////  TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3, (GameStatistics3 gameStat))
+	////{
+ ////     StringTableEntry gameType = gameStat.gameType;
+ ////     bool teamGame = gameStat.teamGame;
+ ////     StringTableEntry levelName = gameStat.levelName;
+ ////     Vector<StringTableEntry> teams = gameStat.teams;
+ ////     Vector<S32> teamScores = gameStat.teamScores;
+ ////     Vector<RangedU32<0,0xFFFFFF> > color = gameStat.color;
+ ////     U16 timeInSecs = gameStat.timeInSecs;
+ ////     Vector<StringTableEntry> playerNames = gameStat.playerNames;
+ ////     Vector<Vector<U8> > playerIds = gameStat.playerIDs;
+ ////     Vector<bool> isBot = gameStat.isBot;
+ ////     Vector<bool> lastOnTeam = gameStat.lastOnTeam;
+ ////     Vector<S32> playerScores = gameStat.playerScores;
+ ////     Vector<U16> playerKills = gameStat.playerKills;
+ ////     Vector<U16> playerDeaths = gameStat.playerDeaths;
+ ////     Vector<U16> playerSuicides = gameStat.playerSuicides;
+ ////     Vector<Vector<U16> > shots = gameStat.shots;
+ ////     Vector<Vector<U16> > hits = gameStat.hits;
 
 
-      if(mInfoFlags & TestModeFlag)       // Ignore stats from server in test mode
-         return;  
+ //     if(mInfoFlags & TestModeFlag)       // Ignore stats from server in test mode
+ //        return;  
 
-      // Some integrity checks to protect agains bad data
-      // TODO: Expand
-      bool error = false;
+ //     // Some integrity checks to protect agains bad data
+ //     // TODO: Expand
+ //     bool error = false;
 
-      if(shots.size() != hits.size())
-      {
-         error = true;
-      }
-      if(!error)
-      {
-         for(S32 i = 0; i < shots.size(); i++)
-            if(shots[i].size() != hits[i].size())
-            {
-               error = true;
-               break;
-            }
-      }
+ //     if(shots.size() != hits.size())
+ //     {
+ //        error = true;
+ //     }
+ //     if(!error)
+ //     {
+ //        for(S32 i = 0; i < shots.size(); i++)
+ //           if(shots[i].size() != hits[i].size())
+ //           {
+ //              error = true;
+ //              break;
+ //           }
+ //     }
 
-      if(error)
-      {
-         // TODO: Log the error, and the client that sent it
-         return;
-      }
+ //     if(error)
+ //     {
+ //        // TODO: Log the error, and the client that sent it
+ //        return;
+ //     }
 
-		string timestr = itos(timeInSecs / 60) + ":";
-      timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
+	//	string timestr = itos(timeInSecs / 60) + ":";
+ //     timestr += ((timeInSecs % 60 < 10) ? "0" : "") + itos(timeInSecs % 60);
 
-      S32 players = 0, bots = 0;
-      for(S32 i = 0; i < isBot.size(); i++)
-      {
-         if(isBot[i])
-            bots++;
-         else
-            players++;
-      }
+ //     S32 players = 0, bots = 0;
+ //     for(S32 i = 0; i < isBot.size(); i++)
+ //     {
+ //        if(isBot[i])
+ //           bots++;
+ //        else
+ //           players++;
+ //     }
 
-      // GAME | stats version (3) | GameVersion | timestamp | GameType | teamGame (true/false) | level name | teams | players | bots | time
-      logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 
-                     mClientBuild, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
-                     teams.size(), players, bots, timestr.c_str() );
+ //     // GAME | stats version (3) | GameVersion | timestamp | GameType | teamGame (true/false) | level name | teams | players | bots | time
+ //     logprintf(LogConsumer::StatisticsFilter, "GAME\t3\t%d\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%s", 
+ //                    mClientBuild, getTimeStamp().c_str(), gameType.getString(), teamGame ? "true" : "false", levelName.getString(), 
+ //                    teams.size(), players, bots, timestr.c_str() );
 
-      // TEAM | stats version (3) | team name | players | bots | score | hexColor
-      for(S32 i = 0; i < teams.size(); i++)
-      {
-         Color teamColor(color[i]);
-         logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%s", 
-                  teams[i].getString(), teamColor.toHexString().c_str());
-      }
+ //     // TEAM | stats version (3) | team name | players | bots | score | hexColor
+ //     for(S32 i = 0; i < teams.size(); i++)
+ //     {
+ //        Color teamColor(color[i]);
+ //        logprintf(LogConsumer::StatisticsFilter, "TEAM\t3\t%s\t%s", 
+ //                 teams[i].getString(), teamColor.toHexString().c_str());
+ //     }
 
-      
-      // TODO: Make this work, integrate with statistics being logged on server
-       //   // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
-   //   logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
-   //            playerName.getString(), 
-   //            authenticated ? "true" : "false", 
-   //            isBot ? "true" : "false", 
-   //            teamName.getString(), 
-   //            score, kills, deaths, suicides, 
-   //            totalShots, totalHits);
+ //     
+ //     // TODO: Make this work, integrate with statistics being logged on server
+ //      //   // PLAYER | stats version (3) | name | authenticated | isBot | team | score | kills | deaths | suicides | shots | hits 
+ //  //   logprintf(LogConsumer::StatisticsFilter, "PLAYER\t3\t%s\t%s\t%s\t%s\t%d\t%d\t%d\t%d\t%d\t%d", 
+ //  //            playerName.getString(), 
+ //  //            authenticated ? "true" : "false", 
+ //  //            isBot ? "true" : "false", 
+ //  //            teamName.getString(), 
+ //  //            score, kills, deaths, suicides, 
+ //  //            totalShots, totalHits);
 
 
-      S32 lastClient = 0;     // Track last player who's info was written
+ //     S32 lastClient = 0;     // Track last player who's info was written
 
-      // TODO: Make put this in a constructor
-      GameStats gameStats;
+ //     // TODO: Make put this in a constructor
+ //     GameStats gameStats;
 
-      gameStats.duration = timeInSecs;
-      gameStats.gameType = gameType.getString();
-      gameStats.isOfficial = false;
-      gameStats.isTeamGame = teamGame;
-      gameStats.levelName = levelName.getString();
-      gameStats.playerCount = playerNames.size();     // Humans + bots
-      gameStats.serverIP = getNetAddressString();
-      gameStats.serverName = mPlayerOrServerName.getString();
-      gameStats.teamCount = teams.size();
+ //     gameStats.duration = timeInSecs;
+ //     gameStats.gameType = gameType.getString();
+ //     gameStats.isOfficial = false;
+ //     gameStats.isTeamGame = teamGame;
+ //     gameStats.levelName = levelName.getString();
+ //     gameStats.playerCount = playerNames.size();     // Humans + bots
+ //     gameStats.serverIP = getNetAddressString();
+ //     gameStats.serverName = mPlayerOrServerName.getString();
+ //     gameStats.teamCount = teams.size();
 
-      //gameStats.teamStats.setSize(teams.size());
+ //     //gameStats.teamStats.setSize(teams.size());
 
-      S32 nextPlayerToProcess = 0;
+ //     S32 nextPlayerToProcess = 0;
 
-      for(S32 i = 0; i < teams.size(); i++)
-      {
-         TeamStats teamStats;
-         Color teamColor(color[i]);
+ //     for(S32 i = 0; i < teams.size(); i++)
+ //     {
+ //        TeamStats teamStats;
+ //        Color teamColor(color[i]);
 
-         teamStats.name = teams[i].getString();
-         teamStats.color = teamColor.toHexString();
+ //        teamStats.name = teams[i].getString();
+ //        teamStats.color = teamColor.toHexString();
 
-         teamStats.score = teamScores[i];
+ //        teamStats.score = teamScores[i];
 
-         for(S32 j = nextPlayerToProcess; j < playerNames.size(); j++)
-         {
-            PlayerStats playerStats;
+ //        for(S32 j = nextPlayerToProcess; j < playerNames.size(); j++)
+ //        {
+ //           PlayerStats playerStats;
 
-            // TODO: Put these into a constuctor
-            playerStats.deaths = playerDeaths[j];
+ //           // TODO: Put these into a constuctor
+ //           playerStats.deaths = playerDeaths[j];
 
-            // Note: Have to wait until team result is computed to set it on the players
+ //           // Note: Have to wait until team result is computed to set it on the players
 
-            Nonce playerId(playerIds[j]);
-            MasterServerConnection *client = findClient(playerId);
-            playerStats.isAuthenticated = (client && client->isAuthenticated());
+ //           Nonce playerId(playerIds[j]);
+ //           MasterServerConnection *client = findClient(playerId);
+ //           playerStats.isAuthenticated = (client && client->isAuthenticated());
 
-            playerStats.isRobot = isBot[j];
-            playerStats.kills = playerKills[j];
-            playerStats.name = playerNames[j].getString();
-            playerStats.points = playerScores[j];
-            playerStats.suicides = playerSuicides[j];
-            playerStats.switchedTeams = teamSwitchCount[j];    
+ //           playerStats.isRobot = isBot[j];
+ //           playerStats.kills = playerKills[j];
+ //           playerStats.name = playerNames[j].getString();
+ //           playerStats.points = playerScores[j];
+ //           playerStats.suicides = playerSuicides[j];
+ //           playerStats.switchedTeams = teamSwitchCount[j];    
 
-            
-            for(S32 k = 0; k < shots[j].size(); k++)
-            {
-               WeaponStats weaponStats;
-               //TODO: Put the following into a constructor
-               weaponStats.hits = hits[j][k];
-               weaponStats.shots = shots[j][k];
-               weaponStats.weaponType = (WeaponType) k;
-               playerStats.weaponStats.push_back(weaponStats);
-            }
+ //           
+ //           for(S32 k = 0; k < shots[j].size(); k++)
+ //           {
+ //              WeaponStats weaponStats;
+ //              //TODO: Put the following into a constructor
+ //              weaponStats.hits = hits[j][k];
+ //              weaponStats.shots = shots[j][k];
+ //              weaponStats.weaponType = (WeaponType) k;
+ //              playerStats.weaponStats.push_back(weaponStats);
+ //           }
 
-            teamStats.playerStats.push_back(playerStats);
+ //           teamStats.playerStats.push_back(playerStats);
 
-            if(lastOnTeam[j])
-            {
-               nextPlayerToProcess = j + 1;
-               break;
-            }
-         }
+ //           if(lastOnTeam[j])
+ //           {
+ //              nextPlayerToProcess = j + 1;
+ //              break;
+ //           }
+ //        }
 
-         gameStats.teamStats.push_back(teamStats);
-      }
+ //        gameStats.teamStats.push_back(teamStats);
+ //     }
 
-      gameStats.teamStats.sort(teamScoreSort);
+ //     gameStats.teamStats.sort(teamScoreSort);
 
-      // Compute win/loss/tie for teams
-      for(S32 i = 0; i < gameStats.teamStats.size(); i++)
-         gameStats.teamStats[i].gameResult = 
-                     getResult(gameStats.teamStats.size(), teamScores[0], gameStats.teamStats.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
+ //     // Compute win/loss/tie for teams
+ //     for(S32 i = 0; i < gameStats.teamStats.size(); i++)
+ //        gameStats.teamStats[i].gameResult = 
+ //                    getResult(gameStats.teamStats.size(), teamScores[0], gameStats.teamStats.size() == 1 ? 0 : teamScores[1], teamScores[i], i == 0);
 
-      // Now that we have the win/loss/tie results for the teams, we can also assign those same results to the players.
-      if(gameStats.isTeamGame)
-      {
-         for(S32 i = 0; i < gameStats.teamStats.size(); i++)
-            for(S32 j = 0; j < gameStats.teamStats[i].playerStats.size(); j++)
-               gameStats.teamStats[i].playerStats[j].gameResult = gameStats.teamStats[i].gameResult;
-      }
-      else
-      {
-         // Non-team games: compute winning player(s) based on score; but must sort first
-         if(!teamGame)
-         {
-            for(S32 i = 0; i < gameStats.teamStats.size(); i++)
-            {
-               gameStats.teamStats[i].playerStats.sort(playerScoreSort);
+ //     // Now that we have the win/loss/tie results for the teams, we can also assign those same results to the players.
+ //     if(gameStats.isTeamGame)
+ //     {
+ //        for(S32 i = 0; i < gameStats.teamStats.size(); i++)
+ //           for(S32 j = 0; j < gameStats.teamStats[i].playerStats.size(); j++)
+ //              gameStats.teamStats[i].playerStats[j].gameResult = gameStats.teamStats[i].gameResult;
+ //     }
+ //     else
+ //     {
+ //        // Non-team games: compute winning player(s) based on score; but must sort first
+ //        if(!teamGame)
+ //        {
+ //           for(S32 i = 0; i < gameStats.teamStats.size(); i++)
+ //           {
+ //              gameStats.teamStats[i].playerStats.sort(playerScoreSort);
 
-               for(S32 j = 0; j < gameStats.teamStats[i].playerStats.size(); j++)
-               {
-                  gameStats.teamStats[i].playerStats[j].gameResult = 
-                     getResult(gameStats.teamStats[i].playerStats.size(), 
-                               gameStats.teamStats[i].playerStats[0].points, 
-                               gameStats.teamStats[i].playerStats.size() == 1 ? 0 : gameStats.teamStats[i].playerStats[1].points, 
-                               gameStats.teamStats[i].playerStats[j].points, 
-                               j == 0);
-               }
-            }
-         }
-      }
+ //              for(S32 j = 0; j < gameStats.teamStats[i].playerStats.size(); j++)
+ //              {
+ //                 gameStats.teamStats[i].playerStats[j].gameResult = 
+ //                    getResult(gameStats.teamStats[i].playerStats.size(), 
+ //                              gameStats.teamStats[i].playerStats[0].points, 
+ //                              gameStats.teamStats[i].playerStats.size() == 1 ? 0 : gameStats.teamStats[i].playerStats[1].points, 
+ //                              gameStats.teamStats[i].playerStats[j].points, 
+ //                              j == 0);
+ //              }
+ //           }
+ //        }
+ //     }
 
-      DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
-                              gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
-      dbWriter.insertStats(gameStats);
-   }
+ //     DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
+ //                             gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
+ //     dbWriter.insertStats(gameStats);
+ //  }
 
-#ifdef USE_GAMESTATS_STRUCT
 	void processIsAuthenticated(GameStats *gameStats)
 	{
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
@@ -1238,9 +1237,9 @@ public:
       }
 	}
 
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (GameStatistics3 stats))
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (VersionedGameStats stats))
    {
-      if(! stats.valid)
+      if(!stats.valid)
       {
          logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
          return;
@@ -1258,7 +1257,6 @@ public:
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
       dbWriter.insertStats(*gameStats);
    }
-#endif
 
 
    // Game server wants to know if user name has been verified
