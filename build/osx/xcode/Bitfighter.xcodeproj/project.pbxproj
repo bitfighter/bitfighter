@@ -53,6 +53,8 @@
 		7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		7374B37212F5D20600B13E6A /* gameStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7374B37012F5D20600B13E6A /* gameStats.cpp */; };
+		7374B37312F5D20600B13E6A /* gameStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7374B37012F5D20600B13E6A /* gameStats.cpp */; };
 		7378261D12960DDF007333BE /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
 		7378261E12960DDF007333BE /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		7378261F12960DDF007333BE /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
@@ -584,6 +586,8 @@
 		73657A0412E2E3FB00BED56F /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../../../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73657A0512E2E3FB00BED56F /* masterInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterInterface.h; path = ../../../master/masterInterface.h; sourceTree = SOURCE_ROOT; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
+		7374B37012F5D20600B13E6A /* gameStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameStats.cpp; path = ../../../zap/gameStats.cpp; sourceTree = SOURCE_ROOT; };
+		7374B37112F5D20600B13E6A /* gameStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameStats.h; path = ../../../zap/gameStats.h; sourceTree = SOURCE_ROOT; };
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
 		737CE3F412904D5300D732B7 /* robots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = robots; path = ../../../installer/robots; sourceTree = SOURCE_ROOT; };
@@ -1168,6 +1172,8 @@
 		73D2F27E12E2D6D800EA5EBE /* zap */ = {
 			isa = PBXGroup;
 			children = (
+				7374B37012F5D20600B13E6A /* gameStats.cpp */,
+				7374B37112F5D20600B13E6A /* gameStats.h */,
 				73D2F28112E2D7E700EA5EBE /* barrier.cpp */,
 				73D2F28212E2D7E700EA5EBE /* barrier.h */,
 				73D2F28512E2D7E700EA5EBE /* BotNavMeshZone.cpp */,
@@ -1941,6 +1947,7 @@
 				73D2F6D412E2E1D400EA5EBE /* lzio.c in Sources */,
 				73D2F6D512E2E1D400EA5EBE /* print.c in Sources */,
 				73657A0612E2E3FB00BED56F /* masterInterface.cpp in Sources */,
+				7374B37212F5D20600B13E6A /* gameStats.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2161,6 +2168,7 @@
 				73D2F6F612E2E1D400EA5EBE /* lzio.c in Sources */,
 				73D2F6F712E2E1D400EA5EBE /* print.c in Sources */,
 				73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */,
+				7374B37312F5D20600B13E6A /* gameStats.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
