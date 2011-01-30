@@ -76,7 +76,9 @@ namespace Types
          gt->name = readString(s);
          gt->score = readS32(s);
          gt->color_bin = s.readInt(24); // 24 bit color
-         gt->color = "000000";//Color(gt->color_bin).toHexString(); // TODO: fix conversion from int to float
+			char c[24];
+			dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32((gt->color_bin >> 16) & 0xFF), U32((gt->color_bin >> 8) & 0xFF), U32(gt->color_bin & 0xFF));
+         gt->color = string(c);
          //gt->gameResult = "?";
          if(!s.isValid()) return;
 

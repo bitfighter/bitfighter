@@ -882,7 +882,7 @@ GameStatistics3 GameType::getGameStats()
       for(S32 j = 0; j < mClientList.size(); j++)
       {
          // Only looking for players on the current team
-         if(mClientList[j]->getTeam() != i)  // this is not sorted... mTeams[i].getId()
+         if(mClientList[j]->getTeam() != i || (U32(mClientList[j]->getTeam()) >= U32(mTeams.size()) && i == 0) )  // this is not sorted... mTeams[i].getId()
             continue;
 
 			teamStats->playerStats.push_back(PlayerStats());
@@ -908,7 +908,7 @@ GameStatistics3 GameType::getGameStats()
 			playerStats->weaponStats.setSize(shots.size());
 			for(S32 k = 0; k < shots.size(); k++)
 			{
-				WeaponStats *weaponStats = &playerStats->weaponStats.last();
+				WeaponStats *weaponStats = &playerStats->weaponStats[k];
 				weaponStats->weaponType = WeaponType(k);
 				weaponStats->shots = shots[k];
 				weaponStats->hits = hits[k];
