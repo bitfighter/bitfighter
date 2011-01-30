@@ -876,7 +876,7 @@ GameStatistics3 GameType::getGameStats()
    for(S32 i = 0; i < mTeams.size(); i++)
 	{
 		TeamStats *teamStats = &gameStats->teamStats[i];
-		teamStats->color_bin = mTeams[i].color.toRangedU32().value;
+		teamStats->color_bin = U32(mTeams[i].color.r * 0xFF)<<16 | U32(mTeams[i].color.g * 0xFF)<<8 | U32(mTeams[i].color.b * 0xFF);
 		teamStats->name = mTeams[i].getName().getString();
 		teamStats->score = mTeams[i].getScore();
       for(S32 j = 0; j < mClientList.size(); j++)
