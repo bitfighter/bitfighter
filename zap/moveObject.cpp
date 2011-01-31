@@ -183,7 +183,8 @@ void MoveObject::move(F32 moveTime, U32 stateIndex, bool isBeingDisplaced, Vecto
       }
 
       // Collision!  Advance to the point of collision
-      mMoveState[stateIndex].pos = mMoveState[stateIndex].pos * 1.01 + mMoveState[stateIndex].vel * collisionTime - collisionPoint * 0.01;
+      // Needs to be slightly away from collisionPoint to avoid getting stuck at the edge of wall
+      mMoveState[stateIndex].pos = (mMoveState[stateIndex].pos + mMoveState[stateIndex].vel * collisionTime) * 1.01 - collisionPoint * 0.01;
 
       if(objectHit->getObjectTypeMask() & MoveableType)     // Collided with movable object
       {

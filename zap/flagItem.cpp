@@ -35,7 +35,7 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(FlagItem);
 
 // C++ constructor
-FlagItem::FlagItem(Point pos) : Item(pos, true, 20)
+FlagItem::FlagItem(Point pos) : Item(pos, true, Ship::CollisionRadius) // radius was 20
 {
    initialize();
 }

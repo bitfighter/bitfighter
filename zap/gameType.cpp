@@ -1018,29 +1018,7 @@ void GameType::saveGameStats()
 //
 //   U16 timeInSecs = U16(mTotalGamePlay / 1000);
 //
-//   /*VersionedGameStats gameStat;
-//   gameStat.gameType = getGameTypeString();
-//   gameStat.teamGame = isTeamGame();
-//   gameStat.levelName = mLevelName;
-//   gameStat.teams = teams;
-//   gameStat.teamScores = scores;
-//   gameStat.color = colors;
-//   gameStat.timeInSecs = timeInSecs;
-//   gameStat.playerNames = playerNames;
-//   gameStat.playerIDs = playerIDs;
-//   gameStat.isBot = isBot;
-//   gameStat.lastOnTeam = lastOnTeam;
-//   gameStat.playerScores = playerScores;    
-//   gameStat.playerKills = playerKills;
-//   gameStat.playerDeaths = playerDeaths;
-//   gameStat.playerSuicides = playerSuicides;
-//   gameStat.shots = shots;
-//   gameStat.hits = hits;
-//   gameStat.playerSwitchedTeamCount = playerSwitchedTeamCount;*/
-//
 //   if(masterConn)                                        // && gIniSettings.SendStatsToMaster)
-//      //masterConn->s2mSendGameStatistics_3(gameStat);
-//
 //      masterConn->s2mSendGameStatistics_3(getGameTypeString(), isTeamGame(), mLevelName, teams, scores, colors, 
 //                                          timeInSecs, playerNames, playerIDs, isBot,
 //                                          lastOnTeam, playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits);

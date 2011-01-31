@@ -470,7 +470,7 @@ void HuntersGameType::spawnShip(GameConnection *theClient)
 TNL_IMPLEMENT_NETOBJECT(HuntersFlagItem);
 
 // C++ constructor
-HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, 30, 4)
+HuntersFlagItem::HuntersFlagItem(Point pos, Point vel, bool useDropDelay) : FlagItem(pos, true, Ship::CollisionRadius, 4)  // radius was 30, which had problem with sticking to wall when drop too close to walls
 {
    mFlagCount = 0;
 
