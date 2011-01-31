@@ -108,7 +108,7 @@ QueryServersUserInterface::QueryServersUserInterface()
    columns.push_back(ColumnInfo("SERVER NAME", 3));
    columns.push_back(ColumnInfo("STAT", 400));
    columns.push_back(ColumnInfo("PING", 450));
-   columns.push_back(ColumnInfo("PLAYERS/BOTS", 490));
+   columns.push_back(ColumnInfo("PLAYERS BOTS", 490));
    columns.push_back(ColumnInfo("ADDRESS", 610));
 
    selectedId = 0xFFFFFF;
@@ -775,17 +775,22 @@ void QueryServersUserInterface::render()
          drawStringf(columns[2].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.pingTime);
 
          // Color by number of players
+			Color color;
          if(s.playerCount == s.maxPlayers)
-            glColor(red);       // max players
+            color = red;       // max players
          else if(s.playerCount == 0)
-            glColor(yellow);    // no players
+            color = yellow;    // no players
          else
-            glColor(green);     // 1 or more players
+            color = green;     // 1 or more players
 
          //if(s.playerCount < 0)      // U32 will never be < 0...
-         //   drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? / ??");
+         //   drawString(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "?? ??");
          //else
-            drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d / %d", s.playerCount, s.botCount);
+         glColor(color*0.5);    // dim color
+         drawStringf(columns[3].xStart + 30, y, SERVER_ENTRY_TEXTSIZE, "/%d", s.maxPlayers);
+         glColor(color);
+         drawStringf(columns[3].xStart, y, SERVER_ENTRY_TEXTSIZE, "%d", s.playerCount);
+         drawStringf(columns[3].xStart + 78, y, SERVER_ENTRY_TEXTSIZE, "%d", s.botCount);
          glColor(white);
          drawString(columns[4].xStart, y, SERVER_ENTRY_TEXTSIZE, s.serverAddress.toString());
       }
@@ -1175,7 +1180,7 @@ void QueryServersUserInterface::sortSelected()
       mLastSortColumn = mSortColumn;
       mSortAscending = true;
    }
-   sort();
+   sort();	
 
    selectedId = servers[currentItem].id;
 }

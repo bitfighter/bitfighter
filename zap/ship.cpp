@@ -1643,14 +1643,18 @@ void Ship::render(S32 layerIndex)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
 
-   if(hasModule(ModuleArmor))
+   if(hasModule(ModuleArmor) && alpha != 0)
    {
+      if(alpha != 1.0)
+         glEnableBlend;
       glLineWidth(gLineWidth3);
-      glColor3f(1,1,0);
+      glColor4f(1,1,0,alpha);
 
       drawPolygon(mMoveState[RenderState].pos, 5, 30, getAimVector().ATAN2());
 
       glLineWidth(gDefaultLineWidth);
+      if(alpha != 1.0)
+         glDisableBlend;
    }
 
    if(isModuleActive(ModuleRepair))
