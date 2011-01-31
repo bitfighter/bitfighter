@@ -93,6 +93,7 @@ namespace Types
    void read(TNL::BitStream &s, VersionedGameStats *val)
    {
       VersionedGameStats_read_start(s);
+
       val->valid = false;
       U8 version = readU8(s);  // Read version number.
       val->version = version;
@@ -157,7 +158,7 @@ namespace Types
       if(playerCount == g->playerCount)  // make sure server don't lie to master.
          val->valid = true;
 
-         // Stops here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched.
+      // Stops here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched.
       VersionedGameStats_read_end(s);
    }
 

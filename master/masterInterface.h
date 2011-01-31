@@ -215,7 +215,7 @@ public:
                                              Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides, 
                                              Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits) );
                                              */
-   TNL_DECLARE_RPC(s2mSendGameStatistics_3_1, (Zap::VersionedGameStats stats));
+   TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
 };
 
 

@@ -148,33 +148,30 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSendUpdgradeStatus, (bool needToUpgr
                   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1) {}
 
 
-// Send player statistics to the master server
+////////////////////////////////////
+// Statistics related
+
+// Send player statistics to the master server -- deprecated in 014
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics, 
    (StringTableEntry playerName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits),
    (playerName, kills, deaths, suicides, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
-
+// Deprecated in 015
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_2, 
    (StringTableEntry playerName, StringTableEntry teamName, U16 kills, U16 deaths, U16 suicides, Vector<U16> shots, Vector<U16> hits),
    (playerName, teamName, kills, deaths, suicides, shots, hits),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 
 
-//TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendPlayerStatistics_3, 
-//   (StringTableEntry playerName, Vector<U8> id, bool isBot, StringTableEntry teamName, S32 score, U16 kills, U16 deaths, U16 suicides, 
-//         Vector<U16> shots, Vector<U16> hits),
-//   (playerName, id, isBot, teamName, score, kills, deaths, suicides, shots, hits),
-//   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
-
-
-// Send game statistics to the master server
+// Send game statistics to the master server -- deprecated in 014
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics, (StringTableEntry gameType, StringTableEntry levelName, 
                                                                  RangedU32<0,128> players, S16 time),
    (gameType, levelName, players, time),
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 3) {}
 
 
+// Deprecated in 015
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEntry gameType, StringTableEntry levelName,
                                                                    Vector<StringTableEntry> teams, Vector<S32> teamScores,
                                                                    Vector<RangedU32<0,256> > colorR, Vector<RangedU32<0,256> > colorG, 
@@ -184,22 +181,11 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEn
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 
 
-//TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3, (StringTableEntry gameType, bool teamGame, 
-//                                                                   StringTableEntry levelName,
-//                                                                   Vector<StringTableEntry> teams, 
-//                                                                   Vector<S32> teamScores, Vector<RangedU32<0,0xFFFFFF> > color, 
-//                                                                   U16 time, Vector<StringTableEntry> playerNames, Vector<Vector<U8> > playerIDs,
-//                                                                   Vector<bool> isBot, Vector<bool> lastOnTeam, Vector<S32> playerScores, 
-//                                                                   Vector<U16> playerKills, Vector<U16> playerDeaths, Vector<U16> playerSuicides,
-//                                                                   Vector<U16> teamSwitchCount, Vector<Vector<U16> > shots, Vector<Vector<U16> > hits),
-//   (gameType, teamGame, levelName, teams, teamScores, color, time, playerNames, playerIDs, isBot, lastOnTeam, 
-//    playerScores, playerKills, playerDeaths, playerSuicides, teamSwitchCount, shots, hits),
-//   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameStats stats), (stats),
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
 
-TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_3_1, (Zap::VersionedGameStats stats), (stats),
-                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
-
-
+////////////////////////////////////
+// Authentication RPCs
 
 TNL_IMPLEMENT_RPC(MasterServerInterface, m2cSetAuthenticated, (RangedU32<0, AuthenticationStatusCount> authStatus, 
                                                                StringPtr correctedName), 

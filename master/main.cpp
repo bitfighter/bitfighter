@@ -1236,13 +1236,21 @@ public:
       }
    }
 
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendGameStatistics_3_1, (VersionedGameStats stats))
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (VersionedGameStats stats))
    {
       if(!stats.valid)
       {
          logprintf(LogConsumer::LogWarning, "Invalid stats %d %s %s", stats.version, getNetAddressString(), mPlayerOrServerName.getString());
          return;
       }
+
+
+#ifdef BF_STATS
+      bool writeToDatabase = true;
+#else
+      bool writeToDatabase = false;
+#endif
+
       GameStats *gameStats = &stats.gameStats;
 
       gameStats->serverIP = getNetAddressString();
@@ -1253,8 +1261,9 @@ public:
       processStatsResults(gameStats);
 
       DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
-                              gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());  
-      dbWriter.insertStats(*gameStats);
+                              gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+
+      dbWriter.insertStats(*gameStats, writeToDatabase);
    }
 
 

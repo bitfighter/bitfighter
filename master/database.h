@@ -65,24 +65,13 @@ private:
    Vector<ServerInformation> cachedServers;
    U64 lastGameID;
 
-#ifdef BF_STATS
    void initialize(const char *server, const char *db, const char *user, const char *password);
-#else
-   void initialize(const char *server, const char *db, const char *user, const char *password) {};
-#endif
 
 public:
-#ifdef BF_STATS
    DatabaseWriter();
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
-   void insertStats(const GameStats &gameStats);
-#else
-   DatabaseWriter() {};
-   DatabaseWriter(const char *server, const char *db, const char *user, const char *password) {};     // Constructor
-   DatabaseWriter(const char *db, const char *user, const char *password) {};                        // Constructor
-   void insertStats(const GameStats &gameStats) {};
-#endif
+   void insertStats(const GameStats &gameStats, bool writeToDatabase);
 };
 
 
