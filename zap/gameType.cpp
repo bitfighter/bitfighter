@@ -934,7 +934,7 @@ void GameType::saveGameStats()
    MasterServerConnection masterConnTest;
    VersionedGameStats_testing = true;
       // to find any errors with write/read, works without connection to master.
-   masterConnTest.s2mSendStatistics(stats);
+   masterConnTest.s2mSendStatistics_test(stats);  // Always end with _test.
    VersionedGameStats_testing = false;
 #endif
 
