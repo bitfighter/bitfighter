@@ -82,11 +82,24 @@ static string sanitize(const string &value)
 #define btos(value) (value ? "1" : "0")
 
 
+#ifndef BF_STATS
+class Query{
+};
+class SimpleResult{
+public:
+   U64 insert_id() {return 0;};
+};
+#define Exception std::exception
+#endif
+
+
 // Create wrapper function to make logging easier
 static SimpleResult runQuery(Query *query, const string &sql)      // TODO: Pass query as a Query *?
 {
 #ifdef BF_STATS
    return query->execute(sql);
+#else
+	throw std::exception("BF_STATS is not defined in compiler, can't run query");
 #endif
 }
 

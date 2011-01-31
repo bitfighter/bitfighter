@@ -633,6 +633,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\master\database.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\dataConnection.cpp"
 			>
 		</File>
