@@ -1773,7 +1773,7 @@ void setupLogging()
    gStdoutLog.setMsgTypes(events);   // writes to stdout
 
    gServerLog.init(joindir(gConfigDirs.logDir, "bitfighter_server.log"), "a");
-   gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter); 
+   gServerLog.setMsgTypes(LogConsumer::AllErrorTypes | LogConsumer::ServerFilter | LogConsumer::StatisticsFilter); 
    gStdoutLog.logprintf("Welcome to Bitfighter!");
 }
 

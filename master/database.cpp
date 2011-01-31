@@ -27,12 +27,14 @@
 #include "tnlLog.h"
 #include "../zap/stringUtils.h"            // For replaceString()
 
+#ifdef BF_STATS
 #ifdef CHRIS
 #include "../mysql++/mysql++.h"
-#elif _MSC_VER // if using visual studio
-#include "../mysql++/lib/mysql++.h"
+//#elif _MSC_VER // if using visual studio
+//#include "../mysql++/lib/mysql++.h"
 #else
 #include "mysql++.h"
+#endif
 #endif
 
 using namespace std;
@@ -67,7 +69,7 @@ void DatabaseWriter::initialize(const char *server, const char *db, const char *
    mDb = db;
    mUser = user;
    mPassword = password;
-   mIsValid = true;
+   mIsValid = db[0] != 0;
 }
 
 
@@ -83,7 +85,9 @@ static string sanitize(const string &value)
 // Create wrapper function to make logging easier
 static SimpleResult runQuery(Query *query, const string &sql)      // TODO: Pass query as a Query *?
 {
+#ifdef BF_STATS
    return query->execute(sql);
+#endif
 }
 
 
@@ -203,18 +207,13 @@ static string insertStatsServer(Query *query, const string &serverName, const st
    return serverId;
 }
 
-
-void DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabase) 
+// Return false if failed to write to database
+bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabase) 
 {
    Query *query = NULL;
 
    try
    {
-      if(!mIsValid)
-      {
-         logprintf("Invalid DatabaseWriter!");
-         return;
-      }
 
       string serverId;
 
@@ -224,6 +223,12 @@ void DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
       }
       else
       {
+#ifdef BF_STATS
+         if(!mIsValid)
+         {
+            //logprintf("Invalid DatabaseWriter!");
+            return false;
+         }
          Connection conn;                                 // Connect to the database
          SimpleResult result;
       
@@ -262,16 +267,22 @@ void DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
                cachedServers.erase(0);
 
             cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
-         }
+			}
+#else
+         return false;
+#endif
       }
 
       insertStatsGame(query, &gameStats, serverId);
+      if(query)
+         delete query;
+      return true;
    }
    catch (const Exception &ex) 
    {
       logprintf("Failure writing stats to database: %s", ex.what());
+      if(query)
+         delete query;
+      return false;
    }
-
-   if(query)
-      delete query;
 }

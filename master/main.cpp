@@ -1263,7 +1263,9 @@ public:
       DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
 
-      dbWriter.insertStats(*gameStats, writeToDatabase);
+      bool error = dbWriter.insertStats(*gameStats, writeToDatabase);
+      if(error)
+         dbWriter.insertStats(*gameStats, true);
    }
 
 

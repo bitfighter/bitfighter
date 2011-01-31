@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "gameStats.h"
+#include "../master/database.h"
 #include "gameWeapons.h"         // For WeaponType enum
 
 #include "tnlMethodDispatch.h"
@@ -40,16 +41,24 @@ namespace Zap
 {
 void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stats
    {
-   GameStats *g = &stats->gameStats;
-      for(S32 i = 0; i < g->teamStats.size(); i++)
+      if(format == 1)
       {
-         TeamStats *gt = &g->teamStats[i];
-         for(S32 j = 0; j < gt->playerStats.size(); j++)
+         DatabaseWriter dbWriter;
+         dbWriter.insertStats(stats->gameStats, true);
+      }
+      else
+      {
+         GameStats *g = &stats->gameStats;
+         for(S32 i = 0; i < g->teamStats.size(); i++)
          {
-            PlayerStats *gp = &gt->playerStats[j];
-            for(S32 k = 0; k < gp->weaponStats.size(); k++)
+            TeamStats *gt = &g->teamStats[i];
+            for(S32 j = 0; j < gt->playerStats.size(); j++)
             {
-               WeaponStats *gw = &gp->weaponStats[k];
+               PlayerStats *gp = &gt->playerStats[j];
+               for(S32 k = 0; k < gp->weaponStats.size(); k++)
+               {
+                  WeaponStats *gw = &gp->weaponStats[k];
+               }
             }
          }
       }
