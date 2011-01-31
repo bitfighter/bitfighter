@@ -120,6 +120,14 @@ extern bool VersionedGameStats_testing;
 
 namespace Types
 {
+   extern void read(TNL::BitStream &s, Zap::WeaponStats *val);
+   extern void write(TNL::BitStream &s, Zap::WeaponStats &val);
+   extern void read(TNL::BitStream &s, Zap::PlayerStats *val);
+   extern void write(TNL::BitStream &s, Zap::PlayerStats &val);
+   extern void read(TNL::BitStream &s, Zap::TeamStats *val);
+   extern void write(TNL::BitStream &s, Zap::TeamStats &val);
+   extern void read(TNL::BitStream &s, Zap::GameStats *val);
+   extern void write(TNL::BitStream &s, Zap::GameStats &val);
    extern void read(TNL::BitStream &s, Zap::VersionedGameStats *val);
    extern void write(TNL::BitStream &s, Zap::VersionedGameStats &val);
 };
