@@ -27,10 +27,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../zap/stringUtils.h"     // For replaceString()
 #include <string.h>
 #include <ctype.h>
-#ifdef SAM_ONLY
-#include "mysql++.h"
-#else
+
+#ifdef _MSC_VER  // visual studio
 #include "../mysql++/lib/mysql++.h"
+#else
+#include "mysql++.h"
 #endif
 
 using namespace mysqlpp;

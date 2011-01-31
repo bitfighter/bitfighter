@@ -29,10 +29,10 @@
 
 #ifdef CHRIS
 #include "../mysql++/mysql++.h"
-#elif SAM_ONLY
-#include "mysql++.h"
-#else
+#elif _MSC_VER // if using visual studio
 #include "../mysql++/lib/mysql++.h"
+#else
+#include "mysql++.h"
 #endif
 
 using namespace std;

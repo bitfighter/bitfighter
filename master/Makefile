@@ -8,11 +8,11 @@
 #
 
 # These flags are for use with both mysql integration and phpbb integration (both use mysql)
-MYSQLFLAGS=-I/usr/include/mysql -Imysql++ 
+MYSQLFLAGS=-I/usr/include/mysql -Imysql++ -I../mysql++
 LDFLAGS= ../mysql++/libmysqlpp.so 
 
 # If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
-CFLAGS_MYSQL=-DMYSQLPP_MYSQL_HEADERS_BURIED
+CFLAGS_STATS=-DBF_STATS -DMYSQLPP_MYSQL_HEADERS_BURIED
 CFLAGS_PHPBB=-DVERIFY_PHPBB3
 
 
@@ -22,44 +22,46 @@ OBJECTS_MASTER=\
    main.o\
    masterInterface.o\
    config.o\
+   ../zap/gameStats.o\
+   ../zap/stringUtils.o
 
-OBJECTS_MYSQL=\
+OBJECTS_STATS=\
    database.o
 
 OBJECTS_PHPBB=\
    authenticator.o\
-   phpbbhash.o\
+   phpbbhash.o
 
-.cpp.o : 
-	$(CC) $(MYSQLFLAGS) -c $(CFLAGS) $<
+.cpp.o: 
+	$(CC) $(MYSQLFLAGS) -c $(CFLAGS) -o $@ $<
 
 
-default: CFLAGS=$(CFLAGS_MYSQL) $(CFLAGS_PHPBB)
 default: master
 
 minimal: MYSQLFLAGS=
 minimal: LDFLAGS=
 minimal: CFLAGS=
-minimal: OBJECTS_MYSQL=
-minimal: OBJECTS_PHPBB=
-minimal: master
+minimal: $(OBJECTS_MASTER)
+minimal: 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+ 
 
-nomysql: CFLAGS=$(CFLAGS_PHPBB)
-nomysql: OBJECTS_MYSQL=
-nomysql: master
+nostats: CFLAGS=$(CFLAGS_PHPBB)
+nostats: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
+nostats: 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
 
-nophpbb: CFLAGS=$(CFLAGS_MYSQL)
-nophpbb: OBJECTS_PHPBB=
-nophpbb: master
 
-interface: CFLAGS=
-interface: MYSQLFLAGS=
-interface: masterInterface.o
+nophpbb: CFLAGS=$(CFLAGS_STATS)
+nophpbb: $(OBJECTS_MASTER) $(OBJECTS_STATS)
+nophpbb:
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_STATS) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS) 
 
-master: $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB)
-# For linux and Mac, uncomment the following, and comment out the Windows line below
 
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+master: CFLAGS=$(CFLAGS_STATS) $(CFLAGS_PHPBB)
+master: $(OBJECTS_MASTER) $(OBJECTS_STATS) $(OBJECTS_PHPBB)
+master: 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_STATS) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
 
 
 # For windows, uncomment out the line below, and comment out the line above
