@@ -99,7 +99,7 @@ static SimpleResult runQuery(Query *query, const string &sql)      // TODO: Pass
 #ifdef BF_STATS
    return query->execute(sql);
 #else
-	throw std::exception("BF_STATS is not defined in compiler, can't run query");
+	throw std::exception();
 #endif
 }
 

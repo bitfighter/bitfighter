@@ -342,7 +342,7 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       {
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.identityToken = clientIdentityToken;
-         if(s.state == ServerRef::SentPing);
+         if(s.state == ServerRef::SentPing)
          {
             s.state = ServerRef::ReceivedPing;
             pendingPings--;
