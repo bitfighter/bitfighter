@@ -94,6 +94,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
     <ClCompile Include="..\zap\barrier.cpp" />
     <ClCompile Include="..\zap\BotNavMeshZone.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="UIMenuItems.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
     <ClInclude Include="..\zap\barrier.h" />
     <ClInclude Include="..\zap\BotNavMeshZone.h" />
