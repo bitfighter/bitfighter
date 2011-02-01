@@ -230,10 +230,8 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
       else
          serverId = insertStatsServer(NULL, gameStats);
         
-
-#ifndef BF_WRITE_TO_MYSQL
-      success = !writeToDatabase;      // If we're trying to write to the database without BF_WRITE_TO_MYSQL set, then we've failed
-#endif
+      if(serverId == "")      // Will only happen if writeToDatabase && ! BF_WRITE_TO_MYSQL
+         return false;
 
       insertStatsGame(query, &gameStats, serverId);
 
