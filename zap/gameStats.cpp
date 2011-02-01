@@ -39,6 +39,65 @@ using namespace Zap;
 
 namespace Zap
 {
+
+// Sorts player stats by score, high to low
+S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b)
+{
+   return b->points - a->points;
+}
+
+
+// Sorts team stats by score, high to low
+S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
+{
+   return b->score - a->score;  
+}
+
+   // This relies on scores being sent sorted in order of descending score
+   string getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst)
+   {
+      if(scores == 1)      // Only one player/team, winner/loser makes no sense
+         return "X";
+      else if(score1 == score2 && currScore == score1)     // Tie -- everyone with high score gets tie
+         return "T";
+      else if(isFirst)     // No tie -- first one gets the win...
+         return "W";
+      else                 // ...and everyone else gets the loss
+         return "L";
+   }
+
+
+   void processStatsResults(GameStats *gameStats)
+   {
+      for(S32 i = 0; i < gameStats->teamStats.size(); i++)
+      {
+         Vector<PlayerStats> *playerStats = &gameStats->teamStats[i].playerStats;
+
+         // Now compute winning player(s) based on score or points; but must sort first
+         if(! gameStats->isTeamGame)
+         {
+            playerStats->sort(playerScoreSort);
+            for(S32 j = 0; j < playerStats->size(); j++)
+               (*playerStats)[j].gameResult = 
+                  getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
+         }
+      }
+      if(gameStats->isTeamGame)
+      {
+         Vector<TeamStats> *teams = &gameStats->teamStats;
+         teams->sort(teamScoreSort);
+         for(S32 i = 0; i < teams->size(); i++)
+         {
+            (*teams)[i].gameResult = 
+               getResult(teams->size(), (*teams)[0].score, teams->size() == 1 ? 0 : (*teams)[1].score, (*teams)[i].score, i == 0);
+            for(S32 j = 0; j < (*teams)[i].playerStats.size(); j++) // make all players in a team same gameResults
+               (*teams)[i].playerStats[j].gameResult = (*teams)[i].gameResult;
+         }
+      }
+   }
+
+
+
 void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stats
    {
       if(format == 1)
