@@ -231,12 +231,9 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
          serverId = insertStatsServer(NULL, gameStats);
         
       if(serverId == "")      // Will only happen if writeToDatabase && ! BF_WRITE_TO_MYSQL -- an illogical combination
-         return false;
-
-      insertStatsGame(query, &gameStats, serverId);
-
-      if(query)      
-         delete query;
+         success = false;
+      else
+         insertStatsGame(query, &gameStats, serverId);
    }
    catch (const Exception &ex) 
    {
