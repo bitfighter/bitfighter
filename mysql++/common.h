@@ -115,7 +115,7 @@
 	// even then, not if included from a MySQL++ header file, since
 	// config.h cannot be safely installed with the other headers.
 #	if defined(MYSQLPP_NOT_HEADER) && !defined(MYSQLPP_XCODE)
-//#		include "config.h"
+#		include "config.h"
 #	endif
 
 	// Make DLL stuff a no-op on this platform.
@@ -125,9 +125,7 @@
 	#define MYSQLPP_PATH_SEPARATOR '/'
 #endif
 
-#if defined(CHRIS)
-#include "mysql_version.h"
-#elif defined(MYSQLPP_MYSQL_HEADERS_BURIED)
+#if defined(MYSQLPP_MYSQL_HEADERS_BURIED)
 #	include <mysql/mysql_version.h>
 #else
 #	include <mysql_version.h>
@@ -185,9 +183,7 @@ typedef unsigned long ulong;
 // MySQL header.  Basically, the above largely replaces MySQL's my_global.h
 // while actually working with C++.  This is why we disobey the MySQL
 // developer docs, which recommend including my_global.h before mysql.h.
-#if defined(CHRIS)
-#  include "mysql.h"
-#elif defined(MYSQLPP_MYSQL_HEADERS_BURIED)
+#if defined(MYSQLPP_MYSQL_HEADERS_BURIED)
 #	include <mysql/mysql.h>
 #else
 #	include <mysql.h>

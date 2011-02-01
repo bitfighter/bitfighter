@@ -28,13 +28,7 @@
 #include "../zap/stringUtils.h"            // For replaceString()
 
 #ifdef BF_STATS
-#ifdef CHRIS
-#include "../mysql++/mysql++.h"
-//#elif _MSC_VER // if using visual studio
-//#include "../mysql++/lib/mysql++.h"
-#else
 #include "mysql++.h"
-#endif
 #endif
 
 using namespace std;

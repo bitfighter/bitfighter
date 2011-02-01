@@ -3,16 +3,13 @@
 # This makefile is for Linux 
 
 
-# 
-# Configuration
-#
+# These flags are for use with both database stats and phpbb integration (both use mysql)
+MYSQLFLAGS=-I/usr/include/mysql -I../mysql++
 
-# These flags are for use with both mysql integration and phpbb integration (both use mysql)
-MYSQLFLAGS=-I/usr/include/mysql -Imysql++ -I../mysql++
-LDFLAGS= ../mysql++/libmysqlpp.so 
+LDFLAGS=../mysql++/libmysqlpp.so 
 
 # If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
-CFLAGS_STATS=-DBF_STATS -DMYSQLPP_MYSQL_HEADERS_BURIED
+CFLAGS_DB_STATS=-DBF_STATS
 CFLAGS_PHPBB=-DVERIFY_PHPBB3
 
 
@@ -23,10 +20,10 @@ OBJECTS_MASTER=\
    masterInterface.o\
    config.o\
    ../zap/gameStats.o\
-   ../zap/stringUtils.o
-
-OBJECTS_STATS=\
+   ../zap/stringUtils.o\
    database.o
+
+OBJECTS_DB_STATS=\
 
 OBJECTS_PHPBB=\
    authenticator.o\
@@ -36,38 +33,51 @@ OBJECTS_PHPBB=\
 	$(CC) $(MYSQLFLAGS) -c $(CFLAGS) -o $@ $<
 
 
+# Compile default with all options on
+
 default: master
+
+
+# Compile without database statistics or phpbb integration
 
 minimal: MYSQLFLAGS=
 minimal: LDFLAGS=
 minimal: CFLAGS=
 minimal: $(OBJECTS_MASTER)
 minimal: 
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm
  
 
-nostats: CFLAGS=$(CFLAGS_PHPBB)
-nostats: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
-nostats: 
+# Compile with database stats off; include phpbb integration
+
+nodbstats: CFLAGS=$(CFLAGS_PHPBB)
+nodbstats: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
+nodbstats: 
+	@$(MAKE) -C ../mysql++
 	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
 
 
-nophpbb: CFLAGS=$(CFLAGS_STATS)
-nophpbb: $(OBJECTS_MASTER) $(OBJECTS_STATS)
+# Compile with no PHPBB integration; include database stats integration
+
+nophpbb: CFLAGS=$(CFLAGS_DB_STATS)
+nophpbb: $(OBJECTS_MASTER) $(OBJECTS_DB_STATS)
 nophpbb:
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_STATS) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS) 
+	@$(MAKE) -C ../mysql++
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_DB_STATS) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS) 
 
 
-master: CFLAGS=$(CFLAGS_STATS) $(CFLAGS_PHPBB)
-master: $(OBJECTS_MASTER) $(OBJECTS_STATS) $(OBJECTS_PHPBB)
+# Compile all options on (with db stats and phpbb)
+
+master: CFLAGS=$(CFLAGS_DB_STATS) $(CFLAGS_PHPBB)
+master: $(OBJECTS_MASTER) $(OBJECTS_DB_STATS) $(OBJECTS_PHPBB)
 master: 
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_STATS) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+	@$(MAKE) -C ../mysql++
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_DB_STATS) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
 
 
-# For windows, uncomment out the line below, and comment out the line above
-#   $(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_MYSQL)  $(OBJECTS_PHPBB) ../tnl/libtnl.a   ../libtomcrypt/libtomcrypt.a   C:/MinGW/lib/libwsock32.a  -lstdc++ -lm  
+# Cleaning
 
-cleano:
-	rm -f $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB)
 clean:
 	rm -f $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB) ../exe/master
+cleano:
+	rm -f $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB)

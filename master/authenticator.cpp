@@ -28,11 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <ctype.h>
 
-//#ifdef _MSC_VER  // visual studio
-//#include "../mysql++/lib/mysql++.h"
-//#else
 #include "mysql++.h"
-//#endif
 
 using namespace mysqlpp;
 using namespace std;
