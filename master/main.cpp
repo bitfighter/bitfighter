@@ -1182,6 +1182,7 @@ public:
       }
    }
 
+
    TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (VersionedGameStats stats))
    {
       if(!stats.valid)

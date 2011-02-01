@@ -39,8 +39,6 @@
 using namespace TNL;
 using namespace std;
 
-extern string lcase(string strToConvert);
-
 extern U32 gMasterPort;
 extern string gMasterName;
 extern string gJasonOutFile;
@@ -155,7 +153,7 @@ void processConfigLine(int argc, string argv[])
       gStatsDatabasePassword = argv[1];
 
    else if(argv[0] == "write_stats_to_database" && argc > 1)
-      gWriteStatsToDatabase = (lcase(argv[1]) == "Yes");
+      gWriteStatsToDatabase = (Zap::lcase(argv[1]) == "Yes");
 }
 
 enum {
