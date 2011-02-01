@@ -863,6 +863,7 @@ VersionedGameStats GameType::getGameStats()
    VersionedGameStats stats;
    GameStats *gameStats = &stats.gameStats;
 
+   gameStats->serverName = gServerGame->getHostName(); // not sent, used for logging stats
 
    gameStats->isOfficial = false;
    gameStats->playerCount = 0; //mClientList.size(); ... will count number of players.
@@ -878,7 +879,12 @@ VersionedGameStats GameType::getGameStats()
    for(S32 i = 0; i < mTeams.size(); i++)
    {
       TeamStats *teamStats = &gameStats->teamStats[i];
-      teamStats->color_bin = U32(mTeams[i].color.r * 0xFF)<<16 | U32(mTeams[i].color.g * 0xFF)<<8 | U32(mTeams[i].color.b * 0xFF);
+
+      teamStats->color_bin = U32(mTeams[i].color.r * 0xF)<<16 | U32(mTeams[i].color.g * 0xFF)<<8 | U32(mTeams[i].color.b * 0xFF);
+      char c[24];
+      dSprintf(c, sizeof(c), "%.6X", teamStats->color_bin);
+      teamStats->color = string(c);
+
       teamStats->name = mTeams[i].getName().getString();
       teamStats->score = mTeams[i].getScore();
       for(S32 j = 0; j < mClientList.size(); j++)
@@ -940,6 +946,8 @@ void GameType::saveGameStats()
 
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
+	if(gIniSettings.LogStats != 0)
+      logGameStats(&stats, gIniSettings.LogStats);
 }
 
 

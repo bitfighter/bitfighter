@@ -100,10 +100,11 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
 
 void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stats
    {
+      processStatsResults(&stats->gameStats);
       if(format == 1)
       {
          DatabaseWriter dbWriter;
-         dbWriter.insertStats(stats->gameStats, true);
+         dbWriter.insertStats(stats->gameStats, false);
       }
       else
       {
@@ -155,6 +156,7 @@ namespace Types
    string readString(TNL::BitStream &s) { char val[256]; s.readString(val); return val; }
    void writeString(TNL::BitStream &s, const string &val) { s.writeString(val.c_str()); }
 
+   U8 VersionedGameStats_readingVersion;
 
    void read(TNL::BitStream &s, Zap::WeaponStats *val)
 	{
@@ -204,7 +206,7 @@ namespace Types
       val->name = readString(s);
       val->score = readS32(s);
       val->color_bin = s.readInt(24); // 24 bit color
-         char c[24];
+      char c[24];
       dSprintf(c, sizeof(c), "%.6X", val->color_bin);
       val->color = string(c);
          //gt->gameResult = "?";
@@ -247,10 +249,10 @@ namespace Types
 
    /// Reads objects from a BitStream.
    void read(TNL::BitStream &s, VersionedGameStats *val)
-            {
+   {
       VersionedGameStats_read_start(s);
-      U8 version = readU8(s);  // Read version number.
-      val->version = version;
+      U8 VersionedGameStats_readingVersion = readU8(s);  // Read version number.
+      val->version = VersionedGameStats_readingVersion;
       read(s, &val->gameStats); // This is not Vector, goes directly to read(s, Zap::GameStats *val)
 
       // Stops here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched.

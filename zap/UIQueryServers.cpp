@@ -341,9 +341,12 @@ void QueryServersUserInterface::gotPingResponse(const Address &theAddress, const
       if(s.sendNonce == theNonce && s.serverAddress == theAddress && s.state == ServerRef::SentPing)
       {
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
-         s.state = ServerRef::ReceivedPing;
          s.identityToken = clientIdentityToken;
-         pendingPings--;
+         if(s.state == ServerRef::SentPing);
+         {
+            s.state = ServerRef::ReceivedPing;
+            pendingPings--;
+         }
          break;
       }
    }
@@ -371,10 +374,13 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
          s.serverName = string(serverName).substr(0, MaxServerNameLen);
          s.serverDescr = string(serverDescr).substr(0, MaxServerDescrLen);
          s.msgColor = yellow;   // yellow server details
-         s.state = ServerRef::ReceivedQuery;
          s.pingTime = Platform::getRealMilliseconds() - s.lastSendTime;
          s.lastSendTime = Platform::getRealMilliseconds();     // Record time our last query was recieved, so we'll know when to send again
-         pendingQueries--;
+         if(s.state == ServerRef::SentQuery)
+         {
+            s.state = ServerRef::ReceivedQuery;
+            pendingQueries--;
+         }
       }
    }
    mShouldSort = true;
@@ -466,7 +472,7 @@ void QueryServersUserInterface::idle(U32 timeDelta)
                s.serverDescr = "No information: Server not responding to status query";
                s.msgColor = red;   // red for errors
                s.playerCount = s.maxPlayers = s.botCount = 0;
-               s.state = ServerRef::ReceivedQuery;
+               s.state = ServerRef::Start;//ReceivedQuery;
                mShouldSort = true;
 
             }

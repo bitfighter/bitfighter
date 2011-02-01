@@ -106,6 +106,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          }
          break;
       case PingResponse:
+         if(!mGame->isServer())
          {
             Nonce theNonce;
             U32 clientIdentityToken;
@@ -115,6 +116,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          }
          break;
       case Query:
+         if(mGame->isServer())
          {
             Nonce theNonce;
             U32 clientIdentityToken;
@@ -141,6 +143,7 @@ void GameNetInterface::handleInfoPacket(const Address &remoteAddress, U8 packetT
          }
          break;
       case QueryResponse:
+         if(!mGame->isServer())
          {
             Nonce theNonce;
             StringTableEntry name;

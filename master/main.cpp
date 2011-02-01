@@ -1210,7 +1210,7 @@ public:
 
       bool error = dbWriter.insertStats(*gameStats, writeToDatabase);
       if(error)
-         dbWriter.insertStats(*gameStats, true);
+         dbWriter.insertStats(*gameStats, false);
    }
 
 
