@@ -387,7 +387,7 @@ bool calcInterceptCourse(GameObject *target, Point aimPos, F32 aimRadius, S32 ai
       Ship *potential = (Ship*)target;
 
       // Is it dead or cloaked?  If so, ignore
-      if((potential->isModuleActive(ModuleCloak) && !potential->areItemsMounted()) || potential->hasExploded)
+      if((potential->isModuleActive(ModuleCloak) && !potential->isItemMountedThatWouldMakeYouVisibleWhileCloaked()) || potential->hasExploded)
          return false;
    }
 
@@ -849,7 +849,7 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
             continue;
 
          // Ignore ship/robot if it's dead or cloaked
-         if((ship->isModuleActive(ModuleCloak) && !ship->areItemsMounted()) || ship->hasExploded)
+         if((ship->isModuleActive(ModuleCloak) && !ship->isItemMountedThatWouldMakeYouVisibleWhileCloaked()) || ship->hasExploded)
             continue;
          }
       }

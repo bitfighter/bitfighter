@@ -69,7 +69,6 @@ public:
    //bool isTeamFlagGame() { return true; }   // Ditto... team info will be ignored... no need to show warning in editor
 
    bool isSpawnWithLoadoutGame() { return true; }
-   bool getMountedObjectsMakesShipsVisible() { return false; }    // Can carry items stealthily in this game
 
    void shipTouchFlag(Ship *ship, FlagItem *flag);
 
@@ -138,6 +137,8 @@ public:
    void renderItem(Point pos);
    void onMountDestroyed();
    void onItemDropped();
+
+   bool isItemThatMakesYouVisibleWhileCloaked() { return false; }
 
    void changeFlagCount(U32 change) { mFlagCount = change; setMaskBits(FlagCountMask); }
    U32 getFlagCount() { return mFlagCount; }

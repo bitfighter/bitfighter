@@ -90,6 +90,8 @@ public:
    void setPositionMask() { setMaskBits(PositionMask); }
 
    bool isMounted() { return mIsMounted; }
+   virtual bool isItemThatMakesYouVisibleWhileCloaked() { return true; }      // HuntersFlagItem overrides to false
+
    void setZone(GoalZone *theZone);
    GoalZone *getZone() { return mZone; }
    bool isInZone() { return mZone == NULL; }

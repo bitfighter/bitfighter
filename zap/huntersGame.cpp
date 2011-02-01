@@ -140,7 +140,7 @@ bool HuntersGameType::isCarryingItems(Ship *ship)
 
 // Cycle through mounted items and find the first one (last one, actually) that's a HuntersFlagItem.
 // Returns NULL if it can't find one.
-HuntersFlagItem *findFirstNexusFlag(Ship *ship)
+static HuntersFlagItem *findFirstNexusFlag(Ship *ship)
 {
    HuntersFlagItem *theFlag = NULL;
 

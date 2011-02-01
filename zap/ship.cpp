@@ -1135,6 +1135,22 @@ static F32 getAngleDiff(F32 a, F32 b)
 }
 
 
+bool Ship::isItemMounted() 
+{ 
+   return mMountedItems.size() != 0; 
+}
+
+
+bool Ship::isItemMountedThatWouldMakeYouVisibleWhileCloaked() 
+{
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid() && mMountedItems[i]->isItemThatMakesYouVisibleWhileCloaked())
+         return true;
+
+   return false;
+}
+
+
 // Returns index of first flag mounted on ship, or NO_FLAG if there aren't any
 S32 Ship::carryingFlag()
 {
