@@ -29,6 +29,7 @@
 
 
 #include "../zap/SharedConstants.h"
+#include "../zap/stringUtils.h"
 
 #include "tnl.h"
 #include "tnlLog.h"
@@ -37,6 +38,8 @@
 
 using namespace TNL;
 using namespace std;
+
+extern string lcase(string strToConvert);
 
 extern U32 gMasterPort;
 extern string gMasterName;
@@ -51,6 +54,7 @@ extern string gDbPassword;
 extern string gPhpbb3Database;
 extern string gPhpbb3TablePrefix;
 
+extern bool gWriteStatsToDatabase;
 extern string gStatsDatabaseAddress;
 extern string gStatsDatabaseName;
 extern string gStatsDatabaseUsername;
@@ -149,6 +153,9 @@ void processConfigLine(int argc, string argv[])
 
    else if(argv[0] == "stats_database_password" && argc > 1)
       gStatsDatabasePassword = argv[1];
+
+   else if(argv[0] == "write_stats_to_database" && argc > 1)
+      gWriteStatsToDatabase = (lcase(argv[1]) == "Yes");
 }
 
 enum {
