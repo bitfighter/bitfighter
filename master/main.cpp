@@ -1623,8 +1623,8 @@ int main(int argc, const char **argv)
    gFileLogConsumer.logprintf("[%s] Master Server %s started - listening on port %d", getTimeStamp().c_str(), gMasterName.c_str(), gMasterPort);
    gStdoutLogConsumer.logprintf("Master Server %s started - listening on port %d", gMasterName.c_str(), gMasterPort);
 
-   const S32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
-   const S32 REREAD_TIME = 5000;         // How often to we re-read our config file? (in ms)
+   const U32 REWRITE_TIME = 5000;        // Rewrite status file at most this often (in ms)
+   const U32 REREAD_TIME = 5000;         // How often to we re-read our config file? (in ms)
 
    U32 lastConfigReadTime = Platform::getRealMilliseconds();
    U32 lastWroteStatusTime = lastConfigReadTime - REWRITE_TIME;    // So we can do a write right off the bat
