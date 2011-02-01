@@ -984,7 +984,7 @@ void Turret::idle(IdleCallPath path)
 
          // Is it dead or cloaked?  Carrying objects makes ship visible, except in nexus game
          TNLAssert(gServerGame->getGameType(), "Bad GameType!");
-         if((potential->isModuleActive(ModuleCloak) && !(potential->isItemMountedThatWouldMakeYouVisibleWhileCloaked())) || potential->hasExploded)
+         if(!potential->isVisible() || potential->hasExploded)
             continue;
       }
 

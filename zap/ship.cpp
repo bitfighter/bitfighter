@@ -1141,8 +1141,11 @@ bool Ship::isItemMounted()
 }
 
 
-bool Ship::isItemMountedThatWouldMakeYouVisibleWhileCloaked() 
+bool Ship::isVisible() 
 {
+   if(!isModuleActive(ModuleCloak))
+      return true;
+
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid() && mMountedItems[i]->isItemThatMakesYouVisibleWhileCloaked())
          return true;
