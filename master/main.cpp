@@ -1199,12 +1199,13 @@ public:
       processIsAuthenticated(gameStats);
       processStatsResults(gameStats);
 
-      DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
-                              gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+      DatabaseWriter databaseWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
+                                    gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
 
-      bool error = dbWriter.insertStats(*gameStats, gWriteStatsToDatabase);
+      bool error = databaseWriter.insertStats(*gameStats, gWriteStatsToDatabase);
+
       if(error)
-         dbWriter.insertStats(*gameStats, false);
+         databaseWriter.insertStats(*gameStats, false);
    }
 
 
