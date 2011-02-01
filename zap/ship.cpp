@@ -1647,9 +1647,16 @@ void Ship::render(S32 layerIndex)
    if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
       renderAimVector();
 
-
    // Now render some "addons"  --> should these be in renderShip?
-   glColor3f(1,1,1);
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid())
+         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
+
+   if(alpha == 0) return;  // don't draw when completely transparent
+   if(alpha != 1.0)
+      glEnableBlend;
+
+   glColor4f(1,1,1,alpha);
    if(isModuleActive(ModuleSensor))
    {
       U32 delta = getGame()->getCurrentTime() - mSensorStartTime;
@@ -1658,28 +1665,20 @@ void Ship::render(S32 layerIndex)
    }
    glPopMatrix();
 
-   for(S32 i = 0; i < mMountedItems.size(); i++)
-      if(mMountedItems[i].isValid())
-         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
-
-   if(hasModule(ModuleArmor) && alpha != 0)
+   if(hasModule(ModuleArmor))
    {
-      if(alpha != 1.0)
-         glEnableBlend;
       glLineWidth(gLineWidth3);
       glColor4f(1,1,0,alpha);
 
       drawPolygon(mMoveState[RenderState].pos, 5, 30, getAimVector().ATAN2());
 
       glLineWidth(gDefaultLineWidth);
-      if(alpha != 1.0)
-         glDisableBlend;
    }
 
    if(isModuleActive(ModuleRepair))
    {
       glLineWidth(gLineWidth3);
-      glColor3f(1,0,0);
+      glColor4f(1,0,0,alpha);
       // render repair rays to all the repairing objects
       Point pos = mMoveState[RenderState].pos;
 
@@ -1699,6 +1698,8 @@ void Ship::render(S32 layerIndex)
       }
       glLineWidth(gDefaultLineWidth);
    }
+   if(alpha != 1.0)
+      glDisableBlend;
 }
 
 S32 LuaShip::id = 99;
