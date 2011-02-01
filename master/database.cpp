@@ -27,7 +27,7 @@
 #include "tnlLog.h"
 #include "../zap/stringUtils.h"            // For replaceString()
 
-#ifdef BF_STATS
+#ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
 #endif
 
@@ -76,7 +76,7 @@ static string sanitize(const string &value)
 #define btos(value) (value ? "1" : "0")
 
 
-#ifndef BF_STATS
+#ifndef BF_WRITE_TO_MYSQL
 class Query{
 };
 class SimpleResult{
@@ -90,7 +90,7 @@ public:
 // Create wrapper function to make logging easier
 static SimpleResult runQuery(Query *query, const string &sql)      // TODO: Pass query as a Query *?
 {
-#ifdef BF_STATS
+#ifdef BF_WRITE_TO_MYSQL
    return query->execute(sql);
 #else
 	throw std::exception();
@@ -196,10 +196,10 @@ static string insertStatsGame(Query *query, const GameStats *gameStats, const st
 }
 
 
-static string insertStatsServer(Query *query, const string &serverName, const string &serverIP)
+static string insertStatsServer(Query *query, const GameStats &gameStats)
 {
    string sql = "INSERT INTO server(server_name, ip_address) "
-                "VALUES('" + sanitize(serverName) + "', '" + serverIP + "');";
+                "VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
 
    string serverId;
 
@@ -214,82 +214,103 @@ static string insertStatsServer(Query *query, const string &serverName, const st
    return serverId;
 }
 
+
 // Return false if failed to write to database
 bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabase) 
 {
    Query *query = NULL;
+   bool success = true;
 
    try
    {
-
       string serverId;
 
-      if(!writeToDatabase)
-      {
-         serverId = insertStatsServer(NULL, gameStats.serverName, gameStats.serverIP);
-      }
+      if(writeToDatabase)
+         serverId = insertStatsServerWithCache();     // calls insertStatsServer
       else
-      {
-#ifdef BF_STATS
-         if(!mIsValid)
-         {
-            //logprintf("Invalid DatabaseWriter!");
-            return false;
-         }
-         Connection conn;                                 // Connect to the database
-         SimpleResult result;
-      
-         conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
-      
-         query = new Query(&conn);
+         serverId = insertStatsServer(NULL, gameStats);
+        
 
-         U64 serverId_int = U64_MAX;
-
-         // Check cache first
-         for(S32 i = cachedServers.size() - 1; i >= 0; i--)
-            if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
-            {
-               serverId_int = cachedServers[i].id;
-               break;
-            }
-
-         if(serverId_int == U64_MAX)  // Not in cache
-         {
-            // Find server in database
-            string sql = "SELECT server_id FROM server AS server "
-                           "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
-            StoreQueryResult results = query->store(sql.c_str(), sql.length());
-
-            if(results.num_rows() >= 1)
-               serverId_int = results[0][0];
-
-            if(serverId_int == U64_MAX)      // Not in database
-               serverId = insertStatsServer(query, gameStats.serverName, gameStats.serverIP);
-            else
-               serverId = itos(serverId_int);
-
-            // Limit cache growth
-            static const S32 SERVER_CACHE_SIZE = 20;
-            if(cachedServers.size() > SERVER_CACHE_SIZE) 
-               cachedServers.erase(0);
-
-            cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
-			}
-#else
-         return false;
+#ifndef BF_WRITE_TO_MYSQL
+      success = !writeToDatabase;      // If we're trying to write to the database without BF_WRITE_TO_MYSQL set, then we've failed
 #endif
-      }
 
       insertStatsGame(query, &gameStats, serverId);
-      if(query)
+
+      if(query)      
          delete query;
-      return true;
    }
    catch (const Exception &ex) 
    {
       logprintf("Failure writing stats to database: %s", ex.what());
-      if(query)
-         delete query;
+      success = false;
+   }
+
+   if(query)
+      delete query;
+
+   return success;
+
+}
+
+
+#ifdef BF_WRITE_TO_MYSQL
+
+string DatabaseWriter::insertStatsServerWithCache()
+{
+   if(!mIsValid)
+   {
+      //logprintf("Invalid DatabaseWriter!");
       return false;
    }
+   Connection conn;                                 // Connect to the database
+   SimpleResult result;
+      
+   conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
+      
+   query = new Query(&conn);
+
+   U64 serverId_int = U64_MAX;
+
+   // Check cache first
+   for(S32 i = cachedServers.size() - 1; i >= 0; i--)
+      if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
+      {
+         serverId_int = cachedServers[i].id;
+         break;
+      }
+
+   if(serverId_int == U64_MAX)  // Not in cache
+   {
+      // Find server in database
+      string sql = "SELECT server_id FROM server AS server "
+                     "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
+      StoreQueryResult results = query->store(sql.c_str(), sql.length());
+
+      if(results.num_rows() >= 1)
+         serverId_int = results[0][0];
+
+      if(serverId_int == U64_MAX)      // Not in database
+         serverId = insertStatsServer(query, gameStats);
+      else
+         serverId = itos(serverId_int);
+
+      // Limit cache growth
+      static const S32 SERVER_CACHE_SIZE = 20;
+      if(cachedServers.size() > SERVER_CACHE_SIZE) 
+         cachedServers.erase(0);
+
+      cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
+
+      return serverId;
+	}
 }
+
+#else
+
+string DatabaseWriter::insertStatsServerWithCache()
+{
+   return "";
+}
+
+#endif

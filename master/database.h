@@ -72,6 +72,7 @@ public:
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
    bool insertStats(const GameStats &gameStats, bool writeToDatabase);
+   string insertStatsServerWithCache();
 };
 
 

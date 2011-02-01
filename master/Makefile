@@ -9,7 +9,7 @@ MYSQLFLAGS=-I/usr/include/mysql -I../mysql++
 LDFLAGS=../mysql++/libmysqlpp.so 
 
 # If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
-CFLAGS_DB_STATS=-DBF_STATS
+CFLAGS_DB_STATS=-DBF_WRITE_TO_MYSQL
 CFLAGS_PHPBB=-DVERIFY_PHPBB3
 
 

@@ -73,6 +73,7 @@ string gStatsDatabaseAddress;
 string gStatsDatabaseName;
 string gStatsDatabaseUsername;
 string gStatsDatabasePassword;
+bool gWriteStatsToDatabase;      // True to write stats to db, false to stats file
 
 //DatabaseWriter *databaseWriter;
 
@@ -1189,13 +1190,6 @@ public:
          return;
       }
 
-
-#ifdef BF_STATS
-      bool writeToDatabase = true;
-#else
-      bool writeToDatabase = false;
-#endif
-
       GameStats *gameStats = &stats.gameStats;
 
       gameStats->serverIP = getNetAddressString();
@@ -1208,7 +1202,7 @@ public:
       DatabaseWriter dbWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
                               gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
 
-      bool error = dbWriter.insertStats(*gameStats, writeToDatabase);
+      bool error = dbWriter.insertStats(*gameStats, gWriteStatsToDatabase);
       if(error)
          dbWriter.insertStats(*gameStats, false);
    }

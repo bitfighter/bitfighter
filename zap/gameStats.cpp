@@ -97,16 +97,18 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
    }
 
 
-
-void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stats
+   void logGameStats(VersionedGameStats *stats, S32 format) 
    {
       processStatsResults(&stats->gameStats);
+
       if(format == 1)
       {
          DatabaseWriter dbWriter;
          dbWriter.insertStats(stats->gameStats, false);
       }
-      else
+
+      // Block does nothing... delete!
+      /*else
       {
          GameStats *g = &stats->gameStats;
          for(S32 i = 0; i < g->teamStats.size(); i++)
@@ -121,7 +123,7 @@ void logGameStats(VersionedGameStats *stats, S32 format)  // TODO: log game stat
                }
             }
          }
-      }
+      }*/
    }
 }
 
