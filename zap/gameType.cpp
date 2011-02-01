@@ -1019,7 +1019,7 @@ void GameType::onGameOver()
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+                            NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mBetweenLevels = gameOver;
    mGameOver = gameOver;
@@ -1027,7 +1027,7 @@ TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cSetGameOver, (bool gameOver), (gameOver
 
 
 TNL_IMPLEMENT_NETOBJECT_RPC(GameType, s2cCanSwitchTeams, (bool allowed), (allowed),
-   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
+                            NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
    mCanSwitchTeams = allowed;
 }

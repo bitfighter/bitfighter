@@ -160,18 +160,23 @@ namespace Types
 
    U8 VersionedGameStats_readingVersion;
 
+
    void read(TNL::BitStream &s, Zap::WeaponStats *val)
 	{
       val->weaponType = WeaponType(readU8(s));
       val->shots = readU16(s);
       val->hits = readU16(s);
 	}
+
+
    void write(TNL::BitStream &s, Zap::WeaponStats &val)
 	{
       write(s, U8(val.weaponType));
       write(s, U16(val.shots));
       write(s, U16(val.hits));
 	}
+
+
    void read(TNL::BitStream &s, Zap::PlayerStats *val)
 	{
       val->name = readString(s);
@@ -188,6 +193,8 @@ namespace Types
       val->nonce.read(&s);
 		read(s, &val->weaponStats);
 	}
+
+
    void write(TNL::BitStream &s, Zap::PlayerStats &val)
    {
       writeString(s, val.name);
@@ -203,8 +210,10 @@ namespace Types
 
       write(s, val.weaponStats);
 	}
+
+
    void read(TNL::BitStream &s, Zap::TeamStats *val)
-      {
+   {
       val->name = readString(s);
       val->score = readS32(s);
       val->color_bin = s.readInt(24); // 24 bit color
@@ -215,6 +224,8 @@ namespace Types
 
 		read(s, &val->playerStats);
 	}
+
+
    void write(TNL::BitStream &s, Zap::TeamStats &val)
          {
       writeString(s, val.name);
@@ -222,17 +233,18 @@ namespace Types
       s.writeInt(val.color_bin,24); // 24 bit color
       write(s, val.playerStats);
 	}
+
+
    void read(TNL::BitStream &s, Zap::GameStats *val)
 	{
       val->isOfficial = s.readFlag();
       val->playerCount = readU16(s);
-      val->duration = readU16(s);     // game length in seconds
+      val->duration = readU16(s);             // game length in seconds
       val->isTeamGame = s.readFlag();
-      //g->isTied = s.readFlag();
       val->gameType = readString(s);
       val->levelName = readString(s);
       read(s, &val->teamStats);
-      val->teamCount = val->teamStats.size(); // is this needed?
+      val->teamCount = val->teamStats.size(); // is this needed?  ==> probably not (CE)
 
 	}
    void write(TNL::BitStream &s, Zap::GameStats &val)
@@ -247,17 +259,14 @@ namespace Types
 	}
 
 	
-	const U8 VersionedGameStats_CurrentVersion = 0;
-
-   /// Reads objects from a BitStream.
+   /// Reads objects from a BitStream
    void read(TNL::BitStream &s, VersionedGameStats *val)
    {
       VersionedGameStats_read_start(s);
-      U8 VersionedGameStats_readingVersion = readU8(s);  // Read version number.
-      val->version = VersionedGameStats_readingVersion;
-      read(s, &val->gameStats); // This is not Vector, goes directly to read(s, Zap::GameStats *val)
+      val->version = readU8(s);  // Read version number
+      read(s, &val->gameStats);  // This is not Vector, goes directly to read(s, Zap::GameStats *val)
 
-      // Stops here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched.
+      // Stop here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched
       VersionedGameStats_read_end(s);
       val->valid = true;
    }
@@ -267,12 +276,13 @@ namespace Types
    void write(TNL::BitStream &s, VersionedGameStats &val)
    {
       VersionedGameStats_write_start(s);
-      write(s, U8(VersionedGameStats_CurrentVersion));       // send current version
+      write(s, U8(val.CURRENT_VERSION));       // Send current version
       write(s, val.gameStats);
 
-      // write(number) write 32 bit when number is S32
-      // write(number) write 8 bit when number is U8
-      // write(U16(number)) always write 16 bit when number is U8, S32, or any type.
+      // To clarify what this does...
+      // write(number) writes 32 bit int when number is S32
+      // write(number) writes 8 bit int when number is U8
+      // write(U16(number)) always writes 16 bit when number is U8, S32, or any other type
 
 
       VersionedGameStats_write_end(s);

@@ -33,7 +33,6 @@
 #include "tnlBitStream.h"
 #include "tnlNetStringTable.h"
 #include "tnlNonce.h"
-//#include "tnlString.h"
 
 using namespace std;
 using namespace TNL;
@@ -101,17 +100,19 @@ struct GameStats
 
 struct VersionedGameStats
 {
+   static const U8 CURRENT_VERSION = 0;
+
    U8 version;
    bool valid;
    GameStats gameStats;
 };
+
 
 extern string getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool isFirst);
 extern S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b);
 extern S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b);
 extern void processStatsResults(GameStats *gameStats);
 extern void logGameStats(VersionedGameStats *stats, S32 format = 1);
-
 
 };    // end namespace Zap
 
