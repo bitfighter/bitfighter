@@ -1101,7 +1101,7 @@ void HostMenuUserInterface::setupMenus()
 
    menuItems.push_back(new YesNoMenuItem("ALLOW MAP DOWNLOADS", gIniSettings.allowGetMap, NULL, "", KEY_M));
 
-   menuItems.push_back(new CounterMenuItem("MAXIMUM PLAYERS:",   gIniSettings.maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
+   //menuItems.push_back(new CounterMenuItem("MAXIMUM PLAYERS:",   gIniSettings.maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
    //menuItems.push_back(new EditableMenuItem("PORT:",                  "28000",              "Use default of 28000", 
    //                                         "", 10, KEY_P));
 }
@@ -1125,7 +1125,7 @@ void HostMenuUserInterface::saveSettings()
    gAdminPassword       = gIniSettings.adminPassword       = menuItems[OPT_ADMIN_PASS]->getValueForWritingToLevelFile();    
    gServerPassword      = gIniSettings.serverPassword      = menuItems[OPT_PASS]->getValueForWritingToLevelFile();
    gIniSettings.allowGetMap                                = menuItems[OPT_GETMAP]->getValueForWritingToLevelFile() == "yes";
-   gIniSettings.maxplayers                                 = menuItems[OPT_MAX_PLAYERS]->getIntValue();
+   //gIniSettings.maxplayers                                 = menuItems[OPT_MAX_PLAYERS]->getIntValue();
 
    saveSettingsToINI();
 }
