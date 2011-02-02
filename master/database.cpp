@@ -76,13 +76,16 @@ static string sanitize(const string &value)
 #define btos(value) (value ? "1" : "0")
 
 
-#ifndef BF_WRITE_TO_MYSQL
-class Query{
+#ifndef BF_WRITE_TO_MYSQL     // Stats not going to mySQL
+class Query {
+   // Empty class
 };
+
 class SimpleResult{
 public:
-   U64 insert_id() {return 0;};
+   U64 insert_id() { return 0; }
 };
+
 #define Exception std::exception
 #endif
 
@@ -223,16 +226,64 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
 
    try
    {
+      if(writeToDatabase && !mIsValid)
+      {
+         //logprintf("Invalid DatabaseWriter!");
+         return false;
+      }
+
       string serverId;
 
+#ifdef BF_WRITE_TO_MYSQL
+      Connection conn;                                 // Connect to the database
+      SimpleResult result;
+      
+      conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
+      
+      query = new Query(&conn);
+
+      U64 serverId_int = U64_MAX;
+
+      // Check cache first
+      for(S32 i = cachedServers.size() - 1; i >= 0; i--)
+         if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
+         {
+            serverId_int = cachedServers[i].id;
+            break;
+         }
+
       if(writeToDatabase)
-         serverId = insertStatsServerWithCache();     // calls insertStatsServer
+      {
+         if(serverId_int == U64_MAX)  // Not in cache
+         {
+            // Find server in database
+            string sql = "SELECT server_id FROM server AS server "
+                           "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
+            StoreQueryResult results = query->store(sql.c_str(), sql.length());
+
+            if(results.num_rows() >= 1)
+               serverId_int = results[0][0];
+
+            if(serverId_int == U64_MAX)      // Not in database
+               serverId = insertStatsServer(query, gameStats);
+            else
+               serverId = itos(serverId_int);
+
+            // Limit cache growth
+            static const S32 SERVER_CACHE_SIZE = 20;
+            if(cachedServers.size() > SERVER_CACHE_SIZE) 
+               cachedServers.erase(0);
+
+            cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
+	      }
+      }
       else
+#endif
          serverId = insertStatsServer(NULL, gameStats);
         
-      if(serverId == "")      // Will only happen if writeToDatabase && ! BF_WRITE_TO_MYSQL -- an illogical combination
-         success = false;
-      else
+      //if(serverId == "")      // Not sure this can ever happen...
+      //   success = false;
+      //else
          insertStatsGame(query, &gameStats, serverId);
    }
    catch (const Exception &ex) 
@@ -247,64 +298,3 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
    return success;
 }
 
-
-#ifdef BF_WRITE_TO_MYSQL
-
-string DatabaseWriter::insertStatsServerWithCache()
-{
-   if(!mIsValid)
-   {
-      //logprintf("Invalid DatabaseWriter!");
-      return false;
-   }
-   Connection conn;                                 // Connect to the database
-   SimpleResult result;
-      
-   conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
-      
-   query = new Query(&conn);
-
-   U64 serverId_int = U64_MAX;
-
-   // Check cache first
-   for(S32 i = cachedServers.size() - 1; i >= 0; i--)
-      if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
-      {
-         serverId_int = cachedServers[i].id;
-         break;
-      }
-
-   if(serverId_int == U64_MAX)  // Not in cache
-   {
-      // Find server in database
-      string sql = "SELECT server_id FROM server AS server "
-                     "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
-      StoreQueryResult results = query->store(sql.c_str(), sql.length());
-
-      if(results.num_rows() >= 1)
-         serverId_int = results[0][0];
-
-      if(serverId_int == U64_MAX)      // Not in database
-         serverId = insertStatsServer(query, gameStats);
-      else
-         serverId = itos(serverId_int);
-
-      // Limit cache growth
-      static const S32 SERVER_CACHE_SIZE = 20;
-      if(cachedServers.size() > SERVER_CACHE_SIZE) 
-         cachedServers.erase(0);
-
-      cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
-
-      return serverId;
-	}
-}
-
-#else
-
-string DatabaseWriter::insertStatsServerWithCache()
-{
-   return "";
-}
-
-#endif

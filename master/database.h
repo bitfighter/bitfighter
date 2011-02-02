@@ -32,6 +32,10 @@
 #include "tnlVector.h"
 #include "tnlNonce.h"
 
+#ifdef BF_WRITE_TO_MYSQL
+#include "mysql++.h"
+#endif
+
 #include <string>
 
 // Forward declaration
@@ -41,8 +45,9 @@ namespace mysqlpp
 };
 
 using namespace TNL;
-using namespace std;
 using namespace Zap;
+using namespace mysqlpp;
+using namespace std;
 
 
 struct ServerInformation
@@ -72,7 +77,6 @@ public:
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
    bool insertStats(const GameStats &gameStats, bool writeToDatabase);
-   string insertStatsServerWithCache();
 };
 
 

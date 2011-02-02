@@ -50,7 +50,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\mysql++</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CHRIS;VERIFY_PHPBB3</PreprocessorDefinitions>
     </ClCompile>
