@@ -822,7 +822,7 @@ void GameConnection::sRequestLoadout(Vector<U32> &loadout)
       ship->setLoadout(loadout);
 }
 
-static Color colors[] =
+Color colors[] =
 {
    Color(1,1,1),           // ColorWhite
    Color(1,0,0),           // ColorRed    ==> also used for chat commands
