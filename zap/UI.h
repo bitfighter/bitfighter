@@ -39,6 +39,10 @@
 
 #include <string>
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(a) sizeof(a)/sizeof(a[0])
+#endif
+
 using namespace TNL;
 using namespace std;
 
