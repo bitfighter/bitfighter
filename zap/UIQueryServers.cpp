@@ -549,9 +549,8 @@ S32 QueryServersUserInterface::getSelectedIndex()
 
    if(mItemSelectedWithMouse)    // When using mouse, always follow mouse cursor
    {
-      
-      S32 indx = floor((gScreenInfo.getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
-                 getFirstServerIndexOnCurrentPage() - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0);
+      S32 indx = S32(floor((gScreenInfo.getMousePos()->y - TOP_OF_SERVER_LIST + 2) / SERVER_ENTRY_HEIGHT) + 
+                     getFirstServerIndexOnCurrentPage() - (mScrollingUpMode || mMouseAtBottomFixFactor ? 1 : 0) );
 
       // Bounds checking and such
       if(indx < 0)
@@ -640,7 +639,7 @@ void QueryServersUserInterface::render()
       buttons[i].render(mJustMovedMouse ? mousePos->x : -1, mJustMovedMouse ? mousePos->y : -1);
 
    bool connectedToMaster = gClientGame->getConnectionToMaster() && gClientGame->getConnectionToMaster()->isEstablished();
-   
+
    if(connectedToMaster)
    {
       glColor(gMasterServerBlue);
@@ -941,7 +940,7 @@ void QueryServersUserInterface::renderMessageBox(bool drawmsg1, bool drawmsg2)
    const S32 msgboxMargin = 20;
 
    S32 ypos = mShowChat ? TOP_OF_SERVER_LIST + 25 + (getDividerPos() - TOP_OF_SERVER_LIST) * 2 / 5 : canvasHeight / 2 ;
-   ypos += (lines - 2) * (F32(fontsize + fontgap) * .5);
+   ypos += (lines - 2) * (fontsize + fontgap) / 2;
 
    const S32 ypos1 = ypos - lines * (fontsize + fontgap) - msgboxMargin;
    const S32 ypos2 = ypos + msgboxMargin;
@@ -1159,7 +1158,7 @@ void QueryServersUserInterface::onMouseDragged(S32 x, S32 y)
       S32 MIN_SERVERS_PER_PAGE = 4;
       S32 MAX_SERVERS_PER_PAGE = 18;
 
-      mServersPerPage = (mousePos->y - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
+      mServersPerPage = ((S32)mousePos->y - TOP_OF_SERVER_LIST - AREA_BETWEEN_BOTTOM_OF_SERVER_LIST_AND_DIVIDER) / SERVER_ENTRY_HEIGHT;
 
       // Bounds checking
       if(mServersPerPage < MIN_SERVERS_PER_PAGE)
@@ -1376,21 +1375,21 @@ Button::Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color
 }
 
 
-bool Button::mouseOver(S32 mouseX, S32 mouseY)
+bool Button::mouseOver(F32 mouseX, F32 mouseY)
 {
    return(mouseX >= mX && mouseX <= mX + mPadding * 2 + UserInterface::getStringWidth(mTextSize, mLabel) &&
           mouseY >= mY && mouseY <= mY + mTextSize + mPadding * 2);
 }
 
 
-void Button::onClick(S32 mouseX, S32 mouseY)
+void Button::onClick(F32 mouseX, F32 mouseY)
 {
    if(mOnClickCallback && mouseOver(mouseX, mouseY))
       mOnClickCallback();
 }
 
 
-void Button::render(S32 mouseX, S32 mouseY)
+void Button::render(F32 mouseX, F32 mouseY)
 {
    S32 start = mTransparent ? 0 : 1;
 

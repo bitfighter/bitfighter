@@ -47,15 +47,15 @@ private:
    S32 mX, mY, mTextSize, mPadding;
    const char *mLabel;
    void (*mOnClickCallback)();
-   bool mouseOver(S32 mouseX, S32 mouseY);
+   bool mouseOver(F32 mouseX, F32 mouseY);
    bool mTransparent;
    Color mBgColor, mFgColor, mHlColor;
 
 public:
    Button(S32 x, S32 y, S32 textSize, S32 padding, const char *label, Color fgColor, Color hlColor, void(*callback)());   // Constructor
 
-   void render(S32 mouseX, S32 mouseY);
-   void onClick(S32 mouseX, S32 mouseY);
+   void render(F32 mouseX, F32 mouseY);
+   void onClick(F32 mouseX, F32 mouseY);
 };
 
 
