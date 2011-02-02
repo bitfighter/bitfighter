@@ -192,17 +192,29 @@ void GameUserInterface::onReactivate()
 }
 
 
-static char sErrorMsg[256];
+static char stringBuffer[256];
 
 void GameUserInterface::displayErrorMessage(const char *format, ...)
 {
    va_list args;
 
    va_start(args, format);
-   vsnprintf(sErrorMsg, sizeof(sErrorMsg), format, args);
+   vsnprintf(stringBuffer, sizeof(stringBuffer), format, args);
    va_end(args);
 
-   displayMessage(gCmdChatColor, sErrorMsg);
+   displayMessage(gCmdChatColor, stringBuffer);
+}
+
+
+void GameUserInterface::displaySuccessMessage(const char *format, ...)
+{
+   va_list args;
+
+   va_start(args, format);
+   vsnprintf(stringBuffer, sizeof(stringBuffer), format, args);
+   va_end(args);
+
+   displayMessage(Color(0.6, 1, 0.8), stringBuffer);
 }
 
 

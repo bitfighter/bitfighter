@@ -110,9 +110,9 @@ struct Color
    Color(float red, float green, float blue) { r = red; g = green; b = blue; }
    Color(float grayScale = 1) { r = grayScale; g = grayScale; b = grayScale; }
 
-   Color(RangedU32<0,0xFFFFFF> rgbInt) { r = F32(U8(rgbInt.value)) / 255.0f; 
-                                         g = F32(U8(rgbInt.value >> 8)) / 255.0f; 
-                                         b = F32(U8(rgbInt.value >> 16)) /255.0f; };
+   Color(U32 rgbInt) { r = F32(U8(rgbInt)) / 255.0f; 
+                       g = F32(U8(rgbInt >> 8)) / 255.0f; 
+                       b = F32(U8(rgbInt >> 16)) / 255.0f; };
 
    void read(const char **argv) { r = (float) atof(argv[0]); g = (float) atof(argv[1]); b = (float) atof(argv[2]); }
 
@@ -145,7 +145,9 @@ struct Color
    string toRGBString() { string s = ftos(r, 3) + "," + ftos(g, 3) + "," + ftos(b, 3); return s; }
    string toHexString() { char c[24]; dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32(r * 0xFF), U32(g * 0xFF), U32(b * 0xFF)); return c; }
 
-   RangedU32<0, 0xFFFFFF> toRangedU32() { return RangedU32<0, 0xFFFFFF>( U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16); }
+
+   U32 toU32() { return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16; }
+   //RangedU32<0, 0xFFFFFF> toRangedU32() { return RangedU32<0, 0xFFFFFF>(toU32()); }
 
    Color operator+(const Color &c) const { return Color (r + c.r, g + c.g, b + c.b); }
    Color operator-(const Color &c) const { return Color (r - c.r, g - c.g, b - c.b); }
@@ -158,7 +160,6 @@ struct Color
 
    bool operator==(const Color &col) const { return r == col.r && g == col.g && b == col.b; }
    bool operator!=(const Color &col) const { return r != col.r || g != col.g || b != col.b; }
-
 };
 
 

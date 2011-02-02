@@ -151,8 +151,8 @@ static string insertStatsPlayer(Query *query, const PlayerStats *playerStats, co
 static string insertStatsTeam(Query *query, const TeamStats *teamStats, const string &gameId)
 {
    string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) "
-            "VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
-                     teamStats->gameResult + "' ,'" + teamStats->color + "');";
+                "VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
+                            teamStats->gameResult + "' ,'" + teamStats->hexColor + "');";
 
    string teamId;
 
@@ -175,9 +175,9 @@ static string insertStatsGame(Query *query, const GameStats *gameStats, const st
 {
    string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, "
                                        "duration_seconds, level_name, is_team_game, team_count) "
-         "VALUES( " + serverId + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + itos(gameStats->playerCount) + ", " +
-                     itos(gameStats->duration) + ", '" + sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
-                     itos(gameStats->teamCount)  + ");";
+                "VALUES( " + serverId + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + itos(gameStats->playerCount) + ", " +
+                             itos(gameStats->duration) + ", '" + sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
+                             itos(gameStats->teamCount)  + ");";
 
    string gameId;
 
@@ -245,7 +245,6 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
       delete query;
 
    return success;
-
 }
 
 

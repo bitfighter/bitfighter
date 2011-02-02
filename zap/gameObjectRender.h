@@ -70,13 +70,14 @@ extern void renderCenteredString(const Point &pos, F32 size, const char *string)
 
 extern void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive);
 extern void renderAimVector();
-extern void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests, bool showDestOverride);
-extern void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
+extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, 
+                             const Vector<Point> &dests, bool showDestOverride);
+extern void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle);
 
 extern void renderFlag(const Point &pos, const Color &flagColor);
 extern void renderFlag(F32 x, F32 y, const Color &flagColor);
-extern void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha);
-extern void renderFlag(F32 x, F32 y, const Color &flagColor, const Color &mastColor, F32 alpha);
+extern void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor, F32 alpha);
+extern void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F32 alpha);
 
 
 //extern void renderFlag(Point pos, Color c, F32 timerFraction);
@@ -110,43 +111,43 @@ extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill,
                         bool open, F32 glowFraction, F32 scaleFact = 1);
 
 
-extern void renderSlipZone(Vector<Point> &bounds, Rect extent);
+extern void renderSlipZone(const Vector<Point> &bounds, Rect extent);
 
-extern void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
+extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 
 
-extern void renderProjectile(Point pos, U32 type, U32 time);
+extern void renderProjectile(const Point &pos, U32 type, U32 time);
 
-extern void renderMine(Point pos, bool armed, bool visible);
-extern void renderGrenade(Point pos, F32 vel);
-extern void renderSpyBug(Point pos, bool visible);
+extern void renderMine(const Point &pos, bool armed, bool visible);
+extern void renderGrenade(const Point &pos, F32 vel);
+extern void renderSpyBug(const Point &pos, bool visible);
 
-extern void renderRepairItem(Point pos);
-extern void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha);
+extern void renderRepairItem(const Point &pos);
+extern void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 
 extern void renderEnergyItem(const Point &pos);
-extern void renderEnergyItem(const Point &pos, bool forEditor, Color overrideColor, F32 alpha);
-extern void renderEnergySymbol(Color overrideColor, F32 alpha);      // Render lightning bolt symbol
+extern void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
+extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // Render lightning bolt symbol
 extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
 
 // Wall rendering
 void renderWallEdges(const Vector<Point> &edges, F32 alpha = 1.0);
 
 //extern void renderSpeedZone(Point pos, Point normal, U32 time);
-void renderSpeedZone(Vector<Point>, U32 time);
+void renderSpeedZone(const Vector<Point> &pts, U32 time);
 
-void renderTestItem(Point pos, F32 alpha = 1);
+void renderTestItem(const Point &pos, F32 alpha = 1);
 
-void renderWorm(Point pos);
+void renderWorm(const Point &pos);
 
-void renderAsteroid(Point pos, S32 design, F32 radius);
-void renderAsteroid(Point pos, S32 design, F32 radius, Color c, F32 alpha = 1);
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact);
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha = 1);
 
-void renderResourceItem(Point pos, F32 alpha = 1);
-void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha);
+void renderResourceItem(const Point &pos, F32 alpha = 1);
+void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha);
 
-void renderSoccerBall(Point pos, F32 alpha = 1);
-void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text);
+void renderSoccerBall(const Point &pos, F32 alpha = 1);
+void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text);
 
 
 extern void renderForceFieldProjector(Point pos, Point normal);

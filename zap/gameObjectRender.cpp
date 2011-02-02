@@ -339,13 +339,13 @@ void renderAimVector()
          glVertex2f(0, 1000);     // 1000 is pretty aribitrary!
       glEnd();
    glDisableBlend;
-
 }
 
 
 #define ABS(x) (((x) > 0) ? (x) : -(x))
 
-void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, Vector<Point> dests, bool showDestOverride)
+void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, 
+                      const Vector<Point> &dests, bool showDestOverride)
 {
    enum {
       NumColors = 6,
@@ -516,8 +516,8 @@ void renderTeleporter(Point pos, U32 type, bool in, S32 time, F32 radiusFraction
 }
 
 
-// Renders turret!
-void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle)
+// Renders turret!  --> note that anchor and normal can't be const &Points because of the point math
+void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 health, F32 barrelAngle)
 {
    glColor(c);
 
@@ -578,7 +578,7 @@ void renderTurret(Color c, Point anchor, Point normal, bool enabled, F32 health,
 }
 
 
-void drawFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
+static void drawFlag(const Color &flagColor, const Color *mastColor, F32 alpha)
 {
    glColor(flagColor, alpha);
    glBegin(GL_LINES);
@@ -597,7 +597,7 @@ void drawFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
       glVertex2f(-15, 0);
 
       // Now the flag's mast
-      glColor((mastColor == 0) ? Color(1,1,1) : mastColor, alpha);
+      glColor(*mastColor, alpha);
 
       glVertex2f(-15, -15);
       glVertex2f(-15, 15);
@@ -605,7 +605,7 @@ void drawFlag(const Color &flagColor, const Color &mastColor, F32 alpha)
 }
 
 
-void renderFlag(F32 x, F32 y, const Color &flagColor, const Color &mastColor, F32 alpha)
+void renderFlag(F32 x, F32 y, const Color &flagColor, const Color *mastColor, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(x, y, 0);
@@ -616,21 +616,23 @@ void renderFlag(F32 x, F32 y, const Color &flagColor, const Color &mastColor, F3
 }
 
 
-void renderFlag(const Point &pos, const Color &flagColor, const Color &mastColor, F32 alpha)
+void renderFlag(const Point &pos, const Color &flagColor, const Color *mastColor, F32 alpha)
 {
    renderFlag(pos.x, pos.y, flagColor, mastColor, alpha);
 }
+
 
 // Could be eliminated with by using an optional param for mastColor, but
 // this seems to cause problems with our extern statements...
 void renderFlag(const Point &pos, const Color &flagColor)
 {
-   renderFlag(pos.x, pos.y, flagColor, 0, 1);
+   renderFlag(pos.x, pos.y, flagColor, NULL, 1);
 }
+
 
 void renderFlag(F32 x, F32 y, const Color &flagColor)
 {
-   renderFlag(x, y, flagColor, 0, 1);
+   renderFlag(x, y, flagColor, NULL, 1);
 }
 
 
@@ -693,7 +695,7 @@ void renderCenteredString(const Point &pos, F32 size, const char *string)
 }
 
 
-void renderPolygonLabel(Point centroid, F32 angle, F32 size, const char *text, F32 scaleFact)
+void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact)
 {
    glPushMatrix();
       glScalef(scaleFact, scaleFact, 0);
@@ -858,19 +860,21 @@ void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point 
 }
 
 
-void renderSlipZone(Vector<Point> &bounds, Rect extent)
+void renderSlipZone(const Vector<Point> &bounds, Rect extent)     
 {
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
 
    glColor(theColor * 0.5);
+
    glBegin(GL_POLYGON);
-   for(S32 i = 0; i < bounds.size(); i++)
-      glVertex2f(bounds[i].x, bounds[i].y);
+      for(S32 i = 0; i < bounds.size(); i++)
+         glVertex2f(bounds[i].x, bounds[i].y);
    glEnd();
+
    glColor(theColor * 0.7);
    glBegin(GL_LINE_LOOP);
-   for(S32 i = 0; i < bounds.size(); i++)
-      glVertex2f(bounds[i].x, bounds[i].y);
+      for(S32 i = 0; i < bounds.size(); i++)
+         glVertex2f(bounds[i].x, bounds[i].y);
    glEnd();
 
    Point extents = extent.getExtents();
@@ -886,7 +890,7 @@ void renderSlipZone(Vector<Point> &bounds, Rect extent)
 }
 
 
-void renderProjectile(Point pos, U32 type, U32 time)
+void renderProjectile(const Point &pos, U32 type, U32 time)
 {
    ProjectileInfo *pi = gProjInfo + type;
 
@@ -983,7 +987,7 @@ void renderProjectile(Point pos, U32 type, U32 time)
 }
 
 
-void renderMine(Point pos, bool armed, bool visible)
+void renderMine(const Point &pos, bool armed, bool visible)
 {
    F32 mod = 0.8;
    F32 vis = .25;
@@ -1024,7 +1028,7 @@ void renderMine(Point pos, bool armed, bool visible)
 // 3 = color change only
 // 4 = normal rendering, filled circle
 // 5 = normal rendering
-void renderGrenade(Point pos, F32 lifeLeft)
+void renderGrenade(const Point &pos, F32 lifeLeft)
 {
    glColor3f(1,1,1);
    drawCircle(pos, 10);
@@ -1124,7 +1128,7 @@ void renderGrenade(Point pos, F32 lifeLeft)
       */
 }
 
-void renderSpyBug(Point pos, bool visible)
+void renderSpyBug(const Point &pos, bool visible)
 {
    F32 mod = 0.25;
 
@@ -1145,13 +1149,13 @@ void renderSpyBug(Point pos, bool visible)
 }
 
 
-void renderRepairItem(Point pos)
+void renderRepairItem(const Point &pos)
 {
    renderRepairItem(pos, false, 0, 1);
 }
 
 
-void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
+void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha)
 {
    F32 crossWidth;
    F32 crossLen;
@@ -1173,7 +1177,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   glColor(overrideColor == 0 ? Color(1,1,1) : overrideColor, alpha);
+   glColor(overrideColor == NULL ? Color(1,1,1) : *overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(-size , -size );
       glVertex2f(size , -size );
@@ -1181,7 +1185,7 @@ void renderRepairItem(Point pos, bool forEditor, Color overrideColor, F32 alpha)
       glVertex2f(-size , size );
    glEnd();
 
-   glColor(overrideColor == 0 ? Color(1,0,0) : overrideColor, alpha);
+   glColor(overrideColor == NULL ? Color(1,0,0) : *overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f(crossWidth, crossWidth);
       glVertex2f(crossLen, crossWidth);
@@ -1242,10 +1246,10 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold)
 
 
 // Render the actual lightning bolt
-void renderEnergySymbol(Color overrideColor, F32 alpha)
+void renderEnergySymbol(const Color *overrideColor, F32 alpha)
 {
    // Yellow lightning bolt
-   glColor(overrideColor == 0 ? Color(1,1,0) : overrideColor, alpha);
+   glColor(overrideColor == NULL ? Color(1,1,0) : *overrideColor, alpha);
    glBegin(GL_LINE_LOOP);
       glVertex2f( 20, -20);
       glVertex2f(  3,  -2);
@@ -1257,7 +1261,7 @@ void renderEnergySymbol(Color overrideColor, F32 alpha)
 
    // Orangey circle
    glLineWidth(gLineWidth3);
-   glColor(overrideColor == 0 ? Color(1, .67 ,0) : overrideColor, alpha);
+   glColor(overrideColor == 0 ? Color(1, .67 ,0) : *overrideColor, alpha);
    glLineWidth(gDefaultLineWidth);
 }
 
@@ -1271,7 +1275,7 @@ void renderEnergySymbol(const Point &pos, F32 scaleFactor)
 }
 
 
-void renderEnergyItem(const Point &pos, bool forEditor, Color overrideColor, F32 alpha)
+void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha)
 {
    F32 scaleFactor = forEditor ? .45 : 1;    // Resize for editor
 
@@ -1289,13 +1293,14 @@ void renderEnergyItem(const Point &pos, bool forEditor, Color overrideColor, F32
 
 void renderEnergyItem(const Point &pos)
 {
-   renderEnergyItem(pos, false, 0, 1);
+   renderEnergyItem(pos, false, NULL, 1);
 }
 
 
 void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 {
    glColor(gIniSettings.wallOutlineColor, alpha);
+
    glBegin(GL_LINES);
       for(S32 i = 0; i < edges.size(); i++)
          glVertex(edges[i]);
@@ -1303,7 +1308,7 @@ void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 }
 
 
-void renderSpeedZone(Vector<Point> points, U32 time)
+void renderSpeedZone(const Vector<Point> &points, U32 time)
 {
    glColor3f(1, 0, 0);     // Red
    for(S32 j = 0; j < 2; j++)
@@ -1318,7 +1323,7 @@ void renderSpeedZone(Vector<Point> points, U32 time)
 }
 
 
-void renderTestItem(Point pos, F32 alpha)
+void renderTestItem(const Point &pos, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
@@ -1329,7 +1334,7 @@ void renderTestItem(Point pos, F32 alpha)
 }
 
 
-void renderWorm(Point pos)
+void renderWorm(const Point &pos)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
@@ -1347,12 +1352,12 @@ void renderWorm(Point pos)
 }
 
 
-void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha)
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact, const Color *color, F32 alpha)
 {
    glPushMatrix();
    glTranslatef(pos.x, pos.y, 0);
 
-   glColor(color == 0 ? Color(.7, .7, .7) : color, alpha);
+   glColor(color ? *color : Color(.7, .7, .7), alpha);
       // Design 1
       glBegin(GL_LINE_LOOP);
          for(S32 i = 0; i < AsteroidPoints; i++)
@@ -1366,18 +1371,18 @@ void renderAsteroid(Point pos, S32 design, F32 scaleFact, Color color, F32 alpha
 }
 
 
-void renderAsteroid(Point pos, S32 design, F32 scaleFact)
+void renderAsteroid(const Point &pos, S32 design, F32 scaleFact)
 {
-   renderAsteroid(pos, design, scaleFact, 0);
+   renderAsteroid(pos, design, scaleFact, NULL);
 }
 
 
-void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha)
+void renderResourceItem(const Point &pos, F32 scaleFactor, const Color *color, F32 alpha)
 {
    glPushMatrix();
       glTranslatef(pos.x, pos.y, 0);
 
-      glColor(color == 0 ? Color(1, 1, 1) : color, alpha);
+      glColor(color == NULL ? Color(1, 1, 1) : *color, alpha);
 
       glBegin(GL_LINE_LOOP);
          glVertex2f(-8 * scaleFactor, 8 * scaleFactor);
@@ -1394,20 +1399,20 @@ void renderResourceItem(Point pos, F32 scaleFactor, Color color, F32 alpha)
 }
 
 
-void renderResourceItem(Point pos, F32 alpha)
+void renderResourceItem(const Point &pos, F32 alpha)
 {
    renderResourceItem(pos, 1, 0, alpha);
 }
 
 
-void renderSoccerBall(Point pos, F32 alpha)
+void renderSoccerBall(const Point &pos, F32 alpha)
 {
    glColor4f(1, 1, 1, alpha);
    drawCircle(pos, SoccerBallItem::SOCCER_BALL_RADIUS);
 }
 
 
-void renderTextItem(Point pos, Point dir, U32 size, S32 team, string text)
+void renderTextItem(const Point &pos, Point dir, U32 size, S32 team, string text)
 {
    if(text == "Bitfighter")
    {

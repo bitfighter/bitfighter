@@ -147,7 +147,7 @@ ChatMessage AbstractChat::getMessage(U32 index)
 // Retrieve the next available chat text color
 Color AbstractChat::getNextColor()
 {
-   static Color colorList[] = {
+   static const Color colorList[] = {
       Color(0.55,0.55,0),     Color(1,0.55,0.55),
       Color(0,0.6,0),         Color(0.68,1,0.25),
       Color(0,0.63,0.63),     Color(0.275,0.51,0.71),
@@ -157,11 +157,11 @@ Color AbstractChat::getNextColor()
       Color(0.86,0.078,1),    Color(0.78,0.08,0.52),
       Color(0.93,0.5,0),      Color(0.63,0.32,0.18),
       Color(0.5,1,1),         Color(1,0.73,1),
-      Color(0.48,0.41,0.93),  0
+      Color(0.48,0.41,0.93)
    };
 
    mColorPtr++;
-   if(colorList[mColorPtr] == 0)
+   if(mColorPtr >= ARRAYSIZE(colorList))     // Wrap-around
       mColorPtr = 0;
 
    return colorList[mColorPtr];

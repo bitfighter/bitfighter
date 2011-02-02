@@ -69,8 +69,8 @@ struct PlayerStats
 
 struct TeamStats 
 {
-   U32 color_bin; // To send as number, not string
-   string color;
+   U32 intColor; // To send as number, not string
+   string hexColor;
    string name;
    S32 score;
    string gameResult;     // 'W', 'L', 'T'

@@ -2326,7 +2326,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          glPushMatrix();
             glTranslatef(pos.x, pos.y, 0);
             glScalef(0.6, 0.6, 1);
-            renderFlag(0, 0, c, hideit ? grayedOutColorDim : 0, alpha);
+            renderFlag(0, 0, c, hideit ? &grayedOutColorDim : NULL, alpha);
          glPopMatrix();
       }
       else if(item.index == ItemFlagSpawn)    // Draw flag spawn point
@@ -2338,9 +2338,9 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          else
          {
             glPushMatrix();
-               glTranslatef(pos.x+1, pos.y, 0);
+               glTranslatef(pos.x + 1, pos.y, 0);
                glScalef(0.4, 0.4, 1);
-               renderFlag(0, 0, c, hideit ? grayedOutColorDim : 0, alpha);
+               renderFlag(0, 0, c, hideit ? &grayedOutColorDim : NULL, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
                drawCircle(Point(-4,0), 26);
@@ -2358,7 +2358,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPushMatrix();
                glTranslatef(pos.x, pos.y, 0);
                glScalef(0.8, 0.8, 1);
-               renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? grayedOutColorDim : 0, alpha);
+               renderAsteroid(Point(0,0), asteroidDesign, .1, hideit ? &grayedOutColorDim : NULL, alpha);
 
                glColor(hideit ? grayedOutColorDim : white, alpha);
                drawCircle(Point(0, 0), 13);
@@ -2386,11 +2386,11 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          {
             glPushMatrix();
                setTranslationAndScale(pos);
-               renderAsteroid(pos, asteroidDesign, asteroidRenderSize[0], alpha);
+               renderAsteroid(pos, asteroidDesign, asteroidRenderSize[0], hideit ? &grayedOutColorDim : NULL, alpha);
             glPopMatrix();
          }
          else     // Dock item rendering
-            renderAsteroid(pos, asteroidDesign, .1, hideit ? grayedOutColorDim : 0, alpha);
+            renderAsteroid(pos, asteroidDesign, .1, hideit ? &grayedOutColorDim : NULL, alpha);
       }
 
       else if(item.index == ItemResource)   // Draw resourceItem
@@ -2403,7 +2403,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             glPopMatrix();
          }
          else     // Dock item rendering
-             renderResourceItem(pos, .4, hideit ? grayedOutColorDim : 0, alpha);
+             renderResourceItem(pos, .4, hideit ? &grayedOutColorDim : NULL, alpha);
       }
       else if(item.index == ItemSoccerBall)  // Soccer ball, obviously
       {
@@ -2458,10 +2458,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
       }
 
       else if(item.index == ItemRepair)
-         renderRepairItem(pos, true, hideit ? grayedOutColorDim : 0, alpha);
+         renderRepairItem(pos, true, hideit ? &grayedOutColorDim : NULL, alpha);
 
       else if(item.index == ItemEnergy)
-         renderEnergyItem(pos, true, hideit ? grayedOutColorDim : 0, alpha);
+         renderEnergyItem(pos, true, hideit ? &grayedOutColorDim : NULL, alpha);
 
       else if(item.index == ItemTurret || item.index == ItemForceField)
       { 

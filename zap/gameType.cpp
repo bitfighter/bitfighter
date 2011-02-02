@@ -880,10 +880,8 @@ VersionedGameStats GameType::getGameStats()
    {
       TeamStats *teamStats = &gameStats->teamStats[i];
 
-      teamStats->color_bin = U32(mTeams[i].color.r * 0xF)<<16 | U32(mTeams[i].color.g * 0xFF)<<8 | U32(mTeams[i].color.b * 0xFF);
-      char c[24];
-      dSprintf(c, sizeof(c), "%.6X", teamStats->color_bin);
-      teamStats->color = string(c);
+      teamStats->intColor = mTeams[i].color.toU32();
+      teamStats->hexColor = mTeams[i].color.toHexString();
 
       teamStats->name = mTeams[i].getName().getString();
       teamStats->score = mTeams[i].getScore();

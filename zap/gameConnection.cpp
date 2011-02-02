@@ -282,12 +282,11 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS
       gGameUserInterface.mOutputFile = NULL;
 
       if(status.value == STATUS_OK)
-         gGameUserInterface.displayMessage(ColorNuclearGreen, "Level download to %s", 
-                                                               gGameUserInterface.remoteLevelDownloadFilename.c_str());
+         gGameUserInterface.displaySuccessMessage("Level download to %s", gGameUserInterface.remoteLevelDownloadFilename.c_str());
       else if(status.value == COMMAND_NOT_ALLOWED)
-         gGameUserInterface.displayMessage(ColorRed, "!!! Getmap command is disabled on this server");
+         gGameUserInterface.displayErrorMessage("!!! Getmap command is disabled on this server");
       else
-         gGameUserInterface.displayMessage(ColorRed, "Error downloading level");
+         gGameUserInterface.displayErrorMessage("Error downloading level");
    }
 }
 

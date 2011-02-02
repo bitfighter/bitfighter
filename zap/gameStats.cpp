@@ -216,21 +216,19 @@ namespace Types
    {
       val->name = readString(s);
       val->score = readS32(s);
-      val->color_bin = s.readInt(24); // 24 bit color
-      char c[24];
-      dSprintf(c, sizeof(c), "%.6X", val->color_bin);
-      val->color = string(c);
-         //gt->gameResult = "?";
+
+      val->intColor = s.readInt(24); // 24 bit color
+      val->hexColor = Color(val->intColor).toHexString();
 
 		read(s, &val->playerStats);
 	}
 
 
    void write(TNL::BitStream &s, Zap::TeamStats &val)
-         {
+   {
       writeString(s, val.name);
       write(s, S32(val.score));
-      s.writeInt(val.color_bin,24); // 24 bit color
+      s.writeInt(val.intColor, 24);    // 24 bit color
       write(s, val.playerStats);
 	}
 
@@ -245,8 +243,9 @@ namespace Types
       val->levelName = readString(s);
       read(s, &val->teamStats);
       val->teamCount = val->teamStats.size(); // is this needed?  ==> probably not (CE)
-
 	}
+
+
    void write(TNL::BitStream &s, Zap::GameStats &val)
 	{
       s.writeFlag(val.isOfficial);
