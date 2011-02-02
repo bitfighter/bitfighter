@@ -179,6 +179,74 @@
 				>
 			</File>
 			<File
+				RelativePath=".\config.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\database.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\zap\gameStats.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\masterInterface.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\phpbbhash.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\zap\stringUtils.cpp"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+			>
+			<File
+				RelativePath=".\authenticator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\database.h"
+				>
+			</File>
+			<File
+				RelativePath="..\zap\gameStats.h"
+				>
+			</File>
+			<File
+				RelativePath=".\masterInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\phpbbhash.h"
+				>
+			</File>
+			<File
+				RelativePath="..\zap\stringUtils.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+			>
+		</Filter>
+		<Filter
+			Name="mysql"
+			>
+			<File
 				RelativePath="..\mysql++\beemutex.cpp"
 				>
 			</File>
@@ -187,19 +255,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\config.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\mysql++\connection.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\mysql++\cpool.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\database.cpp"
 				>
 			</File>
 			<File
@@ -219,19 +279,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\zap\gameStats.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\main.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\mysql++\manip.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\masterInterface.cpp"
 				>
 			</File>
 			<File
@@ -252,10 +300,6 @@
 			</File>
 			<File
 				RelativePath="..\mysql++\options.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\phpbbhash.cpp"
 				>
 			</File>
 			<File
@@ -295,10 +339,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\zap\stringUtils.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\mysql++\tcp_connection.cpp"
 				>
 			</File>
@@ -326,18 +366,6 @@
 				RelativePath="..\mysql++\wnp_connection.cpp"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="Header Files"
-			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
 		</Filter>
 	</Files>
 	<Globals>
