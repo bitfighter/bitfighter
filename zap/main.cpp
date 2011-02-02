@@ -211,7 +211,6 @@ string gHostDescr;               // Brief description of host
 const char *gWindowTitle = "Bitfighter";
 
 // The following things can be set via command line parameters
-S32 gMaxPlayers;                 // Max players allowed -- can change on cmd line, or INI.  Default value in config.h
 
 
 #ifdef ZAP_DEDICATED
@@ -652,10 +651,22 @@ void seedRandomNumberGenerator(string name)
 }
 
 
+U32 getServerMaxPlayers()
+{
+   U32 maxplay;
+   if (gCmdLineSettings.maxplayers > 0)
+      maxplay = gCmdLineSettings.maxplayers;
+   else
+      maxplay = gIniSettings.maxplayers;
+   if(maxplay > MAX_PLAYERS)
+      maxplay = MAX_PLAYERS;
+   return maxplay;
+}
+
 // Host a game (and maybe even play a bit, too!)
 void initHostGame(Address bindAddress, Vector<string> &levelList, bool testMode)
 {
-   gServerGame = new ServerGame(bindAddress, gMaxPlayers, gHostName.c_str(), testMode);
+   gServerGame = new ServerGame(bindAddress, getServerMaxPlayers(), gHostName.c_str(), testMode);
 
    gServerGame->setReadyToConnectToMaster(true);
    seedRandomNumberGenerator(gHostName);
@@ -1550,15 +1561,6 @@ void processStartupParams()
    else if(gIniSettings.hostaddr != "")
       gBindAddress.set(gIniSettings.hostaddr);
    // else stick with default defined earlier
-
-   U32 maxplay;
-   if (gCmdLineSettings.maxplayers > 0)
-      maxplay = gCmdLineSettings.maxplayers;
-   else
-      maxplay = gIniSettings.maxplayers;
-   if(maxplay > MAX_PLAYERS)
-      maxplay = MAX_PLAYERS;
-   gMaxPlayers = (U32) maxplay;
 
 
    if(gCmdLineSettings.displayMode != DISPLAY_MODE_UNKNOWN)

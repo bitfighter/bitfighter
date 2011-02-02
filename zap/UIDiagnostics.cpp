@@ -47,7 +47,7 @@ extern string gServerPassword;
 extern string gAdminPassword;
 extern string gLevelChangePassword;
 extern U32 gSimulatedLag;
-extern S32 gMaxPlayers;
+extern U32 getServerMaxPlayers();
 extern U32 gRawJoystickButtonInputs;
 extern void renderDPad(Point center, F32 radius, bool upStat, bool downStat, bool leftStat, bool rightStat, const char *msg1, const char *msg2);
 extern Address gBindAddress;
@@ -499,11 +499,11 @@ void DiagnosticUserInterface::render()
       ypos += textsize + gap;
       ypos += textsize + gap;
 
-      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", gMaxPlayers);
+      S32 x = getCenteredString2ColStartingPosf(textsize, false, "Max Players: %d", getServerMaxPlayers());
       glColor3f(1,1,1);
       x += drawStringAndGetWidthf(x, ypos, textsize, "Max Players: ");
       glColor3f(1,1,0);
-      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", gMaxPlayers);
+      x += drawStringAndGetWidthf(x, ypos, textsize, "%d", getServerMaxPlayers());
 
       ypos += textsize + gap;
 
