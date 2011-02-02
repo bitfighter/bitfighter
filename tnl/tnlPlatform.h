@@ -138,5 +138,10 @@ int strnicmp(const char *str1, const char *str2, unsigned int len);
 
 #endif
 
+#ifndef TNL_OS_WIN32
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(a) sizeof(a)/sizeof(a[0])
+#endif
+#endif
 
 #endif

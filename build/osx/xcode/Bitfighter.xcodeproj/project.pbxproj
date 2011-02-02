@@ -70,6 +70,8 @@
 		737826A812960DDF007333BE /* tnl.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
 		737826A912960DDF007333BE /* libtomcrypt.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737826AD12960DDF007333BE /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		7378E23812F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
+		7378E23912F93C9D005EF681 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7378E23612F93C9D005EF681 /* database.cpp */; };
 		737CE40512904D5300D732B7 /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		737CE40612904D5300D732B7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
 		737CE44E12904D7D00D732B7 /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
@@ -589,6 +591,8 @@
 		7374B37012F5D20600B13E6A /* gameStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameStats.cpp; path = ../../../zap/gameStats.cpp; sourceTree = SOURCE_ROOT; };
 		7374B37112F5D20600B13E6A /* gameStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameStats.h; path = ../../../zap/gameStats.h; sourceTree = SOURCE_ROOT; };
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7378E23612F93C9D005EF681 /* database.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = database.cpp; path = ../../../master/database.cpp; sourceTree = SOURCE_ROOT; };
+		7378E23712F93C9D005EF681 /* database.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = database.h; path = ../../../master/database.h; sourceTree = SOURCE_ROOT; };
 		737CE312129048B900D732B7 /* libtomcrypt-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "libtomcrypt-Info.plist"; sourceTree = "<group>"; };
 		737CE3F412904D5300D732B7 /* robots */ = {isa = PBXFileReference; lastKnownFileType = folder; name = robots; path = ../../../installer/robots; sourceTree = SOURCE_ROOT; };
 		737CE3FC12904D5300D732B7 /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = scripts; path = ../../../exe/scripts; sourceTree = SOURCE_ROOT; };
@@ -1134,6 +1138,8 @@
 		73657A0312E2E3CF00BED56F /* master */ = {
 			isa = PBXGroup;
 			children = (
+				7378E23612F93C9D005EF681 /* database.cpp */,
+				7378E23712F93C9D005EF681 /* database.h */,
 				73657A0412E2E3FB00BED56F /* masterInterface.cpp */,
 				73657A0512E2E3FB00BED56F /* masterInterface.h */,
 			);
@@ -1948,6 +1954,7 @@
 				73D2F6D512E2E1D400EA5EBE /* print.c in Sources */,
 				73657A0612E2E3FB00BED56F /* masterInterface.cpp in Sources */,
 				7374B37212F5D20600B13E6A /* gameStats.cpp in Sources */,
+				7378E23812F93C9D005EF681 /* database.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2169,6 +2176,7 @@
 				73D2F6F712E2E1D400EA5EBE /* print.c in Sources */,
 				73657A0712E2E3FB00BED56F /* masterInterface.cpp in Sources */,
 				7374B37312F5D20600B13E6A /* gameStats.cpp in Sources */,
+				7378E23912F93C9D005EF681 /* database.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
