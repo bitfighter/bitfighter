@@ -58,10 +58,10 @@ class DatabaseWriter
 {
 private:
    bool mIsValid;
-   const char *mServer;
-   const char *mDb;
-   const char *mUser;
-   const char *mPassword;
+   char mServer[64];   // was const char *, but problems when data in pointer dies.
+   char mDb[64];
+   char mUser[64];
+   char mPassword[64];
    Vector<ServerInformation> cachedServers;
    U64 lastGameID;
 

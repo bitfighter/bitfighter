@@ -1204,10 +1204,10 @@ public:
                                     gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
 
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      bool error = databaseWriter.insertStats(*gameStats, gWriteStatsToDatabase);
+      bool hasWrittenToDatabase = databaseWriter.insertStats(*gameStats, gWriteStatsToDatabase);
 
       // If writing to the database failed, write them to a file as a last ditch effort to save the info
-      if(error)
+      if(! hasWrittenToDatabase)
          databaseWriter.insertStats(*gameStats, false);
    }
 

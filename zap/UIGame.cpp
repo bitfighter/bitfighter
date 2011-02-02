@@ -218,6 +218,16 @@ void GameUserInterface::displaySuccessMessage(const char *format, ...)
 }
 
 
+extern Color colors[];
+void GameUserInterface::displayMessage(GameConnection::MessageColors msgColorIndex, const char *format, ...)
+{
+   va_list args;
+   va_start(args, format);
+   vsnprintf(sErrorMsg, sizeof(sErrorMsg), format, args);
+   va_end(args);
+   displayMessage(colors[msgColorIndex], sErrorMsg);
+}
+
 // A new chat message is here!  We don't actually display anything here, despite the name...
 // just add it to the list, will be displayed in render()
 void GameUserInterface::displayMessage(const Color &msgColor, const char *format, ...)

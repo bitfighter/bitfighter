@@ -59,11 +59,11 @@ DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *pas
 
 void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
 {
-   mServer = server;
-   mDb = db;
-   mUser = user;
-   mPassword = password;
-   mIsValid = db[0] != 0;
+   strncpy(mServer, server, sizeof(mServer)-1);   // was const char *, but problems when data in pointer dies.
+   strncpy(mDb, db, sizeof(mDb)-1);
+   strncpy(mUser, user, sizeof(mUser)-1);
+   strncpy(mPassword, password, sizeof(mPassword)-1);
+   mIsValid = db[0] != 0;  // Not valid if db is empty string.
 }
 
 
@@ -88,7 +88,7 @@ public:
 
 
 // Create wrapper function to make logging easier
-static SimpleResult runQuery(Query *query, const string &sql)      // TODO: Pass query as a Query *?
+static SimpleResult runQuery(Query *query, const string &sql)
 {
 #ifdef BF_WRITE_TO_MYSQL
    return query->execute(sql);
@@ -215,7 +215,7 @@ static string insertStatsServer(Query *query, const GameStats &gameStats)
 }
 
 
-// Return false if failed to write to database
+// Return false if failed, true if written to database
 bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabase) 
 {
    Query *query = NULL;

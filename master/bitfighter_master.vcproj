@@ -179,6 +179,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\database.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\zap\gameStats.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -201,6 +209,14 @@
 						AdditionalIncludeDirectories="../tnl;.;../openal;../glut;../lua/include"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\zap\stringUtils.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\zap\stringUtils.h"
+				>
 			</File>
 		</Filter>
 		<Filter
