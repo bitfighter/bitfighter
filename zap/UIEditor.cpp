@@ -2376,7 +2376,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          }
          else     // Dock item rendering
          {
-            glColor(hideit ? grayedOutColorBright : Color(.7,.7,.7), alpha);
+            glColor(hideit ? grayedOutColorBright : Color(1,1,0), alpha);
             drawPolygon(pos, 7, 8, 0);
          }
       }
