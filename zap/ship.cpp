@@ -1648,9 +1648,6 @@ void Ship::render(S32 layerIndex)
       renderAimVector();
 
    // Now render some "addons"  --> should these be in renderShip?
-   for(S32 i = 0; i < mMountedItems.size(); i++)
-      if(mMountedItems[i].isValid())
-         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
 
    if(alpha == 0) return;  // don't draw when completely transparent
    if(alpha != 1.0)
@@ -1700,6 +1697,10 @@ void Ship::render(S32 layerIndex)
    }
    if(alpha != 1.0)
       glDisableBlend;
+
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid())
+         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
 }
 
 S32 LuaShip::id = 99;
