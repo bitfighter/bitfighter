@@ -597,7 +597,7 @@ static void drawFlag(const Color &flagColor, const Color *mastColor, F32 alpha)
       glVertex2f(-15, 0);
 
       // Now the flag's mast
-      glColor(*mastColor, alpha);
+      glColor(mastColor != NULL ? *mastColor : Color(1,1,1), alpha);
 
       glVertex2f(-15, -15);
       glVertex2f(-15, 15);
