@@ -223,9 +223,9 @@ void GameUserInterface::displayMessage(GameConnection::MessageColors msgColorInd
 {
    va_list args;
    va_start(args, format);
-   vsnprintf(sErrorMsg, sizeof(sErrorMsg), format, args);
+   vsnprintf(stringBuffer, sizeof(stringBuffer), format, args);
    va_end(args);
-   displayMessage(colors[msgColorIndex], sErrorMsg);
+   displayMessage(colors[msgColorIndex], stringBuffer);
 }
 
 // A new chat message is here!  We don't actually display anything here, despite the name...
