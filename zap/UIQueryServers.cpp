@@ -677,7 +677,7 @@ void QueryServersUserInterface::render()
 
    // Instructions at bottom of server selection section
    glColor(white);
-   drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE, SEL_SERVER_INSTR_SIZE, 
+   drawCenteredString(getDividerPos() - SEL_SERVER_INSTR_SIZE - SEL_SERVER_INSTR_GAP_ABOVE_DIVIDER_LINE + 1, SEL_SERVER_INSTR_SIZE, 
                       "UP, DOWN to select, ENTER to join | Click on column to sort | ESC exits");
 
    if(servers.size())      // There are servers to display...
@@ -721,7 +721,7 @@ void QueryServersUserInterface::render()
          {
             // Render server description at bottom
             glColor(s.msgColor);
-            U32 serverDescrLoc = TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT  ;
+            U32 serverDescrLoc = TOP_OF_SERVER_LIST + getServersPerPage() * SERVER_ENTRY_HEIGHT + 2;
             drawString(horizMargin, serverDescrLoc, SERVER_DESCR_TEXTSIZE, s.serverDescr.c_str());    
          }
 
