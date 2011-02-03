@@ -27,7 +27,7 @@ INSERT INTO server VALUES(8, 'User levels', '65.49.81.67');
 DROP TABLE IF EXISTS stats_game;
 CREATE TABLE stats_game (
   stats_game_id INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL,
-  server_id INTEGER NOT NULL REFERENCES server(server_id),
+  server_id INTEGER NOT NULL,
   game_type TEXT NOT NULL,
   is_official BOOL NOT NULL,
   player_count INTEGER NOT NULL,
@@ -35,7 +35,8 @@ CREATE TABLE stats_game (
   level_name TEXT NOT NULL,
   is_team_game BOOL NOT NULL,
   team_count BOOL NULL,
-  insertion_date DATETIME NOT NULL  DEFAULT CURRENT_TIMESTAMP);
+  insertion_date DATETIME NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(server_id) REFERENCES server(server_id));
 
 CREATE INDEX stats_game_server_id ON stats_game(server_id);
 CREATE INDEX stats_game_is_official ON stats_game(is_official);
@@ -50,12 +51,13 @@ CREATE INDEX stats_game_insertion_date ON stats_game(insertion_date);
 DROP TABLE IF EXISTS stats_team;
 CREATE TABLE stats_team (
   stats_team_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  stats_game_id INTEGER NOT NULL REFERENCES stats_game(stats_game_id),
+  stats_game_id INTEGER NOT NULL,
   team_name TEXT,
   color_hex TEXT NOT NULL,
   team_score INTEGER NULL,
   result CHAR NULL,
-  insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
+  insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(stats_game_id) REFERENCES stats_game(stats_game_id));
 
 
 CREATE INDEX stats_team_stats_game_id ON stats_team(stats_game_id);
@@ -67,7 +69,7 @@ CREATE INDEX stats_team_insertion_date ON stats_team(insertion_date);
 DROP TABLE IF EXISTS stats_player;
 CREATE TABLE stats_player (
   stats_player_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  stats_game_id INTEGER NOT NULL REFERENCES stats_game(stats_game_id),
+  stats_game_id INTEGER NOT NULL,
   player_name TEXT NOT NULL,
   is_authenticated BOOL NOT NULL,
   is_robot BOOL NOT NULL,
@@ -77,8 +79,10 @@ CREATE TABLE stats_player (
   death_count INTEGER  NOT NULL,
   suicide_count INTEGER  NOT NULL,
   switched_team BOOL  NULL,
-  stats_team_id INTEGER NULL REFERENCES stats_team(stats_team_id),
-  insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
+  stats_team_id INTEGER NULL,
+  insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY(stats_game_id) REFERENCES stats_game(stats_game_id),
+  FOREIGN KEY(stats_team_id) REFERENCES stats_team(stats_team_id));
 
 
 CREATE INDEX stats_player_is_authenticated ON stats_player(is_authenticated);
@@ -93,10 +97,11 @@ CREATE INDEX stats_player_stats_game_id ON stats_player(stats_game_id);
 DROP TABLE IF EXISTS stats_player_shots;
 CREATE TABLE  stats_player_shots (
   stats_player_shots_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-  stats_player_id INTEGER NOT NULL REFERENCES stats_player(stats_player_id),
+  stats_player_id INTEGER NOT NULL,
   weapon TEXT NOT NULL,
   shots INTEGER NOT NULL,
-  shots_struck INTEGER NOT NULL);
+  shots_struck INTEGER NOT NULL,
+  FOREIGN KEY(stats_player_id) REFERENCES stats_player(stats_player_id));
 
 
   CREATE UNIQUE INDEX stats_player_shots_player_id_weapon on stats_player_shots(stats_player_id, weapon COLLATE BINARY);
