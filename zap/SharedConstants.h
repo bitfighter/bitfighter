@@ -41,8 +41,8 @@
 #define MAX_PLAYER_NAME_LENGTH 32      // Max length of a player name
 #define MAX_PLAYER_PASSWORD_LENGTH 32
 
-static const TNL::U32 MOTD_LEN = 256;
-static const TNL::U32 MAX_PLAYERS = 127;    // Absolute maximum players ever allowed in a game  --> should not be more than U8_MAX
+static const TNL::S32 MOTD_LEN = 256;
+static const TNL::S32 MAX_PLAYERS = 127;    // Absolute maximum players ever allowed in a game  --> should not be more than U8_MAX
 
 enum AuthenticationStatus {
    AuthenticationStatusAuthenticatedName,

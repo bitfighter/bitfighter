@@ -651,9 +651,9 @@ void seedRandomNumberGenerator(string name)
 }
 
 
-U32 getServerMaxPlayers()
+S32 getServerMaxPlayers()
 {
-   U32 maxplay;
+   S32 maxplay;
    if (gCmdLineSettings.maxplayers > 0)
       maxplay = gCmdLineSettings.maxplayers;
    else
