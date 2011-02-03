@@ -225,6 +225,13 @@ struct IniSettings      // With defaults specified
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
 
+#ifdef BF_WRITE_TO_MYSQL
+	string stats_server;
+	string stats_db;
+	string stats_user;
+	string stats_password;
+#endif
+
 
    // Set default values here
    void init()

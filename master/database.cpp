@@ -238,9 +238,6 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
       Connection conn;                                 // Connect to the database
       SimpleResult result;
       
-      conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
-      
-      query = new Query(&conn);
 
       U64 serverId_int = U64_MAX;
 
@@ -254,6 +251,9 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
 
       if(writeToDatabase)
       {
+         conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
+         query = new Query(&conn);
+
          if(serverId_int == U64_MAX)  // Not in cache
          {
             // Find server in database
