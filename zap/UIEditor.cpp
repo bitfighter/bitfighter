@@ -544,7 +544,6 @@ void EditorUserInterface::loadLevel()
 }
 
 
-//extern S32 gMaxPlayers;
 
 // Process a line read from level file
 void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **argv)

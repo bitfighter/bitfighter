@@ -70,7 +70,6 @@ void GameParamUserInterface::onActivate()
 
 extern const char *gGameTypeNames[];
 extern S32 gDefaultGameTypeIndex;
-extern S32 gMaxPlayers;
 
 void GameParamUserInterface::updateMenuItems(const char *gt)
 {
@@ -259,7 +258,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                            0,                  // value
                                            1,                  // increment
                                            0,                  // min val
-                                           gMaxPlayers,        // max val
+                                           MAX_PLAYERS,        // max val
                                            "players",          // units
                                            "N/A", 
                                            "Min. players you would recommend for this level (to help server select the next level)"));
@@ -270,7 +269,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
                                            0,                  // value
                                            1,                  // increment
                                            0,                  // min val
-                                           gMaxPlayers,        // max val
+                                           MAX_PLAYERS,        // max val
                                            "players",          // units
                                            "N/A",
                                            "Max. players you would recommend for this level (to help server select the next level)"));
@@ -302,12 +301,12 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          }
          else if(!stricmp(words[0].c_str(), "MinPlayers"))
          {
-            S32 minPlayers = max(min(atoi(words[1].c_str()), gMaxPlayers), 0);
+            S32 minPlayers = max(min(atoi(words[1].c_str()), MAX_PLAYERS), 0);
             menuItems[OPT_MIN_PLAYERS]->setIntValue(minPlayers);
          }
          else if(!stricmp(words[0].c_str(), "MaxPlayers"))
          {
-            S32 maxPlayers = max(min(atoi(words[1].c_str()), gMaxPlayers), 0);
+            S32 maxPlayers = max(min(atoi(words[1].c_str()), MAX_PLAYERS), 0);
             menuItems[OPT_MAX_PLAYERS]->setIntValue(maxPlayers);
          }
          else if(!stricmp(words[0].c_str(), "Specials"))

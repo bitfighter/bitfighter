@@ -75,10 +75,7 @@ static void writeConnectionsInfo()
    }
 
    // Creates comma delimited list
-	string str = "";
-   for(S32 i = 0; i < alwaysPingList.size(); i++)
-        str += alwaysPingList[i] + ((i < alwaysPingList.size() - 1) ? "," : "");
-	gINI.SetValue("Connections", "AlwaysPingList", str);
+	gINI.SetValue("Connections", "AlwaysPingList", listToString(alwaysPingList, ','));
 }
 
 
