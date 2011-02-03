@@ -1649,7 +1649,10 @@ void Ship::render(S32 layerIndex)
 
    // Now render some "addons"  --> should these be in renderShip?
 
-   if(alpha == 0) return;  // don't draw when completely transparent
+   if(alpha == 0)  // don't draw when completely transparent
+      glPopMatrix();
+	else
+	{
    if(alpha != 1.0)
       glEnableBlend;
 
@@ -1697,6 +1700,7 @@ void Ship::render(S32 layerIndex)
    }
    if(alpha != 1.0)
       glDisableBlend;
+	}  // endif from skipping drawing if(alpha == )
 
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid())
