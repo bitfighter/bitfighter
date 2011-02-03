@@ -170,6 +170,15 @@ Vector<string> parseString(const string &line)
 }
 
 
+string listToString(Vector<string> &words, char seperator)
+{
+	string str = "";
+   for(S32 i = 0; i < words.size(); i++)
+        str += words[i] + ((i < words.size() - 1) ? "," : "");
+   return str;
+}
+
+
 // Splits inputString into a series of words using the specified separator
 void parseString(const char *inputString, Vector<string> &words, char seperator)
 {

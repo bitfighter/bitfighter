@@ -265,7 +265,7 @@ struct IniSettings      // With defaults specified
       lastEditorName = "";               // No default editor level name
       hostname = "Bitfighter host";      // Default host name
       hostdescr = "";
-      maxplayers = 128;                  // That's a lot of players!
+      maxplayers = 127;
       serverPassword = "";               // Passwords empty by default
       adminPassword = "";
       levelChangePassword = "";

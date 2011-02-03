@@ -45,6 +45,7 @@ wnp_connection.o
 
 default: $(OBJECTS)
 	g++ -shared -o libmysqlpp.so *.o -Wl,-soname,libmysqlpp.so.3 -lmysqlclient
+	rm -f libmysqlpp.so.3 2>/dev/null && ln -s libmysqlpp.so libmysqlpp.so.3
 
 clean:
 	rm -f *.o *.so*

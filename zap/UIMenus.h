@@ -174,6 +174,7 @@ class HostMenuUserInterface : public MenuUserInterface
       OPT_ADMIN_PASS,
       OPT_PASS,
       OPT_GETMAP,
+      OPT_MAX_PLAYERS,
       OPT_PORT,
       OPT_COUNT
    };

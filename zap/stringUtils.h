@@ -50,6 +50,8 @@ string ftos(float f, int digits);
 
 string replaceString(const string &strString, const string &strOld, const string &strNew);
 
+string listToString(Vector<string> &words, char seperator);
+
 // TODO: Merge these methods
 TNL::Vector<string> parseString(const string &line);
 void parseString(const char *inputString, TNL::Vector<string> &words, char seperator);
