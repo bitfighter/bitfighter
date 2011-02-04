@@ -38,6 +38,7 @@
 #include "projectile.h"     // For s2cClientJoinedTeam()
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 #include "stringUtils.h"    // For itos
+#include "BotNavMeshZone.h" // For gBotNavMeshZones.
 #include "gameStats.h"      // For VersionedGameStats def.
 #ifdef BF_WRITE_TO_MYSQL
 #include "../master/database.h"
@@ -1355,6 +1356,10 @@ void GameType::spawnRobot(Robot *robot)
 
 Point GameType::getSpawnPoint(S32 team)
 {
+   // out of range team number
+   if(team < 0 || team >= mTeams.size())
+      return Point(0,0);
+
    // If team has no spawn points, we'll just have them spawn at 0,0
    if(mTeams[team].spawnPoints.size() == 0)
       return Point(0,0);
@@ -1731,6 +1736,7 @@ void GameType::serverAddClient(GameConnection *theClient)
          if(ship->getTeam() >= -2 && ship->getTeam() < mTeams.size())
             minTeamIndex = ship->getTeam();
       }
+		ship->setMaskBits(Ship::ChangeTeamMask);  // This is needed to avoid gray robot ships when using /addbot
    }
    // ...and add new player to that team
    cref->setTeam(minTeamIndex);
@@ -1738,7 +1744,7 @@ void GameType::serverAddClient(GameConnection *theClient)
    theClient->setClientRef(cref);
 
    s2cAddClient(cref->name, false, cref->clientConnection->isAdmin(), cref->isRobot, true);    // Tell other clients about the new guy, who is never us...
-   s2cClientJoinedTeam(cref->name, cref->getTeam());
+   if(cref->getTeam() >= 0) s2cClientJoinedTeam(cref->name, cref->getTeam());
 
    spawnShip(theClient);
 }
@@ -2187,7 +2193,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    else                                                  // ...otherwise...
       cl->setTeam(team);                                 // ...use the one provided
 
-   s2cClientJoinedTeam(cl->name, cl->getTeam());         // Announce the change
+   if(cl->getTeam() >= 0) s2cClientJoinedTeam(cl->name, cl->getTeam());         // Announce the change
    spawnShip(source);                                    // Create a new ship
    cl->clientConnection->switchedTeamCount++;            // Count number of times team is switched.
 }
@@ -2399,7 +2405,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
       bool localClient = mClientList[i]->clientConnection == theConnection;
 
       s2cAddClient(mClientList[i]->name, localClient, mClientList[i]->clientConnection->isAdmin(), mClientList[i]->isRobot, false);
-      s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
+      if(mClientList[i]->getTeam() >= 0) s2cClientJoinedTeam(mClientList[i]->name, mClientList[i]->getTeam());
    }
 
    //for(S32 i = 0; i < Robot::robots.size(); i++)  //Robot is part of mClientList
@@ -2526,6 +2532,32 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          e.push_back(clientRef->clientConnection->getClientName());
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+      }
+   }
+   else if(!stricmp(cmd, "addbot"))
+   {
+      if(!clientRef->clientConnection->isAdmin() && gIniSettings.robotScript == "")  // not admin, no robotScript
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
+      else if(!clientRef->clientConnection->isLevelChanger())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+		else
+		{
+         Robot *robot = new Robot();
+         robot->addToGame(getGame());
+         S32 args_count = 0;
+         const char *args_char[128];  // convert to a format processArgs will allow.
+         // The first arg = team number, the second arg, robot script filename, the rest of args goes into script handler.
+         for(S32 i=0; i<args.size() && i<128; i++)
+         {
+            args_char[i] = args[i].getString();
+            args_count++;
+         }
+         robot->processArguments(args_count, args_char);
+         if(robot->isRunningScript && !robot->startLua())
+            robot->isRunningScript = false;
+         if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
+            BotNavMeshZone::buildOrLoadBotMeshZones();
+
       }
    }
    /* /// Remove this command

@@ -317,6 +317,8 @@ static void loadHostConfiguration()
 	if(args1.size() >= 4) gIniSettings.stats_password = args1[3];
 #endif
 
+   gIniSettings.robotScript            = gINI.GetValue("Host", "RobotScript");
+
 }
 
 
@@ -1171,6 +1173,7 @@ static void writeHost()
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.SetValueI (section, "LogStats", gIniSettings.LogStats);
+   gINI.SetValue  (section, "RobotScript", gIniSettings.robotScript);
 }
 
 

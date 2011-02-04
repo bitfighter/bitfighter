@@ -53,6 +53,7 @@
 #include "luaGameInfo.h"
 #include "luaUtil.h"
 #include "glutInclude.h"
+#include "config.h"              // for gIniSettings.robotScript
 
 #include "oglconsole.h"
 
@@ -1477,7 +1478,7 @@ void Robot::startBots()
 {
    for(S32 i = 0; i < robots.size(); i++)
    {
-      if(! robots[i]->startLua())
+      if(robots[i]->isRunningScript && !robots[i]->startLua())
          robots[i]->isRunningScript = false;
    }
 
@@ -1712,11 +1713,17 @@ bool Robot::processArguments(S32 argc, const char **argv)
       mTeam = atoi(argv[0]);
 	else
 		mTeam = -10;   // The Gametype serverAddClient will take care of out of bound checking
+	
 
 	if(argc >= 2)
+		mFilename = argv[1];
+	else
+		mFilename = gIniSettings.robotScript;
+
+	if(mFilename != "")
 	{
       wasRunningScript = true;
-		mFilename = gConfigDirs.findBotFile(argv[1]);
+		mFilename = gConfigDirs.findBotFile(mFilename);
 		if(mFilename == "")
 		{
 			logprintf("Could not find bot file %s", argv[1]);     // TODO: Better handling here
