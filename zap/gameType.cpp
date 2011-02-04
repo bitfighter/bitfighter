@@ -515,7 +515,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          if(isTeamGame())
          {     // (braces required)
-            if(mTeams[i].numPlayers > maxTeamPlayers)
+            if(mTeams[i].numPlayers + mTeams[i].numBots > maxTeamPlayers)
                maxTeamPlayers = mTeams[i].numPlayers + mTeams[i].numBots;
          }
          else
