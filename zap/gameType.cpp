@@ -957,9 +957,9 @@ void GameType::saveGameStats()
       if(gIniSettings.stats_server != "")
       {
          DatabaseWriter dbWriter(gIniSettings.stats_server.c_str(),
-				gIniSettings.stats_db.c_str(),
-				gIniSettings.stats_user.c_str(),
-				gIniSettings.stats_password.c_str() );
+            gIniSettings.stats_db.c_str(),
+            gIniSettings.stats_user.c_str(),
+            gIniSettings.stats_password.c_str() );
          dbWriter.insertStats(stats.gameStats, true);
       }
 
@@ -1736,7 +1736,7 @@ void GameType::serverAddClient(GameConnection *theClient)
          if(ship->getTeam() >= -2 && ship->getTeam() < mTeams.size())
             minTeamIndex = ship->getTeam();
       }
-		ship->setMaskBits(Ship::ChangeTeamMask);  // This is needed to avoid gray robot ships when using /addbot
+      ship->setMaskBits(Ship::ChangeTeamMask);  // This is needed to avoid gray robot ships when using /addbot
    }
    // ...and add new player to that team
    cref->setTeam(minTeamIndex);
@@ -2540,8 +2540,8 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
       else if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
-		else
-		{
+      else
+      {
          Robot *robot = new Robot();
          robot->addToGame(getGame());
          S32 args_count = 0;
@@ -2558,6 +2558,33 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
             BotNavMeshZone::buildOrLoadBotMeshZones();
 
+         StringTableEntry msg = StringTableEntry("Robot added by %e0");
+         Vector<StringTableEntry> e;
+         e.push_back(clientRef->clientConnection->getClientName());
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+      }
+   }
+   else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
+   {
+      if(!clientRef->clientConnection->isAdmin() && gIniSettings.robotScript == "")  // not admin, no robotScript
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
+      else if(!clientRef->clientConnection->isLevelChanger())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+      else
+      {
+         for(S32 i = Robot::robots.size()-1; i >= 0; i++)
+         {
+            delete Robot::robots[i];
+            if(!stricmp(cmd, "kickbot"))
+               break;
+         }
+
+         StringTableEntry msg = StringTableEntry("Robot kicked by %e0");
+         Vector<StringTableEntry> e;
+         e.push_back(clientRef->clientConnection->getClientName());
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
    }
    /* /// Remove this command
