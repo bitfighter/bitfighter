@@ -303,6 +303,18 @@ static void loadHostConfiguration()
    //gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) != "no");
 
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
+
+#ifdef BF_WRITE_TO_MYSQL
+	Vector<string> args1;
+	parseString(gINI.GetValue("Host", "mysql_stats").c_str(), args1, ',');
+	if(args1.size() >= 1) gIniSettings.stats_server = args1[0];
+	if(args1.size() >= 2) gIniSettings.stats_db = args1[1];
+	if(args1.size() >= 3) gIniSettings.stats_user = args1[2];
+	if(args1.size() >= 4) gIniSettings.stats_password = args1[3];
+#endif
+
+   gIniSettings.robotScript            = gINI.GetValue("Host", "RobotScript");
+
 }
 
 
@@ -1157,12 +1169,13 @@ static void writeHost()
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
+   gINI.SetValue  (section, "RobotScript", gIniSettings.robotScript);
 }
 
 
 static void writeLevels()
 {
-   // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as nodat to clobber an existing value
+   // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
    if(gINI.findSection("Levels") == gINI.noID)    // Section doesn't exist... let's write one
       gINI.addSection("Levels");              

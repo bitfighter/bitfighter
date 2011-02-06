@@ -270,6 +270,7 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 
 
 static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited.
+const F32 MinZoneSize = 32;
 
 static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 {
@@ -280,37 +281,36 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 
 	bool canseeX = gb->pointCanSeePoint(Point(x1, y1), Point(x2, y1)) && gb->pointCanSeePoint(Point(x1, y2), Point(x2, y2));
 	bool canseeY = gb->pointCanSeePoint(Point(x1, y1), Point(x1, y2)) && gb->pointCanSeePoint(Point(x2, y1), Point(x2, y2));
+	bool canseeD = gb->pointCanSeePoint(Point(x1, y1), Point(x2, y2)) && gb->pointCanSeePoint(Point(x1, y2), Point(x2, y1));
 
-	if(canseeX && canseeY &&
-		   gb->pointCanSeePoint(Point(x1, y1), Point(x2, y2)) &&
-		   gb->pointCanSeePoint(Point(x1, y2), Point(x2, y1)) )
+	if(canseeX && canseeY && canseeD)
 	{
 		BotNavMeshZone *botzone = new BotNavMeshZone();
 
-		botzone->addToGame(gServerGame);
 		botzone->mPolyBounds.push_back(Point(x1, y1));
 		botzone->mPolyBounds.push_back(Point(x2, y1));
 		botzone->mPolyBounds.push_back(Point(x2, y2));
 		botzone->mPolyBounds.push_back(Point(x1, y2));
 		botzone->mCentroid = Point((x1 + x2) / 2, (y1 + y2) / 2);
 		botzone->mConvex = true;             // avoid random red and green on /dzones, was uninitalized.
+		botzone->addToGame(gServerGame);
 		botzone->computeExtent();
 	}
 	else
 	{
-		if(canseeX && canseeY) 
+		if((canseeX && canseeY) || canseeD) 
       { 
          canseeX = false; 
          canseeY = false; 
       };
 
-		if(!canseeX && x2 - x1 >= 35 && (canseeY || x2 - x1 > y2 - y1))
+		if(!canseeX && x2 - x1 >= MinZoneSize && (canseeY || x2 - x1 > y2 - y1))
 		{
 			F32 x3 = (x1 + x2) / 2;
 			makeBotMeshZone(x1, y1, x3, y2);
 			makeBotMeshZone(x3, y1, x2, y2);
 		}
-		else if(!canseeY && y2 - y1 >= 35)
+		else if(!canseeY && y2 - y1 >= MinZoneSize)
 		{
 			F32 y3 = (y1 + y2)/2;
 			makeBotMeshZone(x1, y1, x2, y3);

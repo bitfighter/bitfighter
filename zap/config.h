@@ -220,6 +220,8 @@ struct IniSettings      // With defaults specified
    bool logStats;
    //bool SendStatsToMaster;
 
+   string robotScript;
+
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;
@@ -306,6 +308,7 @@ struct IniSettings      // With defaults specified
 
       logStats = true;            // Log statistics into ServerFilter log files
       //SendStatsToMaster = true; // Transmit statistics to the master server
+
    }
 };
 

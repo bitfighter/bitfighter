@@ -857,7 +857,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
 
    if(isInitialUpdate())      // This stuff gets sent only once per ship
    {
-      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
+      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
       //updateMask |= ChangeTeamMask;  // make this bit true to write team.
 
       // Now write all the mounts:
@@ -907,7 +907,7 @@ U32 Ship::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *str
    // are set (as happens when a ship comes into scope).  Therefore, we'll force
    // this to be robot only.
    if(stream->writeFlag(updateMask & RespawnMask && isRobot()))
-      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300);  // If true, ship will appear to spawn on client
+      stream->writeFlag(getGame()->getCurrentTime() - mRespawnTime < 300 && !hasExploded);  // If true, ship will appear to spawn on client
 
    if(stream->writeFlag(updateMask & HealthMask))     // Health
       stream->writeFloat(mHealth, 6);

@@ -35,6 +35,73 @@
 namespace Zap
 {
 
+
+bool PolygonsIntersect(const Vector<Point> &p1, Point rp1, Point rp2)
+{
+   Point cp1 = p1[p1.size() - 1];
+   for(S32 j = 0; j < p1.size(); j++)
+   {
+      Point cp2 = p1[j];
+      if(segmentsIntersect(rp1, rp2, cp1, cp2))
+         return true;
+   }
+   rp1 = rp2;
+   //  line inside the other polygon?
+   return PolygonContains2(p1.address(), p1.size(), rp1);
+}
+bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
+{
+   Point rp1 = p1[p1.size() - 1];
+   for(S32 i = 0; i < p1.size(); i++)
+   {
+      Point rp2 = p1[i];
+
+      Point cp1 = p2[p2.size() - 1];
+      for(S32 j = 0; j < p2.size(); j++)
+      {
+         Point cp2 = p2[j];
+         if(segmentsIntersect(rp1, rp2, cp1, cp2))
+            return true;
+/*
+         Point ce = cp2 - cp1;
+         Point n(-ce.y, ce.x);
+
+         F32 distToZero = n.dot(cp1);
+
+         F32 d1 = n.dot(rp1);
+         F32 d2 = n.dot(rp2);
+
+         bool d1in = d1 >= distToZero;
+         bool d2in = d2 >= distToZero;
+
+         if(!d1in && !d2in) // both points are outside this edge of the poly, so...
+            break;
+         else if((d1in && !d2in) || (d2in && !d1in))
+         {
+            // find the clip intersection point:
+            F32 t = (distToZero - d1) / (d2 - d1);
+            Point clipPoint = rp1 + (rp2 - rp1) * t;
+
+            if(d1in)
+               rp2 = clipPoint;
+            else
+               rp1 = clipPoint;
+         }
+         else if(j == p2.size() - 1)
+            return true;
+
+         // if both are in, go to the next edge.
+*/
+         cp1 = cp2;
+      }
+      rp1 = rp2;
+   }
+   //  all points of polygon is inside the other polygon?
+   return PolygonContains2(p1.address(), p1.size(), p2[0]) || PolygonContains2(p2.address(), p2.size(), p1[0]);
+}
+
+
+
 static Vector<DatabaseObject *> fillVector;
 
 // Returns true if deploy point is valid, false otherwise.  deployPosition and deployNormal are populated if successful.
@@ -51,6 +118,11 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
       return false;
+
+
+   if(deployNormal.dot(ship->getAimVector()) * 2 > 0)
+      deployNormal = -deployNormal;      // This is to fix deploy at wrong side of barrier.
+
 
    // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
    deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
@@ -119,7 +191,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
 
    // We need to ensure forcefield doesn't cross another; doing so can create an impossible situation
    // Forcefield starts at the end of the projector.  Need to know where that is.
-   Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal);
+   Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal, 0);
 
    // Now we can find the end point...
    Point endPoint;
@@ -127,7 +199,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, 1.0, endPoint, &collObj);
 
    // Create a temp forcefield to use for collision testing with other forcefields; this one will be deleted below
-   ForceField *newForceField = new ForceField(-1, forceFieldStart, endPoint);
+   //ForceField *newForceField = new ForceField(-1, forceFieldStart, endPoint);
 
    // Now we can do some actual checking.  We'll do this in two passes, one against existing ffs, another against disabled
    // projectors that might be enabled in the future.
@@ -135,17 +207,46 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    bool collision = false;
 
    // First test existing forcefields -- these will be faster than checking inactive projectors, which we'll do later
-   Rect queryRect(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 2);
+   //Rect queryRect = (forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 2);
+   Rect queryRect(forceFieldStart, endPoint);
+   queryRect.expand(Point(5,5));
+   ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+
+   for(S32 i = 0; i < fillVector.size(); i++)
+   {
+      ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
+      if(ffp)
+      {
+         Vector<Point> thisGeom;
+         Point start,end;
+         ffp->getCollisionPoly(thisGeom);
+         if(PolygonsIntersect(thisGeom, start, end))
+         {
+            collision = true;
+            break;
+         }
+      }
+   }
+
+   if(!collision)
+   {
+   fillVector.clear();
    ship->getGridDatabase()->findObjects(ForceFieldType, fillVector, queryRect);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       ForceField *ff = dynamic_cast<ForceField *>(fillVector[i]);
-      if(ff && ff->intersects(newForceField))
+      if(ff)// && ff->intersects(newForceField)) // intersect slow
       {
-         collision = true;
-         break;
+         Point start, end;
+         ff->getForceFieldStartAndEndPoints(start, end);
+         if(segmentsIntersect(forceFieldStart, endPoint, start, end))
+         {
+            collision = true;
+            break;
+         }
       }
+   }
    }
 
    if(!collision)
@@ -153,20 +254,22 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
       // First we must find any possibly intersecting forcefield projector and if it's inactive, create a temp forcefield
       // Projectors up to two forcefield lengths away must be considered because the end of one could intersect the end of the other
       fillVector.clear();
-      queryRect.set(forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 4);
+      queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
       ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-         if(proj && !proj->isEnabled())      // Enabled projectors handled in forcefield search above
+         if(proj)// && !proj->isEnabled())      // Enabled projectors handled in forcefield search above
          {
             Point start, end;
             proj->getForceFieldStartAndEndPoints(start, end);
 
-            ForceField forceField = ForceField(0, start, end);
+            //ForceField forceField = ForceField(0, start, end);
 
-            if(forceField.intersects(newForceField))
+            //if(forceField.intersects(newForceField))
+
+            if(segmentsIntersect(forceFieldStart, endPoint, start, end))
             {
                collision = true;
                break;
@@ -175,7 +278,7 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
       }
    }
 
-   delete newForceField;
+   //delete newForceField;
 
    if(collision)
    {
@@ -449,53 +552,6 @@ void EngineeredObject::explode()
    FXManager::emitBurst(getActualPos(), Point(b,d) * 0.6, Color(1,1,0), Color(0,1,1));
 
    disableCollision();
-}
-
-
-bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
-{
-   Point rp1 = p1[p1.size() - 1];
-   for(S32 i = 0; i < p1.size(); i++)
-   {
-      Point rp2 = p1[i];
-
-      Point cp1 = p2[p2.size() - 1];
-      for(S32 j = 0; j < p2.size(); j++)
-      {
-         Point cp2 = p2[j];
-         Point ce = cp2 - cp1;
-         Point n(-ce.y, ce.x);
-
-         F32 distToZero = n.dot(cp1);
-
-         F32 d1 = n.dot(rp1);
-         F32 d2 = n.dot(rp2);
-
-         bool d1in = d1 >= distToZero;
-         bool d2in = d2 >= distToZero;
-
-         if(!d1in && !d2in) // both points are outside this edge of the poly, so...
-            break;
-         else if((d1in && !d2in) || (d2in && !d1in))
-         {
-            // find the clip intersection point:
-            F32 t = (distToZero - d1) / (d2 - d1);
-            Point clipPoint = rp1 + (rp2 - rp1) * t;
-
-            if(d1in)
-               rp2 = clipPoint;
-            else
-               rp1 = clipPoint;
-         }
-         else if(j == p2.size() - 1)
-            return true;
-
-         // if both are in, go to the next edge.
-         cp1 = cp2;
-      }
-      rp1 = rp2;
-   }
-   return false;
 }
 
 

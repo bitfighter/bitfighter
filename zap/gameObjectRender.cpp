@@ -860,15 +860,15 @@ void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill, Point 
 }
 
 
-void renderSlipZone(const Vector<Point> &bounds, Rect extent)     
+void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill, Rect extent)     
 {
    Color theColor (0, 0.5, 0);  // Go for a pale green, for now...
 
    glColor(theColor * 0.5);
 
-   glBegin(GL_POLYGON);
-      for(S32 i = 0; i < bounds.size(); i++)
-         glVertex2f(bounds[i].x, bounds[i].y);
+   glBegin(GL_TRIANGLES);
+      for(S32 i = 0; i < boundsFill.size(); i++)
+         glVertex2f(boundsFill[i].x, boundsFill[i].y);
    glEnd();
 
    glColor(theColor * 0.7);
