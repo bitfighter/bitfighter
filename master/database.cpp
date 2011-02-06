@@ -304,12 +304,10 @@ U64 DatabaseWriter::getServerFromCache(const GameStats &gameStats)
 
 
 // Return false if failed, true if written to database
-bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabase) 
+void DatabaseWriter::insertStats(const GameStats &gameStats) 
 {
    Query *query = NULL;
    sqlite3 *sqliteDb = NULL;
-
-   bool success = true;
 
    try
    {
@@ -330,14 +328,14 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
          {
             logprintf("ERROR: Can't open stats database %s: %s", mDb, sqlite3_errmsg(sqliteDb));
             sqlite3_close(sqliteDb);
-            return false;
+            return;
          }
       }
 
       else
       {
          //logprintf("Invalid DatabaseWriter!");
-         return false;
+         return;
       }
 
 
@@ -358,7 +356,6 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
    catch (const Exception &ex) 
    {
       logprintf("Failure writing stats to database: %s", ex.what());
-      success = false;
    }
 
    // Cleanup!
@@ -367,7 +364,5 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
 
    if(sqliteDb)
       sqlite3_close(sqliteDb);
-
-   return success;
 }
 

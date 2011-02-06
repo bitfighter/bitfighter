@@ -85,7 +85,7 @@ public:
    // SQLite constructor
    DatabaseWriter(const char *db);
 
-   bool insertStats(const GameStats &gameStats, bool writeToDatabase);
+   void insertStats(const GameStats &gameStats);
    void addToServerCache(U64 id, const GameStats &gameStats);           // Add database to our cache
    U64 getServerFromCache(const GameStats &gameStats);                  // And get it back out again
 };

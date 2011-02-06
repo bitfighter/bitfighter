@@ -946,8 +946,8 @@ void GameType::saveGameStats()
 
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
-   if(gIniSettings.LogStats != 0)
-      logGameStats(&stats, gIniSettings.LogStats);
+   if(gIniSettings.logStats)
+      logGameStats(&stats);
 
 
 #ifdef BF_WRITE_TO_MYSQL

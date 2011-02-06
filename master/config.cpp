@@ -52,11 +52,11 @@ extern string gDbPassword;
 extern string gPhpbb3Database;
 extern string gPhpbb3TablePrefix;
 
-extern bool gWriteStatsToDatabase;
 extern string gStatsDatabaseAddress;
 extern string gStatsDatabaseName;
 extern string gStatsDatabaseUsername;
 extern string gStatsDatabasePassword;
+extern bool gWriteStatsToMySql;
 
 
 extern U32 gLatestReleasedCSProtocol;
@@ -152,8 +152,9 @@ void processConfigLine(int argc, string argv[])
    else if(argv[0] == "stats_database_password" && argc > 1)
       gStatsDatabasePassword = argv[1];
 
-   else if(argv[0] == "write_stats_to_database" && argc > 1)
-      gWriteStatsToDatabase = (Zap::lcase(argv[1]) == "Yes");
+   else if(argv[0] == "write_stats_to_mysql" && argc > 1)
+      gWriteStatsToMySql = (Zap::lcase(argv[1]) == "yes");
+   
 }
 
 enum {

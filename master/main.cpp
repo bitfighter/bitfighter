@@ -73,9 +73,9 @@ string gStatsDatabaseAddress;
 string gStatsDatabaseName;
 string gStatsDatabaseUsername;
 string gStatsDatabasePassword;
-bool gWriteStatsToDatabase;      // True to write stats to db, false to stats file
 
-//DatabaseWriter *databaseWriter;
+bool gWriteStatsToMySql;
+
 
 class MasterServerConnection;
 
@@ -1200,15 +1200,22 @@ public:
       processIsAuthenticated(gameStats);
       processStatsResults(gameStats);
 
-      DatabaseWriter databaseWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
-                                    gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+      DatabaseWriter databaseWriter;
+
+      if(gWriteStatsToMySql)
+      {
+         databaseWriter = DatabaseWriter(gStatsDatabaseAddress.c_str(), gStatsDatabaseName.c_str(), 
+                                         gStatsDatabaseUsername.c_str(), gStatsDatabasePassword.c_str());
+      }
+      else
+      {
+         databaseWriter = DatabaseWriter("stats.db");
+      }
+
 
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
-      bool hasWrittenToDatabase = databaseWriter.insertStats(*gameStats, gWriteStatsToDatabase);
+      databaseWriter.insertStats(*gameStats);
 
-      // If writing to the database failed, write them to a file as a last ditch effort to save the info
-      if(! hasWrittenToDatabase)
-         databaseWriter.insertStats(*gameStats, false);
    }
 
 

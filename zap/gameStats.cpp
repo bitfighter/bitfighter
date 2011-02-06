@@ -99,13 +99,13 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
    }
 
 
-   void logGameStats(VersionedGameStats *stats, S32 format) 
+   void logGameStats(VersionedGameStats *stats) 
    {
       processStatsResults(&stats->gameStats);
 
       DatabaseWriter databaseWriter("stats.db");
 
-      databaseWriter.insertStats(stats->gameStats, false);
+      databaseWriter.insertStats(stats->gameStats);
    }
 
 

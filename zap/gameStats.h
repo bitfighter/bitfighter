@@ -112,7 +112,7 @@ extern string getResult(S32 scores, S32 score1, S32 score2, S32 currScore, bool 
 extern S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b);
 extern S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b);
 extern void processStatsResults(GameStats *gameStats);
-extern void logGameStats(VersionedGameStats *stats, S32 format = 1);
+extern void logGameStats(VersionedGameStats *stats);
 
 };    // end namespace Zap
 
