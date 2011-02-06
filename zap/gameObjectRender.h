@@ -111,7 +111,7 @@ extern void renderNexus(const Vector<Point> &outline, const Vector<Point> &fill,
                         bool open, F32 glowFraction, F32 scaleFact = 1);
 
 
-extern void renderSlipZone(const Vector<Point> &bounds, Rect extent);
+extern void renderSlipZone(const Vector<Point> &bounds, const Vector<Point> &boundsFill, Rect extent);
 
 extern void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *text, F32 scaleFact = 1);
 

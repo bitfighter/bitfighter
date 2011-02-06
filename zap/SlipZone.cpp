@@ -50,7 +50,7 @@ SlipZone::SlipZone()     // Constructor
 
 void SlipZone::render()
 {
-   renderSlipZone(mPolyBounds, getExtent());
+   renderSlipZone(mPolyBounds, mPolyFill, getExtent());
 }
 
 
