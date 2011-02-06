@@ -217,20 +217,13 @@ struct IniSettings      // With defaults specified
    bool luaLevelGenerator;    
    bool luaBotMessage;        
    bool serverFilter;  
-   S32 LogStats;
+   bool logStats;
    //bool SendStatsToMaster;
 
    Vector<StringTableEntry> levelList;
 
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
-
-#ifdef BF_WRITE_TO_MYSQL
-	string stats_server;
-	string stats_db;
-	string stats_user;
-	string stats_password;
-#endif
 
 
    // Set default values here
@@ -311,7 +304,7 @@ struct IniSettings      // With defaults specified
       luaBotMessage = true;       
       serverFilter = false; 
 
-      LogStats = 1;             // Log statistics into ServerFilter log files
+      logStats = true;            // Log statistics into ServerFilter log files
       //SendStatsToMaster = true; // Transmit statistics to the master server
    }
 };

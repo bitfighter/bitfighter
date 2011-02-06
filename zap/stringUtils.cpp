@@ -72,6 +72,14 @@ string itos(U64 i)
 }
 
 
+string itos(S64 i)
+{
+   char outString[21];  // 20 chars plus a null char, ?9223372036854775808
+   dSprintf(outString, sizeof(outString), "%d", i);
+   return outString;
+}
+
+
 string ftos(F32 f, S32 digits)
 {
    char outString[100];

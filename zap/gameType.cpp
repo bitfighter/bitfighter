@@ -39,9 +39,6 @@
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 #include "stringUtils.h"    // For itos
 #include "gameStats.h"      // For VersionedGameStats def.
-#ifdef BF_WRITE_TO_MYSQL
-#include "../master/database.h"
-#endif
 
 #include "statistics.h"
 #include "masterConnection.h"     // For s2mSendPlayerStatistics, s2mSendGameStatistics
@@ -947,22 +944,8 @@ void GameType::saveGameStats()
 
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
-   if(gIniSettings.LogStats != 0)
-      logGameStats(&stats, gIniSettings.LogStats);
-
-
-#ifdef BF_WRITE_TO_MYSQL
-      processStatsResults(&stats.gameStats);
-      if(gIniSettings.stats_server != "")
-      {
-         DatabaseWriter dbWriter(gIniSettings.stats_server.c_str(),
-				gIniSettings.stats_db.c_str(),
-				gIniSettings.stats_user.c_str(),
-				gIniSettings.stats_password.c_str() );
-         dbWriter.insertStats(stats.gameStats, true);
-      }
-
-#endif
+   if(gIniSettings.logStats != 0)
+      logGameStats(&stats, gIniSettings.logStats);
 }
 
 

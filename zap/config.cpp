@@ -296,27 +296,13 @@ static void loadHostConfiguration()
    S32 fps = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
 	if(fps >= 1) 
       gIniSettings.maxDedicatedFPS = fps; 
-   // else warn?
+   // TODO: else warn?
 
-
-   // allow "Yes" to enable logging
-   string str = gINI.GetValue("Host", "LogStats", "1");
-   gIniSettings.LogStats = atoi(str.c_str());
-   if(lcase(str) == "yes") gIniSettings.LogStats = 1;
+   gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "logStats", gIniSettings.logStats);
 
    //gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) != "no");
 
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
-
-#ifdef BF_WRITE_TO_MYSQL
-	Vector<string> args1;
-	parseString(gINI.GetValue("Host", "mysql_stats").c_str(), args1, ',');
-	if(args1.size() >= 1) gIniSettings.stats_server = args1[0];
-	if(args1.size() >= 2) gIniSettings.stats_db = args1[1];
-	if(args1.size() >= 3) gIniSettings.stats_user = args1[2];
-	if(args1.size() >= 4) gIniSettings.stats_password = args1[3];
-#endif
-
 }
 
 
@@ -1155,7 +1141,7 @@ static void writeHost()
       addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
       addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
-      addComment(" LogStats - Write ending game score statistics into server log, 0 = don't write, 1 = write ending scores, other numbers to adjust formats might be added in the future");
+      addComment(" LogStats - Save game stats locally (saves the same stats as are sent to the master)");
       addComment("----------------");
    }
    gINI.SetValue  (section, "ServerName", gIniSettings.hostname);
@@ -1170,13 +1156,13 @@ static void writeHost()
    gINI.setValueYN(section, "AllowGetMap", gIniSettings.allowGetMap);
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
-   gINI.SetValueI (section, "LogStats", gIniSettings.LogStats);
+   gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
 }
 
 
 static void writeLevels()
 {
-   // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as not to clobber an existing value
+   // If there is no Levels key, we'll add it here.  Otherwise, we'll do nothing so as nodat to clobber an existing value
    // We'll write the default level list (which may have been overridden by the cmd line) because there are no levels in the INI
    if(gINI.findSection("Levels") == gINI.noID)    // Section doesn't exist... let's write one
       gINI.addSection("Levels");              

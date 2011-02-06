@@ -62,21 +62,32 @@ struct ServerInformation
 class DatabaseWriter 
 {
 private:
-   bool mIsValid;
+   bool mMySql;        // Can this connection use mysql?
+   bool mSqlite;       // Can this connection use sqlite?
+
    char mServer[64];   // was const char *, but problems when data in pointer dies.
    char mDb[64];
    char mUser[64];
    char mPassword[64];
    Vector<ServerInformation> cachedServers;
+
    U64 lastGameID;
 
    void initialize(const char *server, const char *db, const char *user, const char *password);
 
 public:
    DatabaseWriter();
+
+   // MySQL constructors
    DatabaseWriter(const char *server, const char *db, const char *user, const char *password);     // Constructor
    DatabaseWriter(const char *db, const char *user, const char *password);                         // Constructor
+
+   // SQLite constructor
+   DatabaseWriter(const char *db);
+
    bool insertStats(const GameStats &gameStats, bool writeToDatabase);
+   void addToServerCache(U64 id, const GameStats &gameStats);           // Add database to our cache
+   U64 getServerFromCache(const GameStats &gameStats);                  // And get it back out again
 };
 
 

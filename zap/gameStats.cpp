@@ -67,6 +67,7 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
    }
 
 
+   // Fills in some of the blanks in the gameStats struct; not everything is sent
    void processStatsResults(GameStats *gameStats)
    {
       for(S32 i = 0; i < gameStats->teamStats.size(); i++)
@@ -82,6 +83,7 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
                   getResult(playerStats->size(), (*playerStats)[0].points, playerStats->size() == 1 ? 0 : (*playerStats)[1].points, (*playerStats)[j].points, j == 0);
          }
       }
+
       if(gameStats->isTeamGame)
       {
          Vector<TeamStats> *teams = &gameStats->teamStats;
@@ -101,31 +103,13 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
    {
       processStatsResults(&stats->gameStats);
 
-      if(format == 1)
-      {
-         DatabaseWriter dbWriter;
-         dbWriter.insertStats(stats->gameStats, false);
-      }
+      DatabaseWriter databaseWriter("stats.db");
 
-      // Block does nothing... delete!
-      /*else
-      {
-         GameStats *g = &stats->gameStats;
-         for(S32 i = 0; i < g->teamStats.size(); i++)
-         {
-            TeamStats *gt = &g->teamStats[i];
-            for(S32 j = 0; j < gt->playerStats.size(); j++)
-            {
-               PlayerStats *gp = &gt->playerStats[j];
-               for(S32 k = 0; k < gp->weaponStats.size(); k++)
-               {
-                  WeaponStats *gw = &gp->weaponStats[k];
-               }
-            }
-         }
-      }*/
+      databaseWriter.insertStats(stats->gameStats, false);
    }
-}
+
+
+};
 
 
 #ifdef TNL_ENABLE_ASSERTS

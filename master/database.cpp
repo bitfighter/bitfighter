@@ -27,6 +27,8 @@
 #include "tnlLog.h"
 #include "../zap/stringUtils.h"            // For replaceString()
 
+#include "../sqlite/sqlite3.h"
+
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
 #endif
@@ -36,34 +38,51 @@ using namespace mysqlpp;
 using namespace TNL;
 
 
+
 // Default constructor -- don't use this one!
 DatabaseWriter::DatabaseWriter()
 {
-   mIsValid = false;
+   mMySql = false;
+   mSqlite = false;
 }
 
 
-// Constructor
+// MySQL Constructor
 DatabaseWriter::DatabaseWriter(const char *server, const char *db, const char *user, const char *password)
 {
    initialize(server, db, user, password);
 }
 
 
-// Constructor -- defaults to local machine for db server
+// MySQL Constructor -- defaults to local machine for db server
 DatabaseWriter::DatabaseWriter(const char *db, const char *user, const char *password)
 {
    initialize("127.0.0.1", db, user, password);
 }
 
 
+// Sqlite Constructor
+DatabaseWriter::DatabaseWriter(const char *db)
+{
+   strncpy(mDb, db, sizeof(mDb) - 1);
+
+   if(fileExists(mDb))
+      mSqlite = true;
+   else
+   {
+      logprintf("Could not find database file %s", mDb);
+      mSqlite = false;
+   }
+}
+
+
 void DatabaseWriter::initialize(const char *server, const char *db, const char *user, const char *password)
 {
-   strncpy(mServer, server, sizeof(mServer)-1);   // was const char *, but problems when data in pointer dies.
-   strncpy(mDb, db, sizeof(mDb)-1);
-   strncpy(mUser, user, sizeof(mUser)-1);
-   strncpy(mPassword, password, sizeof(mPassword)-1);
-   mIsValid = db[0] != 0;  // Not valid if db is empty string.
+   strncpy(mServer, server, sizeof(mServer) - 1);   // was const char *, but problems when data in pointer dies.
+   strncpy(mDb, db, sizeof(mDb) - 1);
+   strncpy(mUser, user, sizeof(mUser) - 1);
+   strncpy(mPassword, password, sizeof(mPassword) - 1);
+   mMySql = (db[0] != 0);                          // Not valid if db is empty string
 }
 
 
@@ -90,18 +109,47 @@ public:
 #endif
 
 
-// Create wrapper function to make logging easier
+// Create wrapper functions to make logging easier -- every stats related query comes through these
+
+// Run a mysql query -- should never get here unless mysql has been compiled in
 static SimpleResult runQuery(Query *query, const string &sql)
 {
 #ifdef BF_WRITE_TO_MYSQL
    return query->execute(sql);
 #else
-	throw std::exception();
+	throw std::exception();    // Should be impossible
 #endif
 }
 
 
-static void insertStatsShots(Query *query, const string &playerId, const Vector<WeaponStats> weaponStats)
+// Run a sqlite query
+static void runQuery(sqlite3 *sqliteDb, const string &sql)
+{
+   char *err = 0;
+   sqlite3_exec(sqliteDb, sql.c_str(), NULL, 0, &err);
+
+   if(err)
+      logprintf("Database error accessing sqlite databse: %s", err);
+}
+
+
+static string runQuery(Query *query, sqlite3 *sqliteDb, const string &sql)
+{
+   if(query)
+      return itos(runQuery(query, sql).insert_id());     // MySQL query
+
+   else if(sqliteDb)
+   {
+      runQuery(sqliteDb, sql);                           // Sqlite query
+      return itos(sqlite3_last_insert_rowid(sqliteDb));  
+   }
+
+   else 
+      return "";
+}
+
+
+static void insertStatsShots(Query *query, sqlite3 *sqliteDb, const string &playerId, const Vector<WeaponStats> weaponStats)
 {
    for(S32 i = 0; i < weaponStats.size(); i++)
    {
@@ -111,17 +159,14 @@ static void insertStatsShots(Query *query, const string &playerId, const Vector<
                        "VALUES(" + playerId + ", '" + WeaponInfo::getWeaponName(weaponStats[i].weaponType) + "', " + 
                                   itos(weaponStats[i].shots) + ", " + itos(weaponStats[i].hits) + ");";
          
-         if(query)
-            itos(runQuery(query, sql).insert_id());
-         else
-            logprintf(LogConsumer::StatisticsFilter, sql.c_str());
+         runQuery(query, sqliteDb, sql);
       }
    }
 }
 
 
 // Inserts player and all associated weapon stats
-static string insertStatsPlayer(Query *query, const PlayerStats *playerStats, const string gameId, const string &teamId)
+static string insertStatsPlayer(Query *query, sqlite3 *sqliteDb, const PlayerStats *playerStats, const string gameId, const string &teamId)
 {
    string sql = "INSERT INTO stats_player(stats_game_id, stats_team_id, player_name, "
                                                "is_authenticated, is_robot, "
@@ -134,87 +179,127 @@ static string insertStatsPlayer(Query *query, const PlayerStats *playerStats, co
                                  itos(playerStats->deaths) + ", " +
                                  itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
 
-   string playerId;
+   string playerId = runQuery(query, sqliteDb, sql);
 
-   if(query)
-      playerId = itos(runQuery(query, sql).insert_id());
-   else
-   {
-      playerId = "(select max(stats_player_id) from stats_player)";
-      logprintf(LogConsumer::StatisticsFilter, sql.c_str());
-   }
-
-   insertStatsShots(query, playerId, playerStats->weaponStats);
+   insertStatsShots(query, sqliteDb, playerId, playerStats->weaponStats);
 
    return playerId;
 }
 
 
 // Inserts stats of team and all players
-static string insertStatsTeam(Query *query, const TeamStats *teamStats, const string &gameId)
+static string insertStatsTeam(Query *query, sqlite3 *sqliteDb, const TeamStats *teamStats, const string &gameId)
 {
    string sql = "INSERT INTO stats_team(stats_game_id, team_name, team_score, result, color_hex) "
                 "VALUES(" + gameId + ", '" + sanitize(teamStats->name) + "', " + itos(teamStats->score) + " ,'" + 
                             teamStats->gameResult + "' ,'" + teamStats->hexColor + "');";
 
-   string teamId;
-
-   if(query)
-      teamId = itos(runQuery(query, sql).insert_id());
-   else
-   {
-      teamId = "(select max(stats_team_id) from stats_team)";
-      logprintf(LogConsumer::StatisticsFilter, sql.c_str());
-   }
+   string teamId = runQuery(query, sqliteDb, sql);
 
    for(S32 i = 0; i < teamStats->playerStats.size(); i++)
-      insertStatsPlayer(query, &teamStats->playerStats[i], gameId, teamId);
+      insertStatsPlayer(query, sqliteDb, &teamStats->playerStats[i], gameId, teamId);
 
    return teamId;
 }
 
 
-static string insertStatsGame(Query *query, const GameStats *gameStats, const string &serverId)
+static string insertStatsGame(Query *query, sqlite3 *sqliteDb, const GameStats *gameStats, U64 serverId)
 {
    string sql = "INSERT INTO stats_game(server_id, game_type, is_official, player_count, "
                                        "duration_seconds, level_name, is_team_game, team_count) "
-                "VALUES( " + serverId + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + itos(gameStats->playerCount) + ", " +
+                "VALUES( " + itos(serverId) + ", '" + gameStats->gameType + "', " + btos(gameStats->isOfficial) + ", " + itos(gameStats->playerCount) + ", " +
                              itos(gameStats->duration) + ", '" + sanitize(gameStats->levelName) + "', " + btos(gameStats->isTeamGame) + ", " + 
                              itos(gameStats->teamCount)  + ");";
 
-   string gameId;
-
-   if(query)
-      gameId = itos(runQuery(query, sql).insert_id());
-   else
-   {
-      gameId = "(select max(stats_game_id) from stats_game)";
-      logprintf(LogConsumer::StatisticsFilter, sql.c_str());
-   }
+   string gameId = runQuery(query, sqliteDb, sql);
 
    for(S32 i = 0; i < gameStats->teamStats.size(); i++)
-      insertStatsTeam(query, &gameStats->teamStats[i], gameId);
+      insertStatsTeam(query, sqliteDb, &gameStats->teamStats[i], gameId);
 
    return gameId;
 }
 
 
-static string insertStatsServer(Query *query, const GameStats &gameStats)
+static U64 insertStatsServer(Query *query, sqlite3 *sqliteDb, const GameStats &gameStats)
 {
    string sql = "INSERT INTO server(server_name, ip_address) "
                 "VALUES('" + sanitize(gameStats.serverName) + "', '" + gameStats.serverIP + "');";
 
-   string serverId;
-
    if(query)
-      serverId = itos(runQuery(query, sql).insert_id());
-   else
+     return runQuery(query, sql).insert_id();
+
+   else if(sqliteDb)
    {
-      serverId = "(select max(server_id) from server)";
-      logprintf(LogConsumer::StatisticsFilter, sql.c_str());
+      runQuery(sqliteDb, sql);
+      return sqlite3_last_insert_rowid(sqliteDb);
    }
 
-   return serverId;
+   return U64_MAX;
+}
+
+
+// Looks in database to find server mathcing the one in gameStats... returns server_id, or U64_MAX if no match was found
+static U64 getServerFromDatabase(Query *query, sqlite3 *sqliteDb, const GameStats &gameStats)
+{
+   // Find server in database
+   string sql = "SELECT server_id FROM server AS server "
+                "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "';";
+                //"WHERE server_name = 'Bitfighter sam686' AND ip_address = '96.2.123.136';";
+
+#ifdef BF_WRITE_TO_MYSQL
+   if(query)
+   {
+      U64 serverId = U64_MAX;
+      StoreQueryResult results = query->store(sql.c_str(), sql.length());
+
+      if(results.num_rows() >= 1)
+         serverId_int = results[0][0];
+
+      return serverId_int;
+   }
+   else
+#endif
+   if(sqliteDb)
+   {
+      char *err = 0;
+      char **results;
+      int rows, cols;
+
+      sqlite3_get_table(sqliteDb, sql.c_str(), &results, &rows, &cols, &err);
+
+      if(rows >= 1)
+      {
+         string result = results[1];      // results[0] will contain the col header, or "server_id"
+         return stoi(result);
+      }
+
+      sqlite3_free_table(results);
+   }
+
+   return U64_MAX;
+}
+
+
+void DatabaseWriter::addToServerCache(U64 id, const GameStats &gameStats)
+{
+   // Limit cache growth
+   static const S32 SERVER_CACHE_SIZE = 20;
+
+   if(cachedServers.size() >= SERVER_CACHE_SIZE) 
+      cachedServers.erase(0);
+
+   cachedServers.push_back(ServerInformation(id, gameStats.serverName, gameStats.serverIP));
+}
+
+
+U64 DatabaseWriter::getServerFromCache(const GameStats &gameStats)
+{
+   // Check cache for server info
+   for(S32 i = cachedServers.size() - 1; i >= 0; i--)
+      if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
+         return  cachedServers[i].id;
+
+   return U64_MAX;
 }
 
 
@@ -222,69 +307,53 @@ static string insertStatsServer(Query *query, const GameStats &gameStats)
 bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabase) 
 {
    Query *query = NULL;
+   sqlite3 *sqliteDb = NULL;
+
    bool success = true;
 
    try
    {
-      if(writeToDatabase && !mIsValid)
+
+#ifdef BF_WRITE_TO_MYSQL
+      if(mMySql)
+      {
+         Connection conn;                                 // Connect to the database
+         conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
+         getServerFromCache
+         query = new Query(&conn);
+      }
+      else
+#endif
+      if(mSqlite)
+      {
+         if(sqlite3_open(mDb, &sqliteDb))    // Returns true if an error occurred
+         {
+            logprintf("ERROR: Can't open stats database %s: %s", mDb, sqlite3_errmsg(sqliteDb));
+            sqlite3_close(sqliteDb);
+            return false;
+         }
+      }
+
+      else
       {
          //logprintf("Invalid DatabaseWriter!");
          return false;
       }
 
-      string serverId;
 
-#ifdef BF_WRITE_TO_MYSQL
-      Connection conn;                                 // Connect to the database
-      SimpleResult result;
-      
+      U64 serverId = getServerFromCache(gameStats);
 
-      U64 serverId_int = U64_MAX;
-
-      // Check cache first
-      for(S32 i = cachedServers.size() - 1; i >= 0; i--)
-         if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
-         {
-            serverId_int = cachedServers[i].id;
-            break;
-         }
-
-      if(writeToDatabase)
+      if(serverId == U64_MAX)      // Not found in cache, check database
       {
-         conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
-         query = new Query(&conn);
+         serverId = getServerFromDatabase(query, sqliteDb, gameStats);
 
-         if(serverId_int == U64_MAX)  // Not in cache
-         {
-            // Find server in database
-            string sql = "SELECT server_id FROM server AS server "
-                           "WHERE server_name = '" + sanitize(gameStats.serverName) + "' AND ip_address = '" + gameStats.serverIP + "'";
-            StoreQueryResult results = query->store(sql.c_str(), sql.length());
+         if(serverId == U64_MAX)   // Not found in database, add to database
+            serverId = insertStatsServer(query, sqliteDb, gameStats);
 
-            if(results.num_rows() >= 1)
-               serverId_int = results[0][0];
+         addToServerCache(serverId, gameStats);
+	   }
 
-            if(serverId_int == U64_MAX)      // Not in database
-               serverId = insertStatsServer(query, gameStats);
-            else
-               serverId = itos(serverId_int);
-
-            // Limit cache growth
-            static const S32 SERVER_CACHE_SIZE = 20;
-            if(cachedServers.size() > SERVER_CACHE_SIZE) 
-               cachedServers.erase(0);
-
-            cachedServers.push_back(ServerInformation(serverId_int, gameStats.serverName, gameStats.serverIP));
-	      }
-      }
-      else
-#endif
-         serverId = insertStatsServer(NULL, gameStats);
-        
-      //if(serverId == "")      // Not sure this can ever happen...
-      //   success = false;
-      //else
-         insertStatsGame(query, &gameStats, serverId);
+      insertStatsGame(query, sqliteDb, &gameStats, serverId);
    }
    catch (const Exception &ex) 
    {
@@ -292,8 +361,12 @@ bool DatabaseWriter::insertStats(const GameStats &gameStats, bool writeToDatabas
       success = false;
    }
 
+   // Cleanup!
    if(query)
       delete query;
+
+   if(sqliteDb)
+      sqlite3_close(sqliteDb);
 
    return success;
 }

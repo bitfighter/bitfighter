@@ -47,7 +47,7 @@ extern string gServerPassword;
 extern string gAdminPassword;
 extern string gLevelChangePassword;
 extern U32 gSimulatedLag;
-extern S32 getServerMaxPlayers();
+extern U32 getServerMaxPlayers();
 extern U32 gRawJoystickButtonInputs;
 extern void renderDPad(Point center, F32 radius, bool upStat, bool downStat, bool leftStat, bool rightStat, const char *msg1, const char *msg2);
 extern Address gBindAddress;

@@ -242,7 +242,6 @@ void Asteroid::damageObject(DamageInfo *theInfo)
 
    if(asteroidRenderSize[mSizeIndex] == -1)    // Kill small items
    {
-      setMaskBits(ExplodedMask);    
       hasExploded = true;
       deleteObject(500);
       return;

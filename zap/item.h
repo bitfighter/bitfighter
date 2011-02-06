@@ -55,8 +55,7 @@ protected:
       MountMask = BIT(3),
       ZoneMask = BIT(4),
       ItemChangedMask = BIT(5),
-      ExplodedMask = BIT(6),
-      FirstFreeMask = BIT(7),
+      FirstFreeMask = BIT(6),
    };
 
    SafePtr<Ship> mMount;

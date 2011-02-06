@@ -1525,13 +1525,9 @@ public:
 
       // Log F5 chat messages
       if(isPrivate)
-      {
          logprintf(LogConsumer::LogChat, "Relayed private msg from %s to %s: %s", mPlayerOrServerName.getString(), privateTo, strippedMessage);
-      }
       else
-      {
          logprintf(LogConsumer::LogChat, "Relayed chat msg from %s: %s", mPlayerOrServerName.getString(), message.getString());
-         }
    }
 
    TNL_DECLARE_NETCONNECTION(MasterServerConnection);

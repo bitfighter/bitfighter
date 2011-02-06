@@ -58,7 +58,7 @@
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessKeepComments>false</PreprocessKeepComments>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PreprocessorDefinitions>TNL_ENABLE_ASSERTS;TNL_DEBUG;TNL_ENABLE_LOGGING;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BF_WRITE_TO_SQLITE;TNL_ENABLE_ASSERTS;TNL_DEBUG;TNL_ENABLE_LOGGING;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -96,6 +96,7 @@
   <ItemGroup>
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
+    <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="..\zap\barrier.cpp" />
     <ClCompile Include="..\zap\BotNavMeshZone.cpp" />
     <ClCompile Include="..\zap\config.cpp" />
@@ -190,6 +191,7 @@
   <ItemGroup>
     <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
+    <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="..\zap\barrier.h" />
     <ClInclude Include="..\zap\BotNavMeshZone.h" />
     <ClInclude Include="..\zap\config.h" />
