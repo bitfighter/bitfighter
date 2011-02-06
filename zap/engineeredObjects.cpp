@@ -91,8 +91,8 @@ bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
             return true;
 
          // if both are in, go to the next edge.
-         cp1 = cp2;
 */
+         cp1 = cp2;
       }
       rp1 = rp2;
    }
@@ -118,6 +118,11 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
 
    if(!hitObject)    // No appropriate walls found, can't deploy, sorry!
       return false;
+
+
+   if(deployNormal.dot(ship->getAimVector()) * 2 > 0)
+      deployNormal = -deployNormal;      // This is to fix deploy at wrong side of barrier.
+
 
    // Set deploy point, and move one unit away from the wall (this is a tiny amount, keeps linework from overlapping with wall)
    deployPosition.set(startPoint + (endPoint - startPoint) * collisionTime + deployNormal);
