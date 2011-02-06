@@ -951,16 +951,14 @@ void GameType::saveGameStats()
 
 
 #ifdef BF_WRITE_TO_MYSQL
-      processStatsResults(&stats.gameStats);
-      if(gIniSettings.stats_server != "")
-      {
-         DatabaseWriter dbWriter(gIniSettings.stats_server.c_str(),
-            gIniSettings.stats_db.c_str(),
-            gIniSettings.stats_user.c_str(),
-            gIniSettings.stats_password.c_str() );
-         dbWriter.insertStats(stats.gameStats, true);
-      }
+   processStatsResults(&stats.gameStats);
+   if(gIniSettings.stats_server != "")
+   {
+      DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
+                                    gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
 
+      databaseWriter.insertStats(stats.gameStats, true);
+   }
 #endif
 }
 

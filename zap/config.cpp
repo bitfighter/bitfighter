@@ -298,23 +298,22 @@ static void loadHostConfiguration()
       gIniSettings.maxDedicatedFPS = fps; 
    // TODO: else warn?
 
-   gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "logStats", gIniSettings.logStats);
+   gIniSettings.logStats = gINI.GetValueYN("Host", "LogStats", gIniSettings.logStats);
 
    //gIniSettings.SendStatsToMaster = (lcase(gINI.GetValue("Host", "SendStatsToMaster", "yes")) != "no");
 
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
 
 #ifdef BF_WRITE_TO_MYSQL
-	Vector<string> args1;
-	parseString(gINI.GetValue("Host", "mysql_stats").c_str(), args1, ',');
-	if(args1.size() >= 1) gIniSettings.stats_server = args1[0];
-	if(args1.size() >= 2) gIniSettings.stats_db = args1[1];
-	if(args1.size() >= 3) gIniSettings.stats_user = args1[2];
-	if(args1.size() >= 4) gIniSettings.stats_password = args1[3];
+	Vector<string> args;
+	parseString(gINI.GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
+	if(args.size() >= 1) gIniSettings.mySqlStatsDatabaseServer = args[0];
+	if(args.size() >= 2) gIniSettings.mySqlStatsDatabaseName = args[1];
+	if(args.size() >= 3) gIniSettings.mySqlStatsDatabaseUser = args[2];
+	if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
 #endif
 
-   gIniSettings.robotScript            = gINI.GetValue("Host", "DefaultRobotScript");
-
+   gIniSettings.defaultRobotScript = gINI.GetValue("Host", "DefaultRobotScript", gIniSettings.defaultRobotScript);
 }
 
 
@@ -1078,7 +1077,7 @@ static void writeSettings()
       gINI.sectionComment(section, " LastName - Name user entered when game last run (may be overwritten if you enter a different name on startup screen)");
       gINI.sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.sectionComment(section, " LastEditorName - Last edited file name");
-      gINI.sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
+      gINI.sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
 
       gINI.sectionComment(section, " LineWidth - default 2, width in pixels, use /LineWidth in game");
       gINI.sectionComment(section, "----------------");
@@ -1153,9 +1152,13 @@ static void writeHost()
       addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
       addComment(" AllowDataConnections - When data connections are allowed, anyone with the admin password can upload or download levels, bots, or");
       addComment("                        levelGen scripts.  This feature is probably insecure, and should be DISABLED unless you require the functionality.");
-      addComment(" LogStats - Save game stats locally (saves the same stats as are sent to the master)");
+      addComment(" LogStats - Save game stats locally to built-in sqlite database (saves the same stats as are sent to the master)");
+      addComment(" DefaultRobotScript - If user adds a robot, this script is used if none is specified");
+      addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
+      addComment("                                 database server, database name, login, and password as a comma delimeted list");
       addComment("----------------");
    }
+
    gINI.SetValue  (section, "ServerName", gIniSettings.hostname);
    gINI.SetValue  (section, "ServerAddress", gIniSettings.hostaddr);
    gINI.SetValue  (section, "ServerDescription", gIniSettings.hostdescr);
@@ -1170,6 +1173,7 @@ static void writeHost()
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
    gINI.SetValue  (section, "DefaultRobotScript", gIniSettings.defaultRobotScript);
+   gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
 }
 
 

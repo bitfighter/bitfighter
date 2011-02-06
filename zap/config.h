@@ -218,7 +218,11 @@ struct IniSettings      // With defaults specified
    bool luaBotMessage;        
    bool serverFilter;  
    bool logStats;
-   //bool SendStatsToMaster;
+
+   string mySqlStatsDatabaseServer;
+   string mySqlStatsDatabaseName;
+   string mySqlStatsDatabaseUser;
+   string mySqlStatsDatabasePassword;
 
    string defaultRobotScript;
 
@@ -272,6 +276,8 @@ struct IniSettings      // With defaults specified
       adminPassword = "";
       levelChangePassword = "";
       levelDir = "";
+
+      defaultRobotScript = "";            // No default robot script  // TODO ==> Make this s_bot
 
       wallFillColor.set(0,0,.15);
       wallOutlineColor.set(0,0,1);
