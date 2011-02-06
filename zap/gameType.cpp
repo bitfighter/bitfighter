@@ -946,20 +946,23 @@ void GameType::saveGameStats()
 
    if(masterConn)
       masterConn->s2mSendStatistics(stats);
-   if(gIniSettings.logStats)
-      logGameStats(&stats);
 
+   if(gIniSettings.logStats)
+   {
+      processStatsResults(&stats.gameStats);
 
 #ifdef BF_WRITE_TO_MYSQL
-   processStatsResults(&stats.gameStats);
-   if(gIniSettings.stats_server != "")
-   {
-      DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
-                                    gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
+      if(gIniSettings.mySqlStatsDatabaseServer != "")
+      {
+         DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
+                                       gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
 
-      databaseWriter.insertStats(stats.gameStats, true);
-   }
+         databaseWriter.insertStats(stats.gameStats, true);
+      }
+      else
 #endif
+      logGameStats(&stats);      // Log to sqlite db
+   }
 }
 
 
