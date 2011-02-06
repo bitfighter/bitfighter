@@ -2573,7 +2573,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
       else
       {
-         for(S32 i = Robot::robots.size()-1; i >= 0; i++)
+         for(S32 i = Robot::robots.size()-1; i >= 0; i--)
          {
             delete Robot::robots[i];
             if(!stricmp(cmd, "kickbot"))
