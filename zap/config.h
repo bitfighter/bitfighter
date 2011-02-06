@@ -220,7 +220,7 @@ struct IniSettings      // With defaults specified
    bool logStats;
    //bool SendStatsToMaster;
 
-   string robotScript;
+   string defaultRobotScript;
 
    Vector<StringTableEntry> levelList;
 

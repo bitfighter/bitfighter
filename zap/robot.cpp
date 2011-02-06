@@ -53,7 +53,7 @@
 #include "luaGameInfo.h"
 #include "luaUtil.h"
 #include "glutInclude.h"
-#include "config.h"              // for gIniSettings.robotScript
+#include "config.h"              // for gIniSettings.defaultRobotScript
 
 #include "oglconsole.h"
 
@@ -1718,7 +1718,7 @@ bool Robot::processArguments(S32 argc, const char **argv)
 	if(argc >= 2)
 		mFilename = argv[1];
 	else
-		mFilename = gIniSettings.robotScript;
+		mFilename = gIniSettings.defaultRobotScript;
 
 	if(mFilename != "")
 	{

@@ -2534,25 +2534,31 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "addbot"))
    {
-      if(!clientRef->clientConnection->isAdmin() && gIniSettings.robotScript == "")  // not admin, no robotScript
+      if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
+
       else if(!clientRef->clientConnection->isLevelChanger())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
+
       else
       {
          Robot *robot = new Robot();
          robot->addToGame(getGame());
          S32 args_count = 0;
-         const char *args_char[128];  // convert to a format processArgs will allow.
-         // The first arg = team number, the second arg, robot script filename, the rest of args goes into script handler.
-         for(S32 i=0; i<args.size() && i<128; i++)
+         const char *args_char[128];  // Convert to a format processArgs will allow
+
+         // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
+         for(S32 i = 0; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
          {
             args_char[i] = args[i].getString();
             args_count++;
          }
+
          robot->processArguments(args_count, args_char);
+
          if(robot->isRunningScript && !robot->startLua())
             robot->isRunningScript = false;
+
          if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
             BotNavMeshZone::buildOrLoadBotMeshZones();
 
@@ -2565,13 +2571,15 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
-      if(!clientRef->clientConnection->isAdmin() && gIniSettings.robotScript == "")  // not admin, no robotScript
+      if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
+
       else if(!clientRef->clientConnection->isLevelChanger())
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permission");
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to kick a bot");
+
       else
       {
-         for(S32 i = Robot::robots.size()-1; i >= 0; i--)
+         for(S32 i = Robot::robots.size() - 1; i >= 0; i--)
          {
             delete Robot::robots[i];
             if(!stricmp(cmd, "kickbot"))
