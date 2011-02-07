@@ -295,7 +295,7 @@ void DatabaseWriter::addToServerCache(U64 id, const GameStats &gameStats)
 U64 DatabaseWriter::getServerFromCache(const GameStats &gameStats)
 {
    // Check cache for server info
-   for(S32 i = cachedServers.size() - 1; i >= 0; i--)
+   for(S32 i = cachedServers.size() - 1; i >= 0; i--)    // Counting backwards visits newest servers first
       if(cachedServers[i].ip == gameStats.serverIP && cachedServers[i].name == gameStats.serverName )
          return  cachedServers[i].id;
 
