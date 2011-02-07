@@ -50,12 +50,12 @@ using namespace mysqlpp;
 using namespace std;
 
 
-struct ServerInformation
+struct ServerInfo
 {
    U64 id;
    string name;
    string ip;
-   ServerInformation(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
+   ServerInfo(U64 id, const string name, const string ip) { this->id = id; this->name = name; this->ip = ip;}
 };
 
 
@@ -69,7 +69,7 @@ private:
    char mDb[64];
    char mUser[64];
    char mPassword[64];
-   Vector<ServerInformation> cachedServers;
+   Vector<ServerInfo> cachedServers;
 
    U64 lastGameID;
 

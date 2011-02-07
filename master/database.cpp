@@ -288,7 +288,7 @@ void DatabaseWriter::addToServerCache(U64 id, const GameStats &gameStats)
    if(cachedServers.size() >= SERVER_CACHE_SIZE) 
       cachedServers.erase(0);
 
-   cachedServers.push_back(ServerInformation(id, gameStats.serverName, gameStats.serverIP));
+   cachedServers.push_back(ServerInfo(id, gameStats.serverName, gameStats.serverIP));
 }
 
 
