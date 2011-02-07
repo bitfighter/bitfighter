@@ -957,7 +957,7 @@ void GameType::saveGameStats()
          DatabaseWriter databaseWriter(gIniSettings.mySqlStatsDatabaseServer.c_str(), gIniSettings.mySqlStatsDatabaseName.c_str(),
                                        gIniSettings.mySqlStatsDatabaseUser.c_str(),   gIniSettings.mySqlStatsDatabasePassword.c_str() );
 
-         databaseWriter.insertStats(stats.gameStats, true);
+         databaseWriter.insertStats(stats.gameStats);
       }
       else
 #endif

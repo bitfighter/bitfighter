@@ -249,7 +249,7 @@ static U64 getServerFromDatabase(Query *query, sqlite3 *sqliteDb, const GameStat
 #ifdef BF_WRITE_TO_MYSQL
    if(query)
    {
-      U64 serverId = U64_MAX;
+      U64 serverId_int = U64_MAX;
       StoreQueryResult results = query->store(sql.c_str(), sql.length());
 
       if(results.num_rows() >= 1)
@@ -270,7 +270,7 @@ static U64 getServerFromDatabase(Query *query, sqlite3 *sqliteDb, const GameStat
       if(rows >= 1)
       {
          string result = results[1];      // results[0] will contain the col header, or "server_id"
-         return stoi(result);
+         return atoi(result.c_str());
       }
 
       sqlite3_free_table(results);
@@ -317,7 +317,7 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
       {
          Connection conn;                                 // Connect to the database
          conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
-         getServerFromCache
+         getServerFromCache(gameStats);
          query = new Query(&conn);
       }
       else
