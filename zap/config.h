@@ -231,6 +231,8 @@ struct IniSettings      // With defaults specified
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
 
+   U32 version;
+
 
    // Set default values here
    void init()
@@ -313,8 +315,8 @@ struct IniSettings      // With defaults specified
       serverFilter = false; 
 
       logStats = true;            // Log statistics into ServerFilter log files
-      //SendStatsToMaster = true; // Transmit statistics to the master server
 
+      version = 0;
    }
 };
 

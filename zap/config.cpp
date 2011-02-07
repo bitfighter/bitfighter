@@ -187,6 +187,8 @@ static void loadGeneralSettings()
    gIniSettings.lastPassword   = gINI.GetValue(section, "LastPassword", gIniSettings.lastPassword);
    gIniSettings.lastEditorName = gINI.GetValue(section, "LastEditorName", gIniSettings.lastEditorName);
 
+   gIniSettings.version = gINI.GetValueI(section, "Version", gIniSettings.version);
+
    gIniSettings.enableExperimentalAimMode = gINI.GetValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
    S32 fps = gINI.GetValueI(section, "MaxFPS", gIniSettings.maxFPS);
    if(fps >= 1) 
@@ -1078,8 +1080,8 @@ static void writeSettings()
       gINI.sectionComment(section, " LastPassword - Password user entered when game last run (may be overwritten if you enter a different pw on startup screen)");
       gINI.sectionComment(section, " LastEditorName - Last edited file name");
       gINI.sectionComment(section, " MaxFPS - Maximum FPS the client will run at.  Higher values use more CPU, lower may increase lag (default = 100)");
-
-      gINI.sectionComment(section, " LineWidth - default 2, width in pixels, use /LineWidth in game");
+      gINI.sectionComment(section, " LineWidth - Width of a \"standard line\" in pixels (default 2); can set with /linewidth in game ");
+      gINI.sectionComment(section, " Version - Version of game last time it was run.  Don't monkey with this value; nothing good can come of it!");
       gINI.sectionComment(section, "----------------");
    }
    saveWindowMode();
