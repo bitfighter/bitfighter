@@ -50,7 +50,7 @@ XXX need to document timers, new luavec stuff XXX
 /* Fixes after 015
 <h4></h4>
 <ul>
-<li>
+<li>Players can see cloaked teammates
 </ul>
 <h4>New Features</h4>
 <ul>

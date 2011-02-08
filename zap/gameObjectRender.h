@@ -68,8 +68,10 @@ void renderEnergyGuage(S32 energy, S32 maxEnergy, S32 cooldownThreshold);
 extern void renderCenteredString(const Point &pos, S32 size, const char *string);
 extern void renderCenteredString(const Point &pos, F32 size, const char *string);
 
-extern void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
+extern void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime, 
                        bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor);
+extern void renderShipCoords(const Point &coords, bool localShip, F32 alpha);
+
 extern void renderAimVector();
 extern void renderTeleporter(const Point &pos, U32 type, bool in, S32 time, F32 radiusFraction, F32 radius, F32 alpha, 
                              const Vector<Point> &dests, bool showDestOverride);

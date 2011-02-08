@@ -172,7 +172,7 @@ void drawCentroidMark(const Point &pos, F32 radius)
 }
 
 
-void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+void renderShip(const Color &c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
                 bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor)
 {
    if(alpha != 1.0)
@@ -310,6 +310,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 s
       glVertex2f(20, -15);
    glEnd();
 
+
    // Armor
    if(hasArmor)
    {
@@ -343,6 +344,22 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 s
    
    if(alpha != 1.0)
       glDisableBlend;
+}
+
+
+void renderShipCoords(const Point &coords, bool localShip, F32 alpha)
+{
+   string str = string("@") + itos((S32) coords.x) + "," + itos((S32) coords.y);
+   const U32 textSize = 18;
+
+   glEnableBlend;
+      
+      glLineWidth(gLineWidth1);
+      glColor4f(1,1,1,0.5 * alpha);
+
+      UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
+   glDisableBlend;
+   glLineWidth(gDefaultLineWidth);
 }
 
 // This is a line extending from the ship to give joystick players some idea of where they're aiming

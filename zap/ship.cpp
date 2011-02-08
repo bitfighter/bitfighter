@@ -52,7 +52,7 @@
 
 #define hypot _hypot    // Kill some warnings
 
-static const bool showCloakedTeammates = false;    // Set to true to allow players to see their cloaked teammates
+static const bool showCloakedTeammates = true;    // Set to true to allow players to see their cloaked teammates
 
 namespace Zap
 {
@@ -1498,24 +1498,23 @@ void Ship::render(S32 layerIndex)
    if(layerIndex == 0) return;   // Only render on layers -1 and 1
    if(hasExploded) return;       // Don't render an exploded ship!
 
-   // An angle of 0 means the ship is heading down the +X axis
-   // since we draw the ship pointing up the Y axis, we should rotate
-   // by the ship's angle, - 90 degrees
-   glPushMatrix();
-   glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
-
    F32 warpInScale = (WarpFadeInTime - mWarpInTimer.getCurrent()) / F32(WarpFadeInTime);
-
-   // Render base ship
    F32 rotAmount = 0;      // We use rotAmount to add the spinny effect you see when a ship spawns or comes through a teleport
    if(warpInScale < 0.8)
       rotAmount = (0.8 - warpInScale) * 540;
+
+   // An angle of 0 means the ship is heading down the +X axis
+   // since we draw the ship pointing up the Y axis, we should rotate
+   // by the ship's angle, - 90 degrees
 
    GameConnection *conn = gClientGame->getConnectionToServer();
    bool localShip = ! (conn && conn->getControlObject() != this);    // i.e. a ship belonging to a remote player
    S32 localPlayerTeam = (conn && conn->getControlObject()) ? conn->getControlObject()->getTeam() : Item::NO_TEAM; // To show cloaked teammates
 
    F32 alpha = isModuleActive(ModuleCloak) ? mCloakTimer.getFraction() : 1 - mCloakTimer.getFraction();
+
+   glPushMatrix();
+   glTranslatef(mMoveState[RenderState].pos.x, mMoveState[RenderState].pos.y, 0);
 
    if(!localShip && layerIndex == 1)      // Need to draw this before the glRotatef below, but only on layer 1...
    {
@@ -1550,22 +1549,9 @@ void Ship::render(S32 layerIndex)
       glDisableBlend;
       glLineWidth(gDefaultLineWidth);
    }
-   else
-   {
-      if(gGameUserInterface.mDebugShowShipCoords)
-      {
-         string str = string("@") + itos((S32) getActualPos().x) + "," + itos((S32) getActualPos().y);
 
-         glEnableBlend;
-            U32 textSize = 18;
-            glLineWidth(gLineWidth1);
-            glColor4f(1,1,1,0.5 * alpha);
-
-            UserInterface::drawStringc(0, 30 + (localShip ? 0 : textSize + 3), textSize, str.c_str() );
-         glDisableBlend;
-         glLineWidth(gDefaultLineWidth);
-      }
-   }
+   if(gGameUserInterface.mDebugShowShipCoords)
+      renderShipCoords(getActualPos(), localShip, alpha);
 
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);
    glScalef(warpInScale, warpInScale, 1);
@@ -1594,13 +1580,73 @@ void Ship::render(S32 layerIndex)
    if(!gameType)
       return;     // This will likely never happen
 
-   Color color(gameType->getShipColor(this));
+   F32 thrusts[4];
+   calcThrustComponents(thrusts);
 
+
+   // Don't completely hide local player or ships on same team
+   if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
+      alpha = max(alpha, 0.25);     // Make sure we have at least .25 alpha
+   
+   if(!localShip)    // Only apply sensor-makes-cloaked-ships-visible to other ships
+   {
+      // If local ship has sensor, it can see cloaked non-local ships
+      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());      // <-- this is our local ship
+      if(ship && ship->isModuleActive(ModuleSensor) && alpha < 0.5)
+         alpha = 0.5;
+   }
+
+   renderShip(gameType->getShipColor(this), alpha, thrusts, mHealth, mRadius, getGame()->getCurrentTime() - mSensorStartTime, 
+              isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
+
+   if(alpha != 1.0)
+      glEnableBlend;
+
+   if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
+      renderAimVector();
+
+   glPopMatrix();  
+
+
+   if(isModuleActive(ModuleRepair) && alpha != 0)     // Don't bother when completely transparent
+   {
+      glLineWidth(gLineWidth3);
+      glColor4f(1,0,0,alpha);
+      // render repair rays to all the repairing objects
+      Point pos = mMoveState[RenderState].pos;
+
+      for(S32 i = 0; i < mRepairTargets.size(); i++)
+      {
+         if(mRepairTargets[i].getPointer() == this)
+            drawCircle(pos, RepairDisplayRadius);
+         else if(mRepairTargets[i])
+         {
+            glBegin(GL_LINES);
+            glVertex2f(pos.x, pos.y);
+
+            Point shipPos = mRepairTargets[i]->getRenderPos();
+            glVertex2f(shipPos.x, shipPos.y);
+            glEnd();
+         }
+      }
+      glLineWidth(gDefaultLineWidth);
+   }
+
+   if(alpha != 1.0)
+      glDisableBlend;
+
+   for(S32 i = 0; i < mMountedItems.size(); i++)
+      if(mMountedItems[i].isValid())
+         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
+}
+
+
+void Ship::calcThrustComponents(F32 *thrusts)
+{
    Point velDir(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
    F32 len = velDir.len();
-   F32 thrusts[4];
 
-   for(U32 i = 0; i < ARRAYSIZE(thrusts); i++)
+   for(U32 i = 0; i < 4; i++)
       thrusts[i] = 0;            // Reset thrusts
 
    if(len > 0)
@@ -1626,67 +1672,13 @@ void Ship::render(S32 layerIndex)
    else if(rotVel < -0.001)
       thrusts[2] += 0.25;
 
+   
    if(isModuleActive(ModuleBoost))
-      for(U32 i = 0; i < ARRAYSIZE(thrusts); i++)
+      for(U32 i = 0; i < 4; i++)
          thrusts[i] *= 1.3;
-
-   // Don't completely hide local player or ships on same team
-   if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
-      alpha = max(alpha, 0.25);     // Make sure we have at least .25 alpha
-   else
-   {
-      // If local ship has sensor, it can see cloaked non-local ships
-      Ship *ship = dynamic_cast<Ship *>(conn->getControlObject());
-      if(ship && ship->isModuleActive(ModuleSensor) && alpha < 0.5)
-         alpha = 0.5;
-   }
-
-   renderShip(color, alpha, thrusts, mHealth, mRadius, getGame()->getCurrentTime() - mSensorStartTime, 
-              isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
-
-   if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
-      renderAimVector();
-
-   // Now render some "addons"  --> should these be in renderShip?
-
-   if(alpha == 0) 
-      return;  // Don't draw when completely transparent
-
-   if(alpha != 1.0)
-      glEnableBlend;
-
-   glPopMatrix();
-
-   if(isModuleActive(ModuleRepair))
-   {
-      glLineWidth(gLineWidth3);
-      glColor4f(1,0,0,alpha);
-      // render repair rays to all the repairing objects
-      Point pos = mMoveState[RenderState].pos;
-
-      for(S32 i = 0; i < mRepairTargets.size(); i++)
-      {
-         if(mRepairTargets[i].getPointer() == this)
-            drawCircle(pos, RepairDisplayRadius);
-         else if(mRepairTargets[i])
-         {
-            glBegin(GL_LINES);
-            glVertex2f(pos.x, pos.y);
-
-            Point shipPos = mRepairTargets[i]->getRenderPos();
-            glVertex2f(shipPos.x, shipPos.y);
-            glEnd();
-         }
-      }
-      glLineWidth(gDefaultLineWidth);
-   }
-   if(alpha != 1.0)
-      glDisableBlend;
-
-   for(S32 i = 0; i < mMountedItems.size(); i++)
-      if(mMountedItems[i].isValid())
-         mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
 }
+
+
 
 S32 LuaShip::id = 99;
 
