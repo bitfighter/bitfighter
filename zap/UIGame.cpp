@@ -63,7 +63,7 @@ namespace Zap
 {
 extern ConfigDirectories gConfigDirs;          //in main.cpp for Getmap
 
-GameUserInterface gGameUserInterface;
+//GameUserInterface gGameUserInterface;
 
 // TODO: Make these static like privateF5MessageDisplayedInGameColor!
 Color gGlobalChatColor(0.9, 0.9, 0.9);
@@ -1357,7 +1357,7 @@ static bool hasAdmin(GameConnection *gc, const char *failureMessage)
 {
    if(!gc->isAdmin())
    {
-      gGameUserInterface.displayErrorMessage(failureMessage);
+      gClientGame->gGameUserInterface->displayErrorMessage(failureMessage);
       return false;
    }
    return true;
@@ -1373,7 +1373,7 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
    {
       if(words.size() < 2 || words[1] == "")
       {
-         gGameUserInterface.displayErrorMessage("!!! Need to supply a password");
+         gClientGame->gGameUserInterface->displayErrorMessage("!!! Need to supply a password");
          return;
       }
 
@@ -1413,7 +1413,7 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
    // Did the user provide a name/description?
    if(type != GameConnection::DeleteLevel && allWords == "")
    { 
-      gGameUserInterface.displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      gClientGame->gGameUserInterface->displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
       return;
    }
 

@@ -87,8 +87,14 @@ TNL_IMPLEMENT_NETOBJECT_RPC(SoccerGameType, s2cSoccerScoreMessage,
    {
       msg = string(clientName.getString()) + " scored an own-goal, giving the other team" + (mTeams.size() == 2 ? "" : "s") + " a point!";
    }
+
+
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
    // Print the message
-   gGameUserInterface.displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
+   clientGame->gGameUserInterface->displayMessage(Color(0.6f, 1.0f, 0.8f), msg.c_str());
 }
 
 

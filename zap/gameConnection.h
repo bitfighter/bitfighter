@@ -76,6 +76,7 @@ struct ClientInfo
 ////////////////////////////////////////
 
 class ClientRef;
+class ClientGame;
 struct LevelInfo;
 
 
@@ -121,6 +122,7 @@ private:
 
 
 public:
+   ClientGame *mClientGame;
    Vector<U32> mOldLoadout;
    U16 switchedTeamCount;
 

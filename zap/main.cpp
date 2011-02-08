@@ -205,6 +205,8 @@ using namespace TNL;
 
 namespace Zap
 {
+extern ClientGame *gClientGame1;
+extern ClientGame *gClientGame2;
 
 string gHostName;                // Server name used when hosting a game (default set in config.h, set in INI or on cmd line)
 string gHostDescr;               // Brief description of host
@@ -823,8 +825,22 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
 
    if(!(gServerGame && gServerGame->hostingModePhase == ServerGame::LoadingLevels))    // Don't idle games during level load
    {
-      if(gClientGame)
+      if(gClientGame2)
+      {
+         gIniSettings.inputMode = Joystick;
+         gClientGame1->mUserInterfaceData->get();
+         gClientGame2->mUserInterfaceData->set();
+         gClientGame = gClientGame2;
          gClientGame->idle(integerTime);
+         gIniSettings.inputMode = Keyboard;
+         gClientGame2->mUserInterfaceData->get();
+         gClientGame1->mUserInterfaceData->set();
+      }
+      if(gClientGame1)
+      {
+         gClientGame = gClientGame1;
+         gClientGame->idle(integerTime);
+      }
       if(gServerGame)
          gServerGame->idle(integerTime);
    }
@@ -906,7 +922,7 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
    if(isFromMaster && connToMaster && connToMaster->getConnectionState() == NetConnection::Connected)     // Request arranged connection
    {
       connToMaster->requestArrangedConnection(remoteAddress);
-      gGameUserInterface.activate();
+      gClientGame->gGameUserInterface->activate();
    }
    else                                                         // Try a direct connection
    {
@@ -940,8 +956,15 @@ void joinGame(Address remoteAddress, bool isFromMaster, bool local)
       else        // Connect to a remote server, but not via the master server
          gameConnection->connect(gClientGame->getNetInterface(), remoteAddress);  
 
-      gGameUserInterface.activate();
+      gClientGame->gGameUserInterface->activate();
    }
+   //if(gClientGame2 && gClientGame != gClientGame2)  // make both client connect for now, until menus works in both clients.
+   //{
+   //   gClientGame = gClientGame2;
+   //   joinGame(remoteAddress, isFromMaster, local);
+   //   gClientGame = gClientGame1;
+   //}
+
 }
 
 
@@ -1588,7 +1611,11 @@ void processStartupParams()
    // Note that we can be in both clientMode and serverMode (such as when we're hosting a game interactively)
 
    if(gCmdLineSettings.clientMode)               // Create ClientGame object
-      gClientGame = new ClientGame(Address());   //   let the system figure out IP address and assign a port
+   {
+      gClientGame1 = new ClientGame(Address());   //   let the system figure out IP address and assign a port
+      gClientGame = gClientGame1;
+   }
+      //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
 
 
    // Not immediately starting a connection...  start out with name entry or main menu
@@ -1596,12 +1623,30 @@ void processStartupParams()
    {
       if(gIniSettings.name == "")
       {
+         if(gClientGame2)
+         {
+            gClientGame = gClientGame2;
+            gClientGame1->mUserInterfaceData->get();
+            gNameEntryUserInterface.activate();
+            gClientGame2->mUserInterfaceData->get();
+            gClientGame1->mUserInterfaceData->set();
+            gClientGame = gClientGame1;
+         }
          gNameEntryUserInterface.activate();
          seedRandomNumberGenerator(gIniSettings.lastName);
          gClientInfo.id.getRandom();                           // Generate a player ID
       }
       else
       {
+         if(gClientGame2)
+         {
+            gClientGame = gClientGame2;
+            gClientGame1->mUserInterfaceData->get();
+            gMainMenuUserInterface.activate();
+            gClientGame2->mUserInterfaceData->get();
+            gClientGame1->mUserInterfaceData->set();
+            gClientGame = gClientGame1;
+         }
          gMainMenuUserInterface.activate();
 
          gClientGame->setReadyToConnectToMaster(true);         // Set elsewhere if in dedicated server mode

@@ -858,6 +858,7 @@ bool extern getKeyState(KeyCode keyCode);
 // simulated keyboard events for menu navigation.
 // Runs through this every game tick, regardless of whether or not joystick button was pressed.
 // There is kind of a mishmash of stuff thrown in here...
+U32 JoystickButtonMask2;
 static bool processJoystickInputs( U32 &buttonMask )
 {
    // It is unknown how to respond to Unknown joystick types!!
@@ -943,46 +944,57 @@ static bool processJoystickInputs( U32 &buttonMask )
    // While we're here, we'll create some psuedo key-down events for the
    // joystick, which we'll use primarily for navigating menus and such
    // Note that the effect of these will be digital (either on or off), not analog
-   if (controls[0] < 0 && !getKeyState(STICK_1_LEFT))
+   JoystickButtonMask2 = 0;
+   if (controls[0] < -0.5) JoystickButtonMask2 |= 1;
+   if (controls[0] > 0.5) JoystickButtonMask2 |= 2;
+   if (controls[1] < -0.5) JoystickButtonMask2 |= 4;
+   if (controls[1] > 0.5) JoystickButtonMask2 |= 8;
+   if (controls[2] < -0.5) JoystickButtonMask2 |= 16;
+   if (controls[2] > 0.5) JoystickButtonMask2 |= 32;
+   if (controls[3] < -0.5) JoystickButtonMask2 |= 64;
+   if (controls[3] > 0.5) JoystickButtonMask2 |= 128;
+/*
+   if (controls[0] < -0.5 && !getKeyState(STICK_1_LEFT))
       simulateKeyDown(STICK_1_LEFT);
-   else if (controls[0] >= 0 && getKeyState(STICK_1_LEFT))
+   else if (controls[0] >= -0.5 && getKeyState(STICK_1_LEFT))
       simulateKeyUp(STICK_1_LEFT);
 
-   if (controls[0] > 0 && !getKeyState(STICK_1_RIGHT))
+   if (controls[0] > 0.5 && !getKeyState(STICK_1_RIGHT))
       simulateKeyDown(STICK_1_RIGHT);
-   else if (controls[0] <= 0 && getKeyState(STICK_1_RIGHT))
+   else if (controls[0] <= 0.5 && getKeyState(STICK_1_RIGHT))
       simulateKeyUp(STICK_1_RIGHT);
 
-   if (controls[1] < 0 && !getKeyState(STICK_1_UP))
+   if (controls[1] < -0.5 && !getKeyState(STICK_1_UP))
       simulateKeyDown(STICK_1_UP);
-   else if (controls[1] >= 0 && getKeyState(STICK_1_UP))
+   else if (controls[1] >= -0.5 && getKeyState(STICK_1_UP))
       simulateKeyUp(STICK_1_UP);
 
-   if (controls[1] > 0 && !getKeyState(STICK_1_DOWN))
+   if (controls[1] > 0.5 && !getKeyState(STICK_1_DOWN))
       simulateKeyDown(STICK_1_DOWN);
-   else if (controls[1] <= 0 && getKeyState(STICK_1_DOWN))
+   else if (controls[1] <= 0.5 && getKeyState(STICK_1_DOWN))
       simulateKeyUp(STICK_1_DOWN);
 
 
-   if (controls[2] < 0 && !getKeyState(STICK_2_LEFT))
+   if (controls[2] < -0.5 && !getKeyState(STICK_2_LEFT))
       simulateKeyDown(STICK_2_LEFT);
-   else if (controls[2] >= 0 && getKeyState(STICK_2_LEFT))
+   else if (controls[2] >= -0.5 && getKeyState(STICK_2_LEFT))
       simulateKeyUp(STICK_2_LEFT);
 
-   if (controls[2] > 0 && !getKeyState(STICK_2_RIGHT))
+   if (controls[2] > 0.5 && !getKeyState(STICK_2_RIGHT))
       simulateKeyDown(STICK_2_RIGHT);
-   else if (controls[2] <= 0 && getKeyState(STICK_2_RIGHT))
+   else if (controls[2] <= 0.5 && getKeyState(STICK_2_RIGHT))
       simulateKeyUp(STICK_2_RIGHT);
 
-   if (controls[3] < 0 && !getKeyState(STICK_2_UP))
+   if (controls[3] < -0.5 && !getKeyState(STICK_2_UP))
       simulateKeyDown(STICK_2_UP);
-   else if (controls[3] >= 0 && getKeyState(STICK_2_UP))
+   else if (controls[3] >= -0.5 && getKeyState(STICK_2_UP))
       simulateKeyUp(STICK_2_UP);
 
-   if (controls[3] > 0 && !getKeyState(STICK_2_DOWN))
+   if (controls[3] > 0.5 && !getKeyState(STICK_2_DOWN))
       simulateKeyDown(STICK_2_DOWN);
-   else if (controls[3] <= 0 && getKeyState(STICK_2_DOWN))
+   else if (controls[3] <= 0.5 && getKeyState(STICK_2_DOWN))
       simulateKeyUp(STICK_2_DOWN);
+*/
 
    //logprintf("ButtonMask: %d", buttonMask);
 
@@ -1109,18 +1121,19 @@ extern void simulateKeyUp(KeyCode keyCode);
 // Also translates joystick button events into our KeyCode system
 // Why oh why do we mix our saving of the game-particular move structure with our
 //    raw joystick input collection?
+U32 JoystickButtonMask2prev = 0;
+U32 JoystickLastButtonsPressed = 0;
 void JoystickUpdateMove(Move *theMove)
 {
-   static U32 lastButtonsPressed = 0;
    U32 buttonMask;
 
    if(!processJoystickInputJournaled(theMove, buttonMask))
       return;
 
    // Figure out which buttons have changed state
-   U32 buttonDown = buttonMask & ~lastButtonsPressed;
-   U32 buttonUp = ~buttonMask & lastButtonsPressed;
-   lastButtonsPressed = buttonMask;
+   U32 buttonDown = buttonMask & ~JoystickLastButtonsPressed;
+   U32 buttonUp = ~buttonMask & JoystickLastButtonsPressed;
+   JoystickLastButtonsPressed = buttonMask;
 
    // Translate button events into our standard keyboard template
    if(buttonDown & ControllerButton1) simulateKeyDown(BUTTON_1);
@@ -1152,6 +1165,28 @@ void JoystickUpdateMove(Move *theMove)
    if(buttonUp & ControllerButtonDPadDown) simulateKeyUp(BUTTON_DPAD_DOWN);
    if(buttonUp & ControllerButtonDPadLeft) simulateKeyUp(BUTTON_DPAD_LEFT);
    if(buttonUp & ControllerButtonDPadRight) simulateKeyUp(BUTTON_DPAD_RIGHT);
+
+   buttonDown = JoystickButtonMask2 & ~JoystickButtonMask2prev;
+   buttonUp = ~JoystickButtonMask2 & JoystickButtonMask2prev;
+   JoystickButtonMask2prev = JoystickButtonMask2;
+
+   if(buttonDown & 1) simulateKeyDown(STICK_1_LEFT);
+   if(buttonDown & 2) simulateKeyDown(STICK_1_RIGHT);
+   if(buttonDown & 4) simulateKeyDown(STICK_1_UP);
+   if(buttonDown & 8) simulateKeyDown(STICK_1_DOWN);
+   if(buttonDown & 16) simulateKeyDown(STICK_1_LEFT);
+   if(buttonDown & 32) simulateKeyDown(STICK_1_RIGHT);
+   if(buttonDown & 64) simulateKeyDown(STICK_1_UP);
+   if(buttonDown & 128) simulateKeyDown(STICK_1_DOWN);
+
+   if(buttonUp & 1) simulateKeyUp(STICK_1_LEFT);
+   if(buttonUp & 2) simulateKeyUp(STICK_1_RIGHT);
+   if(buttonUp & 4) simulateKeyUp(STICK_1_UP);
+   if(buttonUp & 8) simulateKeyUp(STICK_1_DOWN);
+   if(buttonUp & 16) simulateKeyUp(STICK_1_LEFT);
+   if(buttonUp & 32) simulateKeyUp(STICK_1_RIGHT);
+   if(buttonUp & 64) simulateKeyUp(STICK_1_UP);
+   if(buttonUp & 128) simulateKeyUp(STICK_1_DOWN);
 }
 
 

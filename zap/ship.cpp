@@ -1552,7 +1552,7 @@ void Ship::render(S32 layerIndex)
    }
    else
    {
-      if(gGameUserInterface.mDebugShowShipCoords)
+      if(gClientGame->gGameUserInterface->mDebugShowShipCoords)
       {
          string str = string("@") + itos((S32) getActualPos().x) + "," + itos((S32) getActualPos().y);
 

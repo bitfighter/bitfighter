@@ -264,7 +264,7 @@ public:
    static Color privateF5MessageDisplayedInGameColor;
 };
 
-extern GameUserInterface gGameUserInterface;
+//extern GameUserInterface gGameUserInterface;
 
 };
 

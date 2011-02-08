@@ -60,6 +60,7 @@ TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 // Constructor
 GameConnection::GameConnection()
 {
+   mClientGame = NULL;
    initialize();
 }
 
@@ -264,8 +265,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(gGameUserInterface.mOutputFile)
-      fwrite(line.getString(), 1, strlen(line.getString()), gGameUserInterface.mOutputFile);
+   if(mClientGame->gGameUserInterface->mOutputFile)
+      fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->gGameUserInterface->mOutputFile);
       //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
 }
@@ -276,17 +277,18 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(gGameUserInterface.mOutputFile)
+   if(mClientGame->gGameUserInterface->mOutputFile)
    {
-      fclose(gGameUserInterface.mOutputFile);
-      gGameUserInterface.mOutputFile = NULL;
+      fclose(mClientGame->gGameUserInterface->mOutputFile);
+      mClientGame->gGameUserInterface->mOutputFile = NULL;
 
+      if(! mClientGame) return;
       if(status.value == STATUS_OK)
-         gGameUserInterface.displaySuccessMessage("Level download to %s", gGameUserInterface.remoteLevelDownloadFilename.c_str());
+         mClientGame->gGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->gGameUserInterface->remoteLevelDownloadFilename.c_str());
       else if(status.value == COMMAND_NOT_ALLOWED)
-         gGameUserInterface.displayErrorMessage("!!! Getmap command is disabled on this server");
+         mClientGame->gGameUserInterface->displayErrorMessage("!!! Getmap command is disabled on this server");
       else
-         gGameUserInterface.displayErrorMessage("Error downloading level");
+         mClientGame->gGameUserInterface->displayErrorMessage("Error downloading level");
    }
 }
 
@@ -342,7 +344,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sSuspendGame, (bool suspend), (suspend), Net
 // We'll also play the playerJoined sfx to alert local client that the game is on again.
 TNL_IMPLEMENT_RPC(GameConnection, s2cUnsuspend, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   gClientGame->unsuspendGame();       
+   mClientGame->unsuspendGame();       
    SFXObject::play(SFXPlayerJoined, 1);
 }
 
@@ -721,14 +723,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = adminPassSuccessMsg;
          else
-            gGameUserInterface.displayMessage(gCmdChatColor, adminPassSuccessMsg);
+            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, adminPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = adminPassFailureMsg;
          else
-            gGameUserInterface.displayMessage(gCmdChatColor, adminPassFailureMsg);
+            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, adminPassFailureMsg);
       }
    }
 }
@@ -762,7 +764,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
    if(isLevelChanger() && !granted)
-      gGameUserInterface.displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+      mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    setIsLevelChanger(granted);
 
@@ -777,14 +779,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = levelPassSuccessMsg;
          else
-            gGameUserInterface.displayMessage(gCmdChatColor, levelPassSuccessMsg);
+            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, levelPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = levelPassFailureMsg;
          else
-            gGameUserInterface.displayMessage(gCmdChatColor, levelPassFailureMsg);
+            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, levelPassFailureMsg);
       }
    }
 }
@@ -837,7 +839,7 @@ Color gCmdChatColor = colors[GameConnection::ColorRed];
 static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
 
-   gGameUserInterface.displayMessage(colors[colorIndex], "%s", message);
+   gClientGame->gGameUserInterface->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SFXObject::play(sfxEnum);
 }
@@ -899,7 +901,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cTouchdownScored,
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
    displayMessageE(GameConnection::ColorNuclearGreen, sfx, formatString, e);
-   gClientGame->getGameType()->majorScoringEventOcurred(team);
+   mClientGame->getGameType()->majorScoringEventOcurred(team);
 }
 
 
@@ -1029,7 +1031,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
                   (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   gGameUserInterface.shutdownInitiated(time, name, reason, originator);
+   mClientGame->gGameUserInterface->shutdownInitiated(time, name, reason, originator);
 }
 
 
@@ -1050,7 +1052,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   gGameUserInterface.shutdownCanceled();
+   mClientGame->gGameUserInterface->shutdownCanceled();
 }
 
 
@@ -1281,8 +1283,8 @@ void GameConnection::onConnectionEstablished()
 
    if(isInitiator())    // Runs on client
    {
-      gClientGame->setInCommanderMap(false);       // Start game in regular mode.
-      gClientGame->clearZoomDelta();               // No in zoom effect
+      mClientGame->setInCommanderMap(false);       // Start game in regular mode.
+      mClientGame->clearZoomDelta();               // No in zoom effect
       setGhostFrom(false);
       setGhostTo(true);
       logprintf(LogConsumer::LogConnection, "%s - connected to server.", getNetAddressString());
@@ -1351,7 +1353,7 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
       else
          UserInterface::reactivateMenu(gMainMenuUserInterface);
 
-      gClientGame->unsuspendGame();
+      mClientGame->unsuspendGame();
 
       // Display a context-appropriate error message
       gErrorMsgUserInterface.reset();

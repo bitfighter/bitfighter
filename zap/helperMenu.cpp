@@ -34,7 +34,7 @@ namespace Zap
 // Exit helper mode by entering play mode.  Only one mode is active at a time.
 void HelperMenu::exitHelper() 
 { 
-   gGameUserInterface.enterMode(GameUserInterface::PlayMode); 
+   gClientGame->gGameUserInterface->enterMode(GameUserInterface::PlayMode); 
 }
 
 
@@ -50,7 +50,7 @@ bool HelperMenu::processKeyCode(KeyCode keyCode)
    {
       exitHelper();      // Return to play mode, ship design unchanged
       if(gIniSettings.verboseHelpMessages)
-         gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), getCancelMessage());
+         gClientGame->gGameUserInterface->displayMessage(Color(1.0, 0.5, 0.5), getCancelMessage());
 
       return true;
    }

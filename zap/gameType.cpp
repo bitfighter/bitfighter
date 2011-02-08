@@ -452,10 +452,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 {
    S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   if(mLevelInfoDisplayTimer.getCurrent() || gGameUserInterface.mMissionOverlayActive)
+   if(mLevelInfoDisplayTimer.getCurrent() || gClientGame->gGameUserInterface->mMissionOverlayActive)
    {
       F32 alpha = 1;
-      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !gGameUserInterface.mMissionOverlayActive)
+      if(mLevelInfoDisplayTimer.getCurrent() < 1000 && !gClientGame->gGameUserInterface->mMissionOverlayActive)
          alpha = mLevelInfoDisplayTimer.getCurrent() * 0.001f;
 
       glEnableBlend;
@@ -2033,7 +2033,7 @@ static void switchTeamsCallback(U32 unused)
          return;
 
       gt->c2sChangeTeams(1 - ship->getTeam());                 // If two teams, team will either be 0 or 1, so "1 - " will toggle
-      UserInterface::reactivateMenu(gGameUserInterface);       // Jump back into the game (this option takes place immediately)
+      UserInterface::reactivateMenu(*gClientGame->gGameUserInterface);       // Jump back into the game (this option takes place immediately)
    }
    else
    {
@@ -2095,15 +2095,19 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    mViewBoundsWhileLoading = Rect(lx, ly, ux, uy);
    mLevelHasLoadoutZone = levelHasLoadoutZone;           // Need to pass this because we won't know for sure when the loadout zones will be sent, so searching for them is difficult
 
-   gClientGame->mObjectsLoaded = 0;                      // Reset item counter
-   gGameUserInterface.mShowProgressBar = true;           // Show progress bar
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   clientGame->mObjectsLoaded = 0;                      // Reset item counter
+   clientGame->gGameUserInterface->mShowProgressBar = true;           // Show progress bar
    //gClientGame->setInCommanderMap(true);               // If we change here, need to tell the server we are in this mode.
    //gClientGame->resetZoomDelta();
 
    mLevelInfoDisplayTimer.reset(LevelInfoDisplayTime);   // Start displaying the level info, now that we have it
 
    // Now we know all we need to initialize our loadout options
-   gGameUserInterface.initializeLoadoutOptions(engineerEnabled);
+   clientGame->gGameUserInterface->initializeLoadoutOptions(engineerEnabled);
 }
 
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
@@ -2213,23 +2217,27 @@ GAMETYPE_RPC_S2C(GameType, s2cAddClient,
 
    mClientList.push_back(cref);
 
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
    if(isMyClient)
    {
       mLocalClient = cref;
 
       // Now we'll check if we need an updated scoreboard... this only needed to handle use case of user
       // holding Tab while one game transitions to the next.  Without it, ratings will be reported as 0.
-      if(gGameUserInterface.isInScoreboardMode())
+      if(clientGame->gGameUserInterface->isInScoreboardMode())
       {
-         GameType *g = gClientGame->getGameType();
+         GameType *g = clientGame->getGameType();
          if(g)
             g->c2sRequestScoreboardUpdates(true);
       }
-      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
+      clientGame->gGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "Welcome to the game!");
    }
    else
    {
-      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
+      clientGame->gGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined the game.", name.getString());      
       if(playAlert)
          SFXObject::play(SFXPlayerJoined, 1);
    }
@@ -2273,7 +2281,11 @@ GAMETYPE_RPC_S2C(GameType, s2cRenameClient, (StringTableEntry oldName, StringTab
          break;
       }
    }
-   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   clientGame->gGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s changed to %s", oldName.getString(), newName.getString());
 }
 
 // Server notifies clients that a player has left the game
@@ -2287,7 +2299,11 @@ GAMETYPE_RPC_S2C(GameType, s2cRemoveClient, (StringTableEntry name), (name))
          break;
       }
    }
-   gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   clientGame->gGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s left the game.", name.getString());
    SFXObject::play(SFXPlayerLeft, 1);
 }
 
@@ -2319,7 +2335,12 @@ GAMETYPE_RPC_S2C(GameType, s2cSetTimeRemaining, (U32 timeLeft), (timeLeft))
 GAMETYPE_RPC_S2C(GameType, s2cChangeScoreToWin, (U32 winningScore, StringTableEntry changer), (winningScore, changer))
 {
    mWinningScore = winningScore;
-   gGameUserInterface.displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
+
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   clientGame->gGameUserInterface->displayMessage(Color(0.6f, 1, 0.8f) /*Nuclear green */, 
                "%s changed the winning score to %d.", changer.getString(), mWinningScore);
 }
 
@@ -2335,18 +2356,22 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // The following works as long as everyone runs with a unique name.  Fails if two players have names that collide and have
    // TODO: Better place to get current player's name?  This may fail if users have same name, and system has changed it
    // been corrected by the server.
-   if(gClientGame->getGameType()->mLocalClient && name == gClientGame->getGameType()->mLocalClient->name)      
-      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex).getString());
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   if(clientGame->getGameType()->mLocalClient && name == clientGame->getGameType()->mLocalClient->name)      
+      clientGame->gGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "You have joined team %s.", getTeamName(teamIndex).getString());
    else
-      gGameUserInterface.displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex).getString());
+      clientGame->gGameUserInterface->displayMessage(Color(0.6f, 0.6f, 0.8f), "%s joined team %s.", name.getString(), getTeamName(teamIndex).getString());
 
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
-   Rect worldBounds = gClientGame->computeWorldObjectExtents();
+   Rect worldBounds = clientGame->computeWorldObjectExtents();
 
    fillVector.clear();
-   gClientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, worldBounds);
+   clientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, worldBounds);
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
@@ -2366,8 +2391,13 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameAdmin, (StringTableEntry name), (name)
 {
    ClientRef *cl = findClientRef(name);
    cl->isAdmin = true;
-   if(gClientGame->getGameType()->mClientList.size() && name != gClientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      gGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
+      clientGame->gGameUserInterface->displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 }
 
 
@@ -2376,8 +2406,13 @@ GAMETYPE_RPC_S2C(GameType, s2cClientBecameLevelChanger, (StringTableEntry name),
 {
    ClientRef *cl = findClientRef(name);
    cl->isLevelChanger = true;
-   if(gClientGame->getGameType()->mClientList.size() && name != gClientGame->getGameType()->mLocalClient->name)    // Don't show message to self
-      gGameUserInterface.displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
+
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   if(clientGame->getGameType()->mClientList.size() && name != clientGame->getGameType()->mLocalClient->name)    // Don't show message to self
+      clientGame->gGameUserInterface->displayMessage(Color(0,1,1), "%s can now change levels.", name.getString());
 }
 
 // Runs after the server knows that the client is available and addressable via the getGhostIndex()
@@ -2434,13 +2469,17 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    mBetweenLevels = false;
    c2sSyncMessagesComplete(sequence);
 
-   gClientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
 
-   gGameUserInterface.mShowProgressBar = false;
+   clientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
+
+   clientGame->gGameUserInterface->mShowProgressBar = false;
    //gClientGame->setInCommanderMap(false);             // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.
    //gClientGame->clearZoomDelta();                     // No in zoom effect
    
-   gGameUserInterface.mProgressBarFadeTimer.reset(1000);
+   clientGame->gGameUserInterface->mProgressBarFadeTimer.reset(1000);
 }
 
 
@@ -2702,25 +2741,33 @@ extern Color gTeamChatColor;
 // Server sends message to the client for display using StringPtr
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatPM, (StringTableEntry fromName, StringTableEntry toName, StringPtr message), (fromName, toName, message))
 {
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
    Color theColor = Color(1,1,0);
    if(mLocalClient->name == toName && toName == fromName)      // Message sent to self
-      gGameUserInterface.displayMessage(theColor, "%s: %s", toName.getString(), message.getString());  
+      clientGame->gGameUserInterface->displayMessage(theColor, "%s: %s", toName.getString(), message.getString());  
 
    else if(mLocalClient->name == toName)                       // To this player
-      gGameUserInterface.displayMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
+      clientGame->gGameUserInterface->displayMessage(theColor, "from %s: %s", fromName.getString(), message.getString());
 
    else if(mLocalClient->name == fromName)                     // From this player
-      gGameUserInterface.displayMessage(theColor, "to %s: %s", toName.getString(), message.getString());
+      clientGame->gGameUserInterface->displayMessage(theColor, "to %s: %s", toName.getString(), message.getString());
 
    else                // Should never get here... shouldn't be able to see PM that is not from or not to you
-      gGameUserInterface.displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
+      clientGame->gGameUserInterface->displayMessage(theColor, "from %s to %s: %s", fromName.getString(), toName.getString(), message.getString());
 }
 
 
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry clientName, StringPtr message), (global, clientName, message))
 {
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   gGameUserInterface.displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   clientGame->gGameUserInterface->displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -2728,7 +2775,11 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessageSTE, (bool global, StringTableEntry clientName, StringTableEntry message), (global, clientName, message))
 {
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
-   gGameUserInterface.displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
+   clientGame->gGameUserInterface->displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
 }
 
 
@@ -2884,25 +2935,29 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
 GAMETYPE_RPC_S2C(GameType, s2cKillMessage, (StringTableEntry victim, StringTableEntry killer, StringTableEntry killerDescr), (victim, killer, killerDescr))
 {
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
    if(killer)  // Known killer, was self, robot, or another player
    {
       if(killer == victim)
          if(killerDescr == "mine")
-            gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
+            clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by own mine", victim.getString());
          else
-            gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
+            clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped self", victim.getString());
       else
          if(killerDescr == "mine")
-            gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
+            clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s was destroyed by mine put down by %s", victim.getString(), killer.getString());
          else
-            gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
+            clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s zapped %s", killer.getString(), victim.getString());
    }
    else if(killerDescr == "mine")   // Killer was some object with its own kill description string
-      gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got blown up by a mine", victim.getString());
    else if(killerDescr != "")
-      gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s %s", victim.getString(), killerDescr.getString());
    else         // Killer unknown
-      gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.8f), "%s got zapped", victim.getString());
 }
 
 

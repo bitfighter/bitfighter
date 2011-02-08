@@ -248,7 +248,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       if(theSame)      // Don't bother if ship config hasn't changed
       {
          if(gIniSettings.verboseHelpMessages)
-            gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- new ship design same as the old.");
+            gClientGame->gGameUserInterface->displayMessage(Color(1.0, 0.5, 0.5), "%s", "Modifications canceled -- new ship design same as the old.");
          return true;
       }
 
@@ -261,7 +261,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       // ...otherwise, display a notice to the player to head for a LoadoutZone
       // We've done a lot of work to get this message just right!  I hope players appreciate it!
       if(gIniSettings.verboseHelpMessages && !(ship && ship->isInZone(LoadoutZoneType)) )          
-         gGameUserInterface.displayMessage(Color(1.0, 0.5, 0.5), 
+         gClientGame->gGameUserInterface->displayMessage(Color(1.0, 0.5, 0.5), 
                                            "Ship design changed -- %s%s", 
                                            spawnWithLoadout ? "changes will be activated when you respawn" : "enter Loadout Zone to activate changes", 
                                            spawnWithLoadout && gt->levelHasLoadoutZone() ? " or enter Loadout Zone." : ".");

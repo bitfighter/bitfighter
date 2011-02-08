@@ -237,6 +237,8 @@ extern U32 gRawJoystickButtonInputs;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
 extern ServerGame *gServerGame;
+extern ClientGame *gClientGame1;
+extern ClientGame *gClientGame2;
 
 // Clean up and get ready to render
 void UserInterface::renderCurrent()    // static
@@ -254,6 +256,29 @@ void UserInterface::renderCurrent()    // static
       glEnable(GL_SCISSOR_TEST);
    
    glViewport(0, 0, gScreenInfo.getWindowWidth(), gScreenInfo.getWindowHeight());
+
+   if(gClientGame2)
+   {
+      gIniSettings.inputMode = Joystick;
+      gClientGame = gClientGame2;
+      gClientGame1->mUserInterfaceData->get();
+      gClientGame2->mUserInterfaceData->set();
+
+      glEnable(GL_SCISSOR_TEST);
+      glViewport(gScreenInfo.getWindowWidth()/2, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+
+      // Run the active UI renderer
+      if(current)
+         current->render();
+
+      gClientGame = gClientGame1;
+      gClientGame2->mUserInterfaceData->get();
+      gClientGame1->mUserInterfaceData->set();
+      glViewport(0, 0, gScreenInfo.getWindowWidth()/2, gScreenInfo.getWindowHeight());
+      gIniSettings.inputMode = Keyboard;
+   }
 
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
@@ -709,6 +734,29 @@ void UserInterface::onMouseMoved(S32 x, S32 y)             { /* Do nothing */ }
 void UserInterface::onMouseDragged(S32 x, S32 y)           { /* Do nothing */ }
 void UserInterface::onKeyDown(KeyCode keyCode, char ascii) { /* Do nothing */ }
 void UserInterface::onKeyUp(KeyCode keyCode)               { /* Do nothing */ }
+
+
+UserInterfaceData::UserInterfaceData() {current = NULL;}
+void UserInterfaceData::get()
+{
+   current = UserInterface::current;
+   prevUIs = UserInterface::prevUIs;
+   vertMargin = UserInterface::vertMargin;
+   horizMargin = UserInterface::horizMargin;
+   chatMargin = UserInterface::chatMargin;
+   S32 inputmode = S32(gIniSettings.inputMode);
+}
+void UserInterfaceData::set()
+{
+   UserInterface::current = current;
+   UserInterface::prevUIs = prevUIs;
+   UserInterface::vertMargin = vertMargin;
+   UserInterface::horizMargin = horizMargin;
+   UserInterface::chatMargin = chatMargin;
+   S32 inputmode = S32(gIniSettings.inputMode);
+}
+
+
 
 };
 
