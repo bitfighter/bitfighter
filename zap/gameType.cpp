@@ -39,7 +39,9 @@
 #include "playerInfo.h"     // For LuaPlayerInfo constructor  
 #include "stringUtils.h"    // For itos
 #include "BotNavMeshZone.h" // For gBotNavMeshZones.
-#include "gameStats.h"      // For VersionedGameStats def.
+#include "gameStats.h"      // For VersionedGameStats def
+#include "version.h"
+
 #include "../master/database.h"
 
 #include "statistics.h"

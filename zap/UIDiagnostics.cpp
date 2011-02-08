@@ -30,6 +30,7 @@
 #include "UIGame.h"
 #include "masterConnection.h"
 #include "input.h"
+#include "version.h"
 
 #include "tnl.h"
 

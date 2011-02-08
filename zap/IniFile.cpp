@@ -157,7 +157,7 @@ void CIniFile::processLine(string line)
          case ';':      // Comments
          case '#':
             if(!names.size())
-               HeaderComment(line.substr(pLeft + 1));
+               headerComment(line.substr(pLeft + 1));
             else
                sectionComment(keyname, line.substr(pLeft + 1));
             break;
@@ -524,13 +524,13 @@ void CIniFile::Erase()
    comments.clear();
 }
 
-void CIniFile::HeaderComment(const string comment)
+void CIniFile::headerComment(const string comment)
 {
    comments.push_back(comment);
 }
 
 
-string CIniFile::HeaderComment(S32 const commentID) const
+string CIniFile::headerComment(S32 const commentID) const
 {
    if(commentID < comments.size())
       return comments[commentID];
@@ -538,7 +538,7 @@ string CIniFile::HeaderComment(S32 const commentID) const
 }
 
 
-bool CIniFile::DeleteHeaderComment(S32 commentID)
+bool CIniFile::deleteHeaderComment(S32 commentID)
 {
    if(commentID < comments.size()) {
       comments.erase(commentID);
@@ -655,6 +655,16 @@ bool CIniFile::deleteSectionComments(const string keyname)
    if(sectionId == noID)
       return false;
    return deleteSectionComments(sectionId);
+}
+
+
+bool CIniFile::deleteAllSectionComments()
+{
+   bool result = true;
+   for(S32 i = 0; i < keys.size() && result; i++)
+      result &= deleteSectionComments(i);
+
+   return result;
 }
 
 

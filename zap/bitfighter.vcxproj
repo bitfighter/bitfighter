@@ -285,6 +285,7 @@
     <ClInclude Include="stringUtils.h" />
     <ClInclude Include="UIAbstractInstructions.h" />
     <ClInclude Include="UIMenuItems.h" />
+    <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\zap\ZAP.rc" />

@@ -28,6 +28,7 @@
 #include "config.h"
 #include "quickChatHelper.h"
 #include "gameLoader.h"    // For LevelListLoader::levelList
+#include "version.h"
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
@@ -1107,6 +1108,8 @@ static void writeSettings()
    gINI.setValueYN(section, "EnableExperimentalAimMode", gIniSettings.enableExperimentalAimMode);
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxFPS);  
 
+   gINI.SetValueI (section, "Version", BUILD_VERSION);
+
    // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
 	if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
       gINI.SetValueF (section, "LineWidth", gDefaultLineWidth);
@@ -1256,14 +1259,14 @@ static void writeINIHeader()
 {
    if(!gINI.NumHeaderComments())
    {
-      gINI.HeaderComment("Bitfighter configuration file");
-      gINI.HeaderComment("=============================");
-      gINI.HeaderComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
-      gINI.HeaderComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
-      gINI.HeaderComment(" First, some basic terminology:");
-      gINI.HeaderComment(" [section]");
-      gINI.HeaderComment(" key=value");
-      gINI.HeaderComment("");
+      gINI.headerComment("Bitfighter configuration file");
+      gINI.headerComment("=============================");
+      gINI.headerComment(" This file is intended to be user-editable, but some settings here may be overwritten by the game.");
+      gINI.headerComment(" If you specify any cmd line parameters that conflict with these settings, the cmd line options will be used.");
+      gINI.headerComment(" First, some basic terminology:");
+      gINI.headerComment(" [section]");
+      gINI.headerComment(" key=value");
+      gINI.headerComment("");
    }
 }
 

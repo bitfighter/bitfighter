@@ -26,6 +26,7 @@
 #include "gameNetInterface.h"
 #include "UIQueryServers.h"
 #include "game.h"
+#include "version.h"
 
 namespace Zap
 {
