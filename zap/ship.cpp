@@ -52,7 +52,7 @@
 
 #define hypot _hypot    // Kill some warnings
 
-static bool showCloakedTeammates = false;    // Set to true to allow players to see their cloaked teammates
+static const bool showCloakedTeammates = false;    // Set to true to allow players to see their cloaked teammates
 
 namespace Zap
 {
@@ -1590,10 +1590,11 @@ void Ship::render(S32 layerIndex)
 
    // LayerIndex == 1
 
-   GameType *g = gClientGame->getGameType();
-   Color color;
-   if(g)
-      color = g->getShipColor(this);
+   GameType *gameType = gClientGame->getGameType();
+   if(!gameType)
+      return;     // This will likely never happen
+
+   Color color(gameType->getShipColor(this));
 
    Point velDir(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
    F32 len = velDir.len();
@@ -1626,15 +1627,12 @@ void Ship::render(S32 layerIndex)
       thrusts[2] += 0.25;
 
    if(isModuleActive(ModuleBoost))
-      for(U32 i = 0; i < 4; i++)
+      for(U32 i = 0; i < ARRAYSIZE(thrusts); i++)
          thrusts[i] *= 1.3;
 
    // Don't completely hide local player or ships on same team
-   if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && g->isTeamGame()))
-   {
-      if(alpha < 0.25)
-         alpha = 0.25;
-   }
+   if(localShip || (showCloakedTeammates && getTeam() == localPlayerTeam && gameType->isTeamGame()))
+      alpha = max(alpha, 0.25);     // Make sure we have at least .25 alpha
    else
    {
       // If local ship has sensor, it can see cloaked non-local ships
