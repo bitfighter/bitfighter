@@ -1099,7 +1099,7 @@ void HostMenuUserInterface::setupMenus()
    menuItems.push_back(new EditableMenuItem("CONNECTION PASSWORD:",   gServerPassword,      "<Anyone can connect>",       
                                             "", MAX_PASSWORD_LENGTH, KEY_C));
 
-   menuItems.push_back(new YesNoMenuItem("ALLOW MAP DOWNLOADS", gIniSettings.allowGetMap, NULL, "", KEY_M));
+   menuItems.push_back(new YesNoMenuItem("ALLOW MAP DOWNLOADS:", gIniSettings.allowGetMap, NULL, "", KEY_M));
 
    //menuItems.push_back(new CounterMenuItem("MAXIMUM PLAYERS:",   gIniSettings.maxplayers, 1, 2, MAX_PLAYERS, "", "", "", KEY_P));
    //menuItems.push_back(new EditableMenuItem("PORT:",                  "28000",              "Use default of 28000", 
