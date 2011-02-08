@@ -246,7 +246,7 @@ void MenuUserInterface::render()
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
-      gGameUserInterface.render();
+      gClientGame->gGameUserInterface->render();
       glColor4f(0, 0, 0, 0.6);
 
       glEnableBlend;
@@ -1313,7 +1313,7 @@ void GameMenuUserInterface::buildMenu()
 }
 
 
-extern GameUserInterface gGameUserInterface;
+//extern GameUserInterface gGameUserInterface;
 
 void GameMenuUserInterface::onEscape()
 {
@@ -1424,7 +1424,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 
    // The selection index is the level to load
    gc->c2sRequestLevelChange(index, false);
-   reactivateMenu(gGameUserInterface);    // Jump back to the game menu
+   reactivateMenu(*gClientGame->gGameUserInterface);    // Jump back to the game menu
 }
 
 
@@ -1537,7 +1537,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    }
 
    if(action != ChangeTeam)                     // Unless we need to move on to the change team screen...
-      reactivateMenu(gGameUserInterface);       // ...it's back to the game!
+      reactivateMenu(*gClientGame->gGameUserInterface);       // ...it's back to the game!
 }
 
 
@@ -1620,7 +1620,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
       }
    }
 
-   reactivateMenu(gGameUserInterface);    // Back to the game!
+   reactivateMenu(*gClientGame->gGameUserInterface);    // Back to the game!
 }
 
 

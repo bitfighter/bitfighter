@@ -168,7 +168,7 @@ void KeyDefMenuUserInterface::render()
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
-      gGameUserInterface.render();
+      gClientGame->gGameUserInterface->render();
       glColor4f(0, 0, 0, 0.6);
       glEnableBlend;
       glBegin(GL_POLYGON);

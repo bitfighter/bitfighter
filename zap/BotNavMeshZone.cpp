@@ -78,7 +78,7 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
-   if(!gGameUserInterface.mDebugShowMeshZones)
+   if(!gClientGame->gGameUserInterface->mDebugShowMeshZones)
       return;
 
    if(mPolyFill.size() == 0)    //Need to process PolyFill here, rendering server objects into client.

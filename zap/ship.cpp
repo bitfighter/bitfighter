@@ -1550,12 +1550,11 @@ void Ship::render(S32 layerIndex)
       glLineWidth(gDefaultLineWidth);
    }
 
-   if(gGameUserInterface.mDebugShowShipCoords)
+   if(gClientGame->gGameUserInterface->mDebugShowShipCoords)
       renderShipCoords(getActualPos(), localShip, alpha);
 
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);
    glScalef(warpInScale, warpInScale, 1);
-
    if(layerIndex == -1)    // TODO: Get rid of this if we stop sending location of cloaked ship to clients
    {
       // Draw the outline of the ship in solid black -- this will block out any stars and give

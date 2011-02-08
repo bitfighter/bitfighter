@@ -95,6 +95,8 @@ class GameType;
 class GameObject;
 class GameConnection;
 class Ship;
+class GameUserInterface;
+struct UserInterfaceData;
 
 /// Base class for server and client Game subclasses.  The Game
 /// base class manages all the objects in the game simulation on
@@ -378,6 +380,9 @@ private:
 public:
    ClientGame(const Address &bindAddress);
    ~ClientGame();
+
+   GameUserInterface *gGameUserInterface;
+   UserInterfaceData *mUserInterfaceData;
 
    bool hasValidControlObject();
    bool isConnectedToServer();

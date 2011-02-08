@@ -322,6 +322,16 @@ public:
    static void playBoop();    // Make some noise!
 };
 
+struct UserInterfaceData
+{
+   UserInterface *current;            // Currently active menu
+   Vector<UserInterface *> prevUIs;   // Previously active menus
+   S32 vertMargin, horizMargin;
+   S32 chatMargin;
+   UserInterfaceData();
+   void get();
+   void set();
+};
 
 };
 

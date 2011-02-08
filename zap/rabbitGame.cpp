@@ -38,44 +38,48 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT_RPC(RabbitGameType, s2cRabbitMessage, (U32 msgIndex, StringTableEntry clientName), (msgIndex, clientName),
    NetClassGroupGameMask, RPCGuaranteedOrdered, RPCToGhost, 0)
 {
+   ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
+   TNLAssert(clientGame, "clientGame is NULL");
+   if(!clientGame) return;
+
    switch (msgIndex)
    {
    case RabbitMsgGrab:
       SFXObject::play(SFXFlagCapture);
-      gGameUserInterface.displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s GRABBED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitKill:
       SFXObject::play(SFXShipHeal);
-      gGameUserInterface.displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s is a rabbid rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgDrop:
       SFXObject::play(SFXFlagDrop);
-      gGameUserInterface.displayMessage(Color(0.0f, 1.0f, 0.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(0.0f, 1.0f, 0.0f),
                   "%s DROPPED the Carrot!",
                   clientName.getString());
       break;
    case RabbitMsgRabbitDead:
       SFXObject::play(SFXShipExplode);
-      gGameUserInterface.displayMessage(Color(1.0f, 0.0f, 0.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 0.0f, 0.0f),
                   "%s killed the rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgReturn:
       SFXObject::play(SFXFlagReturn);
-      gGameUserInterface.displayMessage(Color(1.0f, 0.0f, 1.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 0.0f, 1.0f),
                   "The Carrot has been returned!");
       break;
    case RabbitMsgGameOverWin:
-      gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.0f),
                   "%s is the top rabbit!",
                   clientName.getString());
       break;
    case RabbitMsgGameOverTie:
-      gGameUserInterface.displayMessage(Color(1.0f, 1.0f, 0.0f),
+      clientGame->gGameUserInterface->displayMessage(Color(1.0f, 1.0f, 0.0f),
                   "No top rabbit - Carrot wins by default!");
       break;
    }
