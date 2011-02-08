@@ -1581,7 +1581,7 @@ void Ship::render(S32 layerIndex)
       return;     // This will likely never happen
 
    F32 thrusts[4];
-   calcThrustComponents(thrusts);
+   calcThrustComponents(thrusts);      // Calculate the various thrust components for rendering purposes
 
 
    // Don't completely hide local player or ships on same team
@@ -1602,7 +1602,7 @@ void Ship::render(S32 layerIndex)
    if(alpha != 1.0)
       glEnableBlend;
 
-   if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
+   if(localShip && gShowAimVector && gIniSettings.enableExperimentalAimMode)     // Only show for local ship
       renderAimVector();
 
    glPopMatrix();  
@@ -1635,6 +1635,8 @@ void Ship::render(S32 layerIndex)
    if(alpha != 1.0)
       glDisableBlend;
 
+
+   // Render mounted items
    for(S32 i = 0; i < mMountedItems.size(); i++)
       if(mMountedItems[i].isValid())
          mMountedItems[i]->renderItem(mMoveState[RenderState].pos);
