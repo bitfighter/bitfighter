@@ -1673,7 +1673,7 @@ void EditorUserInterface::renderReferenceShip()
       glTranslatef(mMousePos.x, mMousePos.y, 0);
       glScalef(mCurrentScale / mGridSize, mCurrentScale / mGridSize, 1);
       glRotatef(90, 0, 0, 1);
-      renderShip(red, 1, thrusts, 1, 5, false, false);
+      renderShip(red, 1, thrusts, 1, 5, false, false, false);
       glRotatef(-90, 0, 0, 1);
 
       // And show how far it can see

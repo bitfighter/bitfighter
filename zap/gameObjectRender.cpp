@@ -172,7 +172,7 @@ void drawCentroidMark(const Point &pos, F32 radius)
 }
 
 
-void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive)
+void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive, bool hasArmor)
 {
    if(alpha != 1.0)
       glEnableBlend;
@@ -309,7 +309,18 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
       glVertex2f(20, -15);
    glEnd();
 
-   // Render shield if appropriate
+   // Armor
+   if(hasArmor)
+   {
+      glLineWidth(gLineWidth3);
+      glColor4f(1,1,0,alpha);    // Yellow
+
+      drawPolygon(Point(0,0), 5, 30, FloatHalfPi);
+
+      glLineWidth(gDefaultLineWidth);
+   }
+
+   // Shields
    if(shieldActive)
    {
       F32 shieldRadius = radius + 3;
@@ -320,7 +331,7 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
             glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
       glEnd();
    }
-
+   
    if(alpha != 1.0)
       glDisableBlend;
 }

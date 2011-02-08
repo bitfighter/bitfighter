@@ -333,15 +333,13 @@ static const char *loadoutInstructions[] = {
    "Pressing the ship configuration menu key brings up a menu that",
    "allows the player to choose the next loadout for his or her ship.",
    "This loadout will not be active on the ship until the player",
-   "flies over a Loadout Zone area.",
-   "",
-   "The available modules and their functions are described below:",
-   NULL,
+   "flies over a Loadout Zone area.  Modules include:",
 };
 
 static const char *moduleDescriptions[] = {
    "Boost - Boosts movement speed",
    "Shield - Reflects incoming projectiles",
+   "Armor - Reduces damage, but makes ship harder to control",
    "Repair - Repairs self and nearby damaged objects",
    "Sensor - Increases visible distance and reveals hidden objects",
    "Cloak - Turns the ship invisible",
@@ -351,14 +349,14 @@ void InstructionsUserInterface::renderPage2()
 {
    S32 y = 75;
    glColor3f(1,1,1);
-   for(S32 i = 0; loadoutInstructions[i]; i++)
+   for(S32 i = 0; i < ARRAYSIZE(loadoutInstructions); i++)
    {
       drawCenteredString(y, 20, loadoutInstructions[i]);
       y += 26;
    }
 
    y += 30;
-   for(S32 i = 0; i < 5; i++)
+   for(S32 i = 0; i < 6; i++)
    {
       glColor3f(1,1,1);
       drawString(105, y, 20, moduleDescriptions[i]);
@@ -372,41 +370,47 @@ void InstructionsUserInterface::renderPage2()
 
       switch(i)
       {
-         case 0:
-            renderShip(Color(0, 0, 1), 1, thrustsBoost, 1, Ship::CollisionRadius, false, false);
+         case 0:     // Boost
+            renderShip(Color(0, 0, 1), 1, thrustsBoost, 1, Ship::CollisionRadius, false, false, false);
             glBegin(GL_LINES);
-            glColor3f(1,1,0);
-            glVertex2f(-20, -17);
-            glColor3f(0, 0,0);
-            glVertex2f(-20, -50);
-            glColor3f(1,1,0);
-            glVertex2f(20, -17);
-            glColor3f(0, 0,0);
-            glVertex2f(20, -50);
+               glColor3f(1,1,0);
+               glVertex2f(-20, -17);
+               glColor3f(0, 0,0);
+               glVertex2f(-20, -50);
+               glColor3f(1,1,0);
+               glVertex2f(20, -17);
+               glColor3f(0, 0,0);
+               glVertex2f(20, -50);
             glEnd();
             break;
-         case 1:
-            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, true);
+
+         case 1:     // Shield
+            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, true, false);
             break;
-         case 2:
+
+         case 2:     // Armor
+            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, false, true);
+            break;
+
+         case 3:     // Repair
             {
                F32 health = (gClientGame->getCurrentTime() & 0x7FF) * 0.0005f;
 
-               renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, false, false);
+               renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, false, false, false);
                glLineWidth(gLineWidth3);
                glColor3f(1,0, 0);
                drawCircle(Point(0, 0), Ship::RepairDisplayRadius);
                glLineWidth(gDefaultLineWidth);
             }
             break;
-         case 3:
+         case 4:     // Sensor
             {
-               renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, false);
+               renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, false, false);
                F32 radius = (gClientGame->getCurrentTime() & 0x1FF) * 0.002;
                drawCircle(Point(), radius * Ship::CollisionRadius + 4);
             }
             break;
-         case 4:
+         case 5:     // Cloak
             {
                U32 ct = gClientGame->getCurrentTime();
                F32 frac = ct & 0x3FF;
@@ -415,7 +419,7 @@ void InstructionsUserInterface::renderPage2()
                   alpha = frac * 0.001;
                else
                   alpha = 1 - (frac * 0.001);
-               renderShip(Color(0, 0, 1), alpha, thrusts, 1, Ship::CollisionRadius, false, false);
+               renderShip(Color(0, 0, 1), alpha, thrusts, 1, Ship::CollisionRadius, false, false, false);
             }
             break;
       }

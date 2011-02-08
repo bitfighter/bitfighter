@@ -1570,7 +1570,7 @@ void Ship::render(S32 layerIndex)
    glRotatef(radiansToDegrees(mMoveState[RenderState].angle) - 90 + rotAmount, 0, 0, 1.0);
    glScalef(warpInScale, warpInScale, 1);
 
-   if(layerIndex == -1)
+   if(layerIndex == -1)    // TODO: Get rid of this if we stop sending location of cloaked ship to clients
    {
       // Draw the outline of the ship in solid black -- this will block out any stars and give
       // a tantalizing hint of motion when the ship is cloaked.  Could also try some sort of star-twinkling or
@@ -1598,7 +1598,8 @@ void Ship::render(S32 layerIndex)
    Point velDir(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
    F32 len = velDir.len();
    F32 thrusts[4];
-   for(U32 i = 0; i < 4; i++)
+
+   for(U32 i = 0; i < ARRAYSIZE(thrusts); i++)
       thrusts[i] = 0;            // Reset thrusts
 
    if(len > 0)
@@ -1612,7 +1613,7 @@ void Ship::render(S32 layerIndex)
       shipDirs[2].set(shipDirs[0].y, -shipDirs[0].x);
       shipDirs[3].set(-shipDirs[0].y, shipDirs[0].x);
 
-      for(U32 i = 0; i < 4; i++)
+      for(U32 i = 0; i < ARRAYSIZE(shipDirs); i++)
          thrusts[i] = shipDirs[i].dot(velDir);
    }
 
@@ -1642,7 +1643,7 @@ void Ship::render(S32 layerIndex)
          alpha = 0.5;
    }
 
-   renderShip(color, alpha, thrusts, mHealth, mRadius, isModuleActive(ModuleCloak), isModuleActive(ModuleShield));
+   renderShip(color, alpha, thrusts, mHealth, mRadius, isModuleActive(ModuleCloak), isModuleActive(ModuleShield), hasModule(ModuleArmor));
 
    if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
       renderAimVector();
@@ -1661,16 +1662,6 @@ void Ship::render(S32 layerIndex)
       drawCircle(Point(), radius * Ship::CollisionRadius + 4);
    }
    glPopMatrix();
-
-   if(hasModule(ModuleArmor))
-   {
-      glLineWidth(gLineWidth3);
-      glColor4f(1,1,0,alpha);
-
-      drawPolygon(mMoveState[RenderState].pos, 5, 30, getAimVector().ATAN2());
-
-      glLineWidth(gDefaultLineWidth);
-   }
 
    if(isModuleActive(ModuleRepair))
    {
