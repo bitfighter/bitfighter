@@ -371,7 +371,7 @@ void InstructionsUserInterface::renderPage2()
       switch(i)
       {
          case 0:     // Boost
-            renderShip(Color(0, 0, 1), 1, thrustsBoost, 1, Ship::CollisionRadius, false, false, false);
+            renderShip(Color(0, 0, 1), 1, thrustsBoost, 1, Ship::CollisionRadius, 0, false, false, false, false);
             glBegin(GL_LINES);
                glColor3f(1,1,0);
                glVertex2f(-20, -17);
@@ -385,18 +385,18 @@ void InstructionsUserInterface::renderPage2()
             break;
 
          case 1:     // Shield
-            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, true, false);
+            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, 0, false, true, false, false);
             break;
 
          case 2:     // Armor
-            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, false, true);
+            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, true);
             break;
 
          case 3:     // Repair
             {
                F32 health = (gClientGame->getCurrentTime() & 0x7FF) * 0.0005f;
 
-               renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, false, false, false);
+               renderShip(Color(0, 0, 1), 1, thrusts, health, Ship::CollisionRadius, 0, false, false, false, false);
                glLineWidth(gLineWidth3);
                glColor3f(1,0, 0);
                drawCircle(Point(0, 0), Ship::RepairDisplayRadius);
@@ -404,11 +404,7 @@ void InstructionsUserInterface::renderPage2()
             }
             break;
          case 4:     // Sensor
-            {
-               renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, false, false, false);
-               F32 radius = (gClientGame->getCurrentTime() & 0x1FF) * 0.002;
-               drawCircle(Point(), radius * Ship::CollisionRadius + 4);
-            }
+            renderShip(Color(0, 0, 1), 1, thrusts, 1, Ship::CollisionRadius, gClientGame->getCurrentTime(), false, false, true, false);
             break;
          case 5:     // Cloak
             {
@@ -419,7 +415,7 @@ void InstructionsUserInterface::renderPage2()
                   alpha = frac * 0.001;
                else
                   alpha = 1 - (frac * 0.001);
-               renderShip(Color(0, 0, 1), alpha, thrusts, 1, Ship::CollisionRadius, false, false, false);
+               renderShip(Color(0, 0, 1), alpha, thrusts, 1, Ship::CollisionRadius, 0, false, false, false, false);
             }
             break;
       }

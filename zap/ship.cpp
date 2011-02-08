@@ -1641,24 +1641,20 @@ void Ship::render(S32 layerIndex)
          alpha = 0.5;
    }
 
-   renderShip(color, alpha, thrusts, mHealth, mRadius, isModuleActive(ModuleCloak), isModuleActive(ModuleShield), hasModule(ModuleArmor));
+   renderShip(color, alpha, thrusts, mHealth, mRadius, getGame()->getCurrentTime() - mSensorStartTime, 
+              isModuleActive(ModuleCloak), isModuleActive(ModuleShield), isModuleActive(ModuleSensor), hasModule(ModuleArmor));
 
    if(gShowAimVector && gIniSettings.enableExperimentalAimMode && localShip)     // Only show for local ship
       renderAimVector();
 
    // Now render some "addons"  --> should these be in renderShip?
 
-   if(alpha == 0) return;  // don't draw when completely transparent
+   if(alpha == 0) 
+      return;  // Don't draw when completely transparent
+
    if(alpha != 1.0)
       glEnableBlend;
 
-   glColor4f(1,1,1,alpha);
-   if(isModuleActive(ModuleSensor))
-   {
-      U32 delta = getGame()->getCurrentTime() - mSensorStartTime;
-      F32 radius = (delta & 0x1FF) * 0.002;
-      drawCircle(Point(), radius * Ship::CollisionRadius + 4);
-   }
    glPopMatrix();
 
    if(isModuleActive(ModuleRepair))

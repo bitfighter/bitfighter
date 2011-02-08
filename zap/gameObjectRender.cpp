@@ -172,7 +172,8 @@ void drawCentroidMark(const Point &pos, F32 radius)
 }
 
 
-void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool cloakActive, bool shieldActive, bool hasArmor)
+void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, U32 sensorTime,
+                bool cloakActive, bool shieldActive, bool sensorActive, bool hasArmor)
 {
    if(alpha != 1.0)
       glEnableBlend;
@@ -330,6 +331,14 @@ void renderShip(Color c, F32 alpha, F32 thrusts[], F32 health, F32 radius, bool 
          for(F32 theta = 0; theta <= Float2Pi; theta += 0.3)
             glVertex2f(cos(theta) * shieldRadius, sin(theta) * shieldRadius);
       glEnd();
+   }
+
+      
+   if(sensorActive)
+   {
+      glColor4f(1,1,1,alpha);
+      F32 radius = (sensorTime & 0x1FF) * 0.002;
+      drawCircle(Point(), radius * Ship::CollisionRadius + 4);
    }
    
    if(alpha != 1.0)
