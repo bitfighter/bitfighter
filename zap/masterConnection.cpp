@@ -32,10 +32,11 @@
 #include "gameConnection.h"
 #include "gameNetInterface.h"
 #include "gameObject.h"
+#include "version.h"
 
 #include "SharedConstants.h"    // For AuthenticationStatus enum
 
-#include "../tnl/tnl.h"
+#include "tnl.h"
 #include "../tnl/tnlNetInterface.h"
 
 namespace Zap

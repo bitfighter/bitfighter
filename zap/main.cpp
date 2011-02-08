@@ -47,78 +47,13 @@ XXX need to document timers, new luavec stuff XXX
 
 */
 
-/* Fixes after 014
+/* Fixes after 015
 <h4></h4>
 <ul>
 <li>
 </ul>
 <h4>New Features</h4>
 <ul>
-<li>Engineer module -- build turrets and forcefields by grabbing resources; activate with /engf or /engt; only works on levels containing line Specials Engineer
-<li>Armor module -- makes ship stronger but harder to control; always active, uses no energy (Experimental, may be removed in future version)
-<li>Upload/download resources (levels, levelgens, and bots) from remote server (if enabled, and you have the password) via cmd line parameters
-<li>Added /getmap command to allow anyone get a currently playing map, if server enabled it.
-</ul>
-<h4>User Interface</h4>
-<ul>
-<li>Pressing enter now advances to next menu item on most menus
-</ul>
-
-<h4>Scripting</h4>
-<ul>
-<li>Levelgens can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder
-<li>Levelgens style scripts can be run from the console with run <script> {args}.  
-Scripts can be names .lua or .levelgen, and can be stored in either the levels folder or the lua scripts folder.<br>
-Specifying the extension is optional.
-<li>added game:isNexusOpen() game:getNexusTimeLeft() GoalZone:hasFlag() FlagItem:getCaptureZone() FlagItem:getShip() Ship:getMountedItems() bot:engineerDeployObject(EngineeredTurret or EngineeredForceField)
-<li>Robot errors now appears in game console when hosting.
-<li>Added /showbots to show all robots, /drobot to show robot paths.
-</ul>
-
-<h4>Editor</h4>
-<ul>
-<li>When creating a new level, credits line is prepoluated with current player name (unless it's ChumpChange)
-<li>Max level size now unlimited, individual lines limited to c. 4000 characters, which is plenty
-<li>Can place neutral spawnpoints: Any team can spawn at these
-<li>When running command from console (run <script>) any created items are now selected
-<li>Entering 0 time will create unlimited time games.  Just because you can doesn't mean you should!
-<li>Allow bypass level warnings and errors when trying to test level.
-</ul>
-
-<h4>Misc</h4>
-<ul>
-<li>Passwords now stored in plaintext in the ini file; gives increase in convenience with only small decrease in security; still transmitted via hash
-<li>When master server is unreachable, server will remember recent game servers and will try to contact those
-<li>Can define multiple servers in the INI to always try contacting without assistance of the master
-<li>Engineer module can no longer create crossing forcefields
-<li>Added /linesmooth /linewidth /maxfps commands, and they are available in INI
-<li>Added /setscore and /settime commands that set the score and game time for the current level
-<li>Added /getLevel (/getmap ?) command to download current level to local machine (only some game servers will allow this)
-<li>Near instant display of bot nav zones with /dzones, but now only works on local hosts (i.e. when you are hosting in-process)
-<li>Bot nav zones automatically generates when there is no nav zones and robots is asking for "getWaypoint".
-<li>Bot nav zones can now link both nav zones with teleporters, this allows robots to use teleporters.
-<li>Some bandwidth saving by sending updates less often on slow moving objects.
-<li>Added /pm to send private message in a game server.
-</ul>
-
-
-<h4>Bugs</h4>
-<ul>
-<li>Fixed issue of wrong player being selected on change teams/kick menus
-<li>Fixed rare but very annoying problem of flags that can't be picked up
-<li>Fixed bug with verified names not appearing verified with arranged connection (i.e. most of the time)
-<li>Ingame Bitfighter logo display issues corrected.  
-<li>Bitfighter logo now positioned almost exactly where the generating text is located, at all zooms and rotations <b>Note that if you have levels with the Bitfighter logo, it's position may have shifted!</b>
-<li>Fixed soccer sync problems
-<li>Fixed long loading and lag on level maps with lots of bot zones, /dzones will work only when hosting
-<li>Fixed crash on maps with: missing GameType, missing Team; FlagItem, Soccer and HuntersNexusObject on wrong GameType; out of range team number, Neutral flag in CTF.
-<li>Fixed lots of Robots problems. Robots can now score, hold nexus and rabbit flags, and allow admin to kick robots or change robots team.
-<li>Fixed rare nexus problem with extra flag appearing that doesn't exist on server or other clients.
-<li>Fixed burst and lag while going forward, bouncing off your own ship.
-<li>Fixed some random turret hits self.
-<li>Fixed score board not sorting with lots of players.
-<li>Fixed problem with unable to see all ships in your teams in full map view.
-<li>Fixed bouncer going through ship when too close to the wall.
 </ul>
 */
 
@@ -188,6 +123,8 @@ using namespace TNL;
 #include "keyCode.h"
 #include "config.h"
 #include "md5wrapper.h"
+#include "version.h"
+
 
 #include "screenShooter.h"
 
@@ -1903,6 +1840,20 @@ void setJoystick(ControllerTypeType jsType)
 }
 
 
+extern void clearINIComments();
+
+// Function to handle one-time update tasks
+void checkIfThisIsAnUpdate()
+{
+   if(gIniSettings.version == BUILD_VERSION)
+      return;
+
+   // Wipe out all comments; they will be replaced with any updates
+   gINI.deleteHeaderComments();
+   gINI.deleteAllSectionComments();
+}
+
+
 #ifdef USE_BFUP
 #include <direct.h>
 #include <stdlib.h>
@@ -2025,6 +1976,9 @@ int main(int argc, char **argv)
    }
 
    SFXObject::init();  // Even dedicated server needs sound these days
+
+   checkIfThisIsAnUpdate();
+
 
 #ifndef ZAP_DEDICATED
    if(gClientGame)     // That is, we're starting up in interactive mode, as opposed to running a dedicated server

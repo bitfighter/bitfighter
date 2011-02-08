@@ -174,13 +174,13 @@ public:
    // Get number of header comments.
    size_t NumHeaderComments()   {return comments.size();}
    // Add a header comment.
-   void     HeaderComment( const string comment);
+   void     headerComment( const string comment);
    // Return a header comment.
-   string   HeaderComment( S32 const commentID) const;
+   string   headerComment( S32 const commentID) const;
    // Delete a header comment.
-   bool     DeleteHeaderComment( S32 commentID);
+   bool     deleteHeaderComment( S32 commentID);
    // Delete all header comments.
-   void     DeleteHeaderComments()               {comments.clear();}
+   void     deleteHeaderComments()               { comments.clear(); }
 
    // Key comment functions.
    // Key comments are those comments within a key. Any comments
@@ -203,6 +203,8 @@ public:
    // Delete all comments for a key.
    bool     deleteSectionComments( S32 const sectionId);
    bool     deleteSectionComments( const string keyname);
+
+   bool     deleteAllSectionComments();
 };
 
 
