@@ -42,7 +42,7 @@ void MenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 
 bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 {
-   if(keyCode == KEY_ENTER || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
+   if(keyCode == KEY_ENTER || keyCode == KEY_SPACE || keyCode == KEY_RIGHT || keyCode == MOUSE_LEFT)
    {
       UserInterface::playBoop();
       if(mCallback)
@@ -92,7 +92,7 @@ bool ToggleMenuItem::handleKey(KeyCode keyCode, char ascii)
       return true;
    }
 
-   else if(keyCode == KEY_ENTER)
+   else if(keyCode == KEY_ENTER || keyCode == KEY_SPACE)
    {
       mIndex = (mIndex == (U32)mOptions.size() - 1) ? nextValAfterWrap : mIndex + 1;
 
