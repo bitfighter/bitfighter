@@ -1174,19 +1174,19 @@ void JoystickUpdateMove(Move *theMove)
    if(buttonDown & 2) simulateKeyDown(STICK_1_RIGHT);
    if(buttonDown & 4) simulateKeyDown(STICK_1_UP);
    if(buttonDown & 8) simulateKeyDown(STICK_1_DOWN);
-   if(buttonDown & 16) simulateKeyDown(STICK_1_LEFT);
-   if(buttonDown & 32) simulateKeyDown(STICK_1_RIGHT);
-   if(buttonDown & 64) simulateKeyDown(STICK_1_UP);
-   if(buttonDown & 128) simulateKeyDown(STICK_1_DOWN);
+   if(buttonDown & 16) simulateKeyDown(STICK_2_LEFT);
+   if(buttonDown & 32) simulateKeyDown(STICK_2_RIGHT);
+   if(buttonDown & 64) simulateKeyDown(STICK_2_UP);
+   if(buttonDown & 128) simulateKeyDown(STICK_2_DOWN);
 
    if(buttonUp & 1) simulateKeyUp(STICK_1_LEFT);
    if(buttonUp & 2) simulateKeyUp(STICK_1_RIGHT);
    if(buttonUp & 4) simulateKeyUp(STICK_1_UP);
    if(buttonUp & 8) simulateKeyUp(STICK_1_DOWN);
-   if(buttonUp & 16) simulateKeyUp(STICK_1_LEFT);
-   if(buttonUp & 32) simulateKeyUp(STICK_1_RIGHT);
-   if(buttonUp & 64) simulateKeyUp(STICK_1_UP);
-   if(buttonUp & 128) simulateKeyUp(STICK_1_DOWN);
+   if(buttonUp & 16) simulateKeyUp(STICK_2_LEFT);
+   if(buttonUp & 32) simulateKeyUp(STICK_2_RIGHT);
+   if(buttonUp & 64) simulateKeyUp(STICK_2_UP);
+   if(buttonUp & 128) simulateKeyUp(STICK_2_DOWN);
 }
 
 

@@ -77,6 +77,18 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 // Constructor
 GameUserInterface::GameUserInterface()
 {
+   bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
+   bool mRightDisabled = false;
+   bool mUpDisabled = false;
+   bool mDownDisabled = false;
+   mInScoreboardMode = false;
+   mFPSVisible = false;
+   mHelper = NULL;
+   displayInputModeChangeAlert = false;
+   mMissionOverlayActive = false;
+   mDebugShowShipCoords = false;
+   mDebugShowMeshZones = false;
+
    setMenuID(GameUI);
    enterMode(PlayMode);
    mInScoreboardMode = false;
