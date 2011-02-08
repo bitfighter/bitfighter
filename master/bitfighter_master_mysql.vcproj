@@ -203,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sqlite\sqlite3.c"
+				>
+			</File>
+			<File
 				RelativePath="..\zap\stringUtils.cpp"
 				>
 			</File>
