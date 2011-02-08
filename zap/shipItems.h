@@ -97,7 +97,7 @@ public:
          case ModuleSensor:
             mName = "Sensor";
             mMenuName = "Enhanced Sensor";
-            mMenuHelp = "";
+            mMenuHelp = "(makes Spy Bug Placer available)";
             mEnergyDrain = 8000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
@@ -124,7 +124,7 @@ public:
          case ModuleCloak:
             mName = "Cloak";
             mMenuName = "Cloak Field Modulator";
-            mMenuHelp = "(makes Spy Bug Placer available)";
+            mMenuHelp = "";
             mEnergyDrain = 8000;
             mUseCost = 0;
             mUseType = ModuleUseActive;
