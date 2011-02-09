@@ -194,6 +194,7 @@ public:
 
 extern ScreenInfo gScreenInfo;
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 
@@ -314,13 +315,9 @@ public:
    static S32 getStringWidth(F32 size, const char *str);
    static S32 getStringWidthf(U32 size, const char *format, ...);
 
-   // TODO: Move to ScreenInfo
-   //Point convertWindowToCanvasCoord(Point p) { return Point(p.x * gScreenInfo.getGameCanvasWidth() / gScreenInfo.getWindowWidth(), 
-   //                                                         p.y * gScreenInfo.getGameCanvasHeight() / gScreenInfo.getWindowHeight()); }
-
-
    static void playBoop();    // Make some noise!
 };
+
 
 struct UserInterfaceData
 {
