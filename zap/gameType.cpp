@@ -1390,8 +1390,20 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
    if(loadout.size() != ShipModuleCount + ShipWeaponCount)     // Reject improperly sized loadouts.  Currently 2 + 3
       return;
 
-   if(!engineerIsEnabled() && (loadout[0] == ModuleEngineer || loadout[1] == ModuleEngineer))  // Reject engineer if it is not enabled
-      return;
+   for(S32 i = 0; i < ShipModuleCount; i++)
+   {
+      if(loadout[i] >= U32(ModuleCount)) // bad number. Might crash server if trying to continue...
+         return;
+      if(!engineerIsEnabled() && (loadout[i] == ModuleEngineer)) // Reject engineer if not enabled
+         return;
+   }
+
+   for(S32 i = ShipModuleCount; i < ShipWeaponCount + ShipModuleCount; i++)
+   {
+      if(loadout[i] >= U32(WeaponCount)) // bad number.
+         return;
+   }
+
 
    Ship *theShip = dynamic_cast<Ship *>(cl->clientConnection->getControlObject());
    if(theShip)
@@ -1401,6 +1413,11 @@ void GameType::setClientShipLoadout(ClientRef *cl, const Vector<U32> &loadout, b
 
 void GameType::clientRequestLoadout(GameConnection *client, const Vector<U32> &loadout)
 {
+   Ship *ship = dynamic_cast<Ship *>(client->getControlObject());
+
+   if(ship && ship->isInZone(LoadoutZoneType))
+      setClientShipLoadout(client->getClientRef(), loadout, false);
+
    // Not CE
    //S32 clientIndex = findClientIndexByConnection(client);
    //if(clientIndex != -1)
