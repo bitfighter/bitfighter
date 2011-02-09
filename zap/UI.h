@@ -106,9 +106,6 @@ enum UIID {
 ////////////////////////////////////////
 ////////////////////////////////////////
 
-class ClientGame;
-extern ClientGame *gClientGame2;
-
 class ScreenInfo
 {
 private:
@@ -165,8 +162,8 @@ public:
    S32 getVertPhysicalMargin(DisplayMode mode)  { return mode == DISPLAY_MODE_FULL_SCREEN_UNSTRETCHED ? getVertPhysicalMargin() : 0; }
 
    // The following methods return values in VIRTUAL pixels, not accurate in editor
-   void setGameCanvasSize(S32 width, S32 height) { mGameCanvasWidth = width * (gClientGame2 ? 2 : 1); mGameCanvasHeight = height; }
-   void resetGameCanvasSize() { mGameCanvasWidth = GAME_WIDTH * (gClientGame2 ? 2 : 1); mGameCanvasHeight = GAME_HEIGHT; }
+   void setGameCanvasSize(S32 width, S32 height) { mGameCanvasWidth = width; mGameCanvasHeight = height; }
+   void resetGameCanvasSize() { mGameCanvasWidth = GAME_WIDTH; mGameCanvasHeight = GAME_HEIGHT; }
    S32 getGameCanvasWidth() { return mGameCanvasWidth; }       // canvasWidth, usually 800
    S32 getGameCanvasHeight() { return mGameCanvasHeight; }     // canvasHeight, usually 600
 
