@@ -189,6 +189,9 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       if(keyCode == list->get(index).key || keyCode == list->get(index).button)
          break;
 
+   if(index >= (U32)list->size())
+      return false;
+
    if(!isValidItem(index))
       return false;
 
