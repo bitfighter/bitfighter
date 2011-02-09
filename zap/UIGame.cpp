@@ -240,6 +240,7 @@ void GameUserInterface::displayMessage(GameConnection::MessageColors msgColorInd
    displayMessage(colors[msgColorIndex], stringBuffer);
 }
 
+
 // A new chat message is here!  We don't actually display anything here, despite the name...
 // just add it to the list, will be displayed in render()
 void GameUserInterface::displayMessage(const Color &msgColor, const char *format, ...)

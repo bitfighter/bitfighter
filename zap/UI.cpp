@@ -713,7 +713,6 @@ void UserInterface::renderMessageBox(const char *title, const char *instr, const
          glVertex2f(canvasWidth - inset, boxTop + boxHeight);
          glVertex2f(inset, boxTop + boxHeight);
       glEnd();
-   
    }
 
    // Draw title, message, and footer
@@ -736,7 +735,12 @@ void UserInterface::onKeyDown(KeyCode keyCode, char ascii) { /* Do nothing */ }
 void UserInterface::onKeyUp(KeyCode keyCode)               { /* Do nothing */ }
 
 
-UserInterfaceData::UserInterfaceData() {current = NULL;}
+UserInterfaceData::UserInterfaceData() 
+{
+   current = NULL;
+}
+
+
 void UserInterfaceData::get()
 {
    current = UserInterface::current;
@@ -746,6 +750,8 @@ void UserInterfaceData::get()
    chatMargin = UserInterface::chatMargin;
    S32 inputmode = S32(gIniSettings.inputMode);
 }
+
+
 void UserInterfaceData::set()
 {
    UserInterface::current = current;
@@ -753,9 +759,9 @@ void UserInterfaceData::set()
    UserInterface::vertMargin = vertMargin;
    UserInterface::horizMargin = horizMargin;
    UserInterface::chatMargin = chatMargin;
+
    S32 inputmode = S32(gIniSettings.inputMode);
 }
-
 
 
 };

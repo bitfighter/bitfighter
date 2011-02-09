@@ -69,6 +69,7 @@ bool showDebugBots = false;
 
 // Global Game objects
 ServerGame *gServerGame = NULL;
+
 ClientGame *gClientGame = NULL;
 ClientGame *gClientGame1 = NULL;
 ClientGame *gClientGame2 = NULL;

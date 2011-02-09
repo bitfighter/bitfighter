@@ -758,8 +758,10 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, idle, (U32 integerTime), (integerTi
          gIniSettings.inputMode = Joystick;
          gClientGame1->mUserInterfaceData->get();
          gClientGame2->mUserInterfaceData->set();
+
          gClientGame = gClientGame2;
          gClientGame->idle(integerTime);
+
          gIniSettings.inputMode = Keyboard;
          gClientGame2->mUserInterfaceData->get();
          gClientGame1->mUserInterfaceData->set();
@@ -1540,7 +1542,7 @@ void processStartupParams()
 
    if(gCmdLineSettings.clientMode)               // Create ClientGame object
    {
-      gClientGame1 = new ClientGame(Address());   //   let the system figure out IP address and assign a port
+      gClientGame1 = new ClientGame(Address());   //   Let the system figure out IP address and assign a port
       gClientGame = gClientGame1;
    }
       //gClientGame2 = new ClientGame(Address());   //  !!! 2-player split-screen game in same game.
