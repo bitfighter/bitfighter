@@ -90,13 +90,16 @@ void checkMousePos(S32 maxdx, S32 maxdy)
 BOOL CALLBACK EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID* pContext );
 
 LPDIRECTINPUT8 gDirectInput = NULL;
-LPDIRECTINPUTDEVICE8 gJoystick = NULL;
+LPDIRECTINPUTDEVICE8 gJoystick[32];
+extern U32 gUseStickNumber;
+extern U32 gSticksFound;
 
 extern const S32 gJoystickNameLength;
 extern char gJoystickName[gJoystickNameLength];
 
 void InitJoystick()
 {
+   gSticksFound = 0;
    if(FAILED(DirectInput8Create ( GetModuleHandle(NULL), DIRECTINPUT_VERSION,
          IID_IDirectInput8, (VOID**)&gDirectInput, NULL ) ) )
       return;
@@ -105,10 +108,7 @@ void InitJoystick()
          NULL, DIEDFL_ATTACHEDONLY ) ) )
       return;
 
-   if(!gJoystick)
-      return;
-
-   if( FAILED(gJoystick->SetDataFormat( &c_dfDIJoystick2 ) ) )
+   if(gSticksFound == 0)
       return;
 }
 
@@ -117,19 +117,23 @@ const char *GetJoystickName()
    return gJoystickName;
 }
 
-extern U32 gUseStickNumber;
-extern U32 gSticksFound;
 
 BOOL CALLBACK EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance,
                                      VOID* pContext )
 {
    // Obtain an interface to the enumerated joystick.
-   if(FAILED(gDirectInput->CreateDevice( pdidInstance->guidInstance, &gJoystick, NULL )))
+   if(FAILED(gDirectInput->CreateDevice( pdidInstance->guidInstance, &gJoystick[gSticksFound], NULL )))
       return DIENUM_CONTINUE;
    strcpy(gJoystickName, pdidInstance->tszProductName);
    logprintf("Joystick found: %s", gJoystickName);
+   if( FAILED(gJoystick[gSticksFound]->SetDataFormat( &c_dfDIJoystick2 ) ) )
+   {
+      logprintf("Joystick fail to SetDataFormat");
+      return DIENUM_CONTINUE;
+   }
+
    gSticksFound++;
-   return gSticksFound == gUseStickNumber ? DIENUM_STOP : DIENUM_CONTINUE;     // DIENUM_CONTINUE will find both multiple joysticks...
+   return DIENUM_CONTINUE;  // DIENUM_CONTINUE will find both multiple joysticks...  DIENUM_STOP will not.
 }
 
 // hatMask tracks DPad entry, axes and buttonMask track joysticks and buttons
@@ -140,24 +144,25 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
    // mark: it's called "winJoystick"
    // mark: it's supposed to be gross.
 
+   U32 useStickNumber = gUseStickNumber - 1;  // first joystick is zero.
 
-   if(!gJoystick)
+   if(useStickNumber >= gSticksFound)  // out of range
       return false;
 
-   if(FAILED(gJoystick->Poll() ) )
+   if(FAILED(gJoystick[useStickNumber]->Poll() ) )
    {
       HRESULT hr;
-      hr = gJoystick->Acquire();
+      hr = gJoystick[useStickNumber]->Acquire();
 
       while( hr == DIERR_INPUTLOST )
-         hr = gJoystick->Acquire();
+         hr = gJoystick[useStickNumber]->Acquire();
       return false;
    }
 
    DIJOYSTATE2 js;       // DInput joystick state
 
    // Get the input's device state
-   if(FAILED(gJoystick->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
+   if(FAILED(gJoystick[useStickNumber]->GetDeviceState( sizeof(DIJOYSTATE2), &js ) ) )
       return false; // The device should have been acquired during the Poll()
 
    //logprintf("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d",js.lX,js.lY,js.lZ,js.lRx,js.lRy,js.lRz,js.rglSlider[0],js.rglSlider[1],js.rgdwPOV[0],js.rgdwPOV[1],js.rgdwPOV[2],js.rgdwPOV[3],js./*rgbButtonsButtons[128];//128buttons*/lVX,js.lVY,js.lVZ,js.lVRx,js.lVRy,js.lVRz,js.rglVSlider[0],js.rglVSlider[1],js.lAX,js.lAY,js.lAZ,js.lARx,js.lARy,js.lARz,js.rglASlider[0],js.rglASlider[1],js.lFX,js.lFY,js.lFZ,js.lFRx,js.lFRy,js.lFRz,js.rglFSlider[0],js.rglFSlider[1]);
@@ -219,15 +224,20 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 
 void ShutdownJoystick()
 {
-    // Unacquire the device one last time just in case
-    // the app tried to exit while the device is still acquired.
-    if( gJoystick )
-        gJoystick->Unacquire();
+   for(U32 i=0; i<gSticksFound; i++)
+   {
+      // Unacquire the device one last time just in case
+      // the app tried to exit while the device is still acquired.
+      if(gJoystick[i])
+         gJoystick[i]->Unacquire();
 
-    // Release any DirectInput objects.
-    if(gJoystick)
-      gJoystick->Release();
-    if(gDirectInput)
+      // Release any DirectInput objects.
+      if(gJoystick[i])
+         gJoystick[i]->Release();
+   }
+   gSticksFound = 0;
+
+   if(gDirectInput)
       gDirectInput->Release();
 }
 

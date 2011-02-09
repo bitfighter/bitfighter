@@ -169,7 +169,7 @@ bool gShowAimVector = false;     // Do we render an aim vector?  This should pro
 bool gDisableShipKeyboardInput;  // Disable ship movement while user is in menus
 
 U32 gUseStickNumber = 1;         // Which joystick do you want to use (1 = first, which is typical)
-U32 gSticksFound = 0;            // Which joystick we're actually using...
+U32 gSticksFound = 0;            // Total number of joysticks found
 
 CIniFile gINI("dummy");          // This is our INI file.  Filename set down in main(), but compiler seems to want an arg here.
 
