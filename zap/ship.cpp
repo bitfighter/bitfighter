@@ -52,6 +52,11 @@
 
 #define hypot _hypot    // Kill some warnings
 
+#ifndef min
+#define min(a,b) ((a) <= (b) ? (a) : (b))
+#define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
+
 static const bool showCloakedTeammates = true;    // Set to true to allow players to see their cloaked teammates
 
 namespace Zap
