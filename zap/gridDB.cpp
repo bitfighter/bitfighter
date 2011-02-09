@@ -328,6 +328,7 @@ bool GridDatabase::pointCanSeePoint(const Point &point1, const Point &point2)
    return( findObjectLOS(BarrierType, MoveObject::ActualState, true, point1, point2, time, coll) == NULL );
 }
 
+
 ////////////////////////////////////////
 ////////////////////////////////////////
 

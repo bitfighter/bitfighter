@@ -42,7 +42,7 @@ Vector<SafePtr<BotNavMeshZone> > gBotNavMeshZones;     // List of all our zones
 // Constructor
 BotNavMeshZone::BotNavMeshZone()
 {
-   mGame2 = NULL;
+   mGame = NULL;
    mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    //  The Zones is now rendered without the network interface, if client is hosting.
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
@@ -61,10 +61,10 @@ BotNavMeshZone::~BotNavMeshZone()
       gBotNavMeshZones.erase_fast(i);
       break;
    }
-   if(mGame2)
+   if(mGame)
    {
       removeFromDatabase();
-      mGame2 = NULL;
+      mGame = NULL;
    }
 }
 
@@ -112,7 +112,7 @@ S32 BotNavMeshZone::getRenderSortValue()
 
 GridDatabase * BotNavMeshZone::getGridDatabase()
 {
-   return &mGame2->mDatabaseForBotZones;
+   return &mGame->mDatabaseForBotZones;
 }
 
 
@@ -124,20 +124,22 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
    if(argc < 6)
       return false;
 
-   processPolyBounds(argc, argv, 0, mGame2->getGridSize());
+   processPolyBounds(argc, argv, 0, mGame->getGridSize());
    computeExtent();  // Not needed?
    mConvex = isConvex(mPolyBounds);
 
    return true;
 }
 
-void BotNavMeshZone::addToGame(Game *theGame)
+
+void BotNavMeshZone::addToGame(Game *game)
 {
-   // don't add to game.
-   mGame2 = theGame;
+   // Don't add to game
+   mGame = game;
    addToDatabase();
-	
 }
+
+
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
    //if(!isGhost())     // For now, so we can see them on the client to help with debugging
@@ -145,8 +147,7 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
    //   setScopeAlways();
 
    // Don't need to increment our objectloaded counter, as this object resides only on the server
-   TNLAssert(false,"Should not be added to game");
-
+   TNLAssert(false, "Should not be added to game");
 }
 
 
@@ -154,8 +155,10 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
 void BotNavMeshZone::computeExtent()
 {
    Rect extent(mPolyBounds[0], mPolyBounds[0]);
+
    for(S32 i = 1; i < mPolyBounds.size(); i++)
       extent.unionPoint(mPolyBounds[i]);
+
    setExtent(extent);
 }
 
@@ -165,6 +168,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 {
    for(S32 i = 0; i < mPolyBounds.size(); i++)
       polyPoints.push_back(mPolyBounds[i]);
+
    return true;
 }
 
@@ -177,6 +181,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
    Polygon::packUpdate(connection, stream);
 
    stream->writeInt(mNeighbors.size(), 8);
+
    for(S32 i = 0; i < mNeighbors.size(); i++)
    {
       stream->write(mNeighbors[i].borderStart.x);
@@ -201,15 +206,15 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
    }
 
    U32 size = stream->readInt(8);
+   Point p1, p2;
+
    for(U32 i = 0; i < size; i++)
    {
       NeighboringZone n;
 
-      Point p1;
       stream->read(&p1.x);
       stream->read(&p1.y);
    
-      Point p2;
       stream->read(&p2.x);
       stream->read(&p2.y);
 
@@ -217,7 +222,6 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       n.borderEnd = p2;
       mNeighbors.push_back(n);
      // mNeighborRenderPoints.push_back(Border(p1, p2));
-
    }
 }
 
@@ -226,6 +230,7 @@ S32 findZoneContaining(const Point &p)
 {
    Vector<DatabaseObject *> fillVector;
    gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, fillVector, Rect(p - Point(0.1f,0.1f),p + Point(0.1f,0.1f)));  // slightly extend Rect, it can be on the edge of zone.
+
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       // First a quick, crude elimination check then more comprehensive one
@@ -338,6 +343,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
       return;
    }
 
+   Point bordStart, bordEnd, bordCen;
    // Figure out which zones are adjacent to which, and find the "gateway" between them
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    {
@@ -350,11 +356,9 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          if(!gBotNavMeshZones[i]->getExtent().intersectsOrBorders(gBotNavMeshZones[j]->getExtent()))
             continue;
 
-         Point bordStart, bordEnd;
-
          if(zonesTouch(gBotNavMeshZones[i]->mPolyBounds, gBotNavMeshZones[j]->mPolyBounds, 1.0, bordStart, bordEnd))
          {
-            Point bordCen = Rect(bordStart, bordEnd).getCenter();
+            bordCen.set(Rect(bordStart, bordEnd).getCenter());
 
             NeighboringZone n1;
             n1.zoneID = j;
@@ -379,6 +383,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
       }
 		Vector<DatabaseObject *> objects;
 		gServerGame->getGridDatabase()->findObjects(TeleportType,objects,gBotNavMeshZones[i]->getExtent());
+
 		for(S32 k=0; k<objects.size(); k++)
 		{
 			Teleporter *obj = dynamic_cast<Teleporter *>(objects[k]);
@@ -419,7 +424,6 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
 {
    return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() );
 }
-
 
 
 // Returns a path, including the startZone and targetZone 
