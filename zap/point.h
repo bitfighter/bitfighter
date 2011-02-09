@@ -291,7 +291,7 @@ struct Rect
               );
    }
 
-   void expand(Point delta) { min -= delta; max += delta; }
+   void expand(const Point &delta) { min -= delta; max += delta; }
 
    Point getExtents()
    {
