@@ -111,7 +111,8 @@ OBJECTS_ZAP=\
    md5.o\
    BotNavMeshZone.o\
    ../master/masterInterface.o\
-   ../master/database.o
+   ../master/database.o\
+   ../sqlite/sqlite3.o
 
 
 CFLAGS=
