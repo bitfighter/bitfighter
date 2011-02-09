@@ -63,7 +63,7 @@ namespace Zap
 {
 extern ConfigDirectories gConfigDirs;          //in main.cpp for Getmap
 
-//GameUserInterface gGameUserInterface;
+//GameUserInterface mGameUserInterface;
 
 // TODO: Make these static like privateF5MessageDisplayedInGameColor!
 Color gGlobalChatColor(0.9, 0.9, 0.9);
@@ -103,7 +103,7 @@ GameUserInterface::GameUserInterface()
    mPingAvg = 0;
    mFrameIndex = 0;
 
-   for(U32 i = 0; i < FPSAvgCount; i++)
+   for(U32 i = 0; i < FPS_AVG_COUNT; i++)
    {
       mIdleTimeDelta[i] = 50;
       mPing[i] = 100;
@@ -302,13 +302,13 @@ void GameUserInterface::idle(U32 timeDelta)
       {
          U32 sum = 0, sumping = 0;
 
-         for(U32 i = 0; i < FPSAvgCount; i++)
+         for(U32 i = 0; i < FPS_AVG_COUNT; i++)
          {
             sum += mIdleTimeDelta[i];
             sumping += mPing[i];
          }
 
-         mFPSAvg = (1000 * FPSAvgCount) / F32(sum);
+         mFPSAvg = (1000 * FPS_AVG_COUNT) / F32(sum);
          mPingAvg = F32(sumping) / 32;
          mRecalcFPSTimer = 750;
       }
@@ -324,7 +324,7 @@ void GameUserInterface::idle(U32 timeDelta)
 
    mVoiceRecorder.idle(timeDelta);
 
-   U32 indx = mFrameIndex % FPSAvgCount;
+   U32 indx = mFrameIndex % FPS_AVG_COUNT;
    mIdleTimeDelta[indx] = timeDelta;
 
    if(gClientGame->getConnectionToServer())
@@ -1126,7 +1126,7 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
 
       else if(inputMode == Joystick)      // Check if the user is trying to use keyboard to move when in joystick mode
          if(keyCode == keyUP[Keyboard] || keyCode == keyDOWN[Keyboard] || keyCode == keyLEFT[Keyboard] || keyCode == keyRIGHT[Keyboard])
-            mWrongModeMsgDisplay.reset(WrongModeMsgDisplayTime);
+            mWrongModeMsgDisplay.reset(WRONG_MODE_MSG_DISPLAY_TIME);
    }
 }
 
@@ -1369,7 +1369,7 @@ static bool hasAdmin(GameConnection *gc, const char *failureMessage)
 {
    if(!gc->isAdmin())
    {
-      gClientGame->gGameUserInterface->displayErrorMessage(failureMessage);
+      gClientGame->mGameUserInterface->displayErrorMessage(failureMessage);
       return false;
    }
    return true;
@@ -1385,7 +1385,7 @@ static void changePassword(GameConnection *gc, GameConnection::ParamType type, V
    {
       if(words.size() < 2 || words[1] == "")
       {
-         gClientGame->gGameUserInterface->displayErrorMessage("!!! Need to supply a password");
+         gClientGame->mGameUserInterface->displayErrorMessage("!!! Need to supply a password");
          return;
       }
 
@@ -1425,7 +1425,7 @@ static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType 
    // Did the user provide a name/description?
    if(type != GameConnection::DeleteLevel && allWords == "")
    { 
-      gClientGame->gGameUserInterface->displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
+      gClientGame->mGameUserInterface->displayErrorMessage(type == GameConnection::ServerName ? "!!! Need to supply a name" : "!!! Need to supply a description");
       return;
    }
 

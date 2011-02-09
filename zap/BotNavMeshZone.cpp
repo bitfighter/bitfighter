@@ -27,7 +27,7 @@
 #include "SweptEllipsoid.h"
 #include "robot.h"
 #include "UIMenus.h"
-#include "UIGame.h"           // for access to gGameUserInterface.mDebugShowMeshZones
+#include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones
 #include "gameObjectRender.h"
 #include "teleporter.h"
 
@@ -78,7 +78,7 @@ Point BotNavMeshZone::getCenter()
 
 void BotNavMeshZone::render(S32 layerIndex)    
 {
-   if(!gClientGame->gGameUserInterface->mDebugShowMeshZones)
+   if(!gClientGame->mGameUserInterface->mDebugShowMeshZones)
       return;
 
    if(mPolyFill.size() == 0)    //Need to process PolyFill here, rendering server objects into client.

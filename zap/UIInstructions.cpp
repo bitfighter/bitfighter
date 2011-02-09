@@ -744,7 +744,7 @@ void InstructionsUserInterface::prevPage()
 void InstructionsUserInterface::exitInstructions()
 {
    UserInterface::playBoop();
-   reactivatePrevUI();      //gGameUserInterface
+   reactivatePrevUI();      //mGameUserInterface
 }
 
 

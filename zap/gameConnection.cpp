@@ -265,8 +265,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(mClientGame->gGameUserInterface->mOutputFile)
-      fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->gGameUserInterface->mOutputFile);
+   if(mClientGame->mGameUserInterface->mOutputFile)
+      fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->mGameUserInterface->mOutputFile);
       //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
 }
@@ -277,18 +277,18 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(mClientGame->gGameUserInterface->mOutputFile)
+   if(mClientGame->mGameUserInterface->mOutputFile)
    {
-      fclose(mClientGame->gGameUserInterface->mOutputFile);
-      mClientGame->gGameUserInterface->mOutputFile = NULL;
+      fclose(mClientGame->mGameUserInterface->mOutputFile);
+      mClientGame->mGameUserInterface->mOutputFile = NULL;
 
       if(! mClientGame) return;
       if(status.value == STATUS_OK)
-         mClientGame->gGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->gGameUserInterface->remoteLevelDownloadFilename.c_str());
+         mClientGame->mGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->mGameUserInterface->remoteLevelDownloadFilename.c_str());
       else if(status.value == COMMAND_NOT_ALLOWED)
-         mClientGame->gGameUserInterface->displayErrorMessage("!!! Getmap command is disabled on this server");
+         mClientGame->mGameUserInterface->displayErrorMessage("!!! Getmap command is disabled on this server");
       else
-         mClientGame->gGameUserInterface->displayErrorMessage("Error downloading level");
+         mClientGame->mGameUserInterface->displayErrorMessage("Error downloading level");
    }
 }
 
@@ -644,7 +644,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sAdminPlayerAction,
 //{
 //   ClientRef *cl = findClientRef(name);
 //   cl->clientConnection->isAdmin = true;
-//   gGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
+//   mGameUserInterface.displayMessage(Color(0,1,1), "%s has been granted administrator access.", name.getString());
 //}
 
 
@@ -723,14 +723,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsAdmin, (bool granted), (granted),
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = adminPassSuccessMsg;
          else
-            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, adminPassSuccessMsg);
+            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, adminPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = adminPassFailureMsg;
          else
-            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, adminPassFailureMsg);
+            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, adminPassFailureMsg);
       }
    }
 }
@@ -764,7 +764,7 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
 
    // Check for permissions being rescinded by server, will happen if admin changes level change pw
    if(isLevelChanger() && !granted)
-      mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
+      mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, "An admin has changed the level change password; you must enter the new password to change levels.");
 
    setIsLevelChanger(granted);
 
@@ -779,14 +779,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cSetIsLevelChanger, (bool granted, bool noti
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = levelPassSuccessMsg;
          else
-            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, levelPassSuccessMsg);
+            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, levelPassSuccessMsg);
       }
       else
       {
          if(UserInterface::current->getMenuID() == GameMenuUI)
             gGameMenuUserInterface.mMenuSubTitle = levelPassFailureMsg;
          else
-            mClientGame->gGameUserInterface->displayMessage(gCmdChatColor, levelPassFailureMsg);
+            mClientGame->mGameUserInterface->displayMessage(gCmdChatColor, levelPassFailureMsg);
       }
    }
 }
@@ -839,7 +839,7 @@ Color gCmdChatColor = colors[GameConnection::ColorRed];
 static void displayMessage(U32 colorIndex, U32 sfxEnum, const char *message)
 {
 
-   gClientGame->gGameUserInterface->displayMessage(colors[colorIndex], "%s", message);
+   gClientGame->mGameUserInterface->displayMessage(colors[colorIndex], "%s", message);
    if(sfxEnum != SFXNone)
       SFXObject::play(sfxEnum);
 }
@@ -1031,7 +1031,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestShutdown, (U16 time, StringPtr reaso
 TNL_IMPLEMENT_RPC(GameConnection, s2cInitiateShutdown, (U16 time, StringTableEntry name, StringPtr reason, bool originator),
                   (time, name, reason, originator), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   mClientGame->gGameUserInterface->shutdownInitiated(time, name, reason, originator);
+   mClientGame->mGameUserInterface->shutdownInitiated(time, name, reason, originator);
 }
 
 
@@ -1052,7 +1052,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCancelShutdown, (), (), NetClassGrou
 
 TNL_IMPLEMENT_RPC(GameConnection, s2cCancelShutdown, (), (), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 1)
 {
-   mClientGame->gGameUserInterface->shutdownCanceled();
+   mClientGame->mGameUserInterface->shutdownCanceled();
 }
 
 

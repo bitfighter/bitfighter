@@ -381,7 +381,7 @@ public:
    ClientGame(const Address &bindAddress);
    ~ClientGame();
 
-   GameUserInterface *gGameUserInterface;
+   GameUserInterface *mGameUserInterface;
    UserInterfaceData *mUserInterfaceData;
 
    bool hasValidControlObject();

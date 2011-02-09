@@ -181,7 +181,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
 
       mCompressPointsRelative = controlObjectValid;
 
-      //gGameUserInterface.receivedControlUpdate(false);
+      //mGameUserInterface.receivedControlUpdate(false);
       // CRC mismatch...
       if(bstream->readFlag())
       {
@@ -192,7 +192,7 @@ void ControlObjectConnection::readPacket(BitStream *bstream)
             controlObject->readControlState(bstream);
             mServerPosition = controlObject->getActualPos();
             replayControlObjectMoves = true;
-            //gClientGame->gGameUserInterface.receivedControlUpdate(true);
+            //gClientGame->mGameUserInterface.receivedControlUpdate(true);
          }
          else
             controlObject = NULL;

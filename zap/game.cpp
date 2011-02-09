@@ -998,7 +998,7 @@ void ServerGame::gameEnded()
 // Constructor
 ClientGame::ClientGame(const Address &bindAddress) : Game(bindAddress)
 {
-   gGameUserInterface = new GameUserInterface();
+   mGameUserInterface = new GameUserInterface();
    mUserInterfaceData = new UserInterfaceData();
    mInCommanderMap = false;
    mCommanderZoomDelta = 0;
@@ -1034,7 +1034,7 @@ ClientGame::~ClientGame()
 {
    cleanUp();
    delete mUserInterfaceData;
-   delete gGameUserInterface;
+   delete mGameUserInterface;
 }
 
 bool ClientGame::hasValidControlObject()
@@ -1089,7 +1089,7 @@ void ClientGame::idle(U32 timeDelta)
       else
          mCommanderZoomDelta -= timeDelta;
 
-      gGameUserInterface->onMouseMoved();     // Keep ship pointed towards mouse
+      mGameUserInterface->onMouseMoved();     // Keep ship pointed towards mouse
    }
    else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime) // Zooming out to commander's map
    {
@@ -1097,12 +1097,12 @@ void ClientGame::idle(U32 timeDelta)
       if(mCommanderZoomDelta > CommanderMapZoomTime)
          mCommanderZoomDelta = CommanderMapZoomTime;
 
-      gGameUserInterface->onMouseMoved();  // Keep ship pointed towards mouse
+      mGameUserInterface->onMouseMoved();  // Keep ship pointed towards mouse
    }
    // else we're not zooming in or out, which is most of the time
 
 
-   Move *theMove = gGameUserInterface->getCurrentMove();       // Get move from keyboard input
+   Move *theMove = mGameUserInterface->getCurrentMove();       // Get move from keyboard input
 
    // Overwrite theMove if we're using joystick (also does some other essential joystick stuff)
    // We'll also run this while in the menus so if we enter keyboard mode accidentally, it won't
@@ -1411,7 +1411,7 @@ void ClientGame::renderCommander()
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
    // Set up the view to show the whole level
-   mWorldBounds = gGameUserInterface->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : computeWorldObjectExtents(); 
+   mWorldBounds = mGameUserInterface->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : computeWorldObjectExtents(); 
 
    Point worldCenter = mWorldBounds.getCenter();
    Point worldExtents = mWorldBounds.getExtents();
@@ -1451,7 +1451,7 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects
    rawRenderObjects.clear();
    mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
-   if(gServerGame && gGameUserInterface->mDebugShowMeshZones)
+   if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
        gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,mWorldBounds);
 
    
@@ -1662,7 +1662,7 @@ void ClientGame::renderNormal()
 
    rawRenderObjects.clear();
    mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
-   if(gServerGame && gGameUserInterface->mDebugShowMeshZones)
+   if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
        gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
 
    renderObjects.clear();
@@ -1691,7 +1691,7 @@ void ClientGame::renderNormal()
       ship = dynamic_cast<Ship *>(mConnectionToServer->getControlObject());
 
    if(ship)
-      gGameUserInterface->renderEngineeredItemDeploymentMarker(ship);
+      mGameUserInterface->renderEngineeredItemDeploymentMarker(ship);
 
    glPopMatrix();
 
@@ -1713,7 +1713,7 @@ void ClientGame::render()
    if(!renderObjectsWhileLoading && !hasValidControlObject())
       return;
 
-   if(gGameUserInterface->mShowProgressBar)
+   if(mGameUserInterface->mShowProgressBar)
       renderCommander();
    else if(mGameSuspended)
       renderCommander();

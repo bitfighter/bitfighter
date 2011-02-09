@@ -246,7 +246,7 @@ void MenuUserInterface::render()
    // Draw the game screen, then dim it out so you can still see it under our overlay
    if(gClientGame->getConnectionToServer())
    {
-      gClientGame->gGameUserInterface->render();
+      gClientGame->mGameUserInterface->render();
       glColor4f(0, 0, 0, 0.6);
 
       glEnableBlend;
@@ -925,7 +925,7 @@ void OptionsMenuUserInterface::toggleDisplayMode()
 void OptionsMenuUserInterface::onEscape()
 {
    saveSettingsToINI();
-   reactivatePrevUI();      //gGameUserInterface
+   reactivatePrevUI();      //mGameUserInterface
 }
 
 
@@ -1313,11 +1313,11 @@ void GameMenuUserInterface::buildMenu()
 }
 
 
-//extern GameUserInterface gGameUserInterface;
+//extern GameUserInterface mGameUserInterface;
 
 void GameMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();      //gGameUserInterface
+   reactivatePrevUI();      //mGameUserInterface
 
    // Show alert about input mode changing, if needed
    if(gClientGame->getGameType())
@@ -1395,7 +1395,7 @@ void LevelMenuUserInterface::onActivate()
 
 void LevelMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();    // to gGameUserInterface
+   reactivatePrevUI();    // to mGameUserInterface
 }
 
 
@@ -1424,7 +1424,7 @@ void LevelMenuSelectUserInterface::processSelection(U32 index)
 
    // The selection index is the level to load
    gc->c2sRequestLevelChange(index, false);
-   reactivateMenu(*gClientGame->gGameUserInterface);    // Jump back to the game menu
+   reactivateMenu(*gClientGame->mGameUserInterface);    // Jump back to the game menu
 }
 
 
@@ -1537,7 +1537,7 @@ void PlayerMenuUserInterface::playerSelected(U32 index)
    }
 
    if(action != ChangeTeam)                     // Unless we need to move on to the change team screen...
-      reactivateMenu(*gClientGame->gGameUserInterface);       // ...it's back to the game!
+      reactivateMenu(*gClientGame->mGameUserInterface);       // ...it's back to the game!
 }
 
 
@@ -1577,7 +1577,7 @@ void PlayerMenuUserInterface::render()
 
 void PlayerMenuUserInterface::onEscape()
 {
-   reactivatePrevUI();   //gGameUserInterface
+   reactivatePrevUI();   //mGameUserInterface
 }
 
 
@@ -1620,7 +1620,7 @@ void TeamMenuUserInterface::processSelection(U32 index)
       }
    }
 
-   reactivateMenu(*gClientGame->gGameUserInterface);    // Back to the game!
+   reactivateMenu(*gClientGame->mGameUserInterface);    // Back to the game!
 }
 
 
