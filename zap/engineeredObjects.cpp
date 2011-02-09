@@ -36,20 +36,22 @@ namespace Zap
 {
 
 
-bool PolygonsIntersect(const Vector<Point> &p1, Point rp1, Point rp2)
+bool polygonIntersectsSegment(const Vector<Point> &points, Point start, Point end)
 {
-   Point cp1 = p1[p1.size() - 1];
-   for(S32 j = 0; j < p1.size(); j++)
+   Point cp1 = points[points.size() - 1];
+   for(S32 j = 0; j < points.size(); j++)
    {
-      Point cp2 = p1[j];
-      if(segmentsIntersect(rp1, rp2, cp1, cp2))
+      Point cp2 = points[j];
+      if(segmentsIntersect(start, end, cp1, cp2))
          return true;
    }
-   rp1 = rp2;
-   //  line inside the other polygon?
-   return PolygonContains2(p1.address(), p1.size(), rp1);
+   
+   //  Line inside polygon?  If so, then the start will be within.
+   return PolygonContains2(points.address(), points.size(), start);
 }
-bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
+
+
+bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
 {
    Point rp1 = p1[p1.size() - 1];
    for(S32 i = 0; i < p1.size(); i++)
@@ -100,6 +102,10 @@ bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2)
    return PolygonContains2(p1.address(), p1.size(), p2[0]) || PolygonContains2(p2.address(), p2.size(), p1[0]);
 }
 
+static bool forceFieldEdgesIntersectPoints(const Vector<Point> &points, const Vector<Point> forceField)
+{
+   return polygonIntersectsSegment(points, forceField[0], forceField[1]) || polygonIntersectsSegment(points, forceField[2], forceField[3]);
+}
 
 
 static Vector<DatabaseObject *> fillVector;
@@ -193,83 +199,64 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
    // Forcefield starts at the end of the projector.  Need to know where that is.
    Point forceFieldStart = ForceFieldProjector::getForceFieldStartPoint(mDeployPosition, mDeployNormal, 0);
 
-   // Now we can find the end point...
-   Point endPoint;
+   // Now we can find the point where the forcefield would end if this were a valid position
+   Point forceFieldEnd;
    DatabaseObject *collObj;
-   ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, 1.0, endPoint, &collObj);
+   ForceField::findForceFieldEnd(ship->getGridDatabase(), forceFieldStart, mDeployNormal, 1.0, forceFieldEnd, &collObj);
 
-   // Create a temp forcefield to use for collision testing with other forcefields; this one will be deleted below
-   //ForceField *newForceField = new ForceField(-1, forceFieldStart, endPoint);
-
-   // Now we can do some actual checking.  We'll do this in two passes, one against existing ffs, another against disabled
-   // projectors that might be enabled in the future.
    Vector<DatabaseObject *> fillVector;
    bool collision = false;
 
-   // First test existing forcefields -- these will be faster than checking inactive projectors, which we'll do later
-   //Rect queryRect = (forceFieldStart, ForceField::MAX_FORCEFIELD_LENGTH * 2);
-   Rect queryRect(forceFieldStart, endPoint);
-   queryRect.expand(Point(5,5));
+   // Check for collisions with existing projectors
+   Rect queryRect(forceFieldStart, forceFieldEnd);
+   queryRect.expand(Point(5,5));    // Just a touch bigger than the bare minimum
+
+   Vector<Point> candidateForceFieldGeom;
+   ForceField::getGeom(forceFieldStart, forceFieldEnd, candidateForceFieldGeom);
+
    ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
+
+   Vector<Point> ffpGeom;     // Geom of any projectors we find
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {
       ForceFieldProjector *ffp = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
       if(ffp)
       {
-         Vector<Point> thisGeom;
-         Point start,end;
-         ffp->getCollisionPoly(thisGeom);
-         if(PolygonsIntersect(thisGeom, start, end))
+         ffpGeom.clear();
+         ffp->getCollisionPoly(ffpGeom);
+         if(forceFieldEdgesIntersectPoints(ffpGeom, candidateForceFieldGeom))
          {
             collision = true;
             break;
          }
       }
    }
-
+   
    if(!collision)
    {
-   fillVector.clear();
-   ship->getGridDatabase()->findObjects(ForceFieldType, fillVector, queryRect);
-
-   for(S32 i = 0; i < fillVector.size(); i++)
-   {
-      ForceField *ff = dynamic_cast<ForceField *>(fillVector[i]);
-      if(ff)// && ff->intersects(newForceField)) // intersect slow
-      {
-         Point start, end;
-         ff->getForceFieldStartAndEndPoints(start, end);
-         if(segmentsIntersect(forceFieldStart, endPoint, start, end))
-         {
-            collision = true;
-            break;
-         }
-      }
-   }
-   }
-
-   if(!collision)
-   {
-      // First we must find any possibly intersecting forcefield projector and if it's inactive, create a temp forcefield
-      // Projectors up to two forcefield lengths away must be considered because the end of one could intersect the end of the other
+      // Check for collision with forcefields that could be projected from those projectors.
+      // Projectors up to two forcefield lengths away must be considered because the end of 
+      // one could intersect the end of the other.
       fillVector.clear();
       queryRect.expand(Point(ForceField::MAX_FORCEFIELD_LENGTH, ForceField::MAX_FORCEFIELD_LENGTH));
       ship->getGridDatabase()->findObjects(ForceFieldProjectorType, fillVector, queryRect);
 
+      // Reusable containers for holding geom of any forcefields we might need to check for intersection with our candidate
+      Point start, end;
+      Vector<Point> ffGeom;
+
       for(S32 i = 0; i < fillVector.size(); i++)
       {
          ForceFieldProjector *proj = dynamic_cast<ForceFieldProjector *>(fillVector[i]);
-         if(proj)// && !proj->isEnabled())      // Enabled projectors handled in forcefield search above
+         if(proj)
          {
-            Point start, end;
             proj->getForceFieldStartAndEndPoints(start, end);
 
-            //ForceField forceField = ForceField(0, start, end);
+            ffGeom.clear();
+            ForceField::getGeom(start, end, ffGeom);
 
-            //if(forceField.intersects(newForceField))
-
-            if(segmentsIntersect(forceFieldStart, endPoint, start, end))
+            if(forceFieldEdgesIntersectPoints(candidateForceFieldGeom, ffGeom))
             {
                collision = true;
                break;
@@ -278,7 +265,6 @@ bool EngineerModuleDeployer::canCreateObjectAtLocation(Ship *ship, U32 objectTyp
       }
    }
 
-   //delete newForceField;
 
    if(collision)
    {
@@ -569,7 +555,7 @@ bool EngineeredObject::checkDeploymentPosition(const Vector<Point> &thisBounds, 
       Vector<Point> foundObjectBounds;
       dynamic_cast<GameObject *>(foundObjects[i])->getCollisionPoly(foundObjectBounds);
 
-      if(PolygonsIntersect(thisBounds, foundObjectBounds))     // Do they intersect?
+      if(polygonsIntersect(thisBounds, foundObjectBounds))     // Do they intersect?
          return false;     // Bad location
    }
    return true;            // Good location
@@ -811,7 +797,7 @@ bool ForceField::intersects(ForceField *forceField)
    getGeom(thisGeom);
    forceField->getGeom(thatGeom);
 
-   return PolygonsIntersect(thisGeom, thatGeom);
+   return polygonsIntersect(thisGeom, thatGeom);
 }
 
 
@@ -874,6 +860,7 @@ void ForceField::unpackUpdate(GhostConnection *connection, BitStream *stream)
 }
 
 
+// static
 void ForceField::getGeom(const Point &start, const Point &end, Vector<Point> &geom, F32 scaleFact)
 {
    static const F32 FORCEFIELD_HALF_WIDTH = 2.5;

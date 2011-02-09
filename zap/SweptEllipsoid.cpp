@@ -202,7 +202,7 @@ bool isConvex(const Vector<Point> &verts)
 // Check if circle at inCenter with radius^2 = inRadiusSq intersects with a polygon.
 // Function returns true when it does and the intersection point is in outPoint
 // Works only for convex hulls.. maybe no longer true... may work for all polys now
-bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint)
+bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint)
 {
    // Check if the center is inside the polygon  ==> now works for all polys
    if(PolygonContains2(inVertices, inNumVertices, inCenter))
@@ -575,7 +575,7 @@ bool SweptCircleEdgeVertexIntersect(const Point *inVertices, int inNumVertices, 
 bool PolygonSweptCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inBegin, const Point &inDelta, F32 inRadius, Point &outPoint, F32 &outFraction)
 {
    // Test if circle intersects at t = 0
-   if (PolygonCircleIntersect(inVertices, inNumVertices, inBegin, inRadius * inRadius, outPoint))
+   if(polygonCircleIntersect(inVertices, inNumVertices, inBegin, inRadius * inRadius, outPoint))
    {
       outFraction = 0;
       return true;

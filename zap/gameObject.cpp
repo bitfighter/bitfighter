@@ -342,8 +342,8 @@ bool GameObject::collisionPolyPointIntersect(Point point)
 }
 
 
-extern bool PolygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
-extern bool PolygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint);
+extern bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
+extern bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Point &inCenter, F32 inRadiusSq, Point &outPoint);
 
 // Find if the specified polygon intersects theObject's collisionPoly or collisonCircle
 bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
@@ -355,12 +355,12 @@ bool GameObject::collisionPolyPointIntersect(Vector<Point> points)
    polyPoints.clear();
 
    if(getCollisionPoly(polyPoints))
-      return PolygonsIntersect(polyPoints, points);
+      return polygonsIntersect(polyPoints, points);
 
    else if(getCollisionCircle(MoveObject::ActualState, center, radius))
    {
       Point pt;
-      return PolygonCircleIntersect(&points[0], points.size(), center, radius * radius, pt);
+      return polygonCircleIntersect(&points[0], points.size(), center, radius * radius, pt);
    }
    else
       return false;
@@ -378,7 +378,7 @@ bool GameObject::collisionPolyPointIntersect(Point center, F32 radius)
    polyPoints.clear();
 
    if(getCollisionPoly(polyPoints))
-      return PolygonCircleIntersect(&polyPoints[0], polyPoints.size(), center, radius * radius, pt);
+      return polygonCircleIntersect(&polyPoints[0], polyPoints.size(), center, radius * radius, pt);
 
    else if(getCollisionCircle(MoveObject::ActualState, c, r))
       return ( center.distSquared(c) < (radius + r) * (radius + r) );
