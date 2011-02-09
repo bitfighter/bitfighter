@@ -73,6 +73,9 @@ bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point 
 bool zonesTouch(const Vector<Point> &zone1, const Vector<Point> &zone2, F32 scaleFact, Point &overlapStart, Point &overlapEnd);
 bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEnough);
 
+bool polygonsIntersect(const Vector<Point> &p1, const Vector<Point> &p2);
+bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end);
+
 Point findCentroid(const Vector<Point> &polyPoints);
 F32 area(const Vector<Point> &polyPoints);
 F32 angleOfLongestSide(const Vector<Point> &polyPoints);
