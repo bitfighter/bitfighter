@@ -42,7 +42,6 @@
 namespace Zap
 {
 
-extern bool gQuit;
 extern string gPlayerPassword;
 
 TNL_IMPLEMENT_NETCONNECTION(MasterServerConnection, NetClassGroupMaster, false);

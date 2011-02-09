@@ -160,9 +160,6 @@ bool gDedicatedServer = true;    // This will allow us to omit the -dedicated pa
 bool gDedicatedServer = false;   // Usually, we just want to play.  If true, we'll be in server-only, no-player mode
 #endif
 
-bool gQuit = false;
-bool gIsServer = false;
-
 // Handle any md5 requests
 md5wrapper md5;
 
@@ -210,13 +207,9 @@ Address gMasterAddress;
 Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may be overwritten by INI or cmd line setting
       // Above is equivalent to ("IP:Any:28000")
 
-//Vector<StringTableEntry> gLevelList;      // Levels we'll play when we're hosting
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
 char gJoystickName[gJoystickNameLength] = "";
-
-S32 gPhysicalScreenWidth;
-S32 gPhysicalScreenHeight;
 
 extern NameEntryUserInterface gNameEntryUserInterface;
 
