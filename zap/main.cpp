@@ -51,6 +51,8 @@ XXX need to document timers, new luavec stuff XXX
 <h4></h4>
 <ul>
 <li>Players can see cloaked teammates
+<li>Fixed bug with crossing forcefields when using engineer module
+<li>Fixed bug letting players pick heat seeker when the weapon doesn't yet exist
 </ul>
 <h4>New Features</h4>
 <ul>
