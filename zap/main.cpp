@@ -213,10 +213,6 @@ Address gBindAddress(IPProtocol, Address::Any, 28000);      // Good for now, may
 //Vector<StringTableEntry> gLevelList;      // Levels we'll play when we're hosting
 Vector<StringTableEntry> gLevelSkipList;  // Levels we'll never load, to create a semi-delete function for remote server mgt
 
-// Lower = more slippery!  Not used at the moment...
-F32 gNormalFriction = 1000;   // Friction between vehicle and ground, ordinary
-F32 gSlipFriction = 400;      // Friction, on a slip square
-
 char gJoystickName[gJoystickNameLength] = "";
 
 S32 gPhysicalScreenWidth;
