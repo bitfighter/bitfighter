@@ -96,6 +96,18 @@ extern ControllerTypeType stringToJoystickType(string strJoystick);
 extern string joystickTypeToString(S32 controllerType);
 extern string joystickTypeToPrettyString(S32 controllerType);
 
+
+struct JoystickMapping
+{
+   bool enable;
+   U32 axes[MaxJoystickAxes*2]; // one for < 0, the other for > 0
+   U32 button[32];
+   U32 pov[4];
+};
+extern JoystickMapping gJoystickMapping;
+
+
+
 };
 
 #endif

@@ -48,7 +48,7 @@ bool gJoystickInit = false;
 static Display *Xdisplay = XOpenDisplay(NULL);
 
 
-#define MAX_AXIS 16
+#define MAX_AXIS 32
 #define MAX_BUTTON 32	// Can fit 32 buttons in a 32 bit integer!
 
 
@@ -145,6 +145,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 
   while (result!=0 && loop1 < 100)
   {
+    U32 num;
     loop1++;
     switch (joyPads[useStick].ev.type)
     {
@@ -153,11 +154,15 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 		case JS_EVENT_INIT | JS_EVENT_BUTTON:
 		  break;
 		case JS_EVENT_AXIS:
-		  joyPads[useStick].aPos[joyPads[useStick].ev.number] = joyPads[useStick].ev.value;
+        num = joyPads[useStick].ev.number;
+		  if(num < MAX_AXIS)
+          joyPads[useStick].aPos[num] = joyPads[useStick].ev.value;
 		  joyPads[useStick].changed = true;
 		  break;
 		case JS_EVENT_BUTTON:
-		  joyPads[useStick].bPos[joyPads[useStick].ev.number] = joyPads[useStick].ev.value;
+        joyPads[useStick].ev.number;
+		  if(num < MAX_BUTTON)
+		    joyPads[useStick].bPos[num] = joyPads[useStick].ev.value;
 		  joyPads[useStick].changed = true;
 		break;
 		default:
