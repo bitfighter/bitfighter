@@ -1076,6 +1076,7 @@ void ClientGame::idle(U32 timeDelta)
    if(isSuspended())
    {
       mNetInterface->processConnections();
+      SFXObject::process();                        // Process sound effects (SFX)
       return;
    }
 
