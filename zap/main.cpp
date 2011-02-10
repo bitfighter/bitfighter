@@ -53,6 +53,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Players can see cloaked teammates
 <li>Fixed bug with crossing forcefields when using engineer module
 <li>Fixed bug letting players pick heat seeker when the weapon doesn't yet exist
+<li>Can now choose one of multiple joystick. If there is no joystick, then you cannot change input from keyboard to joystick.
 </ul>
 <h4>New Features</h4>
 <ul>

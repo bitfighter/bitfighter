@@ -48,6 +48,9 @@
 
 namespace Zap
 {
+extern U32 gUseStickNumber;
+extern U32 gSticksFound;
+
 
 // Sorts alphanumerically by menuItem.value
 S32 QSORT_CALLBACK menuItemValueSort(MenuItem **a, MenuItem **b)
@@ -815,6 +818,7 @@ static void setControllerCallback(U32 jsType)
 static void setInputModeCallback(U32 val)
 {
    gIniSettings.inputMode = (val == 0) ? Keyboard : Joystick;
+   if(val >= 1) gUseStickNumber = val;
 }
 
 static void setVoiceEchoCallback(U32 val)
@@ -849,8 +853,9 @@ void OptionsMenuUserInterface::setupMenus()
 
    opts.clear();
    opts.push_back("KEYBOARD");
-   opts.push_back("JOYSTICK");
-   menuItems.push_back(new ToggleMenuItem("PRIMARY INPUT:", opts, gIniSettings.inputMode == Keyboard ? 0 : 1, true, 
+   for(U32 i = 0; i < gSticksFound; i++)
+      opts.push_back(string("JOYSTICK ") + itos(i+1));
+   menuItems.push_back(new ToggleMenuItem("PRIMARY INPUT:", opts, gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, true, 
                        setInputModeCallback, "Specify whether you want to play with your keyboard or joystick",    KEY_P, KEY_I));
 
    opts.clear();
