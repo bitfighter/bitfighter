@@ -198,7 +198,7 @@ S32 LuaLevelGenerator::addWall(lua_State *L)
       logError(e.what());
    }
 
-   mCaller->parseArgs(line.c_str());
+   mCaller->parseLevelLine(line.c_str());
 
    return 0;
 }
@@ -245,7 +245,7 @@ S32 LuaLevelGenerator::addLevelLine(lua_State *L)
    checkArgCount(L, 1, methodName);
    const char *line = getString(L, 1, methodName);
 
-   mCaller->parseArgs(line);
+   mCaller->parseLevelLine(line);
 
    //clearStack();
 

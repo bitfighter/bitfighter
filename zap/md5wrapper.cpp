@@ -166,7 +166,7 @@ std::string md5wrapper::getHashFromFile(std::string filename)
  	
 	//read the filecontent
 	while ( (len = fread (buffer, 1, 1024, file)) )
-   	{
+   {
 		md5->MD5Update (&context, buffer, len);
 	}
 	
