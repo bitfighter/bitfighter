@@ -1178,7 +1178,10 @@ static void writeHost()
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
    gINI.SetValue  (section, "DefaultRobotScript", gIniSettings.defaultRobotScript);
-   gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
+#ifdef BF_WRITE_TO_MYSQL
+   // TODO: fix this... Don't want to overwrite existing settings
+   //gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password"); // overwrites to defaults...
+#endif
 }
 
 
