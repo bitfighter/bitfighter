@@ -76,7 +76,7 @@ inline char getNextChar()
 inline void addCharToArg(char c)
 {
    if(c >= ' ' && c <= '~')         // Limit ourselves to printable chars
-      if(argc < MaxArgc && argLen < MaxArgLen-1)
+      if(argc < MaxArgc && argLen < MaxArgLen - 1)
       {
          argv[argc][argLen] = c;
          argLen++;
@@ -109,20 +109,20 @@ inline void addArg()
 // Parse the contents of the level file string is the file data itself
 // This is rather ugly!  Totally old school!
 
-// Each line of the file is parsed separately by processLevelLoadLine in game.cpp or UIEditor.cpp
+// Each line of the file is handled separately by processLevelLoadLine in game.cpp or UIEditor.cpp
 
-int LevelLoader::parseArgs(const char *string)
+void LevelLoader::parseLevelLine(const char *string)
 {
    argc = 0;
    argLen = 0;
    idLen = 0;
 
    argString = string;
+
    char c;
 
    for(S32 i = 0; i < MaxArgc; i++)
       argv[i] = argv_buffer[i];
-
 
 stateEatingWhitespace:
    c = getNextChar();
@@ -214,8 +214,7 @@ stateLineParseDone:
 
    if(c)
       goto stateEatingWhitespace;
-   return 0;
-}  // parseArgs
+}  // parseLevelLine
 
 
 // Reads files by chunks, converts to lines
@@ -265,10 +264,10 @@ bool LevelLoader::initLevelFromFile(const char *filename)
       char c = levelChunk[cur];     // Read a char, hold onto it for a second
       levelChunk[cur] = 0;          // Replace it with null
 
-      parseArgs(levelChunk);        // parseArgs will read from the beginning of the chunk until it hits the null we just inserted
+      parseLevelLine(levelChunk);   // ParseLevelLine will read from the beginning of the chunk until it hits the null we just inserted
       levelChunk[cur] = c;          // Replace the null with our saved char
 
-      // Now get rid of that line we just processed with parseArgs, by copying the data starting at cur back to the beginning of our chunk
+      // Now get rid of that line we just processed with parseLevelLine, by copying the data starting at cur back to the beginning of our chunk
       S32 cur2 = 0;
       while(cur + cur2 != lastByteRead)      // Don't go beyond the data we've read
       {
