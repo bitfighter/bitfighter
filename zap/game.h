@@ -118,6 +118,7 @@ protected:
    bool mReadyToConnectToMaster;
 
    F32 mGridSize;          // GridSize for this level (default defined below)
+   string mLevelFileHash;  // MD5 hash of level file
 
    struct DeleteRef
    {

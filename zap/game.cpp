@@ -714,6 +714,8 @@ bool ServerGame::loadLevel(const string &origFilename2)
       logprintf("Unable to process level file \"%s\".  Skipping...", origFilename.c_str());
       return false;
    }
+   else
+      mLevelFileHash = md5.getHashFromFile(filename);    // TODO: Combine this with the reading of the file we're doing anyway in initLevelFromFile()
 
    // We should have a gameType by the time we get here... but in case we don't, we'll add a default one now
    if(!getGameType())
