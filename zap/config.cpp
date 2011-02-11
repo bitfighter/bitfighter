@@ -1369,7 +1369,10 @@ void saveSettingsToINI()
    
    writeDefaultQuickChatMessages();    // Does nothing if there are already chat messages in the INI
 
-   writeJoystick();
+      // only needed for users using custom joystick 
+      // or joystick that maps differenly in LINUX
+      // This adds 200+ lines.
+   //writeJoystick();
 
    gINI.WriteFile();
 }
