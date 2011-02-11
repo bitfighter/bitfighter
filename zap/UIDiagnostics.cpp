@@ -135,7 +135,13 @@ static void initFoldersBlock(S32 textsize)
 {
    names.push_back("Level Dir:");
    vals.push_back(gConfigDirs.levelDir == "" ? "<<Unresolvable>>" : gConfigDirs.levelDir.c_str());
+
+   names.push_back("");
+   vals.push_back("");
       
+   names.push_back("Cache Dir:");
+   vals.push_back(gConfigDirs.cacheDir.c_str());
+
    names.push_back("INI Dir:");
    vals.push_back(gConfigDirs.iniDir.c_str());
       

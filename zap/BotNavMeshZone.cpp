@@ -326,7 +326,7 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 
 
 // In future, this function will store generated zones in a cache... but not yet; now it's just buildBotMeshZones!
-void BotNavMeshZone::buildOrLoadBotMeshZones()
+void BotNavMeshZone::buildBotMeshZones()
 {
 	Rect bounds = gServerGame->computeWorldObjectExtents();
 	makeBotMeshZone(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);

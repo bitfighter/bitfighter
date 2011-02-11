@@ -55,6 +55,8 @@ Item::Item(Point p, bool collideable, float radius, float mass) : MoveObject(p, 
    UpdateTimer1 = 0;
 }
 
+
+// s
 bool Item::processArguments(S32 argc, const char **argv)
 {
    if(argc < 2)
@@ -72,6 +74,7 @@ bool Item::processArguments(S32 argc, const char **argv)
 }
 
 
+// c
 void Item::render()
 {
    // If the item is mounted, renderItem will be called from the ship it is mounted to

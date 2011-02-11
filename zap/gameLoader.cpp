@@ -218,7 +218,7 @@ stateLineParseDone:
 
 
 // Reads files by chunks, converts to lines
-bool LevelLoader::initLevelFromFile(const char *filename)
+bool LevelLoader::loadLevelFromFile(const char *filename)
 {
    char levelChunk[4096];     // Data buffer for reading in chunks of our level file
    FILE *file = fopen(filename, "r");
@@ -259,7 +259,7 @@ bool LevelLoader::initLevelFromFile(const char *filename)
       }
       cur++;   // Advance cursor past that last \n, now points to first char of second line in chunk
 
-      TNLAssert(cur >= 0 && cur < sizeof(levelChunk), "LevelLoader::initLevelFromFile, Cur out of range");
+      TNLAssert(cur >= 0 && cur < sizeof(levelChunk), "LevelLoader::loadLevelFromFile, Cur out of range");
 
       char c = levelChunk[cur];     // Read a char, hold onto it for a second
       levelChunk[cur] = 0;          // Replace it with null

@@ -44,6 +44,7 @@
 #include "SweptEllipsoid.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
+#include "stringUtils.h"
 #include "../glut/glutInclude.h"
 
 #include "oglconsole.h"          // Our console object
@@ -491,7 +492,7 @@ void EditorUserInterface::loadLevel()
    char fileBuffer[1024];
    dSprintf(fileBuffer, sizeof(fileBuffer), "%s/%s", gConfigDirs.levelDir.c_str(), mEditFileName.c_str());
 
-   if(initLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
+   if(loadLevelFromFile(fileBuffer))   // Process level file --> returns true if file found and loaded, false if not (assume it's a new level)
    {
       // Loaded a level!
       makeSureThereIsAtLeastOneTeam(); // Make sure we at least have one team
@@ -4540,24 +4541,6 @@ void EditorUserInterface::setWarnMessage(string msg1, string msg2)
    mWarnMsg2 = msg2;
    mWarnMsgTimer = warnMsgDisplayTime;
    mWarnMsgColor = gErrorMessageTextColor;
-}
-
-
-// Safe fprintf ==> throws exception if writing fails
-static void s_fprintf(FILE *stream, const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-
-    char buffer[2048];
-    vsnprintf(buffer, sizeof(buffer), format, args);
-
-    va_end(args);
-
-    if(fprintf(stream, "%s", buffer) < 0)     // Uh-oh...
-    {
-       throw(SaveException("Error writing to file"));
-    }
 }
 
 

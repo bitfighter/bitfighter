@@ -2619,7 +2619,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             robot->isRunningScript = false;
 
          if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
-            BotNavMeshZone::buildOrLoadBotMeshZones();
+            gServerGame->buildOrLoadBotMeshZones();
 
          StringTableEntry msg = StringTableEntry("Robot added by %e0");
          Vector<StringTableEntry> e;

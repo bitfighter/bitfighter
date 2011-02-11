@@ -40,8 +40,6 @@ using namespace std;
 namespace Zap
 {
 
-#define gameTypeLen 256
-
 class TeamEditor;
 
 enum VertexRenderStyles
@@ -98,17 +96,6 @@ public:
 
 ////////////////////////////////////////
 ////////////////////////////////////////
-
-// From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
-struct SaveException : public std::exception
-{
-   string msg;
-
-   SaveException(string str) : msg(str) { /* do nothing */ }    // Constructor
-   ~SaveException() throw() { /* do nothing */ }                // Destructor, needed to avoid "looser throw specifier" errors with gcc
-   const char* what() const throw() { return msg.c_str(); }
-};
-
 
 enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[]
 {
@@ -309,10 +296,6 @@ public:
    void renderWalls(bool convert, F32 alpha);
 };
 
-////////////////////////////////////////
-////////////////////////////////////////
-
-
 
 ////////////////////////////////////////
 ////////////////////////////////////////
@@ -501,7 +484,9 @@ public:
 
    void saveUndoState();
 
-   char mGameType[gameTypeLen];
+   #define GAME_TYPE_LEN 256   // TODO: Define this in terms of something else...
+   char mGameType[GAME_TYPE_LEN];
+
    Vector<string> mGameTypeArgs;
 
    void syncUnmovedItems();

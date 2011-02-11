@@ -26,6 +26,10 @@
 #ifndef STRING_UTILS_H
 #define STRING_UTILS_H
 
+#ifdef _MSC_VER
+#pragma warning (disable: 4996)     // Disable POSIX deprecation, certain security warnings that seem to be specific to VC++
+#endif
+
 #include "tnlVector.h"     // For Vector
 #include "tnlTypes.h"
 #include <string>
@@ -35,6 +39,18 @@ using namespace TNL;
 
 namespace Zap
 {
+
+
+// From http://stackoverflow.com/questions/134569/c-exception-throwing-stdstring
+struct SaveException : public std::exception
+{
+   string msg;
+
+   SaveException(string str) : msg(str) { /* do nothing */ }    // Constructor
+   ~SaveException() throw() { /* do nothing */ }                // Destructor, needed to avoid "looser throw specifier" errors with gcc
+   const char* what() const throw() { return msg.c_str(); }
+};
+
 
 // Collection of useful string things
 
@@ -63,6 +79,7 @@ string lcase(string strToConvert);
 string ucase(string strToConvert);
 
 
+void s_fprintf(FILE *stream, const char *format, ...);      // throws SaveException
 
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 

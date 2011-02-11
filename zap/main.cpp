@@ -1041,6 +1041,20 @@ void readFolderLocationParams(Vector<StringPtr> &argv)
          i--;
       }
 
+      else if(!stricmp(argv[i].getString(), "-cachedir"))      // additional arg required
+      {
+         if(!hasAdditionalArg)
+         {
+            logprintf(LogConsumer::LogError, "You must specify the folder where cache files are to be stored with the -cachedir option");
+            exitGame(1);
+         }
+
+         gCmdLineSettings.dirs.cacheDir = argv[i+1].getString();
+         argv.erase(i);
+         argv.erase(i);
+         i--;
+      }
+
       else if(!stricmp(argv[i].getString(), "-robotdir"))      // additional arg required
       {
          if(!hasAdditionalArg)

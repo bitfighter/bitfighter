@@ -40,7 +40,7 @@ namespace Zap
 
 class RepairItem : public PickupItem
 {
-private:
+protected:
    typedef PickupItem Parent;
 
 public:

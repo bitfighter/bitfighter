@@ -1365,9 +1365,10 @@ void ConfigDirectories::resolveDirs()
    gConfigDirs.logDir        = resolutionHelper(gCmdLineSettings.dirs.logDir,        rootDataDir, "");
    gConfigDirs.screenshotDir = resolutionHelper(gCmdLineSettings.dirs.screenshotDir, rootDataDir, "screenshots");
 
-   // rootDataDir not used for sfx or lua folders
-   gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
+   // rootDataDir not used for these folders
+   gConfigDirs.cacheDir      = resolutionHelper(gCmdLineSettings.dirs.cacheDir,      "", "cache");
    gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");      
+   gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
 }
 
 

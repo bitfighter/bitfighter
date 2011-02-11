@@ -41,12 +41,15 @@
 #include "ship.h"
 #include "sparkManager.h"
 #include "SweptEllipsoid.h"
+#include "luaLevelGenerator.h"
+#include "robot.h"
+#include "shipItems.h"           // For moduleInfos
+#include "stringUtils.h"
+
 #include "UIGame.h"
 #include "UIMenus.h"
 #include "UINameEntry.h"
-#include "luaLevelGenerator.h"
-#include "shipItems.h"           // For moduleInfos
-#include "robot.h"
+
 
 //#include "UIChat.h"
 
@@ -619,7 +622,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    // Do some prep work if we have bots and/or zones
    if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
-      BotNavMeshZone::buildOrLoadBotMeshZones();
+      buildOrLoadBotMeshZones();
    else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
       BotNavMeshZone::buildBotNavMeshZoneConnections();    
 
@@ -639,6 +642,50 @@ void ServerGame::cycleLevel(S32 nextLevel)
          mGameType->serverAddClient(gc);
       gc->activateGhosting();
    }
+}
+
+
+static void saveBotMeshZones(const char *filename)
+{
+   FILE *f = fopen(filename, "w");
+   if(!f)
+   {
+      logprintf("Error saving bot nav mesh zone cache to %s", filename);
+      return;
+   }
+
+   Vector<Point> pts;
+   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   {
+      pts.clear();
+      gBotNavMeshZones[i]->getCollisionPoly(pts);
+
+      s_fprintf(f, "%s", "BotNavMeshZone");
+
+      for(S32 j = 0; j < pts.size(); j++)
+         s_fprintf(f, " %g %g ", pts[j].x, pts[j].y);
+
+      s_fprintf(f, "\n");
+   }
+
+   fclose(f);
+}
+
+
+extern ConfigDirectories gConfigDirs;
+extern string joindir(const string &path, const string &filename);
+
+void ServerGame::buildOrLoadBotMeshZones()
+{
+   string filename = joindir(gConfigDirs.cacheDir, mLevelFileHash + ".zones");
+
+   if(!loadLevelFromFile(filename.c_str()))
+   {
+      BotNavMeshZone::buildBotMeshZones();
+      saveBotMeshZones(filename.c_str());
+   }
+
+   BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
 }
 
 
@@ -709,7 +756,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
       return false;
    }
 
-   if(!initLevelFromFile(filename.c_str()))
+   if(!loadLevelFromFile(filename.c_str()))
    {
       logprintf("Unable to process level file \"%s\".  Skipping...", origFilename.c_str());
       return false;

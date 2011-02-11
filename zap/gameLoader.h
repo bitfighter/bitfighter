@@ -43,7 +43,7 @@ public:
    const static int MaxArgLen = 100;  // Each at most MaxArgLen bytes long  (enforced in addCharToArg)
    const static int MaxIdLen = 11;    // Max 32-bit int is 10 digits, plus room for a null
 
-   bool initLevelFromFile(const char *file);
+   bool loadLevelFromFile(const char *file);
    void parseLevelLine(const char *string);
 
    // Implementers of this class need to provide the following implementations:

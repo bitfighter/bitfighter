@@ -23,8 +23,11 @@
 //
 //------------------------------------------------------------------------------------
 
+#include "stringUtils.h"
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
+
+#include <stdarg.h>        // For va_args
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
@@ -218,6 +221,24 @@ void parseString(const char *inputString, Vector<string> &words, char seperator)
     word[wn] = 0;
     if(wn > 0) 
        words.push_back(word);
+}
+
+
+// Safe fprintf ==> throws exception if writing fails
+void s_fprintf(FILE *stream, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+
+    char buffer[2048];
+    vsnprintf(buffer, sizeof(buffer), format, args);
+
+    va_end(args);
+
+    if(fprintf(stream, "%s", buffer) < 0)     // Uh-oh...
+    {
+       throw(SaveException("Error writing to file"));
+    }
 }
 
 
