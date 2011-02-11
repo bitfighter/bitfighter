@@ -898,7 +898,7 @@ static bool processJoystickInputs( U32 &buttonMask )
       controls[1] = 0;
       controls[2] = 0;
       controls[3] = 0;
-      for(U32 i = 0; i < MaxJoystickAxes*2; i++)
+      for(U32 i = 0; i < MaxJoystickAxes; i++)
       {
          U32 mask;
          F32 axes1 = axes[i];
@@ -919,7 +919,7 @@ static bool processJoystickInputs( U32 &buttonMask )
          if(mask & 0x400000) controls[3] -= axes1;
          if(mask & 0x800000) controls[3] += axes1;
       }
-      newButtonMask &= 0x00FFFFFF;
+      newButtonMask &= 0xFF00FFFF;
       for(U32 i = 0; i < 32; i++)
       {
          if(buttonMask & (1 << i))
@@ -938,7 +938,7 @@ static bool processJoystickInputs( U32 &buttonMask )
       if(newButtonMask & 0x200000) controls[2] += 1;
       if(newButtonMask & 0x400000) controls[3] -= 1;
       if(newButtonMask & 0x800000) controls[3] += 1;
-      newButtonMask &= 0x00FFFFFF;
+      buttonMask = newButtonMask & 0xFF00FFFF;
    }
    else
    {
@@ -947,22 +947,7 @@ static bool processJoystickInputs( U32 &buttonMask )
       // Firing input --> controls[2] is left-right, controls[3] is up-down
       controls[2] = axes[shootAxisRemaps[gIniSettings.joystickType][0]];
       controls[3] = axes[shootAxisRemaps[gIniSettings.joystickType][1]];
-   }
 
-   // Movement input --> controls[0] is left-right, controls[1] is up-down
-   for(S32 i = 0; i <= 1; i ++)
-   {
-      controls[i] = axes[i];
-
-      if(controls[i] < minValues[i])
-         minValues[i] = controls[i];
-      if(controls[i] > maxValues[i])
-         maxValues[i] = controls[i];
-
-      if(controls[i] < 0)
-         controls[i] = - (controls[i] / minValues[i]);
-      else if(controls[i] > 0)
-         controls[i] = (controls[i] / maxValues[i]);
 
       // Remap button inputs
       U32 retMask = 0;
@@ -974,7 +959,7 @@ static bool processJoystickInputs( U32 &buttonMask )
       buttonMask = retMask | hatMask;
    
    
-      if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox)
+      if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox && !gJoystickMapping.enable)
       {
          // XBox (windows, not linux) also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
          // Note that if both triggers are depressed equally, they'll cancel each other out, and if one is pressed more than the other,
@@ -985,6 +970,23 @@ static bool processJoystickInputs( U32 &buttonMask )
          else if(axes[2] > deadZone)
             buttonMask |= ControllerButton8;
       }
+   }
+
+   // Movement input --> controls[0] is left-right, controls[1] is up-down
+   for(S32 i = 0; i <= 1; i ++)
+   {
+      //controls[i] = axes[i];
+
+      if(controls[i] < minValues[i])
+         minValues[i] = controls[i];
+      if(controls[i] > maxValues[i])
+         maxValues[i] = controls[i];
+
+      if(controls[i] < 0)
+         controls[i] = - (controls[i] / minValues[i]);
+      else if(controls[i] > 0)
+         controls[i] = (controls[i] / maxValues[i]);
+
    }
 
    // XBox control inputs are in a circle, not a square, which makes

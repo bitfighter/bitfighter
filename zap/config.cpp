@@ -925,9 +925,9 @@ void readJoystick()
    for(U32 i=0; i<MaxJoystickAxes*2; i++)
    {
       Vector<string> buttonList;
-      parseString(gINI.GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+24) : "").c_str(), buttonList, ',');
+      parseString(gINI.GetValue("Joystick", "Axes" + itos(i), i<8 ? itos(i+16) : "").c_str(), buttonList, ',');
       gJoystickMapping.axes[i] = 0;
-      for(U32 j=0; j<buttonList.size(); j++)
+      for(S32 j=0; j<buttonList.size(); j++)
       {
          gJoystickMapping.axes[i] |= 1 << atoi(buttonList[j].c_str());
       }
@@ -937,7 +937,7 @@ void readJoystick()
       Vector<string> buttonList;
       parseString(gINI.GetValue("Joystick", "Button" + itos(i), i<10 ? itos(i) : "").c_str(), buttonList, ',');
       gJoystickMapping.button[i] = 0;
-      for(U32 j=0; j<buttonList.size(); j++)
+      for(S32 j=0; j<buttonList.size(); j++)
       {
          gJoystickMapping.button[i] |= 1 << atoi(buttonList[j].c_str());
       }
@@ -947,7 +947,7 @@ void readJoystick()
       Vector<string> buttonList;
       parseString(gINI.GetValue("Joystick", "Pov" + itos(i), itos(i+10)).c_str(), buttonList, ',');
       gJoystickMapping.pov[i] = 0;
-      for(U32 j=0; j<buttonList.size(); j++)
+      for(S32 j=0; j<buttonList.size(); j++)
       {
          gJoystickMapping.pov[i] |= 1 << atoi(buttonList[j].c_str());
       }
