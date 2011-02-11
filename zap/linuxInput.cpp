@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "input.h"
+//#include "tnlLog.h"
 
 #ifndef ZAP_DEDICATED
 
@@ -48,8 +49,8 @@ bool gJoystickInit = false;
 static Display *Xdisplay = XOpenDisplay(NULL);
 
 
-#define MAX_AXIS 32
-#define MAX_BUTTON 32	// Can fit 32 buttons in a 32 bit integer!
+const U32 MAX_AXIS = 32;
+const U32 MAX_BUTTON = 32;	// Can fit 32 buttons in a 32 bit integer!
 
 
 struct padData {
@@ -58,10 +59,10 @@ struct padData {
 	int fd;
 	int version;
 	char devName[80];
+	js_event ev;
+	bool changed;
 	int aPos[MAX_AXIS];
 	int bPos[MAX_BUTTON];
-	bool changed;
-	js_event ev;
 };
 
 const int MAX_JOYPADS = 8;
@@ -112,18 +113,19 @@ void InitJoystick()
       ioctl(joyPads[gSticksFound].fd, JSIOCGNAME(80), &joyPads[gSticksFound].devName);
       fcntl(joyPads[gSticksFound].fd, F_SETFL, O_NONBLOCK);
 
-      //logprintf ("axis : %d\n", pad1.axisCount);
-      //logprintf ("buttons : %d\n", pad1.buttonCount);
-      //logprintf ("version : %d\n", pad1.version);
-      //logprintf ("name : %s\n", pad1.devName);
+      //logprintf ("axis : %d\n", joyPads[gSticksFound].axisCount);
+      //logprintf ("buttons : %d\n", joyPads[gSticksFound].buttonCount);
+      //logprintf ("version : %d\n", joyPads[gSticksFound].version);
+      //logprintf ("name : %s\n", joyPads[gSticksFound].devName);
       // set default values
       joyPads[gSticksFound].changed = false;
-      for (int i=0;i<joyPads[gSticksFound].axisCount;i++) joyPads[i].aPos[i]=0;
-      for (int i=0;i<joyPads[gSticksFound].buttonCount;i++) joyPads[i].bPos[i]=0;
-      gSticksFound++;
+      for (int i=0;i<MAX_AXIS;i++) {joyPads[gSticksFound].aPos[i]=0;}
+      for (int i=0;i<MAX_BUTTON;i++) {joyPads[gSticksFound].bPos[i]=0;}
+      if(joyPads[gSticksFound].axisCount != 0 || joyPads[gSticksFound].buttonCount != 0) gSticksFound++;
    }
-   gJoystickInit = true;
  }
+ //logprintf("Found %i joysticks", gSticksFound);
+ gJoystickInit = true;
 #endif
 }
 
@@ -134,7 +136,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 	InitJoystick();
 
   U32 useStick = gUseStickNumber - 1;
-  if(useStick >= gSticksFound)
+  if(useStick > gSticksFound)
     return false;
 
   if(joyPads[useStick].fd == 0)
@@ -173,10 +175,10 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
   }
 
   buttonMask = 0;
-  for(S32 b=0; b<joyPads[useStick].buttonCount; b++)
+  for(S32 b=0; b<joyPads[useStick].buttonCount && b < MAX_BUTTON; b++)
     buttonMask = buttonMask | ((joyPads[useStick].bPos[b] != 0 ? 1 : 0) << b);
 
-  for(S32 b=0; b<joyPads[useStick].buttonCount && b<MaxJoystickAxes; b++)
+  for(S32 b=0; b<MaxJoystickAxes && b<MAX_AXIS; b++)
     axes[b] = F32(joyPads[useStick].aPos[b])/32768; //convert to Float between -1.0 and 1.0
 
   hatMask = 0; //POV (d-pad) either get maps to 2 more axes (logitech dual action), or 4 more buttons?
@@ -194,8 +196,8 @@ const char *GetJoystickName()
 	InitJoystick();
 
   U32 useStick = gUseStickNumber - 1;
-  if(useStick >= gSticksFound)
-    return false;
+  if(useStick > gSticksFound)
+    return "";
 
   return joyPads[useStick].devName;
 #else
