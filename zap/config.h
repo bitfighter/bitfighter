@@ -280,8 +280,8 @@ struct IniSettings      // With defaults specified
       levelChangePassword = "";
       levelDir = "";
 
-      defaultRobotScript = "";            // No default robot script  // TODO ==> Make this s_bot
-
+      defaultRobotScript = "s_bot.bot";            
+         
       wallFillColor.set(0,0,.15);
       wallOutlineColor.set(0,0,1);
 
