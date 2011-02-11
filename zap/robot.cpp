@@ -736,7 +736,7 @@ S32 LuaRobot::getReqLoadout(lua_State *L)
    if(requestedLoadout.size() == 0)    // Robots and clients starts at zero size requested loadout.
       return getCurrLoadout(L);
 
-   for(S32 i = 0; i < ShipModuleCount + ShipModuleCount; i++)
+   for(S32 i = 0; i < ShipModuleCount + ShipWeaponCount; i++)
       loadoutItems[i] = requestedLoadout[i];
 
    LuaLoadout *loadout = new LuaLoadout(loadoutItems);
