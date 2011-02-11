@@ -244,7 +244,7 @@ void Asteroid::damageObject(DamageInfo *theInfo)
    {
       hasExploded = true;
       deleteObject(500);
-      setMaskBits(0x10000000);  // fix asteroids delay destroy after hit again...
+      setMaskBits(ExplodedMask);    // Fix asteroids delay destroy after hit again...
       return;
    }
 
