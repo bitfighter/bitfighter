@@ -1507,8 +1507,10 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects
    rawRenderObjects.clear();
    mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
+
+   // If we're drawing bot zones, add them to our list of render objects
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
-       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,mWorldBounds);
+       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, rawRenderObjects, mWorldBounds);
 
    
    renderObjects.clear();
@@ -1516,7 +1518,7 @@ void ClientGame::renderCommander()
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
 
    if(gServerGame && showDebugBots)
-      for(S32 i = 0; i<Robot::robots.size(); i++)
+      for(S32 i = 0; i < Robot::robots.size(); i++)
          renderObjects.push_back(Robot::robots[i]);
 
    if(u)
