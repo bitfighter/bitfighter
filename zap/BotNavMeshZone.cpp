@@ -330,8 +330,28 @@ void BotNavMeshZone::buildOrLoadBotMeshZones()
 {
 	Rect bounds = gServerGame->computeWorldObjectExtents();
 	makeBotMeshZone(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+}
 
-   buildBotNavMeshZoneConnections();      // Create the connections between zones
+
+Vector<DatabaseObject *> zones;
+extern Rect gServerWorldBounds;
+
+// Returns index of zone containing specified point
+static BotNavMeshZone *findZoneContainingPoint(const Point &point)
+{
+   Rect rect(point, 0.01f);
+   zones.clear();
+   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, zones, rect); 
+
+   // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
+   for(S32 i = 0; i < zones.size(); i++)
+   {
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);     
+      if(zone)
+         return zone;
+   }
+
+   return NULL;
 }
 
 
@@ -339,11 +359,14 @@ void BotNavMeshZone::buildOrLoadBotMeshZones()
 void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
    if(gBotNavMeshZones.size() == 0)
-   {
       return;
-   }
 
+   // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
    Point bordStart, bordEnd, bordCen;
+   Rect rect;
+   NeighboringZone neighbor;
+   Vector<DatabaseObject *> objects;
+
    // Figure out which zones are adjacent to which, and find the "gateway" between them
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    {
@@ -358,61 +381,64 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 
          if(zonesTouch(gBotNavMeshZones[i]->mPolyBounds, gBotNavMeshZones[j]->mPolyBounds, 1.0, bordStart, bordEnd))
          {
-            bordCen.set(Rect(bordStart, bordEnd).getCenter());
+            rect.set(bordStart, bordEnd);
+            bordCen.set(rect.getCenter());
 
-            NeighboringZone n1;
-            n1.zoneID = j;
-            n1.borderStart.set(bordStart);
-            n1.borderEnd.set(bordEnd);
-            n1.borderCenter.set(bordCen);
+            // Zone j is a neighbor of i
+            neighbor.zoneID = j;
+            neighbor.borderStart.set(bordStart);
+            neighbor.borderEnd.set(bordEnd);
+            neighbor.borderCenter.set(bordCen);
 
-            n1.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            n1.center.set(gBotNavMeshZones[j]->getCenter());
-            gBotNavMeshZones[i]->mNeighbors.push_back(n1);
+            neighbor.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
+            neighbor.center.set(gBotNavMeshZones[j]->getCenter());
+            gBotNavMeshZones[i]->mNeighbors.push_back(neighbor);
 
-            NeighboringZone n2;
-            n2.zoneID = i;
-            n2.borderStart.set(bordStart);
-            n2.borderEnd.set(bordEnd);
-            n2.borderCenter.set(bordCen);
+            // Zone i is a neighbor of j
+            neighbor.zoneID = i;
+            neighbor.borderStart.set(bordStart);
+            neighbor.borderEnd.set(bordEnd);
+            neighbor.borderCenter.set(bordCen);
 
-            n2.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
-            n2.center.set(gBotNavMeshZones[i]->getCenter());
-            gBotNavMeshZones[j]->mNeighbors.push_back(n2);
+            neighbor.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
+            neighbor.center.set(gBotNavMeshZones[i]->getCenter());
+            gBotNavMeshZones[j]->mNeighbors.push_back(neighbor);
          }
       }
-		Vector<DatabaseObject *> objects;
-		gServerGame->getGridDatabase()->findObjects(TeleportType,objects,gBotNavMeshZones[i]->getExtent());
+   }
+		
+   // Now create paths representing the teleporters
+   Vector<DatabaseObject *> teleporters, dests;
 
-		for(S32 k=0; k<objects.size(); k++)
+	gServerGame->getGridDatabase()->findObjects(TeleportType, teleporters, gServerWorldBounds);
+
+	for(S32 i = 0; i < teleporters.size(); i++)
+	{
+		Teleporter *teleporter = dynamic_cast<Teleporter *>(teleporters[i]);
+
+      if(!teleporter)
+         continue;
+
+      BotNavMeshZone *origZone = findZoneContainingPoint(teleporter->getActualPos());
+
+		for(S32 j = 0; j < teleporter->mDest.size(); j++)     // Review each teleporter destination
 		{
-			Teleporter *obj = dynamic_cast<Teleporter *>(objects[k]);
-			if(obj && PolygonContains2(gBotNavMeshZones[i]->mPolyBounds.address(), gBotNavMeshZones[i]->mPolyBounds.size(), obj->getActualPos()))
-			{
-				for(S32 l=0; l<obj->mDest.size(); l++)  // Go through each teleporter destination.
-				{
-					Vector<DatabaseObject *> objects2;
-					gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,objects2,Rect(obj->mDest[l]-Point(-0.1f,-0.1f),obj->mDest[l]+Point(-0.1f,-0.1f)));  // need to extend the rect slightly, in case it is on between of the edge of bot zones.
-					for(S32 m=0; m<objects2.size(); m++)
-					{
-						BotNavMeshZone *destZone = dynamic_cast<BotNavMeshZone *>(objects2[m]);
-						if(destZone)
-						{
-						 	if(PolygonContains2(destZone->mPolyBounds.address(), gBotNavMeshZones[m]->mPolyBounds.size(), obj->mDest[l]))
-							{
-								NeighboringZone n1;         // Teleporter is one way path.
-								n1.zoneID = destZone->mZoneID;
-								n1.borderStart.set(obj->getActualPos());
-								n1.borderEnd.set(obj->mDest[l]);
-								n1.borderCenter.set(obj->getActualPos());  // use teleporter position as center, but not destination.
+         BotNavMeshZone *destZone = findZoneContainingPoint(teleporter->mDest[j]);
 
-								n1.distTo = 0; //obj->mDest[l].len();  //teleport instantly, don't want it to count as long distance.
-								n1.center.set(obj->getActualPos());
-								gBotNavMeshZones[i]->mNeighbors.push_back(n1);
-							}
-						}
-					}
-				}
+			if(origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+			{
+				// Teleporter is one way path
+				neighbor.zoneID = destZone->mZoneID;
+				neighbor.borderStart.set(teleporter->getActualPos());
+				neighbor.borderEnd.set(teleporter->mDest[j]);
+				neighbor.borderCenter.set(teleporter->getActualPos());
+
+            // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
+            // This should be the average of the costs of traveling from each dest zone to the target zone
+				neighbor.distTo = 0;                                    
+				neighbor.center.set(teleporter->getActualPos());
+
+				origZone->mNeighbors.push_back(neighbor);
 			}
 		}
    }
