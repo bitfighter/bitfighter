@@ -33,19 +33,6 @@ CREATE TABLE IF NOT EXISTS `server` (
   UNIQUE KEY `name_ip_unique` (`server_name`(50),`ip_address`(15))
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
 
---
--- Dumping data for table `server`
---
-
-INSERT INTO `server` (`server_id`, `server_name`, `ip_address`) VALUES
-(1, 'Bitfighter sam686', '96.2.123.136'),
-(2, 'Classic Levels', '65.49.81.67'),
-(3, 'Edshin Collection', '65.49.81.67'),
-(4, 'InvaderAlex Collection', '65.49.81.67'),
-(5, 'New Player?', '65.49.81.67'),
-(6, 'Bobdaduck Collection', '65.49.81.67'),
-(7, 'Robots', '65.49.81.67'),
-(8, 'User levels', '65.49.81.67');
 
 -- --------------------------------------------------------
 

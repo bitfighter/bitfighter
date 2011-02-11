@@ -31,6 +31,7 @@
 #include "tnlTypes.h"
 #include "tnlVector.h"
 #include "tnlNonce.h"
+#include "../sqlite/sqlite3.h"
 
 #ifdef BF_WRITE_TO_MYSQL
 #include "mysql++.h"
@@ -63,7 +64,6 @@ class DatabaseWriter
 {
 private:
    bool mMySql;        // Can this connection use mysql?
-   bool mSqlite;       // Can this connection use sqlite?
 
    char mServer[64];   // was const char *, but problems when data in pointer dies.
    char mDb[64];
@@ -74,6 +74,8 @@ private:
    U64 lastGameID;
 
    void initialize(const char *server, const char *db, const char *user, const char *password);
+   void createStatsDatabase();
+   string getSqliteSchema();
 
 public:
    DatabaseWriter();

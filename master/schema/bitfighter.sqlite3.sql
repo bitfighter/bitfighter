@@ -14,15 +14,6 @@ CREATE TABLE server (server_id INTEGER PRIMARY KEY  AUTOINCREMENT  NOT NULL, ser
 
 CREATE UNIQUE INDEX server_name_ip_unique ON server(server_name COLLATE BINARY, ip_address COLLATE BINARY);
 
-INSERT INTO server VALUES(1, 'Bitfighter sam686', '96.2.123.136');
-INSERT INTO server VALUES(2, 'Classic Levels', '65.49.81.67');
-INSERT INTO server VALUES(3, 'Edshin Collection', '65.49.81.67');
-INSERT INTO server VALUES(4, 'InvaderAlex Collection', '65.49.81.67');
-INSERT INTO server VALUES(5, 'New Player?', '65.49.81.67');
-INSERT INTO server VALUES(6, 'Bobdaduck Collection', '65.49.81.67');
-INSERT INTO server VALUES(7, 'Robots', '65.49.81.67');
-INSERT INTO server VALUES(8, 'User levels', '65.49.81.67');
-
 /*  stats_game */
 DROP TABLE IF EXISTS stats_game;
 CREATE TABLE stats_game (
