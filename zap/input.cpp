@@ -39,6 +39,8 @@
 
 namespace Zap
 {
+JoystickMapping gJoystickMapping;
+
 
 // First, some variables to hold our various non-keyboard inputs
 enum JoystickAxes {
@@ -61,6 +63,7 @@ enum AlignType {
 
 F32 gJoystickInput[JOYSTICK_COUNT][AXIS_COUNT];
 U32 gRawJoystickButtonInputs;
+F32 gRawAxisButtonInputs[MaxJoystickAxes];
 
 
 extern void drawCircle(const Point &pos, F32 radius);
@@ -116,7 +119,7 @@ static S32 keyCodeToButtonIndex(KeyCode keyCode)
 static U32 controllerButtonCounts[ControllerTypeCount] =          { 9,       10,       9,        10,       10,       10,      10,       14 };     // How many buttons?
 #ifdef TNL_OS_LINUX
 //                                      ? = need to change?         ?       works       ?          ?        ?         ?        ?         ?
-static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 3 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
+static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 3 }, { 5, 2 }, { 5, 2 }, { 2, 3 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
 #else
 static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };
 #endif
@@ -850,6 +853,10 @@ string joystickTypeToPrettyString(S32 controllerType)
 
 
 
+
+
+
+
 void extern simulateKeyDown(KeyCode keyCode);
 void extern simulateKeyUp(KeyCode keyCode);
 bool extern getKeyState(KeyCode keyCode);
@@ -862,7 +869,7 @@ U32 JoystickButtonMask2;
 static bool processJoystickInputs( U32 &buttonMask )
 {
    // It is unknown how to respond to Unknown joystick types!!
-   if(gIniSettings.joystickType >= ControllerTypeCount)
+   if(gIniSettings.joystickType >= ControllerTypeCount && !gJoystickMapping.enable)
       return false;
 
    F32 axes[MaxJoystickAxes];
@@ -874,14 +881,101 @@ static bool processJoystickInputs( U32 &buttonMask )
    if(!ReadJoystick(axes, buttonMask, hatMask))
       return false;     // false = no joystick input
 
+   gRawJoystickButtonInputs = buttonMask;
+   for(U32 i=0; i<MaxJoystickAxes; i++)
+   {
+      gRawAxisButtonInputs[i] = axes[i];
+   }
+
    // All axes return -1 to 1
    // Let's map the controls
    F32 controls[4];     // 0, 1 --> move; 2, 3 --> fire
 
+   if(gJoystickMapping.enable)
+   {
+      U32 newButtonMask = 0;
+      controls[0] = 0;
+      controls[1] = 0;
+      controls[2] = 0;
+      controls[3] = 0;
+      for(U32 i = 0; i < MaxJoystickAxes; i++)
+      {
+         U32 mask;
+         F32 axes1 = axes[i];
+         if(axes1 < 0)
+         {
+            mask = gJoystickMapping.axes[i*2];
+            axes1 = -axes1;
+         }
+         else
+            mask = gJoystickMapping.axes[i*2+1];
+         if(axes1 > 0.5) newButtonMask |= mask;
+         if(mask & 0x10000) controls[0] -= axes1;
+         if(mask & 0x20000) controls[0] += axes1;
+         if(mask & 0x40000) controls[1] -= axes1;
+         if(mask & 0x80000) controls[1] += axes1;
+         if(mask & 0x100000) controls[2] -= axes1;
+         if(mask & 0x200000) controls[2] += axes1;
+         if(mask & 0x400000) controls[3] -= axes1;
+         if(mask & 0x800000) controls[3] += axes1;
+      }
+      newButtonMask &= 0xFF00FFFF;
+      for(U32 i = 0; i < 32; i++)
+      {
+         if(buttonMask & (1 << i))
+            newButtonMask |= gJoystickMapping.button[i];
+      }
+      for(U32 i = 0; i < 4; i++)
+      {
+         if(hatMask & (ControllerButtonDPadUp << i))
+            newButtonMask |= gJoystickMapping.pov[i];
+      }
+      if(newButtonMask & 0x10000) controls[0] -= 1;
+      if(newButtonMask & 0x20000) controls[0] += 1;
+      if(newButtonMask & 0x40000) controls[1] -= 1;
+      if(newButtonMask & 0x80000) controls[1] += 1;
+      if(newButtonMask & 0x100000) controls[2] -= 1;
+      if(newButtonMask & 0x200000) controls[2] += 1;
+      if(newButtonMask & 0x400000) controls[3] -= 1;
+      if(newButtonMask & 0x800000) controls[3] += 1;
+      buttonMask = newButtonMask & 0xFF00FFFF;
+   }
+   else
+   {
+      controls[0] = axes[0];
+      controls[1] = axes[1];
+      // Firing input --> controls[2] is left-right, controls[3] is up-down
+      controls[2] = axes[shootAxisRemaps[gIniSettings.joystickType][0]];
+      controls[3] = axes[shootAxisRemaps[gIniSettings.joystickType][1]];
+
+
+      // Remap button inputs
+      U32 retMask = 0;
+      for(S32 i = 0; i < MaxJoystickButtons; i++)
+         if(buttonMask & (1 << i))
+         {
+            retMask |= controllerButtonRemaps[gIniSettings.joystickType][i];
+         }
+      buttonMask = retMask | hatMask;
+   
+   
+      if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox && !gJoystickMapping.enable)
+      {
+         // XBox (windows, not linux) also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
+         // Note that if both triggers are depressed equally, they'll cancel each other out, and if one is pressed more than the other,
+         // only that one will be detected.
+         F32 deadZone = 0.075f;
+         if(axes[2] < -deadZone)
+            buttonMask |= ControllerButton7;
+         else if(axes[2] > deadZone)
+            buttonMask |= ControllerButton8;
+      }
+   }
+
    // Movement input --> controls[0] is left-right, controls[1] is up-down
    for(S32 i = 0; i <= 1; i ++)
    {
-      controls[i] = axes[i];
+      //controls[i] = axes[i];
 
       if(controls[i] < minValues[i])
          minValues[i] = controls[i];
@@ -892,6 +986,7 @@ static bool processJoystickInputs( U32 &buttonMask )
          controls[i] = - (controls[i] / minValues[i]);
       else if(controls[i] > 0)
          controls[i] = (controls[i] / maxValues[i]);
+
    }
 
    // XBox control inputs are in a circle, not a square, which makes
@@ -916,9 +1011,6 @@ static bool processJoystickInputs( U32 &buttonMask )
       controls[1] = dir.y;
    }
 
-   // Firing input --> controls[2] is left-right, controls[3] is up-down
-   controls[2] = axes[shootAxisRemaps[gIniSettings.joystickType][0]];
-   controls[3] = axes[shootAxisRemaps[gIniSettings.joystickType][1]];
 
 
    // Create dead zones, so minimal stick movement or miscalibration will have no effect
@@ -953,74 +1045,9 @@ static bool processJoystickInputs( U32 &buttonMask )
    if (controls[2] > 0.5) JoystickButtonMask2 |= 32;
    if (controls[3] < -0.5) JoystickButtonMask2 |= 64;
    if (controls[3] > 0.5) JoystickButtonMask2 |= 128;
-/*
-   if (controls[0] < -0.5 && !getKeyState(STICK_1_LEFT))
-      simulateKeyDown(STICK_1_LEFT);
-   else if (controls[0] >= -0.5 && getKeyState(STICK_1_LEFT))
-      simulateKeyUp(STICK_1_LEFT);
-
-   if (controls[0] > 0.5 && !getKeyState(STICK_1_RIGHT))
-      simulateKeyDown(STICK_1_RIGHT);
-   else if (controls[0] <= 0.5 && getKeyState(STICK_1_RIGHT))
-      simulateKeyUp(STICK_1_RIGHT);
-
-   if (controls[1] < -0.5 && !getKeyState(STICK_1_UP))
-      simulateKeyDown(STICK_1_UP);
-   else if (controls[1] >= -0.5 && getKeyState(STICK_1_UP))
-      simulateKeyUp(STICK_1_UP);
-
-   if (controls[1] > 0.5 && !getKeyState(STICK_1_DOWN))
-      simulateKeyDown(STICK_1_DOWN);
-   else if (controls[1] <= 0.5 && getKeyState(STICK_1_DOWN))
-      simulateKeyUp(STICK_1_DOWN);
-
-
-   if (controls[2] < -0.5 && !getKeyState(STICK_2_LEFT))
-      simulateKeyDown(STICK_2_LEFT);
-   else if (controls[2] >= -0.5 && getKeyState(STICK_2_LEFT))
-      simulateKeyUp(STICK_2_LEFT);
-
-   if (controls[2] > 0.5 && !getKeyState(STICK_2_RIGHT))
-      simulateKeyDown(STICK_2_RIGHT);
-   else if (controls[2] <= 0.5 && getKeyState(STICK_2_RIGHT))
-      simulateKeyUp(STICK_2_RIGHT);
-
-   if (controls[3] < -0.5 && !getKeyState(STICK_2_UP))
-      simulateKeyDown(STICK_2_UP);
-   else if (controls[3] >= -0.5 && getKeyState(STICK_2_UP))
-      simulateKeyUp(STICK_2_UP);
-
-   if (controls[3] > 0.5 && !getKeyState(STICK_2_DOWN))
-      simulateKeyDown(STICK_2_DOWN);
-   else if (controls[3] <= 0.5 && getKeyState(STICK_2_DOWN))
-      simulateKeyUp(STICK_2_DOWN);
-*/
 
    //logprintf("ButtonMask: %d", buttonMask);
 
-   // Remap button inputs
-   U32 retMask = 0;
-   gRawJoystickButtonInputs = 0;
-   for(S32 i = 0; i < MaxJoystickButtons; i++)
-      if(buttonMask & (1 << i))
-      {
-         gRawJoystickButtonInputs |= (1 << i);
-         retMask |= controllerButtonRemaps[gIniSettings.joystickType][i];
-      }
-   buttonMask = retMask | hatMask;
-
-
-   if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox)
-   {
-      // XBox also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
-      // Note that if both triggers are depressed equally, they'll cancel each other out, and if one is pressed more than the other,
-      // only that one will be detected.
-      F32 deadZone = 0.075f;
-      if(axes[2] < -deadZone)
-         buttonMask |= ControllerButton7;
-      else if(axes[2] > deadZone)
-         buttonMask |= ControllerButton8;
-   }
 
    return true;      // true = processed joystick input
 }

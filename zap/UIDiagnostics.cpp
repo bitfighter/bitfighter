@@ -40,6 +40,8 @@
 namespace Zap
 {
 
+extern F32 gRawAxisButtonInputs[MaxJoystickAxes];
+
 extern string gHostName, gHostDescr;
 extern CmdLineSettings gCmdLineSettings;
 extern IniSettings gIniSettings;
@@ -413,6 +415,21 @@ void DiagnosticUserInterface::render()
       for(S32 i = 0; i < MaxJoystickButtons; i++)
          if(gRawJoystickButtonInputs & (1 << i))
             hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
+
+      glBegin(GL_LINES);
+      for(S32 i = 0; i < MaxJoystickAxes; i++) // shows RAW axis inputs
+      {
+         glColor3f(0.5,0,0);
+         glVertex2f(i*8+400, ypos - 20);
+         glVertex2f(i*8+400, ypos + 20);
+         glColor3f(1,1,0);
+         glVertex2f(i*8+400, ypos);
+         F32 a = gRawAxisButtonInputs[i];
+         if(a < -1) a = -1;
+         if(a > 1) a = 1;
+         glVertex2f(i*8+400, ypos + a * 20);
+      }
+      glEnd();
 
       ypos += textsize + gap + 10;
 
