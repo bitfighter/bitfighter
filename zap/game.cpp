@@ -839,13 +839,18 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
 		S32 objlen = (S32) strlen(obj);
 		// All game types are of form XXXXGameType
 		if(objlen >= 8 && !strcmp(obj + objlen - 8, "GameType"))
-		{	if(mGameType)
-			{	logprintf(LogConsumer::LogWarning, "Duplicate GameType in level \"%s\"", origFilename.c_str());
+		{	
+         if(mGameType)
+			{	
+            logprintf(LogConsumer::LogWarning, "Duplicate GameType in level \"%s\"", origFilename.c_str());
 				return;
 			}
-		}else
-		{	if(!mGameType)
-			{	logprintf(LogConsumer::LogWarning, "Missing GameType in level \"%s\"", origFilename.c_str());
+		}
+      else
+		{	
+         if(!mGameType)
+			{	
+            logprintf(LogConsumer::LogWarning, "Missing GameType in level \"%s\"", origFilename.c_str());
 				return;
 			}
 		}

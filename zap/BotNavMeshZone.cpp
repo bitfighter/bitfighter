@@ -110,7 +110,7 @@ S32 BotNavMeshZone::getRenderSortValue()
    return -2;
 }
 
-GridDatabase * BotNavMeshZone::getGridDatabase()
+GridDatabase *BotNavMeshZone::getGridDatabase()
 {
    return &mGame->mDatabaseForBotZones;
 }
