@@ -136,7 +136,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 	InitJoystick();
 
   U32 useStick = gUseStickNumber - 1;
-  if(useStick > gSticksFound)
+  if(useStick >= gSticksFound)
     return false;
 
   if(joyPads[useStick].fd == 0)
@@ -196,7 +196,7 @@ const char *GetJoystickName()
 	InitJoystick();
 
   U32 useStick = gUseStickNumber - 1;
-  if(useStick > gSticksFound)
+  if(useStick >= gSticksFound)
     return "";
 
   return joyPads[useStick].devName;
