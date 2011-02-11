@@ -60,26 +60,25 @@ enum InputMode {
    Joystick = 1
 };
 
-enum ButtonInfo {
-   MaxJoystickAxes = 12,
-   MaxJoystickButtons = 14,
-   ControllerButton1 = 1 << 0,
-   ControllerButton2 = 1 << 1,
-   ControllerButton3 = 1 << 2,
-   ControllerButton4 = 1 << 3,
-   ControllerButton5 = 1 << 4,
-   ControllerButton6 = 1 << 5,
-   ControllerButton7 = 1 << 6,
-   ControllerButton8 = 1 << 7,
+const U32 MaxJoystickAxes = 32;  // Linux joystick could have a lot of axis.
+const U32 MaxJoystickButtons = 14;
 
-   ControllerButtonStart = 1 << 8,
-   ControllerButtonBack = 1 << 9,
+const U32 ControllerButton1 = 1 << 0;
+const U32 ControllerButton2 = 1 << 1;
+const U32 ControllerButton3 = 1 << 2;
+const U32 ControllerButton4 = 1 << 3;
+const U32 ControllerButton5 = 1 << 4;
+const U32 ControllerButton6 = 1 << 5;
+const U32 ControllerButton7 = 1 << 6;
+const U32 ControllerButton8 = 1 << 7;
 
-   ControllerButtonDPadUp = 1 << 10,
-   ControllerButtonDPadDown = 1 << 11,
-   ControllerButtonDPadLeft = 1 << 12,
-   ControllerButtonDPadRight = 1 << 13,
-};
+const U32 ControllerButtonStart = 1 << 8;
+const U32 ControllerButtonBack = 1 << 9;
+
+const U32 ControllerButtonDPadUp = 1 << 10;
+const U32 ControllerButtonDPadDown = 1 << 11;
+const U32 ControllerButtonDPadLeft = 1 << 12;
+const U32 ControllerButtonDPadRight = 1 << 13;
 
 // The following functions are defined differently on each platform in the the platInput.cpp files
 

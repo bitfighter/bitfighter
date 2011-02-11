@@ -63,6 +63,7 @@ enum AlignType {
 
 F32 gJoystickInput[JOYSTICK_COUNT][AXIS_COUNT];
 U32 gRawJoystickButtonInputs;
+F32 gRawAxisButtonInputs[MaxJoystickAxes];
 
 
 extern void drawCircle(const Point &pos, F32 radius);
@@ -868,7 +869,7 @@ U32 JoystickButtonMask2;
 static bool processJoystickInputs( U32 &buttonMask )
 {
    // It is unknown how to respond to Unknown joystick types!!
-   if(gIniSettings.joystickType >= ControllerTypeCount)
+   if(gIniSettings.joystickType >= ControllerTypeCount && !gJoystickMapping.enable)
       return false;
 
    F32 axes[MaxJoystickAxes];
@@ -881,6 +882,10 @@ static bool processJoystickInputs( U32 &buttonMask )
       return false;     // false = no joystick input
 
    gRawJoystickButtonInputs = buttonMask;
+   for(U32 i=0; i<MaxJoystickAxes; i++)
+   {
+      gRawAxisButtonInputs[i] = axes[i];
+   }
 
    // All axes return -1 to 1
    // Let's map the controls
