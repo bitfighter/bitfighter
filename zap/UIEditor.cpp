@@ -4191,6 +4191,8 @@ void EditorUserInterface::textEntryKeyHandler(KeyCode keyCode, char ascii)
 }
 
 
+static const S32 MAX_REPOP_DELAY = 600;      // That's 10 whole minutes!
+
 void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii)
 {
    if( keyCode == KEY_J && getKeyState(KEY_CTRL) )
@@ -4212,7 +4214,7 @@ void EditorUserInterface::specialAttributeKeyHandler(KeyCode keyCode, char ascii
    {
       if(keyCode == KEY_UP)         // Up - increase delay
       {  /* braces required */
-         if(mItems[mEditingSpecialAttrItem].repopDelay < 120)
+         if(mItems[mEditingSpecialAttrItem].repopDelay < MAX_REPOP_DELAY)
             mItems[mEditingSpecialAttrItem].repopDelay++;
       }
       else if(keyCode == KEY_DOWN)  // Down - decrease delay
