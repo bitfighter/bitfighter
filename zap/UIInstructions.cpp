@@ -611,13 +611,12 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/levpass <password>", "Request level change permissions" },
    { "-", NULL },       // Horiz. line
    { "/suspend", "Place game on hold while waiting for players" },
-   { "/getmap [file]", "Save currently playing level in <file>, if allowed" },
+   { "/getmap [file]", "Save currently playing level in [file], if allowed" },
    { "/pm <name> <message>", "Send private message to player" },
    { "-", NULL },       // Horiz. line
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
    { "/vvol <0-10>", "Set voice chat volume" },
-
    { NULL, NULL },      // End of list
 },{
    { "/add <time in minutes>", "Add time to the current game" },
@@ -626,6 +625,11 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/restart", "Restart current level" },
    { "/settime <time in minutes>", "Set play time for the level" },
    { "/setscore <score>", "Set score to win the level" },
+   { "-", NULL },       // Horiz. line
+   { "/addbot [team] [file]", "Add a bot from [file].bot, extra args go to the bot"},
+   { "/kickbot", "Kick most recently added bot"},
+   { "/kickbots", "Kick all bots"},
+
 
    { NULL, NULL },      // End of list
 }, {
