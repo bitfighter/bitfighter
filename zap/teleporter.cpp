@@ -52,12 +52,14 @@ Teleporter::Teleporter()
    mTime = 0;
 }
 
+
 void Teleporter::onAddedToGame(Game *theGame)
 {
    if(!isGhost())
       setScopeAlways();    // Always in scope!
    getGame()->mObjectsLoaded++;
 }
+
 
 bool Teleporter::processArguments(S32 argc, const char **argv)
 {
