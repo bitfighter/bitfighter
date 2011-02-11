@@ -1451,7 +1451,7 @@ void ConfigDirectories::resolveDirs()
 }
 
 
-static bool assignifexists(const string &path)
+static bool assignIfExists(const string &path)
 {
    if(fileExists(path))
    {
@@ -1500,20 +1500,20 @@ static bool assignifexists(const string &path)
 static void doResolveLevelDir(const string &rootDataDir, const string &levelDir, const string &iniLevelDir)
 {
    if(levelDir != "")
-      if(assignifexists(levelDir))
+      if(assignIfExists(levelDir))
          return;
 
    if(rootDataDir != "")
    {
       if(levelDir != "")
       {
-         if(assignifexists(strictjoindir(rootDataDir, "levels", levelDir)))
+         if(assignIfExists(strictjoindir(rootDataDir, "levels", levelDir)))
             return;
-         else if(assignifexists(strictjoindir(rootDataDir, levelDir)))
+         else if(assignIfExists(strictjoindir(rootDataDir, levelDir)))
             return;
       }
 
-      if(assignifexists(strictjoindir(rootDataDir, "levels")))
+      if(assignIfExists(strictjoindir(rootDataDir, "levels")))
          return;
    }
 
@@ -1522,15 +1522,15 @@ static void doResolveLevelDir(const string &rootDataDir, const string &levelDir,
    {
       if(levelDir != "")
       {
-         if(assignifexists(strictjoindir(iniLevelDir, levelDir)))
+         if(assignIfExists(strictjoindir(iniLevelDir, levelDir)))
             return;
       }
 
-      if(assignifexists(iniLevelDir))
+      if(assignIfExists(iniLevelDir))
          return;
    }
 
-   if(assignifexists("levels"))
+   if(assignIfExists("levels"))
       return;
 
    gConfigDirs.levelDir = "";    // Surrender
