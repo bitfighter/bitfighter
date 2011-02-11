@@ -76,15 +76,14 @@ protected:
    // Read a series of points from a command line, and add them to a Vector of points
    void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
    {
+      Point p;
       for(S32 i = firstCoord; i < argc; i += 2)
       {
          // Put a cap on the number of vertices in a polygon
          if(mPolyBounds.size() >= gMaxPolygonPoints)      // || argc == i + 1 might be needed...
             break;
 
-         Point p;
-         p.x = (F32) atof(argv[i]) * gridSize;
-         p.y = (F32) atof(argv[i+1]) * gridSize;
+         p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
          mPolyBounds.push_back(p);
       }
 
