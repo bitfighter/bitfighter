@@ -1616,12 +1616,14 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    else if(words[0] == "dzones")
    {
        mDebugShowMeshZones = !mDebugShowMeshZones;
-       if(!gServerGame) displayErrorMessage("!!! Zones can only be displayed on a local host");
+       if(!gServerGame) 
+          displayErrorMessage("!!! Zones can only be displayed on a local host");
    }
    else if(words[0] == "drobot")
    {
        showDebugBots = !showDebugBots;
-       if(!gServerGame) displayErrorMessage("!!! d-robot can only be displayed on a local host");
+       if(!gServerGame) 
+          displayErrorMessage("!!! Robots can only be shown on a local host");
    }
    else if(words[0] == "svol")      // SFX volume
       setVolume(SfxVolumeType, words);
