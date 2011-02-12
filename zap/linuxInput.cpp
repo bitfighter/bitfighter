@@ -69,7 +69,8 @@ const int MAX_JOYPADS = 8;
 padData joyPads[MAX_JOYPADS];
 
 extern U32 gUseStickNumber;
-extern U32 gSticksFound;
+extern Vector<string> gJoystickNames;
+U32 gSticksFound;
 
 #endif
 
@@ -98,6 +99,9 @@ void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
 void InitJoystick()
 {
 #ifndef ZAP_DEDICATED
+ if(gJoystickInit)
+    ShutdownJoystick();
+
  char chr1[15] = "/dev/input/js0";
  gSticksFound = 0;
  for(int i = 0; i < MAX_JOYPADS; i++)
@@ -121,7 +125,13 @@ void InitJoystick()
       joyPads[gSticksFound].changed = false;
       for (int i=0;i<MAX_AXIS;i++) {joyPads[gSticksFound].aPos[i]=0;}
       for (int i=0;i<MAX_BUTTON;i++) {joyPads[gSticksFound].bPos[i]=0;}
-      if(joyPads[gSticksFound].axisCount != 0 || joyPads[gSticksFound].buttonCount != 0) gSticksFound++;
+      if(joyPads[gSticksFound].axisCount != 0 || joyPads[gSticksFound].buttonCount != 0)
+      {
+         gJoystickNames.push_back(joyPads[useStick].devName);
+         gSticksFound++;
+      }
+      else
+         close(joyPads[useStick].fd);
    }
  }
  //logprintf("Found %i joysticks", gSticksFound);
@@ -213,6 +223,8 @@ void ShutdownJoystick()
     if(joyPads[i].fd != 0) close(joyPads[i].fd);
   }
   gSticksFound = 0;
+  gJoystickNames.clear();
+  gJoystickInit = false;
 #endif
 }
 
