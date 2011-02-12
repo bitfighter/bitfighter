@@ -27,6 +27,7 @@
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
 
+#include <stdio.h>
 #include <stdarg.h>        // For va_args
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
