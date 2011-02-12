@@ -306,9 +306,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
    {
 
 #ifdef BF_WRITE_TO_MYSQL
-      if(mMySql)
+      Connection conn;  // create Connection HERE, so it won't be destroyed later on causing errors.
+      if(mMySql)                                          // Connect to the database
       {
-         Connection conn;                                 // Connect to the database
          conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
          getServerFromCache(gameStats);
          query = new Query(&conn);
