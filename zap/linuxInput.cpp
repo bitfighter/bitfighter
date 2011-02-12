@@ -127,11 +127,11 @@ void InitJoystick()
       for (int i=0;i<MAX_BUTTON;i++) {joyPads[gSticksFound].bPos[i]=0;}
       if(joyPads[gSticksFound].axisCount != 0 || joyPads[gSticksFound].buttonCount != 0)
       {
-         gJoystickNames.push_back(joyPads[useStick].devName);
+         gJoystickNames.push_back(joyPads[gSticksFound].devName);
          gSticksFound++;
       }
       else
-         close(joyPads[useStick].fd);
+         close(joyPads[gSticksFound].fd);
    }
  }
  //logprintf("Found %i joysticks", gSticksFound);
