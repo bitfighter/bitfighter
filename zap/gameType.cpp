@@ -2591,41 +2591,90 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "addbot"))
    {
+	   if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
+		   clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server doesn't have robot script");
+	   
+	   else if(!clientRef->clientConnection->isLevelChanger())
+		   clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
+	   
+	   else
+	   {
+		   Robot *robot = new Robot();
+		   robot->addToGame(getGame());
+		   S32 args_count = 0;
+		   const char *args_char[128];  // Convert to a format processArgs will allow
+		   
+		   // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
+		   for(S32 i = 0; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
+		   {
+			   args_char[i] = args[i].getString();
+			   args_count++;
+		   }
+		   
+		   robot->processArguments(args_count, args_char);
+		   
+		   if(robot->isRunningScript && !robot->startLua())
+			   robot->isRunningScript = false;
+		   
+		   if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
+			   gServerGame->buildOrLoadBotMeshZones();
+		   
+		   StringTableEntry msg = StringTableEntry("Robot added by %e0");
+		   Vector<StringTableEntry> e;
+		   e.push_back(clientRef->clientConnection->getClientName());
+		   for(S32 i = 0; i < mClientList.size(); i++)
+			   mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+	   }
+   }
+	/* Experimental command
+   else if(!stricmp(cmd, "addbots"))
+   {
       if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
 
       else if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
 
-      else
+	  else if (atoi(args[0].getString()) <= 0)
+		  clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid bot count");
+	  else
       {
-         Robot *robot = new Robot();
-         robot->addToGame(getGame());
+		 
+        
          S32 args_count = 0;
          const char *args_char[128];  // Convert to a format processArgs will allow
 
          // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-         for(S32 i = 0; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
+         for(S32 i = 1; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
          {
             args_char[i] = args[i].getString();
             args_count++;
          }
+		  
+		 S32 bots = atoi(args[0].getString());
+		 for (S32 i = 0; i < bots; i++)
+		 {
+			 Robot *robot = new Robot();
+			 robot->addToGame(getGame());
 
-         robot->processArguments(args_count, args_char);
+			 robot->processArguments(args_count, args_char);
 
-         if(robot->isRunningScript && !robot->startLua())
-            robot->isRunningScript = false;
+			 if(robot->isRunningScript && !robot->startLua())
+				 robot->isRunningScript = false;
+			 
 
-         if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
-            gServerGame->buildOrLoadBotMeshZones();
+		 }
+		if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
+			gServerGame->buildOrLoadBotMeshZones();
 
-         StringTableEntry msg = StringTableEntry("Robot added by %e0");
+         StringTableEntry msg = StringTableEntry(itos(10) + "robots added by %e0");
          Vector<StringTableEntry> e;
-         e.push_back(clientRef->clientConnection->getClientName());
+		  e.push_back(clientRef->clientConnection->getClientName());
          for(S32 i = 0; i < mClientList.size(); i++)
             mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
       }
    }
+	*/
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
       if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
