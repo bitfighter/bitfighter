@@ -816,9 +816,7 @@ void GameType::renderTimeLeft()
    glColor3f(1,1,1);
 
    if(mGameTimer.getPeriod() == 0)
-   {
       UserInterface::drawString(x, y, size, "Unlim.");
-   }
    else
    {
       U32 minsRemaining = timeLeft / (60000);
