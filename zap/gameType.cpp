@@ -2134,8 +2134,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
    if(!source->isLevelChanger())                         // Level changers and above
       return;
 
-   mGameTimer.reset(mGameTimer.getCurrent() + time);     // Increment "official time"
-   s2cSetTimeRemaining(mGameTimer.getCurrent());         // Broadcast time to clients
+   mGameTimer.extend(time);                         // Increase "official time"
+   s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
 
    static StringTableEntry msg("%e0 has extended the game");
    Vector<StringTableEntry> e;
@@ -2522,15 +2522,12 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
-
 // Runs the server side commands, which the client may or may not know about
 
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
 // When adding new commands, please update GameUserInterface::populateChatCmdList() and also the help screen (UIInstructions.cpp)
 void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args)
 {
-   //if(!stricmp(cmd, ""))  return;     // removed, it will not cause any errors, we simply not going to find "" command
-
    if(!stricmp(cmd, "settime"))
    {
       if(!clientRef->clientConnection->isLevelChanger())
@@ -2539,12 +2536,14 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter time in minutes");
       else
       {
-         F32 time = atof(args[0].getString());
+         U32 time = (U32)(60 * 1000 * atof(args[0].getString()));
+
          if(time < 0 || time == 0 && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
          else
          {
-            mGameTimer.reset((U32)(60 * 1000 * time));       // Change "official time"
+            // We want to preserve the actual, overall time of the game in mGameTimer's period
+            mGameTimer.extend(S32(time - mGameTimer.getCurrent()));
 
             s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
 

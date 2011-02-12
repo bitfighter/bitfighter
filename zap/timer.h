@@ -28,6 +28,11 @@
 
 #include "../tnl/tnlTypes.h"
 
+#ifndef ABS
+#define ABS(x) (((x) > 0) ? (x) : -(x))
+#endif
+
+
 using namespace TNL;
 
 namespace Zap
@@ -68,9 +73,14 @@ public:
    void setPeriod(U32 period) { mPeriod = period; }
    U32 getPeriod() { return mPeriod; }
    void reset() { mCurrentCounter = mPeriod; }     // Start timer over, using last time set
-   void extend(U32 time) { mPeriod += time; mCurrentCounter += time; }     // Add time to timer while preserving period duration
-   void shorten(U32 time) { mPeriod         = mPeriod         > time ? mPeriod - time         : 0; 
-                            mCurrentCounter = mCurrentCounter > time ? mCurrentCounter - time : 0; }
+
+   // Extend will add or remove time from the timer in a way that preserves overall timer duration
+   void extend(S32 time) { 
+      U32 U32time = U32(ABS(time));
+      if(time > 0) { mPeriod += U32time; mCurrentCounter += U32time; } 
+      else { mPeriod         = mPeriod         > U32time ? mPeriod - U32time         : 0; 
+             mCurrentCounter = mCurrentCounter > U32time ? mCurrentCounter - U32time : 0; }
+   }
 
    void reset(U32 newCounter, U32 newPeriod = 0)   // Start timer over, setting timer to the time specified
    {
