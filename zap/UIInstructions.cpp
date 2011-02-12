@@ -618,6 +618,7 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/svol <0-10>", "Set SFX volume" },
    { "/vvol <0-10>", "Set voice chat volume" },
    { NULL, NULL },      // End of list
+
 },{
    { "/add <time in minutes>", "Add time to the current game" },
    { "/next", "Start next level" },
@@ -626,12 +627,11 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/settime <time in minutes>", "Set play time for the level" },
    { "/setscore <score>", "Set score to win the level" },
    { "-", NULL },       // Horiz. line
-   { "/addbot [team] [file]", "Add a bot from [file].bot, extra args go to the bot"},
+   { "/addbot [team] [file] [args]", "Add a bot from [file] to [team], pass [args] to bot"},
    { "/kickbot", "Kick most recently added bot"},
    { "/kickbots", "Kick all bots"},
-
-
    { NULL, NULL },      // End of list
+
 }, {
    { "/kick <player name>",        "Kick a player from the game" },
    { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
@@ -641,8 +641,8 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/setservername <name>",      "Set server name" },
    { "/setserverdescr <descr>",    "Set server description" },
    { "/deletecurrentlevel",        "Remove current level from server" },
-
    { NULL, NULL },      // End of list
+
 }, {
    { "/dcoords", "Show ship coordinates" },
    { "/dzones", "Show bot nav mesh zones" },
@@ -652,7 +652,6 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/linewidth <number>", "Default = 2, Changes width of all lines" },
    { "/linesmooth", "Enable line smoothing, might look better" },
    { "/maxfps <number>", "Set maximum speed of game in frames per second" },
-   
    { NULL, NULL },      // End of list
    } };
 
