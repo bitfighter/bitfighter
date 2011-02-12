@@ -174,7 +174,7 @@ namespace Types
       val->deaths = readU16(s);
       val->suicides = readU16(s);
       val->switchedTeamCount = readU8(s);
-      val->switchedTeams = (val->switchedTeamCount != 0);
+      //val->switchedTeams = (val->switchedTeamCount != 0);
       val->isRobot = s.readFlag();
       val->isAdmin = s.readFlag();
       val->isLevelChanger = s.readFlag();

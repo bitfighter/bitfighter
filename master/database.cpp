@@ -170,7 +170,7 @@ static string insertStatsPlayer(Query *query, sqlite3 *sqliteDb, const PlayerSta
                                  btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
                                  itos(playerStats->deaths) + ", " +
-                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
+                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeamCount != 0) + ");";
 
    string playerId = runQuery(query, sqliteDb, sql);
 
