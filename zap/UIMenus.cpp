@@ -778,6 +778,7 @@ static string getVolMsg(F32 volume)
    return msg;
 }
 
+
 //////////
 // Callbacks for Options menu
 static void setSFXVolumeCallback(U32 vol)
@@ -815,11 +816,41 @@ static void setControllerCallback(U32 jsType)
    gIniSettings.joystickType = jsType;
 }
 
+
+static void addStickOptions(Vector<string> *opts)
+{
+   opts->clear();
+   opts->push_back("KEYBOARD");
+   
+   for(U32 i = 0; i < gSticksFound; i++)
+      opts->push_back(string("JOYSTICK ") + itos(i+1));
+}
+
+
 static void setInputModeCallback(U32 val)
 {
+   U32 sticks = gSticksFound;
+   InitJoystick();      // Will allow people to plug in joystick while in this menu...
+
+   if(sticks != gSticksFound)
+   {
+      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[2]);
+
+      if(menuItem)
+         addStickOptions(&menuItem->mOptions);
+
+      if(val > gSticksFound)
+      {
+         val = 0;
+         menuItem->setValueIndex(0);
+      }
+   }
+
    gIniSettings.inputMode = (val == 0) ? Keyboard : Joystick;
-   if(val >= 1) gUseStickNumber = val;
+   if(val >= 1) 
+      gUseStickNumber = val;
 }
+
 
 static void setVoiceEchoCallback(U32 val)
 {
@@ -851,10 +882,10 @@ void OptionsMenuUserInterface::setupMenus()
 
    menuItems.push_back(getWindowModeMenuItem());
 
-   opts.clear();
-   opts.push_back("KEYBOARD");
-   for(U32 i = 0; i < gSticksFound; i++)
-      opts.push_back(string("JOYSTICK ") + itos(i+1));
+   InitJoystick();   // Refresh joystick list
+
+   addStickOptions(&opts);
+
    menuItems.push_back(new ToggleMenuItem("PRIMARY INPUT:", opts, gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, true, 
                        setInputModeCallback, "Specify whether you want to play with your keyboard or joystick",    KEY_P, KEY_I));
 

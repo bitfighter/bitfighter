@@ -124,7 +124,6 @@ class ToggleMenuItem : public MenuItem
 protected:
    string mValue;
    U32 mIndex;
-   Vector<string> mOptions;
    bool mWrap;
 
 public:
@@ -142,12 +141,14 @@ public:
    virtual string getValueForDisplayingInMenu() { return mValue; }
    virtual const char *getSpecialEditingInstructions() { return "Use [<-] and [->] keys to change value."; }
    virtual S32 getValueIndex() { return mIndex; }
+   virtual void setValueIndex(U32 index) { mIndex = index; }
 
    virtual void render(S32 ypos, S32 textsize, bool isSelected);
    virtual bool handleKey(KeyCode keyCode, char ascii);
 
    virtual void activatedWithShortcutKey() { /* Do nothing */ }
 
+   Vector<string> mOptions;
 };
 
 
