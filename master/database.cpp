@@ -170,7 +170,7 @@ static string insertStatsPlayer(Query *query, sqlite3 *sqliteDb, const PlayerSta
                                  btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
                                  itos(playerStats->deaths) + ", " +
-                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeams) + ");";
+                                 itos(playerStats->suicides) + ", " + btos(playerStats->switchedTeamCount != 0) + ");";
 
    string playerId = runQuery(query, sqliteDb, sql);
 
@@ -306,9 +306,9 @@ void DatabaseWriter::insertStats(const GameStats &gameStats)
    {
 
 #ifdef BF_WRITE_TO_MYSQL
-      if(mMySql)
+      Connection conn;  // create Connection HERE, so it won't be destroyed later on causing errors.
+      if(mMySql)                                          // Connect to the database
       {
-         Connection conn;                                 // Connect to the database
          conn.connect(mDb, mServer, mUser, mPassword);    // Will throw error if it fails
          getServerFromCache(gameStats);
          query = new Query(&conn);

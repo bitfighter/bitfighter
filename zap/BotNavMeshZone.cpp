@@ -348,8 +348,15 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
    {
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);     
       if(zone)
-         return zone;
+      {
+         if(PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
+            return zone;   // Make sure point is inside the polygon
+
+      }
    }
+
+   if(zones.size() != 0)  // in case of point was close to polygon, but not inside the zone?
+      return dynamic_cast<BotNavMeshZone *>(zones[0]);
 
    return NULL;
 }
@@ -425,7 +432,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 		{
          BotNavMeshZone *destZone = findZoneContainingPoint(teleporter->mDest[j]);
 
-			if(origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+			if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
 			{
 				// Teleporter is one way path
 				neighbor.zoneID = destZone->mZoneID;

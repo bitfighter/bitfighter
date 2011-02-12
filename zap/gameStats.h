@@ -58,7 +58,7 @@ struct PlayerStats
    S32 kills;
    S32 deaths;
    S32 suicides;
-   bool switchedTeams;
+   //bool switchedTeams;
    S32 switchedTeamCount;
    Vector<WeaponStats> weaponStats;
 
