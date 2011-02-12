@@ -92,14 +92,12 @@ BOOL CALLBACK EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance, VOID*
 LPDIRECTINPUT8 gDirectInput = NULL;
 LPDIRECTINPUTDEVICE8 gJoystick[32];
 extern U32 gUseStickNumber;
-extern U32 gSticksFound;
 
-extern const S32 gJoystickNameLength;
-extern char gJoystickName[gJoystickNameLength];
+extern Vector<string> gJoystickNames;
 
 void InitJoystick()
 {
-   gSticksFound = 0;
+   gJoystickNames.clear();
    if(FAILED(DirectInput8Create ( GetModuleHandle(NULL), DIRECTINPUT_VERSION,
          IID_IDirectInput8, (VOID**)&gDirectInput, NULL ) ) )
       return;
@@ -108,13 +106,8 @@ void InitJoystick()
          NULL, DIEDFL_ATTACHEDONLY ) ) )
       return;
 
-   if(gSticksFound == 0)
-      return;
-}
-
-const char *GetJoystickName()
-{
-   return gJoystickName;
+   if(gUseStickNumber > (U32)gJoystickNames.size())
+      gUseStickNumber = (U32)gJoystickNames.size();
 }
 
 
@@ -122,17 +115,18 @@ BOOL CALLBACK EnumJoysticksCallback( const DIDEVICEINSTANCE* pdidInstance,
                                      VOID* pContext )
 {
    // Obtain an interface to the enumerated joystick.
-   if(FAILED(gDirectInput->CreateDevice( pdidInstance->guidInstance, &gJoystick[gSticksFound], NULL )))
+   if(FAILED(gDirectInput->CreateDevice( pdidInstance->guidInstance, &gJoystick[gJoystickNames.size()], NULL )))
       return DIENUM_CONTINUE;
-   strcpy(gJoystickName, pdidInstance->tszProductName);
-   logprintf("Joystick found: %s", gJoystickName);
-   if( FAILED(gJoystick[gSticksFound]->SetDataFormat( &c_dfDIJoystick2 ) ) )
+   
+   logprintf("Joystick %d found: %s", gJoystickNames.size(), pdidInstance->tszProductName);
+   if( FAILED(gJoystick[gJoystickNames.size()]->SetDataFormat( &c_dfDIJoystick2 ) ) )
    {
       logprintf("Joystick fail to SetDataFormat");
       return DIENUM_CONTINUE;
    }
 
-   gSticksFound++;
+   gJoystickNames.push_back(pdidInstance->tszProductName);
+
    return DIENUM_CONTINUE;  // DIENUM_CONTINUE will find both multiple joysticks...  DIENUM_STOP will not.
 }
 
@@ -146,7 +140,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 
    U32 useStickNumber = gUseStickNumber - 1;  // first joystick is zero.
 
-   if(useStickNumber >= gSticksFound)  // out of range
+   if(useStickNumber >= (U32)gJoystickNames.size())  // out of range
       return false;
 
    if(FAILED(gJoystick[useStickNumber]->Poll() ) )
@@ -224,7 +218,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
 
 void ShutdownJoystick()
 {
-   for(U32 i=0; i<gSticksFound; i++)
+   for(S32 i = 0; i < gJoystickNames.size(); i++)
    {
       // Unacquire the device one last time just in case
       // the app tried to exit while the device is still acquired.
@@ -235,7 +229,7 @@ void ShutdownJoystick()
       if(gJoystick[i])
          gJoystick[i]->Release();
    }
-   gSticksFound = 0;
+   gJoystickNames.clear();
 
    if(gDirectInput)
       gDirectInput->Release();

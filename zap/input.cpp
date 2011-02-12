@@ -724,6 +724,9 @@ void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 o
 
 ////////// End rendering functions
 
+extern Vector<string> gJoystickNames;
+extern U32 gUseStickNumber;
+
 ControllerTypeType autodetectJoystickType()
 {
    S32 ret = UnknownController;
@@ -733,32 +736,44 @@ ControllerTypeType autodetectJoystickType()
       return (ControllerTypeType) ret;
       )
 
-   const char *joystickName = GetJoystickName();
+   if(gUseStickNumber > 0)
+   {
+      if(gJoystickNames[gUseStickNumber - 1] == "WingMan")
+         ret = LogitechWingman;
 
-   if(!strncmp(joystickName, "WingMan", 7))
-      ret = LogitechWingman;
-   else if(!strcmp(joystickName, "XBoxOnXBox"))
-      ret = XBoxControllerOnXBox;
-   // Note that on the only XBox controller I've used on windows, the autodetect string was simply:
-   // "Controller (XBOX 360 For Windows)".  I don't know if there are other variations out there.
-   else if(strstr(joystickName, "XBOX") || strstr(joystickName, "XBox"))
-      ret = XBoxController;
-   else if(!strcmp(joystickName, "4 axis 16 button joystick"))
-      ret = PS2DualShock;                                         // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
-   else if(!strcmp(joystickName, "PC Conversion Cable"))
-      ret = PS2DualShockConversionCable;                          // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
-   else if(strstr(joystickName, "P880"))
-      ret = SaitekDualAnalogP880;
-   else if(strstr(joystickName, "Dual Analog Rumble Pad"))
-      ret = SaitekDualAnalogRumblePad;
-   else if(strstr(joystickName, "Logitech Dual Action"))
-      ret = LogitechDualAction;
-   else if(strstr(joystickName, "USB Joystick"))
-      ret = GenericController;
-   else if(strcmp(joystickName, ""))      // Anything else -- joystick present but unknown
-      ret = UnknownController;
-   else
-      ret = NoController;
+      else if(gJoystickNames[gUseStickNumber - 1] == "XBoxOnXBox")
+         ret = XBoxControllerOnXBox;
+
+      // Note that on the only XBox controller I've used on windows, the autodetect string was simply:
+      // "Controller (XBOX 360 For Windows)".  I don't know if there are other variations out there.
+      else if(gJoystickNames[gUseStickNumber - 1].find("XBOX") != string::npos || 
+              gJoystickNames[gUseStickNumber - 1].find("XBox") != string::npos)
+         ret = XBoxController;
+
+      else if(gJoystickNames[gUseStickNumber - 1] == "4 axis 16 button joystick")
+         ret = PS2DualShock;                                         // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
+
+      else if(gJoystickNames[gUseStickNumber - 1] == "PC Conversion Cable")
+         ret = PS2DualShockConversionCable;                          // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
+
+      else if(gJoystickNames[gUseStickNumber - 1] == "P880")
+         ret = SaitekDualAnalogP880;
+
+      else if(gJoystickNames[gUseStickNumber - 1] == "Dual Analog Rumble Pad")
+         ret = SaitekDualAnalogRumblePad;
+
+      else if(gJoystickNames[gUseStickNumber - 1].find("Logitech Dual Action") != string::npos)
+         ret = LogitechDualAction;
+
+      else if(gJoystickNames[gUseStickNumber - 1].find("USB Joystick") != string::npos)
+         ret = GenericController;
+
+      else if(gJoystickNames[gUseStickNumber - 1] == "")      // Anything else -- joystick present but unknown
+         ret = UnknownController;
+
+      else     // Not sure this can ever happen
+         ret = NoController;
+   }
 
    TNL_JOURNAL_WRITE_BLOCK(JoystickAutodetect,
       TNL_JOURNAL_WRITE((ret));

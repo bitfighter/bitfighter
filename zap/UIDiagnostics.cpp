@@ -287,33 +287,15 @@ static S32 showMasterBlock(S32 textsize, S32 ypos, S32 gap, bool leftcol)
 
 
 extern ClientGame *gClientGame;
-extern const S32 gJoystickNameLength;
-extern char gJoystickName[gJoystickNameLength];
+extern Vector<string> gJoystickNames;
 extern ControllerTypeType gAutoDetectedJoystickType;
-extern U32 gSticksFound;
+extern U32 gUseStickNumber;
 extern string gLevelDir;
 extern string gPlayerPassword;
 extern ClientInfo gClientInfo;
 
 void DiagnosticUserInterface::render()
 {
-   /*
-   if (prevUIs.size())           // If there is an underlying menu...
-   {
-      prevUIs.last()->render();  // ...render it...
-
-      glColor4f(0, 0, 0, 0.75);  // ... and dim it out a bit, nay, a lot
-      glEnable(GL_BLEND);
-         glBegin(GL_POLYGON);
-            glVertex2f(0, 0);
-            glVertex2f(canvasWidth, 0);
-            glVertex2f(canvasWidth, canvasHeight);
-            glVertex2f(0, canvasHeight);
-         glEnd();
-      glDisable(GL_BLEND);
-   }
-   */
-
    // Draw title, subtitle, and footer
    glColor3f(1,0,0);
    drawStringf(3, 3, 25, "DIAGNOSTICS - %s", pageHeaders[mCurPage]);
@@ -328,24 +310,26 @@ void DiagnosticUserInterface::render()
       glVertex2f(800, 569);
    glEnd();
 
-   const S32 ts = 14;
+   S32 textsize = 14;
 
    if(mCurPage == 0)
    {
+      string inputMode = gIniSettings.getInputMode();
+
       glColor3f(1,0,0);
       drawCenteredString(vertMargin + 37, 18, "Is something wrong?");
 
       S32 x;
-      x = getCenteredStringStartingPosf(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently %s]",            
-                                        gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
+      x = getCenteredStringStartingPosf(textsize, "Can't control your ship? Check your input mode "
+                                                  "(Options>Primary Input) [currently %s]", inputMode.c_str());
       glColor3f(0,1,0);
-      drawString(x, vertMargin + 63, ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
-      x += getStringWidth(ts, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
+      x += drawStringAndGetWidth(x, vertMargin + 63, textsize, "Can't control your ship? Check your input mode (Options>Primary Input) [currently ");
+
       glColor3f(1,0,0);
-      drawString(x, vertMargin + 63, ts, gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
-      x += getStringWidth(ts, gIniSettings.inputMode == Keyboard ? "Keyboard" : "Joystick");
+      x += drawStringAndGetWidthf(x, vertMargin + 63, textsize, "%s", inputMode.c_str());
+
       glColor3f(0,1,0);
-      drawString(x, vertMargin + 63, ts, "]");
+      drawString(x, vertMargin + 63, textsize, "]");
 
       // Box around something wrong? block
       glColor3f(0,1,1);
@@ -366,7 +350,7 @@ void DiagnosticUserInterface::render()
 
       glColor3f(1,1,1);
 
-      S32 textsize = 16;
+      textsize = 16;
 
       drawCenteredString2Colf(ypos, textsize, false, "%s", gMainMenuUserInterface.getNeedToUpgrade() ? 
                                                            "<<Update available>>" : "<<Current version>>");
@@ -383,12 +367,17 @@ void DiagnosticUserInterface::render()
       showMasterBlock(textsize, ypos, gap, false);
 
       ypos += textsize + gap;
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Input Mode:", "%s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+      drawCenteredStringPair2Colf(ypos, textsize, true, "Input Mode:", "%s", inputMode.c_str());
+  
       ypos += textsize + gap;
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Curr. Joystick:", "%s", joystickTypeToString(gIniSettings.joystickType).c_str());
+      
+      S32 index = gUseStickNumber == 0 ? 1 : gUseStickNumber - 1;
 
-      ypos += textsize + gap;
-      drawCenteredStringPair2Colf(ypos, textsize, true, "Autodetect Str.:", "%s", strcmp(gJoystickName,"") ? gJoystickName : "<None>");
+      if(gJoystickNames.size() == 0)
+         drawCenteredString2Col(ypos, textsize, true, "No joysticks detected");
+      else
+         drawCenteredStringPair2Colf(ypos, textsize, true, "Autodetect Str.:", "%s", 
+                                     gJoystickNames[index] == "" ? gJoystickNames[index].c_str() : "<None>");
 
       ypos += textsize + gap;
       ypos += textsize + gap;
@@ -410,7 +399,7 @@ void DiagnosticUserInterface::render()
       glColor3f(1, 0, 1);
       ypos += textsize + gap;
       hpos = horizMargin;
-      hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", gSticksFound);
+      hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", gUseStickNumber);
 
       for(S32 i = 0; i < MaxJoystickButtons; i++)
          if(gRawJoystickButtonInputs & (1 << i))

@@ -357,7 +357,8 @@ string MasterServerConnection::getMasterName()
    return mMasterName;
 }
 
-extern char gJoystickName[260];     // 260 should be MAX_PATH from windef.h...
+
+extern Vector<string> gJoystickNames;
 
 // Send a connection request to the master server.  Also, tell them a little about ourselves.
 // Note that most of these parameters are completely bogus...  but even if they're not currently used, we gotta send something.
@@ -370,7 +371,9 @@ void MasterServerConnection::writeConnectRequest(BitStream *bstream)
    bstream->write(MASTER_PROTOCOL_VERSION);  // Version of the protocol we'll be using to communicate with the master
    bstream->write(CS_PROTOCOL_VERSION);      // Version of the Client-Server protocol we use (can only play with others using same version)
    bstream->write(BUILD_VERSION);            // Current build of this game
-   bstream->writeString(gJoystickName);      // Controller's autodetect string (for research purposes!)
+
+   // First controller's autodetect string (for research purposes!)
+   bstream->writeString(gJoystickNames.size() > 0 ? gJoystickNames[0].c_str() : "");  
 
 
    if(bstream->writeFlag(mIsGameServer))     // We're a server, tell the master a little about us

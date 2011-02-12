@@ -49,7 +49,6 @@
 namespace Zap
 {
 extern U32 gUseStickNumber;
-extern U32 gSticksFound;
 
 
 // Sorts alphanumerically by menuItem.value
@@ -817,29 +816,31 @@ static void setControllerCallback(U32 jsType)
 }
 
 
+extern Vector<string> gJoystickNames;
+
 static void addStickOptions(Vector<string> *opts)
 {
    opts->clear();
    opts->push_back("KEYBOARD");
    
-   for(U32 i = 0; i < gSticksFound; i++)
+   for(S32 i = 0; i < gJoystickNames.size(); i++)
       opts->push_back(string("JOYSTICK ") + itos(i+1));
 }
 
 
 static void setInputModeCallback(U32 val)
 {
-   U32 sticks = gSticksFound;
+   S32 sticks = gJoystickNames.size();
    InitJoystick();      // Will allow people to plug in joystick while in this menu...
 
-   if(sticks != gSticksFound)
+   if(sticks != gJoystickNames.size())
    {
       ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[2]);
 
       if(menuItem)
          addStickOptions(&menuItem->mOptions);
 
-      if(val > gSticksFound)
+      if(val > (U32)gJoystickNames.size())
       {
          val = 0;
          menuItem->setValueIndex(0);

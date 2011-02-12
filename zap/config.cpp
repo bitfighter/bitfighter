@@ -1654,6 +1654,21 @@ string ConfigDirectories::findBotFile(const string &filename)           // stati
 }
 
 
+////////////////////////////////////////
+////////////////////////////////////////
+
+extern U32 gUseStickNumber;
+
+// Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
+string IniSettings::getInputMode()
+{
+   if(gIniSettings.inputMode == Joystick)
+      return "Joystick " + itos(gUseStickNumber);
+   else
+      return "Keyboard";
+}
+
+
 };
 
 

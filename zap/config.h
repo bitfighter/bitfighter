@@ -226,6 +226,7 @@ struct IniSettings      // With defaults specified
    string mySqlStatsDatabasePassword;
 
    string defaultRobotScript;
+   string getInputMode();        // Returns display-friendly mode designator like "Keyboard" or "Joystick 1"
 
    Vector<StringTableEntry> levelList;
 

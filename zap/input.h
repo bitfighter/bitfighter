@@ -37,8 +37,6 @@ using namespace std;
 namespace Zap
 {
 
-const S32 gJoystickNameLength = 260;   // Needs to be 260 in windows, 255 in OSX (or does it?) --> we'll use the bigger of the two here
-
 enum ControllerTypeType
 {
    LogitechWingman,
@@ -85,7 +83,6 @@ const U32 ControllerButtonDPadRight = 1 << 13;
 void getModifierState( bool &shiftDown, bool &controlDown, bool &altDown );
 
 void InitJoystick();
-const char *GetJoystickName();
 ControllerTypeType autodetectJoystickType();
 void ShutdownJoystick();
 bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask);

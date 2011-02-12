@@ -1817,7 +1817,7 @@ void GameUserInterface::populateChatCmdList()
    // commands that runs in game server, in processServerCommand
    mChatCmds.push_back("/settime");
    mChatCmds.push_back("/setscore");
-   mChatCmds.push_back("/showBots");
+   mChatCmds.push_back("/showbots");
 
    // Administrative commands
    mChatCmds.push_back("/kick");
