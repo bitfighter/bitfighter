@@ -69,6 +69,8 @@ public:
    U32 getPeriod() { return mPeriod; }
    void reset() { mCurrentCounter = mPeriod; }     // Start timer over, using last time set
    void extend(U32 time) { mPeriod += time; mCurrentCounter += time; }     // Add time to timer while preserving period duration
+   void shorten(U32 time) { mPeriod         = mPeriod         > time ? mPeriod - time         : 0; 
+                            mCurrentCounter = mCurrentCounter > time ? mCurrentCounter - time : 0; }
 
    void reset(U32 newCounter, U32 newPeriod = 0)   // Start timer over, setting timer to the time specified
    {
