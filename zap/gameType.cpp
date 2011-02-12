@@ -1979,6 +1979,7 @@ void GameType::updateRatings()
       conn->mGamesPlayed++;
       conn->mScore = 0;
       conn->mTotalScore = 0;
+      conn->mStatistics.resetStatistics();
    }
 }
 
