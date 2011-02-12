@@ -78,6 +78,8 @@ public:
 
    Vector<U16> getShotsVector();
    Vector<U16> getHitsVector();
+
+   void resetStatistics();   // Reset Player Statistics (used at end of match)
 };
 
 };

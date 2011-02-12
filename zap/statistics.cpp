@@ -168,6 +168,19 @@ U16 Statistics::getFratricides()
    return mFratricides;
 }
 
+void Statistics::resetStatistics()
+{
+   mKills = 0;
+   mDeaths = 0;
+   mSuicides = 0;
+   mFratricides = 0;
+
+   for(S32 i = 0; i < WeaponCount; i++)
+   {
+      mShots[i] = 0;
+      mHits[i] = 0;
+   }
+}
 
 }
 

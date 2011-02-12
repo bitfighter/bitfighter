@@ -353,8 +353,8 @@ void GameType::idle(GameObject::IdleCallPath path)
             updateClientScoreboard(mClientList[i]);
    }
 
-   // Periodically send time-remaining updates to the clients
-   if(mGameTimeUpdateTimer.update(deltaT))
+   // Periodically send time-remaining updates to the clients unless the game timer is at zero
+   if(mGameTimeUpdateTimer.update(deltaT) && mGameTimer.getCurrent() != 0)
    {
       mGameTimeUpdateTimer.reset();
       s2cSetTimeRemaining(mGameTimer.getCurrent());
@@ -1977,6 +1977,7 @@ void GameType::updateRatings()
       conn->mGamesPlayed++;
       conn->mScore = 0;
       conn->mTotalScore = 0;
+      conn->mStatistics.resetStatistics();
    }
 }
 
