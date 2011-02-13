@@ -125,7 +125,7 @@ bool BotNavMeshZone::processArguments(S32 argc, const char **argv)
       return false;
 
    processPolyBounds(argc, argv, 0, mGame->getGridSize());
-   computeExtent();  // Not needed?
+   computeExtent();  // Computes extent so we can insert this into the BotNavMesh object database
    mConvex = isConvex(mPolyBounds);
 
    return true;

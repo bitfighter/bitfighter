@@ -647,6 +647,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
 static void saveBotMeshZones(const char *filename)
 {
+   F32 gridSize = gServerGame->getGridSize();
+
    FILE *f = fopen(filename, "w");
    if(!f)
    {
@@ -663,7 +665,7 @@ static void saveBotMeshZones(const char *filename)
       s_fprintf(f, "%s", "BotNavMeshZone");
 
       for(S32 j = 0; j < pts.size(); j++)
-         s_fprintf(f, " %g %g ", pts[j].x, pts[j].y);
+         s_fprintf(f, " %g %g ", pts[j].x / gridSize, pts[j].y / gridSize);
 
       s_fprintf(f, "\n");
    }
