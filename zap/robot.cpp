@@ -915,7 +915,10 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
          // still see it, even though in some cases, the turning of the ship around a
          // protruding corner may make it technically not visible.  This will prevent
          // rapidfire recalcuation of the path when it's not really necessary.
-         if(first || thisRobot->canSeePoint(last))
+
+         // removed if(first) ... Problems with Robot get stuck after pushed from burst or mines.
+         // To save calculations, might want to avoid (thisRobot->canSeePoint(last))
+         if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), last))
          {
             dest = last;
             found = true;
