@@ -63,7 +63,6 @@
 #include "tnlNetInterface.h"
 
 #include <sys/stat.h>
-#include <direct.h>              // For mkdir
 
 using namespace TNL;
 
@@ -683,9 +682,7 @@ void ServerGame::buildOrLoadBotMeshZones()
 {
    string filename = joindir(gConfigDirs.cacheDir, mLevelFileHash + ".zones");
 
-   // Make sure directory exists, because it might not...
-   if(!fileExists(gConfigDirs.cacheDir))
-      mkdir(gConfigDirs.cacheDir.c_str());
+   makeSureFolderExists(gConfigDirs.cacheDir);
 
    if(!loadLevelFromFile(filename.c_str()))
    {
