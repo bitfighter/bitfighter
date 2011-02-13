@@ -68,9 +68,8 @@ struct padData {
 const int MAX_JOYPADS = 8;
 padData joyPads[MAX_JOYPADS];
 
-extern U32 gUseStickNumber;
 extern Vector<string> gJoystickNames;
-U32 gSticksFound = 0;
+extern U32 gUseStickNumber;
 
 #endif
 
@@ -104,7 +103,8 @@ void InitJoystick()
       ShutdownJoystick();
 
    char chr1[15] = "/dev/input/js0";
-   gSticksFound = 0;
+   U32 gSticksFound = 0;
+
    gJoystickNames.clear();
    for(int i = 0; i < MAX_JOYPADS; i++)
    {
@@ -125,8 +125,13 @@ void InitJoystick()
          //logprintf ("name : %s\n", joyPads[gSticksFound].devName);
          // set default values
          joyPads[gSticksFound].changed = false;
-         for (int i=0;i<MAX_AXIS;i++) {joyPads[gSticksFound].aPos[i]=0;}
-         for (int i=0;i<MAX_BUTTON;i++) {joyPads[gSticksFound].bPos[i]=0;}
+
+         for (U32 i = 0; i<MAX_AXIS; i++)
+            joyPads[gSticksFound].aPos[i]=0;
+
+         for (U32 i = 0; i<MAX_BUTTON; i++)
+            joyPads[gSticksFound].bPos[i]=0;
+
          if(joyPads[gSticksFound].axisCount != 0 || joyPads[gSticksFound].buttonCount != 0)
          {
             gJoystickNames.push_back(joyPads[gSticksFound].devName);
@@ -138,6 +143,9 @@ void InitJoystick()
    }
    logprintf("Found %i joysticks", gSticksFound);
    gJoystickInit = true;
+
+   if(gUseStickNumber > (U32)gJoystickNames.size())
+      gUseStickNumber = (U32)gJoystickNames.size();
 #endif
 }
 
@@ -147,51 +155,51 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
    if(! gJoystickInit)
       InitJoystick();
 
-   U32 useStick = gUseStickNumber - 1;
-   if(useStick >= gSticksFound)
+   U32 useStickNumber = gUseStickNumber - 1;
+   if(useStickNumber >= (U32)gJoystickNames.size())
       return false;
 
-   if(joyPads[useStick].fd == 0)
+   if(joyPads[useStickNumber].fd == 0)
       return false;
 
-   int result = read(joyPads[useStick].fd, &joyPads[useStick].ev, sizeof(joyPads[useStick].ev));
+   int result = read(joyPads[useStickNumber].fd, &joyPads[useStickNumber].ev, sizeof(joyPads[useStickNumber].ev));
    int loop1 = 0;
 
    while (result!=0 && loop1 < 100)
    {
       U32 num;
       loop1++;
-      switch (joyPads[useStick].ev.type)
+      switch (joyPads[useStickNumber].ev.type)
       {
       case JS_EVENT_INIT:
       case JS_EVENT_INIT | JS_EVENT_AXIS:
       case JS_EVENT_INIT | JS_EVENT_BUTTON:
       break;
       case JS_EVENT_AXIS:
-         num = joyPads[useStick].ev.number;
+         num = joyPads[useStickNumber].ev.number;
          if(num < MAX_AXIS)
-            joyPads[useStick].aPos[num] = joyPads[useStick].ev.value;
-         joyPads[useStick].changed = true;
+            joyPads[useStickNumber].aPos[num] = joyPads[useStickNumber].ev.value;
+         joyPads[useStickNumber].changed = true;
          break;
       case JS_EVENT_BUTTON:
-         joyPads[useStick].ev.number;
+         joyPads[useStickNumber].ev.number;
          if(num < MAX_BUTTON)
-            joyPads[useStick].bPos[num] = joyPads[useStick].ev.value;
-         joyPads[useStick].changed = true;
+            joyPads[useStickNumber].bPos[num] = joyPads[useStickNumber].ev.value;
+         joyPads[useStickNumber].changed = true;
          break;
       default:
          //logprintf ("Other event ? %d\nnumber=%d\nvalue=%d\n", pad1.ev.type,pad1.ev.number, pad1.ev.value);
          break;
       }
-      result = read(joyPads[useStick].fd, &joyPads[useStick].ev, sizeof(joyPads[useStick].ev));
+      result = read(joyPads[useStickNumber].fd, &joyPads[useStickNumber].ev, sizeof(joyPads[useStickNumber].ev));
    }
 
    buttonMask = 0;
-   for(S32 b=0; b<joyPads[useStick].buttonCount && b < MAX_BUTTON; b++)
-      buttonMask = buttonMask | ((joyPads[useStick].bPos[b] != 0 ? 1 : 0) << b);
+   for(U32 b=0; b<joyPads[useStickNumber].buttonCount && b < MAX_BUTTON; b++)
+      buttonMask = buttonMask | ((joyPads[useStickNumber].bPos[b] != 0 ? 1 : 0) << b);
 
-   for(S32 b=0; b<MaxJoystickAxes && b<MAX_AXIS; b++)
-      axes[b] = F32(joyPads[useStick].aPos[b])/32768; //convert to Float between -1.0 and 1.0
+   for(U32 b=0; b<MaxJoystickAxes && b<MAX_AXIS; b++)
+      axes[b] = F32(joyPads[useStickNumber].aPos[b])/32768; //convert to Float between -1.0 and 1.0
 
    hatMask = 0; //POV (d-pad) either get maps to 2 more axes (logitech dual action), or 4 more buttons?
 
@@ -207,11 +215,11 @@ const char *GetJoystickName()
    if(! gJoystickInit)
       InitJoystick();
 
-   U32 useStick = gUseStickNumber - 1;
-   if(useStick >= gSticksFound)
+   U32 useStickNumber = gUseStickNumber - 1;
+   if(useStickNumber >= (U32)gJoystickNames.size())
       return "";
 
-   return joyPads[useStick].devName;
+   return joyPads[useStickNumber].devName;
 #else
    return "";
 #endif
@@ -224,7 +232,7 @@ void ShutdownJoystick()
    {
       if(joyPads[i].fd != 0) close(joyPads[i].fd);
    }
-   gSticksFound = 0;
+
    gJoystickNames.clear();
    gJoystickInit = false;
 #endif
