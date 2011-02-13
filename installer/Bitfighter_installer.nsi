@@ -228,9 +228,6 @@ Section "Install"
   File /r ".\robots\*.bot" 
 
   
-  SetOutPath "$DOCUMENTS\Bitfighter\screenshots"
-  File ".\screenshots\readme.txt"
-  
   ;Insert datadir path into twoplayers.bat
   Push "@@ROOT_DATA_DIR@@" ; text to be replaced
   Push $\"$DOCUMENTS\Bitfighter$\"  ; replace with
@@ -278,6 +275,7 @@ Section "Uninstall"
   RMDir /r $INSTDIR\levels
   RMDir /r $INSTDIR\robots
   RMDir /r $INSTDIR\screenshots
+  RMDir /r $INSTDIR\cache
   RMDir /r $INSTDIR\lua
   RMDir /r $INSTDIR
   
