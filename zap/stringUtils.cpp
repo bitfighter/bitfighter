@@ -243,6 +243,7 @@ void s_fprintf(FILE *stream, const char *format, ...)
 }
 
 
+// Returns true if file or folder exists
 // Ok, not strictly a string util, but do we really want a fileutils just for this??
 bool fileExists(const string &path)
 {
