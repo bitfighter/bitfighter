@@ -69,7 +69,7 @@ CREATE TABLE stats_player (
   kill_count INTEGER  NOT NULL,
   death_count INTEGER  NOT NULL,
   suicide_count INTEGER  NOT NULL,
-  switched_team BOOL  NULL,
+  switched_team_count INTEGER  NULL,
   stats_team_id INTEGER NULL,
   insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY(stats_game_id) REFERENCES stats_game(stats_game_id),

@@ -165,7 +165,7 @@ static string insertStatsPlayer(Query *query, sqlite3 *sqliteDb, const PlayerSta
                                                "is_authenticated, is_robot, "
                                                "result, points, kill_count, "
                                                "death_count, "
-                                               "suicide_count, switched_team) "
+                                               "suicide_count, switched_team_count) "
                       "VALUES(" + gameId + ", " + teamId + ", '" + sanitize(playerStats->name) + "', " +
                                  btos(playerStats->isAuthenticated) + ", " + btos(playerStats->isRobot) + ", '" +
                                  playerStats->gameResult + "', " + itos(playerStats->points) + ", " + itos(playerStats->kills) + ", " + 
@@ -442,7 +442,7 @@ string DatabaseWriter::getSqliteSchema() {
       "  kill_count INTEGER  NOT NULL,"
       "  death_count INTEGER  NOT NULL,"
       "  suicide_count INTEGER  NOT NULL,"
-      "  switched_team BOOL  NULL,"
+      "  switched_team_count INTEGER  NULL,"
       "  stats_team_id INTEGER NULL,"
       "  insertion_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,"
       "  FOREIGN KEY(stats_game_id) REFERENCES stats_game(stats_game_id),"

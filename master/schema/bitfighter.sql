@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 29, 2011 at 12:29 AM
+-- Generation Time: Feb 12, 2011 at 05:49 PM
 -- Server version: 5.1.49
 -- PHP Version: 5.3.3
 
@@ -32,6 +32,10 @@ CREATE TABLE IF NOT EXISTS `server` (
   PRIMARY KEY (`server_id`),
   UNIQUE KEY `name_ip_unique` (`server_name`(50),`ip_address`(15))
 )  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=9 ;
+
+--
+-- Dumping data for table `server`
+--
 
 
 -- --------------------------------------------------------
@@ -83,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `stats_player` (
   `kill_count` smallint(5) unsigned NOT NULL,
   `death_count` smallint(5) unsigned NOT NULL,
   `suicide_count` smallint(5) unsigned NOT NULL,
-  `switched_team` tinyint(1) DEFAULT NULL,
+  `switched_team_count` smallint(5) unsigned DEFAULT NULL,
   `stats_team_id` int(11) DEFAULT NULL,
   `insertion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`stats_player_id`),
