@@ -543,20 +543,15 @@ void Screenshooter::saveScreenshot()
        
       makeSureFolderExists(gConfigDirs.screenshotDir);
 
-      char filename[64];
       string fullfilename;
-      FILE *filex;
       S32 ctr = 0;
 
-      while(true)
+      while(true)    // Settle in for the long haul, boys.
       {
-         dSprintf(filename, 256, "screenshot_%d.bmp", ctr);
-         fullfilename = joindir(gConfigDirs.screenshotDir.c_str(), filename);
-         filex = fopen(fullfilename.c_str(), "rb");
-         if (filex == NULL) 
+         fullfilename = joindir(gConfigDirs.screenshotDir.c_str(), "screenshot_" + itos(ctr) + ".bmp");
+
+         if(!fileExists(fullfilename))
             break;
-         else 
-            fclose(filex);
 
          ctr++;
       }   
