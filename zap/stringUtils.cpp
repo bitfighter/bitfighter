@@ -32,6 +32,7 @@
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
+#include <direct.h>        // For mkdir
 
 using namespace std;
 using namespace TNL;
@@ -251,6 +252,13 @@ bool fileExists(const string &path)
    return (stat(path.c_str(), &st) == 0);               // Does path exist?
 }
 
+
+void makeSureFolderExists(const string &dir)
+{
+   if(!fileExists(dir))
+      mkdir(dir.c_str());
+}
+   
 
 // Join without checking for blank parts
 string strictjoindir(const string &part1, const string &part2)

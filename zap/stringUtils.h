@@ -84,7 +84,9 @@ void s_fprintf(FILE *stream, const char *format, ...);      // throws SaveExcept
 //bool caseInsensitiveStringCompare(const string &str1, const string &str2);
 
 // File utils
-bool fileExists(const string &path);         // Does file exist?
+bool fileExists(const string &path);               // Does file exist?
+void makeSureFolderExists(const string &dir);      // Like the man said: Make sure folder exists
+
 
 // Two different variations on joining file and folder names
 string strictjoindir(const string &part1, const string &part2);
