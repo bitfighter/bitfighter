@@ -235,13 +235,28 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
       if(!gc)
          return true;
 
+      // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
+      bool theSame = true;
+
+      if(loadout.size() != gc->mOldLoadout.size())
+         theSame = false;
+      else
+      {
+         for(S32 i = 0; i < loadout.size(); i++)  // Check old requested loadout
+            theSame = theSame && loadout[i] == gc->mOldLoadout[i];
+      }
+
+      if(!theSame)
+      {
+         gc->c2sRequestLoadout(loadout);     // Tell server our loadout has changed.  Server will check if we're in the zone and activate loadout, if needed
+         gc->mOldLoadout = loadout;
+      }
+
       Ship *ship = dynamic_cast<Ship *>(gc->getControlObject()); 
       if(!ship)
          return true;
 
-      // Check to see if the new configuration is the same as the old.  If so, we have nothing to do.
-      bool theSame = true;
-
+      theSame = true;
       for(S32 i = 0; i < ShipModuleCount; i++)
          theSame = theSame && (gLoadoutModules[mModule[i]].index == (U32)ship->getModule(i));
 
@@ -255,7 +270,6 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
          return true;
       }
 
-      gc->c2sRequestLoadout(loadout);     // Tell server our loadout has changed.  Server will check if we're in the zone and activate loadout, if needed
 
       GameType *gt = gClientGame->getGameType();
       bool spawnWithLoadout = gt->isSpawnWithLoadoutGame() || ! gt->levelHasLoadoutZone();

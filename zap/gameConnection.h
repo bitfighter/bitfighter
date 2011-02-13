@@ -123,7 +123,7 @@ private:
 
 public:
    ClientGame *mClientGame;
-   Vector<U32> mOldLoadout;
+   Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    U16 switchedTeamCount;
 
    void linkToClientList();
