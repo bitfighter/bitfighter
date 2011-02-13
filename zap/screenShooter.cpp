@@ -541,13 +541,7 @@ void Screenshooter::saveScreenshot()
       if (pixels == NULL) 
          return;    
        
-      const char *folder;
-      struct stat st;
-
-      if( stat( gConfigDirs.screenshotDir.c_str(), &st ) == 0 )      // Put our screenshots in the screenshots folder
-         folder = gConfigDirs.screenshotDir.c_str();                 // it it exists... otherwise they go in the 
-      else                                         // executable folder (".")
-         folder = ".";
+      makeSureFolderExists(gConfigDirs.screenshotDir);
 
       char filename[64];
       string fullfilename;
@@ -557,7 +551,7 @@ void Screenshooter::saveScreenshot()
       while(true)
       {
          dSprintf(filename, 256, "screenshot_%d.bmp", ctr);
-         fullfilename = joindir(folder, filename);
+         fullfilename = joindir(gConfigDirs.screenshotDir.c_str(), filename);
          filex = fopen(fullfilename.c_str(), "rb");
          if (filex == NULL) 
             break;
