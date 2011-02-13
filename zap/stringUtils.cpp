@@ -26,6 +26,7 @@
 #include "stringUtils.h"
 #include "tnlPlatform.h"   // For Vector, types, and dSprintf
 #include "tnlVector.h"
+#include "tnlLog.h"
 
 #include <stdio.h>
 #include <stdarg.h>        // For va_args
@@ -253,10 +254,19 @@ bool fileExists(const string &path)
 }
 
 
-void makeSureFolderExists(const string &dir)
+bool makeSureFolderExists(const string &dir)
 {
    if(!fileExists(dir))
+   {
       mkdir(dir.c_str());
+      if(!fileExists(dir))
+      {
+         logprintf(LogConsumer::LogError, "Could not create folder %s", dir.c_str());
+         return false;
+      }
+   }
+
+   return true;
 }
    
 
