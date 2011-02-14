@@ -2179,6 +2179,9 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    if(mTeams.size() <= 1)     // Can't change if there's only one team...
       return;
 
+   if(team < mTeams.size())     // Don't allow out of range team, Negative is allowed.
+      return;
+
    ClientRef *cl = source->getClientRef();
    if(cl->getTeam() == team)     // Don't explode if not switching team.
       return;
@@ -2209,7 +2212,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
       cl->respawnTimer.clear();     // If we've just died, this will keep a second copy of ourselves from appearing
    }
 
-   if(team == -1)                                        // If no team provided...
+   if(team < 0)                                          // If no team provided...
       cl->setTeam((cl->getTeam() + 1) % mTeams.size());  // ...find the next one...
    else                                                  // ...otherwise...
       cl->setTeam(team);                                 // ...use the one provided
@@ -2712,6 +2715,16 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       updateClientChangedName(clientRef->clientConnection,uniqueName);
    }
    */
+   else if(!stricmp(cmd, "yes"))
+   {
+      clientRef->clientConnection->mVote = 1;
+      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted Yes");
+   }
+   else if(!stricmp(cmd, "no"))
+   {
+      clientRef->clientConnection->mVote = 2;
+      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted No");
+   }
    else
    {
       // Command not found, tell the client

@@ -309,6 +309,7 @@ extern string gHostDescr;
 // Constructor
 ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : Game(theBindAddress)
 {
+   mVoteTimer = 0;
    mPlayerCount = 0;
    mMaxPlayers = maxPlayers;
    mHostName = gHostName;
@@ -351,6 +352,15 @@ void Game::cleanUp()
       delete gBotNavMeshZones.last().getPointer();
 }
 
+
+void ServerGame::voteStart()
+{
+   mVoteTimer = 12000;
+   for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+   {
+      walk->mVote = 0;
+   }
+}
 
 S32 ServerGame::getLevelNameCount()
 {
@@ -943,6 +953,81 @@ void ServerGame::idle(U32 timeDelta)
       return;
    }
 
+
+   if(mVoteTimer != 0)
+   {
+      if(timeDelta < mVoteTimer)  // voting continue
+      {
+         if((mVoteTimer-timeDelta) % 1000 > mVoteTimer % 1000) // show message
+         {
+            Vector<StringTableEntry> e;
+            Vector<StringPtr> s;
+            Vector<S32> i;
+            StringTableEntry msg;
+            i.push_back(mVoteTimer / 1000);
+            switch(mVoteType)
+            {
+            case 0:
+               msg = "/YES or /NO : %i0 : Change Level to %e0";
+               e.push_back(getLevelNameFromIndex(mVoteNumber));
+               break;
+            case 1:
+               msg = "/YES or /NO : %i0 : Add %i1 minutes";
+               i.push_back(mVoteNumber);
+               break;
+            case 2:
+               msg = "/YES or /NO : %i0 : Set %i1 minutes";
+               i.push_back(mVoteNumber);
+               break;
+            case 3:
+               msg = "/YES or /NO : %i0 : Set score %i1";
+               i.push_back(mVoteNumber);
+               break;
+            }
+            for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+            {
+               if(walk->mVote == 0)
+                  walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXUIBoop, msg, e, s, i);
+            }
+         }
+         mVoteTimer -= timeDelta;
+      }
+      else                        // Vote ends
+      {
+         S32 voteYes = 0;
+         S32 voteNo = 0;
+         mVoteTimer = 0;
+         for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+         {
+            if(walk->mVote == 1) voteYes++;
+            if(walk->mVote == 2) voteNo++;
+         }
+         if(voteYes > voteNo)
+         {
+            mVoteTimer = 0;
+            switch(mVoteType)
+            {
+            case 0:
+               cycleLevel(mVoteNumber);
+            case 1:
+               ;
+            }
+         }
+         {
+            Vector<StringTableEntry> e;
+            Vector<StringPtr> s;
+            Vector<S32> i;
+            i.push_back(voteYes);
+            i.push_back(voteNo);
+            e.push_back(voteYes > voteNo ? "Pass" : "Fail");
+            for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+            {
+               walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no", e, s, i);
+            }
+         }
+      }
+   }
+
    // If there are no players on the server, we can enter "suspended animation" mode, but not during the first half-second of hosting.
    // This will prevent locally hosted game from immediately suspending for a frame, giving the local client a chance to 
    // connect.  A little hacky, but works!
@@ -952,7 +1037,7 @@ void ServerGame::idle(U32 timeDelta)
       unsuspendGame(false);
 
    if(timeDelta > 2000)   // prevents timeDelta from going too high, usually when after the server was frozen.
-      timeDelta = 1000;
+      timeDelta = 100;
    mCurrentTime += timeDelta;
    mNetInterface->checkIncomingPackets();
    checkConnectionToMaster(timeDelta);    // Connect to master server if not connected

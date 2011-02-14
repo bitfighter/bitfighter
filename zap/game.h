@@ -292,6 +292,14 @@ public:
    ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode);    // Constructor
    ~ServerGame();   // Destructor
 
+   U32 mVoteTimer;
+   S32 mVoteType;
+   S32 mVoteYes;
+   S32 mVoteNo;
+   S32 mVoteNumber;
+   SafePtr<GameConnection> mVoteClientConnection;
+   void voteStart();
+
    enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      
 
    static const S32 NEXT_LEVEL = -1;

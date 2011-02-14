@@ -60,6 +60,7 @@ TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 // Constructor
 GameConnection::GameConnection()
 {
+   mVote = 0;
    mClientGame = NULL;
    initialize();
 }
@@ -984,12 +985,23 @@ TNL_IMPLEMENT_RPC(GameConnection, s2cAddLevel, (StringTableEntry name, StringTab
    mLevelInfos.push_back(LevelInfo(name, type));
 }
 
-
+extern string gLevelChangePassword;
 TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, bool isRelative), (newLevelIndex, isRelative), 
                               NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirClientToServer, 1)
 {
    if(!mIsLevelChanger)
       return;
+
+   // use voting when no level change password and more then 1 players
+   if(!mIsAdmin && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
+   {
+      if(gServerGame->mVoteTimer != 0)
+         return;
+      gServerGame->mVoteType = 0;
+      gServerGame->mVoteNumber = newLevelIndex;
+      gServerGame->voteStart();
+      return;
+   }
 
    bool restart = false;
 

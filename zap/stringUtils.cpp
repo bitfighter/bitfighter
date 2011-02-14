@@ -33,7 +33,9 @@
 #include <string>          // For... everything.  This is stringUtils, after all!
 #include <sstream>         // For parseString
 #include <sys/stat.h>      // For testing existence of folders
+#ifdef TNL_OS_WIN32
 #include <direct.h>        // For mkdir
+#endif
 
 using namespace std;
 using namespace TNL;
@@ -258,7 +260,11 @@ bool makeSureFolderExists(const string &dir)
 {
    if(!fileExists(dir))
    {
+#ifdef TNL_OS_WIN32
       mkdir(dir.c_str());
+#else
+      mkdir(dir.c_str(), 0755);
+#endif
       if(!fileExists(dir))
       {
          logprintf(LogConsumer::LogError, "Could not create folder %s", dir.c_str());
