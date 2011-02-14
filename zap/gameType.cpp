@@ -495,7 +495,8 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
       glEnableBlend;
       glColor4f(1, 0.5 , 0.5, alpha);
-      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
+      UserInterface::drawCenteredStringf(UserInterface::vertMargin + 130, 20, "Input mode changed to %s", 
+                                         gIniSettings.inputMode == Joystick ? "Joystick" : "Keyboard");
       glDisableBlend;
    }
 
@@ -544,7 +545,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          Color c = getTeamColor(i);
          glEnableBlend;
 
-         glColor4f(c.r, c.g, c.b, 0.6);
+         glColor(c, 0.6);
          glBegin(GL_POLYGON);
             glVertex2f(xl, yt);
             glVertex2f(xr, yt);
@@ -819,8 +820,8 @@ void GameType::renderTimeLeft()
       UserInterface::drawString(x, y, size, "Unlim.");
    else
    {
-      U32 minsRemaining = timeLeft / (60);
-      U32 secsRemaining = (timeLeft - (minsRemaining * 60000));
+      U32 minsRemaining = timeLeft / 60;
+      U32 secsRemaining = timeLeft - (minsRemaining * 60);
 
       UserInterface::drawStringf(x, y, size, "%02d:%02d", minsRemaining, secsRemaining);
    }
