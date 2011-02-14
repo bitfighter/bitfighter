@@ -126,6 +126,8 @@ public:
    Vector<U32> mOldLoadout;   // Server: to respawn with old loadout  Client: to check if using same loadout configuration
    U16 switchedTeamCount;
 
+   U8 mVote;  // 0 = not voted,  1 = vote yes,  2 = vote no
+
    void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 
