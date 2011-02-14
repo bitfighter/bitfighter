@@ -999,6 +999,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
          return;
       gServerGame->mVoteType = 0;
       gServerGame->mVoteNumber = newLevelIndex;
+      gServerGame->mVoteClientName = getClientName();
       gServerGame->voteStart();
       return;
    }

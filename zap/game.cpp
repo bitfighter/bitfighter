@@ -972,16 +972,28 @@ void ServerGame::idle(U32 timeDelta)
                e.push_back(getLevelNameFromIndex(mVoteNumber));
                break;
             case 1:
-               msg = "/YES or /NO : %i0 : Add %i1 minutes";
-               i.push_back(mVoteNumber);
+               msg = "/YES or /NO : %i0 : Add time %i1 minutes";
+               i.push_back(mVoteNumber / 60000);
                break;
             case 2:
-               msg = "/YES or /NO : %i0 : Set %i1 minutes";
-               i.push_back(mVoteNumber);
+               msg = "/YES or /NO : %i0 : Set time %i1 minutes %i2 seconds";
+               i.push_back(mVoteNumber / 60000);
+               i.push_back((mVoteNumber / 1000) % 60);
                break;
             case 3:
                msg = "/YES or /NO : %i0 : Set score %i1";
                i.push_back(mVoteNumber);
+               break;
+            case 4:
+               msg = "/YES or /NO : %i0 : Change team %e0 to %e1";
+               e.push_back(mVoteClientName);
+               {
+                  GameType *gt = getGameType();
+                  if(gt)
+                     e.push_back(gt->getTeamName(mVoteNumber));
+                  else
+                     e.push_back("?");
+               }
                break;
             }
             for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -1004,13 +1016,41 @@ void ServerGame::idle(U32 timeDelta)
          }
          if(voteYes > voteNo)
          {
+            GameType *gt = getGameType();
             mVoteTimer = 0;
             switch(mVoteType)
             {
             case 0:
                cycleLevel(mVoteNumber);
             case 1:
-               ;
+               if(gt)
+               {
+                  gt->mGameTimer.extend(mVoteNumber);                  // Increase "official time"
+                  gt->s2cSetTimeRemaining(gt->mGameTimer.getCurrent());    // Broadcast time to clients
+               }
+               break;
+            case 2:
+               if(gt)
+               {
+                  gt->mGameTimer.extend(S32(mVoteNumber - gt->mGameTimer.getCurrent()));
+                  gt->s2cSetTimeRemaining(gt->mGameTimer.getCurrent());    // Broadcast time to clients
+               }
+               break;
+            case 3:
+               if(gt)
+               {
+                  gt->mWinningScore = mVoteNumber;
+                  gt->s2cChangeScoreToWin(mVoteNumber, mVoteClientName);    // Broadcast score to clients
+               }
+               break;
+            case 4:
+               if(gt)
+               {
+                  for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+                     if(walk->getClientName() == mVoteClientName)
+                        gt->changeClientTeam(walk, mVoteNumber);
+               }
+               break;
             }
          }
          {

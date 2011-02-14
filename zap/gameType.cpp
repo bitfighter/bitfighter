@@ -2128,12 +2128,26 @@ GAMETYPE_RPC_S2C(GameType, s2cSetLevelInfo, (StringTableEntry levelName, StringT
    clientGame->mGameUserInterface->initializeLoadoutOptions(engineerEnabled);
 }
 
+extern string gLevelChangePassword;
 GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
 {
    GameConnection *source = dynamic_cast<GameConnection *>(NetObject::getRPCSourceConnection());
 
    if(!source->isLevelChanger())                         // Level changers and above
       return;
+
+   // use voting when no level change password and more then 1 players
+   if(!source->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
+   {
+      if(gServerGame->mVoteTimer != 0)
+         return;
+      gServerGame->mVoteType = 1;
+      gServerGame->mVoteNumber = time;
+      gServerGame->mVoteClientName = source->getClientName();
+      gServerGame->voteStart();
+      return;
+   }
+
 
    mGameTimer.extend(time);                         // Increase "official time"
    s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
@@ -2152,6 +2166,17 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
 
    if(!source->isAdmin() && source->mSwitchTimer.getCurrent())                // If we're not admin and we're waiting for our switch-expiration to reset,
       return;                                                                 // return without processing the change team request
+
+   if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
+   {
+      if(gServerGame->mVoteTimer != 0)
+         return;
+      gServerGame->mVoteType = 4;
+      gServerGame->mVoteNumber = team;
+      gServerGame->mVoteClientName = source->getClientName();
+      gServerGame->voteStart();
+      return;
+   }
 
    changeClientTeam(source, team);
 
@@ -2179,7 +2204,7 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    if(mTeams.size() <= 1)     // Can't change if there's only one team...
       return;
 
-   if(team < mTeams.size())     // Don't allow out of range team, Negative is allowed.
+   if(team >= mTeams.size())     // Don't allow out of range team, Negative is allowed.
       return;
 
    ClientRef *cl = source->getClientRef();
@@ -2546,6 +2571,17 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
          else
          {
+            // use voting when no level change password and more then 1 players
+            if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
+            {
+               if(gServerGame->mVoteTimer != 0)
+                  return;
+               gServerGame->mVoteType = 2;
+               gServerGame->mVoteNumber = time;
+               gServerGame->mVoteClientName = clientRef->clientConnection->getClientName();
+               gServerGame->voteStart();
+               return;
+            }
             // We want to preserve the actual, overall time of the game in mGameTimer's period
             mGameTimer.extend(S32(time - mGameTimer.getCurrent()));
 
@@ -2573,6 +2609,17 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid score... winning score not changed");
          else
          {
+            // use voting when no level change password and more then 1 players
+            if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
+            {
+               if(gServerGame->mVoteTimer != 0)
+                  return;
+               gServerGame->mVoteType = 3;
+               gServerGame->mVoteNumber = score;
+               gServerGame->mVoteClientName = clientRef->clientConnection->getClientName();
+               gServerGame->voteStart();
+               return;
+            }
             mWinningScore = score;
             s2cChangeScoreToWin(mWinningScore, clientRef->clientConnection->getClientName());
          }
