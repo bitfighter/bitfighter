@@ -1022,6 +1022,7 @@ void ServerGame::idle(U32 timeDelta)
             {
             case 0:
                cycleLevel(mVoteNumber);
+               break;
             case 1:
                if(gt)
                {

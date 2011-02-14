@@ -1320,7 +1320,7 @@ void GameType::spawnShip(GameConnection *theClient)
       newShip->addToGame(getGame());
    }
 
-   if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
+   if(!levelHasLoadoutZone())  // || isSpawnWithLoadoutGame()
       setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
    else
       setClientShipLoadout(cl, theClient->mOldLoadout, true);     // old loadout
