@@ -281,7 +281,7 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
    OPT_MAX_PLAYERS = menuItems.size() - 1;
 
    menuItems.push_back(new YesNoMenuItem("Allow Engineer Module:",       
-                                          false,
+                                          true,                // Engineer enabled by default
                                           NULL,
                                           "Allow players to use the Engineer module?"));
    OPT_ENGINEER = menuItems.size() - 1;

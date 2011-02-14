@@ -58,6 +58,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Fixed selecting loadout that is same as ship after selecting new loadout, now avoids changing ships loadout when cancelled.
 <li>Can now choose one of multiple joysticks. If there is no joystick, then you cannot change input from keyboard to joystick.
 <li>Can add or remove joysticks while in the options menu; no longer requires restart
+<li>New levels have engineer enabled by default
 </ul>
 <h4>New Features</h4>
 <ul>
