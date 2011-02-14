@@ -73,6 +73,10 @@ static const char *pageHeaders[] = {
    "SCRIPING CONSOLE"
 };
 
+
+static const S32 FIRST_COMMAND_PAGE = 8;
+
+
 static ControlStringsEditor consoleCommands1[] = {
    { "add <a> <b>", "Print a + b -- test command" },
    { "exit, quit", "Close the console" },
@@ -136,6 +140,14 @@ void InstructionsUserInterface::render()
       // When adding page, be sure to increase NUM_PAGES, and add item to pageHeaders array
    }
 }
+
+
+void InstructionsUserInterface::activateInCommandMode()
+{
+   this->activate();
+   mCurPage = FIRST_COMMAND_PAGE;
+}
+
 
 struct ControlString
 {

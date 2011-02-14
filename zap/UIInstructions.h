@@ -49,6 +49,7 @@ public:
 
    void onKeyDown(KeyCode keyCode, char ascii);
 
+   void activateInCommandMode();
    void onActivate();
    void exitInstructions();
 };

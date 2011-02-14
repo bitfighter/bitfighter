@@ -958,7 +958,13 @@ void GameUserInterface::onKeyDown(KeyCode keyCode, char ascii)
    else if(keyCode == keyHELP)          // Turn on help screen
    {
       UserInterface::playBoop();
-      gInstructionsUserInterface.activate();
+
+      if(mCurrentMode == ChatMode)
+         gInstructionsUserInterface.activateInCommandMode();
+      else
+         gInstructionsUserInterface.activate();
+
+
    }
    // Shift-/ toggles console window for the moment  (Ctrl-/ fails in glut!)
    // Don't want to open console while chatting, do we?  Only open when not in any special mode.
