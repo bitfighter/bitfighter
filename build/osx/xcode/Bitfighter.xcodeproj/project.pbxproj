@@ -1835,7 +1835,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\ntools_dir=\"../tools\"\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\ncp -R \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}\"\nln -s /Applications \"${to_package_dir}/Applications\"\n\nuncompressed_dmg=`$tools_dir/dmg-create \"${to_package_dir}\" \"${app_name}\"`\n\n$tools_dir/dmg-convert \"${uncompressed_dmg}\" \"${final_dmg}\"\nrm \"${uncompressed_dmg}\"\nrm -r \"${to_package_dir}\"";
+			shellScript = "app_name=\"Bitfighter\"\nto_package_dir=$( mktemp -dt ${app_name} )\npkgdmg=\"../tools/pkg-dmg\"\n\ndsstore=bitfighter.dsstore\nbackground=bf_dmg_background.png\n\n# magic\nversion=$( grep 'ZAP_GAME_RELEASE' ../../../zap/game.h |cut -f3 -d' ' | sed 's/\"//g' )\nfinal_dmg=\"${BUILT_PRODUCTS_DIR}/${app_name}-${version}.macosx-universal\"\n\ntest -f \"${final_dmg}.dmg\" && rm \"${final_dmg}.dmg\"\n\nrsync -av \"${BUILT_PRODUCTS_DIR}/${app_name}.app\" \"${to_package_dir}/\"\n\n$pkgdmg --target ${final_dmg} --source ${to_package_dir} --volname ${app_name} --copy ${dsstore}:/.DS_Store --mkdir /.background --copy ${background}:/.background --symlink /Applications:/Applications\n\nrm -r \"${to_package_dir}\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
