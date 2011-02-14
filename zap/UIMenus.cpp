@@ -888,7 +888,7 @@ void OptionsMenuUserInterface::setupMenus()
    addStickOptions(&opts);
 
    menuItems.push_back(new ToggleMenuItem("PRIMARY INPUT:", opts, gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, true, 
-                       setInputModeCallback, "Specify whether you want to play with your keyboard or joystick",    KEY_P, KEY_I));
+                       setInputModeCallback, "Specify whether you want to play with your keyboard or joystick", KEY_P, KEY_I));
 
    opts.clear();
    for(S32 i = 0; i < ControllerTypeCount; i++)
