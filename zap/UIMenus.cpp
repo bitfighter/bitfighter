@@ -847,6 +847,10 @@ static void setInputModeCallback(U32 val)
          val = 0;
          menuItem->setValueIndex(0);
       }
+
+      // Special case handler for common situation
+      if(sticks == 0 && gJoystickNames.size() == 1)      // User just plugged a stick in
+         menuItem->setValueIndex(1);
    }
 
    gIniSettings.inputMode = (val == 0) ? Keyboard : Joystick;
