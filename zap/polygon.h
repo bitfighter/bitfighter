@@ -76,7 +76,8 @@ protected:
    // Read a series of points from a command line, and add them to a Vector of points
    void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
    {
-      Point p;
+      Point p, lastP;
+      
       for(S32 i = firstCoord; i < argc; i += 2)
       {
          // Put a cap on the number of vertices in a polygon
@@ -84,8 +85,16 @@ protected:
             break;
 
          p.set( (F32) atof(argv[i]) * gridSize, (F32) atof(argv[i+1]) * gridSize );
-         mPolyBounds.push_back(p);
+
+         if(i == firstCoord || p != lastP)
+            mPolyBounds.push_back(p);
+         
+         lastP.set(p);
       }
+
+      // Check if last point was same as first; if so, scrap it
+      if(mPolyBounds.first() == mPolyBounds.last())
+         mPolyBounds.erase(mPolyBounds.size() - 1);
 
       mCentroid = findCentroid(mPolyBounds);
    }
