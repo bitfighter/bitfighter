@@ -828,7 +828,7 @@ string joindir(const string &path, const string &filename)
    if(path == "")
       return filename;
 
-   // Does path already have a trailing delimieter?  If so, we'll use that.
+   // Does path already have a trailing delimiter?  If so, we'll use that.
    if(path[path.length() - 1] == '\\' || path[path.length() - 1] == '/')
       return path + filename;
 
