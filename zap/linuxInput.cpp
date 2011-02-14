@@ -182,7 +182,7 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
          joyPads[useStickNumber].changed = true;
          break;
       case JS_EVENT_BUTTON:
-         joyPads[useStickNumber].ev.number;
+         num = joyPads[useStickNumber].ev.number;
          if(num < MAX_BUTTON)
             joyPads[useStickNumber].bPos[num] = joyPads[useStickNumber].ev.value;
          joyPads[useStickNumber].changed = true;
