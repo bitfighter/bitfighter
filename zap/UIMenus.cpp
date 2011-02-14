@@ -828,6 +828,8 @@ static void addStickOptions(Vector<string> *opts)
 }
 
 
+static S32 INPUT_MODE_MENU_ITEM_INDEX = 0;
+
 static void setInputModeCallback(U32 val)
 {
    S32 sticks = gJoystickNames.size();
@@ -835,7 +837,7 @@ static void setInputModeCallback(U32 val)
 
    if(sticks != gJoystickNames.size())
    {
-      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[2]);
+      ToggleMenuItem *menuItem = dynamic_cast<ToggleMenuItem *>(gOptionsMenuUserInterface.menuItems[INPUT_MODE_MENU_ITEM_INDEX]);
 
       if(menuItem)
          addStickOptions(&menuItem->mOptions);
@@ -889,6 +891,8 @@ void OptionsMenuUserInterface::setupMenus()
 
    menuItems.push_back(new ToggleMenuItem("PRIMARY INPUT:", opts, gIniSettings.inputMode == Keyboard ? 0 : gUseStickNumber, true, 
                        setInputModeCallback, "Specify whether you want to play with your keyboard or joystick", KEY_P, KEY_I));
+
+   INPUT_MODE_MENU_ITEM_INDEX = menuItems.size() - 1;
 
    opts.clear();
    for(S32 i = 0; i < ControllerTypeCount; i++)
