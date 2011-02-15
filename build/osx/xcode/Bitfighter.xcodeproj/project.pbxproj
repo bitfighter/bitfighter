@@ -60,7 +60,6 @@
 		7378261E12960DDF007333BE /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		7378261F12960DDF007333BE /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
 		7378262012960DDF007333BE /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
-		7378262112960DDF007333BE /* screenshots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE41F12904D7D00D732B7 /* screenshots */; };
 		7378262212960DDF007333BE /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = 737CE42212904D7D00D732B7 /* sfx */; };
 		7378262312960DDF007333BE /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		7378269E12960DDF007333BE /* tnl.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE61D1290553D00D732B7 /* tnl.framework */; };
@@ -76,7 +75,6 @@
 		737CE40512904D5300D732B7 /* robots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3F412904D5300D732B7 /* robots */; };
 		737CE40612904D5300D732B7 /* scripts in Resources */ = {isa = PBXBuildFile; fileRef = 737CE3FC12904D5300D732B7 /* scripts */; };
 		737CE44E12904D7D00D732B7 /* levels in Resources */ = {isa = PBXBuildFile; fileRef = 737CE40712904D7D00D732B7 /* levels */; };
-		737CE44F12904D7D00D732B7 /* screenshots in Resources */ = {isa = PBXBuildFile; fileRef = 737CE41F12904D7D00D732B7 /* screenshots */; };
 		737CE45012904D7D00D732B7 /* sfx in Resources */ = {isa = PBXBuildFile; fileRef = 737CE42212904D7D00D732B7 /* sfx */; };
 		737CE5CA129051CB00D732B7 /* libtomcrypt.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
 		737CE5CB129051DC00D732B7 /* libtomcrypt.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 737CE46C12904E9E00D732B7 /* libtomcrypt.framework */; };
@@ -1737,7 +1735,6 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Bitfighter" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -1769,7 +1766,6 @@
 				7378261E12960DDF007333BE /* robots in Resources */,
 				7378261F12960DDF007333BE /* scripts in Resources */,
 				7378262012960DDF007333BE /* levels in Resources */,
-				7378262112960DDF007333BE /* screenshots in Resources */,
 				7378262212960DDF007333BE /* sfx in Resources */,
 				7378262312960DDF007333BE /* bitfighter.sh in Resources */,
 				73D2F37412E2D7E800EA5EBE /* Info.plist in Resources */,
@@ -1800,7 +1796,6 @@
 				737CE40512904D5300D732B7 /* robots in Resources */,
 				737CE40612904D5300D732B7 /* scripts in Resources */,
 				737CE44E12904D7D00D732B7 /* levels in Resources */,
-				737CE44F12904D7D00D732B7 /* screenshots in Resources */,
 				737CE45012904D7D00D732B7 /* sfx in Resources */,
 				736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */,
 				73D2F3E712E2D7E800EA5EBE /* Info.plist in Resources */,
