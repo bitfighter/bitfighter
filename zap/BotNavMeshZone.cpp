@@ -428,6 +428,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 
       BotNavMeshZone *origZone = findZoneContainingPoint(teleporter->getActualPos());
 
+      if(origZone != NULL)
 		for(S32 j = 0; j < teleporter->mDest.size(); j++)     // Review each teleporter destination
 		{
          BotNavMeshZone *destZone = findZoneContainingPoint(teleporter->mDest[j]);

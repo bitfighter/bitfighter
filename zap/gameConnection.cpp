@@ -1289,7 +1289,7 @@ void GameConnection::onConnectionEstablished()
 
    Address addr = this->getNetAddress();
    if(this->isLocalConnection())    // Local connections don't use network, maximum bandwidth
-   {  
+   {
       minPacketSendPeriod = 15;
       minPacketRecvPeriod = 15;
       maxSendBandwidth = 65535;    // Error when higher than 65535
@@ -1366,6 +1366,11 @@ void GameConnection::onConnectionTerminated(NetConnection::TerminationReason rea
 {
    if(isInitiator())    // i.e. this is a client that connected to the server
    {
+      TNLAssert(mClientGame, "onConnectionTerminated: mClientGame is NULL");
+      if(!mClientGame)
+         return;
+
+
       if(UserInterface::cameFrom(EditorUI))
          UserInterface::reactivateMenu(gEditorUserInterface);
       else
@@ -1450,6 +1455,10 @@ void GameConnection::onConnectTerminated(TerminationReason reason, const char *n
 {
    if(isInitiator())
    {
+      TNLAssert(mClientGame, "onConnectTerminated: mClientGame is NULL");
+      if(!mClientGame)
+         return;
+
       if(reason == ReasonNeedServerPassword)
       {
          // We have the wrong password, let's make sure it's not saved
