@@ -53,8 +53,6 @@
 namespace Zap
 {
 
-extern char gJoystickName[gJoystickNameLength];
-
 bool gJoystickInit = false;
 
 void getModifierState(bool &shiftDown, bool &controlDown, bool &altDown)
@@ -216,15 +214,14 @@ static void HIDGetElementsCFArrayHandler (const void * value, void * parameter)
    }
 }
 
-const char *GetJoystickName() { return gJoystickName; }
-
-
+extern Vector<string> gJoystickNames;
 extern U32 gUseStickNumber;
-extern U32 gSticksFound;
-extern const S32 gJoystickNameLength;
 
 void InitJoystick()
 {
+   U32 gSticksFound = 0;
+   gJoystickNames.clear();
+
    mach_port_t masterPort = NULL;
    io_iterator_t hidObjectIterator = NULL;
 
@@ -244,6 +241,8 @@ void InitJoystick()
    {
       IOHIDDeviceInterface **device;
       io_object_t ioHIDDeviceObject = IOIteratorNext(hidObjectIterator);
+
+      string joystickName;
       if(!ioHIDDeviceObject)     // No more devices, so let's get out of here!
          break;
 
@@ -261,7 +260,10 @@ void InitJoystick()
             if (buffer)
             {
                if (CFStringGetCString (static_cast<CFStringRef>(refCF), buffer, bufferSize, CFStringGetSystemEncoding ()))
-                  strncpy(gJoystickName, buffer, gJoystickNameLength);      // Save joystick name
+               {
+//                  strncpy(gJoystickName, buffer, gJoystickNameLength);      // Save joystick name
+                  joystickName = string(buffer);
+               }
                free(buffer);
             }
          }
@@ -298,6 +300,7 @@ void InitJoystick()
                         result = (*device)->open(device, 0);
                         gController.device = device;
                         gJoystickInit = true;
+                        gJoystickNames.push_back(joystickName);
                         gSticksFound++;      // <--- CE Multi-player @ single machine attempt
                      }
                      (*ppPlugInInterface)->Release (ppPlugInInterface);
@@ -322,6 +325,9 @@ void InitJoystick()
    }     // for(;;) loop
 
    IOObjectRelease (hidObjectIterator); /* release the iterator */
+
+   if(gUseStickNumber > (U32)gJoystickNames.size())
+      gUseStickNumber = (U32)gJoystickNames.size();
 }
 
 bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
@@ -355,8 +361,22 @@ bool ReadJoystick(F32 axes[MaxJoystickAxes], U32 &buttonMask, U32 &hatMask)
    return true;
 }
 
+const char *GetJoystickName()
+{
+   if(!gJoystickInit)
+      InitJoystick();
+
+   U32 useStickNumber = gUseStickNumber - 1;
+   if(useStickNumber >= (U32)gJoystickNames.size())
+      return "";
+
+   return gJoystickNames[useStickNumber].c_str();
+}
+
 void ShutdownJoystick()
 {
+   gJoystickNames.clear();
+
    if(gController.device)
       (*(gController.device))->close(gController.device);
 }
