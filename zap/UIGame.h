@@ -185,6 +185,7 @@ private:
 
 public:
    GameUserInterface();             // Constructor
+   ~GameUserInterface();             // Destructor
 
    bool displayInputModeChangeAlert;
    bool mMissionOverlayActive;      // Are game instructions (F2) visible?

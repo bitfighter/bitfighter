@@ -77,6 +77,7 @@ Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 // Constructor
 GameUserInterface::GameUserInterface()
 {
+   mOutputFile = NULL;
    bool mLeftDisabled = false; // Fix some uninitalized variables (randomly was true)
    bool mRightDisabled = false;
    bool mUpDisabled = false;
@@ -132,6 +133,12 @@ GameUserInterface::GameUserInterface()
    remoteLevelDownloadFilename = "downloaded.level";
 }
 
+// Destructor
+GameUserInterface::~GameUserInterface()
+{
+   if(mOutputFile)
+      fclose(mOutputFile);
+}
 
 void processGameConsoleCommand(OGLCONSOLE_Console console, char *cmd)
 {

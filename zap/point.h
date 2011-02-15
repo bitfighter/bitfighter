@@ -143,7 +143,7 @@ struct Color
    }
 
    string toRGBString() { string s = ftos(r, 3) + "," + ftos(g, 3) + "," + ftos(b, 3); return s; }
-   string toHexString() { char c[24]; dSprintf(c, sizeof(c), "%.2X%.2X%.2X", U32(r * 0xFF), U32(g * 0xFF), U32(b * 0xFF)); return c; }
+   string toHexString() { char c[7]; dSprintf(c, sizeof(c), "%.6X", U32(r * 0xFF) << 24 >> 8 | U32(g * 0xFF) << 24 >> 16 | (U32(b * 0xFF)) & 0xFF); return c; }
 
 
    U32 toU32() { return U32(r * 0xFF) | U32(g * 0xFF)<<8 | U32(b * 0xFF)<<16; }

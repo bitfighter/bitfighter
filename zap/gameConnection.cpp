@@ -266,7 +266,10 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestCurrentLevel, (), (), NetClassGroupG
 TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(mClientGame->mGameUserInterface->mOutputFile)
+   // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
+   TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
+
+   if(mClientGame && mClientGame->mGameUserInterface->mOutputFile)
       fwrite(line.getString(), 1, strlen(line.getString()), mClientGame->mGameUserInterface->mOutputFile);
       //mOutputFile.write(line.getString(), strlen(line.getString()));
    // else... what?
@@ -278,12 +281,14 @@ TNL_IMPLEMENT_RPC(GameConnection, s2rSendLine, (StringPtr line), (line),
 TNL_IMPLEMENT_RPC(GameConnection, s2rCommandComplete, (RangedU32<0,SENDER_STATUS_COUNT> status), (status), 
                   NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirAny, 1)
 {
-   if(mClientGame->mGameUserInterface->mOutputFile)
+   // server might need mOutputFile, if the server were to receive files. Currently, server don't receive files in-game.
+   TNLAssert(mClientGame != NULL, "trying to get mOutputFile, mClientGame is NULL");
+
+   if(mClientGame && mClientGame->mGameUserInterface->mOutputFile)
    {
       fclose(mClientGame->mGameUserInterface->mOutputFile);
       mClientGame->mGameUserInterface->mOutputFile = NULL;
 
-      if(! mClientGame) return;
       if(status.value == STATUS_OK)
          mClientGame->mGameUserInterface->displaySuccessMessage("Level download to %s", mClientGame->mGameUserInterface->remoteLevelDownloadFilename.c_str());
       else if(status.value == COMMAND_NOT_ALLOWED)
