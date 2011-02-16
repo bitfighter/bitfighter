@@ -914,13 +914,16 @@ VersionedGameStats GameType::getGameStats()
 
          Vector<U16> shots = statistics->getShotsVector();
          Vector<U16> hits = statistics->getHitsVector();
-         playerStats->weaponStats.setSize(shots.size());
          for(S32 k = 0; k < shots.size(); k++)
          {
-            WeaponStats *weaponStats = &playerStats->weaponStats[k];
-            weaponStats->weaponType = WeaponType(k);
-            weaponStats->shots = shots[k];
-            weaponStats->hits = hits[k];
+            if(shots[k] != 0 || hits[k] != 0)
+            {
+               WeaponStats weaponStats;
+               weaponStats.weaponType = WeaponType(k);
+               weaponStats.shots = shots[k];
+               weaponStats.hits = hits[k];
+               playerStats->weaponStats.push_back(weaponStats);
+            }
          }
          gameStats->playerCount++;
       }
