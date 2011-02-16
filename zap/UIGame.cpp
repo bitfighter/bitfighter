@@ -1470,8 +1470,8 @@ static string makeFilenameFromString(const char *levelname)
 
 
 
-// returns a pointer of string of chars, after "count" number of args
-const char * findPointerOfArg(const char *message, S32 count)
+// Returns a pointer of string of chars, after "count" number of args
+static const char *findPointerOfArg(const char *message, S32 count)
 {
    S32 spacecount = 0;
    S32 cur = 0;
@@ -1480,8 +1480,8 @@ const char * findPointerOfArg(const char *message, S32 count)
    // Message needs to include everything including multiple spaces.  Message starts after second space.
    while(message[cur] != '\0' && spacecount != count)
    {
-      if(message[cur] == ' ' && prevchar!=' ') 
-         spacecount++;  // Double space does not count as a seperate parameter
+      if(message[cur] == ' ' && prevchar != ' ') 
+         spacecount++;        // Double space does not count as a seperate parameter
       prevchar = message[cur];
       cur++;
    }
@@ -1621,14 +1621,10 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          else
          {
             // Did user provide a valid, known name?
-            if(gClientGame->getGameType())
-            {
-               ClientRef *clientRef = gClientGame->getGameType()->findClientRef(words[1].c_str());
-               if(!clientRef)
-                  displayErrorMessage("!!! Could not find player %s", words[1].c_str());
-               else
-                  gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
-            }
+            if(!checkName(&words[1]))
+               displayErrorMessage("!!! Could not find player: %s", words[1].c_str());
+            else
+               gc->c2sAdminPlayerAction(words[1].c_str(), PlayerMenuUserInterface::Kick, 0);     // Team doesn't matter with kick!
          }
       }
    }
@@ -1768,15 +1764,17 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          displayErrorMessage("!!! Usage: /pm <player name> <message>");
       else
       {
-         const char *message = mLineEditor.c_str();  // Get the original line.
-         message = findPointerOfArg(message, 2);     // Set pointer after 2 args
+         if(!checkName(&words[1]))
+            displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+         else
+         {
+            const char *message = mLineEditor.c_str();  // Get the original line
+            message = findPointerOfArg(message, 2);     // Set pointer after 2 args
 
-         // The above keeps multiple space, but not the one below.
-         //string message = concatenate(words, 2);  // in this line, multi space converts to single space; "1   2      3" becomes "1 2 3"
-
-         GameType *gt = gClientGame->getGameType();
-         if(gt)
-            gt->c2sSendChatPM(words[1], message); 
+            GameType *gt = gClientGame->getGameType();
+            if(gt)
+               gt->c2sSendChatPM(words[1], message); 
+         }
       }
    }
    else if(words[0] == "mute")
