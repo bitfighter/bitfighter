@@ -629,6 +629,8 @@ static ControlStringsEditor commands[][20] = { {                  // NO MORE THA
    { "/mvol <0-10>", "Set music volume" },
    { "/svol <0-10>", "Set SFX volume" },
    { "/vvol <0-10>", "Set voice chat volume" },
+   { "-", NULL },       // Horiz. line
+   { "/mute <name>", "Hide chat messages from <name> until you quit" },
    { NULL, NULL },      // End of list
 
 },{

@@ -1489,6 +1489,34 @@ const char * findPointerOfArg(const char *message, S32 count)
 }
 
 
+bool GameUserInterface::checkName(string &name)
+{
+   S32 potentials = 0;
+   string potential;
+
+   for(S32 i = 0; i < gClientGame->getGameType()->mClientList.size(); i++)
+   {
+      if(!gClientGame->getGameType()->mClientList[i].isValid())
+         continue;
+
+      const char *n = gClientGame->getGameType()->mClientList[i]->name.getString();
+      if(!strcmp(n, name.c_str()))           // Exact match
+         return true;
+      else if(!stricmp(n, name.c_str()))     // Case insensitive match
+      {
+         potentials++;
+         potential = n;
+      }
+   }
+
+   if(potentials == 1)
+   {
+      name = potential;
+      return true;
+   }
+
+   return false;
+}
 
 
 extern ClientInfo gClientInfo;
@@ -1607,31 +1635,34 @@ bool GameUserInterface::processCommand(Vector<string> &words)
 
    else if(words[0] == "admin")     // Request admin permissions
    {
-      if(words.size() < 2 || words[1] == "")
-         displayErrorMessage("!!! Need to supply a password");
-      else if(gc->isAdmin())
+      if(gc->isAdmin())
          displayErrorMessage("!!! You are already an admin");
+      else if(words.size() < 2 || words[1] == "")
+         displayErrorMessage("!!! Need to supply a password");
       else
          gc->submitAdminPassword(words[1].c_str());
    }
 
    else if(words[0] == "levpass" || words[0] == "levelpass" || words[0] == "lvlpass")
    {
-      if(words.size() < 2 || words[1] == "")
-         displayErrorMessage("!!! Need to supply a password");
-      else if(gc->isLevelChanger())
+      if(gc->isLevelChanger())
          displayErrorMessage("!!! You can already change levels");
+      else if(words.size() < 2 || words[1] == "")
+         displayErrorMessage("!!! Need to supply a password");
       else
          gc->submitLevelChangePassword(words[1].c_str());
    }
+
    else if(words[0] == "showcoords")
       mDebugShowShipCoords = !mDebugShowShipCoords;
+
    else if(words[0] == "showzones")
    {
        mDebugShowMeshZones = !mDebugShowMeshZones;
        if(!gServerGame) 
           displayErrorMessage("!!! Zones can only be displayed on a local host");
    }
+
    else if(words[0] == "showpaths")
    {
        showDebugBots = !showDebugBots;
@@ -1733,19 +1764,34 @@ bool GameUserInterface::processCommand(Vector<string> &words)
    }
    else if(words[0] == "pm")
    {
-      if(words.size() < 2)
+      if(words.size() < 3)
          displayErrorMessage("!!! Usage: /pm <player name> <message>");
       else
       {
          const char *message = mLineEditor.c_str();  // Get the original line.
-         message = findPointerOfArg(message,2); // Set pointer after 2 args
+         message = findPointerOfArg(message, 2);     // Set pointer after 2 args
 
          // The above keeps multiple space, but not the one below.
          //string message = concatenate(words, 2);  // in this line, multi space converts to single space; "1   2      3" becomes "1 2 3"
 
          GameType *gt = gClientGame->getGameType();
          if(gt)
-            gt->c2sSendChatPM(words[1], message); //.c_str()
+            gt->c2sSendChatPM(words[1], message); 
+      }
+   }
+   else if(words[0] == "mute")
+   {
+      if(words.size() < 2)
+         displayErrorMessage("!!! Usage: /mute <player name>");
+      else
+      {
+         if(!checkName(words[1]))
+            displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
+         else
+         {
+            mMuteList.push_back(words[1]);
+            displaySuccessMessage("Player %s has been muted", words[1].c_str());
+         }
       }
    }
    else if(words[0] == "getmap" || words[0] == "getlevel")    // Getmap or getlevel?  Allow either...
@@ -1826,6 +1872,7 @@ void GameUserInterface::populateChatCmdList()
    mChatCmds.push_back("/maxfps");
    mChatCmds.push_back("/pm");
    mChatCmds.push_back("/getmap");
+   mChatCmds.push_back("/mute");
 
    // commands that runs in game server, in processServerCommand
    mChatCmds.push_back("/settime");
@@ -1898,6 +1945,18 @@ void GameUserInterface::cancelChat()
 {
    mLineEditor.clear();
    enterMode(PlayMode);
+}
+
+
+bool GameUserInterface::isOnMuteList(const string &name)
+{
+   for(S32 i = 0; i < mMuteList.size(); i++)
+   {
+      if(mMuteList[i] == name)
+         return true;
+   }
+   
+   return false;
 }
 
 

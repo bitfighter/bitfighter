@@ -2899,7 +2899,9 @@ GAMETYPE_RPC_S2C(GameType, s2cDisplayChatMessage, (bool global, StringTableEntry
 {
    ClientGame *clientGame = dynamic_cast<ClientGame *>(getGame());
    TNLAssert(clientGame, "clientGame is NULL");
-   if(!clientGame) return;
+
+   if(!clientGame || clientGame->mGameUserInterface->isOnMuteList(clientName.getString()))
+      return;
 
    Color theColor = global ? gGlobalChatColor : gTeamChatColor;
    clientGame->mGameUserInterface->displayMessage(theColor, "%s: %s", clientName.getString(), message.getString());
