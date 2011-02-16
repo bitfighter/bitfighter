@@ -919,13 +919,16 @@ VersionedGameStats GameType::getGameStats()
 
          Vector<U16> shots = statistics->getShotsVector();
          Vector<U16> hits = statistics->getHitsVector();
-         playerStats->weaponStats.setSize(shots.size());
          for(S32 k = 0; k < shots.size(); k++)
          {
-            WeaponStats *weaponStats = &playerStats->weaponStats[k];
-            weaponStats->weaponType = WeaponType(k);
-            weaponStats->shots = shots[k];
-            weaponStats->hits = hits[k];
+            if(shots[k] != 0 || hits[k] != 0)
+            {
+               WeaponStats weaponStats;
+               weaponStats.weaponType = WeaponType(k);
+               weaponStats.shots = shots[k];
+               weaponStats.hits = hits[k];
+               playerStats->weaponStats.push_back(weaponStats);
+            }
          }
          gameStats->playerCount++;
       }
@@ -1325,7 +1328,7 @@ void GameType::spawnShip(GameConnection *theClient)
       newShip->addToGame(getGame());
    }
 
-   if(isSpawnWithLoadoutGame() || !levelHasLoadoutZone())
+   if(!levelHasLoadoutZone())  // || isSpawnWithLoadoutGame()
       setClientShipLoadout(cl, theClient->getLoadout());     // Set loadout if this is a SpawnWithLoadout type of game, or there is no loadout zone
    else
       setClientShipLoadout(cl, theClient->mOldLoadout, true);     // old loadout

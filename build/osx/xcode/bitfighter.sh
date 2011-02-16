@@ -6,7 +6,7 @@ cd "$launch_dir"
 datadir="../Resources"
 userdatadir="$HOME/Library/Application Support/Bitfighter"
 
-# Am I dedicated?
+# Am I dedicated?  For Zoomber...
 dedicated=0
 if [ -f "Bitfighterd" ]; then
   dedicated=1
@@ -15,7 +15,7 @@ fi
 # create settings dir in users home directory
 if [ ! -d "$userdatadir/robots" ]; then
   mkdir "$userdatadir"
-  cp -r "$datadir/screenshots" "$userdatadir/"
+  mkdir "$userdatadir/screenshots"
   cp -r "$datadir/levels" "$userdatadir/"
   cp -r "$datadir/robots" "$userdatadir/"
   ln -s "$userdatadir" "$HOME/Documents/bitfighter_settings"
