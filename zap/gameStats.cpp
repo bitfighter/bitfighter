@@ -41,7 +41,7 @@ using namespace Zap;
 namespace Zap
 {
 
-extern ConfigDirectories gConfigDirs;
+extern ConfigDirectories gConfigDirs; // Fail to compile master.  Link errors, missing gConfigDirs.
 
 // Sorts player stats by score, high to low
 S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b)

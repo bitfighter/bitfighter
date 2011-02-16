@@ -271,6 +271,8 @@ protected:
 
    StringTableEntry mAutoDetectStr;             // Player's joystick autodetect string, for research purposes
 
+   ByteBuffer *mDataBuffer;
+
    /// @}
 
 public:
@@ -279,6 +281,7 @@ public:
    /// so we don't explode if we destruct right away.
    MasterServerConnection()
    {
+      mDataBuffer = NULL;
       mStrikeCount = 0; 
       mLastActivityTime = 0;
       mNext = this;
@@ -313,6 +316,8 @@ public:
                walk->m2cPlayerLeftGlobalChat(mPlayerOrServerName);
 
       gNeedToWriteStatus = true;
+      if(mDataBuffer)
+         delete mDataBuffer;
    }
 
    /// Adds this connection to the doubly linked list of servers
@@ -1183,7 +1188,7 @@ public:
    }
 
 
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (VersionedGameStats stats))
+   void SaveStatistics(VersionedGameStats &stats)
    {
       if(!stats.valid)
       {
@@ -1216,6 +1221,38 @@ public:
       // Will fail if compiled without database support and gWriteStatsToDatabase is true
       databaseWriter.insertStats(*gameStats);
 
+   }
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (VersionedGameStats stats))
+   {
+      SaveStatistics(stats);
+   }
+
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (U8 type, ByteBufferPtr data))
+   {
+      if(mDataBuffer)
+      {
+         if(mDataBuffer->getBufferSize() < 1024*128)  // limit memory, to avoid eating too much memory.
+            mDataBuffer->appendBuffer(*data.getPointer());
+      }
+      else
+      {
+         mDataBuffer = new ByteBuffer(*data.getPointer());
+         mDataBuffer->takeOwnership();
+      }
+
+      if(type == 1)
+      {
+         BitStream s(mDataBuffer->getBuffer(), mDataBuffer->getBufferSize());
+         VersionedGameStats versionStats;
+         Types::read(s, &versionStats);
+         SaveStatistics(versionStats);
+      }
+
+      if(type != 0)
+      {
+         delete mDataBuffer;
+         mDataBuffer = NULL;
+      }
    }
 
 

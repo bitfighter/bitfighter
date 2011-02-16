@@ -181,8 +181,13 @@ TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendGameStatistics_2, (StringTableEn
    NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 4) {}
 
 
+// 015
 TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendStatistics, (Zap::VersionedGameStats stats), (stats),
                   NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 6) {}
+
+// future?
+TNL_IMPLEMENT_RPC(MasterServerInterface, s2mSendDataParts, (U8 mode, ByteBufferPtr data), (mode, data),
+                  NetClassGroupMasterMask, RPCGuaranteedOrdered, RPCDirClientToServer, 7) {}
 
 ////////////////////////////////////
 // Authentication RPCs
