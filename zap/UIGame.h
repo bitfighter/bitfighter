@@ -173,7 +173,7 @@ private:
    bool mModActivated[ShipModuleCount];
 
    void setBusyChatting(bool busy);       // Tell the server we are (or are not) busy chatting
-   bool checkName(string &name);          // Make sure name is valid, and correct case of name if otherwise correct
+   bool checkName(string *name);          // Make sure name is valid, and correct case of name if otherwise correct
 
    enum VolumeType {
       SfxVolumeType,

@@ -1489,7 +1489,7 @@ const char * findPointerOfArg(const char *message, S32 count)
 }
 
 
-bool GameUserInterface::checkName(string &name)
+bool GameUserInterface::checkName(string *name)
 {
    S32 potentials = 0;
    string potential;
@@ -1500,9 +1500,9 @@ bool GameUserInterface::checkName(string &name)
          continue;
 
       const char *n = gClientGame->getGameType()->mClientList[i]->name.getString();
-      if(!strcmp(n, name.c_str()))           // Exact match
+      if(!strcmp(n, name->c_str()))           // Exact match
          return true;
-      else if(!stricmp(n, name.c_str()))     // Case insensitive match
+      else if(!stricmp(n, name->c_str()))     // Case insensitive match
       {
          potentials++;
          potential = n;
@@ -1511,7 +1511,7 @@ bool GameUserInterface::checkName(string &name)
 
    if(potentials == 1)
    {
-      name = potential;
+      *name = potential;
       return true;
    }
 
@@ -1785,7 +1785,7 @@ bool GameUserInterface::processCommand(Vector<string> &words)
          displayErrorMessage("!!! Usage: /mute <player name>");
       else
       {
-         if(!checkName(words[1]))
+         if(!checkName(&words[1]))
             displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
          else
          {
