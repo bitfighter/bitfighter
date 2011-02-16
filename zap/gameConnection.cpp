@@ -1000,12 +1000,7 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    // use voting when no level change password and more then 1 players
    if(!mIsAdmin && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
    {
-      if(gServerGame->mVoteTimer != 0)
-         return;
-      gServerGame->mVoteType = 0;
-      gServerGame->mVoteNumber = newLevelIndex;
-      gServerGame->mVoteClientName = getClientName();
-      gServerGame->voteStart();
+      gServerGame->voteStart(this, 0, newLevelIndex);
       return;
    }
 

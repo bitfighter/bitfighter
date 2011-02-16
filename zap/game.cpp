@@ -353,13 +353,47 @@ void Game::cleanUp()
 }
 
 
-void ServerGame::voteStart()
+void ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 {
+   if(gServerGame->mVoteTimer != 0)
+   {
+      client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't start vote when there is pending vote.");
+      return;
+   }
+
    mVoteTimer = 12000;
+   mVoteType = type;
+   mVoteNumber = number;
+   mVoteClientName = client->getClientName();
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
    {
       walk->mVote = 0;
    }
+   client->mVote = 1;
+   client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
+}
+
+void ServerGame::voteClient(GameConnection *client, bool voteYes)
+{
+   if(mVoteTimer == 0)
+      client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Nothing to vote");
+   else if(client->mVote == (voteYes ? 2 : 1))
+      client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Already voted");
+   else if(client->mVote == 0)
+   {
+      if(voteYes)
+         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted Yes");
+      else
+         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted No");
+   }
+   else
+   {
+      if(voteYes)
+         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Changed vote to Yes");
+      else
+         client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Changed vote to No");
+   }
+   client->mVote = voteYes ? 2 : 1;
 }
 
 S32 ServerGame::getLevelNameCount()
@@ -996,11 +1030,17 @@ void ServerGame::idle(U32 timeDelta)
                }
                break;
             }
+            bool WaitingToVote = false;
             for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
             {
-               if(walk->mVote == 0)
+               if(walk->mVote == 0 && !walk->isRobot())
+               {
+                  WaitingToVote = true;
                   walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXUIBoop, msg, e, s, i);
+               }
             }
+            if(!WaitingToVote)
+               mVoteTimer = 1;  // no more waiting when everyone have voted.
          }
          mVoteTimer -= timeDelta;
       }

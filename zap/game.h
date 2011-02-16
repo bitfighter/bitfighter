@@ -299,7 +299,8 @@ public:
    S32 mVoteNumber;
    //SafePtr<GameConnection> mVoteClientConnection;
    StringTableEntry mVoteClientName;
-   void voteStart();
+   void voteStart(GameConnection *client, S32 type, S32 number = 0);
+   void voteClient(GameConnection *client, bool voteYes);
 
    enum HostingModePhases { NotHosting, LoadingLevels, DoneLoadingLevels, Hosting };      
 

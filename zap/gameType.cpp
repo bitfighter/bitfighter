@@ -2178,12 +2178,7 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
    // use voting when no level change password and more then 1 players
    if(!source->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
    {
-      if(gServerGame->mVoteTimer != 0)
-         return;
-      gServerGame->mVoteType = 1;
-      gServerGame->mVoteNumber = time;
-      gServerGame->mVoteClientName = source->getClientName();
-      gServerGame->voteStart();
+      gServerGame->voteStart(source, 1, time);
       return;
    }
 
@@ -2208,12 +2203,7 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
 
    if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
    {
-      if(gServerGame->mVoteTimer != 0)
-         return;
-      gServerGame->mVoteType = 4;
-      gServerGame->mVoteNumber = team;
-      gServerGame->mVoteClientName = source->getClientName();
-      gServerGame->voteStart();
+      gServerGame->voteStart(source, 4, team);
       return;
    }
 
@@ -2613,12 +2603,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             // use voting when no level change password and more then 1 players
             if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
             {
-               if(gServerGame->mVoteTimer != 0)
-                  return;
-               gServerGame->mVoteType = 2;
-               gServerGame->mVoteNumber = time;
-               gServerGame->mVoteClientName = clientRef->clientConnection->getClientName();
-               gServerGame->voteStart();
+               gServerGame->voteStart(clientRef->clientConnection, 2, time);
                return;
             }
             // We want to preserve the actual, overall time of the game in mGameTimer's period
@@ -2656,7 +2641,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
                gServerGame->mVoteType = 3;
                gServerGame->mVoteNumber = score;
                gServerGame->mVoteClientName = clientRef->clientConnection->getClientName();
-               gServerGame->voteStart();
+               gServerGame->voteStart(clientRef->clientConnection, 3, score);
                return;
             }
             mWinningScore = score;
@@ -2803,13 +2788,11 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    */
    else if(!stricmp(cmd, "yes"))
    {
-      clientRef->clientConnection->mVote = 1;
-      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted Yes");
+      gServerGame->voteClient(clientRef->clientConnection, true);
    }
    else if(!stricmp(cmd, "no"))
    {
-      clientRef->clientConnection->mVote = 2;
-      clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Voted No");
+      gServerGame->voteClient(clientRef->clientConnection, false);
    }
    else
    {
