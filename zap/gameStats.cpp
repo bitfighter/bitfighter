@@ -23,7 +23,7 @@
 //
 //------------------------------------------------------------------------------------
 
-#include "config.h"
+//#include "config.h"
 #include "gameStats.h"
 #include "../master/database.h"
 #include "gameWeapons.h"         // For WeaponType enum
@@ -39,9 +39,11 @@ using namespace TNL;
 using namespace Zap;
 
 namespace Zap
+
 {
 
-extern ConfigDirectories gConfigDirs;
+//extern ConfigDirectories gConfigDirs; // Fail to compile master.  Link errors, missing gConfigDirs.
+string gSqlite = "stats";
 
 // Sorts player stats by score, high to low
 S32 QSORT_CALLBACK playerScoreSort(PlayerStats *a, PlayerStats *b)
@@ -106,7 +108,7 @@ S32 QSORT_CALLBACK teamScoreSort(TeamStats *a, TeamStats *b)
    {
       processStatsResults(&stats->gameStats);
 
-      string databasePath = gConfigDirs.logDir + "stats.db";
+      string databasePath = gSqlite + ".db";
 
       DatabaseWriter databaseWriter(databasePath.c_str());
 
@@ -256,7 +258,8 @@ namespace Types
 
       // Stop here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched
       VersionedGameStats_read_end(s);
-      val->valid = true;
+      if(s.isValid())
+         val->valid = true;
    }
 
 

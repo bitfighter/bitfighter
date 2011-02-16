@@ -201,6 +201,8 @@ public:
    TNL_DECLARE_RPC(m2sSetAuthenticated, (Vector<U8> id, StringTableEntry name, RangedU32<0,AuthenticationStatusCount> status));
 
    TNL_DECLARE_RPC(s2mSendStatistics, (Zap::VersionedGameStats stats));
+
+   TNL_DECLARE_RPC(s2mSendDataParts, (U8 type, ByteBufferPtr data));
 };
 
 
