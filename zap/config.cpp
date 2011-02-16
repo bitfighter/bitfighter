@@ -1432,6 +1432,7 @@ string resolutionHelper(const string &cmdLineDir, const string &rootDataDir, con
 
 
 extern ConfigDirectories gConfigDirs;
+extern string gSqlite;
 
 // Doesn't handle leveldir -- that one is handled separately, later, because it requires input from the INI file
 void ConfigDirectories::resolveDirs()
@@ -1448,6 +1449,8 @@ void ConfigDirectories::resolveDirs()
    gConfigDirs.cacheDir      = resolutionHelper(gCmdLineSettings.dirs.cacheDir,      "", "cache");
    gConfigDirs.luaDir        = resolutionHelper(gCmdLineSettings.dirs.luaDir,        "", "scripts");      
    gConfigDirs.sfxDir        = resolutionHelper(gCmdLineSettings.dirs.sfxDir,        "", "sfx");   
+
+   gSqlite = gConfigDirs.logDir + "stats";
 }
 
 

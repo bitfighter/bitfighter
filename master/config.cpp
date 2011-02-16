@@ -58,6 +58,9 @@ extern string gStatsDatabaseUsername;
 extern string gStatsDatabasePassword;
 extern bool gWriteStatsToMySql;
 
+namespace Zap {
+   extern string gSqlite;
+}
 
 extern U32 gLatestReleasedCSProtocol;
 
@@ -154,6 +157,9 @@ void processConfigLine(int argc, string argv[])
 
    else if(argv[0] == "write_stats_to_mysql" && argc > 1)
       gWriteStatsToMySql = (Zap::lcase(argv[1]) == "yes");
+
+   else if(argv[0] == "Sqlite" && argc > 1)
+      Zap::gSqlite = argv[1];
    
 }
 
