@@ -37,22 +37,25 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(CTFGameType);
 
-void CTFGameType::addFlag(FlagItem *theFlag)
+
+void CTFGameType::addFlag(FlagItem *flag)
 {
-   S32 i;
-   for(i = 0; i < mFlags.size(); i++)
-   {
-      if(mFlags[i] == NULL)
-      {
-         mFlags[i] = theFlag;
-         break;
-      }
-   }
-   if(i == mFlags.size())
-      mFlags.push_back(theFlag);
+   //S32 i;
+   //for(i = 0; i < mFlags.size(); i++)     // What is this for???
+   //{
+   //   if(mFlags[i] == NULL)
+   //   {
+   //      mFlags[i] = theFlag;
+   //      break;
+   //   }
+   //}
+   //if(i == mFlags.size())
+   //   mFlags.push_back(theFlag); 
+
+   Parent::addFlag(flag);
 
    if(!isGhost())
-      addItemOfInterest(theFlag);
+      addItemOfInterest(flag);      // Server only
 }
 
 
@@ -185,6 +188,16 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
       else
          renderObjectiveArrow(mFlags[i], getTeamColor(mFlags[i]->getTeam()));
    }
+}
+
+
+bool CTFGameType::teamHasFlag(S32 teamId)
+{
+   for(S32 i = 0; i < mFlags.size(); i++)
+      if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
+         return true;
+
+   return false;
 }
 
 

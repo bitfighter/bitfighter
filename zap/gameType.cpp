@@ -641,6 +641,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       {
          S32 ypos = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - lroff - (teams.size() - i - 1) * 38;
 
+         glColor3f(1,0,1);
+         if(teamHasFlag(teams[i].getId()))
+            UserInterface::drawString(xpos - 50, ypos + 3, 18, "*");
+
          renderFlag(xpos - 20, ypos + 18, teams[i].color);
          glColor3f(1,1,1);
          UserInterface::drawStringf(xpos, ypos, textsize, "%d", teams[i].getScore());
@@ -1552,11 +1556,12 @@ void GameType::performProxyScopeQuery(GameObject *scopeObject, GameConnection *c
 }
 
 
+// Server only
 void GameType::addItemOfInterest(Item *theItem)
 {
 #ifdef TNL_DEBUG
    for(S32 i = 0; i < mItemsOfInterest.size(); i++)
-      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != theItem, "item in ItemOfInterest already exist.");
+      TNLAssert(mItemsOfInterest[i].theItem.getPointer() != theItem, "Item already exists in ItemOfInterest!");
 #endif
    ItemOfInterest i;
    i.theItem = theItem;

@@ -48,23 +48,24 @@ public:
 
    bool isFlagGame() { return true; }
 
-
-   void addFlag(FlagItem *theFlag)
+   // Server only
+   void addFlag(FlagItem *flag)
    {
-      S32 i;
-      for(i = 0; i < mFlags.size(); i++)
-      {
-         if(mFlags[i] == NULL)
-         {
-            mFlags[i] = theFlag;
-            break;
-         }
-      }
-      if(i == mFlags.size())
-         mFlags.push_back(theFlag);
+      //S32 i;
+      //for(i = 0; i < mFlags.size(); i++)     // What is this?!?
+      //{
+      //   if(mFlags[i] == NULL)
+      //   {
+      //      mFlags[i] = theFlag;
+      //      break;
+      //   }
+      //}
+      //if(i == mFlags.size())
+      //   mFlags.push_back(theFlag);    // Parent::addFlag(flag);
 
+      Parent::addFlag(flag);
       if(!isGhost())
-         addItemOfInterest(theFlag);
+         addItemOfInterest(flag);      // Server only
    }
 
 

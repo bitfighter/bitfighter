@@ -30,6 +30,8 @@
 namespace Zap
 {
 
+U32 Team::mNextId = 0;
+
 // Read team from level file params
 void AbstractTeam::readTeamFromLevelLine(S32 argc, const char **argv)
 {

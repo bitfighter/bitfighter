@@ -50,15 +50,16 @@ XXX need to document timers, new luavec stuff XXX
 /* Fixes after 015
 <h4></h4>
 <ul>
-<li>Players can now see cloaked teammates
-<li>Fixed bug with crossing forcefields when using engineer module
-<li>Fixed bug letting some players pick heat seeker when the weapon doesn't yet exist
+<li>Players can now see cloaked teammates.
+<li>Fixed bug with crossing forcefields when using engineer module.
+<li>Fixed bug letting some players pick heat seeker when the weapon doesn't yet exist.
 <li>Fixed a possible server crash when client sends invalid weapon or module in loadout.
 <li>Fixed Robot getReqLoadout that returns invalid third weapon.
 <li>Fixed selecting loadout that is same as ship after selecting new loadout, now avoids changing ships loadout when cancelled.
 <li>Can now choose one of multiple joysticks. If there is no joystick, then you cannot change input from keyboard to joystick.
-<li>Can add or remove joysticks while in the options menu; no longer requires restart
-<li>New levels have engineer enabled by default
+<li>Can add or remove joysticks while in the options menu; no longer requires restart.
+<li>New levels have engineer enabled by default.
+<li>Indicator now shows which team possesses the flag in CTF, ZC, and rabbit in team mode.
 </ul>
 <h4>New Features</h4>
 <ul>

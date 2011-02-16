@@ -192,16 +192,16 @@ void RabbitGameType::idle(GameObject::IdleCallPath path)
    for(S32 flagIndex = 0; flagIndex < mFlags.size(); flagIndex++)
    {
       FlagItem *mRabbitFlag = mFlags[flagIndex];
-      if(! mRabbitFlag)
+      if(!mRabbitFlag)
 		{
          TNLAssert(false, "RabbitGameType::idle NULL mFlags");
          mFlags.erase_fast(flagIndex);
 		}
       else
       {
-         if (mRabbitFlag->isMounted())
+         if(mRabbitFlag->isMounted())
          {
-            if (mRabbitFlag->mTimer.update(deltaT))
+            if(mRabbitFlag->mTimer.update(deltaT))
             {
                onFlagHeld(mRabbitFlag->getMount());
                mRabbitFlag->mTimer.reset(mFlagScoreTimer);
@@ -209,7 +209,7 @@ void RabbitGameType::idle(GameObject::IdleCallPath path)
          }
          else
          {
-            if (!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
+            if(!mRabbitFlag->isAtHome() && mRabbitFlag->mTimer.update(deltaT))
             {
                mRabbitFlag->sendHome();
                static StringTableEntry returnString("The carrot has been returned!");
@@ -264,6 +264,17 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 }
 
 
+bool RabbitGameType::teamHasFlag(S32 teamId)
+{
+   if(isTeamGame())  
+      for(S32 i = 0; i < mFlags.size(); i++)
+         if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
+            return true;
+
+   return false;
+}
+
+
 void RabbitGameType::itemDropped(Ship *ship, Item *item)
 {
    FlagItem *flag = dynamic_cast<FlagItem *>(item);
@@ -292,24 +303,26 @@ void RabbitGameType::onFlagHeld(Ship *ship)
 }
 
 
-void RabbitGameType::addFlag(FlagItem *theFlag)
+void RabbitGameType::addFlag(FlagItem *flag)
 {
-   //mRabbitFlag = theFlag;
-   mFlags.push_back(theFlag);
-   theFlag->setScopeAlways();
+   Parent::addFlag(flag);
+   if(!isGhost())
+      flag->setScopeAlways();
 }
+
 
 // Rabbit killed another ship
 void RabbitGameType::onFlaggerKill(Ship *rabbitShip)
 {
    s2cRabbitMessage(RabbitMsgRabbitKill, rabbitShip->getName());
-   updateScore(rabbitShip, RabbitKills);      // Event: RabbitKills
+   updateScore(rabbitShip, RabbitKills);  
 }
+
 
 void RabbitGameType::onFlaggerDead(Ship *killerShip)
 {
    s2cRabbitMessage(RabbitMsgRabbitDead, killerShip->getName());
-   updateScore(killerShip, RabbitKilled);     // Event: RabbitKilled
+   updateScore(killerShip, RabbitKilled); 
 }
 
 

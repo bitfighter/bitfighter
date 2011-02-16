@@ -168,6 +168,7 @@ public:
    virtual bool isTeamGame() { return mTeams.size() > 1; }                                   // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
+   virtual bool teamHasFlag(S32 teamId) { return false; }
    S32 getWinningScore() { return mWinningScore; }
    U32 getTotalGameTime() { return (mGameTimer.getPeriod() / 1000); }
    S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); }
@@ -191,7 +192,7 @@ public:
 
    F32 getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 updateSkips);
 
-   Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retireve, HTF, CTF)
+   Vector<SafePtr<FlagItem> > mFlags;    // List of flags for those games that keep lists of flags (retrieve, HTF, CTF)
 
    static void printRules();             // Dump game-rule info
 
@@ -348,7 +349,7 @@ public:
 
 
    // gameType flag methods for CTF, Rabbit, Football
-   virtual void addFlag(FlagItem *flag) {  /* do nothing */  }
+   virtual void addFlag(FlagItem *flag) {  mFlags.push_back(flag);  }
    virtual void itemDropped(Ship *ship, Item *item) {  /* do nothing */  }
    virtual void shipTouchFlag(Ship *ship, FlagItem *flag) {  /* do nothing */  }
 

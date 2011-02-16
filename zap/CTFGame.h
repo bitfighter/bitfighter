@@ -41,23 +41,23 @@ private:
    typedef GameType Parent;
 
 public:
-   bool isFlagGame() { return true; }
    void addFlag(FlagItem *flag);
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, Item *item);
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
    void renderInterfaceOverlay(bool scoreboardVisible);
+   bool teamHasFlag(S32 teamId);
 
    GameTypes getGameType() { return CTFGame; }
    const char *getGameTypeString() { return "Capture the Flag"; }
    const char *getShortName() { return "CTF"; }
    const char *getInstructionString() { return "Take the opposing team's flag and touch it to your flag!"; }
    
+   bool isFlagGame() { return true; }
    bool isTeamGame() { return true; }
    bool canBeTeamGame() { return true; }
    bool canBeIndividualGame() { return false; }
    bool isTeamFlagGame() { return true; }    // Teams matter with our flags in this game
-
 
    S32 getEventScore(ScoringGroup scoreGroup, ScoringEvent scoreEvent, S32 data);
 

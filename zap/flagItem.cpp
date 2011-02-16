@@ -84,11 +84,9 @@ Lunar<FlagItem>::RegType FlagItem::methods[] =
 };
 
 
-
 void FlagItem::onAddedToGame(Game *theGame)
-{
-   if(! isGhost())
-      theGame->getGameType()->addFlag(this);    // Does nothing for Nexus game
+{ 
+   theGame->getGameType()->addFlag(this);    
    getGame()->mObjectsLoaded++;
 }
 

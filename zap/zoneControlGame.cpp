@@ -61,10 +61,13 @@ public:
    void shipTouchFlag(Ship *ship, FlagItem *flag);
    void itemDropped(Ship *ship, Item *item);
    void addZone(GoalZone *zone);
-   void addFlag(FlagItem *flag)
+
+   void addFlag(FlagItem *flag)     // Server only
    {
+      Parent::addFlag(flag);
       mFlag = flag;
-      addItemOfInterest(flag);
+      if(!isGhost())
+         addItemOfInterest(flag);      // Server only
    }
 
    void shipTouchZone(Ship *ship, GoalZone *zone);
@@ -79,6 +82,8 @@ public:
 
 
    void renderInterfaceOverlay(bool scoreboardVisible);
+   bool teamHasFlag(S32 teamId);
+
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
    void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
 
@@ -278,6 +283,16 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
          }
       }
    }
+}
+
+
+bool ZoneControlGameType::teamHasFlag(S32 teamId)
+{
+   for(S32 i = 0; i < mFlags.size(); i++)
+      if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
+         return true;
+
+   return false;
 }
 
 
