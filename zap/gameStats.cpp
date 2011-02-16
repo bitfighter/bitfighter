@@ -258,7 +258,8 @@ namespace Types
 
       // Stop here if TNL_ENABLE_ASSERTS is on, and write/read size is not matched
       VersionedGameStats_read_end(s);
-      val->valid = true;
+      if(s.isValid())
+         val->valid = true;
    }
 
 

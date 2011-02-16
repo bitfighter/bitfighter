@@ -940,15 +940,45 @@ void GameType::saveGameStats()
    VersionedGameStats stats = getGameStats();
 
 #ifdef TNL_ENABLE_ASSERTS
-   MasterServerConnection masterConnTest;
-   VersionedGameStats_testing = true;
-      // to find any errors with write/read, works without connection to master.
-   masterConnTest.s2mSendStatistics_test(stats);  // Always end with _test.
-   VersionedGameStats_testing = false;
+   {
+      // This is to find any errors with write/read
+      VersionedGameStats_testing = true;
+      BitStream s;
+      VersionedGameStats stats2;
+      Types::write(s, stats);
+      s.setBitPosition(0);
+      Types::read(s, &stats2);
+      TNLAssert(s.isValid(), "Stats not valid, problem with gameStats.cpp read/write");
+      VersionedGameStats_testing = false;
+   }
 #endif
-
+ 
    if(masterConn)
+   {
       masterConn->s2mSendStatistics(stats);
+      // below: it can send much bigger data for stats. (requires master update)
+      /*
+      BitStream s;
+      const U32 partsSize = 512;   // max 1023, limited by ByteBufferSizeBitSize=10
+      Types::write(s, stats);
+      U32 size = s.getBytePosition();
+      for(U32 i=0; i<size; i+=partsSize)
+      {
+         if(i+partsSize < size)
+         {
+            ByteBuffer *bytebuffer = new ByteBuffer(&s.getBuffer()[i], partsSize);
+            bytebuffer->takeOwnership();  // may have to use this to prevent errors.
+            masterConn->s2mSendDataParts(0, ByteBufferPtr(bytebuffer));
+         }
+         else
+         {
+            ByteBuffer *bytebuffer = new ByteBuffer(&s.getBuffer()[i], size-i);
+            bytebuffer->takeOwnership();
+            masterConn->s2mSendDataParts(1, ByteBufferPtr(bytebuffer));
+         }
+      }
+      */
+   }
 
    if(gIniSettings.logStats)
    {

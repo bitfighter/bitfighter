@@ -1227,11 +1227,11 @@ public:
       SaveStatistics(stats);
    }
 
-   TNL_DECLARE_RPC_OVERRIDE(s2mSendStatistics, (U8 type, ByteBufferPtr data))
+   TNL_DECLARE_RPC_OVERRIDE(s2mSendDataParts, (U8 type, ByteBufferPtr data))
    {
       if(mDataBuffer)
       {
-         if(mDataBuffer->getBufferSize() < 1024*128)  // limit memory, to avoid eating too much memory.
+         if(mDataBuffer->getBufferSize() < 1024*256)  // limit memory, to avoid eating too much memory.
             mDataBuffer->appendBuffer(*data.getPointer());
       }
       else
