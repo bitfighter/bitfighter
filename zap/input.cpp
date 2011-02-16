@@ -114,16 +114,16 @@ static S32 keyCodeToButtonIndex(KeyCode keyCode)
 }
 
 // Unfortunately, Linux and Windows map joystick axes differently
-// From ControllerTypeType enum ---> LogitechWingman, LogitechDualAction, SaitekDualAnalogP880, SaitekDualAnalogRumblePad, PS2DualShock, PS2DualShockConversionCable, XBoxController, XBoxControllerOnXBox
-//                                                                Wingmn    DualAct   P880     RumbPad     PS2  PS2 w/Cnvrtr  XBox    XBoxOnXBox
-static U32 controllerButtonCounts[ControllerTypeCount] =          { 9,       10,       9,        10,       10,       10,      10,       14 };     // How many buttons?
+// From ControllerTypeType enum ---> LogitechWingman, LogitechDualAction, SaitekDualAnalogP880, SaitekDualAnalogRumblePad, PS2DualShock, PS2DualShockConversionCable, PS3DualShock, XBoxController, XBoxControllerOnXBox                                                                                                                                              \/ FIXME: Someone check PS3 Joypad on windows!
+//                                                                Wingmn    DualAct   P880     RumbPad     PS2  PS2 w/Cnvrtr  PS3   XBox    XBoxOnXBox
+static U32 controllerButtonCounts[ControllerTypeCount] =          { 9,       10,       9,        10,       10,       10,      10,     10,     14 };     // How many buttons?
 #ifdef TNL_OS_LINUX
-//                                      ? = need to change?         ?       works       ?          ?        ?         ?        ?         ?
-static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 3 }, { 5, 2 }, { 5, 2 }, { 2, 3 }, { 5, 2}, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
+//                                      ? = need to change?         ?       works       ?          ?        ?         ?        ?         ?         ?
+static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 3 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 2, 3 }, { 3, 4 }, { 3, 4 } };  // What axes to use for firing?  Should we let users set this somehow?
 #else
-static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 3, 4 }, { 3, 4 } };
+static U32 shootAxisRemaps[ControllerTypeCount][AXIS_COUNT] = { { 5, 6 }, { 2, 5 }, { 5, 2 }, { 5, 2 }, { 2, 5 }, { 5, 2}, { 2, 5 }, { 3, 4 }, { 3, 4 } };
 #endif
- 
+
 // PS3 Joystick: http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
 
 static U32 controllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
@@ -224,6 +224,26 @@ static U32 controllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
       0,
       0,
    },
+   { // PS3DualShock    13
+      ControllerButtonStart, // Start
+      0, // L3 - Unused
+      0, // R3 - Unused
+      ControllerButtonBack, // Select
+      ControllerButtonDPadUp, // DPAD Up
+      ControllerButtonDPadRight, // DPAD Right
+      ControllerButtonDPadDown, // DPAD Down
+      ControllerButtonDPadLeft, // DPAD Left
+      ControllerButton5, // L2
+      ControllerButton6, // R2
+      ControllerButton7, // L1
+      ControllerButton8, // R1
+      ControllerButton4, // Triangle
+      ControllerButton2, // Circle
+      // FIXME: If you can get X and Square Working. Add them as these buttons:
+      // ControllerButton1 // X
+      // ControllerButton3 // Square
+      // Above order should be correct. X is Button 14 Square is Button 15.
+   },
    { // XBoxController     10
       ControllerButton1,      // A
       ControllerButton2,      // B
@@ -235,8 +255,8 @@ static U32 controllerButtonRemaps[ControllerTypeCount][MaxJoystickButtons] =
       ControllerButtonStart,  // >
       0,
       0,
-      ControllerButton7,      
-      ControllerButton8,      
+      ControllerButton7,
+      ControllerButton8,
       0,
       0,
    },
@@ -471,7 +491,7 @@ S32 getControllerButtonRenderedSize(KeyCode keyCode)
       else if(buttonIndex < 9)      // start  -> S button?
          return 12;                 
       else                          // No back button?    
-        return -1;                  
+        return -1;
    }
 
    else if(joy == SaitekDualAnalogRumblePad)    // First 4 buttons are circles, next 4 are rectangles
@@ -486,6 +506,14 @@ S32 getControllerButtonRenderedSize(KeyCode keyCode)
 
    // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
    else if(joy == PS2DualShock || joy == PS2DualShockConversionCable)
+   {
+      if(buttonIndex < 4)
+         return 18;
+      else
+         return rectButtonWidth;
+   }
+  // http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
+   else if(joy == PS3DualShock)
    {
       if(buttonIndex < 4)
          return 18;
@@ -661,6 +689,75 @@ void renderControllerButton(F32 x, F32 y, KeyCode keyCode, bool activated, S32 o
          }
       }
    }
+   // http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
+   // Based on PS2DualShock
+   else if(joy == PS3DualShock)
+   {
+      if(buttonIndex >= controllerButtonCounts[joy])
+         return;
+
+      static F32 color[6][3] = {
+            { 0.5, 0.5, 1 },
+            { 1, 0.5, 0.5 },
+            { 1, 0.5, 1 },
+            { 0.5, 1, 0.5 },
+            { 0.7, 0.7, 0.7 },
+            { 0.7, 0.7, 0.7 }
+      };
+      Color c(color[buttonIndex][0], color[buttonIndex][1], color[buttonIndex][2]);
+      Point center(x, y + 8);
+      if(buttonIndex < 4)
+      {
+         setButtonColor(activated);
+         drawCircle(center, 9);
+         glColor(c);
+         switch(buttonIndex)
+         {
+         case 0:     // X
+            glBegin(GL_LINES);
+            glVertex(center + Point(-5, -5));
+            glVertex(center + Point(5, 5));
+            glVertex(center + Point(-5, 5));
+            glVertex(center + Point(5, -5));
+            glEnd();
+            break;
+         case 1:     // Circle
+            drawCircle(center, 6);
+            break;
+         case 2:     // Square
+            glBegin(GL_LINE_LOOP);
+            glVertex(center + Point(-5, -5));
+            glVertex(center + Point(-5, 5));
+            glVertex(center + Point(5, 5));
+            glVertex(center + Point(5, -5));
+            glEnd();
+            break;
+         case 3:     // Triangle
+            glBegin(GL_LINE_LOOP);
+            glVertex(center + Point(0, -7));
+            glVertex(center + Point(6, 5));
+            glVertex(center + Point(-6, 5));
+            glEnd();
+            break;
+         }
+      }
+      else
+      {
+         string labels[] = { "L2", "R2", "L1", "R1", "Sel", "Strt" };
+         if (buttonIndex < 9)    // Shoulder buttons
+            renderRectButton(Point(x, y), labels[buttonIndex - 4].c_str(), ALIGN_CENTER, activated);
+         else
+         {  // Triangle button
+            setButtonColor(activated);
+            glBegin(GL_LINE_LOOP);
+            glVertex(center + Point(-15, -9));
+            glVertex(center + Point(-15, 10));
+            glVertex(center + Point(12, 0));
+            glEnd();
+            UserInterface::drawString(x - 13, y + 3, 8, labels[buttonIndex - 4].c_str());
+         }
+      }
+   }
    else if(joy == XBoxController || joy == XBoxControllerOnXBox)
    {
       if(buttonIndex >= controllerButtonCounts[joy])
@@ -756,6 +853,11 @@ ControllerTypeType autodetectJoystickType()
       else if(gJoystickNames[gUseStickNumber - 1] == "PC Conversion Cable")
          ret = PS2DualShockConversionCable;                          // http://ecx.images-amazon.com/images/I/412Q3RFHZVL._SS500_.jpg
 
+      // Note that on Linux, when I plug in the controller, DMSG outputs Sony PLAYSTATION(R)3 Controller.
+      // Was connected.. Thus i have used it here. This may be different on Windows...
+      else if(gJoystickNames[gUseStickNumber - 1].find("PLAYSTATION(R)3") != string::npos)
+         ret = PS3DualShock;                                                     // http://ps3media.ign.com/ps3/image/article/705/705934/e3-2006-in-depth-with-the-ps3-controller-20060515010609802.jpg
+
       else if(gJoystickNames[gUseStickNumber - 1] == "P880")
          ret = SaitekDualAnalogP880;
 
@@ -796,6 +898,8 @@ ControllerTypeType stringToJoystickType(string strJoystick)
       return PS2DualShock;
    else if (strJoystick == "PS2DualShockConversionCable")
       return PS2DualShockConversionCable;
+   else if (strJoystick == "PS3DualShock")
+      return PS3DualShock;
    else if (strJoystick == "XBoxController")
       return XBoxController;
    else if (strJoystick == "XBoxControllerOnXBox")
@@ -824,6 +928,8 @@ string joystickTypeToString(S32 controllerType)
          return "PS2DualShock";
       case PS2DualShockConversionCable:
          return "PS2DualShockConversionCable";
+      case PS3DualShock:
+         return "PS3DualShock";
       case XBoxController:
          return "XBoxController";
       case XBoxControllerOnXBox:
@@ -853,6 +959,8 @@ string joystickTypeToPrettyString(S32 controllerType)
          return "PS2 Dualshock USB";
       case PS2DualShockConversionCable:
          return "PS2 Dualshock USB with Conversion Cable";
+      case PS3DualShock:
+         return "PS3 Sixaxis";
       case XBoxController:
          return "XBox Controller USB";
       case XBoxControllerOnXBox:
@@ -972,8 +1080,8 @@ static bool processJoystickInputs( U32 &buttonMask )
             retMask |= controllerButtonRemaps[gIniSettings.joystickType][i];
          }
       buttonMask = retMask | hatMask;
-   
-   
+
+
       if(gIniSettings.joystickType == XBoxController || gIniSettings.joystickType == XBoxControllerOnXBox && !gJoystickMapping.enable)
       {
          // XBox (windows, not linux) also seems to map triggers to axes[2], so we'll create some pseudo-button events for the triggers here
@@ -1186,6 +1294,13 @@ void JoystickUpdateMove(Move *theMove)
    if(buttonDown & ControllerButton6) simulateKeyDown(BUTTON_6);
    if(buttonDown & ControllerButton7) simulateKeyDown(BUTTON_7);
    if(buttonDown & ControllerButton8) simulateKeyDown(BUTTON_8);
+/*   if(buttonDown & ControllerButton9) simulateKeyDown(BUTTON_9);
+   if(buttonDown & ControllerButton10) simulateKeyDown(BUTTON_10);
+   if(buttonDown & ControllerButton11) simulateKeyDown(BUTTON_11);
+   if(buttonDown & ControllerButton12) simulateKeyDown(BUTTON_12);
+   if(buttonDown & ControllerButton13) simulateKeyDown(BUTTON_13);
+   if(buttonDown & ControllerButton14) simulateKeyDown(BUTTON_14);
+   if(buttonDown & ControllerButton15) simulateKeyDown(BUTTON_15); */
    if(buttonDown & ControllerButtonStart) simulateKeyDown(BUTTON_START);
    if(buttonDown & ControllerButtonBack) simulateKeyDown(BUTTON_BACK);
    if(buttonDown & ControllerButtonDPadUp) simulateKeyDown(BUTTON_DPAD_UP);
@@ -1201,6 +1316,13 @@ void JoystickUpdateMove(Move *theMove)
    if(buttonUp & ControllerButton6) simulateKeyUp(BUTTON_6);
    if(buttonUp & ControllerButton7) simulateKeyUp(BUTTON_7);
    if(buttonUp & ControllerButton8) simulateKeyUp(BUTTON_8);
+/*   if(buttonUp & ControllerButton9) simulateKeyUp(BUTTON_9);
+   if(buttonUp & ControllerButton10) simulateKeyUp(BUTTON_10);
+   if(buttonUp & ControllerButton11) simulateKeyUp(BUTTON_11);
+   if(buttonUp & ControllerButton12) simulateKeyUp(BUTTON_12);
+   if(buttonUp & ControllerButton13) simulateKeyUp(BUTTON_13);
+   if(buttonUp & ControllerButton14) simulateKeyUp(BUTTON_14);
+   if(buttonUp & ControllerButton15) simulateKeyUp(BUTTON_15); */
    if(buttonUp & ControllerButtonStart) simulateKeyUp(BUTTON_START);
    if(buttonUp & ControllerButtonBack) simulateKeyUp(BUTTON_BACK);
    if(buttonUp & ControllerButtonDPadUp) simulateKeyUp(BUTTON_DPAD_UP);

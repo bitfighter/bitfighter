@@ -45,6 +45,7 @@ enum ControllerTypeType
    SaitekDualAnalogRumblePad, // 4 buttons on top, 4 in front
    PS2DualShock,
    PS2DualShockConversionCable,
+   PS3DualShock,
    XBoxController,
    XBoxControllerOnXBox,
    ControllerTypeCount,
