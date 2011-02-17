@@ -2206,11 +2206,12 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
    if(!source->isAdmin() && source->mSwitchTimer.getCurrent())                // If we're not admin and we're waiting for our switch-expiration to reset,
       return;                                                                 // return without processing the change team request
 
-   if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
-   {
-      gServerGame->voteStart(source, 4, team);
-      return;
-   }
+   // Vote to change team can be more problems then the old way...
+   //if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
+   //{
+   //   gServerGame->voteStart(source, 4, team);
+   //   return;
+   //}
 
    changeClientTeam(source, team);
 

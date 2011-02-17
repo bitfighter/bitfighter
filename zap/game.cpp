@@ -377,7 +377,7 @@ void ServerGame::voteClient(GameConnection *client, bool voteYes)
 {
    if(mVoteTimer == 0)
       client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Nothing to vote");
-   else if(client->mVote == (voteYes ? 2 : 1))
+   else if(client->mVote == (voteYes ? 1 : 2))
       client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Already voted");
    else if(client->mVote == 0)
    {
@@ -1048,13 +1048,19 @@ void ServerGame::idle(U32 timeDelta)
       {
          S32 voteYes = 0;
          S32 voteNo = 0;
+         S32 voteNothing = 0;
          mVoteTimer = 0;
          for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
          {
-            if(walk->mVote == 1) voteYes++;
-            if(walk->mVote == 2) voteNo++;
+            if(walk->mVote == 1)
+               voteYes++;
+            else if(walk->mVote == 2)
+               voteNo++;
+            else if(!walk->isRobot())
+               voteNothing++;
          }
-         if(voteYes > voteNo)
+         bool votePass = voteYes * 2 > voteNo * 2 + voteNothing;
+         if(votePass)
          {
             GameType *gt = getGameType();
             mVoteTimer = 0;
@@ -1100,10 +1106,11 @@ void ServerGame::idle(U32 timeDelta)
             Vector<S32> i;
             i.push_back(voteYes);
             i.push_back(voteNo);
-            e.push_back(voteYes > voteNo ? "Pass" : "Fail");
+            i.push_back(voteNothing);
+            e.push_back(votePass ? "Pass" : "Fail");
             for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
             {
-               walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no", e, s, i);
+               walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
             }
          }
       }
