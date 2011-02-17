@@ -2585,6 +2585,28 @@ GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool
 }
 
 
+GameConnection *findClient(GameType *gt, const char *name)
+{
+   for(S32 i = 0; i < gt->mClientList.size(); i++)
+   {
+      const char *found = gt->mClientList[i]->clientConnection->getClientName().getString();
+      if(!stricmp(name, found))
+         return gt->mClientList[i]->clientConnection;
+   }
+   GameConnection *client = NULL;
+   for(S32 i = 0; i < gt->mClientList.size(); i++)
+   {
+      const char *found = gt->mClientList[i]->clientConnection->getClientName().getString();
+      if(strstr(found, name))
+      {
+         if(client)
+            return NULL;
+         client = gt->mClientList[i]->clientConnection;
+      }
+   }
+   return client;
+}
+
 // Runs the server side commands, which the client may or may not know about
 
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
@@ -2753,6 +2775,24 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    {
       gServerGame->voteClient(clientRef->clientConnection, false);
    }
+   else if(!stricmp(cmd, "gmute"))
+   {
+      if(!clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need admin permission");
+      else if(args.size() < 1)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter player name");
+      else
+      {
+         GameConnection *gc = findClient(this, args[0].getString());
+         if(!gc)
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Player name not found");
+         else
+         {
+            gc->mChatMute = !gc->mChatMute;
+            clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, gc->mChatMute ? "Player is muted" : "Player is not muted");
+         }
+      }
+   }
    else
    {
       // Command not found, tell the client
@@ -2802,6 +2842,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChat, (bool global, StringPtr message), (globa
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientRef *clientRef = source->getClientRef();
 
+   if(source->mChatMute)
+      return;
+
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
                                  s2cDisplayChatMessage, (global, source->getClientName(), message));
    sendChatDisplayEvent(clientRef, global, message.getString(), theEvent);
@@ -2813,6 +2856,9 @@ GAMETYPE_RPC_C2S(GameType, c2sSendChatSTE, (bool global, StringTableEntry messag
 {
    GameConnection *source = (GameConnection *) getRPCSourceConnection();
    ClientRef *clientRef = source->getClientRef();
+
+   if(source->mChatMute)
+      return;
 
    RefPtr<NetEvent> theEvent = TNL_RPC_CONSTRUCT_NETEVENT(this,
       s2cDisplayChatMessageSTE, (global, source->getClientName(), message));
