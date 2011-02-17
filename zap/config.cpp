@@ -273,7 +273,6 @@ static void loadSoundSettings()
    gIniSettings.voiceChatVolLevel = checkVol(gIniSettings.voiceChatVolLevel);
 }
 
-
 static void loadHostConfiguration()
 {
    gIniSettings.hostname  = gINI.GetValue("Host", "ServerName", gIniSettings.hostname);
@@ -308,6 +307,10 @@ static void loadHostConfiguration()
 	if(args.size() >= 2) gIniSettings.mySqlStatsDatabaseName = args[1];
 	if(args.size() >= 3) gIniSettings.mySqlStatsDatabaseUser = args[2];
 	if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
+   if(gIniSettings.mySqlStatsDatabaseServer == "server" && gIniSettings.mySqlStatsDatabaseName == "dbname")
+   {
+      mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
+   }
 #endif
 
    gIniSettings.defaultRobotScript = gINI.GetValue("Host", "DefaultRobotScript", gIniSettings.defaultRobotScript);
@@ -1253,8 +1256,8 @@ static void writeHost()
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
    gINI.SetValue  (section, "DefaultRobotScript", gIniSettings.defaultRobotScript);
 #ifdef BF_WRITE_TO_MYSQL
-   // TODO: fix this... Don't want to overwrite existing settings
-   //gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password"); // overwrites to defaults...
+   if(gIniSettings.mySqlStatsDatabaseServer == "" && gIniSettings.mySqlStatsDatabaseName == "" && gIniSettings.mySqlStatsDatabaseLogin == "" && gIniSettings.mySqlStatsDatabasePassword == "")
+      gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
 #endif
 }
 

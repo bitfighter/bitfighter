@@ -985,7 +985,9 @@ void GameType::saveGameStats()
       */
    }
 
+#ifndef BF_WRITE_TO_MYSQL  // for some reason, logStats keep going back to NO, probably because of running old release version of 015
    if(gIniSettings.logStats)
+#endif
    {
       processStatsResults(&stats.gameStats);
 
