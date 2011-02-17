@@ -61,20 +61,21 @@ public:
 class Team : public AbstractTeam
 {  
 private:
-   U32 mId;                // Helps keep track of teams after they've been sorted
-   static U32 mNextId;
+   //static U32 mNextId;     // The problem is it never goes back to zero, so it keeps counting up and up, to > 100 ?
+                  // As with any statics, it can cause problems with (in the future) multiplayer split screen clients in one game
 
 protected:
    S32 mScore;
 
 public:
+   U32 mId;                // Helps keep track of teams after they've been sorted
    StringTableEntry _name;
    Vector<Point> spawnPoints;
    Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
 
    F32 rating; 
 
-   Team() { numPlayers = 0; numBots = 0; mScore = 0; rating = 0; mId = mNextId++;}     // Quickie constructor
+   Team() { numPlayers = 0; numBots = 0; mScore = 0; rating = 0;}// mId = mNextId++;}     // Quickie constructor
 
    void setName(const char *name) { _name = name; }
    void setName(StringTableEntry name) { _name = name; }
