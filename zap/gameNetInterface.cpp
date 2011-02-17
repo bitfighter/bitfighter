@@ -61,9 +61,10 @@ bool GameNetInterface::isAddressBanned(const Address &theAddress)
 
 void GameNetInterface::processPacket(const Address &sourceAddress, BitStream *pStream)
 {
-   for(S32 i = 0; i < mBanList.size(); i++)
-      if(sourceAddress.isEqualAddress(mBanList[i].theAddress))
-         return;        // Ignore packets from banned hosts
+   // can cause problems when one of multiple player using same IP address is kicked, causing all player in same IP address to disconnect. Moved to GameConnection::readConnectRequest (sam)
+   //for(S32 i = 0; i < mBanList.size(); i++)
+      //if(sourceAddress.isEqualAddress(mBanList[i].theAddress))
+         //return;        // Ignore packets from banned hosts
 
    Parent::processPacket(sourceAddress, pStream);
 }

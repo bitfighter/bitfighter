@@ -309,7 +309,7 @@ static void loadHostConfiguration()
 	if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
    if(gIniSettings.mySqlStatsDatabaseServer == "server" && gIniSettings.mySqlStatsDatabaseName == "dbname")
    {
-      mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
+      gIniSettings.mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
    }
 #endif
 
@@ -1256,7 +1256,7 @@ static void writeHost()
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
    gINI.SetValue  (section, "DefaultRobotScript", gIniSettings.defaultRobotScript);
 #ifdef BF_WRITE_TO_MYSQL
-   if(gIniSettings.mySqlStatsDatabaseServer == "" && gIniSettings.mySqlStatsDatabaseName == "" && gIniSettings.mySqlStatsDatabaseLogin == "" && gIniSettings.mySqlStatsDatabasePassword == "")
+   if(gIniSettings.mySqlStatsDatabaseServer == "" && gIniSettings.mySqlStatsDatabaseName == "" && gIniSettings.mySqlStatsDatabaseUser == "" && gIniSettings.mySqlStatsDatabasePassword == "")
       gINI.SetValue  (section, "MySqlStatsDatabaseCredentials", "server, dbname, login, password");
 #endif
 }
