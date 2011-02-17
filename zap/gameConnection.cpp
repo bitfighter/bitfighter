@@ -1152,6 +1152,12 @@ bool GameConnection::readConnectRequest(BitStream *stream, NetConnection::Termin
       return false;
    }
 
+   if(gServerGame->getNetInterface()->isAddressBanned(getNetAddress()))
+   {
+      reason = ReasonKickedByAdmin;
+      return false;
+   }
+
    char buf[256];
 
    stream->readString(buf);

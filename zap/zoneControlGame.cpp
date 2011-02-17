@@ -288,11 +288,12 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 bool ZoneControlGameType::teamHasFlag(S32 teamId)
 {
-   // TODO: fix runtime error.
-   //for(S32 i = 0; i < mFlags.size(); i++)
-   //   if(mFlags[i]->getMount() && U32(mFlags[i]->getMount()->getTeam()) < U32(GameType::mTeams.size()))
-   //   if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
-   //      return true;
+   for(S32 i = 0; i < mFlags.size(); i++)
+   {
+      TNLAssert(mFlags[i], "NULL flag");
+      if(mFlags[i]->isMounted() && mFlags[i]->getMount()->getTeam() == teamId)
+         return true;
+   }
 
    return false;
 }

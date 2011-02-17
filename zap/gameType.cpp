@@ -620,7 +620,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       Vector<Team> teams(mTeams.size());
 
       for(S32 i = 0; i < mTeams.size(); i++)
+      {
          teams.push_back(mTeams[i]);
+         teams[i].mId = i;
+      }
 
       teams.sort(teamScoreSort);    
 
