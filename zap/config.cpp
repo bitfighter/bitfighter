@@ -283,7 +283,8 @@ static void loadHostConfiguration()
    gIniSettings.adminPassword       = gINI.GetValue("Host", "AdminPassword", gIniSettings.adminPassword);
    gIniSettings.levelChangePassword = gINI.GetValue("Host", "LevelChangePassword", gIniSettings.levelChangePassword);
    gIniSettings.levelDir            = gINI.GetValue("Host", "LevelDir", gIniSettings.levelDir);
-   gIniSettings.maxplayers          = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxplayers);
+   gIniSettings.maxPlayers          = gINI.GetValueI("Host", "MaxPlayers", gIniSettings.maxPlayers);
+   gIniSettings.maxBots             = gINI.GetValueI("Host", "MaxBots", gIniSettings.maxBots);
 
    gIniSettings.alertsVolLevel = (float) gINI.GetValueI("Host", "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10)) / 10.0f;
    gIniSettings.allowGetMap          = gINI.GetValueYN("Host", "AllowGetMap", gIniSettings.allowGetMap);
@@ -1229,6 +1230,7 @@ static void writeHost()
       addComment(" LevelChangePassword - Use this password to change levels on your server.  Leave blank to grant access to all.");
       addComment(" LevelDir - Specify where level files are stored; can be overridden on command line with -leveldir param.");
       addComment(" MaxPlayers - The max number of players that can play on your server.");
+      addComment(" MaxBots - The max number of bots allowed on this server.");
       addComment(" AlertsVolume - Volume of audio alerts when players join or leave game from 0 (mute) to 10 (full bore).");
       addComment(" MaxFPS - Maximum FPS the dedicaetd server will run at.  Higher values use more CPU, lower may increase lag (default = 100).");
       addComment(" AllowGetMap - When getmap is allowed, anyone can download the current level using the /getmap command.");
@@ -1248,7 +1250,8 @@ static void writeHost()
    gINI.SetValue  (section, "AdminPassword", gIniSettings.adminPassword);
    gINI.SetValue  (section, "LevelChangePassword", gIniSettings.levelChangePassword);
    gINI.SetValue  (section, "LevelDir", gIniSettings.levelDir);
-   gINI.SetValueI (section, "MaxPlayers", gIniSettings.maxplayers);
+   gINI.SetValueI (section, "MaxPlayers", gIniSettings.maxPlayers);
+   gINI.SetValueI (section, "MaxBots", gIniSettings.maxBots);
    gINI.SetValueI (section, "AlertsVolume", (S32) (gIniSettings.alertsVolLevel * 10));
    gINI.setValueYN(section, "AllowGetMap", gIniSettings.allowGetMap);
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);

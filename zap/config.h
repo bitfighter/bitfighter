@@ -110,7 +110,7 @@ struct CmdLineSettings
 
    ConfigDirectories dirs;
 
-   S32 maxplayers;
+   S32 maxPlayers;
 
    DisplayMode displayMode;    // Fullscreen param supplied
 
@@ -128,7 +128,7 @@ struct CmdLineSettings
       loss = 0;
       lag = 0;
       forceUpdate = false;
-      maxplayers = -1;
+      maxPlayers = -1;
       displayMode = DISPLAY_MODE_UNKNOWN;
       winWidth = -1;
       xpos = -9999;
@@ -184,7 +184,8 @@ struct IniSettings      // With defaults specified
    string adminPassword;
    string levelChangePassword;      // Password to allow access to level changing functionality on non-local server
    string levelDir;                 // Folder where levels are stored, by default
-   S32 maxplayers;                  // Max number of players that can play on local server
+   S32 maxPlayers;                  // Max number of players that can play on local server
+   S32 maxBots;
 
    bool useUpdater;                 // Use updater system (windows only)
 
@@ -275,7 +276,8 @@ struct IniSettings      // With defaults specified
       lastEditorName = "";               // No default editor level name
       hostname = "Bitfighter host";      // Default host name
       hostdescr = "";
-      maxplayers = 127;
+      maxPlayers = 127;
+      maxBots = 127;
       serverPassword = "";               // Passwords empty by default
       adminPassword = "";
       levelChangePassword = "";

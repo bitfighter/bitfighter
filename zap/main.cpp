@@ -590,12 +590,14 @@ void seedRandomNumberGenerator(string name)
 U32 getServerMaxPlayers()
 {
    U32 maxplay;
-   if (gCmdLineSettings.maxplayers > 0)
-      maxplay = gCmdLineSettings.maxplayers;
+   if (gCmdLineSettings.maxPlayers > 0)
+      maxplay = gCmdLineSettings.maxPlayers;
    else
-      maxplay = gIniSettings.maxplayers;
+      maxplay = gIniSettings.maxPlayers;
+
    if(maxplay > MAX_PLAYERS)
       maxplay = MAX_PLAYERS;
+
    return maxplay;
 }
 
@@ -1278,7 +1280,7 @@ TNL_IMPLEMENT_JOURNAL_ENTRYPOINT(ZapJournal, readCmdLineParams, (Vector<StringPt
       else if(!stricmp(argv[i], "-maxplayers")) // additional arg required
       {
          if(hasAdditionalArg)
-            gCmdLineSettings.maxplayers = atoi(argv[i+1]);
+            gCmdLineSettings.maxPlayers = atoi(argv[i+1]);
          else
          {
             logprintf(LogConsumer::LogError, "You must specify the max number of players on your server with the -maxplayers option");

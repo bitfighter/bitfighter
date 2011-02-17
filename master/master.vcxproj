@@ -52,7 +52,7 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\tnl;..\libtomcrypt;..\mysql++</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CHRIS;VERIFY_PHPBB3</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

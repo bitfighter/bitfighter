@@ -1,5 +1,5 @@
 # Script grabs version number from game.h
-!searchparse /file "../zap/game.h" `ZAP_GAME_RELEASE "` versionNumber `"`
+!searchparse /file "../zap/version.h" `ZAP_GAME_RELEASE "` versionNumber `"`
 !define curVersion "${versionNumber}"  
 ;--------------------------------
 ; Include Modern UI
