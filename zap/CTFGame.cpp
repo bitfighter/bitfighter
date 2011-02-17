@@ -193,9 +193,11 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 
 bool CTFGameType::teamHasFlag(S32 teamId)
 {
-   for(S32 i = 0; i < mFlags.size(); i++)
-      if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
-         return true;
+   // TODO: fix runtime error.
+   //for(S32 i = 0; i < mFlags.size(); i++)
+   //   if((U32(mFlags[i]->getMount()->getTeam()) < U32(GameType::mTeams.size())) && mFlags[i] && mFlags[i]->getMount() && U32(mFlags[i]->getMount()->getTeam()) < U32(GameType::mTeams.size()))
+   //   if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
+   //      return true;
 
    return false;
 }

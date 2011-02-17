@@ -393,7 +393,7 @@ void ServerGame::voteClient(GameConnection *client, bool voteYes)
       else
          client->s2cDisplayMessage(GameConnection::ColorGreen, SFXNone, "Changed vote to No");
    }
-   client->mVote = voteYes ? 2 : 1;
+   client->mVote = voteYes ? 1 : 2;
 }
 
 S32 ServerGame::getLevelNameCount()
@@ -1040,7 +1040,7 @@ void ServerGame::idle(U32 timeDelta)
                }
             }
             if(!WaitingToVote)
-               mVoteTimer = 1;  // no more waiting when everyone have voted.
+               mVoteTimer = timeDelta + 1;  // no more waiting when everyone have voted.
          }
          mVoteTimer -= timeDelta;
       }
