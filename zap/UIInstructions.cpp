@@ -617,66 +617,12 @@ void InstructionsUserInterface::renderPageObjectDesc(U32 index)
 }
 
 
-// Have room on the screen for up to 16 total lines
-static ControlStringsEditor commands[][20] = { {                  // NO MORE THAN 20 COMMANDS PER PAGE!!!!!
-   { "/admin <password>", "Request admin permissions" },
-   { "/levpass <password>", "Request level change permissions" },
-   { "-", NULL },       // Horiz. line
-   { "/suspend", "Place game on hold while waiting for players" },
-   { "/getmap [file]", "Save currently playing level in [file], if allowed" },
-   { "/pm <name> <message>", "Send private message to player" },
-   { "-", NULL },       // Horiz. line
-   { "/mvol <0-10>", "Set music volume" },
-   { "/svol <0-10>", "Set SFX volume" },
-   { "/vvol <0-10>", "Set voice chat volume" },
-   { "-", NULL },       // Horiz. line
-   { "/mute <name>", "Hide chat messages from <name> until you quit" },
-   { NULL, NULL },      // End of list
-
-},{
-   { "/add <time in minutes>", "Add time to the current game" },
-   { "/next", "Start next level" },
-   { "/prev", "Replay previous level" },
-   { "/restart", "Restart current level" },
-   { "/settime <time in minutes>", "Set play time for the level" },
-   { "/setscore <score>", "Set score to win the level" },
-   { "-", NULL },       // Horiz. line
-   { "/addbot [team] [file] [args]", "Add a bot from [file] to [team], pass [args] to bot"},
-   { "/kickbot", "Kick most recently added bot"},
-   { "/kickbots", "Kick all bots"},
-   { NULL, NULL },      // End of list
-
-}, {
-   { "/kick <player name>",        "Kick a player from the game" },
-   { "/shutdown [time] [message]", "Start orderly shutdown of server (def. = 10 secs)" },
-   { "/setlevpass [passwd]",       "Set level change password (use blank to clear)" },
-   { "/setadminpass <passwd>",     "Set admin password" },
-   { "/setserverpass [passwd]",    "Set server password  (use blank to clear)" },
-   { "/setservername <name>",      "Set server name" },
-   { "/setserverdescr <descr>",    "Set server description" },
-   { "/deletecurrentlevel",        "Remove current level from server" },
-   { NULL, NULL },      // End of list
-
-}, {
-   { "/showcoords", "Show ship coordinates" },
-   { "/showzones", "Show bot nav mesh zones" },
-   { "/showpaths", "Show robot paths" },
-   { "/showbots", "Show all robots" },
-   { "-", NULL },       // Horiz. line
-   { "/linewidth <number>", "Default = 2, Changes width of all lines" },
-   { "/linesmooth", "Enable line smoothing, might look better" },
-   { "/maxfps <number>", "Set maximum speed of game in frames per second" },
-   { NULL, NULL },      // End of list
-   } };
-
+extern CommandInfo chatCmds[];
+extern S32 chatCmdSize;
 
 void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 {
-   ControlStringsEditor *cmdList;
-
-   TNLAssert(page < ARRAYSIZE(commands), "Page too high!");
-
-   cmdList = commands[page];
+   TNLAssert(page < COMMAND_CATEGORIES, "Page too high!");
 
    S32 ypos = 50;
 
@@ -719,23 +665,47 @@ void InstructionsUserInterface::renderPageCommands(U32 page, const char *msg)
 
    ypos += 5;     // Small gap before cmds start
 
-   for(S32 i = 0; cmdList[i].command; i++)
+
+   bool first = true;
+   S32 section = -1;
+
+   for(S32 i = 0; i < chatCmdSize && U32(chatCmds[i].helpCategory) <= page; i++)
    {
-      if(cmdList[i].command[0] == '-')      // Horiz spacer
+      if(U32(chatCmds[i].helpCategory) < page)
+         continue;
+
+      if(first)
+      {
+         section = chatCmds[i].helpGroup;
+         first = false;
+      }
+
+      // Check if we've just changed sections... if so, draw a horizontal line ----------
+      if(chatCmds[i].helpGroup > section)      
       {
          glColor3f(0.4, 0.4, 0.4);
          glBegin(GL_LINES);
-            glVertex2f(cmdCol, ypos + (cmdSize + cmdGap) / 4);
-            glVertex2f(cmdCol + 335, ypos + (cmdSize + cmdGap) / 4);
+            glVertex2f(cmdCol, ypos + (cmdSize + cmdGap) / 3);
+            glVertex2f(cmdCol + 335, ypos + (cmdSize + cmdGap) / 3);
          glEnd();
+
+         section = chatCmds[i].helpGroup;
+
+         ypos += cmdSize + cmdGap;
       }
-      else
-      {
-         glColor(cmdColor);
-         drawString(cmdCol, ypos, cmdSize, cmdList[i].command);      // Textual description of function (1st arg in lists above)
-         glColor(descrColor);
-         drawString(descrCol, ypos, cmdSize, cmdList[i].descr);
-      }
+
+      glColor(cmdColor);
+      
+      // Assemble command & args from data in the chatCmds struct
+      string cmdString = "/" + chatCmds[i].cmdName;
+
+      for(S32 j = 0; j < chatCmds[i].cmdArgCount; j++)
+         cmdString += " " + chatCmds[i].helpArgString[j];
+
+      drawString(cmdCol, ypos, cmdSize, cmdString.c_str());      
+      glColor(descrColor);
+      drawString(descrCol, ypos, cmdSize, chatCmds[i].helpTextString.c_str());
+
       ypos += cmdSize + cmdGap;
    }
 }
