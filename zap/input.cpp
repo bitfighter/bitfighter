@@ -1074,7 +1074,7 @@ static bool processJoystickInputs( U32 &buttonMask )
 
       // Remap button inputs
       U32 retMask = 0;
-      for(S32 i = 0; i < MaxJoystickButtons; i++)
+      for(U32 i = 0; i < MaxJoystickButtons; i++)
          if(buttonMask & (1 << i))
          {
             retMask |= controllerButtonRemaps[gIniSettings.joystickType][i];

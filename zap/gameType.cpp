@@ -2622,7 +2622,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter time in minutes");
       else
       {
-         U32 time = (U32)(60 * 1000 * atof(args[0].getString()));
+         S32 time = (60 * 1000 * atof(args[0].getString()));
 
          if(time < 0 || time == 0 && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
@@ -2635,7 +2635,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
                return;
             }
             // We want to preserve the actual, overall time of the game in mGameTimer's period
-            mGameTimer.extend(S32(time - mGameTimer.getCurrent()));
+            mGameTimer.extend(time - mGameTimer.getCurrent());
 
             s2cSetTimeRemaining(mGameTimer.getCurrent());    // Broadcast time to clients
 

@@ -82,7 +82,7 @@ public:
 
 
    void renderInterfaceOverlay(bool scoreboardVisible);
-   bool teamHasFlag(S32 teamId);
+   bool teamHasFlag(U32 teamId);
 
    void performProxyScopeQuery(GameObject *scopeObject, GameConnection *connection);
    void majorScoringEventOcurred(S32 team);    // Gets run when a touchdown is scored
@@ -286,13 +286,14 @@ void ZoneControlGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-bool ZoneControlGameType::teamHasFlag(S32 teamId)
+bool ZoneControlGameType::teamHasFlag(U32 teamId)
 {
    for(S32 i = 0; i < mFlags.size(); i++)
    {
       //TNLAssert(mFlags[i], "NULL flag");
-      if(mFlags[i]) if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == teamId)
-         return true;
+      if(mFlags[i])
+         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
+            return true;
    }
 
    return false;

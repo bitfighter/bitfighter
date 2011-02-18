@@ -168,7 +168,7 @@ public:
    virtual bool isTeamGame() { return mTeams.size() > 1; }                                   // Team game if we have teams.  Otherwise it's every man for himself.
    virtual bool canBeTeamGame() { return true; }
    virtual bool canBeIndividualGame() { return true; }
-   virtual bool teamHasFlag(S32 teamId) { return false; }
+   virtual bool teamHasFlag(U32 teamId) { return false; }
    S32 getWinningScore() { return mWinningScore; }
    U32 getTotalGameTime() { return (mGameTimer.getPeriod() / 1000); }
    S32 getRemainingGameTime() { return (mGameTimer.getCurrent() / 1000); }

@@ -78,7 +78,7 @@ public:
    bool objectCanDamageObject(GameObject *damager, GameObject *victim);
    void controlObjectForClientKilled(GameConnection *theClient, GameObject *clientObject, GameObject *killerObject);
    bool shipHasFlag(Ship *ship);
-   bool teamHasFlag(S32 team);
+   bool teamHasFlag(U32 team);
    Color getShipColor(Ship *s);
 
    Color getTeamColor(S32 team);

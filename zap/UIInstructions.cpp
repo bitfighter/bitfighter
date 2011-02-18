@@ -361,7 +361,7 @@ void InstructionsUserInterface::renderPage2()
 {
    S32 y = 75;
    glColor3f(1,1,1);
-   for(S32 i = 0; i < ARRAYSIZE(loadoutInstructions); i++)
+   for(U32 i = 0; i < ARRAYSIZE(loadoutInstructions); i++)
    {
       drawCenteredString(y, 20, loadoutInstructions[i]);
       y += 26;

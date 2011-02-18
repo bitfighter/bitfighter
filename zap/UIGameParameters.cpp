@@ -306,12 +306,12 @@ void GameParamUserInterface::updateMenuItems(S32 gtIndex)
          }
          else if(!stricmp(words[0].c_str(), "MinPlayers"))
          {
-            S32 minPlayers = max(min(atoi(words[1].c_str()), MAX_PLAYERS), 0);
+            S32 minPlayers = max((S32)min(atoi(words[1].c_str()), MAX_PLAYERS), 0);
             menuItems[OPT_MIN_PLAYERS]->setIntValue(minPlayers);
          }
          else if(!stricmp(words[0].c_str(), "MaxPlayers"))
          {
-            S32 maxPlayers = max(min(atoi(words[1].c_str()), MAX_PLAYERS), 0);
+            S32 maxPlayers = max((S32)min(atoi(words[1].c_str()), MAX_PLAYERS), 0);
             menuItems[OPT_MAX_PLAYERS]->setIntValue(maxPlayers);
          }
          else if(!stricmp(words[0].c_str(), "Specials"))

@@ -191,13 +191,14 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-bool CTFGameType::teamHasFlag(S32 teamId)
+bool CTFGameType::teamHasFlag(U32 teamId)
 {
    for(S32 i = 0; i < mFlags.size(); i++)
    {
       //TNLAssert(mFlags[i], "NULL flag");
-      if(mFlags[i]) if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == teamId)
-         return true;
+      if(mFlags[i])
+         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
+            return true;
    }
 
    return false;

@@ -308,7 +308,7 @@ void UserInterface::renderCurrent()    // static
       glColor3f(1, 0, 1);
       vpos += 23;
       hpos = horizMargin;
-      for(S32 i = 0; i < MaxJoystickButtons; i++)
+      for(U32 i = 0; i < MaxJoystickButtons; i++)
          if(gRawJoystickButtonInputs & (1 << i))
          {
             drawStringf( hpos, vpos, 18, "RawBut [%d]", i );

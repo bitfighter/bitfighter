@@ -264,7 +264,7 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 }
 
 
-bool RabbitGameType::teamHasFlag(S32 teamId)
+bool RabbitGameType::teamHasFlag(U32 teamId)
 {
    if(isTeamGame())  
       for(S32 i = 0; i < mFlags.size(); i++)

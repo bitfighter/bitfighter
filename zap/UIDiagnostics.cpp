@@ -401,12 +401,12 @@ void DiagnosticUserInterface::render()
       hpos = horizMargin;
       hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "Raw Controller Input [%d]: ", gUseStickNumber);
 
-      for(S32 i = 0; i < MaxJoystickButtons; i++)
+      for(U32 i = 0; i < MaxJoystickButtons; i++)
          if(gRawJoystickButtonInputs & (1 << i))
             hpos += drawStringAndGetWidthf( hpos, ypos, textsize - 2, "(%d)", i ) + 5;
 
       glBegin(GL_LINES);
-      for(S32 i = 0; i < MaxJoystickAxes; i++) // shows RAW axis inputs
+      for(U32 i = 0; i < MaxJoystickAxes; i++) // shows RAW axis inputs
       {
          glColor3f(0.5,0,0);
          glVertex2f(i*8+400, ypos - 20);
