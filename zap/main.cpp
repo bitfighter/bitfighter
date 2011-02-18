@@ -682,22 +682,48 @@ void idle()
    }
 
    checkModifierKeyState();      // Most keys are handled as events by GLUT...  but not Ctrl, Alt, Shift!
-   static S64 lastTimer = Platform::getHighPrecisionTimerValue();
+   static S64 lastTimer = Platform::getHighPrecisionTimerValue(); // accurate, but possible wrong speed when overclocking or underclocking CPU
+   static U32 lastTimer2 = Platform::getRealMilliseconds();  // right speed
    static F64 unusedFraction = 0;
+   static S32 timerElapsed2 = 0;
+   static S32 integerTime = 0;
 
    S64 currentTimer = Platform::getHighPrecisionTimerValue();
+   U32 currentTimer2 = Platform::getRealMilliseconds();
+
    if(lastTimer > currentTimer) lastTimer=currentTimer; //Prevent freezing when currentTimer overflow -- seems very unlikely
+   if(lastTimer2 > currentTimer2) lastTimer2=currentTimer2;
 
    F64 timeElapsed = Platform::getHighPrecisionMilliseconds(currentTimer - lastTimer) + unusedFraction;
-   U32 integerTime = U32(timeElapsed);
+   S32 integerTime1 = S32(timeElapsed);
 
-   if( (gDedicatedServer  && integerTime >= 1000 / gIniSettings.maxDedicatedFPS) || 
-       (!gDedicatedServer && integerTime >= 1000 / gIniSettings.maxFPS) )
+   unusedFraction = timeElapsed - integerTime1;
+   lastTimer = currentTimer;
+   timerElapsed2 = timerElapsed2 + S32(currentTimer2 - lastTimer2) - integerTime1;
+   if(timerElapsed2 < 0)  // getHighPrecisionTimerValue going slower then getRealMilliseconds
    {
-      lastTimer = currentTimer;
-      unusedFraction = timeElapsed - integerTime;
+      integerTime1 += timerElapsed2;
+      timerElapsed2 = 0;
+   }
+   if(timerElapsed2 > 200)  // getHighPrecisionTimerValue going faster then getRealMilliseconds
+   {
+      integerTime1 += timerElapsed2 - 200;
+      timerElapsed2 = 200;
+   }
+   lastTimer2 = currentTimer2;
+   integerTime += integerTime1;
+   if(integerTime < -500 || integerTime > 5000)
+      integerTime = 0;
 
-      gZapJournal.idle(integerTime);
+   U32 sleepTime = 1;
+
+   if( (gDedicatedServer  && integerTime >= S32(1000 / gIniSettings.maxDedicatedFPS)) || 
+       (!gDedicatedServer && integerTime >= S32(1000 / gIniSettings.maxFPS)) )
+   {
+      gZapJournal.idle(U32(integerTime));
+      integerTime = 0;
+      if(!gDedicatedServer)
+         sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
    }
 
 
@@ -736,9 +762,7 @@ void idle()
 
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.
-   U32 sleepTime =  1; //integerTime< 8 ? 8-integerTime : 1;
 
-   if(gClientGame && integerTime >= 1000 / gIniSettings.maxFPS) 
       sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
