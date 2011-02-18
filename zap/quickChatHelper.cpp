@@ -188,12 +188,21 @@ bool QuickChatHelper::processKeyCode(KeyCode keyCode)
          walk++;
          if(gQuickChatTree[mCurNode].depth >= gQuickChatTree[walk].depth)
          {
-            GameType *gt = gClientGame->getGameType();
             exitHelper();
 
-            StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
-            if(gt)
-               gt->c2sSendChatSTE(!gQuickChatTree[mCurNode].teamOnly, entry);
+            if(gQuickChatTree[mCurNode].commandOnly)
+            {
+               gClientGame->mGameUserInterface->runCommand(gQuickChatTree[mCurNode].msg.c_str());
+            }
+            else
+            {
+               GameType *gt = gClientGame->getGameType();
+               if(gt)
+               {
+                  StringTableEntry entry(gQuickChatTree[mCurNode].msg.c_str());
+                  gt->c2sSendChatSTE(!gQuickChatTree[mCurNode].teamOnly, entry);
+               }
+            }
          }
          return true;
       }

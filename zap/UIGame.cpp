@@ -1320,6 +1320,24 @@ Move *GameUserInterface::getCurrentMove()
 }
 
 
+
+void GameUserInterface::runCommand(const char *input)
+{
+   Vector<string> words = parseString(input);
+   if(!processCommand(words))    // Try the command locally; if can't be run, send it on to the server
+   {
+      const char * c1 = mLineEditor.c_str();
+      GameType *gt = gClientGame->getGameType();
+      if(gt)
+      {
+         Vector<StringPtr> args;
+         for(S32 i = 1; i < words.size(); i++)
+            args.push_back(StringPtr(words[i]));
+         gt->c2sSendCommand(StringTableEntry(words[0], false), args);
+      }
+   }
+}
+
 // User has finished entering a chat message and pressed <enter>
 void GameUserInterface::issueChat()
 {
@@ -1334,20 +1352,7 @@ void GameUserInterface::issueChat()
       }
       else                             // It's a command
       {
-         Vector<string> words = parseString(mLineEditor.c_str());
-
-         if(!processCommand(words))    // Try the command locally; if can't be run, send it on to the server
-         {
-            const char * c1 = mLineEditor.c_str();
-            GameType *gt = gClientGame->getGameType();
-            if(gt)
-            {
-               Vector<StringPtr> args;
-               for(S32 i = 1; i < words.size(); i++)
-                  args.push_back(StringPtr(words[i]));
-               gt->c2sSendCommand(StringTableEntry(words[0], false), args);
-            }
-         }
+         runCommand(mLineEditor.c_str());
       }
    }
    cancelChat();

@@ -499,7 +499,9 @@ static void loadQuickChatMessages()
       node.depth = 1;   // This is a top-level message node
       node.keyCode = stringToKeyCode(gINI.GetValue(messages[i], "Key", "A").c_str());
       node.buttonCode = stringToKeyCode(gINI.GetValue(messages[i], "Button", "Button 1").c_str());
-      node.teamOnly = lcase(gINI.GetValue(messages[i], "MessageType", "Team")) == "team";          // lcase for case insensitivity
+      string str1 = lcase(gINI.GetValue(messages[i], "MessageType", "Team"));      // lcase for case insensitivity
+      node.teamOnly = str1 == "team";
+      node.commandOnly = str1 == "command";
       node.caption = gINI.GetValue(messages[i], "Caption", "Caption");
       node.msg = gINI.GetValue(messages[i], "Message", "Message");
       node.isMsgItem = true;
