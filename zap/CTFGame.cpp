@@ -191,7 +191,7 @@ void CTFGameType::renderInterfaceOverlay(bool scoreboardVisible)
 }
 
 
-bool CTFGameType::teamHasFlag(U32 teamId)
+bool CTFGameType::teamHasFlag(S32 teamId)
 {
    for(S32 i = 0; i < mFlags.size(); i++)
    {

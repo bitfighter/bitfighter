@@ -68,7 +68,7 @@ protected:
    S32 mScore;
 
 public:
-   U32 mId;                // Helps keep track of teams after they've been sorted
+   S32 mId;                // Helps keep track of teams after they've been sorted
    StringTableEntry _name;
    Vector<Point> spawnPoints;
    Vector<FlagSpawn> flagSpawnPoints;   // List of places for team flags to spawn
@@ -82,7 +82,7 @@ public:
    StringTableEntry getName() { return _name.getString(); }
 
    S32 getScore() { return mScore; }
-   U32 getId() { return mId; }      
+   S32 getId() { return mId; }
    void setScore(S32 score) { mScore = score; }
    void addScore(S32 score) { mScore += score; }
 };
