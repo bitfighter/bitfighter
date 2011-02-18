@@ -47,6 +47,7 @@ struct QuickChatNode
    KeyCode keyCode;
    KeyCode buttonCode;
    bool teamOnly;
+   bool commandOnly;
    string caption;
    string msg;
    bool isMsgItem;         // False for groups, true for messages

@@ -61,6 +61,7 @@ TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 GameConnection::GameConnection()
 {
    mVote = 0;
+   mChatMute = false;
    mClientGame = NULL;
    initialize();
 }

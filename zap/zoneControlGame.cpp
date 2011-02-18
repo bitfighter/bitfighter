@@ -290,8 +290,8 @@ bool ZoneControlGameType::teamHasFlag(S32 teamId)
 {
    for(S32 i = 0; i < mFlags.size(); i++)
    {
-      TNLAssert(mFlags[i], "NULL flag");
-      if(mFlags[i]->isMounted() && mFlags[i]->getMount()->getTeam() == teamId)
+      //TNLAssert(mFlags[i], "NULL flag");
+      if(mFlags[i]) if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == teamId)
          return true;
    }
 

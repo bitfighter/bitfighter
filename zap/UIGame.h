@@ -243,6 +243,7 @@ public:
 
    void idle(U32 timeDelta);
 
+   void runCommand(const char *input);
    void issueChat();                // Send chat message (either Team or Global)
    void cancelChat();
    bool isOnMuteList(const string &name);
