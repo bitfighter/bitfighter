@@ -319,7 +319,7 @@ public:
    static void setServerDescrHandler(GameUserInterface *gui, const Vector<string> &words);
    static void serverCommandHandler(GameUserInterface *gui, const Vector<string> &words);
    static void pmHandler(GameUserInterface *gui, const Vector<string> &words);
-   static void GameUserInterface::muteHandler(GameUserInterface *gui, const Vector<string> &words);
+   static void muteHandler(GameUserInterface *gui, const Vector<string> &words);
    static void maxFpsHandler(GameUserInterface *gui, const Vector<string> &words);
    static void lineSmoothHandler(GameUserInterface *gui, const Vector<string> &words);
    static void lineWidthHandler(GameUserInterface *gui, const Vector<string> &words);
