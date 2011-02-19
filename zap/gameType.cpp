@@ -2183,8 +2183,8 @@ GAMETYPE_RPC_C2S(GameType, c2sAddTime, (U32 time), (time))
    // use voting when no level change password and more then 1 players
    if(!source->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
    {
-      gServerGame->voteStart(source, 1, time);
-      return;
+      if(gServerGame->voteStart(source, 1, time))
+         return;
    }
 
 
@@ -2207,15 +2207,15 @@ GAMETYPE_RPC_C2S(GameType, c2sChangeTeams, (S32 team), (team))
       return;                                                                 // return without processing the change team request
 
    // Vote to change team can be more problems then the old way...
-   //if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
-   //{
-   //   gServerGame->voteStart(source, 4, team);
-   //   return;
-   //}
+   if((!source->isLevelChanger() || gLevelChangePassword.length() == 0) && gServerGame->getPlayerCount() > 1)
+   {
+      if(gServerGame->voteStart(source, 4, team))
+         return;
+   }
 
    changeClientTeam(source, team);
 
-   if(!source->isAdmin())
+   if(!source->isAdmin() && gServerGame->getPlayerCount() > 1)
    {
       NetObject::setRPCDestConnection(NetObject::getRPCSourceConnection());   // Send c2s to the changing player only
       s2cCanSwitchTeams(false);                                               // Let the client know they can't switch until they hear back from us
@@ -2631,8 +2631,8 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             // use voting when no level change password and more then 1 players
             if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
             {
-               gServerGame->voteStart(clientRef->clientConnection, 2, time);
-               return;
+               if(gServerGame->voteStart(clientRef->clientConnection, 2, time))
+                  return;
             }
             // We want to preserve the actual, overall time of the game in mGameTimer's period
             mGameTimer.extend(time - mGameTimer.getCurrent());
@@ -2664,13 +2664,8 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
             // use voting when no level change password and more then 1 players
             if(!clientRef->clientConnection->isAdmin() && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
             {
-               if(gServerGame->mVoteTimer != 0)
+               if(gServerGame->voteStart(clientRef->clientConnection, 3, score))
                   return;
-               gServerGame->mVoteType = 3;
-               gServerGame->mVoteNumber = score;
-               gServerGame->mVoteClientName = clientRef->clientConnection->getClientName();
-               gServerGame->voteStart(clientRef->clientConnection, 3, score);
-               return;
             }
             mWinningScore = score;
             s2cChangeScoreToWin(mWinningScore, clientRef->clientConnection->getClientName());

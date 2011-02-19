@@ -187,6 +187,13 @@ struct IniSettings      // With defaults specified
    S32 maxPlayers;                  // Max number of players that can play on local server
    S32 maxBots;
 
+   U32 voteLength;
+   U32 voteLengthToChangeTeam;
+   U32 voteRetryLength;
+   S32 voteYesStrength;
+   S32 voteNoStrength;
+   S32 voteNothingStrength;
+
    bool useUpdater;                 // Use updater system (windows only)
 
    // Game window location when in windowed mode
@@ -287,6 +294,13 @@ struct IniSettings      // With defaults specified
          
       wallFillColor.set(0,0,.15);
       wallOutlineColor.set(0,0,1);
+
+      voteLength = 12;
+      voteLengthToChangeTeam = 10;
+      voteRetryLength = 30;
+      voteYesStrength = 2;
+      voteNoStrength = -2;
+      voteNothingStrength = -1;
 
       useUpdater = true;
 

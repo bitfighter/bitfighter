@@ -353,15 +353,30 @@ void Game::cleanUp()
 }
 
 
-void ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
+// Return true when handled
+bool ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
 {
    if(gServerGame->mVoteTimer != 0)
    {
       client->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "Can't start vote when there is pending vote.");
-      return;
+      return true;
    }
 
-   mVoteTimer = 12000;
+   if(client->mVoteTime != 0)
+   {
+      Vector<StringTableEntry> e;
+      Vector<StringPtr> s;
+      Vector<S32> i;
+      i.push_back(client->mVoteTime / 1000);
+      client->s2cDisplayMessageESI(GameConnection::ColorRed, SFXNone, "Can't start vote, try again %i0 seconds later.", e, s, i);
+      return true;
+   }
+   if(type == 4) // change team
+      mVoteTimer = gIniSettings.voteLengthToChangeTeam * 1000;
+   else
+      mVoteTimer = gIniSettings.voteLength * 1000;
+   if(mVoteTimer == 0)
+      return false;
    mVoteType = type;
    mVoteNumber = number;
    mVoteClientName = client->getClientName();
@@ -371,6 +386,7 @@ void ServerGame::voteStart(GameConnection *client, S32 type, S32 number)
    }
    client->mVote = 1;
    client->s2cDisplayMessage(GameConnection::ColorAqua, SFXNone, "Vote started, waiting for others to vote.");
+   return true;
 }
 
 void ServerGame::voteClient(GameConnection *client, bool voteYes)
@@ -1059,7 +1075,7 @@ void ServerGame::idle(U32 timeDelta)
             else if(!walk->isRobot())
                voteNothing++;
          }
-         bool votePass = voteYes * 2 > voteNo * 2 + voteNothing;
+         bool votePass = voteYes * gIniSettings.voteYesStrength + voteNo * gIniSettings.voteNoStrength + voteNothing * gIniSettings.voteNothingStrength > 0;
          if(votePass)
          {
             GameType *gt = getGameType();
@@ -1111,6 +1127,8 @@ void ServerGame::idle(U32 timeDelta)
             for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
             {
                walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
+               if(!votePass && walk->getClientName() == mVoteClientName)
+                  walk->mVoteTime = gIniSettings.voteRetryLength * 1000;
             }
          }
       }
@@ -1180,6 +1198,10 @@ void ServerGame::idle(U32 timeDelta)
       {
          walk->addToTimeCredit(timeDelta);
          walk->updateAuthenticationTimer(timeDelta);
+         if(walk->mVoteTime <= timeDelta)
+            walk->mVoteTime = 0;
+         else
+            walk->mVoteTime -= timeDelta;
       }
    }
 
