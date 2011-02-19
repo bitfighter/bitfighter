@@ -297,6 +297,8 @@ public:
    S32 mVoteYes;
    S32 mVoteNo;
    S32 mVoteNumber;
+   S32 mNextLevel;
+
    //SafePtr<GameConnection> mVoteClientConnection;
    StringTableEntry mVoteClientName;
    bool voteStart(GameConnection *client, S32 type, S32 number = 0);

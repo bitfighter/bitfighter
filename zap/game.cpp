@@ -310,6 +310,7 @@ extern string gHostDescr;
 ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char *hostName, bool testMode) : Game(theBindAddress)
 {
    mVoteTimer = 0;
+   mNextLevel = NEXT_LEVEL;
    mPlayerCount = 0;
    mMaxPlayers = maxPlayers;
    mHostName = gHostName;
@@ -609,6 +610,7 @@ extern void testBotNavMeshZoneConnections();
 void ServerGame::cycleLevel(S32 nextLevel)
 {
    cleanUp();
+   mLevelSwitchTimer.clear();
    mScopeAlwaysList.clear();
 
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
@@ -1083,7 +1085,10 @@ void ServerGame::idle(U32 timeDelta)
             switch(mVoteType)
             {
             case 0:
-               cycleLevel(mVoteNumber);
+               //cycleLevel(mVoteNumber);
+               mNextLevel = mVoteNumber;
+               if(gt)
+                  gt->gameOverManGameOver();
                break;
             case 1:
                if(gt)
@@ -1233,7 +1238,8 @@ void ServerGame::idle(U32 timeDelta)
    {
       // Normalize ratings for this game
       getGameType()->updateRatings();
-      cycleLevel(NEXT_LEVEL);
+      cycleLevel(mNextLevel);
+      mNextLevel = NEXT_LEVEL;
    }
 
    // Lastly, play any sounds server might have made...
