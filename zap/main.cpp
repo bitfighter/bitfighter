@@ -60,6 +60,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Can add or remove joysticks while in the options menu; no longer requires restart.
 <li>New levels have engineer enabled by default.
 <li>Indicator now shows which team possesses the flag in CTF, ZC, and rabbit in team mode.
+<li>Added support for PS3 joystick
 </ul>
 <h4>New Features</h4>
 <ul>

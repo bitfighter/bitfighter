@@ -41,9 +41,10 @@ namespace Zap
 
 enum ArgTypes {
    NAME,    // Player name (can be tab-completed)
+   TEAM,    // Team name (can be tab-completed)
    INT,     // Integer argument
    STR,      // String argument
-   NUL      // Nothing
+   ARG_TYPES
 };
 
 enum HelpCategories {
@@ -252,8 +253,6 @@ public:
    void shutdownCanceled();
 
    Vector<string> parseString(const char *str);    // Break a chat msg into parsable bits
-   bool processCommand(Vector<string> &words);     // Process a cmd entered into the chat interface
-   //void populateChatCmdList();                     // Add all our chat cmds to a list for autocompletion purposes
 
    void setVolume(VolumeType volType, const Vector<string> &words);
 

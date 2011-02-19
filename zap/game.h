@@ -203,7 +203,7 @@ public:
 
    void setScopeAlwaysObject(GameObject *theObject);
    GameType *getGameType();
-   U32 getTeamCount();
+   S32 getTeamCount();
 
    void setGameType(GameType *theGameType);
    void processDeleteList(U32 timeDelta);

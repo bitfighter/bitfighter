@@ -1125,6 +1125,7 @@ static string makeFilenameFromString(const char *levelname)
 }
 
 
+// TODO: Probably misnamed... handles deletes too
 static void changeServerNameDescr(GameConnection *gc, GameConnection::ParamType type, const Vector<string> &words)
 {
    // Concatenate all params into a single string
@@ -1469,7 +1470,7 @@ void GameUserInterface::deleteCurrentLevelHandler(GameUserInterface *gui, const 
    GameConnection *gc = gClientGame->getConnectionToServer();
 
    if(hasAdmin(gc, "!!! You don't have permission to delete the current level"))
-      changeServerNameDescr(gc, GameConnection::DeleteLevel, words);
+      changeServerNameDescr(gc, GameConnection::DeleteLevel, words);    // handles deletes too
 }
 
 
@@ -1569,23 +1570,31 @@ void GameUserInterface::muteHandler(GameUserInterface *gui, const Vector<string>
 
 void GameUserInterface::serverCommandHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   // TODO make command handlers for server commands like /addbot /kickbots
+   GameType *gt = gClientGame->getGameType();
+   if(gt)
+   {
+      Vector<StringPtr> args;
+
+      for(S32 i = 1; i < words.size(); i++)
+         args.push_back(StringPtr(words[i]));
+
+      gt->c2sSendCommand(StringTableEntry(words[0], false), args);
+   }
 }
 
 
-CommandInfo chatCmds[] = { 
-   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory helpGroup   helpArgString  helpTextSstring
+CommandInfo chatCmds[] = {   
+   //  cmdName          cmdCallback               cmdArgInfo cmdArgCount   helpCategory helpGroup   helpArgString            helpTextSstring
    { "admin",   GameUserInterface::adminPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request admin permissions"  },
    { "levpass", GameUserInterface::levelPassHandler, { STR },      1,       ADV_COMMANDS,    0,      {"<password>"},         "Request level change permissions"  },
    { "servvol", GameUserInterface::servVolHandler,   { INT },      1,       ADV_COMMANDS,    0,      {"<0-10>"},             "Set volume of server"  },
    { "getmap",  GameUserInterface::getMapHandler,    { STR },      1,       ADV_COMMANDS,    1,      {"[file]"},             "Save currently playing level in [file], if allowed" },
    { "suspend", GameUserInterface::suspendHandler,   {  },         0,       ADV_COMMANDS,    1,      {  },                   "Place game on hold while waiting for players" },
-   { "pm",      GameUserInterface::pmHandler,        { STR, STR }, 2,       ADV_COMMANDS,    1,      {"<name>","<message>"}, "Send private message to player" },
+   { "pm",      GameUserInterface::pmHandler,        { NAME, STR },2,       ADV_COMMANDS,    1,      {"<name>","<message>"}, "Send private message to player" },
    { "mvol",    GameUserInterface::mVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set music volume"      },
    { "svol",    GameUserInterface::sVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set SFX volume"        },
    { "vvol",    GameUserInterface::vVolHandler,      { INT },      1,       ADV_COMMANDS,    2,      {"<0-10>"},             "Set voice chat volume" },
-   { "mute",    GameUserInterface::muteHandler,      { STR },      1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
-
+   { "mute",    GameUserInterface::muteHandler,      { NAME },     1,       ADV_COMMANDS,    3,      {"<name>"},             "Hide chat messages from <name> until you quit" },
 
    { "add",      GameUserInterface::addTimeHandler,       { INT },           0,       LEVEL_COMMANDS,  0,      {"<time in minutes>"},        "Add time to the current game" },
    { "next",     GameUserInterface::nextLevelHandler,     {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Start next level" },
@@ -1593,10 +1602,9 @@ CommandInfo chatCmds[] = {
    { "restart",  GameUserInterface::restartLevelHandler,  {  },              0,       LEVEL_COMMANDS,  0,      {  },                         "Restart current level" },
    { "settime",  GameUserInterface::serverCommandHandler, { INT },           1,       LEVEL_COMMANDS,  0,      {"<time in minutes>"},        "Set play time for the level" },
    { "setscore", GameUserInterface::serverCommandHandler, { INT },           1,       LEVEL_COMMANDS,  0,      {"<score>"},                  "Set score to win the level" },
-   { "addbot",   GameUserInterface::serverCommandHandler, { STR, STR, STR }, 3,       LEVEL_COMMANDS,  1,      {"[team]","[file]","[args]"}, "Add a bot from [file] to [team], pass [args] to bot" },
+   { "addbot",   GameUserInterface::serverCommandHandler, { TEAM, STR, STR },3,       LEVEL_COMMANDS,  1,      {"[team]","[file]","[args]"}, "Add a bot from [file] to [team], pass [args] to bot" },
    { "kickbot",  GameUserInterface::serverCommandHandler, {  },              1,       LEVEL_COMMANDS,  1,      {  },                         "Kick most recently added bot" },
    { "kickbots", GameUserInterface::serverCommandHandler, {  },              1,       LEVEL_COMMANDS,  1,      {  },                         "Kick all bots" },
-
 
    { "kick",               GameUserInterface::kickPlayerHandler,         { NAME },    1,  ADMIN_COMMANDS, 0, {"<player name>"},      "Kick a player from the game" },
    { "shutdown",           GameUserInterface::shutdownServerHandler,     {INT, STR }, 2,  ADMIN_COMMANDS, 0, {"[time]","[message]"}, "Start orderly shutdown of server (def. = 10 secs)" },
@@ -1605,7 +1613,7 @@ CommandInfo chatCmds[] = {
    { "setserverpass",      GameUserInterface::setServerPassHandler,      { STR },     1,  ADMIN_COMMANDS, 0, {"<passwd>"},           "Set admin password" },
    { "setservername",      GameUserInterface::setServerNameHandler,      { STR },     1,  ADMIN_COMMANDS, 0, {"<name>"},             "Set server name" },
    { "setserverdescr",     GameUserInterface::setServerDescrHandler,     { STR },     1,  ADMIN_COMMANDS, 0, {"<descr>"},            "Set server description" },
-   { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { STR },     1,  ADMIN_COMMANDS, 0, {"<level>"},            "Remove current level from server" },
+   { "deletecurrentlevel", GameUserInterface::deleteCurrentLevelHandler, { },         0,  ADMIN_COMMANDS, 0, {""},                   "Remove current level from server" },
 
    { "showcoords", GameUserInterface::showCoordsHandler,    {  },    0, DEBUG_COMMANDS, 0, {  },         "Show ship coordinates" },
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show bot nav mesh zones" },
@@ -1726,25 +1734,76 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       cancelChat();
    else if(keyCode == KEY_TAB)      // Auto complete any commands
    {
-      if(isCmdChat())     // It's a command!
+      if(isCmdChat())     // It's a command!  Complete!  Complete!
       {
-         S32 found = -1;
-         S32 start = mCurrentChatType == CmdChat ? 1 : 0;     // Do we need to lop the leading '/' off mChatCmds item?
+         // First, parse line into words
+         Vector<string> words = parseString(mLineEditor.c_str());
+         Vector<string> candidates;
 
-         size_t len = mLineEditor.length();
-         for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
-            if(chatCmds[i].cmdName.substr(start, len) == mLineEditor.getString())
+         S32 arg = words.size() - 1;
+
+         if(arg == 0)         // Command completion
+         {
+            for(S32 i = 0; i < chatCmdSize; i++)
+               candidates.push_back(chatCmds[i].cmdName);      // Totally ineffecient -- this will never change over course of game
+         }
+         else if(arg > 0)     // Arg completion
+         {
+            S32 cmd = -1;
+
+            for(S32 i = 0; i < chatCmdSize; i++)
             {
-               if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete
-                  return;
-               found = i;
+               if(!stricmp(chatCmds[i].cmdName.c_str(), words[0].c_str()))
+               {
+                  cmd = i;
+                  break;
+               }
             }
 
-         if(found == -1)         // Found no match... no expansion possible
-            return;
+            if(cmd != -1 && arg <= chatCmds[cmd].cmdArgCount)     // Found a command
+            {
+               ArgTypes argType = chatCmds[cmd].cmdArgInfo[arg - 1];  // What type of arg are we expecting?
 
-         //mLineEditor.clear();
-         mLineEditor.setString(chatCmds[found].cmdName.substr(start) + " ");    // Add the command
+               if(argType == NAME)           // Player names
+               {  
+                  if(gClientGame->getGameType())
+                     for(S32 i = 0; i < gClientGame->getGameType()->mClientList.size(); i++)
+                        if(gClientGame->getGameType()->mClientList[i].isValid())
+                           candidates.push_back(gClientGame->getGameType()->mClientList[i]->name.getString());
+               }
+               else if(argType == TEAM)      // Team names
+               {
+                  if(gClientGame->getGameType())
+                     for(S32 i = 0; i < gClientGame->getTeamCount(); i++)
+                        candidates.push_back(gClientGame->getGameType()->getTeamName(i).getString());
+               }
+               // else no completion
+            }
+         }
+
+         // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
+         if(candidates.size() > 0)
+         {
+            S32 found = -1;
+
+            size_t len = words[arg].size();
+
+            for(S32 i = 0; i < candidates.size(); i++)
+            {
+               if(!stricmp(candidates[i].substr(0, len).c_str(), words[arg].c_str()))
+               {
+                  if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete
+                     return;
+                  found = i;
+               }
+            }
+
+            if(found == -1)         // Found no match... no expansion possible
+               return;
+
+            words[arg] = candidates[found];
+            mLineEditor.setString(concatenate(words));    // Add the command
+         }
       }
    }
    else if(ascii)     // Append any other keys to the chat message
@@ -1888,24 +1947,6 @@ Move *GameUserInterface::getCurrentMove()
 }
 
 
-
-void GameUserInterface::runCommand(const char *input)
-{
-   Vector<string> words = parseString(input);
-   if(!processCommand(words))    // Try the command locally; if can't be run, send it on to the server
-   {
-      const char * c1 = mLineEditor.c_str();
-      GameType *gt = gClientGame->getGameType();
-      if(gt)
-      {
-         Vector<StringPtr> args;
-         for(S32 i = 1; i < words.size(); i++)
-            args.push_back(StringPtr(words[i]));
-         gt->c2sSendCommand(StringTableEntry(words[0], false), args);
-      }
-   }
-}
-
 // User has finished entering a chat message and pressed <enter>
 void GameUserInterface::issueChat()
 {
@@ -1918,12 +1959,11 @@ void GameUserInterface::issueChat()
          if(gt)
             gt->c2sSendChat(mCurrentChatType == GlobalChat, mLineEditor.c_str());   // Broadcast message
       }
-      else                             // It's a command
-      {
+      else    // It's a command
          runCommand(mLineEditor.c_str());
-      }
    }
-   cancelChat();
+
+   cancelChat();     // Hide chat display
 }
 
 
@@ -1955,26 +1995,28 @@ Vector<string> GameUserInterface::parseString(const char *str)
 // Process a command entered at the chat prompt
 // Returns true if command was handled (even if it was bogus); returning false will cause command to be passed on to the server
 // Runs on client
-bool GameUserInterface::processCommand(Vector<string> &words)
+void GameUserInterface::runCommand(const char *input)
 {
+   Vector<string> words = parseString(input);
+
    if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command.
-      return true;
+      return;
 
    GameConnection *gc = gClientGame->getConnectionToServer();
    if(!gc)
    {
       displayErrorMessage("!!! Not connected to server");
-      return true;
+      return;
    }
 
    for(U32 i = 0; i < ARRAYSIZE(chatCmds); i++)
       if(words[0] == chatCmds[i].cmdName)
       {
          chatCmds[i].cmdCallback(this, words);
-         return true;
+         return;
       }
 
-   return false;     // Command unknown to client, will pass it on to server
+   serverCommandHandler(this, words);     // Command unknown to client, will pass it on to server
 }
 
 

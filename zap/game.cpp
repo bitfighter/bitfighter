@@ -136,7 +136,7 @@ GameType *Game::getGameType()
 }
 
 
-U32 Game::getTeamCount()
+S32 Game::getTeamCount()
 {
    return(mGameType.isValid() ? mGameType->mTeams.size() : 0);
 }
