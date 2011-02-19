@@ -127,6 +127,7 @@ public:
    U16 switchedTeamCount;
 
    U8 mVote;  // 0 = not voted,  1 = vote yes,  2 = vote no
+   U32 mVoteTime;
    bool mChatMute;
 
    void linkToClientList();

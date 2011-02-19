@@ -301,6 +301,13 @@ static void loadHostConfiguration()
 
    gIniSettings.alertsVolLevel = checkVol(gIniSettings.alertsVolLevel);
 
+   gIniSettings.voteLength             = (U32) gINI.GetValueI("Host", "VoteLength", S32(gIniSettings.voteLength) );
+   gIniSettings.voteLengthToChangeTeam = (U32) gINI.GetValueI("Host", "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
+   gIniSettings.voteRetryLength        = (U32) gINI.GetValueI("Host", "VoteRetryLength", S32(gIniSettings.voteRetryLength) );
+   gIniSettings.voteYesStrength        = gINI.GetValueI("Host", "VoteYesStrength", gIniSettings.voteYesStrength );
+   gIniSettings.voteNoStrength         = gINI.GetValueI("Host", "VoteNoStrength", gIniSettings.voteNoStrength );
+   gIniSettings.voteNothingStrength    = gINI.GetValueI("Host", "VoteNothingStrength", gIniSettings.voteNothingStrength );
+
 #ifdef BF_WRITE_TO_MYSQL
 	Vector<string> args;
 	parseString(gINI.GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
@@ -1242,6 +1249,9 @@ static void writeHost()
       addComment(" DefaultRobotScript - If user adds a robot, this script is used if none is specified");
       addComment(" MySqlStatsDatabaseCredentials - If MySql integration has been compiled in (which it probably hasn't been), you can specify the");
       addComment("                                 database server, database name, login, and password as a comma delimeted list");
+      addComment(" VoteLength - number of seconds the voting will last, zero will disable voting.");
+      addComment(" VoteRetryLength - When vote fail, the vote caller is unable to vote until after this number of seconds.");
+      addComment(" Vote Strengths - Vote will pass when sum of all votes is bigger then zero.");
       addComment("----------------");
    }
 
@@ -1259,6 +1269,14 @@ static void writeHost()
    gINI.setValueYN(section, "AllowDataConnections", gIniSettings.allowDataConnections);
    gINI.SetValueI (section, "MaxFPS", gIniSettings.maxDedicatedFPS);
    gINI.setValueYN(section, "LogStats", gIniSettings.logStats);
+
+   gINI.SetValueI(section, "VoteLength", S32(gIniSettings.voteLength) );
+   gINI.SetValueI(section, "VoteLengthToChangeTeam", S32(gIniSettings.voteLengthToChangeTeam) );
+   gINI.SetValueI(section, "VoteRetryLength", S32(gIniSettings.voteRetryLength) );
+   gINI.SetValueI(section, "VoteYesStrength", gIniSettings.voteYesStrength );
+   gINI.SetValueI(section, "VoteNoStrength", gIniSettings.voteNoStrength );
+   gINI.SetValueI(section, "VoteNothingStrength", gIniSettings.voteNothingStrength );
+
    gINI.SetValue  (section, "DefaultRobotScript", gIniSettings.defaultRobotScript);
 #ifdef BF_WRITE_TO_MYSQL
    if(gIniSettings.mySqlStatsDatabaseServer == "" && gIniSettings.mySqlStatsDatabaseName == "" && gIniSettings.mySqlStatsDatabaseUser == "" && gIniSettings.mySqlStatsDatabasePassword == "")

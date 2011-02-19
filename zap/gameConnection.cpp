@@ -61,6 +61,7 @@ TNL_IMPLEMENT_NETCONNECTION(GameConnection, NetClassGroupGame, true);
 GameConnection::GameConnection()
 {
    mVote = 0;
+   mVoteTime = 0;
    mChatMute = false;
    mClientGame = NULL;
    initialize();
@@ -1001,8 +1002,8 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRequestLevelChange, (S32 newLevelIndex, boo
    // use voting when no level change password and more then 1 players
    if(!mIsAdmin && gLevelChangePassword.length() == 0 && gServerGame->getPlayerCount() > 1)
    {
-      gServerGame->voteStart(this, 0, newLevelIndex);
-      return;
+      if(gServerGame->voteStart(this, 0, newLevelIndex))
+         return;
    }
 
    bool restart = false;
