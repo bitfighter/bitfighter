@@ -764,7 +764,6 @@ void idle()
    // Sleep a bit so we don't saturate the system. For a non-dedicated server,
    // sleep(0) helps reduce the impact of OpenGL on windows.
 
-      sleepTime = 0;      // Live player at the console, but if we're running > 100 fps, we can afford a nap
      
    // If there are no players, set sleepTime to 40 to further reduce impact on the server.
    // We'll only go into this longer sleep on dedicated servers when there are no players.
