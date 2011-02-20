@@ -1825,7 +1825,8 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             size_t len;
             const char *partial;
 
-            if(mLineEditor.getString().back()  != ' ')
+            // taken from http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
+            if(* mLineEditor.getString().rbegin() != ' ')
             {
                arg = words.size() - 1;
                len = words[arg].size();
