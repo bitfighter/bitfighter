@@ -1973,7 +1973,8 @@ Vector<string> GameUserInterface::parseString(const char *str)
    string word = "";
    Vector<string> words;
 
-   S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;        // Start at 1 to omit the leading '/'
+   S32 startIndex = (str[0] == '/') ? 1 : 0;                       // ignore '/' when it is there.
+   //S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;        // Start at 1 to omit the leading '/'
 
    for(size_t i = startIndex; i < strlen(str); i++)
    {

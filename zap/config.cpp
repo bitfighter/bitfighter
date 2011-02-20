@@ -480,6 +480,7 @@ static void loadQuickChatMessages()
    emptynode.keyCode = KEY_UNKNOWN;
    emptynode.buttonCode = KEY_UNKNOWN;
    emptynode.teamOnly = false;
+   emptynode.commandOnly = false;
    emptynode.caption = "";
    emptynode.msg = "";
    gQuickChatTree.push_back(emptynode);
@@ -544,7 +545,9 @@ static void loadQuickChatMessages()
       node.depth = 1;      // This is a group node
       node.keyCode = stringToKeyCode(gINI.GetValue(groups[i], "Key", "A").c_str());
       node.buttonCode = stringToKeyCode(gINI.GetValue(groups[i], "Button", "Button 1").c_str());
-      node.teamOnly = lcase(gINI.GetValue(groups[i], "MessageType", "Team")) == "team";
+      string str1 = lcase(gINI.GetValue(groups[i], "MessageType", "Team"));      // lcase for case insensitivity
+      node.teamOnly = str1 == "team";
+      node.commandOnly = str1 == "command";
       node.caption = gINI.GetValue(groups[i], "Caption", "Caption");
       node.msg = "";
       node.isMsgItem = false;
@@ -555,7 +558,9 @@ static void loadQuickChatMessages()
          node.depth = 2;   // This is a message node
          node.keyCode = stringToKeyCode(gINI.GetValue(messages[j], "Key", "A").c_str());
          node.buttonCode = stringToKeyCode(gINI.GetValue(messages[j], "Button", "Button 1").c_str());
-         node.teamOnly = lcase(gINI.GetValue(messages[j], "MessageType", "Team")) == "team";          // lcase for case insensitivity
+         str1 = lcase(gINI.GetValue(messages[j], "MessageType", "Team"));      // lcase for case insensitivity
+         node.teamOnly = str1 == "team";
+         node.commandOnly = str1 == "command";
          node.caption = gINI.GetValue(messages[j], "Caption", "Caption");
          node.msg = gINI.GetValue(messages[j], "Message", "Message");
          node.isMsgItem = true;
