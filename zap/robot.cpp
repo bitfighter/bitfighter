@@ -1729,8 +1729,8 @@ bool Robot::processArguments(S32 argc, const char **argv)
 		mFilename = gConfigDirs.findBotFile(mFilename);
 		if(mFilename == "")
 		{
-			logprintf("Could not find bot file %s", argv[1]);     // TODO: Better handling here
-         OGLCONSOLE_Print("Could not find bot file %s", argv[1]);
+			logprintf("Could not find bot file %s", mFilename.c_str());     // TODO: Better handling here
+         OGLCONSOLE_Print("Could not find bot file %s", mFilename.c_str());
 			return true;  // we can run built-in robot, not fully working yet...
 		}
 		else
