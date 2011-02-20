@@ -72,17 +72,17 @@ const bool QUIT_ON_SCRIPT_ERROR = true;
 // If this class is in Robot.h, it will have to recompile everything when we change anything in this class
 class RobotController
 {
-	Robot *ship;
-	GameType *gametype;
-	void gotoPoint(Point pos);
-	Point prevEnemyPosition;
+   Robot *ship;
+   GameType *gametype;
+   void gotoPoint(Point pos);
+   Point prevEnemyPosition;
 
 public:
-	RobotController()
-	{
-		// Do nothing
-	}
-	void run(Robot *newship, GameType *newgametype);
+   RobotController()
+   {
+      // Do nothing
+   }
+   void run(Robot *newship, GameType *newgametype);
 };
 
 
@@ -1374,7 +1374,7 @@ Vector<Robot *> Robot::robots;
 // Constructor, runs on client and server
 Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(robotName, false, team, pt, mass, true)
 {
-	robotController = new RobotController();
+   robotController = new RobotController();
    gameConnectionInitalized = false;
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
@@ -1401,7 +1401,7 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
 // Destructor, runs on client and server
 Robot::~Robot()
 {
-	delete (RobotController *)robotController;
+   delete (RobotController *)robotController;
    if(gameConnectionInitalized)
    {
       GameConnection *gc = getOwner();
@@ -1467,7 +1467,7 @@ bool Robot::initialize(Point &pos)
 
    }catch(LuaException &e)
    {
-		logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
+      logError("Robot error during spawn: %s.  Shutting robot down.", e.what());
       //delete this;         //can't delete here, that can cause memory errors
       isRunningScript = false;
       //return false;          //return false have an effect of disconnecting the robot.
@@ -1497,7 +1497,7 @@ extern string joindir(const string &path, const string &filename);
 
 bool Robot::startLua()
 {
-	if(! isRunningScript) return true;
+   if(! isRunningScript) return true;
    LuaObject::cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
@@ -1619,7 +1619,7 @@ bool Robot::startLua()
 // TODO: This is almost identical to the same-named function in luaLevelGenerator.cpp, but each call their own logError function.  How can we combine?
 bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
-	if(! isRunningScript) return true;
+   if(! isRunningScript) return true;
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
    string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
@@ -1645,7 +1645,7 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 // return false if failed
 bool Robot::runMain()
 {
-	if(! isRunningScript) return true;
+   if(! isRunningScript) return true;
    try
    {
       lua_getglobal(L, "_main");
@@ -1712,30 +1712,31 @@ bool Robot::processArguments(S32 argc, const char **argv)
    //if(argc < 2)               // Two required: team and bot file
    //   return false;
 
-	if(argc >= 1)
+   if(argc >= 1)
       mTeam = atoi(argv[0]);
-	else
-		mTeam = -10;   // The Gametype serverAddClient will take care of out of bound checking
-	
+   else
+      mTeam = -10;   // The Gametype serverAddClient will take care of out of bound checking
+   
 
-	if(argc >= 2)
-		mFilename = argv[1];
-	else
-		mFilename = gIniSettings.defaultRobotScript;
+   if(argc >= 2)
+      mFilename = argv[1];
+   else
+      mFilename = gIniSettings.defaultRobotScript;
 
-	if(mFilename != "")
-	{
+   if(mFilename != "")
+   {
       wasRunningScript = true;
-		mFilename = gConfigDirs.findBotFile(mFilename);
-		if(mFilename == "")
-		{
-			logprintf("Could not find bot file %s", mFilename.c_str());     // TODO: Better handling here
-         OGLCONSOLE_Print("Could not find bot file %s", mFilename.c_str());
-			return true;  // we can run built-in robot, not fully working yet...
-		}
-		else
-			isRunningScript = true;
-	}
+      string FileName2 = mFilename;  // for printing filename when not found.
+      mFilename = gConfigDirs.findBotFile(mFilename);
+      if(mFilename == "")
+      {
+         logprintf("Could not find bot file %s", FileName2.c_str());     // TODO: Better handling here
+         OGLCONSOLE_Print("Could not find bot file %s", FileName2.c_str());
+         return true;  // we can run built-in robot, not fully working yet...
+      }
+      else
+         isRunningScript = true;
+   }
 
    // Collect our arguments to be passed into the args table in the robot (starting with the robot name)
    // Need to make a copy or containerize argv[i] somehow,  because otherwise new data will get written
@@ -1854,9 +1855,9 @@ void Robot::render(S32 layerIndex)
       glBegin(GL_LINE_STRIP);
       glVertex2f(getActualPos().x,getActualPos().y);
       for(S32 i=flightPlan.size()-1; i >= 0; i--)
-		{
+      {
          glVertex2f(flightPlan[i].x, flightPlan[i].y);
-		}
+      }
       glEnd();
    }
 }
@@ -1881,8 +1882,8 @@ void Robot::idle(GameObject::IdleCallPath path)
             //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
             GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score
 
-				if(getName() == "")                          // Make sure bots have a name
-					setName(GameConnection::makeUnique("Robot").c_str());
+            if(getName() == "")                          // Make sure bots have a name
+               setName(GameConnection::makeUnique("Robot").c_str());
 
             gc->setClientName(getName());
             setOwner(gc);
@@ -1906,8 +1907,8 @@ void Robot::idle(GameObject::IdleCallPath path)
 
    if(path == GameObject::ServerIdleMainLoop)      // Running on server
    {
-		if(isRunningScript)
-		{
+      if(isRunningScript)
+      {
       // Clear out current move.  It will get set just below with the lua call, but if that function
       // doesn't set the various move components, we want to make sure that they default to 0.
       mCurrentMove.fire = false;
@@ -1936,22 +1937,22 @@ void Robot::idle(GameObject::IdleCallPath path)
          isRunningScript = false;
          return;
       }
-		}
-		else
-		{
-			if(wasRunningScript){
-				if(QUIT_ON_SCRIPT_ERROR)
-				{
-					getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!! Shutting down.");
-					delete this;
-					return;
-				}
-				getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
-				wasRunningScript = false;
-			}
+      }
+      else
+      {
+         if(wasRunningScript){
+            if(QUIT_ON_SCRIPT_ERROR)
+            {
+               getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!! Shutting down.");
+               delete this;
+               return;
+            }
+            getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!!");
+            wasRunningScript = false;
+         }
 
-			((RobotController *)robotController)->run(this,getGame()->getGameType());    // built-in robot might soon be fully programmed without using script file.
-		}
+         ((RobotController *)robotController)->run(this,getGame()->getGameType());    // built-in robot might soon be fully programmed without using script file.
+      }
 
       Ship::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client.
       return;
@@ -1963,56 +1964,56 @@ void Robot::idle(GameObject::IdleCallPath path)
 // Currently does not go anywhere, all it does is fire at enemies.
 void RobotController::run(Robot *newship, GameType *newgametype)
 {
-	ship = newship;
-	gametype = newgametype;
+   ship = newship;
+   gametype = newgametype;
 
 
-	F32 minDistance = F32_MAX;
-	Ship *enemyship = NULL;
-	Vector<DatabaseObject *> objects;
+   F32 minDistance = F32_MAX;
+   Ship *enemyship = NULL;
+   Vector<DatabaseObject *> objects;
    Point pos = ship->getActualPos();
    Rect queryRect(pos, pos);
    queryRect.expand(gServerGame->computePlayerVisArea(ship));
-	gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
-	for(S32 i=0; i<objects.size(); i++)
-	{
-		Ship *foundship = dynamic_cast<Ship *>(objects[i]);
-		if(foundship != NULL)
-		if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
-		{
-			F32 newDist = pos.distanceTo(foundship->getActualPos());
-			if(newDist < minDistance)
-			{
-				if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
-				{
-					minDistance = newDist;
-					enemyship = foundship;
-				}
-			}
-		}
-	}
-	if(enemyship != NULL)
-	{
-		Move move = ship->getCurrentMove();
-		//move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
-		WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
-		F32 interceptAngle;
-		move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
-		if(move.fire)
-			move.angle = interceptAngle;
-		ship->setCurrentMove(move);
-	}
-	else
-	{
-		Move move = ship->getCurrentMove();
-		move.fire = false;
-		ship->setCurrentMove(move);
-	}
+   gServerGame->getGridDatabase()->findObjects(ShipType,objects,queryRect);
+   for(S32 i=0; i<objects.size(); i++)
+   {
+      Ship *foundship = dynamic_cast<Ship *>(objects[i]);
+      if(foundship != NULL)
+      if(!gametype->isTeamGame() || foundship->getTeam() != ship->getTeam())
+      {
+         F32 newDist = pos.distanceTo(foundship->getActualPos());
+         if(newDist < minDistance)
+         {
+            if(gametype->getGridDatabase()->pointCanSeePoint(pos, foundship->getActualPos()))
+            {
+               minDistance = newDist;
+               enemyship = foundship;
+            }
+         }
+      }
+   }
+   if(enemyship != NULL)
+   {
+      Move move = ship->getCurrentMove();
+      //move->angle = ship->getActualPos().angleTo(enemyship->getActualPos());
+      WeaponInfo weap = gWeapons[ship->getSelectedWeapon()];    // Robot's active weapon
+      F32 interceptAngle;
+      move.fire = (calcInterceptCourse(enemyship, ship->getActualPos(), ship->getRadius(), ship->getTeam(), weap.projVelocity, weap.projLiveTime, false, interceptAngle));
+      if(move.fire)
+         move.angle = interceptAngle;
+      ship->setCurrentMove(move);
+   }
+   else
+   {
+      Move move = ship->getCurrentMove();
+      move.fire = false;
+      ship->setCurrentMove(move);
+   }
 }
 
 void RobotController::gotoPoint(Point point)
 {
-	//ship->getCurrentMove();
+   //ship->getCurrentMove();
 }
 
 };
