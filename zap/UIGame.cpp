@@ -74,6 +74,8 @@ extern Color gCmdChatColor;
 Color GameUserInterface::privateF5MessageDisplayedInGameColor(0, 0, 1);
 
 
+static void makeCommandCandidateList();      // Forward delcaration
+
 // Constructor
 GameUserInterface::GameUserInterface()
 {
@@ -131,7 +133,10 @@ GameUserInterface::GameUserInterface()
    //populateChatCmdList();
 
    remoteLevelDownloadFilename = "downloaded.level";
+
+   makeCommandCandidateList();
 }
+
 
 // Destructor
 GameUserInterface::~GameUserInterface()
@@ -1696,7 +1701,8 @@ void GameUserInterface::renderCurrentChat()
    if(isCmdChat())
    {
       string line = mLineEditor.getString();
-      Vector<string> words = parseString(line.c_str());
+      Vector<string> words = parseStringx(line.c_str());
+
       if(words.size() > 0)
       {
          for(S32 i = 0; i < chatCmdSize; i++)
@@ -1722,6 +1728,77 @@ void GameUserInterface::renderCurrentChat()
 }
 
 
+static Vector<string> commandCandidateList;
+static Vector<string> nameCandidateList;         // Reuse this for player and team names
+
+static void makeCommandCandidateList()
+{
+   for(S32 i = 0; i < chatCmdSize; i++)
+      commandCandidateList.push_back(chatCmds[i].cmdName);
+}
+
+static void makePlayerNameCandidateList()
+{
+   nameCandidateList.clear();
+
+   if(gClientGame->getGameType())
+      for(S32 i = 0; i < gClientGame->getGameType()->mClientList.size(); i++)
+         if(gClientGame->getGameType()->mClientList[i].isValid())
+            nameCandidateList.push_back(gClientGame->getGameType()->mClientList[i]->name.getString());
+}
+
+
+static void makeTeamNameCandidateList()
+{
+   nameCandidateList.clear();
+
+   if(gClientGame->getGameType())
+      for(S32 i = 0; i < gClientGame->getTeamCount(); i++)
+         nameCandidateList.push_back(gClientGame->getGameType()->getTeamName(i).getString());
+}
+
+
+static Vector<string> *getCandidateList(const Vector<string> words)
+{
+   S32 arg = words.size() - 1;
+
+   if(arg == 0)         // Command completion
+      return &commandCandidateList;
+
+   else if(arg > 0)     // Arg completion
+   {
+      // Figure out which command we're entering, so we know what kind of args to expect
+      S32 cmd = -1;
+
+      for(S32 i = 0; i < chatCmdSize; i++)
+         if(!stricmp(chatCmds[i].cmdName.c_str(), words[0].c_str()))
+         {
+            cmd = i;
+            break;
+         }
+
+      if(cmd != -1 && arg <= chatCmds[cmd].cmdArgCount)     // Found a command
+      {
+         ArgTypes argType = chatCmds[cmd].cmdArgInfo[arg - 1];  // What type of arg are we expecting?
+
+         if(argType == NAME)           // Player names
+         {  
+            makePlayerNameCandidateList();
+            return &nameCandidateList;
+         }
+
+         else if(argType == TEAM)      // Team names
+         {
+            makeTeamNameCandidateList();
+            return &nameCandidateList;
+         }
+      }
+   }
+   
+   return NULL;                        // No completion options
+}
+
+
 void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
 {
    if(keyCode == KEY_ENTER)
@@ -1737,63 +1814,41 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       if(isCmdChat())     // It's a command!  Complete!  Complete!
       {
          // First, parse line into words
-         Vector<string> words = parseString(mLineEditor.c_str());
-         Vector<string> candidates;
+         Vector<string> words = parseStringx(mLineEditor.c_str());
 
-         S32 arg = words.size() - 1;
-
-         if(arg == 0)         // Command completion
-         {
-            for(S32 i = 0; i < chatCmdSize; i++)
-               candidates.push_back(chatCmds[i].cmdName);      // Totally ineffecient -- this will never change over course of game
-         }
-         else if(arg > 0)     // Arg completion
-         {
-            S32 cmd = -1;
-
-            for(S32 i = 0; i < chatCmdSize; i++)
-            {
-               if(!stricmp(chatCmds[i].cmdName.c_str(), words[0].c_str()))
-               {
-                  cmd = i;
-                  break;
-               }
-            }
-
-            if(cmd != -1 && arg <= chatCmds[cmd].cmdArgCount)     // Found a command
-            {
-               ArgTypes argType = chatCmds[cmd].cmdArgInfo[arg - 1];  // What type of arg are we expecting?
-
-               if(argType == NAME)           // Player names
-               {  
-                  if(gClientGame->getGameType())
-                     for(S32 i = 0; i < gClientGame->getGameType()->mClientList.size(); i++)
-                        if(gClientGame->getGameType()->mClientList[i].isValid())
-                           candidates.push_back(gClientGame->getGameType()->mClientList[i]->name.getString());
-               }
-               else if(argType == TEAM)      // Team names
-               {
-                  if(gClientGame->getGameType())
-                     for(S32 i = 0; i < gClientGame->getTeamCount(); i++)
-                        candidates.push_back(gClientGame->getGameType()->getTeamName(i).getString());
-               }
-               // else no completion
-            }
-         }
+         Vector<string> *candidates = getCandidateList(words);
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
-         if(candidates.size() > 0)
+         if(candidates && candidates->size() > 0)
          {
+            S32 arg;
+            size_t len;
+            const char *partial;
+
+            if(mLineEditor.getString().back()  != ' ')
+            {
+               arg = words.size() - 1;
+               len = words[arg].size();
+               partial = words[arg].c_str();
+            }
+            else     // If final character is a space, then we're really on to the next argument...
+            {
+               arg =  words.size();
+               len = 0;
+               partial = "";
+            }
+
+
+            // Search for matching candidates
             S32 found = -1;
 
-            size_t len = words[arg].size();
-
-            for(S32 i = 0; i < candidates.size(); i++)
+            for(S32 i = 0; i < candidates->size(); i++)
             {
-               if(!stricmp(candidates[i].substr(0, len).c_str(), words[arg].c_str()))
+               if(!stricmp((*candidates)[i].substr(0, len).c_str(), partial))
                {
                   if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete
                      return;
+
                   found = i;
                }
             }
@@ -1801,8 +1856,18 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             if(found == -1)         // Found no match... no expansion possible
                return;
 
-            words[arg] = candidates[found];
-            mLineEditor.setString(concatenate(words));    // Add the command
+            string str = mLineEditor.getString();
+
+            size_t pos = str.find_last_of(' ');
+            string space = " ";
+
+            if(pos == string::npos)    // i.e. string does not contain a space, requires special handling
+            {
+               pos = 0;
+               space = "";
+            }
+
+            mLineEditor.setString(str.substr(0, pos).append(space + (*candidates)[found]));    // Add the command
          }
       }
    }
@@ -1967,27 +2032,13 @@ void GameUserInterface::issueChat()
 }
 
 
-Vector<string> GameUserInterface::parseString(const char *str)
+Vector<string> GameUserInterface::parseStringx(const char *str)
 {
-   // Parse the string
-   string word = "";
-   Vector<string> words;
+   Vector<string> words = parseString(str);
 
-   S32 startIndex = (str[0] == '/') ? 1 : 0;                       // ignore '/' when it is there.
-   //S32 startIndex = (mCurrentChatType == CmdChat) ? 0 : 1;        // Start at 1 to omit the leading '/'
-
-   for(size_t i = startIndex; i < strlen(str); i++)
-   {
-      if(str[i] != ' ')
-         word += words.size() == 0 ? tolower(str[i]) : str[i];    // Make first word all lower case for case insensitivity
-      else if(word != "")
-      {
-         words.push_back(word);
-         word = "";
-      }
-   }
-   if(word != "")
-      words.push_back(word);
+   if(words.size() > 0)
+      if(words[0][0] == '/')
+         words[0].erase(0, 1);      // Remove leading /
 
    return words;
 }
@@ -1998,7 +2049,7 @@ Vector<string> GameUserInterface::parseString(const char *str)
 // Runs on client
 void GameUserInterface::runCommand(const char *input)
 {
-   Vector<string> words = parseString(input);
+   Vector<string> words = parseStringx(input);  // yes
 
    if(words.size() == 0)            // Just in case, must have 1 or more words to check the first word as command.
       return;

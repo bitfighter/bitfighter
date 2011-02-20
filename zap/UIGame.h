@@ -252,7 +252,7 @@ public:
    void shutdownInitiated(U16 time, StringTableEntry who, StringPtr why, bool initiator);
    void shutdownCanceled();
 
-   Vector<string> parseString(const char *str);    // Break a chat msg into parsable bits
+   Vector<string> parseStringx(const char *str);    // Break a chat msg into parsable bits
 
    void setVolume(VolumeType volType, const Vector<string> &words);
 
