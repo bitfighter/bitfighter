@@ -27,6 +27,7 @@
 #define _LINE_EDITOR_H_
 
 #include "tnlTypes.h"
+#include "tnlVector.h"
 #include "timer.h"
 #include "keyCode.h"
 #include <string>
@@ -68,8 +69,8 @@ public:
 
    U32 length() { return (U32)mLine.length(); }
    void addChar(char c);
-   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); }     // Backspace key hit
-   void deletePressed() { backspacePressed(); }                                    // Delete key hit
+   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); matchIndex = -1; }     // Backspace key hit
+   void deletePressed() { backspacePressed(); }                                                     // Delete key hit
    void handleBackspace(KeyCode keyCode);               // Pass this either KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
    void clear() { mLine.clear(); }                      // Clear the string
    char at(U32 pos);                                    // Get char at pos
@@ -80,16 +81,20 @@ public:
    LineEditorFilter mFilter;
    void setFilter(LineEditorFilter filter) { mFilter = filter; }
 
-   string getString() const { return mLine; }                        // Return the string in string format
+   string getString() const { return mLine; }                              // Return the string in string format
    string getDisplayString() const { return mSecret ? string(mLine.length(), '*') : mLine; }
    void setString(string str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
    void setPrompt(string prompt) { mPrompt = prompt; }
    string getPrompt() { return mPrompt; }
-   const char *c_str() { return mLine.c_str(); }                     // Return the string in c_str format
+   const char *c_str() { return mLine.c_str(); }                 // Return the string in c_str format
 
    void drawCursor(S32 x, S32 y, U32 fontSize);                  // Draw our cursor, assuming string is drawn at x,y 
    void drawCursorAngle(S32 x, S32 y, F32 fontSize, F32 angle);  // Draw our cursor, assuming string is drawn at x,y at specified angle
    void drawCursorAngle(F32 x, F32 y, F32 fontSize, F32 angle);
+
+   // For tab expansion 
+   Vector<string> matchList;
+   S32 matchIndex;
 
    S32 getMaxLen() { return mMaxLen; }
 
@@ -97,6 +102,7 @@ public:
    bool operator==(LineEditor &lineEditor) const { return mLine == lineEditor.getString(); }
 
 };
+
 
 };
 

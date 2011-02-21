@@ -120,6 +120,7 @@ void LineEditor::addChar(const char c)
       return;
    
    if(length() < mMaxLen) mLine.append(string(1,c)); 
+   matchIndex = -1;
 }
 
 

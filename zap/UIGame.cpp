@@ -1758,10 +1758,8 @@ static void makeTeamNameCandidateList()
 }
 
 
-static Vector<string> *getCandidateList(const Vector<string> words)
+static Vector<string> *getCandidateList(const string &cmdName, S32 arg)
 {
-   S32 arg = words.size() - 1;
-
    if(arg == 0)         // Command completion
       return &commandCandidateList;
 
@@ -1771,7 +1769,7 @@ static Vector<string> *getCandidateList(const Vector<string> words)
       S32 cmd = -1;
 
       for(S32 i = 0; i < chatCmdSize; i++)
-         if(!stricmp(chatCmds[i].cmdName.c_str(), words[0].c_str()))
+         if(!stricmp(chatCmds[i].cmdName.c_str(), cmdName.c_str()))
          {
             cmd = i;
             break;
@@ -1816,44 +1814,43 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
          // First, parse line into words
          Vector<string> words = parseStringx(mLineEditor.c_str());
 
-         Vector<string> *candidates = getCandidateList(words);
+
+         S32 arg;
+         size_t len;
+         const char *partial;
+
+         if(mLineEditor.getString().back()  != ' ')
+         {
+            arg = words.size() - 1;
+            len = words[arg].size();
+            partial = words[arg].c_str();
+         }
+         else     // If final character is a space, then we're really on to the next argument...
+         {
+            arg =  words.size();
+            len = 0;
+            partial = "";
+         }
+
+         Vector<string> *candidates = getCandidateList(words[0], arg);
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
          {
-            S32 arg;
-            size_t len;
-            const char *partial;
-
-            if(mLineEditor.getString().back()  != ' ')
-            {
-               arg = words.size() - 1;
-               len = words[arg].size();
-               partial = words[arg].c_str();
-            }
-            else     // If final character is a space, then we're really on to the next argument...
-            {
-               arg =  words.size();
-               len = 0;
-               partial = "";
-            }
-
 
             // Search for matching candidates
-            S32 found = -1;
-
-            for(S32 i = 0; i < candidates->size(); i++)
+            if(mLineEditor.matchIndex == -1)
             {
-               if(!stricmp((*candidates)[i].substr(0, len).c_str(), partial))
-               {
-                  if(found != -1)   // We found multiple matches, so that means it's not yet unique enough to autocomplete
-                     return;
+               mLineEditor.matchList.clear();
 
-                  found = i;
+               for(S32 i = 0; i < candidates->size(); i++)
+               {
+                  if(!stricmp((*candidates)[i].substr(0, len).c_str(), partial))
+                     mLineEditor.matchList.push_back((*candidates)[i]);
                }
             }
 
-            if(found == -1)         // Found no match... no expansion possible
+            if(mLineEditor.matchList.size() == 0)         // Found no match... no expansion possible
                return;
 
             string str = mLineEditor.getString();
@@ -1867,7 +1864,10 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
                space = "";
             }
 
-            mLineEditor.setString(str.substr(0, pos).append(space + (*candidates)[found]));    // Add the command
+            mLineEditor.matchIndex++;
+            if(mLineEditor.matchIndex >= mLineEditor.matchList.size())
+               mLineEditor.matchIndex = 0;
+            mLineEditor.setString(str.substr(0, pos).append(space + mLineEditor.matchList[mLineEditor.matchIndex]));    // Add the command
          }
       }
    }
