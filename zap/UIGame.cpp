@@ -1853,7 +1853,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             if(mLineEditor.matchList.size() == 0)               // Found no matches... no expansion possible
                return;
 
-            string *str = &mLineEditor.getString();             // Convenient shortcut
+            const string *str = mLineEditor.getStringPtr();     // Convenient shortcut
 
             size_t pos = str->find_last_of(' ');
             string space = " ";

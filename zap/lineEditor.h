@@ -82,6 +82,7 @@ public:
    void setFilter(LineEditorFilter filter) { mFilter = filter; }
 
    string getString() const { return mLine; }                              // Return the string in string format
+   const string *getStringPtr() const { return &mLine; }
    string getDisplayString() const { return mSecret ? string(mLine.length(), '*') : mLine; }
    void setString(string str) { mLine.assign(str.substr(0, mMaxLen)); }    // Set the string
    void setPrompt(string prompt) { mPrompt = prompt; }
