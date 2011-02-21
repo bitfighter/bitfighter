@@ -359,7 +359,7 @@ inline void BitStream::writeIntAt(U32 value, U8 bitCount, U32 bitPosition)
    setBitPosition(curPos);
 }
 
-#include <stdio.h>
+// #include <stdio.h>
 inline void BitStream::writeRangedU32(U32 value, U32 rangeStart, U32 rangeEnd)
 {
    TNLAssertV(value >= rangeStart && value <= rangeEnd, ("Out of bounds value! [val=%d, start=%d, end=%d]", value, rangeStart, rangeEnd));
