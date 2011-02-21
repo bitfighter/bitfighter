@@ -1,7 +1,7 @@
 # TNL Makefile
 # From Bitfigher (http://bitfighter.org)
 
-CC=g++ -g  -DTNL_ENABLE_LOGGING -I../libtomcrypt/src/headers -I../libtomcrypt # -O2
+CC=g++ -g  -DTNL_ENABLE_LOGGING -I../libtomcrypt/src/headers -I../libtomcrypt -O2
 
 
 OBJECTS=\

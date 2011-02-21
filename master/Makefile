@@ -3,17 +3,19 @@
 # This makefile is for Linux 
 
 
-# These flags are for use with both database stats and phpbb integration (both use mysql)
-MYSQLFLAGS=-I/usr/include/mysql -I../mysql++
+# These flags are for use with mysql: both with database stats and phpbb integration
+IFLAGS_MYSQL=-I/usr/include/mysql -I../mysql++
+LDFLAGS_MYSQL=../mysql++/libmysqlpp.so 
 
-LDFLAGS=../mysql++/libmysqlpp.so 
-
-# If you get an error about not being able to find the mysql headers, try removing MYSQLPP_MYSQL_HEADERS_BURIED flag
-CFLAGS_DB_STATS=-DBF_WRITE_TO_MYSQL
+# Other CFLAGS
+CFLAGS_MYSQL_STATS=-DBF_WRITE_TO_MYSQL
 CFLAGS_PHPBB=-DVERIFY_PHPBB3
 
+# GENERAL FLAGS
+LFLAGS_EXTRA=-lm -ldl -lstdc++ -lpthread
+EXTRA_FLAGS=
 
-CC=g++ -g -I../tnl -I../libtomcrypt -W #-O2
+CC=gcc -g -I../tnl -I../libtomcrypt -W -O2
 
 OBJECTS_MASTER=\
    main.o\
@@ -21,63 +23,73 @@ OBJECTS_MASTER=\
    config.o\
    ../zap/gameStats.o\
    ../zap/stringUtils.o\
+   ../sqlite/sqlite3.o\
    database.o
-
-OBJECTS_DB_STATS=\
 
 OBJECTS_PHPBB=\
    authenticator.o\
    phpbbhash.o
 
+
 .cpp.o: 
-	$(CC) $(MYSQLFLAGS) -c $(CFLAGS) -o $@ $<
+	$(CC) $(EXTRA_FLAGS) -c $(CFLAGS) -o $@ $<
+
+.c.o: 
+	$(CC) $(EXTRA_FLAGS) -c $(CFLAGS) -o $@ $<
 
 
-# Compile default with all options on
+# Compile default with mysql for everything
 
-default: master
+default: mysql
+
+help:
+	@echo
+	@echo "    default:       see mysql"
+	@echo
+	@echo "    minimal:       no phpbb; use default sqlite3 for stats"
+	@echo "    nomysqlstats:  phpbb; use default sqlite3 for stats"
+	@echo "    nophpbb:       no phpbb; use mysql for DB stats"
+	@echo "    mysql:         phpbb; use mysql for DB stats"
+	@echo
 
 
-# Compile without database statistics or phpbb integration
+# Compile without mysql integration for phpbb or stats (use sqlite3 for stats)
 
-minimal: MYSQLFLAGS=
-minimal: LDFLAGS=
-minimal: CFLAGS=
 minimal: $(OBJECTS_MASTER)
 minimal: 
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA)
  
 
-# Compile with database stats off; include phpbb integration
+# Use default sqlite3 for stats; integrate with phpbb
 
-nodbstats: CFLAGS=$(CFLAGS_PHPBB)
-nodbstats: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
-nodbstats: 
+nomysqlstats: EXTRA_FLAGS=$(CFLAGS_PHPBB) $(IFLAGS_MYSQL)
+nomysqlstats: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
+nomysqlstats: 
 	@$(MAKE) -C ../mysql++
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA) $(LDFLAGS_MYSQL) 
 
 
-# Compile with no PHPBB integration; include database stats integration
+# Compile with no phpbb integration; include mysql database stats integration
 
-nophpbb: CFLAGS=$(CFLAGS_DB_STATS)
-nophpbb: $(OBJECTS_MASTER) $(OBJECTS_DB_STATS)
+nophpbb: EXTRA_FLAGS=$(CFLAGS_MYSQL_STATS) $(IFLAGS_MYSQL)
+nophpbb: $(OBJECTS_MASTER)
 nophpbb:
 	@$(MAKE) -C ../mysql++
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_DB_STATS) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS) 
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA) $(LDFLAGS_MYSQL) 
 
 
 # Compile all options on (with db stats and phpbb)
 
-master: CFLAGS=$(CFLAGS_DB_STATS) $(CFLAGS_PHPBB)
-master: $(OBJECTS_MASTER) $(OBJECTS_DB_STATS) $(OBJECTS_PHPBB)
-master: 
+mysql: EXTRA_FLAGS=$(CFLAGS_MYSQL_STATS) $(CFLAGS_PHPBB) $(IFLAGS_MYSQL)
+mysql: $(OBJECTS_MASTER) $(OBJECTS_PHPBB)
+mysql: 
 	@$(MAKE) -C ../mysql++
-	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_DB_STATS) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a -lstdc++ -lm $(LDFLAGS)
+	$(CC) -o ../exe/master $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../tnl/libtnl.a ../libtomcrypt/libtomcrypt.a $(LFLAGS_EXTRA) $(LDFLAGS_MYSQL)
 
 
 # Cleaning
 
 clean:
-	rm -f $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB) ../exe/master
+	rm -f $(OBJECTS_MASTER) $(OBJECTS_PHPBB) ../exe/master
 cleano:
-	rm -f $(OBJECTS_MASTER) $(OBJECTS_MYSQL) $(OBJECTS_PHPBB)
+	rm -f $(OBJECTS_MASTER) $(OBJECTS_PHPBB)

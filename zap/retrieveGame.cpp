@@ -206,9 +206,12 @@ public:
          // Return all the flags to their starting locations if need be
          for(S32 i = 0; i < mFlags.size(); i++)
          {
-            mFlags[i]->setZone(NULL);
-            if(!mFlags[i]->isAtHome())
-               mFlags[i]->sendHome();
+            if(mFlags[i]->getTeam() == s->getTeam() || mFlags[i]->getTeam() == -1) // team and neutral flags
+            {
+               mFlags[i]->setZone(NULL);
+               if(!mFlags[i]->isAtHome())
+                  mFlags[i]->sendHome();
+            }
          }
       }
    }
