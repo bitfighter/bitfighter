@@ -1858,7 +1858,7 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
 
                for(S32 i = 0; i < candidates->size(); i++)
                {
-                  // If partial is empty, then everything matches -- we want all candidated in our list
+                  // If partial is empty, then everything matches -- we want all candidates in our list
                   if(!strcmp(partial, "") || !stricmp((*candidates)[i].substr(0, len).c_str(), partial))
                      mLineEditor.matchList.push_back((*candidates)[i]);
                }
