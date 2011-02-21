@@ -62,8 +62,7 @@ bool MenuItem::handleKey(KeyCode keyCode, char ascii)
 
 void ToggleMenuItem::render(S32 ypos, S32 textsize, bool isSelected)
 {
-   Us
-      erInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), mOptions[mIndex].c_str());
+   UserInterface::drawCenteredStringPair(ypos, textsize, mColor, Color(0,1,1), getText(), mOptions[mIndex].c_str());
 }
 
 

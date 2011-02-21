@@ -1836,57 +1836,44 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
          if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')   
          {
             arg = words.size() - 1;          // No trailing space --> current arg is the last word we've been typing
-            len = words[arg].size();
             partial = words[arg].c_str();    // We'll be matching against what we've typed so far
          }
          else     // If the editor is empty, or if final character is a space, then we need to set these params differently
          {
             arg = words.size();              // Trailing space --> current arg is the next word we've not yet started typing
-            len = 0;
             partial = "";                    // We'll be matching against an empty list since we've typed nothing so far
          }
 
-         Vector<string> *candidates = getCandidateList(words[0], arg);
+         Vector<string> *candidates = getCandidateList(words[0], arg);     // Could return NULL
 
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
          {
-            // Search for matching candidates
-            if(mLineEditor.matchIndex == -1)    // -1 --> Need to build a new match list (gets set to -1 when we change mLineEditor by typing)
-            {
-               mLineEditor.matchList.clear();
+            mLineEditor.buildMatchList(candidates, partial);    // Filter candidates by what we've typed so far
 
-               for(S32 i = 0; i < candidates->size(); i++)
-               {
-                  // If partial is empty, then everything matches -- we want all candidates in our list
-                  if(!strcmp(partial, "") || !stricmp((*candidates)[i].substr(0, len).c_str(), partial))
-                     mLineEditor.matchList.push_back((*candidates)[i]);
-               }
-            }
-
-            if(mLineEditor.matchList.size() == 0)         // Found no match... no expansion possible
+            if(mLineEditor.matchList.size() == 0)               // Found no matches... no expansion possible
                return;
 
-            string str = mLineEditor.getString();
+            string *str = &mLineEditor.getString();
 
-            size_t pos = str.find_last_of(' ');
+            size_t pos = str->find_last_of(' ');
             string space = " ";
 
             if(pos == string::npos)    // i.e. string does not contain a space, requires special handling
             {
                pos = 0;
-               if(words.size() <= 1 && needLeadingSlash)
+               if(words.size() <= 1 && needLeadingSlash)    // ugh!  More special cases!
                   space = "/";
                else
                   space = "";
             }
 
-            mLineEditor.matchIndex++;
+            mLineEditor.matchIndex++;     // Advance to next potential match
 
-            if(mLineEditor.matchIndex >= mLineEditor.matchList.size())
+            if(mLineEditor.matchIndex >= mLineEditor.matchList.size())     // Handle wrap-around
                mLineEditor.matchIndex = 0;
 
-            mLineEditor.setString(str.substr(0, pos).append(space + mLineEditor.matchList[mLineEditor.matchIndex]));    // Add the command
+            mLineEditor.setString(str->substr(0, pos).append(space + mLineEditor.matchList[mLineEditor.matchIndex]));    // Add match to the command
          }
       }
    }

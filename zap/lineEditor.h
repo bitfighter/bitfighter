@@ -95,6 +95,7 @@ public:
    // For tab expansion 
    Vector<string> matchList;
    S32 matchIndex;
+   void buildMatchList(Vector<string> *candidates, const char *partial);
 
    S32 getMaxLen() { return mMaxLen; }
 

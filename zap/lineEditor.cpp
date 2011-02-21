@@ -65,6 +65,26 @@ char LineEditor::at(U32 pos)
 } 
 
 
+// Given a list of potential match candidates, and a partially typed string, find all candidates that are potential matches
+void LineEditor::buildMatchList(Vector<string> *candidates, const char *partial)
+{
+   // Search for matching candidates
+   if(matchIndex == -1)    // -1 --> Need to build a new match list (gets set to -1 when we change mLineEditor by typing)
+   {
+      matchList.clear();
+
+      S32 len = strlen(partial);
+
+      for(S32 i = 0; i < candidates->size(); i++)
+      {
+         // If partial is empty, then everything matches -- we want all candidates in our list
+         if(!strcmp(partial, "") || !stricmp((*candidates)[i].substr(0, len).c_str(), partial))
+            matchList.push_back((*candidates)[i]);
+      }
+   }
+}
+
+
 // Draw our cursor, assuming string is drawn at x,y  (vert spacing works differently than on the angle version
 void LineEditor::drawCursor(S32 x, S32 y, U32 fontSize)
 {
