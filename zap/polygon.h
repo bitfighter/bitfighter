@@ -74,7 +74,7 @@ protected:
 
 
    // Read a series of points from a command line, and add them to a Vector of points
-   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToEqual = false)
    {
       Point p, lastP;
       
@@ -93,7 +93,7 @@ protected:
       }
 
       // Check if last point was same as first; if so, scrap it
-      if(mPolyBounds.first() == mPolyBounds.last())
+      if(!allowFirstAndLastPointToEqual && mPolyBounds.first() == mPolyBounds.last())
          mPolyBounds.erase(mPolyBounds.size() - 1);
 
       mCentroid = findCentroid(mPolyBounds);
