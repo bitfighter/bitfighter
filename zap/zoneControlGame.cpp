@@ -161,7 +161,9 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       return;
 
    S32 oldTeam = z->getTeam();
-   if(oldTeam >= 0)    // Zone is being captured from another team
+   if(mZones.size() > 40)  // Do nothing, too many zones will be annoying with messages.
+      ;
+   else if(oldTeam >= 0)    // Zone is being captured from another team
    {
       static StringTableEntry takeString("%e0 captured a zone from team %e1!");
       Vector<StringTableEntry> e;
