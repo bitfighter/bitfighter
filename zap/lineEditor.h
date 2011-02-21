@@ -65,14 +65,14 @@ public:
       noQuoteFilter        // No "s
    };
 
-   LineEditor(U32 maxLength = 256, string value = "");     // Constructor
+   LineEditor(U32 maxLength = 256, string value = "");   // Constructor
 
    U32 length() { return (U32)mLine.length(); }
    void addChar(char c);
-   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); matchIndex = -1; }     // Backspace key hit
-   void deletePressed() { backspacePressed(); }                                                     // Delete key hit
-   void handleBackspace(KeyCode keyCode);               // Pass this either KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
-   void clear() { mLine.clear(); }                      // Clear the string
+   void backspacePressed() { if(length() > 0) mLine.erase(mLine.size() - 1); matchIndex = -1; }     // User hit Backspace 
+   void deletePressed() { backspacePressed(); }                                                     // User hit Delete 
+   void handleBackspace(KeyCode keyCode);               // Pass KEY_BACKSPACE or KEY_DELETE and it will do the right thing!
+   void clear() { mLine.clear(); matchIndex = -1;}      // Clear the string and tab-expansion matchlist
    char at(U32 pos);                                    // Get char at pos
    bool isEmpty() { return mLine.empty(); }             // Is string empty
 

@@ -1812,25 +1812,38 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       if(isCmdChat())     // It's a command!  Complete!  Complete!
       {
          // First, parse line into words
-         Vector<string> words = parseStringx(mLineEditor.c_str());
+         Vector<string> words = parseString(mLineEditor.c_str());
 
+         bool needLeadingSlash = false;
 
+         // Handle leading slash when command is entered from ordinary chat prompt
+         if(words.size() > 0 && words[0][0] == '/')
+         {
+            // Special case: User has entered process by starting with global chat, and has typed "/" then <tab>
+            if(mLineEditor.getString() == "/")
+               words.clear();          // Clear -- it's as if we're at a fresh "/" prompt where the user has typed nothing
+            else
+               words[0].erase(0, 1);   // Strip -- remove leading "/" so it's as if were at a regular "/" prompt
+
+            needLeadingSlash = true;   // We'll need to add the stripped "/" back in later
+         }
+               
          S32 arg;
          size_t len;
          const char *partial;
-
          
-         if(!mLineEditor.getString().empty() && *mLineEditor.getString().rbegin() != ' ')    // http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
+         // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
+         if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')   
          {
-            arg = words.size() - 1;
+            arg = words.size() - 1;          // No trailing space --> current arg is the last word we've been typing
             len = words[arg].size();
-            partial = words[arg].c_str();
+            partial = words[arg].c_str();    // We'll be matching against what we've typed so far
          }
-         else     // If final character is a space, then we're really on to the next argument...
+         else     // If the editor is empty, or if final character is a space, then we need to set these params differently
          {
-            arg =  words.size();
+            arg = words.size();              // Trailing space --> current arg is the next word we've not yet started typing
             len = 0;
-            partial = "";
+            partial = "";                    // We'll be matching against an empty list since we've typed nothing so far
          }
 
          Vector<string> *candidates = getCandidateList(words[0], arg);
@@ -1838,15 +1851,15 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
          // Now we have our candidates list... let's compare to what the player has already typed to generate completion string
          if(candidates && candidates->size() > 0)
          {
-
             // Search for matching candidates
-            if(mLineEditor.matchIndex == -1)
+            if(mLineEditor.matchIndex == -1)    // -1 --> Need to build a new match list (gets set to -1 when we change mLineEditor by typing)
             {
                mLineEditor.matchList.clear();
 
                for(S32 i = 0; i < candidates->size(); i++)
                {
-                  if(!stricmp((*candidates)[i].substr(0, len).c_str(), partial))
+                  // If partial is empty, then everything matches -- we want all candidated in our list
+                  if(!strcmp(partial, "") || !stricmp((*candidates)[i].substr(0, len).c_str(), partial))
                      mLineEditor.matchList.push_back((*candidates)[i]);
                }
             }
@@ -1862,12 +1875,17 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             if(pos == string::npos)    // i.e. string does not contain a space, requires special handling
             {
                pos = 0;
-               space = "";
+               if(words.size() <= 1 && needLeadingSlash)
+                  space = "/";
+               else
+                  space = "";
             }
 
             mLineEditor.matchIndex++;
+
             if(mLineEditor.matchIndex >= mLineEditor.matchList.size())
                mLineEditor.matchIndex = 0;
+
             mLineEditor.setString(str.substr(0, pos).append(space + mLineEditor.matchList[mLineEditor.matchIndex]));    // Add the command
          }
       }

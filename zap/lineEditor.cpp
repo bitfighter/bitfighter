@@ -39,6 +39,7 @@ LineEditor::LineEditor(U32 maxLength, string value)
    mFilter = allAsciiFilter;
    mPrompt = "";
    mSecret = false;
+   matchIndex = -1;
 }
 
 
