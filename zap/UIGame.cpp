@@ -1828,9 +1828,8 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             needLeadingSlash = true;   // We'll need to add the stripped "/" back in later
          }
                
-         S32 arg;
-         size_t len;
-         const char *partial;
+         S32 arg;                      // Which word we're looking at
+         const char *partial;          // The partially typed word we're trying to match against
          
          // Check for trailing space --> http://www.suodenjoki.dk/us/archive/2010/basic-string-back.htm
          if(words.size() > 0 && *mLineEditor.getString().rbegin() != ' ')   
