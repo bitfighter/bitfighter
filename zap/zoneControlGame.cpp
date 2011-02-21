@@ -161,21 +161,22 @@ void ZoneControlGameType::shipTouchZone(Ship *s, GoalZone *z)
       return;
 
    S32 oldTeam = z->getTeam();
-   if(mZones.size() > 40)  // Do nothing, too many zones will be annoying with messages.
-      ;
-   else if(oldTeam >= 0)    // Zone is being captured from another team
+   if(oldTeam >= 0)    // Zone is being captured from another team
    {
-      static StringTableEntry takeString("%e0 captured a zone from team %e1!");
-      Vector<StringTableEntry> e;
-      e.push_back(s->getName());
-      e.push_back(getTeamName(oldTeam));
+      if(mZones.size() <= 50)  // Don't display message when too many zones will be annoying with messages.
+      {
+         static StringTableEntry takeString("%e0 captured a zone from team %e1!");
+         Vector<StringTableEntry> e;
+         e.push_back(s->getName());
+         e.push_back(getTeamName(oldTeam));
 
-      for(S32 i = 0; i < mClientList.size(); i++)
-         mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
-
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXFlagSnatch, takeString, e);
+      }
       updateScore(z->getTeam(), UncaptureZone);      // Inherently team-only event, no?
    }
    else                 // Zone is neutral
+      if(mZones.size() <= 50)
    {
       static StringTableEntry takeString("%e0 captured an unclaimed zone!");
       Vector<StringTableEntry> e;
