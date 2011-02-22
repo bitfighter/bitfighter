@@ -752,7 +752,7 @@ void ServerGame::buildOrLoadBotMeshZones()
       saveBotMeshZones(filename.c_str());
    }
 
-   BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
+   BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions between zones
 }
 
 

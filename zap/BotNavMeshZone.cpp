@@ -325,7 +325,6 @@ static void makeBotMeshZone(F32 x1, F32 y1, F32 x2, F32 y2)
 }
 
 
-// In future, this function will store generated zones in a cache... but not yet; now it's just buildBotMeshZones!
 void BotNavMeshZone::buildBotMeshZones()
 {
 	Rect bounds = gServerGame->computeWorldObjectExtents();
@@ -351,7 +350,6 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
       {
          if(PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
             return zone;   // Make sure point is inside the polygon
-
       }
    }
 
