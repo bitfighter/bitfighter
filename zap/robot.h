@@ -114,7 +114,7 @@ class Robot : public Ship
 private:
    string mFilename;            // Name of file script was loaded from
 
-   S32 mCurrentZone;            // Zone robot is currently in
+   U16 mCurrentZone;            // Zone robot is currently in
 
    S32 mScore;
    S32 mTotalScore;
@@ -157,7 +157,7 @@ public:
    bool canSeePoint(Point point);         // Is point within robot's LOS?
 
    Vector<Point> flightPlan;              // List of points to get from one point to another
-   S32 flightPlanTo;                      // Zone our flightplan was calculated to
+   U16 flightPlanTo;                      // Zone our flightplan was calculated to
 
    // Some informational functions
    F32 getAnglePt(Point point);
@@ -204,8 +204,8 @@ class LuaRobot : public LuaShip
 
 private:
    Point getNextWaypoint();                          // Helper function for getWaypoint()
-   S32 findClosestZone(Point point);                 // Finds zone closest to point, used when robots get off the map
-   S32 findAndReturnClosestZone(lua_State *L, Point point); // Wraps findClosestZone and handles returning the result to Lua
+   U16 findClosestZone(const Point &point);                 // Finds zone closest to point, used when robots get off the map
+   S32 findAndReturnClosestZone(lua_State *L, const Point &point); // Wraps findClosestZone and handles returning the result to Lua
    S32 doFindItems(lua_State *L, Rect scope);        // Worker method for various find functions
 
    Robot *thisRobot;                                 // Pointer to an actual C++ Robot object

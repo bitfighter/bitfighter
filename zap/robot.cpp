@@ -576,7 +576,7 @@ S32 LuaRobot::getGatewayFromZoneToZone(lua_State *L)
 S32 LuaRobot::getCurrentZone(lua_State *L)
 {
    S32 zone = thisRobot->getCurrentZone();
-   return (zone == -1) ? returnNil(L) : returnInt(L, zone);
+   return (zone == U16_MAX) ? returnNil(L) : returnInt(L, zone);
 }
 
 
@@ -865,8 +865,6 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
 }
 
 
-extern S32 findZoneContaining(const Point &p);
-
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
@@ -882,13 +880,13 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 
-   S32 targetZone = findZoneContaining(target);       // Where we're going
+   U16 targetZone = BotNavMeshZone::findZoneContaining(target);       // Where we're going  ===> returns zone id
 
-   if(targetZone == -1)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
+   if(targetZone == U16_MAX)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
-      targetZone = findClosestZone(target);
+      targetZone = findClosestZone(target);       
  
-      if(targetZone == -1)
+      if(targetZone == U16_MAX)
          return returnNil(L);
    }
 
@@ -896,7 +894,6 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // If we're not, our flightplan is invalid, and we need to skip forward and build a fresh one.
    if(thisRobot->flightPlan.size() > 0 && targetZone == thisRobot->flightPlanTo)
    {
-
       // In case our target has moved, replace final point of our flightplan with the current target location
       thisRobot->flightPlan[0] = target;
 
@@ -940,11 +937,11 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // We need to calculate a new flightplan
    thisRobot->flightPlan.clear();
 
-   S32 currentZone = thisRobot->getCurrentZone();     // Where we are
-   if(currentZone == -1)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
+   U16 currentZone = thisRobot->getCurrentZone();     // Where we are
+   if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
 
       currentZone = findClosestZone(thisRobot->getActualPos());
-      if(currentZone == -1)      // That didn't go so well...
+      if(currentZone == U16_MAX)      // That didn't go so well...
          return returnNil(L);
 
    // We're in, or on the cusp of, the zone containing our target.  We're close!!
@@ -1032,15 +1029,16 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 //}
 //
 
-// Another helper function: finds closest zone to a given point
-S32 LuaRobot::findClosestZone(Point point)
+// Another helper function: returns id of closest zone to a given point
+U16 LuaRobot::findClosestZone(const Point &point)
 {
    // Make two passes, first with a short distance, second with a longer one.  Hope we find it in the first pass because
    // the second pass checks all zones, and that could take a while.
    F32 distsq = 262144;     // 512^2
-   S32 closest = -3;
+   U16 closest = U16_MAX;
+   S32 pass = 1;
  
-   while(closest < -1)
+   while(closest == U16_MAX && pass < 3)
    {
       for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
       {
@@ -1051,27 +1049,27 @@ S32 LuaRobot::findClosestZone(Point point)
          {
             if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))     // This is an expensive test
             {
-               closest = i;  // closest is now >= 0
+               closest = i;  
                distsq = d;
             }
          }
       }
-      if(closest < 0) // Didn't find any matches on the first pass, let's expand our radius and try again
+      if(closest == U16_MAX)   // Didn't find any matches on the first pass, let's expand our radius and try again
       {
-         closest++;
-         distsq=F32_MAX;
+         pass++;
+         distsq = F32_MAX;
       }
    }
  
-   return closest;
+   return closest == U16_MAX ? U16_MAX : gBotNavMeshZones[closest]->mZoneID;
 }
 
 
-S32 LuaRobot::findAndReturnClosestZone(lua_State *L, Point point)
+S32 LuaRobot::findAndReturnClosestZone(lua_State *L, const Point &point)
 {
-   S32 closest = findClosestZone(point);
+   U16 closest = findClosestZone(point);
 
-   if(closest != -1)
+   if(closest != U16_MAX)
       return returnPoint(L, gBotNavMeshZones[closest]->getCenter());
    else
       return returnNil(L);    // Really stuck
@@ -1379,8 +1377,8 @@ Robot::Robot(StringTableEntry robotName, S32 team, Point pt, F32 mass) : Ship(ro
    mObjectTypeMask = RobotType | MoveableType | CommandMapVisType | TurretTargetType;     // Override typemask set by ship
 
    L = NULL;
-   mCurrentZone = -1;
-   flightPlanTo = -1;
+   mCurrentZone = U16_MAX;
+   flightPlanTo = U16_MAX;
 
    // Need to provide some time on here to get timer to trigger robot to spawn.  It's timer driven.
    // respawnTimer.reset(100, RobotRespawnDelay);
@@ -1451,7 +1449,7 @@ bool Robot::initialize(Point &pos)
       //respawnTimer.clear();
       flightPlan.clear();
 
-      mCurrentZone = -1;   // Correct value will be calculated upon first request
+      mCurrentZone = U16_MAX;   // Correct value will be calculated upon first request
 
       Parent::initialize(pos);
 
@@ -1767,14 +1765,12 @@ void Robot::logError(const char *format, ...)
    va_end(args);
 }
 
-
+// Returns zone ID of current zone
 S32 Robot::getCurrentZone()
 {
    // We're in uncharted territory -- try to get the current zone
-   //if(mCurrentZone == -1)
-   //{
-      mCurrentZone = findZoneContaining(getActualPos());
-   //}
+   mCurrentZone = BotNavMeshZone::findZoneContaining(getActualPos());
+
    return mCurrentZone;
 }
 
@@ -1853,11 +1849,11 @@ void Robot::render(S32 layerIndex)
    {
       glColor3f(0,1,1);
       glBegin(GL_LINE_STRIP);
-      glVertex2f(getActualPos().x,getActualPos().y);
-      for(S32 i=flightPlan.size()-1; i >= 0; i--)
-      {
-         glVertex2f(flightPlan[i].x, flightPlan[i].y);
-      }
+         glVertex(getActualPos());
+         for(S32 i = flightPlan.size() - 1; i >= 0; i--)
+         {
+            glVertex2f(flightPlan[i].x, flightPlan[i].y);
+         }
       glEnd();
    }
 }

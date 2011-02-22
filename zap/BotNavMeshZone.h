@@ -73,14 +73,14 @@ public:
 
 class BotNavMeshZone : public GameObject, public Polygon
 {
-
 private:   
    typedef GameObject Parent;
    Game *mGame;
 
 public:
-   bool mConvex;                 // Stores wheter zone is convex or not
-   U16 mZoneID;
+   bool mConvex;           // Stores wheter zone is convex or not
+   U16 mZoneID;            // Unique ID for each zone
+   bool flag;              // Flag used to mark zones during construction process, serves no purpose once zones have been generated
 
    BotNavMeshZone();       // Constructor
    ~BotNavMeshZone();      // Destructor
@@ -111,10 +111,13 @@ public:
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
 
    //Vector<Point> mPolyBounds;
+   const Vector<Point> *getPolyBoundsPtr() { return &mPolyBounds; }
 
    Vector<NeighboringZone> mNeighbors;       // List of other zones this zone touches, only populated on server
    Vector<Border> mNeighborRenderPoints;     // Only populated on client
    S32 getNeighborIndex(S32 zone);           // Returns index of neighboring zone, or -1 if zone is not a neighbor
+
+   static U16 findZoneContaining(const Point &p);    // Returns ID of zone containing specified point
 
    static void buildBotMeshZones();
    static void buildBotNavMeshZoneConnections();

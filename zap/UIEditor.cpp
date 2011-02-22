@@ -663,14 +663,14 @@ void EditorUserInterface::copyScriptItemsToEditor()
 }
 
 
-static S32 findZoneContaining( Vector<WorldItem> &zones, const Point &p)
+static U16 findZoneContaining(Vector<WorldItem> &zones, const Point &p)
 {
    for(S32 i = 0; i < zones.size(); i++)
    {
       // First a quick, crude elimination check then more comprehensive one
       // Since our zones are convex, we can use the faster method!  Yay!
       // Actually, we can't, as it is not reliable... reverting to more comprehensive (and working) version.
-      if( zones[i].getExtent().contains(p) &&
+      if(zones[i].getExtent().contains(p) &&
                   PolygonContains2(zones[i].getVerts().address(), zones[i].getVerts().size(), p) )
          return i;
    }
@@ -690,7 +690,7 @@ void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
    {
       if(mItems[i].index == ItemSpawn)
       {
-         S32 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[0]);
+         U16 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[0]);
          if(zoneIndex >= 0)
          {
             zones[zoneIndex].flag = true;        // Mark zone as processed
@@ -699,7 +699,7 @@ void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
       }
       else if(mItems[i].index == ItemTeleporter)
       {
-         S32 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[1]);    // Intake = vert0, outtake = vert1
+         U16 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[1]);    // Intake = vert0, outtake = vert1
          if(zoneIndex >= 0)
          {
             zones[zoneIndex].flag = true;        // Mark zone as processed
