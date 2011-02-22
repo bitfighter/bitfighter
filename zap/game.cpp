@@ -798,7 +798,7 @@ void ServerGame::buildOrLoadBotMeshZones()
 
    makeSureFolderExists(gConfigDirs.cacheDir);
 
-   if(!readBotNavMeshZones(filename2.c_str()))
+   if(getGameType()->mScriptName != "" || !readBotNavMeshZones(filename2.c_str()))
    {
       //if(!loadLevelFromFile(filename.c_str())) // might not be needed anymore.
    {
@@ -807,7 +807,8 @@ void ServerGame::buildOrLoadBotMeshZones()
    }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
-      writeBotNavMeshZones(filename2.c_str());
+      if(getGameType()->mScriptName == "") 
+         writeBotNavMeshZones(filename2.c_str());
    }
 }
 
