@@ -298,9 +298,9 @@ struct IniSettings      // With defaults specified
       voteLength = 12;
       voteLengthToChangeTeam = 10;
       voteRetryLength = 30;
-      voteYesStrength = 2;
-      voteNoStrength = -2;
-      voteNothingStrength = -1;
+      voteYesStrength = 5;
+      voteNoStrength = -5;
+      voteNothingStrength = -2;
 
       useUpdater = true;
 

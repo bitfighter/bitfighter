@@ -278,6 +278,7 @@ public:
    //S32 getActiveWeapon(lua_State *L);
 
    S32 engineerDeployObject(lua_State *L);
+   S32 dropItem(lua_State *L);
 
    S32 getGame(lua_State *L);             // Get a pointer to a game object, where we can run game-info oriented methods
    Ship *getObj() { return thisRobot; }   // This handles delegation properly when we're dealing with methods inherited from LuaShip

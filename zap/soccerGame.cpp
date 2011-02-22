@@ -483,9 +483,13 @@ bool SoccerBallItem::collide(GameObject *hitObject)
      if(mMount == hitObject)    // Sometimes we get collisions between ship and an already mounted soccer ball.
         return false;  //false = don't hit self
 
+     if(mIsMounted)  // fix problem with random ball jumping from ship to ship?
+        return false;
+
     if(!isGhost())  //Server side
     {
-      if(mLastPlayerMounted == hitObject && mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
+         // mLastPlayerMounted == hitObject &&   without this, that can limit anyone to pickup ball
+      if(mDroppedTimer.getCurrent())      // Have to wait a bit after dropping to pick the ball back up!
          return false;   //False - Go through soccer looks better while dropping, and allow better sync to client.
 
 

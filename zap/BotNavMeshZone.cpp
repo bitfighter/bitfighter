@@ -55,7 +55,8 @@ BotNavMeshZone::BotNavMeshZone()
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
 {
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   //for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   for(S32 i = gBotNavMeshZones.size()-1; i >= 0; i--)  // for speed, check in reverse order. Game::cleanUp() clears on reverse order.
    if(gBotNavMeshZones[i] == this)
    {
       gBotNavMeshZones.erase_fast(i);
@@ -190,6 +191,14 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 
       stream->write(mNeighbors[i].borderEnd.x);
       stream->write(mNeighbors[i].borderEnd.y);
+
+      stream->write(mNeighbors[i].borderCenter.x);
+      stream->write(mNeighbors[i].borderCenter.y);
+
+      stream->write(mNeighbors[i].zoneID);
+      stream->write(mNeighbors[i].distTo);
+      stream->write(mNeighbors[i].center.x);
+      stream->write(mNeighbors[i].center.y);
    }
 
    return 0;
@@ -221,6 +230,12 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 
       n.borderStart = p1;
       n.borderEnd = p2;
+      stream->read(&n.borderCenter.x);
+      stream->read(&n.borderCenter.y);
+      stream->read(&n.zoneID);
+      stream->read(&n.distTo);
+      stream->read(&n.center.x);
+      stream->read(&n.center.y);
       mNeighbors.push_back(n);
      // mNeighborRenderPoints.push_back(Border(p1, p2));
    }
