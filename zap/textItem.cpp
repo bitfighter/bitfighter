@@ -248,7 +248,7 @@ bool LineItem::processArguments(S32 argc, const char **argv)
    mTeam = atoi(argv[0]);
    mWidth = max(min(atoi(argv[1]), static_cast<int>(MAX_LINE_WIDTH)), static_cast<int>(MIN_LINE_WIDTH));
    //mWidth = min(atoi(argv[1]), static_cast<int>(MAX_LINE_WIDTH));
-   processPolyBounds(argc, argv, 2, getGame()->getGridSize(), true);
+   processPolyBounds(argc, argv, 2, getGame()->getGridSize());
 
    computeExtent();
 

@@ -38,7 +38,7 @@ class Polyline
 {
 public:
    Vector<Point> mPolyBounds;
-   Point mCentroid;
+
 
 protected:
    void packUpdate(GhostConnection *connection, BitStream *stream)
@@ -53,28 +53,8 @@ protected:
    }
 
 
-   U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
-   {
-      U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
-
-      for(U32 i = 0; i < size; i++)
-      {
-         Point p;
-         stream->read(&p.x);
-         stream->read(&p.y);
-         mPolyBounds.push_back(p);
-      }
-
-      // We don't ever use this, but it seems like we should compute it anyway...
-      if(size)
-         mCentroid = findCentroid(mPolyBounds);
-
-      return size;
-   }
-
-
    // Read a series of points from a command line, and add them to a Vector of points
-   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToEqual = false)
+   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize, bool allowFirstAndLastPointToBeEqual)
    {
       Point p, lastP;
       
@@ -93,10 +73,30 @@ protected:
       }
 
       // Check if last point was same as first; if so, scrap it
-      if(!allowFirstAndLastPointToEqual && mPolyBounds.first() == mPolyBounds.last())
+      if(!allowFirstAndLastPointToBeEqual && mPolyBounds.first() == mPolyBounds.last())
          mPolyBounds.erase(mPolyBounds.size() - 1);
+   }
 
-      mCentroid = findCentroid(mPolyBounds);
+
+   virtual void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+   {
+      processPolyBounds(argc, argv, firstCoord, gridSize, true);
+   }
+
+
+   U32 unpackUpdate(GhostConnection *connection, BitStream *stream)
+   {
+      U32 size = stream->readEnum(gMaxPolygonPoints) + 1;
+
+      for(U32 i = 0; i < size; i++)
+      {
+         Point p;
+         stream->read(&p.x);
+         stream->read(&p.y);
+         mPolyBounds.push_back(p);
+      }
+
+      return size;
    }
 
 
@@ -117,8 +117,19 @@ protected:
 
 class Polygon : public Polyline
 {
+protected:
+   void processPolyBounds(S32 argc, const char **argv, S32 firstCoord, F32 gridSize)
+   {
+      Parent::processPolyBounds(argc, argv, firstCoord, gridSize, false);
+
+      mCentroid = findCentroid(mPolyBounds);
+   }
+
+
 public:
    typedef Polyline Parent;
+
+   Point mCentroid;
 
    Vector<Point> mPolyFill;      // Triangles used for rendering polygon fill
 
