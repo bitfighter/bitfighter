@@ -272,7 +272,7 @@ bool LoadoutHelper::processKeyCode(KeyCode keyCode)
 
 
       GameType *gt = gClientGame->getGameType();
-      bool spawnWithLoadout = gt->isSpawnWithLoadoutGame() || ! gt->levelHasLoadoutZone();
+      bool spawnWithLoadout = ! gt->levelHasLoadoutZone();  // gt->isSpawnWithLoadoutGame() not used anymore.
 
       // Check if we are in a loadout zone...  if so, it will be changed right away...
       // ...otherwise, display a notice to the player to head for a LoadoutZone

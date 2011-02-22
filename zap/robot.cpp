@@ -283,6 +283,7 @@ Lunar<LuaRobot>::RegType LuaRobot::methods[] = {
    method(LuaRobot, getInterceptCourse),     // Doesn't work well...
 
    method(LuaRobot, engineerDeployObject),
+   method(LuaRobot, dropItem),
 
    {0,0}    // End method list
 };
@@ -1118,6 +1119,17 @@ S32 LuaRobot::engineerDeployObject(lua_State *L)
    if(! thisRobot->getOwner())
       return returnBool(L, false);
    return returnBool(L, thisRobot->getOwner()->sEngineerDeployObject(type));
+}
+
+S32 LuaRobot::dropItem(lua_State *L)
+{
+   static const char *methodName = "Robot:dropItem()";
+
+   S32 count = thisRobot->mMountedItems.size();
+   for(S32 i = count - 1; i >= 0; i--)
+      thisRobot->mMountedItems[i]->onItemDropped();
+
+   return 0;
 }
 
 const char LuaRobot::className[] = "LuaRobot";     // This is the class name as it appears to the Lua scripts
