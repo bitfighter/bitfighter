@@ -55,7 +55,8 @@ BotNavMeshZone::BotNavMeshZone()
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
 {
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   //for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+   for(S32 i = gBotNavMeshZones.size()-1; i >= 0; i--)  // for speed, check in reverse order. Game::cleanUp() clears on reverse order.
    if(gBotNavMeshZones[i] == this)
    {
       gBotNavMeshZones.erase_fast(i);

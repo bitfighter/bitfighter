@@ -740,19 +740,75 @@ static void saveBotMeshZones(const char *filename)
 extern ConfigDirectories gConfigDirs;
 extern string joindir(const string &path, const string &filename);
 
+const U16 versionNumberBotNavMeshZones = 47524;  // some random version number..
+
+bool readBotNavMeshZones(const char *filename)
+{
+   FILE *file = fopen(filename, "rb");
+
+   if(file)
+   {
+      const U32 buffsize = 1024*1024;
+      ByteBuffer byteBuffer(buffsize);
+      fread(byteBuffer.getBuffer(), 1, buffsize, file);
+      fclose(file);
+      BitStream s(byteBuffer.getBuffer(), buffsize);
+
+      U16 version = 0;
+      U16 size = 0;
+      s.read(&version);
+      if(version != versionNumberBotNavMeshZones)
+         return false;
+      s.read(&size);
+      for(U16 i=0; i<size; i++)
+      {
+         BotNavMeshZone *botzone = new BotNavMeshZone();
+         botzone->addToGame(gServerGame);
+         botzone->unpackUpdate(NULL, &s);
+         botzone->computeExtent();
+      }
+      return true;
+   }
+   else
+      return false;
+}
+
+void writeBotNavMeshZones(const char *filename)
+{
+   FILE *file = fopen(filename, "wb");
+   if(file)
+   {
+      BitStream s;
+      s.write(versionNumberBotNavMeshZones);
+      s.write(U16(gBotNavMeshZones.size()));
+
+      for(S32 i=0; i < gBotNavMeshZones.size(); i++)
+         gBotNavMeshZones[i]->packUpdate(NULL, U32_MAX, &s);
+
+      fwrite(s.getBuffer(), 1, s.getBytePosition(), file);
+      fclose(file);
+   }
+}
+
+
 void ServerGame::buildOrLoadBotMeshZones()
 {
    string filename = joindir(gConfigDirs.cacheDir, mLevelFileHash + ".zones");
+   string filename2 = joindir(gConfigDirs.cacheDir, mLevelFileHash + ".zones2");
 
    makeSureFolderExists(gConfigDirs.cacheDir);
 
-   if(!loadLevelFromFile(filename.c_str()))
+   if(!readBotNavMeshZones(filename2.c_str()))
    {
-      BotNavMeshZone::buildBotMeshZones();
-      saveBotMeshZones(filename.c_str());
-   }
+      if(!loadLevelFromFile(filename.c_str()))
+      {
+         BotNavMeshZone::buildBotMeshZones();
+         saveBotMeshZones(filename.c_str());
+      }
 
-   BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
+      BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
+      writeBotNavMeshZones(filename2.c_str());
+   }
 }
 
 
