@@ -740,7 +740,7 @@ static void saveBotMeshZones(const char *filename)
 extern ConfigDirectories gConfigDirs;
 extern string joindir(const string &path, const string &filename);
 
-const U16 versionNumberBotNavMeshZones = 47524;  // some random version number..
+const U16 versionNumberBotNavMeshZones = 47525;  // some random version number..
 
 bool readBotNavMeshZones(const char *filename)
 {
@@ -800,10 +800,10 @@ void ServerGame::buildOrLoadBotMeshZones()
 
    if(!readBotNavMeshZones(filename2.c_str()))
    {
-      if(!loadLevelFromFile(filename.c_str()))
+      //if(!loadLevelFromFile(filename.c_str())) // might not be needed anymore.
       {
          BotNavMeshZone::buildBotMeshZones();
-         saveBotMeshZones(filename.c_str());
+         //saveBotMeshZones(filename.c_str());
       }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones

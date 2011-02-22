@@ -190,6 +190,11 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 
       stream->write(mNeighbors[i].borderEnd.x);
       stream->write(mNeighbors[i].borderEnd.y);
+
+      stream->write(mNeighbors[i].zoneID);
+      stream->write(mNeighbors[i].distTo);
+      stream->write(mNeighbors[i].center.x);
+      stream->write(mNeighbors[i].center.y);
    }
 
    return 0;
@@ -221,6 +226,11 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
 
       n.borderStart = p1;
       n.borderEnd = p2;
+      n.borderCenter = (p1 + p2) * 0.5;
+      stream->read(&n.zoneID);
+      stream->read(&n.distTo);
+      stream->read(&n.center.x);
+      stream->read(&n.center.y);
       mNeighbors.push_back(n);
      // mNeighborRenderPoints.push_back(Border(p1, p2));
    }
