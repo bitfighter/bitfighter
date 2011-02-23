@@ -881,7 +881,10 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    // If we can see the target, go there directly
    if(gServerGame->getGridDatabase()->pointCanSeePoint(thisRobot->getActualPos(), target))
+   {
+      thisRobot->flightPlan.clear();
       return returnPoint(L, target);
+   }
 
    // TODO: cache destination point; if it hasn't moved, then skip ahead.
 

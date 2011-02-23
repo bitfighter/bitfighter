@@ -297,8 +297,14 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited.
 const F32 MinZoneSize = 32;
 
+#include "../recast/include/recast.h"
+
 static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 {
+
+   //rcMeshLoaderObj m_mesh = new rcMeshLoaderObj;
+
+
 	if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
       return;   
 
