@@ -119,25 +119,30 @@ private:
    S32 mScore;
    S32 mTotalScore;
 
-   static U32 mRobotCount;
-
-   LuaPlayerInfo *mPlayerInfo;  // Player info object describing the robot
-
    static const S32 RobotRespawnDelay = 1500;
-   Vector<string> mArgs;        // List of arguments passed to the robot.  Script name itself is the first one.
+
+   LuaPlayerInfo *mPlayerInfo;      // Player info object describing the robot
+
+   Vector<string> mArgs;            // List of arguments passed to the robot.  Script name itself is the first one.
    bool gameConnectionInitalized;
-   void *robotController;       // A pointer of RobotController, for speeding up compiler, it is (void *) here.
+   void *robotController;           // A pointer of RobotController, for speeding up compiler, it is (void *) here.
+
+   void spawn();                    // Handles bot spawning
+
+   static bool mIsPaused;
+   static S32 mStepCount;           // If running for a certain number of steps, this will be > 0, while mIsPaused will be true
 
 public:
-   bool isRunningScript;
-   bool wasRunningScript;
    Robot(StringTableEntry robotName="", S32 team = -1, Point p = Point(0,0), F32 m = 1.0);      // Constructor
-   ~Robot();          // Destructor
-   lua_State *L;                // Main Lua state variable
+   ~Robot();                                                                                    // Destructor
+
+   lua_State *L;                    // Main Lua state variable
 
    bool initialize(Point &pos);
 
-   //void kill(DamageInfo *theInfo);
+   bool isRunningScript;
+   bool wasRunningScript;
+
    void kill();
 
    lua_State *getL() { return L; }
@@ -146,8 +151,6 @@ public:
 
    void render(S32 layerIndex);
    void idle(IdleCallPath path);
-
-   // Point mTarget;     // TODO: Get rid of this!!  why?   not used anymore
 
    bool processArguments(S32 argc, const char **argv);
    void onAddedToGame(Game *);
@@ -165,18 +168,17 @@ public:
    // External robot functions
    bool findNearestShip(Point &loc);      // Return location of nearest known ship within a given area
 
-   //Timer respawnTimer;  //Not needed anymore
-
    bool isRobot() { return true; }
    static S32 getRobotCount() { return robots.size(); }
 
-   LuaRobot *mLuaRobot;    // Could make private and make a public setter method...
+   LuaRobot *mLuaRobot;                // Could make private and make a public setter method...
    static EventManager getEventManager();
 
    LuaPlayerInfo *getPlayerInfo() { return mPlayerInfo; }
 
    static Vector<Robot *> robots;      // Grand master list of all robots in the current game
    static void startBots();            // Loop through all our bots and run thier main() functions
+
    bool startLua();                    // Fire up bot's Lua processor
    bool runMain();                     // Run a robot's main() function
 
@@ -184,11 +186,14 @@ public:
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
    string getFilename() { return mFilename; }
 
-private:
-  int attribute;
-  std::string message;
-  bool loadLuaHelperFunctions(lua_State *L, const char *caller);
+   static void togglePauseStatus() { mIsPaused = !mIsPaused; }
+   static bool isPaused() { return mIsPaused; }
+   static void addSteps(S32 steps) { mStepCount = steps * robots.size(); }     // Each robot will cause the step counter to decrement
 
+private:
+   int attribute;
+   std::string message;
+   bool loadLuaHelperFunctions(lua_State *L, const char *caller);
 
    TNL_DECLARE_CLASS(Robot);
 };
@@ -211,7 +216,6 @@ private:
    Robot *thisRobot;                                 // Pointer to an actual C++ Robot object
 
    bool subscriptions[EventManager::EventTypes];     // Keep track of which events we're subscribed to for rapid unsubscription upon death
-
 
 public:
   // Constants

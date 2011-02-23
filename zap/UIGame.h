@@ -311,6 +311,8 @@ public:
    static void showCoordsHandler(GameUserInterface *gui, const Vector<string> &words);
    static void showZonesHandler(GameUserInterface *gui, const Vector<string> &words);
    static void showPathsHandler(GameUserInterface *gui, const Vector<string> &words);
+   static void pauseBotsHandler(GameUserInterface *gui, const Vector<string> &words);
+   static void stepBotsHandler(GameUserInterface *gui, const Vector<string> &words);
    static void setAdminPassHandler(GameUserInterface *gui, const Vector<string> &words);
    static void setServerPassHandler(GameUserInterface *gui, const Vector<string> &words);
    static void setLevPassHandler(GameUserInterface *gui, const Vector<string> &words);

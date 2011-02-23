@@ -1,3 +1,4 @@
+
 //-----------------------------------------------------------------------------------
 //
 // Bitfighter - A multiplayer vector graphics space game
@@ -66,6 +67,9 @@ namespace Zap
 
 const bool QUIT_ON_SCRIPT_ERROR = true;
 
+
+bool Robot::mIsPaused = false;
+S32 Robot::mStepCount = -1;
 
 // To use this RobotController, add Robot without any parameters in level file.
 // I would like to keep this class here, to speed up compiler.
@@ -1507,7 +1511,9 @@ extern string joindir(const string &path, const string &filename);
 
 bool Robot::startLua()
 {
-   if(! isRunningScript) return true;
+   if(!isRunningScript) 
+      return true;
+
    LuaObject::cleanupAndTerminate(L);
 
    L = lua_open();    // Create a new Lua interpreter
@@ -1629,7 +1635,9 @@ bool Robot::startLua()
 // TODO: This is almost identical to the same-named function in luaLevelGenerator.cpp, but each call their own logError function.  How can we combine?
 bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 {
-   if(! isRunningScript) return true;
+   if(!isRunningScript) 
+      return true;
+
    // Load our standard robot library  TODO: Read the file into memory, store that as a static string in the bot code, and then pass that to Lua rather than rereading this
    // every time a bot is created.
    string fname = joindir(gConfigDirs.luaDir, "lua_helper_functions.lua");
@@ -1655,7 +1663,9 @@ bool Robot::loadLuaHelperFunctions(lua_State *L, const char *caller)
 // return false if failed
 bool Robot::runMain()
 {
-   if(! isRunningScript) return true;
+   if(!isRunningScript) 
+      return true;
+
    try
    {
       lua_getglobal(L, "_main");
@@ -1736,13 +1746,14 @@ bool Robot::processArguments(S32 argc, const char **argv)
    if(mFilename != "")
    {
       wasRunningScript = true;
-      string FileName2 = mFilename;  // for printing filename when not found.
+      string fullFilename = mFilename;  // for printing filename when not found
       mFilename = gConfigDirs.findBotFile(mFilename);
+
       if(mFilename == "")
       {
-         logprintf("Could not find bot file %s", FileName2.c_str());     // TODO: Better handling here
-         OGLCONSOLE_Print("Could not find bot file %s", FileName2.c_str());
-         return true;  // we can run built-in robot, not fully working yet...
+         logprintf("Could not find bot file %s", fullFilename.c_str());     // TODO: Better handling here
+         OGLCONSOLE_Print("Could not find bot file %s", fullFilename.c_str());
+         return true;  // We can run built-in robot, not fully working yet...
       }
       else
          isRunningScript = true;
@@ -1853,22 +1864,23 @@ bool Robot::canSeePoint(Point point)
       gServerGame->getGridDatabase()->pointCanSeePoint(edgePoint2, point) );
 }
 
+
 void Robot::render(S32 layerIndex)
 {
-   if(isGhost())             // client rendering client's objects
-      Ship::render(layerIndex);
-   else if(layerIndex = 1 && flightPlan.size() != 0)   // a client hosting is rendering server objects
+   if(isGhost())                                      // Client rendering client's objects
+      Parent::render(layerIndex);
+
+   else if(layerIndex = 1 && flightPlan.size() != 0)  // Client hosting is rendering server objects
    {
-      glColor3f(0,1,1);
+      glColor3f(1,1,0);       // yellow
       glBegin(GL_LINE_STRIP);
          glVertex(getActualPos());
          for(S32 i = flightPlan.size() - 1; i >= 0; i--)
-         {
-            glVertex2f(flightPlan[i].x, flightPlan[i].y);
-         }
+            glVertex(flightPlan[i]);
       glEnd();
    }
 }
+
 
 void Robot::idle(GameObject::IdleCallPath path)
 {
@@ -1879,76 +1891,57 @@ void Robot::idle(GameObject::IdleCallPath path)
       deltaT = mCurrentMove.time;
 
       TNLAssert(deltaT != 0, "Robot::idle Time is zero")   // Time should never be zero anymore
-      //if(deltaT == 0)      // If deltaT is 0, this may cause problems down the line.  Best thing is just to skip this round.
-      //   return;
 
       // Check to see if we need to respawn this robot
       if(hasExploded)
       {
-         if(!gameConnectionInitalized)  //after gameConnection is initalized, it should spawn.
-         {
-            //  cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready.
-            GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score
+         if(!gameConnectionInitalized)  // After gameConnection is initalized, bot should spawn
+           spawn();
 
-            if(getName() == "")                          // Make sure bots have a name
-               setName(GameConnection::makeUnique("Robot").c_str());
-
-            gc->setClientName(getName());
-            setOwner(gc);
-            gc->linkToClientList();
-            gc->setControlObject(this);
-            gc->setIsRobot(true);
-            getGame()->getGameType()->serverAddClient(gc);  //ClientRef is created in serverAddClient
-            gameConnectionInitalized = true;
-         }
-         //if(respawnTimer.update(mCurrentMove.time))  //not needed anymore
-         //{
-            //gServerGame->getGameType()->spawnRobot(this);
-         //}
          return;
       }
-   }
 
-   // Don't process exploded ships
-   if(hasExploded)
-      return;
-
-   if(path == GameObject::ServerIdleMainLoop)      // Running on server
-   {
       if(isRunningScript)
       {
-      // Clear out current move.  It will get set just below with the lua call, but if that function
-      // doesn't set the various move components, we want to make sure that they default to 0.
-      mCurrentMove.fire = false;
-      mCurrentMove.up = 0;
-      mCurrentMove.down = 0;
-      mCurrentMove.right = 0;
-      mCurrentMove.left = 0;
+         // Clear out current move.  It will get set just below with the lua call, but if that function
+         // doesn't set the various move components, we want to make sure that they default to 0.
+         mCurrentMove.fire = false;
+         mCurrentMove.up = 0;
+         mCurrentMove.down = 0;
+         mCurrentMove.right = 0;
+         mCurrentMove.left = 0;
 
-      for(S32 i = 0; i < ShipModuleCount; i++)
-         mCurrentMove.module[i] = false;
+         for(S32 i = 0; i < ShipModuleCount; i++)
+            mCurrentMove.module[i] = false;
 
-      try
-      {
-         lua_getglobal(L, "_onTick");
-         Lunar<LuaRobot>::push(L, this->mLuaRobot);
+         if(!mIsPaused || mStepCount > 0)
+         {
+            if(mStepCount > 0)
+               mStepCount--;
 
-         lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
+            try
+            {
+               lua_getglobal(L, "_onTick");
+               Lunar<LuaRobot>::push(L, this->mLuaRobot);
 
-         if (lua_pcall(L, 2, 0, 0) != 0)
-            throw LuaException(lua_tostring(L, -1));
+               lua_pushnumber(L, deltaT);    // Pass the time elapsed since we were last here
+
+               if (lua_pcall(L, 2, 0, 0) != 0)
+                  throw LuaException(lua_tostring(L, -1));
+            }
+            catch(LuaException &e)
+            {
+               logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
+               //delete this;
+               isRunningScript = false;
+               return;
+            }
+         }
       }
-      catch(LuaException &e)
+      else     // isRunningScript == false
       {
-         logError("Robot error running _onTick(): %s.  Shutting robot down.", e.what());
-         //delete this;
-         isRunningScript = false;
-         return;
-      }
-      }
-      else
-      {
-         if(wasRunningScript){
+         if(wasRunningScript)
+         {
             if(QUIT_ON_SCRIPT_ERROR)
             {
                getGame()->getGameType()->s2cDisplayChatMessage(true, getName(), "!!! ROBOT ERROR !!! Shutting down.");
@@ -1959,15 +1952,40 @@ void Robot::idle(GameObject::IdleCallPath path)
             wasRunningScript = false;
          }
 
-         ((RobotController *)robotController)->run(this,getGame()->getGameType());    // built-in robot might soon be fully programmed without using script file.
+         // Built-in robot might soon be fully programmed without using script file.
+         ((RobotController *)robotController)->run(this, getGame()->getGameType());    
       }
 
-      Ship::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client.
+      Parent::idle(GameObject::ServerIdleControlFromClient);   // Let's say the script is the client
       return;
    }
+
    TNLAssert(path != GameObject::ServerIdleControlFromClient, "Robot::idle, Should not have ServerIdleControlFromClient");
-   Ship::idle(path);     // All client paths can use this idle.
+
+   if(!hasExploded)
+      Parent::idle(path);     // All client paths can use this idle
 }
+
+
+void Robot::spawn()
+{
+   // Cannot be in onAddedToGame, as it will error, trying to add robots while level map is not ready
+   GameConnection *gc = new GameConnection();   // Need GameConnection and ClientRef to keep track of score...  TODO: Make this work differently
+
+   if(getName() == "")                          // Make sure bots have a name
+      setName(GameConnection::makeUnique("Robot").c_str());
+
+   gc->setClientName(getName());
+   gc->linkToClientList();
+   gc->setControlObject(this);
+   gc->setIsRobot(true);
+   
+   setOwner(gc);
+
+   getGame()->getGameType()->serverAddClient(gc);  // ClientRef is created in serverAddClient
+   gameConnectionInitalized = true;
+}
+
 
 // Currently does not go anywhere, all it does is fire at enemies.
 void RobotController::run(Robot *newship, GameType *newgametype)

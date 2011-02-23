@@ -976,7 +976,17 @@ void GameUserInterface::processPlayModeKey(KeyCode keyCode, char ascii)
    // loadout or engineering menu modes if not used in the loadout
    // menu above
 
-   if(keyCode == keyMOD1[inputMode])
+   if(keyCode == KEY_CLOSEBRACKET && getKeyState(KEY_ALT))     // Alt-] advances bots by one step if frozen
+   {
+      if(Robot::isPaused())
+         Robot::addSteps(1);
+   }
+   else if(keyCode == KEY_CLOSEBRACKET && getKeyState(KEY_CTRL))     // Ctrl-] advances bots by 10 steps if frozen
+   {
+      if(Robot::isPaused())
+         Robot::addSteps(10);
+   }
+   else if(keyCode == keyMOD1[inputMode])
       mModActivated[0] = true;
    else if(keyCode == keyMOD2[inputMode])
       mModActivated[1] = true;
@@ -1412,10 +1422,10 @@ void GameUserInterface::showCoordsHandler(GameUserInterface *gui, const Vector<s
 
 void GameUserInterface::showZonesHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   gui->mDebugShowMeshZones = !gui->mDebugShowMeshZones;
-
    if(!gServerGame) 
       gui->displayErrorMessage("!!! Zones can only be displayed on a local host");
+   else
+      gui->mDebugShowMeshZones = !gui->mDebugShowMeshZones;
 }
 
 
@@ -1423,11 +1433,32 @@ extern bool showDebugBots;  // in game.cpp
 
 void GameUserInterface::showPathsHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   showDebugBots = !showDebugBots;
-
    if(!gServerGame) 
       gui->displayErrorMessage("!!! Robots can only be shown on a local host");
+   else
+      showDebugBots = !showDebugBots;
 }
+
+
+void GameUserInterface::pauseBotsHandler(GameUserInterface *gui, const Vector<string> &words)
+{
+   if(!gServerGame) 
+      gui->displayErrorMessage("!!! Robots can only be frozen on a local host");
+   else
+      Robot::togglePauseStatus();
+}
+
+void GameUserInterface::stepBotsHandler(GameUserInterface *gui, const Vector<string> &words)
+{
+   if(!gServerGame) 
+      gui->displayErrorMessage("!!! Robots can only be stepped on a local host");
+   else
+   {
+      S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
+      Robot::addSteps(steps);
+   }
+}
+
 
 void GameUserInterface::setAdminPassHandler(GameUserInterface *gui, const Vector<string> &words)
 {
@@ -1624,7 +1655,9 @@ CommandInfo chatCmds[] = {
    { "showzones",  GameUserInterface::showZonesHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show bot nav mesh zones" },
    { "showpaths",  GameUserInterface::showPathsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Show robot paths" },
    { "showbots",   GameUserInterface::serverCommandHandler, {  },    0, DEBUG_COMMANDS, 0, {  },         "Show all robots" },
-   { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1, DEBUG_COMMANDS, 1, {"<number>"}, "Default = 2, Changes width of all lines" },
+   { "pausebots",  GameUserInterface::pauseBotsHandler,     {  },    0, DEBUG_COMMANDS, 0, {  },         "Pause all bots.  Reissue to start again" },
+   { "stepbots",   GameUserInterface::stepBotsHandler,      { INT }, 1, DEBUG_COMMANDS, 1, {"[steps]"},  "Advance bots by number of steps (def. = 1)"},
+   { "linewidth",  GameUserInterface::lineWidthHandler,     { INT }, 1, DEBUG_COMMANDS, 1, {"[number]"}, "Change width of all lines (def. = 2)" },
    { "linesmooth", GameUserInterface::lineSmoothHandler,    {  },    0, DEBUG_COMMANDS, 1, {  },         "Enable line smoothing, might look better" },
    { "maxfps",     GameUserInterface::maxFpsHandler,        { INT }, 1, DEBUG_COMMANDS, 1, {"<number>"}, "Set maximum speed of game in frames per second" },
 };

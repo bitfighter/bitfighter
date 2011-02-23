@@ -704,6 +704,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
    renderTimeLeft();
    renderTalkingClients();
+   renderDebugStatus();
 }
 
 
@@ -847,6 +848,63 @@ void GameType::renderTalkingClients()
          UserInterface::drawString(10, y, 20, mClientList[i]->name.getString());
          y += 25;
       }
+   }
+}
+
+
+void GameType::renderDebugStatus()
+{
+   // When bots are frozen, render large pause icon in lower left
+   if(Robot::isPaused())
+   {
+      glColor3f(1,1,1);
+
+      const S32 PAUSE_HEIGHT = 40;
+      const S32 PAUSE_WIDTH = 15;
+      const S32 PAUSE_GAP = 8;
+      const S32 BOX_INSET = 5;
+      const S32 BOX_THICKNESS = 4;
+      const S32 BOX_HEIGHT = PAUSE_HEIGHT + 2 * PAUSE_GAP + BOX_THICKNESS;
+      const S32 BOX_WIDTH = 280;
+      const S32 TEXT_SIZE = 20;
+
+      S32 x, y;
+
+      // Draw box
+      x = UserInterface::vertMargin + BOX_THICKNESS / 2 - 3;
+      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin;
+
+      for(S32 i = 1; i >= 0; i--)
+      {
+         glColor(i ? Color(0,0,0) : Color(1,1,1));
+         glBegin(i ? GL_POLYGON: GL_LINE_LOOP); 
+            glVertex2f(x,             y);
+            glVertex2f(x + BOX_WIDTH, y);
+            glVertex2f(x + BOX_WIDTH, y - BOX_HEIGHT);
+            glVertex2f(x,             y - BOX_HEIGHT);
+         glEnd();
+      }
+
+
+      // Draw Pause symbol
+      x = UserInterface::vertMargin + BOX_THICKNESS + BOX_INSET;
+      y = gScreenInfo.getGameCanvasHeight() - UserInterface::vertMargin - BOX_THICKNESS - BOX_INSET;
+
+      for(S32 i = 0; i < 2; i++)
+      {
+         glBegin(GL_POLYGON);    // Filled rectangle
+            glVertex2f(x,               y);
+            glVertex2f(x + PAUSE_WIDTH, y);
+            glVertex2f(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
+            glVertex2f(x,               y - PAUSE_HEIGHT);
+         glEnd();
+
+         x += PAUSE_WIDTH + PAUSE_GAP;
+      }
+
+      x += BOX_INSET;
+      y -= (TEXT_SIZE + BOX_INSET + BOX_THICKNESS + 3);
+      UserInterface::drawString(x, y, TEXT_SIZE, "STEP: Alt-], Ctrl-]");
    }
 }
 

@@ -329,9 +329,10 @@ public:
    void renderObjectiveArrow(Point p, Color c, F32 alphaMod = 1.0f);
 
    void renderTimeLeft();
-   void renderTalkingClients();
+   void renderTalkingClients();     // Render things related to voicechat
+   void renderDebugStatus();        // Render things related to debugging
 
-   void addTime(U32 time);    // Extend the game by time (in ms)
+   void addTime(U32 time);          // Extend the game by time (in ms)
 
    virtual void clientRequestLoadout(GameConnection *client, const Vector<U32> &loadout);
    virtual void updateShipLoadout(GameObject *shipObject); // called from LoadoutZone when a Ship touches the zone
