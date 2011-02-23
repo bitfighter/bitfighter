@@ -1794,14 +1794,17 @@ void GameType::countTeamPlayers()
 
    for(S32 i = 0; i < mClientList.size(); i++)
    {
-      if(mClientList[i]->isRobot)
-         mTeams[mClientList[i]->getTeam()].numBots++;
-      else
-         mTeams[mClientList[i]->getTeam()].numPlayers++;
+      if(mClientList[i]->getTeam() >= 0 && mClientList[i]->getTeam() < mTeams.size())
+      { // robot could be neutral or hostile, skip out of range team numbers.
+         if(mClientList[i]->isRobot)
+            mTeams[mClientList[i]->getTeam()].numBots++;
+         else
+            mTeams[mClientList[i]->getTeam()].numPlayers++;
 
-      GameConnection *cc = mClientList[i]->clientConnection;
-      if(cc)
-         mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1);
+         GameConnection *cc = mClientList[i]->clientConnection;
+         if(cc)
+            mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1);
+      }
    }
 }
 
@@ -1851,7 +1854,7 @@ void GameType::serverAddClient(GameConnection *theClient)
       Ship *ship = dynamic_cast<Ship *>(theClient->getControlObject());
       if(ship)
       {
-         if(ship->getTeam() >= -2 && ship->getTeam() < mTeams.size())
+         if(ship->getTeam() >= 0 && ship->getTeam() < mTeams.size()) // no more neutral or hostile bots
             minTeamIndex = ship->getTeam();
       }
       ship->setMaskBits(Ship::ChangeTeamMask);  // This is needed to avoid gray robot ships when using /addbot
