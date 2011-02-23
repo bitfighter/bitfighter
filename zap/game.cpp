@@ -317,6 +317,9 @@ ServerGame::ServerGame(const Address &theBindAddress, U32 maxPlayers, const char
    mHostDescr = gHostDescr;
    mShuttingDown = false;
 
+   Robot::setPaused(false);
+
+
    hostingModePhase = ServerGame::NotHosting;
 
    mInfoFlags = 0;                  // Currently only used to specify test mode

@@ -186,6 +186,7 @@ public:
    F32 getRating() { return mTotalScore == 0 ? 0.5f : (F32)mScore / (F32)mTotalScore; }   // Return robot's score
    string getFilename() { return mFilename; }
 
+   static void setPaused(bool isPaused) { mIsPaused = isPaused; }
    static void togglePauseStatus() { mIsPaused = !mIsPaused; }
    static bool isPaused() { return mIsPaused; }
    static void addSteps(S32 steps) { mStepCount = steps * robots.size(); }     // Each robot will cause the step counter to decrement

@@ -1422,7 +1422,7 @@ void GameUserInterface::showCoordsHandler(GameUserInterface *gui, const Vector<s
 
 void GameUserInterface::showZonesHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   if(!gServerGame) 
+   if(!(gServerGame && gServerGame->isTestServer())) 
       gui->displayErrorMessage("!!! Zones can only be displayed on a local host");
    else
       gui->mDebugShowMeshZones = !gui->mDebugShowMeshZones;
@@ -1433,8 +1433,8 @@ extern bool showDebugBots;  // in game.cpp
 
 void GameUserInterface::showPathsHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   if(!gServerGame) 
-      gui->displayErrorMessage("!!! Robots can only be shown on a local host");
+   if(!(gServerGame && gServerGame->isTestServer())) 
+      gui->displayErrorMessage("!!! Robots can only be shown on a test server");
    else
       showDebugBots = !showDebugBots;
 }
@@ -1442,16 +1442,16 @@ void GameUserInterface::showPathsHandler(GameUserInterface *gui, const Vector<st
 
 void GameUserInterface::pauseBotsHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   if(!gServerGame) 
-      gui->displayErrorMessage("!!! Robots can only be frozen on a local host");
+   if(!(gServerGame && gServerGame->isTestServer())) 
+      gui->displayErrorMessage("!!! Robots can only be frozen on a test server");
    else
       Robot::togglePauseStatus();
 }
 
 void GameUserInterface::stepBotsHandler(GameUserInterface *gui, const Vector<string> &words)
 {
-   if(!gServerGame) 
-      gui->displayErrorMessage("!!! Robots can only be stepped on a local host");
+   if(!(gServerGame && gServerGame->isTestServer())) 
+      gui->displayErrorMessage("!!! Robots can only be stepped on a test server");
    else
    {
       S32 steps = words.size() > 1 ? atoi(words[1].c_str()) : 1;
