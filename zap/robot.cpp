@@ -1880,6 +1880,7 @@ void Robot::render(S32 layerIndex)
          glVertex(getActualPos());
          for(S32 i = flightPlan.size() - 1; i >= 0; i--)
             glVertex(flightPlan[i]);
+         
       glEnd();
    }
 }

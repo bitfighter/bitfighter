@@ -804,7 +804,7 @@ void ServerGame::buildOrLoadBotMeshZones()
    {
       //if(!loadLevelFromFile(filename.c_str())) // might not be needed anymore.
       {
-         BotNavMeshZone::buildBotMeshZones();
+         BotNavMeshZone::buildBotMeshZones(this);
             //saveBotMeshZones(filename.c_str());
       }
 
