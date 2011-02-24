@@ -43,17 +43,23 @@ TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
+bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points)
+{
+   // Convert the list of floats into a list of points
+   for(S32 i = 1; i < barrier.verts.size(); i += 2)
+      points.push_back( Point(barrier.verts[i-1], barrier.verts[i]) );
+
+   removeCollinearPoints(points, false);   // Remove collinear points to make rendering nicer and datasets smaller
+
+   return (points.size() >= 2);
+}
+
+
 void constructBarriers(Game *theGame, const BarrierRec &barrier)
 {
    Vector<Point> vec;
 
-   // Convert the list of floats into a list of points
-   for(S32 i = 1; i < barrier.verts.size(); i += 2)
-      vec.push_back( Point(barrier.verts[i-1], barrier.verts[i]) );
-
-   removeCollinearPoints(vec, false);   // Remove collinear points to make rendering nicer and datasets smaller
-
-   if(vec.size() <= 1)
+   if(!loadBarrierPoints(barrier, vec))
       return;
 
    if(barrier.solid)   // This is a solid polygon
