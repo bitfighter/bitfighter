@@ -110,7 +110,6 @@ public:
    bool pointCanSeePoint(const Point &point1, const Point &point2);
 
    void findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents);
-   void findAllObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector);
 
    void addToDatabase(DatabaseObject *theObject, const Rect &extents);
    void removeFromDatabase(DatabaseObject *theObject, const Rect &extents);

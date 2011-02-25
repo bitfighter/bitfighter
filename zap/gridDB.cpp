@@ -104,7 +104,6 @@ void GridDatabase::removeFromDatabase(DatabaseObject *theObject, const Rect &ext
    }
 }
 
-
 // Find all objects in &extents that are of type typeMask
 void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVector, const Rect &extents)
 {
@@ -116,10 +115,10 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    maxx = S32(extents.max.x * widthDiv);
    maxy = S32(extents.max.y * widthDiv);
 
-   if(maxx > minx + BucketRowCount)
-      maxx = minx + BucketRowCount;
-   if(maxy > miny + BucketRowCount)
-      maxy = miny + BucketRowCount;
+   if(maxx >= minx + BucketRowCount)
+      maxx = minx + BucketRowCount - 1;
+   if(maxy >= miny + BucketRowCount)
+      maxy = miny + BucketRowCount - 1;
 
    mQueryId++;    // Used to prevent the same item from being found in multiple buckets
 
