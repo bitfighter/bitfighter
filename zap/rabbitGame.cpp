@@ -266,10 +266,13 @@ void RabbitGameType::shipTouchFlag(Ship *ship, FlagItem *flag)
 
 bool RabbitGameType::teamHasFlag(S32 teamId)
 {
-   if(isTeamGame())  
-      for(S32 i = 0; i < mFlags.size(); i++)
-         if(mFlags[i]->isMounted() && mTeams[mFlags[i]->getMount()->getTeam()].getId() == teamId)
+   for(S32 i = 0; i < mFlags.size(); i++)
+   {
+      //TNLAssert(mFlags[i], "NULL flag");
+      if(mFlags[i])
+         if(mFlags[i]->isMounted() && mFlags[i]->getMount() && mFlags[i]->getMount()->getTeam() == (S32)teamId)
             return true;
+   }
 
    return false;
 }
