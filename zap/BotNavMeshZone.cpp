@@ -175,7 +175,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 }
 
 
-// These methods will be empty later...
+// These methods will be empty later... Currently used for cache.
  U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
    stream->writeInt(mZoneID, 16);
@@ -464,11 +464,205 @@ static void removeUnusedNavMeshZones()
 }
 
 
+const F32 pi = 3.14159265;
+
+struct AngleData
+{
+   F32 Angle1;
+   F32 Angle2;
+   AngleData(F32 angle_1,F32 angle_2) {Angle1 = angle_1; Angle2 = angle_2;}
+   void swapIfOverHalfAngle()
+   {
+      if((Angle1 < Angle2 && Angle1 + pi < Angle2) || (Angle1 > Angle2 && Angle1 - pi > Angle2))
+      {
+         F32 a = Angle1;
+         Angle1 = Angle2;
+         Angle2 = a;
+      }
+   }
+};
+
+struct PointData
+{
+   Point point;
+   Vector<AngleData> angle;
+   PointData(Point p) {point = p;}
+};
+
+S32 QSORT_CALLBACK pointDataSort(PointData *a, PointData *b)
+{
+   if(a->point.x == b->point.x)
+   {
+      if(a->point.y == b->point.y)
+         return 0;
+      else if(a->point.y > b->point.y)
+         return 1;
+      else
+         return -1;
+   }
+   else if(a->point.x > b->point.x)
+      return 1;
+   else
+      return -1;
+}
+
+bool angleUsed(PointData *data, F32 angle)
+{
+   for(S32 i=0; i<data->angle.size(); i++)
+   {
+      AngleData *angledata = &data->angle[i];
+      if(angledata->Angle1 > angledata->Angle2)
+      {
+         if(angledata->Angle1 > angle && angledata->Angle2 < angle) return true;
+      }
+      else
+      {
+         if(angledata->Angle1 > angle || angledata->Angle2 < angle) return true;
+      }
+   }
+   return false;
+}
+bool angleUsed(PointData *data, AngleData *angle1)
+{
+   for(S32 i=0; i<data->angle.size(); i++)
+   {
+      AngleData *angle2 = &data->angle[i];
+      if(angle1->Angle1 <= angle1->Angle2)
+      {
+         if(angle2->Angle1 <= angle2->Angle2)
+         {
+            if(angle1->Angle1 > angle2->Angle2 && angle1->Angle2 < angle2->Angle1) return true;
+         }
+         else
+         {
+            if(angle1->Angle1 < angle2->Angle2 || angle1->Angle2 > angle2->Angle1) return true;
+         }
+      }
+      else
+      {
+         if(angle2->Angle1 > angle2->Angle2) return true; // both is crossing at 360 degree angle.
+         if(angle1->Angle1 < angle2->Angle2 || angle1->Angle2 > angle2->Angle1) return true;
+      }
+   }
+   return false;
+}
+
+void isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
+{
+   GridDatabase *gb = &gServerGame->mDatabaseForBotZones;
+   Point pts[3];
+   pts[0].x = p1->x * .98 + p2->x * .01 + p3->x * .01;
+   pts[0].y = p1->y * .98 + p2->y * .01 + p3->y * .01;
+   pts[1].x = p2->x * .98 + p1->x * .01 + p3->x * .01;
+   pts[1].y = p2->y * .98 + p1->y * .01 + p3->y * .01;
+   pts[2].x = p3->x * .98 + p1->x * .01 + p2->x * .01;
+   pts[2].y = p3->y * .98 + p1->y * .01 + p2->y * .01;
+   Vector<DatabaseObject *> zones;
+   gb->findObjects(BotNavMeshZoneType, zones, Rect(Point(min(min(p1->x, p2->x), p3->x), min(min(p1->y, p2->y), p3->y)), Point(max(max(p1->x, p2->x), p3->x), max(max(p1->y, p2->y), p3->y))) );
+   for(S32 i=0; i<zones.size(); i++)
+   {
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);
+      Vector<Point> otherPolygon;
+      zone->getCollisionPoly(otherPolygon);
+   }
+}
+
+void makeBotMeshZones2()
+{
+   Vector<PointData> data;
+   for(S32 i=0; i < gServerGame->mGameObjects.size(); i++)
+   {
+      GameObject *object = gServerGame->mGameObjects[i];
+      if(object->getObjectTypeMask() & BarrierType)
+      {
+         Vector<Point> points;
+         if(object->getCollisionPoly(points))
+         {
+            Point prevPoint;
+            Point currentPoint = points[points.size()-2];
+            Point nextPoint = points.last();
+            for(S32 j=0; j<points.size(); j++)
+            {
+               prevPoint = currentPoint;
+               currentPoint = nextPoint;
+               nextPoint = points[j];
+               F32 angle = (currentPoint.angleTo(prevPoint) + currentPoint.angleTo(nextPoint)) * 0.5;
+               Point newPoint;
+               newPoint.setPolar(10,angle);
+               if(!PolygonContains2(points.address(), points.size(), currentPoint + newPoint))
+                  data.push_back(PointData(currentPoint + newPoint));
+               else if(!PolygonContains2(points.address(), points.size(), currentPoint - newPoint))
+                  data.push_back(PointData(currentPoint - newPoint));
+               else
+                  TNLAssert(false, "unable to add point");
+            }
+         }
+      }
+   }
+
+   data.sort(pointDataSort);
+   for(S32 i=data.size()-2; i>=0; i--) // remove duplicate
+   {
+      if(data[i+1].point == data[i].point)
+         data.erase(i);
+   }
+
+   GridDatabase *gb = gServerGame->getGridDatabase();
+   for(S32 i=0; i<data.size(); i++)
+   {
+      for(S32 j=i+1; j<data.size(); j++)
+      {
+         F32 ij_angle = data[i].point.angleTo(data[j].point);
+         F32 ji_angle = data[j].point.angleTo(data[i].point);
+         if(//!angleUsed(&data[i], ij_angle) && !angleUsed(&data[j], ji_angle) && 
+            gb->pointCanSeePoint(data[i].point,data[j].point))
+         {
+            for(S32 k=j+1; k<data.size(); k++)
+            {
+               AngleData k_angles(data[k].point.angleTo(data[i].point), data[k].point.angleTo(data[j].point));
+               AngleData i_angles(data[i].point.angleTo(data[k].point), ij_angle);
+               AngleData j_angles(data[j].point.angleTo(data[k].point), ji_angle);
+               k_angles.swapIfOverHalfAngle();
+               i_angles.swapIfOverHalfAngle();
+               j_angles.swapIfOverHalfAngle();
+               if(!angleUsed(&data[k], &k_angles)
+                  && !angleUsed(&data[i], &i_angles)
+                  && !angleUsed(&data[j], &j_angles)
+                  && gb->pointCanSeePoint(data[k].point,data[i].point)
+                  && gb->pointCanSeePoint(data[k].point,data[j].point) )
+               {
+		            BotNavMeshZone *botzone = new BotNavMeshZone();
+
+            		botzone->mPolyBounds.push_back(data[i].point);
+		            botzone->mPolyBounds.push_back(data[j].point);
+		            botzone->mPolyBounds.push_back(data[k].point);
+                  botzone->mCentroid = (data[i].point + data[j].point + data[k].point) * 0.33333333f;  //  maybe (/ 3) instead of (* 0.333333) ?
+
+		            botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		            botzone->addToGame(gServerGame);
+		            botzone->computeExtent();            // Adds zone to the database, needed for computation of further zones
+
+                  PointData *datai = &data[i];
+                  PointData *dataj = &data[j];
+                  PointData *datak = &data[k];
+                  //datai->angle.push_back(i_angles); // angle checking is not working right - removes too many zones.
+                  //dataj->angle.push_back(j_angles);
+                  //datak->angle.push_back(k_angles);
+               }
+            }
+         }
+      }
+   }
+}
+
+
+
 void BotNavMeshZone::buildBotMeshZones()
 {
 	Rect bounds = gServerGame->computeWorldObjectExtents();
 
-	makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+	makeBotMeshZones2();
+	//makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
    removeUnusedNavMeshZones();
 }
 
@@ -537,7 +731,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             neighbor.borderCenter.set(bordCen);
 
             neighbor.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-            neighbor.center.set(gBotNavMeshZones[j]->getCenter());
+            neighbor.center.set(gBotNavMeshZones[j]->mCentroid);
             gBotNavMeshZones[i]->mNeighbors.push_back(neighbor);
 
             // Zone i is a neighbor of j
@@ -547,7 +741,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
             neighbor.borderCenter.set(bordCen);
 
             neighbor.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
-            neighbor.center.set(gBotNavMeshZones[i]->getCenter());
+            neighbor.center.set(gBotNavMeshZones[i]->mCentroid);
             gBotNavMeshZones[j]->mNeighbors.push_back(neighbor);
          }
       }
