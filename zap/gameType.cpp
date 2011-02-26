@@ -1190,11 +1190,11 @@ void GameType::onAddedToGame(Game *theGame)
 {
    theGame->setGameType(this);
    if(getGame()->isServer())
-      mShowAllBots = gServerGame->isTestServer();  //Default to true to show all bots if on testing mode.
+      mShowAllBots = gServerGame->isTestServer();  // Default to true to show all bots if on testing mode
 }
 
 
-extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
+extern void constructBarriers(Game *theGame, const BarrierRec &barrier);
 
 // Returns true if we've handled the line (even if it handling it means that the line was bogus); returns false if
 // caller needs to create an object based on the line
@@ -1310,13 +1310,13 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
             barrier.width = Barrier::MAX_BARRIER_WIDTH;
    
          for(S32 i = 2; i < argc; i++)
-            barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
+            barrier.verts.push_back(atof(argv[i]) *getGame()->getGridSize());
    
          if(barrier.verts.size() > 3)
          {
             barrier.solid = false;
             mBarriers.push_back(barrier);
-            constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
+            constructBarriers(getGame(), barrier);
          }
       }
    }
@@ -1329,11 +1329,12 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          barrier.width = atof(argv[1]);
          for(S32 i = 2; i < argc; i++)
             barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
+
          if(barrier.verts.size() > 3)
          {
             barrier.solid = true;
             mBarriers.push_back(barrier);
-            constructBarriers(getGame(), barrier.verts, barrier.width, barrier.solid);
+            constructBarriers(getGame(), barrier);
          }
       }
    }
@@ -2590,7 +2591,7 @@ void GameType::onGhostAvailable(GhostConnection *theConnection)
    //   s2cClientJoinedTeam(Robot::robots[i]->getName(), Robot::robots[i]->getTeam());
    //}
 
-   // An empty list clears the barriers
+   // Sending an empty list clears the barriers
    Vector<F32> v;
    s2cAddBarriers(v, 0, false);
 
@@ -2638,12 +2639,19 @@ GAMETYPE_RPC_C2S(GameType, c2sSyncMessagesComplete, (U32 sequence), (sequence))
 
 
 // Gets called multiple times as barriers are added
-GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> barrier, F32 width, bool solid), (barrier, width, solid))
+GAMETYPE_RPC_S2C(GameType, s2cAddBarriers, (Vector<F32> verts, F32 width, bool solid), (verts, width, solid))
 {
-   if(!barrier.size())
+   if(!verts.size())
       getGame()->deleteObjects(BarrierType);
    else
-      constructBarriers(getGame(), barrier, width, solid);
+   {
+      BarrierRec barrier;
+      barrier.verts = verts;
+      barrier.width = width;
+      barrier.solid = solid;
+
+      constructBarriers(getGame(), barrier);
+   }
 }
 
 

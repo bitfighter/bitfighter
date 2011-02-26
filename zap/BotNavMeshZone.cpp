@@ -31,6 +31,10 @@
 #include "gameObjectRender.h"
 #include "teleporter.h"
 
+extern "C" {
+#include "../Triangle/triangle.h"      // For Triangle!
+}
+
 namespace Zap
 {
 
@@ -464,12 +468,77 @@ static void removeUnusedNavMeshZones()
 }
 
 
-void BotNavMeshZone::buildBotMeshZones()
+extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
+
+// Server only
+void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 	Rect bounds = gServerGame->computeWorldObjectExtents();
 
 	makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
    removeUnusedNavMeshZones();
+
+   // Just for fun, let's triangulate!
+               
+   //char *triswitches = "zqcV"; // Replace V with Q after debugging
+   ////struct triangulateio *in;                                     
+   //struct triangulateio *out;  
+   
+   // Build wall edge geometry
+/*   Vector<F32> points;
+   const Vector<GameType::BarrierRec> *barriers = game->getGameType()->getBarrierList();
+
+   for(S32 i = 0; i < barriers->size(); i++)
+      constructBarriers(game, barriers->get(i));
+
+
+   for(S32 i = 0; i < gameType->get
+      wallSegments.size(); i++)
+      for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
+         logprintf("%d %2.5f %2.5f", c, wallSegments[i]->edges[j].x, wallSegments[i]->edges[j].y);
+
+   triangulateio in();
+  
+
+   void triangulate(triswitches, *in, out, NULL); */ 
+
+
+   ///////////////////////////////////  TEMP
+   //S32 c = 0;
+   //for(S32 i = 0; i < wallSegments.size(); i++)
+   //   for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
+   //      c++;
+
+   //   logprintf("--------------------------------------");
+
+   //logprintf("%d 2 0 0", c);
+   //
+   //c = 0;
+   //for(S32 i = 0; i < wallSegments.size(); i++)
+   //{
+   //   for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
+   //   {
+   //      logprintf("%d %2.5f %2.5f", c, wallSegments[i]->edges[j].x, wallSegments[i]->edges[j].y);
+   //      c++;
+   //   }
+   //}
+
+   //logprintf("%d 0", c/2);
+
+   //c = 0;
+   //for(S32 i = 0; i < wallSegments.size(); i++)
+   //{
+   //   for(S32 j = 0; j < wallSegments[i]->edges.size(); j+=2)
+   //   {
+   //      logprintf("%d %d %d", c/2, c, c+1);
+   //      c+=2;
+   //   }
+   //}
+
+   //logprintf("%d", wallSegments.size());
+
+   //for(S32 i = 0; i < wallSegments.size(); i++)
+   //   logprintf("%d %2.5f %2.5f", i, wallSegments[i]->getExtent().getCenter().x, wallSegments[i]->getExtent().getCenter().y);
 }
 
 

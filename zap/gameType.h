@@ -99,8 +99,17 @@ class Robot;
 class AsteroidSpawn;
 class Team;
 
+struct BarrierRec
+{
+   Vector<F32> verts;
+   F32 width;
+   bool solid;
+};
+
+
 class GameType : public GameObject
 {
+
 private:
    Point getSpawnPoint(S32 team);         // Picks a spawn point for ship or robot
    virtual U32 getLowerRightCornerScoreboardOffsetFromBottom() { return 60; }      // Game-specific location for the bottom of the scoreboard on the lower-right corner
@@ -110,6 +119,8 @@ private:
    bool mEngineerEnabled;
    bool mShowAllBots;
    U32 mTotalGamePlay;
+
+   Vector<BarrierRec> mBarriers;
 
    void sendChatDisplayEvent(ClientRef *clientRef, bool global, const char *message, NetEvent *theEvent);      // In-game chat message
 
@@ -206,14 +217,9 @@ public:
       NO_FLAG = -1,               // Constant used for ship not having a flag
    };
 
-   struct BarrierRec
-   {
-      Vector<F32> verts;
-      F32 width;
-      bool solid;
-   };
 
-   Vector<BarrierRec> mBarriers;
+   const Vector<BarrierRec> *getBarrierList() { return &mBarriers; }
+
    Vector<RefPtr<ClientRef> > mClientList;
 
    ClientRef *mLocalClient;

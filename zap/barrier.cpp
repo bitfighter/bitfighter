@@ -27,6 +27,8 @@
 #include "gameObjectRender.h"
 #include "SweptEllipsoid.h"    // For polygon triangulation
 
+#include "gameType.h"          // For BarrierRec struct
+
 #include "glutInclude.h"
 #include <cmath>               // C++ version of this headers includes float overloads
 
@@ -38,34 +40,41 @@ namespace Zap
 TNL_IMPLEMENT_NETOBJECT(Barrier);
 
 
+
 extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
-void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid)
+bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points)
+{
+   // Convert the list of floats into a list of points
+   for(S32 i = 1; i < barrier.verts.size(); i += 2)
+      points.push_back( Point(barrier.verts[i-1], barrier.verts[i]) );
+
+   removeCollinearPoints(points, false);   // Remove collinear points to make rendering nicer and datasets smaller
+
+   return (points.size() >= 2);
+}
+
+
+void constructBarriers(Game *theGame, const BarrierRec &barrier)
 {
    Vector<Point> vec;
 
-   // Convert the list of floats into a list of points
-   for(S32 i = 1; i < barrier.size(); i += 2)
-      vec.push_back( Point(barrier[i-1], barrier[i]) );
-
-   removeCollinearPoints(vec, false);   // Remove collinear points to make rendering nicer and datasets smaller
-
-   if(vec.size() <= 1)
+   if(!loadBarrierPoints(barrier, vec))
       return;
 
-   if(solid)   // This is a solid polygon
+   if(barrier.solid)   // This is a solid polygon
    {
       if(vec.first() == vec.last())      // Does our barrier form a closed loop?
          vec.erase(vec.size() - 1);      // If so, remove last vertex
 
-      Barrier *b = new Barrier(vec, width, true);
+      Barrier *b = new Barrier(vec, barrier.width, true);
       b->addToGame(theGame);
    }
    else        // This is a standard series of segments
    {
       // First, fill a vector with barrier segments
       Vector<Point> barrierEnds;
-      Barrier::constructBarrierEndPoints(vec, width, barrierEnds);
+      Barrier::constructBarrierEndPoints(vec, barrier.width, barrierEnds);
 
       Vector<Point> pts;
       // Then add individual segments to the game
@@ -75,7 +84,7 @@ void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, boo
          pts.push_back(barrierEnds[i]);
          pts.push_back(barrierEnds[i+1]);
 
-         Barrier *b = new Barrier(pts, width, false);    // false = not solid
+         Barrier *b = new Barrier(pts, barrier.width, false);    // false = not solid
          b->addToGame(theGame);
       }
    }
@@ -297,7 +306,7 @@ void Barrier::clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Poin
 }
 
 
-// Clean up edge geometry and get barriers ready for proper rendering -- client only
+// Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
 void Barrier::prepareRenderingGeometry()
 {
    resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
@@ -311,7 +320,7 @@ void Barrier::prepareRenderingGeometry()
    {
       mRenderOutlineGeometry.clear();
       if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mRenderOutlineGeometry))
-         clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);
+         clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);     // Populates mRenderLineSegments
    }
 }
 
