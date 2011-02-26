@@ -30,6 +30,7 @@
 #include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones
 #include "gameObjectRender.h"
 #include "teleporter.h"
+#include "barrier.h"          // For Barrier methods in generating zones
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -468,77 +469,139 @@ static void removeUnusedNavMeshZones()
 }
 
 
-extern void constructBarriers(Game *theGame, const Vector<F32> &barrier, F32 width, bool solid);
+static void initIoStruct(triangulateio *ioStruct)
+{
+   ioStruct->numberofpoints = 0;
+   ioStruct->pointlist = NULL;
+
+   ioStruct->segmentlist = NULL;
+   ioStruct->numberofsegments = 0;
+   ioStruct->segmentmarkerlist = NULL; 
+
+   ioStruct->pointmarkerlist = NULL;
+   ioStruct->numberofpointattributes = 0;
+   ioStruct->pointattributelist = NULL;
+
+   ioStruct->numberofregions = 0;
+   ioStruct->numberoftriangles = 0;
+   ioStruct->numberofcorners = 0; 
+
+   ioStruct->trianglelist = NULL;       
+   ioStruct->triangleattributelist = NULL;
+   ioStruct->trianglearealist = NULL;
+   ioStruct->numberoftriangleattributes = 0;    
+   ioStruct->neighborlist = NULL;       
+
+   ioStruct->holelist = NULL;           
+   ioStruct->numberofholes = 0;                 
+
+   ioStruct->regionlist = NULL;         
+   ioStruct->numberofregions = 0;               
+
+   ioStruct->edgelist = NULL;           
+   ioStruct->edgemarkerlist = NULL;     
+   ioStruct->normlist = NULL;           
+   ioStruct->numberofedges = 0;                 
+}
+
+
+extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 
 // Server only
 void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
-	Rect bounds = gServerGame->computeWorldObjectExtents();
+	Rect bounds = game->computeWorldObjectExtents();
 
-	makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-   removeUnusedNavMeshZones();
+	//makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+ //  removeUnusedNavMeshZones();
 
    // Just for fun, let's triangulate!
-               
-   //char *triswitches = "zqcV"; // Replace V with Q after debugging
-   ////struct triangulateio *in;                                     
-   //struct triangulateio *out;  
-   
-   // Build wall edge geometry
-/*   Vector<F32> points;
-   const Vector<GameType::BarrierRec> *barriers = game->getGameType()->getBarrierList();
+   Vector<F32> coords;
+   Vector<F32> holes;
+   Vector<S32> edges;
 
-   for(S32 i = 0; i < barriers->size(); i++)
-      constructBarriers(game, barriers->get(i));
+   Point ctr;     // Reusable container
+
+   for(S32 i = 0; i < game->mGameObjects.size(); i++)
+      if(game->mGameObjects[i]->getObjectTypeMask() & BarrierType)
+      {
+         Barrier *barrier = dynamic_cast<Barrier *>(game->mGameObjects[i]);  
+
+         if(barrier)
+         {
+            barrier->prepareRenderingGeometry();
+            for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j++)
+            {
+               bool found = false;
+               for(S32 k = 0; k < coords.size(); k+=2)
+               {
+                  // TODO: Is this needed, or can we use Triangle's duplicate vertex removal process?
+                  if(coords[k] == barrier->mRenderLineSegments[j].x && coords[k+1] == barrier->mRenderLineSegments[j].y)
+                  {
+                     edges.push_back(k/2);
+                     found = true;
+                     break;
+                  }
+               }
+
+               if(!found)
+               {
+                  edges.push_back(coords.size() / 2);
+                  coords.push_back(barrier->mRenderLineSegments[j].x);
+                  coords.push_back(barrier->mRenderLineSegments[j].y);
+               }
+            }
+         }
+         ctr.set(barrier->getExtent().getCenter());
+         holes.push_back(ctr.x);
+         holes.push_back(ctr.y);
+
+      }
+
+   triangulateio in, out;
+   initIoStruct(&in);
+   initIoStruct(&out);
+
+   in.numberofpoints = coords.size() / 2;
+   in.pointlist = coords.address();
+
+   in.segmentlist = edges.address();
+   in.numberofsegments = edges.size() / 2;
+
+   in.numberofholes = holes.size() / 2;
+   in.holelist = holes.address();
+
+   logprintf("===============================================");
+   logprintf("%d 2 0 0", in.numberofpoints);
+   for(S32 i = 0; i < in.numberofpoints * 2; i+=2)
+      logprintf("%d %f %f", i/2, in.pointlist[i], in.pointlist[i+1]);
+   logprintf("%d 0", in.numberofsegments);
+   for(S32 i = 0; i < in.numberofsegments * 2; i+=2)
+      logprintf("%d %d %d", i/2, in.segmentlist[i], in.segmentlist[i+1]);
+   logprintf("%d", in.numberofholes);
+   for(S32 i = 0; i < in.numberofholes * 2; i+=2)
+      logprintf("%d %f %f", i/2, in.holelist[i], in.holelist[i+1]);
 
 
-   for(S32 i = 0; i < gameType->get
-      wallSegments.size(); i++)
-      for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
-         logprintf("%d %2.5f %2.5f", c, wallSegments[i]->edges[j].x, wallSegments[i]->edges[j].y);
 
-   triangulateio in();
-  
-
-   void triangulate(triswitches, *in, out, NULL); */ 
+   triangulate("zqpcV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
 
 
-   ///////////////////////////////////  TEMP
-   //S32 c = 0;
-   //for(S32 i = 0; i < wallSegments.size(); i++)
-   //   for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
-   //      c++;
+   for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
+   {
+      BotNavMeshZone *botzone = new BotNavMeshZone();
 
-   //   logprintf("--------------------------------------");
+		botzone->mPolyBounds.push_back(Point(out.pointlist[out.trianglelist[i]*2], out.pointlist[out.trianglelist[i]*2 + 1]));
+		botzone->mPolyBounds.push_back(Point(out.pointlist[out.trianglelist[i+1]*2], out.pointlist[out.trianglelist[i+1]*2 + 1]));
+		botzone->mPolyBounds.push_back(Point(out.pointlist[out.trianglelist[i+2]*2], out.pointlist[out.trianglelist[i+2]*2 + 1]));
+      botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-   //logprintf("%d 2 0 0", c);
-   //
-   //c = 0;
-   //for(S32 i = 0; i < wallSegments.size(); i++)
-   //{
-   //   for(S32 j = 0; j < wallSegments[i]->edges.size(); j++)
-   //   {
-   //      logprintf("%d %2.5f %2.5f", c, wallSegments[i]->edges[j].x, wallSegments[i]->edges[j].y);
-   //      c++;
-   //   }
-   //}
+		botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		botzone->addToGame(gServerGame);
+		botzone->computeExtent();   
+   }
 
-   //logprintf("%d 0", c/2);
-
-   //c = 0;
-   //for(S32 i = 0; i < wallSegments.size(); i++)
-   //{
-   //   for(S32 j = 0; j < wallSegments[i]->edges.size(); j+=2)
-   //   {
-   //      logprintf("%d %d %d", c/2, c, c+1);
-   //      c+=2;
-   //   }
-   //}
-
-   //logprintf("%d", wallSegments.size());
-
-   //for(S32 i = 0; i < wallSegments.size(); i++)
-   //   logprintf("%d %2.5f %2.5f", i, wallSegments[i]->getExtent().getCenter().x, wallSegments[i]->getExtent().getCenter().y);
+   //removeUnusedNavMeshZones();
 }
 
 
