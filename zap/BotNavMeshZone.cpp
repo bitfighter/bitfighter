@@ -510,7 +510,6 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 // Server only
 void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
-	Rect bounds = game->computeWorldObjectExtents();
 
 	//makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
  //  removeUnusedNavMeshZones();
@@ -520,7 +519,23 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    Vector<F32> holes;
    Vector<S32> edges;
 
-   Point ctr;     // Reusable container
+	Rect bounds = game->computeWorldObjectExtents();
+
+   F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
+   F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
+
+   coords.push_back(minx);   coords.push_back(miny);
+   coords.push_back(minx);   coords.push_back(maxy);
+   coords.push_back(maxx);   coords.push_back(maxy);
+   coords.push_back(maxx);   coords.push_back(miny);
+
+   edges.push_back(0);       edges.push_back(1);
+   edges.push_back(1);       edges.push_back(2);
+   edges.push_back(2);       edges.push_back(3);
+   edges.push_back(3);       edges.push_back(0);
+
+
+   Point ctr;     // Reusable container for hole calculations
 
    for(S32 i = 0; i < game->mGameObjects.size(); i++)
       if(game->mGameObjects[i]->getObjectTypeMask() & BarrierType)
@@ -532,11 +547,15 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
             barrier->prepareRenderingGeometry();
             for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j++)
             {
+               F32 roundfact = 1;
+               F32 x =  F32(S32(barrier->mRenderLineSegments[j].x * roundfact + 0.5)) / roundfact;
+               F32 y =  F32(S32(barrier->mRenderLineSegments[j].y * roundfact + 0.5)) / roundfact;
+
                bool found = false;
                for(S32 k = 0; k < coords.size(); k+=2)
                {
                   // TODO: Is this needed, or can we use Triangle's duplicate vertex removal process?
-                  if(coords[k] == barrier->mRenderLineSegments[j].x && coords[k+1] == barrier->mRenderLineSegments[j].y)
+                  if(coords[k] == x && coords[k+1] == y)
                   {
                      edges.push_back(k/2);
                      found = true;
@@ -547,15 +566,14 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
                if(!found)
                {
                   edges.push_back(coords.size() / 2);
-                  coords.push_back(barrier->mRenderLineSegments[j].x);
-                  coords.push_back(barrier->mRenderLineSegments[j].y);
+                  coords.push_back(x);
+                  coords.push_back(y);
                }
             }
          }
          ctr.set(barrier->getExtent().getCenter());
          holes.push_back(ctr.x);
          holes.push_back(ctr.y);
-
       }
 
    triangulateio in, out;
@@ -584,7 +602,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
 
 
-   triangulate("zqpcV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+   triangulate("zqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
 
 
    for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
