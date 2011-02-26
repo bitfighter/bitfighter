@@ -691,7 +691,7 @@ void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
       if(mItems[i].index == ItemSpawn)
       {
          U16 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[0]);
-         if(zoneIndex >= 0)
+         if(zoneIndex != U16_MAX)
          {
             zones[zoneIndex].flag = true;        // Mark zone as processed
             inProcessList.push_back(zoneIndex);
@@ -700,7 +700,7 @@ void EditorUserInterface::removeUnusedNavMeshZones(Vector<WorldItem> &zones)
       else if(mItems[i].index == ItemTeleporter)
       {
          U16 zoneIndex = findZoneContaining(zones, mItems[i].getVerts()[1]);    // Intake = vert0, outtake = vert1
-         if(zoneIndex >= 0)
+         if(zoneIndex != U16_MAX)
          {
             zones[zoneIndex].flag = true;        // Mark zone as processed
             inProcessList.push_back(zoneIndex);

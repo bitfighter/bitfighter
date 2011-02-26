@@ -401,7 +401,7 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 // Pass back the overpping extent in two points
 bool segsOverlap(const Point &p1, const Point &p2, const Point &p3, const Point &p4, Point &overlapStart, Point &overlapEnd, F32 scaleFact)
 {
-   const Point *pInt;
+   const Point* pInt = NULL;
    bool found = false;
 
    const F32 closeEnough = 1.0f * 1.0f * scaleFact * scaleFact;
