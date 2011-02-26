@@ -361,6 +361,8 @@ static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 
 const F32 pi = 3.14159265;
 
+
+// AngleData don't work right, might remove both structs and go with only Vector<Point>
 struct AngleData
 {
    F32 Angle1;
@@ -442,16 +444,20 @@ bool angleUsed(PointData *data, AngleData *angle1)
    return false;
 }
 
-void isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
+bool isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
 {
    GridDatabase *gb = &gServerGame->mDatabaseForBotZones;
-   Point pts[3];
-   pts[0].x = p1->x * .98 + p2->x * .01 + p3->x * .01;
-   pts[0].y = p1->y * .98 + p2->y * .01 + p3->y * .01;
-   pts[1].x = p2->x * .98 + p1->x * .01 + p3->x * .01;
-   pts[1].y = p2->y * .98 + p1->y * .01 + p3->y * .01;
-   pts[2].x = p3->x * .98 + p1->x * .01 + p2->x * .01;
-   pts[2].y = p3->y * .98 + p1->y * .01 + p2->y * .01;
+   Vector<Point> pts(3);
+   pts.setSize(3);
+   const F32 mult1 = 0.001953125;
+   const F32 mult2 = 1 - mult1*2;
+   // Slightly reduce size to avoid false positive when one line touch the other.
+   pts[0].x = p1->x * mult2 + p2->x * mult1 + p3->x * mult1;
+   pts[0].y = p1->y * mult2 + p2->y * mult1 + p3->y * mult1;
+   pts[1].x = p2->x * mult2 + p1->x * mult1 + p3->x * mult1;
+   pts[1].y = p2->y * mult2 + p1->y * mult1 + p3->y * mult1;
+   pts[2].x = p3->x * mult2 + p1->x * mult1 + p2->x * mult1;
+   pts[2].y = p3->y * mult2 + p1->y * mult1 + p2->y * mult1;
    Vector<DatabaseObject *> zones;
    gb->findObjects(BotNavMeshZoneType, zones, Rect(Point(min(min(p1->x, p2->x), p3->x), min(min(p1->y, p2->y), p3->y)), Point(max(max(p1->x, p2->x), p3->x), max(max(p1->y, p2->y), p3->y))) );
    for(S32 i=0; i<zones.size(); i++)
@@ -459,7 +465,10 @@ void isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);
       Vector<Point> otherPolygon;
       zone->getCollisionPoly(otherPolygon);
+      if(polygonsIntersect(pts, otherPolygon))
+         return true;
    }
+   return false;
 }
 
 void makeBotMeshZones2()
@@ -483,7 +492,7 @@ void makeBotMeshZones2()
                nextPoint = points[j];
                F32 angle = (currentPoint.angleTo(prevPoint) + currentPoint.angleTo(nextPoint)) * 0.5;
                Point newPoint;
-               newPoint.setPolar(10,angle);
+               newPoint.setPolar(0.01,angle);
                if(!PolygonContains2(points.address(), points.size(), currentPoint + newPoint))
                   data.push_back(PointData(currentPoint + newPoint));
                else if(!PolygonContains2(points.address(), points.size(), currentPoint - newPoint))
@@ -507,12 +516,17 @@ void makeBotMeshZones2()
    {
       for(S32 j=i+1; j<data.size(); j++)
       {
+         bool botZoneAdded = false;
+         bool usingFullRange = false;
+         const F32 ShortRange = 262144;     // 512^2
          F32 ij_angle = data[i].point.angleTo(data[j].point);
          F32 ji_angle = data[j].point.angleTo(data[i].point);
-         if(//!angleUsed(&data[i], ij_angle) && !angleUsed(&data[j], ji_angle) && 
+         if(//!angleUsed(&data[i], ij_angle) && !angleUsed(&data[j], ji_angle) &&
             gb->pointCanSeePoint(data[i].point,data[j].point))
-         {
-            for(S32 k=j+1; k<data.size(); k++)
+         do{
+            for(S32 k=j+1; k<data.size() && !botZoneAdded; k++)
+            {
+            if(usingFullRange || (data[k].point.distanceTo(data[i].point)<ShortRange && data[k].point.distanceTo(data[j].point)<ShortRange))
             {
                AngleData k_angles(data[k].point.angleTo(data[i].point), data[k].point.angleTo(data[j].point));
                AngleData i_angles(data[i].point.angleTo(data[k].point), ij_angle);
@@ -524,7 +538,8 @@ void makeBotMeshZones2()
                   && !angleUsed(&data[i], &i_angles)
                   && !angleUsed(&data[j], &j_angles)
                   && gb->pointCanSeePoint(data[k].point,data[i].point)
-                  && gb->pointCanSeePoint(data[k].point,data[j].point) )
+                  && gb->pointCanSeePoint(data[k].point,data[j].point)
+                  && !isBotZoneCollideWithOtherZone(&data[i].point, &data[j].point, &data[k].point) )
                {
 		            BotNavMeshZone *botzone = new BotNavMeshZone();
 
@@ -537,15 +552,18 @@ void makeBotMeshZones2()
 		            botzone->addToGame(gServerGame);
 		            botzone->computeExtent();            // Adds zone to the database, needed for computation of further zones
 
-                  PointData *datai = &data[i];
-                  PointData *dataj = &data[j];
-                  PointData *datak = &data[k];
+                  //PointData *datai = &data[i];
+                  //PointData *dataj = &data[j];
+                  //PointData *datak = &data[k];
                   //datai->angle.push_back(i_angles); // angle checking is not working right - removes too many zones.
                   //dataj->angle.push_back(j_angles);
                   //datak->angle.push_back(k_angles);
+                  botZoneAdded = true; // force next point..
                }
             }
-         }
+            }
+            usingFullRange = !usingFullRange;
+         }while(usingFullRange);
       }
    }
 }
