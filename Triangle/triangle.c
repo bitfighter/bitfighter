@@ -208,7 +208,7 @@
 /*   recommend double precision unless you want to generate a mesh for which */
 /*   you do not have enough memory.                                          */
 
-/* #define SINGLE */
+ #define SINGLE 
 
 #ifdef SINGLE
 #define REAL float
@@ -268,6 +268,8 @@
 
 /* #define CPU86 */
 /* #define LINUX */
+
+#define TRILIBRARY
 
 #define INEXACT /* Nothing */
 /* #define INEXACT volatile */
@@ -3524,11 +3526,11 @@ struct behavior *b;
 #endif /* not CDT_ONLY */
 #endif /* not TRILIBRARY */
   b->usesegments = b->poly || b->refine || b->quality || b->convex;
-  b->goodangle = cos(b->minangle * PI / 180.0);
+  b->goodangle = (REAL)cos(b->minangle * PI / 180.0);
   if (b->goodangle == 1.0) {
     b->offconstant = 0.0;
   } else {
-    b->offconstant = 0.475 * sqrt((1.0 + b->goodangle) / (1.0 - b->goodangle));
+    b->offconstant = (REAL)(0.475 * sqrt((1.0 + b->goodangle) / (1.0 - b->goodangle)));
   }
   b->goodangle *= b->goodangle;
   if (b->refine && b->noiterationnum) {
@@ -4931,20 +4933,20 @@ void exactinit()
       splitter *= 2.0;
     }
     every_other = !every_other;
-    check = 1.0 + epsilon;
+    check = (REAL) 1.0 + epsilon;
   } while ((check != 1.0) && (check != lastcheck));
   splitter += 1.0;
   /* Error bounds for orientation and incircle tests. */
-  resulterrbound = (3.0 + 8.0 * epsilon) * epsilon;
-  ccwerrboundA = (3.0 + 16.0 * epsilon) * epsilon;
-  ccwerrboundB = (2.0 + 12.0 * epsilon) * epsilon;
-  ccwerrboundC = (9.0 + 64.0 * epsilon) * epsilon * epsilon;
-  iccerrboundA = (10.0 + 96.0 * epsilon) * epsilon;
-  iccerrboundB = (4.0 + 48.0 * epsilon) * epsilon;
-  iccerrboundC = (44.0 + 576.0 * epsilon) * epsilon * epsilon;
-  o3derrboundA = (7.0 + 56.0 * epsilon) * epsilon;
-  o3derrboundB = (3.0 + 28.0 * epsilon) * epsilon;
-  o3derrboundC = (26.0 + 288.0 * epsilon) * epsilon * epsilon;
+  resulterrbound = (REAL)(3.0 + 8.0 * epsilon) * epsilon;
+  ccwerrboundA = (REAL)(3.0 + 16.0 * epsilon) * epsilon;
+  ccwerrboundB = (REAL)(2.0 + 12.0 * epsilon) * epsilon;
+  ccwerrboundC = (REAL)(9.0 + 64.0 * epsilon) * epsilon * epsilon;
+  iccerrboundA = (REAL)(10.0 + 96.0 * epsilon) * epsilon;
+  iccerrboundB = (REAL)(4.0 + 48.0 * epsilon) * epsilon;
+  iccerrboundC = (REAL)(44.0 + 576.0 * epsilon) * epsilon * epsilon;
+  o3derrboundA = (REAL)(7.0 + 56.0 * epsilon) * epsilon;
+  o3derrboundB = (REAL)(3.0 + 28.0 * epsilon) * epsilon;
+  o3derrboundC = (REAL)(26.0 + 288.0 * epsilon) * epsilon * epsilon;
 }
 
 /*****************************************************************************/
@@ -5439,7 +5441,7 @@ REAL permanent;
   }
 
   errbound = iccerrboundC * permanent + resulterrbound * Absolute(det);
-  det += ((adx * adx + ady * ady) * ((bdx * cdytail + cdy * bdxtail)
+  det += (REAL)( ((adx * adx + ady * ady) * ((bdx * cdytail + cdy * bdxtail)
                                      - (bdy * cdxtail + cdx * bdytail))
           + 2.0 * (adx * adxtail + ady * adytail) * (bdx * cdy - bdy * cdx))
        + ((bdx * bdx + bdy * bdy) * ((cdx * adytail + ady * cdxtail)
@@ -5447,7 +5449,7 @@ REAL permanent;
           + 2.0 * (bdx * bdxtail + bdy * bdytail) * (cdx * ady - cdy * adx))
        + ((cdx * cdx + cdy * cdy) * ((adx * bdytail + bdy * adxtail)
                                      - (ady * bdxtail + bdx * adytail))
-          + 2.0 * (cdx * cdxtail + cdy * cdytail) * (adx * bdy - ady * bdx));
+          + 2.0 * (cdx * cdxtail + cdy * cdytail) * (adx * bdy - ady * bdx)));
   if ((det >= errbound) || (-det >= errbound)) {
     return det;
   }
@@ -5479,7 +5481,7 @@ REAL permanent;
 
   if (adxtail != 0.0) {
     axtbclen = scale_expansion_zeroelim(4, bc, adxtail, axtbc);
-    temp16alen = scale_expansion_zeroelim(axtbclen, axtbc, 2.0 * adx,
+    temp16alen = scale_expansion_zeroelim(axtbclen, axtbc, (REAL)2.0 * adx,
                                           temp16a);
 
     axtcclen = scale_expansion_zeroelim(4, cc, adxtail, axtcc);
@@ -5498,7 +5500,7 @@ REAL permanent;
   }
   if (adytail != 0.0) {
     aytbclen = scale_expansion_zeroelim(4, bc, adytail, aytbc);
-    temp16alen = scale_expansion_zeroelim(aytbclen, aytbc, 2.0 * ady,
+    temp16alen = scale_expansion_zeroelim(aytbclen, aytbc, (REAL)2.0 * ady,
                                           temp16a);
 
     aytbblen = scale_expansion_zeroelim(4, bb, adytail, aytbb);
@@ -5517,7 +5519,7 @@ REAL permanent;
   }
   if (bdxtail != 0.0) {
     bxtcalen = scale_expansion_zeroelim(4, ca, bdxtail, bxtca);
-    temp16alen = scale_expansion_zeroelim(bxtcalen, bxtca, 2.0 * bdx,
+    temp16alen = scale_expansion_zeroelim(bxtcalen, bxtca, (REAL)2.0 * bdx,
                                           temp16a);
 
     bxtaalen = scale_expansion_zeroelim(4, aa, bdxtail, bxtaa);
@@ -5536,7 +5538,7 @@ REAL permanent;
   }
   if (bdytail != 0.0) {
     bytcalen = scale_expansion_zeroelim(4, ca, bdytail, bytca);
-    temp16alen = scale_expansion_zeroelim(bytcalen, bytca, 2.0 * bdy,
+    temp16alen = scale_expansion_zeroelim(bytcalen, bytca, (REAL)2.0 * bdy,
                                           temp16a);
 
     bytcclen = scale_expansion_zeroelim(4, cc, bdytail, bytcc);
@@ -5555,7 +5557,7 @@ REAL permanent;
   }
   if (cdxtail != 0.0) {
     cxtablen = scale_expansion_zeroelim(4, ab, cdxtail, cxtab);
-    temp16alen = scale_expansion_zeroelim(cxtablen, cxtab, 2.0 * cdx,
+    temp16alen = scale_expansion_zeroelim(cxtablen, cxtab, (REAL)2.0 * cdx,
                                           temp16a);
 
     cxtbblen = scale_expansion_zeroelim(4, bb, cdxtail, cxtbb);
@@ -5574,7 +5576,7 @@ REAL permanent;
   }
   if (cdytail != 0.0) {
     cytablen = scale_expansion_zeroelim(4, ab, cdytail, cytab);
-    temp16alen = scale_expansion_zeroelim(cytablen, cytab, 2.0 * cdy,
+    temp16alen = scale_expansion_zeroelim(cytablen, cytab, (REAL)2.0 * cdy,
                                           temp16a);
 
     cytaalen = scale_expansion_zeroelim(4, aa, cdytail, cytaa);
@@ -5622,7 +5624,7 @@ REAL permanent;
     if (adxtail != 0.0) {
       temp16alen = scale_expansion_zeroelim(axtbclen, axtbc, adxtail, temp16a);
       axtbctlen = scale_expansion_zeroelim(bctlen, bct, adxtail, axtbct);
-      temp32alen = scale_expansion_zeroelim(axtbctlen, axtbct, 2.0 * adx,
+      temp32alen = scale_expansion_zeroelim(axtbctlen, axtbct, (REAL)2.0 * adx,
                                             temp32a);
       temp48len = fast_expansion_sum_zeroelim(temp16alen, temp16a,
                                               temp32alen, temp32a, temp48);
@@ -5649,7 +5651,7 @@ REAL permanent;
       temp32alen = scale_expansion_zeroelim(axtbctlen, axtbct, adxtail,
                                             temp32a);
       axtbcttlen = scale_expansion_zeroelim(bcttlen, bctt, adxtail, axtbctt);
-      temp16alen = scale_expansion_zeroelim(axtbcttlen, axtbctt, 2.0 * adx,
+      temp16alen = scale_expansion_zeroelim(axtbcttlen, axtbctt, (REAL)2.0 * adx,
                                             temp16a);
       temp16blen = scale_expansion_zeroelim(axtbcttlen, axtbctt, adxtail,
                                             temp16b);
@@ -5664,7 +5666,7 @@ REAL permanent;
     if (adytail != 0.0) {
       temp16alen = scale_expansion_zeroelim(aytbclen, aytbc, adytail, temp16a);
       aytbctlen = scale_expansion_zeroelim(bctlen, bct, adytail, aytbct);
-      temp32alen = scale_expansion_zeroelim(aytbctlen, aytbct, 2.0 * ady,
+      temp32alen = scale_expansion_zeroelim(aytbctlen, aytbct, (REAL)2.0 * ady,
                                             temp32a);
       temp48len = fast_expansion_sum_zeroelim(temp16alen, temp16a,
                                               temp32alen, temp32a, temp48);
@@ -5676,7 +5678,7 @@ REAL permanent;
       temp32alen = scale_expansion_zeroelim(aytbctlen, aytbct, adytail,
                                             temp32a);
       aytbcttlen = scale_expansion_zeroelim(bcttlen, bctt, adytail, aytbctt);
-      temp16alen = scale_expansion_zeroelim(aytbcttlen, aytbctt, 2.0 * ady,
+      temp16alen = scale_expansion_zeroelim(aytbcttlen, aytbctt, (REAL)2.0 * ady,
                                             temp16a);
       temp16blen = scale_expansion_zeroelim(aytbcttlen, aytbctt, adytail,
                                             temp16b);
@@ -5719,7 +5721,7 @@ REAL permanent;
     if (bdxtail != 0.0) {
       temp16alen = scale_expansion_zeroelim(bxtcalen, bxtca, bdxtail, temp16a);
       bxtcatlen = scale_expansion_zeroelim(catlen, cat, bdxtail, bxtcat);
-      temp32alen = scale_expansion_zeroelim(bxtcatlen, bxtcat, 2.0 * bdx,
+      temp32alen = scale_expansion_zeroelim(bxtcatlen, bxtcat, (REAL)2.0 * bdx,
                                             temp32a);
       temp48len = fast_expansion_sum_zeroelim(temp16alen, temp16a,
                                               temp32alen, temp32a, temp48);
@@ -5746,7 +5748,7 @@ REAL permanent;
       temp32alen = scale_expansion_zeroelim(bxtcatlen, bxtcat, bdxtail,
                                             temp32a);
       bxtcattlen = scale_expansion_zeroelim(cattlen, catt, bdxtail, bxtcatt);
-      temp16alen = scale_expansion_zeroelim(bxtcattlen, bxtcatt, 2.0 * bdx,
+      temp16alen = scale_expansion_zeroelim(bxtcattlen, bxtcatt, (REAL)2.0 * bdx,
                                             temp16a);
       temp16blen = scale_expansion_zeroelim(bxtcattlen, bxtcatt, bdxtail,
                                             temp16b);
@@ -5761,7 +5763,7 @@ REAL permanent;
     if (bdytail != 0.0) {
       temp16alen = scale_expansion_zeroelim(bytcalen, bytca, bdytail, temp16a);
       bytcatlen = scale_expansion_zeroelim(catlen, cat, bdytail, bytcat);
-      temp32alen = scale_expansion_zeroelim(bytcatlen, bytcat, 2.0 * bdy,
+      temp32alen = scale_expansion_zeroelim(bytcatlen, bytcat, (REAL)2.0 * bdy,
                                             temp32a);
       temp48len = fast_expansion_sum_zeroelim(temp16alen, temp16a,
                                               temp32alen, temp32a, temp48);
@@ -5773,7 +5775,7 @@ REAL permanent;
       temp32alen = scale_expansion_zeroelim(bytcatlen, bytcat, bdytail,
                                             temp32a);
       bytcattlen = scale_expansion_zeroelim(cattlen, catt, bdytail, bytcatt);
-      temp16alen = scale_expansion_zeroelim(bytcattlen, bytcatt, 2.0 * bdy,
+      temp16alen = scale_expansion_zeroelim(bytcattlen, bytcatt, (REAL)2.0 * bdy,
                                             temp16a);
       temp16blen = scale_expansion_zeroelim(bytcattlen, bytcatt, bdytail,
                                             temp16b);
@@ -5816,7 +5818,7 @@ REAL permanent;
     if (cdxtail != 0.0) {
       temp16alen = scale_expansion_zeroelim(cxtablen, cxtab, cdxtail, temp16a);
       cxtabtlen = scale_expansion_zeroelim(abtlen, abt, cdxtail, cxtabt);
-      temp32alen = scale_expansion_zeroelim(cxtabtlen, cxtabt, 2.0 * cdx,
+      temp32alen = scale_expansion_zeroelim(cxtabtlen, cxtabt, (REAL)2.0 * cdx,
                                             temp32a);
       temp48len = fast_expansion_sum_zeroelim(temp16alen, temp16a,
                                               temp32alen, temp32a, temp48);
@@ -5843,7 +5845,7 @@ REAL permanent;
       temp32alen = scale_expansion_zeroelim(cxtabtlen, cxtabt, cdxtail,
                                             temp32a);
       cxtabttlen = scale_expansion_zeroelim(abttlen, abtt, cdxtail, cxtabtt);
-      temp16alen = scale_expansion_zeroelim(cxtabttlen, cxtabtt, 2.0 * cdx,
+      temp16alen = scale_expansion_zeroelim(cxtabttlen, cxtabtt, (REAL)2.0 * cdx,
                                             temp16a);
       temp16blen = scale_expansion_zeroelim(cxtabttlen, cxtabtt, cdxtail,
                                             temp16b);
@@ -5858,7 +5860,7 @@ REAL permanent;
     if (cdytail != 0.0) {
       temp16alen = scale_expansion_zeroelim(cytablen, cytab, cdytail, temp16a);
       cytabtlen = scale_expansion_zeroelim(abtlen, abt, cdytail, cytabt);
-      temp32alen = scale_expansion_zeroelim(cytabtlen, cytabt, 2.0 * cdy,
+      temp32alen = scale_expansion_zeroelim(cytabtlen, cytabt, (REAL)2.0 * cdy,
                                             temp32a);
       temp48len = fast_expansion_sum_zeroelim(temp16alen, temp16a,
                                               temp32alen, temp32a, temp48);
@@ -5870,7 +5872,7 @@ REAL permanent;
       temp32alen = scale_expansion_zeroelim(cytabtlen, cytabt, cdytail,
                                             temp32a);
       cytabttlen = scale_expansion_zeroelim(abttlen, abtt, cdytail, cytabtt);
-      temp16alen = scale_expansion_zeroelim(cytabttlen, cytabtt, 2.0 * cdy,
+      temp16alen = scale_expansion_zeroelim(cytabttlen, cytabtt, (REAL)2.0 * cdy,
                                             temp16a);
       temp16blen = scale_expansion_zeroelim(cytabttlen, cytabtt, cdytail,
                                             temp16b);
@@ -6554,12 +6556,12 @@ int offcenter;
   dadist = (tdest[0] - tapex[0]) * (tdest[0] - tapex[0]) +
            (tdest[1] - tapex[1]) * (tdest[1] - tapex[1]);
   if (b->noexact) {
-    denominator = 0.5 / (xdo * yao - xao * ydo);
+    denominator = (REAL) 0.5 / (xdo * yao - xao * ydo);
   } else {
     /* Use the counterclockwise() routine to ensure a positive (and */
     /*   reasonably accurate) result, avoiding any possibility of   */
     /*   division by zero.                                          */
-    denominator = 0.5 / counterclockwise(m, b, tdest, tapex, torg);
+    denominator = (REAL)0.5 / counterclockwise(m, b, tdest, tapex, torg);
     /* Don't count the above as an orientation test. */
     m->counterclockcount--;
   }
@@ -6574,8 +6576,8 @@ int offcenter;
   if ((dodist < aodist) && (dodist < dadist)) {
     if (offcenter && (b->offconstant > 0.0)) {
       /* Find the position of the off-center, as described by Alper Ungor. */
-      dxoff = 0.5 * xdo - b->offconstant * ydo;
-      dyoff = 0.5 * ydo + b->offconstant * xdo;
+      dxoff = (REAL)0.5 * xdo - b->offconstant * ydo;
+      dyoff = (REAL)0.5 * ydo + b->offconstant * xdo;
       /* If the off-center is closer to the origin than the */
       /*   circumcenter, use the off-center instead.        */
       if (dxoff * dxoff + dyoff * dyoff < dx * dx + dy * dy) {
@@ -6585,8 +6587,8 @@ int offcenter;
     }
   } else if (aodist < dadist) {
     if (offcenter && (b->offconstant > 0.0)) {
-      dxoff = 0.5 * xao + b->offconstant * yao;
-      dyoff = 0.5 * yao - b->offconstant * xao;
+      dxoff = (REAL)0.5 * xao + b->offconstant * yao;
+      dyoff = (REAL)0.5 * yao - b->offconstant * xao;
       /* If the off-center is closer to the origin than the */
       /*   circumcenter, use the off-center instead.        */
       if (dxoff * dxoff + dyoff * dyoff < dx * dx + dy * dy) {
@@ -6596,9 +6598,9 @@ int offcenter;
     }
   } else {
     if (offcenter && (b->offconstant > 0.0)) {
-      dxoff = 0.5 * (tapex[0] - tdest[0]) -
+      dxoff = (REAL)0.5 * (tapex[0] - tdest[0]) -
               b->offconstant * (tapex[1] - tdest[1]);
-      dyoff = 0.5 * (tapex[1] - tdest[1]) +
+      dyoff = (REAL)0.5 * (tapex[1] - tdest[1]) +
               b->offconstant * (tapex[0] - tdest[0]);
       /* If the off-center is closer to the destination than the */
       /*   circumcenter, use the off-center instead.             */
@@ -6618,8 +6620,8 @@ int offcenter;
   /*   directed from the triangle's origin to its destination, and   */
   /*   an eta-axis, directed from its origin to its apex.            */
   /*   Calculate the xi and eta coordinates of the circumcenter.     */
-  *xi = (yao * dx - xao * dy) * (2.0 * denominator);
-  *eta = (xdo * dy - ydo * dx) * (2.0 * denominator);
+  *xi = (yao * dx - xao * dy) * ((REAL)2.0 * denominator);
+  *eta = (xdo * dy - ydo * dx) * ((REAL)2.0 * denominator);
 }
 
 /**                                                                         **/
@@ -6937,7 +6939,7 @@ struct badtriang *badtri;
   } else {
     /* `badtri->key' is 2.0 to a negative exponent, so we'll record that */
     /*   fact and use the reciprocal of `badtri->key', which is > 1.0.   */
-    length = 1.0 / badtri->key;
+    length = (REAL)1.0 / badtri->key;
     posexponent = 0;
   }
   /* `length' is approximately 2.0 to what exponent?  The following code */
@@ -7289,7 +7291,7 @@ struct otri *testtri;
 
   if (b->vararea || b->fixedarea || b->usertest) {
     /* Check whether the area is larger than permitted. */
-    area = 0.5 * (dxod * dyda - dyod * dxda);
+    area = (REAL)0.5 * (dxod * dyda - dyod * dxda);
     if (b->fixedarea && (area > b->maxarea)) {
       /* Add this triangle to the list of bad triangles. */
       enqueuebadtri(m, b, testtri, minedge, tapex, torg, tdest);
@@ -8694,7 +8696,7 @@ int triflaws;
           setapex(top, leftvertex);
           for (i = 0; i < m->eextras; i++) {
             /* Take the average of the two triangles' attributes. */
-            attrib = 0.5 * (elemattribute(top, i) + elemattribute(horiz, i));
+            attrib = (REAL)0.5 * (elemattribute(top, i) + elemattribute(horiz, i));
             setelemattribute(top, i, attrib);
             setelemattribute(horiz, i, attrib);
           }
@@ -8705,7 +8707,7 @@ int triflaws;
               /* Take the average of the two triangles' area constraints.    */
               /*   This prevents small area constraints from migrating a     */
               /*   long, long way from their original location due to flips. */
-              area = 0.5 * (areabound(top) + areabound(horiz));
+              area = (REAL)0.5 * (areabound(top) + areabound(horiz));
             }
             setareabound(top, area);
             setareabound(horiz, area);
@@ -9586,7 +9588,7 @@ int axis;
         apex(*farright, farrightapex);
         sym(*farleft, checkedge);
         apex(checkedge, checkvertex);
-        /* The pointers to the extremal vertices are restored to the  */
+        /* The pointers to the extrenal vertices are restored to the  */
         /*   leftmost and rightmost vertices (rather than topmost and */
         /*   bottommost).                                             */
         while (checkvertex[0] < farleftpt[0]) {
@@ -9947,7 +9949,9 @@ struct otri *startghost;
     if (!b->poly) {
       /* Watch out for the case where all the input vertices are collinear. */
       if (dissolveedge.tri != m->dummytri) {
-        org(dissolveedge, markorg);
+//#define org(otri, vertexptr)                                                  
+markorg = (vertex) (dissolveedge).tri[plus1mod3[(dissolveedge).orient] + 3];
+        //org(dissolveedge, markorg);
         if (vertexmark(markorg) == 0) {
           setvertexmark(markorg, 1);
         }
@@ -10087,12 +10091,12 @@ struct behavior *b;
   m->infvertex1 = (vertex) trimalloc(m->vertices.itembytes);
   m->infvertex2 = (vertex) trimalloc(m->vertices.itembytes);
   m->infvertex3 = (vertex) trimalloc(m->vertices.itembytes);
-  m->infvertex1[0] = m->xmin - 50.0 * width;
-  m->infvertex1[1] = m->ymin - 40.0 * width;
-  m->infvertex2[0] = m->xmax + 50.0 * width;
-  m->infvertex2[1] = m->ymin - 40.0 * width;
-  m->infvertex3[0] = 0.5 * (m->xmin + m->xmax);
-  m->infvertex3[1] = m->ymax + 60.0 * width;
+  m->infvertex1[0] = m->xmin - (REAL)50.0 * width;
+  m->infvertex1[1] = m->ymin - (REAL)40.0 * width;
+  m->infvertex2[0] = m->xmax + (REAL)50.0 * width;
+  m->infvertex2[1] = m->ymin - (REAL)40.0 * width;
+  m->infvertex3[0] = (REAL)0.5 * (m->xmin + m->xmax);
+  m->infvertex3[1] = m->ymax + (REAL)60.0 * width;
 
   /* Create the bounding box. */
   maketriangle(m, b, &inftri);
@@ -10518,8 +10522,8 @@ REAL ccwabc;
   aclen2 = xac * xac + yac * yac;
   bclen2 = xbc * xbc + ybc * ybc;
   ablen2 = xab * xab + yab * yab;
-  return pc[1] + (xac * bclen2 - xbc * aclen2 + sqrt(aclen2 * bclen2 * ablen2))
-               / (2.0 * ccwabc);
+  return pc[1] + (REAL)(xac * bclen2 - xbc * aclen2 + sqrt(aclen2 * bclen2 * ablen2))
+               / ((REAL)2.0 * ccwabc);
 }
 
 #endif /* not REDUCED */
@@ -10744,7 +10748,7 @@ REAL topy;
   ybc = pb[1] - pc[1];
   aclen2 = xac * xac + yac * yac;
   bclen2 = xbc * xbc + ybc * ybc;
-  searchpoint[0] = pc[0] - (yac * bclen2 - ybc * aclen2) / (2.0 * ccwabc);
+  searchpoint[0] = pc[0] - (yac * bclen2 - ybc * aclen2) / ((REAL)2.0 * ccwabc);
   searchpoint[1] = topy;
   return splayinsert(m, splay(m, splayroot, (vertex) searchpoint, &dummytri),
                      newkey, (vertex) searchpoint);
@@ -11930,7 +11934,7 @@ int newmark;
   newvertex = (vertex) poolalloc(&m->vertices);
   /* Interpolate coordinates and attributes. */
   for (i = 0; i < 2 + m->nextras; i++) {
-    newvertex[i] = 0.5 * (endpoint1[i] + endpoint2[i]);
+    newvertex[i] = (REAL)0.5 * (endpoint1[i] + endpoint2[i]);
   }
   setvertexmark(newvertex, newmark);
   setvertextype(newvertex, SEGMENTVERTEX);
@@ -12281,6 +12285,7 @@ int newmark;
   if (encodedtri != (triangle) NULL) {
     decode(encodedtri, searchtri1);
     org(searchtri1, checkvertex);
+    //checkvertex = (vertex) (searchtri1).tri[plus1mod3[(searchtri1).orient] + 3];
   }
   if (checkvertex != endpoint1) {
     /* Find a boundary triangle to search from. */
@@ -13351,7 +13356,7 @@ int triflaws;
         /* Use the concentric circles if exactly one endpoint is shared */
         /*   with another adjacent segment.                             */
         if (acuteorg || acutedest) {
-          segmentlength = sqrt((edest[0] - eorg[0]) * (edest[0] - eorg[0]) +
+          segmentlength = (REAL)sqrt((edest[0] - eorg[0]) * (edest[0] - eorg[0]) +
                                (edest[1] - eorg[1]) * (edest[1] - eorg[1]));
           /* Find the power of two that most evenly splits the segment.  */
           /*   The worst case is a 2:1 ratio between subsegment lengths. */
@@ -13365,7 +13370,7 @@ int triflaws;
           /* Where do we split the segment? */
           split = nearestpoweroftwo / segmentlength;
           if (acutedest) {
-            split = 1.0 - split;
+            split = (REAL)1.0 - split;
           }
         } else {
           /* If we're not worried about adjacent segments, split */
@@ -13759,7 +13764,7 @@ struct behavior *b;
         /*   its attributes.                                         */
         newvertex = (vertex) poolalloc(&m->vertices);
         for (i = 0; i < 2 + m->nextras; i++) {
-          newvertex[i] = 0.5 * (torg[i] + tdest[i]);
+          newvertex[i] = (REAL)0.5 * (torg[i] + tdest[i]);
         }
         /* Set the new node's marker to zero or one, depending on */
         /*   whether it lies on a boundary.                       */
@@ -15378,10 +15383,10 @@ struct behavior *b;
   int i, ii, j, k;
 
   printf("Mesh quality statistics:\n\n");
-  radconst = PI / 18.0;
-  degconst = 180.0 / PI;
+  radconst = (REAL)PI / (REAL)18.0;
+  degconst = (REAL)180.0 / (REAL)PI;
   for (i = 0; i < 8; i++) {
-    cossquaretable[i] = cos(radconst * (REAL) (i + 1));
+    cossquaretable[i] = (REAL)cos(radconst * (i + 1));
     cossquaretable[i] = cossquaretable[i] * cossquaretable[i];
   }
   for (i = 0; i < 18; i++) {
@@ -15490,24 +15495,24 @@ struct behavior *b;
     triangleloop.tri = triangletraverse(m);
   }
 
-  shortest = sqrt(shortest);
-  longest = sqrt(longest);
-  minaltitude = sqrt(minaltitude);
-  worstaspect = sqrt(worstaspect);
+  shortest = (REAL)sqrt(shortest);
+  longest = (REAL)sqrt(longest);
+  minaltitude = (REAL)sqrt(minaltitude);
+  worstaspect = (REAL)sqrt(worstaspect);
   smallestarea *= 0.5;
   biggestarea *= 0.5;
   if (smallestangle >= 1.0) {
     smallestangle = 0.0;
   } else {
-    smallestangle = degconst * acos(sqrt(smallestangle));
+    smallestangle = degconst * (REAL)acos(sqrt(smallestangle));
   }
   if (biggestangle >= 1.0) {
     biggestangle = 180.0;
   } else {
     if (acutebiggest) {
-      biggestangle = degconst * acos(sqrt(biggestangle));
+      biggestangle = degconst * (REAL)acos(sqrt(biggestangle));
     } else {
-      biggestangle = 180.0 - degconst * acos(sqrt(biggestangle));
+      biggestangle = (REAL)180.0 - degconst * (REAL)acos(sqrt(biggestangle));
     }
   }
 
@@ -15668,31 +15673,10 @@ struct behavior *b;
 /*                                                                           */
 /*****************************************************************************/
 
-#ifdef TRILIBRARY
+#define TRILIBRARY
 
-#ifdef ANSI_DECLARATORS
 void triangulate(char *triswitches, struct triangulateio *in,
                  struct triangulateio *out, struct triangulateio *vorout)
-#else /* not ANSI_DECLARATORS */
-void triangulate(triswitches, in, out, vorout)
-char *triswitches;
-struct triangulateio *in;
-struct triangulateio *out;
-struct triangulateio *vorout;
-#endif /* not ANSI_DECLARATORS */
-
-#else /* not TRILIBRARY */
-
-#ifdef ANSI_DECLARATORS
-int main(int argc, char **argv)
-#else /* not ANSI_DECLARATORS */
-int main(argc, argv)
-int argc;
-char **argv;
-#endif /* not ANSI_DECLARATORS */
-
-#endif /* not TRILIBRARY */
-
 {
   struct mesh m;
   struct behavior b;

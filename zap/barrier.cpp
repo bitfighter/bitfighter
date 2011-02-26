@@ -306,7 +306,7 @@ void Barrier::clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Poin
 }
 
 
-// Clean up edge geometry and get barriers ready for proper rendering -- client only
+// Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
 void Barrier::prepareRenderingGeometry()
 {
    resetEdges(mRenderOutlineGeometry, mRenderLineSegments);

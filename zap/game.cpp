@@ -809,8 +809,10 @@ void ServerGame::buildOrLoadBotMeshZones()
       }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
-      if(getGameType()->mScriptName == "") 
-         writeBotNavMeshZones(cacheFile.c_str());
+
+      // Disable caching for now...
+      //if(getGameType()->mScriptName == "") 
+      //   writeBotNavMeshZones(cacheFile.c_str());
    }
 }
 
