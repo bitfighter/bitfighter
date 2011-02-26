@@ -1576,8 +1576,9 @@ void GameUserInterface::pmHandler(GameUserInterface *gui, const Vector<string> &
          gui->displayErrorMessage("!!! Unknown name: %s", words[1].c_str());
       else
       {
+         S32 argCount = 2 + countCharInString(words[1], ' ');  // Set pointer after 2 args + number of spaces in player name
          const char *message = gui->mLineEditor.c_str();  // Get the original line
-         message = findPointerOfArg(message, 2);     // Set pointer after 2 args
+         message = findPointerOfArg(message, argCount);     // Get the rest of the message
 
          GameType *gt = gClientGame->getGameType();
          if(gt)
@@ -1888,7 +1889,12 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
 
             const string *str = mLineEditor.getStringPtr();     // Convenient shortcut
 
-            size_t pos = str->find_last_of(' ');
+            // if the command string has quotes in it use the last space up to the first quote
+            size_t lastChar = string::npos;
+            if (str->find_first_of("\"") != string::npos)
+               lastChar = str->find_first_of("\"");
+
+            size_t pos = str->find_last_of(' ', lastChar);
             string space = " ";
 
             if(pos == string::npos)    // i.e. string does not contain a space, requires special handling
@@ -1905,7 +1911,12 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
             if(mLineEditor.matchIndex >= mLineEditor.matchList.size())     // Handle wrap-around
                mLineEditor.matchIndex = 0;
 
-            mLineEditor.setString(str->substr(0, pos).append(space + mLineEditor.matchList[mLineEditor.matchIndex]));    // Add match to the command
+            // if match contains a space, wrap in quotes
+            string matchedString = mLineEditor.matchList[mLineEditor.matchIndex];
+            if (matchedString.find_first_of(" ") != string::npos)
+               matchedString = "\"" + matchedString +"\"";
+
+            mLineEditor.setString(str->substr(0, pos).append(space + matchedString));    // Add match to the command
          }
       }
    }

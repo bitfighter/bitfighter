@@ -96,6 +96,8 @@ string trim_right(const string &source, const string &t = " ");
 string trim_left(const string &source, const string &t = " ");
 string trim(const string &source, const string &t = " ");
 
+S32 countCharInString(const string &source, char search);
+
 };
 
 #endif
