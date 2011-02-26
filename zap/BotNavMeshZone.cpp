@@ -557,26 +557,36 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
          if(barrier)
          {
             barrier->prepareRenderingGeometry();
-            for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j++)
+            for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j+=2)
             {
-               F32 roundfact = 1;
-               F32 x =  F32(S32(barrier->mRenderLineSegments[j].x * roundfact + 0.5)) / roundfact;
-               F32 y =  F32(S32(barrier->mRenderLineSegments[j].y * roundfact + 0.5)) / roundfact;
+               F32 p1x = F32(S32((barrier->mRenderLineSegments[j].x + 0.5)));
+               F32 p1y = F32(S32((barrier->mRenderLineSegments[j].y + 0.5)));
+               F32 p2x = F32(S32((barrier->mRenderLineSegments[j+1].x + 0.5)));
+               F32 p2y = F32(S32((barrier->mRenderLineSegments[j+1].y + 0.5)));
 
-               pair<F32,F32> index = pair<F32,F32>(x,y);
+               if(p1x == p2x && p1y == p2y)
+                  continue;
 
-               S32 pt = points[index];
-
-               if(pt == 0)
+               for(S32 j = 0; j < 2; j++)
                {
-                  points[index] = nextPt;
-                  pt = nextPt;
-                  coords.push_back(x);
-                  coords.push_back(y);
-                  nextPt++;
-               }
+                  F32 x = j ? p1x : p2x;
+                  F32 y = j ? p1y : p2y;
 
-               edges.push_back(pt);
+                  pair<F32,F32> index = pair<F32,F32>(x,y);
+
+                  S32 pt = points[index];
+
+                  if(pt == 0)
+                  {
+                     points[index] = nextPt;
+                     pt = nextPt;
+                     coords.push_back(x);
+                     coords.push_back(y);
+                     nextPt++;
+                  }
+
+                  edges.push_back(pt);
+               }
             }
          }
          ctr.set(barrier->getExtent().getCenter());
@@ -599,11 +609,15 @@ U32 done1 = Platform::getRealMilliseconds();
    in.numberofholes = holes.size() / 2;
    in.holelist = holes.address();
 
+   // Note the q param seems to make no difference in speed of trinagulation
+   // X option makes small but consistent improvement in performance
+
    U32 done2 = Platform::getRealMilliseconds();
-   triangulate("zqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
-
+   //triangulate("zXpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+   //328 with X 265/281 e/o X   234/265
    U32 done3 = Platform::getRealMilliseconds();
-
+      triangulate("zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+U32 done4 = Platform::getRealMilliseconds();
    for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
    {
       BotNavMeshZone *botzone = new BotNavMeshZone();
@@ -618,9 +632,9 @@ U32 done1 = Platform::getRealMilliseconds();
 		botzone->computeExtent();   
    }
 
-   U32 done4 = Platform::getRealMilliseconds();
+   U32 done5 = Platform::getRealMilliseconds();
 
-   logprintf("Timings: %d %d %d %d", done1-starttime, done2-done1, done3-done2, done4-done3);
+   logprintf("Timings: %d %d no q:%d no q:%d, %d", done1-starttime, done2-done1, done3-done2, done4-done3, done5-done4);
 }
 
 

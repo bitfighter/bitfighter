@@ -12541,7 +12541,7 @@ char *polyfilename;
                  b->firstnumber + i, polyfilename);
         }
       } else {
-        /* Find the vertices numbered `end1' and `end2'. */
+        /* Find the vertices numbered `end1' and `end2'. */ 
         endpoint1 = getvertex(m, b, end1);
         endpoint2 = getvertex(m, b, end2);
         if ((endpoint1[0] == endpoint2[0]) && (endpoint1[1] == endpoint2[1])) {
