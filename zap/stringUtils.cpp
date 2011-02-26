@@ -176,7 +176,7 @@ Vector<string> parseString(const string &line)
       }
       // otherwise, we had a single word that was quoted. In any case, we now
       // have the item in quotes; remove them
-      item = item.substr(1, lastItemPosition-1);
+      item = trim(item, "\"");
     }
     // item is "fully cooked" now
     result.push_back(item);
@@ -320,6 +320,19 @@ string trim_left(const string &source, const string &t)
 string trim(const string &source, const string &t)
 {
    return trim_left(trim_right(source, t), t);
+}
+
+// count the occurrence of a specific character in a string
+S32 countCharInString(const string &source, char search)
+{
+    S32 count = 0, c = 0;
+    while (source[c] != '\0')
+    {
+          if (source[c] == search)
+              count++;
+          c++;
+    }
+    return count;
 }
 
 

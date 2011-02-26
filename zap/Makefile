@@ -17,7 +17,7 @@
 #
 #######################################
 
-CC=gcc -g  -I../tnl -I../glut -I../openal -DTNL_ENABLE_LOGGING -W -O2
+CC=gcc -g  -I../tnl -I../glut -I../openal -I../Triangle -DTNL_ENABLE_LOGGING -W -O2
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
 INPUT=linuxInput.o 
@@ -112,7 +112,8 @@ OBJECTS_ZAP=\
    BotNavMeshZone.o\
    ../master/masterInterface.o\
    ../master/database.o\
-   ../sqlite/sqlite3.o
+   ../sqlite/sqlite3.o\
+   ../Triangle/triangle.o
 
 
 CFLAGS=
