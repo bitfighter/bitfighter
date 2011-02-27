@@ -19,6 +19,8 @@
 #ifndef RECAST_H
 #define RECAST_H
 
+#include "../zap/point.h"     // For Rect
+
 // Some math headers don't have PI defined.
 static const float RC_PI = 3.14159265f;
 
@@ -715,13 +717,13 @@ bool rcBuildContours(rcContext* ctx, rcCompactHeightfield& chf,
 
 // Builds connected convex polygon mesh from contour polygons.
 // Params:
-//	cset - (in) contour set.
 //	nvp - (in) maximum number of vertices per polygon.
 //	mesh - (out) poly mesh.
 // Returns false if operation ran out of memory.
-bool rcBuildPolyMesh(rcContext* ctx, rcContourSet& cset, int nvp, rcPolyMesh& mesh);
+bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int triCount, rcPolyMesh& mesh);
 
-bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh** meshes, const int nmeshes, rcPolyMesh& mesh);
+//bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh** meshes, const int nmeshes, rcPolyMesh& mesh);
+bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh& mesh);
 
 // Builds detail triangle mesh for each polygon in the poly mesh.
 // Params:

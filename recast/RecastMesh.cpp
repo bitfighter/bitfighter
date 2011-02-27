@@ -893,30 +893,40 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 }
 
 
-bool rcBuildPolyMesh(rcContext* ctx, rcContourSet& cset, int nvp, rcPolyMesh& mesh)
+#include "../zap/point.h"     // For Rect
+
+// nvp = max number of points per polygon
+
+bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
 {
 	rcAssert(ctx);
 	
 	ctx->startTimer(RC_TIMER_BUILD_POLYMESH);
 
-	rcVcopy(mesh.bmin, cset.bmin);
-	rcVcopy(mesh.bmax, cset.bmax);
-	mesh.cs = cset.cs;
-	mesh.ch = cset.ch;
+	//rcVcopy(mesh.bmin, cset.bmin);
+	//rcVcopy(mesh.bmax, cset.bmax);
+   mesh.bmin[0] = bounds.min.x;
+   mesh.bmin[1] = 0;
+   mesh.bmin[2] = bounds.min.y;
+
+   mesh.bmin[0] = bounds.max.x;
+   mesh.bmin[1] = 1;
+   mesh.bmin[2] = bounds.max.y;
+
+	mesh.cs = 1;
+	mesh.ch = 1;
 	
 	int maxVertices = 0;
 	int maxTris = 0;
 	int maxVertsPerCont = 0;
-	for (int i = 0; i < cset.nconts; ++i)
-	{
-		// Skip null contours.
-		if (cset.conts[i].nverts < 3) continue;
-		maxVertices += cset.conts[i].nverts;
-		maxTris += cset.conts[i].nverts - 2;
-		maxVertsPerCont = rcMax(maxVertsPerCont, cset.conts[i].nverts);
-	}
+
+	maxVertices = vertCount;
+	maxTris += ntris;    // Was vertCount - 2
+	maxVertsPerCont = vertCount;
+
+
 	
-	if (maxVertices >= 0xfffe)
+	if (maxVertices >= 0xfffe) // 0xfffe = 65534; that's a lot of vertices!
 	{
 		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Too many vertices %d.", maxVertices);
 		return false;
@@ -988,12 +998,12 @@ bool rcBuildPolyMesh(rcContext* ctx, rcContourSet& cset, int nvp, rcPolyMesh& me
 		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'indices' (%d).", maxVertsPerCont);
 		return false;
 	}
-	rcScopedDelete<int> tris = (int*)rcAlloc(sizeof(int)*maxVertsPerCont*3, RC_ALLOC_TEMP);
-	if (!tris)
-	{
-		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'tris' (%d).", maxVertsPerCont*3);
-		return false;
-	}
+	//rcScopedDelete<int> tris = (int*)rcAlloc(sizeof(int)*maxVertsPerCont*3, RC_ALLOC_TEMP);
+	//if (!tris)
+	//{
+	//	ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'tris' (%d).", maxVertsPerCont*3);
+	//	return false;
+	//}
 	rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(maxVertsPerCont+1)*nvp, RC_ALLOC_TEMP);
 	if (!polys)
 	{
@@ -1002,126 +1012,112 @@ bool rcBuildPolyMesh(rcContext* ctx, rcContourSet& cset, int nvp, rcPolyMesh& me
 	}
 	unsigned short* tmpPoly = &polys[maxVertsPerCont*nvp];
 
-	for (int i = 0; i < cset.nconts; ++i)
-	{
-		rcContour& cont = cset.conts[i];
 		
-		// Skip null contours.
-		if (cont.nverts < 3)
-			continue;
-		
-		// Triangulate contour
-		for (int j = 0; j < cont.nverts; ++j)
-			indices[j] = j;
+	// Triangulate contour
+	for (int j = 0; j < vertCount; ++j)
+		indices[j] = j;
 			
-		int ntris = triangulate(cont.nverts, cont.verts, &indices[0], &tris[0]);
-		if (ntris <= 0)
-		{
-			// Bad triangulation, should not happen.
-/*			printf("\tconst float bmin[3] = {%ff,%ff,%ff};\n", cset.bmin[0], cset.bmin[1], cset.bmin[2]);
-			printf("\tconst float cs = %ff;\n", cset.cs);
-			printf("\tconst float ch = %ff;\n", cset.ch);
-			printf("\tconst int verts[] = {\n");
-			for (int k = 0; k < cont.nverts; ++k)
-			{
-				const int* v = &cont.verts[k*4];
-				printf("\t\t%d,%d,%d,%d,\n", v[0], v[1], v[2], v[3]);
-			}
-			printf("\t};\n\tconst int nverts = sizeof(verts)/(sizeof(int)*4);\n");*/
-			ctx->log(RC_LOG_WARNING, "rcBuildPolyMesh: Bad triangulation Contour %d.", i);
-			ntris = -ntris;
-		}
+	//int ntris = triangulate(vertCount, verts, &indices[0], &tris[0]);
+	if (ntris <= 0)
+	{
+		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: No triangles!");
+		return false;
+	}
 				
-		// Add and merge vertices.
-		for (int j = 0; j < cont.nverts; ++j)
+	// Add and merge vertices.
+	for (int j = 0; j < vertCount; ++j)
+	{
+		const int* v = &verts[j*4];
+		indices[j] = addVertex((unsigned short)v[0], (unsigned short)v[1], (unsigned short)v[2],
+								mesh.verts, firstVert, nextVert, mesh.nverts);
+		if (v[3] & RC_BORDER_VERTEX)
 		{
-			const int* v = &cont.verts[j*4];
-			indices[j] = addVertex((unsigned short)v[0], (unsigned short)v[1], (unsigned short)v[2],
-								   mesh.verts, firstVert, nextVert, mesh.nverts);
-			if (v[3] & RC_BORDER_VERTEX)
-			{
-				// This vertex should be removed.
-				vflags[indices[j]] = 1;
-			}
+			// This vertex should be removed.
+			vflags[indices[j]] = 1;
 		}
+	}
 		
-		// Build initial polygons.
-		int npolys = 0;
-		memset(polys, 0xff, maxVertsPerCont*nvp*sizeof(unsigned short));
-		for (int j = 0; j < ntris; ++j)
+	// Build initial polygons.
+	int npolys = 0;
+	memset(polys, 0xff, maxVertsPerCont*nvp*sizeof(unsigned short));     // Max coord = U16_MAX
+	for (int j = 0; j < ntris; ++j)
+	{
+		int* t = &tris[j*3];
+		if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
 		{
-			int* t = &tris[j*3];
-			if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
-			{
-				polys[npolys*nvp+0] = (unsigned short)indices[t[0]];
-				polys[npolys*nvp+1] = (unsigned short)indices[t[1]];
-				polys[npolys*nvp+2] = (unsigned short)indices[t[2]];
-				npolys++;
-			}
+			polys[npolys*nvp+0] = (unsigned short)indices[t[0]];
+			polys[npolys*nvp+1] = (unsigned short)indices[t[1]];
+			polys[npolys*nvp+2] = (unsigned short)indices[t[2]];
+			npolys++;
 		}
-		if (!npolys)
-			continue;
+	}
 		
-		// Merge polygons.
-		if (nvp > 3)
+   if (npolys == 0)
+	{
+		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: No polygons generated.");
+		return false;
+	}
+
+
+	// Merge polygons.
+	if (nvp > 3)
+	{
+		for(;;)
 		{
-			for(;;)
-			{
-				// Find best polygons to merge.
-				int bestMergeVal = 0;
-				int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
+			// Find best polygons to merge.
+			int bestMergeVal = 0;
+			int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
 				
-				for (int j = 0; j < npolys-1; ++j)
+			for (int j = 0; j < npolys-1; ++j)
+			{
+				unsigned short* pj = &polys[j*nvp];
+				for (int k = j+1; k < npolys; ++k)
 				{
-					unsigned short* pj = &polys[j*nvp];
-					for (int k = j+1; k < npolys; ++k)
+					unsigned short* pk = &polys[k*nvp];
+					int ea, eb;
+					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);
+					if (v > bestMergeVal)
 					{
-						unsigned short* pk = &polys[k*nvp];
-						int ea, eb;
-						int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);
-						if (v > bestMergeVal)
-						{
-							bestMergeVal = v;
-							bestPa = j;
-							bestPb = k;
-							bestEa = ea;
-							bestEb = eb;
-						}
+						bestMergeVal = v;
+						bestPa = j;
+						bestPb = k;
+						bestEa = ea;
+						bestEb = eb;
 					}
 				}
+			}
 				
-				if (bestMergeVal > 0)
-				{
-					// Found best, merge.
-					unsigned short* pa = &polys[bestPa*nvp];
-					unsigned short* pb = &polys[bestPb*nvp];
-					mergePolys(pa, pb, bestEa, bestEb, tmpPoly, nvp);
-					memcpy(pb, &polys[(npolys-1)*nvp], sizeof(unsigned short)*nvp);
-					npolys--;
-				}
-				else
-				{
-					// Could not merge any polygons, stop.
-					break;
-				}
+			if (bestMergeVal > 0)
+			{
+				// Found best, merge.
+				unsigned short* pa = &polys[bestPa*nvp];
+				unsigned short* pb = &polys[bestPb*nvp];
+				mergePolys(pa, pb, bestEa, bestEb, tmpPoly, nvp);
+				memcpy(pb, &polys[(npolys-1)*nvp], sizeof(unsigned short)*nvp);
+				npolys--;
+			}
+			else
+			{
+				// Could not merge any polygons, stop.
+				break;
 			}
 		}
+	}
 		
-		// Store polygons.
-		for (int j = 0; j < npolys; ++j)
+	// Store polygons.
+	for (int j = 0; j < npolys; ++j)
+	{
+		unsigned short* p = &mesh.polys[mesh.npolys*nvp*2];
+		unsigned short* q = &polys[j*nvp];
+		for (int k = 0; k < nvp; ++k)
+			p[k] = q[k];
+		mesh.regs[mesh.npolys] = 1;
+		mesh.areas[mesh.npolys] = 1;
+		mesh.npolys++;
+		if (mesh.npolys > maxTris)
 		{
-			unsigned short* p = &mesh.polys[mesh.npolys*nvp*2];
-			unsigned short* q = &polys[j*nvp];
-			for (int k = 0; k < nvp; ++k)
-				p[k] = q[k];
-			mesh.regs[mesh.npolys] = cont.reg;
-			mesh.areas[mesh.npolys] = cont.area;
-			mesh.npolys++;
-			if (mesh.npolys > maxTris)
-			{
-				ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
-				return false;
-			}
+			ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
+			return false;
 		}
 	}
 	
@@ -1181,12 +1177,12 @@ bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh** meshes, const int nmeshes, r
 {
 	rcAssert(ctx);
 	
-	if (!nmeshes || !meshes)
-		return true;
+	//if (!nmeshes || !meshes)
+	//	return true;
 
 	ctx->startTimer(RC_TIMER_MERGE_POLYMESH);
 
-	mesh.nvp = meshes[0]->nvp;
+	//mesh.nvp = meshes[0]->nvp;
 	mesh.cs = meshes[0]->cs;
 	mesh.ch = meshes[0]->ch;
 	rcVcopy(mesh.bmin, meshes[0]->bmin);

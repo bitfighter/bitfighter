@@ -30,7 +30,8 @@
 #include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones
 #include "gameObjectRender.h"
 #include "teleporter.h"
-#include "barrier.h"          // For Barrier methods in generating zones
+#include "barrier.h"             // For Barrier methods in generating zones
+#include "../recast/Recast.h"    // For zone generation
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -624,9 +625,9 @@ U32 done4 = Platform::getRealMilliseconds();
 
    for(S32 i = 0; i < out.numberofpoints; i+=2)
    {
-      intPoints[i*4] = S32(out.pointlist[i]);            // x
-      intPoints[i*4 + 1] = S32(out.pointlist[i+1]);      // y
-      intPoints[i*4 + 2] = 0;                            // ?
+      intPoints[i*4] = S32(out.pointlist[i] < 0 ? out.pointlist[i] - 0.5 : out.pointlist[i] + 0.5);            // x
+      intPoints[i*4 + 1] = 0;                                                                                  // z, recast calls this y
+      intPoints[i*4 + 2] = S32(out.pointlist[i+1] < 0 ? out.pointlist[i+1] - 0.5 : out.pointlist[i+1] + 0.5);  // y, recast calls this z
       intPoints[i*4 + 3] = 0;                            // ?
    }
    
@@ -636,19 +637,53 @@ U32 done4 = Platform::getRealMilliseconds();
    // tris = out.trianglelist
 
 
-   for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
+   rcContext context;
+   rcPolyMesh mesh;
+
+   // TODO:  What do we need to set on context?
+
+   // 255 is arbitrary
+   rcBuildPolyMesh(&context, 255, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, /*out.numberoftriangles*/1000, mesh);     
+
+
+   // Visualize rcPolyMesh
+   for(S32 i = 0; i < mesh.npolys; i++)
    {
+
       BotNavMeshZone *botzone = new BotNavMeshZone();
 
-		botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])), F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
-		botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
-		botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
+      for(S32 j = 0; j < mesh.nvp * 2; j += 2)
+      {
+         const U16 *vert = &mesh.verts[mesh.polys[j]];
+         if(mesh.polys[j] == U16_MAX)     // We've read past the end of the polygon
+            break;
+
+         logprintf("j=%d,meshPolys[j]=%d, ",j,mesh.polys[j]);
+         logprintf("j=%d,meshPolys[j]=%d, v1,2,3=%d,%d,%d",j,mesh.polys[j],vert[0],vert[1],vert[2]);
+         botzone->mPolyBounds.push_back(Point(vert[0], vert[2]));
+      }
+   
       botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
 		botzone->addToGame(gServerGame);
 		botzone->computeExtent();   
    }
+
+   // Visualize triangle output
+  // for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
+  // {
+  //    BotNavMeshZone *botzone = new BotNavMeshZone();
+
+		//botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])), F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
+		//botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
+		//botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
+  //    botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
+
+		//botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		//botzone->addToGame(gServerGame);
+		//botzone->computeExtent();   
+  // }
 
    U32 done5 = Platform::getRealMilliseconds();
 
