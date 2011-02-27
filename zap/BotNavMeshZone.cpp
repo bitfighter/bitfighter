@@ -513,7 +513,7 @@ void makeBotMeshZones2(F32 x1, F32 y1, F32 x2, F32 y2)
    S32 dataY = S32((y2-y1)*.0035)+1;
    F32 multX = dataX/(x2-x1);
    F32 multY = dataY/(y2-y1);
-   Vector<Vector<Point>> data;
+   Vector<Vector<Point> > data;
    data.setSize(dataX * dataY);
 
    // since there is nothing in bot zone database, we can change BucketWidth size.
@@ -826,7 +826,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
          holes.push_back(ctr.x);
          holes.push_back(ctr.y);
       }
-U32 done1 = Platform::getRealMilliseconds();
+   U32 done1 = Platform::getRealMilliseconds();
 
    triangulateio in, out;
 
@@ -846,8 +846,8 @@ U32 done1 = Platform::getRealMilliseconds();
    // X option makes small but consistent improvement in performance
 
    U32 done3 = Platform::getRealMilliseconds();
-      triangulate("zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
-U32 done4 = Platform::getRealMilliseconds();
+   triangulate((char*)"zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
+   U32 done4 = Platform::getRealMilliseconds();
 
    // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
 
