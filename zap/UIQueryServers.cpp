@@ -369,6 +369,7 @@ void QueryServersUserInterface::gotQueryResponse(const Address &theAddress, cons
          s.passwordRequired = passwordRequired;
          if(!s.isFromMaster)
             s.pingTimedOut = false;       // Cures problem with local servers incorrectly displaying ?s for first 15 seconds
+         s.sendCount = 0;  // Fix random "Query/ping timed out"
          s.everGotQueryResponse = true;
 
          s.serverName = string(serverName).substr(0, MaxServerNameLen);

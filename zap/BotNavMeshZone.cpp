@@ -357,6 +357,233 @@ static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 }
 
 
+
+
+const F32 pi = 3.14159265;
+
+
+
+S32 QSORT_CALLBACK pointDataSort(Point *a, Point *b)
+{
+   if(a->x == b->x)
+   {
+      if(a->y == b->y)
+         return 0;
+      else if(a->y > b->y)
+         return 1;
+      else
+         return -1;
+   }
+   else if(a->x > b->x)
+      return 1;
+   else
+      return -1;
+}
+
+bool isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
+{
+   GridDatabase *gb = &gServerGame->mDatabaseForBotZones;
+   Vector<Point> pts(3);
+   pts.setSize(3);
+   //const F32 mult1 = 0.000244140625;
+   //const F32 mult2 = 1 - mult1*2;
+   // Slightly reduce size to avoid false positive when one line touch the other.
+   //pts[0].x = p1->x * mult2 + p2->x * mult1 + p3->x * mult1;
+   //pts[0].y = p1->y * mult2 + p2->y * mult1 + p3->y * mult1;
+   //pts[1].x = p2->x * mult2 + p1->x * mult1 + p3->x * mult1;
+   //pts[1].y = p2->y * mult2 + p1->y * mult1 + p3->y * mult1;
+   //pts[2].x = p3->x * mult2 + p1->x * mult1 + p2->x * mult1;
+   //pts[2].y = p3->y * mult2 + p1->y * mult1 + p2->y * mult1;
+   pts[0].setPolar(0.1, p1->angleTo(*p2));
+   pts[1].setPolar(0.1, p2->angleTo(*p1));
+   pts[2].setPolar(0.1, p3->angleTo(*p1));
+   Point tmp;
+   tmp.setPolar(0.1, p1->angleTo(*p3));
+   pts[0] += tmp + *p1;
+   tmp.setPolar(0.1, p2->angleTo(*p3));
+   pts[1] += tmp + *p2;
+   tmp.setPolar(0.1, p3->angleTo(*p2));
+   pts[2] += tmp + *p3;
+   Vector<DatabaseObject *> objects;
+   Rect rect = Rect(Point(min(min(p1->x, p2->x), p3->x), min(min(p1->y, p2->y), p3->y)), Point(max(max(p1->x, p2->x), p3->x), max(max(p1->y, p2->y), p3->y)));
+   gb->findObjects(BotNavMeshZoneType, objects, rect);
+   for(S32 i=0; i<objects.size(); i++)
+   {
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
+      Vector<Point> otherPolygon;
+      zone->getCollisionPoly(otherPolygon);
+      if(polygonsIntersect(pts, otherPolygon))
+         return true;
+   }
+   gb = gServerGame->getGridDatabase();
+   objects.clear();
+   gb->findObjects(BarrierType, objects, rect);
+   for(S32 i=0; i<objects.size(); i++)
+   {
+      Barrier *zone = dynamic_cast<Barrier *>(objects[i]);
+      Vector<Point> otherPolygon;
+      zone->getCollisionPoly(otherPolygon);
+      if(polygonsIntersect(pts, otherPolygon))
+         return true;
+   }
+   return false;
+}
+
+// gridDP.cpp
+extern bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, Point p2, 
+                          float &collisionTime, Point &normal);
+
+void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, Point p1, Point p2)
+{
+   F32 time = 0;
+   Point unused1;
+   while(PolygonLineIntersect(input.address(), input.size(), true, p1, p2, time, unused1))
+   {
+      Point p3=p2 * time + p1*(1 - time);
+      output.push_back(p3);
+      time = time + 0.01;
+      if(time > 0.99) break;
+      p1=p2 * time + p1*(1 - time);
+   }
+}
+
+void getBarrierLineCollisionPoints(Vector<Point> &output, GridDatabase *gb, Point p1, Point p2)
+{
+   Vector<DatabaseObject *> objects;
+   Rect rect(p1, p2);
+   gb->findObjects(BarrierType, objects, rect);
+   for(S32 i=0; i<objects.size(); i++)
+   {
+      Vector<Point> collisionPoints;
+      GameObject *obj = dynamic_cast<GameObject *>(objects[i]);
+      obj->getCollisionPoly(collisionPoints);
+      collisionPoints.push_back(collisionPoints[0]); // make this a closed loop
+      getPolygonLineCollisionPoints(output, collisionPoints, p1, p2);
+   }
+
+}
+
+
+void makeBotMeshZones2part(Vector<Point> &data)
+{
+   const F32 minSize = 10;
+   data.sort(pointDataSort);
+   for(S32 i=data.size()-2; i>=0; i--) // remove duplicate
+   {
+      if(data[i+1] == data[i])
+         data.erase(i);
+   }
+
+   GridDatabase *gb = gServerGame->getGridDatabase();
+   for(S32 i=0; i<data.size(); i++)
+   {
+      for(S32 j=i+1; j<data.size(); j++)
+      {
+            bool botZoneAdded = false;
+            const F32 ShortRange = 262144;     // 512^2
+            for(S32 k=j+1; k<data.size() && !botZoneAdded; k++)
+            {
+               if( //&& gb->pointCanSeePoint(data[k].point,data[i].point)
+                  //&& gb->pointCanSeePoint(data[k].point,data[j].point)
+                 !isBotZoneCollideWithOtherZone(&data[i], &data[j], &data[k]) &&
+                 (data[i].distanceTo(data[k]) > minSize
+                 || data[j].distanceTo(data[k]) > minSize
+                 || data[i].distanceTo(data[j]) > minSize) )
+               {
+		            BotNavMeshZone *botzone = new BotNavMeshZone();
+
+            		botzone->mPolyBounds.push_back(data[i]);
+		            botzone->mPolyBounds.push_back(data[j]);
+		            botzone->mPolyBounds.push_back(data[k]);
+                  botzone->mCentroid = (data[i] + data[j] + data[k]) * 0.33333333f;  //  maybe (/ 3) instead of (* 0.333333) ?
+
+		            botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		            botzone->addToGame(gServerGame);
+		            botzone->computeExtent();            // Adds zone to the database, needed for computation of further zones
+
+               }
+            }
+      }
+   }
+}
+
+void makeBotMeshZones2(F32 x1, F32 y1, F32 x2, F32 y2)
+{
+   S32 dataX = S32((x2-x1)*.0035)+1;
+   S32 dataY = S32((y2-y1)*.0035)+1;
+   F32 multX = dataX/(x2-x1);
+   F32 multY = dataY/(y2-y1);
+   Vector<Vector<Point>> data;
+   data.setSize(dataX * dataY);
+
+   // since there is nothing in bot zone database, we can change BucketWidth size.
+   gServerGame->mDatabaseForBotZones.BucketWidth = S32(max(y2-y1,x2-x1)/GridDatabase::BucketRowCount) + 1;
+  
+   for(S32 i=0; i < gServerGame->mGameObjects.size(); i++)
+   {
+      Barrier *object = dynamic_cast<Barrier *>(gServerGame->mGameObjects[i]);
+      if(object && object->getObjectTypeMask() & BarrierType)
+      {
+         Vector<Point> points;
+         if(object->getCollisionPoly(points))
+         {
+            /*
+            Point prevPoint;
+            Point currentPoint = points[points.size()-2];
+            Point nextPoint = points.last();
+            for(S32 j=0; j<points.size(); j++)
+            {
+               prevPoint = currentPoint;
+               currentPoint = nextPoint;
+               nextPoint = points[j];
+               S32 x = S32(((currentPoint.x - x1) * multX));
+               S32 y = S32(((currentPoint.y - y1) * multY));
+               if(x<0) x=0;
+               if(x>=dataX) x=dataX-1;
+               if(y<0) y=0;
+               if(y>=dataY) y=dataY-1;
+               data[y*dataX + x].push_back(currentPoint);
+            }*/
+            object->prepareRenderingGeometry();
+            for(S32 j = 0; j < object->mRenderLineSegments.size(); j++)
+            {
+               Point currentPoint = object->mRenderLineSegments[j];
+               S32 x = S32(((currentPoint.x - x1) * multX));
+               S32 y = S32(((currentPoint.y - y1) * multY));
+               if(x<0) x=0;
+               if(x>=dataX) x=dataX-1;
+               if(y<0) y=0;
+               if(y>=dataY) y=dataY-1;
+               data[y*dataX + x].push_back(currentPoint);
+            }
+         }
+      }
+   }
+   for(S32 x=0; x<dataX; x++)
+   {
+      for(S32 y=0; y<dataY; y++)
+      {
+         S32 d=y*dataX + x;
+         S32 p = data[d].size();
+         data[d].push_back(Point( x    / multX + x1, y    / multY + y1));
+         data[d].push_back(Point((x+1) / multX + x1, y    / multY + y1));
+         data[d].push_back(Point((x+1) / multX + x1,(y+1) / multY + y1));
+         data[d].push_back(Point( x    / multX + x1,(y+1) / multY + y1));
+         getBarrierLineCollisionPoints(data[d], gServerGame->getGridDatabase(), data[d][p], data[d][p+1]);
+         getBarrierLineCollisionPoints(data[d], gServerGame->getGridDatabase(), data[d][p+1], data[d][p+2]);
+         getBarrierLineCollisionPoints(data[d], gServerGame->getGridDatabase(), data[d][p+2], data[d][p+3]);
+         getBarrierLineCollisionPoints(data[d], gServerGame->getGridDatabase(), data[d][p+3], data[d][p]);
+         //for(S32 i=0; i<data[d].size(); i++)
+         //{
+         //   logprintf("%i = %i,%i", d, S32(data[d][i].x), S32(data[d][i].y));
+         //}
+         makeBotMeshZones2part(data[d]);
+      }
+   }
+}
+
+
+
 extern Rect gServerWorldBounds;
 
 // Only runs on server
@@ -513,6 +740,7 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 
+
 	//makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
  //  removeUnusedNavMeshZones();
 
@@ -524,6 +752,10 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    map<pair<F32,F32>, S32> points;
 
 	Rect bounds = game->computeWorldObjectExtents();
+//#ifdef SAM_ONLY
+   //makeBotMeshZones2(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+   //return;
+//#endif
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
