@@ -183,44 +183,73 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
-   if(!isGhost() && hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide, and only runs on server
+   // This is run on both server and client side to reduce teleport lag effect.
+   if(hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide
    {
       Ship *s = dynamic_cast<Ship *>(hitObject);
       if(!s)
          return false;
 
+
+      if(isGhost()) // on client, don't process speedZone on all ships except the controlling one.
+      {
+         ClientGame *client = dynamic_cast<ClientGame *>(getGame());
+         if(client)
+         {
+            GameConnection *gc = client->getConnectionToServer();
+            if(gc && gc->getControlObject() != hitObject) 
+               return false;
+         }
+      }
+
      // Make sure ship hasn't been excluded
-      for(S32 i = 0; i < mExclusions.size(); i++)
-         if(mExclusions[i].ship == s)
-            return false;
+      //for(S32 i = 0; i < mExclusions.size(); i++)
+         //if(mExclusions[i].ship == s)
+            //return false;
+      // Using ship's velosity and position to determine if it should be excluded
+
 
       Point impulse = (dir - pos);
       impulse.normalize(mSpeed);
+      Point shipVel = s->getActualVel();
+      Point shipNormal = shipVel;
+      shipNormal.normalize(mSpeed);
 
       // This following line will cause ships entering the speedzone to have their location set to the same point
       // within the zone so that their path out will be very predictable.
       if(mSnapLocation)
       {
-         s->setActualPos(pos, false);
+         if(shipNormal.distanceTo(impulse) < mSpeed * 0.001 && shipVel.len() > mSpeed * 0.8)
+            return false;
          s->setActualVel(Point(0,0));
+         s->mImpulseVector = impulse * 1.5;     // <-- why???
+         s->setActualPos(pos, false);
+      }
+      else
+      {
+         if(shipNormal.distanceTo(impulse) < mSpeed && s->getActualVel().len() > mSpeed * 0.8)
+            return false;
+         s->mImpulseVector = impulse * 1.5;     // <-- why???
       }
 
-      s->mImpulseVector = impulse * 1.5;     // <-- why???
+
 
       // To ensure we don't give multiple impulses to the same ship, we'll exclude it from
       // further action for about 300ms.  That should do the trick.
 
-      Exclusion exclusion;
-      exclusion.ship = s;
-      exclusion.time = gServerGame->getCurrentTime() + 300;
+      //Exclusion exclusion;
+      //exclusion.ship = s;
+      //exclusion.time = getGame()->getCurrentTime() + 300;
 
-      mExclusions.push_back(exclusion);
+      //mExclusions.push_back(exclusion);
 
-      setMaskBits(HitMask);
-
-      if(s->getControllingClient().isValid())
-         // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
-         s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
+      if(!s->isGhost()) // only server needs to send information.
+      {
+         setMaskBits(HitMask);
+         if(s->getControllingClient().isValid())
+            // Trigger a sound on the player's machine: They're going to be so far away they'll never hear the sound emitted by the gofast itself...
+            s->getControllingClient()->s2cDisplayMessage(0, SFXGoFastInside, "");
+      }
    }
 
    return false;
@@ -230,9 +259,9 @@ bool SpeedZone::collide(GameObject *hitObject)
 void SpeedZone::idle(GameObject::IdleCallPath path)
 {
    // Check for old exclusions that no longer apply
-   for(S32 i = mExclusions.size()-1; i >= 0; i--)
-      if(mExclusions[i].time < gServerGame->getCurrentTime())     // Exclusion has expired
-         mExclusions.erase_fast(i);
+   //for(S32 i = mExclusions.size()-1; i >= 0; i--)
+      //if(mExclusions[i].time < getGame()->getCurrentTime())     // Exclusion has expired
+         //mExclusions.erase_fast(i);
 }
 
 

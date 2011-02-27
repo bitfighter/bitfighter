@@ -17,7 +17,8 @@
 #
 #######################################
 
-CC=gcc -g  -I../tnl -I../glut -I../openal -I../Triangle -DTNL_ENABLE_LOGGING -W -O2
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast
+CC=gcc -g $(INCLUDES) -DTNL_ENABLE_LOGGING -W -O2
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
 INPUT=linuxInput.o 
@@ -113,7 +114,16 @@ OBJECTS_ZAP=\
    ../master/masterInterface.o\
    ../master/database.o\
    ../sqlite/sqlite3.o\
-   ../Triangle/triangle.o
+   ../Triangle/triangle.o\
+   ../recast/RecastAlloc.o\
+   ../recast/Recast.o\
+   ../recast/RecastMeshDetail.o\
+   ../recast/RecastArea.o\
+   ../recast/RecastFilter.o\
+   ../recast/RecastRasterization.o\
+   ../recast/RecastContour.o\
+   ../recast/RecastMesh.o\
+   ../recast/RecastRegion.o
 
 
 CFLAGS=

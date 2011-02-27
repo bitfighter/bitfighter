@@ -157,9 +157,9 @@ bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, P
 
    for(U32 i = 0; i < vertexCount - (inc - 1); i += inc)    // Count by 1s when format is true, 2 when false
    {
-      if(format)     // A-B C-D format ==> don't examine segment B-C
+      if(format)     // A-B-C-D format ==> examine every contiguous pair of vertices
          v2.set(poly[i]);
-      else           // A-B-C-D format ==> examine every contiguous pair of vertices
+      else           // A-B C-D format ==> don't examine segment B-C
       {
          v1.set(poly[i]);
          v2.set(poly[i + 1]);
