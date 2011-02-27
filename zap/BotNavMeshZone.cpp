@@ -616,13 +616,33 @@ U32 done1 = Platform::getRealMilliseconds();
    U32 done3 = Platform::getRealMilliseconds();
       triangulate("zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
 U32 done4 = Platform::getRealMilliseconds();
+
+   // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
+
+   int ntris = out.numberoftriangles;
+   Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,y,?,?
+
+   for(S32 i = 0; i < out.numberofpoints; i+=2)
+   {
+      intPoints[i*4] = S32(out.pointlist[i]);            // x
+      intPoints[i*4 + 1] = S32(out.pointlist[i+1]);      // y
+      intPoints[i*4 + 2] = 0;                            // ?
+      intPoints[i*4 + 3] = 0;                            // ?
+   }
+   
+   
+   // cont.nverts = out.numberofpoints;
+   // cont.verts = intPoints.address();      //<== pointer to array of points in int format
+   // tris = out.trianglelist
+
+
    for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
    {
       BotNavMeshZone *botzone = new BotNavMeshZone();
 
-		botzone->mPolyBounds.push_back(Point(out.pointlist[out.trianglelist[i]*2], out.pointlist[out.trianglelist[i]*2 + 1]));
-		botzone->mPolyBounds.push_back(Point(out.pointlist[out.trianglelist[i+1]*2], out.pointlist[out.trianglelist[i+1]*2 + 1]));
-		botzone->mPolyBounds.push_back(Point(out.pointlist[out.trianglelist[i+2]*2], out.pointlist[out.trianglelist[i+2]*2 + 1]));
+		botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])), F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
+		botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
+		botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
       botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
@@ -633,6 +653,8 @@ U32 done4 = Platform::getRealMilliseconds();
    U32 done5 = Platform::getRealMilliseconds();
 
    logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
+
+   // TODO: free memory allocated by triangles in out struct
 }
 
 
