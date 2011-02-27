@@ -44,14 +44,14 @@ private:
    typedef GameObject Parent;
    Vector<Point> mPolyBounds;
 
-   struct Exclusion {
-      Ship *ship;
-      U32 time;
-   };
+   //struct Exclusion {
+   //   Ship *ship;
+   //   U32 time;
+   //};
 
    // To keep a ship from triggering the SpeedZone multiple times in one go, we'll exclude any ships
    // that hit the zone from hitting it again within a brief time.
-   Vector<Exclusion> mExclusions;
+   //Vector<Exclusion> mExclusions;
 
    // Take our basic inputs, pos and dir, and expand them into a three element
    // vector (the three points of our triangle graphic), and compute its extent
