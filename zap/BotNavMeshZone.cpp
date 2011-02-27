@@ -563,7 +563,8 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
                F32 p1y = F32(S32((barrier->mRenderLineSegments[j].y + 0.5)));
                F32 p2x = F32(S32((barrier->mRenderLineSegments[j+1].x + 0.5)));
                F32 p2y = F32(S32((barrier->mRenderLineSegments[j+1].y + 0.5)));
-
+               
+               // Skip 0-length segments
                if(p1x == p2x && p1y == p2y)
                   continue;
 
@@ -609,14 +610,11 @@ U32 done1 = Platform::getRealMilliseconds();
    in.numberofholes = holes.size() / 2;
    in.holelist = holes.address();
 
-   // Note the q param seems to make no difference in speed of trinagulation
+   // Note the q param seems to make no difference in speed of trinagulation, but makes much prettier triangles!
    // X option makes small but consistent improvement in performance
 
-   U32 done2 = Platform::getRealMilliseconds();
-   //triangulate("zXpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
-   //328 with X 265/281 e/o X   234/265
    U32 done3 = Platform::getRealMilliseconds();
-      triangulate("zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+      triangulate("zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
 U32 done4 = Platform::getRealMilliseconds();
    for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
    {
@@ -634,7 +632,7 @@ U32 done4 = Platform::getRealMilliseconds();
 
    U32 done5 = Platform::getRealMilliseconds();
 
-   logprintf("Timings: %d %d no q:%d no q:%d, %d", done1-starttime, done2-done1, done3-done2, done4-done3, done5-done4);
+   logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
 }
 
 
