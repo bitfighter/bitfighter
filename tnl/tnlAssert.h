@@ -31,6 +31,8 @@
 #include "tnlTypes.h"
 #endif
 
+// More than you ever wanted to know about asserts: http://cnicholson.net/2009/02/stupid-c-tricks-adventures-in-assert/
+
 namespace TNL
 {
 
