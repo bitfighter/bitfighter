@@ -34,6 +34,10 @@ namespace TNL {
 
 #ifdef TNL_ENABLE_ASSERTS
 
+#ifdef WIN32
+#   define _CRT_SECURE_NO_DEPRECATE    // Avoid warnings about vsnprintf
+#endif /* WIN32 */
+
 //-------------------------------------- STATIC Declaration
 static bool processing = false;
 
@@ -54,7 +58,7 @@ void Assert::processAssert(const char *filename, U32 lineNumber, const char  *me
 
    char buffer[2048];
    dSprintf(buffer, sizeof(buffer), "Fatal: (%s: %ld)", filename, lineNumber);
-#ifdef TNL_DEBUG
+#ifdef TNL_DEBUG  
    // In debug versions, allow a retry even for ISVs...
    bool retry = displayMessageBox(buffer, message, true);
 #else
