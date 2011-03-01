@@ -1341,10 +1341,30 @@ void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 {
    glColor(gIniSettings.wallOutlineColor, alpha);
 
+   U32 timebegin = Platform::getRealMilliseconds();
+   for(S32 i = 0; i < 10000; i++)
+   {
+   glEnableClientState(GL_VERTEX_ARRAY);
+
+   glVertexPointer(2, GL_FLOAT, sizeof(Point), &edges[0]);    
+   glDrawArrays(GL_LINES, 0, edges.size());
+
+   glDisableClientState(GL_VERTEX_ARRAY);
+   }
+   U32 timeend = Platform::getRealMilliseconds();
+
+
+   U32 timebegin2 = Platform::getRealMilliseconds();
+   for(S32 i = 0; i < 10000; i++)
+   {
    glBegin(GL_LINES);
       for(S32 i = 0; i < edges.size(); i++)
          glVertex(edges[i]);
    glEnd();
+   }
+   U32 timeend2 = Platform::getRealMilliseconds();
+
+   logprintf("New method: %d, old method: %d", timeend-timebegin, timeend2-timebegin2);
 }
 
 
