@@ -65,6 +65,7 @@ XXX need to document timers, new luavec stuff XXX
 <li>Added support for PS3 joystick.
 <li>Tab-expansion when typing a /command has been much improved.
 <li>Added /pausebots and /stepbots commands, also mapped alt-] to /stepbots, and ctrl-] to /stepbots 10
+<li>Increased rendering efficiency by a tiny bit
 </ul>
 <h4>New Features</h4>
 <ul>
