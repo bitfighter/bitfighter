@@ -858,7 +858,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    for(S32 i = 0; i < out.numberofpoints; i+=2)
    {
       intPoints[i*4] = S32(out.pointlist[i] < 0 ? out.pointlist[i] - 0.5 : out.pointlist[i] + 0.5);            // x
-      intPoints[i*4 + 1] = 0;                                                                                  // z, recast calls this y
+      intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
       intPoints[i*4 + 2] = S32(out.pointlist[i+1] < 0 ? out.pointlist[i+1] - 0.5 : out.pointlist[i+1] + 0.5);  // y, recast calls this z
       intPoints[i*4 + 3] = 0;                            // ?
    }
@@ -873,10 +873,24 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    rcPolyMesh mesh;
 
    // TODO:  What do we need to set on context?
+   
+   // TODO: Put these into real tests, and handle conditions better  
+   TNLAssert(out.numberofpoints > 0, "No output points!");
+   TNLAssert(out.numberoftriangles > 0, "No output triangles!");
+   TNLAssert(out.numberoftriangles < 0xffe, "Too many triagles!");
 
-   // 255 is arbitrary
-   rcBuildPolyMesh(&context, 255, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, /*out.numberoftriangles*/1000, mesh);     
+   // 10 is arbitrary
+   rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
+
+    for(S32 i = 0; i < mesh.npolys; i++)
+   {
+      for(S32 j = 0; j < mesh.nvp; j++)
+      {
+         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)]];
+         logprintf("i:%d, j:%d, vert#: %d", i, j, mesh.polys[(i * mesh.nvp + j)] );
+      }
+    }
 
    // Visualize rcPolyMesh
    for(S32 i = 0; i < mesh.npolys; i++)
@@ -886,12 +900,13 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
       for(S32 j = 0; j < mesh.nvp * 2; j += 2)
       {
-         const U16 *vert = &mesh.verts[mesh.polys[j]];
          if(mesh.polys[j] == U16_MAX)     // We've read past the end of the polygon
             break;
+         
 
-         logprintf("j=%d,meshPolys[j]=%d, ",j,mesh.polys[j]);
-         logprintf("j=%d,meshPolys[j]=%d, v1,2,3=%d,%d,%d",j,mesh.polys[j],vert[0],vert[1],vert[2]);
+         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)]];
+
+         logprintf("poly/i = %d  vert = %d  starting vert: %d, v1,2,3=%d,%d,%d",i,j/2,mesh.polys[j],vert[0],vert[1],vert[2]);
          botzone->mPolyBounds.push_back(Point(vert[0], vert[2]));
       }
    

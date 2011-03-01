@@ -909,9 +909,9 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
    mesh.bmin[1] = 0;
    mesh.bmin[2] = bounds.min.y;
 
-   mesh.bmin[0] = bounds.max.x;
-   mesh.bmin[1] = 1;
-   mesh.bmin[2] = bounds.max.y;
+   mesh.bmax[0] = bounds.max.x;
+   mesh.bmax[1] = 1;
+   mesh.bmax[2] = bounds.max.y;
 
 	mesh.cs = 1;
 	mesh.ch = 1;
