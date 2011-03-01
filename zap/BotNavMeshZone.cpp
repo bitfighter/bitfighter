@@ -854,11 +854,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    int ntris = out.numberoftriangles;
    Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,y,?,?
 
-   for(S32 i = 0; i < out.numberofpoints; i+=2)
+   for(S32 i = 0; i < out.numberofpoints; i++)
    {
-      intPoints[i*4] = S32(out.pointlist[i] < 0 ? out.pointlist[i] - 0.5 : out.pointlist[i] + 0.5);            // x
+      intPoints[i*4] = S32(out.pointlist[2*i] < 0 ? out.pointlist[2*i] - 0.5 : out.pointlist[2*i] + 0.5);            // x
       intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
-      intPoints[i*4 + 2] = S32(out.pointlist[i+1] < 0 ? out.pointlist[i+1] - 0.5 : out.pointlist[i+1] + 0.5);  // y, recast calls this z
+      intPoints[i*4 + 2] = S32(out.pointlist[2*i+1] < 0 ? out.pointlist[2*i+1] - 0.5 : out.pointlist[2*i+1] + 0.5);  // y, recast calls this z
       intPoints[i*4 + 3] = 0;                            // ?
    }
    
