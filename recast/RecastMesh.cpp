@@ -467,7 +467,7 @@ static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
 	int dx = (int)verts[va*3+0] - (int)verts[vb*3+0];     // dx of edge ea
 	int dy = (int)verts[va*3+2] - (int)verts[vb*3+2];     // dy of edge ea
 	
-	return dx*dx + dy*dy;
+	return dx*dx + dy*dy;         // length of edge being merged along
 }
 
 static void mergePolys(unsigned short* pa, unsigned short* pb, int ea, int eb,
@@ -849,9 +849,14 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 		for (;;)
 		{
 			// Find best polygons to merge.
-			int bestMergeVal = 0;
+			int longestMergableEdge = 0;
 			int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
 			
+         // Loop through all polygons to find longest segment along when we can merge adjacent triangles
+         // It is this repeated looping that (probably) slows things down.  Can results of getPolyMergeValue() be cached, and perhaps
+         // sorted to avoid this comparison over and over?  Could keep sorted list of longestMergeEdge, removing values for polygons being
+         // merged, adding values for polys being created, then just pull from the top of the list every time.  That should have a dramatic
+         // improvement on the speed here.
 			for (int j = 0; j < npolys-1; ++j)
 			{
 				unsigned short* pj = &polys[j*nvp];
@@ -859,10 +864,10 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 				{
 					unsigned short* pk = &polys[k*nvp];
 					int ea, eb;
-					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);
-					if (v > bestMergeVal)
+					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // Returns length of commong segment
+					if (v > longestMergableEdge)
 					{
-						bestMergeVal = v;
+						longestMergableEdge = v;
 						bestPa = j;
 						bestPb = k;
 						bestEa = ea;
@@ -871,7 +876,7 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 				}
 			}
 			
-			if (bestMergeVal > 0)
+			if (longestMergableEdge > 0)
 			{
 				// Found best, merge.
 				unsigned short* pa = &polys[bestPa*nvp];
@@ -1029,7 +1034,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		indices[j] = addVertex((unsigned short)v[0], (unsigned short)v[1], (unsigned short)v[2],
 								mesh.verts, firstVert, nextVert, mesh.nverts);
 
-		if (v[3] & RC_BORDER_VERTEX)        // For tiling purposes
+		if (v[3] & RC_BORDER_VERTEX)        // For tiling purposes... not currently used with Bitfighter
 			vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
 	}
 		

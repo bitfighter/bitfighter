@@ -458,7 +458,6 @@ void getBarrierLineCollisionPoints(Vector<Point> &output, GridDatabase *gb, Poin
       Vector<Point> collisionPoints;
       GameObject *obj = dynamic_cast<GameObject *>(objects[i]);
       obj->getCollisionPoly(collisionPoints);
-      collisionPoints.push_back(collisionPoints[0]); // make this a closed loop
       getPolygonLineCollisionPoints(output, collisionPoints, p1, p2);
    }
 
@@ -869,11 +868,9 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    // tris = out.trianglelist
 
 
-   rcContext context;
+   rcContext context(true);      // TODO: Change this to fase
    rcPolyMesh mesh;
 
-   // TODO:  What do we need to set on context?
-   
    // TODO: Put these into real tests, and handle conditions better  
    TNLAssert(out.numberofpoints > 0, "No output points!");
    TNLAssert(out.numberoftriangles > 0, "No output triangles!");
@@ -881,17 +878,17 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
 
    /// test data
-   //static int pts[] = { 0,0,0,0,  2,0,0,0,  2,0,2,0,  0,0,2,0,  3,0,1,0 };
-   //static int tris[] = { 0,2,1,  0,3,2,  2,3,4 };
+   static int pts[] = { 0,0,0,0,  2,0,0,0,  2,0,2,0,  0,0,2,0,  1,0,3,0 };
+   static int tris[] = { 0,1,2,  0,2,3,  2,4,3 };
 
-   //
+   
    //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(2,3)), pts, 5, tris, 3, mesh);     
 
    /// end test
 
 
    // 10 is arbitrary
-   rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles /1.5, mesh);     
+   rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
 
     for(S32 i = 0; i < mesh.npolys; i++)
