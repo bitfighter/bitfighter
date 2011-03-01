@@ -900,7 +900,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
       for(S32 j = 0; j < mesh.nvp * 2; j += 2)
       {
-         if(mesh.polys[j] == U16_MAX)     // We've read past the end of the polygon
+         if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
             break;
          
 
