@@ -900,11 +900,11 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
 {
 	rcAssert(ctx);
-	
+   rcAssert(vertCount < 0xfffe);    // Should be checked before running this function
+   rcAssert(ntris > 0);             // Should be checked before running this function
+
 	ctx->startTimer(RC_TIMER_BUILD_POLYMESH);
 
-	//rcVcopy(mesh.bmin, cset.bmin);
-	//rcVcopy(mesh.bmax, cset.bmax);
    mesh.bmin[0] = bounds.min.x;
    mesh.bmin[1] = 0;
    mesh.bmin[2] = bounds.min.y;
@@ -916,22 +916,10 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	mesh.cs = 1;
 	mesh.ch = 1;
 	
-	int maxVertices = 0;
-	int maxTris = 0;
-	int maxVertsPerCont = 0;
+	int maxVertices = vertCount;
+	int maxTris = ntris;    // Was vertCount - 2
+	int maxVertsPerCont = vertCount;
 
-	maxVertices = vertCount;
-	maxTris += ntris;    // Was vertCount - 2
-	maxVertsPerCont = vertCount;
-
-
-	
-	if (maxVertices >= 0xfffe) // 0xfffe = 65534; that's a lot of vertices!
-	{
-		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Too many vertices %d.", maxVertices);
-		return false;
-	}
-		
 	rcScopedDelete<unsigned char> vflags = (unsigned char*)rcAlloc(sizeof(unsigned char)*maxVertices, RC_ALLOC_TEMP);
 	if (!vflags)
 	{
@@ -998,12 +986,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'indices' (%d).", maxVertsPerCont);
 		return false;
 	}
-	//rcScopedDelete<int> tris = (int*)rcAlloc(sizeof(int)*maxVertsPerCont*3, RC_ALLOC_TEMP);
-	//if (!tris)
-	//{
-	//	ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'tris' (%d).", maxVertsPerCont*3);
-	//	return false;
-	//}
+
 	rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(maxVertsPerCont+1)*nvp, RC_ALLOC_TEMP);
 	if (!polys)
 	{
@@ -1018,11 +1001,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		indices[j] = j;
 			
 	//int ntris = triangulate(vertCount, verts, &indices[0], &tris[0]);
-	if (ntris <= 0)
-	{
-		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: No triangles!");
-		return false;
-	}
+
 				
 	// Add and merge vertices.
 	for (int j = 0; j < vertCount; ++j)
