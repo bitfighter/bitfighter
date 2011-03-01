@@ -138,11 +138,12 @@ static unsigned short addVertex(unsigned short x, unsigned short y, unsigned sho
 	int bucket = computeVertexHash(x, 0, z);
 	int i = firstVert[bucket];
 	
+   // Try to reuse an existing vertex
 	while (i != -1)
 	{
 		const unsigned short* v = &verts[i*3];
 		if (v[0] == x && (rcAbs(v[1] - y) <= 2) && v[2] == z)
-			return (unsigned short)i;
+			return (unsigned short)i;     // Found one!  We'll use this one!
 		i = nextVert[i]; // next
 	}
 	
@@ -384,15 +385,17 @@ static int countPolyVerts(const unsigned short* p, const int nvp)
 inline bool uleft(const unsigned short* a, const unsigned short* b, const unsigned short* c)
 {
 	return ((int)b[0] - (int)a[0]) * ((int)c[2] - (int)a[2]) -
-		   ((int)c[0] - (int)a[0]) * ((int)b[2] - (int)a[2]) < 0;
+		    ((int)c[0] - (int)a[0]) * ((int)b[2] - (int)a[2]) > 0;        // < 0 for CW triangles, > 0 for CCW triangles
 }
 
+
+// Does no merging, returns length^2 of segment that will be merged, or -1 if merge is invalid
 static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
 							 const unsigned short* verts, int& ea, int& eb,
 							 const int nvp)
 {
-	const int na = countPolyVerts(pa, nvp);
-	const int nb = countPolyVerts(pb, nvp);
+	const int na = countPolyVerts(pa, nvp);      // na --> number of verts in a
+	const int nb = countPolyVerts(pb, nvp);      // nb --> number of verts in b
 	
 	// If the merged polygon would be too big, do not merge.
 	if (na+nb-2 > nvp)
@@ -404,20 +407,26 @@ static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
 	
 	for (int i = 0; i < na; ++i)
 	{
-		unsigned short va0 = pa[i];
-		unsigned short va1 = pa[(i+1) % na];
+		unsigned short va0 = pa[i];               // va0 --> 0th vertex of pa (polygon-a)
+		unsigned short va1 = pa[(i+1) % na];      // va1 --> 1st vertex of pa (polygon-a)
+
+      // Get the vertices in ascending order, will make comparing easier later
 		if (va0 > va1)
 			rcSwap(va0, va1);
+
 		for (int j = 0; j < nb; ++j)
 		{
-			unsigned short vb0 = pb[j];
-			unsigned short vb1 = pb[(j+1) % nb];
+			unsigned short vb0 = pb[j];            // vb0 --> 0th vertex of pb (polygon-b)
+			unsigned short vb1 = pb[(j+1) % nb];   // vb1 --> 1st vertex of pb (polygon-b)
+
+         // Get the vertices in ascending order
 			if (vb0 > vb1)
 				rcSwap(vb0, vb1);
-			if (va0 == vb0 && va1 == vb1)
+
+			if (va0 == vb0 && va1 == vb1)    // Are the vertex pairs the same?  If so, we've found a common segment!
 			{
-				ea = i;
-				eb = j;
+				ea = i;     // The ith edge of a matches...
+				eb = j;     // ...the jth edge of b.  These values will be returned to caller.
 				break;
 			}
 		}
@@ -427,26 +436,36 @@ static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
 	if (ea == -1 || eb == -1)
 		return -1;
 	
-	// Check to see if the merged polygon would be convex.
+   // We can merge, and we know that ea and eb represent the same line on different triangles; ea, eb are "edge indexes"
+
+	// Check to see if the merged polygon would be convex
 	unsigned short va, vb, vc;
 	
-	va = pa[(ea+na-1) % na];
-	vb = pa[ea];
-	vc = pb[(eb+2) % nb];
+	va = pa[(ea+na-1) % na];      // vertex just prior to ea
+	vb = pa[ea];                  // vertex at start of segment pointed to by ea 
+	vc = pb[(eb+2) % nb];         // vertex following end of segment pointed to by eb
+
+   // Do the test    (see http://critterai.org/nmgen_polygen for pictoral explanation)
 	if (!uleft(&verts[va*3], &verts[vb*3], &verts[vc*3]))
 		return -1;
 	
-	va = pb[(eb+nb-1) % nb];
-	vb = pb[eb];
-	vc = pa[(ea+2) % na];
+   // And again...
+
+	va = pb[(eb+nb-1) % nb];      // vertex just prior to eb
+	vb = pb[eb];                  // vertex at start of eb
+	vc = pa[(ea+2) % na];         // vertex following end of segment pointed to by ea
+
+   // Do the test
 	if (!uleft(&verts[va*3], &verts[vb*3], &verts[vc*3]))
 		return -1;
 	
-	va = pa[ea];
-	vb = pa[(ea+1)%na];
+   // Now we know that resulting polygon will be convex
+   
+	va = pa[ea];                  // vertex at beginning of ea
+	vb = pa[(ea+1)%na];           // vertex at end of ea
 	
-	int dx = (int)verts[va*3+0] - (int)verts[vb*3+0];
-	int dy = (int)verts[va*3+2] - (int)verts[vb*3+2];
+	int dx = (int)verts[va*3+0] - (int)verts[vb*3+0];     // dx of edge ea
+	int dy = (int)verts[va*3+2] - (int)verts[vb*3+2];     // dy of edge ea
 	
 	return dx*dx + dy*dy;
 }
@@ -996,27 +1015,28 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	unsigned short* tmpPoly = &polys[maxVertsPerCont*nvp];
 
 		
-	// Triangulate contour
 	for (int j = 0; j < vertCount; ++j)
 		indices[j] = j;
 			
 	//int ntris = triangulate(vertCount, verts, &indices[0], &tris[0]);
 
+//bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
 				
 	// Add and merge vertices.
-	for (int j = 0; j < vertCount; ++j)
+	for (int j = 0; j < vertCount; ++j)    // Iterate over each vertex
 	{
-		const int* v = &verts[j*4];
+		const int* v = &verts[j*4];         // v now points to the 4-integer block of memory representing a single vertex (x,z,y,? in bf)
 		indices[j] = addVertex((unsigned short)v[0], (unsigned short)v[1], (unsigned short)v[2],
 								mesh.verts, firstVert, nextVert, mesh.nverts);
-		if (v[3] & RC_BORDER_VERTEX)
-		{
-			// This vertex should be removed.
-			vflags[indices[j]] = 1;
-		}
+
+		if (v[3] & RC_BORDER_VERTEX)        // For tiling purposes
+			vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
 	}
 		
-	// Build initial polygons.
+   // NOTE: firstVert is an indexed list of the first vertex in each triangle
+   //       nextVert is the same for the second vertex
+	// Build initial polygons from triangles -- one triangle goes into each polygon
+
 	int npolys = 0;
 	memset(polys, 0xff, maxVertsPerCont*nvp*sizeof(unsigned short));     // Max coord = U16_MAX
 	for (int j = 0; j < ntris; ++j)
@@ -1039,7 +1059,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 
 
 	// Merge polygons.
-	if (nvp > 3)
+	if (nvp > 3)      // If nvp == 3, we're already there; each polygon will be a copy of an input triangle 
 	{
 		for(;;)
 		{
@@ -1049,12 +1069,12 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 				
 			for (int j = 0; j < npolys-1; ++j)
 			{
-				unsigned short* pj = &polys[j*nvp];
+				unsigned short* pj = &polys[j*nvp];       // pj --> poly-j
 				for (int k = j+1; k < npolys; ++k)
 				{
-					unsigned short* pk = &polys[k*nvp];
+					unsigned short* pk = &polys[k*nvp];    // pk --> poly-k
 					int ea, eb;
-					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);
+					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // sets ea, eb, returns length of merging edge, or -1 if invalid
 					if (v > bestMergeVal)
 					{
 						bestMergeVal = v;

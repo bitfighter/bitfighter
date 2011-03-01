@@ -853,13 +853,13 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
 
    int ntris = out.numberoftriangles;
-   Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,y,?,?
+   Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,z,y,?
 
-   for(S32 i = 0; i < out.numberofpoints; i+=2)
+   for(S32 i = 0; i < out.numberofpoints; i++)
    {
-      intPoints[i*4] = S32(out.pointlist[i] < 0 ? out.pointlist[i] - 0.5 : out.pointlist[i] + 0.5);            // x
+      intPoints[i*4] = S32(out.pointlist[i*2] < 0 ? out.pointlist[i*2] - 0.5 : out.pointlist[i*2] + 0.5);            // x
       intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
-      intPoints[i*4 + 2] = S32(out.pointlist[i+1] < 0 ? out.pointlist[i+1] - 0.5 : out.pointlist[i+1] + 0.5);  // y, recast calls this z
+      intPoints[i*4 + 2] = S32(out.pointlist[i*2+1] < 0 ? out.pointlist[i*2+1] - 0.5 : out.pointlist[i*2+1] + 0.5);  // y, recast calls this z
       intPoints[i*4 + 3] = 0;                            // ?
    }
    
@@ -877,18 +877,32 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    // TODO: Put these into real tests, and handle conditions better  
    TNLAssert(out.numberofpoints > 0, "No output points!");
    TNLAssert(out.numberoftriangles > 0, "No output triangles!");
-   TNLAssert(out.numberoftriangles < 0xffe, "Too many triagles!");
+   TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
+
+
+   /// test data
+   //static int pts[] = { 0,0,0,0,  2,0,0,0,  2,0,2,0,  0,0,2,0,  3,0,1,0 };
+   //static int tris[] = { 0,2,1,  0,3,2,  2,3,4 };
+
+   //
+   //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(2,3)), pts, 5, tris, 3, mesh);     
+
+   /// end test
+
 
    // 10 is arbitrary
-   rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
+   rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles /1.5, mesh);     
 
 
     for(S32 i = 0; i < mesh.npolys; i++)
    {
       for(S32 j = 0; j < mesh.nvp; j++)
       {
+         if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
+            break;
+
          const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)]];
-         logprintf("i:%d, j:%d, vert#: %d", i, j, mesh.polys[(i * mesh.nvp + j)] );
+         logprintf("i:%d, j:%d, vert#: %d  --> %f, %f", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0], vert[2] );
       }
     }
 
@@ -910,11 +924,14 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
          botzone->mPolyBounds.push_back(Point(vert[0], vert[2]));
       }
    
-      botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
+      if(botzone->mPolyBounds.size() > 0)
+      {
+         botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
-		botzone->addToGame(gServerGame);
-		botzone->computeExtent();   
+		   botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		   botzone->addToGame(gServerGame);
+		   botzone->computeExtent();   
+      }
    }
 
    // Visualize triangle output
