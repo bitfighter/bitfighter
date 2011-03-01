@@ -458,7 +458,6 @@ void getBarrierLineCollisionPoints(Vector<Point> &output, GridDatabase *gb, Poin
       Vector<Point> collisionPoints;
       GameObject *obj = dynamic_cast<GameObject *>(objects[i]);
       obj->getCollisionPoly(collisionPoints);
-      collisionPoints.push_back(collisionPoints[0]); // make this a closed loop
       getPolygonLineCollisionPoints(output, collisionPoints, p1, p2);
    }
 

@@ -1341,9 +1341,15 @@ void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 {
    glColor(gIniSettings.wallOutlineColor, alpha);
 
+   //bool colmode = false;
+
    glBegin(GL_LINES);
       for(S32 i = 0; i < edges.size(); i++)
+      {
+         //glColor3f(colmode ? 1 : 0, colmode ? 0 : 1, 0); // in case of wanting to see each lines.
+         //colmode = !colmode;
          glVertex(edges[i]);
+      }
    glEnd();
 }
 
