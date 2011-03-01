@@ -749,6 +749,7 @@ void renderPolygonLabel(const Point &centroid, F32 angle, F32 size, const char *
 // Renders fill in the form of a series of points representing triangles
 void renderTriangulatedPolygonFill(const Vector<Point> &fill)
 {
+   // TODO: rewrite with new method
    for(S32 i = 0; i < fill.size(); i+=3)
    {
       glBegin(GL_POLYGON);
@@ -761,6 +762,7 @@ void renderTriangulatedPolygonFill(const Vector<Point> &fill)
 
 void renderPolygonOutline(const Vector<Point> &outline)
 {
+   // TODO: rewrite with new method
    glBegin(GL_LINE_LOOP);
       for(S32 i = 0; i < outline.size(); i++)
          glVertex2f(outline[i].x, outline[i].y);
