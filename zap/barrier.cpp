@@ -362,12 +362,14 @@ void Barrier::prepareRenderingGeometry()
       }
       for(S32 j=1; j<points.size(); j++)
       {
-         Point midPoint = (points[j] + points[j-1]) * 0.5;
+         Point midPoint = (points[j] + points[j-1]) * 0.5 + Point(0.003,0.007); // to avoid mssing lines, duplicate segments is better then mising segments.
+         Point midPoint2 = (points[j] + points[j-1]) * 0.5 - Point(0.003,0.007);
          bool isInside = false;
          for(S32 k=0; k<objects.size() && !isInside; k++)
          {
             Barrier *obj = dynamic_cast<Barrier *>(objects[k]);
-            isInside = isInside || PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint);
+            isInside = isInside || (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
+               && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
          }
          if(!isInside)
          {
