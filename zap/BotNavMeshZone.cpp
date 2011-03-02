@@ -850,7 +850,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    // X option makes small but consistent improvement in performance
 
    U32 done3 = Platform::getRealMilliseconds();
-   triangulate((char*)"zXqpOV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
+   triangulate((char*)"zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
    U32 done4 = Platform::getRealMilliseconds();
 
    bool useRecast = true;
