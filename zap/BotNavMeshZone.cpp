@@ -880,7 +880,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       // tris = out.trianglelist
 
 
-      rcContext context(true);      // TODO: Change this to fase
+      rcContext context(true);      // TODO: Change this to false
       rcPolyMesh mesh;
 
       // TODO: Put these into real tests, and handle conditions better  
@@ -912,33 +912,21 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
          logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
        }
 
-       for(S32 i = 0; i < mesh.npolys; i++)
-      {
-         for(S32 j = 0; j < mesh.nvp; j++)
-         {
-            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
-               break;
-
-            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
-            logprintf("i:%d, j:%d, vert#: %d  --> %d, %d", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0]-FIX, vert[2]-FIX );
-         }
-       }
 
       // Visualize rcPolyMesh
       for(S32 i = 0; i < mesh.npolys; i++)
       {
-
          BotNavMeshZone *botzone = new BotNavMeshZone();
 
-         for(S32 j = 0; j < mesh.nvp; j += 1)
+         for(S32 j = 0; j < mesh.nvp; j++)
          {
-            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
+            if(mesh.polys[(i * 2 * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
                break;
          
 
-            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+            const U16 *vert = &mesh.verts[mesh.polys[(i * 2 * mesh.nvp + j)] * bytesPerVertex];
 
-            logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[j],vert[0]-FIX,vert[2]-FIX);
+            logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[(i * 2 * mesh.nvp + j)],vert[0]-FIX,vert[2]-FIX);
             botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
          }
    

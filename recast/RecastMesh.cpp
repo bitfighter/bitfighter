@@ -138,7 +138,7 @@ static unsigned short addVertex(unsigned short x, unsigned short y, unsigned sho
 	int bucket = computeVertexHash(x, 0, z);
 	int i = firstVert[bucket];
 	
-   // Try to reuse an existing vertex
+   // Try to reuse an existing vertex if there is one in our bucket
 	while (i != -1)
 	{
 		const unsigned short* v = &verts[i*3];
@@ -1025,7 +1025,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	for (int j = 0; j < vertCount; ++j)
 		indices[j] = j;
 			
-	// Add and merge vertices.
+	// Add vertices that we were handed to our internal index system, merging any duplicates that we find
 	for (int j = 0; j < vertCount; ++j)    // Iterate over each vertex
 	{
 		const int* v = &verts[j*4];         // v now points to the 4-integer block of memory representing a single vertex (x,z,y,? in bf)
@@ -1036,7 +1036,8 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
 	}
 
-  
+   // if vertCount != mesh.nverts, then we passed in some duplicate verts
+   rcAssert(vertCount == mesh.nverts);    // Normally not necessarily true, but with Triangle output, there should be no dupes
 		
    // NOTE: firstVert is an indexed list of the first vertex in each triangle
    //       nextVert is the same for the second vertex
@@ -1055,6 +1056,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			npolys++;
 		}
 	}
+  
 
 	// Merge polygons.
 	if (nvp > 3)      // If nvp == 3, we're already there; each polygon will be a copy of an input triangle 
@@ -1097,17 +1099,21 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		}
 	}
 		
-	// Store polygons.
+	// Copy polygons over from polys into mesh.polys, skipping every second slot
 	for (int j = 0; j < npolys; ++j)
 	{
-		unsigned short* p = &mesh.polys[mesh.npolys*nvp*2];
+      rcAssert(j == mesh.npolys);     // TODO Delete
+		unsigned short* p = &mesh.polys[j*nvp*2];
 		unsigned short* q = &polys[j*nvp];
+
 		for (int k = 0; k < nvp; ++k)
 			p[k] = q[k];
+
 		mesh.regs[mesh.npolys] = 1;
 		mesh.areas[mesh.npolys] = 1;
 		mesh.npolys++;
-		if (mesh.npolys > maxTris)
+
+		if (mesh.npolys > mesh.maxpolys)
 		{
 			ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
 			return false;
@@ -1119,7 +1125,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	// Remove edge vertices.
 	for (int i = 0; i < mesh.nverts; ++i)
 	{
-		if (vflags[i])
+		if (vflags[i])    // Never true for Bitfighter?
 		{
 			if (!canRemoveVertex(ctx, mesh, (unsigned short)i))
 				continue;
@@ -1131,6 +1137,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			}
 			// Remove vertex
 			// Note: mesh.nverts is already decremented inside removeVertex()!
+         // I don't think this is ever hit by Bitfighter
 			for (int j = i; j < mesh.nverts; ++j)
 				vflags[j] = vflags[j+1];
 			--i;
