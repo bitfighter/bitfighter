@@ -754,7 +754,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 	Rect bounds = game->computeWorldObjectExtents();
 
    // Recast only handles 16 bit coordinates
-   TNLAssert(bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.min.x < S16_MAX && bounds.max.y < S16_MAX, "Level out of bounds!");
+   TNLAssert(bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX, "Level out of bounds!");
 
 //#ifdef SAM_ONLY
    //makeBotMeshZones2(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
