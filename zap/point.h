@@ -293,6 +293,8 @@ struct Rect
 
    void expand(const Point &delta) { min -= delta; max += delta; }
 
+   void offset(const Point &offset) { min += offset; max += offset; }
+
    Point getExtents()
    {
       return max - min;
