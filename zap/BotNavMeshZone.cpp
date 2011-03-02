@@ -864,7 +864,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       intPoints[i*4 + 3] = 0;                            // ?
 
       intPoints[i*4] += FIX;
-      intPoints[i*4 + 3] += FIX;
+      intPoints[i*4 + 2] += FIX;
    }
    
    
@@ -887,7 +887,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    static int tris[] = { 0,1,2,  0,2,3,  2,4,3 };
 
       
-   //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(200,300)), pts, 5, tris, 3, mesh);
+   //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(200,300)), pts, ARRAYSIZE(pts)/5, tris, ARRAYSIZE(tris)/3, mesh);
 
    /// end test
 
@@ -901,7 +901,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    for(S32 i = 0; i < mesh.nverts; i++)
    {
       const U16 *vert = &mesh.verts[i * bytesPerVertex];
-      logprintf("vert#: %d  --> %d, %d", i, vert[0], vert[2] );
+      logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
     }
 
     for(S32 i = 0; i < mesh.npolys; i++)
@@ -912,7 +912,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
             break;
 
          const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
-         logprintf("i:%d, j:%d, vert#: %d  --> %d, %d", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0], vert[2] );
+         logprintf("i:%d, j:%d, vert#: %d  --> %d, %d", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0]-FIX, vert[2]-FIX );
       }
     }
 
@@ -930,7 +930,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
          const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
 
-         logprintf("poly/i = %d  vert = %d  starting vert: %d, v1,2,3=%d,%d",i,j,mesh.polys[j],vert[0],vert[2]);
+         logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[j],vert[0]-FIX,vert[2]-FIX);
          botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
       }
    
