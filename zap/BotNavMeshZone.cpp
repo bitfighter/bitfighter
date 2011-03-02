@@ -853,94 +853,115 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    triangulate((char*)"zXqpOV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
    U32 done4 = Platform::getRealMilliseconds();
 
-   S32 FIX = S16_MAX;
-
-   // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
-
-   int ntris = out.numberoftriangles;
-   Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,z,y,?
-
-   for(S32 i = 0; i < out.numberofpoints; i++)
+   bool useRecast = true;
+   if(useRecast)
    {
-      intPoints[i*4] = S32(out.pointlist[i*2] < 0 ? out.pointlist[i*2] - 0.5 : out.pointlist[i*2] + 0.5);            // x
-      intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
-      intPoints[i*4 + 2] = S32(out.pointlist[i*2+1] < 0 ? out.pointlist[i*2+1] - 0.5 : out.pointlist[i*2+1] + 0.5);  // y, recast calls this z
-      intPoints[i*4 + 3] = 0;                            // ?
+      S32 FIX = S16_MAX;
 
-      intPoints[i*4] += FIX;
-      intPoints[i*4 + 2] += FIX;
-   }
+      // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
+
+      int ntris = out.numberoftriangles;
+      Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,z,y,?
+
+      for(S32 i = 0; i < out.numberofpoints; i++)
+      {
+         intPoints[i*4] = S32(out.pointlist[i*2] < 0 ? out.pointlist[i*2] - 0.5 : out.pointlist[i*2] + 0.5);            // x
+         intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
+         intPoints[i*4 + 2] = S32(out.pointlist[i*2+1] < 0 ? out.pointlist[i*2+1] - 0.5 : out.pointlist[i*2+1] + 0.5);  // y, recast calls this z
+         intPoints[i*4 + 3] = 0;                            // ?
+
+         intPoints[i*4] += FIX;
+         intPoints[i*4 + 2] += FIX;
+      }
    
-   
-   // cont.nverts = out.numberofpoints;
-   // cont.verts = intPoints.address();      //<== pointer to array of points in int format
-   // tris = out.trianglelist
+ 
+      // cont.nverts = out.numberofpoints;
+      // cont.verts = intPoints.address();      //<== pointer to array of points in int format
+      // tris = out.trianglelist
 
 
-   rcContext context(true);      // TODO: Change this to fase
-   rcPolyMesh mesh;
+      rcContext context(true);      // TODO: Change this to fase
+      rcPolyMesh mesh;
 
-   // TODO: Put these into real tests, and handle conditions better  
-   TNLAssert(out.numberofpoints > 0, "No output points!");
-   TNLAssert(out.numberoftriangles > 0, "No output triangles!");
-   TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
+      // TODO: Put these into real tests, and handle conditions better  
+      TNLAssert(out.numberofpoints > 0, "No output points!");
+      TNLAssert(out.numberoftriangles > 0, "No output triangles!");
+      TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
 
 
-   /// test data
-   static int pts[] = { 0,0,0,0,  200,0,0,0,  200,0,200,0,  0,0,200,0,  100,0,300,0 };
-   static int tris[] = { 0,1,2,  0,2,3,  2,4,3 };
+      /// test data
+      static int pts[] = { 0,0,0,0,  200,0,0,0,  200,0,200,0,  0,0,200,0,  100,0,300,0 };
+      static int tris[] = { 0,1,2,  0,2,3,  2,4,3 };
 
       
-   //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(200,300)), pts, ARRAYSIZE(pts)/5, tris, ARRAYSIZE(tris)/3, mesh);
+      //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(200,300)), pts, ARRAYSIZE(pts)/5, tris, ARRAYSIZE(tris)/3, mesh);
 
-   /// end test
+      /// end test
 
 
-   // 10 is arbitrary
-   bounds.offset(Point(FIX,FIX));
-   rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
+      // 10 is arbitrary
+      bounds.offset(Point(FIX,FIX));
+      rcBuildPolyMesh(&context, 10 , bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
    
-   const S32 bytesPerVertex = 3;
-     // dump verts
-   for(S32 i = 0; i < mesh.nverts; i++)
-   {
-      const U16 *vert = &mesh.verts[i * bytesPerVertex];
-      logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
-    }
-
-    for(S32 i = 0; i < mesh.npolys; i++)
-   {
-      for(S32 j = 0; j < mesh.nvp; j++)
+      const S32 bytesPerVertex = 3;
+        // dump verts
+      for(S32 i = 0; i < mesh.nverts; i++)
       {
-         if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
-            break;
+         const U16 *vert = &mesh.verts[i * bytesPerVertex];
+         logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
+       }
 
-         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
-         logprintf("i:%d, j:%d, vert#: %d  --> %d, %d", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0]-FIX, vert[2]-FIX );
-      }
-    }
-
-   // Visualize rcPolyMesh
-   for(S32 i = 0; i < mesh.npolys; i++)
-   {
-
-      BotNavMeshZone *botzone = new BotNavMeshZone();
-
-      for(S32 j = 0; j < mesh.nvp; j += 1)
+       for(S32 i = 0; i < mesh.npolys; i++)
       {
-         if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
-            break;
+         for(S32 j = 0; j < mesh.nvp; j++)
+         {
+            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
+               break;
+
+            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+            logprintf("i:%d, j:%d, vert#: %d  --> %d, %d", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0]-FIX, vert[2]-FIX );
+         }
+       }
+
+      // Visualize rcPolyMesh
+      for(S32 i = 0; i < mesh.npolys; i++)
+      {
+
+         BotNavMeshZone *botzone = new BotNavMeshZone();
+
+         for(S32 j = 0; j < mesh.nvp; j += 1)
+         {
+            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
+               break;
          
 
-         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
 
-         logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[j],vert[0]-FIX,vert[2]-FIX);
-         botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
-      }
+            logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[j],vert[0]-FIX,vert[2]-FIX);
+            botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
+         }
    
-      if(botzone->mPolyBounds.size() > 0)
+         if(botzone->mPolyBounds.size() > 0)
+         {
+            botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
+
+		      botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		      botzone->addToGame(gServerGame);
+		      botzone->computeExtent();   
+         }
+      }
+   }
+   else
+   {
+      // Visualize triangle output
+      for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
       {
+         BotNavMeshZone *botzone = new BotNavMeshZone();
+
+		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])), F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
+		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
+		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		   botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
@@ -948,22 +969,6 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 		   botzone->computeExtent();   
       }
    }
-
-   // Visualize triangle output
-  // for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
-  // {
-  //    BotNavMeshZone *botzone = new BotNavMeshZone();
-
-		//botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])), F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
-		//botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
-		//botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
-  //    botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
-
-		//botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
-		//botzone->addToGame(gServerGame);
-		//botzone->computeExtent();   
-  // }
-
    U32 done5 = Platform::getRealMilliseconds();
 
    logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);

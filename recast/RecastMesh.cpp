@@ -927,6 +927,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	rcAssert(ctx);
    rcAssert(vertCount < 0xfffe);    // Should be checked before running this function
    rcAssert(ntris > 0);             // Should be checked before running this function
+   rcAssert(nvp >= 3);              // Anything less would be outrageous!
 
 	ctx->startTimer(RC_TIMER_BUILD_POLYMESH);
 
@@ -943,7 +944,6 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	
 	int maxVertices = vertCount;
 	int maxTris = ntris;    // Was vertCount - 2
-	int maxVertsPerCont = vertCount;
 
 	rcScopedDelete<unsigned char> vflags = (unsigned char*)rcAlloc(sizeof(unsigned char)*maxVertices, RC_ALLOC_TEMP);
 	if (!vflags)
@@ -1005,29 +1005,26 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	for (int i = 0; i < VERTEX_BUCKET_COUNT; ++i)
 		firstVert[i] = -1;
 	
-	rcScopedDelete<int> indices = (int*)rcAlloc(sizeof(int)*maxVertsPerCont, RC_ALLOC_TEMP);
+	rcScopedDelete<int> indices = (int*)rcAlloc(sizeof(int)*vertCount, RC_ALLOC_TEMP);
 	if (!indices)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'indices' (%d).", maxVertsPerCont);
+		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'indices' (%d).", vertCount);
 		return false;
 	}
 
-	rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(maxVertsPerCont+1)*nvp, RC_ALLOC_TEMP);
+   // + 1 reserves a bit of space at the end for a temp workspace
+	rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(ntris + 1)*nvp, RC_ALLOC_TEMP);
 	if (!polys)
 	{
-		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'polys' (%d).", maxVertsPerCont*nvp);
+		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'polys' (%d).", ntris * nvp);
 		return false;
 	}
-	unsigned short* tmpPoly = &polys[maxVertsPerCont*nvp];
+	unsigned short* tmpPoly = &polys[ntris * nvp];     // Use a little reserved space at the end for a temp poly
 
 		
 	for (int j = 0; j < vertCount; ++j)
 		indices[j] = j;
 			
-	//int ntris = triangulate(vertCount, verts, &indices[0], &tris[0]);
-
-//bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
-				
 	// Add and merge vertices.
 	for (int j = 0; j < vertCount; ++j)    // Iterate over each vertex
 	{
@@ -1038,17 +1035,19 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		if (v[3] & RC_BORDER_VERTEX)        // For tiling purposes... not currently used with Bitfighter
 			vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
 	}
+
+  
 		
    // NOTE: firstVert is an indexed list of the first vertex in each triangle
    //       nextVert is the same for the second vertex
 	// Build initial polygons from triangles -- one triangle goes into each polygon
-
 	int npolys = 0;
-	memset(polys, 0xff, maxVertsPerCont*nvp*sizeof(unsigned short));     // Max coord = U16_MAX
+	memset(polys, 0xff, ntris * nvp * sizeof(unsigned short));     // Max coord = U16_MAX
+
 	for (int j = 0; j < ntris; ++j)
 	{
 		int* t = &tris[j*3];
-		if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
+		if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])     // Make sure no dupe vertices
 		{
 			polys[npolys*nvp+0] = (unsigned short)indices[t[0]];
 			polys[npolys*nvp+1] = (unsigned short)indices[t[1]];
@@ -1056,13 +1055,6 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			npolys++;
 		}
 	}
-		
-   if (npolys == 0)
-	{
-		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: No polygons generated.");
-		return false;
-	}
-
 
 	// Merge polygons.
 	if (nvp > 3)      // If nvp == 3, we're already there; each polygon will be a copy of an input triangle 
@@ -1122,6 +1114,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		}
 	}
 	
+   
 	
 	// Remove edge vertices.
 	for (int i = 0; i < mesh.nverts; ++i)
