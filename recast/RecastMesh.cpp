@@ -1037,7 +1037,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	}
 
    // if vertCount != mesh.nverts, then we passed in some duplicate verts
-   rcAssert(vertCount == mesh.nverts);    // Normally not necessarily true, but with Triangle output, there should be no dupes
+//   rcAssert(vertCount == mesh.nverts);    // Normally not necessarily true, but with Triangle output, there should be no dupes
 		
    // NOTE: firstVert is an indexed list of the first vertex in each triangle
    //       nextVert is the same for the second vertex
