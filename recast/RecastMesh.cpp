@@ -525,7 +525,8 @@ static bool canRemoveVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned sho
 			}
 			numVerts++;
 		}
-		if (numRemoved)
+
+		if (numRemoved > 0)
 		{
 			numRemovedVerts += numRemoved;
 			numRemainingEdges += numVerts-(numRemoved+1);
@@ -554,7 +555,7 @@ static bool canRemoveVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned sho
 		unsigned short* p = &mesh.polys[i*nvp*2];
 		const int nv = countPolyVerts(p, nvp);
 
-		// Collect edges which touches the removed vertex.
+		// Collect edges which touch the removed vertex.
 		for (int j = 0, k = nv-1; j < nv; k = j++)
 		{
 			if (p[j] == rem || p[k] == rem)
@@ -686,7 +687,7 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 		}
 	}
 	
-	// Remove vertex.
+	// Remove vertex.  --> can this be made more efficient?  Single memcpy statement?
 	for (int i = (int)rem; i < mesh.nverts; ++i)
 	{
 		mesh.verts[i*3+0] = mesh.verts[(i+1)*3+0];
@@ -864,7 +865,7 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 				{
 					unsigned short* pk = &polys[k*nvp];
 					int ea, eb;
-					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // Returns length of commong segment
+					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // Returns length of common segment
 					if (v > longestMergableEdge)
 					{
 						longestMergableEdge = v;
@@ -1069,7 +1070,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		for(;;)
 		{
 			// Find best polygons to merge.
-			int bestMergeVal = 0;
+			int longestSegmentLen = 0;
 			int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
 				
 			for (int j = 0; j < npolys-1; ++j)
@@ -1079,31 +1080,27 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 				{
 					unsigned short* pk = &polys[k*nvp];    // pk --> poly-k
 					int ea, eb;
-					int v = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // sets ea, eb, returns length of merging edge, or -1 if invalid
-					if (v > bestMergeVal)
+					int len = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // sets ea, eb, returns len of merging edge, -1 if invalid
+					if (len > longestSegmentLen)
 					{
-						bestMergeVal = v;
-						bestPa = j;
+						longestSegmentLen = len;
+						bestPa = j;       // bestPa and bestPb store the indices of the polys we will want to merge next 
 						bestPb = k;
-						bestEa = ea;
-						bestEb = eb;
+						bestEa = ea;      // ea'th edge of A is same as eb'th edge of B...
+						bestEb = eb;      // ...so bestEa and bestEb refer to same edge, the best candidate to remove next
 					}
 				}
 			}
 				
-			if (bestMergeVal > 0)
+			if (longestSegmentLen == 0)      // Could not merge any polygons, stop.
+            break;
+         else                             // Merge
 			{
-				// Found best, merge.
 				unsigned short* pa = &polys[bestPa*nvp];
 				unsigned short* pb = &polys[bestPb*nvp];
 				mergePolys(pa, pb, bestEa, bestEb, tmpPoly, nvp);
 				memcpy(pb, &polys[(npolys-1)*nvp], sizeof(unsigned short)*nvp);
 				npolys--;
-			}
-			else
-			{
-				// Could not merge any polygons, stop.
-				break;
 			}
 		}
 	}

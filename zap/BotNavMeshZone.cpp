@@ -849,6 +849,8 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    triangulate((char*)"zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
    U32 done4 = Platform::getRealMilliseconds();
 
+   S32 FIX = S16_MAX;
+
    // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
 
    int ntris = out.numberoftriangles;
@@ -860,6 +862,9 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
       intPoints[i*4 + 2] = S32(out.pointlist[i*2+1] < 0 ? out.pointlist[i*2+1] - 0.5 : out.pointlist[i*2+1] + 0.5);  // y, recast calls this z
       intPoints[i*4 + 3] = 0;                            // ?
+
+      intPoints[i*4] += FIX;
+      intPoints[i*4 + 3] += FIX;
    }
    
    
@@ -878,11 +883,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
 
    /// test data
-   static int pts[] = { 0,0,0,0,  2,0,0,0,  2,0,2,0,  0,0,2,0,  1,0,3,0 };
+   static int pts[] = { 0,0,0,0,  200,0,0,0,  200,0,200,0,  0,0,200,0,  100,0,300,0 };
    static int tris[] = { 0,1,2,  0,2,3,  2,4,3 };
 
-   
-   //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(2,3)), pts, 5, tris, 3, mesh);     
+      
+   //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(200,300)), pts, 5, tris, 3, mesh);
 
    /// end test
 
@@ -890,6 +895,14 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    // 10 is arbitrary
    rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
+   
+   const S32 bytesPerVertex = 3;
+     // dump verts
+   for(S32 i = 0; i < mesh.nverts; i++)
+   {
+      const U16 *vert = &mesh.verts[i * bytesPerVertex];
+      logprintf("vert#: %d  --> %d, %d", i, vert[0], vert[2] );
+    }
 
     for(S32 i = 0; i < mesh.npolys; i++)
    {
@@ -898,8 +911,8 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
          if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
             break;
 
-         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)]];
-         logprintf("i:%d, j:%d, vert#: %d  --> %f, %f", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0], vert[2] );
+         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+         logprintf("i:%d, j:%d, vert#: %d  --> %d, %d", i, j, mesh.polys[(i * mesh.nvp + j)], vert[0], vert[2] );
       }
     }
 
@@ -909,16 +922,16 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
       BotNavMeshZone *botzone = new BotNavMeshZone();
 
-      for(S32 j = 0; j < mesh.nvp * 2; j += 2)
+      for(S32 j = 0; j < mesh.nvp; j += 1)
       {
          if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
             break;
          
 
-         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)]];
+         const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
 
-         logprintf("poly/i = %d  vert = %d  starting vert: %d, v1,2,3=%d,%d,%d",i,j/2,mesh.polys[j],vert[0],vert[1],vert[2]);
-         botzone->mPolyBounds.push_back(Point(vert[0], vert[2]));
+         logprintf("poly/i = %d  vert = %d  starting vert: %d, v1,2,3=%d,%d",i,j,mesh.polys[j],vert[0],vert[2]);
+         botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
       }
    
       if(botzone->mPolyBounds.size() > 0)
