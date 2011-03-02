@@ -846,7 +846,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    // X option makes small but consistent improvement in performance
 
    U32 done3 = Platform::getRealMilliseconds();
-   triangulate((char*)"zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
+   triangulate((char*)"zXqpOV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
    U32 done4 = Platform::getRealMilliseconds();
 
    S32 FIX = S16_MAX;
@@ -893,6 +893,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
 
    // 10 is arbitrary
+   bounds.offset(Point(FIX,FIX));
    rcBuildPolyMesh(&context, 10, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
    
