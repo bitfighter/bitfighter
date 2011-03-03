@@ -26,6 +26,7 @@
 #include "gameConnection.h"
 #include "game.h"
 #include "gameType.h"
+#include "soccerGame.h"          // For checking if pick up soccer is allowed
 #include "gameNetInterface.h"
 #include "config.h"              // For gIniSettings support
 #include "IniFile.h"             // For CIniFile def
@@ -109,6 +110,7 @@ void GameConnection::initialize()
    mAuthenticationCounter = 0;            // Counts number of retries
    mIsVerified = false;                   // Final conclusion... client is or is not verified
    switchedTeamCount = 0;
+   mSoccerCollide = false;
 }
 
 // Destructor
@@ -1106,6 +1108,11 @@ TNL_IMPLEMENT_RPC(GameConnection, c2sRenameClient, (StringTableEntry newName), (
 	}
 }
 
+// old 015 clients will ignore this command. (new on version 015a)
+TNL_IMPLEMENT_RPC(GameConnection, s2cSoccerCollide, (bool enable), (enable), NetClassGroupGameMask, RPCGuaranteedOrdered, RPCDirServerToClient, 3)
+{
+   mSoccerCollide = enable;
+}
 
 extern IniSettings gIniSettings;
 extern Nonce gClientId;
@@ -1360,6 +1367,10 @@ void GameConnection::onConnectionEstablished()
       logprintf(LogConsumer::LogConnection, "%s - client \"%s\" connected.", getNetAddressString(), mClientName.getString());
       logprintf(LogConsumer::ServerFilter, "%s [%s] joined [%s]", mClientName.getString(), 
                 isLocalConnection() ? "Local Connection" : getNetAddressString(), getTimeStamp().c_str());
+
+      GameType *gt = gServerGame->getGameType();
+      if(gt)
+         s2cSoccerCollide(!gt->mAllowSoccerPickup);
    }
 }
 

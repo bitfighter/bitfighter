@@ -741,8 +741,6 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 
 
-	//makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
- //  removeUnusedNavMeshZones();
 
    // Just for fun, let's triangulate!
    Vector<F32> coords;
@@ -752,6 +750,12 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    map<pair<F32,F32>, S32> points;
 
 	Rect bounds = game->computeWorldObjectExtents();
+
+//#ifdef SAM_ONLY
+   //makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+   //removeUnusedNavMeshZones();
+   //return;
+//#endif
 
    // Recast only handles 16 bit coordinates
    TNLAssert(bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX, "Level out of bounds!");
@@ -962,6 +966,17 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
 
    // TODO: free memory allocated by triangles in out struct
+   trifree(out.pointlist);
+   trifree(out.pointattributelist);
+   trifree(out.pointmarkerlist);
+   trifree(out.trianglelist);
+   trifree(out.triangleattributelist);
+   trifree(out.segmentlist);
+   trifree(out.segmentmarkerlist);
+   trifree(out.edgelist);
+   trifree(out.edgemarkerlist);
+   trifree(out.normlist);
+   trifree(out.neighborlist);
 }
 
 

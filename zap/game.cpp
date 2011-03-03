@@ -694,8 +694,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
+   GameType *gt = getGameType();
    for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
+   {
+      if(gt && gt->mHaveSoccer)
+         walk->s2cSoccerCollide(!gt->mAllowSoccerPickup);
       connectionList.push_back(walk);
+   }
 
    // Now add the connections to the game type, from highest rating to lowest --> will create ratings-based teams
    connectionList.sort(RatingSort);
@@ -938,6 +943,22 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
    if(!stricmp(argv[0], "BotsPerTeam"))
       return;
 
+   if(!stricmp(argv[0], "SoccerPickup"))
+   {
+      if(argc < 2)
+      {
+         logprintf(LogConsumer::LogWarning, "Improperly formed SoccerPickup parameter in level \"%s\"", origFilename.c_str());
+         return;
+      }
+      if(getGameType())
+         getGameType()->mAllowSoccerPickup =
+            !stricmp(argv[0], "yes") ||
+            !stricmp(argv[0], "enable") ||
+            !stricmp(argv[0], "on") ||
+            !stricmp(argv[0], "activate") ||
+            !stricmp(argv[0], "1");
+      return;
+   }
 
    if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int
    {                                      //    specifiying how many pixels in a grid cell)
