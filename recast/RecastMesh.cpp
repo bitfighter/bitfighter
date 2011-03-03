@@ -918,7 +918,18 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 }
 
 
+typedef pair<int,int> zonekey;
+
+
+bool zonemapValSort(const pair<zonekey, int>& a, const pair<zonekey, int>& b)
+{
+   return a.second < b.second;
+}
+
+
 #include "../zap/point.h"     // For Rect
+#include <map>                // For zonemap map
+#include <algorithm>          // For max_element
 
 // nvp = max number of points per polygon
 
@@ -1021,7 +1032,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	}
 	unsigned short* tmpPoly = &polys[ntris * nvp];     // Use a little reserved space at the end for a temp poly
 
-		
+
 	for (int j = 0; j < vertCount; ++j)
 		indices[j] = j;
 			
@@ -1036,9 +1047,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
 	}
 
-   // if vertCount != mesh.nverts, then we passed in some duplicate verts
-//   rcAssert(vertCount == mesh.nverts);    // Normally not necessarily true, but with Triangle output, there should be no dupes
-		
+
    // NOTE: firstVert is an indexed list of the first vertex in each triangle
    //       nextVert is the same for the second vertex
 	// Build initial polygons from triangles -- one triangle goes into each polygon
@@ -1058,52 +1067,82 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	}
   
 
+   map<zonekey,int> zonemap;
+   map<int,int> zoneremap;    // For keeping track of zones whose numbers change
+
+   for (int i = 0; i < npolys-1; i++)
+	{
+		unsigned short* pi = &polys[i*nvp];       // pj --> poly-j
+		for (int j = i + 1; j < npolys; j++)
+      {
+         unsigned short* pj = &polys[j*nvp];
+
+         int ea, eb;
+         int len = getPolyMergeValue(pi, pj, mesh.verts, ea, eb, nvp);
+
+         if(len > -1)
+         {
+            zonemap[zonekey(i,j)] = len;
+         }
+      }
+   }
+
+
 	// Merge polygons.
 	if (nvp > 3)      // If nvp == 3, we're already there; each polygon will be a copy of an input triangle 
 	{
 		for(;;)
 		{
 			// Find best polygons to merge.
-			int longestSegmentLen = 0;
-			int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
-				
-			for (int j = 0; j < npolys-1; ++j)
-			{
-				unsigned short* pj = &polys[j*nvp];       // pj --> poly-j
-				for (int k = j+1; k < npolys; ++k)
-				{
-					unsigned short* pk = &polys[k*nvp];    // pk --> poly-k
-					int ea, eb;
-					int len = getPolyMergeValue(pj, pk, mesh.verts, ea, eb, nvp);    // sets ea, eb, returns len of merging edge, -1 if invalid
-					if (len > longestSegmentLen)
-					{
-						longestSegmentLen = len;
-						bestPa = j;       // bestPa and bestPb store the indices of the polys we will want to merge next 
-						bestPb = k;
-						bestEa = ea;      // ea'th edge of A is same as eb'th edge of B...
-						bestEb = eb;      // ...so bestEa and bestEb refer to same edge, the best candidate to remove next
-					}
-				}
-			}
-				
-			if (longestSegmentLen == 0)      // Could not merge any polygons, stop.
+
+			zonekey zk = max_element(zonemap.begin(), zonemap.end(), zonemapValSort)->first;
+
+         if(zonemap[zk] <= 0)       // No more mergeable polygons... time to stop
             break;
-         else                             // Merge
-			{
-				unsigned short* pa = &polys[bestPa*nvp];
-				unsigned short* pb = &polys[bestPb*nvp];
-				mergePolys(pa, pb, bestEa, bestEb, tmpPoly, nvp);
-				memcpy(pb, &polys[(npolys-1)*nvp], sizeof(unsigned short)*nvp);
+
+ 
+         int i = zk.first;
+         int j = zk.second;
+
+         while(zoneremap[i] > 0)
+            i = zoneremap[i] - 1;
+
+         while(zoneremap[j] > 0)
+            j = zoneremap[j] - 1;
+
+         if(i > j)
+            rcSwap(i,j);
+
+         unsigned short* pa = &polys[i * nvp];      
+         unsigned short* pb = &polys[j * nvp];
+
+         int ea, eb;
+         int len = getPolyMergeValue(pa, pb, mesh.verts, ea, eb, nvp);
+
+         if(len > 0)      // Make sure poly is still mergeable
+         {
+				//unsigned short* pa = &polys[bestPa*nvp];
+				//unsigned short* pb = &polys[bestPb*nvp];
+				mergePolys(pa, pb, ea, eb, tmpPoly, nvp);
+				memset(pb, 0, sizeof(unsigned short)*nvp);
 				npolys--;
-			}
+            printf("Merged %d & %d\n",i,j);
+            zoneremap[j] = i + 1;
+         }
+
+         zonemap[zk] = -1;
 		}
 	}
 		
-	// Copy polygons over from polys into mesh.polys, skipping every second slot
-	for (int j = 0; j < npolys; ++j)
+	// Copy polygons over from polys into mesh.polys, skipping every second slot for some reason
+	for (int j = 0; j < ntris; ++j)
 	{
-      rcAssert(j == mesh.npolys);     // TODO Delete
+
+      //rcAssert(j == mesh.npolys);     // TODO Delete
 		unsigned short* p = &mesh.polys[j*nvp*2];
+      if(p == 0)     // This is a deleted poly
+         continue;
+
 		unsigned short* q = &polys[j*nvp];
 
 		for (int k = 0; k < nvp; ++k)
@@ -1119,7 +1158,6 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			return false;
 		}
 	}
-	
    
 	
 	// Remove edge vertices.
