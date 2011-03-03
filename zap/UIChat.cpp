@@ -51,7 +51,7 @@ U32 AbstractChat::mMessageCount = 0;
 
 // By declaring these here, we avoid link errors
 ChatMessage AbstractChat::mMessages[MESSAGES_TO_RETAIN];
-std::map<string, Color, strCmp> AbstractChat::mFromColors;       // Map nicknames to colors
+std::map<string, Color> AbstractChat::mFromColors;       // Map nicknames to colors
 
 
 AbstractChat::AbstractChat()

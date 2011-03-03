@@ -65,21 +65,14 @@ public:
 ///////////////////////////////////////
 ///////////////////////////////////////
 
-// For sorting our color-nick map, which we'll never do, so this is essentially a dummy
-struct strCmp {
-   bool operator()( string s1, string s2 ) const {
-      return s1 < s2;
-   }
-};
-
 // All our chat classes will inherit from this
 class AbstractChat
 {
 private:
-   static std::map<string, Color, strCmp> mFromColors;       // Map nicknames to colors
+   static std::map<string, Color> mFromColors;       // Map nicknames to colors
    static U32 mColorPtr;
-   Color getNextColor();                                     // Get next available color for a new nick
-   static const S32 MESSAGES_TO_RETAIN = 80;                 // Plenty for now... far too many, really
+   Color getNextColor();                             // Get next available color for a new nick
+   static const S32 MESSAGES_TO_RETAIN = 80;         // Plenty for now... far too many, really
 
    static U32 mMessageCount;
 
