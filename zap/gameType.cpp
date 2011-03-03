@@ -144,6 +144,8 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mEngineerEnabled = false;     // Is engineer module allowed?  By default, no
    mShowAllBots = false;
    mTotalGamePlay = 0;
+   mAllowSoccerPickup = true;
+   mHaveSoccer = false;           // level have soccer balls, used for s2cSoccerCollide
 }
 
 

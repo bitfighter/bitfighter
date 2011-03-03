@@ -130,6 +130,8 @@ public:
    U32 mVoteTime;
    bool mChatMute;
 
+   bool mSoccerCollide;
+
    void linkToClientList();
    Vector<LevelInfo> mLevelInfos;
 
@@ -272,6 +274,8 @@ public:
    TNL_DECLARE_RPC(c2sRenameClient, (StringTableEntry newName));
 
    TNL_DECLARE_RPC(c2sRequestCurrentLevel, ());
+
+   TNL_DECLARE_RPC(s2cSoccerCollide, (bool enable));
 
    static GameConnection *getClientList();
    static S32 getClientCount();

@@ -362,8 +362,13 @@ void SoccerBallItem::onAddedToGame(Game *theGame)
    //   theGame->getGameType()->addItemOfInterest(this);
 
    //((SoccerGameType *) theGame->getGameType())->setBall(this);
-   SoccerGameType * gt = dynamic_cast<SoccerGameType *>(theGame->getGameType());
-   if(gt) gt->setBall(this);
+   GameType *gt = theGame->getGameType();
+   if(gt)
+   {
+      gt->mHaveSoccer = true;
+      SoccerGameType * sgt = dynamic_cast<SoccerGameType *>(gt);
+      if(sgt) sgt->setBall(this);
+   }
    getGame()->mObjectsLoaded++;
 }
 
@@ -497,8 +502,12 @@ bool SoccerBallItem::collide(GameObject *hitObject)
       mLastPlayerTouch = ship;
       mLastPlayerTouchTeam = mLastPlayerTouch->getTeam();      // Used to credit team if ship quits game before goal is scored
       mLastPlayerTouchName = mLastPlayerTouch->getName();      // Used for making nicer looking messages in same situation
+      GameType *gt = getGame()->getGameType();
+      if(gt && !gt->mAllowSoccerPickup)
+         return true;
+      
+      
       mDroppedTimer.clear();
-
       this->mountToShip(ship);
       mLastPlayerMounted = ship;
       mPickupTime = getGame()->getCurrentTime();
@@ -506,24 +515,24 @@ bool SoccerBallItem::collide(GameObject *hitObject)
          // Not needed
          //if(getGame()->getGameType())
          //   getGame()->getGameType()->c2sResendItemStatus(mItemId);
-         return false; //let server do the collision.
+       if(gClientGame && gClientGame->getConnectionToServer())
+          return gClientGame->getConnectionToServer()->mSoccerCollide;
+       return false; //let server do the collision.
     }
    }
    else if(hitObject->getObjectTypeMask() & GoalZoneType)      // SCORE!!!!
    {
       GoalZone *goal = dynamic_cast<GoalZone *>(hitObject);
 
-      if(goal)    
+      if(goal && !isGhost())
       {
-         if(!isGhost())
-         {
-            SoccerGameType *g = dynamic_cast<SoccerGameType *>(getGame()->getGameType());
-            if(g) g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->mScore);
-         }
+         SoccerGameType *g = dynamic_cast<SoccerGameType *>(getGame()->getGameType());
+         if(g) g->scoreGoal(mLastPlayerTouch, mLastPlayerTouchName, mLastPlayerTouchTeam, goal->getTeam(), goal->mScore);
 
          static const S32 POST_SCORE_HIATUS = 1500;
          mSendHomeTimer.reset(POST_SCORE_HIATUS);
       }
+      return false;
    }
    return true;
 }

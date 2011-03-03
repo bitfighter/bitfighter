@@ -265,6 +265,9 @@ public:
    bool mBetweenLevels;          // We'll need to prohibit certain things (like team changes) when game is in an "intermediate" state
    bool mGameOver;               // Set to true when an end condition is met
 
+   bool mAllowSoccerPickup;      // soccer balls only.
+   bool mHaveSoccer;             // does it have soccer balls? used to determine weather or not to send s2cSoccerCollide
+
    enum {
       MaxPing = 999,
       DefaultGameTime = 10 * 60 * 1000,
