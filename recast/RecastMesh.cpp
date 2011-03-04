@@ -390,17 +390,10 @@ inline bool uleft(const unsigned short* a, const unsigned short* b, const unsign
 
 
 // Does no merging, returns length^2 of segment that will be merged, or -1 if merge is invalid
-static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
-							 const unsigned short* verts, int& ea, int& eb,
-							 const int nvp)
+static int getPolyMergeValue_work(unsigned short* pa, unsigned short* pb,
+							             const unsigned short* verts, int& ea, int& eb,
+							             const int na, const int nb)
 {
-	const int na = countPolyVerts(pa, nvp);      // na --> number of verts in a
-	const int nb = countPolyVerts(pb, nvp);      // nb --> number of verts in b
-	
-	// If the merged polygon would be too big, do not merge.
-	if (na+nb-2 > nvp)
-		return -1;
-	
 	// Check if the polygons share an edge.
 	ea = -1;
 	eb = -1;
@@ -469,6 +462,31 @@ static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
 	
 	return dx*dx + dy*dy;         // length of edge being merged along
 }
+
+
+// Wraps getPolyMergeValue_work, slightly optimized for triangles
+static int getTriMergeValue(unsigned short* pa, unsigned short* pb, const unsigned short* verts)
+{
+   int ea, eb;
+   return getPolyMergeValue_work(pa, pb, verts, ea, eb, 3, 3);
+}
+
+
+// Wraps getPolyMergeValue_work, counts vertices and checks if merged poly would be too big
+static int getPolyMergeValue(unsigned short* pa, unsigned short* pb,
+							 const unsigned short* verts, int& ea, int& eb,
+							 const int nvp)
+{
+	const int na = countPolyVerts(pa, nvp);      // na --> number of verts in a
+	const int nb = countPolyVerts(pb, nvp);      // nb --> number of verts in b
+
+   // If the merged polygon would be too big, do not merge.
+	if (na+nb-2 > nvp)
+		return -1;
+
+   return getPolyMergeValue_work(pa, pb, verts, ea, eb, na, nb);
+}
+	
 
 static void mergePolys(unsigned short* pa, unsigned short* pb, int ea, int eb,
 					   unsigned short* tmp, const int nvp)
@@ -853,11 +871,6 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 			int longestMergableEdge = 0;
 			int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
 			
-         // Loop through all polygons to find longest segment along when we can merge adjacent triangles
-         // It is this repeated looping that (probably) slows things down.  Can results of getPolyMergeValue() be cached, and perhaps
-         // sorted to avoid this comparison over and over?  Could keep sorted list of longestMergeEdge, removing values for polygons being
-         // merged, adding values for polys being created, then just pull from the top of the list every time.  That should have a dramatic
-         // improvement on the speed here.
 			for (int j = 0; j < npolys-1; ++j)
 			{
 				unsigned short* pj = &polys[j*nvp];
@@ -917,19 +930,28 @@ static bool removeVertex(rcContext* ctx, rcPolyMesh& mesh, const unsigned short 
 	return true;
 }
 
+struct rect { int minx, miny, maxx, maxy; };
 
-typedef pair<int,int> zonekey;
+struct mergePriority {
+   int i;
+   int j;
+   int priority;
+   
+   mergePriority(int i, int j, int priority) { this->i = i; this->j = j, this->priority = priority; }    // Constructor
+};
 
 
-bool zonemapValSort(const pair<zonekey, int>& a, const pair<zonekey, int>& b)
+// Sorts in ascending order; highest priority items will be at the end of the list
+bool prioritySort(const mergePriority& a, const mergePriority& b)
 {
-   return a.second < b.second;
+   return a.priority < b.priority;
 }
 
 
 #include "../zap/point.h"     // For Rect
 #include <map>                // For zonemap map
-#include <algorithm>          // For max_element
+#include <vector>             // For piority list
+#include <algorithm>          // For sorting the piority list
 
 // nvp = max number of points per polygon
 
@@ -956,13 +978,13 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	int maxVertices = vertCount;
 	int maxTris = ntris;    // Was vertCount - 2
 
-	rcScopedDelete<unsigned char> vflags = (unsigned char*)rcAlloc(sizeof(unsigned char)*maxVertices, RC_ALLOC_TEMP);
+	/*rcScopedDelete<unsigned char> vflags = (unsigned char*)rcAlloc(sizeof(unsigned char)*maxVertices, RC_ALLOC_TEMP);
 	if (!vflags)
 	{
 		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'mesh.verts' (%d).", maxVertices);
 		return false;
 	}
-	memset(vflags, 0, maxVertices);
+	memset(vflags, 0, maxVertices);*/
 	
 	mesh.verts = (unsigned short*)rcAlloc(sizeof(unsigned short)*maxVertices*3, RC_ALLOC_PERM);
 	if (!mesh.verts)
@@ -976,12 +998,16 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'mesh.polys' (%d).", maxTris*nvp*2);
 		return false;
 	}
+
+   // Don't need
 	mesh.regs = (unsigned short*)rcAlloc(sizeof(unsigned short)*maxTris, RC_ALLOC_PERM);
 	if (!mesh.regs)
 	{
 		ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Out of memory 'mesh.regs' (%d).", maxTris);
 		return false;
 	}
+
+   // Don't need
 	mesh.areas = (unsigned char*)rcAlloc(sizeof(unsigned char)*maxTris, RC_ALLOC_PERM);
 	if (!mesh.areas)
 	{
@@ -1043,8 +1069,8 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 		indices[j] = addVertex((unsigned short)v[0], (unsigned short)v[1], (unsigned short)v[2],
 								mesh.verts, firstVert, nextVert, mesh.nverts);
 
-		if (v[3] & RC_BORDER_VERTEX)        // For tiling purposes... not currently used with Bitfighter
-			vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
+		//if (v[3] & RC_BORDER_VERTEX)        // For tiling purposes... not currently used with Bitfighter
+		//	vflags[indices[j]] = 1;          // --> Mark this vertex for later removal
 	}
 
 
@@ -1057,7 +1083,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	for (int j = 0; j < ntris; ++j)
 	{
 		int* t = &tris[j*3];
-		if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])     // Make sure no dupe vertices
+		if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])           // Ensure no dupes -- rounds verts to nearest 2
 		{
 			polys[npolys*nvp+0] = (unsigned short)indices[t[0]];
 			polys[npolys*nvp+1] = (unsigned short)indices[t[1]];
@@ -1065,27 +1091,54 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 			npolys++;
 		}
 	}
+
+
+   // Calc bounds of each triangle so we can more quickly eliminate non-neighboring zone pairs
+   Vector<Zap::Rect> polyExtents;
+   
+   for(int i = 0; i < npolys; i++)
+   {
+      int minx = 0xFFFF, miny = 0xFFFF, maxx = 0, maxy = 0;
+      unsigned short* p = &polys[i*nvp];
+      
+      for (int j = 0; j < 3; j++)               // Triangles generally have 3 verts
+      {
+         int x = (int)mesh.verts[p[j]*3+0];
+         int y = (int)mesh.verts[p[j]*3+2];
+
+         if(x < minx) minx = x;
+         if(y < miny) miny = y;
+         if(x > maxx) maxx = x;
+         if(y > maxy) maxy = y;
+      }
+
+      polyExtents.push_back(Zap::Rect(F32(minx), F32(miny), F32(maxx), F32(maxy)));
+   }
   
 
-   map<zonekey,int> zonemap;
-   map<int,int> zoneremap;    // For keeping track of zones whose numbers change
+   vector<mergePriority> mergePriorityList;     // Ranked list of which zones we'll merge, and in which order
+   map<int,int> zoneRemap;                      // For keeping track of zones whose numbers change
 
    for (int i = 0; i < npolys-1; i++)
 	{
-		unsigned short* pi = &polys[i*nvp];       // pj --> poly-j
+		unsigned short* pi = &polys[i*nvp];       // pi --> pointer to the ith poly
+
 		for (int j = i + 1; j < npolys; j++)
       {
-         unsigned short* pj = &polys[j*nvp];
+         if(!polyExtents[i].intersectsOrBorders(polyExtents[j]))     // If bounding boxes don't overlap, move on
+            continue;
 
-         int ea, eb;
-         int len = getPolyMergeValue(pi, pj, mesh.verts, ea, eb, nvp);
+         unsigned short* pj = &polys[j*nvp];    // pj --> pointer to the jth poly
 
-         if(len > -1)
-         {
-            zonemap[zonekey(i,j)] = len;
-         }
+         int len = getTriMergeValue(pi, pj, mesh.verts);
+
+         if(len > 0)
+            mergePriorityList.push_back(mergePriority(i,j,len));
       }
    }
+
+   // Sort mergePriorityList so the highest priority merges come at the end; then we can just work backwards
+   sort(mergePriorityList.begin(), mergePriorityList.end(), prioritySort);   
 
 
 	// Merge polygons.
@@ -1093,25 +1146,24 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	{
 		for(;;)
 		{
-			// Find best polygons to merge.
 
-			zonekey zk = max_element(zonemap.begin(), zonemap.end(), zonemapValSort)->first;
-
-         if(zonemap[zk] <= 0)       // No more mergeable polygons... time to stop
+         if(mergePriorityList.size() == 0)                  // No more mergeable polygons... time to stop
             break;
 
+			// Find best polygons to merge
+         mergePriority mergees = mergePriorityList.back();  // Retrieve last element -- this will be our next merge candidate
+         mergePriorityList.pop_back();                      // Remove last element from list
+
  
-         int i = zk.first;
-         int j = zk.second;
+         int i = mergees.i;
+         int j = mergees.j;
 
-         while(zoneremap[i] > 0)
-            i = zoneremap[i] - 1;
+         // Figure out if polys i & j have been remapped elsewhere...
+         while(zoneRemap[i] > 0)
+            i = zoneRemap[i] - 1;
 
-         while(zoneremap[j] > 0)
-            j = zoneremap[j] - 1;
-
-         if(i > j)
-            rcSwap(i,j);
+         while(zoneRemap[j] > 0)
+            j = zoneRemap[j] - 1;
 
          unsigned short* pa = &polys[i * nvp];      
          unsigned short* pb = &polys[j * nvp];
@@ -1119,28 +1171,22 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
          int ea, eb;
          int len = getPolyMergeValue(pa, pb, mesh.verts, ea, eb, nvp);
 
-         if(len > 0)      // Make sure poly is still mergeable
+         if(len > 0)      // Make sure poly is still mergeable -- previous mergings may have rendered this pair invalid
          {
-				//unsigned short* pa = &polys[bestPa*nvp];
-				//unsigned short* pb = &polys[bestPb*nvp];
 				mergePolys(pa, pb, ea, eb, tmpPoly, nvp);
-				memset(pb, 0, sizeof(unsigned short)*nvp);
-				npolys--;
-            printf("Merged %d & %d\n",i,j);
-            zoneremap[j] = i + 1;
+				memset(pb, 0, sizeof(unsigned short)*nvp);    // Erase mergee
+            zoneRemap[j] = i + 1;                         // Record that zone j is now part of zone i
+            npolys--;
          }
-
-         zonemap[zk] = -1;
 		}
 	}
 		
 	// Copy polygons over from polys into mesh.polys, skipping every second slot for some reason
 	for (int j = 0; j < ntris; ++j)
 	{
-
-      //rcAssert(j == mesh.npolys);     // TODO Delete
 		unsigned short* p = &mesh.polys[j*nvp*2];
-      if(p == 0)     // This is a deleted poly
+
+      if(p == 0)     // This is a deleted poly... move along, nothing to see...
          continue;
 
 		unsigned short* q = &polys[j*nvp];
@@ -1160,27 +1206,27 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	}
    
 	
-	// Remove edge vertices.
-	for (int i = 0; i < mesh.nverts; ++i)
-	{
-		if (vflags[i])    // Never true for Bitfighter?
-		{
-			if (!canRemoveVertex(ctx, mesh, (unsigned short)i))
-				continue;
-			if (!removeVertex(ctx, mesh, (unsigned short)i, maxTris))
-			{
-				// Failed to remove vertex
-				ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Failed to remove edge vertex %d.", i);
-				return false;
-			}
-			// Remove vertex
-			// Note: mesh.nverts is already decremented inside removeVertex()!
-         // I don't think this is ever hit by Bitfighter
-			for (int j = i; j < mesh.nverts; ++j)
-				vflags[j] = vflags[j+1];
-			--i;
-		}
-	}
+	//// Remove edge vertices.
+	//for (int i = 0; i < mesh.nverts; ++i)
+	//{
+	//	if (vflags[i])    // Never true for Bitfighter?
+	//	{
+	//		if (!canRemoveVertex(ctx, mesh, (unsigned short)i))
+	//			continue;
+	//		if (!removeVertex(ctx, mesh, (unsigned short)i, maxTris))
+	//		{
+	//			// Failed to remove vertex
+	//			ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: Failed to remove edge vertex %d.", i);
+	//			return false;
+	//		}
+	//		// Remove vertex
+	//		// Note: mesh.nverts is already decremented inside removeVertex()!
+ //        // I don't think this is ever hit by Bitfighter
+	//		for (int j = i; j < mesh.nverts; ++j)
+	//			vflags[j] = vflags[j+1];
+	//		--i;
+	//	}
+	//}
 	
 	// Calculate adjacency.
 	if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
@@ -1211,6 +1257,7 @@ bool rcBuildPolyMesh(rcContext* ctx, int nvp, const Zap::Rect &bounds, int* vert
 	
 	return true;
 }
+
 
 bool rcMergePolyMeshes(rcContext* ctx, rcPolyMesh** meshes, const int nmeshes, rcPolyMesh& mesh)
 {

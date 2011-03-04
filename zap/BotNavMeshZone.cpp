@@ -893,28 +893,18 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
 
 
-      /// test data
-      static int pts[] = { 0,0,0,0,  200,0,0,0,  200,0,200,0,  0,0,200,0,  100,0,300,0 };
-      static int tris[] = { 0,1,2,  0,2,3,  2,4,3 };
-
-      
-      //rcBuildPolyMesh(&context, 10, Rect(Point(0,0),Point(200,300)), pts, ARRAYSIZE(pts)/5, tris, ARRAYSIZE(tris)/3, mesh);
-
-      /// end test
-
-
-      // 10 is arbitrary
+      // 6 is max points detour can handle
       bounds.offset(Point(FIX,FIX));
-      rcBuildPolyMesh(&context, 10 , bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
+      rcBuildPolyMesh(&context, 6, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
    
       const S32 bytesPerVertex = 3;
-        // dump verts
-      for(S32 i = 0; i < mesh.nverts; i++)
-      {
-         const U16 *vert = &mesh.verts[i * bytesPerVertex];
-         logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
-       }
+      //  // dump verts
+      //for(S32 i = 0; i < mesh.nverts; i++)
+      //{
+      //   const U16 *vert = &mesh.verts[i * bytesPerVertex];
+      //   logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
+      // }
 
 
       // Visualize rcPolyMesh
@@ -930,7 +920,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
             const U16 *vert = &mesh.verts[mesh.polys[(i * 2 * mesh.nvp + j)] * bytesPerVertex];
 
-            logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[(i * 2 * mesh.nvp + j)],vert[0]-FIX,vert[2]-FIX);
+            //logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[(i * 2 * mesh.nvp + j)],vert[0]-FIX,vert[2]-FIX);
             botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
          }
    
