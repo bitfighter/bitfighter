@@ -851,10 +851,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    in.holelist = holes.address();
 
    // Note the q param seems to make no difference in speed of trinagulation, but makes much prettier triangles!
+   // Removing q does make a big difference in the speed of the aggregation of the triangles, at the cost of uglier zones
    // X option makes small but consistent improvement in performance
 
    U32 done3 = Platform::getRealMilliseconds();
-   triangulate((char*)"zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
+   triangulate((char*)"zXpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
    U32 done4 = Platform::getRealMilliseconds();
 
    bool useRecast = true;
@@ -862,29 +863,17 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    {
       S32 FIX = S16_MAX;
 
-      // Build inputs for Recast step 6.5 -- simulates return of traingulate() method, 1034
-
       int ntris = out.numberoftriangles;
-      Vector<int> intPoints(out.numberofpoints * 4);     // 4 entries per point: x,z,y,?
+      Vector<int> intPoints(out.numberofpoints * 2);     // 2 entries per point: x,y
 
-      for(S32 i = 0; i < out.numberofpoints; i++)
-      {
-         intPoints[i*4] = S32(out.pointlist[i*2] < 0 ? out.pointlist[i*2] - 0.5 : out.pointlist[i*2] + 0.5);            // x
-         intPoints[i*4 + 1] = 1;                                                                                  // z, recast calls this y
-         intPoints[i*4 + 2] = S32(out.pointlist[i*2+1] < 0 ? out.pointlist[i*2+1] - 0.5 : out.pointlist[i*2+1] + 0.5);  // y, recast calls this z
-         intPoints[i*4 + 3] = 0;                            // ?
-
-         intPoints[i*4] += FIX;
-         intPoints[i*4 + 2] += FIX;
-      }
-   
+      for(S32 i = 0; i < out.numberofpoints * 2; i++)
+         intPoints[i] = S32(out.pointlist[i] < 0 ? out.pointlist[i] - 0.5 : out.pointlist[i] + 0.5) + FIX;  
  
       // cont.nverts = out.numberofpoints;
       // cont.verts = intPoints.address();      //<== pointer to array of points in int format
       // tris = out.trianglelist
 
 
-      rcContext context(true);      // TODO: Change this to false
       rcPolyMesh mesh;
 
       // TODO: Put these into real tests, and handle conditions better  
@@ -893,12 +882,12 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
 
 
-      // 6 is max points detour can handle
+      // 6 is arbitrary --> smaller numbers require less memory
       bounds.offset(Point(FIX,FIX));
-      rcBuildPolyMesh(&context, 6, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
+      rcBuildPolyMesh(6, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
    
-      const S32 bytesPerVertex = 3;
+      const S32 bytesPerVertex = 2;
       //  // dump verts
       //for(S32 i = 0; i < mesh.nverts; i++)
       //{
@@ -920,8 +909,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
             const U16 *vert = &mesh.verts[mesh.polys[(i * 2 * mesh.nvp + j)] * bytesPerVertex];
 
-            //logprintf("poly/i = %d  vert = %d  starting vert: %d,  x,y=%d,%d",i,j,mesh.polys[(i * 2 * mesh.nvp + j)],vert[0]-FIX,vert[2]-FIX);
-            botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[2] - FIX));
+            botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[1] - FIX));
          }
    
          if(botzone->mPolyBounds.size() > 0)
@@ -941,7 +929,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       {
          BotNavMeshZone *botzone = new BotNavMeshZone();
 
-		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])), F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
+		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])),   F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
 		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
 		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));

@@ -96,15 +96,8 @@
   <ItemGroup>
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
-    <ClCompile Include="..\recast\Recast.cpp" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
-    <ClCompile Include="..\recast\RecastArea.cpp" />
-    <ClCompile Include="..\recast\RecastContour.cpp" />
-    <ClCompile Include="..\recast\RecastFilter.cpp" />
     <ClCompile Include="..\recast\RecastMesh.cpp" />
-    <ClCompile Include="..\recast\RecastMeshDetail.cpp" />
-    <ClCompile Include="..\recast\RecastRasterization.cpp" />
-    <ClCompile Include="..\recast\RecastRegion.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
     <ClCompile Include="..\Triangle\triangle.c" />
     <ClCompile Include="..\Triangle\tricall.c" />
@@ -204,7 +197,6 @@
     <ClInclude Include="..\master\masterInterface.h" />
     <ClInclude Include="..\recast\Recast.h" />
     <ClInclude Include="..\recast\RecastAlloc.h" />
-    <ClInclude Include="..\recast\RecastAssert.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />
     <ClInclude Include="..\Triangle\triangle.h" />
     <ClInclude Include="..\zap\barrier.h" />

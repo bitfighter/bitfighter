@@ -124,9 +124,6 @@ void rcFreePolyMesh(rcPolyMesh* pmesh)
 	if (!pmesh) return;
 	rcFree(pmesh->verts);
 	rcFree(pmesh->polys);
-	rcFree(pmesh->regs);
-	rcFree(pmesh->flags);
-	rcFree(pmesh->areas);
 	rcFree(pmesh);
 }
 
