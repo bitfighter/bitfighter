@@ -384,8 +384,6 @@ bool prioritySort(const mergePriority& a, const mergePriority& b)
 
 bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
 {
-   mesh.bounds.set(bounds);
-	
 	int maxVertices = vertCount;
 	int maxTris = ntris;    // Was vertCount - 2
 	
