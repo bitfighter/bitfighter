@@ -62,7 +62,7 @@ static bool buildMeshAdjacency(unsigned short* polys, const int npolys,
 	
 	for (int i = 0; i < npolys; ++i)
 	{
-		unsigned short* t = &polys[i*vertsPerPoly*2];
+		unsigned short* t = &polys[i*vertsPerPoly];
 		for (int j = 0; j < vertsPerPoly; ++j)
 		{
 			unsigned short v0 = t[j];
@@ -86,7 +86,7 @@ static bool buildMeshAdjacency(unsigned short* polys, const int npolys,
 	
 	for (int i = 0; i < npolys; ++i)
 	{
-		unsigned short* t = &polys[i*vertsPerPoly*2];
+		unsigned short* t = &polys[i*vertsPerPoly];
 		for (int j = 0; j < vertsPerPoly; ++j)
 		{
 			unsigned short v0 = t[j];
@@ -553,22 +553,22 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
          if(len > 0)      // Make sure poly is still mergeable -- previous mergings may have rendered this pair invalid
          {
 				mergePolys(pa, pb, ea, eb, tmpPoly, nvp);
-				memset(pb, 0, sizeof(unsigned short)*nvp);    // Erase mergee
+				memset(pb, 0xffff, sizeof(unsigned short)*nvp);    // Erase mergee
             zoneRemap[j] = i + 1;                         // Record that zone j is now part of zone i
             npolys--;
          }
 		}
 	}
 		
-	// Copy polygons over from polys into mesh.polys, skipping every second slot for some reason
-	for (int j = 0; j < ntris; ++j)
+
+   memcpy(mesh.polys, polys, ntris*nvp*sizeof(unsigned short*));
+   mesh.npolys = ntris;
+
+	//// Copy polygons over from polys into mesh.polys, skipping every second slot for some reason
+	/*for (int j = 0; j < ntris; ++j)
 	{
-		unsigned short* p = &mesh.polys[j*nvp*2];
-
-      if(p == 0)     // This is a deleted poly... move along, nothing to see...
-         continue;
-
 		unsigned short* q = &polys[j*nvp];
+		unsigned short* p = &mesh.polys[j*nvp*2];
 
 		for (int k = 0; k < nvp; ++k)
 			p[k] = q[k];
@@ -580,15 +580,15 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 			logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
 			return false;
 		}
-	}
+	}*/
    
 	
 	// Calculate adjacency
-	if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
-	{
-		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
-		return false;
-	}
+	//if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
+	//{
+	//	logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
+	//	return false;
+	//}
 
 	if (mesh.nverts > 0xffff)
 	{

@@ -909,11 +909,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
          for(S32 j = 0; j < mesh.nvp; j++)
          {
-            if(mesh.polys[(i * 2 * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
+            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
                break;
          
 
-            const U16 *vert = &mesh.verts[mesh.polys[(i * 2 * mesh.nvp + j)] * bytesPerVertex];
+            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
 
             botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[1] - FIX));
          }
