@@ -241,101 +241,13 @@ struct IniSettings      // With defaults specified
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
 
+   S32 botZoneGeneratorMode;
+   bool useCache;
    U32 version;
 
 
-   // Set default values here
-   void init()
-   {
-      controlsRelative = false;          // Relative controls is lame!
-      displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
-      oldDisplayMode = DISPLAY_MODE_UNKNOWN;
-      joystickType = NoController;
-      echoVoice = false;
-
-      sfxVolLevel = 1.0;                 // SFX volume (0 = silent, 1 = full bore)
-      musicVolLevel = 1.0;               // Music volume (range as above)
-      voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
-      alertsVolLevel = 1.0;              // Audio alerts volume (when in dedicated server mode only, range as above)
-
-      sfxSet = sfxModernSet;             // Start off with our modern sounds
-
-      starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
-      useLineSmoothing = false;          // Enable/disable anti-aliasing
-      diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
-      enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
-
-      showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
-      verboseHelpMessages = true;        // If true, we'll show more handholding messages
-      showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
-      allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
-      allowGetMap = false;               // Disabled by default -- many admins won't want this
-
-      maxDedicatedFPS = 100;             // Max FPS on dedicated server
-      maxFPS = 100;                      // Max FPS on client/non-dedicated server
-
-      inputMode = Keyboard;              // Joystick or Keyboard
-      masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server
-      name = "";                         // Player name (none by default)
-      defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
-      lastName = "ChumpChange";          // Name the user entered last time they ran the game
-      lastPassword = "";
-      lastEditorName = "";               // No default editor level name
-      hostname = "Bitfighter host";      // Default host name
-      hostdescr = "";
-      maxPlayers = 127;
-      maxBots = 127;
-      serverPassword = "";               // Passwords empty by default
-      adminPassword = "";
-      levelChangePassword = "";
-      levelDir = "";
-
-      defaultRobotScript = "s_bot.bot";            
-         
-      wallFillColor.set(0,0,.15);
-      wallOutlineColor.set(0,0,1);
-
-      voteLength = 12;
-      voteLengthToChangeTeam = 10;
-      voteRetryLength = 30;
-      voteYesStrength = 5;
-      voteNoStrength = -5;
-      voteNothingStrength = -2;
-
-      useUpdater = true;
-
-      // Game window location when in windowed mode
-      winXPos = 100;
-      winYPos = 100;
-      winSizeFact = 1.0;
-
-      burstGraphicsMode = 1;
-		neverConnectDirect = false;
-
-      // Specify which events to log
-      logConnectionProtocol = false;
-      logNetConnection = false;
-      logEventConnection = false;
-      logGhostConnection = false;
-      logNetInterface = false;
-      logPlatform = false;
-      logNetBase = false;
-      logUDP = false;
-
-      logFatalError = true;       
-      logError = true;            
-      logWarning = true;          
-      logConnection = true;       
-      logLevelLoaded = true;      
-      logLuaObjectLifecycle = false;
-      luaLevelGenerator = true;   
-      luaBotMessage = true;       
-      serverFilter = false; 
-
-      logStats = true;            // Log statistics into ServerFilter log files
-
-      version = 0;
-   }
+   // Set default values in config.cpp, IniSettings::init()
+   void init();
 };
 
 

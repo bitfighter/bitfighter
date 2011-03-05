@@ -43,6 +43,107 @@
 namespace Zap
 {
 
+// Set default values here
+void IniSettings::init()
+{
+   controlsRelative = false;          // Relative controls is lame!
+   displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   oldDisplayMode = DISPLAY_MODE_UNKNOWN;
+   joystickType = NoController;
+   echoVoice = false;
+
+   sfxVolLevel = 1.0;                 // SFX volume (0 = silent, 1 = full bore)
+   musicVolLevel = 1.0;               // Music volume (range as above)
+   voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
+   alertsVolLevel = 1.0;              // Audio alerts volume (when in dedicated server mode only, range as above)
+
+   sfxSet = sfxModernSet;             // Start off with our modern sounds
+
+   starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
+   useLineSmoothing = false;          // Enable/disable anti-aliasing
+   diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
+   enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
+
+   showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
+   verboseHelpMessages = true;        // If true, we'll show more handholding messages
+   showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
+   allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
+   allowGetMap = false;               // Disabled by default -- many admins won't want this
+
+   maxDedicatedFPS = 100;             // Max FPS on dedicated server
+   maxFPS = 100;                      // Max FPS on client/non-dedicated server
+
+   inputMode = Keyboard;              // Joystick or Keyboard
+   masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server
+   name = "";                         // Player name (none by default)
+   defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
+   lastName = "ChumpChange";          // Name the user entered last time they ran the game
+   lastPassword = "";
+   lastEditorName = "";               // No default editor level name
+   hostname = "Bitfighter host";      // Default host name
+   hostdescr = "";
+   maxPlayers = 127;
+   maxBots = 127;
+   serverPassword = "";               // Passwords empty by default
+   adminPassword = "";
+   levelChangePassword = "";
+   levelDir = "";
+
+   defaultRobotScript = "s_bot.bot";            
+         
+   wallFillColor.set(0,0,.15);
+   wallOutlineColor.set(0,0,1);
+
+   voteLength = 12;
+   voteLengthToChangeTeam = 10;
+   voteRetryLength = 30;
+   voteYesStrength = 5;
+   voteNoStrength = -5;
+   voteNothingStrength = -2;
+
+   useUpdater = true;
+
+   // Game window location when in windowed mode
+   winXPos = 100;
+   winYPos = 100;
+   winSizeFact = 1.0;
+
+   burstGraphicsMode = 1;
+   neverConnectDirect = false;
+
+   // Specify which events to log
+   logConnectionProtocol = false;
+   logNetConnection = false;
+   logEventConnection = false;
+   logGhostConnection = false;
+   logNetInterface = false;
+   logPlatform = false;
+   logNetBase = false;
+   logUDP = false;
+
+   logFatalError = true;       
+   logError = true;            
+   logWarning = true;          
+   logConnection = true;       
+   logLevelLoaded = true;      
+   logLuaObjectLifecycle = false;
+   luaLevelGenerator = true;   
+   luaBotMessage = true;       
+   serverFilter = false; 
+
+   logStats = true;            // Log statistics into ServerFilter log files
+
+   useCache = true;
+   botZoneGeneratorMode = 2;
+      // 0   : off
+      // 1,2 : sam's rectangle zones (2 : removeUnusedNavMeshZones)
+      // 3,4 : sam's triangle zones (4 : removeUnusedNavMeshZones) - very slow
+      // 5,6 : Triangulate (6 : useRecast)
+
+   version = 0;
+}
+
+
 extern CIniFile gINI;
 extern IniSettings gIniSettings;
 extern string lcase(string strToConvert);
@@ -55,13 +156,13 @@ extern Vector<string> alwaysPingList;
 
 static void loadForeignServerInfo()
 {
-	// AlwaysPingList will default to broadcast, can modify the list in the INI
+   // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-	parseString(gINI.GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
+   parseString(gINI.GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
-	// In case the master server fails, we can use this list to try to find some game servers. 
-	//parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
+   // In case the master server fails, we can use this list to try to find some game servers. 
+   //parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
    gINI.GetAllValues("RecentForeignServers", prevServerListFromMaster);
 }
 
@@ -76,7 +177,7 @@ static void writeConnectionsInfo()
    }
 
    // Creates comma delimited list
-	gINI.SetValue("Connections", "AlwaysPingList", listToString(alwaysPingList, ','));
+   gINI.SetValue("Connections", "AlwaysPingList", listToString(alwaysPingList, ','));
 }
 
 
@@ -234,9 +335,11 @@ static void loadDiagnostics()
 static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
-	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
+   gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
    gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
+   gIniSettings.botZoneGeneratorMode = gINI.GetValueI("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
+   gIniSettings.useCache = gINI.GetValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 static void loadEffectsSettings()
@@ -291,7 +394,7 @@ static void loadHostConfiguration()
    gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "AllowDataConnections", gIniSettings.allowDataConnections);
 
    S32 fps = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
-	if(fps >= 1) 
+   if(fps >= 1) 
       gIniSettings.maxDedicatedFPS = fps; 
    // TODO: else warn?
 
@@ -309,12 +412,12 @@ static void loadHostConfiguration()
    gIniSettings.voteNothingStrength    = gINI.GetValueI("Host", "VoteNothingStrength", gIniSettings.voteNothingStrength );
 
 #ifdef BF_WRITE_TO_MYSQL
-	Vector<string> args;
-	parseString(gINI.GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
-	if(args.size() >= 1) gIniSettings.mySqlStatsDatabaseServer = args[0];
-	if(args.size() >= 2) gIniSettings.mySqlStatsDatabaseName = args[1];
-	if(args.size() >= 3) gIniSettings.mySqlStatsDatabaseUser = args[2];
-	if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
+   Vector<string> args;
+   parseString(gINI.GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
+   if(args.size() >= 1) gIniSettings.mySqlStatsDatabaseServer = args[0];
+   if(args.size() >= 2) gIniSettings.mySqlStatsDatabaseName = args[1];
+   if(args.size() >= 3) gIniSettings.mySqlStatsDatabaseUser = args[2];
+   if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
    if(gIniSettings.mySqlStatsDatabaseServer == "server" && gIniSettings.mySqlStatsDatabaseName == "dbname")
    {
       gIniSettings.mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
@@ -1203,7 +1306,7 @@ static void writeSettings()
    gINI.SetValueI (section, "Version", BUILD_VERSION);
 
    // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
-	if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
+   if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
       gINI.SetValueF (section, "LineWidth", gDefaultLineWidth);
 }
 
@@ -1341,6 +1444,8 @@ static void writeTesting()
    gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gINI.SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toRGBString());
    gINI.SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString());
+   gINI.SetValueI ("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
+   gINI.setValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 
@@ -1511,20 +1616,20 @@ static bool assignIfExists(const string &path)
 // ...Otherwise...
 //
 // If rootDataDir is specified then try
-//	    If levelDir is also specified try
-//      		rootDataDir/levels/levelDir
-//      		rootDataDir/levelDir
-//	    End
-//	
-//	    rootDataDir/levels
-// End	   ==> Don't use rootDataDir
+//       If levelDir is also specified try
+//            rootDataDir/levels/levelDir
+//            rootDataDir/levelDir
+//       End
+//   
+//       rootDataDir/levels
+// End      ==> Don't use rootDataDir
 //      
 // If iniLevelDir is specified
-//	    If levelDir is also specified try
-//      		iniLevelDir/levelDir
-//     End	
+//       If levelDir is also specified try
+//            iniLevelDir/levelDir
+//     End   
 //     iniLevelDir
-// End	 ==> Don't use iniLevelDir
+// End    ==> Don't use iniLevelDir
 //      
 // levels
 //

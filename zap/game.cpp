@@ -805,9 +805,7 @@ void ServerGame::buildOrLoadBotMeshZones()
 
    makeSureFolderExists(gConfigDirs.cacheDir);
 
-#ifndef SAM_ONLY // testing new levelgen - need to disable cache.
-   //if(getGameType()->mScriptName != "" || !readBotNavMeshZones(cacheFile.c_str()))
-#endif
+   if(getGameType()->mScriptName != "" || !gIniSettings.useCache || !readBotNavMeshZones(cacheFile.c_str()))
    {
       //if(!loadLevelFromFile(filename.c_str())) // might not be needed anymore.
       {
@@ -816,10 +814,8 @@ void ServerGame::buildOrLoadBotMeshZones()
       }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions bettween zones
-#ifndef SAM_ONLY // testing new levelgen - need to disable cache.
-      //if(getGameType()->mScriptName == "") 
-      //   writeBotNavMeshZones(cacheFile.c_str());
-#endif
+      if(getGameType()->mScriptName == "" && gIniSettings.useCache) 
+         writeBotNavMeshZones(cacheFile.c_str());
    }
 }
 
