@@ -156,13 +156,13 @@ extern Vector<string> alwaysPingList;
 
 static void loadForeignServerInfo()
 {
-	// AlwaysPingList will default to broadcast, can modify the list in the INI
+   // AlwaysPingList will default to broadcast, can modify the list in the INI
    // http://learn-networking.com/network-design/how-a-broadcast-address-works
-	parseString(gINI.GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
+   parseString(gINI.GetValue("Connections", "AlwaysPingList", "IP:Broadcast:28000").c_str(), alwaysPingList, ',');
 
    // These are the servers we found last time we were able to contact the master.
-	// In case the master server fails, we can use this list to try to find some game servers. 
-	//parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
+   // In case the master server fails, we can use this list to try to find some game servers. 
+   //parseString(gINI.GetValue("ForeignServers", "ForeignServerList").c_str(), prevServerListFromMaster, ',');
    gINI.GetAllValues("RecentForeignServers", prevServerListFromMaster);
 }
 
@@ -177,7 +177,7 @@ static void writeConnectionsInfo()
    }
 
    // Creates comma delimited list
-	gINI.SetValue("Connections", "AlwaysPingList", listToString(alwaysPingList, ','));
+   gINI.SetValue("Connections", "AlwaysPingList", listToString(alwaysPingList, ','));
 }
 
 
@@ -335,11 +335,11 @@ static void loadDiagnostics()
 static void loadTestSettings()
 {
    gIniSettings.burstGraphicsMode = max(gINI.GetValueI("Testing", "BurstGraphics", gIniSettings.burstGraphicsMode), 0);
-	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
+   gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
    gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
    gIniSettings.botZoneGeneratorMode = gINI.GetValueI("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
-	gIniSettings.useCache = gINI.GetValueYN("Testing", "UseCache", gIniSettings.useCache);
+   gIniSettings.useCache = gINI.GetValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 static void loadEffectsSettings()
@@ -394,7 +394,7 @@ static void loadHostConfiguration()
    gIniSettings.allowDataConnections = gINI.GetValueYN("Host", "AllowDataConnections", gIniSettings.allowDataConnections);
 
    S32 fps = gINI.GetValueI("Host", "MaxFPS", gIniSettings.maxDedicatedFPS);
-	if(fps >= 1) 
+   if(fps >= 1) 
       gIniSettings.maxDedicatedFPS = fps; 
    // TODO: else warn?
 
@@ -412,12 +412,12 @@ static void loadHostConfiguration()
    gIniSettings.voteNothingStrength    = gINI.GetValueI("Host", "VoteNothingStrength", gIniSettings.voteNothingStrength );
 
 #ifdef BF_WRITE_TO_MYSQL
-	Vector<string> args;
-	parseString(gINI.GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
-	if(args.size() >= 1) gIniSettings.mySqlStatsDatabaseServer = args[0];
-	if(args.size() >= 2) gIniSettings.mySqlStatsDatabaseName = args[1];
-	if(args.size() >= 3) gIniSettings.mySqlStatsDatabaseUser = args[2];
-	if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
+   Vector<string> args;
+   parseString(gINI.GetValue("Host", "MySqlStatsDatabaseCredentials").c_str(), args, ',');
+   if(args.size() >= 1) gIniSettings.mySqlStatsDatabaseServer = args[0];
+   if(args.size() >= 2) gIniSettings.mySqlStatsDatabaseName = args[1];
+   if(args.size() >= 3) gIniSettings.mySqlStatsDatabaseUser = args[2];
+   if(args.size() >= 4) gIniSettings.mySqlStatsDatabasePassword = args[3];
    if(gIniSettings.mySqlStatsDatabaseServer == "server" && gIniSettings.mySqlStatsDatabaseName == "dbname")
    {
       gIniSettings.mySqlStatsDatabaseServer = "";  // blank this, so it won't try to connect to "server"
@@ -1306,7 +1306,7 @@ static void writeSettings()
    gINI.SetValueI (section, "Version", BUILD_VERSION);
 
    // Don't save new value if out of range, so it will go back to the old value. Just in case a user screw up with /linewidth command using value too big or too small
-	if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
+   if(gDefaultLineWidth >= 0.5 && gDefaultLineWidth <= 8)
       gINI.SetValueF (section, "LineWidth", gDefaultLineWidth);
 }
 
@@ -1616,20 +1616,20 @@ static bool assignIfExists(const string &path)
 // ...Otherwise...
 //
 // If rootDataDir is specified then try
-//	    If levelDir is also specified try
-//      		rootDataDir/levels/levelDir
-//      		rootDataDir/levelDir
-//	    End
-//	
-//	    rootDataDir/levels
-// End	   ==> Don't use rootDataDir
+//       If levelDir is also specified try
+//            rootDataDir/levels/levelDir
+//            rootDataDir/levelDir
+//       End
+//   
+//       rootDataDir/levels
+// End      ==> Don't use rootDataDir
 //      
 // If iniLevelDir is specified
-//	    If levelDir is also specified try
-//      		iniLevelDir/levelDir
-//     End	
+//       If levelDir is also specified try
+//            iniLevelDir/levelDir
+//     End   
 //     iniLevelDir
-// End	 ==> Don't use iniLevelDir
+// End    ==> Don't use iniLevelDir
 //      
 // levels
 //
