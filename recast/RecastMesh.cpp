@@ -382,7 +382,7 @@ bool prioritySort(const mergePriority& a, const mergePriority& b)
 
 // nvp = max number of points per polygon
 
-bool rcBuildPolyMesh(int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
+bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, rcPolyMesh& mesh)
 {
    mesh.bounds.set(bounds);
 	

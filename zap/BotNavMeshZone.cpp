@@ -884,7 +884,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
       // 6 is arbitrary --> smaller numbers require less memory
       bounds.offset(Point(FIX,FIX));
-      rcBuildPolyMesh(6, bounds, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
+      rcBuildPolyMesh(6, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
 
    
       const S32 bytesPerVertex = 2;
@@ -892,8 +892,14 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       //for(S32 i = 0; i < mesh.nverts; i++)
       //{
       //   const U16 *vert = &mesh.verts[i * bytesPerVertex];
-      //   logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[2]-FIX );
+      //   logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[1]-FIX );
       // }
+
+      for(S32 i = 0; i < mesh.npolys; i++)
+         for(S32 j = 0; j < mesh.nvp; j++)
+         {
+            logprintf("vert#: %d  --> %d", i, mesh.polys[(i * mesh.nvp + j)]);
+         }
 
 
       // Visualize rcPolyMesh

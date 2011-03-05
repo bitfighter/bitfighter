@@ -19,8 +19,6 @@
 #ifndef RECAST_H
 #define RECAST_H
 
-#include "../zap/point.h"     // For Rect def
-
 // Polymesh store a connected mesh of polygons.
 // The polygons are store in an array where each polygons takes
 // 'nvp*2' elements. The first 'nvp' elements are indices to vertices
@@ -40,7 +38,6 @@ struct rcPolyMesh
 	int npolys;				// Number of polygons.
 	int maxpolys;			// Number of allocated polygons.
 	int nvp;				// Max number of vertices per polygon.
-	Zap::Rect bounds;
 };
 
 rcPolyMesh* rcAllocPolyMesh();
@@ -166,7 +163,7 @@ void rcCalcGridSize(const float* bmin, const float* bmax, float cs, int* w, int*
 //	nvp - (in) maximum number of vertices per polygon.
 //	mesh - (out) poly mesh.
 // Returns false if operation ran out of memory.
-bool rcBuildPolyMesh(int nvp, const Zap::Rect &bounds, int* verts, int vertCount, int *tris, int triCount, rcPolyMesh& mesh);
+bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int triCount, rcPolyMesh& mesh);
 
 
 #endif // RECAST_H
