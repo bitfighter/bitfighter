@@ -434,6 +434,7 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 
    // + 1 reserves a bit of space at the end for a temp workspace
 	rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(ntris + 1)*nvp, RC_ALLOC_TEMP);
+   //	rcScopedDelete<unsigned short> tmpPoly = (unsigned short*)rcAlloc(sizeof(unsigned short)*nvp, RC_ALLOC_TEMP);
 	if (!polys)
 	{
 		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Out of memory 'polys' (%d).", ntris * nvp);
@@ -554,41 +555,23 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
          {
 				mergePolys(pa, pb, ea, eb, tmpPoly, nvp);
 				memset(pb, 0xffff, sizeof(unsigned short)*nvp);    // Erase mergee
-            zoneRemap[j] = i + 1;                         // Record that zone j is now part of zone i
+            zoneRemap[j] = i + 1;                              // Record that zone j is now part of zone i
             npolys--;
          }
 		}
 	}
 		
-
+   // TODO: Why aren't we just building this in mesh.polys... then we can skip this copy!
    memcpy(mesh.polys, polys, ntris*nvp*sizeof(unsigned short*));
    mesh.npolys = ntris;
-
-	//// Copy polygons over from polys into mesh.polys, skipping every second slot for some reason
-	/*for (int j = 0; j < ntris; ++j)
-	{
-		unsigned short* q = &polys[j*nvp];
-		unsigned short* p = &mesh.polys[j*nvp*2];
-
-		for (int k = 0; k < nvp; ++k)
-			p[k] = q[k];
-
-		mesh.npolys++;
-
-		if (mesh.npolys > mesh.maxpolys)
-		{
-			logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
-			return false;
-		}
-	}*/
    
 	
 	// Calculate adjacency
-	//if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
-	//{
-	//	logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
-	//	return false;
-	//}
+	if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
+	{
+		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
+		return false;
+	}
 
 	if (mesh.nverts > 0xffff)
 	{
