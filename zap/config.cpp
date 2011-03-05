@@ -43,6 +43,107 @@
 namespace Zap
 {
 
+// Set default values here
+void IniSettings::init()
+{
+   controlsRelative = false;          // Relative controls is lame!
+   displayMode = DISPLAY_MODE_FULL_SCREEN_STRETCHED;
+   oldDisplayMode = DISPLAY_MODE_UNKNOWN;
+   joystickType = NoController;
+   echoVoice = false;
+
+   sfxVolLevel = 1.0;                 // SFX volume (0 = silent, 1 = full bore)
+   musicVolLevel = 1.0;               // Music volume (range as above)
+   voiceChatVolLevel = 1.0;           // INcoming voice chat volume (range as above)
+   alertsVolLevel = 1.0;              // Audio alerts volume (when in dedicated server mode only, range as above)
+
+   sfxSet = sfxModernSet;             // Start off with our modern sounds
+
+   starsInDistance = true;            // True if stars move in distance behind maze, false if they are in fixed location
+   useLineSmoothing = false;          // Enable/disable anti-aliasing
+   diagnosticKeyDumpMode = false;     // True if want to dump keystrokes to the screen
+   enableExperimentalAimMode = false; // True if we want to show experimental aiming vector in joystick mode
+
+   showWeaponIndicators = true;       // True if we show the weapon indicators on the top of the screen
+   verboseHelpMessages = true;        // If true, we'll show more handholding messages
+   showKeyboardKeys = true;           // True if we show the keyboard shortcuts in joystick mode
+   allowDataConnections = false;      // Disabled unless explicitly enabled for security reasons -- most users won't need this
+   allowGetMap = false;               // Disabled by default -- many admins won't want this
+
+   maxDedicatedFPS = 100;             // Max FPS on dedicated server
+   maxFPS = 100;                      // Max FPS on client/non-dedicated server
+
+   inputMode = Keyboard;              // Joystick or Keyboard
+   masterAddress = "IP:67.18.11.66:25955";   // Default address of our master server
+   name = "";                         // Player name (none by default)
+   defaultName = "ChumpChange";       // Name used if user hits <enter> on name entry screen
+   lastName = "ChumpChange";          // Name the user entered last time they ran the game
+   lastPassword = "";
+   lastEditorName = "";               // No default editor level name
+   hostname = "Bitfighter host";      // Default host name
+   hostdescr = "";
+   maxPlayers = 127;
+   maxBots = 127;
+   serverPassword = "";               // Passwords empty by default
+   adminPassword = "";
+   levelChangePassword = "";
+   levelDir = "";
+
+   defaultRobotScript = "s_bot.bot";            
+         
+   wallFillColor.set(0,0,.15);
+   wallOutlineColor.set(0,0,1);
+
+   voteLength = 12;
+   voteLengthToChangeTeam = 10;
+   voteRetryLength = 30;
+   voteYesStrength = 5;
+   voteNoStrength = -5;
+   voteNothingStrength = -2;
+
+   useUpdater = true;
+
+   // Game window location when in windowed mode
+   winXPos = 100;
+   winYPos = 100;
+   winSizeFact = 1.0;
+
+   burstGraphicsMode = 1;
+   neverConnectDirect = false;
+
+   // Specify which events to log
+   logConnectionProtocol = false;
+   logNetConnection = false;
+   logEventConnection = false;
+   logGhostConnection = false;
+   logNetInterface = false;
+   logPlatform = false;
+   logNetBase = false;
+   logUDP = false;
+
+   logFatalError = true;       
+   logError = true;            
+   logWarning = true;          
+   logConnection = true;       
+   logLevelLoaded = true;      
+   logLuaObjectLifecycle = false;
+   luaLevelGenerator = true;   
+   luaBotMessage = true;       
+   serverFilter = false; 
+
+   logStats = true;            // Log statistics into ServerFilter log files
+
+   useCache = true;
+   botZoneGeneratorMode = 2;
+      // 0   : off
+      // 1,2 : sam's rectangle zones (2 : removeUnusedNavMeshZones)
+      // 3,4 : sam's triangle zones (4 : removeUnusedNavMeshZones) - very slow
+      // 5,6 : Triangulate (6 : useRecast)
+
+   version = 0;
+}
+
+
 extern CIniFile gINI;
 extern IniSettings gIniSettings;
 extern string lcase(string strToConvert);
@@ -237,6 +338,8 @@ static void loadTestSettings()
 	gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
    gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
+   gIniSettings.botZoneGeneratorMode = gINI.GetValueI("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
+	gIniSettings.useCache = gINI.GetValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 static void loadEffectsSettings()
@@ -1341,6 +1444,8 @@ static void writeTesting()
    gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gINI.SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toRGBString());
    gINI.SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString());
+   gINI.SetValueI ("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
+   gINI.setValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 

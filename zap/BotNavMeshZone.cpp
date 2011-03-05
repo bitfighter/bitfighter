@@ -450,17 +450,15 @@ void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, 
 
 void getBarrierLineCollisionPoints(Vector<Point> &output, GridDatabase *gb, Point p1, Point p2)
 {
+   S32 startOut = output.size();
    Vector<DatabaseObject *> objects;
    Rect rect(p1, p2);
    gb->findObjects(BarrierType, objects, rect);
    for(S32 i=0; i<objects.size(); i++)
    {
-      Vector<Point> collisionPoints;
-      GameObject *obj = dynamic_cast<GameObject *>(objects[i]);
-      obj->getCollisionPoly(collisionPoints);
-      getPolygonLineCollisionPoints(output, collisionPoints, p1, p2);
+      Barrier *obj = dynamic_cast<Barrier *>(objects[i]);
+      getPolygonLineCollisionPoints(output, obj->mPoints, p1, p2);
    }
-
 }
 
 
@@ -751,19 +749,26 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
 	Rect bounds = game->computeWorldObjectExtents();
 
-//#ifdef SAM_ONLY
-   //makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-   //removeUnusedNavMeshZones();
-   //return;
-//#endif
+   if(gIniSettings.botZoneGeneratorMode == 0) //disabled
+      return;
+   if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
+   {
+      makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+      if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
+      return;
+   }
+   if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // triangle bot zone
+   {
+      makeBotMeshZones2(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+      if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
+      return;
+   }
+
+   // Triangulate and Recast
+   bool useRecast = gIniSettings.botZoneGeneratorMode >= 6;
 
    // Recast only handles 16 bit coordinates
-   TNLAssert(bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX, "Level out of bounds!");
-
-//#ifdef SAM_ONLY
-   //makeBotMeshZones2(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-   //return;
-//#endif
+   TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX) || !useRecast, "Level out of bounds!");
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
@@ -857,7 +862,6 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    triangulate((char*)"zXqpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging, also test F option
    U32 done4 = Platform::getRealMilliseconds();
 
-   bool useRecast = true;
    if(useRecast)
    {
       S32 FIX = S16_MAX;
