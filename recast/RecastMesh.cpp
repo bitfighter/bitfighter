@@ -18,7 +18,7 @@
 
 #include "Recast.h"
 #include "RecastAlloc.h"
-#include "TNLAssert.h"
+#include "tnlAssert.h"
 #include "tnlLog.h"
 
 #include "../zap/point.h"     // For Rect
@@ -567,11 +567,11 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
    
 	
 	// Calculate adjacency
-	if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
-	{
-		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
-		return false;
-	}
+//	if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
+//	{
+//		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
+//		return false;
+//	}
 
 	if (mesh.nverts > 0xffff)
 	{

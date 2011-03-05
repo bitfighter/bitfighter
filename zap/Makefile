@@ -116,14 +116,7 @@ OBJECTS_ZAP=\
    ../sqlite/sqlite3.o\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
-   ../recast/Recast.o\
-   ../recast/RecastMeshDetail.o\
-   ../recast/RecastArea.o\
-   ../recast/RecastFilter.o\
-   ../recast/RecastRasterization.o\
-   ../recast/RecastContour.o\
-   ../recast/RecastMesh.o\
-   ../recast/RecastRegion.o
+   ../recast/RecastMesh.o
 
 
 CFLAGS=
