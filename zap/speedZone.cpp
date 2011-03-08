@@ -51,6 +51,8 @@ SpeedZone::SpeedZone()
    mObjectTypeMask = SpeedZoneType | CommandMapVisType;
    mSpeed = defaultSpeed;
    mSnapLocation = false;     // Don't snap unless specified
+   mRotateSpeed = 0;
+   mUnpackInit = 0;    // Some form of counter, to know that it is a rotating speed zone.
 }
 
 
@@ -121,8 +123,26 @@ S32 SpeedZone::getRenderSortValue()
 
 
 // Create objects from parameters stored in level file
-bool SpeedZone::processArguments(S32 argc, const char **argv)
+bool SpeedZone::processArguments(S32 argc2, const char **argv2)
 {
+   S32 argc = 0;
+   const char *argv[8];
+   for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   {
+      switch(argv2[i][0])
+      {
+      case 'R': mRotateSpeed = atof(&argv2[i][1]); break;  // using second char to handle number, "R3.4" or "R-1.7"
+      case 'S': mSnapLocation = true; break;  // for "SnapEnabled"
+      default:
+         if(argc < 8)
+         {  argv[argc] = argv2[i];
+            argc++;
+         }
+      }
+   }
+
+   // all string and chars args is processed, numbered arguments left from here down.
+
    if(argc < 4)      // Need two points at a minimum, with an optional speed item
       return false;
 
@@ -141,11 +161,6 @@ bool SpeedZone::processArguments(S32 argc, const char **argv)
 
    if(argc >= 5)
       mSpeed = max(minSpeed, min(maxSpeed, (U16)(atoi(argv[4]))));
-
-   if(argc >= 6)
-      mSnapLocation = true;   
-   else
-      mSnapLocation = false;
 
    return true;
 }
@@ -211,16 +226,20 @@ bool SpeedZone::collide(GameObject *hitObject)
 
       Point impulse = (dir - pos);
       impulse.normalize(mSpeed);
-      Point shipVel = s->getActualVel();
-      Point shipNormal = shipVel;
+      Point shipNormal = s->getActualVel();
       shipNormal.normalize(mSpeed);
+      F32 speed = mSpeed;
+
+         // using mUnpackInit, as client does not know that mRotateSpeed is not zero.
+      if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
+         speed *= 0.001;
+      if(shipNormal.distanceTo(impulse) < speed && s->getActualVel().len() > mSpeed * 0.8)
+         return false;
 
       // This following line will cause ships entering the speedzone to have their location set to the same point
       // within the zone so that their path out will be very predictable.
       if(mSnapLocation)
       {
-         if(shipNormal.distanceTo(impulse) < mSpeed * 0.001 && shipVel.len() > mSpeed * 0.8)
-            return false;
          s->setActualVel(Point(0,0));
          s->mImpulseVector = impulse * 1.5;     // <-- why???
          s->setActualPos(pos, false);
@@ -262,6 +281,16 @@ void SpeedZone::idle(GameObject::IdleCallPath path)
    //for(S32 i = mExclusions.size()-1; i >= 0; i--)
       //if(mExclusions[i].time < getGame()->getCurrentTime())     // Exclusion has expired
          //mExclusions.erase_fast(i);
+   if(mRotateSpeed != 0)
+   {
+      dir -= pos;
+      F32 angle = dir.ATAN2();
+      angle += mRotateSpeed * mCurrentMove.time * 0.001;
+      dir.setPolar(1, angle);
+      dir += pos;
+      setMaskBits(InitMask);
+      preparePoints();     // avoids off center problem..
+   }
 }
 
 
@@ -287,6 +316,7 @@ void SpeedZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
    if(stream->readFlag())
    {
+      mUnpackInit++;
       stream->read(&pos.x);
       stream->read(&pos.y);
 

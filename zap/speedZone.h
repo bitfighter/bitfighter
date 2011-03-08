@@ -71,6 +71,9 @@ public:
    static const U16 maxSpeed = 5000;      // Max speed for the goFast
    static const U16 defaultSpeed = 2000;  // Default speed if none specified
 
+   F32 mRotateSpeed;
+   U32 mUnpackInit;  // Some form of counter, to know that it is a rotating speed zone.
+
    Point pos;
    Point dir;
    U16 mSpeed;             // Speed at which ship is propelled, defaults to defaultSpeed
