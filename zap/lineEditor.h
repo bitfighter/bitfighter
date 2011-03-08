@@ -49,10 +49,10 @@ private:
    string mPrompt;
    bool mSecret;
 
-   U32 mMaxLen;
    static Timer mBlinkTimer;
 
 public:
+   U32 mMaxLen;
    static void updateCursorBlink(U32 timeDelta);
    static bool cursorBlink;
 

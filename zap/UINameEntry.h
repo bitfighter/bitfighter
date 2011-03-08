@@ -115,6 +115,7 @@ public:
       instr2 = "<- and -> keys retrieve existing level names";
       resetOnActivate = false;
       lineEditor.setFilter(LineEditor::fileNameFilter);
+      lineEditor.mMaxLen = MAX_FILE_NAME_LEN;
    }
 
    virtual void onKeyDown(KeyCode keyCode, char ascii);
