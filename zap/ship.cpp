@@ -223,7 +223,7 @@ void Ship::processMove(U32 stateIndex)
    // Apply turbo-boost if active, reduce accel and max vel when armor is present
    F32 maxAccel = (isModuleActive(ModuleBoost) ? BoostAcceleration : Acceleration) * time * 
                   (hasModule(ModuleArmor) ? ARMOR_ACCEL_PENALTY_FACT : 1);
-	maxAccel *= getSlipzoneSpeedMoficationFactor();
+   maxAccel *= getSlipzoneSpeedMoficationFactor();
 
    if(accRequested > maxAccel)
    {
@@ -450,6 +450,15 @@ void Ship::idle(GameObject::IdleCallPath path)
       // For all other cases, advance the actual state of the
       // object with the current move.
       processMove(ActualState);
+
+      // When not moving, Detect if on a GoFast
+      if(mMoveState[ActualState].vel == Point(0,0))
+      {
+         SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneType));
+         if(speedZone)
+            speedZone->collide(this);
+      }
+
 
       // Apply impulse vector and reset it
       mMoveState[ActualState].vel += mImpulseVector;
@@ -761,11 +770,6 @@ void Ship::damageObject(DamageInfo *theInfo)
 void Ship::onAddedToGame(Game *game)
 {
    Parent::onAddedToGame(game);
-
-   // Detect if we spawned on a GoFast
-   SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneType));
-   if(speedZone)
-      speedZone->collide(this);
 
    // From here on down, server only
    if(!isGhost())
