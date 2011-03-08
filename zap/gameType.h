@@ -268,6 +268,8 @@ public:
    bool mAllowSoccerPickup;      // soccer balls only.
    bool mHaveSoccer;             // does it have soccer balls? used to determine weather or not to send s2cSoccerCollide
 
+   bool mAllowAddBot;
+
    enum {
       MaxPing = 999,
       DefaultGameTime = 10 * 60 * 1000,

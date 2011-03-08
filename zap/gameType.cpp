@@ -146,6 +146,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mTotalGamePlay = 0;
    mAllowSoccerPickup = true;
    mHaveSoccer = false;           // level have soccer balls, used for s2cSoccerCollide
+   mAllowAddBot = true;
 }
 
 
@@ -2770,7 +2771,10 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "addbot"))
    {
-      if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
+      if(!mAllowAddBot)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This level does not allow robots");
+
+      else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server doesn't have default robots configured");
       
       else if(!clientRef->clientConnection->isLevelChanger())
