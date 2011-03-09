@@ -26,18 +26,15 @@
 // If a polygon has less than 'bvp' vertices, the remaining indices
 // are set to RC_MESH_NULL_IDX. If an polygon edge does not have a neighbour
 // the neighbour index is set to RC_MESH_NULL_IDX.
-// Vertices can be transformed into world space as follows:
-//   x = bmin[0] + verts[i*3+0]*cs;
-//   y = bmin[1] + verts[i*3+1]*ch;
-//   z = bmin[2] + verts[i*3+2]*cs;
 struct rcPolyMesh
 {	
-	unsigned short* verts;	// Vertices of the mesh, 3 elements per vertex.
-	unsigned short* polys;	// Polygons of the mesh, nvp*2 elements per polygon.
-	int nverts;				// Number of vertices.
-	int npolys;				// Number of polygons.
-	int maxpolys;			// Number of allocated polygons.
-	int nvp;				// Max number of vertices per polygon.
+	unsigned short* verts;	      // Vertices of the mesh, 2 elements per vertex.
+	unsigned short* polys;	      // Polygons of the mesh, nvp elements per polygon.
+   unsigned short* adjacency;    // Info about which polygons are adjacent to which others
+	int nverts;    				   // Number of vertices.
+	int npolys;		         		// Number of polygons.
+	int maxpolys;		         	// Number of allocated polygons.
+	int nvp;				            // Max number of vertices per polygon.
 };
 
 rcPolyMesh* rcAllocPolyMesh();

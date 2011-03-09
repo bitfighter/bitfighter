@@ -32,6 +32,7 @@
 #include "teleporter.h"
 #include "barrier.h"             // For Barrier methods in generating zones
 #include "../recast/Recast.h"    // For zone generation
+#include "../recast/RecastAlloc.h"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -730,6 +731,242 @@ static void initIoStruct(triangulateio *ioStruct)
 }
 
 
+
+struct rcEdge
+{
+	unsigned short vert[2];
+	unsigned short polyEdge[2];
+	unsigned short poly[2];
+};
+
+// Build connections between zones using the adjacency data created in recast
+bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh)    
+{
+   if(gBotNavMeshZones.size() == 0)
+      return true;
+
+   // Dump verts
+   for(S32 i = 0; i < mesh.nverts; i++)
+   {
+      unsigned short *v0 = &mesh.verts[i]; 
+      logprintf("%d : %d,%d", i, v0[0]-S16_MAX,v0[1]-S16_MAX);
+   }
+
+            // Dump verts
+      for(S32 i = 0; i < mesh.npolys*mesh.nvp; i++)
+      {
+         unsigned short *v0 = &mesh.verts[i]; 
+         logprintf("xx %d : %d,%d", i, v0[0]-S16_MAX,v0[1]-S16_MAX);
+      }
+
+   // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
+   Point bordStart, bordEnd, bordCen;
+   Rect rect;
+   NeighboringZone neighbor;
+   Vector<DatabaseObject *> objects;
+
+
+
+
+
+   /////////////////////////////
+   // Based on recast's interpretation of code by Eric Lengyel:
+	// http://www.terathon.com/code/edges.php
+	
+   int maxEdgeCount = mesh.npolys*mesh.nvp;
+	unsigned short* firstEdge = (unsigned short*)rcAlloc(sizeof(unsigned short)*(mesh.nverts + maxEdgeCount), RC_ALLOC_TEMP);
+	if (!firstEdge)      // Allocation went bad
+		return false;
+	unsigned short* nextEdge = firstEdge + mesh.nverts;
+	int edgeCount = 0;
+	
+	rcEdge* edges = (rcEdge*)rcAlloc(sizeof(rcEdge)*maxEdgeCount, RC_ALLOC_TEMP);
+	if (!edges)
+	{
+		rcFree(firstEdge);
+		return false;
+	}
+	
+	for (int i = 0; i < mesh.nverts; i++)
+		firstEdge[i] = RC_MESH_NULL_IDX;
+	
+   // First process edges where 1st node < 2nd node
+	for (int i = 0; i < mesh.npolys; ++i)
+	{
+      unsigned short* t = &mesh.polys[i*mesh.nvp];
+
+      // Skip "missing" polygons
+      if(*t == U16_MAX)
+         continue;
+
+		for (int j = 0; j < mesh.nvp; ++j)
+		{
+			unsigned short v0 = t[j];           // jth vert
+
+         if(v0 == RC_MESH_NULL_IDX)
+            break;
+
+			unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
+
+          U16 *vx = &mesh.verts[v0];
+          U16 *vy = &mesh.verts[v1];
+
+          logprintf("edge %d from %d,%d to %d,%d", j, vx[0]-S16_MAX,vx[1]-S16_MAX,vy[0]-S16_MAX,vy[1]-S16_MAX);
+
+			if (v0 < v1)      
+			{
+				rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
+				edge.vert[0] = v0;
+				edge.vert[1] = v1;
+				edge.poly[0] = (unsigned short)i;      // left poly
+				edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later -- the fact that both are the same is used as a marker
+
+				// Insert edge
+				nextEdge[edgeCount] = firstEdge[v0];   // Next edge on the previous vert now points to the first edge for this vert
+                        logprintf("x Setting next edge @ %d to %d", edgeCount, firstEdge[v0]);
+
+				firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
+                        logprintf("x Setting first edge @ %d to %d", v0, edgeCount);
+
+				edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
+			}
+		}
+	}
+	
+
+   // Now process edges where 2nd node is > 1st node
+	for (int i = 0; i < mesh.npolys; ++i)
+	{
+		unsigned short* t = &mesh.polys[i*mesh.nvp];
+
+      // Skip "missing" polygons
+      if(*t == U16_MAX)
+         continue;
+
+		for (int j = 0; j < mesh.nvp; ++j)
+		{
+			unsigned short v0 = t[j];
+         if(v0 == RC_MESH_NULL_IDX)
+            break;
+
+			unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
+
+			if (v0 > v1)      
+			{
+				for (unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
+				{
+					rcEdge& edge = edges[e];
+					if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
+               {
+						edge.poly[1] = (unsigned short)i;
+                  break;
+               }
+				}
+			}
+		}
+	}
+
+	
+	// Store adjacency
+	for (int i = 0; i < edgeCount; ++i)
+	{
+		const rcEdge& e = edges[i];
+
+		if (e.poly[0] != e.poly[1])      // Should normally be the case
+		{
+         logprintf("Poly: %d and %d  are adjacent, with verts %d %d", e.poly[0] ,e.poly[1], e.vert[0], e.vert[1]);
+
+         U16 *v;
+
+         v = &mesh.verts[e.poly[0] * mesh.nvp + e.vert[0]];
+         U16 a = mesh.verts[e.vert[1]];
+         //v = &mesh.verts[e.polyEdge[i]];
+       neighbor.borderStart.set(v[0]-S16_MAX, v[1]-S16_MAX);     // TODO: Replace this with FIX
+
+       logprintf("border start: %d,%d", v[0]-S16_MAX, v[1]-S16_MAX);
+
+         v = &mesh.verts[e.poly[0] * mesh.nvp + e.vert[1]];
+         //v = &mesh.verts[e.polyEdge[i+1]];
+         neighbor.borderEnd.set(v[0]-S16_MAX, v[1]-S16_MAX);
+logprintf("border end: %d,%d", v[0]-S16_MAX, v[1]-S16_MAX);
+
+         neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
+
+         neighbor.zoneID = e.poly[1];
+         gBotNavMeshZones[e.poly[0]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
+
+         neighbor.zoneID = e.poly[0];
+         gBotNavMeshZones[e.poly[1]]->mNeighbors.push_back(neighbor);
+		}
+	}
+	
+	rcFree(firstEdge);
+	rcFree(edges);
+	
+	return true;
+}
+      //      // Zone j is a neighbor of i
+      //      neighbor.zoneID = j;
+      //      neighbor.borderStart.set(bordStart);
+      //      neighbor.borderEnd.set(bordEnd);
+      //      neighbor.borderCenter.set(bordCen);
+
+      //      neighbor.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
+      //      neighbor.center.set(gBotNavMeshZones[j]->getCenter());
+      //      gBotNavMeshZones[i]->mNeighbors.push_back(neighbor);
+
+      //      // Zone i is a neighbor of j
+      //      neighbor.zoneID = i;
+      //      neighbor.borderStart.set(bordStart);
+      //      neighbor.borderEnd.set(bordEnd);
+      //      neighbor.borderCenter.set(bordCen);
+
+      //      neighbor.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
+      //      neighbor.center.set(gBotNavMeshZones[i]->getCenter());
+      //      gBotNavMeshZones[j]->mNeighbors.push_back(neighbor);
+      //   
+      //}
+   //}
+		
+ //  // Now create paths representing the teleporters
+ //  Vector<DatabaseObject *> teleporters, dests;
+
+	//gServerGame->getGridDatabase()->findObjects(TeleportType, teleporters, gServerWorldBounds);
+
+	//for(S32 i = 0; i < teleporters.size(); i++)
+	//{
+	//	Teleporter *teleporter = dynamic_cast<Teleporter *>(teleporters[i]);
+
+ //     if(!teleporter)
+ //        continue;
+
+ //     BotNavMeshZone *origZone = findZoneContainingPoint(teleporter->getActualPos());
+
+ //     if(origZone != NULL)
+	//	for(S32 j = 0; j < teleporter->mDest.size(); j++)     // Review each teleporter destination
+	//	{
+ //        BotNavMeshZone *destZone = findZoneContainingPoint(teleporter->mDest[j]);
+
+	//		if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
+	//		{
+	//			// Teleporter is one way path
+	//			neighbor.zoneID = destZone->mZoneID;
+	//			neighbor.borderStart.set(teleporter->getActualPos());
+	//			neighbor.borderEnd.set(teleporter->mDest[j]);
+	//			neighbor.borderCenter.set(teleporter->getActualPos());
+
+ //           // Teleport instantly, at no cost -- except this is wrong... if teleporter has multiple dests, actual cost could be quite high.
+ //           // This should be the average of the costs of traveling from each dest zone to the target zone
+	//			neighbor.distTo = 0;                                    
+	//			neighbor.center.set(teleporter->getActualPos());
+
+	//			origZone->mNeighbors.push_back(neighbor);
+	//		}
+	//	}
+   //}
+//}
+
+
 extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 
 #define combine(x,y) pair<F32,F32>((x),(y))
@@ -880,6 +1117,8 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
       rcPolyMesh mesh;
 
+      // TODO: Delete mesh memory allocations
+
       // TODO: Put these into real tests, and handle conditions better  
       TNLAssert(out.numberofpoints > 0, "No output points!");
       TNLAssert(out.numberoftriangles > 0, "No output triangles!");
@@ -899,11 +1138,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       //   logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[1]-FIX );
       // }
 
-      for(S32 i = 0; i < mesh.npolys; i++)
-         for(S32 j = 0; j < mesh.nvp; j++)
-         {
-            logprintf("vert#: %d  --> %d", i, mesh.polys[(i * mesh.nvp + j)]);
-         }
+      //for(S32 i = 0; i < mesh.npolys; i++)
+      //   for(S32 j = 0; j < mesh.nvp; j++)
+      //   {
+      //      logprintf("vert#: %d  --> %d", i, mesh.polys[(i * mesh.nvp + j)]);
+      //   }
 
 
       // Visualize rcPolyMesh
@@ -931,6 +1170,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 		      botzone->computeExtent();   
          }
       }
+
+
+      buildBotNavMeshZoneConnectionsRecastStyle(mesh);
+
+
    }
    else
    {
@@ -1085,6 +1329,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 		}
    }
 }
+
 
 
 // Rough guess as to distance from fromZone to toZone
