@@ -210,6 +210,11 @@ void Ship::processMove(U32 stateIndex)
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
 
+   const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
+   if(getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
+      requestVel.set(0,0);
+
+
    requestVel *= maxVel;
    F32 len = requestVel.len();
 

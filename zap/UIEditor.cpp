@@ -536,7 +536,7 @@ void EditorUserInterface::loadLevel()
 
    for(S32 i = 0; i < mItems.size(); i++)
       if(mItems[i].index == ItemTurret || mItems[i].index == ItemForceField)
-		  mItems[i].snapEngineeredObject(mItems[i].vert(0));
+        mItems[i].snapEngineeredObject(mItems[i].vert(0));
 
    // And hand-process all other items
    for(S32 i = 0; i < mItems.size(); i++)
@@ -2117,10 +2117,10 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                   Vector<Point> dest;
                   dest.push_back(convertLevelToCanvasCoord(item.vert(1)));
 
-				     if(mShowingReferenceShip)
-				        renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
-				     else
-				     {
+                 if(mShowingReferenceShip)
+                    renderTeleporter(pos, 0, true, gClientGame->getCurrentTime(), 1, Teleporter::TELEPORTER_RADIUS, 1, dest, false);
+                 else
+                 {
                      glColor(green);
                      glLineWidth(gLineWidth3);
                      drawPolygon(pos, 12, Teleporter::TELEPORTER_RADIUS, 0);
@@ -3270,8 +3270,10 @@ void EditorUserInterface::findSnapVertex()
 
    Point mouseLevelCoord = convertCanvasToLevelCoord(mMousePos);
 
+   TNLAssert(mItemHit == NONE || U32(mItemHit) < U32(mItems.size()), "mItemHit out of range"); // not sure why...
+
    // If we have a hit item, and it's selected, find the closest vertex in the item
-   if(mItemHit != NONE && mItems[mItemHit].selected)   
+   if(mItemHit != NONE && U32(mItemHit) < U32(mItems.size()) && mItems[mItemHit].selected)   
    {
       // If we've hit an edge, restrict our search to the two verts that make up that edge
       if(mEdgeHit != NONE)
@@ -4673,7 +4675,7 @@ void EditorUserInterface::testLevel()
          i+=2;
       }
       gYesNoUserInterface.setInstr("Press [Y] to start, [ESC] to cancel");
-		gYesNoUserInterface.registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
+      gYesNoUserInterface.registerYesFunction(testLevelStart_local);   // testLevelStart_local() just calls testLevelStart() below
       gYesNoUserInterface.activate();
 
       return;

@@ -1490,10 +1490,6 @@ void ClientGame::idle(U32 timeDelta)
       GameObject *controlObject = mConnectionToServer->getControlObject();
       Ship *ship = dynamic_cast<Ship *>(controlObject);
 
-      const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-      if(ship && ship->getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
-         theMove->left = theMove->right = theMove->up = theMove->down = 0;
-
      // Don't saturate server with moves...
      if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
      { 
