@@ -444,7 +444,9 @@ void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, 
       output.push_back(p3);
       time = time + 0.01;
       if(time > 0.99) break;
+		p3=p1;
       p1=p2 * time + p1*(1 - time);
+		if(p1 == p3) break;   // avoid endless loop.
    }
 }
 
