@@ -684,6 +684,17 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
 
+   if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
+   {
+      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+      GameType *g = new GameType;
+      g->addToGame(this);
+   }
+   if(getGameType()->makeSureTeamCountIsNotZero())
+      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+
+
+
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
    // Do some prep work if we have bots and/or zones
