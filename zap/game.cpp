@@ -1553,7 +1553,7 @@ void ClientGame::prepareBarrierRenderingGeometry()
       {
          Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
          if(barrier)
-            barrier->prepareRenderingGeometry();
+            barrier->prepareRenderingGeometry2();
       }
 }
 
