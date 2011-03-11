@@ -86,10 +86,8 @@ static bool buildMeshAdjacency(unsigned short* polys, const int npolys,
 
 				// Insert edge
 				nextEdge[edgeCount] = firstEdge[v0];   // Next edge on the previous vert now points to the first edge for this vert
-                        logprintf("x Setting next edge @ %d to %d", edgeCount, firstEdge[v0]);
 
 				firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
-                        logprintf("x Setting first edge @ %d to %d", v0, edgeCount);
 
 				edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
 			}
@@ -594,12 +592,12 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
    mesh.npolys = ntris;
 
 
-	// Calculate adjacency
-   if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.adjacency, mesh.nverts, nvp))
-	{
-		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
-		return false;
-	}
+	//// Calculate adjacency
+ //  if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.adjacency, mesh.nverts, nvp))
+	//{
+	//	logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
+	//	return false;
+	//}
 
 	if (mesh.nverts > 0xffff)
 	{

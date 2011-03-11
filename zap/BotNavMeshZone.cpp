@@ -744,7 +744,7 @@ struct rcEdge
 };
 
 // Build connections between zones using the adjacency data created in recast
-bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32> &polyToZoneMap)    
+static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32> &polyToZoneMap)    
 {
    if(gBotNavMeshZones.size() == 0)
       return true;
@@ -774,6 +774,7 @@ bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32
 		return false;
 	}
 	
+
 	for (int i = 0; i < mesh.nverts; i++)
 		firstEdge[i] = RC_MESH_NULL_IDX;
 	
@@ -811,7 +812,6 @@ bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32
 		}
 	}
 	
-
    // Now process edges where 2nd node is > 1st node
 	for (int i = 0; i < mesh.npolys; ++i)
 	{
@@ -1112,12 +1112,11 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 		   botzone->addToGame(gServerGame);
 		   botzone->computeExtent();   
       }
+
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
    }
 
    U32 done5 = Platform::getRealMilliseconds();
-
-
-   buildBotNavMeshZoneConnections();
 
 
    logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
