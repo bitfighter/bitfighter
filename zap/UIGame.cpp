@@ -1284,7 +1284,7 @@ void GameUserInterface::getMapHandler(GameUserInterface *gui, const Vector<strin
    {
       if(words.size() > 1 && words[1] != "")
          gui->remoteLevelDownloadFilename = words[1];
-		else
+      else
          gui->remoteLevelDownloadFilename = "downloaded_" + makeFilenameFromString(gClientGame->getGameType() ?
                gClientGame->getGameType()->mLevelName.getString() : "Level");
       // Add an extension if needed
@@ -1927,11 +1927,11 @@ void GameUserInterface::processChatModeKey(KeyCode keyCode, char ascii)
       {
          S32 promptSize = getStringWidth(FONTSIZE, mCurrentChatType == TeamChat ? "(Team): " : "(Global): ");
 
-         Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
-         if(!ship)
-            return;
+         //Ship *ship = dynamic_cast<Ship *>(gClientGame->getConnectionToServer()->getControlObject());
+         //if(!ship)
+         //   return;  // problem with unable to type something while trying to respawn.
 
-         S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", ship->getName().getString());
+         S32 nameSize = getStringWidthf(FONTSIZE, "%s: ", gClientGame->getConnectionToServer()->getClientName().getString());
          S32 nameWidth = max(nameSize, promptSize);
          // Above block repeated above
 

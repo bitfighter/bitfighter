@@ -85,6 +85,7 @@ public:
 
    // Clean up edge geometry and get barriers ready for proper rendering
    void prepareRenderingGeometry();
+   void prepareRenderingGeometry2();
    
 
    TNL_DECLARE_CLASS(Barrier);

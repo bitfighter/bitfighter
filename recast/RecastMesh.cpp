@@ -588,12 +588,12 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
          }
 		}
 	}
-		
+
    // TODO: Why aren't we just building this in mesh.polys... then we can skip this copy!
    memcpy(mesh.polys, polys, ntris*nvp*sizeof(unsigned short));
    mesh.npolys = ntris;
-   
-	
+
+
 	// Calculate adjacency
    if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.adjacency, mesh.nverts, nvp))
 	{

@@ -684,6 +684,17 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Load the level for real this time (we loaded it once before, when we started the server, but only to grab a few params)
    loadLevel(getLevelFileNameFromIndex(mCurrentLevelIndex));
 
+   if(!getGameType())   // loadLevel can fail (missing file) and not create GameType
+   {
+      logprintf(LogConsumer::LogWarning, "Warning: Missing game type parameter in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+      GameType *g = new GameType;
+      g->addToGame(this);
+   }
+   if(getGameType()->makeSureTeamCountIsNotZero())
+      logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
+
+
+
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
    // Do some prep work if we have bots and/or zones
@@ -956,6 +967,22 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       return;
    }
 
+   if(!stricmp(argv[0], "AllowAddBot"))  // some levels can have "AllowAddBot no" to prevent level from adding robots.
+   {
+      if(argc < 2)
+      {
+         logprintf(LogConsumer::LogWarning, "Improperly formed AllowAddBot parameter in level \"%s\"", origFilename.c_str());
+         return;
+      }
+      if(getGameType())
+         getGameType()->mAllowAddBot =
+            !stricmp(argv[0], "yes") ||
+            !stricmp(argv[0], "enable") ||
+            !stricmp(argv[0], "on") ||
+            !stricmp(argv[0], "1");
+      return;
+   }
+
    if(!stricmp(argv[0], "GridSize"))      // GridSize requires a single parameter (an int
    {                                      //    specifiying how many pixels in a grid cell)
       if(argc < 2)
@@ -983,24 +1010,24 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
          obj[LevelLoader::MaxArgLen] = '\0';
       }
 
-		S32 objlen = (S32) strlen(obj);
-		// All game types are of form XXXXGameType
-		if(objlen >= 8 && !strcmp(obj + objlen - 8, "GameType"))
-		{	
+      S32 objlen = (S32) strlen(obj);
+      // All game types are of form XXXXGameType
+      if(objlen >= 8 && !strcmp(obj + objlen - 8, "GameType"))
+      {   
          if(mGameType)
-			{	
+         {   
             logprintf(LogConsumer::LogWarning, "Duplicate GameType in level \"%s\"", origFilename.c_str());
-				return;
-			}
-		}
+            return;
+         }
+      }
       else
-		{	
+      {   
          if(!mGameType)
-			{	
+         {   
             logprintf(LogConsumer::LogWarning, "Missing GameType in level \"%s\"", origFilename.c_str());
-				return;
-			}
-		}
+            return;
+         }
+      }
 
 
       TNL::Object *theObject = TNL::Object::create(obj);          // Create an object of the type specified on the line
@@ -1248,23 +1275,23 @@ void ServerGame::idle(U32 timeDelta)
       {
          // Only update if something is different.
          if(prevCurrentLevelName != getCurrentLevelName() || prevCurrentLevelType != getCurrentLevelType() || prevRobotCount != getRobotCount() || prevPlayerCount != mPlayerCount)
-			{
-				//logprintf("UPDATE");
-				prevCurrentLevelName = getCurrentLevelName();
-				prevCurrentLevelType = getCurrentLevelType();
-				prevRobotCount = getRobotCount();
-				prevPlayerCount = mPlayerCount;
+         {
+            //logprintf("UPDATE");
+            prevCurrentLevelName = getCurrentLevelName();
+            prevCurrentLevelType = getCurrentLevelType();
+            prevRobotCount = getRobotCount();
+            prevPlayerCount = mPlayerCount;
             masterConn->updateServerStatus(getCurrentLevelName(), getCurrentLevelType(), getRobotCount(), mPlayerCount, mMaxPlayers, mInfoFlags);
-				mMasterUpdateTimer.reset(UpdateServerStatusTime);
-			}
-			else
-				mMasterUpdateTimer.reset(CheckServerStatusTime);
+            mMasterUpdateTimer.reset(UpdateServerStatusTime);
+         }
+         else
+            mMasterUpdateTimer.reset(CheckServerStatusTime);
       }
       else
-		{
+      {
          prevPlayerCount = -1;   //Not sure if needed, but if disconnected, we need to update to master.
-			mMasterUpdateTimer.reset(CheckServerStatusTime);
-		}
+         mMasterUpdateTimer.reset(CheckServerStatusTime);
+      }
    }
 
    mNetInterface->processConnections();
@@ -1463,12 +1490,8 @@ void ClientGame::idle(U32 timeDelta)
       GameObject *controlObject = mConnectionToServer->getControlObject();
       Ship *ship = dynamic_cast<Ship *>(controlObject);
 
-      const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-      if(ship && ship->getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
-         theMove->left = theMove->right = theMove->up = theMove->down = 0;
-
      // Don't saturate server with moves...
-	  if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
+     if(theMove->time >= 6)     // Why 6?  Can this be related to some other factor?
      { 
          // Limited MaxPendingMoves only allows sending a few moves at a time. changing MaxPendingMoves may break compatibility with old version server/client.
          // If running at 1000 FPS and 300 ping it will try to add more then MaxPendingMoves, losing control horribly.
@@ -1479,8 +1502,8 @@ void ClientGame::idle(U32 timeDelta)
       }
       else
          prevTimeDelta += timeDelta;
-	  
-	  theMove->time = timeDelta;
+     
+     theMove->time = timeDelta;
          
 
       theMove->prepare();     // Pack and unpack the move for consistent rounding errors
@@ -1530,7 +1553,7 @@ void ClientGame::prepareBarrierRenderingGeometry()
       {
          Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
          if(barrier)
-            barrier->prepareRenderingGeometry();
+            barrier->prepareRenderingGeometry2();
       }
 }
 

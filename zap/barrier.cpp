@@ -326,7 +326,7 @@ S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, Point p1, Point p2);
 
 // Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
-void Barrier::prepareRenderingGeometry()
+void Barrier::prepareRenderingGeometry2()
 {
    GridDatabase *gridDB = getGridDatabase();
    S32 i_prev = mPoints.size()-1;
@@ -379,22 +379,24 @@ void Barrier::prepareRenderingGeometry()
       }
       i_prev = i;
    }
-
-   //resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
-
-   //static Vector<DatabaseObject *> fillObjects;
-   //fillObjects.clear();
-
-   //findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
-
-   //for(S32 i = 0; i < fillObjects.size(); i++)
-   //{
-      //mRenderOutlineGeometry.clear();
-      //if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mRenderOutlineGeometry))
-         //clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);     // Populates mRenderLineSegments
-   //}
 }
 
+void Barrier::prepareRenderingGeometry()
+{
+   resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
+
+   static Vector<DatabaseObject *> fillObjects;
+   fillObjects.clear();
+
+   findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
+
+   for(S32 i = 0; i < fillObjects.size(); i++)
+   {
+      mRenderOutlineGeometry.clear();
+      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mRenderOutlineGeometry))
+         clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);     // Populates mRenderLineSegments
+   }
+}
 
 void Barrier::render(S32 layerIndex)
 {

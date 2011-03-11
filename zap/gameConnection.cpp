@@ -1354,7 +1354,8 @@ void GameConnection::onConnectionEstablished()
       mAcheivedConnection = true;
       
       // Notify the bots that a new player has joined
-      Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, getClientRef()->getPlayerInfo());
+      if(mClientRef)  // could be NULL when getGameType() is NULL
+         Robot::getEventManager().fireEvent(NULL, EventManager::PlayerJoinedEvent, mClientRef->getPlayerInfo());
 
       if(gLevelChangePassword == "")                // Grant level change permissions if level change PW is blank
       {

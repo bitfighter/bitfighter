@@ -146,6 +146,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mTotalGamePlay = 0;
    mAllowSoccerPickup = true;
    mHaveSoccer = false;           // level have soccer balls, used for s2cSoccerCollide
+   mAllowAddBot = true;
 }
 
 
@@ -2679,6 +2680,17 @@ GameConnection *findClient(GameType *gt, const char *name)
    return client;
 }
 
+bool safeFilename(const char *str)
+{
+   char chr = str[0];
+   while(chr != 0)
+   {
+      if(chr == '\\' || chr == '/')
+         return false;
+   }
+   return true;
+}
+
 // Runs the server side commands, which the client may or may not know about
 
 // This is server side commands, For client side commands, use UIGame.cpp, GameUserInterface::processCommand.
@@ -2759,52 +2771,77 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "addbot"))
    {
-	   if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
-		   clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server doesn't have default robots configured");
-	   
-	   else if(!clientRef->clientConnection->isLevelChanger())
-		   clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
+      if(!mAllowAddBot && !clientRef->clientConnection->isAdmin())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This level does not allow robots");
+
+      else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server doesn't have default robots configured");
+      
+      else if(!clientRef->clientConnection->isLevelChanger())
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to add a bot");
 
       else if(Robot::robots.size() >= gIniSettings.maxBots)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't add more bots -- this server is full");
 
-	   else
-	   {
-		   Robot *robot = new Robot();
-		   robot->addToGame(getGame());
-		   S32 args_count = 0;
-		   const char *args_char[128];  // Convert to a format processArgs will allow
-		   
-		   // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
-		   for(S32 i = 0; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
-		   {
-			   args_char[i] = args[i].getString();
-			   args_count++;
-		   }
-		   
-		   robot->processArguments(args_count, args_char);
-		   
-		   if(robot->isRunningScript && !robot->startLua())
-			   robot->isRunningScript = false;
-		   
-		   if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
-			   gServerGame->buildOrLoadBotMeshZones();
-		   
-		   StringTableEntry msg = StringTableEntry("Robot added by %e0");
-		   Vector<StringTableEntry> e;
-		   e.push_back(clientRef->clientConnection->getClientName());
-		   for(S32 i = 0; i < mClientList.size(); i++)
-			   mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
-	   }
+      else if(args.size() >= 2 && !safeFilename(args[2].getString()))
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid filename");
+
+      else
+      {
+         Robot *robot = new Robot();
+         robot->addToGame(getGame());
+         S32 args_count = 0;
+         const char *args_char[128];  // Convert to a format processArgs will allow
+         
+         // The first arg = team number, the second arg = robot script filename, the rest of args get passed as script arguments
+         for(S32 i = 0; i < args.size() && i < 128; i++)    // TODO: Tie 128 to some constant
+         {
+            args_char[i] = args[i].getString();
+            args_count++;
+         }
+         
+         robot->processArguments(args_count, args_char);
+         
+         if(robot->isRunningScript && !robot->startLua())
+            robot->isRunningScript = false;
+         
+         if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
+            gServerGame->buildOrLoadBotMeshZones();
+         
+         StringTableEntry msg = StringTableEntry("Robot added by %e0");
+         Vector<StringTableEntry> e;
+         e.push_back(clientRef->clientConnection->getClientName());
+         for(S32 i = 0; i < mClientList.size(); i++)
+            mClientList[i]->clientConnection->s2cDisplayMessageE(GameConnection::ColorNuclearGreen, SFXNone, msg, e);
+      }
+   }
+   else if(!stricmp(cmd, "addbots"))
+   {
+      // there is no need to check for permission here, it is checked in processServerCommand(... , "addbot", ...);
+      S32 count = 0;
+      if(args.size() >= 1)
+         count = atoi(args[0].getString());
+
+      if(count <= 0)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need to enter number of bots to add");
+      else
+      {
+         S32 prevRobotSize = -1;
+         args.erase(0);      // remove first arg, which is number of bots to be added
+         while(count > 0 && prevRobotSize != Robot::robots.size()) // loop may end when cannot add anymore bots
+         {  count--;
+            prevRobotSize = Robot::robots.size();
+            processServerCommand(clientRef, "addbot", args);
+         }
+      }
    }
    else if(!stricmp(cmd, "kickbot") || !stricmp(cmd, "kickbots"))
    {
-      if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "")  // not admin, no robotScript
-         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This server don't have robot script");
-
-      else if(!clientRef->clientConnection->isLevelChanger())
+      if(!clientRef->clientConnection->isLevelChanger())
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Need level change permissions to kick a bot");
 
+      else if(Robot::robots.size() == 0)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! No robots");
       else
       {
          for(S32 i = Robot::robots.size() - 1; i >= 0; i--)

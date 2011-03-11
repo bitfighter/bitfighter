@@ -309,9 +309,6 @@ const F32 MinZoneSize = 32;
 static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 {
 
-   //rcMeshLoaderObj m_mesh = new rcMeshLoaderObj;
-
-
 	if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
       return;   
 
@@ -445,7 +442,9 @@ void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, 
       output.push_back(p3);
       time = time + 0.01;
       if(time > 0.99) break;
+		p3=p1;
       p1=p2 * time + p1*(1 - time);
+		if(p1 == p3) break;   // avoid endless loop.
    }
 }
 
@@ -506,8 +505,14 @@ void makeBotMeshZones2part(Vector<Point> &data)
    }
 }
 
-void makeBotMeshZones2(F32 x1, F32 y1, F32 x2, F32 y2)
+//
+static void makeBotMeshZones2(Rect& bounds)
 {
+   F32 x1 = bounds.min.x;
+   F32 y1 = bounds.min.y;
+   F32 x2 = bounds.max.x;
+   F32 y2 = bounds.max.y;
+
    S32 dataX = S32((x2-x1)*.0035)+1;
    S32 dataY = S32((y2-y1)*.0035)+1;
    F32 multX = dataX/(x2-x1);
@@ -543,7 +548,7 @@ void makeBotMeshZones2(F32 x1, F32 y1, F32 x2, F32 y2)
                if(y>=dataY) y=dataY-1;
                data[y*dataX + x].push_back(currentPoint);
             }*/
-            object->prepareRenderingGeometry();
+            object->prepareRenderingGeometry2();
             for(S32 j = 0; j < object->mRenderLineSegments.size(); j++)
             {
                Point currentPoint = object->mRenderLineSegments[j];
@@ -914,8 +919,8 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 
 #define combine(x,y) pair<F32,F32>((x),(y))
 
-// Server only
-void BotNavMeshZone::buildBotMeshZones(Game *game)
+// Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
+static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
 
 
@@ -926,29 +931,6 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    Vector<S32> edges;
 
    map<pair<F32,F32>, S32> points;
-
-	Rect bounds = game->computeWorldObjectExtents();
-
-   if(gIniSettings.botZoneGeneratorMode == 0) //disabled
-      return;
-   if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
-   {
-      makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-      if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
-      return;
-   }
-   if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // triangle bot zone
-   {
-      makeBotMeshZones2(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-      if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
-      return;
-   }
-
-   // Triangulate and Recast
-   bool useRecast = gIniSettings.botZoneGeneratorMode >= 6;
-
-   // Recast only handles 16 bit coordinates
-   TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX) || !useRecast, "Level out of bounds!");
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
@@ -981,7 +963,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
          if(barrier)
          {
-            barrier->prepareRenderingGeometry();
+            barrier->prepareRenderingGeometry2();
             for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j+=2)
             {
                F32 p1x = F32(S32((barrier->mRenderLineSegments[j].x + 0.5)));
@@ -1045,6 +1027,9 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
    if(useRecast)
    {
+      // Recast only handles 16 bit coordinates
+      TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX), "Level out of bounds!");
+
       S32 FIX = S16_MAX;
 
       int ntris = out.numberoftriangles;
@@ -1149,6 +1134,39 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    trifree(out.edgemarkerlist);
    trifree(out.normlist);
    trifree(out.neighborlist);
+}
+
+// Server only
+void BotNavMeshZone::buildBotMeshZones(Game *game)
+{
+
+	Rect bounds = game->computeWorldObjectExtents();
+
+   if(gIniSettings.botZoneGeneratorMode == 0) //disabled
+      return;
+   if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
+   {
+      makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+      if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
+      return;
+   }
+
+   if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // simple triangle bot zones
+   {
+      makeBotMeshZones2(bounds);
+      if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
+      return;
+   }
+
+   if(gIniSettings.botZoneGeneratorMode == 5 || gIniSettings.botZoneGeneratorMode == 6) // triangle with Triangle library
+   {
+      // Triangulate and Recast
+      bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
+      makeBotMeshZones3(bounds, game, useRecast);
+      return;
+   }
+
+   // put default here if none of the above
 }
 
 

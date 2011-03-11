@@ -67,7 +67,14 @@ void TextEntryUserInterface::render()
 
    glColor3f(1,1,1);
 
-   S32 x = drawCenteredString(y, fontSizeBig, lineEditor.getDisplayString().c_str());
+   // this will have an effect of shrinking the text to fit on-screen when text get very long
+   S32 w = getStringWidthf(fontSizeBig, lineEditor.getDisplayString().c_str());
+   if(w > 750)
+      w = 750 * fontSizeBig / w;
+   else
+      w = fontSizeBig;
+
+   S32 x = drawCenteredString(y, w, lineEditor.getDisplayString().c_str());
    lineEditor.drawCursor(x, y, fontSizeBig);
 }
 
