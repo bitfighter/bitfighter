@@ -92,7 +92,7 @@ pictureLoader *LoadPicture(const char* path){
          break;case 24:j=readshort(r);j |= readbyte(r) << 16 | 0xFF000000;
          break;case 16:j=readshort(r);j=j | (j & 255) << 16 | 0xFF000000;
          break;case 8:j=p[readbyte(r)];
-         default:
+         break;default:
             if(!c){e=8-bpp;c=255;d=readbyte(r);}
             j=p[(d & c) >> e];
             e-=bpp;c=c >> bpp;
@@ -108,22 +108,28 @@ pictureLoader *LoadPicture(const char* path){
       for(e=1;e<vx;e++){a=readbyte(r);}
       //If Eof(r) Then y2=0
    }
+   closefile(r);
    return pict;
 }
 
 GLuint glTexHandle[16];
+bool hasLoaded[16];
 
-void setGLTex(S32 num)
+
+// true when loaded successfully
+bool setGLTex(S32 num)
 {
-   if(U32(num) >= 16) return;
+   if(U32(num) >= 16) return false;
 
    if(glTexHandle[num] != 0)
    {
       /* Select our font */
       glBindTexture(GL_TEXTURE_2D, glTexHandle[num]);
       {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}
-      return;
+      return hasLoaded[num];
    }
+   hasLoaded[num] = false;
+
    /* Get a font index from OpenGL */
    glGenTextures(1, &glTexHandle[num]);    /* Create 1 texture, store in glFontHandle */
    {int err=glGetError();if(err)printf("glGenTextures() error: %i\n",err);}
@@ -139,7 +145,13 @@ void setGLTex(S32 num)
 
    pictureLoader *pict = LoadPicture("SMOKE.BMP");
    if(pict == NULL)
-      return;
+      return false;
+
+   //if(num == 0)  // move color into alpha
+   //{
+   //   for(S32 i = pict->x * pict->y - 1; i>=0; i--)
+   //      pict->data[i] = (pict->data[i] << 24) | 0x00FFFFFF;
+   //}
 
    glTexImage2D(
          GL_TEXTURE_2D, 0, GL_RGBA,
@@ -147,4 +159,6 @@ void setGLTex(S32 num)
          GL_RGBA, GL_UNSIGNED_BYTE, pict->data);
    {int err=glGetError();if(err)printf("glBindTexture() error: %i\n",err);}
    delete pict;
+   hasLoaded[num] = true;
+   return true;
 }
