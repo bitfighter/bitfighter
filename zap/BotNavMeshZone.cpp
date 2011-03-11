@@ -53,7 +53,7 @@ BotNavMeshZone::BotNavMeshZone()
    mObjectTypeMask = BotNavMeshZoneType | CommandMapVisType;
    //  The Zones is now rendered without the network interface, if client is hosting.
    //mNetFlags.set(Ghostable);    // For now, so we can see them on the client to help with debugging... when too many zones causes huge lag
-   mZoneID = gBotNavMeshZones.size();
+   mZoneId = gBotNavMeshZones.size();
 
    gBotNavMeshZones.push_back(this);
 }
@@ -93,7 +93,7 @@ void BotNavMeshZone::render(S32 layerIndex)
          Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
-      renderNavMeshZone(mPolyBounds, mPolyFill, mCentroid, mZoneID, mConvex);
+      renderNavMeshZone(mPolyBounds, mPolyFill, mCentroid, mZoneId, mConvex);
    else if(layerIndex == 1)
       renderNavMeshBorders(mNeighbors);
 }
@@ -107,7 +107,7 @@ bool BotNavMeshZone::collide(GameObject *hitObject)
    if(hitObject->getObjectTypeMask() & RobotType)     // Only care about robots...
    {
       Robot *r = (Robot *) hitObject;
-      r->setCurrentZone(mZoneID);
+      r->setCurrentZone(mZoneId);
    }
    return false;
 }
@@ -185,7 +185,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 // These methods will be empty later...
  U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
-   stream->writeInt(mZoneID, 16);
+   stream->writeInt(mZoneId, 16);
 
    Polygon::packUpdate(connection, stream);
 
@@ -214,7 +214,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 
 void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   mZoneID = stream->readInt(16);
+   mZoneId = stream->readInt(16);
 
    if(Polygon::unpackUpdate(connection, stream))
    {
@@ -266,7 +266,7 @@ U16 BotNavMeshZone::findZoneContaining(const Point &p)
       TNLAssert(zone, "NULL zone in findZoneContaining");
       if( zone->getExtent().contains(p) 
                         && (PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), p)) )
-         return zone->mZoneID;
+         return zone->mZoneId;
    }
 
    return U16_MAX;
@@ -683,7 +683,7 @@ static void removeUnusedNavMeshZones()
    // Also calc the centroid and add to the zone database
    for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
    {
-      gBotNavMeshZones[i]->mZoneID = i;
+      gBotNavMeshZones[i]->setZoneId(i);
 
 		gBotNavMeshZones[i]->mConvex = true;             // avoid random red and green on /dzones, was uninitalized.
 		gBotNavMeshZones[i]->addToGame(gServerGame);
@@ -734,39 +734,21 @@ static void initIoStruct(triangulateio *ioStruct)
 
 struct rcEdge
 {
-	unsigned short vert[2];
-	unsigned short polyEdge[2];
-	unsigned short poly[2];
+	unsigned short vert[2];    // from, to verts
+	unsigned short poly[2];    // left, right poly
 };
 
 // Build connections between zones using the adjacency data created in recast
-bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh)    
+bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32> &polyToZoneMap)    
 {
    if(gBotNavMeshZones.size() == 0)
       return true;
-
-   // Dump verts
-   for(S32 i = 0; i < mesh.nverts; i++)
-   {
-      unsigned short *v0 = &mesh.verts[i]; 
-      logprintf("%d : %d,%d", i, v0[0]-S16_MAX,v0[1]-S16_MAX);
-   }
-
-            // Dump verts
-      for(S32 i = 0; i < mesh.npolys*mesh.nvp; i++)
-      {
-         unsigned short *v0 = &mesh.verts[i]; 
-         logprintf("xx %d : %d,%d", i, v0[0]-S16_MAX,v0[1]-S16_MAX);
-      }
 
    // We'll reuse these objects throughout the following block, saving the cost of creating and destructing them
    Point bordStart, bordEnd, bordCen;
    Rect rect;
    NeighboringZone neighbor;
    Vector<DatabaseObject *> objects;
-
-
-
 
 
    /////////////////////////////
@@ -808,11 +790,6 @@ bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh)
 
 			unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];  // j+1th vert
 
-          U16 *vx = &mesh.verts[v0];
-          U16 *vy = &mesh.verts[v1];
-
-          logprintf("edge %d from %d,%d to %d,%d", j, vx[0]-S16_MAX,vx[1]-S16_MAX,vy[0]-S16_MAX,vy[1]-S16_MAX);
-
 			if (v0 < v1)      
 			{
 				rcEdge& edge = edges[edgeCount];       // edge connecting v0 and v1
@@ -821,12 +798,8 @@ bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh)
 				edge.poly[0] = (unsigned short)i;      // left poly
 				edge.poly[1] = (unsigned short)i;      // right poly, will be recalced later -- the fact that both are the same is used as a marker
 
-				// Insert edge
-				nextEdge[edgeCount] = firstEdge[v0];   // Next edge on the previous vert now points to the first edge for this vert
-                        logprintf("x Setting next edge @ %d to %d", edgeCount, firstEdge[v0]);
-
+				nextEdge[edgeCount] = firstEdge[v0];        // Next edge on the previous vert now points to whatever was in firstEdge previously
 				firstEdge[v0] = (unsigned short)edgeCount;  // First edge of this vert 
-                        logprintf("x Setting first edge @ %d to %d", v0, edgeCount);
 
 				edgeCount++;                           // edgeCount never resets -- each edge gets a unique id
 			}
@@ -866,36 +839,27 @@ bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh)
 		}
 	}
 
-	
-	// Store adjacency
-	for (int i = 0; i < edgeCount; ++i)
+	// Now create our neighbor data
+	for (int i = 0; i < edgeCount; i++)
 	{
 		const rcEdge& e = edges[i];
 
 		if (e.poly[0] != e.poly[1])      // Should normally be the case
 		{
-         logprintf("Poly: %d and %d  are adjacent, with verts %d %d", e.poly[0] ,e.poly[1], e.vert[0], e.vert[1]);
-
          U16 *v;
 
-         v = &mesh.verts[e.poly[0] * mesh.nvp + e.vert[0]];
-         U16 a = mesh.verts[e.vert[1]];
-         //v = &mesh.verts[e.polyEdge[i]];
-       neighbor.borderStart.set(v[0]-S16_MAX, v[1]-S16_MAX);     // TODO: Replace this with FIX
+         v = &mesh.verts[e.vert[0] * 2];
+         neighbor.borderStart.set(v[0]-S16_MAX, v[1]-S16_MAX);     // TODO: Replace this with FIX
 
-       logprintf("border start: %d,%d", v[0]-S16_MAX, v[1]-S16_MAX);
-
-         v = &mesh.verts[e.poly[0] * mesh.nvp + e.vert[1]];
-         //v = &mesh.verts[e.polyEdge[i+1]];
+         v = &mesh.verts[e.vert[1] * 2];
          neighbor.borderEnd.set(v[0]-S16_MAX, v[1]-S16_MAX);
-logprintf("border end: %d,%d", v[0]-S16_MAX, v[1]-S16_MAX);
 
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
-         neighbor.zoneID = e.poly[1];
+         neighbor.zoneID = polyToZoneMap[e.poly[1]];  
          gBotNavMeshZones[e.poly[0]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
 
-         neighbor.zoneID = e.poly[0];
+         neighbor.zoneID = polyToZoneMap[e.poly[0]];   
          gBotNavMeshZones[e.poly[1]]->mNeighbors.push_back(neighbor);
 		}
 	}
@@ -905,29 +869,8 @@ logprintf("border end: %d,%d", v[0]-S16_MAX, v[1]-S16_MAX);
 	
 	return true;
 }
-      //      // Zone j is a neighbor of i
-      //      neighbor.zoneID = j;
-      //      neighbor.borderStart.set(bordStart);
-      //      neighbor.borderEnd.set(bordEnd);
-      //      neighbor.borderCenter.set(bordCen);
 
-      //      neighbor.distTo = gBotNavMeshZones[i]->getExtent().getCenter().distanceTo(bordCen);     // Whew!
-      //      neighbor.center.set(gBotNavMeshZones[j]->getCenter());
-      //      gBotNavMeshZones[i]->mNeighbors.push_back(neighbor);
 
-      //      // Zone i is a neighbor of j
-      //      neighbor.zoneID = i;
-      //      neighbor.borderStart.set(bordStart);
-      //      neighbor.borderEnd.set(bordEnd);
-      //      neighbor.borderCenter.set(bordCen);
-
-      //      neighbor.distTo = gBotNavMeshZones[j]->getExtent().getCenter().distanceTo(bordCen);     
-      //      neighbor.center.set(gBotNavMeshZones[i]->getCenter());
-      //      gBotNavMeshZones[j]->mNeighbors.push_back(neighbor);
-      //   
-      //}
-   //}
-		
  //  // Now create paths representing the teleporters
  //  Vector<DatabaseObject *> teleporters, dests;
 
@@ -1131,18 +1074,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
    
       const S32 bytesPerVertex = 2;
-      //  // dump verts
-      //for(S32 i = 0; i < mesh.nverts; i++)
-      //{
-      //   const U16 *vert = &mesh.verts[i * bytesPerVertex];
-      //   logprintf("vert#: %d  --> %d, %d", i, vert[0]-FIX, vert[1]-FIX );
-      // }
-
-      //for(S32 i = 0; i < mesh.npolys; i++)
-      //   for(S32 j = 0; j < mesh.nvp; j++)
-      //   {
-      //      logprintf("vert#: %d  --> %d", i, mesh.polys[(i * mesh.nvp + j)]);
-      //   }
+      Vector<S32> polyToZoneMap(mesh.npolys);
 
 
       // Visualize rcPolyMesh
@@ -1168,11 +1100,14 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 		      botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
 		      botzone->addToGame(gServerGame);
 		      botzone->computeExtent();   
+
+            polyToZoneMap[i] = botzone->getZoneId();
          }
       }
 
 
-      buildBotNavMeshZoneConnectionsRecastStyle(mesh);
+      buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
+      //buildBotNavMeshZoneConnections();
 
 
    }
@@ -1193,7 +1128,12 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 		   botzone->computeExtent();   
       }
    }
+
    U32 done5 = Platform::getRealMilliseconds();
+
+
+   buildBotNavMeshZoneConnections();
+
 
    logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
 
@@ -1314,7 +1254,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 			if(destZone != NULL && origZone != destZone)      // Ignore teleporters that begin and end in the same zone
 			{
 				// Teleporter is one way path
-				neighbor.zoneID = destZone->mZoneID;
+				neighbor.zoneID = destZone->mZoneId;
 				neighbor.borderStart.set(teleporter->getActualPos());
 				neighbor.borderEnd.set(teleporter->mDest[j]);
 				neighbor.borderCenter.set(teleporter->getActualPos());

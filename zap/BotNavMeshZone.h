@@ -76,10 +76,10 @@ class BotNavMeshZone : public GameObject, public Polygon
 private:   
    typedef GameObject Parent;
    Game *mGame;
+   U16 mZoneId;            // Unique ID for each zone
 
 public:
    bool mConvex;           // Stores wheter zone is convex or not
-   U16 mZoneID;            // Unique ID for each zone
    bool flag;              // Flag used to mark zones during construction process, serves no purpose once zones have been generated
 
    BotNavMeshZone();       // Constructor
@@ -109,6 +109,9 @@ public:
    // These methods will be empty later...
    U32 packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream);
    void unpackUpdate(GhostConnection *connection, BitStream *stream);
+
+   U16 getZoneId() { return mZoneId; }
+   void setZoneId(U16 zoneId) { mZoneId = zoneId; }
 
    //Vector<Point> mPolyBounds;
    const Vector<Point> *getPolyBoundsPtr() { return &mPolyBounds; }

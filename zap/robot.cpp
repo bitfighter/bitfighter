@@ -1069,7 +1069,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
       }
    }
  
-   return closest == U16_MAX ? U16_MAX : gBotNavMeshZones[closest]->mZoneID;
+   return closest == U16_MAX ? U16_MAX : gBotNavMeshZones[closest]->getZoneId();
 }
 
 
