@@ -914,7 +914,6 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
    //}
 //}
 
-
 extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 
 #define combine(x,y) pair<F32,F32>((x),(y))
@@ -963,22 +962,22 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
          if(barrier)
          {
-            barrier->prepareRenderingGeometry2();
-            for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j+=2)
+            barrier->prepareBotZoneGeometry();
+            for(S32 j = 0; j < barrier->mBotZoneBufferLineSegments.size(); j+=2)
             {
-               F32 p1x = F32(S32((barrier->mRenderLineSegments[j].x + 0.5)));
-               F32 p1y = F32(S32((barrier->mRenderLineSegments[j].y + 0.5)));
-               F32 p2x = F32(S32((barrier->mRenderLineSegments[j+1].x + 0.5)));
-               F32 p2y = F32(S32((barrier->mRenderLineSegments[j+1].y + 0.5)));
+               F32 p1x = F32(S32((barrier->mBotZoneBufferLineSegments[j].x + 0.5)));
+               F32 p1y = F32(S32((barrier->mBotZoneBufferLineSegments[j].y + 0.5)));
+               F32 p2x = F32(S32((barrier->mBotZoneBufferLineSegments[j+1].x + 0.5)));
+               F32 p2y = F32(S32((barrier->mBotZoneBufferLineSegments[j+1].y + 0.5)));
                
                // Skip 0-length segments
                if(p1x == p2x && p1y == p2y)
                   continue;
 
-               for(S32 j = 0; j < 2; j++)
+               for(S32 k = 0; k < 2; k++)
                {
-                  F32 x = j ? p1x : p2x;
-                  F32 y = j ? p1y : p2y;
+                  F32 x = k ? p1x : p2x;
+                  F32 y = k ? p1y : p2y;
 
                   pair<F32,F32> index = pair<F32,F32>(x,y);
 
