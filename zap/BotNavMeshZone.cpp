@@ -1093,8 +1093,6 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
       buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
       //buildBotNavMeshZoneConnections();
-
-
    }
    else
    {
@@ -1143,17 +1141,28 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
    if(gIniSettings.botZoneGeneratorMode == 0) //disabled
       return;
+
    if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
    {
       makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-      if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
+
+      if(gIniSettings.botZoneGeneratorMode == 2)
+         removeUnusedNavMeshZones();
+
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
+
       return;
    }
 
    if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // simple triangle bot zones
    {
       makeBotMeshZones2(bounds);
-      if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
+
+      if(gIniSettings.botZoneGeneratorMode == 4)
+         removeUnusedNavMeshZones();
+
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
+
       return;
    }
 
@@ -1161,7 +1170,9 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    {
       // Triangulate and Recast
       bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
-      makeBotMeshZones3(bounds, game, useRecast);
+
+      makeBotMeshZones3(bounds, game, useRecast); // bot zone connections are also made in here
+
       return;
    }
 
