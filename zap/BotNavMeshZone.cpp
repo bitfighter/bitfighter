@@ -845,7 +845,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    if(useRecast)
    {
       // Recast only handles 16 bit coordinates
-      TNLAssert((x1 > S16_MIN && y1 > S16_MIN && x2 < S16_MAX && y2 < S16_MAX), "Level out of bounds!");
+      TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX), "Level out of bounds!");
 
       S32 FIX = S16_MAX;
 

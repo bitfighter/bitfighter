@@ -40,6 +40,7 @@
 
 #include "config.h"     // Only for testing burst graphics below
 
+//#include "pictureloader.h"
 
 namespace Zap
 {
@@ -621,6 +622,24 @@ void renderTurret(const Color &c, Point anchor, Point normal, bool enabled, F32 
 static void drawFlag(const Color &flagColor, const Color *mastColor, F32 alpha)
 {
    glColor(flagColor, alpha);
+
+   /*
+   glEnable(GL_TEXTURE_2D);
+   setGLTex(0);
+   glBegin(GL_QUADS);
+      glTexCoord2f(0,0);
+      glVertex2f(-15, -15);
+      glTexCoord2f(1,0);
+      glVertex2f(15, -15);
+      glTexCoord2f(1,1);
+      glVertex2f(15, 15);
+      glTexCoord2f(0,1);
+      glVertex2f(-15, 15);
+   glEnd();
+   glDisable(GL_TEXTURE_2D);
+   return;
+   */
+
    glBegin(GL_LINES);
 
       // First, the flag itself

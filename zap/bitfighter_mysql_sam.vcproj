@@ -921,6 +921,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\pictureloader.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\playerInfo.cpp"
 			>
 		</File>
