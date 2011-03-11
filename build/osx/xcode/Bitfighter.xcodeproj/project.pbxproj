@@ -54,6 +54,12 @@
 		7367D2C012E807EF00861430 /* OpenAL-Soft.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 73D2F60412E2E0A600EA5EBE /* OpenAL-Soft.framework */; };
 		736DE9A612906AA400C3CB73 /* bitfighter.sh in Resources */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
 		736DE9B412906D0E00C3CB73 /* bitfighter.sh in CopyFiles */ = {isa = PBXBuildFile; fileRef = 736DE9A512906AA400C3CB73 /* bitfighter.sh */; };
+		7370288F132A020B00397F99 /* RecastAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702884132A020B00397F99 /* RecastAlloc.cpp */; };
+		73702890132A020B00397F99 /* RecastMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702886132A020B00397F99 /* RecastMesh.cpp */; };
+		73702895132A020B00397F99 /* triangle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7370288C132A020B00397F99 /* triangle.c */; };
+		73702897132A020B00397F99 /* RecastAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702884132A020B00397F99 /* RecastAlloc.cpp */; };
+		73702898132A020B00397F99 /* RecastMesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 73702886132A020B00397F99 /* RecastMesh.cpp */; };
+		7370289D132A020B00397F99 /* triangle.c in Sources */ = {isa = PBXBuildFile; fileRef = 7370288C132A020B00397F99 /* triangle.c */; };
 		7374B37212F5D20600B13E6A /* gameStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7374B37012F5D20600B13E6A /* gameStats.cpp */; };
 		7374B37312F5D20600B13E6A /* gameStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7374B37012F5D20600B13E6A /* gameStats.cpp */; };
 		7378261D12960DDF007333BE /* Bitfighter.icns in Resources */ = {isa = PBXBuildFile; fileRef = 94B7EABF11D7DABC0083AEAF /* Bitfighter.icns */; };
@@ -589,6 +595,12 @@
 		73657A0412E2E3FB00BED56F /* masterInterface.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = masterInterface.cpp; path = ../../../master/masterInterface.cpp; sourceTree = SOURCE_ROOT; };
 		73657A0512E2E3FB00BED56F /* masterInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = masterInterface.h; path = ../../../master/masterInterface.h; sourceTree = SOURCE_ROOT; };
 		736DE9A512906AA400C3CB73 /* bitfighter.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bitfighter.sh; sourceTree = "<group>"; };
+		73702883132A020B00397F99 /* Recast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Recast.h; sourceTree = "<group>"; };
+		73702884132A020B00397F99 /* RecastAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecastAlloc.cpp; sourceTree = "<group>"; };
+		73702885132A020B00397F99 /* RecastAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecastAlloc.h; sourceTree = "<group>"; };
+		73702886132A020B00397F99 /* RecastMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecastMesh.cpp; sourceTree = "<group>"; };
+		7370288C132A020B00397F99 /* triangle.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = triangle.c; sourceTree = "<group>"; };
+		7370288D132A020B00397F99 /* triangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
 		7374B37012F5D20600B13E6A /* gameStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gameStats.cpp; path = ../../../zap/gameStats.cpp; sourceTree = SOURCE_ROOT; };
 		7374B37112F5D20600B13E6A /* gameStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gameStats.h; path = ../../../zap/gameStats.h; sourceTree = SOURCE_ROOT; };
 		737826B112960DDF007333BE /* Bitfighterd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bitfighterd.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1094,6 +1106,8 @@
 		29B97314FDCFA39411CA2CEA /* Bitfighter */ = {
 			isa = PBXGroup;
 			children = (
+				73702882132A020B00397F99 /* recast */,
+				73702887132A020B00397F99 /* Triangle */,
 				5E481F4113053943004F9637 /* sqlite */,
 				73D2F27E12E2D6D800EA5EBE /* zap */,
 				73657A0312E2E3CF00BED56F /* master */,
@@ -1165,6 +1179,28 @@
 			);
 			name = "shell script";
 			sourceTree = "<group>";
+		};
+		73702882132A020B00397F99 /* recast */ = {
+			isa = PBXGroup;
+			children = (
+				73702883132A020B00397F99 /* Recast.h */,
+				73702884132A020B00397F99 /* RecastAlloc.cpp */,
+				73702885132A020B00397F99 /* RecastAlloc.h */,
+				73702886132A020B00397F99 /* RecastMesh.cpp */,
+			);
+			name = recast;
+			path = ../../../recast;
+			sourceTree = SOURCE_ROOT;
+		};
+		73702887132A020B00397F99 /* Triangle */ = {
+			isa = PBXGroup;
+			children = (
+				7370288C132A020B00397F99 /* triangle.c */,
+				7370288D132A020B00397F99 /* triangle.h */,
+			);
+			name = Triangle;
+			path = ../../../Triangle;
+			sourceTree = SOURCE_ROOT;
 		};
 		737CE2FD1290469000D732B7 /* lua */ = {
 			isa = PBXGroup;
@@ -1965,6 +2001,9 @@
 				73657A0612E2E3FB00BED56F /* masterInterface.cpp in Sources */,
 				7374B37212F5D20600B13E6A /* gameStats.cpp in Sources */,
 				7378E23812F93C9D005EF681 /* database.cpp in Sources */,
+				73702897132A020B00397F99 /* RecastAlloc.cpp in Sources */,
+				73702898132A020B00397F99 /* RecastMesh.cpp in Sources */,
+				7370289D132A020B00397F99 /* triangle.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2188,6 +2227,9 @@
 				7374B37312F5D20600B13E6A /* gameStats.cpp in Sources */,
 				7378E23912F93C9D005EF681 /* database.cpp in Sources */,
 				5E481F4413053943004F9637 /* sqlite3.c in Sources */,
+				7370288F132A020B00397F99 /* RecastAlloc.cpp in Sources */,
+				73702890132A020B00397F99 /* RecastMesh.cpp in Sources */,
+				73702895132A020B00397F99 /* triangle.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
