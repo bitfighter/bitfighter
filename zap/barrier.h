@@ -41,10 +41,12 @@ class Barrier : public GameObject
 {
 public:
    Vector<Point> mPoints; ///< The points of the barrier --> if only two, first will be start, second end of an old-school segment
+
    bool mSolid;
    // By precomputing and storing, we should ease the rendering cost
    Vector<Point> mRenderFillGeometry; ///< Actual geometry used for rendering fill.
    Vector<Point> mRenderOutlineGeometry; ///< Actual geometry used for rendering outline.
+   Vector<Point> mBotZoneBufferGeometry; ///< Geometry used for rendering the botzones.
 
    F32 mWidth;
    static const S32 MIN_BARRIER_WIDTH = 1;
@@ -53,6 +55,7 @@ public:
    static const S32 BarrierWidth = 50; ///< The default width of the barrier in game units
 
    Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
+   Vector<Point> mBotZoneBufferLineSegments; ///< The line segments representing a buffered barrier.
 
    /// Barrier constructor
    Barrier(const Vector<Point> &points = Vector<Point>(), F32 width = BarrierWidth, bool solid = false);
@@ -78,15 +81,24 @@ public:
    // Simply takes a segment and "puffs it out" to a rectangle of a specified width, filling cornerPoints.  Does not modify endpoints.
    static void expandCenterlineToOutline(const Point &start, const Point &end, F32 width, Vector<Point> &cornerPoints);
 
+   // Takes a segment and "puffs it out" to a rectangle for bot zone generation.
+   // This rectangle is the width of the barrier plus the ship's collision radius added to the outside
+   static void bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints);
+
    /// clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
    static void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints);
 
    static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
    // Clean up edge geometry and get barriers ready for proper rendering
-   void prepareRenderingGeometry();
-   void prepareRenderingGeometry2();
+   void prepareRenderingGeometry();       // orig
+   void prepareRenderingGeometry2();      // sam's
    
+   // Create geometry for botzones - adds a buffer around barriers
+   void prepareBotZoneGeometry();
+
+   void prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segs);
+
 
    TNL_DECLARE_CLASS(Barrier);
 };

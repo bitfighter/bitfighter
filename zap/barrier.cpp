@@ -122,6 +122,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    else if(mPoints.size() == 2 && mWidth > 0)   // It's a regular segment, so apply width
    {
       expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
+      bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 4 points
       mPoints = mRenderFillGeometry;
    }
 
@@ -235,6 +236,25 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    cornerPoints.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
    cornerPoints.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
    cornerPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+}
+
+// puffs out segment to the specified width with a further buffer for bot zones
+void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints)
+{
+   bufferedPoints.clear();
+
+   Point difference = end - start;
+   Point crossVector(difference.y, -difference.x);  // create a point whose vector from 0,0 is perpenticular to the original vector
+   crossVector.normalize((barrierWidth * 0.5) + Ship::CollisionRadius);  // reduce point so the vector has length of barrier width + ship radius
+
+   Point parallelVector(difference.x, difference.y); // create a vector parallel to original segment
+   parallelVector.normalize(Ship::CollisionRadius);  // reduce point so vector has length of ship radius
+
+   // now add/subtract perpendicular and parallel vectors to buffer the segments
+   bufferedPoints.push_back(Point((start.x - parallelVector.x) + crossVector.x, (start.y - parallelVector.y) + crossVector.y));
+   bufferedPoints.push_back(Point(end.x + parallelVector.x + crossVector.x, end.y + parallelVector.y + crossVector.y));
+   bufferedPoints.push_back(Point(end.x + parallelVector.x - crossVector.x, end.y + parallelVector.y - crossVector.y));
+   bufferedPoints.push_back(Point((start.x - parallelVector.x) - crossVector.x, (start.y - parallelVector.y) - crossVector.y));
 }
 
 
@@ -381,9 +401,9 @@ void Barrier::prepareRenderingGeometry2()
 }
 
 
-void Barrier::prepareRenderingGeometry()
+static void prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segments)
 {
-   resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
+   resetEdges(outlines, segments);
 
    static Vector<DatabaseObject *> fillObjects;
    fillObjects.clear();
@@ -392,10 +412,23 @@ void Barrier::prepareRenderingGeometry()
 
    for(S32 i = 0; i < fillObjects.size(); i++)
    {
-      mRenderOutlineGeometry.clear();
-      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mRenderOutlineGeometry))
-         clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);     // Populates mRenderLineSegments
+      outlines.clear();
+      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(outlines))
+         clipRenderLinesToPoly(outlines, segments);     // Populates segments
    }
+}
+
+
+void Barrier::prepareRenderingGeometry()
+{
+   prepareRenderGeom(mRenderOutlineGeometry, mRenderLineSegments);
+}
+
+
+// Create buffered edge geometry around the barrier for bot zone generation
+void Barrier::prepareBotZoneGeometry()
+{
+   prepareRenderGeom(mBotZoneBufferGeometry, mBotZoneBufferLineSegments);
 }
 
 

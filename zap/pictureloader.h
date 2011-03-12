@@ -10,4 +10,4 @@ struct pictureLoader
    ~pictureLoader() {if(data) delete data;}
 };
 
-extern void setGLTex(S32 num);
+extern bool setGLTex(S32 num);
