@@ -119,10 +119,12 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
        Triangulate::Process(mPoints, mRenderFillGeometry);
+
    else if(mPoints.size() == 2 && mWidth > 0)   // It's a regular segment, so apply width
    {
-      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
-      bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 4 points
+      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);      // Fills mRenderFillGeometry with 4 points
+      bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills mBotZoneBufferGeometry with 4 points
+
       mPoints = mRenderFillGeometry;
    }
 
@@ -238,7 +240,7 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    cornerPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
 }
 
-// puffs out segment to the specified width with a further buffer for bot zones
+// Puffs out segment to the specified width with a further buffer for bot zones
 void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints)
 {
    bufferedPoints.clear();
@@ -401,7 +403,7 @@ void Barrier::prepareRenderingGeometry2()
 }
 
 
-static void prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segments)
+void Barrier::prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segments)
 {
    resetEdges(outlines, segments);
 
