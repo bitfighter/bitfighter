@@ -305,24 +305,23 @@ void Barrier::clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Poin
    lineSegmentPoints = clippedSegments;
 }
 
+
 S32 QSORT_CALLBACK pointDataSortX(Point *a, Point *b)
 {
    if(a->x == b->x)
       return 0;
-   else if(a->x > b->x)
-      return 1;
-   else
-      return -1;
+   else return (a->x > b->x) ? 1 : -1;
 }
+
+
 S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 {
    if(a->y == b->y)
       return 0;
-   else if(a->y > b->y)
-      return 1;
-   else
-      return -1;
+   else return (a->y > b->y) ? 1 : -1;
 }
+
+
 void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, Point p1, Point p2);
 
 // Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
@@ -381,6 +380,7 @@ void Barrier::prepareRenderingGeometry2()
    }
 }
 
+
 void Barrier::prepareRenderingGeometry()
 {
    resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
@@ -398,6 +398,7 @@ void Barrier::prepareRenderingGeometry()
    }
 }
 
+
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
@@ -413,5 +414,6 @@ void Barrier::render(S32 layerIndex)
    else if(layerIndex == 1)      // Second pass: draw the outlines
       renderWallEdges(mRenderLineSegments);
 }
+
 
 };
