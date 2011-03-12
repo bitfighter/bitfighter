@@ -62,8 +62,7 @@ BotNavMeshZone::BotNavMeshZone()
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
 {
-   //for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
-   for(S32 i = gBotNavMeshZones.size()-1; i >= 0; i--)  // for speed, check in reverse order. Game::cleanUp() clears on reverse order.
+   for(S32 i = gBotNavMeshZones.size() - 1; i >= 0; i--)  // For speed, check in reverse order. Game::cleanUp() clears on reverse order.
    if(gBotNavMeshZones[i] == this)
    {
       gBotNavMeshZones.erase_fast(i);
@@ -151,11 +150,6 @@ void BotNavMeshZone::addToGame(Game *game)
 
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
-   //if(!isGhost())     // For now, so we can see them on the client to help with debugging
-   //   if(gBotNavMeshZones.size() < 50) // avoid start-up very long black screen.    // Causes items to stream in 
-   //   setScopeAlways();
-
-   // Don't need to increment our objectloaded counter, as this object resides only on the server
    TNLAssert(false, "Should not be added to game");
 }
 
@@ -304,8 +298,6 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited.
 const F32 MinZoneSize = 32;
 
-//#include "../recast/include/recast.h"
-
 static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 {
 
@@ -354,12 +346,6 @@ static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 		}
 	}
 }
-
-
-
-
-const F32 pi = 3.14159265;
-
 
 
 S32 QSORT_CALLBACK pointDataSort(Point *a, Point *b)
@@ -736,7 +722,6 @@ static void initIoStruct(triangulateio *ioStruct)
 }
 
 
-
 struct rcEdge
 {
 	unsigned short vert[2];    // from, to verts
@@ -922,9 +907,6 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
-
-
-
    // Just for fun, let's triangulate!
    Vector<F32> coords;
    Vector<F32> holes;
