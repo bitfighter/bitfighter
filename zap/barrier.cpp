@@ -24,6 +24,7 @@
 //------------------------------------------------------------------------------------
 
 #include "barrier.h"
+#include "BotNavMeshZone.h"
 #include "gameObjectRender.h"
 #include "SweptEllipsoid.h"    // For polygon triangulation
 
@@ -245,10 +246,10 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 
    Point difference = end - start;
    Point crossVector(difference.y, -difference.x);  // create a point whose vector from 0,0 is perpenticular to the original vector
-   crossVector.normalize((barrierWidth * 0.5) + Ship::CollisionRadius);  // reduce point so the vector has length of barrier width + ship radius
+   crossVector.normalize((barrierWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
 
    Point parallelVector(difference.x, difference.y); // create a vector parallel to original segment
-   parallelVector.normalize(Ship::CollisionRadius);  // reduce point so vector has length of ship radius
+   parallelVector.normalize(BotNavMeshZone::BufferRadius);  // reduce point so vector has length of ship radius
 
    // now add/subtract perpendicular and parallel vectors to buffer the segments
    bufferedPoints.push_back(Point((start.x - parallelVector.x) + crossVector.x, (start.y - parallelVector.y) + crossVector.y));

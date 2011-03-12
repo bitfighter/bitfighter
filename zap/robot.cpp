@@ -892,8 +892,8 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 
    if(targetZone == U16_MAX)       // Our target is off the map.  See if it's visible from any of our zones, and, if so, go there
    {
-      targetZone = findClosestZone(target);       
- 
+      targetZone = findClosestZone(target);
+
       if(targetZone == U16_MAX)
          return returnNil(L);
    }
@@ -946,11 +946,13 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    thisRobot->flightPlan.clear();
 
    U16 currentZone = thisRobot->getCurrentZone();     // Where we are
-   if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
 
+   if(currentZone == U16_MAX)      // We don't really know where we are... bad news!  Let's find closest visible zone and go that way.
+   {
       currentZone = findClosestZone(thisRobot->getActualPos());
-      if(currentZone == U16_MAX)      // That didn't go so well...
-         return returnNil(L);
+   }
+   if(currentZone == U16_MAX)      // That didn't go so well...
+      return returnNil(L);
 
    // We're in, or on the cusp of, the zone containing our target.  We're close!!
    if(currentZone == targetZone)
@@ -1040,36 +1042,68 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
 // Another helper function: returns id of closest zone to a given point
 U16 LuaRobot::findClosestZone(const Point &point)
 {
-   // Make two passes, first with a short distance, second with a longer one.  Hope we find it in the first pass because
-   // the second pass checks all zones, and that could take a while.
-   F32 distsq = 262144;     // 512^2
-   U16 closest = U16_MAX;
-   S32 pass = 1;
- 
-   while(closest == U16_MAX && pass < 3)
+   U16 closestZone = U16_MAX;
+
+   // First, do a quick search for zone based on the buffer; should be 99% of the cases
+
+   // search radius is just slightly larger than twice the zone buffers added to objects like barriers
+   S32 searchRadius = 2 * BotNavMeshZone::BufferRadius + 1;
+
+   Vector<DatabaseObject*> objects;
+   Rect rect = Rect(point.x + searchRadius, point.y + searchRadius, point.x - searchRadius, point.y - searchRadius);
+
+   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, objects, rect);
+
+   for(S32 i=0; i<objects.size(); i++)
    {
-      for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
+      Point center = zone->getCenter();
+
+      if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
       {
-         Point center = gBotNavMeshZones[i]->getCenter();
- 
-         F32 d = center.distSquared(point);     // Use cheaper test first
-         if(d < distsq)
-         {
-            if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))     // This is an expensive test
-            {
-               closest = i;  
-               distsq = d;
-            }
-         }
-      }
-      if(closest == U16_MAX)   // Didn't find any matches on the first pass, let's expand our radius and try again
-      {
-         pass++;
-         distsq = F32_MAX;
+         closestZone = zone->getZoneId();
+         break;
       }
    }
- 
-   return closest == U16_MAX ? U16_MAX : gBotNavMeshZones[closest]->getZoneId();
+
+//   // Second, if no zone found quickly, do exhaustive search using gServerWorldBounds
+//   if (closestZone == U16_MAX)
+//   {
+//      objects.clear();
+//      gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, objects, gServerWorldBounds);
+//
+//      for(S32 i=0; i<objects.size(); i++)
+//      {
+//         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
+//         Point center = zone->getCenter();
+//
+//         if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
+//         {
+//            closestZone = zone->getZoneId();
+//            break;
+//         }
+//      }
+//   }
+
+
+   // Third, target must not be in extents of the map, find nearest zone if a straight line was drawn
+   if (closestZone == U16_MAX)
+   {
+      Point extentsCenter = gServerWorldBounds.getCenter();
+
+      F32 collisionTimeIgnore;
+      Point surfaceNormalIgnore;
+
+      DatabaseObject* object = gServerGame->mDatabaseForBotZones.findObjectLOS(BotNavMeshZoneType,
+            MoveObject::ActualState, point, extentsCenter, collisionTimeIgnore, surfaceNormalIgnore);
+
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(object);
+
+      if (zone != NULL)
+         closestZone = zone->getZoneId();
+   }
+
+   return closestZone;
 }
 
 
