@@ -2683,10 +2683,13 @@ GameConnection *findClient(GameType *gt, const char *name)
 bool safeFilename(const char *str)
 {
    char chr = str[0];
+   S32 i = 0;
    while(chr != 0)
    {
       if(chr == '\\' || chr == '/')
          return false;
+      i++;
+      chr = str[i];
    }
    return true;
 }
@@ -2783,7 +2786,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
       else if(Robot::robots.size() >= gIniSettings.maxBots)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Can't add more bots -- this server is full");
 
-      else if(args.size() >= 2 && !safeFilename(args[2].getString()))
+      else if(args.size() >= 2 && !safeFilename(args[1].getString()))
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid filename");
 
       else
