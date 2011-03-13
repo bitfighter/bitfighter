@@ -429,11 +429,15 @@ void Barrier::prepareBotZoneGeometry()
 
    findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
 
+   Vector<Point> collisionPoly;
+
    for(S32 i = 0; i < fillObjects.size(); i++)
    {
-      mBotZoneBufferGeometry.clear();
-      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mBotZoneBufferGeometry))
-         clipRenderLinesToPoly(mBotZoneBufferGeometry, mBotZoneBufferLineSegments);
+      // make the collision poly be the buffer geometry instead of the barrier geometry
+      collisionPoly = dynamic_cast<Barrier *>(fillObjects[i])->mBotZoneBufferGeometry;
+
+      if(fillObjects[i] != this && !collisionPoly.empty())
+         clipRenderLinesToPoly(collisionPoly, mBotZoneBufferLineSegments);
    }
 }
 
