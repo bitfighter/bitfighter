@@ -700,8 +700,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Do some prep work if we have bots and/or zones
    if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
       buildOrLoadBotMeshZones();
-   //else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
-   //   BotNavMeshZone::buildBotNavMeshZoneConnections();    
+   else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
+      BotNavMeshZone::buildBotNavMeshZoneConnections();    
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
