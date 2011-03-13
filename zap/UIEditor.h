@@ -228,6 +228,7 @@ public:
    Vector<Point> fillPoints;
    Point centroid;
 
+   bool mSolid;                  // Wall only
    void processEndPoints();      // Wall only
 
    void decreaseWidth(S32 amt);  // Wall only

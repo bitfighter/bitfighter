@@ -600,7 +600,13 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
    else
    {
       GameItems itemType = ItemInvalid;
+      bool solid = false;
 
+      if(!strcmp(argv[0], "BarrierMakerS"))
+      {
+         itemType = ItemBarrierMaker;
+         solid = true;
+      }
       for(S32 index = 0; itemDef[index].name != NULL; index++)
          if(!strcmp(argv[0], itemDef[index].name))
          {
@@ -612,7 +618,14 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       {
          WorldItem newItem(itemType, id);
          if(newItem.processArguments(argc - 1, argv + 1))
+         {
+            if(solid)
+            {
+               newItem.mSolid = true;
+               newItem.initializeGeom();
+            }
             mLoadTarget->push_back(newItem);           //don't add to editor if not valid...
+         }
          return;
       }
    }
@@ -2008,6 +2021,7 @@ bool EditorUserInterface::showingNavZones()
 
 extern void renderTriangulatedPolygonFill(const Vector<Point> &fill);
 extern void renderPolygonOutline(const Vector<Point> &outline);
+extern void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, const Color &fillColor, const Color &outlineColor, F32 alpha = 1);
 
 static const S32 asteroidDesign = 2;      // Design we'll use for all asteroids in editor
 
@@ -2222,7 +2236,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       renderLinePolyVertices(item, alpha);
    }
-   else if(item.index == ItemBarrierMaker)  
+   else if(item.index == ItemBarrierMaker && !item.mSolid)  
    {
       if(!fillRendered)    // All walls need to be rendered at the same time, but we only want to do them once
       {
@@ -2236,7 +2250,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       renderLinePolyVertices(item, alpha);
    } 
-   else if(item.geomType() == geomPoly)    // Draw regular line objects and poly objects
+   else if(item.geomType() == geomPoly || item.mSolid)    // Draw regular line objects and poly objects
    {
       // Hide everything in ShowWallsOnly mode, and hide navMeshZones in ShowAllButNavZones mode, 
       // unless it's a dock item or we're showing the reference ship.  NavMeshZones are hidden when reference ship is shown
@@ -2295,6 +2309,14 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                else if(item.index == ItemNavMeshZone)
                   renderNavMeshZone(item.getVerts(), item.fillPoints, item.centroid, mShowMode == NavZoneMode ? -2 : -1, 
                                     item.isConvex(), item.selected);
+
+               else if(item.index == ItemSlipZone)
+                  renderSlipZone(item.getVerts(), item.fillPoints, item.getExtent());
+
+               else if(item.index == ItemBarrierMaker)
+               {
+                  renderPolygon(item.fillPoints, item.getVerts(), gIniSettings.wallFillColor, gIniSettings.wallOutlineColor, 1);
+               }
 
                // If item is selected, and we're not in preview mode, draw a border highlight
                if(!mShowingReferenceShip && (item.selected || item.litUp))
@@ -3016,7 +3038,7 @@ void EditorUserInterface::findHitItemAndEdge()
          // Make a copy of the items vertices that we can add to in the case of a loop
          Vector<Point> verts = mItems[i].getVerts();    
 
-         if(mItems[i].geomType() == geomPoly)   // Add first point to the end to create last side on poly
+         if(mItems[i].geomType() == geomPoly || mItems[i].mSolid)   // Add first point to the end to create last side on poly
             verts.push_back(verts.first());
 
          Point p1 = convertLevelToCanvasCoord(verts[0]);
@@ -3053,7 +3075,7 @@ void EditorUserInterface::findHitItemAndEdge()
       if(mShowMode == NavZoneMode && mItems[i].index != ItemNavMeshZone)
          continue;
 
-      if(mItems[i].geomType() == geomPoly)
+      if(mItems[i].geomType() == geomPoly || mItems[i].mSolid)
       {
          Vector<Point> verts;
          for(S32 j = 0; j < mItems[i].vertCount(); j++)
@@ -3822,7 +3844,7 @@ void EditorUserInterface::onKeyDown(KeyCode keyCode, char ascii)
 
       // Can only add new vertices by clicking on item's edge, not it's interior (for polygons, that is)
       if(mEdgeHit != NONE && mItemHit != NONE && (mItems[mItemHit].geomType() == geomLine ||
-                                                  mItems[mItemHit].geomType() >= geomPoly   ))
+                                                  mItems[mItemHit].geomType() >= geomPoly || mItems[mItemHit].mSolid ))
       {
          if(mItems[mItemHit].vertCount() >= gMaxPolygonPoints)     // Polygon full -- can't add more
             return;
@@ -4593,7 +4615,7 @@ bool EditorUserInterface::saveLevel(bool showFailMessages, bool showSuccessMessa
             if((p.index == ItemBarrierMaker) != (j == 0))
                continue;
 
-            s_fprintf(f, "%s", itemDef[mItems[i].index].name);
+            s_fprintf(f, "%s%s", itemDef[mItems[i].index].name, p.mSolid && p.index == ItemBarrierMaker ? "S" : "");
 
             // Write id if it's not 0
             if(mItems[i].id > 0)
@@ -5142,6 +5164,7 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool
    snapped = false;
    mDockItem = isDockItem;
    mScore = 1;
+   mSolid = false;
 
    if(itemDef[itemType].hasText)
    {
@@ -5166,7 +5189,7 @@ void WorldItem::init(GameItems itemType, S32 xteam, F32 xwidth, U32 itemid, bool
 
 void WorldItem::initializeGeom()
 {
-   if(geomType() == geomPoly)
+   if(geomType() == geomPoly || mSolid)
    {
       Triangulate::Process(mVerts, fillPoints);   // Populates fillPoints from polygon outline
       centroid = findCentroid(mVerts);
@@ -5618,7 +5641,7 @@ void WorldItem::onGeomChanging()
 {
    if(index == ItemTextItem)
       onGeomChanged();
-   else if(geomType() == geomPoly)
+   else if(geomType() == geomPoly || mSolid)
       onGeomChanged();     // Allows poly fill to get reshaped as vertices move
 }
 
@@ -5629,7 +5652,7 @@ void WorldItem::onItemDragging()
    if(index == ItemForceField)
      onGeomChanged();
 
-   else if(geomType() == geomPoly)
+   else if(geomType() == geomPoly || mSolid)
       onGeomChanged();     // Allows poly fill to get dragged around with outline
 }
 
@@ -5654,9 +5677,14 @@ void WorldItem::onGeomChanged()
    
    else if(index == ItemBarrierMaker)
    {  
-      // Fill extendedEndPoints from the vertices of our wall's centerline
-      processEndPoints();
-      getWallSegmentManager()->computeWallSegmentIntersections(this);
+      if(mSolid)
+         initializeGeom();
+      else
+      {
+         // Fill extendedEndPoints from the vertices of our wall's centerline
+         processEndPoints();
+         getWallSegmentManager()->computeWallSegmentIntersections(this);
+      }
 
       gEditorUserInterface.recomputeAllEngineeredItems();      // Seems awfully lazy...  should only recompute items attached to altered wall
 
