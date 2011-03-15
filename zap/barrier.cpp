@@ -239,7 +239,7 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    cornerPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
 }
 
-// puffs out segment to the specified width with a further buffer for bot zones
+// Puffs out segment to the specified width with a further buffer for bot zones
 void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints)
 {
    bufferedPoints.clear();
@@ -330,19 +330,13 @@ S32 QSORT_CALLBACK pointDataSortX(Point *a, Point *b)
 {
    if(a->x == b->x)
       return 0;
-   else if(a->x > b->x)
-      return 1;
-   else
-      return -1;
+   else return (a->x > b->x) ? 1 : -1;
 }
 S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 {
    if(a->y == b->y)
       return 0;
-   else if(a->y > b->y)
-      return 1;
-   else
-      return -1;
+   else return (a->y > b->y) ? 1 : -1;
 }
 
 
@@ -389,7 +383,7 @@ void Barrier::prepareRenderingGeometry2()
 
       for(S32 j=1; j<points.size(); j++)
       {
-         Point midPoint = (points[j] + points[j-1]) * 0.5 + Point(0.003,0.007); // to avoid missing lines, duplicate segments is better than mising segments.
+         Point midPoint = (points[j] + points[j-1]) * 0.5 + Point(0.003,0.007); // to avoid mssing lines, duplicate segments is better then mising segments.
          Point midPoint2 = (points[j] + points[j-1]) * 0.5 - Point(0.003,0.007);
 
          bool isInside = false;
@@ -413,7 +407,7 @@ void Barrier::prepareRenderingGeometry2()
 // Original method, creates too many segments
 void Barrier::prepareRenderingGeometry()
 {
-   resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
+   resetEdges(outlines, segments);
 
    static Vector<DatabaseObject *> fillObjects;
    fillObjects.clear();
@@ -422,34 +416,25 @@ void Barrier::prepareRenderingGeometry()
 
    for(S32 i = 0; i < fillObjects.size(); i++)
    {
-      mRenderOutlineGeometry.clear();
-      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(mRenderOutlineGeometry))
-         clipRenderLinesToPoly(mRenderOutlineGeometry, mRenderLineSegments);     // Populates mRenderLineSegments
+      outlines.clear();
+      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(outlines))
+         clipRenderLinesToPoly(outlines, segments);     // Populates segments
    }
+}
+
+
+void Barrier::prepareRenderingGeometry()
+{
+   prepareRenderGeom(mRenderOutlineGeometry, mRenderLineSegments);
 }
 
 
 // Create buffered edge geometry around the barrier for bot zone generation
 void Barrier::prepareBotZoneGeometry()
 {
-   resetEdges(mBotZoneBufferGeometry, mBotZoneBufferLineSegments);
-
-   static Vector<DatabaseObject *> fillObjects;
-   fillObjects.clear();
-
-   findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
-
-   Vector<Point> collisionPoly;
-
-   for(S32 i = 0; i < fillObjects.size(); i++)
-   {
-      // make the collision poly be the buffer geometry instead of the barrier geometry
-      collisionPoly = dynamic_cast<Barrier *>(fillObjects[i])->mBotZoneBufferGeometry;
-
-      if(fillObjects[i] != this && !collisionPoly.empty())
-         clipRenderLinesToPoly(collisionPoly, mBotZoneBufferLineSegments);
-   }
+   prepareRenderGeom(mBotZoneBufferGeometry, mBotZoneBufferLineSegments);
 }
+
 
 void Barrier::render(S32 layerIndex)
 {

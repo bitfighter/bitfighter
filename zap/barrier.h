@@ -91,11 +91,13 @@ public:
    static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
    // Clean up edge geometry and get barriers ready for proper rendering
-   void prepareRenderingGeometry();
-   void prepareRenderingGeometry2();
+   void prepareRenderingGeometry();       // orig
+   void prepareRenderingGeometry2();      // sam's
    
-   // create geometry for botzones - adds a buffer around barriers
+   // Create geometry for botzones - adds a buffer around barriers
    void prepareBotZoneGeometry();
+
+   void prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segs);
 
 
    TNL_DECLARE_CLASS(Barrier);

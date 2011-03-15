@@ -62,8 +62,7 @@ BotNavMeshZone::BotNavMeshZone()
 // Destructor
 BotNavMeshZone::~BotNavMeshZone()
 {
-   //for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
-   for(S32 i = gBotNavMeshZones.size()-1; i >= 0; i--)  // for speed, check in reverse order. Game::cleanUp() clears on reverse order.
+   for(S32 i = gBotNavMeshZones.size() - 1; i >= 0; i--)  // For speed, check in reverse order. Game::cleanUp() clears on reverse order.
    if(gBotNavMeshZones[i] == this)
    {
       gBotNavMeshZones.erase_fast(i);
@@ -151,11 +150,6 @@ void BotNavMeshZone::addToGame(Game *game)
 
 void BotNavMeshZone::onAddedToGame(Game *theGame)
 {
-   //if(!isGhost())     // For now, so we can see them on the client to help with debugging
-   //   if(gBotNavMeshZones.size() < 50) // avoid start-up very long black screen.    // Causes items to stream in 
-   //   setScopeAlways();
-
-   // Don't need to increment our objectloaded counter, as this object resides only on the server
    TNLAssert(false, "Should not be added to game");
 }
 
@@ -304,8 +298,6 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited.
 const F32 MinZoneSize = 32;
 
-//#include "../recast/include/recast.h"
-
 static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 {
 
@@ -354,12 +346,6 @@ static void makeBotMeshZones(F32 x1, F32 y1, F32 x2, F32 y2)
 		}
 	}
 }
-
-
-
-
-const F32 pi = 3.14159265;
-
 
 
 S32 QSORT_CALLBACK pointDataSort(Point *a, Point *b)
@@ -736,7 +722,6 @@ static void initIoStruct(triangulateio *ioStruct)
 }
 
 
-
 struct rcEdge
 {
 	unsigned short vert[2];    // from, to verts
@@ -914,6 +899,7 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
    //}
 //}
 
+
 extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 
 #define combine(x,y) pair<F32,F32>((x),(y))
@@ -921,9 +907,6 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
-
-
-
    // Just for fun, let's triangulate!
    Vector<F32> coords;
    Vector<F32> holes;
@@ -962,22 +945,22 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
          if(barrier)
          {
-            barrier->prepareBotZoneGeometry();
-            for(S32 j = 0; j < barrier->mBotZoneBufferLineSegments.size(); j+=2)
+            barrier->prepareRenderingGeometry2();
+            for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j+=2)
             {
-               F32 p1x = F32(S32((barrier->mBotZoneBufferLineSegments[j].x + 0.5)));
-               F32 p1y = F32(S32((barrier->mBotZoneBufferLineSegments[j].y + 0.5)));
-               F32 p2x = F32(S32((barrier->mBotZoneBufferLineSegments[j+1].x + 0.5)));
-               F32 p2y = F32(S32((barrier->mBotZoneBufferLineSegments[j+1].y + 0.5)));
+               F32 p1x = F32(S32((barrier->mRenderLineSegments[j].x + 0.5)));
+               F32 p1y = F32(S32((barrier->mRenderLineSegments[j].y + 0.5)));
+               F32 p2x = F32(S32((barrier->mRenderLineSegments[j+1].x + 0.5)));
+               F32 p2y = F32(S32((barrier->mRenderLineSegments[j+1].y + 0.5)));
                
                // Skip 0-length segments
                if(p1x == p2x && p1y == p2y)
                   continue;
 
-               for(S32 k = 0; k < 2; k++)
+               for(S32 j = 0; j < 2; j++)
                {
-                  F32 x = k ? p1x : p2x;
-                  F32 y = k ? p1y : p2y;
+                  F32 x = j ? p1x : p2x;
+                  F32 y = j ? p1y : p2y;
 
                   pair<F32,F32> index = pair<F32,F32>(x,y);
 
@@ -1092,6 +1075,8 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
       buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
       //buildBotNavMeshZoneConnections();
+
+
    }
    else
    {
@@ -1140,28 +1125,17 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 
    if(gIniSettings.botZoneGeneratorMode == 0) //disabled
       return;
-
    if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
    {
       makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-
-      if(gIniSettings.botZoneGeneratorMode == 2)
-         removeUnusedNavMeshZones();
-
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
-
+      if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
       return;
    }
 
    if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // simple triangle bot zones
    {
       makeBotMeshZones2(bounds);
-
-      if(gIniSettings.botZoneGeneratorMode == 4)
-         removeUnusedNavMeshZones();
-
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
-
+      if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
       return;
    }
 
@@ -1169,9 +1143,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    {
       // Triangulate and Recast
       bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
-
-      makeBotMeshZones3(bounds, game, useRecast); // bot zone connections are also made in here
-
+      makeBotMeshZones3(bounds, game, useRecast);
       return;
    }
 
