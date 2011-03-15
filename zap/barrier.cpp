@@ -344,8 +344,11 @@ S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
    else
       return -1;
 }
+
+
 void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, Point p1, Point p2);
 
+// Sam's optimized version, replaces prepareRenderingGeometry(), leaves small holes
 // Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
 void Barrier::prepareRenderingGeometry2()
 {
@@ -376,15 +379,19 @@ void Barrier::prepareRenderingGeometry2()
          points.sort(pointDataSortX);
       else
          points.sort(pointDataSortY);
+
+      // Remove duplicate points
       for(S32 j=points.size()-1; j>=1; j--)
       {
          if(points[j] == points[j-1])
             points.erase(j);
       }
+
       for(S32 j=1; j<points.size(); j++)
       {
-         Point midPoint = (points[j] + points[j-1]) * 0.5 + Point(0.003,0.007); // to avoid mssing lines, duplicate segments is better then mising segments.
+         Point midPoint = (points[j] + points[j-1]) * 0.5 + Point(0.003,0.007); // to avoid missing lines, duplicate segments is better than mising segments.
          Point midPoint2 = (points[j] + points[j-1]) * 0.5 - Point(0.003,0.007);
+
          bool isInside = false;
          for(S32 k=0; k<objects.size() && !isInside; k++)
          {
@@ -402,6 +409,8 @@ void Barrier::prepareRenderingGeometry2()
    }
 }
 
+
+// Original method, creates too many segments
 void Barrier::prepareRenderingGeometry()
 {
    resetEdges(mRenderOutlineGeometry, mRenderLineSegments);
@@ -419,7 +428,8 @@ void Barrier::prepareRenderingGeometry()
    }
 }
 
-// create buffered edge geometry around the barrier for bot zone generation
+
+// Create buffered edge geometry around the barrier for bot zone generation
 void Barrier::prepareBotZoneGeometry()
 {
    resetEdges(mBotZoneBufferGeometry, mBotZoneBufferLineSegments);
