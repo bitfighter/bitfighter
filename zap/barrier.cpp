@@ -340,7 +340,7 @@ S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 }
 
 
-void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, Point p1, Point p2);
+void getPolygonLineCollisionPoints(Vector<Point> &output, const Vector<Point> &input, Point start, Point end);
 
 // Sam's optimized version, replaces prepareRenderingGeometry(), leaves small holes
 // Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
@@ -349,26 +349,36 @@ void Barrier::prepareRenderingGeometry2()
    GridDatabase *gridDB = getGridDatabase();
    S32 i_prev = mPoints.size()-1;
    mRenderOutlineGeometry.clear();
+
+   // Reusable containers
+   Vector<Point> points;
+   Vector<Point> boundaryPoints;
+   Vector<DatabaseObject *> objects;
+   Rect rect;
+
    for(S32 i=0; i<mPoints.size(); i++)
    {
-      Vector<Point> points;
-      Vector<DatabaseObject *> objects;
-      Rect rect(mPoints[i], mPoints[i_prev]);
+      points.clear();
+      objects.clear();
+
+      rect.set(mPoints[i], mPoints[i_prev]);
+
       points.push_back(mPoints[i]);
       points.push_back(mPoints[i_prev]);
-      gridDB->findObjects(BarrierType, objects, rect);
+      gridDB->findObjects(BarrierType, objects, rect);      // Find all barriers in bounding box of mPoints[i] & mPoints[i_prev]
+
       for(S32 j=objects.size()-1; j>=0; j--)
       {
-         Vector<Point> collisionPoints;
-         Barrier *obj = dynamic_cast<Barrier *>(objects[j]);
-         if(obj == this || obj == NULL)
+         Barrier *wall = dynamic_cast<Barrier *>(objects[j]);
+         if(wall == this || wall == NULL)
             objects.erase_fast(j);
          else
          {
-            obj->getCollisionPoly(collisionPoints);
-            getPolygonLineCollisionPoints(points, collisionPoints, mPoints[i], mPoints[i_prev]);
+            wall->getCollisionPoly(boundaryPoints);      // Assigns boundaryPoints
+            getPolygonLineCollisionPoints(points, boundaryPoints, mPoints[i], mPoints[i_prev]);
          }
       }
+
       if(abs(mPoints[i].x - mPoints[i_prev].x) > abs(mPoints[i].y - mPoints[i_prev].y))
          points.sort(pointDataSortX);
       else
@@ -405,7 +415,7 @@ void Barrier::prepareRenderingGeometry2()
 
 
 // Original method, creates too many segments
-void Barrier::prepareRenderingGeometry()
+void Barrier::prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segments)
 {
    resetEdges(outlines, segments);
 

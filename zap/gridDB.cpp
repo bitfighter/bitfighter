@@ -142,14 +142,15 @@ void GridDatabase::findObjects(U32 typeMask, Vector<DatabaseObject *> &fillVecto
    }
 }
 
-
+// TODO: Generic geometry function... Should this move to SweptEllipsoid (reanming that to geomUtils)?
+// Check to see if ray start->end intersects poly 
 // Assumes a polygon in format A-B-C-D if format is true, A-B, C-D, E-F if format is false
-bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, Point p2, 
+bool polygonLineIntersect(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, 
                           float &collisionTime, Point &normal)
 {
    Point v1 = poly[vertexCount - 1];
    Point v2, dv;
-   Point dp = p2 - p1;
+   Point dp = end - start;
 
    S32 inc = format ? 1 : 2;
 
@@ -166,54 +167,32 @@ bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, P
       }
 
       // edge from v1 -> v2
-      // ray from p1 -> p2
+      // ray from start -> end
 
       dv.set(v2 - v1);
-
-      // p1.x + s * dp.x = v1.x + t * dv.x
-      // p1.y + s * dp.y = v1.y + t * dv.y
-
-      // s = (v1.x - p1.x + t * dv.x) / dp.x
-      // p1.y + dp.y * (v1.x - p1.x + t * dv.x) / dp.x = v1.y + t * dv.y
-      // p1.y * dp.x + dp.y * (v1.x - p1.x) + t * dp.y * dv.x =
-      //                         v1.y * dp.x + t * dp.x * dv.y
-      // t * (dp.y * dv.x - dp.x * dv.y) =
-      //                -p1.y * dp.x - dp.y * v1.x + dp.y * p1.x + v1.y * dp.x
-
-      // t = ((p1.x - v1.x) * dp.y + (v1.y - p1.y) * dp.x) / (dp.y * dv.x - dp.x * dv.y)
-
-      // t = (p1.x + s * dp.x - v1.x) / dv.x
-      // ( p1.y + s * dp.y - v1.y ) / dv.y = (p1.x + s * dp.x - v1.x) / dv.x
-      // s * (dp.y / dv.y) + (p1.y - v1.y) / dv.y =
-      // s * (dp.x / dv.x) + (p1.x - v1.x) / dv.x
-      // s * dp.y * dv.x + (p1.y - v1.y) * dv.x =
-      // s * dp.x * dv.y + (p1.x - v1.x) * dv.y
-      // s * ( dp.y * dv.x - dp.x * dv.y ) = (p1.x - v1.x) * dv.y - (p1.y - v1.y) * dv.x
-
-      // s = ( (p1.x - v1.x) * dv.y + (v1.y - p1.y) * dv.x) / ( dp.y * dv.x - dp.x * dv.y)
 
       F32 denom = dp.y * dv.x - dp.x * dv.y;
       if(denom != 0) // otherwise, the lines are parallel
       {
-         F32 s = ( (p1.x - v1.x) * dv.y + (v1.y - p1.y) * dv.x ) / denom;
-         F32 t = ( (p1.x - v1.x) * dp.y + (v1.y - p1.y) * dp.x ) / denom;
+         F32 s = ( (start.x - v1.x) * dv.y + (v1.y - start.y) * dv.x ) / denom;
+         F32 t = ( (start.x - v1.x) * dp.y + (v1.y - start.y) * dp.x ) / denom;
 
-         if(s >= 0 && s <= 1 && t >= 0 && t <= 1)
+         if(s >= 0 && s <= 1 && t >= 0 && t <= 1 && s < currentCollisionTime)    // Found collision closer than others
          {
-            if(s < currentCollisionTime)
-            {
-               normal.set(dv.y, -dv.x);
-               currentCollisionTime = s;
-            }
+            normal.set(dv.y, -dv.x);
+            currentCollisionTime = s;
          }
       } 
       v1.set(v2);    // No real effect if format == false
    }
-   if(currentCollisionTime <= 1)
+
+   if(currentCollisionTime <= 1)    // Found intersection
    {
       collisionTime = currentCollisionTime;
       return true;
    }
+
+   // No intersection
    return false;
 }
 
@@ -254,7 +233,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex,
 }
 
 
-// Format is a passthrough to PolygonLineIntersect().  Will be true for most items, false for walls in editor.
+// Format is a passthrough to polygonLineIntersect().  Will be true for most items, false for walls in editor.
 DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool format,
                                             const Point &rayStart, const Point &rayEnd, 
                                             float &collisionTime, Point &surfaceNormal)
@@ -288,7 +267,7 @@ DatabaseObject *GridDatabase::findObjectLOS(U32 typeMask, U32 stateIndex, bool f
             continue;
 
          Point normal;
-         if(PolygonLineIntersect(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
+         if(polygonLineIntersect(&poly[0], poly.size(), format, rayStart, rayEnd, ct, normal))
          {
             if(ct < collisionTime)
             {

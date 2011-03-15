@@ -414,25 +414,34 @@ bool isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
    return false;
 }
 
-// gridDP.cpp
-extern bool PolygonLineIntersect(Point *poly, U32 vertexCount, bool format, Point p1, Point p2, 
-                          float &collisionTime, Point &normal);
 
-void getPolygonLineCollisionPoints(Vector<Point> &output, Vector<Point> &input, Point p1, Point p2)
+// gridDB.cpp
+extern bool polygonLineIntersect(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, 
+                                 float &collisionTime, Point &normal);
+
+void getPolygonLineCollisionPoints(Vector<Point> &output, const Vector<Point> &input, Point start, Point end)
 {
-   F32 time = 0;
-   Point unused1;
-   while(PolygonLineIntersect(input.address(), input.size(), true, p1, p2, time, unused1))
+   F32 dist;               // Ranges between 0 and 1
+   Point normal_unused;
+   Point collision;        
+
+   while(polygonLineIntersect(input.address(), input.size(), true, start, end, dist, normal_unused))     // Sets dist at point of first intersection
    {
-      Point p3=p2 * time + p1*(1 - time);
-      output.push_back(p3);
-      time = time + 0.01;
-      if(time > 0.99) break;
-		p3=p1;
-      p1=p2 * time + p1*(1 - time);
-		if(p1 == p3) break;   // avoid endless loop.
+      collision = start * (1 - dist) + end * dist;     // Advance collision to point of intersection
+      output.push_back(collision);                     // Save point
+      dist += 0.01;                                    // Advance distance just a bit
+
+      if(dist >= 1.0)                                  // We've arrived at the end of the ray, so we're done
+         break;
+
+		collision = start;                               // Temporarily move collision to start so we can use it to compare
+      start = start * (1 - dist) + end * dist;         // Advance start to just past the intersection, so we can search for the next one
+
+		if(start == collision)                           // Avoid endless loop -- should never happen!
+         break;   
    }
 }
+
 
 void getBarrierLineCollisionPoints(Vector<Point> &output, GridDatabase *gb, Point p1, Point p2)
 {
