@@ -255,10 +255,14 @@ bool polygonCircleIntersect(const Point *inVertices, int inNumVertices, const Po
 // Returns true if polygon instersects or contains segment defined by start - end
 bool polygonIntersectsSegment(const Vector<Point> &points, const Point &start, const Point &end)
 {
+   const Point *pointPrev = &points[points.size() - 1];
    for(S32 i = 0; i < points.size(); i++)
-      if(segmentsIntersect(start, end, points[points.size() - 1], points[i]))
+   {
+      if(segmentsIntersect(start, end, *pointPrev, points[i]))
          return true;
-   
+      pointPrev = &points[i];
+   }
+
    //  Line inside polygon?  If so, then the start will be within.
    return PolygonContains2(points.address(), points.size(), start);
 }
