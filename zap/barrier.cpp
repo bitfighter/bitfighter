@@ -345,6 +345,9 @@ S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 }
 
 
+//#define ROUND(x) (((x) < 0) ? F32(S32((x) - 0.5)) : F32(S32((x) + 0.5)))
+#define ROUND(x) (x)
+
 void getPolygonLineCollisionPoints(Vector<Point> &output, const Vector<Point> &input, Point start, Point end);
 
 // Sam's optimized version, replaces prepareRenderingGeometry(), leaves small holes
@@ -417,8 +420,11 @@ void Barrier::prepareRenderingGeometry2()
          }
          if(!isInside)
          {
-            mRenderLineSegments.push_back(points[j-1]);
-            mRenderLineSegments.push_back(points[j]);
+            Point rounded(ROUND(points[j-1].x), ROUND(points[j-1].y));
+            mRenderLineSegments.push_back(rounded);
+
+            rounded.set(ROUND(points[j].x), ROUND(points[j].y));
+            mRenderLineSegments.push_back(rounded);
          }
       }
 
