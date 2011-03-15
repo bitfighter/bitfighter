@@ -415,29 +415,30 @@ bool isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
 }
 
 
-// gridDB.cpp
+// from gridDB.cpp
 extern bool polygonLineIntersect(Point *poly, U32 vertexCount, bool format, const Point &start, const Point &end, 
                                  float &collisionTime, Point &normal);
 
+// Fills output with location of all intersections between poly specified in input, and ray start->end
 void getPolygonLineCollisionPoints(Vector<Point> &output, const Vector<Point> &input, Point start, Point end)
 {
-   F32 dist;               // Ranges between 0 and 1
+   F32 dist;                  // Ranges between 0 and 1
    Point normal_unused;
-   Point collision;        
+   Point intersection;        
 
    while(polygonLineIntersect(input.address(), input.size(), true, start, end, dist, normal_unused))     // Sets dist at point of first intersection
    {
-      collision = start * (1 - dist) + end * dist;     // Advance collision to point of intersection
-      output.push_back(collision);                     // Save point
-      dist += 0.01;                                    // Advance distance just a bit
+      intersection = start * (1 - dist) + end * dist;     // Advance intersection to point of intersection
+      output.push_back(intersection);                     // Save point
+      dist += 0.01;                                       // Advance distance just a bit
 
-      if(dist >= 1.0)                                  // We've arrived at the end of the ray, so we're done
+      if(dist >= 1.0)                                     // We've arrived at the end of the ray, so we're done
          break;
 
-		collision = start;                               // Temporarily move collision to start so we can use it to compare
-      start = start * (1 - dist) + end * dist;         // Advance start to just past the intersection, so we can search for the next one
+		intersection = start;                               // Temporarily move intersection to start so we can use it to compare
+      start = start * (1 - dist) + end * dist;            // Advance start to just past the intersection, so we can search for the next one
 
-		if(start == collision)                           // Avoid endless loop -- should never happen!
+		if(start == intersection)                           // Avoid endless loop -- should never happen!
          break;   
    }
 }
