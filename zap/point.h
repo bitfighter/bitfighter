@@ -299,6 +299,10 @@ struct Rect
    {
       return max - min;
    }
+
+
+   Rect &operator=(const Rect &r) { set(r); return *this; }       // Performance equivalent to set
+
 };	// struct
 
 };	// namespace
