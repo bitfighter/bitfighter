@@ -326,17 +326,22 @@ void Barrier::clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Poin
    lineSegmentPoints = clippedSegments;
 }
 
+
 S32 QSORT_CALLBACK pointDataSortX(Point *a, Point *b)
 {
    if(a->x == b->x)
       return 0;
-   else return (a->x > b->x) ? 1 : -1;
+
+   return (a->x > b->x) ? 1 : -1;
 }
+
+
 S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 {
    if(a->y == b->y)
       return 0;
-   else return (a->y > b->y) ? 1 : -1;
+
+   return (a->y > b->y) ? 1 : -1;
 }
 
 
@@ -355,53 +360,60 @@ void Barrier::prepareRenderingGeometry2()
    Vector<Point> boundaryPoints;
    Vector<DatabaseObject *> objects;
    Rect rect;
+   Point offset(0.003, 0.007);
 
-   for(S32 i=0; i<mPoints.size(); i++)
+   for(S32 i = 0; i < mPoints.size(); i++)
    {
       points.clear();
       objects.clear();
 
-      rect.set(mPoints[i], mPoints[i_prev]);
+      rect.set(mPoints[i], mPoints[i_prev]);                // Creates bounding box around these two points
 
       points.push_back(mPoints[i]);
       points.push_back(mPoints[i_prev]);
-      gridDB->findObjects(BarrierType, objects, rect);      // Find all barriers in bounding box of mPoints[i] & mPoints[i_prev]
+      gridDB->findObjects(BarrierType, objects, rect);      // Find all barriers in bounding box of mPoints[i] & mPoints[i_prev], fills objects
 
-      for(S32 j=objects.size()-1; j>=0; j--)
+      for(S32 j = objects.size() - 1; j >= 0; j--)
       {
          Barrier *wall = dynamic_cast<Barrier *>(objects[j]);
-         if(wall == this || wall == NULL)
-            objects.erase_fast(j);
+         if(wall == this || wall == NULL)                   // Self or invalid object...              
+            objects.erase_fast(j);                          // ...remove from list (will need cleaned list later)
          else
          {
-            wall->getCollisionPoly(boundaryPoints);      // Assigns boundaryPoints
-            getPolygonLineCollisionPoints(points, boundaryPoints, mPoints[i], mPoints[i_prev]);
+            wall->getCollisionPoly(boundaryPoints);         // Put wall outline into boundaryPoints
+
+            // Fill points with intersections of wall outline and segment mPoints[i] -> mPoints[i_prev]
+            getPolygonLineCollisionPoints(points, boundaryPoints, mPoints[i], mPoints[i_prev]);  
          }
       }
 
+      // Now points contains all intersections of all our walls and the segment mPoints[i] -> mPoints[i_prev]
+
+      // Make sure points is spatially sorted
       if(abs(mPoints[i].x - mPoints[i_prev].x) > abs(mPoints[i].y - mPoints[i_prev].y))
          points.sort(pointDataSortX);
       else
          points.sort(pointDataSortY);
 
-      // Remove duplicate points
-      for(S32 j=points.size()-1; j>=1; j--)
-      {
+      // Remove duplicate points -- due to sorting, dupes will be adjacent to one another
+      for(S32 j = points.size() - 1; j >=1 ; j--)
          if(points[j] == points[j-1])
             points.erase(j);
-      }
 
-      for(S32 j=1; j<points.size(); j++)
+      for(S32 j = 1; j < points.size(); j++)
       {
-         Point midPoint = (points[j] + points[j-1]) * 0.5 + Point(0.003,0.007); // to avoid mssing lines, duplicate segments is better then mising segments.
-         Point midPoint2 = (points[j] + points[j-1]) * 0.5 - Point(0.003,0.007);
+         // Create a pair of midpoints, each a tiny bit offset from the true center
+         Point midPoint  = (points[j] + points[j-1]) * 0.5 + offset;    // To avoid missing lines, duplicate segments are better then mising ones
+         Point midPoint2 = (points[j] + points[j-1]) * 0.5 - offset;
 
          bool isInside = false;
-         for(S32 k=0; k<objects.size() && !isInside; k++)
+
+         // Loop through all walls we found earlier, and see if either our offsetted midpoints falls inside any of those wall outlines
+         for(S32 k = 0; k < objects.size() && !isInside; k++)           
          {
             Barrier *obj = dynamic_cast<Barrier *>(objects[k]);
-            isInside = isInside || (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
-                  && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
+            isInside = (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
+                                 && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
          }
          if(!isInside)
          {
@@ -409,6 +421,7 @@ void Barrier::prepareRenderingGeometry2()
             mRenderLineSegments.push_back(points[j]);
          }
       }
+
       i_prev = i;
    }
 }
