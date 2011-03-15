@@ -261,7 +261,7 @@ static int countPolyVerts(const unsigned short* p, const int nvp)
 inline bool uleft(const unsigned short* a, const unsigned short* b, const unsigned short* c)
 {
 	return ((int)b[0] - (int)a[0]) * ((int)c[1] - (int)a[1]) -
-		    ((int)c[0] - (int)a[0]) * ((int)b[1] - (int)a[1]) > 0;        // < 0 for CW triangles, > 0 for CCW triangles
+		    ((int)c[0] - (int)a[0]) * ((int)b[1] - (int)a[1]) >= 0;        // <= 0 for CW triangles, >= 0 for CCW triangles
 }
 
 
