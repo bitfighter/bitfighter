@@ -71,7 +71,7 @@ struct Point
 
    Point operator*(const Point &pt) { return Point(x * pt.x, y * pt.y); }
 
-   Point &operator=(const Point &pt) { x = pt.x; y = pt.y; return *this; }
+   Point &operator=(const Point &pt) { x = pt.x; y = pt.y; return *this; }       // Performance equivalent to set
    bool operator==(const Point &pt) const { return x == pt.x && y == pt.y; }
    bool operator!=(const Point &pt) const { return x != pt.x || y != pt.y; }
 
