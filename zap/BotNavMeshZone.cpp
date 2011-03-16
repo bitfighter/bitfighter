@@ -34,6 +34,8 @@
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 
+#include "../clipper/clipper.h"
+
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
 }
@@ -914,6 +916,9 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 
 #define combine(x,y) pair<F32,F32>((x),(y))
 
+using namespace clipper;
+
+
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
@@ -922,20 +927,14 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    Vector<F32> holes;
    Vector<S32> edges;
 
-   map<pair<F32,F32>, S32> points;
 
    F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
    F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
 
-   coords.push_back(minx);   coords.push_back(miny);
-   coords.push_back(minx);   coords.push_back(maxy);
-   coords.push_back(maxx);   coords.push_back(maxy);
-   coords.push_back(maxx);   coords.push_back(miny);
-
-   points[combine(minx, miny)] = 0;
-   points[combine(minx, maxy)] = 1;
-   points[combine(maxx, maxy)] = 2;
-   points[combine(maxx, miny)] = 3;
+   coords.push_back(minx);   coords.push_back(miny);     // Point 0
+   coords.push_back(minx);   coords.push_back(maxy);     // Point 1
+   coords.push_back(maxx);   coords.push_back(maxy);     // Point 2
+   coords.push_back(maxx);   coords.push_back(miny);     // Point 3
 
    edges.push_back(0);       edges.push_back(1);
    edges.push_back(1);       edges.push_back(2);
@@ -948,51 +947,57 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    Point ctr;     // Reusable container for hole calculations
 
+
+   TPolyPolygon solution;
+   Clipper clipper;
+
    for(S32 i = 0; i < game->mGameObjects.size(); i++)
+   {
       if(game->mGameObjects[i]->getObjectTypeMask() & BarrierType)
       {
-         Barrier *barrier = dynamic_cast<Barrier *>(game->mGameObjects[i]);  
+         Barrier *barrier = dynamic_cast<Barrier *>(game->mGameObjects[i]);
 
-         if(barrier)
-         {
-            barrier->prepareRenderingGeometry2();
-            for(S32 j = 0; j < barrier->mRenderLineSegments.size(); j+=2)
-            {
-               F32 p1x = F32(S32((barrier->mRenderLineSegments[j].x + 0.5)));
-               F32 p1y = F32(S32((barrier->mRenderLineSegments[j].y + 0.5)));
-               F32 p2x = F32(S32((barrier->mRenderLineSegments[j+1].x + 0.5)));
-               F32 p2y = F32(S32((barrier->mRenderLineSegments[j+1].y + 0.5)));
-               
-               // Skip 0-length segments
-               if(p1x == p2x && p1y == p2y)
-                  continue;
+         clipper.Clear();
 
-               for(S32 j = 0; j < 2; j++)
-               {
-                  F32 x = j ? p1x : p2x;
-                  F32 y = j ? p1y : p2y;
+         for (U32 j = 0; j < solution.size(); j++)
+            clipper.AddPolygon(solution[j], ptSubject);
 
-                  pair<F32,F32> index = pair<F32,F32>(x,y);
+         TPolygon clip;
+         for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
+            clip.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x,barrier->mBotZoneBufferGeometry[j].y));
 
-                  S32 pt = points[index];
+         clipper.AddPolygon(clip, ptClip);
 
-                  if(pt == 0)
-                  {
-                     points[index] = nextPt;
-                     pt = nextPt;
-                     coords.push_back(x);
-                     coords.push_back(y);
-                     nextPt++;
-                  }
+         clipper.Execute(ctUnion, solution);  // Puts merged walls into solution
 
-                  edges.push_back(pt);
-               }
-            }
-         }
-         ctr.set(barrier->getExtent().getCenter());
+         ctr = barrier->getExtent().getCenter();
          holes.push_back(ctr.x);
          holes.push_back(ctr.y);
       }
+   }
+
+   TPolygon poly;
+   for (U32 j = 0; j < solution.size(); j++)
+   {
+      poly = solution[j];
+      S32 first = nextPt;
+      for (U32 k = 0; k < poly.size(); k++)
+      {
+         coords.push_back(poly[k].X);
+         coords.push_back(poly[k].Y);
+
+         if(k > 0)
+         {
+            edges.push_back(nextPt);
+            edges.push_back(nextPt + 1);
+            nextPt++;
+         }
+      }
+
+      edges.push_back(nextPt);
+      edges.push_back(first);
+   }
+
    U32 done1 = Platform::getRealMilliseconds();
 
    triangulateio in, out;

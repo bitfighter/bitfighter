@@ -418,7 +418,7 @@ void Barrier::prepareRenderingGeometry2()
             isInside = (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
                                  && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
          }
-         if(!isInside)
+         if(!isInside)     // No -- add segment to our collection to be rendered
          {
             Point rounded(ROUND(points[j-1].x), ROUND(points[j-1].y));
             mRenderLineSegments.push_back(rounded);
