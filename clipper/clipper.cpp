@@ -31,7 +31,7 @@
 *                                                                              *
 *******************************************************************************/
 
-#include "clipper.hpp"
+#include "clipper.h"
 #include <cmath>
 #include <ctime>
 #include <vector>
