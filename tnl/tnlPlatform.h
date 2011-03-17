@@ -68,6 +68,9 @@ namespace Platform
    /// than that, prepared to see wraparounds.
    U32 getRealMilliseconds();
 
+   // Uses same logic as getRealMilliseconds, returns microseconds
+   U32 getRealMicroseconds();
+
    /// Returns a high-precision time value, in a platform-specific time value
    S64 getHighPrecisionTimerValue();
 

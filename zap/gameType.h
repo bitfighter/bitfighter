@@ -458,6 +458,8 @@ public:
    virtual void majorScoringEventOcurred(S32 team) { /* empty */ }    // Gets called when touchdown is scored...  currently only used by zone control & retrieve
 
    void processServerCommand(ClientRef *clientRef, const char *cmd, Vector<StringPtr> args);
+
+   map <pair<U16,U16>, Vector<Point> > cachedBotFlightPlans;  // cache of zone-to-zone flight plans, shared for all bots
 };
 
 #define GAMETYPE_RPC_S2C(className, methodName, args, argNames) \
