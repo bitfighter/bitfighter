@@ -34,7 +34,7 @@
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 
-#include "../clipper/clipper.h"
+#include "../clipper/clipper.hpp"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -950,6 +950,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    TPolyPolygon solution;
    Clipper clipper;
+   clipper.IgnoreOrientation(true);
 
    for(S32 i = 0; i < game->mGameObjects.size(); i++)
    {
@@ -980,6 +981,10 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    for (U32 j = 0; j < solution.size(); j++)
    {
       poly = solution[j];
+
+      if(poly.size() == 0)
+         continue;
+
       S32 first = nextPt;
       for (U32 k = 0; k < poly.size(); k++)
       {
@@ -996,6 +1001,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
       edges.push_back(nextPt);
       edges.push_back(first);
+      nextPt++;
    }
 
    U32 done1 = Platform::getRealMilliseconds();
