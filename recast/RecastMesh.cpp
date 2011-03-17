@@ -160,13 +160,15 @@ static unsigned short addVertex(unsigned short x, unsigned short y,
 {
 	int bucket = computeVertexHash(x, y);
 	int i = firstVert[bucket];
-	
+
    // Try to reuse an existing vertex if there is one in our bucket
 	while (i != -1)
 	{
 		const unsigned short* v = &verts[i*2];
 		if (v[0] == x && v[1] == y)
+      {
 			return (unsigned short)i;     // Found one!  We'll use this one!
+      }
 		i = nextVert[i]; // next
 	}
 	
@@ -369,8 +371,8 @@ static void mergePolys(unsigned short* pa, unsigned short* pb, int ea, int eb,
 {
 	const int na = countPolyVerts(pa, nvp);
 	const int nb = countPolyVerts(pb, nvp);
-	
-	// Merge polygons.
+
+	// Merge polygons
 	memset(tmp, 0xff, sizeof(unsigned short)*nvp);     // Clear the temp poly
 	int n = 0;
 	// Add pa
@@ -489,11 +491,13 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 	for (int j = 0; j < ntris; ++j)
 	{
 		int* t = &tris[j*3];
-		if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])           // Ensure no dupes -- rounds verts to nearest 2
+
+		if (indices[t[0]] != indices[t[1]] && indices[t[0]] != indices[t[2]] && indices[t[1]] != indices[t[2]])           // Ensure no dupes
 		{
 			polys[npolys*nvp+0] = (unsigned short)indices[t[0]];
 			polys[npolys*nvp+1] = (unsigned short)indices[t[1]];
 			polys[npolys*nvp+2] = (unsigned short)indices[t[2]];
+
 			npolys++;
 		}
 	}
@@ -591,13 +595,6 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
    memcpy(mesh.polys, polys, ntris*nvp*sizeof(unsigned short));
    mesh.npolys = ntris;
 
-
-	//// Calculate adjacency
- //  if (!buildMeshAdjacency(mesh.polys, mesh.npolys, mesh.adjacency, mesh.nverts, nvp))
-	//{
-	//	logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Adjacency failed.");
-	//	return false;
-	//}
 
 	if (mesh.nverts > 0xffff)
 	{

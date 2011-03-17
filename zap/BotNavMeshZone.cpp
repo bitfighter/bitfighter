@@ -859,10 +859,10 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
          neighbor.zoneID = polyToZoneMap[e.poly[1]];  
-         gBotNavMeshZones[e.poly[0]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
+         gBotNavMeshZones[polyToZoneMap[e.poly[0]]]->mNeighbors.push_back(neighbor);  // (copies neighbor implicitly)
 
          neighbor.zoneID = polyToZoneMap[e.poly[0]];   
-         gBotNavMeshZones[e.poly[1]]->mNeighbors.push_back(neighbor);
+         gBotNavMeshZones[polyToZoneMap[e.poly[1]]]->mNeighbors.push_back(neighbor);
 		}
 	}
 	
@@ -1065,30 +1065,39 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       // 6 is arbitrary --> smaller numbers require less memory
       bounds.offset(Point(FIX,FIX));
       rcBuildPolyMesh(6, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
-
+      
+      BotNavMeshZone *botzone = NULL;
    
       const S32 bytesPerVertex = 2;
       Vector<S32> polyToZoneMap(mesh.npolys);
 
-
       // Visualize rcPolyMesh
       for(S32 i = 0; i < mesh.npolys; i++)
       {
-         BotNavMeshZone *botzone = new BotNavMeshZone();
-
          S32 firstx = S32_MAX;
          S32 firsty = S32_MAX;
          S32 lastx = S32_MAX;
          S32 lasty = S32_MAX;
 
-         for(S32 j = 0; j < mesh.nvp; j++)
-         {
-            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
-               break;
-         
+         S32 j = 0;
+         botzone = NULL;
 
-         
+         while(j < mesh.nvp)
+         {
+            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
+               break;
+
             const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
+
+            if(vert[0] == U16_MAX)
+               break;
+
+            if(j == 0)
+            {
+               botzone = new BotNavMeshZone();
+               polyToZoneMap[i] = botzone->getZoneId();
+            }
+
 
             //if(j == 0)
             //{
@@ -1105,17 +1114,16 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
             //   lasty = vert[1] - FIX;
             //}
 
+            j++;
          }
    
-         if(botzone->mPolyBounds.size() > 0)
+         if(botzone != NULL)
          {
             botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		      botzone->mConvex = true;             
 		      botzone->addToGame(gServerGame);
 		      botzone->computeExtent();   
-
-            polyToZoneMap[i] = botzone->getZoneId();
 
             //Vector<Point> collp;
             //botzone->getCollisionPoly(collp);
@@ -1126,6 +1134,8 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
             //}
          }
       }
+
+      logprintf("Recast built %d zones!", gBotNavMeshZones.size() );
 
 
       buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
