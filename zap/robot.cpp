@@ -869,7 +869,6 @@ S32 LuaRobot::doFindItems(lua_State *L, Rect scope)
    return 1;
 }
 
-
 // Get next waypoint to head toward when traveling from current location to x,y
 // Note that this function will be called frequently by various robots, so any
 // optimizations will be helpful.
@@ -973,7 +972,22 @@ S32 LuaRobot::getWaypoint(lua_State *L)  // Takes a luavec or an x,y
    // If we're still here, then we need to find a new path.  Either our original path was invalid for some reason,
    // or the path we had no longer applied to our current location
    thisRobot->flightPlanTo = targetZone;
-   thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target);
+
+   // check cache for path first
+   pair<S32,S32> pathIndex = pair<S32,S32>(currentZone, targetZone);
+
+   if (gServerGame->getGameType()->cachedBotFlightPlans.find(pathIndex) == gServerGame->getGameType()->cachedBotFlightPlans.end())
+   {
+      // not found so calculate flight plan
+      thisRobot->flightPlan = AStar::findPath(currentZone, targetZone, target);
+
+      // now add to cache
+      gServerGame->getGameType()->cachedBotFlightPlans[pathIndex] = thisRobot->flightPlan;
+   }
+   else
+   {
+      thisRobot->flightPlan = gServerGame->getGameType()->cachedBotFlightPlans[pathIndex];
+   }
 
    if(thisRobot->flightPlan.size() > 0)
       return returnPoint(L, thisRobot->flightPlan.last());
