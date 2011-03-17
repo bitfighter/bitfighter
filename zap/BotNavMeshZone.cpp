@@ -947,8 +947,8 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    Point ctr;     // Reusable container for hole calculations
 
-
    TPolyPolygon solution;
+   TPolygon inputPoly;
    Clipper clipper;
    clipper.IgnoreOrientation(true);
 
@@ -958,23 +958,19 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       {
          Barrier *barrier = dynamic_cast<Barrier *>(game->mGameObjects[i]);
 
-         clipper.Clear();
-
-         clipper.AddPolyPolygon(solution, ptSubject);
-
-         TPolygon clip;
+         inputPoly.clear();
          for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
-            clip.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x,barrier->mBotZoneBufferGeometry[j].y));
+            inputPoly.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x,barrier->mBotZoneBufferGeometry[j].y));
 
-         clipper.AddPolygon(clip, ptClip);
-
-         clipper.Execute(ctUnion, solution);  // Puts merged walls into solution
+         clipper.AddPolygon(inputPoly, ptSubject);
 
          ctr = barrier->getExtent().getCenter();
          holes.push_back(ctr.x);
          holes.push_back(ctr.y);
       }
    }
+
+   clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 
    TPolygon poly;
    for (U32 j = 0; j < solution.size(); j++)
@@ -1003,12 +999,13 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       nextPt++;
    }
 
-   //for(S32 i = 0; i < coords.size(); i+=2)
-   //   logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
-
-   //// Dump edges
-   //for(S32 i = 0; i < edges.size(); i+=2)
-   //   logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
+//   // Dump points
+//   for(S32 i = 0; i < coords.size(); i+=2)
+//      logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
+//
+//   // Dump edges
+//   for(S32 i = 0; i < edges.size(); i+=2)
+//      logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
 
    U32 done1 = Platform::getRealMilliseconds();
 
