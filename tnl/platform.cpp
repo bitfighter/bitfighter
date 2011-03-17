@@ -329,6 +329,7 @@ void Platform::forceQuit()
 
 
 U32 x86UNIXGetTickCount();
+U32 x86UNIXGetTickCountMicro();
 //--------------------------------------
 
 U32 Platform::getRealMilliseconds()
@@ -366,6 +367,8 @@ U32 x86UNIXGetTickCount()
    return (secs * 1000) + (uSecs / 1000);
 }
 
+static U32 sg_uSecsOffset = 0;
+
 U32 x86UNIXGetTickCountMicro()
 {
    // TODO: What happens when crossing a day boundary?
@@ -376,12 +379,14 @@ U32 x86UNIXGetTickCountMicro()
       sg_initialized = true;
 
       ::gettimeofday(&t, NULL);
-      sg_secsOffset = t.tv_sec;
+      sg_uSecsOffset = t.tv_usec;
    }
 
    ::gettimeofday(&t, NULL);
 
-   return t.tv_usec;
+   U32 uSecs  = t.tv_usec - sg_uSecsOffset;
+
+   return uSecs;
 }
 
 class UnixTimer

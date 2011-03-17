@@ -65,7 +65,7 @@ SkipList<T>::SkipList( compareFunc cf ): m_CompareFunc(cf)
   //grow beyond this number, but Skiplist performance would slowly degrade.
   //const double maxItems = 10000000;
   const double skip = 4;
-  std::srand ( unsigned int(std::time(0)) );
+  std::srand ( (unsigned int)(std::time(0)) );
 
   m_MaxLevel = 12;//std::ceil( std::log(maxItems)/std::log(skip) );
   m_SkipFrac = 1/skip;
