@@ -34,7 +34,7 @@
 #include "../recast/Recast.h"    // For zone generation
 #include "../recast/RecastAlloc.h"
 
-#include "../clipper/clipper.hpp"
+#include "../clipper/clipper.h"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -960,8 +960,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
          clipper.Clear();
 
-         for (U32 j = 0; j < solution.size(); j++)
-            clipper.AddPolygon(solution[j], ptSubject);
+         clipper.AddPolyPolygon(solution, ptSubject);
 
          TPolygon clip;
          for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
@@ -1003,6 +1002,13 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       edges.push_back(first);
       nextPt++;
    }
+
+   //for(S32 i = 0; i < coords.size(); i+=2)
+   //   logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
+
+   //// Dump edges
+   //for(S32 i = 0; i < edges.size(); i+=2)
+   //   logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
 
    U32 done1 = Platform::getRealMilliseconds();
 
@@ -1070,26 +1076,54 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       {
          BotNavMeshZone *botzone = new BotNavMeshZone();
 
+         S32 firstx = S32_MAX;
+         S32 firsty = S32_MAX;
+         S32 lastx = S32_MAX;
+         S32 lasty = S32_MAX;
+
          for(S32 j = 0; j < mesh.nvp; j++)
          {
             if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)     // We've read past the end of the polygon
                break;
          
 
+         
             const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
 
+            //if(j == 0)
+            //{
+            //   firstx = vert[0] - FIX;
+            //   firsty = vert[1] - FIX;
+            //}
+
+            //// Make sure we don't write the occasional dupe we're getting out of recast
+            //if(!(vert[0] - FIX == lastx && vert[1] - FIX == lasty) && 
+            //      !((j == mesh.nvp || mesh.polys[(i * mesh.nvp + j+1)] == U16_MAX) && vert[0] - FIX == firstx && vert[1] - FIX == firsty))
+            //{
             botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[1] - FIX));
+            //   lastx = vert[0] - FIX;
+            //   lasty = vert[1] - FIX;
+            //}
+
          }
    
          if(botzone->mPolyBounds.size() > 0)
          {
             botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		      botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		      botzone->mConvex = true;             
 		      botzone->addToGame(gServerGame);
 		      botzone->computeExtent();   
 
             polyToZoneMap[i] = botzone->getZoneId();
+
+            //Vector<Point> collp;
+            //botzone->getCollisionPoly(collp);
+            //logprintf("====== zone %d ======", botzone->getZoneId());
+            //for(S32 j = 0; j < collp.size(); j++)
+            //{
+            //   logprintf("Zone %d : %f,%f",  botzone->getZoneId(),collp[j].x, collp[j].y);
+            //}
          }
       }
 
