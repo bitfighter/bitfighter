@@ -17,7 +17,7 @@
 #
 #######################################
 
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper
 CC=gcc -g $(INCLUDES) -DTNL_ENABLE_LOGGING -W -O2
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
@@ -116,7 +116,8 @@ OBJECTS_ZAP=\
    ../sqlite/sqlite3.o\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
-   ../recast/RecastMesh.o
+   ../recast/RecastMesh.o\
+   ../clipper/clipper.o
 
 
 CFLAGS=
