@@ -123,7 +123,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    else if(mPoints.size() == 2 && mWidth > 0)   // It's a regular segment, so apply width
    {
       expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
-      bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 4 points
+      bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 8 points, octagonal
       mPoints = mRenderFillGeometry;
    }
 
@@ -239,7 +239,7 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    cornerPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
 }
 
-// Puffs out segment to the specified width with a further buffer for bot zones
+// Puffs out segment to the specified width with a further buffer for bot zones, has an inset tangent corner cut
 void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints)
 {
    bufferedPoints.clear();
@@ -251,11 +251,24 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
    Point parallelVector(difference.x, difference.y); // create a vector parallel to original segment
    parallelVector.normalize(BotNavMeshZone::BufferRadius);  // reduce point so vector has length of ship radius
 
+   // for octagonal zones
+   //   create extra vectors that are offset full offset to create 'cut' corners
+   //   (0.5 * sqrt(2.0) * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
+   //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
+   Point crossPartial = crossVector;
+   crossPartial.normalize((0.5 * sqrt(2.0) * BotNavMeshZone::BufferRadius) + (barrierWidth * 0.5) - (0.30 * BotNavMeshZone::BufferRadius));
+   Point parallelPartial = parallelVector;
+   parallelPartial.normalize((0.5 * sqrt(2.0) * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
+
    // now add/subtract perpendicular and parallel vectors to buffer the segments
-   bufferedPoints.push_back(Point((start.x - parallelVector.x) + crossVector.x, (start.y - parallelVector.y) + crossVector.y));
-   bufferedPoints.push_back(Point(end.x + parallelVector.x + crossVector.x, end.y + parallelVector.y + crossVector.y));
-   bufferedPoints.push_back(Point(end.x + parallelVector.x - crossVector.x, end.y + parallelVector.y - crossVector.y));
-   bufferedPoints.push_back(Point((start.x - parallelVector.x) - crossVector.x, (start.y - parallelVector.y) - crossVector.y));
+   bufferedPoints.push_back(Point((start.x - parallelVector.x) + crossPartial.x, (start.y - parallelVector.y) + crossPartial.y));
+   bufferedPoints.push_back(Point((start.x - parallelPartial.x) + crossVector.x, (start.y - parallelPartial.y) + crossVector.y));
+   bufferedPoints.push_back(Point(end.x + parallelPartial.x + crossVector.x, end.y + parallelPartial.y + crossVector.y));
+   bufferedPoints.push_back(Point(end.x + parallelVector.x + crossPartial.x, end.y + parallelVector.y + crossPartial.y));
+   bufferedPoints.push_back(Point(end.x + parallelVector.x - crossPartial.x, end.y + parallelVector.y - crossPartial.y));
+   bufferedPoints.push_back(Point(end.x + parallelPartial.x - crossVector.x, end.y + parallelPartial.y - crossVector.y));
+   bufferedPoints.push_back(Point((start.x - parallelPartial.x) - crossVector.x, (start.y - parallelPartial.y) - crossVector.y));
+   bufferedPoints.push_back(Point((start.x - parallelVector.x) - crossPartial.x, (start.y - parallelVector.y) - crossPartial.y));
 }
 
 
