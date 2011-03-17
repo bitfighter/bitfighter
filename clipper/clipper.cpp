@@ -65,7 +65,7 @@ SkipList<T>::SkipList( compareFunc cf ): m_CompareFunc(cf)
   //grow beyond this number, but Skiplist performance would slowly degrade.
   //const double maxItems = 10000000;
   const double skip = 4;
-  std::srand ( std::time(0) );
+  std::srand ( unsigned int(std::time(0)) );
 
   m_MaxLevel = 12;//std::ceil( std::log(maxItems)/std::log(skip) );
   m_SkipFrac = 1/skip;
@@ -2741,8 +2741,8 @@ int CompareForwardAngles(TPolyPt* p1, TPolyPt* p2)
   //1. p1a == p2a
   //2. p1->p1nextInBound is colinear with p2->p2nextInBound
 
-  bool p1Forward = (ofForwardBound & p1->flags);
-  bool p2Forward = (ofForwardBound & p2->flags);
+  bool p1Forward = !((ofForwardBound & p1->flags) == 0);
+  bool p2Forward = !((ofForwardBound & p2->flags) == 0);
   TPolyPt* pTmp = 0;
   TDoublePoint p1a, p1b, p1c,  p2a, p2b, p2c;
   p1b = p1c = p1->pt;
