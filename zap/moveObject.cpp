@@ -26,7 +26,7 @@
 #include "moveObject.h"
 #include "gameType.h"
 #include "gameItems.h"
-#include "SweptEllipsoid.h"
+#include "GeomUtils.h"
 #include "sparkManager.h"
 #include "ship.h"
 #include "sfx.h"

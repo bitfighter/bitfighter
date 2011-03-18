@@ -30,7 +30,7 @@
 #include "gameNetInterface.h"
 #include "ship.h"
 #include "gameObjectRender.h"
-#include "SweptEllipsoid.h"      // For centroid calculation for labeling
+#include "GeomUtils.h"      // For centroid calculation for labeling
 #include "stringUtils.h"         // For itos
 
 #include "../glut/glutInclude.h"

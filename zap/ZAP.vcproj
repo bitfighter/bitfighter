@@ -524,11 +524,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\SweptEllipsoid.cpp"
+				RelativePath=".\GeomUtils.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\SweptEllipsoid.h"
+				RelativePath=".\GeomUtils.h"
 				>
 			</File>
 			<File

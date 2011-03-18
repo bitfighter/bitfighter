@@ -46,8 +46,8 @@
 // removed references to vector2 and replaced with Point
 // added in prototypes for circle collisions
 
-#ifndef _SWEPT_ELLIPSOID_H_
-#define _SWEPT_ELLIPSOID_H_
+#ifndef _GEOM_UTILS_
+#define _GEOM_UTILS_
 
 #include "point.h"
 #include <string>
@@ -129,5 +129,5 @@ private:
 
 
 };
-#endif // _SWEPT_ELLIPSOID_H_
+#endif // _GEOM_UTILS_
 

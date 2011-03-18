@@ -45,7 +45,7 @@
 
 #include "point.h" 
 #include "tnlVector.h"
-#include "SweptEllipsoid.h"      // Must be last
+#include "GeomUtils.h"      // Must be last
 
 using namespace TNL;
 

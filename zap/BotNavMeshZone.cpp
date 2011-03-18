@@ -26,7 +26,7 @@
 //#define usep2t
 
 #include "BotNavMeshZone.h"
-#include "SweptEllipsoid.h"
+#include "GeomUtils.h"
 #include "robot.h"
 #include "UIMenus.h"
 #include "UIGame.h"           // for access to mGameUserInterface.mDebugShowMeshZones

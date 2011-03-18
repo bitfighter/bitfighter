@@ -167,7 +167,7 @@
     <ClCompile Include="..\zap\sparkManager.cpp" />
     <ClCompile Include="..\zap\speedZone.cpp" />
     <ClCompile Include="..\zap\statistics.cpp" />
-    <ClCompile Include="..\zap\SweptEllipsoid.cpp" />
+    <ClCompile Include="..\zap\GeomUtils.cpp" />
     <ClCompile Include="..\zap\teamInfo.cpp" />
     <ClCompile Include="..\zap\teleporter.cpp" />
     <ClCompile Include="..\zap\textItem.cpp" />
@@ -276,7 +276,7 @@
     <ClInclude Include="..\zap\sparkManager.h" />
     <ClInclude Include="..\zap\speedZone.h" />
     <ClInclude Include="..\zap\statistics.h" />
-    <ClInclude Include="..\zap\SweptEllipsoid.h" />
+    <ClInclude Include="..\zap\GeomUtils.h" />
     <ClInclude Include="..\zap\teamInfo.h" />
     <ClInclude Include="..\zap\teleporter.h" />
     <ClInclude Include="..\zap\textItem.h" />

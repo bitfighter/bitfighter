@@ -41,7 +41,7 @@
 #include "gameItems.h"           // For Asteroid defs
 #include "teleporter.h"          // For teleporter radius
 #include "config.h"
-#include "SweptEllipsoid.h"
+#include "GeomUtils.h"
 #include "textItem.h"            // For MAX_TEXTITEM_LEN and MAX_TEXT_SIZE
 #include "luaLevelGenerator.h"
 #include "stringUtils.h"

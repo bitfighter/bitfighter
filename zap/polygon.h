@@ -26,7 +26,7 @@
 #ifndef _POLYGON_H_
 #define _POLYGON_H_
 
-#include "SweptEllipsoid.h"      // For polygon triangulation
+#include "GeomUtils.h"      // For polygon triangulation
 #include "point.h"
 
 namespace Zap

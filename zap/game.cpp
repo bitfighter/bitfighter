@@ -40,7 +40,7 @@
 #include "SharedConstants.h"     // For ServerInfoFlags enum
 #include "ship.h"
 #include "sparkManager.h"
-#include "SweptEllipsoid.h"
+#include "GeomUtils.h"
 #include "luaLevelGenerator.h"
 #include "robot.h"
 #include "shipItems.h"           // For moduleInfos

@@ -37,7 +37,7 @@
 #include "UIEditor.h"
 #include "gameObjectRender.h"
 
-#include "SweptEllipsoid.h"      // For polygon triangulation
+#include "GeomUtils.h"      // For polygon triangulation
 
 #include "../glut/glutInclude.h"
 

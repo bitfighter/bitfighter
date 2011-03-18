@@ -35,7 +35,7 @@
 #include "engineeredObjects.h"
 #include "input.h"
 #include "speedZone.h"           // For SpeedZone::height
-#include "SweptEllipsoid.h"      // For polygon triangulation
+#include "GeomUtils.h"      // For polygon triangulation
 #include "config.h"
 
 #include "../glut/glutInclude.h"

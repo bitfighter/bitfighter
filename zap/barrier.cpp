@@ -26,7 +26,7 @@
 #include "barrier.h"
 #include "BotNavMeshZone.h"
 #include "gameObjectRender.h"
-#include "SweptEllipsoid.h"    // For polygon triangulation
+#include "GeomUtils.h"    // For polygon triangulation
 
 #include "gameType.h"          // For BarrierRec struct
 

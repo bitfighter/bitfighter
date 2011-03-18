@@ -28,7 +28,7 @@ OBJECTS_ZAP=\
    HTFGame.o\
    IniFile.o\
    loadoutZone.o\
-   SweptEllipsoid.o\
+   GeomUtils.o\
    UI.o\
    UIAbstractInstructions.o\
    UIChat.o\
