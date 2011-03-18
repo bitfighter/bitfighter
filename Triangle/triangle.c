@@ -1415,16 +1415,16 @@ REAL area;                                      /* The area of the triangle. */
 /**                                                                         **/
 
 
-// triexit moved to BotNavMeshZone.cpp
-//#ifdef ANSI_DECLARATORS
-//void triexit(int status)
-//#else /* not ANSI_DECLARATORS */
-//void triexit(status)
-//int status;
-//#endif /* not ANSI_DECLARATORS */
-//{
-//  exit(status);
-//}
+// triexit moved to BotNavMeshZone.cpp  --> doesn't compile for me --CE
+#ifdef ANSI_DECLARATORS
+void triexit(int status)
+#else /* not ANSI_DECLARATORS */
+void triexit(status)
+int status;
+#endif /* not ANSI_DECLARATORS */
+{
+  exit(status);
+}
 
 
 #ifdef ANSI_DECLARATORS
@@ -3267,6 +3267,9 @@ void info()
 
 #endif /* not TRILIBRARY */
 
+
+
+
 /*****************************************************************************/
 /*                                                                           */
 /*  internalerror()   Ask the user to send me the defective product.  Exit.  */
@@ -3278,7 +3281,7 @@ void internalerror()
   printf("  Please report this bug to jrs@cs.berkeley.edu\n");
   printf("  Include the message above, your input data set, and the exact\n");
   printf("    command line you used to run Triangle.\n");
-  //triexit(1);
+  triexit(1);
 }
 
 /*****************************************************************************/
