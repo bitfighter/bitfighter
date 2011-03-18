@@ -98,6 +98,11 @@
     <ClCompile Include="..\clipper\clipper_misc.cpp" />
     <ClCompile Include="..\master\database.cpp" />
     <ClCompile Include="..\master\masterInterface.cpp" />
+    <ClCompile Include="..\poly2tri\poly2tri\common\shapes.cc" />
+    <ClCompile Include="..\poly2tri\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="..\poly2tri\poly2tri\sweep\cdt.cc" />
+    <ClCompile Include="..\poly2tri\poly2tri\sweep\sweep.cc" />
+    <ClCompile Include="..\poly2tri\poly2tri\sweep\sweep_context.cc" />
     <ClCompile Include="..\recast\RecastAlloc.cpp" />
     <ClCompile Include="..\recast\RecastMesh.cpp" />
     <ClCompile Include="..\sqlite\sqlite3.c" />
@@ -199,6 +204,13 @@
     <ClInclude Include="..\clipper\clipper_misc.h" />
     <ClInclude Include="..\master\database.h" />
     <ClInclude Include="..\master\masterInterface.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\common\shapes.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\common\utils.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\poly2tri.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\sweep\advancing_front.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\sweep\cdt.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\sweep\sweep.h" />
+    <ClInclude Include="..\poly2tri\poly2tri\sweep\sweep_context.h" />
     <ClInclude Include="..\recast\Recast.h" />
     <ClInclude Include="..\recast\RecastAlloc.h" />
     <ClInclude Include="..\sqlite\sqlite3.h" />

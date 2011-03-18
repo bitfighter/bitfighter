@@ -1554,7 +1554,7 @@ void ClientGame::prepareBarrierRenderingGeometry()
          Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
          if(barrier)
          {
-            barrier->prepareRenderingGeometry2();
+            barrier->prepareRenderingGeometry();
             //for(S32 i = 0; i < barrier->mRenderLineSegments.size(); i++)
             //   logprintf("Point %d: %f, %f", i, barrier->mRenderLineSegments[i].x, barrier->mRenderLineSegments[i].y);
 

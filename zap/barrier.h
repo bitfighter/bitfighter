@@ -92,7 +92,7 @@ public:
 
    // Clean up edge geometry and get barriers ready for proper rendering
    void prepareRenderingGeometry();       // orig
-   void prepareRenderingGeometry2();      // sam's
+   //void prepareRenderingGeometry2();      // sam's
    
    // Create geometry for botzones - adds a buffer around barriers
    void prepareBotZoneGeometry();

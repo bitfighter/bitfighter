@@ -365,85 +365,85 @@ void getPolygonLineCollisionPoints(Vector<Point> &output, const Vector<Point> &i
 
 // Sam's optimized version, replaces prepareRenderingGeometry(), leaves small holes
 // Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
-void Barrier::prepareRenderingGeometry2()
-{
-   GridDatabase *gridDB = getGridDatabase();
-   S32 i_prev = mPoints.size()-1;
-   mRenderOutlineGeometry.clear();
-
-   // Reusable containers
-   Vector<Point> points;
-   Vector<Point> boundaryPoints;
-   Vector<DatabaseObject *> objects;
-   Rect rect;
-   Point offset(0.003, 0.007);
-
-   for(S32 i = 0; i < mPoints.size(); i++)
-   {
-      points.clear();
-      objects.clear();
-
-      rect.set(mPoints[i], mPoints[i_prev]);                // Creates bounding box around these two points
-
-      points.push_back(mPoints[i]);
-      points.push_back(mPoints[i_prev]);
-      gridDB->findObjects(BarrierType, objects, rect);      // Find all barriers in bounding box of mPoints[i] & mPoints[i_prev], fills objects
-
-      for(S32 j = objects.size() - 1; j >= 0; j--)
-      {
-         Barrier *wall = dynamic_cast<Barrier *>(objects[j]);
-         if(wall == this || wall == NULL)                   // Self or invalid object...              
-            objects.erase_fast(j);                          // ...remove from list (will need cleaned list later)
-         else
-         {
-            wall->getCollisionPoly(boundaryPoints);         // Put wall outline into boundaryPoints
-
-            // Fill points with intersections of wall outline and segment mPoints[i] -> mPoints[i_prev]
-            getPolygonLineCollisionPoints(points, boundaryPoints, mPoints[i], mPoints[i_prev]);  
-         }
-      }
-
-      // Now points contains all intersections of all our walls and the segment mPoints[i] -> mPoints[i_prev]
-
-      // Make sure points is spatially sorted
-      if(abs(mPoints[i].x - mPoints[i_prev].x) > abs(mPoints[i].y - mPoints[i_prev].y))
-         points.sort(pointDataSortX);
-      else
-         points.sort(pointDataSortY);
-
-      // Remove duplicate points -- due to sorting, dupes will be adjacent to one another
-      for(S32 j = points.size() - 1; j >=1 ; j--)
-         if(points[j] == points[j-1])
-            points.erase(j);
-
-      for(S32 j = 1; j < points.size(); j++)
-      {
-         // Create a pair of midpoints, each a tiny bit offset from the true center
-         Point midPoint  = (points[j] + points[j-1]) * 0.5 + offset;    // To avoid missing lines, duplicate segments are better then mising ones
-         Point midPoint2 = (points[j] + points[j-1]) * 0.5 - offset;
-
-         bool isInside = false;
-
-         // Loop through all walls we found earlier, and see if either our offsetted midpoints falls inside any of those wall outlines
-         for(S32 k = 0; k < objects.size() && !isInside; k++)           
-         {
-            Barrier *obj = dynamic_cast<Barrier *>(objects[k]);
-            isInside = (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
-                                 && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
-         }
-         if(!isInside)     // No -- add segment to our collection to be rendered
-         {
-            Point rounded(ROUND(points[j-1].x), ROUND(points[j-1].y));
-            mRenderLineSegments.push_back(rounded);
-
-            rounded.set(ROUND(points[j].x), ROUND(points[j].y));
-            mRenderLineSegments.push_back(rounded);
-         }
-      }
-
-      i_prev = i;
-   }
-}
+//void Barrier::prepareRenderingGeometry2()
+//{
+//   GridDatabase *gridDB = getGridDatabase();
+//   S32 i_prev = mPoints.size()-1;
+//   mRenderOutlineGeometry.clear();
+//
+//   // Reusable containers
+//   Vector<Point> points;
+//   Vector<Point> boundaryPoints;
+//   Vector<DatabaseObject *> objects;
+//   Rect rect;
+//   Point offset(0.003, 0.007);
+//
+//   for(S32 i = 0; i < mPoints.size(); i++)
+//   {
+//      points.clear();
+//      objects.clear();
+//
+//      rect.set(mPoints[i], mPoints[i_prev]);                // Creates bounding box around these two points
+//
+//      points.push_back(mPoints[i]);
+//      points.push_back(mPoints[i_prev]);
+//      gridDB->findObjects(BarrierType, objects, rect);      // Find all barriers in bounding box of mPoints[i] & mPoints[i_prev], fills objects
+//
+//      for(S32 j = objects.size() - 1; j >= 0; j--)
+//      {
+//         Barrier *wall = dynamic_cast<Barrier *>(objects[j]);
+//         if(wall == this || wall == NULL)                   // Self or invalid object...              
+//            objects.erase_fast(j);                          // ...remove from list (will need cleaned list later)
+//         else
+//         {
+//            wall->getCollisionPoly(boundaryPoints);         // Put wall outline into boundaryPoints
+//
+//            // Fill points with intersections of wall outline and segment mPoints[i] -> mPoints[i_prev]
+//            getPolygonLineCollisionPoints(points, boundaryPoints, mPoints[i], mPoints[i_prev]);  
+//         }
+//      }
+//
+//      // Now points contains all intersections of all our walls and the segment mPoints[i] -> mPoints[i_prev]
+//
+//      // Make sure points is spatially sorted
+//      if(abs(mPoints[i].x - mPoints[i_prev].x) > abs(mPoints[i].y - mPoints[i_prev].y))
+//         points.sort(pointDataSortX);
+//      else
+//         points.sort(pointDataSortY);
+//
+//      // Remove duplicate points -- due to sorting, dupes will be adjacent to one another
+//      for(S32 j = points.size() - 1; j >=1 ; j--)
+//         if(points[j] == points[j-1])
+//            points.erase(j);
+//
+//      for(S32 j = 1; j < points.size(); j++)
+//      {
+//         // Create a pair of midpoints, each a tiny bit offset from the true center
+//         Point midPoint  = (points[j] + points[j-1]) * 0.5 + offset;    // To avoid missing lines, duplicate segments are better then mising ones
+//         Point midPoint2 = (points[j] + points[j-1]) * 0.5 - offset;
+//
+//         bool isInside = false;
+//
+//         // Loop through all walls we found earlier, and see if either our offsetted midpoints falls inside any of those wall outlines
+//         for(S32 k = 0; k < objects.size() && !isInside; k++)           
+//         {
+//            Barrier *obj = dynamic_cast<Barrier *>(objects[k]);
+//            isInside = (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
+//                                 && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
+//         }
+//         if(!isInside)     // No -- add segment to our collection to be rendered
+//         {
+//            Point rounded(ROUND(points[j-1].x), ROUND(points[j-1].y));
+//            mRenderLineSegments.push_back(rounded);
+//
+//            rounded.set(ROUND(points[j].x), ROUND(points[j].y));
+//            mRenderLineSegments.push_back(rounded);
+//         }
+//      }
+//
+//      i_prev = i;
+//   }
+//}
 
 
 // Original method, creates too many segments

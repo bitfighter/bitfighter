@@ -3276,7 +3276,7 @@ void internalerror()
   printf("  Please report this bug to jrs@cs.berkeley.edu\n");
   printf("  Include the message above, your input data set, and the exact\n");
   printf("    command line you used to run Triangle.\n");
-  triexit(1);
+  //triexit(1);
 }
 
 /*****************************************************************************/
