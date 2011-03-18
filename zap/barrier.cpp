@@ -109,10 +109,13 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    Rect extent(points);
 
-   mWidth = width;
-
+   if(width < 0)             // force positive width.
+      width = -width;
+   mWidth = width;           // must be positive to avoid problem with bufferBarrierForBotZone
+   width = width * 0.5 + 1;  // divide by 2 to avoid double size extents, add 1 to avoid rounding errors.
    if(points.size() == 2)    // It's a regular segment, need to make a little larger to accomodate width
       extent.expand(Point(width, width));
+   // use mWidth, not width, for anything below this.
 
    setExtent(extent);
 
@@ -120,11 +123,14 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
        Triangulate::Process(mPoints, mRenderFillGeometry);
-   else if(mPoints.size() == 2 && mWidth > 0)   // It's a regular segment, so apply width
+   else
    {
-      expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
       bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 8 points, octagonal
-      mPoints = mRenderFillGeometry;
+      if(mPoints.size() == 2 && mWidth != 0)   // It's a regular segment, so apply width
+      {
+         expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
+         mPoints = mRenderFillGeometry;
+      }
    }
 
    getCollisionPoly(mRenderOutlineGeometry);    // Outline is the same for both barrier geometries

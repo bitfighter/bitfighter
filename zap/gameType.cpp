@@ -1306,11 +1306,13 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       {
          BarrierRec barrier;
          barrier.width = atof(argv[1]);
-   
-         if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
-            barrier.width = Barrier::MIN_BARRIER_WIDTH;
-         else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
-            barrier.width = Barrier::MAX_BARRIER_WIDTH;
+
+         // Is this needed here? negative size barrier acks like positive size barriers.
+         // Why limit max, the max is already limited by editor.
+         //if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
+         //   barrier.width = Barrier::MIN_BARRIER_WIDTH;
+         //else if(barrier.width > Barrier::MAX_BARRIER_WIDTH)
+         //   barrier.width = Barrier::MAX_BARRIER_WIDTH;
    
          for(S32 i = 2; i < argc; i++)
             barrier.verts.push_back(atof(argv[i]) *getGame()->getGridSize());
