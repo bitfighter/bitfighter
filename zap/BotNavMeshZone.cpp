@@ -159,11 +159,7 @@ void BotNavMeshZone::onAddedToGame(Game *theGame)
 // Bounding box for quick collision-possibility elimination
 void BotNavMeshZone::computeExtent()
 {
-   Rect extent(mPolyBounds[0], mPolyBounds[0]);
-
-   for(S32 i = 1; i < mPolyBounds.size(); i++)
-      extent.unionPoint(mPolyBounds[i]);
-
+   Rect extent(mPolyBounds);
    setExtent(extent);
 }
 
