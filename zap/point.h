@@ -221,7 +221,6 @@ struct Rect
 
       for(int i = 1; i < p.size(); i++)
          unionPoint(p[i]);
-
    }
 
    void set(const Rect &r)
