@@ -698,42 +698,6 @@ static void removeUnusedNavMeshZones()
 }
 
 
-static void initIoStruct(triangulateio *ioStruct)
-{
-   ioStruct->numberofpoints = 0;
-   ioStruct->pointlist = NULL;
-
-   ioStruct->segmentlist = NULL;
-   ioStruct->numberofsegments = 0;
-   ioStruct->segmentmarkerlist = NULL; 
-
-   ioStruct->pointmarkerlist = NULL;
-   ioStruct->numberofpointattributes = 0;
-   ioStruct->pointattributelist = NULL;
-
-   ioStruct->numberofregions = 0;
-   ioStruct->numberoftriangles = 0;
-   ioStruct->numberofcorners = 0; 
-
-   ioStruct->trianglelist = NULL;       
-   ioStruct->triangleattributelist = NULL;
-   ioStruct->trianglearealist = NULL;
-   ioStruct->numberoftriangleattributes = 0;    
-   ioStruct->neighborlist = NULL;       
-
-   ioStruct->holelist = NULL;           
-   ioStruct->numberofholes = 0;                 
-
-   ioStruct->regionlist = NULL;         
-   ioStruct->numberofregions = 0;               
-
-   ioStruct->edgelist = NULL;           
-   ioStruct->edgemarkerlist = NULL;     
-   ioStruct->normlist = NULL;           
-   ioStruct->numberofedges = 0;                 
-}
-
-
 struct rcEdge
 {
 	unsigned short vert[2];    // from, to verts
@@ -1065,7 +1029,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       
       BotNavMeshZone *botzone = NULL;
    
-      const S32 bytesPerVertex = 2;
+      const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
       Vector<S32> polyToZoneMap(mesh.npolys);
 
       // Visualize rcPolyMesh

@@ -4264,6 +4264,50 @@ int subsegbytes;
 
 /*****************************************************************************/
 /*                                                                           */
+/*  initIoStruct()   Get a triangulateio strucuture all ready to go          */
+/*                                                                           */
+/*  Not part of native Triangle package; Written for Bitfighter              */
+/*                                                                           */
+/*****************************************************************************/
+
+void initIoStruct(struct triangulateio *ioStruct)
+{
+   ioStruct->numberofpoints = 0;
+   ioStruct->pointlist = NULL;
+
+   ioStruct->segmentlist = NULL;
+   ioStruct->numberofsegments = 0;
+   ioStruct->segmentmarkerlist = NULL; 
+
+   ioStruct->pointmarkerlist = NULL;
+   ioStruct->numberofpointattributes = 0;
+   ioStruct->pointattributelist = NULL;
+
+   ioStruct->numberofregions = 0;
+   ioStruct->numberoftriangles = 0;
+   ioStruct->numberofcorners = 0; 
+
+   ioStruct->trianglelist = NULL;       
+   ioStruct->triangleattributelist = NULL;
+   ioStruct->trianglearealist = NULL;
+   ioStruct->numberoftriangleattributes = 0;    
+   ioStruct->neighborlist = NULL;       
+
+   ioStruct->holelist = NULL;           
+   ioStruct->numberofholes = 0;                 
+
+   ioStruct->regionlist = NULL;         
+   ioStruct->numberofregions = 0;               
+
+   ioStruct->edgelist = NULL;           
+   ioStruct->edgemarkerlist = NULL;     
+   ioStruct->normlist = NULL;           
+   ioStruct->numberofedges = 0;                 
+}
+
+
+/*****************************************************************************/
+/*                                                                           */
 /*  initializevertexpool()   Calculate the size of the vertex data structure */
 /*                           and initialize its memory pool.                 */
 /*                                                                           */
