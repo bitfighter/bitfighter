@@ -48,6 +48,19 @@ extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
 }
 
+
+// triangulate wants quit on error
+// will probably crash on error when this function exits
+extern "C" void triexit(int status)
+{
+   TNLAssert(false, "Triangulate error");
+   logprintf(LogConsumer::LogError, "While generating bot zones, Triangulate error");
+   // here may be a good place to print lots of data.
+   throw;  // any better ways?
+}
+
+
+
 namespace Zap
 {
 
