@@ -617,6 +617,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\clipper\clipper.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\config.cpp"
 			>
 		</File>

@@ -1414,16 +1414,18 @@ REAL area;                                      /* The area of the triangle. */
 /**                                                                         **/
 /**                                                                         **/
 
-#ifdef ANSI_DECLARATORS
-void triexit(int status)
-#else /* not ANSI_DECLARATORS */
-void triexit(status)
-int status;
-#endif /* not ANSI_DECLARATORS */
 
-{
-  exit(status);
-}
+// triexit moved to BotNavMeshZone.cpp
+//#ifdef ANSI_DECLARATORS
+//void triexit(int status)
+//#else /* not ANSI_DECLARATORS */
+//void triexit(status)
+//int status;
+//#endif /* not ANSI_DECLARATORS */
+//{
+//  exit(status);
+//}
+
 
 #ifdef ANSI_DECLARATORS
 VOID *trimalloc(int size)
