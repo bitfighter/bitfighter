@@ -897,6 +897,10 @@ extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
 using namespace clipper;
 
 
+#ifdef TNL_DEBUG
+//#define DUMP_DATA    // outputs data before triangulate and before / after clipper
+#endif
+
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
@@ -940,6 +944,11 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
          for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
             inputPoly.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x,barrier->mBotZoneBufferGeometry[j].y));
 
+#ifdef DUMP_DATA
+         for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
+			   logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
+#endif
+
          clipper.AddPolygon(inputPoly, ptSubject);
 
          ctr = barrier->getExtent().getCenter();
@@ -977,15 +986,17 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       nextPt++;
    }
 
-//   // Dump points
-//   for(S32 i = 0; i < coords.size(); i+=2)
-//      logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
-//
-//   // Dump edges
-//   for(S32 i = 0; i < edges.size(); i+=2)
-//      logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
+
+#ifdef DUMP_DATA
+   // Dump points
+   for(S32 i = 0; i < coords.size(); i+=2)
+      logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
 
 
+   // Dump edges
+   for(S32 i = 0; i < edges.size(); i+=2)
+      logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
+#endif
 
 #ifdef usep2t
    U32 done1 = Platform::getRealMilliseconds();
