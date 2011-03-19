@@ -697,11 +697,13 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
+#ifndef ALWAYS_LOAD_BOT_ZONES // when disabled, this will run here, when enabled, will run at different location to instantly load.
    // Do some prep work if we have bots and/or zones
    if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
       buildOrLoadBotMeshZones();
    else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
-      BotNavMeshZone::buildBotNavMeshZoneConnections();    
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
+#endif
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
@@ -892,6 +894,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
    string filename = ConfigDirectories::findLevelFile(origFilename);
 
+   cleanUp();
    if(filename == "")
    {
       logprintf("Unable to find level file \"%s\".  Skipping...", origFilename.c_str());
@@ -938,6 +941,13 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
    getGameType()->onLevelLoaded();
 
+#ifdef ALWAYS_LOAD_BOT_ZONES
+   // Do some prep work if we have bots and/or zones
+   if(getRobotCount() > -1 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
+      buildOrLoadBotMeshZones();
+   else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
+#endif
    return true;
 }
 
