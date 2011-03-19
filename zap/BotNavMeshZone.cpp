@@ -1129,7 +1129,8 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    // X option makes small but consistent improvement in performance
 
    U32 done3 = Platform::getRealMilliseconds();
-   triangulate((char*)"zpXV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+   triangulate((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+         // triangulate 'X' option have problem with crashing error in windows
    U32 done4 = Platform::getRealMilliseconds();
 
    if(useRecast)
@@ -1260,6 +1261,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 
 	Rect bounds = game->computeWorldObjectExtents();
+	bounds.expand(Point(30,30));
 
    if(gIniSettings.botZoneGeneratorMode == 0) //disabled
       return;
@@ -1281,7 +1283,14 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
    {
       // Triangulate and Recast
       bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
-      makeBotMeshZones3(bounds, game, useRecast);
+
+      // try and except allows continue running after error, but no zones get generated
+      __try{
+         makeBotMeshZones3(bounds, game, useRecast);
+      }__except(1){
+         logprintf("Error in makeBotMeshZones3");
+      }
+
       return;
    }
 

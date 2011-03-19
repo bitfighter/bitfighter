@@ -1423,7 +1423,8 @@ void triexit(status)
 int status;
 #endif /* not ANSI_DECLARATORS */
 {
-  exit(status);
+  //_asm int 3;
+  //exit(status);
 }
 
 
