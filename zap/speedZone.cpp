@@ -265,8 +265,8 @@ bool SpeedZone::collide(GameObject *hitObject)
 				s->setActualVel(oldVel);
 				return false;
 			}
-         s->mImpulseVector = impulse * 1.5;     // <-- why???
-         s->setActualVel(Point(0,0));
+         //s->mImpulseVector = impulse * 1.5;     // <-- why???
+         s->setActualVel(impulse * 1.5);
 
       }
       else
