@@ -899,6 +899,7 @@ using namespace clipper;
 
 #ifdef TNL_DEBUG
 //#define DUMP_DATA    // outputs data before triangulate and before / after clipper
+#define DUMP_TIMER
 #endif
 
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
@@ -925,7 +926,9 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    S32 nextPt = 4;
 
+#ifdef DUMP_TIMER
    U32 starttime = Platform::getRealMilliseconds();
+#endif
 
    Point ctr;     // Reusable container for hole calculations
 
@@ -997,9 +1000,10 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    for(S32 i = 0; i < edges.size(); i+=2)
       logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
 #endif
-
-#ifdef usep2t
+#ifdef DUMP_TIMER
    U32 done1 = Platform::getRealMilliseconds();
+#endif
+#ifdef usep2t
 
    p2t::Point p0(bounds.min.x, bounds.min.y);
    p2t::Point p1(bounds.max.x, bounds.min.y);
@@ -1128,10 +1132,14 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    // Removing q does make a big difference in the speed of the aggregation of the triangles, at the cost of uglier zones
    // X option makes small but consistent improvement in performance
 
+#ifdef DUMP_TIMER
    U32 done3 = Platform::getRealMilliseconds();
+#endif
    triangulate((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
-         // triangulate 'X' option have problem with crashing error in windows
+      // triangulate 'X' option have problem with crashing error in windows
+#ifdef DUMP_TIMER
    U32 done4 = Platform::getRealMilliseconds();
+#endif
 
    if(useRecast)
    {
@@ -1242,10 +1250,10 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       BotNavMeshZone::buildBotNavMeshZoneConnections();
    }
 
+#ifdef DUMP_TIMER
    U32 done5 = Platform::getRealMilliseconds();
-
-
-   //logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
+   logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
+#endif
 
    // TODO: free memory allocated by triangles in out struct
    trifree(out.pointlist);
