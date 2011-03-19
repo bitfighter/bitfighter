@@ -1284,7 +1284,7 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       // Triangulate and Recast
       bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
 
-      // try and except allows continue running after error, but no zones get generated
+      // try and except allows continue running after error, but no zones get generated - windows only?
 #ifdef TNL_OS_WIN32
       __try{
 #endif
