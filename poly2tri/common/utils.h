@@ -37,6 +37,7 @@
 
 namespace p2t {
 
+const double M_PI = 3.1415926535897932384626433832795;
 const double PI_3div4 = 3 * M_PI / 4;
 const double EPSILON = 1e-12;
 

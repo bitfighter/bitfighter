@@ -45,7 +45,11 @@
 
 #include "point.h" 
 #include "tnlVector.h"
+#ifdef TNL_OS_WIN32
+#include "tnlLog.h" // to print out exception
+#endif
 #include "GeomUtils.h"      // Must be last
+
 
 using namespace TNL;
 
@@ -775,6 +779,21 @@ bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonLi
    return clipper.Execute(ctUnion, outputPolygonList, pftNonZero, pftNonZero);
 }
 
+#ifdef TNL_OS_WIN32
+void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
+{
+   // error C2712: Cannot use __try in functions that require object unwinding
+   // must be here if wanting to cache exceptions
+   __try{
+      triangulate(a,b,c,d);
+   }__except(1){
+      TNL::logprintf("Exception tessellating with Triangle method");
+      // appears to work just fine with not immediately returning after fail
+   }
+}
+#else
+#define triangulate2(a,b,c,d) triangulate(a,b,c,d)
+#endif
 
 // triangulate a bounded area with complex polygon holes
 bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
@@ -854,17 +873,8 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       in.holelist = holeMarkerList.address();
 
       // try and except allows continue running after error, but no zones get generated - windows only?
-#ifdef TNL_OS_WIN32
-      __try{
-#endif
       // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
-      triangulate((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
-#ifdef TNL_OS_WIN32
-      }__except(1){
-         logprintf("Exception tessellating with Triangle method");
-         return false;
-      }
-#endif
+      triangulate2((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
 
       // add triangle output to custom object for return storage
       outputData.pointList = out.pointlist;
@@ -938,8 +948,7 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       return false;
 
    // If no output points, no triangle points, or too many points, we can't use the data so return false
-   if(outputData.pointCount == 0 || outputData.triangleCount == 0 ||
-         outputData.pointCount >= 0xffe)
+   if(outputData.pointCount == 0 || outputData.triangleCount == 0)
       return false;
 
    return true;
@@ -950,6 +959,10 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 {
    S32 ntris = triangleData.triangleCount;
    Vector<S32> intPoints(triangleData.pointCount * 2);     // 2 entries per point: x,y
+   intPoints.setSize(triangleData.pointCount * 2);
+
+   if(triangleData.pointCount > U16_MAX) // too many points for rcBuildPolyMesh
+      return false;
 
    TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "1 vector size is wrong");
 

@@ -54,6 +54,9 @@
 namespace Zap
 {
 
+static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited
+
+
 TNL_IMPLEMENT_NETOBJECT(BotNavMeshZone);
 
 
@@ -888,7 +891,7 @@ using namespace clipper;
 
 
 #ifdef TNL_DEBUG
-//#define DUMP_DATA    // outputs data before triangulate and before / after clipper
+//#define DUMP_DATA
 #define DUMP_TIMER
 #endif
 
@@ -947,13 +950,15 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    U32 done2 = Platform::getRealMilliseconds();
 #endif
 
-   if(useRecast)
+   bool recastPassed = false;
+
+   if(useRecast && bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
    {
-      if(bounds.getWidth() >= U16_MAX || bounds.getHeight() >= U16_MAX)
-      {
-         logprintf(LogConsumer::LogWarning, "Cannot create bot zones: level too big!");
-         return false;
-      }
+      //if(bounds.getWidth() >= U16_MAX || bounds.getHeight() >= U16_MAX)
+      //{
+      //   logprintf(LogConsumer::LogWarning, "Cannot create bot zones: level too big!");
+      //   return false;
+      //}
 
       rcPolyMesh mesh;
       mesh.offsetX = -1 * floor(bounds.min.x + 0.5);
@@ -963,10 +968,10 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       bounds.offset(Point(mesh.offsetX, mesh.offsetY));
 
       // Merge!  into convex polygons
-      if(!Triangulate::mergeTriangles(triangleData, mesh))
-         return false;
+      recastPassed = Triangulate::mergeTriangles(triangleData, mesh);
+      if(recastPassed)
+      {
 
-      
       BotNavMeshZone *botzone = NULL;
    
       const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
@@ -993,6 +998,9 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
             if(vert[0] == U16_MAX)
                break;
 
+            if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
+               break;
+
             if(j == 0)
             {
                botzone = new BotNavMeshZone();
@@ -1017,20 +1025,24 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       logprintf("Recast built %d zones!", gBotNavMeshZones.size() );
 
       buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
+		}
    }
-   else
+   if(!recastPassed)
    {
       // Visualize triangle output
       for(S32 i = 0; i < triangleData.triangleCount * 3; i+=3)
       {
+         if(gBotNavMeshZones.size() >= MAX_ZONES)      // Don't add too many zones...
+            break;
          BotNavMeshZone *botzone = new BotNavMeshZone();
 
-		   botzone->mPolyBounds.push_back(Point(F32(S32(triangleData.pointList[triangleData.triangleList[i]*2])),   F32(S32(triangleData.pointList[triangleData.triangleList[i]*2 + 1]))));
-		   botzone->mPolyBounds.push_back(Point(F32(S32(triangleData.pointList[triangleData.triangleList[i+1]*2])), F32(S32(triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]))));
-		   botzone->mPolyBounds.push_back(Point(F32(S32(triangleData.pointList[triangleData.triangleList[i+2]*2])), F32(S32(triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]))));
+         // removed F32(S32(...)) - why do rounding here? (sam)
+		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i]*2],   triangleData.pointList[triangleData.triangleList[i]*2 + 1]));
+		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+1]*2], triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]));
+		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		   botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
+		   botzone->mConvex = true;             // Avoid random red and green on /showzones
 		   botzone->addToGame(gServerGame);
 		   botzone->computeExtent();   
       }
@@ -1041,7 +1053,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 #ifdef DUMP_TIMER
    U32 done3 = Platform::getRealMilliseconds();
 
-   logprintf("Timings: %d %d %d %d", done1-starttime, done2-done1, done3-done2);
+   logprintf("Timings: %d %d %d", done1-starttime, done2-done1, done3-done2);
 #endif
 
    return true;
@@ -1210,8 +1222,6 @@ F32 AStar::heuristic(S32 fromZone, S32 toZone)
 {
    return gBotNavMeshZones[fromZone]->getCenter().distanceTo( gBotNavMeshZones[toZone]->getCenter() );
 }
-
-static const S32 MAX_ZONES = 10000;     // Don't make this go above S16 max - 1 (32,766), AStar::findPath is limited
 
 // Returns a path, including the startZone and targetZone 
 Vector<Point> AStar::findPath(S32 startZone, S32 targetZone, const Point &target)

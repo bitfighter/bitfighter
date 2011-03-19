@@ -617,6 +617,26 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\poly2tri\sweep\advancing_front.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\cdt.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\common\shapes.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep.cc"
+			>
+		</File>
+		<File
+			RelativePath="..\poly2tri\sweep\sweep_context.cc"
+			>
+		</File>
+		<File
 			RelativePath="..\clipper\clipper.cpp"
 			>
 		</File>
