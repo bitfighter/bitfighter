@@ -17,7 +17,7 @@
 #
 #######################################
 
-INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper
+INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../poly2tri
 CC=gcc -g $(INCLUDES) -DTNL_ENABLE_LOGGING -W -O2
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
@@ -117,7 +117,12 @@ OBJECTS_ZAP=\
    ../Triangle/triangle.o\
    ../recast/RecastAlloc.o\
    ../recast/RecastMesh.o\
-   ../clipper/clipper.o
+   ../clipper/clipper.o\
+   ../poly2tri/common/shapes.o\
+   ../poly2tri/sweep/sweep.o\
+   ../poly2tri/sweep/sweep_context.o\
+   ../poly2tri/sweep/advancing_front.o\
+   ../poly2tri/sweep/cdt.o
 
 
 CFLAGS=
@@ -128,6 +133,9 @@ WFLAGS=
 LFLAGS=-lstdc++ -lm -ldl -lX11
 
 .c.o:
+	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
+
+.cc.o: 
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 .cpp.o: 
