@@ -294,6 +294,9 @@ struct Rect
 
    void offset(const Point &offset) { min += offset; max += offset; }
 
+   F32 getWidth()  { return ABS(max.x - min.x); }
+   F32 getHeight() { return ABS(max.y - min.y); }
+
    Point getExtents()
    {
       return max - min;
