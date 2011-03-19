@@ -777,8 +777,6 @@ bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonLi
 
 
 // triangulate a bounded area with complex polygon holes
-//
-// TODO return false if a method fails
 bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
 {
@@ -855,19 +853,24 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       in.numberofholes = holeMarkerList.size() / 2;
       in.holelist = holeMarkerList.address();
 
+      // try and except allows continue running after error, but no zones get generated - windows only?
+#ifdef TNL_OS_WIN32
+      __try{
+#endif
       // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
       triangulate((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+#ifdef TNL_OS_WIN32
+      }__except(1){
+         logprintf("Exception tessellating with Triangle method");
+         return false;
+      }
+#endif
 
       // add triangle output to custom object for return storage
       outputData.pointList = out.pointlist;
       outputData.pointCount = out.numberofpoints;
       outputData.triangleList = out.trianglelist;
       outputData.triangleCount = out.numberoftriangles;
-
-      // TODO: Put these into real tests, and handle conditions better
-      TNLAssert(triangleData.pointCount > 0, "No output points!");
-      TNLAssert(triangleData.triangleCount > 0, "No output triangles!");
-      TNLAssert(triangleData.pointCount < 0xffe, "Too many points!");
 
       // clean up Triangle memory
       //
@@ -884,8 +887,7 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       trifree(out.neighborlist);
    }
 
-
-   if (method == cmP2t)
+   else if (method == cmP2t)
    {
       p2t::Point p0(minx, miny);
       p2t::Point p1(maxx, miny);
@@ -931,11 +933,19 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       outputData.triangleList = triList;
       outputData.triangleCount = ntris;
    }
+   // no method used, return false
+   else
+      return false;
+
+   // If no output points, no triangle points, or too many points, we can't use the data so return false
+   if(outputData.pointCount == 0 || outputData.triangleCount == 0 ||
+         outputData.pointCount >= 0xffe)
+      return false;
+
+   return true;
 }
 
 // merge triangles into convex polygons, uses Recast method
-//
-// TODO: return false if failure
 bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices)
 {
    S32 ntris = triangleData.triangleCount;
@@ -953,8 +963,7 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 
    // TODO: Delete mesh memory allocations
 
-   // 6 is arbitrary --> smaller numbers require less memory
-   rcBuildPolyMesh(maxVertices, intPoints.address(), triangleData.pointCount, triangleData.triangleList, triangleData.triangleCount, mesh);
+   return rcBuildPolyMesh(maxVertices, intPoints.address(), triangleData.pointCount, triangleData.triangleList, triangleData.triangleCount, mesh);
 }
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/

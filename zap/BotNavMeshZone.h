@@ -124,7 +124,7 @@ public:
 
    static U16 findZoneContaining(const Point &p);    // Returns ID of zone containing specified point
 
-   static void buildBotMeshZones(Game *game);
+   static bool buildBotMeshZones(Game *game);
    static void buildBotNavMeshZoneConnections();
 
    TNL_DECLARE_CLASS(BotNavMeshZone);

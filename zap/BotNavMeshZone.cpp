@@ -931,7 +931,8 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    // Union holes!
    TPolyPolygon solution;
-   unionPolygons(inputPolygons, solution);
+   if(!unionPolygons(inputPolygons, solution))
+      return false;
 
 #ifdef DUMP_TIMER
    U32 done1 = Platform::getRealMilliseconds();
@@ -939,7 +940,8 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    // Tessellate!
    Triangulate::TriangleData triangleData;
-   Triangulate::ProcessComplex(triangleData, bounds, solution, holes, Triangulate::cmP2t);
+   if(!Triangulate::ProcessComplex(triangleData, bounds, solution, holes, Triangulate::cmTriangle))  // use Triangulate::cmP2t for poly2tri
+      return false;
 
 #ifdef DUMP_TIMER
    U32 done2 = Platform::getRealMilliseconds();
@@ -960,8 +962,9 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       // this works because bounds is always passed by reference.  Is this really needed?
       bounds.offset(Point(mesh.offsetX, mesh.offsetY));
 
-      // Merge!
-      Triangulate::mergeTriangles(triangleData, mesh);
+      // Merge!  into convex polygons
+      if(!Triangulate::mergeTriangles(triangleData, mesh))
+         return false;
 
       
       BotNavMeshZone *botzone = NULL;
@@ -1047,26 +1050,26 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 static const S32 LEVEL_ZONE_BUFFER = 30;
 
 // Server only
-void BotNavMeshZone::buildBotMeshZones(Game *game)
+bool BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 
 	Rect bounds = game->computeWorldObjectExtents();
 	bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
    if(gIniSettings.botZoneGeneratorMode == 0) //disabled
-      return;
+      return false;
    if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
    {
       //makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
       if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
-      return;
+      return false;
    }
 
    if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // simple triangle bot zones
    {
       //makeBotMeshZones2(bounds);
       if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
-      return;
+      return false;
    }
 
    if(gIniSettings.botZoneGeneratorMode == 5 || gIniSettings.botZoneGeneratorMode == 6) // triangle with Triangle library
@@ -1074,21 +1077,11 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       // Triangulate and Recast
       bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
 
-      // try and except allows continue running after error, but no zones get generated - windows only?
-#ifdef TNL_OS_WIN32
-      __try{
-#endif
-         makeBotMeshZones3(bounds, game, useRecast);
-#ifdef TNL_OS_WIN32
-      }__except(1){
-         logprintf("Error in makeBotMeshZones3");
-      }
-#endif
-
-      return;
+      if(makeBotMeshZones3(bounds, game, useRecast))
+         return true;
    }
 
-   // put default here if none of the above
+   return false;
 }
 
 
