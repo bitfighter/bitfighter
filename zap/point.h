@@ -290,12 +290,15 @@ struct Rect
               );
    }
 
+#define INTIFY(a) (a) < 0 ? floor(a) : ceil(a) 
+
    void expand(const Point &delta) { min -= delta; max += delta; }
+   void expandToInt(const Point &delta) { expand(delta); min.set(INTIFY(min.x), INTIFY(min.y)); max.set(INTIFY(max.x), INTIFY(max.y)); }
 
    void offset(const Point &offset) { min += offset; max += offset; }
 
-   F32 getWidth()  { return ABS(max.x - min.x); }
-   F32 getHeight() { return ABS(max.y - min.y); }
+   F32 getWidth()  { return max.x - min.x; }
+   F32 getHeight() { return max.y - min.y; }
 
    Point getExtents()
    {
