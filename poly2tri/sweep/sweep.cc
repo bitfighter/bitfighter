@@ -33,7 +33,6 @@
 #include "sweep_context.h"
 #include "advancing_front.h"
 #include "../common/utils.h"
-#include <math.h>
 
 namespace p2t {
 
@@ -53,7 +52,7 @@ void Sweep::SweepPoints(SweepContext& tcx)
   for (int i = 1; i < tcx.point_count(); i++) {
     Point& point = *tcx.GetPoint(i);
     Node* node = &PointEvent(tcx, point);
-    for (unsigned int i = 0; i < point.edge_list.size(); i++) {
+    for (int i = 0; i < point.edge_list.size(); i++) {
       EdgeEvent(tcx, point.edge_list[i], node);
     }
   }
@@ -715,8 +714,6 @@ Point& Sweep::NextFlipPoint(Point& ep, Point& eq, Triangle& ot, Point& op)
     //throw new RuntimeException("[Unsupported] Opposing point on constrained edge");
     assert(0);
   }
-
-  return *ot.PointCW(op);     // Wrong!
 }
 
 void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle& flip_triangle,
@@ -751,7 +748,7 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
 Sweep::~Sweep() {
 
     // Clean up memory
-    for(unsigned int i = 0; i < nodes_.size(); i++) {
+    for(int i = 0; i < nodes_.size(); i++) {
         delete nodes_[i];
     }
 

@@ -32,13 +32,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define _USE_MATH_DEFINES     // Makes M_PI available
-
 #include <exception>
 #include <math.h>
 
 namespace p2t {
-
 
 const double PI_3div4 = 3 * M_PI / 4;
 const double EPSILON = 1e-12;
