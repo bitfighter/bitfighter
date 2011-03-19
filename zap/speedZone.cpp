@@ -198,6 +198,9 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 // Handle collisions with a SpeedZone
 bool SpeedZone::collide(GameObject *hitObject)
 {
+   static bool ignoreThisCollision = false;
+   if(ignoreThisCollision)
+      return false;
    // This is run on both server and client side to reduce teleport lag effect.
    if(hitObject->getObjectTypeMask() & (ShipType | RobotType))     // Only ships & robots collide
    {
@@ -240,9 +243,31 @@ bool SpeedZone::collide(GameObject *hitObject)
       // within the zone so that their path out will be very predictable.
       if(mSnapLocation)
       {
-         s->setActualVel(Point(0,0));
+         //s->setActualPos(pos, false);
+
+			Point diffpos = s->getActualPos() - pos;
+			Point thisAngle = dir - pos;
+			thisAngle.normalize();
+			Point newPos = thisAngle * diffpos.dot(thisAngle) + pos;
+         //s->setActualPos(newpos, false);
+
+		   Point oldVel = s->getActualVel();
+		   Point oldPos = s->getActualPos();
+
+			ignoreThisCollision = true;
+         s->setActualVel(newPos - s->getActualPos());
+			s->move(1, MoveObject::ActualState, false);
+			ignoreThisCollision = false;
+
+			if(s->getActualPos().distSquared(newPos) > 1)  // make sure we can get to the position without going through walls.
+			{
+				s->setActualPos(oldPos, false);
+				s->setActualVel(oldVel);
+				return false;
+			}
          s->mImpulseVector = impulse * 1.5;     // <-- why???
-         s->setActualPos(pos, false);
+         s->setActualVel(Point(0,0));
+
       }
       else
       {

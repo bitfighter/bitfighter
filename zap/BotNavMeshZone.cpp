@@ -1285,11 +1285,15 @@ void BotNavMeshZone::buildBotMeshZones(Game *game)
       bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
 
       // try and except allows continue running after error, but no zones get generated
+#ifdef TNL_OS_WIN32
       __try{
+#endif
          makeBotMeshZones3(bounds, game, useRecast);
+#ifdef TNL_OS_WIN32
       }__except(1){
          logprintf("Error in makeBotMeshZones3");
       }
+#endif
 
       return;
    }
