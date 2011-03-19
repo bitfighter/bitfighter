@@ -829,10 +829,10 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
          U16 *v;
 
          v = &mesh.verts[e.vert[0] * 2];
-         neighbor.borderStart.set(v[0]-S16_MAX, v[1]-S16_MAX);     // TODO: Replace this with FIX
+         neighbor.borderStart.set(v[0] - mesh.offsetX, v[1] - mesh.offsetY);     
 
          v = &mesh.verts[e.vert[1] * 2];
-         neighbor.borderEnd.set(v[0]-S16_MAX, v[1]-S16_MAX);
+         neighbor.borderEnd.set(v[0] - mesh.offsetX, v[1] - mesh.offsetY);
 
          neighbor.borderCenter.set((neighbor.borderStart + neighbor.borderEnd) * 0.5);
 
@@ -902,7 +902,7 @@ using namespace clipper;
 #endif
 
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
-static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
+static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
    // Just for fun, let's triangulate!
    Vector<F32> coords;
@@ -1026,7 +1026,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       // Recast only handles 16 bit coordinates
       TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX), "Level out of bounds!");
 
-      S32 FIX = S16_MAX;
+      mesh.offset = S16_MAX;
 
       int ntris = tris.size();
       Vector<int> intPoints(ntris * 3 * 2);     // 2 entries per point: x,y
@@ -1038,8 +1038,8 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
          for(S32 j = 0; j < 3; j++)
          {
-            intPoints[i*3 + j*2] = S32(floor(tri->GetPoint(j)->x + .5)) + FIX;
-            intPoints[i*3 + j*2 + 1] = S32(floor(tri->GetPoint(j)->y + .5)) + FIX;
+            intPoints[i*3 + j*2] = S32(floor(tri->GetPoint(j)->x + .5)) + mesh.offset;
+            intPoints[i*3 + j*2 + 1] = S32(floor(tri->GetPoint(j)->y + .5)) + mesh.offset;
             trilist[i*3 + j] = i*3 +j;
          }
       }
@@ -1055,7 +1055,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
 
       // 6 is arbitrary --> smaller numbers require less memory
-      bounds.offset(Point(FIX,FIX));
+      bounds.offset(Point(mesh.offset, mesh.offset));
       rcBuildPolyMesh(6, intPoints.address(), ntris * 3, trilist.address(), ntris, mesh);     
       
       BotNavMeshZone *botzone = NULL;
@@ -1090,7 +1090,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
                polyToZoneMap[i] = botzone->getZoneId();
             }
 
-            botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[1] - FIX));
+            botzone->mPolyBounds.push_back(Point(vert[0] - mesh.offset, vert[1] - mesh.offset));
             j++;
          }
    
@@ -1136,22 +1136,28 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    if(useRecast)
    {
       // Recast only handles 16 bit coordinates
-      TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX), "Level out of bounds!");
+      if(bounds.getWidth() >= U16_MAX || bounds.getHeight() >= U16_MAX)
+      {
+         logprintf(LogConsumer::LogWarning, "Cannot create bot zones: level too big!");
+         return false;
+      }
 
-      S32 FIX = S16_MAX;
+      rcPolyMesh mesh;
+      mesh.offsetX = -1 * floor(bounds.min.x + 0.5);
+      mesh.offsetY = -1 * bounds.min.y;
 
       int ntris = out.numberoftriangles;
       Vector<int> intPoints(out.numberofpoints * 2);     // 2 entries per point: x,y
 
-      for(S32 i = 0; i < out.numberofpoints * 2; i++)
-         intPoints[i] = S32(out.pointlist[i] < 0 ? out.pointlist[i] - 0.5 : out.pointlist[i] + 0.5) + FIX;  
+      for(S32 i = 0; i < out.numberofpoints * 2; i+=2)
+      {
+         intPoints[i]   = floor(out.pointlist[i]   + 0.5) + mesh.offsetX;  
+         intPoints[i+1] = floor(out.pointlist[i+1] + 0.5) + mesh.offsetY;  
+      }
  
       // cont.nverts = out.numberofpoints;
       // cont.verts = intPoints.address();      //<== pointer to array of points in int format
       // tris = out.trianglelist
-
-
-      rcPolyMesh mesh;
 
       // TODO: Delete mesh memory allocations
 
@@ -1162,7 +1168,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
 
       // 6 is arbitrary --> smaller numbers require less memory
-      bounds.offset(Point(FIX,FIX));
+      bounds.offset(Point(mesh.offsetX, mesh.offsetY));
       rcBuildPolyMesh(6, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
       
       BotNavMeshZone *botzone = NULL;
@@ -1197,7 +1203,7 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
                polyToZoneMap[i] = botzone->getZoneId();
             }
 
-            botzone->mPolyBounds.push_back(Point(vert[0] - FIX, vert[1] - FIX));
+            botzone->mPolyBounds.push_back(Point(vert[0] - mesh.offsetX, vert[1] - mesh.offsetY));
             j++;
          }
    
@@ -1254,14 +1260,18 @@ static void makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    trifree(out.normlist);
    trifree(out.neighborlist);
 #endif
+
+   return true;
 }
+
+static const S32 LEVEL_ZONE_BUFFER = 30;
 
 // Server only
 void BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 
 	Rect bounds = game->computeWorldObjectExtents();
-	bounds.expand(Point(30,30));
+	bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
    if(gIniSettings.botZoneGeneratorMode == 0) //disabled
       return;

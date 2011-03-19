@@ -35,6 +35,9 @@ struct rcPolyMesh
 	int npolys;		         		// Number of polygons.
 	int maxpolys;		         	// Number of allocated polygons.
 	int nvp;				            // Max number of vertices per polygon.
+
+   int offsetX;                  // Number added to X coordinates to make them fit in the 0 - U16_MAX range
+   int offsetY;                  // Number added to Y coordinates to make them fit in the 0 - U16_MAX range
 };
 
 rcPolyMesh* rcAllocPolyMesh();
