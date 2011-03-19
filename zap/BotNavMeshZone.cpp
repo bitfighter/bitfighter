@@ -23,8 +23,6 @@
 //
 //------------------------------------------------------------------------------------
 
-//#define usep2t
-
 #include "BotNavMeshZone.h"
 #include "GeomUtils.h"
 #include "robot.h"
@@ -39,14 +37,6 @@
 #include <vector>
 
 #include "../clipper/clipper.h"
-
-#ifdef usept2
-#include "../poly2tri/poly2tri/poly2tri.h"
-#endif
-
-extern "C" {
-#include "../Triangle/triangle.h"      // For Triangle!
-}
 
 
 // triangulate wants quit on error
@@ -829,7 +819,7 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
          U16 *v;
 
          v = &mesh.verts[e.vert[0] * 2];
-         neighbor.borderStart.set(v[0] - mesh.offsetX, v[1] - mesh.offsetY);     
+         neighbor.borderStart.set(v[0] - mesh.offsetX, v[1] - mesh.offsetY);
 
          v = &mesh.verts[e.vert[1] * 2];
          neighbor.borderEnd.set(v[0] - mesh.offsetX, v[1] - mesh.offsetY);
@@ -905,37 +895,16 @@ using namespace clipper;
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
-   // Just for fun, let's triangulate!
-   Vector<F32> coords;
-   Vector<F32> holes;
-   Vector<S32> edges;
-
-
-   F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
-   F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
-
-   coords.push_back(minx);   coords.push_back(miny);     // Point 0
-   coords.push_back(minx);   coords.push_back(maxy);     // Point 1
-   coords.push_back(maxx);   coords.push_back(maxy);     // Point 2
-   coords.push_back(maxx);   coords.push_back(miny);     // Point 3
-
-   edges.push_back(0);       edges.push_back(1);
-   edges.push_back(1);       edges.push_back(2);
-   edges.push_back(2);       edges.push_back(3);
-   edges.push_back(3);       edges.push_back(0);
-
-   S32 nextPt = 4;
 
 #ifdef DUMP_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif
 
+   Vector<F32> holes;
    Point ctr;     // Reusable container for hole calculations
 
-   TPolyPolygon solution;
+   TPolyPolygon inputPolygons;
    TPolygon inputPoly;
-   Clipper clipper;
-   clipper.IgnoreOrientation(true);
 
    for(S32 i = 0; i < game->mGameObjects.size(); i++)
    {
@@ -952,7 +921,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 			   logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
 #endif
 
-         clipper.AddPolygon(inputPoly, ptSubject);
+         inputPolygons.push_back(inputPoly);
 
          ctr = barrier->getExtent().getCenter();
          holes.push_back(ctr.x);
@@ -960,190 +929,24 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       }
    }
 
-   clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
+   // Union holes!
+   TPolyPolygon solution;
+   unionPolygons(inputPolygons, solution);
 
-   TPolygon poly;
-   for (U32 j = 0; j < solution.size(); j++)
-   {
-      poly = solution[j];
-
-      if(poly.size() == 0)
-         continue;
-
-      S32 first = nextPt;
-      for (U32 k = 0; k < poly.size(); k++)
-      {
-         coords.push_back(poly[k].X);
-         coords.push_back(poly[k].Y);
-
-         if(k > 0)
-         {
-            edges.push_back(nextPt);
-            edges.push_back(nextPt + 1);
-            nextPt++;
-         }
-      }
-
-      edges.push_back(nextPt);
-      edges.push_back(first);
-      nextPt++;
-   }
-
-
-#ifdef DUMP_DATA
-   // Dump points
-   for(S32 i = 0; i < coords.size(); i+=2)
-      logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
-
-
-   // Dump edges
-   for(S32 i = 0; i < edges.size(); i+=2)
-      logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
-#endif
 #ifdef DUMP_TIMER
    U32 done1 = Platform::getRealMilliseconds();
 #endif
-#ifdef usep2t
 
-   p2t::Point p0(bounds.min.x, bounds.min.y);
-   p2t::Point p1(bounds.max.x, bounds.min.y);
-   p2t::Point p2(bounds.max.x, bounds.max.y);
-   p2t::Point p3(bounds.min.x, bounds.max.y);
-
-   vector<p2t::Point *> boundBox;
-
-   boundBox.push_back(&p0);
-   boundBox.push_back(&p1);
-   boundBox.push_back(&p2);
-   boundBox.push_back(&p3);
-
-   p2t::CDT cdt(boundBox);
-
-   // Add holes (i.e. walls)
-
-   cdt.Triangulate();      // Make the triangles
-
-   vector<p2t::Triangle *> tris = cdt.GetTriangles();
-
-   if(useRecast)
-   {
-      // Recast only handles 16 bit coordinates
-      TNLAssert((bounds.min.x > S16_MIN && bounds.min.y > S16_MIN && bounds.max.x < S16_MAX && bounds.max.y < S16_MAX), "Level out of bounds!");
-
-      mesh.offset = S16_MAX;
-
-      int ntris = tris.size();
-      Vector<int> intPoints(ntris * 3 * 2);     // 2 entries per point: x,y
-      Vector<int> trilist(ntris * 3);
-
-      for(U32 i = 0; i < tris.size(); i++)
-      {
-         p2t::Triangle *tri = tris[i];
-
-         for(S32 j = 0; j < 3; j++)
-         {
-            intPoints[i*3 + j*2] = S32(floor(tri->GetPoint(j)->x + .5)) + mesh.offset;
-            intPoints[i*3 + j*2 + 1] = S32(floor(tri->GetPoint(j)->y + .5)) + mesh.offset;
-            trilist[i*3 + j] = i*3 +j;
-         }
-      }
-
-      rcPolyMesh mesh;
-
-      // TODO: Delete mesh memory allocations
-
-      // TODO: Put these into real tests, and handle conditions better  
-      //TNLAssert(out.numberofpoints > 0, "No output points!");
-      //TNLAssert(out.numberoftriangles > 0, "No output triangles!");
-      //TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
-
-
-      // 6 is arbitrary --> smaller numbers require less memory
-      bounds.offset(Point(mesh.offset, mesh.offset));
-      rcBuildPolyMesh(6, intPoints.address(), ntris * 3, trilist.address(), ntris, mesh);     
-      
-      BotNavMeshZone *botzone = NULL;
-   
-      const S32 bytesPerVertex = sizeof(U16);      // Recast coords are U16s
-      Vector<S32> polyToZoneMap(mesh.npolys);
-
-      // Visualize rcPolyMesh
-      for(S32 i = 0; i < mesh.npolys; i++)
-      {
-         S32 firstx = S32_MAX;
-         S32 firsty = S32_MAX;
-         S32 lastx = S32_MAX;
-         S32 lasty = S32_MAX;
-
-         S32 j = 0;
-         botzone = NULL;
-
-         while(j < mesh.nvp)
-         {
-            if(mesh.polys[(i * mesh.nvp + j)] == U16_MAX)
-               break;
-
-            const U16 *vert = &mesh.verts[mesh.polys[(i * mesh.nvp + j)] * bytesPerVertex];
-
-            if(vert[0] == U16_MAX)
-               break;
-
-            if(j == 0)
-            {
-               botzone = new BotNavMeshZone();
-               polyToZoneMap[i] = botzone->getZoneId();
-            }
-
-            botzone->mPolyBounds.push_back(Point(vert[0] - mesh.offset, vert[1] - mesh.offset));
-            j++;
-         }
-   
-         if(botzone != NULL)
-         {
-            botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
-
-		      botzone->mConvex = true;             
-		      botzone->addToGame(gServerGame);
-		      botzone->computeExtent();   
-         }
-      }
-
-
-      logprintf("Recast built %d zones!", gBotNavMeshZones.size() );
-
-      buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
-   }
-#else
-   triangulateio in, out;
-
-   initIoStruct(&in);
-   initIoStruct(&out);
-
-   in.numberofpoints = coords.size() / 2;
-   in.pointlist = coords.address();
-
-   in.segmentlist = edges.address();
-   in.numberofsegments = edges.size() / 2;
-
-   in.numberofholes = holes.size() / 2;
-   in.holelist = holes.address();
-
-   // Note the q param seems to make no difference in speed of trinagulation, but makes much prettier triangles!
-   // Removing q does make a big difference in the speed of the aggregation of the triangles, at the cost of uglier zones
-   // X option makes small but consistent improvement in performance
+   // Tessellate!
+   Triangulate::TriangleData triangleData;
+   Triangulate::ProcessComplex(triangleData, bounds, solution, holes, Triangulate::cmP2t);
 
 #ifdef DUMP_TIMER
-   U32 done3 = Platform::getRealMilliseconds();
-#endif
-   triangulate((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
-      // triangulate 'X' option have problem with crashing error in windows
-#ifdef DUMP_TIMER
-   U32 done4 = Platform::getRealMilliseconds();
+   U32 done2 = Platform::getRealMilliseconds();
 #endif
 
    if(useRecast)
    {
-      // Recast only handles 16 bit coordinates
       if(bounds.getWidth() >= U16_MAX || bounds.getHeight() >= U16_MAX)
       {
          logprintf(LogConsumer::LogWarning, "Cannot create bot zones: level too big!");
@@ -1154,30 +957,12 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       mesh.offsetX = -1 * floor(bounds.min.x + 0.5);
       mesh.offsetY = -1 * bounds.min.y;
 
-      int ntris = out.numberoftriangles;
-      Vector<int> intPoints(out.numberofpoints * 2);     // 2 entries per point: x,y
-
-      for(S32 i = 0; i < out.numberofpoints * 2; i+=2)
-      {
-         intPoints[i]   = floor(out.pointlist[i]   + 0.5) + mesh.offsetX;  
-         intPoints[i+1] = floor(out.pointlist[i+1] + 0.5) + mesh.offsetY;  
-      }
- 
-      // cont.nverts = out.numberofpoints;
-      // cont.verts = intPoints.address();      //<== pointer to array of points in int format
-      // tris = out.trianglelist
-
-      // TODO: Delete mesh memory allocations
-
-      // TODO: Put these into real tests, and handle conditions better  
-      TNLAssert(out.numberofpoints > 0, "No output points!");
-      TNLAssert(out.numberoftriangles > 0, "No output triangles!");
-      TNLAssert(out.numberofpoints < 0xffe, "Too many points!");
-
-
-      // 6 is arbitrary --> smaller numbers require less memory
+      // this works because bounds is always passed by reference.  Is this really needed?
       bounds.offset(Point(mesh.offsetX, mesh.offsetY));
-      rcBuildPolyMesh(6, intPoints.address(), out.numberofpoints, out.trianglelist, out.numberoftriangles, mesh);     
+
+      // Merge!
+      Triangulate::mergeTriangles(triangleData, mesh);
+
       
       BotNavMeshZone *botzone = NULL;
    
@@ -1233,13 +1018,13 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    else
    {
       // Visualize triangle output
-      for(S32 i = 0; i < out.numberoftriangles * 3; i+=3)
+      for(S32 i = 0; i < triangleData.triangleCount * 3; i+=3)
       {
          BotNavMeshZone *botzone = new BotNavMeshZone();
 
-		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i]*2])),   F32(S32(out.pointlist[out.trianglelist[i]*2 + 1]))));
-		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+1]*2])), F32(S32(out.pointlist[out.trianglelist[i+1]*2 + 1]))));
-		   botzone->mPolyBounds.push_back(Point(F32(S32(out.pointlist[out.trianglelist[i+2]*2])), F32(S32(out.pointlist[out.trianglelist[i+2]*2 + 1]))));
+		   botzone->mPolyBounds.push_back(Point(F32(S32(triangleData.pointList[triangleData.triangleList[i]*2])),   F32(S32(triangleData.pointList[triangleData.triangleList[i]*2 + 1]))));
+		   botzone->mPolyBounds.push_back(Point(F32(S32(triangleData.pointList[triangleData.triangleList[i+1]*2])), F32(S32(triangleData.pointList[triangleData.triangleList[i+1]*2 + 1]))));
+		   botzone->mPolyBounds.push_back(Point(F32(S32(triangleData.pointList[triangleData.triangleList[i+2]*2])), F32(S32(triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]))));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		   botzone->mConvex = true;             // Avoid random red and green on /dzones, if this is uninitalized
@@ -1251,22 +1036,9 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    }
 
 #ifdef DUMP_TIMER
-   U32 done5 = Platform::getRealMilliseconds();
-   logprintf("Timings: %d %d %d %d", done1-starttime, done3-done1, done4-done3, done5-done4);
-#endif
+   U32 done3 = Platform::getRealMilliseconds();
 
-   // TODO: free memory allocated by triangles in out struct
-   trifree(out.pointlist);
-   trifree(out.pointattributelist);
-   trifree(out.pointmarkerlist);
-   trifree(out.trianglelist);
-   trifree(out.triangleattributelist);
-   trifree(out.segmentlist);
-   trifree(out.segmentmarkerlist);
-   trifree(out.edgelist);
-   trifree(out.edgemarkerlist);
-   trifree(out.normlist);
-   trifree(out.neighborlist);
+   logprintf("Timings: %d %d %d %d", done1-starttime, done2-done1, done3-done2);
 #endif
 
    return true;

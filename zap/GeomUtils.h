@@ -51,8 +51,20 @@
 
 #include "point.h"
 #include <string>
+#include "tnlAlloc.h"
+
+#include "../recast/Recast.h"
+#include "../recast/RecastAlloc.h"
+#include "../clipper/clipper.h"
+
+extern "C" {
+#include "../Triangle/triangle.h"      // For Triangle!
+}
+
+#include "../poly2tri/poly2tri.h"
 
 using namespace TNL;
+using namespace clipper;
 
 namespace Zap {
 
@@ -89,6 +101,7 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
+bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation = false);
 
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
@@ -109,21 +122,45 @@ S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 class Triangulate
 {
 public:
+   // use either Triangle of Poly2Tri to tessellate
+   enum ComplexMethod { cmTriangle, cmP2t};
 
-  // triangulate a contour/polygon, places results in  vector
-  // as series of triangles.
+   // class for output data of the triangulate process methods; hopefully cleans itself up
+   class TriangleData
+   {
+   public:
+      TriangleData() {}
+      ~TriangleData()
+      {
+         if(pointList) free(pointList);
+         if(triangleList) free(triangleList);
+      }
+      F32* pointList;
+      S32 pointCount;
+      S32* triangleList;
+      S32 triangleCount;
+   };
+
+   // triangulate a contour/polygon, places results in  vector
+   // as series of triangles.
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
+   // triangulate a bounded area with complex polygon holes
+   //
+   static bool ProcessComplex(TriangleData& outputData, const Rect& bounds, const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method);
 
-  // decide if point Px/Py is inside triangle defined by
-  // (Ax,Ay) (Bx,By) (Cx,Cy)
-  static bool InsideTriangle(float Ax, float Ay,
-                             float Bx, float By,
-                             float Cx, float Cy,
-                             float Px, float Py);
+   // merge triangles into convex polygons
+   static bool mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);
+
+   // decide if point Px/Py is inside triangle defined by
+   // (Ax,Ay) (Bx,By) (Cx,Cy)
+   static bool InsideTriangle(float Ax, float Ay,
+         float Bx, float By,
+         float Cx, float Cy,
+         float Px, float Py);
 
 private:
-  static bool Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V);
+   static bool Snip(const Vector<Point> &contour, int u, int v, int w, int n, int *V);
 
 };
 

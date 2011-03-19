@@ -766,6 +766,196 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
   return true;
 }
 
+// union any amount of complex polygons and return a list of unioned complex polygons
+bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation)
+{
+   Clipper clipper;
+   clipper.IgnoreOrientation(ignoreOutputOrientation);
+   clipper.AddPolyPolygon(inputPolygonList, ptSubject);
+   return clipper.Execute(ctUnion, outputPolygonList, pftNonZero, pftNonZero);
+}
+
+
+// triangulate a bounded area with complex polygon holes
+//
+// TODO return false if a method fails
+bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
+      const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
+{
+   Vector<F32> coords;
+
+   F32 minx = bounds.min.x;  F32 miny = bounds.min.y;
+   F32 maxx = bounds.max.x;  F32 maxy = bounds.max.y;
+
+   coords.push_back(minx);   coords.push_back(miny);     // Point 0
+   coords.push_back(minx);   coords.push_back(maxy);     // Point 1
+   coords.push_back(maxx);   coords.push_back(maxy);     // Point 2
+   coords.push_back(maxx);   coords.push_back(miny);     // Point 3
+
+   S32 nextPt = 4;
+
+   if (method == cmTriangle)
+   {
+      Vector<S32> edges;
+
+      edges.push_back(0);       edges.push_back(1);
+      edges.push_back(1);       edges.push_back(2);
+      edges.push_back(2);       edges.push_back(3);
+      edges.push_back(3);       edges.push_back(0);
+
+      TPolygon poly;
+      for (U32 j = 0; j < polygonList.size(); j++)
+      {
+         poly = polygonList[j];
+
+         if(poly.size() == 0)
+            continue;
+
+         S32 first = nextPt;
+         for (U32 k = 0; k < poly.size(); k++)
+         {
+            coords.push_back(poly[k].X);
+            coords.push_back(poly[k].Y);
+
+            if(k > 0)
+            {
+               edges.push_back(nextPt);
+               edges.push_back(nextPt + 1);
+               nextPt++;
+            }
+         }
+
+         edges.push_back(nextPt);
+         edges.push_back(first);
+         nextPt++;
+      }
+
+#ifdef DUMP_DATA
+   // Dump points
+   for(S32 i = 0; i < coords.size(); i+=2)
+      logprintf("Point %d: %f, %f", i/2, coords[i], coords[i+1]);
+
+
+   // Dump edges
+   for(S32 i = 0; i < edges.size(); i+=2)
+      logprintf("Edge %d, %d-%d", i/2, edges[i], edges[i+1]);
+#endif
+
+      triangulateio in, out;
+
+      initIoStruct(&in);
+      initIoStruct(&out);
+
+      in.numberofpoints = coords.size() / 2;
+      in.pointlist = coords.address();
+
+      in.segmentlist = edges.address();
+      in.numberofsegments = edges.size() / 2;
+
+      in.numberofholes = holeMarkerList.size() / 2;
+      in.holelist = holeMarkerList.address();
+
+      // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
+      triangulate((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+
+      // add triangle output to custom object for return storage
+      outputData.pointList = out.pointlist;
+      outputData.pointCount = out.numberofpoints;
+      outputData.triangleList = out.trianglelist;
+      outputData.triangleCount = out.numberoftriangles;
+
+      // TODO: Put these into real tests, and handle conditions better
+      TNLAssert(triangleData.pointCount > 0, "No output points!");
+      TNLAssert(triangleData.triangleCount > 0, "No output triangles!");
+      TNLAssert(triangleData.pointCount < 0xffe, "Too many points!");
+
+      // clean up Triangle memory
+      //
+      // pointlist and trianglelist will not be freed as they are now wrapped in TriangleData
+      // to be used later
+      trifree(out.pointattributelist);
+      trifree(out.pointmarkerlist);
+      trifree(out.triangleattributelist);
+      trifree(out.segmentlist);
+      trifree(out.segmentmarkerlist);
+      trifree(out.edgelist);
+      trifree(out.edgemarkerlist);
+      trifree(out.normlist);
+      trifree(out.neighborlist);
+   }
+
+
+   if (method == cmP2t)
+   {
+      p2t::Point p0(minx, miny);
+      p2t::Point p1(maxx, miny);
+      p2t::Point p2(maxx, maxy);
+      p2t::Point p3(minx, maxy);
+
+      vector<p2t::Point *> boundBox;
+
+      boundBox.push_back(&p0);
+      boundBox.push_back(&p1);
+      boundBox.push_back(&p2);
+      boundBox.push_back(&p3);
+
+      p2t::CDT cdt(boundBox);
+
+      // Add holes (i.e. walls)
+
+      cdt.Triangulate();      // Make the triangles
+
+      vector<p2t::Triangle *> tris = cdt.GetTriangles();
+
+      S32 ntris = tris.size();
+      S32 npoints = ntris * 3;
+
+      // allocate memory here to match what Triangle method outputs
+      F32* pointList = (F32*)malloc(sizeof(F32) * npoints * 2);     // 2 entries per point: x,y
+      S32* triList = (S32*)malloc(sizeof(S32) * ntris * 3);
+
+      for(U32 i = 0; i < tris.size(); i++)
+      {
+         p2t::Triangle *tri = tris[i];
+
+         for(S32 j = 0; j < 3; j++)
+         {
+            pointList[i*3 + j*2] = tri->GetPoint(j)->x;
+            pointList[i*3 + j*2 + 1] = tri->GetPoint(j)->y;
+            triList[i*3 + j] = i*3 +j;
+         }
+      }
+
+      outputData.pointList = pointList;
+      outputData.pointCount = npoints;
+      outputData.triangleList = triList;
+      outputData.triangleCount = ntris;
+   }
+}
+
+// merge triangles into convex polygons, uses Recast method
+//
+// TODO: return false if failure
+bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices)
+{
+   S32 ntris = triangleData.triangleCount;
+   Vector<S32> intPoints(triangleData.pointCount * 2);     // 2 entries per point: x,y
+
+   TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "1 vector size is wrong");
+
+   for(S32 i = 0; i < triangleData.pointCount * 2; i+=2)
+   {
+      intPoints[i]   = floor(triangleData.pointList[i]   + 0.5) + mesh.offsetX;
+      intPoints[i+1] = floor(triangleData.pointList[i+1] + 0.5) + mesh.offsetY;
+   }
+
+   TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "2 vector size is wrong");
+
+   // TODO: Delete mesh memory allocations
+
+   // 6 is arbitrary --> smaller numbers require less memory
+   rcBuildPolyMesh(maxVertices, intPoints.address(), triangleData.pointCount, triangleData.triangleList, triangleData.triangleCount, mesh);
+}
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 Point findCentroid(const Vector<Point> &polyPoints)
