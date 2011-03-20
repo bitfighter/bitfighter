@@ -892,14 +892,14 @@ using namespace clipper;
 
 #ifdef TNL_DEBUG
 //#define DUMP_DATA
-#define DUMP_TIMER
+#define LOG_TIMER
 #endif
 
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
 
-#ifdef DUMP_TIMER
+#ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif
 
@@ -947,7 +947,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       return false;
 
 
-#ifdef DUMP_TIMER
+#ifdef LOG_TIMER
    U32 done1 = Platform::getRealMilliseconds();
 #endif
 
@@ -956,7 +956,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    if(!Triangulate::ProcessComplex(triangleData, bounds, solution, holes, Triangulate::cmTriangle))  // use Triangulate::cmP2t for poly2tri
       return false;
 
-#ifdef DUMP_TIMER
+#ifdef LOG_TIMER
    U32 done2 = Platform::getRealMilliseconds();
 #endif
 
@@ -1060,7 +1060,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
       BotNavMeshZone::buildBotNavMeshZoneConnections();
    }
 
-#ifdef DUMP_TIMER
+#ifdef LOG_TIMER
    U32 done3 = Platform::getRealMilliseconds();
 
    logprintf("Timings: %d %d %d", done1-starttime, done2-done1, done3-done2);
