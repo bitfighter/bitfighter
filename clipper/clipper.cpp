@@ -49,7 +49,7 @@ static double const tolerance = 1.0E-10;
 static double const minimal_tolerance = 1.0E-14;
 //precision: defines when adjacent vertices will be considered duplicates
 //and hence ignored. This circumvents edges having indeterminate slope.
-static double const precision = 0.001; // 1.0E-6;
+static double const precision = 1.0E-6;
 static double const slope_precision = 1.0E-3;
 enum TDirection { dRightToLeft, dLeftToRight };
 static const TDoubleRect nullRect = {0,0,0,0};

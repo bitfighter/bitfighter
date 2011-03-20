@@ -884,17 +884,16 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
          TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Fail");
          if(coords[i2] == coords[i2prev] && coords[i2+1] == coords[i2prev+1])
          {
-            logprintf("Duplicate points found %f,%f", coords[i2], coords[i2+1]);
             for(S32 j=0; j<edges.size(); j++)
             {
-               if(edges[j] == i)
-                  edges[j] = i-1;
-               else if(edges[j]+1 == sortID.size())
-                  edges[j] = i;
+               if(edges[j] == (i2 >> 1))
+                  edges[j] = (i2prev >> 1);
+               else if(edges[j]*2+2 == coords.size())
+                  edges[j] = (i2 >> 1);
             }
             for(S32 j=0; j<=i; j++)
-               if(sortID[j]+1 == sortID.size())
-                  sortID[j] = i;
+               if(sortID[j]+2 == coords.size())
+                  sortID[j] = (i2 >> 1);
             coords.erase_fast(i2+1);
             coords.erase_fast(i2);
          }

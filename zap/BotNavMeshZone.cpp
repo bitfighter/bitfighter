@@ -926,23 +926,22 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
          inputPolygons.push_back(inputPoly);
 
-         if(barrier->mBotZoneBufferGeometry.size() > 2)
+         Point point1;
+         Point point2 = barrier->mBotZoneBufferGeometry[barrier->mBotZoneBufferGeometry.size()-2];
+         Point point3 = barrier->mBotZoneBufferGeometry.last();
+
+         for(S32 k=0; k < barrier->mBotZoneBufferGeometry.size(); k++)
          {
-            ctr = barrier->getExtent().getCenter();
-            if(!PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr))
-            {
-               ctr.angleTo(barrier->mBotZoneBufferGeometry[0] - barrier->getExtent().getCenter());
-               ctr += barrier->mBotZoneBufferGeometry[0];
-               if(!PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr))
-               {
-                  ctr.angleTo(barrier->getExtent().getCenter() - barrier->mBotZoneBufferGeometry[0]);
-                  ctr += barrier->mBotZoneBufferGeometry[0];
-               }
-            }
-            if(PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr))
+            point1 = point2;
+            point2 = point3;
+            point3 = barrier->mBotZoneBufferGeometry[k];
+            ctr = (point1 + point2 + point3) * 0.33333333f;
+            if(PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr + Point(1.3,1.7)) &&
+               PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr - Point(1.3,1.7)))
             {
                holes.push_back(ctr.x);
                holes.push_back(ctr.y);
+               break;
             }
          }
       }
@@ -952,6 +951,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
    TPolyPolygon solution;
    if(!unionPolygons(inputPolygons, solution))
       return false;
+
 
 #ifdef DUMP_TIMER
    U32 done1 = Platform::getRealMilliseconds();
