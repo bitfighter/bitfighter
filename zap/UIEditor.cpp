@@ -5192,6 +5192,8 @@ void WorldItem::initializeGeom()
    if(geomType() == geomPoly || mSolid)
    {
       Triangulate::Process(mVerts, fillPoints);   // Populates fillPoints from polygon outline
+      TNLAssert(fillPoints.size() > 0, "Bogus polygon geometry detected!");
+
       centroid = findCentroid(mVerts);
       setExtent(Rect(mVerts));
    }

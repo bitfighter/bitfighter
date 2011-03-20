@@ -104,13 +104,15 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
    if(points.size() < 2)      // Invalid barrier!
    {
       delete this;
+      logprintf(LogConsumer::LogWarning, "Invalid barrier detected (has only one point).  Disregarding...");
       return;
    }
 
    Rect extent(points);
 
-   if(width < 0)             // force positive width.
+   if(width < 0)             // Force positive width
       width = -width;
+
    mWidth = width;           // must be positive to avoid problem with bufferBarrierForBotZone
    width = width * 0.5 + 1;  // divide by 2 to avoid double size extents, add 1 to avoid rounding errors.
    if(points.size() == 2)    // It's a regular segment, need to make a little larger to accomodate width
@@ -123,12 +125,21 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
    {
-       Triangulate::Process(mPoints, mRenderFillGeometry);
-       mBotZoneBufferGeometry = mPoints;  // TODO: make bufferBarrierForBotZone work here
+      Triangulate::Process(mPoints, mRenderFillGeometry);
+
+      if(mRenderFillGeometry.size() == 0)      // Geometry is bogus; perhaps duplicated points, or other badness
+      {
+         delete this;
+         logprintf(LogConsumer::LogWarning, "Invalid barrier detected (polywall with invalid geometry).  Disregarding...");
+         return;
+      }
+
+      mBotZoneBufferGeometry = mPoints;  // TODO: make bufferBarrierForBotZone work here
    }
    else
    {
       bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 8 points, octagonal
+
       if(mPoints.size() == 2 && mWidth != 0)   // It's a regular segment, so apply width
       {
          expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
