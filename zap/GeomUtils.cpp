@@ -45,7 +45,7 @@
 
 #include "point.h" 
 #include "tnlVector.h"
-#include "tnlLog.h" // to print out exception
+#include "tnlLog.h" // for logprintf
 #include "GeomUtils.h"      // Must be last
 
 
@@ -871,7 +871,7 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       sortID.setSize(coords.size()/2);
       for(S32 i=0; i<sortID.size(); i++)
       {
-         sortID[i]=i*2;
+         sortID[i]=i;
       }
 
       pointsToCheck = coords.address();
@@ -881,21 +881,24 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       {
          S32 i2 = sortID[i];
          S32 i2prev = sortID[i-1];
-         TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Fail");
-         if(coords[i2] == coords[i2prev] && coords[i2+1] == coords[i2prev+1])
+         TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Not sorted anymore...");
+         if(coords[i2*2] == coords[i2prev*2] && coords[i2*2+1] == coords[i2prev*2+1])
          {
+#ifdef TNL_DEBUG
+            logprintf("Duplicate points found %f,%f", coords[i2*2], coords[i2*2+1]);
+#endif
             for(S32 j=0; j<edges.size(); j++)
             {
-               if(edges[j] == (i2 >> 1))
-                  edges[j] = (i2prev >> 1);
+               if(edges[j] == i2)
+                  edges[j] = i2prev;
                else if(edges[j]*2+2 == coords.size())
-                  edges[j] = (i2 >> 1);
+                  edges[j] = i2;
             }
-            for(S32 j=0; j<=i; j++)
-               if(sortID[j]+2 == coords.size())
-                  sortID[j] = (i2 >> 1);
-            coords.erase_fast(i2+1);
-            coords.erase_fast(i2);
+            for(S32 j=0; j<i; j++)
+               if(sortID[j]*2+2 == coords.size())
+                  sortID[j] = i2;
+            coords.erase_fast(i2*2+1);
+            coords.erase_fast(i2*2);
          }
       }
 
