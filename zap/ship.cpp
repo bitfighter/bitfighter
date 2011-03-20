@@ -195,7 +195,6 @@ void Ship::setActualPos(Point p, bool warp)
       setMaskBits(PositionMask);
 }
 
-
 // Process a move.  This will advance the position of the ship, as well as adjust its velocity and angle.
 void Ship::processMove(U32 stateIndex)
 {
@@ -210,8 +209,14 @@ void Ship::processMove(U32 stateIndex)
    F32 time = mCurrentMove.time * 0.001;
    Point requestVel(mCurrentMove.right - mCurrentMove.left, mCurrentMove.down - mCurrentMove.up);
 
+   if(mSpeedZoneHit[stateIndex].isValid())
+   {
+      mSpeedZoneHit[stateIndex]->collided(this, stateIndex);
+      mSpeedZoneHit[stateIndex] = NULL;
+   }
+
    const S32 MAX_CONTROLLABLE_SPEED = 1000;     // 1000 is completely arbitrary, but it seems to work well...
-   if(getActualVel().len() > MAX_CONTROLLABLE_SPEED)     
+   if(mMoveState[stateIndex].vel.len() > MAX_CONTROLLABLE_SPEED)     
       requestVel.set(0,0);
 
 
@@ -426,7 +431,6 @@ void Ship::controlMoveReplayComplete()
       mInterpolating = true;
 }
 
-
 void Ship::idle(GameObject::IdleCallPath path)
 {
    // Don't process exploded ships
@@ -452,6 +456,10 @@ void Ship::idle(GameObject::IdleCallPath path)
                getControllingClient()->lostContact())
          return;  // If we're out-of-touch, don't move the ship... moving won't actually hurt, but this seems somehow better
 
+      // Apply impulse vector and reset it
+      mMoveState[ActualState].vel += mImpulseVector;
+      mImpulseVector.set(0,0);
+
       // For all other cases, advance the actual state of the
       // object with the current move.
       processMove(ActualState);
@@ -464,10 +472,6 @@ void Ship::idle(GameObject::IdleCallPath path)
             speedZone->collide(this);
       }
 
-
-      // Apply impulse vector and reset it
-      mMoveState[ActualState].vel += mImpulseVector;
-      mImpulseVector.set(0,0);
 
       if(path == GameObject::ServerIdleControlFromClient ||
          path == GameObject::ClientIdleControlMain ||
