@@ -52,7 +52,7 @@ void Sweep::SweepPoints(SweepContext& tcx)
   for (int i = 1; i < tcx.point_count(); i++) {
     Point& point = *tcx.GetPoint(i);
     Node* node = &PointEvent(tcx, point);
-    for (int i = 0; i < point.edge_list.size(); i++) {
+    for (unsigned int i = 0; i < point.edge_list.size(); i++) {
       EdgeEvent(tcx, point.edge_list[i], node);
     }
   }
@@ -748,7 +748,7 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
 Sweep::~Sweep() {
 
     // Clean up memory
-    for(int i = 0; i < nodes_.size(); i++) {
+    for(unsigned int i = 0; i < nodes_.size(); i++) {
         delete nodes_[i];
     }
 
