@@ -35,13 +35,21 @@
 # Building for Mac:
 #
 
+default: release
 
-default:
+release:
 	@$(MAKE) -C tnl 
 	@$(MAKE) -C libtomcrypt
 	#@$(MAKE) -C master
 	@$(MAKE) -C lua/lua-vec/src
 	@$(MAKE) -C zap	
+
+debug:
+	@$(MAKE) -C tnl debug
+	@$(MAKE) -C libtomcrypt
+	#@$(MAKE) -C master
+	@$(MAKE) -C lua/lua-vec/src
+	@$(MAKE) -C zap	debug
 
 dedicated:
 	@$(MAKE) -C tnl 

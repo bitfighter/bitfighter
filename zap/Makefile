@@ -17,8 +17,10 @@
 #
 #######################################
 
+OPTIMIZE=-O2
+DEBUG=-g
 INCLUDES=-I../tnl -I../glut -I../openal -I../Triangle -I../recast -I../clipper -I../poly2tri
-CC=gcc -g $(INCLUDES) -DTNL_ENABLE_LOGGING -W -O2
+CC=gcc $(DEBUG) $(INCLUDES) -DTNL_ENABLE_LOGGING -W $(OPTIMIZE)
 THREADLIB= -lpthread
 GLUT=-lGL -lGLU -lglut
 INPUT=linuxInput.o 
@@ -142,8 +144,13 @@ LFLAGS=-lstdc++ -lm -ldl -lX11
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) -o $@ $<
 
 
-default: bitfighter
+default: release
 
+debug: OPTIMIZE=
+debug: bitfighter
+
+release: DEBUG=
+release: bitfighter
 
 dedicated: CFLAGS=-DZAP_DEDICATED 
 dedicated: LFLAGS=-lstdc++ -lm -ldl

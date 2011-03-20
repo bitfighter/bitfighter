@@ -1,7 +1,9 @@
 # TNL Makefile
 # From Bitfigher (http://bitfighter.org)
 
-CC=g++ -g  -DTNL_ENABLE_LOGGING -I../libtomcrypt/src/headers -I../libtomcrypt -O2
+OPTIMIZE=-O2
+DEBUG=-g
+CC=g++ $(DEBUG) -DTNL_ENABLE_LOGGING -I../libtomcrypt/src/headers -I../libtomcrypt $(OPTIMIZE)
 
 
 OBJECTS=\
@@ -38,8 +40,15 @@ WFLAGS=
 .cpp.o : 
 	$(CC) $(DFLAGS) $(WFLAGS) -c $(CFLAGS) $<
 
+default: release
 
-default: $(OBJECTS)
+release: DEBUG=
+release: tnl
+
+debug: OPTIMIZE=
+debug: tnl
+
+tnl: $(OBJECTS)
 	@echo Building libtnl.a ...
 	ar rcv libtnl.a $(OBJECTS)
 
