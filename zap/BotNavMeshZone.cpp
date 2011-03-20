@@ -104,11 +104,12 @@ void BotNavMeshZone::render(S32 layerIndex)
    if(!gClientGame->mGameUserInterface->mDebugShowMeshZones)
       return;
 
-   if(mPolyFill.size() == 0)    //Need to process PolyFill here, rendering server objects into client.
-         Triangulate::Process(mPolyBounds, mPolyFill);
+   if(mPolyFill.size() == 0)    // Need to process PolyFill here, rendering server objects into client.
+      Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
       renderNavMeshZone(mPolyBounds, mPolyFill, mCentroid, mZoneId, mConvex);
+
    else if(layerIndex == 1)
       renderNavMeshBorders(mNeighbors);
 }
@@ -1031,12 +1032,16 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
             }
          }
 
-
+#ifdef LOG_TIMER
          logprintf("Recast built %d zones!", gBotNavMeshZones.size() );
+#endif               
 
          buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
 		}
    }
+
+   // If recast failed, build zones from the underlying triangle geometry.  This bit could be made more efficient by using the adjacnecy
+   // data from Triangle, but it should only run rarely, if ever.
    if(!recastPassed)
    {
       // Visualize triangle output
@@ -1120,15 +1125,13 @@ static BotNavMeshZone *findZoneContainingPoint(const Point &point)
    // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
    for(S32 i = 0; i < zones.size(); i++)
    {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);     
-      if(zone)
-      {
-         if(PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
-            return zone;   // Make sure point is inside the polygon
-      }
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);  
+
+      if(zone && PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
+         return zone;   
    }
 
-   if(zones.size() != 0)  // in case of point was close to polygon, but not inside the zone?
+   if(zones.size() != 0)  // In case of point was close to polygon, but not inside the zone?
       return dynamic_cast<BotNavMeshZone *>(zones[0]);
 
    return NULL;

@@ -1009,7 +1009,8 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
    return true;
 }
 
-// merge triangles into convex polygons, uses Recast method
+
+// Merge triangles into convex polygons, uses Recast method
 bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices)
 {
    S32 ntris = triangleData.triangleCount;
@@ -1033,6 +1034,7 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 
    return rcBuildPolyMesh(maxVertices, intPoints.address(), triangleData.pointCount, triangleData.triangleList, triangleData.triangleCount, mesh);
 }
+
 
 // Derived from formulae here: http://local.wasp.uwa.edu.au/~pbourke/geometry/polyarea/
 Point findCentroid(const Vector<Point> &polyPoints)
