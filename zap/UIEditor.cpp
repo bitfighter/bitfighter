@@ -205,7 +205,12 @@ void EditorUserInterface::populateDock()
                                         mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
          yPos += spacer;
       }
+
+      mDockItems.push_back(WorldItem(ItemPolyWall, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, yPos), 
+                                     mCurrentTeam, true, DOCK_POLY_WIDTH, DOCK_POLY_HEIGHT));
+      yPos += spacer;
    }
+
    else if(mShowMode == NavZoneMode)
    {
       mDockItems.push_back(WorldItem(ItemNavMeshZone, Point(gScreenInfo.getGameCanvasWidth() - horizMargin - DOCK_WIDTH + 5, 
@@ -2291,7 +2296,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
             renderPolygonLabel(convertLevelToCanvasCoord(item.centroid, !item.mDockItem), ang, labelSize, 
                                itemDef[item.index].onScreenName);
          }
-         else
+         else     // Not a dock item
          {
             glPushMatrix();  
                setLevelToCanvasCoordConversion();
@@ -2315,10 +2320,13 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
                else if(item.index == ItemSlipZone)
                   renderSlipZone(item.getVerts(), item.fillPoints, item.getExtent());
 
+               else if(item.index == ItemPolyWall)
+                  //renderWallFill(item.fillPoints, item.mSolid);
+                  //glColor((useGameColor ? gIniSettings.wallFillColor : EDITOR_WALL_FILL_COLOR) * (renderLight ? 0.5 : 1));
+                  renderPolygon(item.fillPoints, item.getVerts(), EDITOR_WALL_FILL_COLOR, gIniSettings.wallOutlineColor, 1);
+
                else if(item.index == ItemBarrierMaker)
-               {
                   renderPolygon(item.fillPoints, item.getVerts(), gIniSettings.wallFillColor, gIniSettings.wallOutlineColor, 1);
-               }
 
                // If item is selected, and we're not in preview mode, draw a border highlight
                if(!mShowingReferenceShip && (item.selected || item.litUp))

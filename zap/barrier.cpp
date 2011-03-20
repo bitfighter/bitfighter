@@ -506,15 +506,7 @@ void Barrier::prepareBotZoneGeometry()
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
-   {
-      glColor(gIniSettings.wallFillColor);
-
-      glBegin(mSolid ? GL_TRIANGLES : GL_POLYGON);   // Rendering is a bit different for solid polys
-         for(S32 i = 0; i < mRenderFillGeometry.size(); i++)
-            glVertex(mRenderFillGeometry[i]);
-      glEnd();
-
-   }
+      renderWallFill(mRenderFillGeometry, mSolid);
    else if(layerIndex == 1)      // Second pass: draw the outlines
       renderWallEdges(mRenderLineSegments);
 }

@@ -1358,6 +1358,17 @@ void renderEnergyItem(const Point &pos)
 }
 
 
+void renderWallFill(const Vector<Point> &points, bool polyWall)
+{
+   glColor(gIniSettings.wallFillColor);
+
+   glBegin(polyWall ? GL_TRIANGLES : GL_POLYGON);   // Rendering is a bit different for solid polys
+      for(S32 i = 0; i < points.size(); i++)
+         glVertex(points[i]);
+   glEnd();
+}
+
+
 // Used in both editor and game
 void renderWallEdges(const Vector<Point> &edges, F32 alpha)
 {

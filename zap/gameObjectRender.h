@@ -129,6 +129,7 @@ extern void renderRepairItem(const Point &pos);
 extern void renderRepairItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 
 extern void renderEnergyItem(const Point &pos);
+extern void renderWallFill(const Vector<Point> &points, bool polyWall);
 extern void renderEnergyItem(const Point &pos, bool forEditor, const Color *overrideColor, F32 alpha);
 extern void renderEnergySymbol(const Color *overrideColor, F32 alpha);      // Render lightning bolt symbol
 extern void renderEnergySymbol(const Point &pos, F32 scaleFactor);   // Another signature
