@@ -713,6 +713,7 @@ Point& Sweep::NextFlipPoint(Point& ep, Point& eq, Triangle& ot, Point& op)
   } else{
     //throw new RuntimeException("[Unsupported] Opposing point on constrained edge");
     assert(0);
+    return *ot.PointCCW(op);  // Need to return something
   }
 }
 
