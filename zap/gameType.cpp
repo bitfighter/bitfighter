@@ -1327,8 +1327,11 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       }
    }
    // TODO: Integrate code above with code above!!  EASY!!
-   else if(!stricmp(argv[0], "BarrierMakerS"))
+   else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
+      if(!stricmp(argv[0], "BarrierMakerS"))
+         logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+
       if(argc >= 2)
       { 
          BarrierRec barrier;

@@ -602,7 +602,7 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       GameItems itemType = ItemInvalid;
       bool solid = false;
 
-      if(!strcmp(argv[0], "BarrierMakerS"))
+      if(!strcmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
       {
          itemType = ItemBarrierMaker;
          solid = true;
