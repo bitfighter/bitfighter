@@ -374,54 +374,54 @@ S32 QSORT_CALLBACK pointDataSort(Point *a, Point *b)
       return -1;
 }
 
-bool isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
-{
-   GridDatabase *gb = &gServerGame->mDatabaseForBotZones;
-   Vector<Point> pts(3);
-   pts.setSize(3);
-   //const F32 mult1 = 0.000244140625;
-   //const F32 mult2 = 1 - mult1*2;
-   // Slightly reduce size to avoid false positive when one line touch the other.
-   //pts[0].x = p1->x * mult2 + p2->x * mult1 + p3->x * mult1;
-   //pts[0].y = p1->y * mult2 + p2->y * mult1 + p3->y * mult1;
-   //pts[1].x = p2->x * mult2 + p1->x * mult1 + p3->x * mult1;
-   //pts[1].y = p2->y * mult2 + p1->y * mult1 + p3->y * mult1;
-   //pts[2].x = p3->x * mult2 + p1->x * mult1 + p2->x * mult1;
-   //pts[2].y = p3->y * mult2 + p1->y * mult1 + p2->y * mult1;
-   pts[0].setPolar(0.1, p1->angleTo(*p2));
-   pts[1].setPolar(0.1, p2->angleTo(*p1));
-   pts[2].setPolar(0.1, p3->angleTo(*p1));
-   Point tmp;
-   tmp.setPolar(0.1, p1->angleTo(*p3));
-   pts[0] += tmp + *p1;
-   tmp.setPolar(0.1, p2->angleTo(*p3));
-   pts[1] += tmp + *p2;
-   tmp.setPolar(0.1, p3->angleTo(*p2));
-   pts[2] += tmp + *p3;
-   Vector<DatabaseObject *> objects;
-   Rect rect = Rect(Point(min(min(p1->x, p2->x), p3->x), min(min(p1->y, p2->y), p3->y)), Point(max(max(p1->x, p2->x), p3->x), max(max(p1->y, p2->y), p3->y)));
-   gb->findObjects(BotNavMeshZoneType, objects, rect);
-   for(S32 i=0; i<objects.size(); i++)
-   {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
-      Vector<Point> otherPolygon;
-      zone->getCollisionPoly(otherPolygon);
-      if(polygonsIntersect(pts, otherPolygon))
-         return true;
-   }
-   gb = gServerGame->getGridDatabase();
-   objects.clear();
-   gb->findObjects(BarrierType, objects, rect);
-   for(S32 i=0; i<objects.size(); i++)
-   {
-      Barrier *zone = dynamic_cast<Barrier *>(objects[i]);
-      Vector<Point> otherPolygon;
-      zone->getCollisionPoly(otherPolygon);
-      if(polygonsIntersect(pts, otherPolygon))
-         return true;
-   }
-   return false;
-}
+//bool isBotZoneCollideWithOtherZone(Point *p1, Point *p2, Point *p3)
+//{
+//   GridDatabase *gb = &gServerGame->mDatabaseForBotZones;
+//   Vector<Point> pts(3);
+//   pts.setSize(3);
+//   //const F32 mult1 = 0.000244140625;
+//   //const F32 mult2 = 1 - mult1*2;
+//   // Slightly reduce size to avoid false positive when one line touch the other.
+//   //pts[0].x = p1->x * mult2 + p2->x * mult1 + p3->x * mult1;
+//   //pts[0].y = p1->y * mult2 + p2->y * mult1 + p3->y * mult1;
+//   //pts[1].x = p2->x * mult2 + p1->x * mult1 + p3->x * mult1;
+//   //pts[1].y = p2->y * mult2 + p1->y * mult1 + p3->y * mult1;
+//   //pts[2].x = p3->x * mult2 + p1->x * mult1 + p2->x * mult1;
+//   //pts[2].y = p3->y * mult2 + p1->y * mult1 + p2->y * mult1;
+//   pts[0].setPolar(0.1, p1->angleTo(*p2));
+//   pts[1].setPolar(0.1, p2->angleTo(*p1));
+//   pts[2].setPolar(0.1, p3->angleTo(*p1));
+//   Point tmp;
+//   tmp.setPolar(0.1, p1->angleTo(*p3));
+//   pts[0] += tmp + *p1;
+//   tmp.setPolar(0.1, p2->angleTo(*p3));
+//   pts[1] += tmp + *p2;
+//   tmp.setPolar(0.1, p3->angleTo(*p2));
+//   pts[2] += tmp + *p3;
+//   Vector<DatabaseObject *> objects;
+//   Rect rect = Rect(Point(min(min(p1->x, p2->x), p3->x), min(min(p1->y, p2->y), p3->y)), Point(max(max(p1->x, p2->x), p3->x), max(max(p1->y, p2->y), p3->y)));
+//   gb->findObjects(BotNavMeshZoneType, objects, rect);
+//   for(S32 i=0; i<objects.size(); i++)
+//   {
+//      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
+//      Vector<Point> otherPolygon;
+//      zone->getCollisionPoly(otherPolygon);
+//      if(polygonsIntersect(pts, otherPolygon))
+//         return true;
+//   }
+//   gb = gServerGame->getGridDatabase();
+//   objects.clear();
+//   gb->findObjects(BarrierType, objects, rect);
+//   for(S32 i=0; i<objects.size(); i++)
+//   {
+//      Barrier *zone = dynamic_cast<Barrier *>(objects[i]);
+//      Vector<Point> otherPolygon;
+//      zone->getCollisionPoly(otherPolygon);
+//      if(polygonsIntersect(pts, otherPolygon))
+//         return true;
+//   }
+//   return false;
+//}
 
 
 //// from gridDB.cpp
@@ -926,24 +926,18 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
          inputPolygons.push_back(inputPoly);
 
-         Point point1;
-         Point point2 = barrier->mBotZoneBufferGeometry[barrier->mBotZoneBufferGeometry.size()-2];
-         Point point3 = barrier->mBotZoneBufferGeometry.last();
+         // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have
 
-         for(S32 k=0; k < barrier->mBotZoneBufferGeometry.size(); k++)
+         if(barrier->mSolid)     // Could be concave, centroid of first triangle of fill geom will be interior
          {
-            point1 = point2;
-            point2 = point3;
-            point3 = barrier->mBotZoneBufferGeometry[k];
-            ctr = (point1 + point2 + point3) * 0.33333333f;
-            if(PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr + Point(1.3,1.7)) &&
-               PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr - Point(1.3,1.7)))
-            {
-               holes.push_back(ctr.x);
-               holes.push_back(ctr.y);
-               break;
-            }
+            ctr.set((barrier->mRenderFillGeometry[0].x + barrier->mRenderFillGeometry[1].x + barrier->mRenderFillGeometry[2].x) / 3, 
+                    (barrier->mRenderFillGeometry[0].y + barrier->mRenderFillGeometry[1].y + barrier->mRenderFillGeometry[2].y) / 3);
          }
+         else                    // Standard wall, convex poly, center will be an interior point
+            ctr = barrier->getExtent().getCenter();
+
+         holes.push_back(ctr.x);
+         holes.push_back(ctr.y);
       }
    }
 
