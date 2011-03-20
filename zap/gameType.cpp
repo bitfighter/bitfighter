@@ -1329,14 +1329,24 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
    // TODO: Integrate code above with code above!!  EASY!!
    else if(!stricmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
    {
+      bool width = false;
+
       if(!stricmp(argv[0], "BarrierMakerS"))
+      {
          logprintf(LogConsumer::LogWarning, "BarrierMakerS has been deprecated.  Please use PolyWall instead.");
+         width = true;
+      }
 
       if(argc >= 2)
       { 
          BarrierRec barrier;
-         barrier.width = atof(argv[1]);
-         for(S32 i = 2; i < argc; i++)
+         
+         if(width)      // BarrierMakerS still width, though we ignore it
+            barrier.width = atof(argv[1]);
+         else           // PolyWall does not have width specified
+            barrier.width = 1;
+
+         for(S32 i = 2 - (width ? 0 : 1); i < argc; i++)
             barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
 
          if(barrier.verts.size() > 3)

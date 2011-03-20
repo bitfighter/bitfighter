@@ -105,6 +105,7 @@ enum GameItems    // Remember to keep these properly aligned with gGameItemRecs[
    ItemFlag,
    ItemFlagSpawn,
    ItemBarrierMaker,
+   ItemPolyWall,
    ItemLineItem,
    ItemTeleporter,
    ItemRepair,

@@ -243,6 +243,7 @@ GameItemRec itemDef[] = {
    { "FlagItem",            false,    true,      true,     true,    false,   false,   geomPoint,       0,     false,  "Flags",                  "Flag",     "Flag",         "Flag item, used by a variety of game types." },
    { "FlagSpawn",           false,    true,      true,     true,    false,   true,    geomPoint,       0,     true,   "Flag spawn points",      "FlagSpawn","FlagSpawn",    "Location where flags (or balls in Soccer) spawn after capture." },
    { "BarrierMaker",        true,     false,     false,    false,   false,   false,   geomLine,        0,     false,  "Barrier makers",         "Wall",     "Wall",         "Run-of-the-mill wall item." },
+   { "PolyWall",            false,    false,     false,    false,   false,   false,   geomPoly,        0,     false,  "PolyWall",               "Wall",     "Wall",         "Polygon wall barrier." },
    { "LineItem",            true,     true,      true,     true,    false,   false,   geomLine,        0,     false,  "Decorative Lines",       "LineItem", "LineItem",     "Decorative linework." },
    { "Teleporter",          false,    false,     false,    false,   false,   false,   geomSimpleLine,  0,     false,  "Teleporters",            "Teleport", "Teleport",     "Teleports ships from one place to another. [T]" },
    { "RepairItem",          false,    false,     false,    false,   false,   true,    geomPoint,       0,     false,  "Repair items",           "Repair",      "Repair",       "Repairs damage to ships. [B]" },
@@ -602,11 +603,12 @@ void EditorUserInterface::processLevelLoadLine(U32 argc, U32 id, const char **ar
       GameItems itemType = ItemInvalid;
       bool solid = false;
 
-      if(!strcmp(argv[0], "BarrierMakerS") || !stricmp(argv[0], "PolyWall"))
+      if(!strcmp(argv[0], "BarrierMakerS"))
       {
          itemType = ItemBarrierMaker;
          solid = true;
       }
+
       for(S32 index = 0; itemDef[index].name != NULL; index++)
          if(!strcmp(argv[0], itemDef[index].name))
          {
