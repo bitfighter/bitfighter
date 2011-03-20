@@ -253,7 +253,12 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 {
    bufferedPoints.clear();
 
-   Point difference = end - start;
+   Point difference;
+   if (start == end)  // test for zero-length barriers
+      difference = (end + Point(0,1)) - start;
+   else
+      difference = end - start;
+
    Point crossVector(difference.y, -difference.x);  // create a point whose vector from 0,0 is perpenticular to the original vector
    crossVector.normalize((barrierWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
 
