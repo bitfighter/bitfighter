@@ -2239,7 +2239,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
 
       renderLinePolyVertices(item, alpha);
    }
-   else if(item.index == ItemBarrierMaker)      // add polywall here?
+   else if(item.index == ItemBarrierMaker || item.index == ItemPolyWall)      
    {
       if(!fillRendered)    // All walls need to be rendered at the same time, but we only want to do them once
       {
@@ -2248,7 +2248,7 @@ void EditorUserInterface::renderItem(WorldItem &item, S32 index, bool isBeingEdi
          fillRendered = true;  // Prevent re-rendering of walls this pass
       }  
 
-      if(!mShowingReferenceShip)
+      if(!mShowingReferenceShip && item.index == ItemBarrierMaker)
          item.renderPolylineCenterline(alpha);
 
       renderLinePolyVertices(item, alpha);
@@ -3580,7 +3580,8 @@ void EditorUserInterface::joinBarrier()
 
 void EditorUserInterface::deleteItem(S32 itemIndex)
 {
-   if(mItems[itemIndex].index == ItemBarrierMaker)
+   S32 index = mItems[itemIndex].index;
+   if(index == ItemBarrierMaker || index == ItemPolyWall)
    {
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager.invalidateIntersectingSegments(&mItems[itemIndex]);  // Mark intersecting segments invalid
@@ -3589,7 +3590,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
       recomputeAllEngineeredItems();         // Really only need to recompute items that were attached to deleted wall... but we
                                              // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
-   else if(mItems[itemIndex].index == ItemNavMeshZone)
+   else if(index == ItemNavMeshZone)
       deleteBorderSegs(mItems[itemIndex].mId);
 
    //else
@@ -4743,7 +4744,7 @@ void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
    wallSegmentManager.deleteAllSegments();
 
    for(S32 i = 0; i < mItems.size(); i++)
-      if(mItems[i].index == ItemBarrierMaker)
+      if(mItems[i].index == ItemBarrierMaker || mItems[i].index == ItemPolyWall)
          wallSegmentManager.buildWallSegmentEdgesAndPoints(&mItems[i]);
 }
 
