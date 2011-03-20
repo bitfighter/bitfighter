@@ -218,7 +218,6 @@ void Sweep::Fill(SweepContext& tcx, Node& node)
 
 }
 
-const double M_PI_2 = 2 * 3.1415926535897932384626433832795;
 void Sweep::FillAdvancingFront(SweepContext& tcx, Node& n)
 {
 

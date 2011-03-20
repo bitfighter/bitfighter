@@ -37,7 +37,13 @@
 
 namespace p2t {
 
-const double M_PI = 3.1415926535897932384626433832795;
+// why doesn't windows math.h have these?
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923
+#endif
 const double PI_3div4 = 3 * M_PI / 4;
 const double EPSILON = 1e-12;
 
