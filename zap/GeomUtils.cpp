@@ -389,17 +389,17 @@ bool pointOnSegment(const Point &c, const Point &a, const Point &b, F32 closeEno
 //
 //    Then the distance from C to P = |s|*L.
 //*/
-//	F32 r_numerator   = (c.x - a.x) * (b.x - a.x) + (c.y - a.y) * (b.y - a.y);
-//	F32 r_denomenator = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+//   F32 r_numerator   = (c.x - a.x) * (b.x - a.x) + (c.y - a.y) * (b.y - a.y);
+//   F32 r_denomenator = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
 //   F32 r = r_numerator / r_denomenator;
 //
 //   F32 s = F32((a.y - c.y) * (b.x - a.x) - (a.x - c.x) * (b.y - a.y));
 //
-//	if ((r >= 0) && (r <= 1)) 
-//	{
-//		return(ABS(s) < .0001);      
-//	}
-//	else
+//   if ((r >= 0) && (r <= 1)) 
+//   {
+//      return(ABS(s) < .0001);      
+//   }
+//   else
 //      return false;
 //}
 
@@ -795,6 +795,27 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 #define triangulate2(a,b,c,d) triangulate(a,b,c,d)
 #endif
 
+
+F32 *pointsToCheck;
+S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
+{
+   S32 a = *a_ptr;
+   S32 b = *b_ptr;
+   if(pointsToCheck[a] < pointsToCheck[b] )
+      return -1;
+   else if(pointsToCheck[a] > pointsToCheck[b] )
+      return 1;
+   else
+   {
+      if(pointsToCheck[a+1] < pointsToCheck[b+1] )
+         return -1;
+      else if(pointsToCheck[a+1] > pointsToCheck[b+1] )
+         return 1;
+   }
+   return 0;
+}
+
+
 // triangulate a bounded area with complex polygon holes
 bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
@@ -845,6 +866,40 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
          edges.push_back(nextPt);
          edges.push_back(first);
          nextPt++;
+      }
+
+      // Start of duplicate Points removal, helps to avoid error / crash in triangulate
+      Vector<S32> sortID;
+      sortID.setSize(coords.size()/2);
+      for(S32 i=0; i<sortID.size(); i++)
+      {
+         sortID[i]=i*2;
+      }
+
+      pointsToCheck = coords.address();
+      sortID.sort(IDtoPointSort);
+
+      for(S32 i=sortID.size()-1; i>=1; i--)
+      {
+         S32 i2 = sortID[i];
+         S32 i2prev = sortID[i-1];
+         TNLAssert(IDtoPointSort(&sortID[i], &sortID[i-1]) >= 0, "Fail");
+         if(coords[i2] == coords[i2prev] && coords[i2+1] == coords[i2prev+1])
+         {
+            logprintf("Duplicate points found %f,%f", coords[i2], coords[i2+1]);
+            for(S32 j=0; j<edges.size(); j++)
+            {
+               if(edges[j] == i)
+                  edges[j] = i-1;
+               else if(edges[j]+1 == sortID.size())
+                  edges[j] = i;
+            }
+            for(S32 j=0; j<=i; j++)
+               if(sortID[j]+1 == sortID.size())
+                  sortID[j] = i;
+            coords.erase_fast(i2+1);
+            coords.erase_fast(i2);
+         }
       }
 
 #ifdef DUMP_DATA
