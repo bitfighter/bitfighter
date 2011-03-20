@@ -814,7 +814,7 @@ S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 }
 
 
-// triangulate a bounded area with complex polygon holes
+// Triangulate a bounded area with complex polygon holes
 bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
 {
@@ -850,8 +850,8 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
          S32 first = nextPt;
          for (U32 k = 0; k < poly.size(); k++)
          {
-            coords.push_back(poly[k].X);
-            coords.push_back(poly[k].Y);
+            coords.push_back((F32)poly[k].X);
+            coords.push_back((F32)poly[k].Y);
 
             if(k > 0)
             {
@@ -974,7 +974,7 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
       S32 ntris = tris.size();
       S32 npoints = ntris * 3;
 
-      // allocate memory here to match what Triangle method outputs
+      // Allocate memory here to match what Triangle method outputs
       F32* pointList = (F32*)malloc(sizeof(F32) * npoints * 2);     // 2 entries per point: x,y
       S32* triList = (S32*)malloc(sizeof(S32) * ntris * 3);
 
@@ -984,8 +984,8 @@ bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
 
          for(S32 j = 0; j < 3; j++)
          {
-            pointList[i*3 + j*2] = tri->GetPoint(j)->x;
-            pointList[i*3 + j*2 + 1] = tri->GetPoint(j)->y;
+            pointList[i*3 + j*2] = (F32)tri->GetPoint(j)->x;
+            pointList[i*3 + j*2 + 1] = (F32)tri->GetPoint(j)->y;
             triList[i*3 + j] = i*3 +j;
          }
       }
@@ -1020,8 +1020,8 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 
    for(S32 i = 0; i < triangleData.pointCount * 2; i+=2)
    {
-      intPoints[i]   = floor(triangleData.pointList[i]   + 0.5) + mesh.offsetX;
-      intPoints[i+1] = floor(triangleData.pointList[i+1] + 0.5) + mesh.offsetY;
+      intPoints[i]   = (S32)floor(triangleData.pointList[i]   + 0.5) + mesh.offsetX;
+      intPoints[i+1] = (S32)floor(triangleData.pointList[i+1] + 0.5) + mesh.offsetY;
    }
 
    TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "2 vector size is wrong");
