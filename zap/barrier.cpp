@@ -122,7 +122,10 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
     mSolid = solid;
 
    if(mSolid)
+   {
        Triangulate::Process(mPoints, mRenderFillGeometry);
+       mBotZoneBufferGeometry = mPoints;  // TODO: make bufferBarrierForBotZone work here
+   }
    else
    {
       bufferBarrierForBotZone(mPoints[0], mPoints[1], mWidth, mBotZoneBufferGeometry);     // Fills with 8 points, octagonal

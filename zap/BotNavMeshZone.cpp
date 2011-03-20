@@ -921,14 +921,30 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
 #ifdef DUMP_DATA
          for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
-			   logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
+            logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
 #endif
 
          inputPolygons.push_back(inputPoly);
 
-         ctr = barrier->getExtent().getCenter();
-         holes.push_back(ctr.x);
-         holes.push_back(ctr.y);
+         if(barrier->mBotZoneBufferGeometry.size() > 2)
+         {
+            ctr = barrier->getExtent().getCenter();
+            if(!PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr))
+            {
+               ctr.angleTo(barrier->mBotZoneBufferGeometry[0] - barrier->getExtent().getCenter());
+               ctr += barrier->mBotZoneBufferGeometry[0];
+               if(!PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr))
+               {
+                  ctr.angleTo(barrier->getExtent().getCenter() - barrier->mBotZoneBufferGeometry[0]);
+                  ctr += barrier->mBotZoneBufferGeometry[0];
+               }
+            }
+            if(PolygonContains2(barrier->mBotZoneBufferGeometry.address(), barrier->mBotZoneBufferGeometry.size(), ctr))
+            {
+               holes.push_back(ctr.x);
+               holes.push_back(ctr.y);
+            }
+         }
       }
    }
 
