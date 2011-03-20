@@ -820,11 +820,7 @@ void ServerGame::buildOrLoadBotMeshZones()
 
    if(getGameType()->mScriptName != "" || !gIniSettings.useCache || !readBotNavMeshZones(cacheFile.c_str()))
    {
-      //if(!loadLevelFromFile(filename.c_str())) // might not be needed anymore.
-      {
-         BotNavMeshZone::buildBotMeshZones(this);
-            //saveBotMeshZones(filename.c_str());
-      }
+      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
 
       //BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions between zones
       if(getGameType()->mScriptName == "" && gIniSettings.useCache) 

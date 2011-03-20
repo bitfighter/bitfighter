@@ -147,6 +147,7 @@ GameType::GameType() : mScoreboardUpdateTimer(1000) , mGameTimer(DefaultGameTime
    mAllowSoccerPickup = true;
    mHaveSoccer = false;           // level have soccer balls, used for s2cSoccerCollide
    mAllowAddBot = true;
+   mBotZoneCreationFailed = false;
 }
 
 
@@ -2776,7 +2777,14 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "addbot"))
    {
-      if(!mAllowAddBot && !clientRef->clientConnection->isAdmin())
+      // build zones if no zones exist and no previous failure
+      if(gBotNavMeshZones.size() == 0 && !mBotZoneCreationFailed)
+         gServerGame->buildOrLoadBotMeshZones();
+
+      if(mBotZoneCreationFailed)
+         clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Zone creation failure.  Bots disabled");
+
+      else if(!mAllowAddBot && !clientRef->clientConnection->isAdmin())  // not admin, no robotScript
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! This level does not allow robots");
 
       else if(!clientRef->clientConnection->isAdmin() && gIniSettings.defaultRobotScript == "" && args.size() < 2)  // not admin, no robotScript
@@ -2809,9 +2817,6 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          
          if(robot->isRunningScript && !robot->startLua())
             robot->isRunningScript = false;
-         
-         if(gBotNavMeshZones.size() == 0)     // We have bots but no zones
-            gServerGame->buildOrLoadBotMeshZones();
          
          StringTableEntry msg = StringTableEntry("Robot added by %e0");
          Vector<StringTableEntry> e;
