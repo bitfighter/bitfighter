@@ -797,8 +797,8 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 F32 *pointsToCheck;
 S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 {
-   S32 a = *a_ptr;
-   S32 b = *b_ptr;
+   S32 a = (*a_ptr)*2;
+   S32 b = (*b_ptr)*2;
    if(pointsToCheck[a] < pointsToCheck[b] )
       return -1;
    else if(pointsToCheck[a] > pointsToCheck[b] )
