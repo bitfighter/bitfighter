@@ -45,9 +45,7 @@
 
 #include "point.h" 
 #include "tnlVector.h"
-#ifdef TNL_OS_WIN32
 #include "tnlLog.h" // to print out exception
-#endif
 #include "GeomUtils.h"      // Must be last
 
 
