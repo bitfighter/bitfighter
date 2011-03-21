@@ -641,6 +641,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\clipper\clipper_misc.cpp"
+			>
+		</File>
+		<File
 			RelativePath=".\config.cpp"
 			>
 		</File>
