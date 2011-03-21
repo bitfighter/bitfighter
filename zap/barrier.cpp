@@ -194,8 +194,11 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
       inputPolygons.push_back(inputPoly);
    }
 
-   // Union!
-   return unionPolygons(inputPolygons, solution);
+   // Fire up clipper and union!
+   Clipper clipper;
+   clipper.IgnoreOrientation(false);
+   clipper.AddPolyPolygon(inputPolygons, ptSubject);
+   return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }
 
 

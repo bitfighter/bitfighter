@@ -45,8 +45,8 @@
 
 #include "point.h" 
 #include "tnlVector.h"
-#include "tnlLog.h" // for logprintf
-#include "GeomUtils.h"      // Must be last
+#include "tnlLog.h"           // for logprintf
+#include "GeomUtils.h"        // Must be last
 
 
 using namespace TNL;
@@ -766,15 +766,6 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
   delete[] V;
 
   return true;
-}
-
-// Union any amount of complex polygons and return a list of unioned complex polygons
-bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation)
-{
-   Clipper clipper;
-   clipper.IgnoreOrientation(ignoreOutputOrientation);
-   clipper.AddPolyPolygon(inputPolygonList, ptSubject);
-   return clipper.Execute(ctUnion, outputPolygonList, pftNonZero, pftNonZero);
 }
 
 

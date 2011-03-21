@@ -55,6 +55,7 @@
 
 #include "../recast/Recast.h"
 #include "../recast/RecastAlloc.h"
+
 #include "../clipper/clipper.h"
 
 extern "C" {
@@ -100,8 +101,6 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
-
-bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation = false);
 
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
