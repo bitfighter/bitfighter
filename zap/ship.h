@@ -177,8 +177,8 @@ public:
    bool mCooldown;
    U32 mSensorStartTime;
    Point mImpulseVector;
-	F32 getSlipzoneSpeedMoficationFactor();
-	SafePtr<SpeedZone> mSpeedZoneHit[MoveObject::MoveStateCount];
+   F32 getSlipzoneSpeedMoficationFactor();
+   SafePtr<SpeedZone> mSpeedZoneHit[MoveObject::MoveStateCount];
 
    StringTableEntry getName() { return mPlayerName; }
    void setName(StringTableEntry name) { mPlayerName = name; }

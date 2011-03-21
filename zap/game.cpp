@@ -728,7 +728,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 }
 
-
+/*
 static void saveBotMeshZones(const char *filename)
 {
    F32 gridSize = gServerGame->getGridSize();
@@ -756,7 +756,7 @@ static void saveBotMeshZones(const char *filename)
 
    fclose(f);
 }
-
+*/
 
 extern ConfigDirectories gConfigDirs;
 extern string joindir(const string &path, const string &filename);
@@ -769,11 +769,18 @@ bool readBotNavMeshZones(const char *filename)
 
    if(file)
    {
-      const U32 buffsize = 1024*1024;
+      const U32 buffsize = 256*1024;
       ByteBuffer byteBuffer(buffsize);
-      fread(byteBuffer.getBuffer(), 1, buffsize, file);
+      while(byteBuffer.getBufferSize() < buffsize*64)
+      {
+         S32 sizeread = fread(&(byteBuffer.getBuffer())[byteBuffer.getBufferSize() - buffsize], 1, buffsize, file);
+         if(buffsize == sizeread)
+            byteBuffer.resize(byteBuffer.getBufferSize() + buffsize);
+         else
+            break;
+      }
       fclose(file);
-      BitStream s(byteBuffer.getBuffer(), buffsize);
+      BitStream s(byteBuffer.getBuffer(), byteBuffer.getBufferSize());
 
       U16 version = 0;
       U16 size = 0;
