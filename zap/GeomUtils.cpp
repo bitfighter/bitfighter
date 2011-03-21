@@ -1030,8 +1030,6 @@ bool Triangulate::mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S
 
    TNLAssert((intPoints.size() == (triangleData.pointCount * 2)), "2 vector size is wrong");
 
-   // TODO: Delete mesh memory allocations
-
    return rcBuildPolyMesh(maxVertices, intPoints.address(), triangleData.pointCount, triangleData.triangleList, triangleData.triangleCount, mesh);
 }
 

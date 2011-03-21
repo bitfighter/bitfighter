@@ -713,7 +713,7 @@ struct rcEdge
 };
 
 // Build connections between zones using the adjacency data created in recast
-static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32> &polyToZoneMap)    
+static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
 {
    if(gBotNavMeshZones.size() == 0)
       return true;

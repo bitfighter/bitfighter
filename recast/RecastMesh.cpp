@@ -413,7 +413,7 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Out of memory 'mesh.verts' (%d).", maxVertices);
 		return false;
 	}
-	mesh.polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*maxTris*nvp*2*2, RC_ALLOC_PERM);
+	mesh.polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(ntris + 1)*nvp, RC_ALLOC_PERM);
 	if (!mesh.polys)
 	{
 		logprintf(LogConsumer::LogError, "rcBuildPolyMesh: Out of memory 'mesh.polys' (%d).", maxTris*nvp*2*2);
@@ -434,7 +434,7 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 	mesh.maxpolys = maxTris;
 	
 	memset(mesh.verts, 0, sizeof(unsigned short)*maxVertices*2);
-	memset(mesh.polys, 0xff, sizeof(unsigned short)*maxTris*nvp*2);
+	//memset(mesh.polys, 0xff, sizeof(unsigned short)*maxTris*nvp*2);
 	
 	rcScopedDelete<int> nextVert = (int*)rcAlloc(sizeof(int)*maxVertices, RC_ALLOC_TEMP);
 	if (!nextVert)
@@ -461,7 +461,8 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 	}
 
    // + 1 reserves a bit of space at the end for a temp workspace
-	rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(ntris + 1)*nvp, RC_ALLOC_TEMP);
+	//rcScopedDelete<unsigned short> polys = (unsigned short*)rcAlloc(sizeof(unsigned short)*(ntris + 1)*nvp, RC_ALLOC_TEMP);
+	unsigned short *polys = polys = mesh.polys;
    //	rcScopedDelete<unsigned short> tmpPoly = (unsigned short*)rcAlloc(sizeof(unsigned short)*nvp, RC_ALLOC_TEMP);
 	if (!polys)
 	{
@@ -591,8 +592,8 @@ bool rcBuildPolyMesh(int nvp, int* verts, int vertCount, int *tris, int ntris, r
 		}
 	}
 
-   // TODO: Why aren't we just building this in mesh.polys... then we can skip this copy!
-   memcpy(mesh.polys, polys, ntris*nvp*sizeof(unsigned short));
+   // Why aren't we just building this in mesh.polys... then we can skip this copy!
+   //memcpy(mesh.polys, polys, ntris*nvp*sizeof(unsigned short));
    mesh.npolys = ntris;
 
 
