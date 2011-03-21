@@ -142,7 +142,7 @@ public:
       if(size)
       {
          Triangulate::Process(mPolyBounds, mPolyFill);
-         TNLAssert(mPolyFill.size() > 0, "Bogus polygon geometry detected!");
+         //TNLAssert(mPolyFill.size() > 0, "Bogus polygon geometry detected!"); // should be checked in a different place...
 
          mCentroid = findCentroid(mPolyBounds);
          mLabelAngle = angleOfLongestSide(mPolyBounds);
