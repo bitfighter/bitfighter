@@ -777,7 +777,7 @@ bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonLi
    return clipper.Execute(ctUnion, outputPolygonList, pftNonZero, pftNonZero);
 }
 
-bool offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
+void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
 {
    TPolyPolygon polygons;
    TPolygon poly;
