@@ -713,7 +713,7 @@ struct rcEdge
 };
 
 // Build connections between zones using the adjacency data created in recast
-static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vector<S32> &polyToZoneMap)    
+static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Vector<S32> &polyToZoneMap)    
 {
    if(gBotNavMeshZones.size() == 0)
       return true;
@@ -844,6 +844,31 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
 	return true;
 }
 
+Vector<DatabaseObject *> zones;
+extern Rect gServerWorldBounds;
+
+// Returns index of zone containing specified point
+static BotNavMeshZone *findZoneContainingPoint(const Point &point)
+{
+   Rect rect(point, 0.01f);
+   zones.clear();
+   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, zones, rect); 
+
+   // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
+   for(S32 i = 0; i < zones.size(); i++)
+   {
+      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);  
+
+      if(zone && PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
+         return zone;   
+   }
+
+   if(zones.size() != 0)  // In case of point was close to polygon, but not inside the zone?
+      return dynamic_cast<BotNavMeshZone *>(zones[0]);
+
+   return NULL;
+}
+
 
  //  // Now create paths representing the teleporters
  //  Vector<DatabaseObject *> teleporters, dests;
@@ -882,6 +907,7 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh mesh, const Vec
 	//	}
    //}
 //}
+
 
 
 extern bool loadBarrierPoints(const BarrierRec &barrier, Vector<Point> &points);
@@ -1035,6 +1061,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 #endif               
 
          buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
+         BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections();
 		}
    }
 
@@ -1110,32 +1137,6 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 }
 
 
-Vector<DatabaseObject *> zones;
-extern Rect gServerWorldBounds;
-
-// Returns index of zone containing specified point
-static BotNavMeshZone *findZoneContainingPoint(const Point &point)
-{
-   Rect rect(point, 0.01f);
-   zones.clear();
-   gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, zones, rect); 
-
-   // If there is more than one possible match, pick the first arbitrarily (could happen if dest is right on a zone border)
-   for(S32 i = 0; i < zones.size(); i++)
-   {
-      BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(zones[i]);  
-
-      if(zone && PolygonContains2(zone->mPolyBounds.address(), zone->mPolyBounds.size(), point))
-         return zone;   
-   }
-
-   if(zones.size() != 0)  // In case of point was close to polygon, but not inside the zone?
-      return dynamic_cast<BotNavMeshZone *>(zones[0]);
-
-   return NULL;
-}
-
-
 // Only runs on server
 void BotNavMeshZone::buildBotNavMeshZoneConnections()    
 {
@@ -1187,7 +1188,13 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          }
       }
    }
-		
+   linkTeleportersBotNavMeshZoneConnections();
+}
+
+// Only runs on server
+void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections()
+{
+   NeighboringZone neighbor;
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
@@ -1225,6 +1232,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 		}
    }
 }
+
 
 
 

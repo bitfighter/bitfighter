@@ -87,6 +87,7 @@ public:
    // Takes a segment and "puffs it out" to a rectangle for bot zone generation.
    // This rectangle is the width of the barrier plus the ship's collision radius added to the outside
    static void bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints);
+   static void bufferPolyWallForBotZone(const Vector<Point> &inputPoints, Vector<Point> &bufferedPoints);
 
    // Combines multiple barriers into a single complex polygon
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, clipper::TPolyPolygon &solution);

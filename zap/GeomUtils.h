@@ -57,6 +57,7 @@
 #include "../recast/RecastAlloc.h"
 
 #include "../clipper/clipper.h"
+#include "../clipper/clipper_misc.h"
 
 extern "C" {
 #include "../Triangle/triangle.h"      // For Triangle!
@@ -102,6 +103,7 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
+void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly,const F32 offset);
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
 /** You should replace Vector2d with whatever your own Vector   **/

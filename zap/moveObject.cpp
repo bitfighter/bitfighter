@@ -241,7 +241,7 @@ bool MoveObject::collide(GameObject *otherObject)
    return true;
 }
 
-
+U32 collideStateIndex; // need to somehow pass the stateIndex to SpeedZone::collide
 GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, Point &collisionPoint)
 {
    // Check for collisions against other objects
@@ -257,6 +257,8 @@ GameObject *MoveObject::findFirstCollision(U32 stateIndex, F32 &collisionTime, P
 
    GameObject *collisionObject = NULL;
    Vector<Point> poly;
+
+   collideStateIndex = stateIndex;
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {

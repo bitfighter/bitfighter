@@ -196,9 +196,10 @@ bool SpeedZone::getCollisionPoly(Vector<Point> &polyPoints)
 
 
 // Handle collisions with a SpeedZone
+static bool ignoreThisCollision = false;
+extern U32 collideStateIndex;
 bool SpeedZone::collide(GameObject *hitObject)
 {
-   static bool ignoreThisCollision = false;
    if(ignoreThisCollision)
       return false;
    // This is run on both server and client side to reduce teleport lag effect.
@@ -207,7 +208,6 @@ bool SpeedZone::collide(GameObject *hitObject)
       Ship *s = dynamic_cast<Ship *>(hitObject);
       if(!s)
          return false;
-
 
       if(isGhost()) // on client, don't process speedZone on all ships except the controlling one.
       {
@@ -219,7 +219,15 @@ bool SpeedZone::collide(GameObject *hitObject)
                return false;
          }
       }
+      s->mSpeedZoneHit[collideStateIndex] = this;
+   }
+   return false;
+}
 
+void SpeedZone::collided(Ship *s, U32 stateIndex)
+{
+   {
+      MoveObject::MoveState *moveState = &s->mMoveState[stateIndex];
      // Make sure ship hasn't been excluded
       //for(S32 i = 0; i < mExclusions.size(); i++)
          //if(mExclusions[i].ship == s)
@@ -229,15 +237,15 @@ bool SpeedZone::collide(GameObject *hitObject)
 
       Point impulse = (dir - pos);
       impulse.normalize(mSpeed);
-      Point shipNormal = s->getActualVel();
+      Point shipNormal = moveState->vel;
       shipNormal.normalize(mSpeed);
       F32 speed = mSpeed;
 
          // using mUnpackInit, as client does not know that mRotateSpeed is not zero.
       if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
          speed *= 0.001;
-      if(shipNormal.distanceTo(impulse) < speed && s->getActualVel().len() > mSpeed * 0.8)
-         return false;
+      if(shipNormal.distanceTo(impulse) < speed && moveState->vel.len() > mSpeed * 0.8)
+         return;
 
       // This following line will cause ships entering the speedzone to have their location set to the same point
       // within the zone so that their path out will be very predictable.
@@ -245,35 +253,37 @@ bool SpeedZone::collide(GameObject *hitObject)
       {
          //s->setActualPos(pos, false);
 
-			Point diffpos = s->getActualPos() - pos;
-			Point thisAngle = dir - pos;
-			thisAngle.normalize();
-			Point newPos = thisAngle * diffpos.dot(thisAngle) + pos;
+         Point diffpos = moveState->pos - pos;
+         Point thisAngle = dir - pos;
+         thisAngle.normalize();
+         Point newPos = thisAngle * diffpos.dot(thisAngle) + pos + impulse * 0.001;
          //s->setActualPos(newpos, false);
 
-		   Point oldVel = s->getActualVel();
-		   Point oldPos = s->getActualPos();
+         Point oldVel = moveState->vel;
+         Point oldPos = moveState->pos;
 
-			ignoreThisCollision = true;
-         s->setActualVel(newPos - s->getActualPos());
-			s->move(1, MoveObject::ActualState, false);
-			ignoreThisCollision = false;
+         ignoreThisCollision = true;
+         moveState->vel = newPos - moveState->pos;
+         s->move(1, stateIndex, false);
+         ignoreThisCollision = false;
 
-			if(s->getActualPos().distSquared(newPos) > 1)  // make sure we can get to the position without going through walls.
-			{
-				s->setActualPos(oldPos, false);
-				s->setActualVel(oldVel);
-				return false;
-			}
+         if(s->getActualPos().distSquared(newPos) > 1)  // make sure we can get to the position without going through walls.
+         {
+            moveState->pos = oldPos;
+            moveState->vel = oldVel;
+            return;
+         }
          //s->mImpulseVector = impulse * 1.5;     // <-- why???
-         s->setActualVel(impulse * 1.5);
+         moveState->vel = impulse * 1.5;
+         //moveState->pos = newPos;
 
       }
       else
       {
-         if(shipNormal.distanceTo(impulse) < mSpeed && s->getActualVel().len() > mSpeed * 0.8)
-            return false;
-         s->mImpulseVector = impulse * 1.5;     // <-- why???
+         if(shipNormal.distanceTo(impulse) < mSpeed && moveState->vel.len() > mSpeed * 0.8)
+            return;
+         //s->mImpulseVector = impulse * 1.5;     // <-- why???
+         moveState->vel += impulse * 1.5;
       }
 
 
@@ -287,7 +297,7 @@ bool SpeedZone::collide(GameObject *hitObject)
 
       //mExclusions.push_back(exclusion);
 
-      if(!s->isGhost()) // only server needs to send information.
+      if(!s->isGhost() && stateIndex == MoveObject::ActualState) // only server needs to send information.
       {
          setMaskBits(HitMask);
          if(s->getControllingClient().isValid())
@@ -296,7 +306,6 @@ bool SpeedZone::collide(GameObject *hitObject)
       }
    }
 
-   return false;
 }
 
 

@@ -26,6 +26,8 @@
 // If a polygon has less than 'bvp' vertices, the remaining indices
 // are set to RC_MESH_NULL_IDX. If an polygon edge does not have a neighbour
 // the neighbour index is set to RC_MESH_NULL_IDX.
+void rcFree(void* ptr);
+
 struct rcPolyMesh
 {	
 	unsigned short* verts;	      // Vertices of the mesh, 2 elements per vertex.
@@ -38,6 +40,18 @@ struct rcPolyMesh
 
    int offsetX;                  // Number added to X coordinates to make them fit in the 0 - U16_MAX range
    int offsetY;                  // Number added to Y coordinates to make them fit in the 0 - U16_MAX range
+	rcPolyMesh()
+	{
+		verts = 0;
+		polys = 0;
+		adjacency = 0;
+	}
+	~rcPolyMesh()
+	{
+		rcFree(verts);
+		rcFree(polys);
+		rcFree(adjacency);
+	}
 };
 
 rcPolyMesh* rcAllocPolyMesh();

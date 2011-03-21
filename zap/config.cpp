@@ -134,7 +134,7 @@ void IniSettings::init()
    logStats = true;            // Log statistics into ServerFilter log files
 
    useCache = true;
-   botZoneGeneratorMode = 2;
+   botZoneGeneratorMode = 6;
       // 0   : off
       // 1,2 : sam's rectangle zones (2 : removeUnusedNavMeshZones)
       // 3,4 : sam's triangle zones (4 : removeUnusedNavMeshZones) - very slow

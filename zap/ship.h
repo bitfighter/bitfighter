@@ -38,6 +38,7 @@
 
 namespace Zap
 {
+class SpeedZone;
 
 static const S32 ShipModuleCount = 2;                // Modules a ship can carry
 static const S32 ShipWeaponCount = 3;                // Weapons a ship can carry
@@ -176,7 +177,8 @@ public:
    bool mCooldown;
    U32 mSensorStartTime;
    Point mImpulseVector;
-	F32 getSlipzoneSpeedMoficationFactor();
+   F32 getSlipzoneSpeedMoficationFactor();
+   SafePtr<SpeedZone> mSpeedZoneHit[MoveObject::MoveStateCount];
 
    StringTableEntry getName() { return mPlayerName; }
    void setName(StringTableEntry name) { mPlayerName = name; }

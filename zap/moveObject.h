@@ -54,21 +54,22 @@ public:
    };
 
 protected:
-   struct MoveState
-   {
-      Point pos;        // Actual position of the ship/object
-      float angle;      // Actual angle of the ship/object
-      Point vel;        // Actual velocity of the ship/object
-   };
    enum {
       InterpMaxVelocity = 900, // velocity to use to interpolate to proper position
       InterpAcceleration = 1800,
    };
 
-   MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
    bool mInterpolating;
 
 public:
+   struct MoveState  // need public, not protected, for SpeedZone handling...
+   {
+      Point pos;        // Actual position of the ship/object
+      float angle;      // Actual angle of the ship/object
+      Point vel;        // Actual velocity of the ship/object
+   };
+   MoveState mMoveState[MoveStateCount];     // MoveStateCount = 3, as per enum above
+
    MoveObject(Point pos = Point(0,0), float radius = 1, float mass = 1);
 
    void onAddedToGame(Game *game);
