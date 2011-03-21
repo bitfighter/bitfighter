@@ -22,7 +22,12 @@ static double const pi = 3.14159265358979;
 TPolygon BuildArc(const TDoublePoint &pt,
   const double a1, const double a2, const double r)
 {
-  int steps = std::max(6, int(std::sqrt(std::abs(r)) * std::abs(a2 - a1)));
+//  int steps = std::max(6, int(std::sqrt(std::abs(r)) * std::abs(a2 - a1)));
+
+  // One cut + two extra cuts every 45 degrees
+  // Kept at an odd number of cuts so that there is always a cut perpendicular to the bisecting angle
+  int steps = 2 + 2 * (int(std::abs(a2 - a1)*pi/4));
+
   TPolygon result(steps);
   int n = steps - 1;
   double da = (a2 - a1) / n;

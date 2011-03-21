@@ -86,6 +86,7 @@ public:
    // Takes a segment and "puffs it out" to a rectangle for bot zone generation.
    // This rectangle is the width of the barrier plus the ship's collision radius added to the outside
    static void bufferBarrierForBotZone(const Point &start, const Point &end, F32 barrierWidth, Vector<Point> &bufferedPoints);
+   static void bufferPolyWallForBotZone(const Vector<Point> &inputPoints, Vector<Point> &bufferedPoints);
 
    /// clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
    static void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints);

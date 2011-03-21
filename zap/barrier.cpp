@@ -134,7 +134,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
          return;
       }
 
-      mBotZoneBufferGeometry = mPoints;  // TODO: make bufferBarrierForBotZone work here
+      bufferPolyWallForBotZone(mPoints, mBotZoneBufferGeometry);
    }
    else
    {
@@ -294,6 +294,12 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
    bufferedPoints.push_back(Point(end.x + parallelPartial.x - crossVector.x, end.y + parallelPartial.y - crossVector.y));
    bufferedPoints.push_back(Point((start.x - parallelPartial.x) - crossVector.x, (start.y - parallelPartial.y) - crossVector.y));
    bufferedPoints.push_back(Point((start.x - parallelVector.x) - crossPartial.x, (start.y - parallelVector.y) - crossPartial.y));
+}
+
+
+void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<Point>& bufferedPoints)
+{
+   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
 }
 
 

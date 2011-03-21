@@ -777,6 +777,26 @@ bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonLi
    return clipper.Execute(ctUnion, outputPolygonList, pftNonZero, pftNonZero);
 }
 
+bool offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset)
+{
+   TPolyPolygon polygons;
+   TPolygon poly;
+   for(S32 i = 0; i < inputPoly.size(); i++)
+   {
+      poly.push_back(DoublePoint(inputPoly[i].x, inputPoly[i].y));
+   }
+
+   polygons.push_back(poly);
+
+   polygons = OffsetPolygons(polygons, offset);
+   poly = polygons[0];
+   // only one polygon should comeback since only one went in
+   for(U32 i = 0; i < poly.size(); i++)
+   {
+      outputPoly.push_back(Point(poly[i].X, poly[i].Y));
+   }
+}
+
 #ifdef TNL_OS_WIN32
 void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 {
