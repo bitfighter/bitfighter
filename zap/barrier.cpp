@@ -157,6 +157,48 @@ void Barrier::onAddedToGame(Game *theGame)
 }
 
 
+// Combines multiple barriers into a single complex polygon... fills solution
+bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, TPolyPolygon &solution)
+{
+   TPolyPolygon inputPolygons;
+   TPolygon inputPoly;
+
+   // Reusable container
+   Vector<Point> points;
+
+   for(S32 i = 0; i < barriers.size(); i++)
+   {
+      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
+
+      if(!barrier)
+         continue;
+
+      inputPoly.clear();
+      if(useBotGeom)
+      {
+         for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
+            inputPoly.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y));
+      }
+      else    
+      {
+         barrier->getCollisionPoly(points);        // Puts object bounds into points
+         for (S32 j = 0; j < points.size(); j++)
+            inputPoly.push_back(DoublePoint(points[j].x, points[j].y));
+      }
+
+#ifdef DUMP_DATA
+      for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
+         logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
+#endif
+
+      inputPolygons.push_back(inputPoly);
+   }
+
+   // Union!
+   return unionPolygons(inputPolygons, solution);
+}
+
+
 // Processes mPoints and fills polyPoints 
 bool Barrier::getCollisionPoly(Vector<Point> &polyPoints)
 {

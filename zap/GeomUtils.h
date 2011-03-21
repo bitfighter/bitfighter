@@ -141,18 +141,16 @@ public:
       S32 triangleCount;
    };
 
-   // triangulate a contour/polygon, places results in  vector
-   // as series of triangles.
+   // Triangulate a contour/polygon, places results in  vector as series of triangles
    static bool Process(const Vector<Point> &contour, Vector<Point> &result);
 
-   // triangulate a bounded area with complex polygon holes
-   //
-   static bool ProcessComplex(TriangleData& outputData, const Rect& bounds, const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method);
+   // Triangulate a bounded area with complex polygon holes
+   static bool processComplex(TriangleData& outputData, const Rect& bounds, const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method);
 
-   // merge triangles into convex polygons
+   // Merge triangles into convex polygons
    static bool mergeTriangles(TriangleData& triangleData, rcPolyMesh& mesh, S32 maxVertices = 6);
 
-   // decide if point Px/Py is inside triangle defined by
+   // Decide if point Px/Py is inside triangle defined by
    // (Ax,Ay) (Bx,By) (Cx,Cy)
    static bool InsideTriangle(float Ax, float Ay,
          float Bx, float By,

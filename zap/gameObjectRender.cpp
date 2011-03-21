@@ -789,17 +789,29 @@ void renderPolygonOutline(const Vector<Point> &outline)
 }
 
 
-// Only used locally
-void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, 
-                   const Color &fillColor, const Color &outlineColor, F32 alpha = 1)
+void renderPolygonOutline(const Vector<Point> &outlinePoints, const Color &outlineColor, F32 alpha = 1)
+{
+   glEnableBlend;
+   glColor(outlineColor, alpha);
+   renderPolygonOutline(outlinePoints);
+   glDisableBlend;
+}
+
+
+void renderPolygonFill(const Vector<Point> &fillPoints, const Color &fillColor, F32 alpha = 1)
 {
    glEnableBlend;
    glColor(fillColor, alpha);
    renderTriangulatedPolygonFill(fillPoints);
-
-   glColor(outlineColor, alpha);
-   renderPolygonOutline(outlinePoints);
    glDisableBlend;
+}
+
+
+void renderPolygon(const Vector<Point> &fillPoints, const Vector<Point> &outlinePoints, 
+                   const Color &fillColor, const Color &outlineColor, F32 alpha = 1)
+{
+   renderPolygonFill(fillPoints, fillColor, alpha);
+   renderPolygonOutline(outlinePoints, outlineColor, alpha);
 }
 
 

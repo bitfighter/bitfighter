@@ -768,7 +768,7 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
   return true;
 }
 
-// union any amount of complex polygons and return a list of unioned complex polygons
+// Union any amount of complex polygons and return a list of unioned complex polygons
 bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation)
 {
    Clipper clipper;
@@ -776,6 +776,7 @@ bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonLi
    clipper.AddPolyPolygon(inputPolygonList, ptSubject);
    return clipper.Execute(ctUnion, outputPolygonList, pftNonZero, pftNonZero);
 }
+
 
 #ifdef TNL_OS_WIN32
 void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
@@ -789,6 +790,7 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
       // appears to work just fine with not immediately returning after fail
    }
 }
+
 #else
 #define triangulate2(a,b,c,d) triangulate(a,b,c,d)
 #endif
@@ -815,8 +817,8 @@ S32 QSORT_CALLBACK IDtoPointSort(S32 *a_ptr, S32 *b_ptr)
 
 
 // Triangulate a bounded area with complex polygon holes
-bool Triangulate::ProcessComplex(TriangleData& outputData, const Rect& bounds,
-      const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
+bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
+                                 const TPolyPolygon& polygonList, Vector<F32>& holeMarkerList, ComplexMethod method)
 {
    Vector<F32> coords;
 

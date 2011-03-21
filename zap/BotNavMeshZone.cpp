@@ -896,6 +896,35 @@ using namespace clipper;
 #define LOG_TIMER
 #endif
 
+// Required for input to Triangle
+static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32> &holes)
+{
+   Point ctr; 
+
+   for(S32 i = 0; i < barriers.size(); i++)
+   {
+      Barrier *barrier = dynamic_cast<Barrier *>(barriers[i]);
+
+      if(!barrier)
+         continue;
+
+      // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have:
+      if(barrier->mSolid)     // Could be concave, centroid of first triangle of fill geom will be interior
+      {
+         ctr.set((barrier->mRenderFillGeometry[0].x + barrier->mRenderFillGeometry[1].x + barrier->mRenderFillGeometry[2].x) / 3, 
+                  (barrier->mRenderFillGeometry[0].y + barrier->mRenderFillGeometry[1].y + barrier->mRenderFillGeometry[2].y) / 3);
+      }
+      else                    // Standard wall, convex poly, center will be an interior point
+         ctr = barrier->getExtent().getCenter();
+
+      holes.push_back(ctr.x);
+      holes.push_back(ctr.y);
+   }
+}
+
+
+//extern ServerGame *gServerGame;
+
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
 static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 {
@@ -905,47 +934,16 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 #endif
 
    Vector<F32> holes;
-   Point ctr;     // Reusable container for hole calculations
 
-   TPolyPolygon inputPolygons;
-   TPolygon inputPoly;
+   Vector<DatabaseObject *> barrierList;
+   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
 
-   for(S32 i = 0; i < game->mGameObjects.size(); i++)
-   {
-      if(game->mGameObjects[i]->getObjectTypeMask() & BarrierType)
-      {
-         Barrier *barrier = dynamic_cast<Barrier *>(game->mGameObjects[i]);
-
-         inputPoly.clear();
-         for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
-            inputPoly.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x,barrier->mBotZoneBufferGeometry[j].y));
-
-#ifdef DUMP_DATA
-         for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
-            logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
-#endif
-
-         inputPolygons.push_back(inputPoly);
-
-         // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have:
-
-         if(barrier->mSolid)     // Could be concave, centroid of first triangle of fill geom will be interior
-         {
-            ctr.set((barrier->mRenderFillGeometry[0].x + barrier->mRenderFillGeometry[1].x + barrier->mRenderFillGeometry[2].x) / 3, 
-                    (barrier->mRenderFillGeometry[0].y + barrier->mRenderFillGeometry[1].y + barrier->mRenderFillGeometry[2].y) / 3);
-         }
-         else                    // Standard wall, convex poly, center will be an interior point
-            ctr = barrier->getExtent().getCenter();
-
-         holes.push_back(ctr.x);
-         holes.push_back(ctr.y);
-      }
-   }
-
-   // Union holes!
    TPolyPolygon solution;
-   if(!unionPolygons(inputPolygons, solution))
+
+   if(!Barrier::unionBarriers(barrierList, true, solution))
       return false;
+
+   buildHolesList(barrierList, holes);
 
 
 #ifdef LOG_TIMER
@@ -954,7 +952,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    // Tessellate!
    Triangulate::TriangleData triangleData;
-   if(!Triangulate::ProcessComplex(triangleData, bounds, solution, holes, Triangulate::cmTriangle))  // use Triangulate::cmP2t for poly2tri
+   if(!Triangulate::processComplex(triangleData, bounds, solution, holes, Triangulate::cmTriangle))  // use Triangulate::cmP2t for poly2tri
       return false;
 
 #ifdef LOG_TIMER
