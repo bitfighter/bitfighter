@@ -607,8 +607,28 @@ extern S32 gMaxPolygonPoints;
 // If there are 2 or 4 params, this is an Zap! rectangular format object
 // If there are more, this is a Bitfighter polygonal format object
 // Note parallel code in EditorUserInterface::processLevelLoadLine
-bool HuntersNexusObject::processArguments(S32 argc, const char **argv)
+bool HuntersNexusObject::processArguments(S32 argc2, const char **argv2)
 {
+   // Need to handle or ignore arguments that starts with letters,
+   // so a possible future version can add parameters without compatibility problem.
+   S32 argc = 0;
+   const char *argv[64]; // 32 * 2 = 64
+   for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
+   {
+      char c = argv2[i][0];
+      //switch(c)
+      //{
+      //case 'A': Something = atof(&argv2[i][1]); break;  // using second char to handle number
+      //}
+      if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
+      {
+         if(argc < 65)
+         {  argv[argc] = argv2[i];
+            argc++;
+         }
+      }
+   }
+
    if(argc < 2)
       return false;
 

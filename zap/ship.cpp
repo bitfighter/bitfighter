@@ -464,8 +464,8 @@ void Ship::idle(GameObject::IdleCallPath path)
       // object with the current move.
       processMove(ActualState);
 
-      // When not moving, Detect if on a GoFast
-      if(mMoveState[ActualState].vel == Point(0,0))
+      // When not moving, Detect if on a GoFast - seems better to always detect...
+      //if(mMoveState[ActualState].vel == Point(0,0))
       {
          SpeedZone *speedZone = dynamic_cast<SpeedZone *>(isOnObject(SpeedZoneType));
          if(speedZone)

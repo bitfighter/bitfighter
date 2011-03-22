@@ -551,10 +551,10 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
 
          glColor(c, 0.6);
          glBegin(GL_POLYGON);
-            glVertex2f(xl, yt);
-            glVertex2f(xr, yt);
-            glVertex2f(xr, yb);
-            glVertex2f(xl, yb);
+            glVertex2i(xl, yt);
+            glVertex2i(xr, yt);
+            glVertex2i(xr, yb);
+            glVertex2i(xl, yb);
          glEnd();
 
          glDisableBlend;
@@ -562,13 +562,13 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          glColor3f(1,1,1);
          if(isTeamGame())     // Render team scores
          {
-            renderFlag(xl + 20, yt + 18, c);
-            renderFlag(xr - 20, yt + 18, c);
+            renderFlag(F32(xl + 20), F32(yt + 18), c);
+            renderFlag(F32(xr - 20), F32(yt + 18), c);
 
             glColor3f(1,1,1);
             glBegin(GL_LINES);
-               glVertex2f(xl, yt + teamAreaHeight);
-               glVertex2f(xr, yt + teamAreaHeight);
+               glVertex2i(xl, yt + S32(teamAreaHeight));
+               glVertex2i(xr, yt + S32(teamAreaHeight));
             glEnd();
 
             UserInterface::drawString(xl + 40, yt + 2, 30, getTeamName(i).getString());
@@ -594,7 +594,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          for(S32 j = 0; j < playerScores.size(); j++)
          {
             static const char *bot = "B ";
-            S32 botsize = UserInterface::getStringWidth(fontSize / 2, bot);
+            S32 botsize = UserInterface::getStringWidth(F32(fontSize) * 0.5f, bot);
             S32 x = xl + 40;
 
             // Add the mark of the bot
@@ -610,7 +610,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
             else
                dSprintf(buff, sizeof(buff), "%d", playerScores[j]->getScore());
 
-            UserInterface::drawString(xr - (120 + UserInterface::getStringWidth(fontSize, buff)), curRowY, fontSize, buff);
+            UserInterface::drawString(xr - (120 + UserInterface::getStringWidth(F32(fontSize), buff)), curRowY, fontSize, buff);
             UserInterface::drawStringf(xr - 70, curRowY, fontSize, "%d", playerScores[j]->ping);
             curRowY += maxHeight;
          }
@@ -637,12 +637,12 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       if(maxScore == 0)
          digits = 1;
       else if(maxScore > 0)
-         digits = log10((F32)maxScore) + 1;
+         digits = S32(log10((F32)maxScore)) + 1;
       else
-         digits = log10((F32)maxScore) + 2;
+         digits = S32(log10((F32)maxScore)) + 2;
 
       const S32 textsize = 32;
-      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - digits * UserInterface::getStringWidth(textsize, "0");
+      S32 xpos = gScreenInfo.getGameCanvasWidth() - UserInterface::horizMargin - digits * UserInterface::getStringWidth(F32(textsize), "0");
 
       for(S32 i = 0; i < teams.size(); i++)
       {
@@ -652,7 +652,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
          if(teamHasFlag(teams[i].getId()))
             UserInterface::drawString(xpos - 50, ypos + 3, 18, "*");
 
-         renderFlag(xpos - 20, ypos + 18, teams[i].color);
+         renderFlag(F32(xpos - 20), F32(ypos + 18), teams[i].color);
          glColor3f(1,1,1);
          UserInterface::drawStringf(xpos, ypos, textsize, "%d", teams[i].getScore());
       }
@@ -769,13 +769,13 @@ void GameType::renderObjectiveArrow(Point nearestPoint, Color c, F32 alphaMod)
    Point crossVec(arrowDir.y, -arrowDir.x);
 
    // Fade the arrows as we transition to/from commander's map
-   F32 alpha = (1 - gClientGame->getCommanderZoomFraction()) * 0.6 * alphaMod;
+   F32 alpha = (1 - gClientGame->getCommanderZoomFraction()) * 0.6f * alphaMod;
    if(!alpha)
       return;
 
    // Make indicator fade as we approach the target
    if(dist < 50)
-      alpha *= dist * 0.02;
+      alpha *= dist * 0.02f;
 
    // Scale arrow accorging to distance from objective --> doesn't look very nice
    //F32 scale = max(1 - (min(max(dist,100),1000) - 100) / 900, .5);
@@ -882,10 +882,10 @@ void GameType::renderDebugStatus()
       {
          glColor(i ? Color(0,0,0) : Color(1,1,1));
          glBegin(i ? GL_POLYGON: GL_LINE_LOOP); 
-            glVertex2f(x,             y);
-            glVertex2f(x + BOX_WIDTH, y);
-            glVertex2f(x + BOX_WIDTH, y - BOX_HEIGHT);
-            glVertex2f(x,             y - BOX_HEIGHT);
+            glVertex2i(x,             y);
+            glVertex2i(x + BOX_WIDTH, y);
+            glVertex2i(x + BOX_WIDTH, y - BOX_HEIGHT);
+            glVertex2i(x,             y - BOX_HEIGHT);
          glEnd();
       }
 
@@ -897,10 +897,10 @@ void GameType::renderDebugStatus()
       for(S32 i = 0; i < 2; i++)
       {
          glBegin(GL_POLYGON);    // Filled rectangle
-            glVertex2f(x,               y);
-            glVertex2f(x + PAUSE_WIDTH, y);
-            glVertex2f(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
-            glVertex2f(x,               y - PAUSE_HEIGHT);
+            glVertex2i(x,               y);
+            glVertex2i(x + PAUSE_WIDTH, y);
+            glVertex2i(x + PAUSE_WIDTH, y - PAUSE_HEIGHT);
+            glVertex2i(x,               y - PAUSE_HEIGHT);
          glEnd();
 
          x += PAUSE_WIDTH + PAUSE_GAP;
@@ -1306,7 +1306,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
       if(argc >= 2)
       {
          BarrierRec barrier;
-         barrier.width = atof(argv[1]);
+         barrier.width = F32(atof(argv[1]));
 
          if(barrier.width < Barrier::MIN_BARRIER_WIDTH)
             barrier.width = Barrier::MIN_BARRIER_WIDTH;
@@ -1314,7 +1314,7 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
             barrier.width = Barrier::MAX_BARRIER_WIDTH;
    
          for(S32 i = 2; i < argc; i++)
-            barrier.verts.push_back(atof(argv[i]) *getGame()->getGridSize());
+            barrier.verts.push_back(F32(atof(argv[i])) * getGame()->getGridSize());
    
          if(barrier.verts.size() > 3)
          {
@@ -1340,12 +1340,12 @@ bool GameType::processLevelItem(S32 argc, const char **argv)
          BarrierRec barrier;
          
          if(width)      // BarrierMakerS still width, though we ignore it
-            barrier.width = atof(argv[1]);
+            barrier.width = F32(atof(argv[1]));
          else           // PolyWall does not have width specified
             barrier.width = 1;
 
          for(S32 i = 2 - (width ? 0 : 1); i < argc; i++)
-            barrier.verts.push_back(atof(argv[i]) * getGame()->getGridSize());
+            barrier.verts.push_back(F32(atof(argv[i])) * getGame()->getGridSize());
 
          if(barrier.verts.size() > 3)
          {
@@ -1821,7 +1821,7 @@ void GameType::countTeamPlayers()
 
          GameConnection *cc = mClientList[i]->clientConnection;
          if(cc)
-            mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1);
+            mTeams[mClientList[i]->getTeam()].rating += max(getCurrentRating(cc), .1f);
       }
    }
 }
@@ -2722,7 +2722,7 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Enter time in minutes");
       else
       {
-         S32 time = (60 * 1000 * atof(args[0].getString()));
+         S32 time = S32(60 * 1000 * atof(args[0].getString()));
 
          if(time < 0 || time == 0 && (stricmp(args[0].getString(), "0") && stricmp(args[0].getString(), "unlim")))  // 0 --> unlimited
             clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Invalid time... game time not changed");
@@ -3208,7 +3208,7 @@ GAMETYPE_RPC_S2C(GameType, s2cScoreboardUpdate,
 
       mClientList[i]->ping = pingTimes[i];
       mClientList[i]->setScore(scores[i]);
-      mClientList[i]->setRating(((F32)ratings[i] - 100.0) / 100.0);
+      mClientList[i]->setRating(((F32)ratings[i] - 100.f) / 100.f);
    }
 }
 
