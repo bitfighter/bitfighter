@@ -1561,18 +1561,19 @@ void ClientGame::idle(U32 timeDelta)
 // Client only
 void ClientGame::prepareBarrierRenderingGeometry()
 {
-   for(S32 i = 0; i < mGameObjects.size(); i++)
-      if(mGameObjects[i]->getObjectTypeMask() & BarrierType)
-      {
-         Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
-         if(barrier)
-         {
-            barrier->prepareRenderingGeometry();
-            //for(S32 i = 0; i < barrier->mRenderLineSegments.size(); i++)
-            //   logprintf("Point %d: %f, %f", i, barrier->mRenderLineSegments[i].x, barrier->mRenderLineSegments[i].y);
+   //for(S32 i = 0; i < mGameObjects.size(); i++)
+   //   if(mGameObjects[i]->getObjectTypeMask() & BarrierType)
+   //   {
+   //      Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
+   //      if(barrier)
+   //      {
+   //         barrier->prepareRenderingGeometry();
+   //         //for(S32 i = 0; i < barrier->mRenderLineSegments.size(); i++)
+   //         //   logprintf("Point %d: %f, %f", i, barrier->mRenderLineSegments[i].x, barrier->mRenderLineSegments[i].y);
 
-         }
-      }
+   //      }
+   //   }
+   Barrier::prepareRenderingGeometry();
 }
 
 
@@ -2046,7 +2047,8 @@ void ClientGame::renderNormal()
    Rect extentRect(position - screenSize, position + screenSize);
 
    rawRenderObjects.clear();
-   mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+   mDatabase.findObjects(AllObjectTypes & (~BarrierType), rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
        gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
 

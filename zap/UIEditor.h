@@ -167,7 +167,7 @@ public:
    S32 getRadius(F32 scale);
    Point getSelectionOffset(F32 scale);      // For turrets, apparent selection center is not the same as the item's actual location
 
-   Vector<Point> mRenderLineSegments;  // Used only by barriers
+   //Vector<Point> mRenderLineSegments;  // Used only by barriers
 
    GameItems index;
    S32 team;

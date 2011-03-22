@@ -4969,8 +4969,8 @@ void WallSegmentManager::clipAllWallEdges(Vector<WallSegment *> &wallSegments)
       for(S32 j = i + 1; j < wallSegments.size(); j++)
          if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
          {
-            Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
-            Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
+            //Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
+            //Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
          }
 }
 
@@ -5072,8 +5072,8 @@ void WallSegmentManager::recomputeInvalidWallSegmentIntersections()
 
          if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
          {
-            Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
-            Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
+            //Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
+            //Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
          }
       }
       
