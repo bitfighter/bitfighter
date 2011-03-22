@@ -126,14 +126,20 @@ S32 SpeedZone::getRenderSortValue()
 bool SpeedZone::processArguments(S32 argc2, const char **argv2)
 {
    S32 argc = 0;
-   const char *argv[8];
+   const char *argv[8];  // 8 is ok, SpeedZone only supports 4 numbered args.
    for(S32 i=0; i<argc2; i++)  // the idea here is to allow optional R3.5 for rotate at speed of 3.5
    {
-      switch(argv2[i][0])
+      char c = argv2[i][0];
+      switch(c)
       {
       case 'R': mRotateSpeed = atof(&argv2[i][1]); break;  // using second char to handle number, "R3.4" or "R-1.7"
-      case 'S': mSnapLocation = true; break;  // for "SnapEnabled"
-      default:
+      case 'S':
+         if(strcmp(argv2[i], "SnapEnabled"))
+            mSnapLocation = true;
+         break;
+      }
+      if((c < 'a' || c > 'z') && (c < 'A' || c > 'Z'))
+      {
          if(argc < 8)
          {  argv[argc] = argv2[i];
             argc++;
