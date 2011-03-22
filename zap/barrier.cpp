@@ -134,8 +134,7 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
          return;
       }
 
-      mBotZoneBufferGeometry = mPoints;  /// buffer doesn't work on reverse order points of polygon
-      //bufferPolyWallForBotZone(mPoints, mBotZoneBufferGeometry);
+      bufferPolyWallForBotZone(mPoints, mBotZoneBufferGeometry);
    }
    else
    {
