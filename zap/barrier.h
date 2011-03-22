@@ -57,7 +57,7 @@ public:
 
    static const S32 BarrierWidth = 50; ///< The default width of the barrier in game units
 
-   Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
+   static Vector<Point> mRenderLineSegments; ///< The clipped line segments representing this barrier.
    Vector<Point> mBotZoneBufferLineSegments; ///< The line segments representing a buffered barrier.
 
    /// Barrier constructor
@@ -92,19 +92,19 @@ public:
    // Combines multiple barriers into a single complex polygon
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, clipper::TPolyPolygon &solution);
 
-   /// clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
-   static void clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints);
+   /// Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
+   static void clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints);
 
    static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
    // Clean up edge geometry and get barriers ready for proper rendering
-   void prepareRenderingGeometry();       // orig
+   static void prepareRenderingGeometry();       // orig
    //void prepareRenderingGeometry2();      // sam's
    
    // Create geometry for botzones - adds a buffer around barriers
    void prepareBotZoneGeometry();
 
-   void prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segs);
+   static void prepareRenderGeom(Vector<Point> &segs);
 
 
    TNL_DECLARE_CLASS(Barrier);

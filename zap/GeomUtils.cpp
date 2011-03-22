@@ -874,6 +874,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
             }
          }
 
+         // Close the loop
          edges.push_back(nextPt);
          edges.push_back(first);
          nextPt++;

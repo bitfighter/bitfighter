@@ -40,7 +40,7 @@ namespace Zap
 
 TNL_IMPLEMENT_NETOBJECT(Barrier);
 
-
+Vector<Point> Barrier::mRenderLineSegments;
 
 extern void removeCollinearPoints(Vector<Point> &points, bool isPolygon);
 
@@ -348,71 +348,40 @@ void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<
 }
 
 
+extern Rect gServerWorldBounds;
+
 // Clears out overlapping barrier lines for better rendering appearance, modifies lineSegmentPoints.
 // This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets 
 // refined as each additional intersecting barrier gets processed.
 // static method
-void Barrier::clipRenderLinesToPoly(const Vector<Point> &polyPoints, Vector<Point> &lineSegmentPoints)
+void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 {
-   Vector<Point> clippedSegments;
+   TPolyPolygon solution;
 
-   // Loop through all the segments
-   for(S32 i = 0; i < lineSegmentPoints.size(); i+= 2)
+   Vector<DatabaseObject *> barrierList;
+   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
+
+   unionBarriers(barrierList, false, solution);
+
+
+   TPolygon poly;
+   for (U32 j = 0; j < solution.size(); j++)
    {
-      Point rp1 = lineSegmentPoints[i];
-      Point rp2 = lineSegmentPoints[i + 1];
+      poly = solution[j];
 
-      Point cp1 = polyPoints[polyPoints.size() - 1];
-      for(S32 j = 0; j < polyPoints.size(); j++)
+      if(poly.size() == 0)
+         continue;
+
+      for (U32 k = 1; k < poly.size(); k++)
       {
-         Point cp2 = polyPoints[j];
-         Point ce = cp2 - cp1;
-         Point n(-ce.y, ce.x);
-
-         n.normalize();
-         F32 distToZero = n.dot(cp1);
-
-         F32 d1 = n.dot(rp1);
-         F32 d2 = n.dot(rp2);
-
-         // Setting the following comparisons to >= will cause collinear end segments to go away, but will
-         // cause overlapping walls to disappear
-         bool d1in = (d1 > distToZero);
-         bool d2in = (d2 > distToZero);
-
-         if(!d1in && !d2in) // Both points are outside this edge of the poly...
-         {
-            // ...so add them to the render poly
-            clippedSegments.push_back(rp1);
-            clippedSegments.push_back(rp2);
-            break;
-         }
-         else if((d1in && !d2in) || (d2in && !d1in))
-         {
-            // Find the clip intersection point:
-            F32 t = (distToZero - d1) / (d2 - d1);
-            Point clipPoint = rp1 + (rp2 - rp1) * t;
-
-            if(d1in)
-            {
-               clippedSegments.push_back(clipPoint);
-               clippedSegments.push_back(rp2);
-               rp2 = clipPoint;
-            }
-            else
-            {
-               clippedSegments.push_back(rp1);
-               clippedSegments.push_back(clipPoint);
-               rp1 = clipPoint;
-            }
-         }
-
-         // If both are in, go to the next edge
-         cp1 = cp2;
+         lineSegmentPoints.push_back(Point((F32)poly[k-1].X, (F32)poly[k-1].Y));
+         lineSegmentPoints.push_back(Point((F32)poly[k].X,   (F32)poly[k].Y));
       }
-   }
 
-   lineSegmentPoints = clippedSegments;
+      // Close the loop
+      lineSegmentPoints.push_back(Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y));
+      lineSegmentPoints.push_back(Point((F32)poly[0].X, (F32)poly[0].Y));
+   }
 }
 
 
@@ -434,123 +403,25 @@ S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 }
 
 
-//#define ROUND(x) (((x) < 0) ? F32(S32((x) - 0.5)) : F32(S32((x) + 0.5)))
-#define ROUND(x) (x)
-
-void getPolygonLineCollisionPoints(Vector<Point> &output, const Vector<Point> &input, Point start, Point end);
-
-// Sam's optimized version, replaces prepareRenderingGeometry(), leaves small holes
-// Clean up edge geometry and get barriers ready for proper rendering -- client and server (client for rendering, server for building zones)
-//void Barrier::prepareRenderingGeometry2()
-//{
-//   GridDatabase *gridDB = getGridDatabase();
-//   S32 i_prev = mPoints.size()-1;
-//   mRenderOutlineGeometry.clear();
-//
-//   // Reusable containers
-//   Vector<Point> points;
-//   Vector<Point> boundaryPoints;
-//   Vector<DatabaseObject *> objects;
-//   Rect rect;
-//   Point offset(0.003, 0.007);
-//
-//   for(S32 i = 0; i < mPoints.size(); i++)
-//   {
-//      points.clear();
-//      objects.clear();
-//
-//      rect.set(mPoints[i], mPoints[i_prev]);                // Creates bounding box around these two points
-//
-//      points.push_back(mPoints[i]);
-//      points.push_back(mPoints[i_prev]);
-//      gridDB->findObjects(BarrierType, objects, rect);      // Find all barriers in bounding box of mPoints[i] & mPoints[i_prev], fills objects
-//
-//      for(S32 j = objects.size() - 1; j >= 0; j--)
-//      {
-//         Barrier *wall = dynamic_cast<Barrier *>(objects[j]);
-//         if(wall == this || wall == NULL)                   // Self or invalid object...              
-//            objects.erase_fast(j);                          // ...remove from list (will need cleaned list later)
-//         else
-//         {
-//            wall->getCollisionPoly(boundaryPoints);         // Put wall outline into boundaryPoints
-//
-//            // Fill points with intersections of wall outline and segment mPoints[i] -> mPoints[i_prev]
-//            getPolygonLineCollisionPoints(points, boundaryPoints, mPoints[i], mPoints[i_prev]);  
-//         }
-//      }
-//
-//      // Now points contains all intersections of all our walls and the segment mPoints[i] -> mPoints[i_prev]
-//
-//      // Make sure points is spatially sorted
-//      if(abs(mPoints[i].x - mPoints[i_prev].x) > abs(mPoints[i].y - mPoints[i_prev].y))
-//         points.sort(pointDataSortX);
-//      else
-//         points.sort(pointDataSortY);
-//
-//      // Remove duplicate points -- due to sorting, dupes will be adjacent to one another
-//      for(S32 j = points.size() - 1; j >=1 ; j--)
-//         if(points[j] == points[j-1])
-//            points.erase(j);
-//
-//      for(S32 j = 1; j < points.size(); j++)
-//      {
-//         // Create a pair of midpoints, each a tiny bit offset from the true center
-//         Point midPoint  = (points[j] + points[j-1]) * 0.5 + offset;    // To avoid missing lines, duplicate segments are better then mising ones
-//         Point midPoint2 = (points[j] + points[j-1]) * 0.5 - offset;
-//
-//         bool isInside = false;
-//
-//         // Loop through all walls we found earlier, and see if either our offsetted midpoints falls inside any of those wall outlines
-//         for(S32 k = 0; k < objects.size() && !isInside; k++)           
-//         {
-//            Barrier *obj = dynamic_cast<Barrier *>(objects[k]);
-//            isInside = (PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint)
-//                                 && PolygonContains2(obj->mPoints.address(), obj->mPoints.size(), midPoint2));
-//         }
-//         if(!isInside)     // No -- add segment to our collection to be rendered
-//         {
-//            Point rounded(ROUND(points[j-1].x), ROUND(points[j-1].y));
-//            mRenderLineSegments.push_back(rounded);
-//
-//            rounded.set(ROUND(points[j].x), ROUND(points[j].y));
-//            mRenderLineSegments.push_back(rounded);
-//         }
-//      }
-//
-//      i_prev = i;
-//   }
-//}
-
-
-// Original method, creates too many segments
-void Barrier::prepareRenderGeom(Vector<Point> &outlines, Vector<Point> &segments)
+void Barrier::prepareRenderGeom(Vector<Point> &segments)
 {
-   resetEdges(outlines, segments);
-
-   static Vector<DatabaseObject *> fillObjects;
-   fillObjects.clear();
-
-   findObjects(BarrierType, fillObjects, getExtent());      // Find all potentially colliding wall segments (fillObjects)
-
-   for(S32 i = 0; i < fillObjects.size(); i++)
-   {
-      outlines.clear();
-      if(fillObjects[i] != this && dynamic_cast<GameObject *>(fillObjects[i])->getCollisionPoly(outlines))
-         clipRenderLinesToPoly(outlines, segments);     // Populates segments
-   }
+   //resetEdges(outlines, segments);
+   segments.clear();
+   clipRenderLinesToPoly(segments);
 }
 
 
+// Merges wall outlines together
 void Barrier::prepareRenderingGeometry()
 {
-   prepareRenderGeom(mRenderOutlineGeometry, mRenderLineSegments);
+   prepareRenderGeom(mRenderLineSegments);
 }
 
 
 // Create buffered edge geometry around the barrier for bot zone generation
 void Barrier::prepareBotZoneGeometry()
 {
-   prepareRenderGeom(mBotZoneBufferGeometry, mBotZoneBufferLineSegments);
+   prepareRenderGeom(mBotZoneBufferLineSegments);
 }
 
 
