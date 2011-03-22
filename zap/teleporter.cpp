@@ -78,7 +78,7 @@ bool Teleporter::processArguments(S32 argc, const char **argv)
    bool found = false;
 
    foundObjects.clear();
-   findObjects(TeleportType, foundObjects, gServerGame->computeWorldObjectExtents());
+   findObjects(TeleportType, foundObjects, Rect(mPos.x-1, mPos.y-1, mPos.x+1, mPos.y+1));
 
    for(S32 i = 0; i < foundObjects.size(); i++)
    {
