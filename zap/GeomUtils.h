@@ -102,9 +102,15 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
+// unions any amount of arbitrary complex polygons
 bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation = false);
 
-void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly,const F32 offset);
+// offset a complex polygon by a given amount
+void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, const F32 offset);
+
+// test if a complex polygon has clockwise point winding order
+bool isWoundClockwise(const Vector<Point>& inputPoly);
+
 /*****************************************************************/
 /** Static class to triangulate any contour/polygon efficiently **/
 /** You should replace Vector2d with whatever your own Vector   **/
@@ -119,7 +125,6 @@ void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly,con
 /** use of it in your own code.  Simply replace Vector2d with   **/
 /** whatever your own Vector implementation might be.           **/
 /*****************************************************************/
-
 
 class Triangulate
 {

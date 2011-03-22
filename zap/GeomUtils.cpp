@@ -797,6 +797,28 @@ void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly, co
    }
 }
 
+// test if a complex polygon has clockwise point winding order
+// Implemented from
+// http://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order/1165943#1165943
+bool isWoundClockwise(const Vector<Point>& inputPoly)
+{
+   F32 finalSum = 0;
+   S32 i_prev = inputPoly.size() - 1;
+
+   for (S32 i = 0; i < inputPoly.size(); i++)
+   {
+      // (x2-x1)(y2+y1)
+      finalSum += (inputPoly[i].x - inputPoly[i_prev].x) * (inputPoly[i].y + inputPoly[i_prev].y);
+      i_prev = i;
+   }
+
+   // Negative result = counter-clockwise
+   if (finalSum < 0)
+      return false;
+   else
+      return true;
+}
+
 #ifdef TNL_OS_WIN32
 void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
 {

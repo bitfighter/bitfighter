@@ -299,7 +299,16 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 
 void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<Point>& bufferedPoints)
 {
-   offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   if (isWoundClockwise(inputPoints))  // Must make CCW for clipper's offset method to work
+   {
+      Vector<Point> reversePoints;
+      for(S32 i = inputPoints.size() - 1; i >= 0; i--)
+         reversePoints.push_back(inputPoints[i]);
+
+      offsetPolygon(reversePoints, bufferedPoints, BotNavMeshZone::BufferRadius);
+   }
+   else
+      offsetPolygon(inputPoints, bufferedPoints, BotNavMeshZone::BufferRadius);
 }
 
 
