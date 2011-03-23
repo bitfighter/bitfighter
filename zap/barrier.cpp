@@ -368,7 +368,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
    TPolyPolygon solution;
 
    Vector<DatabaseObject *> barrierList;
-   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
+   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
 
    unionBarriers(barrierList, false, solution);
 
