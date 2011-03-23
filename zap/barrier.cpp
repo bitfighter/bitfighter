@@ -434,11 +434,17 @@ void Barrier::prepareBotZoneGeometry()
 }
 
 
+// Render wall fill only for this wall; all edges rendered in a single pass
 void Barrier::render(S32 layerIndex)
 {
    if(layerIndex == 0)           // First pass: draw the fill
       renderWallFill(mRenderFillGeometry, mSolid);
-   else if(layerIndex == 1)      // Second pass: draw the outlines
+}
+
+// static 
+void Barrier::renderEdges(S32 layerIndex)
+{
+   if(layerIndex == 1)
       renderWallEdges(mRenderLineSegments);
 }
 

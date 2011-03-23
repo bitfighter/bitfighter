@@ -66,8 +66,7 @@ enum GameObjectType
    RepairItemType      = BIT(22),      // Only needed for Lua...
    EnergyItemType      = BIT(23),      // Only needed for Lua...
    SoccerBallItemType  = BIT(24),      // Only needed for Lua and indicating what the ship is carrying...
-         // slot available
-   WormType = BIT(25),
+   WormType            = BIT(25),
 
    TurretType          = BIT(26),      // Formerly EngineeredType
    ForceFieldProjectorType = BIT(27),  // Formerly EngineeredType

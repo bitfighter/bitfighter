@@ -1832,7 +1832,8 @@ void ClientGame::renderCommander()
       drawStars(1 - zoomFrac, offset, modVisSize);
  
 
-   // Render the objects.  Start by putting all command-map-visible objects into renderObjects
+   // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
+   // walls -- those will be rendered separately.
    rawRenderObjects.clear();
    mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
 
@@ -1840,7 +1841,6 @@ void ClientGame::renderCommander()
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
        gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, rawRenderObjects, mWorldBounds);
 
-   
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
       renderObjects.push_back(dynamic_cast<GameObject *>(rawRenderObjects[i]));
@@ -1918,10 +1918,15 @@ void ClientGame::renderCommander()
       }
    }
 
+   // Now render the objects themselves
    renderObjects.sort(renderSortCompare);
 
+   // First pass
    for(S32 i = 0; i < renderObjects.size(); i++)
       renderObjects[i]->render(0);
+
+   // Second pass
+   Barrier::renderEdges(1);    // Render wall edges
 
    for(S32 i = 0; i < renderObjects.size(); i++)
       // Keep our spy bugs from showing up on enemy commander maps, even if they're known
@@ -2047,7 +2052,7 @@ void ClientGame::renderNormal()
    Rect extentRect(position - screenSize, position + screenSize);
 
    rawRenderObjects.clear();
-   mDatabase.findObjects(AllObjectTypes & (~BarrierType), rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
+   mDatabase.findObjects(AllObjectTypes, rawRenderObjects, extentRect);    // Use extent rects to quickly find objects in visual range
 
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
        gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType,rawRenderObjects,extentRect);
@@ -2066,6 +2071,7 @@ void ClientGame::renderNormal()
    // Render in three passes, to ensure some objects are drawn above others
    for(S32 j = -1; j < 2; j++)
    {
+      Barrier::renderEdges(j);    // Render wall edges
       for(S32 i = 0; i < renderObjects.size(); i++)
          renderObjects[i]->render(j);
       FXManager::render(j);

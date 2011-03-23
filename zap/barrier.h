@@ -66,10 +66,11 @@ public:
    /// Adds the server object to the net interface's scope always list
    void onAddedToGame(Game *theGame);
 
-   /// renders this barrier by drawing the render line segments,
-   void render(S32 layer);
+   /// Renders barrier fill
+   void render(S32 layer);                // Renders barrier fill barrier-by-barrier
+   static void renderEdges(S32 layer);    // Renders all edges in one pass
 
-   /// returns a sorting key for the object.  Barriers should sort behind other objects
+   /// Returns a sorting key for the object.  Barriers should be drawn first so as to appear behind other objects.
    S32 getRenderSortValue() { return 0; }
 
    /// returns the collision polygon of this barrier, which is the boundary extruded from the start,end line segment.
