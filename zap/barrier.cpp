@@ -412,25 +412,11 @@ S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
 }
 
 
-void Barrier::prepareRenderGeom(Vector<Point> &segments)
-{
-   //resetEdges(outlines, segments);
-   segments.clear();
-   clipRenderLinesToPoly(segments);
-}
-
-
 // Merges wall outlines together
 void Barrier::prepareRenderingGeometry()
 {
-   prepareRenderGeom(mRenderLineSegments);
-}
-
-
-// Create buffered edge geometry around the barrier for bot zone generation
-void Barrier::prepareBotZoneGeometry()
-{
-   prepareRenderGeom(mBotZoneBufferLineSegments);
+   mRenderLineSegments.clear();
+   clipRenderLinesToPoly(mRenderLineSegments);
 }
 
 
