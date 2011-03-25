@@ -63,7 +63,6 @@
 #include "tnlNetInterface.h"
 
 #include <sys/stat.h>
-#include <WinUser.h>
 
 
 using namespace TNL;
