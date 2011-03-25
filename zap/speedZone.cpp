@@ -134,7 +134,7 @@ bool SpeedZone::processArguments(S32 argc2, const char **argv2)
       {
       case 'R': mRotateSpeed = atof(&argv2[i][1]); break;  // using second char to handle number, "R3.4" or "R-1.7"
       case 'S':
-         if(strcmp(argv2[i], "SnapEnabled"))
+         if(strcmp(argv2[i], "SnapEnable"))
             mSnapLocation = true;
          break;
       }
@@ -249,7 +249,7 @@ void SpeedZone::collided(Ship *s, U32 stateIndex)
 
          // using mUnpackInit, as client does not know that mRotateSpeed is not zero.
       if(mSnapLocation && mRotateSpeed == 0 && mUnpackInit < 3)
-         speed *= 0.001;
+         speed *= 0.5;
       if(shipNormal.distanceTo(impulse) < speed && moveState->vel.len() > mSpeed * 0.8)
          return;
 
