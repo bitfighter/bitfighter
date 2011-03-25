@@ -606,9 +606,6 @@ static S32 QSORT_CALLBACK RatingSort(GameConnection **a, GameConnection **b)
    return getCurrentRating(*b) - getCurrentRating(*a);
 }
 
-
-extern void testBotNavMeshZoneConnections();
-
 // Pass -1 to go to next level, otherwise pass an absolute level number
 void ServerGame::cycleLevel(S32 nextLevel)
 {
@@ -697,13 +694,9 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
-#ifndef ALWAYS_LOAD_BOT_ZONES // when disabled, this will run here, when enabled, will run at different location to instantly load.
    // Do some prep work if we have bots and/or zones
-   if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
+   if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots and no zones
       loadBotMeshZones();
-   else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
-#endif
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
@@ -841,13 +834,6 @@ bool ServerGame::loadLevel(const string &origFilename2)
 
    getGameType()->onLevelLoaded();
 
-#ifdef ALWAYS_LOAD_BOT_ZONES
-   // Do some prep work if we have bots and/or zones
-   if(getRobotCount() > -1 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
-      loadBotMeshZones();
-   else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
-      BotNavMeshZone::buildBotNavMeshZoneConnections();
-#endif
    return true;
 }
 
