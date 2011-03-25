@@ -63,6 +63,8 @@
 #include "tnlNetInterface.h"
 
 #include <sys/stat.h>
+#include <WinUser.h>
+
 
 using namespace TNL;
 
@@ -1464,7 +1466,9 @@ void ClientGame::prepareBarrierRenderingGeometry()
 void ClientGame::supressScreensaver()
 {
 
-#ifdef TNL_OS_WIN32     // Windows only for now, sadly...
+#if defined(TNL_OS_WIN32) && (_WIN32_WINNT > 0x0400)     // Windows only for now, sadly...
+   // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
+
    // Code from Tom Revell's Caffeine screen saver suppression product
 
    // Build keypress

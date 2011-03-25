@@ -1643,7 +1643,8 @@ void processStartupParams()
 bool writeToConsole()
 {
 
-#ifdef WIN32
+#if defined(WIN32) && (_WIN32_WINNT >= 0x0500)
+   // _WIN32_WINNT is needed in case of compiling for old windows 98 (this code won't work for windows 98)
    if(!AttachConsole(-1))
       return false;
    

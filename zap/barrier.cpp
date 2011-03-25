@@ -368,7 +368,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
    TPolyPolygon solution;
 
    Vector<DatabaseObject *> barrierList;
-   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
+   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, Rect(-999999999,-999999999,999999999,999999999));  // F32_MAX does not work?
 
    unionBarriers(barrierList, false, solution);
 
