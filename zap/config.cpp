@@ -133,13 +133,6 @@ void IniSettings::init()
 
    logStats = true;            // Log statistics into ServerFilter log files
 
-   useCache = true;
-   botZoneGeneratorMode = 6;
-      // 0   : off
-      // 1,2 : sam's rectangle zones (2 : removeUnusedNavMeshZones)
-      // 3,4 : sam's triangle zones (4 : removeUnusedNavMeshZones) - very slow
-      // 5,6 : Triangulate (6 : useRecast)
-
    version = 0;
 }
 
@@ -338,8 +331,6 @@ static void loadTestSettings()
    gIniSettings.neverConnectDirect = gINI.GetValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gIniSettings.wallFillColor.set(gINI.GetValue("Testing", "WallFillColor", gIniSettings.wallFillColor.toRGBString()));
    gIniSettings.wallOutlineColor.set(gINI.GetValue("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString()));
-   gIniSettings.botZoneGeneratorMode = gINI.GetValueI("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
-   gIniSettings.useCache = gINI.GetValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 static void loadEffectsSettings()
@@ -1444,8 +1435,6 @@ static void writeTesting()
    gINI.setValueYN("Testing", "NeverConnectDirect", gIniSettings.neverConnectDirect);
    gINI.SetValue  ("Testing", "WallFillColor",   gIniSettings.wallFillColor.toRGBString());
    gINI.SetValue  ("Testing", "WallOutlineColor", gIniSettings.wallOutlineColor.toRGBString());
-   gINI.SetValueI ("Testing", "BotZoneGeneratorMode", gIniSettings.botZoneGeneratorMode);
-   gINI.setValueYN("Testing", "UseCache", gIniSettings.useCache);
 }
 
 

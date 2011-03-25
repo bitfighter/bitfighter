@@ -700,7 +700,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
 #ifndef ALWAYS_LOAD_BOT_ZONES // when disabled, this will run here, when enabled, will run at different location to instantly load.
    // Do some prep work if we have bots and/or zones
    if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
-      buildOrLoadBotMeshZones();
+      loadBotMeshZones();
    else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
       BotNavMeshZone::buildBotNavMeshZoneConnections();
 #endif
@@ -728,113 +728,10 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 }
 
-/*
-static void saveBotMeshZones(const char *filename)
+void ServerGame::loadBotMeshZones()
 {
-   F32 gridSize = gServerGame->getGridSize();
-
-   FILE *f = fopen(filename, "w");
-   if(!f)
-   {
-      logprintf("Error saving bot nav mesh zone cache to %s", filename);
-      return;
-   }
-
-   Vector<Point> pts;
-   for(S32 i = 0; i < gBotNavMeshZones.size(); i++)
-   {
-      pts.clear();
-      gBotNavMeshZones[i]->getCollisionPoly(pts);
-
-      s_fprintf(f, "%s", "BotNavMeshZone");
-
-      for(S32 j = 0; j < pts.size(); j++)
-         s_fprintf(f, " %g %g ", pts[j].x / gridSize, pts[j].y / gridSize);
-
-      s_fprintf(f, "\n");
-   }
-
-   fclose(f);
+   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
 }
-*/
-
-extern ConfigDirectories gConfigDirs;
-extern string joindir(const string &path, const string &filename);
-
-const U16 versionNumberBotNavMeshZones = 47525;  // some random version number..
-
-bool readBotNavMeshZones(const char *filename)
-{
-   FILE *file = fopen(filename, "rb");
-
-   if(file)
-   {
-      const U32 buffsize = 256*1024;
-      ByteBuffer byteBuffer(buffsize);
-      while(byteBuffer.getBufferSize() < buffsize*64)
-      {
-         S32 sizeread = fread(&(byteBuffer.getBuffer())[byteBuffer.getBufferSize() - buffsize], 1, buffsize, file);
-         if(buffsize == sizeread)
-            byteBuffer.resize(byteBuffer.getBufferSize() + buffsize);
-         else
-            break;
-      }
-      fclose(file);
-      BitStream s(byteBuffer.getBuffer(), byteBuffer.getBufferSize());
-
-      U16 version = 0;
-      U16 size = 0;
-      s.read(&version);
-      if(version != versionNumberBotNavMeshZones)
-         return false;
-      s.read(&size);
-      for(U16 i=0; i<size; i++)
-      {
-         BotNavMeshZone *botzone = new BotNavMeshZone();
-         botzone->addToGame(gServerGame);
-         botzone->unpackUpdate(NULL, &s);
-         botzone->computeExtent();
-      }
-      return true;
-   }
-   else
-      return false;
-}
-
-void writeBotNavMeshZones(const char *filename)
-{
-   FILE *file = fopen(filename, "wb");
-   if(file)
-   {
-      BitStream s;
-      s.write(versionNumberBotNavMeshZones);
-      s.write(U16(gBotNavMeshZones.size()));
-
-      for(S32 i=0; i < gBotNavMeshZones.size(); i++)
-         gBotNavMeshZones[i]->packUpdate(NULL, U32_MAX, &s);
-
-      fwrite(s.getBuffer(), 1, s.getBytePosition(), file);
-      fclose(file);
-   }
-}
-
-
-void ServerGame::buildOrLoadBotMeshZones()
-{
-   string cacheFile = joindir(gConfigDirs.cacheDir, mLevelFileHash + ".zones");
-
-   makeSureFolderExists(gConfigDirs.cacheDir);
-
-   if(getGameType()->mScriptName != "" || !gIniSettings.useCache || !readBotNavMeshZones(cacheFile.c_str()))
-   {
-      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
-
-      //BotNavMeshZone::buildBotNavMeshZoneConnections();      // Create the connecions between zones
-      if(getGameType()->mScriptName == "" && gIniSettings.useCache) 
-         writeBotNavMeshZones(cacheFile.c_str());
-   }
-}
-
 
 // Enter suspended animation mode
 void ServerGame::suspendGame()
@@ -947,7 +844,7 @@ bool ServerGame::loadLevel(const string &origFilename2)
 #ifdef ALWAYS_LOAD_BOT_ZONES
    // Do some prep work if we have bots and/or zones
    if(getRobotCount() > -1 && gBotNavMeshZones.size() == 0)     // We have bots but no zones
-      buildOrLoadBotMeshZones();
+      loadBotMeshZones();
    else if(gBotNavMeshZones.size() > 0)                        // We have some pre-generated zones
       BotNavMeshZone::buildBotNavMeshZoneConnections();
 #endif

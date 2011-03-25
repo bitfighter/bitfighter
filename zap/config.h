@@ -241,8 +241,6 @@ struct IniSettings      // With defaults specified
    Vector<string> reservedNames;
    Vector<string> reservedPWs;
 
-   S32 botZoneGeneratorMode;
-   bool useCache;
    U32 version;
 
 

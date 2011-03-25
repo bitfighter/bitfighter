@@ -952,7 +952,7 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32>
 //extern ServerGame *gServerGame;
 
 // Use the Triangle library to create zones.  Optionally use modified Recast to aggregate zones
-static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
+static bool makeBotMeshZones3(Rect& bounds, Game* game)
 {
 
 #ifdef LOG_TIMER
@@ -987,7 +987,7 @@ static bool makeBotMeshZones3(Rect& bounds, Game* game, bool useRecast)
 
    bool recastPassed = false;
 
-   if(useRecast && bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
+   if(bounds.getWidth() < U16_MAX && bounds.getHeight() < U16_MAX)
    {
       //if(bounds.getWidth() >= U16_MAX || bounds.getHeight() >= U16_MAX)
       //{
@@ -1104,34 +1104,15 @@ static const S32 LEVEL_ZONE_BUFFER = 30;
 // Server only
 bool BotNavMeshZone::buildBotMeshZones(Game *game)
 {
+   Rect bounds = game->computeWorldObjectExtents();
+   bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
-	Rect bounds = game->computeWorldObjectExtents();
-	bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
-
-   if(gIniSettings.botZoneGeneratorMode == 0) //disabled
-      return false;
-   if(gIniSettings.botZoneGeneratorMode == 1 || gIniSettings.botZoneGeneratorMode == 2) // rectangle bot zone
-   {
-      //makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-      if(gIniSettings.botZoneGeneratorMode == 2) removeUnusedNavMeshZones();
-      return false;
-   }
-
-   if(gIniSettings.botZoneGeneratorMode == 3 || gIniSettings.botZoneGeneratorMode == 4) // simple triangle bot zones
-   {
-      //makeBotMeshZones2(bounds);
-      if(gIniSettings.botZoneGeneratorMode == 4) removeUnusedNavMeshZones();
-      return false;
-   }
-
-   if(gIniSettings.botZoneGeneratorMode == 5 || gIniSettings.botZoneGeneratorMode == 6) // triangle with Triangle library
-   {
-      // Triangulate and Recast
-      bool useRecast = gIniSettings.botZoneGeneratorMode == 6;
-
-      if(makeBotMeshZones3(bounds, game, useRecast))
-         return true;
-   }
+   // Triangulate and Recast
+   //makeBotMeshZones(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+   //makeBotMeshZones2(bounds);
+   //removeUnusedNavMeshZones()
+   if(makeBotMeshZones3(bounds, game))
+      return true;
 
    return false;
 }
