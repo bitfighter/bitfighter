@@ -708,64 +708,65 @@ bool Triangulate::Snip(const Vector<Point> &contour, int u, int v, int w, int n,
 bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 {
    result.clear();
-  /* allocate and initialize list of Vertices in polygon */
+   /* allocate and initialize list of Vertices in polygon */
 
-  int n = contour.size();
-  if ( n < 3 ) return false;
+   int n = contour.size();
+   if ( n < 3 ) return false;
 
-  int *V = new int[n];
+   int *V = new int[n];
 
-  /* we want a counter-clockwise polygon in V */
+   /* we want a counter-clockwise polygon in V */
 
-  if ( 0.0f < area(contour) )
-    for (int v=0; v<n; v++) V[v] = v;
-  else
-    for(int v=0; v<n; v++) V[v] = (n-1)-v;
+   if ( 0.0f < area(contour) )
+      for (int v=0; v<n; v++) V[v] = v;
+   else
+      for(int v=0; v<n; v++) V[v] = (n-1)-v;
 
-  int nv = n;
+   int nv = n;
 
-  /*  remove nv-2 Vertices, creating 1 triangle every time */
-  int count = 2*nv;   /* error detection */
+   /*  remove nv-2 Vertices, creating 1 triangle every time */
+   int count = 2*nv;   /* error detection */
 
-  for(int m=0, v=nv-1; nv>2; )
-  {
-    /* if we loop, it is probably a non-simple polygon */
-    if (0 >= (count--))
-    {
-      //** Triangulate: ERROR - probable bad polygon!
-      return false;
-    }
+   for(int m=0, v=nv-1; nv>2; )
+   {
+      /* if we loop, it is probably a non-simple polygon */
+      if (0 >= (count--))
+      {
+         //** Triangulate: ERROR - probable bad polygon!
+         delete[] V;
+         return false;
+      }
 
-    /* three consecutive vertices in current polygon, <u,v,w> */
-    int u = v  ; if (nv <= u) u = 0;     /* previous */
-    v = u+1; if (nv <= v) v = 0;     /* new v    */
-    int w = v+1; if (nv <= w) w = 0;     /* next     */
+      /* three consecutive vertices in current polygon, <u,v,w> */
+      int u = v  ; if (nv <= u) u = 0;     /* previous */
+      v = u+1; if (nv <= v) v = 0;     /* new v    */
+      int w = v+1; if (nv <= w) w = 0;     /* next     */
 
-    if ( Snip(contour,u,v,w,nv,V) )
-    {
-      int a,b,c,s,t;
+      if ( Snip(contour,u,v,w,nv,V) )
+      {
+         int a,b,c,s,t;
 
-      /* true names of the vertices */
-      a = V[u]; b = V[v]; c = V[w];
+         /* true names of the vertices */
+         a = V[u]; b = V[v]; c = V[w];
 
-      /* output Triangle */
-      result.push_back( contour[a] );
-      result.push_back( contour[b] );
-      result.push_back( contour[c] );
+         /* output Triangle */
+         result.push_back( contour[a] );
+         result.push_back( contour[b] );
+         result.push_back( contour[c] );
 
-      m++;
+         m++;
 
-      /* remove v from remaining polygon */
-      for(s=v,t=v+1;t<nv;s++,t++) V[s] = V[t]; nv--;
+         /* remove v from remaining polygon */
+         for(s=v,t=v+1;t<nv;s++,t++) V[s] = V[t]; nv--;
 
-      /* resest error detection counter */
-      count = 2*nv;
-    }
-  }
+         /* resest error detection counter */
+         count = 2*nv;
+      }
+   }
 
-  delete[] V;
+   delete[] V;
 
-  return true;
+   return true;
 }
 
 
