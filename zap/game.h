@@ -117,6 +117,8 @@ protected:
    U32 mNextMasterTryTime;
    bool mReadyToConnectToMaster;
 
+   Rect mWorldExtents;     // Extents of everything
+
    F32 mGridSize;          // GridSize for this level (default defined below)
    string mLevelFileHash;  // MD5 hash of level file
 
@@ -159,6 +161,8 @@ public:
 
    Vector<GameObject *> mGameObjects;
 
+   Rect getWorldExtents() { return mWorldExtents; }
+
    virtual U32 getPlayerCount() = 0;         // Implemented differently on client and server
 
    Game(const Address &theBindAddress);      // Constructor
@@ -167,7 +171,7 @@ public:
 
    ModuleInfo *getModuleInfo(ShipModule module) { return &mModuleInfos[(U32)module]; }
    
-   Rect computeWorldObjectExtents();
+   void computeWorldObjectExtents();
    Rect computeBarrierExtents();
 
    Point computePlayerVisArea(Ship *ship);
@@ -382,7 +386,6 @@ private:
    };
 
    Point mStars[NumStars];
-   Rect mWorldBounds;
 
    SafePtr<GameConnection> mConnectionToServer; // If this is a client game, this is the connection to the server
    bool mInCommanderMap;
@@ -411,8 +414,8 @@ public:
    F32 getCommanderZoomFraction() { return mCommanderZoomDelta / F32(CommanderMapZoomTime); }
    Point worldToScreenPoint(Point p);
    void drawStars(F32 alphaFrac, Point cameraPos, Point visibleExtent);
-   void render();
-   
+
+   void render();             // Delegates to renderNormal, renderCommander, or renderSuspended, as appropriate
    void renderNormal();       // Render game in normal play mode
    void renderCommander();    // Render game in commander's map mode
    void renderSuspended();    // Render suspended game

@@ -102,7 +102,8 @@ void BotNavMeshZone::render(S32 layerIndex)
    if(!gClientGame->mGameUserInterface->mDebugShowMeshZones)
       return;
 
-   if(mPolyFill.size() == 0)    // Need to process PolyFill here, rendering server objects into client.
+   // TODO: Move to constructor, only doing this when there is a local client?
+   if(mPolyFill.size() == 0)    // Need to process PolyFill here, rendering server objects into client.  
       Triangulate::Process(mPolyBounds, mPolyFill);
 
    if(layerIndex == 0)
@@ -496,7 +497,7 @@ static bool makeBotMeshZones(Rect& bounds, Game* game)
    Vector<F32> holes;
 
    Vector<DatabaseObject *> barrierList;
-   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
+   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerGame->getWorldExtents());
 
    TPolyPolygon solution;
 
@@ -638,7 +639,7 @@ static const S32 LEVEL_ZONE_BUFFER = 30;
 // Server only
 bool BotNavMeshZone::buildBotMeshZones(Game *game)
 {
-   Rect bounds = game->computeWorldObjectExtents();
+   Rect bounds = game->getWorldExtents();
    bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
 
    // Triangulate and Recast
@@ -711,7 +712,7 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections()
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-	gServerGame->getGridDatabase()->findObjects(TeleportType, teleporters, gServerWorldBounds);
+	gServerGame->getGridDatabase()->findObjects(TeleportType, teleporters, gServerGame->getWorldExtents());
 
 	for(S32 i = 0; i < teleporters.size(); i++)
 	{

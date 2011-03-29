@@ -1162,16 +1162,14 @@ F32 GameType::getUpdatePriority(NetObject *scopeObject, U32 updateMask, S32 upda
 }
 
 
-extern Rect gServerWorldBounds;
-
 // Find all spubugs in the game, and store them for future reference
 // server only
 void GameType::catalogSpybugs()
 {
    mSpyBugs.clear();
 
-   // Find all spybugs in the game
-   gServerGame->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, gServerWorldBounds);
+   // Find all spybugs in the game, load them into mSpyBugs
+   getGame()->getGridDatabase()->findObjects(SpyBugType, mSpyBugs, getGame()->getWorldExtents());
 }
 
 
@@ -1182,7 +1180,7 @@ void GameType::onLevelLoaded()
 
    // Figure out if this level has any loadout zones
    fillVector.clear();
-   getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, gServerWorldBounds);
+   getGame()->getGridDatabase()->findObjects(LoadoutZoneType, fillVector, getGame()->getWorldExtents());
 
    mLevelHasLoadoutZone = (fillVector.size() > 0);
 
@@ -2330,10 +2328,10 @@ void GameType::changeClientTeam(GameConnection *source, S32 team)
    if(ship)
    {
       // Find all spybugs and mines that this player owned, and reset ownership
-      Rect worldBounds = gServerGame->computeWorldObjectExtents();
+      Rect worldBounds = getGame()->getWorldExtents();
 
       fillVector.clear();
-      gServerGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, gServerWorldBounds);
+      getGame()->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, getGame()->getWorldExtents());
 
       for(S32 i = 0; i < fillVector.size(); i++)
       {
@@ -2528,10 +2526,8 @@ GAMETYPE_RPC_S2C(GameType, s2cClientJoinedTeam,
    // Make this client forget about any mines or spybugs he knows about... it's a bit of a kludge to do this here,
    // but this RPC only runs when a player joins the game or changes teams, so this will never hurt, and we can
    // save the overhead of sending a separate message which, while theoretically cleaner, will never be needed practically.
-   Rect worldBounds = clientGame->computeWorldObjectExtents();
-
    fillVector.clear();
-   clientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, worldBounds);
+   clientGame->getGridDatabase()->findObjects(SpyBugType | MineType, fillVector, clientGame->getWorldExtents());
 
    for(S32 i = 0; i < fillVector.size(); i++)
    {

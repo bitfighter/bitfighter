@@ -810,12 +810,10 @@ S32 LuaRobot::findItems(lua_State *L)
 }
 
 
-extern Rect gServerWorldBounds;
-
 // Same but gets all visible items from whole game... out-of-scope items will be ignored
 S32 LuaRobot::findGlobalItems(lua_State *L)
 {
-   return doFindItems(L, gServerWorldBounds);
+   return doFindItems(L, gServerGame->getWorldExtents());
 }
 
 
@@ -1060,7 +1058,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
 
    // First, do a quick search for zone based on the buffer; should be 99% of the cases
 
-   // search radius is just slightly larger than twice the zone buffers added to objects like barriers
+   // Search radius is just slightly larger than twice the zone buffers added to objects like barriers
    S32 searchRadius = 2 * BotNavMeshZone::BufferRadius + 1;
 
    Vector<DatabaseObject*> objects;
@@ -1068,7 +1066,7 @@ U16 LuaRobot::findClosestZone(const Point &point)
 
    gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, objects, rect);
 
-   for(S32 i=0; i<objects.size(); i++)
+   for(S32 i = 0; i < objects.size(); i++)
    {
       BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
       Point center = zone->getCenter();
@@ -1080,30 +1078,10 @@ U16 LuaRobot::findClosestZone(const Point &point)
       }
    }
 
-//   // Second, if no zone found quickly, do exhaustive search using gServerWorldBounds
-//   if (closestZone == U16_MAX)
-//   {
-//      objects.clear();
-//      gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, objects, gServerWorldBounds);
-//
-//      for(S32 i=0; i<objects.size(); i++)
-//      {
-//         BotNavMeshZone *zone = dynamic_cast<BotNavMeshZone *>(objects[i]);
-//         Point center = zone->getCenter();
-//
-//         if(gServerGame->getGridDatabase()->pointCanSeePoint(center, point))  // This is an expensive test
-//         {
-//            closestZone = zone->getZoneId();
-//            break;
-//         }
-//      }
-//   }
-
-
-   // Third, target must not be in extents of the map, find nearest zone if a straight line was drawn
+   // Target must be outside extents of the map, find nearest zone if a straight line was drawn
    if (closestZone == U16_MAX)
    {
-      Point extentsCenter = gServerWorldBounds.getCenter();
+      Point extentsCenter = gServerGame->getWorldExtents().getCenter();
 
       F32 collisionTimeIgnore;
       Point surfaceNormalIgnore;

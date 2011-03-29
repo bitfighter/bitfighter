@@ -79,8 +79,6 @@ ClientGame *gClientGame = NULL;
 ClientGame *gClientGame1 = NULL;
 ClientGame *gClientGame2 = NULL;
 
-Rect gServerWorldBounds = Rect();
-
 extern ScreenInfo gScreenInfo;
 
 //-----------------------------------------------------------------------------------
@@ -241,10 +239,13 @@ void Game::deleteObjects(U32 typeMask)
 }
 
 
-Rect Game::computeWorldObjectExtents()
+void Game::computeWorldObjectExtents()
 {
-    if(!mGameObjects.size())
-      return Rect();
+    if(!mGameObjects.size())     // No objects ==> no extents!
+    {
+       mWorldExtents = Rect();
+      return;
+    }
 
    // All this rigamarole is to make world extent correct for levels that do not overlap (0,0)
    // The problem is that the GameType is treated as an object, and has the extent (0,0), and
@@ -265,13 +266,16 @@ Rect Game::computeWorldObjectExtents()
       }
 
    if(first == -1)      // No suitable objects found, return empty extents
-      return Rect();
+   {
+      mWorldExtents = Rect();
+      return;
+   }
 
    // Now start unioning the extents of remaining objects.  Should be all of them.
    for(S32 i = first + 1; i < mGameObjects.size(); i++)
       theRect.unionRect(mGameObjects[i]->getExtent());
 
-   return theRect;
+   mWorldExtents = theRect;
 }
 
 
@@ -722,6 +726,7 @@ void ServerGame::cycleLevel(S32 nextLevel)
    }
 }
 
+
 void ServerGame::loadBotMeshZones()
 {
    getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
@@ -938,7 +943,7 @@ void ServerGame::processLevelLoadLine(U32 argc, U32 id, const char **argv)
       }
       else  // object was valid
       {
-         gServerWorldBounds = gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
+         gServerGame->computeWorldObjectExtents();    // Make sure this is current if we process a robot that needs this for intro code
          object->addToGame(this);
 
          bool validArgs = object->processArguments(argc - 1, argv + 1);
@@ -1125,20 +1130,18 @@ void ServerGame::idle(U32 timeDelta)
                break;
             }
          }
+         Vector<StringTableEntry> e;
+         Vector<StringPtr> s;
+         Vector<S32> i;
+         i.push_back(voteYes);
+         i.push_back(voteNo);
+         i.push_back(voteNothing);
+         e.push_back(votePass ? "Pass" : "Fail");
+         for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
          {
-            Vector<StringTableEntry> e;
-            Vector<StringPtr> s;
-            Vector<S32> i;
-            i.push_back(voteYes);
-            i.push_back(voteNo);
-            i.push_back(voteNothing);
-            e.push_back(votePass ? "Pass" : "Fail");
-            for(GameConnection *walk = GameConnection::getClientList(); walk; walk = walk->getNextClient())
-            {
-               walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
-               if(!votePass && walk->getClientName() == mVoteClientName)
-                  walk->mVoteTime = gIniSettings.voteRetryLength * 1000;
-            }
+            walk->s2cDisplayMessageESI(GameConnection::ColorAqua, SFXNone, "Vote %e0 - %i0 yes, %i1 no, %i2 not voted", e, s, i);
+            if(!votePass && walk->getClientName() == mVoteClientName)
+               walk->mVoteTime = gIniSettings.voteRetryLength * 1000;
          }
       }
    }
@@ -1217,7 +1220,7 @@ void ServerGame::idle(U32 timeDelta)
    // Compute new world extents -- these might change if a ship flies far away, for example...
    // In practice, we could probably just set it and forget it when we load a level.
    // Compute it here to save recomputing it for every robot and other method that relies on it.
-   gServerWorldBounds = gServerGame->computeWorldObjectExtents();
+   computeWorldObjectExtents();
 
    // Visit each game object, handling moves and running its idle method
    for(S32 i = 0; i < mGameObjects.size(); i++)
@@ -1325,6 +1328,7 @@ void ClientGame::setConnectionToServer(GameConnection *theConnection)
    theConnection->mClientGame = this;
 }
 
+
 extern void JoystickUpdateMove(Move *theMove);
 extern IniSettings gIniSettings;
 
@@ -1344,6 +1348,8 @@ void ClientGame::idle(U32 timeDelta)
       return;
    }
 
+   computeWorldObjectExtents();
+
    // Only update at most MaxMoveTime milliseconds
    if(timeDelta > Move::MaxMoveTime)
       timeDelta = Move::MaxMoveTime;
@@ -1357,9 +1363,10 @@ void ClientGame::idle(U32 timeDelta)
 
       mGameUserInterface->onMouseMoved();     // Keep ship pointed towards mouse
    }
-   else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime) // Zooming out to commander's map
+   else if(mInCommanderMap && mCommanderZoomDelta != CommanderMapZoomTime)    // Zooming out to commander's map
    {
       mCommanderZoomDelta += timeDelta;
+
       if(mCommanderZoomDelta > CommanderMapZoomTime)
          mCommanderZoomDelta = CommanderMapZoomTime;
 
@@ -1400,7 +1407,7 @@ void ClientGame::idle(U32 timeDelta)
       else
          prevTimeDelta += timeDelta;
      
-     theMove->time = timeDelta;
+      theMove->time = timeDelta;
          
 
       theMove->prepare();     // Pack and unpack the move for consistent rounding errors
@@ -1621,8 +1628,7 @@ Point ClientGame::worldToScreenPoint(Point p)
    if(mCommanderZoomDelta)    // In commander's map, or zooming in/out
    {
       F32 zoomFrac = getCommanderZoomFraction();
-      Point worldCenter = mWorldBounds.getCenter();
-      Point worldExtents = mWorldBounds.getExtents();
+      Point worldExtents = mWorldExtents.getExtents();
       worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
       worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
@@ -1633,7 +1639,7 @@ Point ClientGame::worldToScreenPoint(Point p)
       else
          worldExtents.x *= screenAspectRatio / aspectRatio;
 
-      Point offset = (worldCenter - position) * zoomFrac + position;
+      Point offset = (mWorldExtents.getCenter() - position) * zoomFrac + position;
       Point visSize = computePlayerVisArea(ship) * 2;
       Point modVisSize = (worldExtents - visSize) * zoomFrac + visSize;
 
@@ -1680,11 +1686,7 @@ void ClientGame::renderCommander()
    const S32 canvasWidth = gScreenInfo.getGameCanvasWidth();
    const S32 canvasHeight = gScreenInfo.getGameCanvasHeight();
 
-   // Set up the view to show the whole level
-   mWorldBounds = mGameUserInterface->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : computeWorldObjectExtents(); 
-
-   Point worldCenter = mWorldBounds.getCenter();
-   Point worldExtents = mWorldBounds.getExtents();
+   Point worldExtents = (mGameUserInterface->mShowProgressBar ? getGameType()->mViewBoundsWhileLoading : mWorldExtents).getExtents();
    worldExtents.x *= canvasWidth / F32(canvasWidth - (UserInterface::horizMargin * 2));
    worldExtents.y *= canvasHeight / F32(canvasHeight - (UserInterface::vertMargin * 2));
 
@@ -1711,7 +1713,7 @@ void ClientGame::renderCommander()
    Point visScale(canvasWidth / modVisSize.x, canvasHeight / modVisSize.y );
    glScalef(visScale.x, visScale.y, 1);
 
-   Point offset = (worldCenter - position) * zoomFrac + position;
+   Point offset = (mWorldExtents.getCenter() - position) * zoomFrac + position;
    glTranslatef(-offset.x, -offset.y, 0);
 
    if(zoomFrac < 0.95)
@@ -1721,11 +1723,11 @@ void ClientGame::renderCommander()
    // Render the objects.  Start by putting all command-map-visible objects into renderObjects.  Note that this no longer captures
    // walls -- those will be rendered separately.
    rawRenderObjects.clear();
-   mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldBounds);
+   mDatabase.findObjects(CommandMapVisType, rawRenderObjects, mWorldExtents);
 
    // If we're drawing bot zones, add them to our list of render objects
    if(gServerGame && mGameUserInterface->mDebugShowMeshZones)
-       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, rawRenderObjects, mWorldBounds);
+       gServerGame->mDatabaseForBotZones.findObjects(BotNavMeshZoneType, rawRenderObjects, mWorldExtents);
 
    renderObjects.clear();
    for(S32 i = 0; i < rawRenderObjects.size(); i++)
@@ -1773,7 +1775,7 @@ void ClientGame::renderCommander()
          }
 
          Vector<DatabaseObject *> spyBugObjects;
-         mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldBounds);
+         mDatabase.findObjects(SpyBugType, spyBugObjects, mWorldExtents);
 
          // Render spy bug visibility range second, so ranges appear above ship scanner range
          for(S32 i = 0; i < spyBugObjects.size(); i++)
