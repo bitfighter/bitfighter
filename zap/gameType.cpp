@@ -2784,10 +2784,6 @@ void GameType::processServerCommand(ClientRef *clientRef, const char *cmd, Vecto
    }
    else if(!stricmp(cmd, "addbot"))
    {
-      // build zones if no zones exist and no previous failure
-      if(gBotNavMeshZones.size() == 0 && !mBotZoneCreationFailed)
-         gServerGame->loadBotMeshZones();
-
       if(mBotZoneCreationFailed)
          clientRef->clientConnection->s2cDisplayMessage(GameConnection::ColorRed, SFXNone, "!!! Zone creation failure.  Bots disabled");
 

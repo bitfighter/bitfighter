@@ -486,6 +486,7 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32>
 }
 
 
+// Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
 static bool makeBotMeshZones(Rect& bounds, Game* game)
 {

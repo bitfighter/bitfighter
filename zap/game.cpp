@@ -699,9 +699,8 @@ void ServerGame::cycleLevel(S32 nextLevel)
 
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
 
-   // Do some prep work if we have bots and/or zones
-   if(getRobotCount() > 0 && gBotNavMeshZones.size() == 0)     // We have bots and no zones
-      loadBotMeshZones();
+   // Try and load Bot Zones for this level, set flag if failed
+   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;
@@ -724,12 +723,6 @@ void ServerGame::cycleLevel(S32 nextLevel)
          mGameType->serverAddClient(gc);
       gc->activateGhosting();
    }
-}
-
-
-void ServerGame::loadBotMeshZones()
-{
-   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
 }
 
 // Enter suspended animation mode
