@@ -368,7 +368,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
    TPolyPolygon solution;
 
    Vector<DatabaseObject *> barrierList;
-   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->computeWorldObjectExtents());  // F32_MAX does not work?
+   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents());  // F32_MAX does not work?
 
    unionBarriers(barrierList, false, solution);
 
@@ -380,8 +380,6 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 
       if(poly.size() == 0)
          continue;
-
-      lineSegmentPoints.setSize(poly.size());
 
       for (U32 j = 1; j < poly.size(); j++)
       {
