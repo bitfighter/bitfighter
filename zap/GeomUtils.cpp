@@ -966,7 +966,7 @@ bool Triangulate::processComplex(TriangleData& outputData, const Rect& bounds,
 
       // try and except allows continue running after error, but no zones get generated - windows only?
       // Adding the 'X' option gives a speed boost but seems to crash on several levels running on windows
-      triangulate2((char*)"zpV", &in, &out, NULL);  // TODO: Replace V with Q after debugging
+      triangulate2((char*)"zpQ", &in, &out, NULL);  // TODO: Replace V with Q after debugging
 
       // add triangle output to custom object for return storage
       outputData.pointList = out.pointlist;
