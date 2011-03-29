@@ -500,7 +500,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game* game)
    Vector<F32> holes;
 
    Vector<DatabaseObject *> barrierList;
-   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerWorldBounds);
+   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
 
    TPolyPolygon solution;
 
