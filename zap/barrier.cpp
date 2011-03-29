@@ -374,17 +374,19 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 
 
    TPolygon poly;
-   for (U32 j = 0; j < solution.size(); j++)
+   for (U32 i = 0; i < solution.size(); i++)
    {
-      poly = solution[j];
+      poly = solution[i];
 
       if(poly.size() == 0)
          continue;
 
-      for (U32 k = 1; k < poly.size(); k++)
+      lineSegmentPoints.setSize(poly.size());
+
+      for (U32 j = 1; j < poly.size(); j++)
       {
-         lineSegmentPoints.push_back(Point((F32)poly[k-1].X, (F32)poly[k-1].Y));
-         lineSegmentPoints.push_back(Point((F32)poly[k].X,   (F32)poly[k].Y));
+         lineSegmentPoints.push_back(Point((F32)poly[j-1].X, (F32)poly[j-1].Y));
+         lineSegmentPoints.push_back(Point((F32)poly[j].X,   (F32)poly[j].Y));
       }
 
       // Close the loop
