@@ -372,9 +372,16 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 
    unionBarriers(barrierList, false, solution);
 
+   // Precomputing list size improves performance dramatically
+   S32 size = 0;
+   for(U32 i = 0; i < solution.size(); i++)
+      size += solution[i].size();
+
+   lineSegmentPoints.setSize(size);
+
 
    TPolygon poly;
-   for (U32 i = 0; i < solution.size(); i++)
+   for(U32 i = 0; i < solution.size(); i++)
    {
       poly = solution[i];
 
