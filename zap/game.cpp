@@ -700,8 +700,14 @@ void ServerGame::cycleLevel(S32 nextLevel)
    // Compute world Extents nice and early
    computeWorldObjectExtents();
 
+   if(gBotNavMeshZones.size() != 0) // There is some zones loaded in the level..
+   {
+      getGameType()->mBotZoneCreationFailed = false;
+      BotNavMeshZone::buildBotNavMeshZoneConnections();
+   }
+   else
    // Try and load Bot Zones for this level, set flag if failed
-   getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
+      getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
 
    // Build a list of our current connections
    Vector<GameConnection *> connectionList;

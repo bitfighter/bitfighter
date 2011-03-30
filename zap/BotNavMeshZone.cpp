@@ -191,6 +191,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 // These methods will be empty later...
  U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
+/*
    stream->writeInt(mZoneId, 16);
 
    Polygon::packUpdate(connection, stream);
@@ -213,14 +214,14 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
       stream->write(mNeighbors[i].center.x);
       stream->write(mNeighbors[i].center.y);
    }
-
+*/
    return 0;
 }
 
 
 void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   mZoneId = stream->readInt(16);
+/*   mZoneId = stream->readInt(16);
 
    if(Polygon::unpackUpdate(connection, stream))
    {
@@ -251,7 +252,7 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       stream->read(&n.center.y);
       mNeighbors.push_back(n);
      // mNeighborRenderPoints.push_back(Border(p1, p2));
-   }
+   }*/
 }
 
 
@@ -586,9 +587,11 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
             {
                botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		         botzone->mConvex = true;             
-		         botzone->addToGame(game);
-		         botzone->computeExtent();   
+               botzone->mConvex = true;
+               botzone->addToGame(game);
+               botzone->computeExtent();
+               if(gClientGame)      // Only triangulate when there is client
+                  Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
             }
          }
 
@@ -618,10 +621,12 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		   botzone->mConvex = true;             // Avoid random red and green on /showzones
+		   botzone->mConvex = true;             // Avoid random red and green on /showzones.
 		   botzone->addToGame(game);
 		   botzone->computeExtent();   
-      }
+         if(gClientGame)      // Only triangulate when there is client
+            Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
+       }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();
    }
