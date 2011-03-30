@@ -59,7 +59,7 @@ bool EngineerModuleDeployer::findDeployPoint(Ship *ship, Point &deployPosition, 
       return false;
 
 
-   if(deployNormal.dot(ship->getAimVector()) * 2 > 0)
+   if(deployNormal.dot(ship->getAimVector()) > 0)
       deployNormal = -deployNormal;      // This is to fix deploy at wrong side of barrier.
 
 
@@ -337,6 +337,11 @@ DatabaseObject *EngineeredObject::findAnchorPointAndNormal(GridDatabase *db, con
          }
       }
    }
+
+   Vector<Point> walls;
+   if(closestWall && closestWall->getCollisionPoly(walls))
+      if(isWoundClockwise(walls))
+         normal = -normal;  // to avoid objects pointing inside polygon walls
 
    return closestWall;
 }

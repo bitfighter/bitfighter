@@ -469,7 +469,7 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32>
          continue;
 
       // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have:
-      if(barrier->mSolid)     // Could be concave, centroid of first triangle of fill geom will be interior
+      if(barrier->mSolid && barrier->mRenderFillGeometry.size() >= 3)     // Could be concave, centroid of first triangle of fill geom will be interior
       {
          ctr.set((barrier->mRenderFillGeometry[0].x + barrier->mRenderFillGeometry[1].x + barrier->mRenderFillGeometry[2].x) / 3, 
                   (barrier->mRenderFillGeometry[0].y + barrier->mRenderFillGeometry[1].y + barrier->mRenderFillGeometry[2].y) / 3);
