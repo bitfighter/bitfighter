@@ -1376,7 +1376,6 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    if(minDist >= 90 / (mCurrentScale * mCurrentScale))
    {
       if(snapToWallEdges)
-         // Check the edges of walls -- we'll reuse the list of walls we found earlier when looking for corners
          checkEdgesForSnap(p, WallSegmentManager::mWallEdges, false, minDist, snapPoint);
    }
 

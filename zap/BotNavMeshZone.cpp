@@ -290,8 +290,6 @@ S32 BotNavMeshZone::getNeighborIndex(S32 zoneID)
 }
 
 
-extern Rect gServerWorldBounds;
-
 struct rcEdge
 {
 	unsigned short vert[2];    // from, to verts
@@ -329,12 +327,11 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 		return false;
 	}
 	
-
-	for (int i = 0; i < mesh.nverts; i++)
+	for(int i = 0; i < mesh.nverts; i++)
 		firstEdge[i] = RC_MESH_NULL_IDX;
 	
    // First process edges where 1st node < 2nd node
-	for (int i = 0; i < mesh.npolys; ++i)
+	for(int i = 0; i < mesh.npolys; ++i)
 	{
       unsigned short* t = &mesh.polys[i*mesh.nvp];
 
@@ -368,7 +365,7 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 	}
 	
    // Now process edges where 2nd node is > 1st node
-	for (int i = 0; i < mesh.npolys; ++i)
+	for(int i = 0; i < mesh.npolys; ++i)
 	{
 		unsigned short* t = &mesh.polys[i*mesh.nvp];
 
@@ -376,7 +373,7 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
       if(*t == U16_MAX)
          continue;
 
-		for (int j = 0; j < mesh.nvp; ++j)
+		for(int j = 0; j < mesh.nvp; ++j)
 		{
 			unsigned short v0 = t[j];
          if(v0 == RC_MESH_NULL_IDX)
@@ -384,12 +381,12 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 
 			unsigned short v1 = (j+1 >= mesh.nvp || t[j+1] == RC_MESH_NULL_IDX) ? t[0] : t[j+1];
 
-			if (v0 > v1)      
+			if(v0 > v1)      
 			{
-				for (unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
+				for(unsigned short e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
 				{
 					rcEdge& edge = edges[e];
-					if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
+					if(edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
                {
 						edge.poly[1] = (unsigned short)i;
                   break;
@@ -400,11 +397,11 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 	}
 
 	// Now create our neighbor data
-	for (int i = 0; i < edgeCount; i++)
+	for(int i = 0; i < edgeCount; i++)
 	{
 		const rcEdge& e = edges[i];
 
-		if (e.poly[0] != e.poly[1])      // Should normally be the case
+		if(e.poly[0] != e.poly[1])      // Should normally be the case
 		{
          U16 *v;
 
@@ -430,8 +427,8 @@ static bool buildBotNavMeshZoneConnectionsRecastStyle(rcPolyMesh &mesh, const Ve
 	return true;
 }
 
+
 Vector<DatabaseObject *> zones;
-extern Rect gServerWorldBounds;
 
 // Returns index of zone containing specified point
 static BotNavMeshZone *findZoneContainingPoint(const Point &point)
@@ -501,7 +498,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
    Vector<F32> holes;
 
    Vector<DatabaseObject *> barrierList;
-   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
+   game->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
 
    TPolyPolygon solution;
 
@@ -590,7 +587,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
                botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		         botzone->mConvex = true;             
-		         botzone->addToGame(gServerGame);
+		         botzone->addToGame(game);
 		         botzone->computeExtent();   
             }
          }
@@ -600,7 +597,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 #endif               
 
          buildBotNavMeshZoneConnectionsRecastStyle(mesh, polyToZoneMap);
-         BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections();
+         BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(game);
 		}
    }
 
@@ -622,7 +619,7 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
 		   botzone->mConvex = true;             // Avoid random red and green on /showzones
-		   botzone->addToGame(gServerGame);
+		   botzone->addToGame(game);
 		   botzone->computeExtent();   
       }
 
@@ -695,13 +692,13 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
 }
 
 // Only runs on server
-void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections()
+void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
 {
    NeighboringZone neighbor;
    // Now create paths representing the teleporters
    Vector<DatabaseObject *> teleporters, dests;
 
-	gServerGame->getGridDatabase()->findObjects(TeleportType, teleporters, gServerGame->getWorldExtents());
+	game->getGridDatabase()->findObjects(TeleportType, teleporters, game->getWorldExtents());
 
 	for(S32 i = 0; i < teleporters.size(); i++)
 	{
