@@ -395,7 +395,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
    for(U32 i = 0; i < solution.size(); i++)
       size += solution[i].size();
 
-   lineSegmentPoints.setSize(size);
+   lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
 
 
    TPolygon poly;
