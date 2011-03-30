@@ -174,20 +174,21 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
          continue;
 
       inputPoly.clear();
+
       if(useBotGeom)
       {
-         for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
+         for(S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
             inputPoly.push_back(DoublePoint(barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y));
       }
       else    
       {
          barrier->getCollisionPoly(points);        // Puts object bounds into points
-         for (S32 j = 0; j < points.size(); j++)
+         for(S32 j = 0; j < points.size(); j++)
             inputPoly.push_back(DoublePoint(points[j].x, points[j].y));
       }
 
 #ifdef DUMP_DATA
-      for (S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
+      for(S32 j = 0; j < barrier->mBotZoneBufferGeometry.size(); j++)
          logprintf("Before Clipper Point: %f %f", barrier->mBotZoneBufferGeometry[j].x, barrier->mBotZoneBufferGeometry[j].y);
 #endif
 
@@ -196,7 +197,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
 
    // Fire up clipper and union!
    Clipper clipper;
-   clipper.IgnoreOrientation(false);
+   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
    clipper.AddPolyPolygon(inputPolygons, ptSubject);
    return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }
@@ -368,7 +369,24 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
    TPolyPolygon solution;
 
    Vector<DatabaseObject *> barrierList;
-   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents());  // F32_MAX does not work?
+
+   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents()); 
+
+   // Visualize raw barrier geometry
+   //Vector<Point> points;
+   //for(S32 i = 0; i < barrierList.size(); i++)
+   //{
+   //   Barrier *barrier = dynamic_cast<Barrier *>(barrierList[i]);
+   //   barrier->getCollisionPoly(points);
+   //   for(S32 j = 1; j < points.size(); j++)
+   //   {
+   //      lineSegmentPoints.push_back(points[j-1]);
+   //      lineSegmentPoints.push_back(points[j]);
+   //   }
+   //   lineSegmentPoints.push_back(points[points.size()-1]);
+   //   lineSegmentPoints.push_back(points[0]);
+   //}
+   //return;
 
    unionBarriers(barrierList, false, solution);
 
@@ -388,7 +406,7 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
       if(poly.size() == 0)
          continue;
 
-      for (U32 j = 1; j < poly.size(); j++)
+      for(U32 j = 1; j < poly.size(); j++)
       {
          lineSegmentPoints.push_back(Point((F32)poly[j-1].X, (F32)poly[j-1].Y));
          lineSegmentPoints.push_back(Point((F32)poly[j].X,   (F32)poly[j].Y));
