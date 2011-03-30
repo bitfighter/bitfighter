@@ -488,17 +488,20 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32>
 
 // Server only
 // Use the Triangle library to create zones.  Aggregate triangles with Recast
-static bool makeBotMeshZones(Rect& bounds, Game* game)
+bool BotNavMeshZone::buildBotMeshZones(Game *game)
 {
 
 #ifdef LOG_TIMER
    U32 starttime = Platform::getRealMilliseconds();
 #endif
 
+   Rect bounds = game->getWorldExtents();
+   bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
+
    Vector<F32> holes;
 
    Vector<DatabaseObject *> barrierList;
-   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, gServerGame->getWorldExtents());
+   gServerGame->getGridDatabase()->findObjects(BarrierType, barrierList, bounds);
 
    TPolyPolygon solution;
 
@@ -633,21 +636,6 @@ static bool makeBotMeshZones(Rect& bounds, Game* game)
 #endif
 
    return true;
-}
-
-static const S32 LEVEL_ZONE_BUFFER = 30;
-
-// Server only
-bool BotNavMeshZone::buildBotMeshZones(Game *game)
-{
-   Rect bounds = game->getWorldExtents();
-   bounds.expandToInt(Point(LEVEL_ZONE_BUFFER, LEVEL_ZONE_BUFFER));      // Provide a little breathing room
-
-   // Triangulate and Recast
-   if(makeBotMeshZones(bounds, game))
-      return true;
-
-   return false;
 }
 
 
