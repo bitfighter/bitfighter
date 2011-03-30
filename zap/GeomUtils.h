@@ -103,11 +103,14 @@ bool findIntersection(const Point &p1, const Point &p2, const Point &p3, const P
 // Returns index of points vector closest to point
 S32 findClosestPoint(const Point &point, const Vector<Point> &points);
 
-// unions any amount of arbitrary complex polygons
-bool unionPolygons(TPolyPolygon& inputPolygonList, TPolyPolygon& outputPolygonList, bool ignoreOutputOrientation = false);
-
-// offset a complex polygon by a given amount
+// Offset a complex polygon by a given amount
 void offsetPolygon(const Vector<Point>& inputPoly, Vector<Point>& outputPoly,const F32 offset);
+
+// Use Clipper to merge inputPolygons, placing the result in solution
+bool mergePolys(const TPolyPolygon &inputPolygons, TPolyPolygon &solution);
+
+// Convert a TPolyPolygon to a list of points in a-b c-d e-f format
+void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentPoints);
 
 // test if a complex polygon has clockwise point winding order
 bool isWoundClockwise(const Vector<Point>& inputPoly);

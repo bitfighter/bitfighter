@@ -96,6 +96,8 @@ enum EntryMode {
 static EntryMode entryMode;
 static Vector<ZoneBorder> zoneBorders;
 
+Vector<Point> WallSegmentManager::mWallEdges;
+
 void saveLevelCallback()
 {
    if(gEditorUserInterface.saveLevel(true, true))
@@ -1357,23 +1359,16 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    // Build a list of walls we might be snapping to if we're snapping to either the edges or corners
    static Vector<DatabaseObject *> foundObjects;
 
-   if(snapToWallCorners || snapToWallEdges)
-   {
-      foundObjects.clear();
-      mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
-   }
+   //if(snapToWallCorners || snapToWallEdges)
+   //{
+   //   foundObjects.clear();
+   //   mGridDatabase.findObjects(BarrierType, foundObjects, Rect(p, sqrt(minDist) * 2));   // minDist is dist squared
+   //}
 
 
-   // Search for a corner to snap to - by using segment ends, we'll also look for intersections between segments
+   // Search for a corner to snap to - by using wall edges, we'll also look for intersections between segments
    if(snapToWallCorners)
-   {
-      for(S32 i = 0; i < foundObjects.size(); i++)
-      {
-         WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
-
-         checkCornersForSnap(p, seg->edges, minDist, snapPoint);
-      }
-   }
+      checkCornersForSnap(p, WallSegmentManager::mWallEdges, minDist, snapPoint);
 
    // If we're editing a vertex of a polygon, and if we're outside of some threshold distance, see if we can 
    // snap to the edge of a another zone or wall.  Decreasing value in minDist test will favor snapping to walls, 
@@ -1381,14 +1376,8 @@ Point EditorUserInterface::snapPoint(Point const &p, bool snapWhileOnDock)
    if(minDist >= 90 / (mCurrentScale * mCurrentScale))
    {
       if(snapToWallEdges)
-      {   
          // Check the edges of walls -- we'll reuse the list of walls we found earlier when looking for corners
-         for(S32 i = 0; i < foundObjects.size(); i++)
-         {
-            WallSegment *seg = dynamic_cast<WallSegment *>(foundObjects[i]);
-            checkEdgesForSnap(p, seg->edges, false, minDist, snapPoint);
-         }
-      }
+         checkEdgesForSnap(p, WallSegmentManager::mWallEdges, false, minDist, snapPoint);
    }
 
    // Will overwrite snapPoint if a zone corner or edge is found, thus prioritizing zone edges to other things when 
@@ -3596,7 +3585,7 @@ void EditorUserInterface::deleteItem(S32 itemIndex)
       // Need to recompute boundaries of any intersecting walls
       wallSegmentManager.invalidateIntersectingSegments(&mItems[itemIndex]);  // Mark intersecting segments invalid
       wallSegmentManager.deleteSegments(mItems[itemIndex].mId);               // Delete the segments associated with the wall
-      wallSegmentManager.recomputeInvalidWallSegmentIntersections();          // Recompute intersections
+      wallSegmentManager.recomputeAllWallGeometry();                          // Recompute wall edges
       recomputeAllEngineeredItems();         // Really only need to recompute items that were attached to deleted wall... but we
                                              // don't yet have a method to do that, and I'm feeling lazy at the moment
    }
@@ -4749,6 +4738,7 @@ void EditorUserInterface::testLevelStart()
 }
 
 
+// Puts 
 void EditorUserInterface::buildAllWallSegmentEdgesAndPoints()
 {
    wallSegmentManager.deleteAllSegments();
@@ -4958,20 +4948,7 @@ GridDatabase *getGridDatabase()
 void WallSegmentManager::recomputeAllWallGeometry()
 {
    gEditorUserInterface.buildAllWallSegmentEdgesAndPoints();
-   clipAllWallEdges(wallSegments);
-}
-
-
-// Static method, used above and from instructions
-void WallSegmentManager::clipAllWallEdges(Vector<WallSegment *> &wallSegments)
-{
-   for(S32 i = 0; i < wallSegments.size() - 1; i++)
-      for(S32 j = i + 1; j < wallSegments.size(); j++)
-         if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
-         {
-            //Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
-            //Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
-         }
+   clipAllWallEdges(wallSegments, mWallEdges);
 }
 
 
@@ -5021,6 +4998,28 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 }
 
 
+// Static method, used above and from instructions
+void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges)
+{
+   TPolyPolygon inputPolygons, solution;
+   TPolygon inputPoly;
+
+   for(S32 i = 0; i < wallSegments.size() - 1; i++)
+   {
+      inputPoly.clear();
+
+      for(S32 j = 0; j < wallSegments[i]->corners.size(); j++)
+         inputPoly.push_back(DoublePoint(wallSegments[i]->corners[j].x, wallSegments[i]->corners[j].y));
+
+      inputPolygons.push_back(inputPoly);
+   }
+
+   mergePolys(inputPolygons, solution);      // Merged wall segments are placed in solution
+
+   unpackPolyPolygon(solution, wallEdges);
+}
+
+
 // Takes a wall, finds all intersecting segments, and marks them invalid
 void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
 {
@@ -5053,32 +5052,6 @@ void WallSegmentManager::invalidateIntersectingSegments(WorldItem *item)
 
    for(S32 i = 0; i < intersectingSegments.size(); i++)
       dynamic_cast<WallSegment *>(intersectingSegments[i])->invalid = true;
-
-}
-
-
-// Look at all our wallSegments, and recompute boundary geometry for any items marked as invalid 
-void WallSegmentManager::recomputeInvalidWallSegmentIntersections()
-{
-   for(S32 i = 0; i < wallSegments.size(); i++)
-   {
-      if(!wallSegments[i]->invalid)
-         continue;
-
-      for(S32 j = 0; j < wallSegments.size(); j++)
-      {
-         if(i == j)     // Don't process against self
-            continue;
-
-         if(wallSegments[i]->getExtent().intersects(wallSegments[j]->getExtent()))
-         {
-            //Barrier::clipRenderLinesToPoly(wallSegments[i]->corners, wallSegments[j]->edges);
-            //Barrier::clipRenderLinesToPoly(wallSegments[j]->corners, wallSegments[i]->edges);
-         }
-      }
-      
-      wallSegments[i]->invalid = false;
-   }
 }
 
 
@@ -5086,8 +5059,8 @@ void WallSegmentManager::recomputeInvalidWallSegmentIntersections()
 // need to be recomputed.
 void WallSegmentManager::computeWallSegmentIntersections(WorldItem *item)
 {
-   invalidateIntersectingSegments(item);
-   recomputeInvalidWallSegmentIntersections();
+   invalidateIntersectingSegments(item);     // TODO: Is this step still needed?
+   recomputeAllWallGeometry();
 }
 
 
@@ -5126,8 +5099,7 @@ void WallSegmentManager::renderWalls(bool convert, F32 alpha)
    }
 
    // Render the exterior outlines -- these are stored as a sequence of lines, rather than individual points
-   for(S32 i = 0; i < wallSegments.size(); i++)
-      wallSegments[i]->renderOutline(alpha);
+   renderWallEdges(mWallEdges);
 }
 
 
@@ -5829,12 +5801,6 @@ WallSegment::~WallSegment()
 void WallSegment::resetEdges()
 {
    Barrier::resetEdges(corners, edges);
-}
-
-
-void WallSegment::renderOutline(F32 alpha)
-{
-   renderWallEdges(edges, alpha);
 }
 
 

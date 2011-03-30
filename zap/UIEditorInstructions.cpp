@@ -378,13 +378,13 @@ void EditorInstructionsUserInterface::renderPageWalls()
          wallSegments.push_back(newSegment);                   // Add it to our segment list
       }
 
-      WallSegmentManager::clipAllWallEdges(wallSegments);      // Remove interior wall outline fragments
+      Vector<Point> edges;
+      WallSegmentManager::clipAllWallEdges(wallSegments, edges);      // Remove interior wall outline fragments
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          wallSegments[i]->renderFill(false);
 
-      for(S32 i = 0; i < wallSegments.size(); i++)
-         wallSegments[i]->renderOutline(1.0);
+      renderWallEdges(edges);
 
       for(S32 i = 0; i < wallSegments.size(); i++)
          delete wallSegments[i];

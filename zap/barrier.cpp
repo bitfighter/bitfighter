@@ -195,11 +195,7 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
       inputPolygons.push_back(inputPoly);
    }
 
-   // Fire up clipper and union!
-   Clipper clipper;
-   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
-   clipper.AddPolyPolygon(inputPolygons, ptSubject);
-   return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
+   return mergePolys(inputPolygons, solution);
 }
 
 
@@ -360,64 +356,17 @@ void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<
 }
 
 
-extern Rect gServerWorldBounds;
-
 // Clears out overlapping barrier lines for better rendering appearance, modifies lineSegmentPoints.
 // This is effectively called on every pair of potentially intersecting barriers, and lineSegmentPoints gets 
 // refined as each additional intersecting barrier gets processed.
 // static method
-void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
+void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints)
 {
    TPolyPolygon solution;
 
-   Vector<DatabaseObject *> barrierList;
-
-   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents()); 
-
-   // Visualize raw barrier geometry
-   //Vector<Point> points;
-   //for(S32 i = 0; i < barrierList.size(); i++)
-   //{
-   //   Barrier *barrier = dynamic_cast<Barrier *>(barrierList[i]);
-   //   barrier->getCollisionPoly(points);
-   //   for(S32 j = 1; j < points.size(); j++)
-   //   {
-   //      lineSegmentPoints.push_back(points[j-1]);
-   //      lineSegmentPoints.push_back(points[j]);
-   //   }
-   //   lineSegmentPoints.push_back(points[points.size()-1]);
-   //   lineSegmentPoints.push_back(points[0]);
-   //}
-   //return;
-
    unionBarriers(barrierList, false, solution);
 
-   // Precomputing list size improves performance dramatically
-   S32 segments = 0;
-   for(U32 i = 0; i < solution.size(); i++)
-      segments += solution[i].size();
-
-   lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
-
-
-   TPolygon poly;
-   for(U32 i = 0; i < solution.size(); i++)
-   {
-      poly = solution[i];
-
-      if(poly.size() == 0)
-         continue;
-
-      for(U32 j = 1; j < poly.size(); j++)
-      {
-         lineSegmentPoints.push_back(Point((F32)poly[j-1].X, (F32)poly[j-1].Y));
-         lineSegmentPoints.push_back(Point((F32)poly[j].X,   (F32)poly[j].Y));
-      }
-
-      // Close the loop
-      lineSegmentPoints.push_back(Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y));
-      lineSegmentPoints.push_back(Point((F32)poly[0].X, (F32)poly[0].Y));
-   }
+   unpackPolyPolygon(solution, lineSegmentPoints);
 }
 
 
@@ -425,7 +374,12 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 void Barrier::prepareRenderingGeometry()
 {
    mRenderLineSegments.clear();
-   clipRenderLinesToPoly(mRenderLineSegments);
+
+   Vector<DatabaseObject *> barrierList;
+
+   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents()); 
+
+   clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }
 
 

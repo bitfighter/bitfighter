@@ -94,7 +94,7 @@ public:
    static bool unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBotGeom, clipper::TPolyPolygon &solution);
 
    /// Clips the current set of render lines against the polygon passed as polyPoints, modifies lineSegmentPoints.
-   static void clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints);
+   static void clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList, Vector<Point> &lineSegmentPoints);
 
    static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 

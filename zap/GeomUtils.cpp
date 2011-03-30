@@ -636,16 +636,14 @@ static const float EPSILON=0.0000000001f;
 
 F32 area(const Vector<Point> &contour)
 {
-
   int n = contour.size();
 
-  float A=0.0f;
+  float A = 0.0f;
 
-  for(int p=n-1,q=0; q<n; p=q++)
-  {
-    A+= contour[p].x*contour[q].y - contour[q].x*contour[p].y;
-  }
-  return A*0.5f;
+  for(int p = n-1, q = 0; q < n; p = q++)
+    A += contour[p].x * contour[q].y - contour[q].x * contour[p].y;
+
+  return A * 0.5f;
 }
 
    /*
@@ -711,25 +709,28 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
    /* allocate and initialize list of Vertices in polygon */
 
    int n = contour.size();
-   if ( n < 3 ) return false;
+   if(n < 3) 
+      return false;
 
    int *V = new int[n];
 
    /* we want a counter-clockwise polygon in V */
 
-   if ( 0.0f < area(contour) )
-      for (int v=0; v<n; v++) V[v] = v;
+   if(area(contour) > 0)
+      for (int v=0; v < n; v++) 
+         V[v] = v;
    else
-      for(int v=0; v<n; v++) V[v] = (n-1)-v;
+      for(int v = 0; v < n; v++) 
+         V[v] = (n-1)-v;
 
    int nv = n;
 
-   /*  remove nv-2 Vertices, creating 1 triangle every time */
+   /*  Remove nv-2 Vertices, creating 1 triangle every time */
    int count = 2*nv;   /* error detection */
 
-   for(int m=0, v=nv-1; nv>2; )
+   for(int m = 0, v = nv - 1; nv > 2; )
    {
-      /* if we loop, it is probably a non-simple polygon */
+      /* If we loop, it is probably a non-simple polygon */
       if (0 >= (count--))
       {
          //** Triangulate: ERROR - probable bad polygon!
@@ -737,12 +738,20 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
          return false;
       }
 
-      /* three consecutive vertices in current polygon, <u,v,w> */
-      int u = v  ; if (nv <= u) u = 0;     /* previous */
-      v = u+1; if (nv <= v) v = 0;     /* new v    */
-      int w = v+1; if (nv <= w) w = 0;     /* next     */
+      /* Three consecutive vertices in current polygon, <u,v,w> */
+      int u = v; 
+      if (nv <= u) 
+         u = 0;     // previous
 
-      if ( Snip(contour,u,v,w,nv,V) )
+      v = u + 1; 
+      if(nv <= v) 
+         v = 0;     // new v   
+
+      int w = v+1; 
+      if(nv <= w) 
+         w = 0;     // next     
+
+      if( Snip(contour,u,v,w,nv,V) )
       {
          int a,b,c,s,t;
 
@@ -770,7 +779,53 @@ bool Triangulate::Process(const Vector<Point> &contour, Vector<Point> &result)
 }
 
 
-// What does this do?
+// Use Clipper to merge inputPolygons, placing the result in solution
+bool mergePolys(const TPolyPolygon &inputPolygons, TPolyPolygon &solution)
+{
+   // Fire up clipper and union!
+   Clipper clipper;
+   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
+   clipper.AddPolyPolygon(inputPolygons, ptSubject);
+   
+   return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
+}
+
+
+// Convert a TPolyPolygon to a list of points in a-b c-d e-f format
+void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentPoints)
+{
+   // Precomputing list size improves performance dramatically
+   S32 segments = 0;
+   for(U32 i = 0; i < solution.size(); i++)
+      segments += solution[i].size();
+
+   lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
+
+   TPolygon poly;
+   S32 index = 0;
+
+   for(U32 i = 0; i < solution.size(); i++)
+   {
+      poly = solution[i];
+
+      if(poly.size() == 0)
+         continue;
+
+      for(U32 j = 1; j < poly.size(); j++)
+      {
+         lineSegmentPoints[index++] = Point((F32)poly[j-1].X, (F32)poly[j-1].Y);
+         lineSegmentPoints[index++] = Point((F32)poly[j].X,   (F32)poly[j].Y);
+      }
+
+      // Close the loop
+      lineSegmentPoints[index++] = Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y);
+      lineSegmentPoints[index++] = Point((F32)poly[0].X, (F32)poly[0].Y);
+   }
+}
+
+
+
+// Offset a complex polygon by a given amount
 void offsetPolygon(const Vector<Point> &inputPoly, Vector<Point> &outputPoly, const F32 offset)
 {
    TPolyPolygon polygons;
@@ -781,7 +836,7 @@ void offsetPolygon(const Vector<Point> &inputPoly, Vector<Point> &outputPoly, co
 
    polygons.push_back(poly);
 
-   polygons = OffsetPolygons(polygons, offset);
+   polygons = OffsetPolygons(polygons, offset);    // Call Clipper to do the dirty work
    poly = polygons[0];
 
    // Only one polygon should come back since only one went in
@@ -798,7 +853,7 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
    F32 finalSum = 0;
    S32 i_prev = inputPoly.size() - 1;
 
-   for (S32 i = 0; i < inputPoly.size(); i++)
+   for(S32 i = 0; i < inputPoly.size(); i++)
    {
       // (x2-x1)(y2+y1)
       finalSum += (inputPoly[i].x - inputPoly[i_prev].x) * (inputPoly[i].y + inputPoly[i_prev].y);
@@ -806,7 +861,7 @@ bool isWoundClockwise(const Vector<Point>& inputPoly)
    }
 
    // Negative result = counter-clockwise
-   if (finalSum < 0)
+   if(finalSum < 0)
       return false;
    else
       return true;

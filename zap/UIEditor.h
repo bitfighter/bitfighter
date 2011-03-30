@@ -79,7 +79,6 @@ public:
    void resetEdges();         // Compute basic edges from corner points
    void computeBoundingBox(); // Computes bounding box based on the corners, updates database
    
-   void renderOutline(F32 alpha);
    void renderFill(bool renderLight);
 
    ////////////////////
@@ -275,6 +274,7 @@ public:
    ~WallSegmentManager() { /* Do nothing */ }
 
    Vector<WallSegment *> wallSegments;
+   static Vector<Point> mWallEdges;             // a-b c-d format
 
    void deleteSegments(U32 owner);              // Delete all segments owned by specified WorldItem
    void deleteAllSegments();
@@ -285,12 +285,11 @@ public:
    // Takes a wall, finds all intersecting segments, and marks them invalid
    void invalidateIntersectingSegments(WorldItem *item);
 
-   // Look at all our wallSegments, and recompute boundary geometry for any items marked as invalid 
-   void recomputeInvalidWallSegmentIntersections();
-
    void buildWallSegmentEdgesAndPoints(WorldItem *item);
    void recomputeAllWallGeometry();
-   static void clipAllWallEdges(Vector<WallSegment *> &wallSegments);
+   
+   // Populate wallEdges
+   static void clipAllWallEdges(const Vector<WallSegment *> &wallSegments, Vector<Point> &wallEdges);
  
    ////////////////
    // Render functions
