@@ -2631,7 +2631,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
       return;
 
    clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
-   clientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
+   Barrier::prepareRenderingGeometry(clientGame);    // Get walls ready to render
 
    clientGame->mGameUserInterface->mShowProgressBar = false;
    //gClientGame->setInCommanderMap(false);          // Start game in regular mode, If we change here, need to tell the server we are in this mode. Map can change while in commander map.

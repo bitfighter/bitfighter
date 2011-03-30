@@ -370,14 +370,14 @@ void Barrier::clipRenderLinesToPoly(const Vector<DatabaseObject *> &barrierList,
 }
 
 
-// Merges wall outlines together
-void Barrier::prepareRenderingGeometry()
+// Merges wall outlines together, client only
+void Barrier::prepareRenderingGeometry(Game *game)
 {
    mRenderLineSegments.clear();
 
    Vector<DatabaseObject *> barrierList;
 
-   gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents()); 
+   game->getGridDatabase()->findObjects(BarrierType, barrierList, game->getWorldExtents()); 
 
    clipRenderLinesToPoly(barrierList, mRenderLineSegments);
 }

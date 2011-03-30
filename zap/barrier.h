@@ -99,7 +99,7 @@ public:
    static void constructBarrierEndPoints(const Vector<Point> &vec, F32 width, Vector<Point> &barrierEnds);
 
    // Clean up edge geometry and get barriers ready for proper rendering
-   static void prepareRenderingGeometry();
+   static void prepareRenderingGeometry(Game *game);
 
 
    TNL_DECLARE_CLASS(Barrier);

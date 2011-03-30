@@ -431,8 +431,6 @@ public:
 
    void suspendGame()   { mGameSuspended = true; }
    void unsuspendGame() { mGameSuspended = false; }
-
-   void prepareBarrierRenderingGeometry();      // Get walls ready for display
 };
 
 ////////////////////////////////////////

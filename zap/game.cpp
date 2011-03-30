@@ -1443,13 +1443,6 @@ void ClientGame::idle(U32 timeDelta)
 }
 
 
-// Client only
-void ClientGame::prepareBarrierRenderingGeometry()
-{
-   Barrier::prepareRenderingGeometry();
-}
-
-
 // Fire keyboard event to suppress screen saver
 void ClientGame::supressScreensaver()
 {
