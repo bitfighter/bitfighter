@@ -734,8 +734,6 @@ void BotNavMeshZone::linkTeleportersBotNavMeshZoneConnections(Game *game)
 }
 
 
-
-
 // Rough guess as to distance from fromZone to toZone
 F32 AStar::heuristic(S32 fromZone, S32 toZone)
 {
