@@ -826,6 +826,8 @@ void unpackPolyPolygon(const TPolyPolygon &solution, Vector<Point> &lineSegmentP
 
 
 // Offset a complex polygon by a given amount
+// Uses clipper to create a buffer around a polygon with the given offset
+// TODO: somehow merge Point <-> DoublePoint conversions to speed processing; maybe get clipper to use Point?
 void offsetPolygon(const Vector<Point> &inputPoly, Vector<Point> &outputPoly, const F32 offset)
 {
    TPolyPolygon polygons;

@@ -695,9 +695,10 @@ void ServerGame::cycleLevel(S32 nextLevel)
    if(getGameType()->makeSureTeamCountIsNotZero())
       logprintf(LogConsumer::LogWarning, "Warning: Missing Team in level \"%s\"", gServerGame->getLevelFileNameFromIndex(mCurrentLevelIndex).c_str());
 
-
-
    logprintf(LogConsumer::ServerFilter, "Done. [%s]", getTimeStamp().c_str());
+
+   // Compute world Extents nice and early
+   computeWorldObjectExtents();
 
    // Try and load Bot Zones for this level, set flag if failed
    getGameType()->mBotZoneCreationFailed = !BotNavMeshZone::buildBotMeshZones(this);
