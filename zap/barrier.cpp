@@ -197,7 +197,8 @@ bool Barrier::unionBarriers(const Vector<DatabaseObject *> &barriers, bool useBo
 
    // Fire up clipper and union!
    Clipper clipper;
-   clipper.IgnoreOrientation(false);      // Can be true?  Would that make things go faster?
+   // According to clipper doc, ignoring orientation can speed up clipper as much as 60%; poly2tri might require orientation
+   clipper.IgnoreOrientation(true);
    clipper.AddPolyPolygon(inputPolygons, ptSubject);
    return clipper.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }
@@ -333,14 +334,14 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
    parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
 
    // Now add/subtract perpendicular and parallel vectors to buffer the segments
-   bufferedPoints.push_back(start - parallelVector  + crossPartial);
-   bufferedPoints.push_back(start - parallelVector  + crossVector);
-   bufferedPoints.push_back(end   + parallelPartial + crossVector);
-   bufferedPoints.push_back(end   + parallelVector  + crossPartial);
-   bufferedPoints.push_back(end   + parallelVector  - crossPartial);
-   bufferedPoints.push_back(end   + parallelPartial - crossVector);
-   bufferedPoints.push_back(start - parallelPartial - crossVector);
-   bufferedPoints.push_back(start - parallelVector  - crossPartial);
+   bufferedPoints.push_back((start - parallelVector)  + crossPartial);
+   bufferedPoints.push_back((start - parallelVector)  + crossVector);
+   bufferedPoints.push_back(end    + parallelPartial  + crossVector);
+   bufferedPoints.push_back(end    + parallelVector   + crossPartial);
+   bufferedPoints.push_back(end    + parallelVector   - crossPartial);
+   bufferedPoints.push_back(end    + parallelPartial  - crossVector);
+   bufferedPoints.push_back((start - parallelPartial) - crossVector);
+   bufferedPoints.push_back((start - parallelVector)  - crossPartial);
 }
 
 
