@@ -375,22 +375,6 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 
    gClientGame->getGridDatabase()->findObjects(BarrierType, barrierList, gClientGame->getWorldExtents()); 
 
-   // Visualize raw barrier geometry
-   //Vector<Point> points;
-   //for(S32 i = 0; i < barrierList.size(); i++)
-   //{
-   //   Barrier *barrier = dynamic_cast<Barrier *>(barrierList[i]);
-   //   barrier->getCollisionPoly(points);
-   //   for(S32 j = 1; j < points.size(); j++)
-   //   {
-   //      lineSegmentPoints.push_back(points[j-1]);
-   //      lineSegmentPoints.push_back(points[j]);
-   //   }
-   //   lineSegmentPoints.push_back(points[points.size()-1]);
-   //   lineSegmentPoints.push_back(points[0]);
-   //}
-   //return;
-
    unionBarriers(barrierList, false, solution);
 
    // Precomputing list size improves performance dramatically
@@ -400,8 +384,8 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 
    lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
 
-
    TPolygon poly;
+   S32 polyIndex = 0;
    for(U32 i = 0; i < solution.size(); i++)
    {
       poly = solution[i];
@@ -411,13 +395,13 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
 
       for(U32 j = 1; j < poly.size(); j++)
       {
-         lineSegmentPoints.push_back(Point((F32)poly[j-1].X, (F32)poly[j-1].Y));
-         lineSegmentPoints.push_back(Point((F32)poly[j].X,   (F32)poly[j].Y));
+         lineSegmentPoints[polyIndex++] = Point((F32)poly[j-1].X, (F32)poly[j-1].Y);
+         lineSegmentPoints[polyIndex++] = Point((F32)poly[j].X,   (F32)poly[j].Y);
       }
 
       // Close the loop
-      lineSegmentPoints.push_back(Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y));
-      lineSegmentPoints.push_back(Point((F32)poly[0].X, (F32)poly[0].Y));
+      lineSegmentPoints[polyIndex++] = Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y);
+      lineSegmentPoints[polyIndex++] = Point((F32)poly[0].X, (F32)poly[0].Y);
    }
 }
 
