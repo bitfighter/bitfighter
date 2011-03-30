@@ -299,10 +299,10 @@ void Barrier::expandCenterlineToOutline(const Point &start, const Point &end, F3
    Point crossVec(dir.y, -dir.x);
    crossVec.normalize(width * 0.5);
 
-   cornerPoints.push_back(Point(start.x + crossVec.x, start.y + crossVec.y));
-   cornerPoints.push_back(Point(end.x + crossVec.x, end.y + crossVec.y));
-   cornerPoints.push_back(Point(end.x - crossVec.x, end.y - crossVec.y));
-   cornerPoints.push_back(Point(start.x - crossVec.x, start.y - crossVec.y));
+   cornerPoints.push_back(start + crossVec);
+   cornerPoints.push_back(end + crossVec);
+   cornerPoints.push_back(end - crossVec);
+   cornerPoints.push_back(start - crossVec);
 }
 
 // Puffs out segment to the specified width with a further buffer for bot zones, has an inset tangent corner cut
@@ -311,35 +311,36 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
    bufferedPoints.clear();
 
    Point difference;
-   if (start == end)  // test for zero-length barriers
+   if (start == end)  // Test for zero-length barriers
       difference = (end + Point(0,1)) - start;
    else
       difference = end - start;
 
-   Point crossVector(difference.y, -difference.x);  // create a point whose vector from 0,0 is perpenticular to the original vector
+   Point crossVector(difference.y, -difference.x);  // Create a point whose vector from 0,0 is perpenticular to the original vector
    crossVector.normalize((barrierWidth * 0.5) + BotNavMeshZone::BufferRadius);  // reduce point so the vector has length of barrier width + ship radius
 
-   Point parallelVector(difference.x, difference.y); // create a vector parallel to original segment
-   parallelVector.normalize(BotNavMeshZone::BufferRadius);  // reduce point so vector has length of ship radius
+   Point parallelVector(difference.x, difference.y); // Create a vector parallel to original segment
+   parallelVector.normalize(BotNavMeshZone::BufferRadius);  // Reduce point so vector has length of ship radius
 
-   // for octagonal zones
+   // For octagonal zones
    //   create extra vectors that are offset full offset to create 'cut' corners
-   //   (0.5 * sqrt(2.0) * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
+   //   (FloatSqrtHalf * BotNavMeshZone::BufferRadius)  creates a tangent to the radius of the buffer
    //   we then subtract a little from the tangent cut to shorten the buffer on the corners and allow zones to be created when barriers are close
    Point crossPartial = crossVector;
-   crossPartial.normalize((0.5 * sqrt(2.0) * BotNavMeshZone::BufferRadius) + (barrierWidth * 0.5) - (0.30 * BotNavMeshZone::BufferRadius));
-   Point parallelPartial = parallelVector;
-   parallelPartial.normalize((0.5 * sqrt(2.0) * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
+   crossPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) + (barrierWidth * 0.5) - (0.30 * BotNavMeshZone::BufferRadius));
 
-   // now add/subtract perpendicular and parallel vectors to buffer the segments
-   bufferedPoints.push_back(Point((start.x - parallelVector.x) + crossPartial.x, (start.y - parallelVector.y) + crossPartial.y));
-   bufferedPoints.push_back(Point((start.x - parallelPartial.x) + crossVector.x, (start.y - parallelPartial.y) + crossVector.y));
-   bufferedPoints.push_back(Point(end.x + parallelPartial.x + crossVector.x, end.y + parallelPartial.y + crossVector.y));
-   bufferedPoints.push_back(Point(end.x + parallelVector.x + crossPartial.x, end.y + parallelVector.y + crossPartial.y));
-   bufferedPoints.push_back(Point(end.x + parallelVector.x - crossPartial.x, end.y + parallelVector.y - crossPartial.y));
-   bufferedPoints.push_back(Point(end.x + parallelPartial.x - crossVector.x, end.y + parallelPartial.y - crossVector.y));
-   bufferedPoints.push_back(Point((start.x - parallelPartial.x) - crossVector.x, (start.y - parallelPartial.y) - crossVector.y));
-   bufferedPoints.push_back(Point((start.x - parallelVector.x) - crossPartial.x, (start.y - parallelVector.y) - crossPartial.y));
+   Point parallelPartial = parallelVector;
+   parallelPartial.normalize((FloatSqrtHalf * BotNavMeshZone::BufferRadius) - (0.30 * BotNavMeshZone::BufferRadius));
+
+   // Now add/subtract perpendicular and parallel vectors to buffer the segments
+   bufferedPoints.push_back(start - parallelVector  + crossPartial);
+   bufferedPoints.push_back(start - parallelVector  + crossVector);
+   bufferedPoints.push_back(end   + parallelPartial + crossVector);
+   bufferedPoints.push_back(end   + parallelVector  + crossPartial);
+   bufferedPoints.push_back(end   + parallelVector  - crossPartial);
+   bufferedPoints.push_back(end   + parallelPartial - crossVector);
+   bufferedPoints.push_back(start - parallelPartial - crossVector);
+   bufferedPoints.push_back(start - parallelVector  - crossPartial);
 }
 
 
@@ -347,7 +348,8 @@ void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<
 {
    if (isWoundClockwise(inputPoints))  // Must make CCW for clipper's offset method to work
    {
-      Vector<Point> reversePoints;
+      Vector<Point> reversePoints(inputPoints.size());
+
       for(S32 i = inputPoints.size() - 1; i >= 0; i--)
          reversePoints.push_back(inputPoints[i]);
 
@@ -391,9 +393,9 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
    unionBarriers(barrierList, false, solution);
 
    // Precomputing list size improves performance dramatically
-   S32 size = 0;
+   S32 segments = 0;
    for(U32 i = 0; i < solution.size(); i++)
-      size += solution[i].size();
+      segments += solution[i].size();
 
    lineSegmentPoints.setSize(segments * 2);      // 2 points per line segment
 
@@ -416,24 +418,6 @@ void Barrier::clipRenderLinesToPoly(Vector<Point> &lineSegmentPoints)
       lineSegmentPoints.push_back(Point((F32)poly[poly.size()-1].X, (F32)poly[poly.size()-1].Y));
       lineSegmentPoints.push_back(Point((F32)poly[0].X, (F32)poly[0].Y));
    }
-}
-
-
-S32 QSORT_CALLBACK pointDataSortX(Point *a, Point *b)
-{
-   if(a->x == b->x)
-      return 0;
-
-   return (a->x > b->x) ? 1 : -1;
-}
-
-
-S32 QSORT_CALLBACK pointDataSortY(Point *a, Point *b)
-{
-   if(a->y == b->y)
-      return 0;
-
-   return (a->y > b->y) ? 1 : -1;
 }
 
 
