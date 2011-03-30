@@ -1446,18 +1446,6 @@ void ClientGame::idle(U32 timeDelta)
 // Client only
 void ClientGame::prepareBarrierRenderingGeometry()
 {
-   //for(S32 i = 0; i < mGameObjects.size(); i++)
-   //   if(mGameObjects[i]->getObjectTypeMask() & BarrierType)
-   //   {
-   //      Barrier *barrier = dynamic_cast<Barrier *>(mGameObjects[i]);  
-   //      if(barrier)
-   //      {
-   //         barrier->prepareRenderingGeometry();
-   //         //for(S32 i = 0; i < barrier->mRenderLineSegments.size(); i++)
-   //         //   logprintf("Point %d: %f, %f", i, barrier->mRenderLineSegments[i].x, barrier->mRenderLineSegments[i].y);
-
-   //      }
-   //   }
    Barrier::prepareRenderingGeometry();
 }
 

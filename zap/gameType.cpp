@@ -2630,6 +2630,7 @@ GAMETYPE_RPC_S2C(GameType, s2cSyncMessagesComplete, (U32 sequence), (sequence))
    if(!clientGame) 
       return;
 
+   clientGame->computeWorldObjectExtents();          // Make sure our world extents reflect all the objects we've loaded
    clientGame->prepareBarrierRenderingGeometry();    // Get walls ready to render
 
    clientGame->mGameUserInterface->mShowProgressBar = false;
