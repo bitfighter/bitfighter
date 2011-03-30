@@ -688,7 +688,7 @@ void BotNavMeshZone::buildBotNavMeshZoneConnections()
          }
       }
    }
-   linkTeleportersBotNavMeshZoneConnections();
+   linkTeleportersBotNavMeshZoneConnections(gServerGame);
 }
 
 // Only runs on server

@@ -127,7 +127,7 @@ public:
 
    static bool buildBotMeshZones(Game *game);
    static void buildBotNavMeshZoneConnections();
-   static void linkTeleportersBotNavMeshZoneConnections();
+   static void linkTeleportersBotNavMeshZoneConnections(Game *game);
 
    TNL_DECLARE_CLASS(BotNavMeshZone);
 };
