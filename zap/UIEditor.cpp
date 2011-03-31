@@ -4954,16 +4954,16 @@ void WallSegmentManager::recomputeAllWallGeometry()
 void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
 {
    // Find any forcefields that terminate on this wall, and mark them for recalculation later
-   Vector<WorldItem *> items;    // A list of forcefields terminating on the wall segment that we'll be deleting
+   Vector<WorldItem *> forcefields;    // A list of forcefields terminating on the wall segment that we'll be deleting
 
    S32 count = wallSegments.size();                
    for(S32 i = 0; i < count; i++)
       if(wallSegments[i]->mOwner == item->mId)     // Segment belongs to item
          for(S32 j = 0; j < gEditorUserInterface.mItems.size(); j++)
             if(gEditorUserInterface.mItems[j].index == ItemForceField && 
-               ( gEditorUserInterface.mItems[j].forceFieldEndSegment == wallSegments[i] ||
-                 gEditorUserInterface.mItems[j].forceFieldMountSegment == wallSegments[i] ) )
-               items.push_back(&gEditorUserInterface.mItems[j]);
+                  ( gEditorUserInterface.mItems[j].forceFieldEndSegment == wallSegments[i] ||
+                    gEditorUserInterface.mItems[j].forceFieldMountSegment == wallSegments[i] ) )
+               forcefields.push_back(&gEditorUserInterface.mItems[j]);
 
    // Get rid of any existing segments that correspond to our item; we'll be building new ones
    deleteSegments(item->mId);
@@ -4992,8 +4992,8 @@ void WallSegmentManager::buildWallSegmentEdgesAndPoints(WorldItem *item)
    item->setExtent(allSegExtent);
 
    // Alert all forcefields terminating on any of the wall segments we deleted and potentially recreated
-   for(S32 j = 0; j < items.size(); j++)  
-      items[j]->onGeomChanged();
+   for(S32 j = 0; j < forcefields.size(); j++)  
+      forcefields[j]->onGeomChanged();
 }
 
 
@@ -5003,7 +5003,7 @@ void WallSegmentManager::clipAllWallEdges(const Vector<WallSegment *> &wallSegme
    TPolyPolygon inputPolygons, solution;
    TPolygon inputPoly;
 
-   for(S32 i = 0; i < wallSegments.size() - 1; i++)
+   for(S32 i = 0; i < wallSegments.size(); i++)
    {
       inputPoly.clear();
 
