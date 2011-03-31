@@ -125,6 +125,16 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
    {
+      if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly
+      {
+         Vector<Point> reversePoints;
+
+         for(S32 i = mPoints.size() - 1; i >= 0; i--)
+            reversePoints.push_back(mPoints[i]);
+
+         mPoints = reversePoints;
+      }
+
       Triangulate::Process(mPoints, mRenderFillGeometry);
 
       if(mRenderFillGeometry.size() == 0)      // Geometry is bogus; perhaps duplicated points, or other badness
