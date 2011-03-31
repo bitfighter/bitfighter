@@ -191,6 +191,7 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
 // These methods will be empty later...
  U32 BotNavMeshZone::packUpdate(GhostConnection *connection, U32 updateMask, BitStream *stream)
 {
+/*
    stream->writeInt(mZoneId, 16);
 
    Polygon::packUpdate(connection, stream);
@@ -213,14 +214,14 @@ bool BotNavMeshZone::getCollisionPoly(Vector<Point> &polyPoints)
       stream->write(mNeighbors[i].center.x);
       stream->write(mNeighbors[i].center.y);
    }
-
+*/
    return 0;
 }
 
 
 void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream)
 {
-   mZoneId = stream->readInt(16);
+/*   mZoneId = stream->readInt(16);
 
    if(Polygon::unpackUpdate(connection, stream))
    {
@@ -251,7 +252,7 @@ void BotNavMeshZone::unpackUpdate(GhostConnection *connection, BitStream *stream
       stream->read(&n.center.y);
       mNeighbors.push_back(n);
      // mNeighborRenderPoints.push_back(Border(p1, p2));
-   }
+   }*/
 }
 
 
@@ -469,7 +470,7 @@ static void buildHolesList(const Vector<DatabaseObject *> &barriers, Vector<F32>
          continue;
 
       // Triangle requires a point interior to each hole.  Finding one depends on what type of barrier we have:
-      if(barrier->mSolid)     // Could be concave, centroid of first triangle of fill geom will be interior
+      if(barrier->mSolid && barrier->mRenderFillGeometry.size() >= 3)     // Could be concave, centroid of first triangle of fill geom will be interior
       {
          ctr.set((barrier->mRenderFillGeometry[0].x + barrier->mRenderFillGeometry[1].x + barrier->mRenderFillGeometry[2].x) / 3, 
                   (barrier->mRenderFillGeometry[0].y + barrier->mRenderFillGeometry[1].y + barrier->mRenderFillGeometry[2].y) / 3);
@@ -586,9 +587,11 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
             {
                botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		         botzone->mConvex = true;             
-		         botzone->addToGame(game);
-		         botzone->computeExtent();   
+               botzone->mConvex = true;
+               botzone->addToGame(game);
+               botzone->computeExtent();
+               if(gClientGame)      // Only triangulate when there is client
+                  Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
             }
          }
 
@@ -618,10 +621,12 @@ bool BotNavMeshZone::buildBotMeshZones(Game *game)
 		   botzone->mPolyBounds.push_back(Point(triangleData.pointList[triangleData.triangleList[i+2]*2], triangleData.pointList[triangleData.triangleList[i+2]*2 + 1]));
          botzone->mCentroid.set(findCentroid(botzone->mPolyBounds));
 
-		   botzone->mConvex = true;             // Avoid random red and green on /showzones
+		   botzone->mConvex = true;             // Avoid random red and green on /showzones.
 		   botzone->addToGame(game);
 		   botzone->computeExtent();   
-      }
+         if(gClientGame)      // Only triangulate when there is client
+            Triangulate::Process(botzone->mPolyBounds, botzone->mPolyFill);
+       }
 
       BotNavMeshZone::buildBotNavMeshZoneConnections();
    }

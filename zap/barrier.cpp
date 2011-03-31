@@ -125,6 +125,16 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
    {
+      if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly
+      {
+         Vector<Point> reversePoints;
+
+         for(S32 i = mPoints.size() - 1; i >= 0; i--)
+            reversePoints.push_back(mPoints[i]);
+
+         mPoints = reversePoints;
+      }
+
       Triangulate::Process(mPoints, mRenderFillGeometry);
 
       if(mRenderFillGeometry.size() == 0)      // Geometry is bogus; perhaps duplicated points, or other badness
@@ -344,7 +354,7 @@ void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<
 {
    if (isWoundClockwise(inputPoints))  // Must make CCW for clipper's offset method to work
    {
-      Vector<Point> reversePoints(inputPoints.size());
+      Vector<Point> reversePoints;
 
       for(S32 i = inputPoints.size() - 1; i >= 0; i--)
          reversePoints.push_back(inputPoints[i]);

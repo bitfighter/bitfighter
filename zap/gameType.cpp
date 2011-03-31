@@ -621,7 +621,7 @@ void GameType::renderInterfaceOverlay(bool scoreboardVisible)
       S32 lroff = getLowerRightCornerScoreboardOffsetFromBottom();
 
       // Build a list of teams, so we can sort by score
-      Vector<Team> teams(mTeams.size());
+      Vector<Team> teams;
 
       for(S32 i = 0; i < mTeams.size(); i++)
       {

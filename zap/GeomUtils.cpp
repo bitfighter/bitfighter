@@ -877,7 +877,6 @@ void triangulate2(char *a, triangulateio *b, triangulateio *c, triangulateio *d)
       triangulate(a,b,c,d);
    }__except(1){
       TNL::logprintf("Exception tessellating with Triangle method");
-      // appears to work just fine with not immediately returning after fail
    }
 }
 

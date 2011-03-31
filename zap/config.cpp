@@ -195,7 +195,7 @@ static void writeForeignServerInfo()
    if(gINI.findSection("Levels") != gINI.noID)
    {
       S32 numLevels = gINI.NumValues("Levels");
-      Vector<string> levelValNames(numLevels);
+      Vector<string> levelValNames;
 
       for(S32 i = 0; i < numLevels; i++)
          levelValNames.push_back(gINI.ValueName("Levels", i));
