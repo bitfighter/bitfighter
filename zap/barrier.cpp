@@ -344,7 +344,7 @@ void Barrier::bufferPolyWallForBotZone(const Vector<Point>& inputPoints, Vector<
 {
    if (isWoundClockwise(inputPoints))  // Must make CCW for clipper's offset method to work
    {
-      Vector<Point> reversePoints(inputPoints.size());
+      Vector<Point> reversePoints;
 
       for(S32 i = inputPoints.size() - 1; i >= 0; i--)
          reversePoints.push_back(inputPoints[i]);
