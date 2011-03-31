@@ -125,12 +125,13 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
    if(mSolid)
    {
-      if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly
+      if (isWoundClockwise(mPoints))  // all walls must be CCW to clip correctly  
+      // TODO: could we pass a direction flag rather than reversing the array, which is slow??
       {
-         Vector<Point> reversePoints;
+         Vector<Point> reversePoints(mPoints.size());
 
          for(S32 i = mPoints.size() - 1; i >= 0; i--)
-            reversePoints.push_back(mPoints[i]);
+            reversePoints[mPoints.size() - i - 1] = mPoints[i];
 
          mPoints = reversePoints;
       }
