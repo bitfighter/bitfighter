@@ -343,7 +343,7 @@ void Barrier::bufferBarrierForBotZone(const Point &start, const Point &end, F32 
 
    // Now add/subtract perpendicular and parallel vectors to buffer the segments
    bufferedPoints.push_back((start - parallelVector)  + crossPartial);
-   bufferedPoints.push_back((start - parallelVector)  + crossVector);
+   bufferedPoints.push_back((start - parallelPartial)  + crossVector);
    bufferedPoints.push_back(end   + parallelPartial + crossVector);
    bufferedPoints.push_back(end   + parallelVector  + crossPartial);
    bufferedPoints.push_back(end   + parallelVector  - crossPartial);
