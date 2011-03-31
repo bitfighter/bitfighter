@@ -152,6 +152,9 @@ Barrier::Barrier(const Vector<Point> &points, F32 width, bool solid)
 
       if(mPoints.size() == 2 && mWidth != 0)   // It's a regular segment, so apply width
       {
+         if (mPoints[0] == mPoints[1])         // Test for zero-length barriers
+            mPoints[1] += Point(0,0.5);        // Add vertical vector of half a point so we can see outline geo in-game
+
          expandCenterlineToOutline(mPoints[0], mPoints[1], mWidth, mRenderFillGeometry);     // Fills with 4 points
          mPoints = mRenderFillGeometry;
       }
